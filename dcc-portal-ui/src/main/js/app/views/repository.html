@@ -1,0 +1,63 @@
+<h1><span class="t_badge t_badge_icon t_badge__download"><span class="icon-database"></span></span>Data Repository</h1>
+<section style="padding-top:0">
+    <div class="alert alert-info" data-ng-if="slugs.length===0">
+        <p>Data Repository provides access to all ICGC cancer project data, including uniformly
+            processed/annotated data files.</p>
+    </div>
+
+    <div data-ng-if="slugs.length > 0 && slugs[0].name === 'release_15'" class="alert alert-error">
+        We recommend to not use this version (Version 15.0) of ICGC data as it has been deprecated. <br>
+        Please use ICGC Version <strong>15.1</strong> which includes bug fixes and masked data.
+    </div>
+
+    <div class="wide">
+        <span data-ng-init="predicate='name'"></span>
+        <span data-ng-init="reverse=false"></span>
+
+        <section class="loading" data-ng-if="!files">
+            <h3><i class="icon-spin icon-spinner"></i>Loading data repository</h3>
+        </section>
+
+        <div data-ng-if="files">
+            <ul class="breadcrumb" style="background:#fff;font-size:1.5rem">
+                <li><a href="/repository">~</a></li>
+                <li data-ng-repeat="p in slugs">
+                    <span class="divider">/</span>
+                    <a data-ng-if="!$last"
+                       data-ng-style="p.name === 'release_15'?{'text-decoration':'line-through'}:{}"
+                       href="/repository/{{ p.url }}">{{ p.name }}</a>
+                    <span data-ng-if="$last"
+                          data-ng-style="p.name === 'release_15'?{'text-decoration':'line-through'}:{}">{{ p.name }}</span>
+                </li>
+            </ul>
+            <table class="table" style="font-size: 1.1rem">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="text-right">File Size</th>
+                    <th class="text-right">Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-ng-repeat="file in files">
+                    <td data-ng-if="file.type=='f'">
+                        <i class="icon-file"></i>
+                        <a target="_self" href="/api/v1/download?fn={{file.name}}">{{ (file.name).split('/').pop() }}</a>
+                    </td>
+                    <td data-ng-if="file.type=='d'"
+                        data-ng-style="(file.name).split('/').pop() === 'release_15'?{'text-decoration':'line-through'}:{}">
+                        <i class="icon-folder-open"></i>
+                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">
+                            [{{ (file.name).split('/').pop() }}] {{ ((file.name).split('/').pop() | define) }}</a>
+                        <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{
+                            (file.name).split('/').pop() }}</a>
+                    </td>
+                    <td data-ng-if="file.type=='f'" class="text-right">{{ file.size | bytes }}</td>
+                    <td data-ng-if="file.type=='d'" class="text-right">--</td>
+                    <td class="text-right">{{ file.date | date }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

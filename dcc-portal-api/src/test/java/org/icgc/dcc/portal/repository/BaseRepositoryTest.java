@@ -1,0 +1,225 @@
+/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.icgc.dcc.portal.repository;
+
+import static com.github.tlrx.elasticsearch.test.EsSetup.createIndex;
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Preconditions.checkState;
+import static org.apache.commons.lang.StringUtils.join;
+import static org.icgc.dcc.portal.util.JsonUtils.parseFilters;
+
+import java.io.File;
+import java.io.IOException;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+
+import org.icgc.dcc.portal.model.IndexModel;
+import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.junit.After;
+import org.junit.Before;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.tlrx.elasticsearch.test.EsSetup;
+import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
+import com.github.tlrx.elasticsearch.test.request.CreateIndex;
+import com.google.common.io.Files;
+
+public class BaseRepositoryTest {
+
+  /**
+   * Test configuration.
+   */
+  protected static final String INDEX_NAME = "dcc-release-etl-cli";
+  protected static final String SETTINGS_FILE_NAME = "index.settings.json";
+  protected static final String JSON_DIR = "../../dcc-etl/dcc-etl-indexer/src/main/resources/org/icgc/dcc/etl/indexer";
+  protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
+  protected static final File SETTINGS_FILE = new File(JSON_DIR, SETTINGS_FILE_NAME);
+  protected static final IndexModel INDEX = new IndexModel(INDEX_NAME);
+
+  /**
+   * Test data.
+   */
+  protected static final String MISSING_ID = "@@@@@@@@@@@";
+
+  /**
+   * ES facade.
+   */
+  protected EsSetup es;
+
+  @Before
+  public void before() {
+    es = new EsSetup();
+  }
+
+  @After
+  public void after() {
+    es.terminate();
+  }
+
+  protected String joinFilters(String... filters) {
+    return "{" + join(filters, ",") + "}";
+  }
+
+  @SneakyThrows
+  public void bulkInsert(JSONProvider provider) {
+    byte[] content = provider.toJson().getBytes("UTF-8");
+    checkState(!es.client()
+        .prepareBulk()
+        .add(content, 0, content.length, true)
+        .setRefresh(true)
+        .execute()
+        .actionGet()
+        .hasFailures());
+  }
+
+  @SneakyThrows
+  public void bulkInsert() {
+    bulkInsert(bulkFile(getClass()));
+  }
+
+  /**
+   * Creates the index, settings and {@code TypeName} mapping
+   * 
+   * @param typeName - the index type to create
+   * @return
+   */
+  protected static CreateIndex createIndexMapping(Type typeName) {
+    return createIndexMappings(typeName);
+  }
+
+  protected static CreateIndex createIndexMappings(Type... typeNames) {
+    CreateIndex request = createIndex(INDEX_NAME)
+        .withSettings(settingsSource(SETTINGS_FILE));
+
+    for (Type typeName : typeNames) {
+      request = request.withMapping(typeName.getId(), mappingSource(typeName));
+    }
+
+    return request;
+  }
+
+  protected static FileJSONProvider jsonFile(File file) {
+    return new FileJSONProvider(file);
+  }
+
+  protected static BulkJSONProvider bulkFile(File file) {
+    return new BulkJSONProvider(file);
+  }
+
+  protected static BulkJSONProvider bulkFile(String fileName) {
+    return new BulkJSONProvider(new File(FIXTURES_DIR, fileName));
+  }
+
+  protected static BulkJSONProvider bulkFile(Class<?> testClass) {
+    return new BulkJSONProvider(new File(FIXTURES_DIR, testClass.getSimpleName() + ".json"));
+  }
+
+  protected static ObjectNode filters(String jsonish) {
+    return (ObjectNode) parseFilters(jsonish);
+  }
+
+  @SneakyThrows
+  private static String settingsSource() {
+    return settingsSource(SETTINGS_FILE);
+  }
+
+  @SneakyThrows
+  private static String settingsSource(File settingsFile) {
+    // Override production values that would introduce test timing delays / issues
+    return objectNode(settingsFile)
+        .put("index.number_of_shards", 1)
+        .put("index.number_of_replicas", 0)
+        .toString();
+  }
+
+  private static String mappingSource(Type typeName) {
+    return mappingSource(mappingFile(typeName));
+  }
+
+  @SneakyThrows
+  private static String mappingSource(File mappingFile) {
+    return json(mappingFile);
+  }
+
+  private static File mappingFile(Type typeName) {
+    String mappingFileName = typeName.getId() + ".mapping.json";
+    return new File(JSON_DIR, mappingFileName);
+  }
+
+  private static String json(File file) throws IOException, JsonProcessingException {
+    return objectNode(file).toString();
+  }
+
+  private static ObjectNode objectNode(File file) throws IOException, JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    return (ObjectNode) mapper.readTree(file);
+  }
+
+  /**
+   * {@link JSONProvider} implementation that can read files from the local file system.
+   */
+  @RequiredArgsConstructor
+  private static class FileJSONProvider implements JSONProvider {
+
+    @NonNull
+    private final File file;
+
+    @Override
+    @SneakyThrows
+    public String toJson() {
+      return Files.toString(file, UTF_8);
+    }
+
+  }
+
+  /**
+   * {@link JSONProvider} implementation that can read formatted concatenated Elasticsearch bulk load files as specified
+   * in http://www.elasticsearch.org/guide/reference/api/bulk/.
+   */
+  @RequiredArgsConstructor
+  protected static class BulkJSONProvider implements JSONProvider {
+
+    @NonNull
+    private final File file;
+
+    @Override
+    @SneakyThrows
+    public String toJson() {
+      // Normalize to non-pretty printed in memory representation
+      ObjectReader reader = new ObjectMapper().reader(JsonNode.class);
+      MappingIterator<JsonNode> iterator = reader.readValues(file);
+
+      StringBuilder builder = new StringBuilder();
+      while (iterator.hasNext()) {
+        // Write non-pretty printed
+        JsonNode jsonNode = iterator.nextValue();
+        builder.append(jsonNode);
+        builder.append("\n");
+      }
+
+      return builder.toString();
+    }
+  }
+}

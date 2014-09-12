@@ -1,0 +1,17 @@
+#home-page {
+  section {
+    border: none;
+    padding: 1rem;
+    position: relative;
+
+    @include breakpoint($break-landscape) {
+      @include float-span(4);
+    }
+  }
+
+  .subhead {
+    margin-top: -1rem;
+    color: $grey;
+    font-size: 1.9rem;
+  }
+}

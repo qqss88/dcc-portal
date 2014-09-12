@@ -1,0 +1,621 @@
+<!--
+  ~ Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the terms of the GNU Public
+  ~ License v3.0. You should have received a copy of the GNU Pathwayral Public License along with this
+  ~ program. If not, see <http://www.gnu.org/licenses/>.
+  ~
+  ~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+  ~ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  ~ FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  ~ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  ~ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  ~ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  ~ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+  ~ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  -->
+
+<div class="h1-wrap">
+    <h1 data-ui-scrollfix=79><span class="t_badge t_badge__pathway"></span>
+        {{ PathwayCtrl.pathway.id }}</h1>
+</div>
+<div data-scroll-spy="">
+<aside data-ui-scrollfix=79 class="t_sidenav">
+    <section>
+        <ul class="t_subnav__items">
+            <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a>
+            </li>
+            <li data-spy="projects" class="t_subnav__items__item"><a data-scrollto href="#projects">Cancer
+                Distribution</a></li>
+            <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Genes</a></li>
+            <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
+            <li><br></li>
+            <li class="t_subnav__items__item"><span>Page Filters</span></li>
+            <li class="t_subnav__items__box">
+                <ul class="t_facets">
+                    <terms data-type="mutation"
+                           data-facet-name="functionalImpact"
+                           data-hide-count="true"
+                           data-label="Mutation Impact"
+                           data-facet="PathwayCtrl.mutationFacets.functionalImpact"></terms>
+                </ul>
+            </li>
+        </ul>
+    </section>
+</aside>
+<article>
+<section id="summary">
+    <div class="wide">
+        <h3>Summary</h3>
+        <table class="table table-info">
+            <tr>
+                <th>ID</th>
+                <td>{{ PathwayCtrl.pathway.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ PathwayCtrl.pathway.name }}</td>
+            </tr>
+            <tr>
+                <th>Data Source</th>
+                <td>{{ PathwayCtrl.pathway.source }}</td>
+            </tr>
+            <tr>
+                <th>Genes</th>
+                <td>
+                    <a href='/search/g?filters={"gene":{"pathwayId":{"is":["{{PathwayCtrl.pathway.id}}"]}}}'>{{PathwayCtrl.pathway.geneCount}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Hierarchy</th>
+                <td>
+                   <new-scope>
+                   <ul data-hide-list="{{PathwayCtrl.pathway.parentPathways}}" data-limit="3">
+                       <li data-ng-repeat="sublist in list">
+                           <span>
+                               <i class="icon-external-link"></i>
+                               <a href="http://www.reactome.org/PathwayBrowser/{{PathwayCtrl.pathway.linkOut[$index]}}" target="_blank">View in Reactome Pathway Browser</a>
+                           </span>
+                           <div>
+                               <div data-ng-repeat="segment in sublist">
+                                   <a data-ng-style="{'margin-left': $index+'rem'}" href="/pathways/{{segment.reactomeId}}">{{segment.name}}</a>
+                               </div>
+
+                               <div>
+                                  <span data-ng-style="{'margin-left': (sublist.length+1)+'rem'}">{{PathwayCtrl.pathway.name }} </span>
+                               </div>
+                           </div>
+                           <br>
+                       <li>
+                   </ul>
+                   </new-scope>
+                </td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td data-ng-if="PathwayCtrl.pathway.summation === '???' || PathwayCtrl.pathway.summation === ''">
+                --
+                </td>
+                <td data-ng-if="PathwayCtrl.pathway.summation !== '???'">
+                    <hide-text text="{{ PathwayCtrl.pathway.summation}}"></hide-text>
+                </td>
+            </tr>
+        </table>
+    </div>
+</section>
+<section id="projects"
+         data-ng-class="{'loading': !PathwayCtrl.pathway.fprojects, 'empty': PathwayCtrl.pathway.fprojects.length == 0}">
+    <h3 data-ng-if="!PathwayCtrl.pathway.fprojects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
+
+    <h3 data-ng-if="PathwayCtrl.pathway.fprojects.length == 0">No Donors Affected.</h3>
+
+    <div data-ng-if="PathwayCtrl.pathway.fprojects.length > 0">
+        <h3>Cancer Distribution
+            <span data-open-in-list='?filters={{PathwayCtrl.baseAdvQuery}}' data-type='donor'></span>
+        </h3>
+
+        <h4 class="subhead">
+            <a data-ng-href='/search?filters={{PathwayCtrl.baseAdvQuery}}'>
+                <strong>{{PathwayCtrl.totalDonors | number}}</strong></a>
+            donors affected by
+            <a data-ng-href='/search/m?filters={{PathwayCtrl.baseAdvQuery}}'>
+                <strong>{{PathwayCtrl.totalMutations | number}}</strong></a>
+            mutations across
+            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(PathwayCtrl.pathway.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
+                <strong>{{PathwayCtrl.pathway.fprojects.length | number}}</strong></a>
+            projects
+            <br>
+
+            <a data-ng-href='search/g?filters={{PathwayCtrl.baseAdvQuery}}'><strong>{{PathwayCtrl.totalGenes}}</strong>
+            </a>
+            out of
+            <a data-ng-href='/search/g?filters={"gene":{"pathwayId":{"is":["{{PathwayCtrl.pathway.id}}"]}}}'>
+                <strong>{{PathwayCtrl.pathway.geneCount}}</strong>
+            </a>
+            genes in this pathway affected by mutations across
+            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(PathwayCtrl.pathway.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
+                <strong>{{PathwayCtrl.pathway.fprojects.length | number}}</strong>
+            </a>
+            cancer projects
+        </h4>
+
+        <div data-ng-if="PathwayCtrl.donorBar.hasData">
+            <bar class="half" height=250 items="PathwayCtrl.donorBar" heading="Top Projects by Donor Proportion"
+                 subheading="Top 10 projects with donors containing mutated genes in the pathway sorted by proportion of affected donors"
+                 ylabel="% of Donors Affected"
+                 format="percentage"></bar>
+        </div>
+        <div data-ng-if="PathwayCtrl.geneBar.hasData" class="clearfix">
+            <bar class="half omega" height=250 items="PathwayCtrl.geneBar" heading="Top Projects by Gene Proportion"
+                 subheading="Top 10 projects with donors containing mutated genes in the pathway sorted by proportion of mutated genes"
+                 ylabel="% of Genes Affected"
+                 format="percentage"></bar>
+        </div>
+        <span class="t_table_top">
+            Showing <strong>{{PathwayCtrl.pathway.fprojects.length | number}}</strong> projects
+            <span data-toolbar data-dl="{{PathwayCtrl.pathway.id}}_distribution"></span>
+        </span>
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>Project</th>
+                <th>Site</th>
+                <th>Tumour Type</th>
+                <th>Tumour Subtype</th>
+                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Pathway contains SSM">#
+                    Donors affected</abbr> <i class="icon-sort-down"></i></th>
+                <th><abbr data-tooltip="Number of SSM observed in {{ PathwayCtrl.pathway.id }}"
+                          data-tooltip-placement="left"># Mutations</abbr></th>
+                <th><abbr data-tooltip="Number of Genes affected by {{ PathwayCtrl.pathway.id }}"
+                          data-tooltip-placement="left"># Genes</abbr></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="project in PathwayCtrl.pathway.fprojects | orderBy:'uiAffectedDonorPercentage':true">
+                <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
+                    {{ project.id }}
+                </a></td>
+                <td>{{ project.primarySite }}</td>
+                <td>{{ project.tumourType }}</td>
+                <td>{{ project.tumourSubtype }}</td>
+                <td class="text-right" style="position: relative; display: block">
+                    <span data-ng-style="{width:project.uiAffectedDonorPercentage*100+'%'}"
+                          class="t_facets__facet__terms__active__term__bar"></span>
+                    <span style="position: relative">
+                    <a data-ng-href='/search?filters={{project.advQuery}}'>
+                        {{ project.affectedDonorCount | number }}
+                    </a>
+                    /
+                    <a data-ng-href='/search?filters={"donor":{"projectId":{"is":["{{ project.id }}"]},"availableDataTypes":{"is":["ssm"]}}}'>
+                        {{ project.ssmTestedDonorCount | number }}
+                    </a>
+                    <em>({{ project.uiAffectedDonorPercentage*100 | number:2 }}%)</em>
+                    </span>
+                </td>
+                <td class="text-right">
+                    <span data-ng-if="project.mutationCount==null"><i class="icon-spinner icon-spin"></i></span>
+                    <span data-ng-if="project.mutationCount === 0">--</span>
+                    <a data-ng-if="project.mutationCount > 0"
+                       data-ng-href='/search/m?filters={{project.advQuery}}'>
+                        {{ project.mutationCount | number }}
+                    </a>
+                </td>
+                <td class="text-right">
+                    <span data-ng-if="project.geneCount==null"><i class="icon-spinner icon-spin"></i></span>
+                    <span data-ng-if="project.geneCount === 0">--</span>
+                    <a data-ng-if="project.geneCount > 0"
+                       data-ng-href='/search/g?filters={{project.advQuery}}'>
+                        {{ project.geneCount | number }}
+                    </a> /
+                    <a data-ng-href='/search/g?filters={"gene":{"pathwayId":{"is":["{{PathwayCtrl.pathway.id}}"]}}}'>
+                        {{PathwayCtrl.pathway.geneCount}}
+                    </a>
+                    <em>({{ project.uiAffectedGenePercentage*100 | number:2 }}%)</em>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="hidden" id="{{PathwayCtrl.pathway.id}}_distribution">
+            <thead>
+            <tr>
+                <th>Project</th>
+                <th>Site</th>
+                <th>Tumour Type</th>
+                <th>Tumour Subtype</th>
+                <th>Number of donors with the current gene containing simple somatic mutations in the current project
+                </th>
+                <th>Number of SSM-tested donors in the current project</th>
+                <th>Percentage of donors with the current gene</th>
+                <th>Mutations</th>
+                <th>Genes</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="project in PathwayCtrl.pathway.fprojects | orderBy:'uiAffectedDonorPercentage':true">
+                <td>{{project.name}}</td>
+                <td>{{project.primarySite}}</td>
+                <td>{{project.tumourType}}</td>
+                <td>{{project.tumourSubtype}}</td>
+                <td>{{project.affectedDonorCount}}</td>
+                <td>{{project.ssmTestedDonorCount}}</td>
+                <td>{{project.uiAffectedDonorPercentage}}</td>
+                <td>{{project.mutationCount}}</td>
+                <td>{{project.geneCount}}/{{PathwayCtrl.pathway.geneCount}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<section id="genes"
+         data-ng-controller="PathwayGenesCtrl as PathwayGenesCtrl"
+         data-ng-class="{'loading': !PathwayGenesCtrl.genes.hits, 'empty': PathwayGenesCtrl.genes.hits.length == 0}">
+    <h3 data-ng-if="!PathwayGenesCtrl.genes.hits">
+        <i class="icon-spinner icon-spin"></i> Fetching Mutated Genes...
+    </h3>
+
+    <h3 data-ng-if="PathwayGenesCtrl.genes.hits.length == 0">
+        No Mutated Genes Found.
+    </h3>
+
+    <div data-ng-if="PathwayGenesCtrl.genes.hits.length > 0">
+        <h3>Most Frequently Mutated Genes
+            <span data-open-in-list='/g?filters={{PathwayCtrl.baseAdvQuery}}'></span>
+        </h3>
+
+        <div class="clearfix">
+            <bar data-ng-if="PathwayGenesCtrl.bar.hasData" format="percentage"
+                 class="wide" height=200 items="PathwayGenesCtrl.bar"
+                 title=""
+                 ylabel="% of Donors Affected">
+            </bar>
+        </div>
+        <div class="t_table_top">
+            Showing <strong>{{PathwayGenesCtrl.genes.hits.length | number}}</strong> of
+            <strong>{{PathwayGenesCtrl.genes.pagination.total | number}}</strong> genes
+            <span data-toolbar data-dl="{{PathwayCtrl.pathway.id}}_genes"></span>
+        </div>
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th><abbr
+                        data-tooltip-html-unsafe="Gene location on the genome, chr:start-end">Location</abbr></th>
+                <th>Type</th>
+                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Pathway contains SSM">#
+                    Donors affected</abbr> <i class="icon-sort-down"></i></th>
+                <th class="text-center">
+                    <abbr data-tooltip-html-unsafe="Number of SSM in the Gene"
+                          data-tooltip-placement="left"># Mutations</abbr>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="gene in PathwayGenesCtrl.genes.hits">
+                <td><a data-ui-sref="gene({id:gene.id})">{{gene.symbol}}</a></td>
+                <td>{{gene.name}}</td>
+                <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
+                <td>{{gene.type}}</td>
+                <td class="text-right" style="display:block; position: relative; white-space: nowrap">
+                    <span data-ng-style="{width:gene.affectedDonorCountFiltered/PathwayCtrl.totalDonors * 100+'%'}"
+                          class="t_facets__facet__terms__active__term__bar"></span>
+                    <span style="position: relative">
+                        <a
+                                data-ng-href='/search?filters={{gene.advQuery}}'>
+                            {{gene.affectedDonorCountFiltered | number}}
+                        </a>
+                        /
+                        <a data-ng-href='/search?filters={"gene":{"pathwayId":{"is":["{{PathwayCtrl.pathway.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
+                            {{PathwayCtrl.totalDonors | number}}</a>
+                        <em>({{gene.affectedDonorCountFiltered/PathwayCtrl.totalDonors * 100 | number:2}}%)</em>
+                    </span>
+                </td>
+                <td class="text-right">
+                    <span data-ng-show="gene.mutationCount === null"><i class="icon-spinner icon-spin"></i></span>
+                    <span data-ng-show="gene.mutationCount === 0">--</span>
+                    <a data-ng-show="gene.mutationCount > 0"
+                       href='/search/m?filters={{gene.advQuery}}'>
+                        {{gene.mutationCount | number}}
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="hidden" id="{{PathwayCtrl.pathway.id}}_genes">
+            <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Number of donors affected</th>
+                <th>Total number of SSM-tested donors from the current pathway</th>
+                <th>Percentage of affected donors</th>
+                <th>Mutations</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="gene in PathwayGenesCtrl.genes.hits">
+                <td>{{gene.symbol}}</td>
+                <td>{{gene.name}}</td>
+                <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
+                <td>{{gene.type}}</td>
+                <td>{{gene.affectedDonorCountFiltered}}</td>
+                <td>{{PathwayCtrl.totalDonors}}</td>
+                <td>{{gene.affectedDonorCountFiltered / PathwayCtrl.totalDonors}}</td>
+                <td>{{gene.mutationCount}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<section id="mutations"
+         data-ng-controller="PathwayMutationsCtrl as PathwayMutationsCtrl"
+         data-ng-class="{'loading': !PathwayMutationsCtrl.mutations.hits, 'empty': PathwayMutationsCtrl.mutations.hits.length == 0}">
+    <h3 data-ng-if="!PathwayMutationsCtrl.mutations.hits">
+        <i class="icon-spinner icon-spin"></i> Fetching Mutations...
+    </h3>
+
+    <h3 data-ng-if="PathwayMutationsCtrl.mutations.hits.length == 0">
+        No Mutations Found.
+    </h3>
+
+    <div data-ng-if="PathwayMutationsCtrl.mutations.hits.length > 0">
+        <h3>Most Frequent Mutations
+            <span data-open-in-list='/m?filters={{PathwayCtrl.baseAdvQuery}}'></span>
+        </h3>
+
+        <div class="clearfix">
+            <bar class="wide" data-ng-if="PathwayMutationsCtrl.bar.hasData" height=200 items="PathwayMutationsCtrl.bar"
+                 title=""
+                 ylabel="Donors affected"></bar>
+        </div>
+
+        <div class="t_table_top">
+            Showing <strong>{{PathwayMutationsCtrl.mutations.hits.length}}</strong> of
+            <strong>{{PathwayMutationsCtrl.mutations.pagination.total | number}}</strong> mutations
+            <span data-toolbar data-dl="{{PathwayCtrl.pathway.id}}_mutations"></span>
+        </div>
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>
+                    <abbr data-tooltip="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
+                        change</abbr>
+                </th>
+                <th>Type</th>
+                <th>
+                    <abbr data-tooltip="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
+                </th>
+                <th class="text-center">
+                    <abbr data-tooltip-html-unsafe="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
+                          data-tooltip-placement="left"># Donors affected</abbr></th>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="mutation in PathwayMutationsCtrl.mutations.hits">
+                <td><a data-ui-sref="mutation({id:mutation.id})">{{mutation.id}}</a></td>
+                <td>chr{{mutation.chromosome}}:g.{{mutation.start}}{{mutation.mutation}}</td>
+                <td><abbr data-tooltip="{{ mutation.type | define }}">{{mutation.type}}</abbr></td>
+                <td>
+                    <mutation-consequences data-ng-if="mutation.consequences"
+                                           data-items="mutation.consequences"></mutation-consequences>
+                </td>
+                <td class="text-right" style="white-space: nowrap">
+                    <ul data-hide-sum-list="{{mutation.uiDonors}}"
+                        data-link='/search?filters={{mutation.advQuery}}'>
+                        <li data-ng-repeat="p in list | orderBy:'percentage':true"
+                            style="position: relative">
+                            <span data-ng-style="{width:p.percentage * 100+'%'}"
+                                  class="t_facets__facet__terms__active__term__bar"></span>
+                            <span style="position: relative">
+                                <a data-tooltip-placement="left"
+                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip-append-to-body="true"
+                                   href="/projects/{{p.term}}">{{p.term}}</a>
+                            <a href='/search?filters={{p.advQuery}}'>
+                                {{p.count | number}}
+                            </a>/
+                            <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]},"availableDataTypes":{"is":["ssm"]}}}'>
+                                {{p.countTotal | number}}
+                            </a>
+                            <em>({{p.percentage * 100 | number:2}}%)</em>
+                            </span>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="hidden" id="{{PathwayCtrl.pathway.id}}_mutations">
+            <thead>
+            <tr>
+                <th>Mutation ID</th>
+                <th>Genomic DNA Change</th>
+                <th>Type</th>
+                <th>Consequences</th>
+                <th>Donors affected</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="mutation in PathwayMutationsCtrl.mutations.hits">
+                <td>{{mutation.id}}</td>
+                <td>chr{{mutation.chromosome}}:g.{{mutation.start}}{{mutation.mutation}}</td>
+                <td>{{mutation.type}}</td>
+                <td>
+                    <mutation-consequences data-ng-if="mutation.consequences"
+                                           data-items="mutation.consequences"></mutation-consequences>
+                </td>
+                <td>
+                    <div data-ng-repeat="p in mutation.uiDonors | orderBy:'percentage':true">
+                        <div>{{p.term}}:{{p.count | number}}/{{p.countTotal | number}}</div>
+                        <div data-ng-if="!$last">|</div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section id="donors"
+         data-ng-controller="PathwayDonorsCtrl as PathwayDonorsCtrl"
+         data-ng-class="{'loading': !PathwayDonorsCtrl.donors.hits, 'empty': PathwayDonorsCtrl.donors.hits.length == 0}">
+    <h3 data-ng-if="!PathwayDonorsCtrl.donors.hits">
+        <i class="icon-spinner icon-spin"></i> Fetching Donors...
+    </h3>
+
+    <h3 data-ng-if="PathwayDonorsCtrl.donors.hits.length == 0">
+        No Affected Donors Found.
+    </h3>
+
+    <div data-ng-if="PathwayDonorsCtrl.donors.hits.length > 0">
+        <h3>Most Affected Donors
+            <span data-open-in-list='?filters={{PathwayCtrl.baseAdvQuery}}' data-type='donor'></span>
+        </h3>
+
+        <div class="clearfix">
+            <bar class="wide" data-ng-if="PathwayDonorsCtrl.bar.hasData" height=200 items="PathwayDonorsCtrl.bar"
+                 title=""
+                 ylabel="Genes affected"></bar>
+        </div>
+
+        <div class="t_table_top">
+            Showing <strong>{{PathwayDonorsCtrl.donors.hits.length}}</strong> of <strong>{{PathwayDonorsCtrl.donors.pagination.total
+            | number}}</strong> donors
+            <span data-toolbar data-dl="{{PathwayCtrl.pathway.id}}_donors"></span>
+        </div>
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th rowspan="2">ID</th>
+                <th rowspan="2">Site</th>
+                <th rowspan="2">Gender</th>
+                <th rowspan="2" class="text-center"><abbr data-tooltip="Age at Diagnosis">Age</abbr></th>
+                <th rowspan="2"><abbr data-tooltip="Tumour Stage at Diagnosis">Stage</abbr></th>
+                <th rowspan="2" class="text-center">
+                    <abbr data-tooltip="Survival Time in days">Survival<br>(days)</abbr>
+                </th>
+                <th rowspan="2"><abbr data-tooltip="Experimental analyses performed">Analyses</abbr></th>
+                <th colspan="11" class="text-center">Available Data Types</th>
+                <th rowspan="2" data-tooltip="Number of SSM"><abbr># Mutations</abbr></th>
+                <th rowspan="2">
+                    <abbr data-tooltip="Number of Genes with SSM"
+                          data-tooltip-placement="left"># Genes <i class="icon-caret-down"></i></abbr>
+                </th>
+            </tr>
+            <tr>
+                <th data-tooltip="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
+                <th data-tooltip="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
+                <th data-tooltip="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
+                <th data-tooltip="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
+                <th data-tooltip="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
+                <th data-tooltip="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
+                <th data-tooltip="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
+                <th data-tooltip="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
+                <th data-tooltip="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
+                <th data-tooltip="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
+                <th data-tooltip="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="donor in PathwayDonorsCtrl.donors.hits">
+                <td><a data-ui-sref="donor({id:donor.id})">{{donor.id}}</a></td>
+                <td>{{donor.primarySite}}</td>
+                <td>{{donor.gender}}</td>
+                <td class="text-right">{{donor.ageAtDiagnosis | numberPT}}</td>
+                <td>{{donor.tumourStageAtDiagnosis}}</td>
+                <td class="text-right">{{donor.survivalTime | numberPT}}</td>
+                <td>{{donor.analysisTypes.join(', ')}}</td>
+                <td class="text-center"><span data-exists="donor.ssmCount"></span></td>
+                <td class="text-center"><span data-exists="donor.cnsmExists"></span></td>
+                <td class="text-center"><span data-exists="donor.stsmExists"></span></td>
+                <td class="text-center"><span data-exists="donor.sgvExists"></span></td>
+                <td class="text-center"><span data-exists="donor.methArrayExists"></span></td>
+                <td class="text-center"><span data-exists="donor.methSeqExists"></span></td>
+                <td class="text-center"><span data-exists="donor.expArrayExists"></span></td>
+                <td class="text-center"><span data-exists="donor.expSeqExists"></span></td>
+                <td class="text-center"><span data-exists="donor.pexpExists"></span></td>
+                <td class="text-center"><span data-exists="donor.mirnaSeqExists"></span></td>
+                <td class="text-center"><span data-exists="donor.jcnExists"></span></td>
+                <td class="text-right">
+                    <i data-ng-if="donor.mutationCount===null"
+                       class="icon-spinner icon-spin"></i>
+                    <span data-ng-if="donor.mutationCount === 0">--</span>
+                    <!--
+                    <a data-ng-if="donor.mutationCount"
+                       href='/search/m?filters={"gene":{"pathwayId":{"is":["{{PathwayCtrl.pathway.id}}"]}},"donor":{"id":{"is":["{{donor.id}}"]}}}'>
+                    -->
+                    <a data-ng-if="donor.mutationCount" href='/search/m?filters={{donor.advQuery}}'>
+                        {{donor.mutationCount | number}}
+                    </a>
+                </td>
+                <td class="text-right">
+                    <a href='/search/g?filters={{donor.advQuery}}'>
+                        {{donor.ssmAffectedGenes | number}}
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="hidden" id="{{PathwayCtrl.pathway.id}}_donors">
+            <thead>
+            <tr>
+                <th>Donor ID</th>
+                <th>Site</th>
+                <th>Gender</th>
+                <th>Age at Diagnosis</th>
+                <th>Tumor Stage at Diagnosis</th>
+                <th>Survival Time (days)</th>
+                <th>Experimental Analyses</th>
+                <th>SSM</th>
+                <th>CNSM</th>
+                <th>StSM</th>
+                <th>SGV</th>
+                <th>METH-A</th>
+                <th>METH-S</th>
+                <th>EXP-A</th>
+                <th>EXP-S</th>
+                <th>PEXP</th>
+                <th>miRNA-S</th>
+                <th>JCN</th>
+                <th>Mutations</th>
+                <th>Mutated Genes</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="donor in PathwayDonorsCtrl.donors.hits">
+                <td>{{donor.id}}</td>
+                <td>{{donor.primarySite}}</td>
+                <td>{{donor.gender}}</td>
+                <td>{{donor.ageAtDiagnosis}}</td>
+                <td>{{donor.tumourStageAtDiagnosis}}</td>
+                <td>{{donor.survivalTime}}</td>
+                <td>{{donor.analysisTypes.join(', ')}}</td>
+                <td>{{donor.ssmCount? 'True': 'False'}}</td>
+                <td>{{donor.cnsmExists? 'True':'False'}}</td>
+                <td>{{donor.stsmExists? 'True':'False'}}</td>
+                <td>{{donor.sgvExists? 'True':'False'}}</td>
+                <td>{{donor.methArrayExists? 'True':'False'}}</td>
+                <td>{{donor.methSeqExists? 'True':'False'}}</td>
+                <td>{{donor.expArrayExists? 'True':'False'}}</td>
+                <td>{{donor.expSeqExists? 'True':'False'}}</td>
+                <td>{{donor.pexpExists? 'True':'False'}}</td>
+                <td>{{donor.mirnaSeqExists? 'True':'False'}}</td>
+                <td>{{donor.jcnExists? 'True':'False'}}</td>
+                <td>{{donor.mutationCount}}</td>
+                <td>{{donor.ssmAffectedGenes}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+</article>
+</div>

@@ -1,0 +1,35 @@
+<div data-ng-if="isActive" class="t_current">
+    <ul>
+        <li>
+            <button type="button" class="t_button t_current__remove_all" data-ng-click="Facets.removeAll()">
+                <i class="icon-undo"></i>
+            </button>
+            <share-button></share-button>
+        </li>
+        <li data-ng-repeat="(typeName, type) in filters">
+            <ul>
+                <li data-ng-repeat="(facet, terms) in type track by facet" class="t_facets__facet">
+                    <span class="t_facets__facet__label"
+                          data-ng-click="Facets.removeFacet({type:typeName, facet: facet})" data-ng-switch="facet">
+                        <span data-ng-switch-when="id">{{typeName | trans:true}}</span>
+                        <span data-ng-switch-when="pathwayId">Pathway</span>
+                        <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
+                        <span data-ng-switch-default="">{{facet | trans:true}}</span>
+                    </span>
+                    is
+                    <ul class="t_facets__facet__terms">
+                        <li data-ng-repeat="term in terms.is track by term" class="t_facets__facet__terms__term">
+                            <span data-ng-if="!$first" class="t_current__or"> OR </span>
+                            <span class="t_facets__facet__terms__active__term__label"
+                                  data-ng-click="Facets.removeTerm({type: typeName, facet: facet, term: term})"
+                                  data-tooltip="{{term | trans | define:true}}"
+                                  data-tooltip-append-to-body="true">{{term | trans:true}}</span>
+                        </li>
+                    </ul>
+                    <span data-ng-if="!$last" class="t_current__and"> AND </span>
+                </li>
+            </ul>
+            <span data-ng-if="!$last" class="t_current__and"> AND </span>
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,124 @@
+.t_gv__navbar {
+  padding-bottom: 1rem;
+
+  button {
+    line-height: 2rem;
+  }
+  input {
+    margin-top: -.1rem;
+  }
+}
+
+.gv-panel-title, .gv-status-bar {
+  font: {
+    family: $sans-stack;
+    size: 1.2rem;
+    weight: 300;
+  }
+  color: $black;
+  padding: .5rem;
+  background: $greyLightest;
+  border: none;
+  margin-bottom: .25rem;
+}
+
+.ocb-font-size-14 {
+  font-size: 1rem;
+}
+
+.ocb-track-title-font-size {
+  font-size: 1rem;
+  line-height: 2rem;
+}
+
+.ocb-track-feature-font-size, .ocb-font-size-12 {
+  font-size: .8rem;
+  line-height: 1rem;
+}
+
+.ocb-font-sourcesanspro {
+  font-family: $sans-stack;
+}
+
+.gv_pos_num {
+  font-size: .9rem;
+  fill: $green
+}
+
+.gv_nts_line {
+  fill: $greyDark;
+}
+
+.gv_centerline {
+  opacity: 0.5;
+  border: 1px solid $orange;
+  background: $yellow;
+}
+
+.gv_mouseline {
+  border: 1px solid $black;
+  opacity: 0.2;
+  background: $greyDark;
+}
+
+.gv_selectbox {
+  //stroke-width: 2;
+  //stroke: $blue;
+  fill: $blue;
+  opacity: 0.4;
+}
+
+.gv_selectbox_active {
+  //stroke-width: 2;
+  //stroke: $orange;
+  fill: $orange;
+  opacity: .3;
+}
+
+.gv_faded_region, .gv_active_region {
+  z-index: 0;
+  position: absolute;
+  height: 100%;
+}
+
+.gv_faded_region {
+  //background-color: $black;
+  //opacity: .1;
+}
+
+.gv_active_region {
+  background-color: $orange;
+  opacity: .3;
+}
+
+.ocb-track-resize {
+  opacity: 1;
+  background-color: $greyLightest;
+  background-repeat: no-repeat;
+  background-position: 49%;
+  height: .75rem;
+  border-top: 1px solid $greyLighter;
+  border-bottom: 1px solid $greyLighter;
+
+  &:hover {
+    background-repeat: no-repeat;
+    background-color: $greyLighter;
+    cursor: ns-resize;
+  }
+}
+
+.gv_track_title {
+  padding: .2rem;
+  font-size: 1rem;
+  background: none;
+  border-bottom: 1px dashed $greyLight;
+}
+
+.gv_track {
+  fill: transparent;
+}
+
+.gv_track_hover {
+  opacity: .1                                                ;
+  fill: $cyan;
+}

@@ -1,0 +1,74 @@
+<ul class="t_facets__facet" data-ng-show="facet.terms.length || actives">
+    <li class="t_facets__facet__title" data-ng-class="{t_facets__facet__title_active:actives.length}">
+        <span data-ng-click="collapsed=!collapsed" class="t_facets__facet__title__label">
+            <i data-ng-class="{'icon-caret-down':!collapsed, 'icon-caret-right':collapsed}"></i>
+            {{ label ? label : (facetName | trans:true) }}
+        </span>
+        <span data-ng-if="actives.length" class="t_facets__facet__terms__inactive__reset t_tools">
+            <span data-ng-click="removeFacet()" class="t_tools__tool"><i class="icon-undo"></i></span>
+        </span>
+    </li>
+    <li class="t_facets__facet__terms">
+        <ul class="t_facets__facet__terms__active">
+            <li class="t_facets__facet__terms__active__term__label"
+                data-active-term data-item="item"
+                data-ng-mouseenter="mouseOver($event)"
+                data-ng-mouseleave="mouseLeave($event)"
+                data-ng-repeat="item in actives | orderBy:'-count'"
+                data-ng-click="removeTerm(item.term)">
+                <span data-ng-hide="hideCount" data-ng-style="bar(item.count)"
+                      class="t_facets__facet__terms__active__term__bar"></span>
+                <span class="t_facets__facet__terms__active__term__label__text">
+                    <span ng-if="!defined">
+                    <i style='color:{{sites[item.term]}}' class="icon-ok t_impact_{{ item.term | lowercase }}"></i>
+                    <span
+                            data-tooltip-append-to-body="true"
+                            data-tooltip="{{item.term}}"
+                            data-tooltip-ellipsed="true"
+                            data-tooltip-placement="right">{{item.term | trans:capitalize}}</span>
+                        </span>
+                    <span ng-if="defined">
+                        <i style='color:{{projects[item.term]}}' class="icon-ok"></i>
+                        <span
+                                data-tooltip-append-to-body="true"
+                                data-tooltip="{{ item.term | trans:capitalize | define }}"
+                                data-tooltip-placement="right">{{item.term | trans:capitalize}}</span>
+                    </span>
+                </span>
+                <span data-ng-hide="hideCount" class="t_facets__facet__terms__active__term__count">{{item.count | number}}</span>
+                <span data-ng-if="hideCount"
+                      class="t_facets__facet__terms__active__term__count t_facets__facet__term__na">{{hideText}}</span>
+            </li>
+        </ul>
+        <ul data-ng-hide="collapsed || inactives.length == 0" class="t_facets__facet__terms__inactive"
+            data-facet-list="{{ inactives }}"
+            data-limit=5>
+            <li class="t_facets__facet__terms__inactive__term"
+                data-ng-repeat="item in list track by item.term">
+                <span data-ng-hide="hideCount" data-ng-style="bar(item.count)"
+                      class="t_facets__facet__terms__inactive__term__bar"></span>
+                <span data-ng-if="!defined"
+                      class="t_facets__facet__terms__inactive__term__label"
+                      data-tooltip-append-to-body="true"
+                      data-tooltip-ellipsed="true"
+                      data-tooltip-html-unsafe="{{ item.term | trans:capitalize }}"
+                      data-ng-click="addTerm(item.term)">
+                    <i style='color:{{sites[item.term]}}' class="icon-check-empty t_impact_{{ item.term | lowercase }}"></i>
+                    {{item.term | trans:capitalize}}
+                </span>
+                <span data-ng-if="defined"
+                      class="t_facets__facet__terms__inactive__term__label"
+                      data-tooltip-append-to-body="true"
+                      data-tooltip-placement="right"
+                      data-tooltip-html-unsafe="{{ item.term | trans:capitalize | define}}"
+                      data-ng-click="addTerm(item.term)">
+                    <i style='color:{{projects[item.term]}}' class="icon-check-empty"></i>
+                    {{item.term | trans:capitalize}}
+                </span>
+                <span data-ng-hide="hideCount" class="t_facets__facet__terms__inactive__term__count">{{item.count | number}}</span>
+                <span data-ng-if="hideCount"
+                      class="t_facets__facet__terms__inactive__term__count t_facets__facet__term__na">{{hideText}}</span>
+            </li>
+        </ul>
+    </li>
+</ul>

@@ -1,0 +1,76 @@
+.t_tab_pane {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.t_tabs {
+  font-weight: 300;
+  border-bottom: 1px solid $greyLighter;
+  margin-top: -1px;
+}
+
+.t_tabs__tab {
+  display: inline-block;
+  background: $greyLightest;
+  color: $greyDark;
+  padding: .7rem;
+  width: 12rem;
+  cursor: pointer;
+  margin-right: -.25rem;
+  margin-bottom: -1px; //- will need to use this
+
+  border-top: 1px solid $greyLighter;
+  border-right: 1px solid $greyLighter;
+  border-bottom: 1px solid $greyLighter;
+
+  //transition: color .5s, border-top-color .5s, background .5s;
+
+  &:hover {
+    color: $greyDarker;
+    background: $greyLightestEver;
+    border-top-color: $greyDarker;
+  }
+
+  &.active {
+    background: $white;
+    color: $greyDarker;
+    cursor: default;
+    border-top-color: $greyDarker;
+    border-bottom-color: $white;
+  }
+}
+
+.t_tabs__tab__donor {
+  &.active, &:hover {
+    border-top-color: $donor;
+  }
+}
+.t_tabs__tab__gene {
+  &.active, &:hover {
+    border-top-color: $gene;
+  }
+}
+.t_tabs__tab__mutation {
+  &.active, &:hover {
+    border-top-color: $mutation;
+  }
+}
+
+aside {
+  .t_tabs {
+    margin-top: 0;
+    margin-right: -2rem;
+  }
+  .t_tabs__tab {
+    padding: .5rem 0;
+    text-align: center;
+    width: 5rem;
+    margin-right: -3px;
+  }
+  .t_tab_pane {
+    //margin-right: -2rem;
+  }
+}

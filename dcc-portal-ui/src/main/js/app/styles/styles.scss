@@ -1,0 +1,340 @@
+//-----------------------------------------------------------------------------
+// Base
+@import "_base/base";
+//-----------------------------------------------------------------------------
+// Layout
+@import "layout";
+//-----------------------------------------------------------------------------
+// General
+@import "_general/root";
+@import "_general/type";
+//-----------------------------------------------------------------------------
+// Sections
+@import "_sections/header";
+@import "_sections/home";
+@import "_sections/donor";
+@import "_sections/advanced";
+@import "_sections/results";
+@import "_sections/footer";
+@import "_sections/download";
+//-----------------------------------------------------------------------------
+// Modules
+@import "_modules/modules";
+
+html {
+  font-family: $sans-stack;
+  font-size: .7rem;
+  line-height: 1.618rem;
+  overflow-y: scroll;
+
+  @include breakpoint($break-laptop) {
+    font-size: .8rem;
+  }
+  @include breakpoint($break-widescreen) {
+    font-size: 0.9rem;
+  }
+}
+
+b, i {
+  font-weight: normal;
+  font-style: normal;
+}
+
+.amp {
+  font-family: $amp-stack;
+}
+
+.caps {
+  @include caps;
+}
+
+/*a {
+  #{$link} {
+    text-decoration: none;
+  }
+  #{$focus} {
+    text-decoration: underline;
+  }
+}*/
+
+//-----------------------------------------------------------------------------
+// Code Blocks
+
+.highlight {
+
+  background: transparent;
+  border: 0;
+}
+
+abbr {
+  border-bottom: 1px dashed $yellow;
+}
+
+code, pre {
+  font-family: $mono-stack;
+}
+
+code {
+
+}
+
+pre {
+
+  overflow: auto;
+}
+
+// ---
+html, body {
+  background: $greyLightest;
+}
+
+article {
+  border: {
+    top: 1px solid $greyLight;
+    left: 1px solid $greyLight;
+  }
+  //  padding-bottom: 9999px;
+  //  margin-bottom: -9999px;
+}
+
+section {
+  padding: 2rem;
+  margin: 0;
+  box-shadow: none;
+  background: $white;
+  border-radius: 0;
+  border-bottom: 1px solid $greyLight;
+}
+
+section:last-child {
+  border: none;
+}
+
+aside {
+  font-size: .9rem;
+  section {
+    padding: 1rem;
+  }
+}
+
+article.full {
+  @include grid-span(12);
+  border: 0;
+}
+
+ul, ul li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ol {
+  vertical-align: middle;
+  p {
+    margin: .2rem 0;
+    font: {
+      family: $sans-stack;
+      size: 1rem;
+    }
+  }
+}
+
+.match {
+  font-weight: 700;
+}
+
+.empty, .loading {
+  color: $greyDark;
+  h3 {
+    color: $greyDark;
+    margin-bottom: 0;
+  }
+}
+
+.loading-text {
+  margin: 2rem;
+}
+
+.loading-icon {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.data-available {
+  color: $green;
+}
+
+.data-missing {
+  color: $red;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.ui-scrollfix {
+  position: fixed;
+  z-index: 99;
+}
+
+.h1-wrap {
+  height: 5rem;
+}
+
+h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
+  // Sets a max width. Site will be fluid until it reaches 1200, then stick there.
+  width: 1200px;
+
+  @include breakpoint($break-widescreen) {
+    width: 1440px;
+  }
+  top: 0;
+  padding: .5rem 0;
+  background: hsla(0, 0%, 100%, .9);
+  border-bottom: 1px solid $greyLightest;
+}
+
+aside.ui-scrollfix {
+  top: 5rem;
+  section {
+    background: transparent;
+  }
+}
+
+.open-in {
+  font-size: 1rem;
+  color: $grey;
+  text-transform: uppercase;
+}
+
+h3:hover {
+  .pilcrow {
+    opacity: 1;
+  }
+}
+
+.pilcrow {
+  opacity: .1;
+}
+
+.t_sidebar {
+  position: relative;
+}
+
+.t_notify_popup, #buorg {
+  position: fixed;
+  z-index: 1000000;
+  width: 100%;
+  font-size: 1.25rem;
+  background: $orange;
+  color: $white;
+  padding: 1rem 2rem;
+  left: 0;
+  border: none;
+  font-family: inherit;
+}
+
+.t_notify_body {
+  font-size: 1rem;
+}
+
+.t_notify_warning {
+  background: $yellow;
+}
+
+.t_notify_success {
+  background: $green;
+}
+
+
+#buorg {
+  div {
+    padding: 0
+  }
+
+  #buorgclose {
+    position: relative;
+    float: right;
+    right: 0;
+    top: 0;
+    height: 0;
+    width: 0;
+    font-weight: normal;
+    font-size: 1rem;
+    padding: 0;
+    padding-right: 1rem;
+  }
+}
+
+#loading-screen {
+  position: fixed;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  /* Fallback for web browsers that doesn't support RGBa */
+  background: hsl(0, 0, 0) transparent;
+  /* RGBa with 0.6 opacity */
+  background: hsla(100, 100, 100, 0.6);
+  text-align: center;
+
+  font-size: 6rem;
+  color: $greyDark;
+
+  i, img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+  }
+  i {
+    margin-left: -2rem;
+    margin-top: -8rem;
+  }
+  img {
+    height: 3rem;
+    margin-left: .7rem;
+    margin-top: -6.5rem;
+  }
+}
+
+/******/
+
+////.quick-fade.ng-leave,
+//.quick-fade.ng-enter {
+//  -webkit-transition:0.2s linear all;
+//  -moz-transition:0.2s linear all;
+//  -o-transition:0.2s linear all;
+//  transition:0.2s linear all;
+//}
+////.transition-fade.ng-leave,
+//.transition-fade.ng-enter {
+//  -webkit-transition:0.5s linear all;
+//  -moz-transition:0.5s linear all;
+//  -o-transition:0.5s linear all;
+//  transition:0.5s linear all;
+//}
+//.transition-fade.ng-enter,
+//.transition-fade.ng-leave.ng-leave-active,
+//.quick-fade.ng-enter,
+//.quick-fade.ng-leave.ng-leave-active {
+//  -ms-opacity: 0;
+//  opacity: 0;
+//}
+//.transition-fade.ng-leave,
+//.transition-fade.ng-enter.ng-enter-active,
+//.quick-fade.ng-leave,
+//.quick-fade.ng-enter.ng-leave-active {
+//  -ms-opacity: 1;
+//  opacity: 1;
+//}

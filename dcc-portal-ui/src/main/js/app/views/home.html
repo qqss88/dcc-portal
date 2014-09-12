@@ -1,0 +1,112 @@
+<article class="full">
+    <div class="clearfix">
+        <form class="t_suggest">
+            <input
+                    class="t_suggest__input"
+                    placeholder="eg. BRAF, KRAS G12D, DO35100, MU7870, apoptosis"
+                    autofocus="true"
+                    data-suggest
+                    />
+            <i class="t_suggest__embedded t_suggest__embedded__left t_suggest__embedded__search icon-search"></i>
+            <i class="t_suggest__embedded t_suggest__embedded__right  icon-spin icon-spinner" data-ng-show='isBusy'></i>
+            <i class="t_suggest__embedded t_suggest__embedded__right t_suggest__embedded__clear icon-cancel"
+               data-ng-click="query='';quick()" data-ng-show='query && !isBusy'></i>
+        </form>
+    </div>
+    <section>
+        <h3>About Us</h3>
+
+        <p>The <a target="_blank" href="http://icgc.org"><i class="icon-external-link"></i>ICGC</a> Data Portal provides tools for visualizing, querying
+            and downloading
+            the data released quarterly by the consortium's member projects.</p>
+
+        <p>To access ICGC controlled tier data, please read these <a href="http://docs.icgc.org/access-controlled-data" target="_blank">instructions.</a></p>
+
+        <p>New features will be regularly added by the <a href="/team">DCC development team</a>.
+            <a href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback"><i class="icon-mail"></i>Feedback is welcome.</a>
+        </p>
+
+        <p>Subscribe to our Twitter <a target="_blank" href="https://twitter.com/icgc_dcc"><i class="icon-twitter"></i>feed</a> to get updates.</p>
+        <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/icgc_dcc"
+           data-widget-id="380699364819091456"
+           data-chrome="nofooter noborders transparent"
+           data-theme="light"
+           data-tweet-limit="2"><i class="icon-spin icon-spinner"></i>Loading Tweets...</a>
+        <script>!function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
+            if (!d.getElementById(id)) {
+                js = d.createElement(s);
+                js.id = id;
+                js.src = p + "://platform.twitter.com/widgets.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }
+        }(document, "script", "twitter-wjs");</script>
+        <a target="_blank" style="margin-left: 4rem" href="https://twitter.com/icgc_dcc"><i class="icon-twitter"></i>See more news.</a>
+
+    </section>
+    <section class="text-center" data-ng-controller="ReleaseCtrl as ReleaseCtrl">
+        <h3>Data Release {{ ReleaseCtrl.release.releaseNumber }}</h3>
+        <h3 class="subhead">{{ ReleaseCtrl.applicationReleaseDate }}</h3>
+        <donut home=true items='ReleaseCtrl.donut' inner-label='Donors' outer-label='Donors'
+               heading="Donor Distribution by Primary Site" height="325"></donut>
+        <br>
+
+        <div>
+            <table class="table table-striped table-bordered table-hover table-condensed">
+                <tbody>
+                <tr>
+                    <td>Cancer projects</td>
+                    <td class="text-right">
+                        <a href="/projects">{{ReleaseCtrl.release.projectCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Cancer primary sites</td>
+                    <td class="text-right">{{ReleaseCtrl.release.primarySiteCount | number}}</td>
+                </tr>
+                <tr>
+                    <td>Donors</td>
+                    <td class="text-right">
+                        <a href="/search">{{ReleaseCtrl.release.donorCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Simple somatic mutations</td>
+                    <td class="text-right">
+                        <a href="/search/m">{{ReleaseCtrl.release.ssmCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mutated genes</td>
+                    <td class="text-right">
+                        <a href='/search/g?filters={"donor":{"availableDataTypes":{"is":["ssm"]}}}'>
+                        {{ReleaseCtrl.release.mutatedGeneCount | number}}</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="sidebar omega">
+        <h3>Information</h3>
+        <ul>
+            <li><a target="_blank" href="http://docs.icgc.org/access-controlled-data">Access Controlled Data</a></li>
+            <li><a target="_blank" href="http://docs.icgc.org/methods">Methods</a></li>
+            <li><a target="_blank" href="http://docs.icgc.org/data-submission">Submitter Tools</a></li>
+        </ul>
+        <h3>Tutorial</h3>
+        <h4>Example Queries</h4>
+        <ol>
+            <li>
+                <a
+                        href='/search/m?filters={"gene":{"id":{"is":["ENSG00000157764"]}},"mutation":{"consequenceType":{"is":["missense"]}},"donor":{"primarySite":{"is":["Colorectal"]}}}'>BRAF
+                    missense mutations in colorectal cancer</a></li>
+            <li>
+                <a href='/search/g?filters={"mutation":{"functionalImpact":{"is":["High"]}}, "donor":{"projectId":{"is":["MALY-DE"]}, "tumourStageAtDiagnosis":{"is":["III"]}}}'>
+                Most frequently mutated genes by high impact mutations in stage III malignant lymphoma </a></li>
+            <li>
+                <a href='/search?filters={"donor":{"primarySite":{"is":["Brain"]}, "availableDataTypes":{"is":["meth_array", "meth_seq"]}},"mutation":{"consequenceType":{"is":["frameshift_variant"]}}}'>Brain
+                    cancer donors with frameshift mutations and having methylation data available</a></li>
+        </ol>
+    </section>
+</article>

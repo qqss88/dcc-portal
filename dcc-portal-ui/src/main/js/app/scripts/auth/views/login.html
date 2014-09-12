@@ -1,0 +1,16 @@
+<div style="background: #eaeaea;color:#333;text-align: right; padding: .2rem 1rem">
+    <span data-ng-show="user.verifying"><i class="icon-spinner icon-spin"></i> Verifying...</span>
+    <span data-ng-show="user.email && !user.verifying">
+        <i data-ng-show="user.daco" class="icon-shield data-available"
+           data-tooltip-placement="bottom"
+           data-tooltip-html-unsafe="Authenticated"></i>
+        <i data-ng-hide="user.daco" class="icon-shield data-missing"
+           data-tooltip-placement="bottom"
+           data-tooltip-html-unsafe="Unauthenticated"></i>
+        {{user.email}}
+        <i data-ng-show="user.daco" style="cursor: pointer" class="icon-cog"
+           data-ng-click="authModal=true"></i>
+        (<a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
+    <a data-ng-hide="user.email || user.verifying" data-ng-click="loginModal=true" href="">
+        <i class="icon-login"></i>Login</a>
+</div>

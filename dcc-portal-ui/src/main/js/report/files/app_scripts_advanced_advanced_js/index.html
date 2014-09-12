@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Plato - app/scripts/advanced/advanced.js</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome-ie7.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="http://github.com/es-analysis/plato">Plato on Github</a>
+    <ul class="nav navbar-nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>app/scripts/advanced/advanced.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"  data-container="body"></i></a></h2>
+      <p class="stat">71.79</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h2>
+      <p class="stat">364</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="col-md-6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="col-md-6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty" data-container="body"></i></a></h2>
+      <p class="stat">38.91</p>
+    </div>
+    <div class="col-md-6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs" data-container="body"></i></a></h2>
+      <p class="stat">3.89</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity" data-container="body"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="col-md-6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC" data-container="body"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="col-md-12">/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+(function () {
+  &#039;use strict&#039;;
+
+  var module = angular.module(&#039;icgc.advanced&#039;, [&#039;icgc.advanced.controllers&#039;, &#039;ui.router&#039;]);
+
+  module.config(function ($stateProvider) {
+    $stateProvider.state(&#039;advanced&#039;, {
+      url: &#039;/search?filters&#039;,
+      data: {
+        tab: &#039;donor&#039;
+      },
+      reloadOnSearch: false,
+      templateUrl: &#039;/scripts/advanced/views/advanced.html&#039;,
+      controller: &#039;AdvancedCtrl as AdvancedCtrl&#039;
+    })
+        .state(&#039;advanced.gene&#039;, {
+          url: &#039;/g&#039;,
+          reloadOnSearch: false,
+          data: {tab: &#039;gene&#039;}
+        })
+        .state(&#039;advanced.mutation&#039;, {
+          url: &#039;/m&#039;,
+          reloadOnSearch: false,
+          data: {tab: &#039;mutation&#039;, subTab: &#039;mutation&#039;}
+        })
+        .state(&#039;advanced.mutation.occurrence&#039;, {
+          url: &#039;/o&#039;,
+          reloadOnSearch: false,
+          data: {subTab: &#039;occurrence&#039;}
+        });
+  });
+})();
+
+(function () {
+  &#039;use strict&#039;;
+
+  var module = angular.module(&#039;icgc.advanced.controllers&#039;, [&#039;icgc.advanced.services&#039;]);
+
+  module.controller(&#039;AdvancedCtrl&#039;, function ($scope, $state, Page, State, AdvancedDonorService, AdvancedGeneService, AdvancedMutationService) {
+    Page.setTitle(&#039;Advanced Search&#039;);
+    Page.setPage(&#039;advanced&#039;);
+
+    var _ctrl = this;
+
+    _ctrl.state = State;
+
+    _ctrl.Donor = AdvancedDonorService;
+    _ctrl.Gene = AdvancedGeneService;
+    _ctrl.Mutation = AdvancedMutationService;
+
+    function refresh() {
+      _ctrl.Donor.refresh();
+      _ctrl.Gene.refresh();
+      _ctrl.Mutation.refresh();
+    }
+
+    function ajax() {
+      _ctrl.Donor.ajax();
+      _ctrl.Gene.ajax();
+      _ctrl.Mutation.ajax();
+    }
+
+    _ctrl.setTab = function (tab) {
+      _ctrl.state.setTab(tab);
+      ajax();
+    };
+
+    _ctrl.setSubTab = function (tab) {
+      _ctrl.state.setSubTab(tab);
+    };
+
+    // Setup
+    _ctrl.setTab($state.current.data.tab);
+    _ctrl.setSubTab($state.current.data.subTab);
+    refresh();
+
+    // Refresh when filters change
+    // Data is cached so refreshing on tab switch
+    // should be free
+    $scope.$on(&#039;$locationChangeSuccess&#039;, function (event, next) {
+      if (next.indexOf(&#039;search&#039;) !== -1) {
+        refresh();
+      }
+    });
+
+    // Tabs need to update when using browser buttons
+    // Shouldn&#039;t have to worry about refreshing data here
+    // since you cannot change tabs and filters in one movement
+    // ... actually you can by clicking on counts in the tables
+    // $scope.$on(&#039;$locationChangeSuccess&#039;) should take care of that anyway
+    $scope.$watch(function () {
+      return $state.current.data.tab;
+    }, function () {
+      _ctrl.setTab($state.current.data.tab);
+    });
+    $scope.$watch(function () {
+      return $state.current.data.subTab;
+    }, function () {
+      _ctrl.setSubTab($state.current.data.subTab);
+    });
+  });
+
+  module.service(&#039;AdvancedDonorService&#039;, function (Page, LocationService, HighchartsService, Donors, State) {
+    var _this = this;
+
+    _this.ajax = function () {
+      if (!!(State.isTab(&#039;donor&#039;) &amp;&amp; _this.donors)) {
+        _this.mutationCounts = null;
+        Donors
+            .one(_.pluck(_this.donors.hits, &#039;id&#039;).join(&#039;,&#039;))
+            .handler
+            .one(&#039;mutations&#039;, &#039;count&#039;).get({filters: LocationService.filters()}).then(function (counts) {
+              _this.mutationCounts = counts;
+            });
+
+        var facets = _this.donors.facets;
+        _this.pieProjectId = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;projectId&#039;,
+          facets: facets
+        });
+        _this.piePrimarySite = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;primarySite&#039;,
+          facets: facets
+        });
+        _this.pieGender = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;gender&#039;,
+          facets: facets
+        });
+        _this.pieTumourStage = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;tumourStageAtDiagnosis&#039;,
+          facets: facets
+        });
+        _this.pieVitalStatus = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;vitalStatus&#039;,
+          facets: facets
+        });
+        _this.pieStatusFollowup = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;diseaseStatusLastFollowup&#039;,
+          facets: facets
+        });
+        _this.pieRelapseType = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;relapseType&#039;,
+          facets: facets
+        });
+        _this.pieAge = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;ageAtDiagnosisGroup&#039;,
+          facets: facets
+        });
+        _this.pieDataTypes = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;availableDataTypes&#039;,
+          facets: facets
+        });
+        _this.pieAnalysisTypes = HighchartsService.pie({
+          type: &#039;donor&#039;,
+          facet: &#039;analysisTypes&#039;,
+          facets: facets
+        });
+      }
+    };
+
+    _this.success = function (donors) {
+      Page.stopWork();
+      _this.loading = false;
+
+      donors.hits.forEach(function (donor) {
+        donor.embedQuery = LocationService.overwriteFilters({donor: {id: {is: [donor.id]}}});
+      });
+      _this.donors = donors;
+      _this.ajax();
+    };
+
+    _this.refresh = function () {
+      Page.startWork();
+      _this.loading = true;
+      var params = LocationService.getJsonParam(&#039;donors&#039;);
+      params.include = &#039;facets&#039;;
+      Donors.getList(params).then(_this.success);
+    };
+  });
+
+  module.service(&#039;AdvancedGeneService&#039;, function (Page, LocationService, Genes, Projects, Donors, State) {
+    var _this = this;
+
+    _this.ajax = function () {
+      if (State.isTab(&#039;gene&#039;) &amp;&amp; _this.genes) {
+        _this.mutationCounts = null;
+        var geneIds = _.pluck(_this.genes.hits, &#039;id&#039;).join(&#039;,&#039;);
+        // Get Mutations counts
+        Genes.one(geneIds).handler
+            .one(&#039;mutations&#039;, &#039;count&#039;).get({filters: LocationService.filters()}).then(function (data) {
+              _this.mutationCounts = data;
+            });
+
+        // Need to get SSM Test Donor counts from projects
+        Projects.getList().then(function (projects) {
+          _this.genes.hits.forEach(function (gene) {
+            Donors.getList({
+              size: 0,
+              include: &#039;facets&#039;,
+              filters: LocationService.mergeIntoFilters({gene: {id: {is: gene.id}}})
+            }).then(function (data) {
+              gene.uiDonors = data.facets.projectId.terms;
+              gene.uiDonors.forEach(function (facet) {
+                var p = _.find(projects.hits, function (item) {
+                  return item.id === facet.term;
+                });
+
+                facet.countTotal = p.ssmTestedDonorCount;
+                facet.percentage = facet.count / p.ssmTestedDonorCount;
+              });
+            });
+          });
+        });
+      }
+    };
+
+    _this.success = function (genes) {
+      Page.stopWork();
+      _this.loading = false;
+
+      genes.hits.forEach(function (gene) {
+        gene.embedQuery = LocationService.overwriteFilters({gene: {id: {is: [gene.id]}}});
+      });
+      _this.genes = genes;
+      _this.ajax();
+    };
+
+    _this.refresh = function () {
+      Page.startWork();
+      _this.loading = true;
+      var params = LocationService.getJsonParam(&#039;genes&#039;);
+      params.include = &#039;facets&#039;;
+      Genes.getList(params).then(_this.success);
+    };
+  });
+
+  module.service(&#039;AdvancedMutationService&#039;, function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State) {
+    var _this = this;
+
+    _this.ajax = function () {
+      if (State.isTab(&#039;mutation&#039;) &amp;&amp; _this.mutations) {
+        // Need to get SSM Test Donor counts from projects
+        Projects.getList().then(function (projects) {
+          _this.mutations.hits.forEach(function (mutation) {
+            Donors.getList({
+              size: 0,
+              include: &#039;facets&#039;,
+              filters: LocationService.mergeIntoFilters({mutation: {id: {is: mutation.id}}})
+            }).then(function (data) {
+              mutation.uiDonors = data.facets.projectId.terms;
+              mutation.uiDonors.forEach(function (facet) {
+                var p = _.find(projects.hits, function (item) {
+                  return item.id === facet.term;
+                });
+
+                facet.countTotal = p.ssmTestedDonorCount;
+                facet.percentage = facet.count / p.ssmTestedDonorCount;
+              });
+            });
+          });
+        });
+
+        var facets = _this.mutations.facets;
+        _this.pieConsequences = HighchartsService.pie({
+          type: &#039;mutation&#039;,
+          facet: &#039;consequenceType&#039;,
+          facets: facets
+        });
+        _this.piePlatform = HighchartsService.pie({
+          type: &#039;mutation&#039;,
+          facet: &#039;platform&#039;,
+          facets: facets
+        });
+        _this.pieVerificationStatus = HighchartsService.pie({
+          type: &#039;mutation&#039;,
+          facet: &#039;verificationStatus&#039;,
+          facets: facets
+        });
+        _this.pieType = HighchartsService.pie({
+          type: &#039;mutation&#039;,
+          facet: &#039;type&#039;,
+          facets: facets
+        });
+      }
+    };
+
+    _this.mSuccess = function (mutations) {
+      Page.stopWork();
+      _this.loading = false;
+
+      mutations.hits.forEach(function (mutation) {
+        mutation.embedQuery = LocationService.overwriteFilters({mutation: {id: {is: [mutation.id]}}});
+      });
+      _this.mutations = mutations;
+      _this.ajax();
+    };
+
+    _this.oSuccess = function (occurrences) {
+      _this.occurrences = occurrences;
+    };
+
+    _this.refresh = function () {
+      Page.startWork();
+      _this.loading = true;
+      var mParams = LocationService.getJsonParam(&#039;mutations&#039;);
+      mParams.include = [&#039;facets&#039;, &#039;consequences&#039;];
+      Mutations.getList(mParams).then(_this.mSuccess);
+      Occurrences.getList(LocationService.getJsonParam(&#039;occurrences&#039;)).then(_this.oSuccess);
+    };
+  });
+})();
+
+(function () {
+  &#039;use strict&#039;;
+
+  var module = angular.module(&#039;icgc.advanced.services&#039;, []);
+
+  module.service(&#039;State&#039;, function () {
+    this.loading = false;
+
+    this.setTab = function (tab) {
+      this.tab = tab;
+      this.facetTab = tab;
+      if (tab === &#039;mutation&#039;) {
+        this.subTab = tab;
+      }
+    };
+    this.getTab = function () {
+      return this.tab;
+    };
+    this.isTab = function (tab) {
+      return this.tab === tab;
+    };
+
+    this.setFacetTab = function (tab) {
+      this.facetTab = tab;
+    };
+    this.getFacetTab = function () {
+      return this.facetTab;
+    };
+    this.isFacetTab = function (tab) {
+      return this.facetTab === tab;
+    };
+
+    this.setSubTab = function (tab) {
+      this.subTab = tab;
+    };
+    this.getSubTab = function () {
+      return this.subTab;
+    };
+    this.isSubTab = function (tab) {
+      return this.subTab === tab;
+    };
+  });
+})();</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

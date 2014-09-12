@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap-3.0.0-wip.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome-ie7.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="brand" href="http://github.com/jsoverson/plato">Plato on Github</a>
+    <ul class="nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>app/scripts/mutations/services.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
+      <p class="stat">61.02</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
+      <p class="stat">294</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="span6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="span6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
+      <p class="stat">14.71</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
+      <p class="stat">4.17</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="span6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="span12">/*
+ * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+&#039;use strict&#039;;
+
+angular.module(&#039;app.mutations.services&#039;, [&#039;app.mutations.models&#039;]);
+
+angular.module(&#039;app.mutations.services&#039;).service(&#039;MutationsService&#039;, function(Mutations) {
+  this.translateConsequences = function(c) {
+    function transcript(t) {
+      return {
+        id: t.transcript_id,
+        name: t.name,
+        isCanonical: t.is_canonical
+      };
+    }
+
+    return {
+      gene: {
+        id: c.gene_id,
+        symbol: c.gene_symbol,
+        strand: c.gene_strand
+      },
+      aaMutation: c.aa_mutation,
+      consequenceType: c.consequence_type,
+      cdsMutation: c.cds_mutation,
+      transcripts: _.map(c.transcripts, transcript)
+    };
+  };
+
+  this.translateMutation = function(m) {
+    function transcript(t) {
+      return {
+        id: t.id,
+        biotype: t.biotype,
+        cdnaCodingStart: t.cdna_coding_start,
+        cdnaCodingEnd: t.cdna_coding_end,
+        codingRegionStart: t.coding_region_start,
+        codingRegionEnd: t.coding_region_end,
+        consequence: {
+          _geneId: t.consequence._gene_id,
+          _transcriptId: t.consequence._transcript_id,
+          aaMutation: t.consequence.aa_mutation,
+          cdsMutation: t.consequence.cds_mutation,
+          consequenceType: t.consequence.consequence_type,
+          geneAffected: t.consequence.gene_affected,
+          geneBuildVersion: t.consequence.gene_build_version,
+          transcriptAffected: t.consequence.transcript_affected
+        },
+        start: t.start,
+        end: t.end,
+        startExon: t.start_exon,
+        endExon: t.end_exon,
+        gene: {
+          _geneId: t.gene._gene_id,
+          canonicalTranscriptId: t.gene.canonical_transcript_id,
+          chromosome: t.gene.chromosome,
+          description: t.gene.description,
+          end: t.gene.end,
+          start: t.gene.start,
+          name: t.gene.name,
+          strand: t.gene.strand,
+          symbol: t.gene.symbol,
+          synonyms: t.gene.synonyms
+        },
+        isCanonical: t.is_canonical,
+        length: t.length,
+        lengthAminoAcid: t.length_amino_acid,
+        lengthCds: t.length_cds,
+        name: t.name,
+        numberOfExons: t.number_of_exons,
+        seqExonStart: t.seq_exon_start,
+        seqExonEnd: t.seq_exon_end,
+        translationId: t.translation_id
+      };
+    }
+
+    function occurrence(o) {
+      return {
+        _projectId: o._project_id,
+        _donorId: o._donor_id,
+        _specimenId: o._specimen_id,
+        _sampleId: o._sample_id,
+        _matchedSampleId: o._matched_sample_id,
+        analysisId: o.analysis_id,
+        analysisSampleId: o.analysis_sample_id,
+        assemblyVersion: o.assembly_version,
+        chromosome: o.chromosome,
+        chromosomeStart: o.chromosome_start,
+        chromosomeEnd: o.chromosome_end,
+        chromosomeStrand: o.chromosome_strand,
+        consequenceType: o.consequence_type,
+        controlGenotype: o.control_genotype,
+        mutation: o.mutation,
+        mutationType: o.mutation_type,
+        matchedSampleId: o.matched_sample_id,
+        rawDataRepository: o.raw_data_repository,
+        tumourGenotype: o.tumour_genotype,
+        donor: {
+          _donorId: o.donor._donor_id,
+          _projectId: o.donor._project_id,
+          experimentalAnalysisPerformed: o.donor.experimental_analysis_performed,
+          donorAgeAtDiagnosis: o.donor.donor_age_at_diagnosis,
+          donorAgeAtLastFollowup: o.donor.donor_age_at_last_followup,
+          donorDiagnosisIcd10: o.donor.donor_diagnosis_icd10,
+          donorId: o.donor.donor_id,
+          donorIntervalOfLastFollowup: o.donor.donor_interval_of_last_followup,
+          donorNotes: o.donor.donor_notes,
+          donorRegionOfResidence: o.donor.donor_region_of_residence,
+          donorSex: o.donor.donor_sex,
+          donorTumourStageAtDiagnosis: o.donor.donor_tumour_stage_at_diagnosis,
+          donorTumourStageAtDiagnosisSupplemental: o.donor.donor_tumour_stage_at_diagnosis_supplemental,
+          donorTumourStagingSystemAtDiagnosis: o.donor.donor_tumour_stage_at_diagnosis,
+          donorVitalStatus: o.donor.donor_vital_status,
+          summary: {
+            availableDataType: o.donor._summary._available_data_type,
+            cngvCount: o.donor._summary._cngv_count,
+            cnsmCount: o.donor._summary._cnsm_count,
+            expExists: o.donor._summary._exp_exists,
+            jcnExists: o.donor._summary._jcn_exists,
+            methExists: o.donor._summary._meth_exists,
+            mirnaExists: o.donor._summary._mirna_exists,
+            pexpExists: o.donor._summary._pexp_exists,
+            sgvCount: o.donor._summary._sgv_count,
+            ssmCount: o.donor._summary._ssm_count,
+            stgvCount: o.donor._summary._stgv_count,
+            stsmCount: o.donor._summary._stsm_count,
+            experimentalAnalysisPerformed: o.donor._summary.experimental_analysis_performed
+          }
+        },
+        project: {
+          _projectId: o.project._project_id,
+          countries: o.project.countries,
+          primarySite: o.project.primary_site,
+          projectName: o.project.project_name,
+          pubmedIds: o.project.pubmed_ids,
+          tumourSubtype: o.project.tumor_subtype,
+          tumourType: o.project.tumor_type,
+          summary: {
+            availableDataType: o.project._summary._available_data_type,
+            cngvTestedDonorCount: o.project._summary._cngv_tested_donor_count,
+            cnsmTestedDonorCount: o.project._summary._cnsm_tested_donor_count,
+            expTestedDonorCount: o.project._summary._exp_tested_donor_count,
+            jcnTestedDonorCount: o.project._summary._jcn_tested_donor_count,
+            methTestedDonorCount: o.project._summary._meth_tested_donor_count,
+            mirnaTestedDonorCount: o.project._summary._mirna_tested_donor_count,
+            pexpTestedDonorCount: o.project._summary._pexp_tested_donor_count,
+            sgvTestedDonorCount: o.project._summary._sgv_tested_donor_count,
+            ssmTestedDonorCount: o.project._summary._ssm_tested_donor_count,
+            stgvTestedDonorCount: o.project._summary._stgv_tested_donor_count,
+            stsmTestedDonorCount: o.project._summary._stsm_tested_donor_count,
+            totalDonorCount: o.project._summary._total_donor_count,
+            totalSampleCount: o.project._summary._total_sample_count,
+            totalSpecimenCount: o.project._summary._total_specimen_count,
+            experimentalAnalysisPerformed: o.project._summary.experimental_analysis_performed
+          }
+        }
+      };
+    }
+
+    return {
+      id: m.id,
+      assemblyVersion: m.source.assembly_version,
+      chromosome: m.source.chromosome,
+      chromosomeStart: m.source.chromosome_start,
+      chromosomeEnd: m.source.chromosome_end,
+      consequenceType: m.source.consequence_type,
+      isAnnotated: m.source.is_annotated,
+      mutation: m.source.mutation,
+      mutationType: m.source.mutation_type,
+      platform: m.source.platform,
+      validationStatuses: m.source.validation_status,
+      ssmOccurrences: _.map(m.source.ssm_occurrence, occurrence),
+      transcripts: _.map(m.source.transcript, transcript),
+      summary: {
+        affectedDonorCount: m.source._summary._affected_donor_count,
+        affectedProjectCount: m.source._summary._affected_project_count,
+        affectedProjectIds: m.source._summary._affected_project_id
+      }
+    };
+  };
+
+  this.translateMutations = function(mutationsData) {
+    function consequence(c) {
+      return {
+        _geneId: c._gene_id,
+        geneSymbol: c.gene_symbol,
+        aaMutation: c.aa_mutation,
+        consequenceType: c.consequence_type,
+        isCanonical: c.is_canonical,
+        proteinDomainAffected: c.protein_domain_affected,
+        transcriptId: c.transcript_id
+      };
+    }
+    function transcript(t) {
+      return {
+        biotype: t.biotype,
+        cdnaCodingStart: t.cdna_coding_start,
+        cdnaCodingEnd: t.cdna_coding_end,
+        codingRegionStart: t.coding_region_start,
+        codingRegionEnd: t.coding_region_end,
+        consequence: {
+          _geneId: t.consequence._gene_id,
+          _transcriptId: t.consequence._transcript_id,
+          aaMutation: t.consequence.aa_mutation,
+          cdsMutation: t.consequence.cds_mutation,
+          consequenceType: t.consequence.consequence_type,
+          geneAffected: t.consequence.gene_affected,
+          geneBuildVersion: t.consequence.gene_build_version,
+          transcriptAffected: t.consequence.transcript_affected
+        }
+      };
+    }
+
+    function mutation(data) {
+      return {
+        id: data.id,
+        score: data.score,
+        chromosome: data.fields.chromosome,
+        chromosomeStart: data.fields.chromosome_start,
+        consequenceType: data.fields.consequence_type,
+        consequences: _.map(data.fields.consequences, consequence),
+        mutation: data.fields.mutation,
+        mutationType: data.fields.mutation_type,
+        donorIds: data.fields[&#039;ssm_occurrence.donor._donor_id&#039;],
+        projectIds: data.fields[&#039;ssm_occurrence.project._project_id&#039;],
+        totalDonorCounts: data.fields[&#039;ssm_occurrence.project._summary._total_donor_count&#039;],
+        validationStatuses: data.fields[&#039;ssm_occurrence.validation_status&#039;],
+        transcripts: _.map(data.fields.transcript, transcript),
+        // Gene page needs these (2) to calculate project total donor count - but that count already exists as a field
+        ssmOccurrenceProjectIds: data.fields[&#039;ssm_occurrence.project._project_id&#039;],
+        ssmOccurrenceProjectTotalDonorCount: data.fields[&#039;ssm_occurrence.project._summary._total_donor_count&#039;],
+        // these (2) fields are return by donor/{}/mutations
+        project: {
+          affectedDonorCount: data.fields.project_affected_donor_count,
+          totalDonorCount: data.fields.project_total_donor_count
+        },
+        // Summary only returned by /mutations
+        summary: data.fields._summary ? {
+          affectedDonorCount: data.fields._summary._affected_donor_count,
+          affectedProjectCount: data.fields._summary._affected_project_count,
+          affectedProjectIds: data.fields._summary._affected_project_id
+        } : {},
+        //  These (3) fields are returned by project/{}/mutations
+        affectedDonorCount: data.fields.affected_donor_count,
+        affectedProjectDonorCounts: data.fields.affected_project_donor_counts,
+        totalDonorCount: data.fields.total_donor_count
+      };
+    }
+
+    return {
+      pagination: mutationsData.pagination,
+      facets: mutationsData.facets,
+      hits: _.map(mutationsData.hits, mutation)
+    };
+  };
+
+  this.query = function() {
+    return Mutations.query();
+  };
+
+  this.get = function(params) {
+    return Mutations.get(params);
+  };
+
+  this.getConsequences = function(params) {
+    return Mutations.getConsequences(params);
+  };
+
+  this.queryByProject = function(projectId) {
+    return Mutations.getByProject(projectId);
+  };
+
+  this.getTopByProject = function(projectId) {
+    return Mutations.getTop({project: {_project_id: projectId}});
+  };
+
+  this.queryByGene = function(geneId) {
+    return Mutations.embQuery({gene: {_gene_id: geneId}});
+  };
+
+  this.countByGene = function(geneId) {
+    return Mutations.count({gene: {_gene_id: geneId}});
+  };
+
+  this.queryByDonor = function(donorId) {
+    return Mutations.getByDonor(donorId);
+  };
+
+  this.countByGeneProject = function(symbol, project_name) {
+    return Mutations.count({gene: {symbol: symbol}, project: {project_name: project_name}});
+  };
+
+  this.countByGeneIdProjectId = function(geneId, projectId) {
+    return Mutations.count({gene: {_gene_id: geneId}, project: {_project_id: projectId}});
+  };
+});</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

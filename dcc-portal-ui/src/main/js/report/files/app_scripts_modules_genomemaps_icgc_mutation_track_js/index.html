@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap-3.0.0-wip.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome-ie7.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="brand" href="http://github.com/jsoverson/plato">Plato on Github</a>
+    <ul class="nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>app/scripts/modules/genomemaps/icgc-mutation-track.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
+      <p class="stat">56.68</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
+      <p class="stat">325</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="span6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="span6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
+      <p class="stat">53.43</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
+      <p class="stat">3.70</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="span6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="span12">/*
+ * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
+ * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
+ * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
+ *
+ * This file is part of JS Common Libs.
+ *
+ * JS Common Libs is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JS Common Libs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JS Common Libs. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+IcgcMutationTrack.prototype = new Track({});
+
+function IcgcMutationTrack(args) {
+    Track.call(this,args);
+    // Using Underscore &#039;extend&#039; function to extend and add Backbone Events
+    _.extend(this, Backbone.Events);
+
+    //set default args
+
+    //save default render reference;
+    this.defaultRenderer = this.renderer;
+    this.histogramRenderer = new HistogramRenderer();
+
+
+    this.chunksDisplayed = {};
+
+
+    //set instantiation args, must be last
+    _.extend(this, args);
+};
+
+IcgcMutationTrack.prototype.render = function(targetId){
+    var _this = this;
+    this.initializeDom(targetId);
+
+    this.svgCanvasOffset = (this.width * 3 / 2) / this.pixelBase;
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
+    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
+
+    this.dataAdapter.on(&#039;data:ready&#039;,function(event){
+        if(event.params.histogram == true){
+            _this.renderer = _this.histogramRenderer;
+        }else{
+            _this.renderer = _this.defaultRenderer;
+        }
+//        _this.renderer = _this.defaultRenderer;
+//        _this.setHeight(_this.height - trackSvg.getHeight());//modify height before redraw
+        var features = _this._getFeaturesByChunks(event);
+        _this.renderer.render(features, {
+            svgCanvasFeatures : _this.svgCanvasFeatures,
+            featureTypes:_this.featureTypes,
+            renderedArea:_this.renderedArea,
+            pixelBase : _this.pixelBase,
+            position : _this.region.center(),
+            width : _this.width,
+            zoom : _this.zoom,
+            labelZoom : _this.labelZoom,
+            pixelPosition : _this.pixelPosition
+
+        });
+        _this.updateHeight();
+        _this.setLoading(false);
+    });
+
+
+
+    this.modalDiv = $(&#039;&lt;div&gt;&lt;/div&gt;&#039;)[0];
+    $(&#039;body&#039;).append(this.modalDiv);
+    this.renderer.on(&#039;feature:click&#039;, function (e) {
+        _this._variantInfo(e);
+    });
+
+};
+
+IcgcMutationTrack.prototype.draw = function(){
+    var _this = this;
+
+    this.svgCanvasLeftLimit = this.region.start - this.svgCanvasOffset*2;
+    this.svgCanvasRightLimit = this.region.start + this.svgCanvasOffset*2
+
+    this.updateHistogramParams();
+    this.cleanSvg();
+//    setCallRegion();
+
+    if( this.zoom &gt;= this.visibleRange.start &amp;&amp; this.zoom &lt;= this.visibleRange.end ){
+        this.setLoading(true);
+        var data = this.dataAdapter.getData({
+            chromosome:this.region.chromosome,
+            start:this.region.start-this.svgCanvasOffset*2,
+            end:this.region.end+this.svgCanvasOffset*2,
+            histogram:this.histogram,
+            histogramLogarithm:this.histogramLogarithm,
+            histogramMax:this.histogramMax,
+            interval:this.interval
+        });
+
+        this.invalidZoomText.setAttribute(&quot;visibility&quot;, &quot;hidden&quot;);
+    }else{
+        this.invalidZoomText.setAttribute(&quot;visibility&quot;, &quot;visible&quot;);
+    }
+
+};
+
+
+IcgcMutationTrack.prototype.move = function(disp){
+    var _this = this;
+//    trackSvg.position = _this.region.center();
+    _this.region.center();
+    var pixelDisplacement = disp*_this.pixelBase;
+    this.pixelPosition-=pixelDisplacement;
+
+    //parseFloat important
+    var move =  parseFloat(this.svgCanvasFeatures.getAttribute(&quot;x&quot;)) + pixelDisplacement;
+    this.svgCanvasFeatures.setAttribute(&quot;x&quot;,move);
+
+    var virtualStart = parseInt(this.region.start - this.svgCanvasOffset);
+    var virtualEnd = parseInt(this.region.end + this.svgCanvasOffset);
+    // check if track is visible in this zoom
+    if(this.zoom &gt;= this.visibleRange.start &amp;&amp; this.zoom &lt;= this.visibleRange.end){
+
+        if(disp&gt;0 &amp;&amp; virtualStart &lt; this.svgCanvasLeftLimit){
+            this.dataAdapter.getData({
+                chromosome:_this.region.chromosome,
+                start:parseInt(this.svgCanvasLeftLimit-this.svgCanvasOffset),
+                end:this.svgCanvasLeftLimit,
+                histogram:this.histogram,
+                interval:this.interval
+            });
+            this.svgCanvasLeftLimit = parseInt(this.svgCanvasLeftLimit - this.svgCanvasOffset);
+        }
+
+        if(disp&lt;0 &amp;&amp; virtualEnd &gt; this.svgCanvasRightLimit){
+            this.dataAdapter.getData({
+                chromosome:_this.region.chromosome,
+                start:this.svgCanvasRightLimit,
+                end:parseInt(this.svgCanvasRightLimit+this.svgCanvasOffset),
+                histogram:this.histogram,
+                interval:this.interval,
+                transcript:this.transcript
+            });
+            this.svgCanvasRightLimit = parseInt(this.svgCanvasRightLimit+this.svgCanvasOffset);
+        }
+
+    }
+
+};
+
+IcgcMutationTrack.prototype._getFeaturesByChunks = function(response, filters){
+    //Returns an array avoiding already drawn features in this.chunksDisplayed
+    var chunks = response.items;
+    var dataType = response.params.dataType;
+    var chromosome = response.params.chromosome;
+    var features = [];
+
+
+    var feature, displayed, featureFirstChunk, featureLastChunk, features = [];
+    for ( var i = 0, leni = chunks.length; i &lt; leni; i++) {
+
+        if(this.chunksDisplayed[chunks[i].key+dataType]!=true){//check if any chunk is already displayed and skip it
+
+            if(chunks[i][dataType] != null){
+
+                for ( var j = 0, lenj = chunks[i][dataType].length; j &lt; lenj; j++) {
+                    feature = chunks[i][dataType][j];
+
+                    //check if any feature has been already displayed by another chunk
+                    displayed = false;
+                    featureFirstChunk = this.dataAdapter.featureCache._getChunk(feature.start);
+                    featureLastChunk = this.dataAdapter.featureCache._getChunk(feature.end);
+                    for(var f=featureFirstChunk; f&lt;=featureLastChunk; f++){
+                        var fkey = chromosome+&quot;:&quot;+f;
+                        if(this.chunksDisplayed[fkey+dataType]==true){
+                            displayed = true;
+                            break;
+                        }
+                    }
+                    if(!displayed){
+                        //apply filter
+                        // if(filters != null) {
+                        //		var pass = true;
+                        // 		for(filter in filters) {
+                        // 			pass = pass &amp;&amp; filters[filter](feature);
+                        //			if(pass == false) {
+                        //				break;
+                        //			}
+                        // 		}
+                        //		if(pass) features.push(feature);
+                        // } else {
+                        features.push(feature);
+                    }
+                }
+                this.chunksDisplayed[chunks[i].key+dataType]=true;
+            }
+        }
+    }
+    return features;
+};
+
+IcgcMutationTrack.prototype._variantInfo = function(e){
+    var _this = this;
+    var chromosome = e.feature.chromosome;
+    var position = e.feature.start;
+    var mutation = e.feature.mutation.replace(/&gt;/gi,&#039;:&#039;);
+    var url = &#039;http://ws.bioinfo.cipf.es/cellbase/rest/v2/hsa/genomic/variant/&#039;+chromosome+&#039;:&#039;+position+&#039;:&#039;+mutation+&#039;/consequence_type?of=json&#039;;
+    var mutationPhenUrl = &#039;http://ws.bioinfo.cipf.es/cellbase/rest/v2/hsa/genomic/variant/&#039;+chromosome+&#039;:&#039;+position+&#039;:&#039;+mutation+&#039;/mutation_phenotype?of=json&#039;;
+
+    var consequenceResponse, phenotypeResponse;
+    var id = Utils.randomString();
+    $.ajax({
+        url: url,
+        dataType: &#039;json&#039;,
+        async:false,
+        success: function(data){
+            consequenceResponse = data;
+        }
+    });
+
+    $.ajax({
+        url: mutationPhenUrl,
+        dataType: &#039;json&#039;,
+        async:false,
+        success: function(data){
+            phenotypeResponse = data[0];
+        }
+    });
+
+    var table = &#039;&lt;table class=&quot;table table-condensed&quot;&gt;&#039;+
+        &#039;&lt;thead&gt;&lt;tr&gt;&lt;/thead&gt;&#039;+
+        &#039;&lt;td&gt;Position&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Mutation&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Gene ID&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Feature ID&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Feature type&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Feature position&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Consequence type&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Consequence type Obo&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;AA position&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Aminoacid change&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Codon change&lt;/td&gt;&#039;+
+        &#039;&lt;/tr&gt;&lt;/thead&gt;&#039;;
+    for(i in consequenceResponse){
+        var item = consequenceResponse[i];
+        table+= &#039;&lt;tr&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.chromosome+&#039;:&#039;+item.position+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.referenceAllele+&#039;&gt;&#039;+item.alternativeAllele+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.geneId+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.featureId+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.featureType+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.featureStart+&#039;-&#039;+item.featureEnd+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.consequenceType+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.consequenceTypeObo+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.aaPosition+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.aminoacidChange+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item.codonChange+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;/tr&gt;&#039;;
+    }
+    table += &#039;&lt;/table&gt;&#039;;
+
+
+
+
+    var table2 = &#039;&lt;table class=&quot;table table-condensed&quot;&gt;&#039;+
+        &#039;&lt;thead&gt;&lt;tr&gt;&lt;/thead&gt;&#039;+
+        &#039;&lt;td&gt;Position&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Mutation CDS&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Mutation Aa&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Gene name&lt;/td&gt;&#039;+
+//        &#039;&lt;td&gt;Transcript&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Primary site&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Site subtype&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Primary histology&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Mutation description&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Mutation zigosity&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Description&lt;/td&gt;&#039;+
+        &#039;&lt;td&gt;Source&lt;/td&gt;&#039;+
+        &#039;&lt;/tr&gt;&lt;/thead&gt;&#039;;
+
+    for(i in phenotypeResponse){
+        var item2 = phenotypeResponse[i];
+        table2+= &#039;&lt;tr&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.chromosome+&#039;:&#039;+item2.start+&#039;-&#039;+item2.end+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.mutationCds+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.mutationAa+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.geneName+&#039;&lt;/td&gt;&#039;+
+//            &#039;&lt;td&gt;&#039;+item2.ensemblTranscript+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.primarySite+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.siteSubtype+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.primaryHistology+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.mutationDescription+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.mutationZigosity+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.primaryHistology+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.description+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;td&gt;&#039;+item2.source+&#039;&lt;/td&gt;&#039;+
+            &#039;&lt;/tr&gt;&#039;;
+    }
+    table2 += &#039;&lt;/table&gt;&#039;;
+
+
+
+    var html =
+
+        &#039;&lt;div id=&quot;mutationModal&#039;+id+&#039;&quot; class=&quot;modal hide fade&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-labelledby=&quot;myModalLabel&quot; aria-hidden=&quot;true&quot; style=&quot;width:1200px;margin-left:-600px;&quot;&gt;&#039;+
+            &#039;&lt;div class=&quot;modal-header&quot;&gt;&#039;+
+            &#039;&lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot; aria-hidden=&quot;true&quot;&gt;×&lt;/button&gt;&#039;+
+            &#039;&lt;h3 id=&quot;myModalLabel&quot;&gt;Variant - &#039;+ e.feature.id +&#039;&lt;/h3&gt;&#039;+
+            &#039;&lt;/div&gt;&#039;+
+            &#039;&lt;div class=&quot;modal-body&quot;&gt;&#039;+
+            &#039;&lt;ul class=&quot;nav nav-tabs&quot; id=&quot;mutationTabs&#039;+id+&#039;&quot;&gt;&#039;+
+            &#039;&lt;li class=&quot;active&quot;&gt;&lt;a href=&quot;#vareffect&#039;+id+&#039;&quot;&gt;Variant effect&lt;/a&gt;&lt;/li&gt;&#039;+
+            &#039;&lt;li&gt;&lt;a href=&quot;#mutphenotype&#039;+id+&#039;&quot;&gt;Mutaton phenotype&lt;/a&gt;&lt;/li&gt;&#039;+
+            &#039;&lt;/ul&gt;&#039;+
+            &#039;&lt;div class=&quot;tab-content&quot;&gt;&#039;+
+            &#039;&lt;div class=&quot;tab-pane active&quot; id=&quot;vareffect&#039;+id+&#039;&quot;&gt;&#039;+table+&#039;&lt;/div&gt;&#039;+
+            &#039;&lt;div class=&quot;tab-pane&quot; id=&quot;mutphenotype&#039;+id+&#039;&quot;&gt;&#039;+table2+&#039;&lt;/div&gt;&#039;+
+            &#039;&lt;/div&gt;&#039;+
+            &#039;&lt;/div&gt;&#039;+
+            &#039;&lt;div class=&quot;modal-footer&quot;&gt;&#039;+
+            &#039;&lt;button class=&quot;btn btn-primary&quot; data-dismiss=&quot;modal&quot;&gt;Close&lt;/button&gt;&#039;+
+            &#039;&lt;/div&gt;&#039;+
+            &#039;&lt;/div&gt;&#039;+
+            &#039;&#039;;
+
+    $(_this.modalDiv).html(html);
+
+    $(&#039;#mutationTabs&#039;+id+&#039; a&#039;).click(function (e) {
+        e.preventDefault();
+        $(this).tab(&#039;show&#039;);
+    })
+
+    $(&#039;#mutationModal&#039;+id).modal(&#039;show&#039;);
+
+
+
+
+}</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

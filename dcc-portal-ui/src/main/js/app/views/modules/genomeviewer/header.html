@@ -1,0 +1,29 @@
+<span style="font-size:1.2rem; margin-right: 2rem">Homo sapiens GRCh37</span>
+<span data-ng-if="options.panels">
+    <button class="t_button" ng-class="{'t_button__active': panels.karyotype}"
+            ng-click="togglePanel('karyotype')">Karyotype
+    </button>
+    <button class="t_button" ng-class="{'t_button__active': panels.chromosome}"
+            ng-click="togglePanel('chromosome')">Chromosome
+    </button>
+    <button class="t_button" ng-class="{'t_button__active': panels.regionOverview}"
+            ng-click="togglePanel('overviewTrackList')">Region Overview
+    </button>
+</span>
+<span data-ng-if="options.autofit">
+    <button data-tooltip="Auto Fit Panel Height" class="t_button" ng-click="autoFit()"><i
+            class="icon-resize-vertical"></i></button>
+</span>
+<!--<form class="pull-right">-->
+    <!--<button data-tooltip="Reset Location" class="t_button" data-ng-click="reset($event)"><i class="icon-undo"></i></button>-->
+    <!--<button data-tooltip="Zoom Out" class="t_button" data-ng-click="zoomOut()"><i class="icon-zoom-out"></i></button>-->
+    <!--<slider data-move-start="moveStart" data-move-end="moveEnd" style="width:10rem" data-floor="{{ zoom.min }}"-->
+            <!--data-ceiling="{{ zoom.max }}" data-step="1" data-precision="0" data-ng-model="zoom.current"></slider>-->
+    <!--<button data-tooltip="Zoom In" class="t_button" data-ng-click="zoomIn()"><i class="icon-zoom-in"></i></button>-->
+    <!--<span data-ng-if="false">-->
+        <!--<input ng-model="location" placeholder="Search by location">-->
+        <!--<i class="t_suggest__embedded t_suggest__embedded__right t_suggest__embedded__clear icon-remove"-->
+           <!--style="top:0.2rem;right:3.1rem" ng-click="location=''" ng-show='location'></i>-->
+        <!--<button class="t_button" ng-click="parseLocation()">Go</button>-->
+    <!--</span>-->
+<!--</form>-->

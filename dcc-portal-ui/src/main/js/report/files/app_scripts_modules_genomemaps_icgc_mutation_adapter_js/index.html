@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  <link href="../../assets/css/vendor/morris.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/bootstrap-3.0.0-wip.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/font-awesome-ie7.css" rel="stylesheet">
+  <link href="../../assets/css/vendor/codemirror.css" rel="stylesheet">
+  <link href="../../assets/css/plato.css" rel="stylesheet">
+  <link href="../../assets/css/plato-file.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-fixed-top">
+  <div class="container">
+    <a class="brand" href="http://github.com/jsoverson/plato">Plato on Github</a>
+    <ul class="nav">
+      <li>
+        <a href="../../index.html">Report Home</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>app/scripts/modules/genomemaps/icgc-mutation-adapter.js</h1>
+  </div>
+</div>
+
+<div class="container aggregate-stats">
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Maintainability <a href="http://blogs.msdn.com/b/codeanalysis/archive/2007/11/20/maintainability-index-range-and-meaning.aspx"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="A value between 0 and 100 that represents the relative ease of maintaining the code. A high value means better maintainability." data-original-title="Maintainability Index"></i></a></h2>
+      <p class="stat">52.65</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Lines of code <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h2>
+      <p class="stat">251</p>
+    </div>
+  </div>
+  <div class="row historical">
+    <div class="span6">
+      <p id="chart_historical_maint" class="chart"></p>
+    </div>
+    <div class="span6">
+      <p id="chart_historical_sloc" class="chart"></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h2 class="header">Difficulty  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="The difficulty measure is related to the difficulty of the program to write or understand." data-original-title="Difficulty"></i></a></h2>
+      <p class="stat">58.43</p>
+    </div>
+    <div class="span6">
+      <h2 class="header">Estimated Errors  <a href="http://en.wikipedia.org/wiki/Halstead_complexity_measures"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Halstead's delivered bugs is an estimate for the number of errors in the implementation." data-original-title="Delivered Bugs"></i></a></h2>
+      <p class="stat">2.71</p>
+    </div>
+  </div>
+</div>
+
+<div class="container charts">
+  <div class="row">
+    <h2 class="header">Function weight</h2>
+  </div>
+  <div class="row">
+    <div class="span6">
+      <h3 class="chart-header">By Complexity <a href="http://en.wikipedia.org/wiki/Cyclomatic_complexity"><i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="This metric counts the number of distinct paths through a block of code. Lower values are better." data-original-title="Cyclomatic Complexity"></i></a></h3>
+      <div id="fn-by-complexity" class="stat"></div>
+    </div>
+    <div class="span6">
+      <h3 class="chart-header">By SLOC  <i class="icon icon-info-sign" rel="popover" data-placement="top" data-trigger="hover" data-content="Source Lines of Code / Logical Lines of Code" data-original-title="SLOC/LSLOC"></i></h3>
+      <div id="fn-by-sloc" class="stat"></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <textarea id="file-source" class="span12">/*
+ * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
+ * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
+ * Copyright (c) 2012 Ignacio Medina (ICM-CIPF)
+ *
+ * This file is part of JS Common Libs.
+ *
+ * JS Common Libs is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * JS Common Libs is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JS Common Libs. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+function IcgcMutationAdapter(args) {
+
+  _.extend(this, Backbone.Events);
+
+  this.host = null;
+  this.gzip = true;
+
+  this.params = {};
+  if (args != null) {
+    if (args.host != null) {
+      this.host = args.host;
+    }
+    if (args.species != null) {
+      this.species = args.species;
+    }
+    if (args.category != null) {
+      this.category = args.category;
+    }
+    if (args.subCategory != null) {
+      this.subCategory = args.subCategory;
+    }
+    if (args.resource != null) {
+      this.resource = args.resource;
+    }
+    if (args.featureCache != null) {
+      var argsFeatureCache = args.featureCache;
+    }
+    if (args.params != null) {
+      this.params = args.params;
+    }
+    if (args.filters != null) {
+      this.filters = args.filters;
+    }
+    if (args.options != null) {
+      this.options = args.options;
+    }
+    if (args.featureConfig != null) {
+      if (args.featureConfig.filters != null) {
+        this.filtersConfig = args.featureConfig.filters;
+      }
+      if (args.featureConfig.options != null) {
+        this.optionsConfig = args.featureConfig.options;
+        for (var i = 0; i &lt; this.optionsConfig.length; i++) {
+          if (this.optionsConfig[i].checked == true) {
+            this.options[this.optionsConfig[i].name] = true;
+            this.params[this.optionsConfig[i].name] = true;
+          }
+        }
+      }
+    }
+  }
+  this.featureCache = new FeatureCache(argsFeatureCache);
+}
+
+IcgcMutationAdapter.prototype.clearData = function() {
+  this.featureCache.clear();
+};
+
+IcgcMutationAdapter.prototype.setFilters = function(filters) {
+  this.clearData();
+  this.filters = filters;
+  for (filter in filters) {
+    var value = filters[filter].toString();
+    delete this.params[filter];
+    if (value != &#039;&#039;) {
+      this.params[filter] = value;
+    }
+  }
+};
+IcgcMutationAdapter.prototype.setOption = function(opt, value) {
+  if (opt.fetch) {
+    this.clearData();
+  }
+  this.options[opt.name] = value;
+  for (option in this.options) {
+    if (this.options[opt.name] != null) {
+      this.params[opt.name] = this.options[opt.name];
+    } else {
+      delete this.params[opt.name];
+    }
+  }
+};
+
+IcgcMutationAdapter.prototype.getData = function(args) {
+  var rnd = String.fromCharCode(65 + Math.round(Math.random() * 10));
+  var _this = this;
+  //region check
+  this.params[&#039;histogram&#039;] = args.histogram;
+  this.params[&#039;interval&#039;] = args.interval;
+  this.params[&#039;transcript&#039;] = args.transcript;
+  this.params[&#039;chromosome&#039;] = args.chromosome;
+  this.params[&#039;resource&#039;] = this.resource;
+
+  if (args.start &lt; 1) {
+    args.start = 1;
+  }
+  if (args.end &gt; 300000000) {
+    args.end = 300000000;
+  }
+
+  var dataType = &#039;data&#039;;
+  if (args.histogram) {
+    dataType = &#039;histogram&#039; + args.interval;
+  }
+  if (args.transcript) {
+    dataType = &#039;withTranscripts&#039;;
+  }
+
+  this.params[&#039;dataType&#039;] = dataType;
+
+  var firstChunk = this.featureCache._getChunk(args.start);
+  var lastChunk = this.featureCache._getChunk(args.end);
+  var chunks = [];
+  var itemList = [];
+  for (var i = firstChunk; i &lt;= lastChunk; i++) {
+    var key = args.chromosome + &#039;:&#039; + i;
+    if (this.featureCache.cache[key] == null || this.featureCache.cache[key][dataType] == null) {
+      chunks.push(i);
+    } else {
+      var item = this.featureCache.getFeatureChunk(key);
+      itemList.push(item);
+    }
+  }
+
+  var segmentObj = {chromosome: args.chromosome, start: args.start, end: args.end};
+
+  var webServiceCallBack = function(data, segment) {
+
+    var jsonResponse = data[0];
+    if(_this.params.histogram == true){
+        jsonResponse = data;
+    }
+
+    var activeMutationTypes = [];
+
+      if(_this.filters) {
+        for(i in _this.filters.terms) {
+            if(_this.filters.terms[i].active) {
+                activeMutationTypes.push(_this.filters.terms[i].term);
+            }
+        }
+      }
+      console.time(&#039; save &#039; + rnd);
+
+    for (var i = 0; i &lt; jsonResponse.length; i++) {
+      var feature = jsonResponse[i];
+
+//      console.log(feature);
+
+//console.log(_this.filters);
+
+//        if(_this.filters) {
+//             if(_.contains(activeMutationTypes, feature.mutationType)) {
+//                    _this.featureCache.putFeaturesByRegion(feature, segmentObj, &#039;snp&#039;, dataType);
+//                }
+//
+//        }else {
+//            _this.featureCache.putFeaturesByRegion(feature, segmentObj, &#039;snp&#039;, dataType);
+//        }
+        _this.featureCache.putFeaturesByRegion(feature, segment, &#039;snp&#039;, dataType);
+    }
+      var items = _this.featureCache.getFeatureChunksByRegion(segment);
+      if (items != null) {
+          itemList = itemList.concat(items);
+      }
+      _this.trigger(&#039;data:ready&#039;, {items: itemList, params: _this.params, cached: false, sender: _this});
+        console.timeEnd(&#039; save &#039; + rnd);
+  };
+
+  var queries = [];
+  var updateStart = true;
+  var updateEnd = true;
+  if (chunks.length &gt; 0) {
+    //		console.log(chunks);
+
+    for (var i = 0; i &lt; chunks.length; i++) {
+
+      if (updateStart) {
+        var chunkStart = parseInt(chunks[i] * this.featureCache.chunkSize);
+        updateStart = false;
+      }
+      if (updateEnd) {
+        var chunkEnd = parseInt((chunks[i] * this.featureCache.chunkSize) + this.featureCache.chunkSize - 1);
+        updateEnd = false;
+      }
+
+      if (chunks[i + 1] != null) {
+        if (chunks[i] + 1 == chunks[i + 1]) {
+          updateEnd = true;
+        } else {
+          var query = args.chromosome + &#039;:&#039; + chunkStart + &#039;-&#039; + chunkEnd;
+          queries.push(query);
+          updateStart = true;
+          updateEnd = true;
+        }
+      } else {
+        var query = args.chromosome + &#039;:&#039; + chunkStart + &#039;-&#039; + chunkEnd;
+        queries.push(query);
+        updateStart = true;
+        updateEnd = true;
+      }
+    }
+    //		console.log(querys);
+    console.time(_this.resource + &#039; get and save &#039; + rnd);
+    for (query in queries) {
+      this._callWebService(queries[query], webServiceCallBack);
+    }
+    //		cellBaseManager.get(this.category, this.subCategory, querys, this.resource, this.params);
+  } else {
+    if (itemList.length &gt; 0) {
+      _this.trigger(&#039;data:ready&#039;, {items: itemList, params: this.params, sender: this});
+    }
+  }
+};
+
+IcgcMutationAdapter.prototype._callWebService = function(segmentString, callback) {
+//    ?segment=&#039; + segmentString + &#039;&amp;chromosome=13&amp;resource=mutation&amp;dataType=data
+//     http://localhost:9001/api/browser/mutation?segment=17:7480000-7669999&amp;resource=mutation&amp;histogram=true&amp;interval=2000
+    console.log(this.params.interval);
+    var params = {
+        segment:segmentString,
+        resource:&#039;mutation&#039;,
+        histogram:this.params.histogram,
+        interval:this.params.interval
+    };
+//    var host = &#039;http://localhost:9001/&#039;;
+    var host = &#039;&#039;;
+  $.ajax({
+    type: &#039;GET&#039;,
+    //        url : &#039;http://imedina:8080/api/genes?segment=&#039;+segmentString+&#039;&amp;chromosome=13&amp;resource=gene&amp;dataType=data&#039;,
+    //        url : &#039;http://imedina:8080/api/genes?filters={&quot;gene&quot;:{&quot;gene_location&quot;:[&quot;chr&#039;+segmentString+&#039;&quot;]}}&#039;,
+    url: host+&#039;api/browser/mutation&#039;+this._getQuery(params),
+    dataType: &#039;json&#039;,//still firefox 20 does not auto serialize JSON, You can force it to always do the parsing by adding dataType: &#039;json&#039; to your call.
+    async: true,
+    success: function(data){
+        var region = new Region({str:segmentString});
+        callback(data,region);
+    }
+  });
+};
+
+IcgcMutationAdapter.prototype._getQuery = function(paramsWS){
+    var query = &quot;&quot;;
+    for ( var key in paramsWS) {
+        if(paramsWS[key]!=null)
+            query+=key+&#039;=&#039;+paramsWS[key]+&#039;&amp;&#039;;
+    }
+    if(query!=&#039;&#039;)
+        query = &quot;?&quot;+query.slice(0,-1);
+    return query;
+};</textarea>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>.</p>
+  </div>
+</footer>
+
+<script type="text/html" id="complexity-popover-template">
+  <div class="complexity-notice">
+    Complexity : {{ complexity.cyclomatic }} <br>
+    Length : {{ complexity.halstead.length }} <br>
+    Difficulty : {{ complexity.halstead.difficulty.toFixed(2) }} <br>
+    Est # bugs : {{ complexity.halstead.bugs.toFixed(2) }}<br>
+  </div>
+</script>
+
+<script type="text/javascript" src="../../assets/scripts/bundles/core-bundle.js"></script>
+<script type="text/javascript" src="../../assets/scripts/bundles/codemirror.js"></script>
+<script type="text/javascript" src="../../assets/scripts/codemirror.markpopovertext.js"></script>
+<script type="text/javascript" src="report.js"></script>
+<script type="text/javascript" src="report.history.js"></script>
+<script type="text/javascript" src="../../assets/scripts/plato-file.js"></script>
+</body>
+</html>

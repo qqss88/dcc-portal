@@ -1,0 +1,147 @@
+# HTTP
+http:
+  # The root path for the Jersey servlet.
+  rootPath: "/api/*"
+  
+  # HTTP request log settings.
+  requestLog:
+
+    # Settings for logging to stdout.
+    console:
+
+      # If true, log requests to stdout.
+      enabled: true
+
+    # Settings for logging to a file.
+    file:
+
+      # If true, log requests to a file.
+      enabled: false
+
+# Controls generation of "Last-Modified" and "ETag" HTTP headers
+cache:
+  # Enable Last-Modified HTTP header generation
+  enableLastModified: true
+
+  # List of resources for which Last-Modified HTTP header should not be generated. Format: regex accepted by java.lang.String
+  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$"]
+
+  # Enable ETag HTTP header generation
+  enableETag: false
+
+  # List of resources for which ETag HTTP header should not be generated. Format: regex accepted by java.lang.String
+  excludeETag: []
+
+# Authorization 
+crowd:
+  ssoUrl: "https://***REMOVED***/user?continue="
+
+hazelcast:
+  # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset
+
+  # Credentials to enter a group. E.g. dev, uat, prod groups
+  groupName: "dcc-dev"
+  groupPassword: "dccpasswd"
+
+  # Time-to-live settings.
+  # Maximum number of seconds for each entry to stay in the cache. Entries that are
+  # older than the set value and not updated for that time
+  # will get automatically evicted from the cache.
+
+  # Expire inactive users in 15 minutes
+  usersCacheTTL: 900
+
+  # Expire openId authentication attempt in 2 minutes
+  openidAuthTTL: 120
+
+# ElasticSearch index and hosts
+elastic:
+  indexName: dcc-etl-cli # Override using -Ddw.elastic.indexName=indexName for local development
+  nodeAddresses:
+    - host: "localhost"
+      port: 9300
+
+# Mail
+mail:
+  enabled: false
+  recipientEmail: ***REMOVED***
+
+# Genomemaps
+browser:
+  dataSources:
+     - uri: gene
+       className: org.icgc.dcc.portal.browser.ds.GeneDataSource
+     - uri: mutation
+       className: org.icgc.dcc.portal.browser.ds.MutationDataSource
+
+# Data download
+download:
+  enabled: false
+  uri: "***REMOVED***"
+  dynamicRootPath: "/icgc/download/dynamic/r12"
+  staticRootPath: "/icgc/download/static"
+  currentReleaseSymlink: "/current /r12"
+  maxUsers: 16
+  stage: "DEVELOPMENT"
+
+web:
+  # Defines an external URL when the portal is behind a reverse proxy / load balancer. E.g. shortUrl resource uses it for generation of valid URLs
+  baseUrl: "http://localhost:8080"
+
+# Logging settings
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL
+  level: INFO
+
+  # Logger-specific levels
+  loggers:
+  
+    # Jersey request logging
+    "com.sun.jersey.api.container.filter.LoggingFilter": INFO
+    
+    # ElasticSearch query logging
+    "org.icgc.dcc.portal.service.BaseQueryService": INFO
+    "org.icgc.dcc.portal.browser.ds.GeneParser": INFO
+    "org.icgc.dcc.portal.browser.ds.MutationParser": INFO
+
+    # Very chatty
+    "com.wordnik.swagger.jsonschema.ApiModelParser": WARN
+
+    # ERRORs should be converted to WARNs in Swagger 1.2.2
+    "com.wordnik.swagger.jaxrs.HelpApi": OFF
+
+# ICGC Client configuration
+icgc:
+
+  # CGP/DACO API endpoint
+  cgpUrl: "https://***REMOVED***/ud_oauth/1/search"
+
+  # ShortUrl API endpoint
+  shortUrl: "https://***REMOVED***/short/api/1/shorten"
+
+  # CUD API endpoint
+  cudUrl: "https://***REMOVED***/ud_rest/1"
+
+  # CUD credentials. Obtained from webdev@oicr.on.ca
+  cudAppId: "change_me"
+  cudUser: "change_me"
+  cudPassword: "change_me"
+
+  # OAuth credentials
+  # To generate the credentials go to icgc.org, log in, go to the "OAuth Settings" tab and request "Regenerate all tokens"
+  consumerKey: "***REMOVED***"
+  consumerSecret: "***REMOVED***"
+  accessToken: "***REMOVED***"
+  accessSecret: "***REMOVED***"
+
+  # Log HTTP requests to the API
+  enableHttpLogging: false
+
+  # Disallow self-signed SSL certificates
+  enableStrictSSL: false
+
+
+# Portal release configuration
+release:
+  releaseDate: "Month Day, Year"

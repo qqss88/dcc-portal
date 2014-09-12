@@ -1,0 +1,88 @@
+<button class="t_button" type="button" data-ng-click="calculateSize()"
+        data-nng-show="show">
+    <i data-ng-class="{'icon-download':!calc, 'icon-spin icon-spinner':calc}"></i>
+        <span data-nng-if="!dlFilter">
+            <span data-ng-if="!calc"> Download Donor Data</span>
+            <span data-ng-if="calc"> Calculating file sizes...</span>
+        </span>
+</button>
+<div data-modal=modal data-options="opts">
+    <div class="modal-dialog light">
+        <div class="modal-content">
+            <div class="modal-header clearfix">
+                <h3 class="pull-left">Download Donor Data</h3>
+                <button class="pull-right t_button" data-ng-click="modal=false;reset();"><i
+                        class="icon-cancel"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="max-height:none">
+                <span data-ng-init="totalSize=0"></span>
+                <div class="alert alert-error" data-ng-if="errorConcurrentLimit" style="margin-bottom: 0">
+                    The number of concurrent users downloading data is exceeding the system limit. Please try again in a
+                    few minutes.
+                </div>
+                <div>
+                    <div class="alert alert-info">
+                      To browse and download unfiltered data, please visit the
+                      <a href="/repository" data-ng-click="modal=false"><i class="icon-database"></i><strong>Data Repository</strong></a> section.
+                    </div>
+                    Search criteria results in <strong>{{totalDonor | number}}</strong> donors. Select data types to download
+                    <table class="table table-info">
+                        <thead>
+                        <tr>
+                            <th>Data Type</th>
+                            <th class="text-right">File Size (Estimated)</th>
+                            <th class="text-right">Select</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr data-ng-repeat="type in dataTypes" data-ng-click="toggle(type)">
+                            <td>
+                                <span>{{type.uiLabel}}</span>
+                            </td>
+                            <td class="text-right">
+                               <span data-ng-if="type.sizes > 0">
+                                 {{type.sizes | bytes}}
+                               </span>
+                               <span data-ng-if="type.sizes === 0">
+                                 --
+                               </span>
+                            </td>
+                            <td class="text-right">
+                                <i data-ng-if="type.sizes > 0" style="cursor: pointer" data-ng-class="{'icon-check':type.active, 'icon-check-empty':!type.active}"></i>
+                                <span data-ng-if="type.sizes === 0" >--</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <span class="pull-left"><strong>Total file size {{overallSize | bytes}}</strong></span>
+                                <span class="pull-right"><strong>{{dlFile}} files selected ({{dlTotal | bytes}})</strong></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                   <div>
+                      <input type="text" size="45" 
+                          placeholder="Send email notifications"
+                          ng-model="emailAddress" 
+                          ng-change="validateEmail()"></input>
+
+                      <span data-ng-if="emailAddress.length > 0">
+                         <i style="font-size:2.0em" class="icon icon-ok" data-ng-show="isValidEmail"></i>
+                         <i style="font-size:2.0em" class="icon icon-cancel" data-ng-hide="isValidEmail"></i>
+                      </span>
+                   </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="t_button" data-ng-click="modal=false;reset()">Cancel</button>
+                <button class="t_button" data-ng-click="dlFiles();"
+                        data-ng-disabled="dlTotal==0 || errorMaxFileSize || !isValidEmail"><i class="icon-download"></i>Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

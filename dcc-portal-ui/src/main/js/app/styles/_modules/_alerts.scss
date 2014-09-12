@@ -1,0 +1,16 @@
+.alert {
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  margin-left: -2rem;
+  margin-right: -2rem;
+  padding: .5rem 2rem;
+}
+.alert-info {
+  background: lighten($cyan, 49);
+  color: $cyan;
+}
+.alert-error {
+  background: lighten($red, 43);
+  color: $red;
+}

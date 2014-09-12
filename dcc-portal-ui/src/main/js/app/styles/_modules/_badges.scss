@@ -1,0 +1,86 @@
+.t_badge {
+  font-family: $mono-stack;
+  color: $white;
+  background: $grey;
+  border-radius: 50%;
+  display: inline-block;
+  padding: .2rem 1rem 0rem;
+  text-align: center;
+  vertical-align: middle;
+
+  i {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  @include breakpoint($break-laptop) {
+    padding: .4rem 1rem .3rem;
+  }
+
+  @include breakpoint($break-widescreen) {
+    padding: .4rem 1rem .4rem;
+  }
+}
+
+h1 {
+  .t_badge {
+    padding: .5rem 1.1rem .2rem 1.2rem;
+    margin: 0 2rem;
+  }
+  .t_badge_icon {
+    padding: .5rem .8rem .2rem;
+    font-size: 1.6rem;
+  }
+}
+
+.t_badge__gene {
+  background: $gene;
+}
+
+.t_badge__gene:after {
+  content: "G";
+}
+
+.t_badge__donor {
+  background: $donor;
+}
+
+.t_badge__donor:after {
+  content: "D";
+}
+
+.t_badge__mutation {
+  background: $mutation;
+}
+
+.t_badge__mutation:after {
+  content: "M";
+}
+
+.t_badge__pathway {
+  background: $pathway;
+}
+
+.t_badge__pathway:after {
+  content: "P";
+}
+
+.t_badge__project, .t_badge__projects {
+  background: $project;
+}
+
+.t_badge__project:after {
+  content: "P";
+}
+
+.t_badge__advanced {
+  background: $blue;
+}
+
+.t_badge__download {
+  background: $cyan;
+}
+
+.t_badge__q {
+  background: $magenta;
+}

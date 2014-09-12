@@ -1,0 +1,26 @@
+<h3 data-ng-if="!AdvancedCtrl.Donor.donors" class="loading loading-icon">
+    <i class="icon-spinner icon-spin"></i>
+</h3>
+<ul data-ng-show="AdvancedCtrl.Donor.donors" class="t_facets">
+    <li data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder="eg. DO1" data-type="donor"></li>
+    <terms data-type="donor" data-facet-name="primarySite"
+           data-facet="AdvancedCtrl.Donor.donors.facets.primarySite"></terms>
+    <terms data-type="donor" data-facet-name="projectId" data-defined="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.projectId"></terms>
+    <terms data-type="donor" data-facet-name="gender" data-capitalize="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.gender"></terms>
+    <terms data-type="donor" data-facet-name="tumourStageAtDiagnosis"
+           data-facet="AdvancedCtrl.Donor.donors.facets.tumourStageAtDiagnosis" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="vitalStatus" data-capitalize="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.vitalStatus" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="diseaseStatusLastFollowup" data-capitalize="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.diseaseStatusLastFollowup" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="relapseType" data-capitalize="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.relapseType" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="ageAtDiagnosisGroup"
+           data-facet="AdvancedCtrl.Donor.donors.facets.ageAtDiagnosisGroup" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="availableDataTypes" data-defined="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.availableDataTypes" data-collapsed="true"></terms>
+    <terms data-type="donor" data-facet-name="analysisTypes" data-defined="true"
+           data-facet="AdvancedCtrl.Donor.donors.facets.analysisTypes" data-collapsed="true"></terms>
+</ul>

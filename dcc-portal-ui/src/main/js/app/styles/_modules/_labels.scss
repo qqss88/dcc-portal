@@ -1,0 +1,44 @@
+.t_labels {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.t_labels__label {
+  padding: .5rem 1rem;
+  background: $greyDarker;
+  color: $white;
+  border-radius: 1rem;
+  margin-right: 1rem;
+  cursor: pointer;
+
+  transition: opacity .5s;
+}
+
+.t_labels__label.t_labels__label_inactive {
+  color: $greyLighter;
+  opacity: .5;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.t_labels__label__genes {
+  background-color: $gene;
+}
+
+.t_labels__label__donors {
+  background-color: $donor;
+}
+
+.t_labels__label__mutations {
+  background-color: $mutation;
+}
+
+.t_labels__label__projects {
+  background-color: $project;
+}
+
+.t_labels__label__pathways {
+  background-color: $pathway;
+}

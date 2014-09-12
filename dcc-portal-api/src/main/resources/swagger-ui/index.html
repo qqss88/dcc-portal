@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ICGC :: Data Portal :: API Documentation</title>
+  <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'/>
+  <link href='css/highlight.default.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <script type="text/javascript" src="lib/shred.bundle.js"></script>
+  <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+  <script src='lib/handlebars-1.0.0.js' type='text/javascript'></script>
+  <script src='lib/underscore-min.js' type='text/javascript'></script>
+  <script src='lib/backbone-min.js' type='text/javascript'></script>
+  <script src='lib/swagger.js' type='text/javascript'></script>
+  <script src='swagger-ui.js' type='text/javascript'></script>
+  <script src='lib/highlight.7.3.pack.js' type='text/javascript'></script>
+  <script type="text/javascript">
+    $(function () {
+      window.swaggerUi = new SwaggerUi({
+      // Modified
+      url: "/api/api-docs",
+      apiKey: "",
+      dom_id: "swagger-ui-container",
+      supportedSubmitMethods: ['get', 'post', 'put'],
+      onComplete: function(swaggerApi, swaggerUi){
+        log("Loaded SwaggerUI")
+        $('pre code').each(function(i, e) {hljs.highlightBlock(e)});
+      },
+      onFailure: function(data) {
+        log("Unable to Load SwaggerUI");
+      },
+      docExpansion: "none"
+    });
+
+    window.swaggerUi.load();
+  });
+
+  </script>
+</head>
+
+<body>
+<div id='header'
+     style="border-bottom: 1px solid #E6E6E6;background: #FAFAFA;margin-bottom: 1rem;padding: .4rem 2rem;position: relative;">
+    <h1 style="font-size: 1.6rem;margin: .8rem;line-height: 1rem;" class="ng-scope">
+        <a href="/" style="color: #333;font-size: 2.6rem;font-weight: 300;font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;text-transform: none;text-decoration: none;">
+            <img style="margin-bottom: -.3rem;height: 2.6rem;width: 2.6rem;" src="http://dcc.icgc.org/styles/images/icgc-logo.png">
+            <span style="color: #999;" id="icgc">ICGC</span> Data Portal - API Documentation
+        </a>
+    </h1>
+</div>
+
+<div id="message-bar" class="swagger-ui-wrap">
+  &nbsp;
+</div>
+
+<div id="swagger-ui-container" class="swagger-ui-wrap">
+
+</div>
+
+</body>
+
+</html>
