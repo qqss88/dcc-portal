@@ -53,7 +53,7 @@ public class BaseRepositoryTest {
    */
   protected static final String INDEX_NAME = "dcc-release-etl-cli";
   protected static final String SETTINGS_FILE_NAME = "index.settings.json";
-  protected static final String JSON_DIR = "../../dcc-etl/dcc-etl-indexer/src/main/resources/org/icgc/dcc/etl/indexer";
+  protected static final String JSON_DIR = "src/test/resources/org/icgc/dcc/etl/indexer";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
   protected static final File SETTINGS_FILE = new File(JSON_DIR, SETTINGS_FILE_NAME);
   protected static final IndexModel INDEX = new IndexModel(INDEX_NAME);
