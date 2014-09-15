@@ -66,26 +66,10 @@
     <!-- endbuild -->
 </head>
 <body id="{{ AppCtrl.Page.page() }}-page">
-<notify></notify>
-<div data-ng-if="!AppCtrl.appLoaded || AppCtrl.Page.working() || AppCtrl.Page.getError()" id="loading-screen">
-    <div data-ng-if="(!AppCtrl.appLoaded || AppCtrl.Page.working()) && ! AppCtrl.Page.getError()">
-        <i class="icon-spin icon-spinner"></i>
-        <img style="height: 3rem;" src="styles/images/icgc-logo.png">
-    </div>
-</div>
 
-<div class="wrap light ng-cloak">
-    <login></login>
-    <header data-ng-include="'/views/common/header.html'"></header>
-    <div class="content transition-fade" data-ui-view></div>
-    <div class="push"></div>
-</div>
-<footer class="ng-cloak" data-ng-controller="FooterCtrl as FooterCtrl">
-    <div data-ng-include="'/views/common/footer.html'"></div>
-</footer>
 
 <noscript>
-    <style scoped="">#loading-screen {
+    <style>#loading-screen {
         display: none;
     }</style>
     <div class="wrap light">
@@ -107,7 +91,6 @@
             <li><a href="/team">The Team</a></li>
             <li><a href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback">Contact Us</a></li>
             <li><a href="https://twitter.com/icgc_dcc">Twitter</a></li>
-            <li><a href="http://dcc.icgc.org">Legacy Portal</a></li>
         </ul>
         <ul>
             <li class="heading">ICGC</li>
@@ -120,6 +103,7 @@
         </ul>
         <div class="logo omega"><a href="http://oicr.on.ca/" target="_blank"><img
                 src="styles/images/OICR2logo.png"></a></div>
+        <div style="clear:both"></div>
         <div>
             <small> &copy; 2014 <a href="http://icgc.org">International Cancer Genome Consortium.</a> All Rights
                 reserved.
@@ -127,6 +111,25 @@
         </div>
     </footer>
 </noscript>
+
+
+<notify></notify>
+<div data-ng-if="!AppCtrl.appLoaded || AppCtrl.Page.working() || AppCtrl.Page.getError()" id="loading-screen">
+    <div data-ng-if="(!AppCtrl.appLoaded || AppCtrl.Page.working()) && ! AppCtrl.Page.getError()">
+        <i class="icon-spin icon-spinner"></i>
+        <img style="height: 3rem;" src="styles/images/icgc-logo.png">
+    </div>
+</div>
+<div class="wrap light ng-cloak">
+    <login></login>
+    <header data-ng-include="'/views/common/header.html'"></header>
+    <div class="content transition-fade" data-ui-view></div>
+    <div class="push"></div>
+</div>
+<footer class="ng-cloak" data-ng-controller="FooterCtrl as FooterCtrl">
+    <div data-ng-include="'/views/common/footer.html'"></div>
+</footer>
+
 
 <!-- build:js scripts/vendor-core.min.js -->
 <script src="vendor/scripts/jquery-2.0.3.js"></script>
@@ -265,7 +268,7 @@
     } catch (err) {
     }
 </script>
-<noscript><p><img src="http://webstats.oicr.on.ca/piwik/piwik.php?idsite=32" style="border:0" alt=""/></p></noscript>
+<noscript><p><img src="https://webstats.oicr.on.ca/piwik/piwik.php?idsite=32" style="border:0" alt=""/></p></noscript>
 <!-- End Piwik Tracking Code -->
 
 <script type="text/javascript">
