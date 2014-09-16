@@ -58,7 +58,7 @@ public class UIResource {
 
   private final DonorService donorService;
 
-  @Path("/gene-project-donors/{geneIds}")
+  @Path("/geneProjectDonorCounts/{geneIds}")
   @GET
   // This is used to build the genes-projects-donors breakdown
   public Map<String, TermFacet> countProjectDonor(

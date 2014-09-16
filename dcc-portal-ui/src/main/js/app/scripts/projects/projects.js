@@ -87,7 +87,7 @@
             Page.stopWork();
 
             // FIXME: elasticsearch aggregation support may be more efficient
-            Restangular.one('ui').one('gene-project-donors', _.pluck(genes.hits, 'id'))
+            Restangular.one('ui').one('geneProjectDonorCounts', _.pluck(genes.hits, 'id'))
               .get({'filters': params}).then(function(geneProjectFacets) {
 
               genes.hits.forEach(function(gene) {
