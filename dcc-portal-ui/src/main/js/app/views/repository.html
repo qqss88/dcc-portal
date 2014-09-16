@@ -30,6 +30,7 @@
                           data-ng-style="p.name === 'release_15'?{'text-decoration':'line-through'}:{}">{{ p.name }}</span>
                 </li>
             </ul>
+
             <table class="table" style="font-size: 1.1rem">
                 <thead>
                 <tr>
@@ -42,15 +43,14 @@
                 <tr data-ng-repeat="file in files">
                     <td data-ng-if="file.type=='f'">
                         <i class="icon-file"></i>
-                        <a target="_self" href="/api/v1/download?fn={{file.name}}">{{ (file.name).split('/').pop() }}</a>
+                        <a data-ng-if="!file.isText" target="_self" href="/api/v1/download?fn={{file.name}}">{{ file.baseName }}</a>
+                        <a data-ng-if="file.isText" data-ng-click="openText(file.name)" href="">{{ file.baseName }}</a>
                     </td>
                     <td data-ng-if="file.type=='d'"
-                        data-ng-style="(file.name).split('/').pop() === 'release_15'?{'text-decoration':'line-through'}:{}">
+                        data-ng-style="(file.baseName === 'release_15')?{'text-decoration':'line-through'}:{}">
                         <i class="icon-folder-open"></i>
-                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">
-                            [{{ (file.name).split('/').pop() }}] {{ ((file.name).split('/').pop() | define) }}</a>
-                        <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{
-                            (file.name).split('/').pop() }}</a>
+                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">[{{ file.baseName }}] {{ file.baseName | define }}</a>
+                        <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{ file.baseName }}</a>
                     </td>
                     <td data-ng-if="file.type=='f'" class="text-right">{{ file.size | bytes }}</td>
                     <td data-ng-if="file.type=='d'" class="text-right">--</td>
@@ -59,5 +59,21 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Dialog -->
+        <div data-modal="modal" class="modal hide fade">
+            <div class="modal-dialog light">
+                <div class="modal-content">
+                    <div class="modal-header clearfix">
+                        <h3 class="pull-left"><a target="_self" href="/api/v1/download?fn={{displayName}}">{{displayName}}</a></h3>
+                        <button class="pull-right t_button" data-ng-click="modal=false"><i class="icon-cancel"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="over-flow:auto;white-space:pre">{{displayContent}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
