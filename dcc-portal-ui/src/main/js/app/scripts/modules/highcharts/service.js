@@ -339,33 +339,25 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       return {};
     }
 
-    var r, data = [], xAxis = [], genes = params.genes, totalDonors = 0, otherCount = 0;
+    var r, data = [], xAxis = [], genes = params.genes;
 
     function sort(a, b) {
-      return a.cout - b.count;
+      return a.id > b.id;
     }
 
     function sortGenes(a, b) {
       return b.affectedDonorCountFiltered - a.affectedDonorCountFiltered;
     }
 
-    function add(project) {
-      if (project.count > (totalDonors * 0.03)) {
-        data.push({name: project.term, data: [
-          {
-            x: i,
-            y: project.count,
-            color: _this.projectColours[project.id],
-            gene_id: gene.id
-          }
-        ]});
-      } else {
-        otherCount += project.count? project.count: 0;
-      }
-    }
-
-    function sum(project) {
-      totalDonors += project.count? project.count: 0;
+    function add(item) {
+      data.push({name: item.name, data: [
+        {
+          x: i,
+          y: item.count,
+          color: _this.projectColours[item.id],
+          gene_id: gene.id
+        }
+      ]});
     }
 
     genes.sort(sortGenes);
@@ -373,22 +365,8 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     for (var i = 0; i < genes.length; ++i) {
       var gene = genes[i];
       xAxis.push(gene.symbol);
-      // gene.projects.sort(sort).forEach(sum);
-      gene.uiFIProjects.sort(sort).forEach(sum);
-
+      gene.uiFIProjects.sort(sort);
       gene.uiFIProjects.forEach(add);
-      if (otherCount) {
-        data.unshift({name: 'Others', data: [
-          {
-            x: i,
-            y: otherCount,
-            color: '#FFD1DC',
-            gene_id: gene.id
-          }
-        ]});
-      }
-      otherCount = 0;
-      totalDonors = 0;
     }
 
 

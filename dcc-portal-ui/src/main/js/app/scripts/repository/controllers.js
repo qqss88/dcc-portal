@@ -22,7 +22,7 @@ angular.module('app.download.controllers', ['app.download.services']);
 // Note download may result in unwarranted warnings, see:
 // http://stackoverflow.com/questions/15393210/chrome-showing-canceled-on-successful-file-download-200-status
 angular.module('app.download.controllers').controller('DownloadController',
-  function ($window, $filter, $scope, Page, $stateParams, DownloadService) {
+  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular) {
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
@@ -42,6 +42,15 @@ angular.module('app.download.controllers').controller('DownloadController',
       }
     }
 
+    $scope.displayName = '';
+    $scope.openText = function( fileName ) {
+      Restangular.one('download').get( {'fn':fileName}).then(function(data) {
+        $scope.displayName = fileName;
+        $scope.displayContent = data;
+        $scope.modal = true;
+      });
+    };
+
     buildBreadcrumbs();
 
     DownloadService.folder($scope.path).then(function (response) {
@@ -49,7 +58,10 @@ angular.module('app.download.controllers').controller('DownloadController',
       files = response;
 
       files.forEach(function (file) {
-        var name, tName;
+        var name, tName, extension;
+
+        // For convienence
+        file.baseName = file.name.split('/').pop();
 
         // Check if there is a translation code for directories (projects)
         if (file.type === 'd') {
@@ -58,6 +70,12 @@ angular.module('app.download.controllers').controller('DownloadController',
           if (name !== tName) {
             file.translation = tName;
           }
+        }
+
+        // Check file extension
+        extension = file.name.split('.').pop();
+        if (_.contains(['txt', 'me'], extension.toLowerCase())) {
+          file.isText = true;
         }
       });
 

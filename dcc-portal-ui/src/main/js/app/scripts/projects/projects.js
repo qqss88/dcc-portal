@@ -45,7 +45,7 @@
 
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
-  module.controller('ProjectsCtrl', function ($q, $scope, Page, Projects, HighchartsService, Donors) {
+  module.controller('ProjectsCtrl', function ($q, $scope, Page, Projects, HighchartsService, Donors, Restangular) {
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
     Page.setPage('projects');
@@ -73,7 +73,6 @@
           countBy: 'totalDonorCount'
         });
 
-        // FIXME: elasticsearch aggregation support will probably efficient
         _ctrl.stacked = [];
 
         Projects.one(_.pluck(data.hits, 'id').join(','))
@@ -82,41 +81,39 @@
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
           }).then(function (genes) {
-            var promiseList = [];
+            var params = {
+              mutation: {functionalImpact:{is:['High']}}
+            };
             Page.stopWork();
 
-            // Send out facet queries
-            genes.hits.forEach(function(gene) {
-              promiseList.push(
-                Donors.handler.get('', {
-                  size: 0,
-                  include: 'facets',
-                  filters: {
-                    donor: {projectId:{is: _.pluck(data.hits, 'id')}},
-                    gene: {id:{is:[gene.id]}},
-                    mutation: {functionalImpact:{is:['High']}}
-                  }
-                })
-              );
-            });
+            // FIXME: elasticsearch aggregation support may be more efficient
+            Restangular.one('ui').one('geneProjectDonorCounts', _.pluck(genes.hits, 'id'))
+              .get({'filters': params}).then(function(geneProjectFacets) {
 
-            // We need to wait/synchronize all facets queries before rendering
-            $q.all(promiseList).then(function (projectList) {
-              genes.hits.forEach(function(gene, idx) {
-                gene.uiFIProjects = projectList[idx].facets.projectName.terms;
-                gene.uiFIProjects.forEach(function(t) {
-                  var proj = _.findWhere(data.hits, function (p) {
-                    return t.term === p.name;
+              genes.hits.forEach(function(gene) {
+                var uiFIProjects = [];
+
+                geneProjectFacets[gene.id].terms.forEach(function(t) {
+                  var proj = _.findWhere( data.hits, function(p) {
+                    return p.id === t.term;
                   });
-                  t.id = proj.id;
+
+                  if (angular.isDefined(proj)) {
+                    uiFIProjects.push({
+                      id: t.term,
+                      name: proj.name,
+                      count: t.count
+                    });
+                  }
                 });
+
+                gene.uiFIProjects = uiFIProjects;
               });
 
               _ctrl.stacked = HighchartsService.stacked({
                 genes: genes.hits
               });
             });
-
           });
       }
     }

@@ -74,7 +74,6 @@
             <tr>
                 <th>Reactome pathways</th>
                 <td>
-                    <new-scope>
                     <ul data-hide-list="{{GeneCtrl.gene.pathways | orderBy:'name'}}" data-limit="10">
                         <li data-ng-repeat="pathway in list">
                             <a href="pathways/{{pathway.id}}"><span> {{pathway.name}}</span>
@@ -82,7 +81,6 @@
                         </li>
                     </ul>
                     <span data-ng-if="! GeneCtrl.gene.pathways">None</span>
-                    </new-scope>
                 </td>
             </tr>
             <tr data-ng-if="GeneCtrl.gene.list">

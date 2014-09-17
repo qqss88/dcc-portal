@@ -28,7 +28,7 @@ angular.module('app.ui', [
   'app.ui.dl',
   'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.temporary'
+  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy'
 ]);
 
 angular.module('app.ui.exists', []).directive('exists', function () {
@@ -277,6 +277,7 @@ angular.module('app.ui.hidetext', []).directive('hideText', function () {
     restrict: 'E',
     replace: true,
     transclude: true,
+    scope: {},
     template: '<div class="t_sh">' +
               '{{ text }}' +
               '<div ng-if="text.length>=limit" class="t_sh__toggle">' +
@@ -822,6 +823,7 @@ angular.module('app.ui.scrollSpy', []).directive('scrollSpy', function ($window)
 
 // FIXME: This forces a new isolated scope. This is just a temporary fix for
 // directives that clobber each other if they happen to share the same scope.
+/*
 angular.module('app.ui.temporary', []).directive('newScope', function () {
   return {
     restrict: 'E',
@@ -829,3 +831,4 @@ angular.module('app.ui.temporary', []).directive('newScope', function () {
     replace: true
   };
 });
+*/
