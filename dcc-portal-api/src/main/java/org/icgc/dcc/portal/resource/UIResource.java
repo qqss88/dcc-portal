@@ -34,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.common.collect.ImmutableList;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
@@ -43,6 +42,7 @@ import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.util.JsonUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiParam;

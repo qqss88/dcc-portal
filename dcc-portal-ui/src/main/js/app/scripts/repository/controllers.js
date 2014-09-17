@@ -74,7 +74,7 @@ angular.module('app.download.controllers').controller('DownloadController',
 
         // Check file extension
         extension = file.name.split('.').pop();
-        if (_.contains(['txt', 'me'], extension)) {
+        if (_.contains(['txt', 'me'], extension.toLowerCase())) {
           file.isText = true;
         }
       });
