@@ -3,10 +3,10 @@
     <span data-ng-show="user.token && !user.verifying">
         <i data-ng-show="user.daco" class="icon-shield data-available"
            data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="Authenticated"></i>
+           data-tooltip-html-unsafe="Authorized"></i>
         <i data-ng-hide="user.daco" class="icon-shield data-missing"
            data-tooltip-placement="bottom"
-           data-tooltip-html-unsafe="Unauthenticated"></i>
+           data-tooltip-html-unsafe="Unauthorized"></i>
         {{user.email}}
         <i data-ng-show="user.daco" style="cursor: pointer" class="icon-cog"
            data-ng-click="authModal=true"></i>
