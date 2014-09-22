@@ -80,41 +80,41 @@
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
-        }).then(function (genes) {
-          var params = {
-            mutation: {functionalImpact:{is:['High']}}
-          };
-          Page.stopWork();
+          }).then(function (genes) {
+            var params = {
+              mutation: {functionalImpact:{is:['High']}}
+            };
+            Page.stopWork();
 
-          // FIXME: elasticsearch aggregation support may be more efficient
-          Restangular.one('ui').one('geneProjectDonorCounts', _.pluck(genes.hits, 'id'))
-            .get({'filters': params}).then(function(geneProjectFacets) {
+            // FIXME: elasticsearch aggregation support may be more efficient
+            Restangular.one('ui').one('geneProjectDonorCounts', _.pluck(genes.hits, 'id'))
+              .get({'filters': params}).then(function(geneProjectFacets) {
 
-            genes.hits.forEach(function(gene) {
-              var uiFIProjects = [];
+              genes.hits.forEach(function(gene) {
+                var uiFIProjects = [];
 
-              geneProjectFacets[gene.id].terms.forEach(function(t) {
-                var proj = _.findWhere( data.hits, function(p) {
-                  return p.id === t.term;
+                geneProjectFacets[gene.id].terms.forEach(function(t) {
+                  var proj = _.findWhere( data.hits, function(p) {
+                    return p.id === t.term;
+                  });
+
+                  if (angular.isDefined(proj)) {
+                    uiFIProjects.push({
+                      id: t.term,
+                      name: proj.name,
+                      count: t.count
+                    });
+                  }
                 });
 
-                if (angular.isDefined(proj)) {
-                  uiFIProjects.push({
-                    id: t.term,
-                    name: proj.name,
-                    count: t.count
-                  });
-                }
+                gene.uiFIProjects = uiFIProjects;
               });
 
-              gene.uiFIProjects = uiFIProjects;
-            });
-
-            _ctrl.stacked = HighchartsService.stacked({
-              genes: genes.hits
+              _ctrl.stacked = HighchartsService.stacked({
+                genes: genes.hits
+              });
             });
           });
-        });
       }
     }
 
