@@ -75,8 +75,8 @@
 
         _ctrl.stacked = [];
 
-        Projects.one(_.pluck(data.hits, 'id').join(','))
-          .handler.one('genes').get({
+
+        Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
@@ -141,6 +141,7 @@
 
     _ctrl.project = project;
 
+
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
       _ctrl.project.uiPublicationList = [];
     }
@@ -184,9 +185,13 @@
     var _ctrl = this;
 
     function success(genes) {
-      if (genes.hasOwnProperty('hits')) {
+      if (genes.hasOwnProperty('hits') ) {
         var geneIds = _.pluck(genes.hits, 'id').join(',');
         _ctrl.genes = genes;
+
+        if (_.isEmpty(_ctrl.genes.hits)) {
+          return;
+        }
 
         Projects.one().get().then(function (data) {
           var project = data;
@@ -256,9 +261,14 @@
   module.controller('ProjectMutationsCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
     var _ctrl = this, project = Projects.one();
 
+
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
         _ctrl.mutations = mutations;
+
+        if ( _.isEmpty(_ctrl.mutations.hits)) {
+          return;
+        }
 
         mutations.advQuery = LocationService.mergeIntoFilters({donor: {projectId: {is: [project.id]}}});
 
@@ -368,6 +378,10 @@
 
     this.all = function () {
       return Restangular.all('projects');
+    };
+
+    this.several = function(list) {
+      return Restangular.several('projects', list);
     };
 
     this.getList = function (params) {

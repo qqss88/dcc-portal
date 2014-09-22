@@ -528,16 +528,16 @@
 
 <section id="donors"
          data-ng-controller="ProjectDonorsCtrl as ProjectDonorsCtrl"
-         data-ng-class="{'loading': !ProjectDonorsCtrl.donors.hits, 'empty': ProjectDonorsCtrl.donors.hits.length == 0}">
-    <h3 data-ng-if="!ProjectDonorsCtrl.donors.hits">
+         data-ng-class="{'loading': !ProjectDonorsCtrl.donors.hits, 'empty': ProjectDonorsCtrl.donors.hits.length == 0 || ProjectCtrl.project.ssmTestedDonorCount == 0}">
+    <h3 data-ng-if="!ProjectDonorsCtrl.donors.hits && ProjectCtrl.project.ssmTestedDonorCount > 0">
         <i class="icon-spinner icon-spin"></i> Fetching Donors...
     </h3>
 
-    <h3 data-ng-if="ProjectDonorsCtrl.donors.hits.length == 0">
+    <h3 data-ng-if="ProjectDonorsCtrl.donors.hits.length == 0 || ProjectCtrl.project.ssmTestedDonorCount == 0">
         No Affected Donors Found.
     </h3>
 
-    <div data-ng-if="ProjectDonorsCtrl.donors.hits.length > 0">
+    <div data-ng-if="ProjectDonorsCtrl.donors.hits.length > 0 && ProjectCtrl.project.ssmTestedDonorCount > 0">
         <h3>Most Affected Donors
             <span data-open-in-list='?filters={{ProjectDonorsCtrl.donors.advQuery}}' data-type='donor'></span>
         </h3>
