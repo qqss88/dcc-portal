@@ -41,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.auth.openid.OpenidAuthService;
+import org.icgc.dcc.portal.auth.openid.OpenIDAuthService;
 import org.icgc.dcc.portal.model.security.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.openid4java.message.ParameterList;
@@ -64,7 +64,7 @@ public class OpenidResource extends BaseResource {
   private static final String RESPONSE_HEADER_VALUE_TEMPLATE = "%s;HttpOnly";
 
   @NonNull
-  private final OpenidAuthService openidService;
+  private final OpenIDAuthService openidService;
 
   /**
    * Handles the authentication request from the user after they select their OpenID Provider

@@ -38,7 +38,7 @@ import com.google.inject.Inject;
  */
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @_({ @Inject }))
-public class OpenidAuthService {
+public class OpenIDAuthService {
 
   public static final String OPENID_EMAIL = "http://schema.openid.net/contact/email";
   public static final String AXSCHEMA_EMAIL = "http://axschema.org/contact/email";
