@@ -19,17 +19,18 @@
     </div>
     <div style="position: relative; margin-right: -2rem">
         <div data-ng-if="loading" class="loadingOverlay"></div>
-        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('donor')}">
+        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('donor')}" data-ng-if="AdvancedCtrl.state.isFacetTab('donor')">
             <div data-ng-include="'scripts/advanced/views/advanced.facets.donors.html'"></div>
         </div>
-        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('gene')}">
+        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('gene')}" data-ng-if="AdvancedCtrl.state.isFacetTab('gene')">
             <div data-ng-include="'scripts/advanced/views/advanced.facets.genes.html'"></div>
         </div>
-        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('mutation')}">
+        <div class='t_tab_pane' data-ng-class="{active: AdvancedCtrl.state.isFacetTab('mutation')}" data-ng-if="AdvancedCtrl.state.isFacetTab('mutation')">
             <div data-ng-include="'scripts/advanced/views/advanced.facets.mutations.html'"></div>
         </div>
     </div>
 </aside>
+
 <article style="position: relative;">
     <div data-ng-if="loading" class="loadingOverlay"></div>
     <current></current>
