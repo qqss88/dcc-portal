@@ -18,9 +18,9 @@
 package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.DefaultValue;
@@ -58,15 +58,13 @@ public class UIResource {
   private final DonorService donorService;
 
   /*
-   * This is used to fetch project-donorCount breakdown for a list of genes. 
-   * It builds the data for gene chart on the projects page.
+   * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
+   * projects page.
    * 
-   *   gene1: [ proj1: K11, proj2: K12 ... projN:K1N ]
-   *   ...
-   *   geneM: [ proj1: KM1, proj2: KM2 ... projN:KMN ]
-   *   
-   * FIXME: Checkout elasticsearch aggregation framework when we have it to see if it can
-   * alleviate the amount of requests, which is based on # of genes passed in.
+   * gene1: [ proj1: K11, proj2: K12 ... projN:K1N ] ... geneM: [ proj1: KM1, proj2: KM2 ... projN:KMN ]
+   * 
+   * FIXME: Checkout elasticsearch aggregation framework when we have it to see if it can alleviate the amount of
+   * requests, which is based on # of genes passed in.
    */
   @Path("/geneProjectDonorCounts/{geneIds}")
   @GET
@@ -75,7 +73,7 @@ public class UIResource {
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
       ) {
 
-	val result = Maps.<String, TermFacet> newHashMap();
+    val result = Maps.<String, TermFacet> newHashMap();
 
     for (val geneId : geneIds.get()) {
       val geneFilter = new FiltersParam(String.format("{gene:{id:{is:[\"%s\"]}}}", geneId));
@@ -83,6 +81,8 @@ public class UIResource {
 
       Donors donors = donorService.findAllCentric(Query.builder()
           .filters(filterNode)
+          .sort("id")
+          .order(DEFAULT_ORDER)
           .fields(Collections.<String> emptyList())
           .includes(ImmutableList.of("facets"))
           .size(0).build());
