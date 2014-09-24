@@ -20,22 +20,22 @@
             </th>
             <th rowspan="2" data-sortable data-type="genes" data-field="name">Name</th>
             <th rowspan="2" data-sortable data-type="genes" data-field="start"><abbr
-                    data-tooltip="Gene location on the genome, chr:start-end">Location</abbr></th>
+                    tooltip2 tooltip2-text="Gene location on the genome, chr:start-end">Location</abbr></th>
             <th rowspan="2" data-sortable data-type="genes" data-field="type">Type</th>
             <th colspan="2" class="text-center"># Donors affected</th>
             <th rowspan="2" class="text-center">
-                <abbr data-tooltip-html-unsafe="Number of Simple Somatic Mutations<br>Filtered by Current Search Criteria"
-                      data-tooltip-placement="left"># Mutations</abbr>
+                <abbr tooltip2 tooltip-text="Number of Simple Somatic Mutations<br>Filtered by Current Search Criteria"
+                      tooltip2-placement="left"># Mutations</abbr>
             </th>
         </tr>
         <tr>
             <th data-sortable data-type="genes" data-field="affectedDonorCountFiltered" data-active="true"
                 data-reversed="true" class="text-center">
-                <abbr data-tooltip-html-unsafe="Number of Donors where Gene contains SSM<br>Filtered by Current Search Criteria / unfiltered # donors the gene is mutated.">
+                <abbr tooltip2 tooltip2-text="Number of Donors where Gene contains SSM<br>Filtered by Current Search Criteria / unfiltered # donors the gene is mutated.">
                 Total</abbr>
             </th>
             <th class="text-center">
-                <abbr data-tooltip-html-unsafe="# Donors where gene contains SSM filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project.">
+                <abbr tooltip2 tooltip2-text="# Donors where gene contains SSM filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project.">
                     Across all Projects</abbr>
             </th>
         </tr>
@@ -66,9 +66,9 @@
                     <li data-ng-repeat="p in list | orderBy:'percentage':true"
                         style="position: relative">
                             <span style="position: relative">
-                                <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
-                                   data-tooltip-append-to-body="true"
+                                <a tooltip2 
+                                   tooltip2-placement="left"
+                                   tooltip2-text="{{ p.term | define }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
                             <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]}},"gene":{"id":{"is":["{{gene.id}}"]}}}'>
                                 {{p.count | number}}
