@@ -28,8 +28,128 @@ angular.module('app.ui', [
   'app.ui.dl',
   'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy'
+  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl'
 ]);
+
+
+// Centralized tooltip directive. There should be only one per application
+angular.module('app.ui.tooltipControl', [])
+  .directive('tooltipControl', function ($timeout, $position, $rootScope) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+      },
+      templateUrl: 'template/tooltip2.html',
+      link: function (scope, element) {
+        scope.placement = 'right';
+        scope.html = '???';
+        scope.top = -999;
+        scope.left = -999;
+
+        function calculatePlacement(placement, target) {
+          var position = $position.offset(target);
+          var result = {};
+
+          var ttWidth = element.prop('offsetWidth');
+          var ttHeight = element.prop('offsetHeight');
+
+          console.log(ttWidth, ttHeight);
+
+          // TODO: more support
+          switch(placement) {
+            case 'right':
+              result = {
+                top: position.top + position.height / 2 - ttHeight / 2, 
+                left: position.left + position.width
+              };
+              break;
+            case 'left':
+              result = {
+                top: position.top + position.height / 2 - ttHeight / 2,
+                left: position.left - ttWidth
+              };
+              break;
+            case 'bottom':
+            case 'top':
+              result = {
+                top: position.top - ttHeight,
+                left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+              };
+              break;
+            default:
+              result = {
+                top: position.top,
+                left: position.left + position.width / 2
+              };
+          }
+          return result;
+        }
+
+        $rootScope.$on('tooltip::show', function(evt, params) {
+          // var position = $position.offset(params.element);
+          scope.$apply(function() {
+            // var position;
+            if (params.text) {
+              scope.html = params.text;
+            }
+            if (params.placement) {
+              scope.placement = params.placement;
+            }
+          });
+
+          var position = calculatePlacement(params.placement, params.element);
+          element.css('top', position.top);
+          element.css('left', position.left);
+        });
+        $rootScope.$on('tooltip::hide', function() {
+          element.css('top', -999);
+          element.css('left', -999);
+          /*
+          scope.$apply(function() {
+            scope.top = -999;
+            scope.left = -999;
+          });*/
+        });
+      }
+    };
+  });
+
+
+// Light weight directive for request tooltips
+angular.module('app.ui.tooltip', [])
+  .directive('tooltip2', function($timeout) {
+    return {
+      restrict: 'A',
+      replace: false,
+      scope: {
+      },
+      link: function(scope, element, attrs) {
+        var tooltipPromise;
+        element.bind('mouseenter', function() {
+          tooltipPromise = $timeout(function() {
+            console.log('emitting');
+            scope.$emit('tooltip::show', {
+              element: element,
+              text: attrs.tooltip2Text || '???',
+              placement: attrs.tooltip2Placement || 'top'
+            });
+          }, 500);
+        });
+
+        element.bind('mouseleave', function() {
+          $timeout.cancel(tooltipPromise);
+          scope.$emit('tooltip::hide');
+        });
+
+        scope.$on('$destroy', function() {
+          element.off();
+          element.unbind();
+        });
+      }
+    };
+  });
+
 
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
@@ -141,6 +261,24 @@ angular.module('app.ui.lists', []).directive('hideSumList', function (Projects) 
     }
   };
 });
+
+
+// TODO: move this out
+angular.module('app.ui.lists').directive('ngTimeit', ['$parse', '$timeout', function($parse, $timeout) {
+    return {
+      restrict: 'A',
+      link: function(scope, element, attrs){
+        var modelFn = $parse(attrs.ngTimeit);
+        var then = new Date();
+        $timeout(function(){
+          var now = new Date();
+          modelFn.assign(scope, (now - then) / 1000.0);
+        });
+      }
+    };
+  }
+]);
+
 
 angular.module('app.ui.lists').directive('hideLinkList', function () {
   return {
