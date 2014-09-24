@@ -113,12 +113,7 @@
             <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
             <td>{{ gene.type | trans }}</td>
             <td>{{gene.affectedDonorCountFiltered }}/{{gene.affectedDonorCountTotal}}</td>
-            <td>
-                <div data-ng-repeat="uiDonor in gene.uiDonors">
-                    {{uiDonor.term}}:{{uiDonor.count}}/{{uiDonor.countTotal}}
-                    <div data-ng-if="!$last">|</div>
-                </div>
-            </td>
+            <td> {{gene.uiDonorsExportString}} </td>
             <td>{{AdvancedCtrl.Gene.mutationCounts[gene.id]}}</td>
         </tr>
         </tbody>

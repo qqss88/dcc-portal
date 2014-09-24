@@ -151,6 +151,28 @@ angular.module('app.ui.tooltip', [])
   });
 
 
+
+angular.module('app.ui.exists', []).directive('exists', function () {
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      exists: '='
+    },
+    template: '<span></span>',
+    link: function(scope, element) {
+      if (scope.exists) {
+        element.append('<i>').attr('class', 'icon-ok');
+      } else {
+        element.append('--');
+      }
+      // scope.$destroy();
+    }
+  };
+});
+
+
+/*
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
     restrict: 'A',
@@ -161,6 +183,7 @@ angular.module('app.ui.exists', []).directive('exists', function () {
     template: '<span><i data-ng-if="exists" class="icon-ok"></i><span data-ng-if="!exists">--</span></span>'
   };
 });
+*/
 
 angular.module('app.ui.es', []).directive('expandSearch', function () {
   return {
@@ -489,7 +512,7 @@ angular.module('app.ui.mutation').directive('mutationConsequences', function ($f
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-              '<abbr data-tooltip="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+              '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
               '<span data-ng-repeat="(gk, gv) in c.data">' +
               '<span data-ng-if="$first == true">: </span>' +
               '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +

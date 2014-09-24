@@ -100,12 +100,7 @@
             <mutation-consequences items="mutation.consequences"></mutation-consequences>
         </td>
         <td>{{mutation.affectedDonorCountFiltered}}/{{mutation.affectedDonorCountTotal}}</td>
-        <td>
-            <div data-ng-repeat="uiDonor in mutation.uiDonors">
-                {{uiDonor.term}}:{{uiDonor.count}}/{{uiDonor.countTotal}}
-                <div ng-if="!$last">|</div>
-            </div>
-        </td>
+        <td>{{mutation.uiDonorsExportString}}</td>
     </tr>
     </tbody>
 </table>
