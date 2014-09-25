@@ -384,6 +384,8 @@
 
   module.service('State', function () {
     this.loading = false;
+    this.visitedTab = {};
+    this.visitedFacet = {};
 
     this.setTab = function (tab) {
       this.tab = tab;
@@ -391,6 +393,8 @@
       if (tab === 'mutation') {
         this.subTab = tab;
       }
+      this.visitedTab[tab] = true;
+      this.visitedFacet[tab] = true;
     };
     this.getTab = function () {
       return this.tab;
@@ -399,8 +403,16 @@
       return this.tab === tab;
     };
 
+    this.hasVisitedTab = function(tab) {
+      return this.visitedTab[tab];
+    };
+    this.hasVisitedFacet = function(tab) {
+      return this.visitedFacet[tab];
+    };
+
     this.setFacetTab = function (tab) {
       this.facetTab = tab;
+      this.visitedFacet[tab] = true;
     };
     this.getFacetTab = function () {
       return this.facetTab;
