@@ -24,7 +24,8 @@
     var title = 'Loading...',
       page = 'home',
       error = false,
-      working = 0;
+      working = 0,
+      exporting = false;
 
     return {
       title: function () {
@@ -69,6 +70,15 @@
       },
       getError: function() {
         return error;
+      },
+      startExport: function() {
+        exporting = true;
+      },
+      stopExport: function() {
+        exporting = false;
+      },
+      isExporting: function() {
+        return exporting;
       }
     };
   });

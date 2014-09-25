@@ -54,7 +54,6 @@ angular.module('app.ui.tooltipControl', [])
           var ttWidth = element.prop('offsetWidth');
           var ttHeight = element.prop('offsetHeight');
 
-          console.log(ttWidth, ttHeight);
 
           // TODO: more support (bottom and ellipses)
           switch(placement) {
@@ -87,9 +86,7 @@ angular.module('app.ui.tooltipControl', [])
         }
 
         $rootScope.$on('tooltip::show', function(evt, params) {
-          // var position = $position.offset(params.element);
           scope.$apply(function() {
-            // var position;
             if (params.text) {
               scope.html = params.text;
             }
@@ -123,7 +120,6 @@ angular.module('app.ui.tooltip', [])
         var tooltipPromise;
         element.bind('mouseenter', function() {
           tooltipPromise = $timeout(function() {
-            console.log('emitting');
             scope.$emit('tooltip::show', {
               element: element,
               text: attrs.tooltip2Text || '???',
@@ -166,19 +162,6 @@ angular.module('app.ui.exists', []).directive('exists', function () {
   };
 });
 
-
-/*
-angular.module('app.ui.exists', []).directive('exists', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    scope: {
-      exists: '='
-    },
-    template: '<span><i data-ng-if="exists" class="icon-ok"></i><span data-ng-if="!exists">--</span></span>'
-  };
-});
-*/
 
 angular.module('app.ui.es', []).directive('expandSearch', function () {
   return {
@@ -473,33 +456,7 @@ angular.module('app.ui.nested', []).directive('nested', function ($location) {
 });
 
 
-// Format FatHMM function impact scores: null, damaging or tolerated
-angular.module('app.ui.mutation', []).directive('fathmm', function() {
-  return {
-    restrict: 'E',
-    scope: {
-      item: '='
-    },
-    template: '<span data-ng-if="!item">--</span>' +
-              '<span data-tooltip="Damaging: {{item.score | number:2}}" ' +
-              ' data-ng-if="item && item.prediction === \'DAMAGING\'"' +
-              ' style="color:#AA1122">D</span>' +
-              '<span data-tooltip="Tolerated: {{item.score | number:2}}"' +
-              ' data-ng-if="item && item.prediction === \'TOLERATED\'"' +
-              ' style="color:#11AA22">T</span>'
-
-    /* nums
-    template: '<span data-ng-if="!item">--</span>' +
-              '<span data-ng-if="item && item.prediction === \'DAMAGING\'"' +
-              ' style="color:#AA1122">{{item.score | number:2}}</span>' +
-              '<span data-ng-if="item && item.prediction === \'TOLERATED\'"' +
-              ' style="color:#11AA22">{{item.score | number:2}}</span>'
-    */
-  };
-});
-
-
-angular.module('app.ui.mutation').directive('mutationConsequences', function ($filter, ConsequenceOrder) {
+angular.module('app.ui.mutation', []).directive('mutationConsequences', function ($filter, ConsequenceOrder) {
   return {
     restrict: 'E',
     scope: {

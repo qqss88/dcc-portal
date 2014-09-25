@@ -255,6 +255,7 @@
     };
   });
 
+  /*
   module.directive('facetList', function () {
     return {
       restrict: 'A',
@@ -312,4 +313,5 @@
       }
     };
   });
+  */
 })();
