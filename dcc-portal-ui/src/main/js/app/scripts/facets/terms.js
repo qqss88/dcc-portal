@@ -48,6 +48,8 @@
       }
     }
 
+    $scope.displayLimit = 5;
+
     $scope.addTerm = function (term) {
       Facets.addTerm({
         type: $scope.type,
@@ -74,6 +76,15 @@
     $scope.bar = function (count) {
       return {width: (count / ($scope.facet.total + $scope.facet.missing) * 100) + '%'};
     };
+
+    $scope.toggle = function() {
+      $scope.expanded = !$scope.expanded;
+      if (!$scope.collapsed) {
+        $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
+        console.log($scope.displayLimit);
+      }
+    };
+
 
     $scope.projects = HighchartsService.projectColours;
     $scope.sites = HighchartsService.primarySiteColours;

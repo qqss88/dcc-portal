@@ -56,11 +56,11 @@ angular.module('app.ui.tooltipControl', [])
 
           console.log(ttWidth, ttHeight);
 
-          // TODO: more support
+          // TODO: more support (bottom and ellipses)
           switch(placement) {
             case 'right':
               result = {
-                top: position.top + position.height / 2 - ttHeight / 2, 
+                top: position.top + position.height / 2 - ttHeight / 2,
                 left: position.left + position.width
               };
               break;
@@ -105,11 +105,6 @@ angular.module('app.ui.tooltipControl', [])
         $rootScope.$on('tooltip::hide', function() {
           element.css('top', -999);
           element.css('left', -999);
-          /*
-          scope.$apply(function() {
-            scope.top = -999;
-            scope.left = -999;
-          });*/
         });
       }
     };
@@ -512,6 +507,27 @@ angular.module('app.ui.mutation').directive('mutationConsequences', function ($f
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
+                '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+                '<span data-ng-repeat="(gk, gv) in c.data">' +
+                  '<span>{{ $first==true? ": " : ""}}</span>' +
+                  //'<span data-ng-if="$first == true">: </span>' +
+                  '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
+                  '<span data-ng-repeat="aa in gv.aaChangeList">' +
+                    '<span class="t_impact_{{aa.FI | lowercase }}">{{aa.aaMutation}}</span>' +
+                    '<span>{{ $last === false? ", " : ""}}</span>' +
+                    //'<span data-ng-if="!$last">, </span>' +
+                  '</span>' +
+                  //'<span data-ng-if="$last != true"> - </span>' +
+                  '<span>{{ $last === false? " - " : "" }}</span>' +
+                '</span>' +
+                '<span class="hidden">{{ $last === false? "|" : "" }}</span>' + // Separator for html download
+                //'<span class="hidden" data-ng-if="$last != true">|</span>' + // Separator for html download
+              '</li>' +
+              '</ul>',
+
+    /*
+    template: '<ul class="unstyled">' +
+              '<li data-ng-repeat="c in consequences">' +
               '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
               '<span data-ng-repeat="(gk, gv) in c.data">' +
               '<span data-ng-if="$first == true">: </span>' +
@@ -525,6 +541,7 @@ angular.module('app.ui.mutation').directive('mutationConsequences', function ($f
               '<span class="hidden" data-ng-if="$last != true">|</span>' + // Separator for html download
               '</li>' +
               '</ul>',
+    */
     link: function (scope) {
       var consequenceMap;
 
