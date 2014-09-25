@@ -61,7 +61,7 @@
 
       var _ctrl = this;
 
-      //_ctrl.page = Page;
+      _ctrl.Page = Page;
       //$scope.debugTimer = 0;
 
       _ctrl.state = State;

@@ -17,7 +17,7 @@
 
 'use strict';
 
-angular.module('icgc.ui.toolbar', []).directive('toolbar', function ($filter) {
+angular.module('icgc.ui.toolbar', []).directive('toolbar', function ($filter, $timeout, Page) {
   return {
     restrict: 'A',
     replace: true,
@@ -26,7 +26,21 @@ angular.module('icgc.ui.toolbar', []).directive('toolbar', function ($filter) {
     },
     templateUrl: 'views/ui/toolbar.html',
     link: function (scope) {
-      scope.downloadHTMLTable = function (id, type) {
+
+      scope.downloadHTMLTable = function(id, type) {
+        Page.startExport();
+
+        // There is probably a nicer way to do this..
+        // Basically we need to trigger an $apply cycle to generate the hidden table to download,
+        // but without clobbering ourselves by calling apply inside apply.
+        $timeout(function() {
+          scope.downloadHTMLTable2(id, type);
+          Page.stopExport();
+        }, 1, true);
+
+      };
+
+      scope.downloadHTMLTable2 = function (id, type) {
         var tableData, delimiter, filename;
 
         // i.e. mutation_2012_04_02_20_56_33.tsv

@@ -160,7 +160,7 @@
         <pagination-controls data-type="donors" data-data="AdvancedCtrl.Donor.donors"></pagination-controls>
 
 
-        <table class="hidden" id="donors">
+        <table class="hidden" id="donors" data-ng-if="AdvancedCtrl.Page.isExporting()">
             <thead>
             <tr>
                 <td>Donor ID</td>

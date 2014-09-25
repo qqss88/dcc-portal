@@ -94,7 +94,7 @@
     </table>
     <pagination-controls type="genes" data="AdvancedCtrl.Gene.genes"></pagination-controls>
 
-    <table class="hidden" id="genes">
+    <table class="hidden" id="genes" data-ng-hide="AdvancedCtrl.Page.isExporting()">
         <thead>
         <tr>
             <th>Symbol</th>
@@ -111,9 +111,9 @@
             <td>{{gene.symbol}}</td>
             <td>{{gene.name}}</td>
             <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
-            <td>{{ gene.type | trans }}</td>
+            <td>{{gene.type | trans}}</td>
             <td>{{gene.affectedDonorCountFiltered }}/{{gene.affectedDonorCountTotal}}</td>
-            <td> {{gene.uiDonorsExportString}} </td>
+            <td>{{gene.uiDonorsExportString}}</td>
             <td>{{AdvancedCtrl.Gene.mutationCounts[gene.id]}}</td>
         </tr>
         </tbody>

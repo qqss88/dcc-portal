@@ -120,7 +120,7 @@
     </table>
     <pagination-controls data-type="occurrences" data="AdvancedCtrl.Mutation.occurrences"></pagination-controls>
 
-    <table id="occurrences" class="hidden">
+    <table id="occurrences" class="hidden" data-ng-if="AdvancedCtrl.Page.isExporting()">
         <thead>
         <tr>
             <th>ID</th>
