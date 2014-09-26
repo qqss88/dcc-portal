@@ -28,13 +28,13 @@ angular.module('app.ui', [
   'app.ui.dl',
   'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl'
+  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2'
 ]);
 
 
 // Centralized tooltip directive. There should be only one per application
 angular.module('app.ui.tooltipControl', [])
-  .directive('tooltipControl', function ($timeout, $position, $rootScope) {
+  .directive('tooltipControl', function ($position, $rootScope, $sce) {
     return {
       restrict: 'E',
       replace: true,
@@ -44,8 +44,6 @@ angular.module('app.ui.tooltipControl', [])
       link: function (scope, element) {
         scope.placement = 'right';
         scope.html = '???';
-        scope.top = -999;
-        scope.left = -999;
 
         function calculatePlacement(placement, target) {
           var position = $position.offset(target);
@@ -54,8 +52,6 @@ angular.module('app.ui.tooltipControl', [])
           var ttWidth = element.prop('offsetWidth');
           var ttHeight = element.prop('offsetHeight');
 
-
-          // TODO: more support (bottom and ellipses)
           switch(placement) {
             case 'right':
               result = {
@@ -88,7 +84,7 @@ angular.module('app.ui.tooltipControl', [])
         $rootScope.$on('tooltip::show', function(evt, params) {
           scope.$apply(function() {
             if (params.text) {
-              scope.html = params.text;
+              scope.html = $sce.trustAsHtml(params.text);
             }
             if (params.placement) {
               scope.placement = params.placement;
@@ -118,7 +114,17 @@ angular.module('app.ui.tooltip', [])
       },
       link: function(scope, element, attrs) {
         var tooltipPromise;
+
         element.bind('mouseenter', function() {
+          // If overflow is specified, check if tooltip is need or not
+          console.log(' debug ', attrs.tooltip2Overflow, attrs.tooltip2Placement);
+          if (attrs.tooltip2Overflow === 'true') {
+            console.log(element.context.scrollWidth, element.context.clientWidth);
+            if (element.context.scrollWidth <= element.context.clientWidth) {
+              return;
+            }
+          }
+
           tooltipPromise = $timeout(function() {
             scope.$emit('tooltip::show', {
               element: element,
@@ -133,6 +139,11 @@ angular.module('app.ui.tooltip', [])
           scope.$emit('tooltip::hide');
         });
 
+        element.bind('click', function() {
+          $timeout.cancel(tooltipPromise);
+          scope.$emit('tooltip::hide');
+        });
+
         scope.$on('$destroy', function() {
           element.off();
           element.unbind();
@@ -141,6 +152,18 @@ angular.module('app.ui.tooltip', [])
     };
   });
 
+
+
+angular.module('app.ui.exists2', []).directive('exists2', function () {
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      exists2: '='
+    },
+    template: '<span><i data-ng-if="exists2" class="icon-ok"></i><span data-ng-if="!exists2">--</span></span>'
+  };
+});
 
 
 angular.module('app.ui.exists', []).directive('exists', function () {
@@ -152,12 +175,24 @@ angular.module('app.ui.exists', []).directive('exists', function () {
     },
     template: '<span></span>',
     link: function(scope, element) {
-      if (scope.exists) {
-        element.append('<i>').attr('class', 'icon-ok');
-      } else {
-        element.append('--');
+      var iconOK = angular.element('<i>').addClass('icon-ok');
+
+      function update() {
+        element.empty();
+        if (scope.exists) {
+          element.append(iconOK);
+        } else {
+          element.append('--');
+        }
       }
-      // scope.$destroy();
+      update();
+
+      scope.$watch('exists', function(n, o) {
+        if (n === o) {
+           return;
+        }
+        update();
+      });
     }
   };
 });
@@ -467,18 +502,14 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
                 '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
                 '<span data-ng-repeat="(gk, gv) in c.data">' +
                   '<span>{{ $first==true? ": " : ""}}</span>' +
-                  //'<span data-ng-if="$first == true">: </span>' +
                   '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
                   '<span data-ng-repeat="aa in gv.aaChangeList">' +
                     '<span class="t_impact_{{aa.FI | lowercase }}">{{aa.aaMutation}}</span>' +
                     '<span>{{ $last === false? ", " : ""}}</span>' +
-                    //'<span data-ng-if="!$last">, </span>' +
                   '</span>' +
-                  //'<span data-ng-if="$last != true"> - </span>' +
                   '<span>{{ $last === false? " - " : "" }}</span>' +
                 '</span>' +
                 '<span class="hidden">{{ $last === false? "|" : "" }}</span>' + // Separator for html download
-                //'<span class="hidden" data-ng-if="$last != true">|</span>' + // Separator for html download
               '</li>' +
               '</ul>',
 
