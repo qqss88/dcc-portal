@@ -118,7 +118,6 @@ angular.module('app.ui.tooltip', [])
         element.bind('mouseenter', function() {
           // If overflow is specified, check if tooltip is need or not
           if (attrs.tooltip2Overflow === 'true') {
-            console.log(element.context.scrollWidth, element.context.clientWidth);
             if (element.context.scrollWidth <= element.context.clientWidth) {
               return;
             }
@@ -301,23 +300,6 @@ angular.module('app.ui.lists', []).directive('hideSumList', function (Projects) 
     }
   };
 });
-
-
-// TODO: move this out
-angular.module('app.ui.lists').directive('ngTimeit', ['$parse', '$timeout', function($parse, $timeout) {
-    return {
-      restrict: 'A',
-      link: function(scope, element, attrs){
-        var modelFn = $parse(attrs.ngTimeit);
-        var then = new Date();
-        $timeout(function(){
-          var now = new Date();
-          modelFn.assign(scope, (now - then) / 1000.0);
-        });
-      }
-    };
-  }
-]);
 
 
 angular.module('app.ui.lists').directive('hideLinkList', function () {

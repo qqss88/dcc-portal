@@ -62,8 +62,6 @@
       var _ctrl = this;
 
       _ctrl.Page = Page;
-      //$scope.debugTimer = 0;
-
       _ctrl.state = State;
 
       _ctrl.Donor = AdvancedDonorService;
@@ -253,7 +251,7 @@
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
 
-                // FIXME: This is just used for gene CSV export, it is unwieldly to do it in the view
+                // This is just used for gene CSV export, it is unwieldly to do it in the view
                 gene.uiDonorsExportString = gene.uiDonors.map(function(d) {
                   return d.term + ':' + d.count + '/' +  d.countTotal;
                 }).join('|');
@@ -318,7 +316,7 @@
                     facet.percentage = facet.count / p.ssmTestedDonorCount;
                   });
 
-                  // FIXME: This is just used for mutation CSV export, it is unwieldly to do it in the view
+                  // This is just used for mutation CSV export, it is unwieldly to do it in the view
                   mutation.uiDonorsExportString = mutation.uiDonors.map(function(d) {
                     return d.term + ':' + d.count + '/' + d.countTotal;
                   }).join('|');
