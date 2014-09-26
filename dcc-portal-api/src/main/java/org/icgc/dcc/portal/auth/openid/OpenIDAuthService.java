@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.security.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
@@ -191,7 +192,7 @@ public class OpenIDAuthService {
    */
   private User configureDacoAccess(UUID authToken, User user, URI redirect) {
     try {
-      if (authService.hasDacoAccess(user.getEmailAddress())) {
+      if (authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
         user.setDaco(true);
       }
     } catch (NoSuchElementException e) {
