@@ -25,6 +25,7 @@ import org.icgc.dcc.icgc.client.api.ICGCException;
 import org.icgc.dcc.icgc.client.api.cud.CUDClient;
 import org.icgc.dcc.icgc.client.api.cud.User;
 import org.icgc.dcc.icgc.client.api.daco.DACOClient;
+import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.ICGCConfiguration;
 
 import com.google.inject.Inject;
@@ -50,12 +51,8 @@ public class AuthService {
    * 
    * @throws ICGCException and its sub-classes
    */
-  public boolean hasDacoAccess(String username) {
-    for (val user : dacoClient.getUsers()) {
-      if (user.getOpenid().equals(username)) return true;
-    }
-
-    return false;
+  public boolean hasDacoAccess(String userId, UserType userType) {
+    return dacoClient.hasDacoAccess(userId, userType);
   }
 
   /**
