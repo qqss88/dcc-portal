@@ -17,7 +17,7 @@
 
 'use strict';
 
-angular.module('icgc.ui', ['icgc.ui.suggest', 'icgc.ui.table', 'icgc.ui.tooltip', 'icgc.ui.toolbar', 'icgc.ui.openin']);
+angular.module('icgc.ui', ['icgc.ui.suggest', 'icgc.ui.table', 'icgc.ui.toolbar', 'icgc.ui.openin']);
 
 angular.module('app.ui', [
   'app.ui.sortable',
@@ -53,30 +53,30 @@ angular.module('app.ui.tooltipControl', [])
           var ttHeight = element.prop('offsetHeight');
 
           switch(placement) {
-            case 'right':
-              result = {
-                top: position.top + position.height / 2 - ttHeight / 2,
-                left: position.left + position.width
-              };
-              break;
-            case 'left':
-              result = {
-                top: position.top + position.height / 2 - ttHeight / 2,
-                left: position.left - ttWidth
-              };
-              break;
-            case 'bottom':
-            case 'top':
-              result = {
-                top: position.top - ttHeight,
-                left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
-              };
-              break;
-            default:
-              result = {
-                top: position.top,
-                left: position.left + position.width / 2
-              };
+          case 'right':
+            result = {
+              top: position.top + position.height / 2 - ttHeight / 2,
+              left: position.left + position.width
+            };
+            break;
+          case 'left':
+            result = {
+              top: position.top + position.height / 2 - ttHeight / 2,
+              left: position.left - ttWidth
+            };
+            break;
+          case 'bottom':
+          case 'top':
+            result = {
+              top: position.top - ttHeight,
+              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+            };
+            break;
+          default:
+            result = {
+              top: position.top,
+              left: position.left + position.width / 2
+            };
           }
           return result;
         }
@@ -117,7 +117,6 @@ angular.module('app.ui.tooltip', [])
 
         element.bind('mouseenter', function() {
           // If overflow is specified, check if tooltip is need or not
-          console.log(' debug ', attrs.tooltip2Overflow, attrs.tooltip2Placement);
           if (attrs.tooltip2Overflow === 'true') {
             console.log(element.context.scrollWidth, element.context.clientWidth);
             if (element.context.scrollWidth <= element.context.clientWidth) {
@@ -189,9 +188,14 @@ angular.module('app.ui.exists', []).directive('exists', function () {
 
       scope.$watch('exists', function(n, o) {
         if (n === o) {
-           return;
+          return;
         }
         update();
+      });
+
+      scope.$on('$destroy', function() {
+        iconOK.remove();
+        iconOK = null;
       });
     }
   };

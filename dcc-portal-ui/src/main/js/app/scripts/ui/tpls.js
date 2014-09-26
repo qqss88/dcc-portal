@@ -23,26 +23,11 @@ angular.module('app.ui.tpls', ['template/tsize.html', 'template/sortable.html', 
 
 angular.module('template/tooltip2.html', []).run(function ($templateCache) {
   $templateCache.put('template/tooltip2.html',
-      '<div class="tooltip {{placement}} in fade" style="top:-999px; left:-999px; display:block">\n' +
-      '  <div class="tooltip-arrow"></div>\n' +
-      '  <div class="tooltip-inner" data-ng-bind-html="html" style="background-color:#22BB55"></div>\n' +
-      '</div>\n' +
-      '');
-      /*
-      '<div class="tooltip {{placement}} in fade" style="top:{{top}}px; left:{{left}}px; display:block">\n' +
-      '  <div class="tooltip-arrow"></div>\n' +
-      '  <div class="tooltip-inner" data-ng-bind-html="html" style="background-color:#22BB55"></div>\n' +
-      '</div>\n' +
-      '');
-      */
-
-      /*
-      '<div class="tooltip {{ placement }} in fade" is-open="true" content="Test Something">' +
-      '  <div class="tooltip-arrow"></div>' +
-      //'  <div class="tooltip-inner" data-ng-bind-html="html">xyz</div>' +
-      '  <div class="tooltip-inner">xyz</div>' +
-      '</div>');
-      */
+    '<div class="tooltip {{placement}} in fade" style="top:-999px; left:-999px; display:block">\n' +
+    '  <div class="tooltip-arrow"></div>\n' +
+    '  <div class="tooltip-inner" data-ng-bind-html="html"></div>\n' +
+    '</div>\n' +
+    '');
 });
 
 angular.module('template/tsize.html', []).run(function ($templateCache) {
