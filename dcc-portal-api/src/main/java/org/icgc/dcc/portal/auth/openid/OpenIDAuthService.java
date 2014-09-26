@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.security.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
@@ -38,7 +39,7 @@ import com.google.inject.Inject;
  */
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @_({ @Inject }))
-public class OpenidAuthService {
+public class OpenIDAuthService {
 
   public static final String OPENID_EMAIL = "http://schema.openid.net/contact/email";
   public static final String AXSCHEMA_EMAIL = "http://axschema.org/contact/email";
@@ -191,7 +192,7 @@ public class OpenidAuthService {
    */
   private User configureDacoAccess(UUID authToken, User user, URI redirect) {
     try {
-      if (authService.hasDacoAccess(user.getEmailAddress())) {
+      if (authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
         user.setDaco(true);
       }
     } catch (NoSuchElementException e) {

@@ -37,7 +37,7 @@ public class OpenIDServiceTest {
   private static final String OP_ENDPOINT = "https://open.login.yahooapis.com/openid/op/auth";
 
   @SuppressWarnings("unused")
-  private OpenidAuthService openidService;
+  private OpenIDAuthService openidService;
   private final HazelcastInstance hazelcast = HazelcastFactory.createLocalHazelcastInstance();
   private final DistributedCacheService distributedCacheService = new DistributedCacheService(hazelcast);
 
@@ -59,7 +59,7 @@ public class OpenIDServiceTest {
   @Before
   public void setUp() throws Exception {
 
-    openidService = new OpenidAuthService(distributedCacheService, consumerManager, authService);
+    openidService = new OpenIDAuthService(distributedCacheService, consumerManager, authService);
 
     val discoveryInfo = createDiscoveryInfo();
     when(consumerManager.discover(OPENID_IDENTIFIER)).thenReturn(discoveries);
