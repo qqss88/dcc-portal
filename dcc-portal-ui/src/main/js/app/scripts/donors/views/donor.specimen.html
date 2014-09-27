@@ -134,7 +134,7 @@
                     <td>
                         <ul>
                             <li data-ng-repeat="item in sample.availableRawSequenceData | unique">
-                            <abbr data-tooltip="{{ item.libraryStrategy | define }}">
+                            <abbr tooltip2 tooltip2-text="{{ item.libraryStrategy | define }}">
                                     {{ item.libraryStrategy }}
                                 </abbr>
                             </li>
@@ -153,8 +153,9 @@
                         <ul>
                             <li data-ng-repeat="item in sample.availableRawSequenceData | unique">
                             <i data-ng-if="item.id" style="cursor: pointer" class="icon-file-alt"
-                                   data-tooltip-placement="left"
-                                   data-tooltip="{{ item.id }}"></i>
+                                   tooltip2
+                                   tooltip2-placement="left"
+                                   tooltip2-text="{{ item.id }}"></i>
                                 <span data-ng-if="!item.id">--</span>
                             </li>
                         </ul>

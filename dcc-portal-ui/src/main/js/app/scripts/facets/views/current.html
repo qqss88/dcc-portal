@@ -22,8 +22,8 @@
                             <span data-ng-if="!$first" class="t_current__or"> OR </span>
                             <span class="t_facets__facet__terms__active__term__label"
                                   data-ng-click="Facets.removeTerm({type: typeName, facet: facet, term: term})"
-                                  data-tooltip="{{term | trans | define:true}}"
-                                  data-tooltip-append-to-body="true">{{term | trans:true}}</span>
+                                  tooltip2
+                                  tooltip2-text="{{term | trans | define:true}}">{{term | trans:true}}</span>
                         </li>
                     </ul>
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>

@@ -502,6 +502,9 @@ angular.module('highcharts.directives').directive('stacked', function ($location
         }
         c = new Highcharts.Chart(settings);
 
+        if (!settings.xAxis.categories) {
+          c.showLoading('<i class="icon-spinner icon-spin"></i> Loading...');
+        }
         if (settings.xAxis.categories && settings.xAxis.categories.length === 0) {
           c.showLoading('No Data');
         }

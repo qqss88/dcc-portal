@@ -17,7 +17,7 @@
 
 'use strict';
 
-angular.module('icgc.ui', ['icgc.ui.suggest', 'icgc.ui.table', 'icgc.ui.tooltip', 'icgc.ui.toolbar', 'icgc.ui.openin']);
+angular.module('icgc.ui', ['icgc.ui.suggest', 'icgc.ui.table', 'icgc.ui.toolbar', 'icgc.ui.openin']);
 
 angular.module('app.ui', [
   'app.ui.sortable',
@@ -28,8 +28,141 @@ angular.module('app.ui', [
   'app.ui.dl',
   'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy'
+  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2'
 ]);
+
+
+// Centralized tooltip directive. There should be only one per application
+angular.module('app.ui.tooltipControl', [])
+  .directive('tooltipControl', function ($position, $rootScope, $sce) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+      },
+      templateUrl: 'template/tooltip2.html',
+      link: function (scope, element) {
+        scope.placement = 'right';
+        scope.html = '???';
+
+        function calculatePlacement(placement, target) {
+          var position = $position.offset(target);
+          var result = {};
+
+          var ttWidth = element.prop('offsetWidth');
+          var ttHeight = element.prop('offsetHeight');
+
+          switch(placement) {
+          case 'right':
+            result = {
+              top: position.top + position.height / 2 - ttHeight / 2,
+              left: position.left + position.width
+            };
+            break;
+          case 'left':
+            result = {
+              top: position.top + position.height / 2 - ttHeight / 2,
+              left: position.left - ttWidth
+            };
+            break;
+          case 'bottom':
+          case 'top':
+            result = {
+              top: position.top - ttHeight,
+              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+            };
+            break;
+          default:
+            result = {
+              top: position.top,
+              left: position.left + position.width / 2
+            };
+          }
+          return result;
+        }
+
+        $rootScope.$on('tooltip::show', function(evt, params) {
+          scope.$apply(function() {
+            if (params.text) {
+              scope.html = $sce.trustAsHtml(params.text);
+            }
+            if (params.placement) {
+              scope.placement = params.placement;
+            }
+          });
+
+          var position = calculatePlacement(params.placement, params.element);
+          element.css('top', position.top);
+          element.css('left', position.left);
+        });
+        $rootScope.$on('tooltip::hide', function() {
+          element.css('top', -999);
+          element.css('left', -999);
+        });
+      }
+    };
+  });
+
+
+// Light weight directive for request tooltips
+angular.module('app.ui.tooltip', [])
+  .directive('tooltip2', function($timeout) {
+    return {
+      restrict: 'A',
+      replace: false,
+      scope: {
+      },
+      link: function(scope, element, attrs) {
+        var tooltipPromise;
+
+        element.bind('mouseenter', function() {
+          // If overflow is specified, check if tooltip is need or not
+          if (attrs.tooltip2Overflow === 'true') {
+            if (element.context.scrollWidth <= element.context.clientWidth) {
+              return;
+            }
+          }
+
+          tooltipPromise = $timeout(function() {
+            scope.$emit('tooltip::show', {
+              element: element,
+              text: attrs.tooltip2Text || '???',
+              placement: attrs.tooltip2Placement || 'top'
+            });
+          }, 500);
+        });
+
+        element.bind('mouseleave', function() {
+          $timeout.cancel(tooltipPromise);
+          scope.$emit('tooltip::hide');
+        });
+
+        element.bind('click', function() {
+          $timeout.cancel(tooltipPromise);
+          scope.$emit('tooltip::hide');
+        });
+
+        scope.$on('$destroy', function() {
+          element.off();
+          element.unbind();
+        });
+      }
+    };
+  });
+
+
+
+angular.module('app.ui.exists2', []).directive('exists2', function () {
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      exists2: '='
+    },
+    template: '<span><i data-ng-if="exists2" class="icon-ok"></i><span data-ng-if="!exists2">--</span></span>'
+  };
+});
+
 
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
@@ -38,9 +171,35 @@ angular.module('app.ui.exists', []).directive('exists', function () {
     scope: {
       exists: '='
     },
-    template: '<span><i data-ng-if="exists" class="icon-ok"></i><span data-ng-if="!exists">--</span></span>'
+    template: '<span></span>',
+    link: function(scope, element) {
+      var iconOK = angular.element('<i>').addClass('icon-ok');
+
+      function update() {
+        element.empty();
+        if (scope.exists) {
+          element.append(iconOK);
+        } else {
+          element.append('--');
+        }
+      }
+      update();
+
+      scope.$watch('exists', function(n, o) {
+        if (n === o) {
+          return;
+        }
+        update();
+      });
+
+      scope.$on('$destroy', function() {
+        iconOK.remove();
+        iconOK = null;
+      });
+    }
   };
 });
+
 
 angular.module('app.ui.es', []).directive('expandSearch', function () {
   return {
@@ -141,6 +300,7 @@ angular.module('app.ui.lists', []).directive('hideSumList', function (Projects) 
     }
   };
 });
+
 
 angular.module('app.ui.lists').directive('hideLinkList', function () {
   return {
@@ -317,33 +477,7 @@ angular.module('app.ui.nested', []).directive('nested', function ($location) {
 });
 
 
-// Format FatHMM function impact scores: null, damaging or tolerated
-angular.module('app.ui.mutation', []).directive('fathmm', function() {
-  return {
-    restrict: 'E',
-    scope: {
-      item: '='
-    },
-    template: '<span data-ng-if="!item">--</span>' +
-              '<span data-tooltip="Damaging: {{item.score | number:2}}" ' +
-              ' data-ng-if="item && item.prediction === \'DAMAGING\'"' +
-              ' style="color:#AA1122">D</span>' +
-              '<span data-tooltip="Tolerated: {{item.score | number:2}}"' +
-              ' data-ng-if="item && item.prediction === \'TOLERATED\'"' +
-              ' style="color:#11AA22">T</span>'
-
-    /* nums
-    template: '<span data-ng-if="!item">--</span>' +
-              '<span data-ng-if="item && item.prediction === \'DAMAGING\'"' +
-              ' style="color:#AA1122">{{item.score | number:2}}</span>' +
-              '<span data-ng-if="item && item.prediction === \'TOLERATED\'"' +
-              ' style="color:#11AA22">{{item.score | number:2}}</span>'
-    */
-  };
-});
-
-
-angular.module('app.ui.mutation').directive('mutationConsequences', function ($filter, ConsequenceOrder) {
+angular.module('app.ui.mutation', []).directive('mutationConsequences', function ($filter, ConsequenceOrder) {
   return {
     restrict: 'E',
     scope: {
@@ -351,17 +485,17 @@ angular.module('app.ui.mutation').directive('mutationConsequences', function ($f
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-              '<abbr data-tooltip="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
-              '<span data-ng-repeat="(gk, gv) in c.data">' +
-              '<span data-ng-if="$first == true">: </span>' +
-              '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
-              '<span data-ng-repeat="aa in gv.aaChangeList">' +
-              '<span class="t_impact_{{aa.FI | lowercase }}">{{aa.aaMutation}}</span>' +
-              '<span data-ng-if="!$last">, </span>' +
-              '</span>' +
-              '<span data-ng-if="$last != true"> - </span>' +
-              '</span>' +
-              '<span class="hidden" data-ng-if="$last != true">|</span>' + // Separator for html download
+                '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+                '<span data-ng-repeat="(gk, gv) in c.data">' +
+                  '<span>{{ $first==true? ": " : ""}}</span>' +
+                  '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
+                  '<span data-ng-repeat="aa in gv.aaChangeList">' +
+                    '<span class="t_impact_{{aa.FI | lowercase }}">{{aa.aaMutation}}</span>' +
+                    '<span>{{ $last === false? ", " : ""}}</span>' +
+                  '</span>' +
+                  '<span>{{ $last === false? " - " : "" }}</span>' +
+                '</span>' +
+                '<span class="hidden">{{ $last === false? "|" : "" }}</span>' + // Separator for html download
               '</li>' +
               '</ul>',
     link: function (scope) {

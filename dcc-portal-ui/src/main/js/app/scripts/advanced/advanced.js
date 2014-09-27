@@ -61,6 +61,7 @@
 
       var _ctrl = this;
 
+      _ctrl.Page = Page;
       _ctrl.state = State;
 
       _ctrl.Donor = AdvancedDonorService;
@@ -248,6 +249,11 @@
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
+
+                // This is just used for gene CSV export, it is unwieldly to do it in the view
+                gene.uiDonorsExportString = gene.uiDonors.map(function(d) {
+                  return d.term + ':' + d.count + '/' +  d.countTotal;
+                }).join('|');
               }
             });
           });
@@ -308,6 +314,11 @@
                     facet.countTotal = p.ssmTestedDonorCount;
                     facet.percentage = facet.count / p.ssmTestedDonorCount;
                   });
+
+                  // This is just used for mutation CSV export, it is unwieldly to do it in the view
+                  mutation.uiDonorsExportString = mutation.uiDonors.map(function(d) {
+                    return d.term + ':' + d.count + '/' + d.countTotal;
+                  }).join('|');
                 }
               });
             });
@@ -370,6 +381,8 @@
 
   module.service('State', function () {
     this.loading = false;
+    this.visitedTab = {};
+    this.visitedFacet = {};
 
     this.setTab = function (tab) {
       this.tab = tab;
@@ -377,6 +390,8 @@
       if (tab === 'mutation') {
         this.subTab = tab;
       }
+      this.visitedTab[tab] = true;
+      this.visitedFacet[tab] = true;
     };
     this.getTab = function () {
       return this.tab;
@@ -385,8 +400,16 @@
       return this.tab === tab;
     };
 
+    this.hasVisitedTab = function(tab) {
+      return this.visitedTab[tab];
+    };
+    this.hasVisitedFacet = function(tab) {
+      return this.visitedFacet[tab];
+    };
+
     this.setFacetTab = function (tab) {
       this.facetTab = tab;
+      this.visitedFacet[tab] = true;
     };
     this.getFacetTab = function () {
       return this.facetTab;
