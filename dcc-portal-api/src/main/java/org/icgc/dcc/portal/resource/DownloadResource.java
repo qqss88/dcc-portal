@@ -88,7 +88,7 @@ import org.icgc.dcc.data.downloader.SelectionEntry;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.NotFoundException;

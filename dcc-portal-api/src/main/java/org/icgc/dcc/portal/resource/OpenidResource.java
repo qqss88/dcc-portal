@@ -42,7 +42,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthService;
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.openid4java.message.ParameterList;
 

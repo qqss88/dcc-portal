@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.auth.openid;
 
 import lombok.NonNull;
 
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 
 import com.google.inject.Inject;
 import com.sun.jersey.api.model.Parameter;

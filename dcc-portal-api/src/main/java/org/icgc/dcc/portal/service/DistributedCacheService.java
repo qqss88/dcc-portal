@@ -27,7 +27,7 @@ import java.util.UUID;
 import lombok.NonNull;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.openid4java.discovery.DiscoveryInformation;
 
 import com.google.common.base.Optional;

@@ -21,7 +21,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 
 import com.google.common.base.Optional;

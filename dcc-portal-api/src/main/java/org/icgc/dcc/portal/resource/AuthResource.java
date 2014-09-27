@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.icgc.client.api.ICGCAccessException;
 import org.icgc.dcc.icgc.client.api.ICGCException;
 import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 

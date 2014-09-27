@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.utils.HazelcastFactory;
 import org.junit.After;
 import org.junit.Before;

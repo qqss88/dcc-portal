@@ -46,7 +46,7 @@ import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
-import org.icgc.dcc.portal.model.security.User;
+import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.NotFoundException;

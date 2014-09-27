@@ -15,7 +15,7 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.icgc.dcc.portal;
+package org.icgc.dcc.portal.config;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,14 +54,6 @@ import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.browser.model.DataSource;
-import org.icgc.dcc.portal.config.CacheConfiguration;
-import org.icgc.dcc.portal.config.CrowdConfiguration;
-import org.icgc.dcc.portal.config.DataPortalConfiguration;
-import org.icgc.dcc.portal.config.ElasticSearchConfiguration;
-import org.icgc.dcc.portal.config.HazelcastConfiguration;
-import org.icgc.dcc.portal.config.ICGCConfiguration;
-import org.icgc.dcc.portal.config.MailConfiguration;
-import org.icgc.dcc.portal.config.WebConfiguration;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.Versions;
 import org.icgc.dcc.portal.service.DistributedCacheService;
@@ -79,7 +71,7 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 @Slf4j
-public class DataPortalModule extends AbstractModule {
+public class PortalModule extends AbstractModule {
 
   @Provides
   @Singleton
