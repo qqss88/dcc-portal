@@ -96,7 +96,6 @@
       _ctrl.setSubTab($state.current.data.subTab);
       refresh();
 
-
       // Refresh when filters change
       // Data is cached so refreshing on tab switch
       // should be free

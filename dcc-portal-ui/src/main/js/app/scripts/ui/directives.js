@@ -498,24 +498,6 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
                 '<span class="hidden">{{ $last === false? "|" : "" }}</span>' + // Separator for html download
               '</li>' +
               '</ul>',
-
-    /*
-    template: '<ul class="unstyled">' +
-              '<li data-ng-repeat="c in consequences">' +
-              '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
-              '<span data-ng-repeat="(gk, gv) in c.data">' +
-              '<span data-ng-if="$first == true">: </span>' +
-              '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
-              '<span data-ng-repeat="aa in gv.aaChangeList">' +
-              '<span class="t_impact_{{aa.FI | lowercase }}">{{aa.aaMutation}}</span>' +
-              '<span data-ng-if="!$last">, </span>' +
-              '</span>' +
-              '<span data-ng-if="$last != true"> - </span>' +
-              '</span>' +
-              '<span class="hidden" data-ng-if="$last != true">|</span>' + // Separator for html download
-              '</li>' +
-              '</ul>',
-    */
     link: function (scope) {
       var consequenceMap;
 
