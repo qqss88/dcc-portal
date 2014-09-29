@@ -323,7 +323,7 @@
       'tumourStageAtDiagnosis': 'Tumour Stage',
       'vitalStatus': 'Vital Status',
       'diseaseStatusLastFollowup': 'Disease Status',
-      'relapseType': 'Release Type',
+      'relapseType': 'Relapse Type',
       'ageAtDiagnosisGroup': 'Age at Diagnosis',
       'availableDataTypes': 'Available Data Type',
       'analysisTypes': 'Donor Analysis Type',
