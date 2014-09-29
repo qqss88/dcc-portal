@@ -91,7 +91,7 @@
       $rootScope.$on('$stateChangeSuccess', scroll);
     });
 
-  module.config(function ($locationProvider, $stateProvider, $tooltipProvider, $urlRouterProvider,
+  module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
                           AngularyticsProvider, RestangularProvider) {
 
     // Use in production or when UI hosted by API
@@ -106,8 +106,6 @@
     $locationProvider.html5Mode(true);
 
     AngularyticsProvider.setEventHandlers(['Google']);
-
-    $tooltipProvider.options({popupDelay: 500});
 
     $stateProvider.state(
       'team', {
