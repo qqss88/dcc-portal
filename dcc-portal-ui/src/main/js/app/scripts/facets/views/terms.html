@@ -21,13 +21,13 @@
                 <span class="t_facets__facet__terms__active__term__label__text">
                     <span ng-if="!defined">
                     <i style='color:{{sites[item.term]}}' class="icon-ok t_impact_{{ item.term | lowercase }}"></i>
-                        <span tooltip2 tooltip2-text={{item.term}} tooltip2-overflow="true">
+                        <span data-tooltip={{item.term}} data-tooltip-placement="overflow">
                         {{item.term | trans: capitalize }}
                         </span>
                     </span>
                     <span ng-if="defined">
                         <i style='color:{{projects[item.term]}}' class="icon-ok"></i>
-                        <span tooltip2 tooltip2-text="{{ item.term | trans:capitalize | define }}">
+                        <span data-tooltip="{{ item.term | trans:capitalize | define }}">
                         {{ item.term | trans: capitalize }}
                         </span>
                     </span>
@@ -44,10 +44,8 @@
 
                 <span data-ng-hide="hideCount" data-ng-style="bar(item.count)" class="t_facets__facet__terms__inactive__term__bar"></span>
                 <span class="t_facets__facet__terms__inactive__term__label"
-                      tooltip2
-                      tooltip2-overflow="{{ defined? 'false':'true'}}"
-                      tooltip2-placement="{{ defined? 'right':'top'}}"
-                      tooltip2-text="{{ defined? (item.term | trans:capitalize | define) : (item.term | trans:capitalize) }}"
+                      data-tooltip="{{ defined? (item.term | trans:capitalize | define) : (item.term | trans:capitalize) }}"
+                      data-tooltip-placement="{{ defined? 'right':'overflow'}}"
                       data-ng-click="addTerm(item.term)">
                     <i style='color:{{ defined? projects[item.term] : sites[item.term] }}' class="icon-check-empty t_impact_{{item.term | lowercase}}"></i>
                     {{item.term | trans:capitalize}} 

@@ -215,23 +215,21 @@
             <thead>
             <tr>
                 <th rowspan="2">ID</th>
-                <th rowspan="2"><abbr tooltip2
-                        tooltip2-text="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
+                <th rowspan="2"><abbr data-tooltip="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
                     change</abbr></th>
                 <th rowspan="2">Type</th>
-                <th rowspan="2"><abbr tooltip2
-                        tooltip2-text="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
+                <th rowspan="2"><abbr data-tooltip="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
                 </th>
                 <th colspan="2" class="text-center"># Donors affected</th>
             </tr>
             <tr>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="Breakdown of Affected Donors in {{ DonorCtrl.donor.projectId }}<br># Donors affected / # SSM tested donors">
+                    <abbr data-tooltip="Breakdown of Affected Donors in {{ DonorCtrl.donor.projectId }}<br># Donors affected / # SSM tested donors">
                         {{ DonorCtrl.donor.projectId }}
                     </abbr> <i class="icon-caret-down"></i></th>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
-                          tooltip2-placement="left">Across all Projects</abbr></th>
+                    <abbr data-tooltip="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
+                          data-tooltip-placement="left">Across all Projects</abbr></th>
             </tr>
             </thead>
             <tbody>
@@ -240,7 +238,7 @@
                     <a href="/mutations/{{ mutation.id }}">{{ mutation.id }}</a>
                 </td>
                 <td>chr{{mutation.chromosome}}:g.{{mutation.start}}{{mutation.mutation}}</td>
-                <td><abbr tooltip2 tooltip2-text="{{ mutation.type | define }}">{{ mutation.type }}</abbr>
+                <td><abbr data-tooltip="{{ mutation.type | define }}">{{ mutation.type }}</abbr>
                 </td>
                 <td>
                     <mutation-consequences items="mutation.consequences"></mutation-consequences>
@@ -270,9 +268,8 @@
                             <span data-ng-style="{width:p.percentage * 100+'%'}"
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
-                                <a tooltip2
-                                   tooltip2-placement="left"
-                                   tooltip2-text="{{ p.term | define }}"
+                                <a data-tooltip-placement="left"
+                                   data-tooltip="{{ p.term | define }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}

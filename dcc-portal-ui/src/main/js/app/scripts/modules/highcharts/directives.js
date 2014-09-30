@@ -501,7 +501,6 @@ angular.module('highcharts.directives').directive('stacked', function ($location
           c.destroy();
         }
         c = new Highcharts.Chart(settings);
-
         if (!settings.xAxis.categories) {
           c.showLoading('<i class="icon-spinner icon-spin"></i> Loading...');
         }
@@ -592,9 +591,8 @@ angular.module('highcharts.directives').directive('stacked', function ($location
         }
       };
 
-      $scope.$watch('items', function (newValue) {
-        var deepCopy, newSettings;
-
+      $scope.$watch('items', function (newValue, oldValue) {
+        var deepCopy, newSettings, dataCopy;
         if (!newValue) {
           return;
         }
@@ -604,10 +602,16 @@ angular.module('highcharts.directives').directive('stacked', function ($location
         // our original renderTo will be the same
         deepCopy = true;
         newSettings = {};
-        jQuery.extend(deepCopy, newSettings, chartsDefaults);
-        newSettings.xAxis.categories = newValue.x;
-        newSettings.series = newValue.s;
+        dataCopy = {};
 
+        jQuery.extend(deepCopy, newSettings, chartsDefaults);
+
+        // Highcharts seem to change the internals, so we want to make
+        // a deep copy to prevent angular watchers from firing over and over
+        jQuery.extend(true, dataCopy, newValue);
+
+        newSettings.xAxis.categories = dataCopy.x;
+        newSettings.series = dataCopy.s;
         newSettings.subtitle.text = $scope.subTitle;
 
         renderChart(newSettings);

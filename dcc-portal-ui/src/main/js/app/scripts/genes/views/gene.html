@@ -207,15 +207,15 @@
                 <th>Site</th>
                 <th>Tumour Type</th>
                 <th>Tumour Subtype</th>
-                <th><abbr tooltip2 tooltip2-text="Number of Donors where {{ GeneCtrl.gene.symbol }} contains SSM">#
+                <th><abbr data-tooltip="Number of Donors where {{ GeneCtrl.gene.symbol }} contains SSM">#
                     Donors affected</abbr> <i class="icon-sort-down"></i></th>
-                <th><abbr tooltip2 tooltip2-text="Number of SSM observed in {{ GeneCtrl.gene.symbol }}"
-                          tooltip2-placement="left"># Mutations</abbr></th>
+                <th><abbr data-tooltip="Number of SSM observed in {{ GeneCtrl.gene.symbol }}"
+                          data-tooltip-placement="left"># Mutations</abbr></th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="project in GeneCtrl.gene.fprojects | orderBy:'uiAffectedDonorPercentage':true">
-                <td><a tooltip2 tooltip2-text="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
+                <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
                     {{ project.id }}
                 </a></td>
                 <td>{{ project.primarySite }}</td>
@@ -343,15 +343,15 @@
             <thead>
             <tr>
                 <th>ID</th>
-                <th><abbr tooltip2 tooltip2-text="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
+                <th><abbr data-tooltip="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
                     change</abbr></th>
                 <th>Type</th>
                 <th><abbr
-                        tooltip2 tooltip2-text="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
+                        data-tooltip="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
                 </th>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
-                          tooltip2-placement="left"># Donors affected</abbr></th>
+                    <abbr data-tooltip="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
+                          data-tooltip-placement="left"># Donors affected</abbr></th>
                 </th>
             </tr>
             </thead>
@@ -359,7 +359,7 @@
             <tr data-ng-repeat="mutation in GeneMutationsCtrl.mutations.hits">
                 <td><a data-ng-href="/mutations/{{ mutation.id }}">{{ mutation.id }}</a></td>
                 <td>chr{{mutation.chromosome}}:g.{{mutation.start}}{{mutation.mutation}}</td>
-                <td><abbr tooltip2 tooltip2-text="{{ mutation.type | define }}">{{ mutation.type }}</abbr></td>
+                <td><abbr data-tooltip="{{ mutation.type | define }}">{{ mutation.type }}</abbr></td>
                 <td style="max-width: 20rem; white-space: normal">
                     <mutation-consequences data-ng-if="mutation.consequences"
                                            items="mutation.consequences"></mutation-consequences>
@@ -372,9 +372,8 @@
                             <span data-ng-style="{width:p.percentage * 100+'%'}"
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
-                                <a tooltip2 
-                                   tooltip2-placement="left"
-                                   tooltip2-text="{{ p.term | define }}"
+                                <a data-tooltip-placement="left"
+                                   data-tooltip="{{ p.term | define }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}

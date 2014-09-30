@@ -41,7 +41,7 @@
                 <a href="/donors/{{ occurrence.donorId }}">{{ occurrence.donorId }}</a>
             </td>
             <td>
-                <a tooltip2 tooltip2-text="{{ occurrence.projectId | define }}"
+                <a data-tooltip="{{ occurrence.projectId | define }}"
                    href="/projects/{{ occurrence.projectId }}">{{ occurrence.projectId }}</a>
             </td>
             <td class="t_cell_line_break">
