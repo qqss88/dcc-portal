@@ -591,7 +591,7 @@ angular.module('highcharts.directives').directive('stacked', function ($location
         }
       };
 
-      $scope.$watch('items', function (newValue, oldValue) {
+      $scope.$watch('items', function (newValue) {
         var deepCopy, newSettings, dataCopy;
         if (!newValue) {
           return;
