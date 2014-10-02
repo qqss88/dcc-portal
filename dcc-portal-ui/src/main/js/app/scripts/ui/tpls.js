@@ -18,11 +18,11 @@
 'use strict';
 
 angular.module('app.ui.tpls', ['template/tsize.html', 'template/sortable.html', 'template/pagination.html',
-  'template/dialog/message.html', 'template/tooltip2.html']);
+  'template/dialog/message.html', 'template/tooltip.html']);
 
 
-angular.module('template/tooltip2.html', []).run(function ($templateCache) {
-  $templateCache.put('template/tooltip2.html',
+angular.module('template/tooltip.html', []).run(function ($templateCache) {
+  $templateCache.put('template/tooltip.html',
     '<div class="tooltip {{placement}} in fade" style="top:-999px; left:-999px; display:block">\n' +
     '  <div class="tooltip-arrow"></div>\n' +
     '  <div class="tooltip-inner" data-ng-bind-html="html"></div>\n' +

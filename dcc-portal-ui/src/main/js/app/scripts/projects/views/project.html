@@ -76,7 +76,7 @@
     <div data-ng-if="ProjectCtrl.hasExp"><h3>Experimental Analyses</h3>
         <table class="table table-info">
             <tr data-ng-repeat="(k,v) in ProjectCtrl.project.experimentalAnalysisPerformedSampleCounts track by k">
-                <th><abbr tooltip2 tooltip2-text="{{ k | define }}">{{k}}</abbr></th>
+                <th><abbr data-tooltip="{{ k | define }}">{{k}}</abbr></th>
                 <td>
                     {{v}} samples from
                     <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]},\"analysisTypes\":{\"is\":[\"{{k}}\"]}}}"})'>
@@ -276,22 +276,20 @@
             <tr>
                 <th rowspan="2">Symbol</th>
                 <th rowspan="2">Name</th>
-                <th rowspan="2"><abbr tooltip2
-                        tooltip2-text="Gene location on the genome, chr:start-end">Location</abbr></th>
+                <th rowspan="2"><abbr data-tooltip="Gene location on the genome, chr:start-end">Location</abbr></th>
                 <th rowspan="2">Type</th>
                 <th colspan="2" class="text-center"># Donors affected</th>
                 <th rowspan="2" class="text-center">
-                    <abbr tooltip2 tooltip2-text="Number of SSM in the Gene"
-                          tooltip2-placement="left"># Mutations</abbr>
+                    <abbr data-tooltip="Number of SSM in the Gene" data-tooltip-placement="left"># Mutations</abbr>
                 </th>
             </tr>
             <tr>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="Breakdown of Affected Donors in {{ ProjectCtrl.project.id }}<br># Donors where Gene is mutated / # SSM tested donors">
+                    <abbr data-tooltip="Breakdown of Affected Donors in {{ ProjectCtrl.project.id }}<br># Donors where Gene is mutated / # SSM tested donors">
                         in {{ProjectCtrl.project.id}}
                     </abbr> <i class="icon-caret-down"></i></th>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="# Donors where gene contains SSM filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
+                    <abbr data-tooltip="# Donors where gene contains SSM filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
                           tooltip-placement="left">Across all Projects</abbr></th>
             </tr>
             </thead>
@@ -325,8 +323,8 @@
                             <span data-ng-style="{width:p.percentage * 100+'%'}"
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
-                                <a tooltip2 tooltip2-placement="left"
-                                   tooltip2-text="{{ p.term | define }}"
+                                <a data-tooltip-placement="left"
+                                   data-tooltip="{{ p.term | define }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -418,29 +416,29 @@
             <tr>
                 <th rowspan="2">ID</th>
                 <th rowspan="2">
-                    <abbr tooltip2 tooltip2-text="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
+                    <abbr data-tooltip="Genomic DNA change, shown as {chromosome}:g.{start}{ref}>{tumor}">DNA
                         change</abbr>
                 </th>
                 <th rowspan="2">Type</th>
                 <th rowspan="2">
-                    <abbr tooltip2 tooltip2-text="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
+                    <abbr data-tooltip="Consequences caused by the mutation, annotated using SnpEff with Sequence Ontology terms. High, Low impact AA change is in RED or GREEN respectively.">Consequences</abbr>
                 </th>
                 <th colspan="2" class="text-center"># Donors affected</th>
             </tr>
             <tr>
                 <th class="text-center"
-                    tooltip2 tooltip2-text="Breakdown of Affected Donors in {{ ProjectCtrl.project.id }}<br># Donors affected / # SSM tested donors">
+                    data-tooltip="Breakdown of Affected Donors in {{ ProjectCtrl.project.id }}<br># Donors affected / # SSM tested donors">
                     <abbr>in {{ProjectCtrl.project.id}}</abbr> <i class="icon-caret-down"></i></th>
                 <th class="text-center">
-                    <abbr tooltip2 tooltip2-text="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
-                          tooltip2-placement="left">Across all Project</abbr></th>
+                    <abbr data-tooltip="# Donors where mutation is observed filtered by current criteria / # SSM tested donors portal wide. Expand to see breakdown by project."
+                          data-tooltip-placement="left">Across all Project</abbr></th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="mutation in ProjectMutationsCtrl.mutations.hits">
                 <td><a data-ui-sref="mutation({id:mutation.id})">{{mutation.id}}</a></td>
                 <td>chr{{mutation.chromosome}}:g.{{mutation.start}}{{mutation.mutation}}</td>
-                <td><abbr tooltip2 tooltip2-text="{{ mutation.type | define }}">{{mutation.type}}</abbr></td>
+                <td><abbr data-tooltip="{{ mutation.type | define }}">{{mutation.type}}</abbr></td>
                 <td>
                     <mutation-consequences data-items="mutation.consequences"></mutation-consequences>
                 </td>
@@ -468,9 +466,8 @@
                             <span data-ng-style="{width:p.percentage * 100+'%'}"
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
-                                <a tooltip2
-                                   tooltip2-placement="left"
-                                   tooltip2-text="{{ p.term | define }}"
+                                <a data-tooltip-placement="left"
+                                   data-tooltip="{{ p.term | define }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -556,31 +553,30 @@
                 <th rowspan="2">ID</th>
                 <th rowspan="2">Site</th>
                 <th rowspan="2">Gender</th>
-                <th rowspan="2" class="text-center"><abbr tooltip2 tooltip2-text="Age at Diagnosis">Age</abbr></th>
-                <th rowspan="2"><abbr tooltip2 tooltip2-text="Tumour Stage at Diagnosis">Stage</abbr></th>
+                <th rowspan="2" class="text-center"><abbr data-tooltip="Age at Diagnosis">Age</abbr></th>
+                <th rowspan="2"><abbr data-tooltip="Tumour Stage at Diagnosis">Stage</abbr></th>
                 <th rowspan="2" class="text-center">
-                    <abbr tooltip2 tooltip2-text="Survival Time in days">Survival<br>(days)</abbr>
+                    <abbr data-tooltip="Survival Time in days">Survival<br>(days)</abbr>
                 </th>
-                <th rowspan="2"><abbr tooltip2 tooltip2-text="Experimental analyses performed">Analyses</abbr></th>
+                <th rowspan="2"><abbr data-tooltip="Experimental analyses performed">Analyses</abbr></th>
                 <th colspan="11" class="text-center">Available Data Types</th>
-                <th rowspan="2" tooltip2 tooltip2-text="Number of SSM"><abbr># Mutations</abbr></th>
+                <th rowspan="2" data-tooltip="Number of SSM"><abbr># Mutations</abbr></th>
                 <th rowspan="2">
-                    <abbr tooltip2 tooltip2-text="Number of Genes with SSM"
-                          tooltip2-placement="left"># Genes <i class="icon-caret-down"></i></abbr>
+                    <abbr data-tooltip="Number of Genes with SSM" data-tooltip-placement="left"># Genes <i class="icon-caret-down"></i></abbr>
                 </th>
             </tr>
             <tr>
-                <th tooltip2 tooltip2-text="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
-                <th tooltip2 tooltip2-text="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
+                <th data-tooltip="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
+                <th data-tooltip="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
+                <th data-tooltip="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
+                <th data-tooltip="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
+                <th data-tooltip="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
+                <th data-tooltip="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
+                <th data-tooltip="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
+                <th data-tooltip="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
+                <th data-tooltip="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
+                <th data-tooltip="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
+                <th data-tooltip="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
             </tr>
             </thead>
             <tbody>

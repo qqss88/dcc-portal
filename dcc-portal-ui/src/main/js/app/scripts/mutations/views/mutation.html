@@ -36,7 +36,7 @@
             </tr>
             <tr>
                 <th>Type</th>
-                <td><abbr tooltip2 tooltip2-text="{{ MutationCtrl.mutation.type | define }}">
+                <td><abbr data-tooltip="{{ MutationCtrl.mutation.type | define }}">
                     {{ MutationCtrl.mutation.type}}</abbr></td>
             </tr>
             <tr>
@@ -73,7 +73,7 @@
             <tr>
                 <th>Gene</th>
                 <th>AA Change</th>
-                <th><abbr tooltip2 tooltip2-text="{{ 'Consequence' | define }}">Consequence</abbr></th>
+                <th><abbr data-tooltip="{{ 'Consequence' | define }}">Consequence</abbr></th>
                 <th>Coding DNA Change</th>
                 <th>Strand</th>
                 <th>Transcript(s)</th>
@@ -87,7 +87,7 @@
                 <td>
                     <span class="t_impact_{{consequence.functionalImpact | lowercase }}">{{consequence.aaMutation}}</span>
                 </td>
-                <td><abbr tooltip2 tooltip2-text="{{ consequence.type | trans | define }}">{{consequence.type | trans}}</abbr>
+                <td><abbr data-tooltip="{{ consequence.type | trans | define }}">{{consequence.type | trans}}</abbr>
                 </td>
                 <td>{{consequence.cdsMutation}}</td>
                 <td>
@@ -177,14 +177,13 @@
                 <th>Site</th>
                 <th>Tumour Type</th>
                 <th>Tumour Subtype</th>
-                <th><abbr tooltip2
-                        tooltip2-text="Breakdown of Donors affected by {{ MutationCtrl.mutation.id }}<br># Donors where {{ MutationCtrl.mutation.id }} observed / # SSM tested Donors"
-                        tooltip2-placement="left"># Donors affected</abbr> <i class="icon-sort-down"></i></th>
+                <th><abbr data-tooltip="Breakdown of Donors affected by {{ MutationCtrl.mutation.id }}<br># Donors where {{ MutationCtrl.mutation.id }} observed / # SSM tested Donors"
+                        data-tooltip-placement="left"># Donors affected</abbr> <i class="icon-sort-down"></i></th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="project in MutationCtrl.projects | orderBy:'-percentAffected'">
-                <td><a tooltip2 tooltip2-text="{{ project.id | define }}" data-ng-href="/projects/{{project.id}}">
+                <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{project.id}}">
                     {{project.id}}
                 </a></td>
                 <td>{{project.primarySite}}</td>

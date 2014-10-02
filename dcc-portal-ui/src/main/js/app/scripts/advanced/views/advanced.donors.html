@@ -51,55 +51,53 @@
                 <th rowspan="2" data-sortable data-type="donors" data-field="primarySite">Site</th>
                 <th rowspan="2" data-sortable data-type="donors" data-field="gender">Gender</th>
                 <th rowspan="2" data-sortable data-type="donors" data-field="ageAtDiagnosis" class="text-center">
-                    <abbr tooltip2 tooltip2-text="Age at Diagnosis">Age</abbr>
+                    <abbr data-tooltip="Age at Diagnosis">Age</abbr>
                 </th>
                 <th rowspan="2" data-sortable data-type="donors" data-field="tumourStageAtDiagnosis">
-                    <abbr tooltip2 tooltip2-text="Tumour Stage at Diagnosis">Stage</abbr></th>
+                    <abbr data-tooltip="Tumour Stage at Diagnosis">Stage</abbr></th>
                 <th rowspan="2" data-sortable data-type="donors" data-field="survivalTime" class="text-center">
-                    <abbr tooltip2 tooltip2-text="Survival Time in days">Survival<br>(days)</abbr>
+                    <abbr data-tooltip="Survival Time in days">Survival<br>(days)</abbr>
                 </th>
                 <th colspan="11" class="text-center">Available Data Types</th>
                 <th rowspan="2">
-                    <abbr tooltip2 tooltip2-text="Number of SSM<br>Filtered by Current Search Criteria">#
+                    <abbr data-tooltip="Number of SSM<br>Filtered by Current Search Criteria">#
                         Mutations</abbr></th>
                 <th rowspan="2" data-sortable data-type="donors" data-field="ssmAffectedGenes" data-active="true"
                     data-reversed="true">
-                    <abbr tooltip2 tooltip2-text="Number of Genes with SSM<br>Filtered by Current Search Criteria"
-                          tooltip2-placement="left"># Genes</abbr>
+                    <abbr data-tooltip="Number of Genes with SSM<br>Filtered by Current Search Criteria"
+                          data-tooltip-placement="left"># Genes</abbr>
                 </th>
             </tr>
             <tr>
                 <th class="text-center" data-type="donors" data-field="ssmCount"><abbr
-                        tooltip2 tooltip2-text="{{ 'SSM' | define }}" class="tiny-header">SSM</abbr></th>
+                        data-tooltip="{{ 'SSM' | define }}" class="tiny-header">SSM</abbr></th>
                 <th class="text-center" data-type="donors" data-field="cnsmExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'CNSM' | define }}" class="tiny-header">CNSM</abbr></th>
+                        data-tooltip="{{ 'CNSM' | define }}" class="tiny-header">CNSM</abbr></th>
                 <th class="text-center" data-type="donors" data-field="stsmExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'StSM' | define }}" class="tiny-header">StSM</abbr></th>
+                        data-tooltip="{{ 'StSM' | define }}" class="tiny-header">StSM</abbr></th>
                 <th class="text-center" data-type="donors" data-field="sgvExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'SGV' | define }}" class="tiny-header">SGV</abbr></th>
+                        data-tooltip="{{ 'SGV' | define }}" class="tiny-header">SGV</abbr></th>
                 <th class="text-center" data-type="donors" data-field="methArrayExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'METH-A' | define }}" class="tiny-header">METH-A</abbr></th>
+                        data-tooltip="{{ 'METH-A' | define }}" class="tiny-header">METH-A</abbr></th>
                 <th class="text-center" data-type="donors" data-field="methSeqExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'METH-S' | define }}" class="tiny-header">METH-S</abbr></th>
-
+                        data-tooltip="{{ 'METH-S' | define }}" class="tiny-header">METH-S</abbr></th>
                 <th class="text-center" data-type="donors" data-field="expArrayExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'EXP-A' | define }}" class="tiny-header">EXP-A</abbr></th>
+                        data-tooltip="{{ 'EXP-A' | define }}" class="tiny-header">EXP-A</abbr></th>
                 <th class="text-center" data-type="donors" data-field="expSeqExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'EXP-S' | define }}" class="tiny-header">EXP-S</abbr></th>
-
+                        data-tooltip="{{ 'EXP-S' | define }}" class="tiny-header">EXP-S</abbr></th>
                 <th class="text-center" data-type="donors" data-field="pexpExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'PEXP' | define }}" class="tiny-header">PEXP</abbr></th>
+                        data-tooltip="{{ 'PEXP' | define }}" class="tiny-header">PEXP</abbr></th>
                 <th class="text-center" data-type="donors" data-field="mirnaSeqExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'miRNA-S' | define }}" class="tiny-header">miRNA-S</abbr></th>
+                        tooltip="{{ 'miRNA-S' | define }}" class="tiny-header">miRNA-S</abbr></th>
                 <th class="text-center" data-type="donors" data-field="jcnExists"><abbr
-                        tooltip2 tooltip2-text="{{ 'JCN' | define }}" class="tiny-header">JCN</abbr></th>
+                        data-tooltip="{{ 'JCN' | define }}" class="tiny-header">JCN</abbr></th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="donor in AdvancedCtrl.Donor.donors.hits track by donor.id">
                 <td><a href="/donors/{{ donor.id }}">{{ donor.id }}</a></td>
                 <td>
-                    <a tooltip2 tooltip2-text="{{ donor.projectId | define }}" tooltip2-placement="top" href="/projects/{{ donor.projectId }}">
+                    <a data-tooltip="{{ donor.projectId | define }}" data-tooltip-placement="top" href="/projects/{{ donor.projectId }}">
                         {{ donor.projectId }}
                     </a>
                 </td>

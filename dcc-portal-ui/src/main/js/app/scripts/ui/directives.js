@@ -40,7 +40,7 @@ angular.module('app.ui.tooltipControl', [])
       replace: true,
       scope: {
       },
-      templateUrl: 'template/tooltip2.html',
+      templateUrl: 'template/tooltip.html',
       link: function (scope, element) {
         scope.placement = 'right';
         scope.html = '???';
@@ -65,7 +65,6 @@ angular.module('app.ui.tooltipControl', [])
               left: position.left - ttWidth
             };
             break;
-          case 'bottom':
           case 'top':
             result = {
               top: position.top - ttHeight,
@@ -106,7 +105,7 @@ angular.module('app.ui.tooltipControl', [])
 
 // Light weight directive for request tooltips
 angular.module('app.ui.tooltip', [])
-  .directive('tooltip2', function($timeout) {
+  .directive('tooltip', function($timeout) {
     return {
       restrict: 'A',
       replace: false,
@@ -116,18 +115,26 @@ angular.module('app.ui.tooltip', [])
         var tooltipPromise;
 
         element.bind('mouseenter', function() {
-          // If overflow is specified, check if tooltip is need or not
-          if (attrs.tooltip2Overflow === 'true') {
+          var placement = attrs.tooltipPlacement || 'top';
+
+          if (! attrs.tooltip) {
+            return;
+          }
+
+          // If placement = overflow, check if there is actually overflow
+          if (attrs.tooltipPlacement === 'overflow') {
             if (element.context.scrollWidth <= element.context.clientWidth) {
               return;
+            } else {
+              placement = 'top';
             }
           }
 
           tooltipPromise = $timeout(function() {
             scope.$emit('tooltip::show', {
               element: element,
-              text: attrs.tooltip2Text || '???',
-              placement: attrs.tooltip2Placement || 'top'
+              text: attrs.tooltip || '???',
+              placement: placement || 'top'
             });
           }, 500);
         });
@@ -485,7 +492,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-                '<abbr tooltip2 tooltip2-text="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+                '<abbr data-tooltip="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
                 '<span data-ng-repeat="(gk, gv) in c.data">' +
                   '<span>{{ $first==true? ": " : ""}}</span>' +
                   '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
@@ -954,15 +961,3 @@ angular.module('app.ui.scrollSpy', []).directive('scrollSpy', function ($window)
     };
   });
 
-
-// FIXME: This forces a new isolated scope. This is just a temporary fix for
-// directives that clobber each other if they happen to share the same scope.
-/*
-angular.module('app.ui.temporary', []).directive('newScope', function () {
-  return {
-    restrict: 'E',
-    scope: true,
-    replace: true
-  };
-});
-*/
