@@ -37,7 +37,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.resource.AuthResource;
-import org.icgc.dcc.portal.resource.OpenidResource;
+import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthenticationException;
 
 @Provider
@@ -83,7 +83,7 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
   }
 
   /**
-   * Is used by {@link OpenidResource}
+   * Is used by {@link OpenIDResource}
    */
   private static Response createRedirectResponse(AuthenticationException e) {
     return Response

@@ -1,7 +1,6 @@
 package org.icgc.dcc.portal.auth.openid;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.icgc.dcc.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwRedirectException;
 
@@ -17,8 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.core.util.Scheme;
 import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.User;
+import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
 import org.icgc.dcc.portal.service.DistributedCacheService;
@@ -50,11 +51,6 @@ public class OpenIDAuthService {
   public static final String GOOGLE_ENDPOINT = "https://www.google.com/accounts/o8/id";
 
   private static final int DEFAULT_HTTP_PORT = 80;
-
-  // Used for generation of returnUrl. The end-user and an HTTPS termination point(portal or load balancer)
-  // always communicate over HTTPS in OpenID authentication scenario
-  private static final String HOST_WITH_PORT_TEMPLATE = "https://%s:%d";
-  private static final String HOST_WITHOUT_PORT_TEMPLATE = "https://%s";
   private static final String DEFAULT_USER_MESSAGE = "An error occurred while trying to log in.";
 
   @NonNull
@@ -274,17 +270,30 @@ public class OpenIDAuthService {
   }
 
   private static String formatReturnToUrl(String name, int port, UUID sessionToken, String returnTo) {
-    val host =
-        (port == DEFAULT_HTTP_PORT) ? _(HOST_WITHOUT_PORT_TEMPLATE, name) : _(HOST_WITH_PORT_TEMPLATE, name, port);
 
-    val redirect = UriBuilder.fromUri(_("%s%s", host, returnTo)).build().toString();
+    UriBuilder redirectBuilder;
+    UriBuilder returnBuilder;
+    if (port == DEFAULT_HTTP_PORT) {
+      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTP.getId()).host(name).path(returnTo);
+      returnBuilder = UriBuilder.fromPath("api").path(OpenIDResource.class).path("verify")
+          .scheme(Scheme.HTTP.getId())
+          .host(name)
+          .queryParam("token", sessionToken)
+          .queryParam("redirect", redirectBuilder.build().toString());
+    } else {
+      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTPS.getId()).host(name).port(port).path(returnTo);
+      returnBuilder = UriBuilder.fromPath("api").path(OpenIDResource.class).path("verify")
+          .scheme(Scheme.HTTPS.getId())
+          .port(port)
+          .host(name)
+          .queryParam("token", sessionToken)
+          .queryParam("redirect", redirectBuilder.build().toString());
+    }
 
-    val builder = UriBuilder.fromUri(host)
-        .path("api/v1/auth/openid/verify")
-        .queryParam("token", sessionToken)
-        .queryParam("redirect", redirect);
+    val returnToURLStr = returnBuilder.build().toString();
+    log.info("Return to URL: {}", returnToURLStr);
 
-    return builder.build().toString();
+    return returnToURLStr;
   }
 
   /**

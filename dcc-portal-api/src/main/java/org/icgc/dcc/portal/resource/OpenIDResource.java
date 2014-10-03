@@ -55,7 +55,7 @@ import com.google.inject.Inject;
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @_({ @Inject }))
-public class OpenidResource extends BaseResource {
+public class OpenIDResource extends BaseResource {
 
   private static final String IDENTIFIER_PARAM_NAME = "identifier";
   private static final String CURRENT_URL_PARAM_NAME = "currentUrl";
