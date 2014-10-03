@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import javax.ws.rs.core.UriBuilder;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -272,11 +274,17 @@ public class OpenIDAuthService {
   }
 
   private static String formatReturnToUrl(String name, int port, UUID sessionToken, String returnTo) {
-    val host = (port == DEFAULT_HTTP_PORT) ?
-        _(HOST_WITHOUT_PORT_TEMPLATE, name) : _(HOST_WITH_PORT_TEMPLATE, name, port);
-    val redirect = _("%s%s", host, returnTo);
+    val host =
+        (port == DEFAULT_HTTP_PORT) ? _(HOST_WITHOUT_PORT_TEMPLATE, name) : _(HOST_WITH_PORT_TEMPLATE, name, port);
 
-    return _("%s/api/v1/auth/openid/verify?token=%s&redirect=%s", host, sessionToken, redirect);
+    val redirect = UriBuilder.fromUri(_("%s%s", host, returnTo)).build().toString();
+
+    val builder = UriBuilder.fromUri(host)
+        .path("api/v1/auth/openid/verify")
+        .queryParam("token", sessionToken)
+        .queryParam("redirect", redirect);
+
+    return builder.build().toString();
   }
 
   /**
