@@ -190,9 +190,15 @@ public class OpenIDAuthService {
    */
   private User configureDacoAccess(UUID authToken, User user, URI redirect) {
     try {
-      if (authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
+      val hasEmail = !isNullOrEmpty(user.getEmailAddress());
+      val hasIdentifier = !isNullOrEmpty(user.getOpenIDIdentifier());
+
+      if (hasEmail && authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
+        user.setDaco(true);
+      } else if (hasIdentifier && authService.hasDacoAccess(user.getOpenIDIdentifier(), UserType.OPENID)) {
         user.setDaco(true);
       }
+
     } catch (NoSuchElementException e) {
       throwRedirectException(DEFAULT_USER_MESSAGE, "Failed to check DACO access settings for the user", redirect);
     }
@@ -269,26 +275,26 @@ public class OpenIDAuthService {
     }
   }
 
-  private static String formatReturnToUrl(String name, int port, UUID sessionToken, String returnTo) {
+  private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
 
     UriBuilder redirectBuilder;
     UriBuilder returnBuilder;
     if (port == DEFAULT_HTTP_PORT) {
-      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTP.getId()).host(name).path(returnTo);
-      returnBuilder = UriBuilder.fromPath("api").path(OpenIDResource.class).path("verify")
-          .scheme(Scheme.HTTP.getId())
-          .host(name)
-          .queryParam("token", sessionToken)
-          .queryParam("redirect", redirectBuilder.build().toString());
+      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTP.getId());
+      returnBuilder = UriBuilder.fromPath("api").scheme(Scheme.HTTP.getId());
     } else {
-      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTPS.getId()).host(name).port(port).path(returnTo);
-      returnBuilder = UriBuilder.fromPath("api").path(OpenIDResource.class).path("verify")
-          .scheme(Scheme.HTTPS.getId())
-          .port(port)
-          .host(name)
-          .queryParam("token", sessionToken)
-          .queryParam("redirect", redirectBuilder.build().toString());
+      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTPS.getId()).port(port);
+      returnBuilder = UriBuilder.fromPath("api").scheme(Scheme.HTTPS.getId()).port(port);
     }
+
+    redirectBuilder.host(hostname)
+        .path(returnTo);
+
+    returnBuilder.host(hostname)
+        .path(OpenIDResource.class)
+        .path("verify")
+        .queryParam("token", sessionToken)
+        .queryParam("redirect", redirectBuilder.build().toString());
 
     val returnToURLStr = returnBuilder.build().toString();
     log.info("Return to URL: {}", returnToURLStr);
