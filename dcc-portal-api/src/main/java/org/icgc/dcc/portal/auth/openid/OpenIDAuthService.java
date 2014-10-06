@@ -277,14 +277,15 @@ public class OpenIDAuthService {
 
   private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
 
-    UriBuilder redirectBuilder;
-    UriBuilder returnBuilder;
+    UriBuilder redirectBuilder = UriBuilder.fromPath("/");
+    UriBuilder returnBuilder = UriBuilder.fromPath("api");
+
     if (port == DEFAULT_HTTP_PORT) {
-      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTP.getId());
-      returnBuilder = UriBuilder.fromPath("api").scheme(Scheme.HTTP.getId());
+      redirectBuilder.scheme(Scheme.HTTP.getId());
+      returnBuilder.scheme(Scheme.HTTP.getId());
     } else {
-      redirectBuilder = UriBuilder.fromPath("/").scheme(Scheme.HTTPS.getId()).port(port);
-      returnBuilder = UriBuilder.fromPath("api").scheme(Scheme.HTTPS.getId()).port(port);
+      redirectBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+      returnBuilder.scheme(Scheme.HTTPS.getId()).port(port);
     }
 
     redirectBuilder.host(hostname)
