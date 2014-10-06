@@ -87,7 +87,7 @@
     }
 
     function redirect(url) {
-      $window.location = url + $window.location.href;
+      $window.location = url + encodeURIComponent($window.location.href);
     }
 
     return {
@@ -101,7 +101,8 @@
 
     function provider(identifier) {
       return handler.post(
-        'provider', {}, {identifier: identifier, currentUrl: $window.location.pathname + $window.location.search}
+        'provider', {}, {identifier: identifier,
+          currentUrl: encodeURIComponent($window.location.pathname + $window.location.search)}
       ).then(function (response) {
           $window.location = response.replace(/"/g, '');
         });

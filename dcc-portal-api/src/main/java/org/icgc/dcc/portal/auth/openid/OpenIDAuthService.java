@@ -1,7 +1,6 @@
 package org.icgc.dcc.portal.auth.openid;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.icgc.dcc.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwRedirectException;
 
@@ -10,13 +9,17 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import javax.ws.rs.core.UriBuilder;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.core.util.Scheme;
 import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.User;
+import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
 import org.icgc.dcc.portal.service.DistributedCacheService;
@@ -48,11 +51,6 @@ public class OpenIDAuthService {
   public static final String GOOGLE_ENDPOINT = "https://www.google.com/accounts/o8/id";
 
   private static final int DEFAULT_HTTP_PORT = 80;
-
-  // Used for generation of returnUrl. The end-user and an HTTPS termination point(portal or load balancer)
-  // always communicate over HTTPS in OpenID authentication scenario
-  private static final String HOST_WITH_PORT_TEMPLATE = "https://%s:%d";
-  private static final String HOST_WITHOUT_PORT_TEMPLATE = "https://%s";
   private static final String DEFAULT_USER_MESSAGE = "An error occurred while trying to log in.";
 
   @NonNull
@@ -192,9 +190,15 @@ public class OpenIDAuthService {
    */
   private User configureDacoAccess(UUID authToken, User user, URI redirect) {
     try {
-      if (authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
+      val hasEmail = !isNullOrEmpty(user.getEmailAddress());
+      val hasIdentifier = !isNullOrEmpty(user.getOpenIDIdentifier());
+
+      if (hasEmail && authService.hasDacoAccess(user.getEmailAddress(), UserType.OPENID)) {
+        user.setDaco(true);
+      } else if (hasIdentifier && authService.hasDacoAccess(user.getOpenIDIdentifier(), UserType.OPENID)) {
         user.setDaco(true);
       }
+
     } catch (NoSuchElementException e) {
       throwRedirectException(DEFAULT_USER_MESSAGE, "Failed to check DACO access settings for the user", redirect);
     }
@@ -271,12 +275,32 @@ public class OpenIDAuthService {
     }
   }
 
-  private static String formatReturnToUrl(String name, int port, UUID sessionToken, String returnTo) {
-    val host = (port == DEFAULT_HTTP_PORT) ?
-        _(HOST_WITHOUT_PORT_TEMPLATE, name) : _(HOST_WITH_PORT_TEMPLATE, name, port);
-    val redirect = _("%s%s", host, returnTo);
+  private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
 
-    return _("%s/api/v1/auth/openid/verify?token=%s&redirect=%s", host, sessionToken, redirect);
+    UriBuilder redirectBuilder = UriBuilder.fromPath("/");
+    UriBuilder returnBuilder = UriBuilder.fromPath("api");
+
+    if (port == DEFAULT_HTTP_PORT) {
+      redirectBuilder.scheme(Scheme.HTTP.getId());
+      returnBuilder.scheme(Scheme.HTTP.getId());
+    } else {
+      redirectBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+      returnBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+    }
+
+    redirectBuilder.host(hostname)
+        .path(returnTo);
+
+    returnBuilder.host(hostname)
+        .path(OpenIDResource.class)
+        .path("verify")
+        .queryParam("token", sessionToken)
+        .queryParam("redirect", redirectBuilder.build().toString());
+
+    val returnToURLStr = returnBuilder.build().toString();
+    log.info("Return to URL: {}", returnToURLStr);
+
+    return returnToURLStr;
   }
 
   /**
