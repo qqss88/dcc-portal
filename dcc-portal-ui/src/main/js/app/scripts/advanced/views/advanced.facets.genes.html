@@ -4,6 +4,13 @@
 <ul data-ng-show="AdvancedCtrl.Gene.genes" class="t_facets">
     <li data-tags-facet data-label="Gene" data-facet-name="id" data-placeholder="eg. KRAS, ENSG00000133703"
         data-type="gene"></li>
+
+    <li>
+       <div>
+           <span><upload-genelist></upload-genelist></span>
+       </div>
+    </li>
+
     <li data-tags-facet data-label="Pathway"
         data-facet-name="pathwayId"
         data-placeholder="eg. REACT_75842, TNF signaling" data-type="pathway">
