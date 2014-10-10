@@ -54,7 +54,12 @@ public class BrowserResourceTest extends ResourceTest {
 
   @Override
   protected final void setUpResources() {
-    addResource(new BrowserResource(client, "index", dataSources()));
+    val resource = new BrowserResource();
+    resource.setClient(client);
+    resource.setIndexName("indexName");
+    resource.setDataSources(dataSources());
+
+    addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
   }
 

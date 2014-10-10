@@ -39,7 +39,9 @@ import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.resource.AuthResource;
 import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthenticationException;
+import org.springframework.stereotype.Component;
 
+@Component
 @Provider
 public class AuthenticationExceptionMapper implements ExceptionMapper<AuthenticationException> {
 

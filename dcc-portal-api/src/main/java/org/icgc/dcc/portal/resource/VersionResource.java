@@ -27,13 +27,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.icgc.dcc.portal.model.Versions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiOperation;
 
+@Component
 @Path("/version")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_(@Inject))
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class VersionResource {
 
   @NonNull

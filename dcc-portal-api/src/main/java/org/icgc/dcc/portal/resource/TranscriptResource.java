@@ -26,10 +26,11 @@ import org.icgc.dcc.portal.model.Transcript;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -38,11 +39,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/transcripts")
 @Produces(APPLICATION_JSON)
 @Api(value = "/transcripts", description = "Operations about transcripts")
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class TranscriptResource {
 
   private static final String DEFAULT_FILTERS = "{}";

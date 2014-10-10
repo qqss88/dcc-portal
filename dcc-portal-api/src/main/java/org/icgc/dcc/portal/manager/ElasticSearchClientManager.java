@@ -20,18 +20,18 @@ package org.icgc.dcc.portal.manager;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.client.Client;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.yammer.dropwizard.lifecycle.Managed;
 
 @Slf4j
-@Singleton
+@Component
 public class ElasticSearchClientManager implements Managed {
 
   private final Client client;
 
-  @Inject
+  @Autowired
   public ElasticSearchClientManager(Client client) {
     this.client = client;
   }

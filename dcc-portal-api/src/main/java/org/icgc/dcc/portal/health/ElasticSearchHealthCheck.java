@@ -20,20 +20,20 @@ package org.icgc.dcc.portal.health;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.client.Client;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
-@Singleton
+@Component
 public final class ElasticSearchHealthCheck extends HealthCheck {
 
   private static final String CHECK_NAME = "elasticsearch";
 
   private final Client client;
 
-  @Inject
+  @Autowired
   public ElasticSearchHealthCheck(Client client) {
     super(CHECK_NAME);
     this.client = client;

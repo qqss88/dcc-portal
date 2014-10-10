@@ -27,8 +27,8 @@ import org.icgc.dcc.common.client.api.cud.User;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.ICGCConfiguration;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Provides authentication services against the Central User Directory (CUD) and utilities to check if the user is a
@@ -36,7 +36,8 @@ import com.google.inject.Inject;
  * 
  * @see https://wiki.oicr.on.ca/display/icgcweb/CUD-LOGIN
  */
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class AuthService {
 
   @NonNull

@@ -40,14 +40,16 @@ import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 
+@Component
 @Path("/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";

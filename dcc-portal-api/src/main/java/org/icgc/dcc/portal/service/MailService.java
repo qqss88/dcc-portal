@@ -25,15 +25,17 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import lombok.Value;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.config.MailConfiguration;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Slf4j
-@Value
+@Service
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class MailService {
 
   /**
@@ -41,13 +43,8 @@ public class MailService {
    */
   public static final String SMTP_HOST = "mail.smtp.host";
 
+  @NonNull
   private final MailConfiguration mailConfig;
-
-  @Inject
-  public MailService(MailConfiguration mailConfig) {
-    super();
-    this.mailConfig = mailConfig;
-  }
 
   public void sendEmail(final String subject, final String message, boolean async) {
     if (!mailConfig.isEnabled()) {

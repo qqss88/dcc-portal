@@ -31,10 +31,11 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class SearchRepository {
 
   private static final Kind KIND = Kind.KEYWORD;
@@ -48,7 +49,7 @@ public class SearchRepository {
 
   private final String index;
 
-  @Inject
+  @Autowired
   SearchRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;

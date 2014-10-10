@@ -45,16 +45,17 @@ import org.icgc.dcc.portal.auth.openid.OpenIDAuthService;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.openid4java.message.ParameterList;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Resource that performs OpenID authentication.
  */
+@Component
 @Path("/v1/auth/openid")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OpenIDResource extends BaseResource {
 
   private static final String IDENTIFIER_PARAM_NAME = "identifier";

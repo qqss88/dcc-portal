@@ -34,19 +34,21 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.SearchService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/keywords")
 @Produces(APPLICATION_JSON)
 @Api(value = "/keyword", description = "Operations about keyword search")
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class SearchResource {
 
   private static final String DEFAULT_FILTERS = "{}";

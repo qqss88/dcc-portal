@@ -26,7 +26,6 @@ import static org.icgc.dcc.portal.util.VersionUtils.getApiVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getApplicationVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,12 +57,13 @@ import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.Versions;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.google.inject.name.Named;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.config.MapConfig;
@@ -71,14 +71,18 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 @Slf4j
-public class PortalModule extends AbstractModule {
+@Lazy
+@Configuration
+public class PortalConfig {
 
-  @Provides
-  @Singleton
-  public Client client(DataPortalConfiguration config) {
+  @Autowired
+  private DataPortalConfiguration config;
+
+  @Bean
+  public Client client() {
     // TransportClient is thread-safe so @Singleton is appropriate
-    ElasticSearchConfiguration configuration = config.getElastic();
-    TransportClient client = new TransportClient();
+    val configuration = config.getElastic();
+    val client = new TransportClient();
     for (val nodeAddress : configuration.getNodeAddresses()) {
       client.addTransportAddress(new InetSocketTransportAddress(
           nodeAddress.getHost(),
@@ -88,14 +92,12 @@ public class PortalModule extends AbstractModule {
     return client;
   }
 
-  @Provides
-  @Singleton
-  @Named("indexName")
-  public String indexName(DataPortalConfiguration config, Client client) {
+  @Bean
+  public String indexName() {
     String indexName = config.getElastic().getIndexName();
 
     // Get cluster state
-    ClusterState clusterState = client.admin().cluster()
+    ClusterState clusterState = client().admin().cluster()
         .prepareState()
         .execute()
         .actionGet()
@@ -115,9 +117,8 @@ public class PortalModule extends AbstractModule {
     return indexName;
   }
 
-  @Provides
-  @Singleton
-  public DynamicDownloader dynamicDownloader(DataPortalConfiguration config) {
+  @Bean
+  public DynamicDownloader dynamicDownloader() {
     val downloadConfig = config.getDownload();
     if (!downloadConfig.isEnabled()) {
       return null;
@@ -134,17 +135,14 @@ public class PortalModule extends AbstractModule {
 
   }
 
-  @Provides
-  @Singleton
-  @Named("stage")
-  public Stage downloaderEnv(DataPortalConfiguration config) {
+  @Bean
+  public Stage stage() {
     return config.getDownload().getStage();
   }
 
-  @Provides
-  @Singleton
+  @Bean
   @SneakyThrows
-  public ExportedDataFileSystem exportedDataFileSystem(DataPortalConfiguration config) {
+  public ExportedDataFileSystem exportedDataFileSystem() {
     val downloadConfig = config.getDownload();
     if (!downloadConfig.isEnabled()) {
       return null;
@@ -154,22 +152,20 @@ public class PortalModule extends AbstractModule {
     return new ExportedDataFileSystem(rootDir, downloadConfig.getCurrentReleaseSymlink());
   }
 
-  @Provides
-  @Singleton
-  @Named("indexMetadata")
+  @Bean
+  @SneakyThrows
   @SuppressWarnings("unchecked")
-  public Map<String, String> indexMetadata(Client client, @Named("indexName") String indexName)
-      throws IOException {
+  public Map<String, String> indexMetadata() {
     // Get cluster state
-    ClusterState clusterState = client.admin().cluster()
+    ClusterState clusterState = client().admin().cluster()
         .prepareState()
-        .setFilterIndices(indexName)
+        .setFilterIndices(indexName())
         .execute()
         .actionGet()
         .getState();
 
-    IndexMetaData indexMetaData = clusterState.getMetaData().index(indexName);
-    checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName);
+    IndexMetaData indexMetaData = clusterState.getMetaData().index(indexName());
+    checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName());
 
     // Get the first mappings. This is arbitrary since they all contain the same metadata
     MappingMetaData mappingMetaData = indexMetaData.getMappings().values().asList().get(0);
@@ -183,61 +179,42 @@ public class PortalModule extends AbstractModule {
     return meta;
   }
 
-  @Provides
-  @Singleton
-  public Versions versions(@Named("indexName") String indexName,
-      @Named("indexMetadata") Map<String, String> indexMetadata) {
+  @Bean
+  public Versions versions() {
     return new Versions(
         getApiVersion(),
         getApplicationVersion(),
         getCommitId(),
-        firstNonNull(indexMetadata.get("git.commit.id.abbrev"), "unknown"),
-        indexName);
+        firstNonNull(indexMetadata().get("git.commit.id.abbrev"), "unknown"),
+        indexName());
   }
 
-  @Provides
-  @Singleton
-  @Named("dataSources")
-  public List<DataSource> dataSources(DataPortalConfiguration config) {
+  @Bean
+  @Qualifier
+  public List<DataSource> dataSources() {
     return config.getBrowser().getDataSources();
   }
 
-  @Provides
-  @Singleton
-  public MailConfiguration mailConfig(DataPortalConfiguration config) {
+  @Bean
+  public MailConfiguration mailConfig() {
     return config.getMail();
   }
 
-  @Provides
-  @Singleton
-  public CrowdConfiguration crowdConfig(DataPortalConfiguration config) {
-    return config.getCrowd();
-  }
-
-  @Override
-  protected void configure() {
-    // Empty
-  }
-
-  @Provides
-  @Singleton
-  public OpenIDAuthProvider OpenIDRestrictedToProvider(OpenIDAuthenticator authenticator) {
+  @Bean
+  public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
     return new OpenIDAuthProvider(authenticator, "OpenID");
   }
 
-  @Provides
-  @Singleton
-  public Settings settings(DataPortalConfiguration config) {
-
+  @Bean
+  public Settings settings() {
     return Settings.builder()
         .ssoUrl(config.getCrowd().getSsoUrl())
         .releaseDate(config.getRelease().getReleaseDate())
         .build();
   }
 
-  @Provides
-  @Singleton
-  public ShortURLClient shortURLClient(DataPortalConfiguration config) {
+  @Bean
+  public ShortURLClient shortURLClient() {
     val icgc = checkNotNull(config.getIcgc());
     val icgcConfig = ICGCClientConfig.builder()
         .shortServiceUrl(icgc.getShortUrl())
@@ -252,14 +229,12 @@ public class PortalModule extends AbstractModule {
     return ICGCClient.create(icgcConfig).shortUrl();
   }
 
-  @Provides
-  @Singleton
-  public ICGCConfiguration icgcConfiguration(DataPortalConfiguration config) {
+  @Bean
+  public ICGCConfiguration icgcConfiguration() {
     return config.getIcgc();
   }
 
-  @Provides
-  @Singleton
+  @Bean
   public ICGCClient icgcClient(ICGCConfiguration icgc) {
     val icgcConfig = ICGCClientConfig.builder()
         .cgpServiceUrl(icgc.getCgpUrl())
@@ -276,26 +251,22 @@ public class PortalModule extends AbstractModule {
     return ICGCClient.create(icgcConfig);
   }
 
-  @Provides
-  @Singleton
+  @Bean
   public DACOClient dacoClient(ICGCClient icgcClient) {
     return icgcClient.daco();
   }
 
-  @Provides
-  @Singleton
+  @Bean
   public CUDClient cudClient(ICGCClient icgcClient) {
     return icgcClient.cud();
   }
 
-  @Provides
-  @Singleton
-  public HazelcastInstance hazelcastInstance(DataPortalConfiguration config) {
+  @Bean
+  public HazelcastInstance hazelcastInstance() {
     return Hazelcast.newHazelcastInstance(getHazelcastConfig(config.getHazelcast()));
   }
 
-  @Provides
-  @Singleton
+  @Bean
   public ConsumerManager consumerManager(HazelcastInstance hazelcast) {
     val consumerManager = new ConsumerManager();
     consumerManager.setAssociations(new DistributedConsumerAssociationStore(hazelcast));
@@ -304,10 +275,24 @@ public class PortalModule extends AbstractModule {
     return consumerManager;
   }
 
-  @Provides
-  @Singleton
+  @Bean
   public DistributedCacheService distributedCacheService(HazelcastInstance hazelcast) {
     return new DistributedCacheService(hazelcast);
+  }
+
+  @Bean
+  public CrowdConfiguration crowdConfig() {
+    return config.getCrowd();
+  }
+
+  @Bean
+  public CacheConfiguration cacheConfiguration() {
+    return config.getCache();
+  }
+
+  @Bean
+  public WebConfiguration webConfiguration() {
+    return config.getWeb();
   }
 
   private static Config getHazelcastConfig(HazelcastConfiguration hazelcastConfig) {
@@ -328,18 +313,6 @@ public class PortalModule extends AbstractModule {
     openidAuthMapConfig.setName(DistributedCacheService.DISCOVERY_INFO_CACHE_NAME);
     openidAuthMapConfig.setTimeToLiveSeconds(hazelcastConfig.getOpenidAuthTTL());
     mapConfigs.put(DistributedCacheService.DISCOVERY_INFO_CACHE_NAME, openidAuthMapConfig);
-  }
-
-  @Provides
-  @Singleton
-  public CacheConfiguration cacheConfiguration(DataPortalConfiguration config) {
-    return config.getCache();
-  }
-
-  @Provides
-  @Singleton
-  public WebConfiguration webConfiguration(DataPortalConfiguration config) {
-    return config.getWeb();
   }
 
 }

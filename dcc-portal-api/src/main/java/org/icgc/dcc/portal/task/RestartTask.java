@@ -21,6 +21,8 @@ import java.io.PrintWriter;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.yammer.dropwizard.tasks.Task;
 
@@ -30,6 +32,7 @@ import com.yammer.dropwizard.tasks.Task;
  * @see http://wrapper.tanukisoftware.com/doc/english/prop-filter-x-n.html
  */
 @Slf4j
+@Component
 public class RestartTask extends Task {
 
   /**

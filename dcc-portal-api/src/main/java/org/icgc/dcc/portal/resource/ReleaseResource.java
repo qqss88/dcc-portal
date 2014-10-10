@@ -35,19 +35,21 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Release;
 import org.icgc.dcc.portal.model.Releases;
 import org.icgc.dcc.portal.service.ReleaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/releases")
 @Produces(APPLICATION_JSON)
 @Api(value = "/releases", description = "Operations about releases")
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class ReleaseResource {
 
   private static final String DEFAULT_FILTERS = "{}";

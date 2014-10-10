@@ -22,13 +22,11 @@ import lombok.RequiredArgsConstructor;
 import org.icgc.dcc.portal.model.Pathway;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.PathwayRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.google.inject.Inject;
-
-/**
- * 
- */
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class PathwayService {
 
   private final PathwayRepository pathwayRepository;
@@ -36,4 +34,5 @@ public class PathwayService {
   public Pathway findOne(String pathwayId, Query query) {
     return new Pathway(pathwayRepository.findOne(pathwayId, query));
   }
+
 }

@@ -34,8 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.Pathway;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.PathwayService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -43,11 +44,12 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/pathways")
 @Produces(APPLICATION_JSON)
 @Api(value = "/pathways", description = "Operations about pathways")
-@RequiredArgsConstructor(onConstructor = @_({@Inject}))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class PathwayResource {
 
   private final PathwayService pathwayService;
@@ -56,12 +58,12 @@ public class PathwayResource {
   @GET
   @Timed
   @ApiOperation(value = "Find a pathway by id", notes = "If a pathway does not exist with the specified id an error will be returned", response = Pathway.class)
-  @ApiResponses(value = {@ApiResponse(code = NOT_FOUND_404, message = "Pathway not found")})
+  @ApiResponses(value = { @ApiResponse(code = NOT_FOUND_404, message = "Pathway not found") })
   public Pathway find(
-    @ApiParam(value = "Pathway ID", required = true) @PathParam("pathwayId") String pathwayId,
-    @ApiParam(value = "Select fields returned", allowMultiple = true) @QueryParam("field") List<String> fields,
-    @ApiParam(value = "Include addition data in the response", allowMultiple = true) @QueryParam("include") List<String> include
-  ) {
+      @ApiParam(value = "Pathway ID", required = true) @PathParam("pathwayId") String pathwayId,
+      @ApiParam(value = "Select fields returned", allowMultiple = true) @QueryParam("field") List<String> fields,
+      @ApiParam(value = "Include addition data in the response", allowMultiple = true) @QueryParam("include") List<String> include
+      ) {
     log.info("Request for Pathway '{}'", pathwayId);
 
     Pathway pathway = pathwayService.findOne(pathwayId, Query.builder().fields(fields).includes(include).build());

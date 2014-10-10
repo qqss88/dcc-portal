@@ -28,7 +28,9 @@ import javax.ws.rs.ext.Provider;
 
 import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.service.BadRequestException;
+import org.springframework.stereotype.Component;
 
+@Component
 @Provider
 public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestException> {
 

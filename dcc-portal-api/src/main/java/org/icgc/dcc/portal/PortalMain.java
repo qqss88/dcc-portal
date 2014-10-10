@@ -22,8 +22,6 @@ import static com.google.common.base.Strings.padEnd;
 import static com.sun.jersey.api.container.filter.LoggingFilter.FEATURE_LOGGING_DISABLE_ENTITY;
 import static com.sun.jersey.api.core.ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS;
 import static com.sun.jersey.api.core.ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS;
-import static java.lang.String.format;
-import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.repeat;
 import static org.eclipse.jetty.util.resource.JarResource.newJarResource;
 import static org.eclipse.jetty.util.resource.Resource.newClassPathResource;
@@ -31,33 +29,29 @@ import static org.eclipse.jetty.util.resource.Resource.newResource;
 import static org.icgc.dcc.portal.util.DropwizardUtils.removeDwExceptionMapper;
 import static org.icgc.dcc.portal.util.ListUtils.list;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Properties;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.eclipse.jetty.util.resource.Resource;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
 import org.icgc.dcc.portal.bundle.SwaggerBundle;
 import org.icgc.dcc.portal.config.DataPortalConfiguration;
-import org.icgc.dcc.portal.config.PortalModule;
 import org.icgc.dcc.portal.filter.CachingFilter;
 import org.icgc.dcc.portal.filter.CrossOriginFilter;
 import org.icgc.dcc.portal.filter.VersionFilter;
 import org.icgc.dcc.portal.util.VersionUtils;
 import org.icgc.dcc.portal.writer.ErrorMessageBodyWriter;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
 
-import com.google.inject.Stage;
-import com.hubspot.dropwizard.guice.GuiceBundle;
+import com.github.nhuray.dropwizard.spring.SpringBundle;
 import com.sun.jersey.api.container.filter.LoggingFilter;
+import com.sun.jersey.spi.spring.container.SpringComponentProviderFactory;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.config.Bootstrap;
@@ -71,23 +65,22 @@ public class PortalMain extends Service<DataPortalConfiguration> {
    * Constants.
    */
   private static final String PACKAGE = PortalMain.class.getPackage().getName();
-  private static final String APPLICATION_NAME = "portal-api";
-  private static final char SPACE = ' ';
+  private static final String APPLICATION_NAME = "dcc-portal-api";
 
-  private static String[] args;
-  private static GuiceBundle<DataPortalConfiguration> guice;
+  private final ConfigurableApplicationContext context;
+
+  public PortalMain() {
+    this.context = createApplicationContext();
+  }
 
   public static void main(String... args) throws Exception {
-    PortalMain.args = args;
     new PortalMain().run(args);
   }
 
   @Override
   public final void initialize(Bootstrap<DataPortalConfiguration> bootstrap) {
-    guice = createGuiceBundle(bootstrap);
-
     bootstrap.setName(APPLICATION_NAME);
-    bootstrap.addBundle(guice);
+    bootstrap.addBundle(new SpringBundle<DataPortalConfiguration>(context, true, true));
     bootstrap.addBundle(new SwaggerBundle());
     bootstrap.addBundle(new AssetsBundle("/app/", "/", "index.html"));
   }
@@ -101,6 +94,7 @@ public class PortalMain extends Service<DataPortalConfiguration> {
         .setInitParam("statusEnabled", "false");
 
     environment.addProvider(new ErrorMessageBodyWriter());
+    environment.addProvider(new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context));
 
     environment.enableJerseyFeature(FEATURE_LOGGING_DISABLE_ENTITY);
     environment.setJerseyProperty(PROPERTY_CONTAINER_REQUEST_FILTERS,
@@ -113,22 +107,7 @@ public class PortalMain extends Service<DataPortalConfiguration> {
             CachingFilter.class.getName()));
 
     removeDwExceptionMapper(environment, LoggingExceptionMapper.class);
-    initSingleton(config);
-    logInfo(config, args);
-  }
-
-  /**
-   * Put all singletons that require eager loading here
-   * 
-   * @param config
-   */
-  private void initSingleton(DataPortalConfiguration config) {
-    if (config.getDownload().getStage() == Stage.PRODUCTION) {
-      log.info("Initializing singletons, please wait ...");
-      guice.getInjector().getInstance(DynamicDownloader.class);
-      guice.getInjector().getInstance(ExportedDataFileSystem.class);
-      log.info("Singletons initialized.");
-    }
+    logInfo(config);
   }
 
   /**
@@ -143,21 +122,14 @@ public class PortalMain extends Service<DataPortalConfiguration> {
         newJarResource(newResource(getJarUri()))); // Jar resource
   }
 
-  /**
-   * Configures the {@code GuiceBundle} with application modules and classpath scanning.
-   * 
-   * @param bootstrap
-   * @return
-   */
-  private GuiceBundle<DataPortalConfiguration> createGuiceBundle(Bootstrap<DataPortalConfiguration> bootstrap) {
-    return new GuiceBundle.Builder<DataPortalConfiguration>()
-        .addModule(new PortalModule())
-        .setConfigClass(getConfigurationClass())
-        .enableAutoConfig(PACKAGE)
-        .build();
+  private static ConfigurableApplicationContext createApplicationContext() {
+    val context = new AnnotationConfigApplicationContext();
+    context.scan(PACKAGE);
+
+    return context;
   }
 
-  private void logInfo(DataPortalConfiguration config, String... args) {
+  private void logInfo(DataPortalConfiguration config) {
     log.info("{}", repeat("-", 100));
     log.info("Version: {}", getVersion());
     log.info("Built:   {}", getBuildTimestamp());
@@ -167,7 +139,6 @@ public class PortalMain extends Service<DataPortalConfiguration> {
       String value = scmInfo.getProperty(property, "").replaceAll("\n", " ");
       log.info("         {}: {}", padEnd(property, 24, ' '), value);
     }
-    log.info("Command: {}", formatArguments(args));
     log.info("Config: {}", config);
     log.info("Working Directory: {}", System.getProperty("user.dir"));
     log.info("{}", repeat("-", 100));
@@ -185,20 +156,6 @@ public class PortalMain extends Service<DataPortalConfiguration> {
 
   private URI getJarUri() throws URISyntaxException {
     return getClass().getProtectionDomain().getCodeSource().getLocation().toURI();
-  }
-
-  private static String getJarName() {
-    String jarPath = PortalMain.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    File jarFile = new File(jarPath);
-
-    return jarFile.getName();
-  }
-
-  private static String formatArguments(String... args) {
-    RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
-    List<String> inputArguments = runtime.getInputArguments();
-
-    return format("java %s -jar %s %s", join(inputArguments, SPACE), getJarName(), join(args, SPACE));
   }
 
 }

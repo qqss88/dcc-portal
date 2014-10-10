@@ -26,11 +26,12 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Release;
 import org.icgc.dcc.portal.model.Releases;
 import org.icgc.dcc.portal.repository.ReleaseRepository;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class ReleaseService {
 
   private final ReleaseRepository releaseRepository;

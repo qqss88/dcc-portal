@@ -41,16 +41,18 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiParam;
 
+@Component
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
