@@ -61,6 +61,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -70,10 +71,12 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 
 @Slf4j
@@ -353,5 +356,57 @@ public class GeneRepository implements Repository {
     log.debug("{}", map);
 
     return map;
+  }
+
+  /*
+   * Lookup up genes by ensembl gene_id or gene symbol
+   * 
+   * @param input a list of string identifiers of either ensembl id or gene symbol
+   * 
+   * @returns a map of matched identifiers
+   */
+  public Multimap<String, String> validateIdentifiers(List<String> input) {
+    val boolFilter = FilterBuilders.boolFilter();
+    val idFilter = FilterBuilders.termsFilter("_gene_id", input.toArray());
+    val symbolFilter = FilterBuilders.termsFilter("symbol", input.toArray());
+
+    // gene_id => symbol is many-to-one, so we need two lookup tables
+    val idLookup = Maps.<String, String> newHashMap();
+    val symbolLookup = ArrayListMultimap.<String, String> create();
+
+    boolFilter.should(idFilter, symbolFilter);
+    val search = client.prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFilter(boolFilter)
+        .addFields("_gene_id", "symbol")
+        .setSize(5000);
+
+    // Get the valid lookups
+    log.info("Search is {}", search);
+    val response = search.execute().actionGet();
+    for (SearchHit hit : response.getHits()) {
+      val id = (String) hit.getFields().get("_gene_id").getValue();
+      val symbol = (String) hit.getFields().get("symbol").getValue();
+
+      idLookup.put(id, symbol);
+      symbolLookup.put(symbol, id);
+      log.info("{} - {}", id, symbol);
+    }
+
+    // Now match with input
+    val result = ArrayListMultimap.<String, String> create();
+    for (String key : input) {
+      if (idLookup.containsKey(key)) {
+        result.put(key, key);
+        continue;
+      }
+      if (symbolLookup.containsKey(key)) {
+        result.putAll(key, symbolLookup.get(key));
+        continue;
+      }
+    }
+
+    return result;
   }
 }
