@@ -19,25 +19,25 @@
 (function () {
   'use strict';
   angular.module('icgc.genelist', ['icgc.genelist.controllers', 'icgc.genelist.directives']);
+
 })();
 
 // TODO: Probably want a service
 // TODO: Should add additional icons: upload, warning
-// TODO: Is it "Genelist", "Gene list" or "Gene List" ???
-
 
 (function () {
   'use strict';
 
   angular.module('icgc.genelist.controllers', []);
 
-  angular.module('icgc.genelist.controllers').controller('genelistController', function($scope, $timeout, $http, Restangular) {
+  angular.module('icgc.genelist.controllers')
+    .controller('genelistController', function($scope, $timeout, $http, Restangular) {
     var verifyPromise = null;
     var delay = 1000;
 
     function verify() {
-      $scope.verifying = true;
-      $scope.verified = false;
+      $scope.state = 'verifying';
+
 
       // TODO: remove, just keeping it around because this works
       // $http.post('http://localhost:8080/api/v1/ui/identifier/genes', 'geneIdentifiers=' + $scope.rawText, { transformRequest: angular.identity }).then(function(x) {
@@ -51,8 +51,7 @@
         .customPOST(data, 'genes').then(function(result) {
 
           result = Restangular.stripRestangular(result);
-          $scope.verifying = false;
-          $scope.verified = true;
+          $scope.state = 'verified';
           $scope.validIds = [];
           $scope.invalidIds = [];
 
@@ -66,46 +65,37 @@
         });
     }
 
-    $scope.rawText = "";
-    $scope.verifying = false;
-    $scope.verified = false;
+    function verifyFile() {
+      // Update UI
+      $scope.state = 'uploading';
+      $scope.fileName = $scope.myFile.name;
+
+      // The $timeout is just to give sufficent time in order to convey system state
+      $timeout(function() {
+        var data = new FormData();
+        data.append('filepath', $scope.myFile);
+        Restangular.one('ui/identifier').withHttpConfig({transformRequest: angular.identity})
+          .customPOST(data, 'test', {}, {'Content-Type': undefined}).then(function(result) {
+            $scope.rawText = result.data;
+            verify();
+          });
+      }, 1000);
+    }
+
+
+    $scope.rawText = '';
+    $scope.state = '';
 
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 
     // way of modeling [input type=file]. So to get file information, it is proxied through a 
-    // directive that gets the value from $element
+    // directive that gets the file value (myFile) from input $element
     $scope.$watch('myFile', function(newValue, oldValue) {
       if (! newValue) {
         return;
       }
-
-      console.log('test', $scope.myFile);
-
-      // Update UI
-      $scope.fileName = $scope.myFile.name;
-
-      // Echo the file content
-      var data = new FormData();
-      data.append('filepath', $scope.myFile);
-      Restangular.one('ui/identifier').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'test', {}, {'Content-Type': undefined}).then(function(result) {
-          console.log("echo result", result);
-          $scope.rawText = result.data;
-          verify();
-        });
+      verifyFile();
     }, true);
 
-    /*
-    $scope.loadFile = function() {
-      console.log('test', $scope.myFile);
-      console.log('loading file...', $scope.filepath);
-
-      var data = new FormData();
-      data.append('filepath', $scope.filepath);
-
-      Restangular.one('ui/identifier').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'test', {}, {'Content-Type': undefined}).then(function(result) {
-        });
-    }; */
 
     $scope.updateGenelist = function() {
       // If content was from file, clear out the filename
@@ -116,10 +106,9 @@
     };
 
     $scope.reset = function() {
-      $scope.verifying = false;
-      $scope.verified = false;
+      $scope.state = '';
       $scope.fileName = null;
-      $scope.rawText = "";
+      $scope.rawText = '';
       $scope.validIds = [];
       $scope.invalidIds = [];
     };

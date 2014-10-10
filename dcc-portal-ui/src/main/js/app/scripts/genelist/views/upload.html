@@ -1,9 +1,3 @@
-<!--
-<button class="t_button" type="button" data-ng-click="genelistModal=!genelistModal; reset();">
-<i class="icon-download"></i> Upload Gene List
-</button>
--->
-
 <a href="" data-ng-click="genelistModal=!genelistModal; reset();">
     <i class="icon-download"></i> Upload Gene List
 </a>
@@ -28,28 +22,36 @@
                <div style="padding:0.25rem">
                    <textarea 
                        placeholder="e.g. TTN, TP53, CSMD3, ENSG ENSG00000151952, ENSG00000133703"
-                       data-ng-disabled="verifying"
+                       data-ng-disabled="state==='verifying'"
                        data-ng-model="rawText" 
                        data-ng-change="updateGenelist()"> 
                    </textarea>
                </div>
                <div>
+                   <button class="t_button pull-right" data-ng-click="reset()">Clear</button>
+               </div>
+               <br>
+               <div>
+                   <div>Or choose a file to upload</div>
                    <span class="t_button btn btn-file">
-                       <!--Browse <input type="file" data-ng-model="filepath" data-ng-change="loadFile(this)"> -->
                        Browse <input type="file" data-file-upload="myFile">
                    </span>
                    {{fileName}}
-                   <button class="t_button pull-right" data-ng-click="reset()">Clear</button>
                </div>
 
-               <span data-ng-if="verifying"><i class="icon-spin icon-spinner"></i> Verifying gene list ... </span>
-               <div data-ng-if="verified"> 
+               <span data-ng-if="state==='verifying'"><i class="icon-spin icon-spinner"></i> Verifying Gene List ... </span>
+               <span data-ng-if="state==='uploading'"><i class="icon-spin icon-spinner"></i> Loading Gene List file ... </span>
+               <div data-ng-if="state==='verified'"> 
+                   <!--
                    <br/>
                    <span> {{validIds.length}} gene(s) found</span>
+                   -->
                    <br/>
-                   <span data-ng-hide="invalidIds.length === 0" class="alert-error"> {{invalidIds.length}} gene(s) <strong>not</strong> recognized in the system </span>
-                   <div style="max-height:25%; overflow:scroll">
-                       <hide-text text="{{ invalidIds.join(', ') }}"></hide-text>
+                   <span data-ng-hide="invalidIds.length === 0" data-ng-init="expanded=false"> 
+                       <a href="" data-ng-click="expanded=!expanded"><span class="alert-error">{{invalidIds.length}} gene(s) <strong>not</strong> recognized in the system</span></a>
+                   </span>
+                   <div style="max-height:25%; overflow:scroll" data-ng-hide="!expanded">
+                       {{ invalidIds.join(', ') }}
                    </div>
                </div>
 
@@ -59,7 +61,7 @@
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="genelistModal=false; reset();">Cancel</button>
                 <button class="t_button" 
-                    data-ng-disabled="!verified || validIds.length === 0">Submit</button> 
+                    data-ng-disabled="state !== 'verified' || validIds.length === 0">Submit</button> 
             </div>
         </div>
     </div>
