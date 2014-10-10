@@ -5,9 +5,9 @@ import java.util.List;
 import lombok.Getter;
 import lombok.ToString;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.icgc.dcc.portal.browser.model.DataSource;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Getter
 @ToString

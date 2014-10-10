@@ -19,12 +19,14 @@ package org.icgc.dcc.portal.model;
 
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.base.Joiner;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
 import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Joiner;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -10,8 +10,8 @@ import org.icgc.dcc.portal.model.Projects;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.ProjectRepository;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 
 @RequiredArgsConstructor(onConstructor = @_({ @Inject }))

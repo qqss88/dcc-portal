@@ -18,10 +18,10 @@
 package org.icgc.dcc.portal.service;
 
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -32,7 +32,9 @@ import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.OccurrenceRepository;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 
 @Slf4j
 public class OccurrenceService {

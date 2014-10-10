@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
-import static org.icgc.dcc.core.util.FormatUtils._;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 

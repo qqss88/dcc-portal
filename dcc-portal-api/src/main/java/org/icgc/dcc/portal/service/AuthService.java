@@ -21,11 +21,11 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.icgc.dcc.icgc.client.api.ICGCException;
-import org.icgc.dcc.icgc.client.api.cud.CUDClient;
-import org.icgc.dcc.icgc.client.api.cud.User;
-import org.icgc.dcc.icgc.client.api.daco.DACOClient;
-import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
+import org.icgc.dcc.common.client.api.ICGCException;
+import org.icgc.dcc.common.client.api.cud.CUDClient;
+import org.icgc.dcc.common.client.api.cud.User;
+import org.icgc.dcc.common.client.api.daco.DACOClient;
+import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.ICGCConfiguration;
 
 import com.google.inject.Inject;

@@ -91,9 +91,9 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DonorService;
+import org.icgc.dcc.portal.service.ForbiddenAccessException;
 import org.icgc.dcc.portal.service.NotFoundException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
-import org.icgc.dcc.portal.service.ForbiddenAccessException;
 import org.icgc.dcc.portal.util.JsonUtils;
 
 import com.google.common.base.Predicate;

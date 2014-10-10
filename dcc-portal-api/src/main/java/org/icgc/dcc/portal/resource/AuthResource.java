@@ -6,7 +6,7 @@ import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.icgc.dcc.core.util.FormatUtils._;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.config.CrowdConfiguration.CUD_TOKEN_NAME;
 import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
@@ -34,9 +34,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.icgc.client.api.ICGCAccessException;
-import org.icgc.dcc.icgc.client.api.ICGCException;
-import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
+import org.icgc.dcc.common.client.api.ICGCAccessException;
+import org.icgc.dcc.common.client.api.ICGCException;
+import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.DistributedCacheService;
@@ -124,7 +124,7 @@ public class AuthResource extends BaseResource {
     user.setEmailAddress(userName);
 
     try {
-      if (authService.hasDacoAccess(userName, UserType.USERNAME)) {
+      if (authService.hasDacoAccess(userName, UserType.CUD)) {
         log.debug("Granted DACO access to user '{}'", userName);
         user.setDaco(true);
       }

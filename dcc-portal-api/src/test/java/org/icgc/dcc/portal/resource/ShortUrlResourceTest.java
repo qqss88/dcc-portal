@@ -22,9 +22,9 @@ import static org.icgc.dcc.portal.resource.ShortUrlResource.SHORT_URL_PARAM;
 import static org.mockito.Mockito.when;
 import lombok.val;
 
-import org.icgc.dcc.icgc.client.api.ICGCUnknownException;
-import org.icgc.dcc.icgc.client.api.shorturl.ShortURLClient;
-import org.icgc.dcc.icgc.client.api.shorturl.ShortURLResponse;
+import org.icgc.dcc.common.client.api.ICGCUnknownException;
+import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
+import org.icgc.dcc.common.client.api.shorturl.ShortURLResponse;
 import org.icgc.dcc.portal.config.WebConfiguration;
 import org.icgc.dcc.portal.mapper.NotFoundExceptionMapper;
 import org.icgc.dcc.portal.service.BadRequestException;
