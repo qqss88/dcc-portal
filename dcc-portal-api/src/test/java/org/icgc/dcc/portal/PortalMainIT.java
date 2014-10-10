@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal;
 
 import static lombok.AccessLevel.PRIVATE;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 

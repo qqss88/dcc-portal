@@ -1,6 +1,6 @@
 package org.icgc.dcc.portal.service;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.util.UUID;

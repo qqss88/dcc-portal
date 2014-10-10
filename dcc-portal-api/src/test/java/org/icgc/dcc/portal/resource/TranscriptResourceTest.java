@@ -1,6 +1,6 @@
 package org.icgc.dcc.portal.resource;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;

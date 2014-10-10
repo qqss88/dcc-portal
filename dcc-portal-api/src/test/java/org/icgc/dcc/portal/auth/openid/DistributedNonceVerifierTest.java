@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.auth.openid;
 
 import static com.googlecode.catchexception.CatchException.catchException;
 import static com.googlecode.catchexception.CatchException.caughtException;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier.NONCE_CACHE_NAME;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

@@ -17,7 +17,7 @@
 
 package org.icgc.dcc.portal.repository;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.Map;
