@@ -220,9 +220,7 @@ public class DownloadResource {
   }
 
   @Autowired
-  public DownloadResource(DonorService donorService, DynamicDownloader downloader,
-      ExportedDataFileSystem fs, Stage env) {
-    super();
+  public DownloadResource(DonorService donorService, DynamicDownloader downloader, ExportedDataFileSystem fs, Stage env) {
     this.donorService = donorService;
     this.downloader = downloader;
     this.fs = fs;

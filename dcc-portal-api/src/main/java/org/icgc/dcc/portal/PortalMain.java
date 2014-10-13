@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import lombok.SneakyThrows;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.eclipse.jetty.util.resource.Resource;
@@ -43,50 +42,42 @@ import org.icgc.dcc.portal.config.DataPortalConfiguration;
 import org.icgc.dcc.portal.filter.CachingFilter;
 import org.icgc.dcc.portal.filter.CrossOriginFilter;
 import org.icgc.dcc.portal.filter.VersionFilter;
+import org.icgc.dcc.portal.spring.SpringService;
 import org.icgc.dcc.portal.util.VersionUtils;
 import org.icgc.dcc.portal.writer.ErrorMessageBodyWriter;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
 
-import com.github.nhuray.dropwizard.spring.SpringBundle;
 import com.sun.jersey.api.container.filter.LoggingFilter;
-import com.sun.jersey.spi.spring.container.SpringComponentProviderFactory;
-import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.jersey.LoggingExceptionMapper;
 
 @Slf4j
-public class PortalMain extends Service<DataPortalConfiguration> {
+public class PortalMain extends SpringService<DataPortalConfiguration> {
 
   /**
    * Constants.
    */
-  private static final String PACKAGE = PortalMain.class.getPackage().getName();
   private static final String APPLICATION_NAME = "dcc-portal-api";
-
-  private final ConfigurableApplicationContext context;
-
-  public PortalMain() {
-    this.context = createApplicationContext();
-  }
 
   public static void main(String... args) throws Exception {
     new PortalMain().run(args);
   }
 
   @Override
-  public final void initialize(Bootstrap<DataPortalConfiguration> bootstrap) {
+  public void initialize(Bootstrap<DataPortalConfiguration> bootstrap) {
+    super.initialize(bootstrap);
+
     bootstrap.setName(APPLICATION_NAME);
-    bootstrap.addBundle(new SpringBundle<DataPortalConfiguration>(context, true, true));
     bootstrap.addBundle(new SwaggerBundle());
     bootstrap.addBundle(new AssetsBundle("/app/", "/", "index.html"));
   }
 
   @Override
-  public final void run(DataPortalConfiguration config, Environment environment) throws Exception {
+  public void run(DataPortalConfiguration config, Environment environment) throws Exception {
+    super.run(config, environment);
+
     environment.setBaseResource(getBaseResource());
 
     environment.addFilter(UrlRewriteFilter.class, "/*")
@@ -94,7 +85,6 @@ public class PortalMain extends Service<DataPortalConfiguration> {
         .setInitParam("statusEnabled", "false");
 
     environment.addProvider(new ErrorMessageBodyWriter());
-    environment.addProvider(new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context));
 
     environment.enableJerseyFeature(FEATURE_LOGGING_DISABLE_ENTITY);
     environment.setJerseyProperty(PROPERTY_CONTAINER_REQUEST_FILTERS,
@@ -120,13 +110,6 @@ public class PortalMain extends Service<DataPortalConfiguration> {
     return firstNonNull(
         newClassPathResource("."), // File system resource
         newJarResource(newResource(getJarUri()))); // Jar resource
-  }
-
-  private static ConfigurableApplicationContext createApplicationContext() {
-    val context = new AnnotationConfigApplicationContext();
-    context.scan(PACKAGE);
-
-    return context;
   }
 
   private void logInfo(DataPortalConfiguration config) {
