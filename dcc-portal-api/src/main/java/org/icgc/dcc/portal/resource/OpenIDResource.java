@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 
 import java.net.URI;
@@ -42,6 +41,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthService;
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.openid4java.message.ParameterList;
@@ -137,7 +137,7 @@ public class OpenIDResource extends BaseResource {
     val sessionToken = user.getSessionToken().toString();
     log.info("Replacing session token with {}", sessionToken);
 
-    return createSessionCookie(SESSION_TOKEN_NAME, sessionToken);
+    return createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, sessionToken);
   }
 
 }

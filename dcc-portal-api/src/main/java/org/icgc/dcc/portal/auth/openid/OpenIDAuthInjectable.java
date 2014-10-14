@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.auth.openid;
 
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
@@ -92,8 +93,8 @@ class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
     UUID token = null;
 
     try {
-      if (cookies.containsKey(SESSION_TOKEN_NAME)) {
-        token = UUID.fromString(cookies.get(SESSION_TOKEN_NAME).getValue());
+      if (cookies.containsKey(CrowdProperties.SESSION_TOKEN_NAME)) {
+        token = UUID.fromString(cookies.get(CrowdProperties.SESSION_TOKEN_NAME).getValue());
       } else if (!headers.isEmpty()) {
         token = UUID.fromString(headers.get(0));
       }

@@ -29,7 +29,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.config.MailConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class MailService {
   public static final String SMTP_HOST = "mail.smtp.host";
 
   @NonNull
-  private final MailConfiguration mailConfig;
+  private final MailProperties mailConfig;
 
   public void sendEmail(final String subject, final String message, boolean async) {
     if (!mailConfig.isEnabled()) {

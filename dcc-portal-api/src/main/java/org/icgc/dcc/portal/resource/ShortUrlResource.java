@@ -36,7 +36,7 @@ import org.hibernate.validator.constraints.URL;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLResponse;
-import org.icgc.dcc.portal.config.WebConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.ShortUrl;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
@@ -70,7 +70,7 @@ public class ShortUrlResource {
   private final String baseUrl;
 
   @Autowired
-  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebConfiguration config) {
+  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebProperties config) {
     this.apiClient = apiClient;
     // Ensure baseUrl does not end with '/'
     this.baseUrl = config.getBaseUrl().replaceFirst("/$", "");

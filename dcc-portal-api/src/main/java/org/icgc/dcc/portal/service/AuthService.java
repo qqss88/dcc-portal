@@ -26,7 +26,7 @@ import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.cud.User;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
-import org.icgc.dcc.portal.config.ICGCConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +45,7 @@ public class AuthService {
   @NonNull
   private DACOClient dacoClient;
   @NonNull
-  private ICGCConfiguration icgcConfig;
+  private ICGCProperties icgcConfig;
 
   /**
    * Checks Central User Directory(CUD) if <tt>username</tt> has DACO access.

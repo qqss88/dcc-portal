@@ -17,30 +17,14 @@
 
 package org.icgc.dcc.portal.config;
 
-import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getFirst;
-import static com.google.common.collect.Maps.newHashMap;
-import static org.icgc.dcc.portal.util.VersionUtils.getApiVersion;
-import static org.icgc.dcc.portal.util.VersionUtils.getApplicationVersion;
-import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.cluster.ClusterState;
-import org.elasticsearch.cluster.metadata.AliasMetaData;
-import org.elasticsearch.cluster.metadata.IndexMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
@@ -53,8 +37,13 @@ import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.browser.model.DataSource;
+import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
+import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
+import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
+import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
+import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
-import org.icgc.dcc.portal.model.Versions;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,56 +59,16 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
-@Slf4j
 @Lazy
 @Configuration
 public class PortalConfig {
 
   @Autowired
-  private DataPortalConfiguration config;
-
-  @Bean
-  public Client client() {
-    // TransportClient is thread-safe so @Singleton is appropriate
-    val configuration = config.getElastic();
-    val client = new TransportClient();
-    for (val nodeAddress : configuration.getNodeAddresses()) {
-      client.addTransportAddress(new InetSocketTransportAddress(
-          nodeAddress.getHost(),
-          nodeAddress.getPort()));
-    }
-
-    return client;
-  }
-
-  @Bean
-  public String indexName() {
-    String indexName = config.getElastic().getIndexName();
-
-    // Get cluster state
-    ClusterState clusterState = client().admin().cluster()
-        .prepareState()
-        .execute()
-        .actionGet()
-        .getState();
-
-    Map<String, AliasMetaData> aliases = clusterState.getMetaData().aliases().get(indexName);
-    if (aliases != null) {
-      Set<String> indexNames = aliases.keySet();
-      checkState(indexNames.size() == 1, "Expected alias to point to a single index but instead it points to '%s'",
-          indexNames);
-
-      String realIndexName = getFirst(indexNames, null);
-      log.warn("Redirecting configured index alias of '{}' with real index name '{}'", indexName, realIndexName);
-      indexName = realIndexName;
-    }
-
-    return indexName;
-  }
+  private PortalProperties properties;
 
   @Bean
   public DynamicDownloader dynamicDownloader() {
-    val downloadConfig = config.getDownload();
+    val downloadConfig = properties.getDownload();
     if (!downloadConfig.isEnabled()) {
       return null;
     }
@@ -137,13 +86,13 @@ public class PortalConfig {
 
   @Bean
   public Stage stage() {
-    return config.getDownload().getStage();
+    return properties.getDownload().getStage();
   }
 
   @Bean
   @SneakyThrows
   public ExportedDataFileSystem exportedDataFileSystem() {
-    val downloadConfig = config.getDownload();
+    val downloadConfig = properties.getDownload();
     if (!downloadConfig.isEnabled()) {
       return null;
     }
@@ -153,51 +102,14 @@ public class PortalConfig {
   }
 
   @Bean
-  @SneakyThrows
-  @SuppressWarnings("unchecked")
-  public Map<String, String> indexMetadata() {
-    // Get cluster state
-    ClusterState clusterState = client().admin().cluster()
-        .prepareState()
-        .setFilterIndices(indexName())
-        .execute()
-        .actionGet()
-        .getState();
-
-    IndexMetaData indexMetaData = clusterState.getMetaData().index(indexName());
-    checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName());
-
-    // Get the first mappings. This is arbitrary since they all contain the same metadata
-    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().asList().get(0);
-
-    Map<String, Object> source = mappingMetaData.sourceAsMap();
-    Map<String, String> meta = (Map<String, String>) source.get("_meta");
-    if (meta == null) {
-      meta = newHashMap();
-    }
-
-    return meta;
-  }
-
-  @Bean
-  public Versions versions() {
-    return new Versions(
-        getApiVersion(),
-        getApplicationVersion(),
-        getCommitId(),
-        firstNonNull(indexMetadata().get("git.commit.id.abbrev"), "unknown"),
-        indexName());
-  }
-
-  @Bean
   @Qualifier
   public List<DataSource> dataSources() {
-    return config.getBrowser().getDataSources();
+    return properties.getBrowser().getDataSources();
   }
 
   @Bean
-  public MailConfiguration mailConfig() {
-    return config.getMail();
+  public MailProperties mailConfig() {
+    return properties.getMail();
   }
 
   @Bean
@@ -208,14 +120,14 @@ public class PortalConfig {
   @Bean
   public Settings settings() {
     return Settings.builder()
-        .ssoUrl(config.getCrowd().getSsoUrl())
-        .releaseDate(config.getRelease().getReleaseDate())
+        .ssoUrl(properties.getCrowd().getSsoUrl())
+        .releaseDate(properties.getRelease().getReleaseDate())
         .build();
   }
 
   @Bean
   public ShortURLClient shortURLClient() {
-    val icgc = checkNotNull(config.getIcgc());
+    val icgc = checkNotNull(properties.getIcgc());
     val icgcConfig = ICGCClientConfig.builder()
         .shortServiceUrl(icgc.getShortUrl())
         .consumerKey(icgc.getConsumerKey())
@@ -230,12 +142,12 @@ public class PortalConfig {
   }
 
   @Bean
-  public ICGCConfiguration icgcConfiguration() {
-    return config.getIcgc();
+  public ICGCProperties icgcConfiguration() {
+    return properties.getIcgc();
   }
 
   @Bean
-  public ICGCClient icgcClient(ICGCConfiguration icgc) {
+  public ICGCClient icgcClient(ICGCProperties icgc) {
     val icgcConfig = ICGCClientConfig.builder()
         .cgpServiceUrl(icgc.getCgpUrl())
         .cudServiceUrl(icgc.getCudUrl())
@@ -263,7 +175,7 @@ public class PortalConfig {
 
   @Bean
   public HazelcastInstance hazelcastInstance() {
-    return Hazelcast.newHazelcastInstance(getHazelcastConfig(config.getHazelcast()));
+    return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
   }
 
   @Bean
@@ -281,21 +193,21 @@ public class PortalConfig {
   }
 
   @Bean
-  public CrowdConfiguration crowdConfig() {
-    return config.getCrowd();
+  public CrowdProperties crowdConfig() {
+    return properties.getCrowd();
   }
 
   @Bean
-  public CacheConfiguration cacheConfiguration() {
-    return config.getCache();
+  public CacheProperties cacheConfiguration() {
+    return properties.getCache();
   }
 
   @Bean
-  public WebConfiguration webConfiguration() {
-    return config.getWeb();
+  public WebProperties webConfiguration() {
+    return properties.getWeb();
   }
 
-  private static Config getHazelcastConfig(HazelcastConfiguration hazelcastConfig) {
+  private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {
     val config = new Config();
     config.setGroupConfig(new GroupConfig(hazelcastConfig.getGroupName(), hazelcastConfig.getGroupPassword()));
     configureMapConfigs(hazelcastConfig, config.getMapConfigs());
@@ -303,7 +215,7 @@ public class PortalConfig {
     return config;
   }
 
-  private static void configureMapConfigs(HazelcastConfiguration hazelcastConfig, Map<String, MapConfig> mapConfigs) {
+  private static void configureMapConfigs(HazelcastProperties hazelcastConfig, Map<String, MapConfig> mapConfigs) {
     val usersMapConfig = new MapConfig();
     usersMapConfig.setName(DistributedCacheService.USERS_CACHE_NAME);
     usersMapConfig.setTimeToLiveSeconds(hazelcastConfig.getUsersCacheTTL());

@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import lombok.val;
 
 import org.elasticsearch.client.Client;
-import org.icgc.dcc.portal.config.CacheConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,7 @@ public class CachingFilter implements ContainerRequestFilter, ContainerResponseF
   private final List<Pattern> excludeEtagPatterns;
 
   @Autowired
-  public CachingFilter(Client client, @Value("#{indexName}") String indexName, CacheConfiguration cacheConfig) {
+  public CachingFilter(Client client, @Value("#{indexName}") String indexName, CacheProperties cacheConfig) {
     this.lastModifiedDate = getLastModified(client, indexName);
     this.enableLastModified = cacheConfig.isEnableLastModified();
     this.enableEtag = cacheConfig.isEnableETag();

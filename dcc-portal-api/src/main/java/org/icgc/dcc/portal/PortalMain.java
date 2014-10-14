@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.eclipse.jetty.util.resource.Resource;
 import org.icgc.dcc.portal.bundle.SwaggerBundle;
-import org.icgc.dcc.portal.config.DataPortalConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.filter.CachingFilter;
 import org.icgc.dcc.portal.filter.CrossOriginFilter;
 import org.icgc.dcc.portal.filter.VersionFilter;
@@ -54,7 +54,7 @@ import com.yammer.dropwizard.config.Environment;
 import com.yammer.dropwizard.jersey.LoggingExceptionMapper;
 
 @Slf4j
-public class PortalMain extends SpringService<DataPortalConfiguration> {
+public class PortalMain extends SpringService<PortalProperties> {
 
   /**
    * Constants.
@@ -66,7 +66,7 @@ public class PortalMain extends SpringService<DataPortalConfiguration> {
   }
 
   @Override
-  public void initialize(Bootstrap<DataPortalConfiguration> bootstrap) {
+  public void initialize(Bootstrap<PortalProperties> bootstrap) {
     super.initialize(bootstrap);
 
     bootstrap.setName(APPLICATION_NAME);
@@ -75,7 +75,7 @@ public class PortalMain extends SpringService<DataPortalConfiguration> {
   }
 
   @Override
-  public void run(DataPortalConfiguration config, Environment environment) throws Exception {
+  public void run(PortalProperties config, Environment environment) throws Exception {
     super.run(config, environment);
 
     environment.setBaseResource(getBaseResource());
@@ -112,7 +112,7 @@ public class PortalMain extends SpringService<DataPortalConfiguration> {
         newJarResource(newResource(getJarUri()))); // Jar resource
   }
 
-  private void logInfo(DataPortalConfiguration config) {
+  private void logInfo(PortalProperties config) {
     log.info("{}", repeat("-", 100));
     log.info("Version: {}", getVersion());
     log.info("Built:   {}", getBuildTimestamp());
