@@ -15,60 +15,12 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.config;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.Data;
 
-import org.icgc.dcc.portal.model.GeneListDAO;
-import org.skife.jdbi.v2.DBI;
+@Data
+public class DatabaseConfiguration {
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-/**
- * Gene-list related operations, uses genes under the hood
- */
-@Singleton
-@Slf4j
-public class GeneListService {
-
-  private final DBI dbi;
-  private final GeneListDAO geneListDAO;
-
-  @Inject
-  public GeneListService(DBI dbi) {
-    // String testURI = format("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from '%s'", "inMemGenelist.sql");
-    this.dbi = dbi;
-    dbi.open();
-    geneListDAO = dbi.open(GeneListDAO.class);
-  }
-
-  /*
-   * Get the next sequence Id, and use the Id as key to insert and return it. Do this in 2 discrete steps for
-   * compatibility
-   */
-  public long insert(String data) {
-    long id = geneListDAO.nextId();
-    geneListDAO.insert(id, data);
-    return id;
-  }
-
-  public String get(long id) {
-    return geneListDAO.get(id);
-  }
-
-  /*
-   * Test
-   */
-  public static void main(String[] args) {
-    DBI dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'inMemGenelist.sql'");
-    GeneListService service = new GeneListService(dbi);
-
-    service.insert("a,b,c,d,e,f,g"); // 0
-    service.insert("a,b,c,d,e,f,g,lalalal"); // 1
-
-    log.info("Data: {}", service.get(1));
-    log.info("Data: {}", service.get(0));
-  }
-
+  private String url;
 }

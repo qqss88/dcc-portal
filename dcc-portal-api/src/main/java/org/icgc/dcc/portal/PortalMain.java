@@ -51,6 +51,7 @@ import org.icgc.dcc.portal.config.PortalModule;
 import org.icgc.dcc.portal.filter.CachingFilter;
 import org.icgc.dcc.portal.filter.CrossOriginFilter;
 import org.icgc.dcc.portal.filter.VersionFilter;
+import org.icgc.dcc.portal.service.GeneListService;
 import org.icgc.dcc.portal.util.VersionUtils;
 import org.icgc.dcc.portal.writer.ErrorMessageBodyWriter;
 import org.tuckey.web.filters.urlrewrite.UrlRewriteFilter;
@@ -103,6 +104,7 @@ public class PortalMain extends Service<DataPortalConfiguration> {
     environment.addProvider(new ErrorMessageBodyWriter());
 
     environment.enableJerseyFeature(FEATURE_LOGGING_DISABLE_ENTITY);
+
     environment.setJerseyProperty(PROPERTY_CONTAINER_REQUEST_FILTERS,
         list(LoggingFilter.class.getName(),
             CachingFilter.class.getName()));
@@ -129,6 +131,7 @@ public class PortalMain extends Service<DataPortalConfiguration> {
       guice.getInjector().getInstance(ExportedDataFileSystem.class);
       log.info("Singletons initialized.");
     }
+    guice.getInjector().getInstance(GeneListService.class);
   }
 
   /**

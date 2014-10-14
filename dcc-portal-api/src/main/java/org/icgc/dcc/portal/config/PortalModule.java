@@ -58,6 +58,7 @@ import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.Versions;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
+import org.skife.jdbi.v2.DBI;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -72,6 +73,14 @@ import com.hazelcast.core.HazelcastInstance;
 
 @Slf4j
 public class PortalModule extends AbstractModule {
+
+  @Provides
+  @Singleton
+  public DBI dbi(DataPortalConfiguration config) {
+    DatabaseConfiguration databaseConfig = config.getDatabase();
+    DBI dbi = new DBI(databaseConfig.getUrl());
+    return dbi;
+  }
 
   @Provides
   @Singleton

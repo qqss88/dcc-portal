@@ -56,10 +56,10 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  indexName: dcc-etl-cli # Override using -Ddw.elastic.indexName=indexName for local development
+  indexName: icgc17-0-9 # Override using -Ddw.elastic.indexName=indexName for local development
   nodeAddresses:
     - host: "localhost"
-      port: 9300
+      port: 9999
 
 # Mail
 mail:
@@ -141,6 +141,9 @@ icgc:
   # Disallow self-signed SSL certificates
   enableStrictSSL: false
 
+# Persistence layer configuration
+database:
+  url: "jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/conf/inMemGenelist.sql'"
 
 # Portal release configuration
 release:

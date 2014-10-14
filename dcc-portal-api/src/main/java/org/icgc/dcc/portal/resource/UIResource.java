@@ -43,10 +43,12 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.QueryFilters;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.util.JsonUtils;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -66,6 +68,14 @@ public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
+
+  @Path("/test")
+  @GET
+  public Map<String, String> test(
+      @ApiParam(value="hello") @QueryFilters ObjectNode filters
+      ) {
+    return Maps.<String, String> newHashMap();
+  }
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the

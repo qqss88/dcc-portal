@@ -18,9 +18,10 @@
 
 (function () {
   'use strict';
-  angular.module('icgc.genelist', ['icgc.genelist.controllers', 'icgc.genelist.directives']);
 
+  angular.module('icgc.genelist', ['icgc.genelist.controllers', 'icgc.genelist.directives']);
 })();
+
 
 // TODO: Probably want a service
 // TODO: Should add additional icons: upload, warning
@@ -47,8 +48,8 @@
       // });
 
       var data = 'geneIdentifiers=' + encodeURI($scope.rawText);
-      Restangular.one('ui/identifier').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'genes').then(function(result) {
+      Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'validate').then(function(result) {
 
           result = Restangular.stripRestangular(result);
           $scope.state = 'verified';
@@ -74,8 +75,8 @@
       $timeout(function() {
         var data = new FormData();
         data.append('filepath', $scope.myFile);
-        Restangular.one('ui/identifier').withHttpConfig({transformRequest: angular.identity})
-          .customPOST(data, 'test', {}, {'Content-Type': undefined}).then(function(result) {
+        Restangular.one('ui').withHttpConfig({transformRequest: angular.identity})
+          .customPOST(data, 'file', {}, {'Content-Type': undefined}).then(function(result) {
             $scope.rawText = result.data;
             verify();
           });

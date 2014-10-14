@@ -31,6 +31,10 @@ public class DataPortalConfiguration extends Configuration {
 
   @Valid
   @JsonProperty
+  private final DatabaseConfiguration database = new DatabaseConfiguration();
+
+  @Valid
+  @JsonProperty
   private final CrowdConfiguration crowd = new CrowdConfiguration();
 
   @Valid
