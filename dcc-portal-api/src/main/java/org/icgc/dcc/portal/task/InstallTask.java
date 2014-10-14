@@ -31,6 +31,8 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.yammer.dropwizard.tasks.Task;
@@ -41,6 +43,7 @@ import com.yammer.dropwizard.tasks.Task;
  * @see {@link src/main/bin/install}
  */
 @Slf4j
+@Component
 public class InstallTask extends Task {
 
   /**

@@ -7,8 +7,6 @@ import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.CUD_TOKEN_NAME;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
@@ -37,17 +35,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.common.client.api.ICGCAccessException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
 
+@Component
 @Path("/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";
@@ -66,8 +67,8 @@ public class AuthResource extends BaseResource {
   @GET
   @Path("/verify")
   public Response verify(
-      @CookieParam(value = SESSION_TOKEN_NAME) String sessionToken,
-      @CookieParam(value = CUD_TOKEN_NAME) String cudToken) {
+      @CookieParam(value = CrowdProperties.SESSION_TOKEN_NAME) String sessionToken,
+      @CookieParam(value = CrowdProperties.CUD_TOKEN_NAME) String cudToken) {
 
     // Already logged in and knows credentials
     if (sessionToken != null) {
@@ -207,11 +208,11 @@ public class AuthResource extends BaseResource {
   }
 
   private static boolean isSessionTokenCookie(Cookie cookie) {
-    return cookie.getName().equals(SESSION_TOKEN_NAME);
+    return cookie.getName().equals(CrowdProperties.SESSION_TOKEN_NAME);
   }
 
   private static Response verifiedResponse(User user) {
-    val cookie = createSessionCookie(SESSION_TOKEN_NAME, user.getSessionToken().toString());
+    val cookie = createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, user.getSessionToken().toString());
 
     return Response.ok(ImmutableMap.of(TOKEN_KEY, user.getSessionToken(), USERNAME_KEY, user.getEmailAddress(),
         DACO_ACCESS_KEY, user.getDaco()))
@@ -219,8 +220,8 @@ public class AuthResource extends BaseResource {
   }
 
   private static Response createLogoutResponse(Status status, String message) {
-    val dccCookie = deleteCookie(SESSION_TOKEN_NAME);
-    val crowdCookie = deleteCookie(CUD_TOKEN_NAME);
+    val dccCookie = deleteCookie(CrowdProperties.SESSION_TOKEN_NAME);
+    val crowdCookie = deleteCookie(CrowdProperties.CUD_TOKEN_NAME);
 
     return status(status)
         .header(SET_COOKIE, dccCookie.toString())

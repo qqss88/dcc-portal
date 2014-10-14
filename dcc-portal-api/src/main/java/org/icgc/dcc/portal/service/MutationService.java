@@ -20,15 +20,17 @@ import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.MutationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class MutationService {
 
   private final MutationRepository mutationRepository;

@@ -31,6 +31,8 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.DonorRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvMapWriter;
 
 import com.google.common.collect.ComparisonChain;
@@ -38,9 +40,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.google.inject.Inject;
 
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;

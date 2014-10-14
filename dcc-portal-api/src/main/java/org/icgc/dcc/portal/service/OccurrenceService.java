@@ -17,9 +17,9 @@
 
 package org.icgc.dcc.portal.service;
 
-
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -31,20 +31,18 @@ import org.icgc.dcc.portal.model.Occurrences;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.OccurrenceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 
 @Slf4j
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
-
-  @Inject
-  public OccurrenceService(OccurrenceRepository occurrenceRepository) {
-    this.occurrenceRepository = occurrenceRepository;
-  }
 
   public Occurrences findAll(Query query) {
     log.info("{}", query);
@@ -61,7 +59,6 @@ public class OccurrenceService {
       }
       list.add(new Occurrence(fieldMap));
     }
-
 
     Occurrences occurrences = new Occurrences(list.build());
     occurrences.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));

@@ -32,8 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.ElasticSearchException;
 import org.icgc.dcc.portal.model.Error;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 @Provider
 public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
 

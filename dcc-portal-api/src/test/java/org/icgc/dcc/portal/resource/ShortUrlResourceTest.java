@@ -25,7 +25,7 @@ import lombok.val;
 import org.icgc.dcc.common.client.api.ICGCUnknownException;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLResponse;
-import org.icgc.dcc.portal.config.WebConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.mapper.NotFoundExceptionMapper;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
@@ -53,7 +53,7 @@ public class ShortUrlResourceTest extends ResourceTest {
 
   @Override
   protected void setUpResources() throws Exception {
-    val webConfig = new WebConfiguration();
+    val webConfig = new WebProperties();
     webConfig.setBaseUrl(BASE_URL);
 
     shortUrlResource = new ShortUrlResource(shortURLClient, webConfig);

@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.SESSION_TOKEN_NAME;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 
 import java.net.URI;
@@ -42,19 +41,21 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthService;
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.openid4java.message.ParameterList;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Resource that performs OpenID authentication.
  */
+@Component
 @Path("/v1/auth/openid")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OpenIDResource extends BaseResource {
 
   private static final String IDENTIFIER_PARAM_NAME = "identifier";
@@ -136,7 +137,7 @@ public class OpenIDResource extends BaseResource {
     val sessionToken = user.getSessionToken().toString();
     log.info("Replacing session token with {}", sessionToken);
 
-    return createSessionCookie(SESSION_TOKEN_NAME, sessionToken);
+    return createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, sessionToken);
   }
 
 }

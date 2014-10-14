@@ -39,12 +39,14 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 
 @Slf4j
+@Component
 public class ReleaseRepository {
 
   private static final Type TYPE = Type.RELEASE;
@@ -54,7 +56,7 @@ public class ReleaseRepository {
 
   private final String index;
 
-  @Inject
+  @Autowired
   ReleaseRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;

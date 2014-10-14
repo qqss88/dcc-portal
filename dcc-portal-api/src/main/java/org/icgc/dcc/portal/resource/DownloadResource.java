@@ -95,6 +95,8 @@ import org.icgc.dcc.portal.service.ForbiddenAccessException;
 import org.icgc.dcc.portal.service.NotFoundException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -103,15 +105,14 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import com.google.inject.Stage;
-import com.google.inject.name.Named;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.auth.Auth;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Api(value = "/v1/download", description = "Operations about archive downloading")
 @Path("/v1/download")
@@ -218,10 +219,8 @@ public class DownloadResource {
     private final String downloadId;
   }
 
-  @Inject
-  public DownloadResource(DonorService donorService, DynamicDownloader downloader,
-      ExportedDataFileSystem fs, @Named("stage") Stage env) {
-    super();
+  @Autowired
+  public DownloadResource(DonorService donorService, DynamicDownloader downloader, ExportedDataFileSystem fs, Stage env) {
     this.donorService = donorService;
     this.downloader = downloader;
     this.fs = fs;

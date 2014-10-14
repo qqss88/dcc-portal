@@ -36,18 +36,20 @@ import org.hibernate.validator.constraints.URL;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLResponse;
-import org.icgc.dcc.portal.config.WebConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.ShortUrl;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+@Component
 @Slf4j
 @Path("/v1/short")
 @Produces(APPLICATION_JSON)
@@ -67,8 +69,8 @@ public class ShortUrlResource {
   @NotEmpty
   private final String baseUrl;
 
-  @Inject
-  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebConfiguration config) {
+  @Autowired
+  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebProperties config) {
     this.apiClient = apiClient;
     // Ensure baseUrl does not end with '/'
     this.baseUrl = config.getBaseUrl().replaceFirst("/$", "");

@@ -78,20 +78,19 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 
 @Slf4j
+@Component
 public class DonorRepository implements Repository {
 
-  /**
-   *
-   */
   private static final String SCORE =
       "g = doc['gene._gene_id']; x = doc['gene._summary._ssm_count']; g.value == '' || g.empty || x.empty || x.value < 1 ? 0 : 1";
 
@@ -122,7 +121,7 @@ public class DonorRepository implements Repository {
   private final Client client;
   private final String index;
 
-  @Inject
+  @Autowired
   DonorRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;

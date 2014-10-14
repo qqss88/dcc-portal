@@ -26,13 +26,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.Versions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
-@RequiredArgsConstructor(onConstructor = @_(@Inject))
+@Component
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class VersionFilter implements ContainerResponseFilter {
 
   /**

@@ -31,32 +31,31 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.service.MailService;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 @Provider
-// @RequiredArgsConstructor(onConstructor = @_(@Inject))
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   private static final Random RANDOM = new Random();
 
+  @NonNull
   private final MailService mailService;
 
   @Context
   private HttpHeaders headers;
   @Context
   private HttpServletRequest request;
-
-  @Inject
-  public GenericExceptionMapper(MailService mailService) {
-    this.mailService = mailService;
-  }
 
   @Override
   public Response toResponse(Throwable t) {

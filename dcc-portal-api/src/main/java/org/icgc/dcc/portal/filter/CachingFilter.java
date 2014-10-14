@@ -33,18 +33,20 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import lombok.val;
 
 import org.elasticsearch.client.Client;
-import org.icgc.dcc.portal.config.CacheConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.HashFunction;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
+@Component
 public class CachingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
   private static final String DATE_FIELD_NAME = "date";
@@ -59,8 +61,8 @@ public class CachingFilter implements ContainerRequestFilter, ContainerResponseF
   private final List<Pattern> excludeLastModifiedPatterns;
   private final List<Pattern> excludeEtagPatterns;
 
-  @Inject
-  public CachingFilter(Client client, @Named("indexName") String indexName, CacheConfiguration cacheConfig) {
+  @Autowired
+  public CachingFilter(Client client, @Value("#{indexName}") String indexName, CacheProperties cacheConfig) {
     this.lastModifiedDate = getLastModified(client, indexName);
     this.enableLastModified = cacheConfig.isEnableLastModified();
     this.enableEtag = cacheConfig.isEnableETag();

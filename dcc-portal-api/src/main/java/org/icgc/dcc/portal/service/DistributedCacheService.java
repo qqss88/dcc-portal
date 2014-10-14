@@ -29,11 +29,13 @@ import lombok.val;
 
 import org.icgc.dcc.portal.model.User;
 import org.openid4java.discovery.DiscoveryInformation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
 import com.hazelcast.core.HazelcastInstance;
 
+@Service
 public class DistributedCacheService {
 
   public static final String USERS_CACHE_NAME = "users";
@@ -45,7 +47,7 @@ public class DistributedCacheService {
   // Stores session information about logged in users
   private final Map<UUID, User> usersCache;
 
-  @Inject
+  @Autowired
   public DistributedCacheService(HazelcastInstance hazelcast) {
     this.usersCache = hazelcast.getMap(USERS_CACHE_NAME);
     this.discoveryInfoCache = hazelcast.getMap(DISCOVERY_INFO_CACHE_NAME);

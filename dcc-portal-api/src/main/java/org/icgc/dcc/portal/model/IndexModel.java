@@ -6,10 +6,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
+
+@Component
 public class IndexModel {
 
   public static final int MAX_FACET_TERM_COUNT = 1024;
@@ -522,8 +525,8 @@ public class IndexModel {
 
   private String index;
 
-  @Inject
-  public IndexModel(@Named("indexName") String index) {
+  @Autowired
+  public IndexModel(@Value("#{indexName}") String index) {
     super();
     this.index = index;
   }

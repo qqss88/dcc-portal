@@ -30,7 +30,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 import org.elasticsearch.common.collect.ImmutableList;
-import org.icgc.dcc.portal.config.CacheConfiguration;
+import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 
 import com.sun.jersey.api.Responses;
 import com.sun.jersey.core.header.InBoundHeaders;
@@ -72,12 +72,12 @@ public final class FilterUtils {
   }
 
   /**
-   * Creates a {@link CacheConfiguration} with enabled generation of <tt>Last-Modified</tt> and <tt>ETag</tt> HTTP
-   * headers and empty exclude resources lists.
+   * Creates a {@link CacheProperties} with enabled generation of <tt>Last-Modified</tt> and <tt>ETag</tt> HTTP headers
+   * and empty exclude resources lists.
    * @return
    */
-  public static CacheConfiguration createCacheConfigucation() {
-    val config = new CacheConfiguration();
+  public static CacheProperties createCacheConfigucation() {
+    val config = new CacheProperties();
     val excludeList = new ImmutableList.Builder<String>().build();
 
     config.setEnableETag(true);
