@@ -16,15 +16,15 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singletonList;
 import static lombok.AccessLevel.PRIVATE;
-import static com.google.common.base.Objects.firstNonNull;
-import static com.google.common.collect.Sets.newTreeSet;
 import static org.icgc.dcc.portal.util.MapUtils.map;
 
 import java.util.Collection;

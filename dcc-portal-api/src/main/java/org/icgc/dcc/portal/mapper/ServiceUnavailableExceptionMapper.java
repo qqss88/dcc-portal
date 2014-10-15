@@ -28,7 +28,9 @@ import javax.ws.rs.ext.Provider;
 
 import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
+import org.springframework.stereotype.Component;
 
+@Component
 @Provider
 public class ServiceUnavailableExceptionMapper implements ExceptionMapper<ServiceUnavailableException> {
 

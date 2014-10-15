@@ -43,27 +43,27 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.model.QueryFilters;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
-import com.google.inject.Inject;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
@@ -72,7 +72,7 @@ public class UIResource {
   @Path("/test")
   @GET
   public Map<String, String> test(
-      @ApiParam(value="hello") @QueryFilters ObjectNode filters
+      @ApiParam(value = "hello") @QueryParam("filters") FiltersParam filters
       ) {
     return Maps.<String, String> newHashMap();
   }

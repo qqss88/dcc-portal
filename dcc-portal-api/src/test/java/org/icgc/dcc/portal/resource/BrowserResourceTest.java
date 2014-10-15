@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -54,7 +54,12 @@ public class BrowserResourceTest extends ResourceTest {
 
   @Override
   protected final void setUpResources() {
-    addResource(new BrowserResource(client, "index", dataSources()));
+    val resource = new BrowserResource();
+    resource.setClient(client);
+    resource.setIndexName("indexName");
+    resource.setDataSources(dataSources());
+
+    addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
   }
 

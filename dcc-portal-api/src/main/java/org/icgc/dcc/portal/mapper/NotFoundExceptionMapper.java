@@ -30,7 +30,9 @@ import javax.ws.rs.ext.Provider;
 
 import org.icgc.dcc.portal.model.Error;
 import org.icgc.dcc.portal.service.NotFoundException;
+import org.springframework.stereotype.Component;
 
+@Component
 @Provider
 public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
 

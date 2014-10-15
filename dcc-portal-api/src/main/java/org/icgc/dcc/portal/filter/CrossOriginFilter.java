@@ -28,10 +28,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.Response;
 
+import org.springframework.stereotype.Component;
+
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 
+@Component
 public class CrossOriginFilter implements ContainerResponseFilter {
 
   @Override

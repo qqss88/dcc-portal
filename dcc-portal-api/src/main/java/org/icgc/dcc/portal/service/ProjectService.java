@@ -9,12 +9,14 @@ import org.icgc.dcc.portal.model.Project;
 import org.icgc.dcc.portal.model.Projects;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.ProjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
+import com.google.common.collect.Maps;
 
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class ProjectService {
 
   private final ProjectRepository projectRepository;

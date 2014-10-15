@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 
 import java.io.Serializable;
+
 import lombok.Value;
 
 @Value

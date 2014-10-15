@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.validator.routines.UrlValidator.ALLOW_LOCAL_URLS;
-import static org.icgc.dcc.core.util.FormatUtils._;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,21 +33,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
-import org.icgc.dcc.icgc.client.api.ICGCException;
-import org.icgc.dcc.icgc.client.api.shorturl.ShortURLClient;
-import org.icgc.dcc.icgc.client.api.shorturl.ShortURLResponse;
-import org.icgc.dcc.portal.config.WebConfiguration;
+import org.icgc.dcc.common.client.api.ICGCException;
+import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
+import org.icgc.dcc.common.client.api.shorturl.ShortURLResponse;
+import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.ShortUrl;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+@Component
 @Slf4j
 @Path("/v1/short")
 @Produces(APPLICATION_JSON)
@@ -67,8 +69,8 @@ public class ShortUrlResource {
   @NotEmpty
   private final String baseUrl;
 
-  @Inject
-  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebConfiguration config) {
+  @Autowired
+  public ShortUrlResource(@NonNull ShortURLClient apiClient, @NonNull WebProperties config) {
     this.apiClient = apiClient;
     // Ensure baseUrl does not end with '/'
     this.baseUrl = config.getBaseUrl().replaceFirst("/$", "");

@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.portal.config.CrowdConfiguration.CUD_TOKEN_NAME;
 
 import java.net.URI;
 import java.util.UUID;
@@ -29,6 +28,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.service.AuthenticationException;
 
 /**
@@ -53,7 +53,7 @@ public final class AuthUtils {
         cookieName,
         FAILED_AUTH_COOKIE_VALUE,
         COOKIE_PATH,
-        (cookieName.equals(CUD_TOKEN_NAME)) ? ICGC_DOMAIN : DEFAULT_DOMAIN,
+        (cookieName.equals(CrowdProperties.CUD_TOKEN_NAME)) ? ICGC_DOMAIN : DEFAULT_DOMAIN,
         COOKIE_COMMENT,
         FAILED_AUTH_COOKIE_AGE,
         SECURE);

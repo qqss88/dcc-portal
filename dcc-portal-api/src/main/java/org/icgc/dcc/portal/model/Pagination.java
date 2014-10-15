@@ -17,11 +17,11 @@
 
 package org.icgc.dcc.portal.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wordnik.swagger.annotations.ApiModelProperty;
+import static java.lang.Math.floor;
 import lombok.Value;
 
-import static java.lang.Math.floor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_EMPTY)

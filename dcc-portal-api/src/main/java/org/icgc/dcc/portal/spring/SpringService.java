@@ -15,25 +15,45 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.config;
+package org.icgc.dcc.portal.spring;
 
-import lombok.Data;
+import lombok.val;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-@Data
-public class HazelcastConfiguration {
+import com.github.nhuray.dropwizard.spring.SpringBundle;
+import com.sun.jersey.spi.spring.container.SpringComponentProviderFactory;
+import com.yammer.dropwizard.Service;
+import com.yammer.dropwizard.config.Bootstrap;
+import com.yammer.dropwizard.config.Configuration;
+import com.yammer.dropwizard.config.Environment;
 
-  @JsonProperty
-  String groupName;
+/**
+ * Base class for Dropwizard Spring integration.
+ * 
+ * @param <T>
+ */
+public abstract class SpringService<T extends Configuration> extends Service<T> {
 
-  @JsonProperty
-  String groupPassword;
+  private final AnnotationConfigApplicationContext context;
 
-  @JsonProperty
-  int usersCacheTTL;
+  public SpringService() {
+    this.context = new AnnotationConfigApplicationContext();
 
-  @JsonProperty
-  int openidAuthTTL;
+    context.scan(this.getClass().getPackage().getName());
+  }
+
+  @Override
+  public void initialize(Bootstrap<T> bootstrap) {
+    bootstrap.addBundle(new SpringBundle<T>(context, true, true));
+  }
+
+  @Override
+  public void run(T configuration, Environment environment) throws Exception {
+    // This is required for ContainerRequestFilter, ContainerResponseFilter, etc injection
+    val springProvider = new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context);
+
+    environment.addProvider(springProvider);
+  }
 
 }

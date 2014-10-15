@@ -16,8 +16,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.core.util.Scheme;
-import org.icgc.dcc.icgc.client.api.daco.DACOClient.UserType;
+import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
+import org.icgc.dcc.common.core.util.Scheme;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthService;
@@ -34,14 +34,15 @@ import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.AxMessage;
 import org.openid4java.message.ax.FetchRequest;
 import org.openid4java.message.ax.FetchResponse;
-
-import com.google.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The service provides utilities to perform OpenID authentication.
  */
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OpenIDAuthService {
 
   public static final String OPENID_EMAIL = "http://schema.openid.net/contact/email";

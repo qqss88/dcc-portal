@@ -17,7 +17,7 @@
 
 package org.icgc.dcc.portal.repository;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;

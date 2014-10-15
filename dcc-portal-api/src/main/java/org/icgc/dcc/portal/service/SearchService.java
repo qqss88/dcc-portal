@@ -28,15 +28,17 @@ import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.SearchRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
+import com.google.common.collect.Maps;
 
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@Service
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class SearchService {
 
   private final SearchRepository searchRepository;

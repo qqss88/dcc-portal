@@ -18,9 +18,10 @@ package org.icgc.dcc.portal.model;
 
 
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
 import com.yammer.dropwizard.jersey.params.AbstractParam;
-import java.util.List;
 
 public class IdsParam extends AbstractParam<List<String>> {
 

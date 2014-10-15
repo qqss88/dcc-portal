@@ -23,12 +23,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
 
-import com.google.inject.Inject;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.yammer.metrics.annotation.Timed;
 import java.util.Date;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -36,14 +32,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import org.springframework.stereotype.Component;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.yammer.metrics.annotation.Timed;
+
+@Component
 @Api(value = "/echo", description = "Operations about echoing data")
 @Path("/echo")
 public class EchoResource extends BaseResource {
-
-  @Inject
-  public EchoResource() {
-    super();
-  }
 
   @ApiOperation("Echo file contents")
   @Consumes(APPLICATION_FORM_URLENCODED)
@@ -52,11 +51,11 @@ public class EchoResource extends BaseResource {
   @Timed
   public Response echo(
 
-  @ApiParam(value = "The name of the file to echo") @FormParam("fileName") String fileName,
+      @ApiParam(value = "The name of the file to echo") @FormParam("fileName") String fileName,
 
-  @ApiParam(value = "The contents of the file to echo") @FormParam("text") String text
+      @ApiParam(value = "The contents of the file to echo") @FormParam("text") String text
 
-  ) {
+      ) {
 
     return ok().entity(text)
         .header(CONTENT_DISPOSITION, type("attachment").fileName(fileName).creationDate(new Date()).build()).build();

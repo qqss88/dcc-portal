@@ -24,21 +24,23 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import org.icgc.dcc.portal.model.Settings;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
 
 /**
  * Fetch application settings
  */
+@Component
 @Path("/v1/settings")
 @Produces(APPLICATION_JSON)
 public class SettingsResource {
 
   private final Settings settings;
 
-  @Inject
+  @Autowired
   public SettingsResource(Settings settings) {
     this.settings = settings;
   }

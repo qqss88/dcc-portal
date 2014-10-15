@@ -17,11 +17,12 @@
 
 package org.icgc.dcc.portal.model;
 
-import lombok.Value;
-
-import javax.ws.rs.core.Response.StatusType;
 import java.io.IOException;
 import java.io.Serializable;
+
+import javax.ws.rs.core.Response.StatusType;
+
+import lombok.Value;
 
 @Value
 public class Error implements Serializable {

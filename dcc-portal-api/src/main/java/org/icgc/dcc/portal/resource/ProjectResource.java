@@ -91,10 +91,11 @@ import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.service.ProjectService;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -103,11 +104,12 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Slf4j
 @Path("/v1/projects")
 @Produces(APPLICATION_JSON)
 @Api(value = "/projects", description = "Operations about " + PROJECT)
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class ProjectResource {
 
   private static final String PROJECT_FILTER_TEMPLATE = "{donor:{projectId:{is:['%s']}}}";

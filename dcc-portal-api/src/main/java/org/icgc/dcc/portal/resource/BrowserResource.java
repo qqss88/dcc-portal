@@ -10,11 +10,13 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -22,20 +24,22 @@ import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.browser.ds.AnnotationDataSource;
 import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.service.BadRequestException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
 
 /**
  * Genome browser endpoints that mimic the Cellbase API style.
  */
+@Component
 @Path("/browser")
 @Produces(TEXT_PLAIN)
-// @Api(value = "/browser", description = "Read only operations to support genome browsers")
+@Setter
 public class BrowserResource {
 
   /**
@@ -48,23 +52,23 @@ public class BrowserResource {
   private static final long EXCLUDE_TRANSCRIPT_SEGMENT_RANGE_MAX = 20 * 1000 * 1000;
 
   /**
+   * Configuration
+   */
+  @Value("#{indexName}")
+  private String indexName;
+  @Resource
+  private List<DataSource> dataSources;
+
+  /**
+   * State.
+   */
+  @Autowired
+  private Client client;
+
+  /**
    * Request state.
    */
-  private final Client client;
-  private final String indexName;
-  private final List<DataSource> dataSources;
-  private final Map<String, String> queryMap = newHashMap();
-
-  @Inject
-  public BrowserResource(Client client,
-
-      @Named("indexName") String indexName,
-
-      @Named("dataSources") List<DataSource> dataSources) {
-    this.client = client;
-    this.indexName = indexName;
-    this.dataSources = dataSources;
-  }
+  private Map<String, String> queryMap = newHashMap();
 
   /**
    * Handles requests for gene objects

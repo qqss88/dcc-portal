@@ -31,16 +31,18 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.MutationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Path("/v1/protein")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class ProteinResource {
 
   private final MutationService mutationService;

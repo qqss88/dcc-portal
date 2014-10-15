@@ -20,8 +20,9 @@ package org.icgc.dcc.portal.auth.openid;
 import lombok.NonNull;
 
 import org.icgc.dcc.portal.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
@@ -39,6 +40,7 @@ import com.yammer.dropwizard.auth.Authenticator;
  * 
  * @param <T> the principal type.
  */
+@Component
 public class OpenIDAuthProvider implements InjectableProvider<Auth, Parameter> {
 
   @NonNull
@@ -46,7 +48,7 @@ public class OpenIDAuthProvider implements InjectableProvider<Auth, Parameter> {
   @NonNull
   private final String realm;
 
-  @Inject
+  @Autowired
   public OpenIDAuthProvider(Authenticator<OpenIDCredentials, User> authenticator, String realm) {
     this.authenticator = authenticator;
     this.realm = realm;
