@@ -41,19 +41,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.service.GeneListService;
 import org.icgc.dcc.portal.service.GeneService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.inject.Inject;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Component
 @Path("/v1/genelist")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 @Slf4j
 public class GeneListResource {
 

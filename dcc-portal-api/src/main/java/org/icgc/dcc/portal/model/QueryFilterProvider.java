@@ -23,16 +23,20 @@ import java.util.Set;
 
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.ext.Provider;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.GeneListService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
-import com.google.inject.Inject;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
@@ -41,12 +45,15 @@ import com.sun.jersey.spi.inject.Injectable;
 import com.sun.jersey.spi.inject.InjectableProvider;
 
 @Slf4j
+@Component
+@Provider
+// @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class QueryFilterProvider implements InjectableProvider<QueryParam, Parameter> {
 
   @Context
   private HttpContext context;
 
-  @Inject
+  @Autowired
   private GeneListService genelistService;
 
   @Override
@@ -56,6 +63,8 @@ public class QueryFilterProvider implements InjectableProvider<QueryParam, Param
 
   @Override
   public Injectable<FiltersParam> getInjectable(ComponentContext ic, QueryParam a, Parameter c) {
+    log.info(">>>> {}", c);
+
     if (FiltersParam.class != c.getParameterClass()) {
       return null;
     }
@@ -66,7 +75,7 @@ public class QueryFilterProvider implements InjectableProvider<QueryParam, Param
       public FiltersParam getValue() {
 
         val queryParameters = context.getUriInfo().getQueryParameters();
-        val filtersStr = queryParameters.getFirst("filters");
+        val filtersStr = Objects.firstNonNull(queryParameters.getFirst("filters"), "{}");
         val result = new FiltersParam(filtersStr);
         val node = result.get();
 
@@ -86,10 +95,12 @@ public class QueryFilterProvider implements InjectableProvider<QueryParam, Param
             }
             // geneListIds.addAll(ImmutableList.<String> copyOf(blob.split(",")));
           }
+          ((ObjectNode) node.get("gene")).remove("myGeneList");
         } else {
           return result;
         }
 
+        log.info("Gene list IDS {}", geneListIds);
         for (val id : geneListIds) {
           node.with("gene").with("id").withArray("is").add(id);
         }

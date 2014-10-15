@@ -21,23 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.GeneListDAO;
 import org.skife.jdbi.v2.DBI;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Gene-list related operations, uses genes under the hood
  */
-@Singleton
+@Service
 @Slf4j
 public class GeneListService {
 
   private final DBI dbi;
   private final GeneListDAO geneListDAO;
 
-  @Inject
+  @Autowired
   public GeneListService(DBI dbi) {
-    // String testURI = format("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from '%s'", "inMemGenelist.sql");
     this.dbi = dbi;
     dbi.open();
     geneListDAO = dbi.open(GeneListDAO.class);
@@ -60,15 +58,14 @@ public class GeneListService {
   /*
    * Test
    */
-  public static void main(String[] args) {
-    DBI dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'inMemGenelist.sql'");
-    GeneListService service = new GeneListService(dbi);
-
-    service.insert("a,b,c,d,e,f,g"); // 0
-    service.insert("a,b,c,d,e,f,g,lalalal"); // 1
-
-    log.info("Data: {}", service.get(1));
-    log.info("Data: {}", service.get(0));
-  }
+  /*
+   * public static void main(String[] args) { DBI dbi = new
+   * DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'inMemGenelist.sql'"); GeneListService service = new
+   * GeneListService(dbi);
+   * 
+   * service.insert("a,b,c,d,e,f,g"); // 0 service.insert("a,b,c,d,e,f,g,lalalal"); // 1
+   * 
+   * log.info("Data: {}", service.get(1)); log.info("Data: {}", service.get(0)); }
+   */
 
 }

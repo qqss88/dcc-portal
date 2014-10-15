@@ -83,6 +83,10 @@ public class PortalProperties extends Configuration {
   @JsonProperty
   ReleaseProperties release = new ReleaseProperties();
 
+  @Valid
+  @JsonProperty
+  DatabaseProperties database = new DatabaseProperties();
+
   @Getter
   @ToString
   public static class BrowserProperties {
@@ -301,7 +305,6 @@ public class PortalProperties extends Configuration {
   public static class DatabaseProperties {
 
     @JsonProperty
-    @URL
     String url;
   }
 

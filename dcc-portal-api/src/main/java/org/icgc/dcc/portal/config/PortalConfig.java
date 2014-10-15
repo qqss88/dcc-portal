@@ -24,6 +24,7 @@ import java.util.Map;
 
 import lombok.SneakyThrows;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
@@ -46,6 +47,7 @@ import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
+import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -61,6 +63,7 @@ import com.hazelcast.core.HazelcastInstance;
 
 @Lazy
 @Configuration
+@Slf4j
 public class PortalConfig {
 
   @Autowired
@@ -205,6 +208,12 @@ public class PortalConfig {
   @Bean
   public WebProperties webConfiguration() {
     return properties.getWeb();
+  }
+
+  @Bean
+  public DBI getDBI() {
+    DBI dbi = new DBI(properties.getDatabase().getUrl());
+    return dbi;
   }
 
   private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {
