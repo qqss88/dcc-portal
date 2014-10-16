@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.service;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import org.icgc.dcc.portal.repository.GeneListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,19 +34,12 @@ public class GeneListService {
   @NonNull
   private final GeneListRepository geneListRepository;
 
-  /**
-   * Get the next sequence Id, and use the Id as key to insert and return it. Do this in 2 discrete steps for
-   * compatibility
-   */
-  public long save(String data) {
-    val id = geneListRepository.nextId();
-    geneListRepository.insert(id, data);
-
-    return id;
+  public String get(long id) {
+    return geneListRepository.find(id);
   }
 
-  public String get(long id) {
-    return geneListRepository.get(id);
+  public long save(String data) {
+    return geneListRepository.insert(data);
   }
 
 }

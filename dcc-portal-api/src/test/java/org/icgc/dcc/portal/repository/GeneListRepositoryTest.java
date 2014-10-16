@@ -17,27 +17,39 @@
  */
 package org.icgc.dcc.portal.repository;
 
-import javax.annotation.PreDestroy;
+import static org.assertj.core.api.Assertions.assertThat;
+import lombok.val;
 
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 
-/**
- * Data access for Gene List The SQLs are written to work with Postgresql.
- */
-public interface GeneListRepository {
+public class GeneListRepositoryTest {
 
-  @SqlQuery("SELECT data FROM genelist WHERE id = :id")
-  String find(@Bind("id") long id);
+  GeneListRepository repository;
 
-  @SqlUpdate("INSERT INTO genelist (data) VALUES (:data)")
-  long insert(@Bind("data") String data);
+  @Before
+  public void setUp() {
+    val dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
+    this.repository = dbi.open(GeneListRepository.class);
+  }
 
-  /**
-   * {@code close} with no args is used to close the connection.
-   */
-  @PreDestroy
-  void close();
+  @After
+  public void tearDown() {
+    repository.close();
+  }
+
+  @Test
+  public void testInsertFind() {
+    val expectedData = "test";
+
+    val id = repository.insert(expectedData);
+    assertThat(id).isPositive();
+
+    val actualData = repository.find(id);
+    assertThat(actualData).isEqualTo(actualData);
+
+  }
 
 }
