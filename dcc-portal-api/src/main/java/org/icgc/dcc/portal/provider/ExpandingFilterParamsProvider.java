@@ -19,11 +19,12 @@ package org.icgc.dcc.portal.provider;
 
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.nullToEmpty;
+import static com.google.common.collect.Iterables.addAll;
+import static com.google.common.collect.Iterables.isEmpty;
 import static com.sun.jersey.core.spi.component.ComponentScope.PerRequest;
-import static org.elasticsearch.common.collect.Iterables.addAll;
-import static org.elasticsearch.common.collect.Iterables.isEmpty;
 
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -160,10 +161,10 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
     return !getGeneFilter(filters).path(GENE_LIST_ID_FIELD_NAME).path(IS_FIELD_NAME).isMissingNode();
   }
 
-  private static Set<Long> getGeneListIds(ObjectNode filters) {
-    val geneListIds = Sets.<Long> newLinkedHashSet();
+  private static Set<UUID> getGeneListIds(ObjectNode filters) {
+    val geneListIds = Sets.<UUID> newLinkedHashSet();
     for (val geneIdNode : getGeneFilter(filters).path(GENE_LIST_ID_FIELD_NAME).withArray(IS_FIELD_NAME)) {
-      val geneListId = geneIdNode.longValue();
+      val geneListId = UUID.fromString(geneIdNode.textValue());
 
       geneListIds.add(geneListId);
     }

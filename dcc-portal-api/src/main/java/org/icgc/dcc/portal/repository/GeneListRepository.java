@@ -17,24 +17,24 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import java.util.UUID;
+
 import javax.annotation.PreDestroy;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 
 /**
- * Data access for Gene List The SQLs are written to work with Postgresql.
+ * Data access for Gene Lists. <b> SQLs are written to work with Postgresql.
  */
 public interface GeneListRepository {
 
   @SqlQuery("SELECT data FROM genelist WHERE id = :id")
-  String find(@Bind("id") long id);
+  String find(@Bind("id") UUID id);
 
-  @GetGeneratedKeys
-  @SqlUpdate("INSERT INTO genelist (data) VALUES (:data)")
-  long insert(@Bind("data") String data);
+  @SqlUpdate("INSERT INTO genelist (id, data) VALUES (:id, :data)")
+  int save(@Bind("id") UUID id, @Bind("data") String data);
 
   /**
    * {@code close} with no args is used to close the connection.

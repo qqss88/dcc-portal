@@ -23,6 +23,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
@@ -66,13 +67,14 @@ public class GeneListResource {
   @GET
   public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) {
     val result = Lists.<Map<String, String>> newLinkedList();
-    for (val id : geneListIds.get()) {
-      val geneListStr = geneListService.get(Long.parseLong(id));
+    for (val value : geneListIds.get()) {
+      val id = UUID.fromString(value);
+      val geneList = geneListService.get(id);
 
-      if (isNullOrEmpty(geneListStr)) {
-        result.add(ImmutableMap.<String, String> of(id, ""));
+      if (isNullOrEmpty(geneList)) {
+        result.add(ImmutableMap.of(value, ""));
       } else {
-        result.add(ImmutableMap.<String, String> of(id, geneListService.get(Long.parseLong(id))));
+        result.add(ImmutableMap.of(value, geneList));
       }
     }
 
@@ -84,7 +86,7 @@ public class GeneListResource {
   @Timed
   public Map<String, String> saveGeneList(
       @ApiParam(value = "The contents to be parsed and verified") @FormParam("geneIds") String geneIds) {
-    long id = geneListService.save(geneIds);
+    UUID id = geneListService.save(geneIds);
     return ImmutableMap.<String, String> of("id", "" + id);
   }
 

@@ -17,8 +17,11 @@
  */
 package org.icgc.dcc.portal.service;
 
+import java.util.UUID;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 import org.icgc.dcc.portal.repository.GeneListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +37,15 @@ public class GeneListService {
   @NonNull
   private final GeneListRepository geneListRepository;
 
-  public String get(long id) {
+  public String get(UUID id) {
     return geneListRepository.find(id);
   }
 
-  public long save(String data) {
-    return geneListRepository.insert(data);
+  public UUID save(String data) {
+    val id = UUID.randomUUID();
+    geneListRepository.save(id, data);
+
+    return id;
   }
 
 }

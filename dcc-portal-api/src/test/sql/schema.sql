@@ -3,6 +3,6 @@ DROP TABLE IF EXISTS genelist;
 
 -- Create
 CREATE TABLE genelist(
-   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+   id UUID PRIMARY KEY,
    data TEXT 
 );

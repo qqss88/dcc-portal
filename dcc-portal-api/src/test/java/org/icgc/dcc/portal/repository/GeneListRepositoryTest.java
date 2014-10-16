@@ -18,6 +18,9 @@
 package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
+
 import lombok.val;
 
 import org.junit.After;
@@ -41,19 +44,24 @@ public class GeneListRepositoryTest {
   }
 
   @Test
-  public void testInsertFind() {
-    val expectedData = "test";
+  public void testAll() {
+    val id1 = UUID.randomUUID();
+    val data1 = "data2";
+    val count1 = repository.save(id1, data1);
+    assertThat(count1).isEqualTo(1);
 
-    val geneListId1 = repository.insert(expectedData);
-    assertThat(geneListId1).isPositive();
+    val id2 = UUID.randomUUID();
+    val data2 = "data2";
+    val count2 = repository.save(id2, data2);
+    assertThat(count2).isEqualTo(1);
 
-    val geneListId2 = repository.insert(expectedData);
-    assertThat(geneListId2).isPositive();
+    assertThat(id1).isNotEqualTo(id2);
 
-    assertThat(geneListId1).isLessThan(geneListId2);
+    val actualData1 = repository.find(id1);
+    assertThat(data1).isEqualTo(actualData1);
 
-    val actualData = repository.find(geneListId1);
-    assertThat(expectedData).isEqualTo(actualData);
+    val actualData2 = repository.find(id2);
+    assertThat(data2).isEqualTo(actualData2);
   }
 
 }
