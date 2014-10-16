@@ -128,4 +128,5 @@ public class SearchConfig {
         firstNonNull(indexMetadata().get("git.commit.id.abbrev"), "unknown"),
         indexName());
   }
+
 }

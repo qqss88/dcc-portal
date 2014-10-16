@@ -306,6 +306,7 @@ public class PortalProperties extends Configuration {
 
     @JsonProperty
     String url;
+
   }
 
 }
