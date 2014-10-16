@@ -61,7 +61,7 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
   private static final String DEFAULT_FILTERS = "{}";
   private static final String FILTERS_QUERY_PARAM_NAME = "filters";
   private static final String GENE_FILTER_FIELD_NAME = "gene";
-  private static final String GENE_LIST_ID_FIELD_NAME = "myGeneList";
+  private static final String GENE_LIST_ID_FIELD_NAME = "uploadedGeneList";
   private static final String GENE_ID_FILTER_FIELD_NAME = "id";
   private static final String IS_FIELD_NAME = "is";
 

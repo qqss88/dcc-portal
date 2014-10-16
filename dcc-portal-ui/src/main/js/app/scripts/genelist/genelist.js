@@ -97,7 +97,7 @@
             filters.gene = {};
           }
           $scope.genelistModal = false;
-          filters.gene.uploadedGeneList = [result.id];
+          filters.gene.uploadedGeneList = [parseInt(result.id, 10)];
           LocationService.setFilters(filters);
         });
     }
