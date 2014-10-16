@@ -17,10 +17,11 @@
  */
 package org.icgc.dcc.portal.service;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
-import org.icgc.dcc.portal.model.GeneListDAO;
-import org.skife.jdbi.v2.DBI;
+import org.icgc.dcc.portal.dao.GeneListDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,44 +29,25 @@ import org.springframework.stereotype.Service;
  * Gene-list related operations, uses genes under the hood
  */
 @Service
-@Slf4j
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class GeneListService {
 
-  private final DBI dbi;
+  @NonNull
   private final GeneListDAO geneListDAO;
 
-  @Autowired
-  public GeneListService(DBI dbi) {
-    this.dbi = dbi;
-    dbi.open();
-    geneListDAO = dbi.open(GeneListDAO.class);
-  }
-
-  /*
+  /**
    * Get the next sequence Id, and use the Id as key to insert and return it. Do this in 2 discrete steps for
    * compatibility
    */
   public long insert(String data) {
-    long id = geneListDAO.nextId();
+    val id = geneListDAO.nextId();
     geneListDAO.insert(id, data);
+
     return id;
   }
 
   public String get(long id) {
     return geneListDAO.get(id);
   }
-
-  /*
-   * Test
-   */
-  /*
-   * public static void main(String[] args) { DBI dbi = new
-   * DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'inMemGenelist.sql'"); GeneListService service = new
-   * GeneListService(dbi);
-   * 
-   * service.insert("a,b,c,d,e,f,g"); // 0 service.insert("a,b,c,d,e,f,g,lalalal"); // 1
-   * 
-   * log.info("Data: {}", service.get(1)); log.info("Data: {}", service.get(0)); }
-   */
 
 }

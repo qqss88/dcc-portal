@@ -24,7 +24,6 @@ import java.util.Map;
 
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
@@ -44,6 +43,7 @@ import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
+import org.icgc.dcc.portal.dao.GeneListDAO;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
@@ -63,7 +63,6 @@ import com.hazelcast.core.HazelcastInstance;
 
 @Lazy
 @Configuration
-@Slf4j
 public class PortalConfig {
 
   @Autowired
@@ -71,20 +70,19 @@ public class PortalConfig {
 
   @Bean
   public DynamicDownloader dynamicDownloader() {
-    val downloadConfig = properties.getDownload();
-    if (!downloadConfig.isEnabled()) {
+    val download = properties.getDownload();
+    if (!download.isEnabled()) {
       return null;
     }
 
     return new DynamicDownloader(
-        downloadConfig.getUri() + downloadConfig.getDynamicRootPath(),
-        downloadConfig.getQuorum(),
-        downloadConfig.getOozieUrl(),
-        downloadConfig.getAppPath(),
-        downloadConfig.getSupportEmailAddress(),
-        downloadConfig.getCapacityThreshold(),
-        downloadConfig.getReleaseName());
-
+        download.getUri() + download.getDynamicRootPath(),
+        download.getQuorum(),
+        download.getOozieUrl(),
+        download.getAppPath(),
+        download.getSupportEmailAddress(),
+        download.getCapacityThreshold(),
+        download.getReleaseName());
   }
 
   @Bean
@@ -118,6 +116,11 @@ public class PortalConfig {
   @Bean
   public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
     return new OpenIDAuthProvider(authenticator, "OpenID");
+  }
+
+  @Bean(destroyMethod = "close")
+  public GeneListDAO geneListDAO(DBI dbi) {
+    return dbi.open(GeneListDAO.class);
   }
 
   @Bean
@@ -208,12 +211,6 @@ public class PortalConfig {
   @Bean
   public WebProperties webConfiguration() {
     return properties.getWeb();
-  }
-
-  @Bean
-  public DBI getDBI() {
-    DBI dbi = new DBI(properties.getDatabase().getUrl());
-    return dbi;
   }
 
   private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {

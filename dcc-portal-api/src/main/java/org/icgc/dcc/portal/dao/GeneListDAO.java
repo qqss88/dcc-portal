@@ -15,12 +15,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.config;
+package org.icgc.dcc.portal.dao;
 
-import lombok.Data;
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 
-@Data
-public class DatabaseConfiguration {
+/**
+ * Data access for Gene List The SQLs are written to work with Postgresql.
+ */
+public interface GeneListDAO {
 
-  private String url;
+  @SqlQuery("SELECT NEXTVAL('genelist_sequence')")
+  long nextId();
+
+  @SqlUpdate("INSERT INTO genelist (id, data) VALUES (:id, :data)")
+  void insert(@Bind("id") long id, @Bind("data") String data);
+
+  @SqlQuery("SELECT data FROM genelist WHERE id = :id")
+  String get(@Bind("id") long id);
+
+  /**
+   * {@code close} with no args is used to close the connection.
+   */
+  void close();
+
 }
