@@ -44,12 +44,16 @@ public class GeneListRepositoryTest {
   public void testInsertFind() {
     val expectedData = "test";
 
-    val id = repository.insert(expectedData);
-    assertThat(id).isPositive();
+    val geneListId1 = repository.insert(expectedData);
+    assertThat(geneListId1).isPositive();
 
-    val actualData = repository.find(id);
-    assertThat(actualData).isEqualTo(actualData);
+    val geneListId2 = repository.insert(expectedData);
+    assertThat(geneListId2).isPositive();
 
+    assertThat(geneListId1).isLessThan(geneListId2);
+
+    val actualData = repository.find(geneListId1);
+    assertThat(expectedData).isEqualTo(actualData);
   }
 
 }

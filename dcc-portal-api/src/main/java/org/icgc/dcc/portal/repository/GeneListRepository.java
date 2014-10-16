@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.repository;
 import javax.annotation.PreDestroy;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
 import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 
@@ -31,6 +32,7 @@ public interface GeneListRepository {
   @SqlQuery("SELECT data FROM genelist WHERE id = :id")
   String find(@Bind("id") long id);
 
+  @GetGeneratedKeys
   @SqlUpdate("INSERT INTO genelist (data) VALUES (:data)")
   long insert(@Bind("data") String data);
 
