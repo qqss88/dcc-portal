@@ -8,9 +8,9 @@
                 data-ng-mouseleave="toggleRemove=false" >
                 <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> Gene List
             </li>
-            <li>
+            <li class="text-right">
                 <a href="" data-ng-click="genelistModal=!genelistModal; reset();">
-                    <span><i class="icon-download"></i> Upload Gene List</span>
+                    <span><i class="icon-upload"></i> Upload Gene List</span>
                 </a>
             </li>
         </ul>
@@ -63,7 +63,11 @@
                    -->
                    <br/>
                    <span data-ng-hide="invalidIds.length === 0" data-ng-init="expanded=false"> 
-                       <a href="" data-ng-click="expanded=!expanded"><span class="alert-error">{{invalidIds.length}} gene(s) <strong>not</strong> recognized in the system</span></a>
+                       <a href="" data-ng-click="expanded=!expanded">
+                           <span class="alert-error">
+                               <i class="icon-attention-1"></i>{{invalidIds.length}} gene(s) not recognized in the system
+                           </span>
+                       </a>
                    </span>
                    <div style="max-height:25%; overflow:scroll" data-ng-hide="!expanded">
                        {{ invalidIds.join(', ') }}

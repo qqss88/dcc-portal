@@ -1,10 +1,10 @@
 @font-face {
-  font-family: 'icgc-icons';
-  src: url('fonts/icgc-icons.eot?17943347');
-  src: url('fonts/icgc-icons.eot?17943347#iefix') format('embedded-opentype'),
-       url('fonts/icgc-icons.woff?17943347') format('woff'),
-       url('fonts/icgc-icons.ttf?17943347') format('truetype'),
-       url('fonts/icgc-icons.svg?17943347#icgc-icons') format('svg');
+  font-family: 'fontello';
+  src: url('fonts/icgc-icons.eot?92084567');
+  src: url('fonts/icgc-icons.eot?92084567#iefix') format('embedded-opentype'),
+       url('fonts/icgc-icons.woff?92084567') format('woff'),
+       url('fonts/icgc-icons.ttf?92084567') format('truetype'),
+       url('fonts/icgc-icons.svg?92084567#fontello') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -13,86 +13,89 @@
 /*
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
-    font-family: 'icgc-icons';
-    src: url('../font/icgc-icons.svg?17943347#icgc-icons') format('svg');
+    font-family: 'fontello';
+    src: url('../font/fontello.svg?92084567#fontello') format('svg');
   }
 }
 */
-
+ 
  [class^="icon-"]:before, [class*=" icon-"]:before {
-  font-family: "icgc-icons";
+  font-family: "fontello";
   font-style: normal;
   font-weight: normal;
   speak: none;
-
+ 
   display: inline-block;
   text-decoration: inherit;
   width: 1em;
   margin-right: .2em;
   text-align: center;
   /* opacity: .8; */
-
+ 
   /* For safety - reset parent styles, that can break glyph codes*/
   font-variant: normal;
   text-transform: none;
-
+     
   /* fix buttons height, for twitter bootstrap */
   line-height: 1em;
-
+ 
   /* Animation center compensation - margins should be symmetric */
   /* remove if not needed */
   margin-left: .2em;
-
+ 
   /* you can be more comfortable with increased icons size */
   /* font-size: 120%; */
-
+ 
   /* Uncomment for 3D effect */
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
+ 
+.icon-upload:before { content: '\e800'; } /* '' */
+.icon-spinner:before { content: '\e801'; } /* '' */
+.icon-check-empty:before { content: '\e802'; } /* '' */
+.icon-info:before { content: '\e803'; } /* '' */
+.icon-list:before { content: '\e804'; } /* '' */
+.icon-team:before { content: '\e805'; } /* '' */
+.icon-cancel:before { content: '\e806'; } /* '' */
+.icon-zoom-out:before { content: '\e807'; } /* '' */
+.icon-check:before { content: '\e808'; } /* '' */
+.icon-ok:before { content: '\e809'; } /* '' */
+.icon-external-link:before { content: '\e80a'; } /* '' */
+.icon-download:before { content: '\e80b'; } /* '' */
+.icon-attention:before { content: '\e80c'; } /* '' */
+.icon-file:before { content: '\e80d'; } /* '' */
+.icon-file-alt:before { content: '\e80e'; } /* '' */
+.icon-folder-closed:before { content: '\e80f'; } /* '' */
+.icon-folder-open:before { content: '\e810'; } /* '' */
+.icon-resize-vertical:before { content: '\e811'; } /* '' */
+.icon-caret-down:before { content: '\e812'; } /* '' */
+.icon-caret-up:before { content: '\e813'; } /* '' */
+.icon-caret-left:before { content: '\e814'; } /* '' */
+.icon-caret-right:before { content: '\e815'; } /* '' */
+.icon-shield:before { content: '\e816'; } /* '' */
+.icon-video:before { content: '\e817'; } /* '' */
+.icon-search:before { content: '\e818'; } /* '' */
+.icon-mail:before { content: '\e819'; } /* '' */
+.icon-picture:before { content: '\e81a'; } /* '' */
+.icon-plus:before { content: '\e81b'; } /* '' */
+.icon-minus:before { content: '\e81c'; } /* '' */
+.icon-help:before { content: '\e81d'; } /* '' */
+.icon-home:before { content: '\e81e'; } /* '' */
+.icon-cog:before { content: '\e81f'; } /* '' */
+.icon-login:before { content: '\e820'; } /* '' */
+.icon-logout:before { content: '\e821'; } /* '' */
+.icon-time:before { content: '\e822'; } /* '' */
+.icon-sort:before { content: '\e823'; } /* '' */
+.icon-sort-down:before { content: '\e824'; } /* '' */
+.icon-sort-up:before { content: '\e825'; } /* '' */
+.icon-chart:before { content: '\e826'; } /* '' */
+.icon-database:before { content: '\e827'; } /* '' */
+.icon-twitter:before { content: '\e828'; } /* '' */
+.icon-undo:before { content: '\e829'; } /* '' */
+.icon-pilcrow:before { content: '\e82a'; } /* '' */
+.icon-zoom-in:before { content: '\e82b'; } /* '' */
+.icon-attention-1:before { content: '\e82c'; } /* '' */
 
-.icon-spinner:before { content: '\e800'; } /* '' */
-.icon-check-empty:before { content: '\e821'; } /* '' */
-.icon-info:before { content: '\e81e'; } /* '' */
-.icon-external-link:before { content: '\e80e'; } /* '' */
-.icon-download:before { content: '\e80d'; } /* '' */
-.icon-attention:before { content: '\e824'; } /* '' */
-.icon-file:before { content: '\e803'; } /* '' */
-.icon-file-alt:before { content: '\e804'; } /* '' */
-.icon-folder-closed:before { content: '\e817'; } /* '' */
-.icon-folder-open:before { content: '\e816'; } /* '' */
-.icon-resize-vertical:before { content: '\e82b'; } /* '' */
-.icon-caret-down:before { content: '\e81c'; } /* '' */
-.icon-caret-up:before { content: '\e81b'; } /* '' */
-.icon-caret-left:before { content: '\e81a'; } /* '' */
-.icon-caret-right:before { content: '\e819'; } /* '' */
-.icon-shield:before { content: '\e827'; } /* '' */
-.icon-video:before { content: '\e818'; } /* '' */
-.icon-search:before { content: '\e806'; } /* '' */
-.icon-mail:before { content: '\e825'; } /* '' */
-.icon-picture:before { content: '\e805'; } /* '' */
-.icon-list:before { content: '\e80c'; } /* '' */
-.icon-team:before { content: '\e81f'; } /* '' */
-.icon-cancel:before { content: '\e802'; } /* '' */
-.icon-plus:before { content: '\e807'; } /* '' */
-.icon-minus:before { content: '\e808'; } /* '' */
-.icon-help:before { content: '\e80a'; } /* '' */
-.icon-home:before { content: '\e815'; } /* '' */
-.icon-cog:before { content: '\e82a'; } /* '' */
-.icon-login:before { content: '\e828'; } /* '' */
-.icon-logout:before { content: '\e829'; } /* '' */
-.icon-time:before { content: '\e811'; } /* '' */
-.icon-sort:before { content: '\e812'; } /* '' */
-.icon-sort-down:before { content: '\e813'; } /* '' */
-.icon-sort-up:before { content: '\e814'; } /* '' */
-.icon-chart:before { content: '\e80b'; } /* '' */
-.icon-database:before { content: '\e809'; } /* '' */
-.icon-twitter:before { content: '\e826'; } /* '' */
-.icon-undo:before { content: '\e81d'; } /* '' */
-.icon-pilcrow:before { content: '\e820'; } /* '' */
-.icon-zoom-in:before { content: '\e80f'; } /* '' */
-.icon-zoom-out:before { content: '\e810'; } /* '' */
-.icon-check:before { content: '\e822'; } /* '' */
-.icon-ok:before { content: '\e801'; } /* '' */
 
 /*
    Animation example, for spinners
