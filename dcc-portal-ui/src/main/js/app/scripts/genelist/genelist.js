@@ -18,7 +18,6 @@
 
 (function () {
   'use strict';
-
   angular.module('icgc.genelist', ['icgc.genelist.controllers', 'icgc.genelist.directives']);
 })();
 
@@ -41,15 +40,7 @@
     function verify() {
       $scope.state = 'verifying';
 
-
-      // TODO: remove, just keeping it around because this works
-      // $http.post('http://localhost:8080/api/v1/ui/identifier/genes', 'geneIdentifiers=' + $scope.rawText, { transformRequest: angular.identity }).then(function(x) {
-      //   $scope.verifying = false;
-      //   $scope.verified = true;
-      //   console.log('x', x);
-      // });
-
-      var data = 'geneIdentifiers=' + encodeURI($scope.rawText);
+      var data = 'data=' + encodeURI($scope.rawText);
       Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, 'validate').then(function(result) {
 
@@ -87,11 +78,9 @@
 
     function createNewGeneList() {
       var data = 'geneIds=' + encodeURI($scope.validIds.join(','));
-      console.log("sending ", data);
       Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
           var filters = LocationService.filters();
-          console.log("Gene list id is", result);
 
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
@@ -101,14 +90,36 @@
           }
 
           $scope.genelistModal = false;
-          filters.gene.uploadedGeneList.is = [parseInt(result.id, 10)];
+          filters.gene.uploadedGeneList.is = [result.id];
           LocationService.setFilters(filters);
         });
     }
 
+    function remove() {
+      var filters = LocationService.basicFilters();
+      LocationService.setFilters(filters);
+    }
 
+  
+    // Init
     $scope.rawText = '';
     $scope.state = '';
+    $scope.hasGeneList = false;
+
+
+    $scope.$watch(function () { return LocationService.search(); }, function(n) {
+      var filters = LocationService.filters();
+      $scope.hasGeneList = false;
+      if (filters.hasOwnProperty('gene')) {
+        if (filters.gene.hasOwnProperty('uploadedGeneList')) {
+          $scope.hasGeneList = true;
+        }
+      }
+    }, true);
+
+    $scope.remove = function() {
+      remove();
+    };
 
     $scope.newGeneList = function() {
       createNewGeneList();
@@ -117,7 +128,7 @@
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 
     // way of modeling [input type=file]. So to get file information, it is proxied through a 
     // directive that gets the file value (myFile) from input $element
-    $scope.$watch('myFile', function(newValue, oldValue) {
+    $scope.$watch('myFile', function(newValue) {
       if (! newValue) {
         return;
       }

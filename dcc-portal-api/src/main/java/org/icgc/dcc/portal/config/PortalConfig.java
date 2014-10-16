@@ -118,6 +118,7 @@ public class PortalConfig {
     return new OpenIDAuthProvider(authenticator, "OpenID");
   }
 
+  @Bean
   public GeneListRepository geneListRepository(DBI dbi) {
     return dbi.open(GeneListRepository.class);
   }

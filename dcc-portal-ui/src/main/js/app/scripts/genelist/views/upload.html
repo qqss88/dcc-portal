@@ -1,6 +1,21 @@
-<a href="" data-ng-click="genelistModal=!genelistModal; reset();">
-    <i class="icon-download"></i> Upload Gene List
-</a>
+<ul class="t_facets__facet"> 
+    <li class="t_facets__facet__terms">
+        <ul class="t_facets__facet__terms__active">
+            <li class="t_facets__facet__terms__active__term__label" 
+                data-ng-if="hasGeneList"
+                data-ng-click="remove()"
+                data-ng-mouseover="toggleRemove=true"
+                data-ng-mouseleave="toggleRemove=false" >
+                <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> Gene List
+            </li>
+            <li>
+                <a href="" data-ng-click="genelistModal=!genelistModal; reset();">
+                    <span><i class="icon-download"></i> Upload Gene List</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>
 <div data-modal=genelistModal>
     <div class="modal-dialog light">
         <div class="modal-content">
@@ -21,8 +36,8 @@
                </div>
                <div style="padding:0.25rem">
                    <textarea 
+                       rows="5" 
                        placeholder="e.g. TTN, TP53, CSMD3, ENSG ENSG00000151952, ENSG00000133703"
-                       data-ng-disabled="state==='verifying'"
                        data-ng-model="rawText" 
                        data-ng-change="updateGenelist()"> 
                    </textarea>

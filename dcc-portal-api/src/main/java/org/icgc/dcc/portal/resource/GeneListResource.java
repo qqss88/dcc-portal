@@ -85,7 +85,7 @@ public class GeneListResource {
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
   public Map<String, String> saveGeneList(
-      @ApiParam(value = "The contents to be parsed and verified") @FormParam("geneIds") String geneIds) {
+      @ApiParam(value = "The Ids to be saved as a Gene List") @FormParam("geneIds") String geneIds) {
     UUID id = geneListService.save(geneIds);
     return ImmutableMap.<String, String> of("id", "" + id);
   }
@@ -95,14 +95,12 @@ public class GeneListResource {
   @POST
   @Timed
   public Map<String, List<String>> findGenesByIdentifiers(
-      @ApiParam(value = "The contents to be parsed and verified") @FormParam("geneIdentifiers") String geneIdentifiers) {
-
-    log.info("!!! Form content {}", geneIdentifiers);
+      @ApiParam(value = "The contents to be parsed and verified") @FormParam("data") String data) {
 
     // Spaces, tabs, commas, or new lines
     val delimiters = Pattern.compile("[, \t\r\n]");
     val splitter = Splitter.on(delimiters).omitEmptyStrings();
-    val ids = ImmutableList.<String> copyOf(splitter.split(geneIdentifiers));
+    val ids = ImmutableList.<String> copyOf(splitter.split(data));
 
     log.info("Sending {} gene identifiers to be verified.", ids.size());
     val validResults = geneService.validateIdentifiers(ids);
