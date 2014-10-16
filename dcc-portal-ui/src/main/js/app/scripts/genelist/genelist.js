@@ -25,6 +25,8 @@
 
 // TODO: Probably want a service
 // TODO: Should add additional icons: upload, warning
+// TODO: Extend LocationService to filter out extra stuff like genelist
+// TODO: Clean up
 
 (function () {
   'use strict';
@@ -32,7 +34,7 @@
   angular.module('icgc.genelist.controllers', []);
 
   angular.module('icgc.genelist.controllers')
-    .controller('genelistController', function($scope, $timeout, $http, Restangular) {
+    .controller('genelistController', function($scope, $timeout, $http, Restangular, LocationService) {
     var verifyPromise = null;
     var delay = 1000;
 
@@ -83,9 +85,30 @@
       }, 1000);
     }
 
+    function createNewGeneList() {
+      var data = 'geneIds=' + encodeURI($scope.validIds.join(','));
+      console.log("sending ", data);
+      Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data).then(function(result) {
+          var filters = LocationService.filters();
+          console.log("Gene list id is", result);
+
+          if (! filters.hasOwnProperty('gene')) {
+            filters.gene = {};
+          }
+          $scope.genelistModal = false;
+          filters.gene.uploadedGeneList = [result.id];
+          LocationService.setFilters(filters);
+        });
+    }
+
 
     $scope.rawText = '';
     $scope.state = '';
+
+    $scope.newGeneList = function() {
+      createNewGeneList();
+    };
 
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 
     // way of modeling [input type=file]. So to get file information, it is proxied through a 
