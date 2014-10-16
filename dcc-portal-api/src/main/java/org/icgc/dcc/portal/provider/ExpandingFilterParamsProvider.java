@@ -158,12 +158,12 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
   }
 
   private static boolean hasGeneListIds(ObjectNode filters) {
-    return !getGeneFilter(filters).path(GENE_LIST_ID_FIELD_NAME).isMissingNode();
+    return !getGeneFilter(filters).path(GENE_LIST_ID_FIELD_NAME).path(IS_FIELD_NAME).isMissingNode();
   }
 
   private static Set<Long> getGeneListIds(ObjectNode filters) {
     val geneListIds = Sets.<Long> newLinkedHashSet();
-    for (val geneIdNode : getGeneFilter(filters).withArray(GENE_LIST_ID_FIELD_NAME)) {
+    for (val geneIdNode : getGeneFilter(filters).path(GENE_LIST_ID_FIELD_NAME).withArray(IS_FIELD_NAME)) {
       val geneListId = geneIdNode.longValue();
 
       geneListIds.add(geneListId);

@@ -96,8 +96,12 @@
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
           }
+          if (! filters.gene.hasOwnProperty('uploadedGeneList')) {
+            filters.gene.uploadedGeneList = {};
+          }
+
           $scope.genelistModal = false;
-          filters.gene.uploadedGeneList = [parseInt(result.id, 10)];
+          filters.gene.uploadedGeneList.is = [parseInt(result.id, 10)];
           LocationService.setFilters(filters);
         });
     }

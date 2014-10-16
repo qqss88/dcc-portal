@@ -26,15 +26,32 @@
       path: function () {
         return $location.path();
       },
+
       search: function () {
         return $location.search();
       },
+
       clear: function () {
         return $location.search({});
       },
+
+      // Returns the current filters unadorned by the expansion elements that would alter the semantics
+      basicFilters: function() {
+        var filters = this.getJsonParam('filters');
+        if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('uploadedGeneList')) {
+          delete filters.gene.uploadedGeneList;
+          if (_.isEmpty(filters.gene)) {
+            delete filters.gene;
+          }
+        }
+        return filters;
+      },
+
+      // Returns the current filters
       filters: function () {
         return this.getJsonParam('filters');
       },
+
       setFilters: function (filters) {
         var search = this.search();
 
