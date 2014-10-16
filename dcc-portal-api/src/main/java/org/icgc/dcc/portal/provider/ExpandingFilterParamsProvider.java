@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.provider;
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.sun.jersey.core.spi.component.ComponentScope.PerRequest;
+import static org.elasticsearch.common.collect.Iterables.addAll;
 import static org.elasticsearch.common.collect.Iterables.isEmpty;
 
 import java.util.Set;
@@ -138,9 +139,7 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
         throw new BadRequestException("Cannot find gene list id " + geneListId);
       }
 
-      for (val geneId : geneIds) {
-        geneListGeneIds.add(geneId);
-      }
+      addAll(geneListGeneIds, geneIds);
     }
 
     return geneListGeneIds;

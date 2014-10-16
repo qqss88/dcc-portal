@@ -43,8 +43,8 @@ import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
-import org.icgc.dcc.portal.dao.GeneListDAO;
 import org.icgc.dcc.portal.model.Settings;
+import org.icgc.dcc.portal.repository.GeneListRepository;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
 import org.skife.jdbi.v2.DBI;
@@ -118,9 +118,8 @@ public class PortalConfig {
     return new OpenIDAuthProvider(authenticator, "OpenID");
   }
 
-  @Bean(destroyMethod = "close")
-  public GeneListDAO geneListDAO(DBI dbi) {
-    return dbi.open(GeneListDAO.class);
+  public GeneListRepository geneListRepository(DBI dbi) {
+    return dbi.open(GeneListRepository.class);
   }
 
   @Bean

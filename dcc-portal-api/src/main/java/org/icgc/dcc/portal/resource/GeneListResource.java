@@ -64,10 +64,7 @@ public class GeneListResource {
 
   @Path("/{genelistIds}")
   @GET
-  public List<Map<String, String>> getGeneList(
-      @PathParam("genelistIds") IdsParam geneListIds
-      ) {
-
+  public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) {
     val result = Lists.<Map<String, String>> newLinkedList();
     for (val id : geneListIds.get()) {
       val geneListStr = geneListService.get(Long.parseLong(id));
@@ -78,16 +75,16 @@ public class GeneListResource {
         result.add(ImmutableMap.<String, String> of(id, geneListService.get(Long.parseLong(id))));
       }
     }
+
     return result;
   }
 
-  // @Path("/genelist")
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
   public Map<String, String> saveGeneList(
       @ApiParam(value = "The contents to be parsed and verified") @FormParam("geneIds") String geneIds) {
-    long id = geneListService.insert(geneIds);
+    long id = geneListService.save(geneIds);
     return ImmutableMap.<String, String> of("id", "" + id);
   }
 

@@ -69,14 +69,6 @@ public class UIResource {
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
 
-  @Path("/test")
-  @GET
-  public Map<String, String> test(
-      @ApiParam(value = "hello") @QueryParam("filters") FiltersParam filters
-      ) {
-    return Maps.<String, String> newHashMap();
-  }
-
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
    * projects page.

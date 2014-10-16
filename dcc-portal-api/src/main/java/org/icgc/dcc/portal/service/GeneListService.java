@@ -21,7 +21,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.icgc.dcc.portal.dao.GeneListDAO;
+import org.icgc.dcc.portal.repository.GeneListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,21 +33,21 @@ import org.springframework.stereotype.Service;
 public class GeneListService {
 
   @NonNull
-  private final GeneListDAO geneListDAO;
+  private final GeneListRepository geneListRepository;
 
   /**
    * Get the next sequence Id, and use the Id as key to insert and return it. Do this in 2 discrete steps for
    * compatibility
    */
-  public long insert(String data) {
-    val id = geneListDAO.nextId();
-    geneListDAO.insert(id, data);
+  public long save(String data) {
+    val id = geneListRepository.nextId();
+    geneListRepository.insert(id, data);
 
     return id;
   }
 
   public String get(long id) {
-    return geneListDAO.get(id);
+    return geneListRepository.get(id);
   }
 
 }

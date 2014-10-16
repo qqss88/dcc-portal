@@ -15,7 +15,9 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.dao;
+package org.icgc.dcc.portal.repository;
+
+import javax.annotation.PreDestroy;
 
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -24,7 +26,7 @@ import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 /**
  * Data access for Gene List The SQLs are written to work with Postgresql.
  */
-public interface GeneListDAO {
+public interface GeneListRepository {
 
   @SqlQuery("SELECT NEXTVAL('genelist_sequence')")
   long nextId();
@@ -38,6 +40,7 @@ public interface GeneListDAO {
   /**
    * {@code close} with no args is used to close the connection.
    */
+  @PreDestroy
   void close();
 
 }
