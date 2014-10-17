@@ -141,6 +141,16 @@
         var s = this.search();
         delete s[param];
         $location.search(s);
+      },
+
+      hasGeneList: function() {
+        var filters = this.getJsonParam('filters');
+        if (filters.hasOwnProperty('gene')) {
+          if (filters.gene.hasOwnProperty('uploadedGeneList')) {
+            return true;
+          }
+        }
+        return false;
       }
     };
   });

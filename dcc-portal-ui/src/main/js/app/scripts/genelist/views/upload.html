@@ -8,10 +8,11 @@
                 data-ng-mouseleave="toggleRemove=false" >
                 <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> Gene List
             </li>
-            <li class="text-right">
-                <a href="" data-ng-click="genelistModal=!genelistModal; reset();">
-                    <span><i class="icon-upload"></i> Upload Gene List</span>
-                </a>
+            <li class="text-right" data-ng-hide="collapsed">
+                <button type="button" class="t_button" data-ng-click="genelistModal=!genelistModal; reset();">
+                    <i class="icon-upload"></i> Upload Gene List
+                </button>
+                <br><br>
             </li>
         </ul>
     </li>

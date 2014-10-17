@@ -177,6 +177,9 @@
   angular.module('icgc.genelist.directives').directive('uploadGenelist', function () {
     return {
       restrict: 'E',
+      scope: {
+        collapsed: '='
+      },
       templateUrl: '/scripts/genelist/views/upload.html',
       controller: 'genelistController'
     };

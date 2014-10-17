@@ -29,6 +29,16 @@
         type: type,
         facet: $scope.facetName
       });
+
+      // Check if there are extended element associated with this facet
+      // i.e. : GeneList is a subse of Gene
+      $scope.hasExtension = false;
+      if ($scope.type === 'gene') {
+        if (LocationService.hasGeneList() === true) {
+          console.log('Found gene list extension');
+          $scope.hasExtension = true;
+        }
+      }
     }
 
     $scope.addTerm = function (term) {
@@ -65,6 +75,13 @@
         facet: $scope.facetName
       });
 
+      if ($scope.type === 'gene' && LocationService.hasGeneList() === true) {
+        Facets.removeFacet({
+          type: type,
+          facet: 'uploadedGeneList'
+        });
+      }
+
     };
 
     // Needed if term removed from outside scope
@@ -90,7 +107,13 @@
         example: '@',
         placeholder: '@'
       },
-      templateUrl: 'scripts/facets/views/tags.html',
+      templateUrl: function(elem, attr) {
+        console.log('in templateURL', attr.type);
+        if (attr.type === 'gene') {
+          return 'scripts/facets/views/genetags.html';
+        }
+        return 'scripts/facets/views/tags.html';
+      },
       controller: 'tagsFacetCtrl'
     };
   });
