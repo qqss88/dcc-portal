@@ -70,7 +70,7 @@
                 <a href="/search" data-ng-if="!job.filter">None </a>
                 <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter">
                     <ul style="display:inline">
-                        <li data-ng-repeat="(typeName, type) in job.filter" style="display:inline">
+                        <li data-ng-repeat="(typeName, type) in job.uiQueryFilter" style="display:inline">
                             <ul style="display:inline">
                                 <li data-ng-repeat="(facet, terms) in type track by facet" style="display:inline">
                                     <span data-ng-switch="facet">

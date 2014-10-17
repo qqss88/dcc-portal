@@ -242,7 +242,9 @@ public class DownloadResource {
 
       @ApiParam(value = "user email address", required = false) @QueryParam("email") @DefaultValue("") String email,
 
-      @ApiParam(value = "download url", required = true) @QueryParam("downloadUrl") @DefaultValue("") String downloadUrl
+      @ApiParam(value = "download url", required = true) @QueryParam("downloadUrl") @DefaultValue("") String downloadUrl,
+
+      @ApiParam(value = "UI representation of the filter string", required = false) @QueryParam("uiQueryStr") @DefaultValue("{}") String uiQueryStr
 
       ) {
 
@@ -276,6 +278,7 @@ public class DownloadResource {
 
     ImmutableMap.Builder<String, String> jobInfoBuilder = ImmutableMap.builder();
     jobInfoBuilder.put("filter", filters.toString());
+    jobInfoBuilder.put("uiQueryStr", uiQueryStr);
     jobInfoBuilder.put("startTime", String.valueOf(System.currentTimeMillis()));
     jobInfoBuilder.put("hasEmail", String.valueOf(!email.equals("")));
     jobInfoBuilder.put(IS_CONTROLLED, String.valueOf(isLogin));

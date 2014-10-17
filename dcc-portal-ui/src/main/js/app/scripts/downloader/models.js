@@ -23,7 +23,7 @@ angular.module('app.downloader.model', []);
 angular.module('app.downloader.model').factory('Downloader', function ($http) {
   return {
 
-    requestDownloadJob: function (filters, info, email, downloadUrl) {
+    requestDownloadJob: function (filters, info, email, downloadUrl, uiQueryStr) {
       var url;
       filters = JSON.stringify(filters);
       info = JSON.stringify(info);
@@ -31,7 +31,9 @@ angular.module('app.downloader.model').factory('Downloader', function ($http) {
             'filters=' + filters +
             '&info=' + info +
             '&email=' + email +
-            '&downloadUrl=' + downloadUrl;
+            '&downloadUrl=' + downloadUrl +
+            '&uiQueryStr=' + encodeURIComponent(uiQueryStr);
+
       return $http.get(url);
     },
 

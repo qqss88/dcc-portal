@@ -153,12 +153,15 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
                 job.archiveSize = jobInfo.fileSize;  // Total archive size
               }
 
+              // Filter is the expanded query, uiFilter is what user sees
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
+              job.uiQueryFilter = cleanFilter(JSON.parse(jobInfo.uiQueryStr));
 
               if (_.isEmpty(job.filter)) {
                 delete job.filter;
+                delete job.uiQueryFilter;
               } else {
-                job.filterStr = encodeURIComponent(JSON.stringify(job.filter));
+                job.filterStr = encodeURIComponent(JSON.stringify(job.uiQueryFilter));
               }
               job.isExpanded = true;
               job.hasEmail = jobInfo.hasEmail === 'true';

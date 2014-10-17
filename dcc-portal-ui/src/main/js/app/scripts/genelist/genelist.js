@@ -107,7 +107,7 @@
     $scope.hasGeneList = false;
 
 
-    $scope.$watch(function () { return LocationService.search(); }, function(n) {
+    $scope.$watch(function () { return LocationService.search(); }, function() {
       var filters = LocationService.filters();
       $scope.hasGeneList = false;
       if (filters.hasOwnProperty('gene')) {

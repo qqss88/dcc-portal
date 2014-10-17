@@ -190,12 +190,12 @@
     };
 
     _this.success = function (donors) {
-      var uniqueDonorFilter = LocationService.basicFilters();
+      var filters = LocationService.filters();
       Page.stopWork();
       _this.loading = false;
 
       donors.hits.forEach(function (donor) {
-        donor.embedQuery = LocationService.merge(uniqueDonorFilter, {donor: {id: {is: [donor.id]}}}, 'facet');
+        donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
       });
       _this.donors = donors;
       _this.ajax();
@@ -303,8 +303,7 @@
               }).then(function (data) {
                 mutation.uiDonors = [];
                 if (data.facets.projectId.terms) {
-                  // var _f = LocationService.filters();
-                  var _f = LocationService.basicFilters();
+                  var _f = LocationService.filters();
                   if (_f.hasOwnProperty('donor')) {
                     delete _f.donor.projectId;
                     if (_.isEmpty(_f.donor)) {
@@ -360,7 +359,7 @@
         _this.loading = false;
 
         mutations.hits.forEach(function (mutation) {
-          var filters = LocationService.basicFilters();
+          var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
         });
         _this.mutations = mutations;
