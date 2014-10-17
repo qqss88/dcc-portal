@@ -24,10 +24,25 @@
 
   module.controller('currentCtrl', function ($scope, Facets, LocationService) {
     $scope.Facets = Facets;
+
     function refresh() {
-      $scope.filters = LocationService.filters();
+      $scope.filters = LocationService.getUIDisplayFilters();
       $scope.isActive = _.keys($scope.filters).length;
     }
+
+    $scope.removeFacet = function(type, facet) {
+      Facets.removeFacet({
+        type: type,
+        facet: facet
+      });
+
+      if (type === 'gene' && facet === 'id') {
+        Facets.removeFacet({
+          type: type,
+          facet: 'uploadedGeneList'
+        });
+      }
+    };
 
     refresh();
     $scope.$on('$locationChangeSuccess', function () {

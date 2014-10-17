@@ -35,7 +35,6 @@
       $scope.hasExtension = false;
       if ($scope.type === 'gene') {
         if (LocationService.hasGeneList() === true) {
-          console.log('Found gene list extension');
           $scope.hasExtension = true;
         }
       }
@@ -108,7 +107,6 @@
         placeholder: '@'
       },
       templateUrl: function(elem, attr) {
-        console.log('in templateURL', attr.type);
         if (attr.type === 'gene') {
           return 'scripts/facets/views/genetags.html';
         }

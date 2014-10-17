@@ -151,7 +151,44 @@
           }
         }
         return false;
+      },
+
+      getUIDisplayFilters: function() {
+        var display = {}, filters = this.filters();
+
+        angular.forEach(filters, function(typeFilters, typeKey) {
+          display[typeKey] = {};
+          angular.forEach(typeFilters, function(facetFilters, facetKey) {
+            var uiFacetKey = facetKey;
+
+            // Genelist expansion maps to gene id
+            if (typeKey === 'gene' && (facetKey === 'id' || facetKey === 'uploadedGeneList')) {
+              uiFacetKey = 'id';
+            }
+
+            // Allocate terms
+            if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+              display[typeKey][uiFacetKey] = {};
+              display[typeKey][uiFacetKey].is = [];
+            }
+
+            facetFilters.is.forEach(function(term) {
+              var uiTerm = term;
+              if (typeKey === 'gene' && facetKey === 'uploadedGeneList') {
+                uiTerm = 'Gene List'
+              }
+              display[typeKey][uiFacetKey].is.push({
+                term: uiTerm,
+                controlTerm: term,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+            });
+          });
+        });
+        return display;
       }
+
     };
   });
 })();
