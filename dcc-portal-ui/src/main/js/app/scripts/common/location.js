@@ -177,12 +177,23 @@
               if (typeKey === 'gene' && facetKey === 'uploadedGeneList') {
                 uiTerm = 'Gene List'
               }
-              display[typeKey][uiFacetKey].is.push({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
+
+              if (facetKey === 'uploadedGeneList') {
+                display[typeKey][uiFacetKey].is.unshift({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              } else {
+                display[typeKey][uiFacetKey].is.push({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              }
+
             });
           });
         });
