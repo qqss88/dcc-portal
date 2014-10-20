@@ -22,7 +22,7 @@ angular.module('app.downloader.controllers', ['app.downloader.services']);
 // Controls the download jobs for dynamic downloads
 // Note: We try to preemptitively determine status as a way improve UX and reduce polls
 angular.module('app.downloader.controllers').controller('DownloaderController',
-  function ($window, $filter, $timeout, $scope, Page, DownloaderService, DataTypes, ids) {
+  function ($window, $filter, $timeout, $scope, Page, DownloaderService, DataTypes, FiltersUtil, ids) {
     var cancelTimeout;
     var dataTypeOrder = DataTypes.order;
 
@@ -155,13 +155,13 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
               // Filter is the expanded query, uiFilter is what user sees
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
-              job.uiQueryFilter = cleanFilter(JSON.parse(jobInfo.uiQueryStr));
+              job.uiQueryFilter = FiltersUtil.buildUIFilters(cleanFilter(JSON.parse(jobInfo.uiQueryStr)));
 
               if (_.isEmpty(job.filter)) {
                 delete job.filter;
                 delete job.uiQueryFilter;
               } else {
-                job.filterStr = encodeURIComponent(JSON.stringify(job.uiQueryFilter));
+                job.filterStr = encodeURIComponent(jobInfo.uiQueryStr);
               }
               job.isExpanded = true;
               job.hasEmail = jobInfo.hasEmail === 'true';

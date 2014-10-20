@@ -33,7 +33,7 @@
   angular.module('icgc.genelist.controllers', []);
 
   angular.module('icgc.genelist.controllers')
-    .controller('genelistController', function($scope, $timeout, $http, Restangular, LocationService) {
+    .controller('genelistController', function($scope, $timeout, $http, Restangular, LocationService, FiltersUtil) {
     var verifyPromise = null;
     var delay = 1000;
 
@@ -96,7 +96,7 @@
     }
 
     function remove() {
-      var filters = LocationService.basicFilters();
+      var filters = FiltersUtil.removeExtensions(LocationService.filters());
       LocationService.setFilters(filters);
     }
 

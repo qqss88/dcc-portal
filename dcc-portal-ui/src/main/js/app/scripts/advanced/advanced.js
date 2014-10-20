@@ -210,14 +210,14 @@
     };
   });
 
-  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State) {
+  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State, FiltersUtil) {
     var _this = this;
 
     _this.ajax = function () {
       if (State.isTab('gene') && _this.genes && _this.genes.hits && _this.genes.hits.length) {
         _this.mutationCounts = null;
         var geneIds = _.pluck(_this.genes.hits, 'id').join(',');
-        var uniqueGeneFilter = LocationService.basicFilters();
+        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
 
         // Get Mutations counts
         Genes.one(geneIds).handler
@@ -236,7 +236,7 @@
             }).then(function (data) {
               gene.uiDonors = [];
               if (data.facets.projectId.terms) {
-                var _f = LocationService.basicFilters();
+                var _f = FiltersUtil.removeExtensions(LocationService.filters());
                 if (_f.hasOwnProperty('donor')) {
                   delete _f.donor.projectId;
                   if (_.isEmpty(_f.donor)) {
@@ -271,7 +271,7 @@
       _this.loading = false;
 
       genes.hits.forEach(function (gene) {
-        var uniqueGeneFilter = LocationService.basicFilters();
+        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
         gene.embedQuery = LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet');
       });
       _this.genes = genes;

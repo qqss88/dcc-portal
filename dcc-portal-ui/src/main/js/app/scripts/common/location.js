@@ -30,28 +30,12 @@
       search: function () {
         return $location.search();
       },
-
       clear: function () {
         return $location.search({});
       },
-
-      // Returns the current filters unadorned by the expansion elements that would alter the semantics
-      basicFilters: function() {
-        var filters = this.getJsonParam('filters');
-        if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('uploadedGeneList')) {
-          delete filters.gene.uploadedGeneList;
-          if (_.isEmpty(filters.gene)) {
-            delete filters.gene;
-          }
-        }
-        return filters;
-      },
-
-      // Returns the current filters
       filters: function () {
         return this.getJsonParam('filters');
       },
-
       setFilters: function (filters) {
         var search = this.search();
 
@@ -141,63 +125,6 @@
         var s = this.search();
         delete s[param];
         $location.search(s);
-      },
-
-      hasGeneList: function() {
-        var filters = this.getJsonParam('filters');
-        if (filters.hasOwnProperty('gene')) {
-          if (filters.gene.hasOwnProperty('uploadedGeneList')) {
-            return true;
-          }
-        }
-        return false;
-      },
-
-      getUIDisplayFilters: function() {
-        var display = {}, filters = this.filters();
-
-        angular.forEach(filters, function(typeFilters, typeKey) {
-          display[typeKey] = {};
-          angular.forEach(typeFilters, function(facetFilters, facetKey) {
-            var uiFacetKey = facetKey;
-
-            // Genelist expansion maps to gene id
-            if (typeKey === 'gene' && (facetKey === 'id' || facetKey === 'uploadedGeneList')) {
-              uiFacetKey = 'id';
-            }
-
-            // Allocate terms
-            if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
-              display[typeKey][uiFacetKey] = {};
-              display[typeKey][uiFacetKey].is = [];
-            }
-
-            facetFilters.is.forEach(function(term) {
-              var uiTerm = term;
-              if (typeKey === 'gene' && facetKey === 'uploadedGeneList') {
-                uiTerm = 'Gene List'
-              }
-
-              if (facetKey === 'uploadedGeneList') {
-                display[typeKey][uiFacetKey].is.unshift({
-                  term: uiTerm,
-                  controlTerm: term,
-                  controlFacet: facetKey,
-                  controlType: typeKey
-                });
-              } else {
-                display[typeKey][uiFacetKey].is.push({
-                  term: uiTerm,
-                  controlTerm: term,
-                  controlFacet: facetKey,
-                  controlType: typeKey
-                });
-              }
-
-            });
-          });
-        });
-        return display;
       }
 
     };

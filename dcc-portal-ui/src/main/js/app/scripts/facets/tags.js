@@ -20,7 +20,7 @@
 
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
-  module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService) {
+  module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService, FiltersUtil) {
     $scope.projects = HighchartsService.projectColours;
 
     function setup() {
@@ -34,7 +34,7 @@
       // i.e. : GeneList is a subse of Gene
       $scope.hasExtension = false;
       if ($scope.type === 'gene') {
-        if (LocationService.hasGeneList() === true) {
+        if (FiltersUtil.hasGeneListExtension( LocationService.filters())) {
           $scope.hasExtension = true;
         }
       }
@@ -74,7 +74,7 @@
         facet: $scope.facetName
       });
 
-      if ($scope.type === 'gene' && LocationService.hasGeneList() === true) {
+      if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(LocationService.filters()) === true) {
         Facets.removeFacet({
           type: type,
           facet: 'uploadedGeneList'

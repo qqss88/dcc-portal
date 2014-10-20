@@ -22,11 +22,11 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService) {
+  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil) {
     $scope.Facets = Facets;
 
     function refresh() {
-      $scope.filters = LocationService.getUIDisplayFilters();
+      $scope.filters = FiltersUtil.buildUIFilters(LocationService.filters());
       $scope.isActive = _.keys($scope.filters).length;
     }
 
