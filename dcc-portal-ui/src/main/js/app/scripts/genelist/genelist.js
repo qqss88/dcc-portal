@@ -28,8 +28,9 @@
 
   angular.module('icgc.genelist.controllers', []);
 
-  angular.module('icgc.genelist.controllers')
-    .controller('genelistController', function($scope, $timeout, $http, Restangular, LocationService, FiltersUtil) {
+  angular.module('icgc.genelist.controllers').controller('genelistController',
+    function($scope, $timeout, $http, $location, Restangular, LocationService, FiltersUtil) {
+
     var verifyPromise = null;
     var delay = 1000;
 
@@ -87,7 +88,9 @@
 
           $scope.genelistModal = false;
           filters.gene.uploadedGeneList.is = [result.id];
-          LocationService.setFilters(filters);
+
+          $location.path('/search/g').search({'filters': angular.toJson(filters)});
+          // LocationService.setFilters(filters);
         });
     }
 

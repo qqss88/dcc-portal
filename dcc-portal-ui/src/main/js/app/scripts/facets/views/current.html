@@ -29,9 +29,10 @@
                                   data-ng-style="hoverStyle"
                                   data-ng-click="Facets.removeTerm({type: termObj.controlType, facet: termObj.controlFacet, term: termObj.controlTerm})"
                                   data-tooltip="{{ termObj.term | trans | define:true }}">{{termObj.term | trans:true}}</span>
+                            <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>  
                         </li>
                         <li data-ng-show="terms.is.length > 2">
-                            <a href=""><span data-ng-click="expandTerms=!expandTerms">
+                            <a href=""><span data-ng-click="expandTerms=!expandTerms" class="t_current__or">
                                 <i class="{{expandTerms?'icon-caret-left':''}}"></i> {{ expandTerms? 'less':'...'}}
                             </span></a> 
                         </li>

@@ -26,7 +26,7 @@ angular.module('app.ui', [
   'app.ui.tpls',
   'app.ui.synonyms',
   'app.ui.dl',
-  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
+  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur', 'app.ui.autofocus',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
   'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2',
   'app.ui.fileUpload'
@@ -643,6 +643,17 @@ angular.module('app.ui.blur', []).directive('blur', function ($parse) {
     }
 
     element.on('blur', callback);
+  };
+});
+
+angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout) {
+  return {
+    restrict: 'A',
+    link: function($scope, $element) {
+      $timeout(function() {
+        $element[0].focus();
+      });
+    }
   };
 });
 

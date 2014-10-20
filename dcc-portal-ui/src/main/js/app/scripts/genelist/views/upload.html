@@ -43,6 +43,7 @@
                    <textarea 
                        rows="5" 
                        placeholder="e.g. TTN, TP53, CSMD3, ENSG ENSG00000151952, ENSG00000133703"
+                       data-autofocus
                        data-ng-model="rawText" 
                        data-ng-change="updateGenelist()"> 
                    </textarea>
@@ -54,7 +55,7 @@
                <div>
                    <div>Or choose a file to upload</div>
                    <span class="t_button btn btn-file">
-                       Browse <input type="file" data-file-upload="myFile">
+                       Browse <input type="file" accept=".tsv,.csv,text/*" data-file-upload="myFile">
                    </span>
                    {{fileName}}
                </div>
