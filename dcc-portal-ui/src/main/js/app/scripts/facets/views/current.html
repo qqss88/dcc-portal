@@ -21,7 +21,7 @@
                         <span data-ng-switch-default="">{{facet | trans:true}}</span>
                     </span>
 
-                    <strong class="t_current__or"> IN (</strong>
+                    <span class="t_current__or"> IN ( </span>
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false">
                         <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? 999: 2) track by termObj.term" 
                             class="t_facets__facet__terms__term">
@@ -36,7 +36,7 @@
                             </span></a> 
                         </li>
                     </ul> 
-                    <strong class="t_current__or">)</strong>
+                    <span class="t_current__or"> ) </span>
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>
                 </li>
             </ul>
