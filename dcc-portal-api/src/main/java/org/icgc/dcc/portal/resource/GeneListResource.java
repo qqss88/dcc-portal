@@ -100,7 +100,7 @@ public class GeneListResource {
     // Spaces, tabs, commas, or new lines
     val delimiters = Pattern.compile("[, \t\r\n]");
     val splitter = Splitter.on(delimiters).omitEmptyStrings();
-    val ids = ImmutableList.<String> copyOf(splitter.split(data));
+    val ids = ImmutableList.<String> copyOf(splitter.split(data.toUpperCase()));
 
     log.info("Sending {} gene identifiers to be verified.", ids.size());
     val validResults = geneService.validateIdentifiers(ids);

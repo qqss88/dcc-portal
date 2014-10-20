@@ -23,10 +23,6 @@
 
 
 // TODO: Probably want a service
-// TODO: Should add additional icons: upload, warning
-// TODO: Extend LocationService to filter out extra stuff like genelist
-// TODO: Clean up
-
 (function () {
   'use strict';
 
