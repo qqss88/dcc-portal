@@ -35,7 +35,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.service.BadRequestException;
-import org.icgc.dcc.portal.service.GeneListService;
+import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,7 +78,7 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
   @Context
   private HttpContext context;
   @Autowired
-  private GeneListService geneListService;
+  private UserGeneSetService userGeneSetService;
 
   @Override
   public ComponentScope getScope() {
@@ -134,8 +134,8 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
 
     val geneListGeneIds = Sets.<String> newLinkedHashSet();
     for (val geneListId : geneListIds) {
-      // TODO: Make geneListService return a List<String>:
-      val geneIds = parseGeneIds(geneListService.get(geneListId));
+      // TODO: Make userGeneSetService return a List<String>:
+      val geneIds = parseGeneIds(userGeneSetService.get(geneListId));
       if (isEmpty(geneIds)) {
         throw new BadRequestException("Cannot find gene list id " + geneListId);
       }
