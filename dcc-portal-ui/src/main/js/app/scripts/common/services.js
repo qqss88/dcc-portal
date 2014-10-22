@@ -452,7 +452,7 @@
           facetFilters.is.forEach(function(term) {
             var uiTerm = term;
             if (typeKey === 'gene' && facetKey === Extensions.GENE_LIST) {
-              uiTerm = 'Gene List';
+              uiTerm = 'Uploaded Gene List';
             }
 
             // Extension terms goes first
