@@ -44,7 +44,7 @@ import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
-import org.icgc.dcc.portal.repository.GeneListRepository;
+import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
 import org.skife.jdbi.v2.DBI;
@@ -119,8 +119,8 @@ public class PortalConfig {
   }
 
   @Bean
-  public GeneListRepository geneListRepository(DBI dbi) {
-    return dbi.open(GeneListRepository.class);
+  public UserGeneSetRepository userGeneSetRepository(DBI dbi) {
+    return dbi.open(UserGeneSetRepository.class);
   }
 
   @Bean

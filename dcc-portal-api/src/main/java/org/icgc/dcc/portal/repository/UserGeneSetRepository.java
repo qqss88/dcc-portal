@@ -15,37 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.repository;
 
 import java.util.UUID;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import javax.annotation.PreDestroy;
 
-import org.icgc.dcc.portal.repository.GeneListRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 
 /**
- * Gene-list related operations, uses genes under the hood
+ * Data access for abstraction for working with user defined "gene sets".
  */
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class GeneListService {
+public interface UserGeneSetRepository {
 
-  @NonNull
-  private final GeneListRepository geneListRepository;
+  /**
+   * Database table name.
+   */
+  public static final String TABLE_NAME = "user_gene_set";
 
-  public String get(UUID id) {
-    return geneListRepository.find(id);
-  }
+  @SqlQuery("SELECT data FROM " + TABLE_NAME + " WHERE id = :id")
+  String find(@Bind("id") UUID id);
 
-  public UUID save(String data) {
-    val id = UUID.randomUUID();
-    geneListRepository.save(id, data);
+  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (id, data) VALUES (:id, :data)")
+  int save(@Bind("id") UUID id, @Bind("data") String data);
 
-    return id;
-  }
+  /**
+   * {@code close} with no args is used to close the connection.
+   */
+  @PreDestroy
+  void close();
 
 }

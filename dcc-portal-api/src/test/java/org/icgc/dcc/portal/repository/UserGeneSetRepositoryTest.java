@@ -28,14 +28,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.skife.jdbi.v2.DBI;
 
-public class GeneListRepositoryTest {
+public class UserGeneSetRepositoryTest {
 
-  GeneListRepository repository;
+  UserGeneSetRepository repository;
 
   @Before
   public void setUp() {
     val dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
-    this.repository = dbi.open(GeneListRepository.class);
+    this.repository = dbi.open(UserGeneSetRepository.class);
   }
 
   @After

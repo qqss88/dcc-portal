@@ -40,7 +40,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IdsParam;
-import org.icgc.dcc.portal.service.GeneListService;
+import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.icgc.dcc.portal.service.GeneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,7 +60,7 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 public class GeneListResource {
 
-  private final GeneListService geneListService;
+  private final UserGeneSetService userGeneSetService;
   private final GeneService geneService;
 
   @Path("/{genelistIds}")
@@ -69,7 +69,7 @@ public class GeneListResource {
     val result = Lists.<Map<String, String>> newLinkedList();
     for (val value : geneListIds.get()) {
       val id = UUID.fromString(value);
-      val geneList = geneListService.get(id);
+      val geneList = userGeneSetService.get(id);
 
       if (isNullOrEmpty(geneList)) {
         result.add(ImmutableMap.of(value, ""));
@@ -86,7 +86,7 @@ public class GeneListResource {
   @Timed
   public Map<String, String> saveGeneList(
       @ApiParam(value = "The Ids to be saved as a Gene List") @FormParam("geneIds") String geneIds) {
-    UUID id = geneListService.save(geneIds);
+    UUID id = userGeneSetService.save(geneIds);
     return ImmutableMap.<String, String> of("id", "" + id);
   }
 

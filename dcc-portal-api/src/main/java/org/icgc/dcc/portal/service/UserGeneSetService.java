@@ -15,31 +15,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.repository;
+package org.icgc.dcc.portal.service;
 
 import java.util.UUID;
 
-import javax.annotation.PreDestroy;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.icgc.dcc.portal.repository.UserGeneSetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * Data access for Gene Lists. <b> SQLs are written to work with Postgresql.
+ * User "gene set" related operations.
  */
-public interface GeneListRepository {
+@Service
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+public class UserGeneSetService {
 
-  @SqlQuery("SELECT data FROM genelist WHERE id = :id")
-  String find(@Bind("id") UUID id);
+  @NonNull
+  private final UserGeneSetRepository repository;
 
-  @SqlUpdate("INSERT INTO genelist (id, data) VALUES (:id, :data)")
-  int save(@Bind("id") UUID id, @Bind("data") String data);
+  public String get(@NonNull UUID id) {
+    return repository.find(id);
+  }
 
-  /**
-   * {@code close} with no args is used to close the connection.
-   */
-  @PreDestroy
-  void close();
+  public UUID save(@NonNull String data) {
+    val id = UUID.randomUUID();
+    repository.save(id, data);
+
+    return id;
+  }
 
 }
