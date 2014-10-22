@@ -33,6 +33,7 @@
     'angular-underscore',
     'angularytics',
     'chieffancypants.loadingBar',
+    'btford.markdown',
 
     // 3rd party
     'highcharts',
@@ -99,7 +100,7 @@
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:5381/api/v1');
+    // RestangularProvider.setBaseUrl('https://localhost:8080/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 

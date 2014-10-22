@@ -5,9 +5,15 @@
             processed/annotated data files.</p>
     </div>
 
+    <!--
     <div data-ng-if="slugs.length > 0 && slugs[0].name === 'release_15'" class="alert alert-error">
         We recommend to not use this version (Version 15.0) of ICGC data as it has been deprecated. <br>
         Please use ICGC Version <strong>15.1</strong> which includes bug fixes and masked data.
+    </div>
+    -->
+
+    <div data-ng-repeat="file in textFiles | filter:{name:'notice.txt'}" class="alert alert-error">
+       <div btf-markdown="file.textContent" class="release_notice"></div>
     </div>
 
     <div class="wide">
@@ -19,7 +25,7 @@
         </section>
 
         <div data-ng-if="files">
-            <ul class="breadcrumb" style="background:#fff;font-size:1.5rem">
+            <ul class="breadcrumb" style="background:#fff;font-size:1.25rem">
                 <li><a href="/repository">~</a></li>
                 <li data-ng-repeat="p in slugs">
                     <span class="divider">/</span>
@@ -43,8 +49,7 @@
                 <tr data-ng-repeat="file in files">
                     <td data-ng-if="file.type=='f'">
                         <i class="icon-file"></i>
-                        <a data-ng-if="!file.isText" target="_self" href="/api/v1/download?fn={{file.name}}">{{ file.baseName }}</a>
-                        <a data-ng-if="file.isText" data-ng-click="openText(file.name)" href="">{{ file.baseName }}</a>
+                        <a target="_self" href="/api/v1/download?fn={{file.name}}">{{ file.baseName }}</a>
                     </td>
                     <td data-ng-if="file.type=='d'"
                         data-ng-style="(file.baseName === 'release_15')?{'text-decoration':'line-through'}:{}">
@@ -60,20 +65,15 @@
             </table>
         </div>
 
-        <!-- Dialog -->
-        <div data-modal="modal" class="modal hide fade">
-            <div class="modal-dialog light">
-                <div class="modal-content">
-                    <div class="modal-header clearfix">
-                        <h3 class="pull-left"><a target="_self" href="/api/v1/download?fn={{displayName}}">{{displayName}}</a></h3>
-                        <button class="pull-right t_button" data-ng-click="modal=false"><i class="icon-cancel"></i></button>
-                    </div>
-                    <div class="modal-body">
-                        <div style="over-flow:auto;white-space:pre">{{displayContent}}</div>
-                    </div>
-                </div>
-            </div>
+        <div>
+           <br>
+           <div data-ng-repeat="file in textFiles | filter:{name : '!notice.txt'}"> 
+               <div class="well well-small">
+                   <div><a target="_self" href="/api/v1/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
+                   <hr>
+                   <div btf-markdown="file.textContent"></div>
+               </div>
+           </div>
         </div>
-
     </div>
 </section>

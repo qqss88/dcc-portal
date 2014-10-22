@@ -42,15 +42,6 @@ angular.module('app.download.controllers').controller('DownloadController',
       }
     }
 
-    $scope.displayName = '';
-    $scope.openText = function( fileName ) {
-      Restangular.one('download').get( {'fn':fileName}).then(function(data) {
-        $scope.displayName = fileName;
-        $scope.displayContent = data;
-        $scope.modal = true;
-      });
-    };
-
     buildBreadcrumbs();
 
     DownloadService.folder($scope.path).then(function (response) {
@@ -76,7 +67,10 @@ angular.module('app.download.controllers').controller('DownloadController',
         extension = file.name.split('.').pop();
         if (_.contains(['txt', 'me'], extension.toLowerCase())) {
           file.isText = true;
+        } else {
+          file.isText = false;
         }
+
       });
 
       // Order the files and folders, see DCC-1648, basically
@@ -85,6 +79,12 @@ angular.module('app.download.controllers').controller('DownloadController',
         var pattern, name;
 
         name = file.name.split('/').pop();
+
+        pattern = /notice\.txt$/i;
+        if (pattern.test(name)) {
+          return -4;
+        }
+
         pattern = /readme\.txt$/i;
         if (pattern.test(name)) {
           return -3;
@@ -118,6 +118,17 @@ angular.module('app.download.controllers').controller('DownloadController',
       }
 
       $scope.files = files;
+
+      // Fetch data content if file is plain text
+      $scope.textFiles = _.filter(files, function(f) {
+        return f.type === 'f' && f.isText === true;
+      });
+      $scope.textFiles.forEach(function(f) {
+        Restangular.one('download').get( {'fn':f.name}).then(function(data) {
+          f.textContent = data;
+        });
+      });
+
     });
 
   });

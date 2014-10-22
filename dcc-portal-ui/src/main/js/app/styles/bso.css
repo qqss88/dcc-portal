@@ -17,6 +17,13 @@
 }
 
 
+/* Force alert-error to markdown */
+.alert-error .release_notice * {
+   // color: #FF0000;
+   color: rgb(220, 50, 47) !important;
+}
+
+
 /* A slimmer pagination control */
 .pagination {
     margin-top: 0px;
