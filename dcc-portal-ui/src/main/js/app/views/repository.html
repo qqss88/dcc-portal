@@ -71,7 +71,9 @@
                <div class="well well-small">
                    <div><a target="_self" href="/api/v1/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
                    <hr>
-                   <div btf-markdown="file.textContent"></div>
+                   <div class="markdown_container">
+                       <div btf-markdown="file.textContent"></div>
+                   </div>
                </div>
            </div>
         </div>
