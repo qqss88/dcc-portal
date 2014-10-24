@@ -29,6 +29,8 @@ angular.module('app.download.controllers').controller('DownloadController',
     $scope.path = $stateParams.path;
     $scope.slugs = [];
 
+    $scope.deprecatedReleases = ['release_15'];
+
     function buildBreadcrumbs() {
       var i, s, slug, url;
 
