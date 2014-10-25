@@ -17,6 +17,23 @@
 }
 
 
+/* Style showdown markup */
+.alert-error .release_notice * {
+   color: rgb(220, 50, 47) !important;
+}
+
+.markdown_container table, th, td {
+   border: 1px solid rgb(230, 230, 230); 
+   text-align: left;
+   padding: .2rem .4rem;
+   line-height: 1rem;
+}
+
+.markdown_container table td p {
+   margin: 0.5rem;
+}
+
+
 /* A slimmer pagination control */
 .pagination {
     margin-top: 0px;

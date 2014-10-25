@@ -33,6 +33,7 @@
     'angular-underscore',
     'angularytics',
     'chieffancypants.loadingBar',
+    'btford.markdown',
 
     // 3rd party
     'highcharts',
@@ -92,14 +93,14 @@
     });
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
-                          AngularyticsProvider, RestangularProvider) {
+                          AngularyticsProvider, RestangularProvider, markdownConverterProvider) {
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:5381/api/v1');
+    // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -123,6 +124,10 @@
         Notify.setMessage('Cannot find: ' + $location.url());
         Notify.showErrors();
       }]);
+    });
+
+    markdownConverterProvider.config({
+      extensions: ['table']
     });
   });
 
