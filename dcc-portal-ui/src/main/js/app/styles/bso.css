@@ -46,6 +46,15 @@ textarea {
    margin: 0.2rem;
 }
 
+.alert-warning {
+   color: #c09853;
+   background-color: #fcf8e3
+}
+
+.alert-warning h4 {
+   color: #c09853;
+}
+
 
 
 /* A slimmer pagination control */

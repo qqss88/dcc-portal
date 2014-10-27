@@ -118,7 +118,6 @@ public class UIResource {
 
     String content = CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
 
-    log.info("File content is {}", content);
     return ImmutableMap.<String, String> of("data", content);
   }
 

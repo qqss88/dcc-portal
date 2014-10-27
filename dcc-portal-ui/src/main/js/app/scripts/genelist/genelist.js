@@ -41,12 +41,19 @@
       Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, 'validate').then(function(result) {
 
-          result = Restangular.stripRestangular(result);
+          var result = Restangular.stripRestangular(result);
           $scope.state = 'verified';
           $scope.validIds = [];
           $scope.invalidIds = [];
+          $scope.warnings = [];
 
-          angular.forEach(result, function(value, key) {
+          if (result.warning) {
+            result.warning.forEach(function(msg) {
+            });
+          }
+
+
+          angular.forEach(result.data, function(value, key) {
             if (!value || value.length === 0) {
               $scope.invalidIds.push( key );
             } else {

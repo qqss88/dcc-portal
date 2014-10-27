@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.service.UserGeneSetService;
+import org.icgc.dcc.portal.model.UploadedGeneList;
 import org.icgc.dcc.portal.service.GeneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
@@ -62,6 +62,8 @@ public class GeneListResource {
 
   private final UserGeneSetService userGeneSetService;
   private final GeneService geneService;
+
+  private final static int MAX_GENE_LIST_SIZE = 1000;
 
   @Path("/{genelistIds}")
   @GET
@@ -94,26 +96,45 @@ public class GeneListResource {
   @Consumes(APPLICATION_FORM_URLENCODED)
   @POST
   @Timed
-  public Map<String, List<String>> findGenesByIdentifiers(
+  // public Map<String, List<String>> findGenesByIdentifiers(
+  public UploadedGeneList findGenesByIdentifiers(
       @ApiParam(value = "The contents to be parsed and verified") @FormParam("data") String data) {
+
+    val geneList = new UploadedGeneList();
 
     // Spaces, tabs, commas, or new lines
     val delimiters = Pattern.compile("[, \t\r\n]");
     val splitter = Splitter.on(delimiters).omitEmptyStrings();
-    val ids = ImmutableList.<String> copyOf(splitter.split(data.toUpperCase()));
+    val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
+
+    int size = originalIds.size();
+    if (originalIds.size() > MAX_GENE_LIST_SIZE) {
+      log.info("Exceeds maximum size {}", MAX_GENE_LIST_SIZE);
+      size = MAX_GENE_LIST_SIZE;
+      geneList.getWarnings().add(
+          String.format("Input data exceeds maximum threshold, only the first %s gene identifiers are processed",
+              MAX_GENE_LIST_SIZE));
+    }
+    val ids = originalIds.subList(0, size - 1);
+    val matchIds = ImmutableList.<String> builder();
+
+    for (val id : ids) {
+      matchIds.add(id.toUpperCase());
+    }
 
     log.info("Sending {} gene identifiers to be verified.", ids.size());
-    val validResults = geneService.validateIdentifiers(ids);
+    val validResults = geneService.validateIdentifiers(matchIds.build());
 
-    val result = Maps.<String, List<String>> newHashMap();
-    for (String id : ids) {
-      if (validResults.containsKey(id)) {
-        result.put(id, ImmutableList.copyOf(validResults.get(id)));
+    for (val id : ids) {
+      val matchId = id.toUpperCase();
+      if (validResults.containsKey(matchId)) {
+        geneList.getData().put(id, ImmutableList.copyOf(validResults.get(matchId)));
       } else {
-        result.put(id, Collections.<String> emptyList());
+        geneList.getData().put(id, Collections.<String> emptyList());
       }
+      geneList.getData().put("abc", Collections.<String> emptyList());
     }
-    return result;
-  }
+    return geneList;
 
+  }
 }
