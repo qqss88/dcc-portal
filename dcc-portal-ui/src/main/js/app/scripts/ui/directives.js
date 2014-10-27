@@ -45,6 +45,13 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
       $element.bind('change', function() {
         $scope.$apply(function() {
           modelSetter($scope, $element[0].files[0]);
+
+          // Trick the input so the same file will trigger another 'change' event
+          // Used for gene list upload to textarea
+          if ($element[0].value) {
+            $element[0].value = '';
+          }
+
         });
       });
     }

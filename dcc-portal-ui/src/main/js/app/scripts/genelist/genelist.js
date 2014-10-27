@@ -47,8 +47,9 @@
           $scope.invalidIds = [];
           $scope.warnings = [];
 
-          if (result.warning) {
-            result.warning.forEach(function(msg) {
+          if (result.warnings) {
+            result.warnings.forEach(function(msg) {
+              $scope.warnings.push(msg);
             });
           }
 
@@ -145,6 +146,9 @@
     $scope.updateGenelist = function() {
       // If content was from file, clear out the filename
       $scope.fileName = null;
+      if ($scope.myFile) {
+        $scope.myFile = null;
+      }
 
       $timeout.cancel(verifyPromise);
       verifyPromise = $timeout(verify, delay, true);
@@ -156,6 +160,9 @@
       $scope.rawText = '';
       $scope.validIds = [];
       $scope.invalidIds = [];
+      if ($scope.myFile) {
+        $scope.myFile = null;
+      }
     };
 
     $scope.$on('$destroy', function() {
