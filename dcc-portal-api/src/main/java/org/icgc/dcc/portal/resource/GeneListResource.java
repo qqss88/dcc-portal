@@ -40,9 +40,9 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IdsParam;
-import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.icgc.dcc.portal.model.UploadedGeneList;
 import org.icgc.dcc.portal.service.GeneService;
+import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,33 +106,28 @@ public class GeneListResource {
     val delimiters = Pattern.compile("[, \t\r\n]");
     val splitter = Splitter.on(delimiters).omitEmptyStrings();
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
-
-    int size = originalIds.size();
-    if (originalIds.size() > MAX_GENE_LIST_SIZE) {
-      log.info("Exceeds maximum size {}", MAX_GENE_LIST_SIZE);
-      size = MAX_GENE_LIST_SIZE;
-      geneList.getWarnings().add(
-          String.format("Input data exceeds maximum threshold, only the first %s gene identifiers are processed",
-              MAX_GENE_LIST_SIZE));
-    }
-    val ids = originalIds.subList(0, size - 1);
     val matchIds = ImmutableList.<String> builder();
 
-    for (val id : ids) {
+    if (originalIds.size() > MAX_GENE_LIST_SIZE) {
+      log.info("Exceeds maximum size {}", MAX_GENE_LIST_SIZE);
+      geneList.getWarnings().add(
+          String.format("Input data exceeds maximum threshold of %s gene identifiers.", MAX_GENE_LIST_SIZE));
+      return geneList;
+    }
+
+    for (val id : originalIds) {
       matchIds.add(id.toUpperCase());
     }
 
-    log.info("Sending {} gene identifiers to be verified.", ids.size());
     val validResults = geneService.validateIdentifiers(matchIds.build());
 
-    for (val id : ids) {
+    for (val id : originalIds) {
       val matchId = id.toUpperCase();
       if (validResults.containsKey(matchId)) {
         geneList.getData().put(id, ImmutableList.copyOf(validResults.get(matchId)));
       } else {
         geneList.getData().put(id, Collections.<String> emptyList());
       }
-      geneList.getData().put("abc", Collections.<String> emptyList());
     }
     return geneList;
 
