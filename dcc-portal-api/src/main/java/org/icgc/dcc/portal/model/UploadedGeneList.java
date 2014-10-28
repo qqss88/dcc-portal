@@ -29,14 +29,9 @@ import com.google.common.collect.Maps;
 @Data
 public class UploadedGeneList {
 
-  public UploadedGeneList() {
-    data = Maps.<String, List<String>> newHashMap();
-    warnings = Lists.<String> newArrayList();
-  }
+  @JsonProperty
+  Map<String, List<String>> data = Maps.<String, List<String>> newHashMap();
 
   @JsonProperty
-  Map<String, List<String>> data;
-
-  @JsonProperty
-  List<String> warnings;
+  List<String> warnings = Lists.<String> newArrayList();
 }
