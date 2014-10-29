@@ -38,7 +38,7 @@
       $scope.state = 'verifying';
 
       var data = 'geneIds=' + encodeURI($scope.rawText);
-      Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
+      Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, undefined, {'validateOnly':true}).then(function(result) {
 
           var verifyResult = Restangular.stripRestangular(result);
@@ -83,7 +83,7 @@
 
     function createNewGeneList() {
       var data = 'geneIds=' + encodeURI($scope.validIds.join(','));
-      Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
+      Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
           var filters = LocationService.filters();
 

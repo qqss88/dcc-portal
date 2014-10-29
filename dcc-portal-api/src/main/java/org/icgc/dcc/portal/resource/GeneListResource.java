@@ -62,7 +62,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
-@Path("/v1/genelist")
+@Path("/v1/genelists")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 @Slf4j

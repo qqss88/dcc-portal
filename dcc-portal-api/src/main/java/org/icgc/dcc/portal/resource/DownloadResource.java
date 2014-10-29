@@ -240,11 +240,11 @@ public class DownloadResource {
 
       @ApiParam(value = "Archive param") @QueryParam("info") @DefaultValue("") String info,
 
-      @ApiParam(value = "user email address", required = false) @QueryParam("email") @DefaultValue("") String email,
+      @ApiParam(value = "user email address", required = false, access = "internal") @QueryParam("email") @DefaultValue("") String email,
 
-      @ApiParam(value = "download url", required = true) @QueryParam("downloadUrl") @DefaultValue("") String downloadUrl,
+      @ApiParam(value = "download url", required = false, access = "internal") @QueryParam("downloadUrl") @DefaultValue("") String downloadUrl,
 
-      @ApiParam(value = "UI representation of the filter string", required = false) @QueryParam("uiQueryStr") @DefaultValue("{}") String uiQueryStr
+      @ApiParam(value = "UI representation of the filter string", required = false, access = "internal") @QueryParam("uiQueryStr") @DefaultValue("{}") String uiQueryStr
 
       ) {
 
