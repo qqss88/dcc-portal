@@ -62,7 +62,7 @@ textarea {
    color: rgb(220, 50, 47) !important;
 }
 
-.markdown_container table, th, td {
+.markdown_container table th td {
    border: 1px solid rgb(230, 230, 230); 
    text-align: left;
    padding: .2rem .4rem;
