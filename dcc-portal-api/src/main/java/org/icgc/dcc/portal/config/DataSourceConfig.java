@@ -15,48 +15,21 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.icgc.dcc.portal.config;
 
-(function () {
+import org.skife.jdbi.v2.DBI;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-  'use strict';
+/**
+ * Configuration relating to data access.
+ */
+@Configuration
+public class DataSourceConfig {
 
-  var module = angular.module('icgc.facets.current', []);
+  @Bean
+  public DBI dbi(PortalProperties properties) {
+    return new DBI(properties.getDatabase().getUrl());
+  }
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil) {
-    $scope.Facets = Facets;
-
-    function refresh() {
-      $scope.filters = FiltersUtil.buildUIFilters(LocationService.filters());
-      $scope.isActive = _.keys($scope.filters).length;
-    }
-
-    $scope.removeFacet = function(type, facet) {
-      Facets.removeFacet({
-        type: type,
-        facet: facet
-      });
-
-      if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
-        Facets.removeFacet({
-          type: type,
-          facet: 'uploadedGeneList'
-        });
-      }
-    };
-
-    refresh();
-    $scope.$on('$locationChangeSuccess', function () {
-      refresh();
-
-    });
-  });
-
-  module.directive('current', function () {
-    return {
-      restrict: 'E',
-      templateUrl: '/scripts/facets/views/current.html',
-      controller: 'currentCtrl'
-    };
-  });
-
-})();
+}

@@ -24,8 +24,8 @@ angular.module('app.downloader.services', ['app.downloader.model']);
 // 1) Request/query download against the server
 // 2) Local download job cache management
 angular.module('app.downloader.services').service('DownloaderService', function(Downloader, $window) {
-  this.requestDownloadJob = function(filters, info, email, downloadUrl) {
-    return Downloader.requestDownloadJob(filters, info, email, downloadUrl);
+  this.requestDownloadJob = function(filters, info, email, downloadUrl, uiQueryStr) {
+    return Downloader.requestDownloadJob(filters, info, email, downloadUrl, uiQueryStr);
   };
   this.cancelJob = function(ids) {
     return Downloader.cancelJob(ids);

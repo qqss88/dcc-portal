@@ -56,6 +56,8 @@
     'icgc.releases',
     'icgc.keyword',
     'icgc.browser',
+    'icgc.genelist',
+    
     // old
     'app.ui',
     'app.common',
@@ -93,16 +95,19 @@
     });
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
-                          AngularyticsProvider, RestangularProvider, markdownConverterProvider) {
+                          AngularyticsProvider, $httpProvider, RestangularProvider, markdownConverterProvider) {
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
+    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
     // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
+
+    $httpProvider.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
     $locationProvider.html5Mode(true);
 

@@ -5,6 +5,7 @@ import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -23,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
@@ -31,6 +33,10 @@ public class GeneService {
   private final GeneRepository geneRepository;
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
+
+  public Multimap<String, String> validateIdentifiers(List<String> ids) {
+    return geneRepository.validateIdentifiers(ids);
+  }
 
   public Genes findAllCentric(Query query) {
     val projectIds = Lists.<String> newArrayList();

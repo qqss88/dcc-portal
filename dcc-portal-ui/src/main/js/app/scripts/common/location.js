@@ -26,6 +26,7 @@
       path: function () {
         return $location.path();
       },
+
       search: function () {
         return $location.search();
       },
@@ -125,6 +126,7 @@
         delete s[param];
         $location.search(s);
       }
+
     };
   });
 })();

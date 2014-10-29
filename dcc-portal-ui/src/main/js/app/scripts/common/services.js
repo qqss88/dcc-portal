@@ -20,6 +20,11 @@
 
   var module = angular.module('app.common.services', []);
 
+  module.constant('Extensions', {
+    'GENE_LIST': 'uploadedGeneList',
+    'GENE_ID': 'id'
+  });
+
   module.factory('Page', function () {
     var title = 'Loading...',
       page = 'home',
@@ -400,6 +405,77 @@
 
     this.getTranslations = function() {
       return translations;
+    };
+
+  });
+
+
+  module.service('FiltersUtil', function(Extensions) {
+    this.removeExtensions = function(filters) {
+      if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
+        delete filters.gene.uploadedGeneList;
+        if (_.isEmpty(filters.gene)) {
+          delete filters.gene;
+        }
+      }
+      return filters;
+    };
+
+    this.hasGeneListExtension = function(filters) {
+      if (filters.hasOwnProperty('gene')) {
+        if (filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    this.buildUIFilters = function(filters) {
+      var display = {};
+
+      angular.forEach(filters, function(typeFilters, typeKey) {
+        display[typeKey] = {};
+        angular.forEach(typeFilters, function(facetFilters, facetKey) {
+          var uiFacetKey = facetKey;
+
+          // Genelist expansion maps to gene id
+          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || facetKey === Extensions.GENE_LIST)) {
+            uiFacetKey = 'id';
+          }
+
+          // Allocate terms
+          if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+            display[typeKey][uiFacetKey] = {};
+            display[typeKey][uiFacetKey].is = [];
+          }
+
+          facetFilters.is.forEach(function(term) {
+            var uiTerm = term;
+            if (typeKey === 'gene' && facetKey === Extensions.GENE_LIST) {
+              uiTerm = 'Uploaded Gene List';
+            }
+
+            // Extension terms goes first
+            if (facetKey === Extensions.GENE_LIST) {
+              display[typeKey][uiFacetKey].is.unshift({
+                term: uiTerm,
+                controlTerm: term,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+            } else {
+              display[typeKey][uiFacetKey].is.push({
+                term: uiTerm,
+                controlTerm: term,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+            }
+
+          });
+        });
+      });
+      return display;
     };
 
   });

@@ -190,11 +190,12 @@
     };
 
     _this.success = function (donors) {
+      var filters = LocationService.filters();
       Page.stopWork();
       _this.loading = false;
 
       donors.hits.forEach(function (donor) {
-        donor.embedQuery = LocationService.overwriteFilters({donor: {id: {is: [donor.id]}}}, 'facet');
+        donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
       });
       _this.donors = donors;
       _this.ajax();
@@ -209,18 +210,21 @@
     };
   });
 
-  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State) {
+  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State, FiltersUtil) {
     var _this = this;
 
     _this.ajax = function () {
       if (State.isTab('gene') && _this.genes && _this.genes.hits && _this.genes.hits.length) {
         _this.mutationCounts = null;
         var geneIds = _.pluck(_this.genes.hits, 'id').join(',');
+        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
+
         // Get Mutations counts
         Genes.one(geneIds).handler
           .one('mutations', 'counts').get({filters: LocationService.filters()}).then(function (data) {
             _this.mutationCounts = data;
           });
+
 
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
@@ -228,17 +232,18 @@
             Donors.getList({
               size: 0,
               include: 'facets',
-              filters: LocationService.overwriteFilters({gene: {id: {is: gene.id}}}, 'facet')
+              filters: LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet')
             }).then(function (data) {
               gene.uiDonors = [];
               if (data.facets.projectId.terms) {
-                var _f = LocationService.filters();
+                var _f = FiltersUtil.removeExtensions(LocationService.filters());
                 if (_f.hasOwnProperty('donor')) {
                   delete _f.donor.projectId;
                   if (_.isEmpty(_f.donor)) {
                     delete _f.donor;
                   }
                 }
+
                 gene.uiDonorsLink = LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet');
                 gene.uiDonors = data.facets.projectId.terms;
                 gene.uiDonors.forEach(function (facet) {
@@ -266,7 +271,8 @@
       _this.loading = false;
 
       genes.hits.forEach(function (gene) {
-        gene.embedQuery = LocationService.overwriteFilters({gene: {id: {is: [gene.id]}}}, 'facet');
+        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
+        gene.embedQuery = LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet');
       });
       _this.genes = genes;
       _this.ajax();
@@ -353,7 +359,8 @@
         _this.loading = false;
 
         mutations.hits.forEach(function (mutation) {
-          mutation.embedQuery = LocationService.overwriteFilters({mutation: {id: {is: [mutation.id]}}}, 'facet');
+          var filters = LocationService.filters();
+          mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
         });
         _this.mutations = mutations;
         _this.ajax();

@@ -171,7 +171,8 @@ angular.module('app.ui.dl', []).directive('dlButton',
               linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/downloader';
 
               DownloaderService
-                .requestDownloadJob(filters, actives, scope.emailAddress, linkURL).then(function (job) {
+                .requestDownloadJob(filters, actives, scope.emailAddress,
+                  linkURL, JSON.stringify(filters)).then(function (job) {
 
                   // Update cache
                   /* Remove local history for now until better user management is in place
