@@ -37,9 +37,9 @@
     function verify() {
       $scope.state = 'verifying';
 
-      var data = 'data=' + encodeURI($scope.rawText);
+      var data = 'geneIds=' + encodeURI($scope.rawText);
       Restangular.one('genelist').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'validate').then(function(result) {
+        .customPOST(data, undefined, {'validateOnly':true}).then(function(result) {
 
           var verifyResult = Restangular.stripRestangular(result);
           $scope.state = 'verified';
@@ -54,7 +54,7 @@
           }
 
 
-          angular.forEach(verifyResult.data, function(value, key) {
+          angular.forEach(verifyResult.validGenes, function(value, key) {
             if (!value || value.length === 0) {
               $scope.invalidIds.push( key );
             } else {
@@ -95,7 +95,7 @@
           }
 
           $scope.genelistModal = false;
-          filters.gene.uploadedGeneList.is = [result.id];
+          filters.gene.uploadedGeneList.is = [result.geneListId];
 
           $location.path('/search/g').search({'filters': angular.toJson(filters)});
           // LocationService.setFilters(filters);

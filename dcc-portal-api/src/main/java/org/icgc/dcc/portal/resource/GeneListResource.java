@@ -24,29 +24,36 @@ import static org.icgc.dcc.common.core.util.FormatUtils._;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.common.base.Joiner;
+import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.UploadedGeneList;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -64,6 +71,8 @@ public class GeneListResource {
   private final UserGeneSetService userGeneSetService;
   private final GeneService geneService;
 
+  // Spaces, tabs, commas, or new lines
+  private final static Pattern GENE_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_GENE_LIST_SIZE = 1000;
 
   @Path("/{genelistIds}")
@@ -87,25 +96,37 @@ public class GeneListResource {
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
-  public Map<String, String> saveGeneList(
-      @ApiParam(value = "The Ids to be saved as a Gene List") @FormParam("geneIds") String geneIds) {
-    UUID id = userGeneSetService.save(geneIds);
-    return ImmutableMap.<String, String> of("id", "" + id);
+  public UploadedGeneList processGeneList(
+      @ApiParam(value = "The Ids to be saved as a Gene List") @FormParam("geneIds") String geneIds,
+      @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly
+      ) {
+
+    val result = findGenesByIdentifiers(geneIds);
+
+    if (validationOnly) {
+      return result;
+    }
+
+    Set<String> uniqueIds = Sets.<String> newHashSet();
+    for (val idKey : result.getValidGenes().keySet()) {
+      uniqueIds.addAll(result.getValidGenes().get(idKey));
+    }
+
+    // Sanity check, we require at least one valid id in order to store
+    if (uniqueIds.size() == 0) {
+      throw new BadRequestException("Request contains no valid gene Ids");
+    }
+
+    UUID id = userGeneSetService.save(Joiner.on(Separators.COMMA).skipNulls().join(uniqueIds));
+    result.setGeneListId(id.toString());
+    return result;
   }
 
-  @Path("/validate")
-  @Consumes(APPLICATION_FORM_URLENCODED)
-  @POST
-  @Timed
-  // public Map<String, List<String>> findGenesByIdentifiers(
-  public UploadedGeneList findGenesByIdentifiers(
-      @ApiParam(value = "The contents to be parsed and verified") @FormParam("data") String data) {
+  public UploadedGeneList findGenesByIdentifiers(String data) {
 
     val geneList = new UploadedGeneList();
 
-    // Spaces, tabs, commas, or new lines
-    val delimiters = Pattern.compile("[, \t\r\n]");
-    val splitter = Splitter.on(delimiters).omitEmptyStrings();
+    val splitter = Splitter.on(GENE_DELIMITERS).omitEmptyStrings();
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
     val matchIds = ImmutableList.<String> builder();
 
@@ -125,9 +146,9 @@ public class GeneListResource {
     for (val id : originalIds) {
       val matchId = id.toUpperCase();
       if (validResults.containsKey(matchId)) {
-        geneList.getData().put(id, ImmutableList.copyOf(validResults.get(matchId)));
+        geneList.getValidGenes().put(id, ImmutableList.copyOf(validResults.get(matchId)));
       } else {
-        geneList.getData().put(id, Collections.<String> emptyList());
+        geneList.getValidGenes().put(id, Collections.<String> emptyList());
       }
     }
     return geneList;
