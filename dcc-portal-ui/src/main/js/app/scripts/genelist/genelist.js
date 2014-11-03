@@ -53,14 +53,9 @@
             });
           }
 
+          $scope.invalidIds = verifyResult.invalidGenes;
+          $scope.validIds = verifyResult.validGenes;
 
-          angular.forEach(verifyResult.validGenes, function(value, key) {
-            if (!value || value.length === 0) {
-              $scope.invalidIds.push( key );
-            } else {
-              $scope.validIds = $scope.validIds.concat(value);
-            }
-          });
         });
     }
 

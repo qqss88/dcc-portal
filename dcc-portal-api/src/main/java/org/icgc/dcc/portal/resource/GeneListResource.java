@@ -21,7 +21,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,9 +107,7 @@ public class GeneListResource {
     }
 
     Set<String> uniqueIds = Sets.<String> newHashSet();
-    for (val idKey : result.getValidGenes().keySet()) {
-      uniqueIds.addAll(result.getValidGenes().get(idKey));
-    }
+    uniqueIds.addAll(result.getValidGenes());
 
     // Sanity check, we require at least one valid id in order to store
     if (uniqueIds.size() == 0) {
@@ -146,9 +143,9 @@ public class GeneListResource {
     for (val id : originalIds) {
       val matchId = id.toUpperCase();
       if (validResults.containsKey(matchId)) {
-        geneList.getValidGenes().put(id, ImmutableList.copyOf(validResults.get(matchId)));
+        geneList.getValidGenes().addAll(validResults.get(matchId));
       } else {
-        geneList.getValidGenes().put(id, Collections.<String> emptyList());
+        geneList.getInvalidGenes().add(id);
       }
     }
     return geneList;
