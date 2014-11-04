@@ -31,6 +31,9 @@ public class IndexModel {
     GENE("gene"),
     MUTATION("mutation"),
     PATHWAY("pathway"),
+
+    GENE_SET("geneSet"),
+
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
     OCCURRENCE("occurrence"),
@@ -47,6 +50,7 @@ public class IndexModel {
     private final String id;
   }
 
+  // Index document type
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Type {
@@ -56,6 +60,7 @@ public class IndexModel {
     MUTATION("mutation"),
     RELEASE("release"),
     PATHWAY("pathway"),
+    GENE_SET("gene-set"), // FIXME: Double check name with Bob
     DONOR_CENTRIC("donor-centric"),
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
@@ -64,6 +69,7 @@ public class IndexModel {
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
+    GENESET_TEXT("gene-set-text"), // FIXME: Double check name with Bob
     PROJECT_TEXT("project-text");
 
     private final String id;
@@ -501,6 +507,37 @@ public class IndexModel {
           .put("geneCount", "gene_count")
           .build();
 
+  private static final ImmutableMap<String, String> GENESET_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "id")
+          .put("name", "name")
+          .put("type", "type")
+          .put("source", "source")
+          .put("description", "description")
+          .put("geneCount", "_summary._gene_count")
+
+          // Pathway
+          .put("hierarchy", "pathway.hierarchy")
+
+          // Gene Ontology
+          .put("ontology", "go_term.ontology")
+          .put("altIds", "go_term.alt_ids")
+          .put("synonyms", "go_term.synonyms")
+          .put("inferredTree", "go_term.inferred_tree")
+
+          // Curated gene set
+          // ???
+          .build();
+
+  /*
+   * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
+   * String>() .put("ontology", "ontology") .put("altIds", "alt_ids") .put("synonyms", "synonyms") .put("inferredTree",
+   * "inferred_tree") .build();
+   * 
+   * private static final ImmutableMap<String, String> PATHWAY_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
+   * String>() .put("hierarchy", "hierarchy") .build();
+   */
+
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
   static {
@@ -521,6 +558,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.RELEASE, RELEASE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
   }
 
   private String index;
