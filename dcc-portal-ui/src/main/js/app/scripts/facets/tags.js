@@ -81,6 +81,8 @@
         });
       }
 
+      // TODO: Reset pathways, reset goterms, reset curated
+
     };
 
     // Needed if term removed from outside scope
@@ -109,6 +111,12 @@
       templateUrl: function(elem, attr) {
         if (attr.type === 'gene') {
           return 'scripts/facets/views/genetags.html';
+        }
+        if (attr.type === 'goTerm') {
+          return 'scripts/facets/views/gotags.html';
+        }
+        if (attr.type === 'pathway') {
+          return 'scripts/facets/views/pathwaytags.html';
         }
         return 'scripts/facets/views/tags.html';
       },
