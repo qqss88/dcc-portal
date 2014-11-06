@@ -53,12 +53,53 @@
 
       _ctrl.geneSet = geneSet;
 
+      // Builds an UI friendly inferred tree
+      function uiInferredTree(inferredTree) {
+        var root = {}, node = root;
+        return root;
+      }
+
+      // Builds an UI friendly list of parent pathway hierarchies
+      function uiPathwayHierarchy(parentPathways) {
+        var hierarchyList = [];
+        parentPathways.forEach(function(path) {
+          var root = {}, node = root;
+
+          // Convert list to
+          path.forEach(function(n, idx) {
+            node.id = n.id;
+            node.name = n.name;
+            
+            // Has childre, swap
+            if (idx < path.length) {
+              node.children = [];
+              node.children.push({});
+              node = node.children[0];
+            }
+          });
+
+          // Lastly, add self
+          node.id = _ctrl.geneSet.id;
+          node.name = _ctrl.geneSet.name;
+
+          hierarchyList.push(root);
+        });
+
+        console.log("hierarchies", hierarchyList);
+        return hierarchyList;
+      }
 
 
-
+      // Builds the project-donor distribution based on thie gene set
+      // 1) Create embedded search queries
+      // 2) Project-donor breakdown
+      // 3) Project-gene breakdwon
       function refresh() {
         var _filter = LocationService.mergeIntoFilters(f);
         _ctrl.baseAdvQuery = _filter;
+
+
+        _ctrl.uiParentPathways = uiPathwayHierarchy(geneSet.parentPathways);
 
         Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
           _ctrl.totalMutations = count;
@@ -134,7 +175,7 @@
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {
-        if (dest.indexOf('pathways') !== -1) {
+        if (dest.indexOf('genesets') !== -1) {
           refresh();
         }
       });
@@ -172,7 +213,7 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('pathways') !== -1) {
+      if (dest.indexOf('genesets') !== -1) {
         refresh();
       }
     });
@@ -240,7 +281,7 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('pathways') !== -1) {
+      if (dest.indexOf('genesets') !== -1) {
         refresh();
       }
     });
@@ -278,7 +319,7 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('pathways') !== -1) {
+      if (dest.indexOf('genesets') !== -1) {
         refresh();
       }
     });

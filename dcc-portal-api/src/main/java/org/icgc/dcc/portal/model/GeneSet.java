@@ -29,6 +29,7 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -53,6 +54,9 @@ public class GeneSet {
   @ApiModelProperty(value = "Count of genes affected")
   Long geneCount;
 
+  @ApiModelProperty(value = "Projects affected")
+  List<Project> projects;
+
   // Reactome pathway - FIXME: model project-donor for pathway
   List<List<Map<String, String>>> hierarchy;
 
@@ -73,6 +77,8 @@ public class GeneSet {
     type = (String) fieldMap.get(fields.get("type"));
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
+    projects = buildProjects(fieldMap);
+
     // Reactome pathway specific fields
     hierarchy = (List<List<Map<String, String>>>) fieldMap.get(fields.get("pathway.hierarchy"));
 
@@ -88,5 +94,26 @@ public class GeneSet {
     if (field instanceof Integer) return (long) (Integer) field;
     else
       return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Project> buildProjects(Map<String, Object> fieldMap) {
+    val ps = (List<Map<String, Object>>) fieldMap.get("projects");
+    val projects = Lists.<Project> newArrayList();
+
+    if (ps != null) {
+      for (val p : ps) {
+        p.put("_summary._total_donor_count", ((Map<String, Object>) p.get("_summary")).get("_total_donor_count"));
+        p.put("_summary._affected_donor_count",
+            ((Map<String, Object>) p.get("_summary")).get("_affected_donor_count"));
+        p.put("_summary._available_data_type", ((Map<String, Object>) p.get("_summary")).get("_available_data_type"));
+        p.put("_summary._ssm_tested_donor_count",
+            ((Map<String, Object>) p.get("_summary")).get("_ssm_tested_donor_count"));
+        projects.add(new Project(p));
+      }
+      return projects;
+    } else {
+      return null;
+    }
   }
 }

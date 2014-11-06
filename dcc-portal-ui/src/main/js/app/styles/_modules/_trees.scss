@@ -1,0 +1,59 @@
+/* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
+
+.tree {
+   font-size: 1em;
+   font-family: Tahoma;
+}
+
+.tree ul {
+   padding: 0 0 0 15px; 
+}
+
+.tree li {
+    list-style-type:none;
+    margin:0;
+    padding:7px 5px 0 5px !important;
+    position:relative
+}
+
+.tree li::before, .tree li::after {
+    content:'';
+    left:-7px;
+    position:absolute;
+    right:auto;
+}
+
+.tree li::before {
+    border-left:1px solid #bbb;
+    bottom:50px;
+    height:100%;
+    top:0;
+    width:1px;
+}
+
+.tree li::after {
+    border-top:1px solid #bbb;
+    height:20px;
+    top:20px;
+    width:12px;
+}
+
+.tree li span {
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    border-radius:3px;
+
+    border:1px solid #bbb;
+    display:inline-block;
+    padding:1px 4px;
+    text-decoration:none;
+}
+
+.tree>ul>li::before, .tree>ul>li::after {
+    border:0;
+}
+
+.tree li:last-child::before {
+    height:20px;
+}
+

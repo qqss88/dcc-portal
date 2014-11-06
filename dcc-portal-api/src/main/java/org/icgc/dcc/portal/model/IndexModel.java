@@ -515,6 +515,7 @@ public class IndexModel {
           .put("source", "source")
           .put("description", "description")
           .put("geneCount", "_summary._gene_count")
+          .put("projects", "projects")
 
           // Pathway
           .put("hierarchy", "pathway.hierarchy")

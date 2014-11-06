@@ -67,9 +67,9 @@ public class GeneSetRepository {
         fields.get("altIds"),
         fields.get("synonyms"),
         fields.get("inferredTree"),
+        fields.get("projects"),
 
         // Old fields - To remove
-        fields.get("projects"),
         fields.get("geneList"),
         fields.get("parentPathways"),
         fields.get("linkOut"));
