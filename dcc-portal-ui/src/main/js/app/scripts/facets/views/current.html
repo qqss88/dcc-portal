@@ -21,7 +21,10 @@
                         <span data-ng-switch-default="">{{facet | trans:true}}</span>
                     </span>
 
-                    <span class="t_current__or"> {{ terms.is.length === 1? "IS" : "IN (" }} </span>
+                    <span class="t_current__or">
+                        {{ terms.is.length !== 1? "IN (" : terms.is[0].controlFacet === 'uploadedGeneList'? "IN (" : "IS" }} 
+                    </span>
+
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
                         <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? terms.is.length : limit) track by termObj.term" 
                             class="t_facets__facet__terms__term">
@@ -37,7 +40,10 @@
                             </span></a> 
                         </li>
                     </ul> 
-                    <span class="t_current__or"> {{ terms.is.length === 1? "" : ")" }}</span>
+                    <span class="t_current__or"> 
+                        {{ terms.is.length !== 1? ")" : terms.is[0].controlFacet === 'uploadedGeneList'?  ")" : ""}}
+                    </span>
+
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>
                 </li>
             </ul>

@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.model;
 
 import java.util.List;
-import java.util.Map;
 
 import lombok.Data;
 
@@ -26,14 +25,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Data
 @JsonInclude(Include.NON_NULL)
 public class UploadedGeneList {
 
   @JsonProperty
-  Map<String, List<String>> validGenes = Maps.<String, List<String>> newHashMap();
+  List<String> validGenes = Lists.newArrayList();
+
+  @JsonProperty
+  List<String> invalidGenes = Lists.newArrayList();
 
   @JsonProperty
   List<String> warnings = Lists.<String> newArrayList();
