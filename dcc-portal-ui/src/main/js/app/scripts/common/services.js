@@ -311,6 +311,10 @@
       // No Data
       '_missing': 'No Data',
 
+      // GO Ontology
+      'colocalizes_with': 'Colocalizes With',
+      'contributes_to': 'Contributes To',
+
       // OOZIE worflow status
       'NOT_FOUND': 'Not Found',
       'RUNNING': 'Running',

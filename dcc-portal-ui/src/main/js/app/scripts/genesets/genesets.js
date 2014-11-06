@@ -65,12 +65,12 @@
         parentPathways.forEach(function(path) {
           var root = {}, node = root;
 
-          // Convert list to
+          // Add all ancestors
           path.forEach(function(n, idx) {
             node.reactomeId = n.reactomeId;
             node.name = n.name;
             
-            // Has childre, swap
+            // Has children, swap
             if (idx < path.length) {
               node.children = [];
               node.children.push({});
@@ -79,7 +79,7 @@
           });
 
           // Lastly, add self
-          node.reactomeId = _ctrl.geneSet.reactomeId;
+          node.reactomeId = _ctrl.geneSet.id;
           node.name = _ctrl.geneSet.name;
 
           hierarchyList.push(root);
