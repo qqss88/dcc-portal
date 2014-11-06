@@ -1,13 +1,13 @@
 /* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
 
-.tree {
-   font-size: 1em;
-   font-family: Tahoma;
-}
-
 .tree ul {
    padding: 0 0 0 15px; 
 }
+
+.tree>ul {
+   padding: 0;
+}
+
 
 .tree li {
     list-style-type:none;

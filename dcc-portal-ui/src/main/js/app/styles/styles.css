@@ -2185,27 +2185,41 @@ h1 .t_badge_icon {
   content: "P";
 }
 
-/* line 68, _modules/_badges.scss */
+/* line 69, _modules/_badges.scss */
+.t_badge__geneset {
+  background: #1a9900;
+}
+
+/* line 73, _modules/_badges.scss */
+.t_badge__geneset:after {
+  content: "S";
+}
+
+/*
+.t_badge__geneset::first-letter {
+  vertical-align: super;
+} */
+/* line 84, _modules/_badges.scss */
 .t_badge__project, .t_badge__projects {
   background: #e9931c;
 }
 
-/* line 72, _modules/_badges.scss */
+/* line 88, _modules/_badges.scss */
 .t_badge__project:after {
   content: "P";
 }
 
-/* line 76, _modules/_badges.scss */
+/* line 92, _modules/_badges.scss */
 .t_badge__advanced {
   background: #166aa2;
 }
 
-/* line 80, _modules/_badges.scss */
+/* line 96, _modules/_badges.scss */
 .t_badge__download {
   background: #1693c0;
 }
 
-/* line 84, _modules/_badges.scss */
+/* line 100, _modules/_badges.scss */
 .t_badge__q {
   background: #d33682;
 }
@@ -3088,6 +3102,71 @@ g.marker rect.selected {
 .proteinstructure .marker {
   stroke: #666;
   stroke-width: 1px;
+}
+
+/* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
+/* line 3, _modules/_trees.scss */
+.tree ul {
+  padding: 0 0 0 15px;
+}
+
+/* line 7, _modules/_trees.scss */
+.tree > ul {
+  padding: 0;
+}
+
+/* line 12, _modules/_trees.scss */
+.tree li {
+  list-style-type: none;
+  margin: 0;
+  padding: 7px 5px 0 5px !important;
+  position: relative;
+}
+
+/* line 19, _modules/_trees.scss */
+.tree li::before, .tree li::after {
+  content: '';
+  left: -7px;
+  position: absolute;
+  right: auto;
+}
+
+/* line 26, _modules/_trees.scss */
+.tree li::before {
+  border-left: 1px solid #bbb;
+  bottom: 50px;
+  height: 100%;
+  top: 0;
+  width: 1px;
+}
+
+/* line 34, _modules/_trees.scss */
+.tree li::after {
+  border-top: 1px solid #bbb;
+  height: 20px;
+  top: 20px;
+  width: 12px;
+}
+
+/* line 41, _modules/_trees.scss */
+.tree li span {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border: 1px solid #bbb;
+  display: inline-block;
+  padding: 1px 4px;
+  text-decoration: none;
+}
+
+/* line 52, _modules/_trees.scss */
+.tree > ul > li::before, .tree > ul > li::after {
+  border: 0;
+}
+
+/* line 56, _modules/_trees.scss */
+.tree li:last-child::before {
+  height: 20px;
 }
 
 /* line 24, styles.scss */

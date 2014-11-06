@@ -29,9 +29,53 @@ angular.module('app.ui', [
   'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur', 'app.ui.autofocus',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
   'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2',
-  'app.ui.fileUpload'
+  'app.ui.fileUpload', 'app.ui.trees'
 ]);
 
+
+// Cannot use a recursive template, partially because angularJS caps the number of digest cycles
+// to 10. While this can be modified (albeit globally), it may bring other problems...
+angular.module('app.ui.trees', []).directive('pathwayTree', function($compile) {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      tree: '='
+    },
+    template: '<div class="tree"></div>',
+    link: function($scope, $element) {
+
+       // D3 would've been easier...
+       function addNesting(e, current) {
+         var ul, li, span, anchor;
+         ul = angular.element('<ul>');
+         li = angular.element('<li>');
+         span = angular.element('<span>');
+         anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + current.reactomeId).text(current.name);
+
+         anchor.appendTo(span);
+         span.appendTo(li);
+         li.appendTo(ul);
+         ul.appendTo(e);
+
+         if (current.children && current.children.length > 0) {
+           current.children.forEach(function(child) {
+             addNesting(li, child);
+           });
+         }
+       }
+
+       $scope.tree.forEach(function(child) {
+         addNesting($element[0], child);
+       });
+
+
+       // Dynamically generated contents need compilation
+       $compile($element.contents())($scope);
+
+    }
+  };
+});
 
 // See: https://github.com/angular/angular.js/issues/1375
 // See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs

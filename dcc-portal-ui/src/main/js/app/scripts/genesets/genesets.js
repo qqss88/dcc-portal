@@ -67,7 +67,7 @@
 
           // Convert list to
           path.forEach(function(n, idx) {
-            node.id = n.id;
+            node.reactomeId = n.reactomeId;
             node.name = n.name;
             
             // Has childre, swap
@@ -79,7 +79,7 @@
           });
 
           // Lastly, add self
-          node.id = _ctrl.geneSet.id;
+          node.reactomeId = _ctrl.geneSet.reactomeId;
           node.name = _ctrl.geneSet.name;
 
           hierarchyList.push(root);

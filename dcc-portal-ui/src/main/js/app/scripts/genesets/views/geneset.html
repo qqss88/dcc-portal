@@ -16,7 +16,7 @@
   -->
 
 <div class="h1-wrap">
-    <h1 data-ui-scrollfix=79><span class="t_badge t_badge__pathway"></span>
+    <h1 data-ui-scrollfix=79><span class="t_badge t_badge__geneset"></span>
         {{ GeneSetCtrl.geneSet.id }}</h1>
 </div>
 <div data-scroll-spy="">
@@ -66,6 +66,29 @@
                 <th>Genes</th>
                 <td>
                     <a href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Hierarchy</th>
+                <td>
+                   <div data-ng-repeat="hier in GeneSetCtrl.uiParentPathways">
+                       <span>
+                           <i class="icon-external-link"></i>
+                           <a href="http://www.reactome.org/PathwayBrowser/TODO" target="_blank">View in Reactome Pathway Browser</a>
+                       </span>
+                       <pathway-tree tree="[hier]"></pathway-tree>
+                       <br>
+                   </div>
+                   <!--
+                   <div class="tree"> 
+                      <ul style="padding-left:0px">
+                          <li ng-repeat="data in GeneSetCtrl.uiParentPathways" ng-include="'template/tree.html'">
+                          </li>
+                      </ul>
+                   </div>
+                   <br>
+                   -->
+
                 </td>
             </tr>
             <tr>
