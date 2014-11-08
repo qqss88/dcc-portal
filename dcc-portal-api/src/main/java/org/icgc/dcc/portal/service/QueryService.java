@@ -28,28 +28,40 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.NOT;
+import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
+@Slf4j
 public class QueryService {
+
+  // Gene set fields are "virtual", in the sense that they are not 1-to-1 with the index structure
+  private static List<String> geneSetFields = ImmutableList.<String> of("pathway", "goterm", "curated");
+  private static List<String> geneSetExistFields = ImmutableList.<String> of("hasPathway", "hasGoterm", "hasCurated");
 
   private static List<String> locationFields = Lists.newArrayList("location", "transcript.gene.location",
       "gene.location", "ssm.consequence.gene.location", "ssm.location", "donor.ssm.location", "gene.ssm.location");
@@ -169,14 +181,119 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.OBSERVATION, prefixMapping);
   }
 
+  // Test
+  // TODO: Must_not has to be above nested sets
+  public static void main(String args[]) throws JsonProcessingException, IOException {
+
+    ObjectNode objNode =
+        (ObjectNode) MAPPER
+            .readTree(
+            // "{'gene':{'id':{'is': ['abc']}, 'goterm':{'is':['go1', 'go2'], 'not':['go3']}, 'pathway':{'is':['pathway1']}, 'hasPathway':true   }}"
+            "{'gene':{'goterm':{'is':['go1', 'go2'], 'not':['go3']} }}"
+            );
+
+    ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
+        Kind.DONOR, "donor",
+        Kind.MUTATION, "donor.ssm",
+        Kind.CONSEQUENCE, "donor.ssm.consequence",
+        Kind.OBSERVATION, "donor.ssm.observation"));
+
+    val filter = QueryService.buildTypeFilters(objNode, Kind.GENE, NESTED_MAPPING);
+    log.info("!!!!!!!!!!\n{}", filter);
+  }
+
+  public static FilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
+    val fieldName = String.format("%s.%s", prefixMapping.get(Kind.GENE), "sets");
+    return null;
+  }
+
   public static BoolFilterBuilder buildTypeFilters(ObjectNode filters, Kind kind,
       ImmutableMap<Kind, String> prefixMapping) {
-    val fields = filters.path(kind.getId()).fields();
 
     val termFilters = FilterBuilders.boolFilter();
-    // Loops over facets
+
+    val genePath = filters.path(Kind.GENE.getId());
+    ArrayList<NestedFilterBuilder> geneSetInclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
+    ArrayList<NestedFilterBuilder> geneSetExclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
+
+    ArrayList<NestedFilterBuilder> geneSetExistFilters = Lists.<NestedFilterBuilder> newArrayList();
+
+    for (val geneSetField : geneSetFields) {
+
+      if (!genePath.path(geneSetField).isMissingNode()) {
+
+        for (String bool : Lists.newArrayList(IS, NOT)) {
+          val boolNode = genePath.path(geneSetField).path(bool);
+          if (!boolNode.isMissingNode() && boolNode.isArray()) {
+            List<String> termList = Lists.newArrayList();
+            for (val item : boolNode) {
+              termList.add(item.textValue());
+            }
+            val idFilter = termsFilter("id", termList);
+            val typeFilter = termsFilter("type", geneSetField);
+
+            val filter = FilterBuilders.nestedFilter("sets", FilterBuilders.boolFilter().must(idFilter, typeFilter));
+            if (bool.equals(IS)) {
+              geneSetInclusionFilters.add(filter);
+            } else {
+              geneSetExclusionFilters.add(filter);
+            }
+
+            /*
+             * if (bool.equals(IS)) { boolFilter.must(termsFilter); } else { boolFilter.mustNot(termsFilter); }
+             */
+          }
+        }
+        // val filter = FilterBuilders.nestedFilter("sets", FilterBuilders.boolFilter().must(boolFilter));
+        // geneSetFilters.add(filter);
+      }
+    }
+
+    if (geneSetInclusionFilters.size() > 0) {
+      val mustGeneSetFilter = FilterBuilders.boolFilter();
+      for (val geneSetInclusionFilter : geneSetInclusionFilters) {
+        mustGeneSetFilter.must(geneSetInclusionFilter);
+      }
+      termFilters.must(mustGeneSetFilter);
+    }
+    if (geneSetExclusionFilters.size() > 0) {
+      val mustGeneSetFilter = FilterBuilders.boolFilter();
+      for (val geneSetExclusionFilter : geneSetExclusionFilters) {
+        mustGeneSetFilter.mustNot(geneSetExclusionFilter);
+      }
+      termFilters.must(mustGeneSetFilter);
+    }
+
+    for (val geneSetExistField : geneSetExistFields) {
+
+      if (!genePath.path(geneSetExistField).isMissingNode()) {
+        val exist = genePath.path(geneSetExistField).asBoolean();
+
+        if (exist) {
+          val filter = nestedFilter("sets", FilterBuilders.boolFilter().must(termFilter("type", geneSetExistField)));
+          geneSetExistFilters.add(filter);
+        } else {
+          val filter = nestedFilter("sets", FilterBuilders.boolFilter().mustNot(termFilter("type", geneSetExistField)));
+          geneSetExistFilters.add(filter);
+        }
+      }
+    }
+
+    if (geneSetExistFilters.size() > 0) {
+      val mustGeneSetFilter = FilterBuilders.boolFilter();
+      for (val geneSetExistFilter : geneSetExistFilters) {
+        mustGeneSetFilter.must(geneSetExistFilter);
+      }
+      termFilters.must(mustGeneSetFilter);
+    }
+
+    val fields = filters.path(kind.getId()).fields();
     while (fields.hasNext()) {
       val facetField = fields.next();
+
+      // Skip the virtual fields
+      if (geneSetFields.contains(facetField)) continue;
+      if (geneSetExistFields.contains(facetField)) continue;
 
       // Check that facet field is in Field Mapping
       val typeMapping = FIELDS_MAPPING.get(kind);
@@ -224,6 +341,9 @@ public class QueryService {
               }
             }
 
+            // TODO: termFilters must exist / fb
+            // {gene: {type:{is:[], exists:true}}}
+
             if (bool.equals(IS)) {
               termFilters.must(fb);
             } else if (bool.equals(NOT)) {
@@ -231,6 +351,7 @@ public class QueryService {
             }
           }
         }
+
       }
     }
     return termFilters;
