@@ -47,7 +47,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, geneSet) {
-      var _ctrl = this, f = {gene: {pathwayId: {is: [geneSet.id]}}};
+      var _ctrl = this, f = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
       Page.setPage('entity');
 
@@ -62,6 +62,10 @@
       // Builds an UI friendly list of parent pathway hierarchies
       function uiPathwayHierarchy(parentPathways) {
         var hierarchyList = [];
+        if (! angular.isDefined(parentPathways)) {
+          return hierarchyList;
+        }
+
         parentPathways.forEach(function(path) {
           var root = {}, node = root;
 
@@ -117,7 +121,7 @@
               _ctrl.geneSet.projects.forEach(function (p) {
                 p.mutationCount = data[p.id];
                 p.advQuery = LocationService.mergeIntoFilters({
-                  gene: {pathwayId:{is:[_ctrl.geneSet.id]}},
+                  gene: {geneSetId:{is:[_ctrl.geneSet.id]}},
                   donor: {projectId:{is:[p.id]}, availableDataTypes:{is:['ssm']}}
                 });
               });
@@ -184,18 +188,17 @@
     });
 
   module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets) {
-    var _ctrl = this, _pathway = '', _filter = {};
+    var _ctrl = this, _geneSet = '', _filter = {};
 
     function success(genes) {
-      if (genes.hasOwnProperty('hits')) {
+      if (genes.hasOwnProperty('hits') && genes.hits.length > 0) {
         _ctrl.genes = genes;
-
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
           'counts').get({filters: _filter}).then(function (data) {
             _ctrl.genes.hits.forEach(function (g) {
               g.mutationCount = data[g.id];
               g.advQuery = LocationService.mergeIntoFilters({
-                gene: {pathwayId: {is: [_pathway.id]}, id:{is:[g.id]}}
+                gene: {geneSetId: {is: [_geneSet.id]}, id:{is:[g.id]}}
               });
             });
           });
@@ -203,9 +206,9 @@
     }
 
     function refresh() {
-      GeneSets.one().get({include: 'projects'}).then(function (pathway) {
-        _pathway = pathway;
-        _filter = LocationService.mergeIntoFilters({gene: {pathwayId: {is: pathway.id}}});
+      GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
+        _geneSet = geneSet;
+        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: geneSet.id}}});
         Genes.getList({
           filters: _filter
         }).then(success);
@@ -222,7 +225,7 @@
   });
 
   module.controller('GeneSetMutationsCtrl', function ($scope, Mutations, GeneSets, Projects, LocationService, Donors) {
-    var _ctrl = this, pathway;
+    var _ctrl = this, geneSet;
 
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
@@ -236,13 +239,13 @@
               include: 'facets',
               filters: LocationService.mergeIntoFilters({
                 mutation: {id: {is: mutation.id}},
-                gene: {pathwayId: {is: pathway.id}}
+                gene: {geneSetId: {is: geneSet.id}}
               })
             }).then(function (data) {
               mutation.uiDonors = data.facets.projectId.terms;
               mutation.advQuery = LocationService.mergeIntoFilters({
                 mutation: {id: {is: [mutation.id] }},
-                gene: {pathwayId: {is: [pathway.id] }}
+                gene: {geneSetId: {is: [geneSet.id] }}
               });
 
               if (mutation.uiDonors) {
@@ -254,7 +257,7 @@
                   facet.advQuery = LocationService.mergeIntoFilters({
                     mutation: {id: {is: [mutation.id]}},
                     donor: {projectId: {is: [facet.term]}},
-                    gene: {pathwayId: {is: [pathway.id] }}
+                    gene: {geneSetId: {is: [geneSet.id] }}
                   });
 
                   facet.countTotal = p.ssmTestedDonorCount;
@@ -269,12 +272,12 @@
 
     function refresh() {
       GeneSets.one().get({include: 'projects'}).then(function (p) {
-        pathway = p;
+        geneSet = p;
 
         Mutations.getList({
           include: 'consequences',
           filters: LocationService.mergeIntoFilters({
-            gene: {pathwayId: {is: pathway.id}}
+            gene: {geneSetId: {is: geneSet.id}}
           })
         }).then(success);
       });
@@ -290,7 +293,7 @@
   });
 
   module.controller('GeneSetDonorsCtrl', function ($scope, LocationService, Donors, GeneSets) {
-    var _ctrl = this, _pathway, _filter;
+    var _ctrl = this, _geneSet, _filter;
 
     function success(donors) {
       if (donors.hasOwnProperty('hits')) {
@@ -302,7 +305,7 @@
           _ctrl.donors.hits.forEach(function (d) {
             d.mutationCount = data[d.id];
             d.advQuery = LocationService.mergeIntoFilters({
-              gene: {pathwayId: {is: [_pathway.id]}},
+              gene: {geneSetId: {is: [_geneSet.id]}},
               donor: {id:{is:[d.id]}}
             });
           });
@@ -311,9 +314,9 @@
     }
 
     function refresh() {
-      GeneSets.one().get({include: 'projects'}).then(function (pathway) {
-        _pathway = pathway;
-        _filter = LocationService.mergeIntoFilters({gene: {pathwayId: {is: pathway.id}}});
+      GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
+        _geneSet = geneSet;
+        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: geneSet.id}}});
         Donors.getList({filters: _filter}).then(success);
       });
     }
@@ -334,7 +337,7 @@
   var module = angular.module('icgc.genesets.models', []);
 
   module.service('GeneSets', function (Restangular, LocationService, GeneSet) {
-    this.handler = Restangular.all('pathways');
+    this.handler = Restangular.all('genesets');
 
     this.getList = function (params) {
       var defaults = {
@@ -356,7 +359,7 @@
     this.handler = {};
 
     this.init = function (id) {
-      this.handler = Restangular.one('pathways', id);
+      this.handler = Restangular.one('genesets', id);
       return _this;
     };
 
