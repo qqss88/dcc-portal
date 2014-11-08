@@ -60,7 +60,7 @@ public class GeneSetResource {
   @ApiOperation(value = "Find a gene set by id", notes = "If a gene set does not exist with the specified id an error will be returned", response = GeneSet.class)
   @ApiResponses(value = { @ApiResponse(code = NOT_FOUND_404, message = "GeneSet not found") })
   public GeneSet find(
-      @ApiParam(value = "GeneSet ID", required = true) @PathParam("pathwayId") String id,
+      @ApiParam(value = "GeneSet ID", required = true) @PathParam("Id") String id,
       @ApiParam(value = "Select fields returned", allowMultiple = true) @QueryParam("field") List<String> fields
       ) {
     log.info("Request for gene set'{}'", id);

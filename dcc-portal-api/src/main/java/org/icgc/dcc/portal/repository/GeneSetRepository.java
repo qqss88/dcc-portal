@@ -45,8 +45,8 @@ import com.google.common.collect.Maps;
 @Component
 public class GeneSetRepository {
 
-  private static final Type TYPE = Type.PATHWAY;
-  private static final Kind KIND = Kind.PATHWAY;
+  private static final Type TYPE = Type.GENE_SET;
+  private static final Kind KIND = Kind.GENE_SET;
 
   private final Client client;
   private final String index;
@@ -67,12 +67,12 @@ public class GeneSetRepository {
         fields.get("altIds"),
         fields.get("synonyms"),
         fields.get("inferredTree"),
-        fields.get("projects"),
+        fields.get("projects"));
 
-        // Old fields - To remove
-        fields.get("geneList"),
-        fields.get("parentPathways"),
-        fields.get("linkOut"));
+    // Old fields - To remove
+    /*
+     * fields.get("geneList"), fields.get("parentPathways"), fields.get("linkOut"));
+     */
 
     val search = client.prepareGet(index, TYPE.getId(), id);
 
@@ -82,8 +82,9 @@ public class GeneSetRepository {
           fs.add(fields.get(field));
         }
       }
-    } else
+    } else {
       fs.addAll(fields.values().asList());
+    }
 
     search.setFields(fs.toArray(new String[fs.size()]));
 

@@ -169,8 +169,8 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.TRANSCRIPT, prefixMapping);
   }
 
-  public static BoolFilterBuilder buildPathwayFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
-    return buildTypeFilters(filters, Kind.PATHWAY, prefixMapping);
+  public static BoolFilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
+    return buildTypeFilters(filters, Kind.GENE_SET, prefixMapping);
   }
 
   public static BoolFilterBuilder buildEmbOccurrenceFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
@@ -200,11 +200,6 @@ public class QueryService {
 
     val filter = QueryService.buildTypeFilters(objNode, Kind.GENE, NESTED_MAPPING);
     log.info("!!!!!!!!!!\n{}", filter);
-  }
-
-  public static FilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
-    val fieldName = String.format("%s.%s", prefixMapping.get(Kind.GENE), "sets");
-    return null;
   }
 
   public static BoolFilterBuilder buildTypeFilters(ObjectNode filters, Kind kind,
@@ -432,12 +427,12 @@ public class QueryService {
   public static ObjectNode remapG2P(ObjectNode filters) {
     if (filters.has("gene")) {
       val gene = (ObjectNode) filters.get("gene");
-      if (gene.has("pathwayId")) {
-        val pathway = new ObjectMapper().createObjectNode();
-        pathway.put("id", gene.remove("pathwayId"));
+      if (gene.has("geneSetId")) {
+        val geneSet = new ObjectMapper().createObjectNode();
+        geneSet.put("id", gene.remove("geneSetId"));
 
-        if (pathway.fieldNames().hasNext()) {
-          filters.put("pathway", pathway);
+        if (geneSet.fieldNames().hasNext()) {
+          filters.put("geneSet", geneSet);
         }
 
         if (gene.fieldNames().hasNext()) {
@@ -538,8 +533,8 @@ public class QueryService {
     return hasFilter(filters, Kind.OBSERVATION);
   }
 
-  static public final Boolean hasPathway(ObjectNode filters) {
-    return hasFilter(filters, Kind.PATHWAY);
+  static public final Boolean hasGeneSet(ObjectNode filters) {
+    return hasFilter(filters, Kind.GENE_SET);
   }
 
   static public final Boolean hasTranscript(ObjectNode filters) {

@@ -215,6 +215,7 @@ public class IndexModel {
           .put("pathwayName", "pathways.pathway_name")
           .put("pathways", "pathways")
           .put("sets", "sets")
+          .put("geneSetId", "sets.id")
           // .put("list", "list")
           // .put("goTerms", "go_terms")
           // .put("curatedSets", "curated_sets")

@@ -98,7 +98,7 @@ public class GeneRepository implements Repository {
       Kind.OBSERVATION, "donor.ssm.observation"));
   protected static final ImmutableMap<Kind, String> PREFIX_MAPPING = NESTED_MAPPING;
 
-  private static final ImmutableList<String> FACETS = ImmutableList.of("type", "list");
+  private static final ImmutableList<String> FACETS = ImmutableList.of("type");
 
   private final Client client;
   private final String index;

@@ -31,18 +31,18 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
+import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildPathwayFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildProjectFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildTranscriptFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
 import static org.icgc.dcc.portal.service.QueryService.hasDonor;
 import static org.icgc.dcc.portal.service.QueryService.hasGene;
+import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
 import static org.icgc.dcc.portal.service.QueryService.hasMutation;
 import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.hasPathway;
 import static org.icgc.dcc.portal.service.QueryService.hasProject;
 import static org.icgc.dcc.portal.service.QueryService.hasTranscript;
 import static org.icgc.dcc.portal.service.QueryService.remapD2P;
@@ -103,7 +103,7 @@ public class MutationRepository implements Repository {
       .put(Kind.DONOR, "ssm_occurrence")
       .put(Kind.TRANSCRIPT, "transcript")
       .put(Kind.GENE, "transcript")
-      .put(Kind.PATHWAY, "transcript.gene.pathways")
+      .put(Kind.GENE_SET, "transcript.gene.sets")
       .put(Kind.OBSERVATION, "ssm_occurrence.observation")
       .build());
 
@@ -115,7 +115,7 @@ public class MutationRepository implements Repository {
       .put(Kind.TRANSCRIPT, "transcript")
       .put(Kind.CONSEQUENCE, "transcript.consequence")
       .put(Kind.GENE, "transcript.gene")
-      .put(Kind.PATHWAY, "transcript.gene.pathways")
+      .put(Kind.GENE_SET, "transcript.gene.sets")
       .put(Kind.OBSERVATION, "ssm_occurrence.observation")
       .build());
 
@@ -214,26 +214,26 @@ public class MutationRepository implements Repository {
     boolean hasDonor = hasDonor(filters);
     boolean hasProject = hasProject(filters);
     boolean hasGene = hasGene(filters);
-    boolean hasPathway = hasPathway(filters);
+    boolean hasGeneSet = hasGeneSet(filters);
     boolean hasMutation = hasMutation(filters);
     boolean hasConsequence = hasConsequence(filters);
     boolean hasTranscript = hasTranscript(filters);
     boolean hasObservation = hasObservation(filters);
 
-    if (hasProject || hasGene || hasPathway || hasDonor || hasMutation || hasConsequence || hasTranscript
+    if (hasProject || hasGene || hasGeneSet || hasDonor || hasMutation || hasConsequence || hasTranscript
         || hasObservation) {
       matchAll = false;
       if (hasMutation) {
         musts.add(buildMutationFilters(filters, PREFIX_MAPPING));
       }
-      if (hasGene || hasPathway || hasConsequence || hasTranscript) {
+      if (hasGene || hasGeneSet || hasConsequence || hasTranscript) {
         val tb = FilterBuilders.boolFilter();
         val tMusts = Lists.<FilterBuilder> newArrayList();
         if (hasTranscript) tMusts.add(buildTranscriptFilters(filters, PREFIX_MAPPING));
         if (hasConsequence) tMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
         if (hasGene) tMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-        if (hasPathway) tMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.PATHWAY),
-            buildPathwayFilters(filters, PREFIX_MAPPING)));
+        if (hasGeneSet) tMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
+            buildGeneSetFilters(filters, PREFIX_MAPPING)));
         tb.must(tMusts.toArray(new FilterBuilder[tMusts.size()]));
 
         // Facet is nested so filter cannot be nested
