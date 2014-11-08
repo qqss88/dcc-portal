@@ -189,7 +189,7 @@ public class QueryService {
         (ObjectNode) MAPPER
             .readTree(
             // "{'gene':{'id':{'is': ['abc']}, 'goterm':{'is':['go1', 'go2'], 'not':['go3']}, 'pathway':{'is':['pathway1']}, 'hasPathway':true   }}"
-            "{'gene':{'goterm':{'is':['go1', 'go2'], 'not':['go3']} }}"
+            "{'gene':{'goterm':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}"
             );
 
     ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
@@ -217,6 +217,7 @@ public class QueryService {
     ArrayList<NestedFilterBuilder> geneSetExclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
 
     ArrayList<NestedFilterBuilder> geneSetExistFilters = Lists.<NestedFilterBuilder> newArrayList();
+    ArrayList<NestedFilterBuilder> geneSetNotExistFilters = Lists.<NestedFilterBuilder> newArrayList();
 
     for (val geneSetField : geneSetFields) {
 
@@ -269,12 +270,11 @@ public class QueryService {
       if (!genePath.path(geneSetExistField).isMissingNode()) {
         val exist = genePath.path(geneSetExistField).asBoolean();
 
+        val filter = nestedFilter("sets", FilterBuilders.boolFilter().must(termFilter("type", geneSetExistField)));
         if (exist) {
-          val filter = nestedFilter("sets", FilterBuilders.boolFilter().must(termFilter("type", geneSetExistField)));
           geneSetExistFilters.add(filter);
         } else {
-          val filter = nestedFilter("sets", FilterBuilders.boolFilter().mustNot(termFilter("type", geneSetExistField)));
-          geneSetExistFilters.add(filter);
+          geneSetNotExistFilters.add(filter);
         }
       }
     }
@@ -283,6 +283,14 @@ public class QueryService {
       val mustGeneSetFilter = FilterBuilders.boolFilter();
       for (val geneSetExistFilter : geneSetExistFilters) {
         mustGeneSetFilter.must(geneSetExistFilter);
+      }
+      termFilters.must(mustGeneSetFilter);
+    }
+
+    if (geneSetNotExistFilters.size() > 0) {
+      val mustGeneSetFilter = FilterBuilders.boolFilter();
+      for (val geneSetNotExistFilter : geneSetNotExistFilters) {
+        mustGeneSetFilter.mustNot(geneSetNotExistFilter);
       }
       termFilters.must(mustGeneSetFilter);
     }

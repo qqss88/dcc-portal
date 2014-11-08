@@ -349,7 +349,7 @@ public class GeneRepository implements Repository {
     val map = Maps.<String, Object> newHashMap();
     for (val f : response.getFields().values()) {
       if (Lists.newArrayList(fieldMapping.get("affectedTranscriptIds"), fieldMapping.get("synonyms"), "transcripts",
-          "project", fieldMapping.get("list"), "pathways").contains(f.getName())) {
+          "project", fieldMapping.get("sets")).contains(f.getName())) {
         map.put(f.getName(), f.getValues());
       } else {
         map.put(f.getName(), f.getValue());

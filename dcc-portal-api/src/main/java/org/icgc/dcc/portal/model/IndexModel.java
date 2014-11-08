@@ -214,7 +214,10 @@ public class IndexModel {
           .put("pathwayId", "pathways.pathway_id")
           .put("pathwayName", "pathways.pathway_name")
           .put("pathways", "pathways")
-          .put("list", "list")
+          .put("sets", "sets")
+          // .put("list", "list")
+          // .put("goTerms", "go_terms")
+          // .put("curatedSets", "curated_sets")
           .build();
 
   private static final ImmutableMap<String, String> MUTATIONS_FIELDS_MAPPING =

@@ -63,6 +63,7 @@
 
 
     // ==== Test Data
+    /*
     var sets =  [{
         "id": "GO:1",
         "type": "GO Term",
@@ -93,20 +94,24 @@
         "direct": true
     }];
     _ctrl.gene.sets = sets;
+    */
     // ==== End
+
 
 
     // Extract to make it easier to handle on the view
     _ctrl.uiGeneSets = {};
     _ctrl.uiGeneSets.pathwayList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'Pathway' && set.direct === true;
+      return set.type === 'pathway' && set.annotation === 'direct';
     });
     _ctrl.uiGeneSets.goList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'GO Term' && set.direct === true;
+      return set.type === 'go_term' && set.annotation === 'direct';
     });
     _ctrl.uiGeneSets.curatedList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'Curated' && set.direct === true;
+      return set.type === 'curated' && set.annotation === 'direct';
     });
+
+    console.log('Set', _ctrl.gene.sets, _ctrl.uiGeneSets);
 
 
     function refresh() {

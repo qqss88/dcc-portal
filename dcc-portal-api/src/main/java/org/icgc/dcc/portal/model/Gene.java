@@ -67,15 +67,19 @@ public class Gene {
   @ApiModelProperty(value = "Affected Transcript IDs", required = true)
   List<String> affectedTranscriptIds;
 
-  @ApiModelProperty(value = "Cancer Gene List", required = true)
-  List<String> list;
+  // @ApiModelProperty(value = "Cancer Gene List", required = true)
+  // List<String> list;
+
   @ApiModelProperty(value = "Transcripts")
   List<Transcript> transcripts;
   @ApiModelProperty(value = "Projects that have a Donor affected by the Gene")
   List<Project> projects;
 
-  @ApiModelProperty(value = "Pathways associated with this Gene")
-  List<Pathway> pathways;
+  // @ApiModelProperty(value = "Pathways associated with this Gene")
+  // List<Pathway> pathways;
+
+  @ApiModelProperty(value = "Genesets associated with this Gene")
+  List<GeneSetAnnotation> sets;
 
   @SuppressWarnings("unchecked")
   @JsonCreator
@@ -95,10 +99,11 @@ public class Gene {
     affectedTranscriptIds = (List<String>) fieldMap.get(fields.get("affectedTranscriptIds"));
     affectedDonorCountTotal = getLong(fieldMap.get(fields.get("affectedDonorCountTotal")));
     affectedDonorCountFiltered = getLong(fieldMap.get(fields.get("affectedDonorCountFiltered")));
-    list = (List<String>) fieldMap.get(fields.get("list"));
+    // list = (List<String>) fieldMap.get(fields.get("list"));
     transcripts = buildTranscripts((List<Map<String, Object>>) fieldMap.get("transcripts"));
     projects = buildProjects(fieldMap);
-    pathways = buildPathways((List<Map<String, Object>>) fieldMap.get("pathways"));
+    // pathways = buildPathways((List<Map<String, Object>>) fieldMap.get("pathways"));
+    sets = buildGeneSets((List<Map<String, Object>>) fieldMap.get("sets"));
   }
 
   private List<Transcript> buildTranscripts(List<Map<String, Object>> field) {
@@ -108,6 +113,15 @@ public class Gene {
       lst.add(new Transcript(item));
     }
     return lst;
+  }
+
+  private List<GeneSetAnnotation> buildGeneSets(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    val result = Lists.<GeneSetAnnotation> newArrayList();
+    for (Map<String, Object> item : field) {
+      result.add(new GeneSetAnnotation(item));
+    }
+    return result;
   }
 
   private List<Pathway> buildPathways(List<Map<String, Object>> field) {
