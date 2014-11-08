@@ -526,7 +526,7 @@ public class IndexModel {
 
           // Gene Ontology
           .put("ontology", "go_term.ontology")
-          .put("altIds", "go_term.alt_ids")
+          .put("altIds", "go_term.alt_id")
           .put("synonyms", "go_term.synonyms")
           .put("inferredTree", "go_term.inferred_tree")
 

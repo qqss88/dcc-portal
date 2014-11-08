@@ -30,6 +30,7 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -50,6 +51,9 @@ public class GeneSet {
 
   @ApiModelProperty(value = "Type", required = true)
   String type;
+
+  @ApiModelProperty(value = "Description", required = true)
+  String description;
 
   @ApiModelProperty(value = "Count of genes affected")
   Long geneCount;
@@ -75,18 +79,61 @@ public class GeneSet {
     name = (String) fieldMap.get(fields.get("name"));
     source = (String) fieldMap.get(fields.get("source"));
     type = (String) fieldMap.get(fields.get("type"));
+    description = (String) fieldMap.get(fields.get("description"));
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
     projects = buildProjects(fieldMap);
 
     // Reactome pathway specific fields
-    hierarchy = (List<List<Map<String, String>>>) fieldMap.get(fields.get("pathway.hierarchy"));
+    // hierarchy = (List<List<Map<String, String>>>) fieldMap.get(fields.get("hierarchy"));
+    hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(fields.get("hierarchy")));
 
     // Gene ontology specific fields
-    ontology = (String) fieldMap.get(fields.get("go_term.ontology"));
-    altIds = (List<String>) fieldMap.get(fields.get("go_term.altIds"));
-    synonyms = (List<String>) fieldMap.get(fields.get("go_term.synonyms"));
-    inferredTree = (List<Map<String, String>>) fieldMap.get(fields.get("go_term.inferredTree"));
+    ontology = (String) fieldMap.get(fields.get("ontology"));
+    altIds = (List<String>) fieldMap.get(fields.get("altIds"));
+    synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
+    inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(fields.get("inferredTree")));
+  }
+
+  @SuppressWarnings("unused")
+  private List<List<Map<String, String>>> buildPathwayHierarchy(List<List<Map<String, Object>>> field) {
+    val result = Lists.<List<Map<String, String>>> newArrayList();
+
+    if (field == null) {
+      return result;
+    }
+
+    for (val parentPath : field) {
+      val path = Lists.<Map<String, String>> newArrayList();
+      for (val pathwayNode : parentPath) {
+        val node = Maps.<String, String> newHashMap();
+        node.put("id", (String) pathwayNode.get("id"));
+        node.put("name", (String) pathwayNode.get("name"));
+        node.put("diagrammed", String.valueOf(pathwayNode.get("diagrammed")));
+        path.add(node);
+      }
+      result.add(path);
+    }
+    return result;
+  }
+
+  @SuppressWarnings("unused")
+  private List<Map<String, String>> buildInferredTree(List<Map<String, Object>> field) {
+    val result = Lists.<Map<String, String>> newArrayList();
+
+    if (field == null) {
+      return result;
+    }
+
+    for (val obj : field) {
+      val treeNode = Maps.<String, String> newHashMap();
+      treeNode.put("id", (String) obj.get("id"));
+      treeNode.put("name", (String) obj.get("name"));
+      treeNode.put("relation", (String) obj.get("relation"));
+      treeNode.put("level", String.valueOf(obj.get("level")));
+      result.add(treeNode);
+    }
+    return result;
   }
 
   private Long getLong(Object field) {

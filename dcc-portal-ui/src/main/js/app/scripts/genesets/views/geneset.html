@@ -60,7 +60,7 @@
             </tr>
             <tr>
                 <th>Gene Set Type</th>
-                <td>???</td>
+                <td>{{ GeneSetCtrl.geneSet.type }}</td>
             </tr>
             <tr>
                 <th>Genes</th>
@@ -68,6 +68,7 @@
                     <a href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
                 </td>
             </tr>
+            <!--
             <tr>
                 <th>Hierarchy</th>
                 <td>
@@ -79,41 +80,44 @@
                        <pathway-tree tree="[hier]"></pathway-tree>
                        <br>
                    </div>
-                   <!--
-                   <div class="tree"> 
-                      <ul style="padding-left:0px">
-                          <li ng-repeat="data in GeneSetCtrl.uiParentPathways" ng-include="'template/tree.html'">
-                          </li>
-                      </ul>
-                   </div>
-                   <br>
-                   -->
-
                 </td>
             </tr>
+            -->
             <tr>
                 <th>Description</td>
-                <td>???</td>
+                <td>
+                    <hide-text text="{{ GeneSetCtrl.geneSet.description}}"></hide-text>
+                </td>
             </tr>
-            <tr data-ng-if="1===1">
+            <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Ontology</th>
-                <td>???</td>
+                <td>{{ GeneSetCtrl.geneSet.ontology }}</td>
             </tr>
-            <tr data-ng-if="1===1">
+            <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Alt. ID</th>
-                <td>???</td>
+                <td>{{ GeneSetCtrl.geneSet.altIds.join(' ') }}</td>
             </tr>
-            <tr data-ng-if="1===1">
+            <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Synonyms</th>
-                <td>???</td>
+                <td>{{ GeneSetCtrl.geneSet.synonyms.join(' ') }}</td>
             </tr>
-            <tr data-ng-if="1===1">
+            <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Inferred Tree</th>
                 <td>???</td>
             </tr>
-            <tr data-ng-if="1===1">
+            <tr data-ng-if="GeneSetCtrl.geneSet.type==='pathway'">
                 <th>Hierarchy</th>
-                <td>???</td>
+                <td>
+
+                   <div data-ng-repeat="hier in GeneSetCtrl.uiParentPathways">
+                       <span>
+                           <i class="icon-external-link"></i>
+                           <a href="http://www.reactome.org/PathwayBrowser/TODO" target="_blank">View in Reactome Pathway Browser</a>
+                       </span>
+                       <pathway-tree tree="[hier]"></pathway-tree>
+                       <br>
+                   </div>
+                </td>
             </tr>
         </table>
 

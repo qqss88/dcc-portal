@@ -103,7 +103,7 @@
         _ctrl.baseAdvQuery = _filter;
 
 
-        _ctrl.uiParentPathways = uiPathwayHierarchy(geneSet.parentPathways);
+        _ctrl.uiParentPathways = uiPathwayHierarchy(geneSet.hierarchy);
 
         Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
           _ctrl.totalMutations = count;
