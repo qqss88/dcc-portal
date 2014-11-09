@@ -58,6 +58,9 @@ public class GeneSet {
   @ApiModelProperty(value = "Count of genes affected")
   Long geneCount;
 
+  @ApiModelProperty(value = "Has Reactome Diagram")
+  String diagrammed;
+
   @ApiModelProperty(value = "Projects affected")
   List<Project> projects;
 
@@ -87,6 +90,7 @@ public class GeneSet {
     // Reactome pathway specific fields
     // hierarchy = (List<List<Map<String, String>>>) fieldMap.get(fields.get("hierarchy"));
     hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(fields.get("hierarchy")));
+    diagrammed = String.valueOf(fieldMap.get(fields.get("diagrammed")));
 
     // Gene ontology specific fields
     ontology = (String) fieldMap.get(fields.get("ontology"));

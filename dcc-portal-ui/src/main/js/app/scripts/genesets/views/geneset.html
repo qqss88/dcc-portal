@@ -116,9 +116,9 @@
                    <div data-ng-repeat="hier in GeneSetCtrl.uiParentPathways">
                        <span>
                            <i class="icon-external-link"></i>
-                           <a href="http://www.reactome.org/PathwayBrowser/TODO" target="_blank">View in Reactome Pathway Browser</a>
+                           <a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{hier.diagramId}}&ID={{GeneSetCtrl.geneSet.id}}" target="_blank">View in Reactome Pathway Browser</a>
                        </span>
-                       <pathway-tree tree="[hier]"></pathway-tree>
+                       <pathway-tree tree="[hier.root]"></pathway-tree>
                        <br>
                    </div>
                 </td>

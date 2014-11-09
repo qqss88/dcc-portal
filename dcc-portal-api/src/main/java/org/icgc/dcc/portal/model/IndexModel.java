@@ -523,6 +523,7 @@ public class IndexModel {
 
           // Pathway
           .put("hierarchy", "pathway.hierarchy")
+          .put("diagrammed", "pathway.diagrammed")
 
           // Gene Ontology
           .put("ontology", "go_term.ontology")

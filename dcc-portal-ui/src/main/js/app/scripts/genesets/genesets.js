@@ -92,13 +92,18 @@
         }
 
         parentPathways.forEach(function(path) {
-          var root = {}, node = root;
+          var root = {}, node = root, diagramId = '';
 
           // Add all ancestors
           path.forEach(function(n, idx) {
             node.id = n.id;
             node.name = n.name;
-            
+
+            // FIXME: just make it bool in api?
+            if (n.diagrammed === 'true') {
+              diagramId = node.id;
+            }
+
             // Has children, swap
             if (idx < path.length) {
               node.children = [];
@@ -111,7 +116,16 @@
           node.id = _ctrl.geneSet.id;
           node.name = _ctrl.geneSet.name;
 
-          hierarchyList.push(root);
+          // FIXME: check self-diagram logic with junjun
+          if (_ctrl.geneSet.diagrammed === 'true') {
+            diagramId = node.id;
+          }
+
+
+          hierarchyList.push({
+            'root': root,
+            'diagramId': diagramId
+          });
         });
         return hierarchyList;
       }
@@ -138,8 +152,14 @@
         });
 
 
-        if (_ctrl.geneSet.hasOwnProperty('projects') && _ctrl.geneSet.projects.length) {
+        if (_ctrl.geneSet.hasOwnProperty('projects')) {
           _ctrl.geneSet.projectIds = _.pluck(_ctrl.geneSet.projects, 'id');
+
+          if (_.isEmpty(_ctrl.geneSet.projectIds)) {
+            _ctrl.geneSet.fprojects = [];
+            return;
+          }
+
           Projects.one(_ctrl.geneSet.projectIds.join(',')).handler.one('mutations',
             'counts').get({filters: _filter}).then(function (data) {
               _ctrl.geneSet.projects.forEach(function (p) {
@@ -215,8 +235,12 @@
     var _ctrl = this, _geneSet = '', _filter = {};
 
     function success(genes) {
-      if (genes.hasOwnProperty('hits') && genes.hits.length > 0) {
+      if (genes.hasOwnProperty('hits')) {
         _ctrl.genes = genes;
+        if (_.isEmpty(_ctrl.genes.hits)) {
+          return;
+        }
+
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
           'counts').get({filters: _filter}).then(function (data) {
             _ctrl.genes.hits.forEach(function (g) {
@@ -322,6 +346,10 @@
     function success(donors) {
       if (donors.hasOwnProperty('hits')) {
         _ctrl.donors = donors;
+
+        if (_.isEmpty(_ctrl.donors.hits)) {
+          return;
+        }
 
         Donors.one(_.pluck(_ctrl.donors.hits, 'id').join(',')).handler.one('mutations', 'counts').get({
           filters: _filter
