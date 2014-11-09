@@ -490,9 +490,12 @@ public class IndexModel {
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
+          // GO Term
+          .put("altId", "alt_id")
+
           // Pathway
-          .put("url", "url")
-          .put("source", "source")
+          // .put("url", "url")
+          // .put("source", "source")
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =

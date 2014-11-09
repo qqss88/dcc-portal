@@ -9,7 +9,7 @@
             data-ng-click="click(r)"
             class="t_suggest_flyout__hits__hit">
             <td class="t_suggest_flyout__hits__hit__type">
-                <span class="t_badge t_badge__{{ r.type }}"></span>
+                <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
             </td>
             <td class="t_suggest_flyout__hits__hit__text">
                 <span>
@@ -23,6 +23,10 @@
                            data-ng-switch-when="project"></span>
                      <span data-ng-bind-html="r.id | highlight:activeQuery"
                            data-ng-switch-when="pathway"></span>
+                     <span data-ng-bind-html="r.id | highlight:activeQuery"
+                           data-ng-switch-when="go_term"></span>
+                     <span data-ng-bind-html="r.id | highlight:activeQuery"
+                           data-ng-switch-when="curated_set"></span>
                 </span>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="gene">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
@@ -50,6 +54,12 @@
                     <li data-ng-bind-html="r.tumourSubtype | highlight:activeQuery:true"></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="pathway">
+                    <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
+                </ul>
+                <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="go_term">
+                    <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
+                </ul>
+                <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="curated_set">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
                 </ul>
             </td>

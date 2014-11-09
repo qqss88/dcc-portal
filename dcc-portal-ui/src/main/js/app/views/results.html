@@ -37,7 +37,7 @@
                           class="t_labels__label t_labels__label__mutations"></span>
                     <span data-param data-key='type' data-value=project
                           class="t_labels__label t_labels__label__projects"></span>
-                    <span data-param data-key='type' data-value=pathway
+                    <span data-param data-key='type' data-value="gene set"
                           class="t_labels__label t_labels__label__pathways"></span>
                 </div>
             </form>
@@ -47,7 +47,8 @@
         <table class="t_quick">
             <tr data-ng-repeat="r in results.hits" data-ng-switch="r.type" class="t_quick__hit">
                 <td class="t_quick__hit__type">
-                    <span data-ng-class="'t_badge t_badge__'+r.type"></span>
+                    <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
+                    <!--<span data-ng-class="'t_badge t_badge__'+r.type"></span>-->
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="gene">
                     <a href="/genes/{{r.id}}" data-ng-bind-html="r.symbol | highlight:activeQuery "></a>
@@ -131,19 +132,54 @@
                     </ul>
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="pathway">
-                    <a href="/pathways/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery "></a>
+                    <a href="/genesets/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery "></a>
                     <ul class="t_quick__hit__text__details">
                         <li>
-                            <span class="t_quick__hit__text__details__label">Pathway</span>
-                        <span class="t_quick__hit__text__details__value"
-                              data-ng-bind-html=" r.name | highlight:activeQuery "></span>
+                            <span class="t_quick__hit__text__details__label">Gene Set Type</span>
+                            <span class="t_quick__hit__text__details__value">Reactome Pathway</span> 
                         </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Gene Set Name</span>
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html=" r.name | highlight:activeQuery "></span>
+                        </li>
+                        <!--
                         <li data-ng-if="r.url">
                             <span class="t_quick__hit__text__details__label">Source</span>
                         <span class="t_quick__hit__text__details__value">
                             <a target="_blank" href="http://www.reactome.org/PathwayBrowser{{r.url}}">View in
                                 {{r.source}}</a>
                         </span>
+                        </li>
+                        -->
+                    </ul>
+                </td>
+                <td class="t_quick__hit__text" data-ng-switch-when="go_term">
+                    <a href="/genesets/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery "></a>
+                    <ul class="t_quick__hit__text__details">
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Gene Set Type</span>
+                            <span class="t_quick__hit__text__details__value">GO</span> 
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Gene Set Name</span>
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html=" r.name | highlight:activeQuery "></span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Alt. ID</span>
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html=" r.goAltId.join(', ') | highlight:activeQuery "></span>
+                        </li>
+                    </ul>
+                </td>
+                <td class="t_quick__hit__text" data-ng-switch-when="curated_set">
+                    <a href="/genesets/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery "></a>
+                    <ul class="t_quick__hit__text__details">
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Gene Set Type</span>
+                            <span class="t_quick__hit__text__details__value">Curated Gene Set</span> 
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Gene Set Name</span>
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html=" r.name | highlight:activeQuery "></span>
                         </li>
                     </ul>
                 </td>

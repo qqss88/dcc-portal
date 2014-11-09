@@ -1467,7 +1467,7 @@ header #brand img {
   /* line 20, _sections/_results.scss */
   .t_quick__hit__text__details__label {
     text-align: right;
-    width: 7rem;
+    width: 8rem;
     border-right: 1px solid #f2f2f2;
   }
 }
@@ -3159,12 +3159,12 @@ g.marker rect.selected {
   text-decoration: none;
 }
 
-/* line 52, _modules/_trees.scss */
+/* line 55, _modules/_trees.scss */
 .tree > ul > li::before, .tree > ul > li::after {
   border: 0;
 }
 
-/* line 56, _modules/_trees.scss */
+/* line 59, _modules/_trees.scss */
 .tree li:last-child::before {
   height: 20px;
 }
