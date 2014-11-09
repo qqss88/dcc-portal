@@ -54,15 +54,40 @@
       _ctrl.geneSet = geneSet;
 
       // Builds an UI friendly inferred tree
+      // A -> [B, C] -> D -> [E, F, G]
       function uiInferredTree(inferredTree) {
-        var root = {}, node = root;
+        var root = {}, node = root, current = null;
+
+        if (! angular.isDefined(inferredTree) || _.isEmpty(inferredTree) ) {
+          return {};
+        }
+
+        current = inferredTree[0].level;
+
+        node.goTerms = [];
+        inferredTree.forEach(function(goTerm) {
+          if (goTerm.level !== current) {
+            current = goTerm.level;
+            node.child = {};
+            node.child .goTerms = [];
+            node = node.child;
+          }
+          node.goTerms.push({
+            name: goTerm.name,
+            id: goTerm.id,
+            relation: goTerm.relation,
+            level: parseInt(goTerm.level, 10)
+          });
+        });
         return root;
       }
 
+
       // Builds an UI friendly list of parent pathway hierarchies
+      // [ [A->B], [C-D->E->F] ]
       function uiPathwayHierarchy(parentPathways) {
         var hierarchyList = [];
-        if (! angular.isDefined(parentPathways)) {
+        if (! angular.isDefined(parentPathways) || _.isEmpty(parentPathways) ) {
           return hierarchyList;
         }
 
@@ -71,7 +96,7 @@
 
           // Add all ancestors
           path.forEach(function(n, idx) {
-            node.reactomeId = n.reactomeId;
+            node.id = n.id;
             node.name = n.name;
             
             // Has children, swap
@@ -83,13 +108,11 @@
           });
 
           // Lastly, add self
-          node.reactomeId = _ctrl.geneSet.id;
+          node.id = _ctrl.geneSet.id;
           node.name = _ctrl.geneSet.name;
 
           hierarchyList.push(root);
         });
-
-        console.log("hierarchies", hierarchyList);
         return hierarchyList;
       }
 
@@ -104,6 +127,7 @@
 
 
         _ctrl.uiParentPathways = uiPathwayHierarchy(geneSet.hierarchy);
+        _ctrl.uiInferredTree = uiInferredTree(geneSet.inferredTree);
 
         Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
           _ctrl.totalMutations = count;

@@ -65,7 +65,7 @@
             <tr>
                 <th>Genes</th>
                 <td>
-                    <a href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
+                    <a href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
                 </td>
             </tr>
             <!--
@@ -103,7 +103,11 @@
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Inferred Tree</th>
-                <td>???</td>
+                <!--<td>{{GeneSetCtrl.geneSet.inferredTree}}</td>-->
+                <!--<td>{{GeneSetCtrl.uiInferredTree}}</td>-->
+                <td>
+                    <inferred-tree tree="GeneSetCtrl.uiInferredTree"></inferred-tree>
+                </td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='pathway'">
                 <th>Hierarchy</th>
@@ -202,10 +206,10 @@
             <a data-ng-href='search/g?filters={{GeneSetCtrl.baseAdvQuery}}'><strong>{{GeneSetCtrl.totalGenes}}</strong>
             </a>
             out of
-            <a data-ng-href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
+            <a data-ng-href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
                 <strong>{{GeneSetCtrl.geneSet.geneCount}}</strong>
             </a>
-            genes in this pathway affected by mutations across
+            genes in this gene set affected by mutations across
             <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneSetCtrl.geneSet.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
                 <strong>{{GeneSetCtrl.geneSet.fprojects.length | number}}</strong>
             </a>
@@ -214,13 +218,13 @@
 
         <div data-ng-if="GeneSetCtrl.donorBar.hasData">
             <bar class="half" height=250 items="GeneSetCtrl.donorBar" heading="Top Projects by Donor Proportion"
-                 subheading="Top 10 projects with donors containing mutated genes in the pathway sorted by proportion of affected donors"
+                 subheading="Top 10 projects with donors containing mutated genes in the gene set sorted by proportion of affected donors"
                  ylabel="% of Donors Affected"
                  format="percentage"></bar>
         </div>
         <div data-ng-if="GeneSetCtrl.geneBar.hasData" class="clearfix">
             <bar class="half omega" height=250 items="GeneSetCtrl.geneBar" heading="Top Projects by Gene Proportion"
-                 subheading="Top 10 projects with donors containing mutated genes in the pathway sorted by proportion of mutated genes"
+                 subheading="Top 10 projects with donors containing mutated genes in the gene set sorted by proportion of mutated genes"
                  ylabel="% of Genes Affected"
                  format="percentage"></bar>
         </div>
@@ -280,7 +284,7 @@
                        data-ng-href='/search/g?filters={{project.advQuery}}'>
                         {{ project.geneCount | number }}
                     </a> /
-                    <a data-ng-href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
+                    <a data-ng-href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
                         {{GeneSetCtrl.geneSet.geneCount}}
                     </a>
                     <em>({{ project.uiAffectedGenePercentage*100 | number:2 }}%)</em>
@@ -377,7 +381,7 @@
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
                         /
-                        <a data-ng-href='/search?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
+                        <a data-ng-href='/search?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
                             {{GeneSetCtrl.totalDonors | number}}</a>
                         <em>({{gene.affectedDonorCountFiltered/GeneSetCtrl.totalDonors * 100 | number:2}}%)</em>
                     </span>
@@ -402,7 +406,7 @@
                 <th>Location</th>
                 <th>Type</th>
                 <th>Number of donors affected</th>
-                <th>Total number of SSM-tested donors from the current pathway</th>
+                <th>Total number of SSM-tested donors from the current gene set</th>
                 <th>Percentage of affected donors</th>
                 <th>Mutations</th>
             </tr>

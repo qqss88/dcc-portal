@@ -51,7 +51,7 @@ angular.module('app.ui.trees', []).directive('pathwayTree', function($compile) {
          ul = angular.element('<ul>');
          li = angular.element('<li>');
          span = angular.element('<span>');
-         anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + current.reactomeId).text(current.name);
+         anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + current.id).text(current.name);
 
          anchor.appendTo(span);
          span.appendTo(li);
@@ -75,7 +75,53 @@ angular.module('app.ui.trees', []).directive('pathwayTree', function($compile) {
 
     }
   };
+}).directive('inferredTree', function($compile) {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      tree: '='
+    },
+    template: '<div class="tree"></div>',
+    link: function($scope, $element) {
+
+       function addNesting(e, current) {
+         var ul, li, span, anchor;
+         ul = angular.element('<ul>');
+         li = angular.element('<li>');
+         span = angular.element('<span>');
+
+         current.goTerms.forEach(function(goTerm) {
+           anchor = angular.element('<a>')
+             .attr('data-ng-href', '/genesets/' + goTerm.id)
+             .text( goTerm.id + ' ' + goTerm.name);
+
+           if (goTerm.level === 0) {
+             anchor.css('font-weight', 600);
+           }
+
+           anchor.appendTo(span);
+           angular.element('<br>').appendTo(span);
+         });
+         span.appendTo(li);
+         li.appendTo(ul);
+         ul.appendTo(e);
+
+         if (current.child) {
+           addNesting(li, current.child);
+         }
+       }
+
+       addNesting($element[0], $scope.tree);
+
+       // Dynamically generated contents need compilation
+       $compile($element.contents())($scope);
+
+    }
+  };
 });
+
+
 
 // See: https://github.com/angular/angular.js/issues/1375
 // See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
