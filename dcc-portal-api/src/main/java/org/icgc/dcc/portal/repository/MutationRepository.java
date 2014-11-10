@@ -232,8 +232,11 @@ public class MutationRepository implements Repository {
         if (hasTranscript) tMusts.add(buildTranscriptFilters(filters, PREFIX_MAPPING));
         if (hasConsequence) tMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
         if (hasGene) tMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-        if (hasGeneSet) tMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
-            buildGeneSetFilters(filters, PREFIX_MAPPING)));
+
+        if (hasGeneSet) tMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+        // if (hasGeneSet) tMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
+        // buildGeneSetFilters(filters, PREFIX_MAPPING)));
+
         tb.must(tMusts.toArray(new FilterBuilder[tMusts.size()]));
 
         // Facet is nested so filter cannot be nested

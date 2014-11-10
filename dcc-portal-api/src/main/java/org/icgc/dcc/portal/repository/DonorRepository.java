@@ -185,9 +185,12 @@ public class DonorRepository implements Repository {
       boolean hasMutation, boolean hasConsequence, boolean hasObservation) {
     val gMusts = Lists.<FilterBuilder> newArrayList();
     if (hasGene) gMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-    if (hasGeneSet) {
-      gMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET), buildGeneSetFilters(filters, PREFIX_MAPPING)));
-    }
+    if (hasGeneSet) gMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+    /*
+     * if (hasGeneSet) { gMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET), buildGeneSetFilters(filters,
+     * PREFIX_MAPPING))); }
+     */
+
     if (hasMutation || hasConsequence || hasObservation) {
       val nb = FilterBuilders.boolFilter();
       val nMusts = Lists.<FilterBuilder> newArrayList();

@@ -151,8 +151,11 @@ public class OccurrenceRepository {
           val nMusts = Lists.<FilterBuilder> newArrayList();
           if (hasConsequence) nMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
           if (hasGene) nMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-          if (hasGeneSet) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
-              buildGeneSetFilters(filters, PREFIX_MAPPING)));
+
+          if (hasGeneSet) nMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+          // if (hasGeneSet) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
+          // buildGeneSetFilters(filters, PREFIX_MAPPING)));
+
           nb.must(nMusts.toArray(new FilterBuilder[nMusts.size()]));
           mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.CONSEQUENCE), nb));
         }

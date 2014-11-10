@@ -205,7 +205,7 @@ public class IndexModel {
           .put("end", "end")
           .put("strand", "strand")
           .put("description", "description")
-          .put("synonyms", "synonyms")
+          .put("synonyms", "synonyms") // Is a multi field
           .put("externalDbIds", "external_db_ids")
           .put("affectedDonorCountTotal", "_summary._affected_donor_count")
           .put("affectedDonorCountFiltered", "_score")

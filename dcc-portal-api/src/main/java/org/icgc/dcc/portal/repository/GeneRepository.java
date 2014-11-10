@@ -33,14 +33,17 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
+import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
 import static org.icgc.dcc.portal.service.QueryService.hasDonor;
 import static org.icgc.dcc.portal.service.QueryService.hasGene;
+import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
 import static org.icgc.dcc.portal.service.QueryService.hasMutation;
 import static org.icgc.dcc.portal.service.QueryService.hasObservation;
+import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 
@@ -92,6 +95,7 @@ public class GeneRepository implements Repository {
   private static final Kind KIND = Kind.GENE;
 
   private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
+      Kind.GENE_SET, "sets",
       Kind.DONOR, "donor",
       Kind.MUTATION, "donor.ssm",
       Kind.CONSEQUENCE, "donor.ssm.consequence",
@@ -147,12 +151,17 @@ public class GeneRepository implements Repository {
     boolean hasMutation = hasMutation(filters);
     boolean hasConsequence = hasConsequence(filters);
     boolean hasObservation = hasObservation(filters);
+    boolean hasGeneSet = hasGeneSet(filters);
 
-    if (hasGene || hasDonor || hasMutation || hasConsequence || hasObservation) {
+    if (hasGene || hasGeneSet || hasDonor || hasMutation || hasConsequence || hasObservation) {
       matchAll = false;
       if (hasGene) {
         musts.add(buildGeneFilters(filters, PREFIX_MAPPING));
       }
+      if (hasGeneSet) {
+        musts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+      }
+
       if (hasDonor || hasMutation || hasConsequence || hasObservation) {
         val db = FilterBuilders.boolFilter();
         val dMusts = buildDonorNestedFilters(filters, hasDonor, hasMutation, hasConsequence, hasObservation);
@@ -312,7 +321,7 @@ public class GeneRepository implements Repository {
   }
 
   public ObjectNode remapFilters(ObjectNode filters) {
-    return remapM2O(remapM2C(filters));
+    return remapG2P(remapM2O(remapM2C(filters)));
   }
 
   public Map<String, Object> findOne(String id, Query query) {

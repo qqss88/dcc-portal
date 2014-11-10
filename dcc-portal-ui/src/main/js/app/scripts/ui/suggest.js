@@ -180,7 +180,12 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
 
       scope.click = function (item) {
         if (item) {
-          $location.path('/' + item.type + 's/' + item.id).search({});
+          var resourceType = item.type;
+          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
+            resourceType = 'geneset';
+          }
+
+          $location.path('/' + resourceType + 's/' + item.id).search({});
         } else {
           $location.path('/q').search({q: scope.query});
         }

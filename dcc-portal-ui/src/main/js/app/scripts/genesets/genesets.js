@@ -160,6 +160,7 @@
             return;
           }
 
+
           Projects.one(_ctrl.geneSet.projectIds.join(',')).handler.one('mutations',
             'counts').get({filters: _filter}).then(function (data) {
               _ctrl.geneSet.projects.forEach(function (p) {
@@ -256,7 +257,7 @@
     function refresh() {
       GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: geneSet.id}}});
+        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Genes.getList({
           filters: _filter
         }).then(success);
@@ -282,14 +283,17 @@
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
           _ctrl.mutations.hits.forEach(function (mutation) {
+            console.log('mutation', mutation);
             Donors.getList({
               size: 0,
               include: 'facets',
               filters: LocationService.mergeIntoFilters({
                 mutation: {id: {is: mutation.id}},
-                gene: {geneSetId: {is: geneSet.id}}
+                gene: {geneSetId: {is: [geneSet.id] }}
               })
             }).then(function (data) {
+              console.log('mutation', data);
+
               mutation.uiDonors = data.facets.projectId.terms;
               mutation.advQuery = LocationService.mergeIntoFilters({
                 mutation: {id: {is: [mutation.id] }},
@@ -325,7 +329,7 @@
         Mutations.getList({
           include: 'consequences',
           filters: LocationService.mergeIntoFilters({
-            gene: {geneSetId: {is: geneSet.id}}
+            gene: {geneSetId: {is: [geneSet.id]}}
           })
         }).then(success);
       });
@@ -368,7 +372,7 @@
     function refresh() {
       GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: geneSet.id}}});
+        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Donors.getList({filters: _filter}).then(success);
       });
     }
