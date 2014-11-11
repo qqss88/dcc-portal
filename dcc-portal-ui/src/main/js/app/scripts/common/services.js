@@ -20,10 +20,6 @@
 
   var module = angular.module('app.common.services', []);
 
-  module.constant('Extensions', {
-    'GENE_LIST': 'uploadedGeneList',
-    'GENE_ID': 'id'
-  });
 
   module.factory('Page', function () {
     var title = 'Loading...',
@@ -454,13 +450,20 @@
           }
 
           facetFilters.is.forEach(function(term) {
-            var uiTerm = term;
+            var uiTerm = term, isPredefined = false;
             if (typeKey === 'gene' && facetKey === Extensions.GENE_LIST) {
               uiTerm = 'Uploaded Gene List';
+              isPredefined = true;
+            } else if (typeKey === 'gene' && facetKey === 'goTermId') {
+              var predefinedGO = _.find(Extensions.GENE_ONTOLOGY_ROOTS, function(go) { return go.id === term; });
+              if (predefinedGO) {
+                uiTerm = predefinedGO.name;
+                isPredefined = true;
+              }
             }
 
             // Extension terms goes first
-            if (facetKey === Extensions.GENE_LIST) {
+            if (isPredefined) {
               display[typeKey][uiFacetKey].is.unshift({
                 term: uiTerm,
                 controlTerm: term,
@@ -475,6 +478,7 @@
                 controlType: typeKey
               });
             }
+
 
           });
         });

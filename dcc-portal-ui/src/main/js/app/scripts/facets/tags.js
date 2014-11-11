@@ -20,15 +20,23 @@
 
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
-  module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService, FiltersUtil) {
+  module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions) {
     $scope.projects = HighchartsService.projectColours;
 
     function setup() {
-      var type = $scope.type === 'pathway' ? 'gene' : $scope.type;
+      var type = $scope.type;
+
+      // Remap logical types to index type
+      if (_.contains(['go_term', 'pathway', 'curated_set'], type)) {
+        type = 'gene';
+      }
+
       $scope.actives = Facets.getActiveTags({
         type: type,
         facet: $scope.facetName
       });
+
+      console.log('actives', $scope.type, $scope.actives);
 
       // Check if there are extended element associated with this facet
       // i.e. : GeneList is a subse of Gene
@@ -40,12 +48,25 @@
       }
     }
 
+    $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
+    $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
+      return go.id;
+    });
+
+
     $scope.addTerm = function (term) {
       var type, name;
 
+
       if ($scope.type === 'pathway') {
         type = 'gene';
-        name = $scope.facetName.replace('pathway', '').toLowerCase();
+        name = 'id';
+      } else if ($scope.type === 'go_term') {
+        type = 'gene';
+        name = 'id';
+      } else if ($scope.type === 'curated_set') {
+        type = 'gene';
+        name = 'id';
       } else {
         type = $scope.type;
         name = $scope.facetName;
@@ -59,7 +80,11 @@
     };
 
     $scope.removeTerm = function (term) {
-      var type = $scope.type === 'pathway' ? 'gene' : $scope.type;
+      var type = $scope.type;
+      if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
+        type = 'gene';
+      }
+
       Facets.removeTerm({
         type: type,
         facet: $scope.facetName,
@@ -68,7 +93,12 @@
     };
 
     $scope.removeFacet = function () {
-      var type = $scope.type === 'pathway' ? 'gene' : $scope.type;
+      // var type = $scope.type === 'pathway' ? 'gene' : $scope.type;
+      var type = $scope.type;
+      if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
+        type = 'gene';
+      }
+
       Facets.removeFacet({
         type: type,
         facet: $scope.facetName
@@ -109,10 +139,13 @@
         placeholder: '@'
       },
       templateUrl: function(elem, attr) {
+
         if (attr.type === 'gene') {
-          return 'scripts/facets/views/genetags.html';
+          if (attr.facetName === 'id') {
+            return 'scripts/facets/views/genetags.html';
+          }
         }
-        if (attr.type === 'goTerm') {
+        if (attr.type === 'go_term') {
           return 'scripts/facets/views/gotags.html';
         }
         if (attr.type === 'pathway') {

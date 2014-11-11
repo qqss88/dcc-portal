@@ -69,6 +69,8 @@ public class SearchRepository {
     else if (type.equals("project")) search.setTypes(PROJECT_TEXT.getId());
     else if (type.equals("pathway")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("geneSet")) search.setTypes(GENESET_TEXT.getId());
+    else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
+    else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
     else
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
           GENESET_TEXT.getId());
@@ -102,8 +104,12 @@ public class SearchRepository {
 
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
 
-    if (type.equals("pathway") || type.equals("curated_set") || type.equals("go_term")) {
-      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", type)));
+    if (type.equals("pathway")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "pathway")));
+    } else if (type.equals("curated_set")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
+    } else if (type.equals("go_term")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
     }
 
     log.debug("{}", search);

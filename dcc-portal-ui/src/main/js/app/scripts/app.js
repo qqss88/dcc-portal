@@ -163,6 +163,17 @@
     Compatibility.run();
   });
 
+
+  module.constant('Extensions', {
+    GENE_LIST: 'uploadedGeneList',
+    GENE_ID: 'id',
+    GENE_ONTOLOGY_ROOTS: [
+      {id: 'GO:0003674', name: 'Molecular Function'},
+      {id: 'GO:0008150', name: 'Biological Process'},
+      {id: 'GO:0005575', name: 'Cellular Component'}]
+  });
+
+
   module.constant('DataTypes', {
     'mapping': {
       'clinical': 'Clinical data',
@@ -193,6 +204,7 @@
       'meth_seq'
     ]
   });
+
 
   module.controller('AppCtrl', function ($scope, Page) {
     var _ctrl = this;
