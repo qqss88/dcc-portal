@@ -9,7 +9,6 @@
             data-ng-click="click(r)"
             class="t_suggest_flyout__hits__hit">
             <td class="t_suggest_flyout__hits__hit__type">
-                <!--<span class="t_badge t_badge__{{ r.type }}"></span> -->
                 <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
             </td>
             <td class="t_suggest_flyout__hits__hit__text">

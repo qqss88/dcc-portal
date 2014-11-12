@@ -430,6 +430,27 @@
       return false;
     };
 
+
+    this.getGeneSetQueryType = function(type) {
+      if (type === 'go_term') {
+        return 'goTermId';
+      } else if (type === 'curated_set') {
+        return 'curatedSetId';
+      } else if (type === 'pathway') {
+        return 'pathwayId';
+      }
+      return 'geneSetId';
+    };
+
+
+    this.buildGeneSetFilterByType = function(type, geneSetIds) {
+      var filter = {gene:{}};
+      filter.gene[type] = {is: geneSetIds};
+      console.log('building', JSON.stringify(filter));
+      return filter;
+    };
+
+
     this.buildUIFilters = function(filters) {
       var display = {};
 
@@ -443,11 +464,27 @@
             uiFacetKey = 'id';
           }
 
+          // Remap gene ontologies
+          if (uiFacetKey === 'hasPathway') {
+            var uiTerm = 'Reactome Pathway';
+            uiFacetKey = 'pathwayId';
+            display[typeKey][uiFacetKey] = {};
+            display[typeKey][uiFacetKey].is = [];
+            display[typeKey][uiFacetKey].is.unshift({
+              term: uiTerm,
+              controlTerm: undefined,
+              controlFacet: facetKey,
+              controlType: typeKey
+            });
+            return;
+          }
+
           // Allocate terms
           if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
             display[typeKey][uiFacetKey] = {};
             display[typeKey][uiFacetKey].is = [];
           }
+
 
           facetFilters.is.forEach(function(term) {
             var uiTerm = term, isPredefined = false;

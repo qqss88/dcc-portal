@@ -46,12 +46,17 @@
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, geneSet) {
-      var _ctrl = this, f = {gene: {geneSetId: {is: [geneSet.id]}}};
+    function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, FiltersUtil, geneSet) {
+      var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
       Page.setPage('entity');
 
       _ctrl.geneSet = geneSet;
+      _ctrl.geneSet.queryType = FiltersUtil.getGeneSetQueryType(_ctrl.geneSet.type);
+
+      // Build adv query based on type
+      geneSetFilter = {};
+      geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
 
       // Builds an UI friendly inferred tree
       // A -> [B, C] -> D -> [E, F, G]
@@ -136,7 +141,7 @@
       // 2) Project-donor breakdown
       // 3) Project-gene breakdwon
       function refresh() {
-        var _filter = LocationService.mergeIntoFilters(f);
+        var _filter = LocationService.mergeIntoFilters({gene:geneSetFilter});
         _ctrl.baseAdvQuery = _filter;
 
 
@@ -166,7 +171,8 @@
               _ctrl.geneSet.projects.forEach(function (p) {
                 p.mutationCount = data[p.id];
                 p.advQuery = LocationService.mergeIntoFilters({
-                  gene: {geneSetId:{is:[_ctrl.geneSet.id]}},
+                  //gene: {geneSetId:{is:[_ctrl.geneSet.id]}},
+                  gene: geneSetFilter,
                   donor: {projectId:{is:[p.id]}, availableDataTypes:{is:['ssm']}}
                 });
               });
@@ -232,22 +238,30 @@
       refresh();
     });
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets) {
+  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
     var _ctrl = this, _geneSet = '', _filter = {};
 
     function success(genes) {
+      var geneSetQueryType = FiltersUtil.getGeneSetQueryType(_geneSet.type);
+
       if (genes.hasOwnProperty('hits')) {
         _ctrl.genes = genes;
         if (_.isEmpty(_ctrl.genes.hits)) {
           return;
         }
 
+
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
           'counts').get({filters: _filter}).then(function (data) {
             _ctrl.genes.hits.forEach(function (g) {
+
+              var geneFilter = { id:{is:[g.id]}};
+              geneFilter[geneSetQueryType] = {is:[_geneSet.id]};
+
               g.mutationCount = data[g.id];
               g.advQuery = LocationService.mergeIntoFilters({
-                gene: {geneSetId: {is: [_geneSet.id]}, id:{is:[g.id]}}
+                // gene: {geneSetId: {is: [_geneSet.id]}, id:{is:[g.id]}}
+                gene: geneFilter
               });
             });
           });
@@ -273,10 +287,14 @@
     refresh();
   });
 
-  module.controller('GeneSetMutationsCtrl', function ($scope, Mutations, GeneSets, Projects, LocationService, Donors) {
+  module.controller('GeneSetMutationsCtrl', function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil) {
     var _ctrl = this, geneSet;
 
     function success(mutations) {
+      var geneSetQueryType = FiltersUtil.getGeneSetQueryType(geneSet.type);
+      var geneFilter = {};
+      geneFilter[geneSetQueryType] = {is:[geneSet.id]};
+
       if (mutations.hasOwnProperty('hits')) {
         _ctrl.mutations = mutations;
 
@@ -292,12 +310,11 @@
                 gene: {geneSetId: {is: [geneSet.id] }}
               })
             }).then(function (data) {
-              console.log('mutation', data);
 
               mutation.uiDonors = data.facets.projectId.terms;
               mutation.advQuery = LocationService.mergeIntoFilters({
                 mutation: {id: {is: [mutation.id] }},
-                gene: {geneSetId: {is: [geneSet.id] }}
+                gene: geneFilter
               });
 
               if (mutation.uiDonors) {
@@ -309,7 +326,7 @@
                   facet.advQuery = LocationService.mergeIntoFilters({
                     mutation: {id: {is: [mutation.id]}},
                     donor: {projectId: {is: [facet.term]}},
-                    gene: {geneSetId: {is: [geneSet.id] }}
+                    gene: geneFilter
                   });
 
                   facet.countTotal = p.ssmTestedDonorCount;
@@ -344,10 +361,15 @@
     refresh();
   });
 
-  module.controller('GeneSetDonorsCtrl', function ($scope, LocationService, Donors, GeneSets) {
+  module.controller('GeneSetDonorsCtrl', function ($scope, LocationService, Donors, GeneSets, FiltersUtil) {
     var _ctrl = this, _geneSet, _filter;
 
+
     function success(donors) {
+      var geneSetQueryType = FiltersUtil.getGeneSetQueryType(_geneSet.type);
+      var geneFilter = {};
+      geneFilter[geneSetQueryType] = {is:[_geneSet.id]};
+
       if (donors.hasOwnProperty('hits')) {
         _ctrl.donors = donors;
 
@@ -361,7 +383,7 @@
           _ctrl.donors.hits.forEach(function (d) {
             d.mutationCount = data[d.id];
             d.advQuery = LocationService.mergeIntoFilters({
-              gene: {geneSetId: {is: [_geneSet.id]}},
+              gene: geneFilter,
               donor: {id:{is:[d.id]}}
             });
           });

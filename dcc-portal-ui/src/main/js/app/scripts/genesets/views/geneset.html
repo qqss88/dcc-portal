@@ -65,24 +65,9 @@
             <tr>
                 <th>Genes</th>
                 <td>
-                    <a href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
+                    <a href='/search/g?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
                 </td>
             </tr>
-            <!--
-            <tr>
-                <th>Hierarchy</th>
-                <td>
-                   <div data-ng-repeat="hier in GeneSetCtrl.uiParentPathways">
-                       <span>
-                           <i class="icon-external-link"></i>
-                           <a href="http://www.reactome.org/PathwayBrowser/TODO" target="_blank">View in Reactome Pathway Browser</a>
-                       </span>
-                       <pathway-tree tree="[hier]"></pathway-tree>
-                       <br>
-                   </div>
-                </td>
-            </tr>
-            -->
             <tr>
                 <th>Description</td>
                 <td>
@@ -125,59 +110,6 @@
             </tr>
         </table>
 
-        <!-- old -->
-        <table class="table table-info">
-            <tr>
-                <th>ID</th>
-                <td>{{ GeneSetCtrl.geneSet.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ GeneSetCtrl.geneSet.name }}</td>
-            </tr>
-            <tr>
-                <th>Data Source</th>
-                <td>{{ GeneSetCtrl.geneSet.source }}</td>
-            </tr>
-            <tr>
-                <th>Genes</th>
-                <td>
-                    <a href='/search/g?filters={"gene":{"pathwayId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
-                </td>
-            </tr>
-            <tr>
-                <th>Hierarchy</th>
-                <td>
-                   <ul data-hide-list="{{GeneSetCtrl.geneSet.parentPathways}}" data-limit="3">
-                       <li data-ng-repeat="sublist in list">
-                           <span>
-                               <i class="icon-external-link"></i>
-                               <a href="http://www.reactome.org/PathwayBrowser/{{GeneSetCtrl.geneSet.linkOut[$index]}}" target="_blank">View in Reactome Pathway Browser</a>
-                           </span>
-                           <div>
-                               <div data-ng-repeat="segment in sublist">
-                                   <a data-ng-style="{'margin-left': $index+'rem'}" href="/pathways/{{segment.reactomeId}}">{{segment.name}}</a>
-                               </div>
-
-                               <div>
-                                  <span data-ng-style="{'margin-left': (sublist.length+1)+'rem'}">{{GeneSetCtrl.geneSet.name }} </span>
-                               </div>
-                           </div>
-                           <br>
-                       <li>
-                   </ul>
-                </td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td data-ng-if="GeneSetCtrl.geneSet.summation === '???' || GeneSetCtrl.geneSet.summation === ''">
-                --
-                </td>
-                <td data-ng-if="GeneSetCtrl.geneSet.summation !== '???'">
-                    <hide-text text="{{ GeneSetCtrl.geneSet.summation}}"></hide-text>
-                </td>
-            </tr>
-        </table>
     </div>
 </section>
 <section id="projects"
@@ -206,7 +138,7 @@
             <a data-ng-href='search/g?filters={{GeneSetCtrl.baseAdvQuery}}'><strong>{{GeneSetCtrl.totalGenes}}</strong>
             </a>
             out of
-            <a data-ng-href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
+            <a data-ng-href='/search/g?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
                 <strong>{{GeneSetCtrl.geneSet.geneCount}}</strong>
             </a>
             genes in this gene set affected by mutations across
@@ -284,7 +216,7 @@
                        data-ng-href='/search/g?filters={{project.advQuery}}'>
                         {{ project.geneCount | number }}
                     </a> /
-                    <a data-ng-href='/search/g?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
+                    <a data-ng-href='/search/g?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>
                         {{GeneSetCtrl.geneSet.geneCount}}
                     </a>
                     <em>({{ project.uiAffectedGenePercentage*100 | number:2 }}%)</em>
@@ -381,7 +313,7 @@
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
                         /
-                        <a data-ng-href='/search?filters={"gene":{"geneSetId":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
+                        <a data-ng-href='/search?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
                             {{GeneSetCtrl.totalDonors | number}}</a>
                         <em>({{gene.affectedDonorCountFiltered/GeneSetCtrl.totalDonors * 100 | number:2}}%)</em>
                     </span>
