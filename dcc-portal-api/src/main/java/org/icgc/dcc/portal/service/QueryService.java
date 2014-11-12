@@ -25,6 +25,8 @@ import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
+import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_TYPE_FIELDS;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
@@ -33,7 +35,6 @@ import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,9 +44,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
+import org.icgc.dcc.portal.model.IndexModel.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
@@ -65,13 +66,25 @@ public class QueryService {
   private static List<String> geneSetFields = ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId",
       "curatedSetId");
 
-  private static Map<String, String> geneSetFieldTypeMap = ImmutableMap.<String, String> of(
-      "pathwayId", "pathway",
-      "goTermId", "go_term",
-      "curatedSetId", "curated_set"
-      );
+  // TODO:
+  // resultFILter := must();
+  // For each type in [go_term, pathway, curated_set]
+  // idFilter := must( IS and NOT)
+  // existFilter := must( type = type)
+  // typeFilter := should(idFilter, existFilter)
+  // resultFilter := resultFIlter.must(shouldFilter)
 
-  private static List<String> geneSetExistFields = ImmutableList.<String> of("hasPathway", "hasGoterm", "hasCurated");
+  private static Map<String, String> geneSetFieldTypeMap = ImmutableMap.<String, String> builder()
+      .put("pathwayId", "pathway")
+      .put("hasPathway", "pathway")
+      .put("goTermId", "go_term")
+      .put("hasGOTerm", "go_term")
+      .put("curatedSetId", "curated_set")
+      .put("hasCuratedSet", "curated_set")
+      .build();
+
+  private static List<String> geneSetExistFields = ImmutableList
+      .<String> of("hasPathway", "hasGOTerm", "hasCuratedSet");
 
   private static List<String> locationFields = Lists.newArrayList("location", "transcript.gene.location",
       "gene.location", "ssm.consequence.gene.location", "ssm.location", "donor.ssm.location", "gene.ssm.location");
@@ -179,8 +192,107 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.TRANSCRIPT, prefixMapping);
   }
 
+  public static void main(String args[]) throws JsonProcessingException, IOException {
+
+    ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
+        Kind.GENE_SET, "sets",
+        Kind.DONOR, "donor",
+        Kind.MUTATION, "donor.ssm",
+        Kind.CONSEQUENCE, "donor.ssm.consequence",
+        Kind.OBSERVATION, "donor.ssm.observation"));
+
+    ObjectNode objNode =
+        (ObjectNode) MAPPER.readTree(
+            "{'geneSet':{'goTermId':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}");
+
+    val filter = QueryService.buildGeneSetFilters(objNode, NESTED_MAPPING);
+    log.info("!!!!!!!!!!\n{}", filter);
+  }
+
+  // TODO:
+  // resultFILter := must();
+  // For each type in [go_term, pathway, curated_set]
+  // idFilter := must( IS and NOT)
+  // existFilter := must( type = type)
+  // typeFilter := should(idFilter, existFilter)
+  // resultFilter := resultFIlter.must(shouldFilter)
   public static BoolFilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
-    return buildTypeFilters(filters, Kind.GENE_SET, prefixMapping);
+    val resultFilter = FilterBuilders.boolFilter();
+    val prefix = prefixMapping.get(Kind.GENE_SET);
+    val geneSetNode = filters.path(Kind.GENE_SET.getId());
+
+    for (val geneSetType : GeneSetType.values()) {
+      val geneSetIdFilter = FilterBuilders.boolFilter();
+      val geneSetTypeFilter = FilterBuilders.boolFilter();
+
+      boolean hasIds = false;
+      boolean hasType = false;
+
+      val idFieldName = GENE_SET_QUERY_ID_FIELDS.get(geneSetType.getType());
+      val typeFieldName = GENE_SET_QUERY_TYPE_FIELDS.get(geneSetType.getType());
+
+      val typeFilter = termFilter(_("%s.%s", prefix, "type"), geneSetType.getType());
+
+      // If ids are set to be filtered
+      if (geneSetNode.has(idFieldName)) {
+        for (String bool : Lists.newArrayList(IS, NOT)) {
+          val boolNode = geneSetNode.path(idFieldName).path(bool);
+          if (boolNode.isMissingNode() || !boolNode.isArray()) continue;
+
+          hasIds = true;
+
+          // 1) Add IS or NOT terms
+          List<String> termList = Lists.newArrayList();
+          for (val item : boolNode) {
+            termList.add(item.textValue());
+          }
+
+          // 2) Gene sets are nested documents
+          val idFilter = termsFilter(_("%s.%s", prefix, "id"), termList);
+
+          // 3) Must or must not
+          if (bool.equals(IS)) {
+            geneSetIdFilter.must(idFilter);
+          } else {
+            geneSetIdFilter.mustNot(idFilter);
+          }
+
+        }
+
+        // Don't attach for geneset itself
+        if (!geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
+          geneSetIdFilter.must(typeFilter);
+        }
+      }
+
+      // If types are set to be filtered
+      if (geneSetNode.has(typeFieldName)) {
+        val type = geneSetNode.path(typeFieldName).asBoolean();
+        hasType = true;
+
+        // Determine must or must not
+        if (type == true) {
+          geneSetTypeFilter.must(typeFilter);
+        } else {
+          geneSetTypeFilter.mustNot(typeFilter);
+        }
+      }
+
+      // Build overall filter a geneset type
+      if (hasType && hasIds) {
+        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+            .should(geneSetIdFilter)
+            .should(geneSetTypeFilter)));
+      } else if (hasIds) {
+        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+            .must(geneSetIdFilter)));
+      } else if (hasType) {
+        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+            .must(geneSetTypeFilter)));
+      }
+
+    }
+    return resultFilter;
   }
 
   public static BoolFilterBuilder buildEmbOccurrenceFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
@@ -191,130 +303,69 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.OBSERVATION, prefixMapping);
   }
 
-  // Test
-  // TODO: Must_not has to be above nested sets
-  public static void main(String args[]) throws JsonProcessingException, IOException {
-
-    ObjectNode objNode =
-        (ObjectNode) MAPPER
-            .readTree(
-            // "{'gene':{'id':{'is': ['abc']}, 'goterm':{'is':['go1', 'go2'], 'not':['go3']}, 'pathway':{'is':['pathway1']}, 'hasPathway':true   }}"
-            "{'gene':{'goterm':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}"
-            );
-
-    ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
-        Kind.DONOR, "donor",
-        Kind.MUTATION, "donor.ssm",
-        Kind.CONSEQUENCE, "donor.ssm.consequence",
-        Kind.OBSERVATION, "donor.ssm.observation"));
-
-    val filter = QueryService.buildTypeFilters(objNode, Kind.GENE, NESTED_MAPPING);
-    log.info("!!!!!!!!!!\n{}", filter);
-  }
-
   public static BoolFilterBuilder buildTypeFilters(ObjectNode filters, Kind kind,
       ImmutableMap<Kind, String> prefixMapping) {
 
-    log.info("Building type filters {} {}", prefixMapping.get(kind.getId()), filters);
-
     val termFilters = FilterBuilders.boolFilter();
-
-    val genePath = filters.path(Kind.GENE_SET.getId());
-    ArrayList<NestedFilterBuilder> geneSetInclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
-    ArrayList<NestedFilterBuilder> geneSetExclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
-
-    ArrayList<NestedFilterBuilder> geneSetExistFilters = Lists.<NestedFilterBuilder> newArrayList();
-    ArrayList<NestedFilterBuilder> geneSetNotExistFilters = Lists.<NestedFilterBuilder> newArrayList();
-
-    for (val geneSetField : geneSetFields) {
-
-      // FIXME: move out
-      if (!genePath.path(geneSetField).isMissingNode() && kind.getId().equals("geneSet")) {
-
-        for (String bool : Lists.newArrayList(IS, NOT)) {
-          val boolNode = genePath.path(geneSetField).path(bool);
-          if (!boolNode.isMissingNode() && boolNode.isArray()) {
-            List<String> termList = Lists.newArrayList();
-            for (val item : boolNode) {
-              termList.add(item.textValue());
-            }
-
-            val nestedPrefix = prefixMapping.get(Kind.GENE_SET);
-
-            NestedFilterBuilder nestedFilter;
-            // val idFilter = termsFilter("id", termList);
-            val idFilter = termsFilter(_("%s.%s", nestedPrefix, "id"), termList);
-
-            // If specified by the virtual fields, we need to add a type limition
-            if (geneSetFieldTypeMap.containsKey(geneSetField)) {
-              // val typeFilter = termsFilter("type", geneSetFieldTypeMap.get(geneSetField));
-              val typeFilter = termsFilter(_("%s.%s", nestedPrefix, "type"), geneSetFieldTypeMap.get(geneSetField));
-              nestedFilter =
-                  FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET),
-                      FilterBuilders.boolFilter().must(idFilter, typeFilter));
-            } else {
-              nestedFilter =
-                  FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET),
-                      FilterBuilders.boolFilter().must(idFilter));
-            }
-
-            if (bool.equals(IS)) {
-              geneSetInclusionFilters.add(nestedFilter);
-            } else {
-              geneSetExclusionFilters.add(nestedFilter);
-            }
-
-          }
-        }
-      }
-    }
-
-    if (geneSetInclusionFilters.size() > 0) {
-      val mustGeneSetFilter = FilterBuilders.boolFilter();
-      for (val geneSetInclusionFilter : geneSetInclusionFilters) {
-        mustGeneSetFilter.must(geneSetInclusionFilter);
-      }
-      termFilters.must(mustGeneSetFilter);
-    }
-    if (geneSetExclusionFilters.size() > 0) {
-      val mustGeneSetFilter = FilterBuilders.boolFilter();
-      for (val geneSetExclusionFilter : geneSetExclusionFilters) {
-        mustGeneSetFilter.mustNot(geneSetExclusionFilter);
-      }
-      termFilters.must(mustGeneSetFilter);
-    }
-
-    for (val geneSetExistField : geneSetExistFields) {
-
-      if (!genePath.path(geneSetExistField).isMissingNode()) {
-        val exist = genePath.path(geneSetExistField).asBoolean();
-
-        val filter =
-            nestedFilter(prefixMapping.get(Kind.GENE_SET),
-                FilterBuilders.boolFilter().must(termFilter("type", geneSetExistField)));
-        if (exist) {
-          geneSetExistFilters.add(filter);
-        } else {
-          geneSetNotExistFilters.add(filter);
-        }
-      }
-    }
-
-    if (geneSetExistFilters.size() > 0) {
-      val mustGeneSetFilter = FilterBuilders.boolFilter();
-      for (val geneSetExistFilter : geneSetExistFilters) {
-        mustGeneSetFilter.must(geneSetExistFilter);
-      }
-      termFilters.must(mustGeneSetFilter);
-    }
-
-    if (geneSetNotExistFilters.size() > 0) {
-      val mustGeneSetFilter = FilterBuilders.boolFilter();
-      for (val geneSetNotExistFilter : geneSetNotExistFilters) {
-        mustGeneSetFilter.mustNot(geneSetNotExistFilter);
-      }
-      termFilters.must(mustGeneSetFilter);
-    }
+    /*
+     * val genePath = filters.path(Kind.GENE_SET.getId());
+     * 
+     * ArrayList<NestedFilterBuilder> geneSetInclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
+     * ArrayList<NestedFilterBuilder> geneSetExclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
+     * ArrayList<NestedFilterBuilder> geneSetExistFilters = Lists.<NestedFilterBuilder> newArrayList();
+     * ArrayList<NestedFilterBuilder> geneSetNotExistFilters = Lists.<NestedFilterBuilder> newArrayList();
+     * 
+     * // For each type
+     * 
+     * for (val geneSetField : geneSetFields) {
+     * 
+     * // FIXME: move out if (!genePath.path(geneSetField).isMissingNode() && kind.getId().equals("geneSet")) {
+     * 
+     * for (String bool : Lists.newArrayList(IS, NOT)) { val boolNode = genePath.path(geneSetField).path(bool); if
+     * (!boolNode.isMissingNode() && boolNode.isArray()) { List<String> termList = Lists.newArrayList(); for (val item :
+     * boolNode) { termList.add(item.textValue()); }
+     * 
+     * val nestedPrefix = prefixMapping.get(Kind.GENE_SET);
+     * 
+     * NestedFilterBuilder nestedFilter; val idFilter = termsFilter(_("%s.%s", nestedPrefix, "id"), termList);
+     * 
+     * // If specified by the virtual fields, we need to add a type limitation if
+     * (geneSetFieldTypeMap.containsKey(geneSetField)) { val typeFilter = termsFilter(_("%s.%s", nestedPrefix, "type"),
+     * geneSetFieldTypeMap.get(geneSetField)); nestedFilter =
+     * FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET), FilterBuilders.boolFilter().must(idFilter,
+     * typeFilter)); } else { nestedFilter = FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET),
+     * FilterBuilders.boolFilter().must(idFilter)); }
+     * 
+     * if (bool.equals(IS)) { geneSetInclusionFilters.add(nestedFilter); } else {
+     * geneSetExclusionFilters.add(nestedFilter); }
+     * 
+     * } }
+     * 
+     * } }
+     * 
+     * if (geneSetInclusionFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
+     * geneSetInclusionFilter : geneSetInclusionFilters) { mustGeneSetFilter.must(geneSetInclusionFilter); }
+     * termFilters.must(mustGeneSetFilter); } if (geneSetExclusionFilters.size() > 0) { val mustGeneSetFilter =
+     * FilterBuilders.boolFilter(); for (val geneSetExclusionFilter : geneSetExclusionFilters) {
+     * mustGeneSetFilter.mustNot(geneSetExclusionFilter); } termFilters.must(mustGeneSetFilter); }
+     * 
+     * for (val geneSetExistField : geneSetExistFields) {
+     * 
+     * if (!genePath.path(geneSetExistField).isMissingNode()) { val exist =
+     * genePath.path(geneSetExistField).asBoolean();
+     * 
+     * val filter = nestedFilter(prefixMapping.get(Kind.GENE_SET), FilterBuilders.boolFilter().must(termFilter("type",
+     * geneSetFieldTypeMap.get(geneSetExistField)))); if (exist) { geneSetExistFilters.add(filter); } else {
+     * geneSetNotExistFilters.add(filter); } log.info(">>>>>>>>>> {}", filter); } }
+     * 
+     * if (geneSetExistFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
+     * geneSetExistFilter : geneSetExistFilters) { mustGeneSetFilter.must(geneSetExistFilter); }
+     * termFilters.must(mustGeneSetFilter); }
+     * 
+     * if (geneSetNotExistFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
+     * geneSetNotExistFilter : geneSetNotExistFilters) { mustGeneSetFilter.mustNot(geneSetNotExistFilter); }
+     * termFilters.must(mustGeneSetFilter); }
+     */
 
     // log.info("After building : {}", termFilters);
 
@@ -323,8 +374,8 @@ public class QueryService {
       val facetField = fields.next();
 
       // Skip the virtual fields
-      if (geneSetFields.contains(facetField)) continue;
-      if (geneSetExistFields.contains(facetField)) continue;
+      // if (geneSetFields.contains(facetField)) continue;
+      // if (geneSetExistFields.contains(facetField)) continue;
 
       // Check that facet field is in Field Mapping
       val typeMapping = FIELDS_MAPPING.get(kind);
@@ -458,7 +509,9 @@ public class QueryService {
       val gene = (ObjectNode) filters.get("gene");
 
       val geneSet = new ObjectMapper().createObjectNode();
-      val geneSetList = ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId", "curatedSetId");
+      val geneSetList =
+          ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId", "curatedSetId", "hasGOTerm", "hasPathway",
+              "hasCuratedSet");
 
       for (val geneSetIdentifier : geneSetList) {
         if (gene.has(geneSetIdentifier)) {

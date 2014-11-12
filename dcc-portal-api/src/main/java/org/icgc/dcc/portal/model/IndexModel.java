@@ -1,6 +1,7 @@
 package org.icgc.dcc.portal.model;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -569,6 +570,28 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
   }
+
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+  @Getter
+  public static enum GeneSetType {
+    GENE_SET_TYPE_ALL("geneSetAll"),
+    GENE_SET_TYPE_GO("go_term"),
+    GENE_SET_TYPE_PATHWAY("pathway"),
+    GENE_SET_TYPE_CURATED("curated_set");
+
+    private final String type;
+  }
+
+  public static final Map<String, String> GENE_SET_QUERY_ID_FIELDS = ImmutableMap.<String, String> builder()
+      .put(GeneSetType.GENE_SET_TYPE_ALL.getType(), "geneSetId")
+      .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(), "curatedSetId")
+      .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "pathwayId")
+      .put(GeneSetType.GENE_SET_TYPE_GO.getType(), "goTermId").build();
+
+  public static final Map<String, String> GENE_SET_QUERY_TYPE_FIELDS = ImmutableMap.<String, String> of(
+      GeneSetType.GENE_SET_TYPE_CURATED.getType(), "hasCuratedSet",
+      GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "hasPathway",
+      GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
 
   private String index;
 
