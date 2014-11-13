@@ -44,6 +44,9 @@
     border-radius:3px;
 
     border:1px solid #bbb;
+    // border-left:1px solid #bbb;
+    // border-bottom:1px solid #bbb;
+
     display:inline-block;
     padding:1px 4px;
     text-decoration:none;
@@ -55,5 +58,25 @@
 
 .tree li:last-child::before {
     height:20px;
+}
+
+
+.tree .goterm_part_of {
+   color: #FF8800;
+}
+
+.tree .goterm_is_a {
+}
+
+.tree .goterm_regulates {
+   color: #FF8800;
+}
+
+.tree .goterm_positively_regulates {
+   color: #0000FF;
+}
+
+.tree .goterm_negatively_regulates {
+   color: #FF0000;
 }
 

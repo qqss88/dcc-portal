@@ -44,34 +44,39 @@ angular.module('app.ui.trees', []).directive('pathwayTree', function($compile) {
     },
     template: '<div class="tree"></div>',
     link: function($scope, $element) {
+      // D3 would've been easier...
+      function addNesting(e, current) {
+        var ul, li, span, anchor;
+        ul = angular.element('<ul>');
+        li = angular.element('<li>');
+        span = angular.element('<span>');
 
-       // D3 would've been easier...
-       function addNesting(e, current) {
-         var ul, li, span, anchor;
-         ul = angular.element('<ul>');
-         li = angular.element('<li>');
-         span = angular.element('<span>');
-         anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + current.id).text(current.name);
-
-         anchor.appendTo(span);
-         span.appendTo(li);
-         li.appendTo(ul);
-         ul.appendTo(e);
-
-         if (current.children && current.children.length > 0) {
-           current.children.forEach(function(child) {
-             addNesting(li, child);
-           });
-         }
-       }
-
-       $scope.tree.forEach(function(child) {
-         addNesting($element[0], child);
-       });
+        if (current.children) {
+          anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + current.id).text(current.name);
+          anchor.appendTo(span);
+        } else {
+          angular.element('<strong>').text(current.name).appendTo(span);
+        }
 
 
-       // Dynamically generated contents need compilation
-       $compile($element.contents())($scope);
+        span.appendTo(li);
+        li.appendTo(ul);
+        ul.appendTo(e);
+
+        if (current.children && current.children.length > 0) {
+          current.children.forEach(function(child) {
+            addNesting(li, child);
+          });
+        }
+      }
+
+      $scope.tree.forEach(function(child) {
+        addNesting($element[0], child);
+      });
+
+
+      // Dynamically generated contents need compilation
+      $compile($element.contents())($scope);
 
     }
   };
@@ -85,37 +90,71 @@ angular.module('app.ui.trees', []).directive('pathwayTree', function($compile) {
     template: '<div class="tree"></div>',
     link: function($scope, $element) {
 
-       function addNesting(e, current) {
-         var ul, li, span, anchor;
-         ul = angular.element('<ul>');
-         li = angular.element('<li>');
-         span = angular.element('<span>');
+      function getRelation(relation) {
+        var element = angular.element('<abbr>').attr('data-tooltip-placement', 'left');
 
-         current.goTerms.forEach(function(goTerm) {
-           anchor = angular.element('<a>')
-             .attr('data-ng-href', '/genesets/' + goTerm.id)
-             .text( goTerm.id + ' ' + goTerm.name);
+        if (relation === 'is_a') {
+          return element.text('I ');
+        } else if (relation === 'part_of') {
+          return element.text('P')
+            .attr('data-tooltip', 'Inferred part of')
+            .attr('class', 'goterm_part_of');
+        } else if (relation === 'regulates') {
+          return element.text('R')
+            .attr('data-tooltip', 'Inferred regulates')
+            .attr('class', 'goterm_regulates');
+        } else if (relation === 'positively_regulates') {
+          return element.text('R')
+            .attr('data-tooltip', 'Inferred positively regulates')
+            .attr('class', 'goterm_regulates');
+        } else if (relation === 'negatively_regulates') {
+          return element.text('R')
+            .attr('data-tooltip', 'Inferred negatively regulates')
+            .attr('class', 'goterm_regulates');
+        }
+        return null;
+      }
 
-           if (goTerm.level === 0) {
-             anchor.css('font-weight', 600);
-           }
+      function addNesting(e, current) {
+        var ul, li, span, anchor, relation, label;
 
-           anchor.appendTo(span);
-           angular.element('<br>').appendTo(span);
-         });
-         span.appendTo(li);
-         li.appendTo(ul);
-         ul.appendTo(e);
+        ul = angular.element('<ul>');
+        li = angular.element('<li>');
+        span = angular.element('<span>');
 
-         if (current.child) {
-           addNesting(li, current.child);
-         }
-       }
 
-       addNesting($element[0], $scope.tree);
+        current.goTerms.forEach(function(goTerm) {
+          label = ' ' + goTerm.id + ' ' + goTerm.name;
+          anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + goTerm.id).text(label);
+          relation = getRelation(goTerm.relation);
 
-       // Dynamically generated contents need compilation
-       $compile($element.contents())($scope);
+          if (relation) {
+            relation.appendTo(span);
+          }
+
+          if (goTerm.level === 0) {
+            angular.element('<strong>').text(label).appendTo(span);
+          } else {
+            anchor.appendTo(span);
+          }
+
+          // relation = angular.element('<strong>').text(goTerm.relation);
+          angular.element('<br>').appendTo(span);
+        });
+
+        span.appendTo(li);
+        li.appendTo(ul);
+        ul.appendTo(e);
+
+        if (current.child) {
+          addNesting(li, current.child);
+        }
+      }
+
+      addNesting($element[0], $scope.tree);
+
+      // Dynamically generated contents need compilation
+      $compile($element.contents())($scope);
 
     }
   };
@@ -677,6 +716,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
   };
 });
 
+// Used in keyword search
 angular.module('app.ui.param', []).directive('param', function (LocationService) {
   return {
     restrict: 'A',

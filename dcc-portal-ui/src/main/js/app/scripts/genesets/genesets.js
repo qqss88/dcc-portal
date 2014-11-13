@@ -287,7 +287,9 @@
     refresh();
   });
 
-  module.controller('GeneSetMutationsCtrl', function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil) {
+  module.controller('GeneSetMutationsCtrl',
+    function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil) {
+
     var _ctrl = this, geneSet;
 
     function success(mutations) {

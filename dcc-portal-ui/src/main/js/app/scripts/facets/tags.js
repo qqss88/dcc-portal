@@ -20,12 +20,20 @@
 
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
-  module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions) {
+  module.controller('tagsFacetCtrl',
+    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions, GeneSets) {
+
     $scope.projects = HighchartsService.projectColours;
     $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
     $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
       return go.id;
     });
+
+    $scope.predefinedCurated = Extensions.CURATE_SET_ROOTS;
+    $scope.predefinedCuratedIds = Extensions.CURATE_SET_ROOTS.map(function(curated) {
+      return curated.id;
+    });
+
 
     $scope.hasPathwayTypePredicate = false;
 
@@ -51,7 +59,6 @@
       });
 
 
-      console.log('actives', $scope.type, $scope.actives);
 
       // Check if there are extended element associated with this facet
       // i.e. : GeneList is a subse of Gene
@@ -165,7 +172,6 @@
         placeholder: '@'
       },
       templateUrl: function(elem, attr) {
-
         if (attr.type === 'gene') {
           if (attr.facetName === 'id') {
             return 'scripts/facets/views/genetags.html';
@@ -176,6 +182,9 @@
         }
         if (attr.type === 'pathway') {
           return 'scripts/facets/views/pathwaytags.html';
+        }
+        if (attr.type === 'curated_set') {
+          return 'scripts/facets/views/curatedtags.html';
         }
         return 'scripts/facets/views/tags.html';
       },
