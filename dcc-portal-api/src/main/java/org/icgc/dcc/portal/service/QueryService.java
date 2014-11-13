@@ -307,75 +307,9 @@ public class QueryService {
       ImmutableMap<Kind, String> prefixMapping) {
 
     val termFilters = FilterBuilders.boolFilter();
-    /*
-     * val genePath = filters.path(Kind.GENE_SET.getId());
-     * 
-     * ArrayList<NestedFilterBuilder> geneSetInclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
-     * ArrayList<NestedFilterBuilder> geneSetExclusionFilters = Lists.<NestedFilterBuilder> newArrayList();
-     * ArrayList<NestedFilterBuilder> geneSetExistFilters = Lists.<NestedFilterBuilder> newArrayList();
-     * ArrayList<NestedFilterBuilder> geneSetNotExistFilters = Lists.<NestedFilterBuilder> newArrayList();
-     * 
-     * // For each type
-     * 
-     * for (val geneSetField : geneSetFields) {
-     * 
-     * // FIXME: move out if (!genePath.path(geneSetField).isMissingNode() && kind.getId().equals("geneSet")) {
-     * 
-     * for (String bool : Lists.newArrayList(IS, NOT)) { val boolNode = genePath.path(geneSetField).path(bool); if
-     * (!boolNode.isMissingNode() && boolNode.isArray()) { List<String> termList = Lists.newArrayList(); for (val item :
-     * boolNode) { termList.add(item.textValue()); }
-     * 
-     * val nestedPrefix = prefixMapping.get(Kind.GENE_SET);
-     * 
-     * NestedFilterBuilder nestedFilter; val idFilter = termsFilter(_("%s.%s", nestedPrefix, "id"), termList);
-     * 
-     * // If specified by the virtual fields, we need to add a type limitation if
-     * (geneSetFieldTypeMap.containsKey(geneSetField)) { val typeFilter = termsFilter(_("%s.%s", nestedPrefix, "type"),
-     * geneSetFieldTypeMap.get(geneSetField)); nestedFilter =
-     * FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET), FilterBuilders.boolFilter().must(idFilter,
-     * typeFilter)); } else { nestedFilter = FilterBuilders.nestedFilter(prefixMapping.get(Kind.GENE_SET),
-     * FilterBuilders.boolFilter().must(idFilter)); }
-     * 
-     * if (bool.equals(IS)) { geneSetInclusionFilters.add(nestedFilter); } else {
-     * geneSetExclusionFilters.add(nestedFilter); }
-     * 
-     * } }
-     * 
-     * } }
-     * 
-     * if (geneSetInclusionFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
-     * geneSetInclusionFilter : geneSetInclusionFilters) { mustGeneSetFilter.must(geneSetInclusionFilter); }
-     * termFilters.must(mustGeneSetFilter); } if (geneSetExclusionFilters.size() > 0) { val mustGeneSetFilter =
-     * FilterBuilders.boolFilter(); for (val geneSetExclusionFilter : geneSetExclusionFilters) {
-     * mustGeneSetFilter.mustNot(geneSetExclusionFilter); } termFilters.must(mustGeneSetFilter); }
-     * 
-     * for (val geneSetExistField : geneSetExistFields) {
-     * 
-     * if (!genePath.path(geneSetExistField).isMissingNode()) { val exist =
-     * genePath.path(geneSetExistField).asBoolean();
-     * 
-     * val filter = nestedFilter(prefixMapping.get(Kind.GENE_SET), FilterBuilders.boolFilter().must(termFilter("type",
-     * geneSetFieldTypeMap.get(geneSetExistField)))); if (exist) { geneSetExistFilters.add(filter); } else {
-     * geneSetNotExistFilters.add(filter); } log.info(">>>>>>>>>> {}", filter); } }
-     * 
-     * if (geneSetExistFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
-     * geneSetExistFilter : geneSetExistFilters) { mustGeneSetFilter.must(geneSetExistFilter); }
-     * termFilters.must(mustGeneSetFilter); }
-     * 
-     * if (geneSetNotExistFilters.size() > 0) { val mustGeneSetFilter = FilterBuilders.boolFilter(); for (val
-     * geneSetNotExistFilter : geneSetNotExistFilters) { mustGeneSetFilter.mustNot(geneSetNotExistFilter); }
-     * termFilters.must(mustGeneSetFilter); }
-     */
-
-    // log.info("After building : {}", termFilters);
-
     val fields = filters.path(kind.getId()).fields();
     while (fields.hasNext()) {
       val facetField = fields.next();
-
-      // Skip the virtual fields
-      // if (geneSetFields.contains(facetField)) continue;
-      // if (geneSetExistFields.contains(facetField)) continue;
 
       // Check that facet field is in Field Mapping
       val typeMapping = FIELDS_MAPPING.get(kind);

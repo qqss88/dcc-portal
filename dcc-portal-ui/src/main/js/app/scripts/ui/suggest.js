@@ -115,7 +115,11 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
         }
 
         function url(item) {
-          return '/' + item.type + 's/' + item.id;
+          var resourceType = item.type;
+          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
+            resourceType = 'geneset';
+          }
+          return '/' + resourceType + 's/' + item.id;
         }
 
         // Go the the 'active' hit

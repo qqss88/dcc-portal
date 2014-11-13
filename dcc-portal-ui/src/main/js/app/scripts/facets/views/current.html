@@ -24,7 +24,7 @@
                     </span>
 
                     <span class="t_current__or">
-                        {{ terms.is.length !== 1? "IN (" : terms.is[0].controlFacet === 'uploadedGeneList'? "IN (" : "IS" }} 
+                        {{ terms.is.length !== 1? "IN (" : ['uploadedGeneList', 'hasPathway'].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
                     </span>
 
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
@@ -32,7 +32,7 @@
                             class="t_facets__facet__terms__term">
                             <span class="t_facets__facet__terms__active__term__label"
                                   data-ng-style="hoverStyle"
-                                  data-ng-click="Facets.removeTerm({type: termObj.controlType, facet: termObj.controlFacet, term: termObj.controlTerm})"
+                                  data-ng-click="removeTerm(termObj.controlType, termObj.controlFacet, termObj.controlTerm)"
                                   data-tooltip="{{ termObj.term | trans | define:true }}">{{termObj.term | trans:true}}</span>
                             <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>  
                         </li>
@@ -43,7 +43,7 @@
                         </li>
                     </ul> 
                     <span class="t_current__or"> 
-                        {{ terms.is.length !== 1? ")" : terms.is[0].controlFacet === 'uploadedGeneList'?  ")" : ""}}
+                        {{ terms.is.length !== 1? ")" : ['uploadedGeneList', 'hasPathway'].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
                     </span>
 
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>

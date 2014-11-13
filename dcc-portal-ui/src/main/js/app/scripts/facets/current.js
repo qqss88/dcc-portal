@@ -30,6 +30,11 @@
       $scope.isActive = _.keys($scope.filters).length;
     }
 
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
     $scope.removeFacet = function(type, facet) {
       Facets.removeFacet({
         type: type,
@@ -42,6 +47,28 @@
           facet: 'uploadedGeneList'
         });
       }
+    };
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
+    $scope.removeTerm = function(type, facet, term) {
+      console.log('current remove term', type, facet, term);
+
+      if (type === 'gene' && facet === 'hasPathway') {
+        Facets.removeFacet({
+          type: type,
+          facet: facet
+        });
+      } else {
+        Facets.removeTerm({
+          type: type,
+          facet: facet,
+          term: term
+        });
+      }
+
     };
 
     refresh();

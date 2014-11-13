@@ -22,19 +22,34 @@
 
   module.controller('tagsFacetCtrl', function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions) {
     $scope.projects = HighchartsService.projectColours;
+    $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
+    $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
+      return go.id;
+    });
+
+    $scope.hasPathwayTypePredicate = false;
+
 
     function setup() {
-      var type = $scope.type;
+      var type = $scope.type, filters = LocationService.filters();
 
       // Remap logical types to index type
       if (_.contains(['go_term', 'pathway', 'curated_set'], type)) {
         type = 'gene';
       }
 
+      if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('hasPathway')) {
+        $scope.hasPathwayTypePredicate = true;
+      } else {
+        $scope.hasPathwayTypePredicate = false;
+      }
+
+
       $scope.actives = Facets.getActiveTags({
         type: type,
         facet: $scope.facetName
       });
+
 
       console.log('actives', $scope.type, $scope.actives);
 
@@ -48,10 +63,21 @@
       }
     }
 
-    $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
-    $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
-      return go.id;
-    });
+    $scope.addGeneSetType = function(type) {
+      var filters = LocationService.filters();
+      if (filters.hasOwnProperty('gene')) {
+        filters.gene[type] = true;
+      }
+      LocationService.setFilters(filters);
+    };
+
+    $scope.removeGeneSetType = function(type) {
+      var filters = LocationService.filters();
+      if (filters.hasOwnProperty('gene')) {
+        delete filters.gene[type];
+      }
+      LocationService.setFilters(filters);
+    };
 
 
     $scope.addTerm = function (term) {
