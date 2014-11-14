@@ -60,45 +60,6 @@
     _ctrl.totalDonors = 0;
     _ctrl.gene.hasGVChromosome = GMService.isValidChromosome(_ctrl.gene.chromosome);
 
-
-
-    // ==== Test Data
-    /*
-    var sets =  [{
-        "id": "GO:1",
-        "type": "GO Term",
-        "name": "GO Term Name 1",
-        "direct": true,
-
-        // GO term specific
-        "qualifiers": ["colocalizes_with"]
-    }, {
-        "id": "GO:2",
-        "type": "GO Term",
-        "name": "GO Term Name 2",
-        "direct": false
-    }, {
-        "id": "REACT_2",
-        "type": "Pathway",
-        "name": "Pathway Name 2",
-        "direct": true,
-    }, {
-        "id": "REACT_3",
-        "type": "Pathway",
-        "name": "Pathway Name 3",
-        "direct": false
-    }, {
-        "id": "GS001",
-        "type": "Curated",
-        "name": "Cancer Gene Census",
-        "direct": true
-    }];
-    _ctrl.gene.sets = sets;
-    */
-    // ==== End
-
-
-
     // Extract to make it easier to handle on the view
     _ctrl.uiGeneSets = {};
     _ctrl.uiGeneSets.pathwayList = _.filter(_ctrl.gene.sets, function(set) {
@@ -110,8 +71,6 @@
     _ctrl.uiGeneSets.curatedList = _.filter(_ctrl.gene.sets, function(set) {
       return set.type === 'curated' && set.annotation === 'direct';
     });
-
-    console.log('Set', _ctrl.gene.sets, _ctrl.uiGeneSets);
 
 
     function refresh() {

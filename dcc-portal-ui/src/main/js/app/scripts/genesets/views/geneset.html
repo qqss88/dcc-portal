@@ -109,8 +109,48 @@
                 </td>
             </tr>
         </table>
-
     </div>
+
+    <div class="narrow omega">
+        <h3>External References</h3>
+        <table class="table table-info">
+            <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'">
+                <td>
+                    <a href="http://www.reactome.org/content/detail/{{GeneSetCtrl.geneSet.id}}"
+                       target="_blank">Reactome Pathway ID Page</a>
+                </td>
+            </tr>
+
+            <tr data-ng-if="GeneSetCtrl.geneSet.source === 'COSMIC - Sanger'">
+                <td>
+                    <a href="http://cancer.sanger.ac.uk/cancergenome/projects/census/"
+                       target="_blank">Cancer Gene Census Page on COSMIC</a>
+                </td>
+            </tr>
+
+            <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>
+                    <a href="http://amigo.geneontology.org/amigo/term/{{GeneSetCtrl.geneSet.id}}"
+                       target="_blank">GO ID detailed Page on AMIGO2</a>
+                </td>
+            </tr>
+            <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>
+                    <a href="http://www.ebi.ac.uk/QuickGO/GTerm?id={{GeneSetCtrl.geneSet.id}}"
+                       target="_blank">GO ID Page on EBI QuickGo</a>
+                </td>
+            </tr>
+            <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>
+                    <a href="http://geneontology.org/"
+                       target="_blank">GO Website</a>
+                </td>
+            </tr>
+
+
+        </table>
+    </div>
+
 </section>
 <section id="projects"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.fprojects, 'empty': GeneSetCtrl.geneSet.fprojects.length == 0}">

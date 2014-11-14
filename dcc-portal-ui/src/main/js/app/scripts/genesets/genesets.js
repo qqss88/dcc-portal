@@ -171,7 +171,6 @@
               _ctrl.geneSet.projects.forEach(function (p) {
                 p.mutationCount = data[p.id];
                 p.advQuery = LocationService.mergeIntoFilters({
-                  //gene: {geneSetId:{is:[_ctrl.geneSet.id]}},
                   gene: geneSetFilter,
                   donor: {projectId:{is:[p.id]}, availableDataTypes:{is:['ssm']}}
                 });
@@ -260,7 +259,6 @@
 
               g.mutationCount = data[g.id];
               g.advQuery = LocationService.mergeIntoFilters({
-                // gene: {geneSetId: {is: [_geneSet.id]}, id:{is:[g.id]}}
                 gene: geneFilter
               });
             });
