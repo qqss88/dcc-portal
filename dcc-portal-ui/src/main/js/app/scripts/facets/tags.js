@@ -24,42 +24,15 @@
     function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions, GeneSets, Genes) {
 
     $scope.projects = HighchartsService.projectColours;
-    $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
-    $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
-      return go.id;
-    });
-    $scope.predefinedCurated = Extensions.CURATE_SET_ROOTS;
-    $scope.predefinedCuratedIds = Extensions.CURATE_SET_ROOTS.map(function(curated) {
-      return curated.id;
-    });
-
-
-    $scope.hasPathwayTypePredicate = false;
 
 
     function setup() {
-      var type = $scope.type, filters = LocationService.filters();
+      var type = $scope.type, filters = LocationService.filters(), activeIds = [];
 
       // Remap logical types to index type
       if (_.contains(['go_term', 'pathway', 'curated_set'], type)) {
         type = 'gene';
       }
-
-      if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('hasPathway')) {
-        $scope.hasPathwayTypePredicate = true;
-      } else {
-        $scope.hasPathwayTypePredicate = false;
-      }
-
-      GeneSets.several($scope.predefinedGOIds.join(','))
-        .get('genes/counts', {filters: LocationService.filters()}).then(function(result) {
-        $scope.predefinedIdCounts = result;
-      });
-
-      Genes.handler.one('count').get({filters:{gene:{hasPathway:true}}}).then(function (result) {
-        $scope.allPathwayCount = result;
-      });
-
 
       $scope.actives = Facets.getActiveTags({
         type: type,
@@ -67,12 +40,57 @@
       });
 
 
+      // Grab predefined geneset fields: each gene set type require specialized logic
+      //   go has predefined Ids, searchable Ids, and Id counts
+      //   pathway has predefined type, searchableIds, Id counts and type counts
+      //   curated_set has predefined Ids and Id counts
+      if ($scope.type === 'go_term') {
+        $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
+        $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
+          return go.id;
+        });
+        activeIds = $scope.actives.concat($scope.predefinedGOIds);
+
+        GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
+          $scope.GOIdCounts = result;
+        });
+      } else if ($scope.type === 'pathway') {
+        var pathwayTypeFilters = {};
+
+        if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty('hasPathway')) {
+          $scope.hasPathwayTypePredicate = true;
+        } else {
+          $scope.hasPathwayTypePredicate = false;
+        }
+
+        activeIds = $scope.actives;
+        pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}}); 
+
+        Genes.handler.one('count').get({filters:pathwayTypeFilters}).then(function (result) {
+          $scope.allPathwayCounts = result;
+        });
+        if (activeIds && activeIds.length > 0) {
+          GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
+            $scope.pathwayIdCounts = result;
+          });
+        }
+      } else if ($scope.type === 'curated_set') {
+        $scope.predefinedCurated = Extensions.CURATE_SET_ROOTS;
+        $scope.predefinedCuratedIds = Extensions.CURATE_SET_ROOTS.map(function(curated) {
+          return curated.id;
+        });
+        activeIds = $scope.predefinedCuratedIds;
+
+        GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
+          $scope.curatedIdCounts = result;
+        });
+      }
 
       // Check if there are extended element associated with this facet
       // i.e. : GeneList is a subse of Gene
       $scope.hasExtension = false;
       if ($scope.type === 'gene') {
-        if (FiltersUtil.hasGeneListExtension( LocationService.filters())) {
+        if (FiltersUtil.hasGeneListExtension(filters)) {
           $scope.hasExtension = true;
         }
       }
@@ -101,15 +119,7 @@
 
     $scope.addTerm = function (term) {
       var type, name;
-
-
-      if ($scope.type === 'pathway') {
-        type = 'gene';
-        name = 'id';
-      } else if ($scope.type === 'go_term') {
-        type = 'gene';
-        name = 'id';
-      } else if ($scope.type === 'curated_set') {
+      if (_.contains(['go_term', 'pathway', 'curated_set'], $scope.type)) {
         type = 'gene';
         name = 'id';
       } else {
@@ -138,8 +148,7 @@
     };
 
     $scope.removeFacet = function () {
-      // var type = $scope.type === 'pathway' ? 'gene' : $scope.type;
-      var type = $scope.type;
+      var type = $scope.type, filters = LocationService.filters();
       if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
         type = 'gene';
       }
@@ -149,15 +158,14 @@
         facet: $scope.facetName
       });
 
-      if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(LocationService.filters()) === true) {
+      if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(filters) === true) {
         Facets.removeFacet({
           type: type,
           facet: 'uploadedGeneList'
         });
       }
-
-
     };
+
 
     // Needed if term removed from outside scope
     $scope.$watch(function () {

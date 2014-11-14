@@ -492,7 +492,7 @@ public class IndexModel {
           .put("projectId", "projectId")
 
           // GO Term
-          .put("altId", "alt_id")
+          .put("altIds", "alt_ids")
 
           // Pathway
           // .put("url", "url")
@@ -531,7 +531,7 @@ public class IndexModel {
 
           // Gene Ontology
           .put("ontology", "go_term.ontology")
-          .put("altIds", "go_term.alt_id")
+          .put("altIds", "go_term.alt_ids")
           .put("synonyms", "go_term.synonyms")
           .put("inferredTree", "go_term.inferred_tree")
 
