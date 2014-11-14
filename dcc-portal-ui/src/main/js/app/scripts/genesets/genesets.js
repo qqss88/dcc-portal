@@ -419,6 +419,10 @@
   module.service('GeneSets', function (Restangular, LocationService, GeneSet) {
     this.handler = Restangular.all('genesets');
 
+    this.several = function(list) {
+      return Restangular.several('genesets', list);
+    };
+
     this.getList = function (params) {
       var defaults = {
         size: 10,

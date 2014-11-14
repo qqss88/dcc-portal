@@ -56,6 +56,8 @@ public class ResourceUtils {
   static final String API_MUTATION_PARAM = "mutationId";
   static final String API_GENE_VALUE = "Gene ID";
   static final String API_GENE_PARAM = "geneId";
+  static final String API_GENE_SET_PARAM = "geneSetId";
+  static final String API_GENE_SET_VALUE = "Gene Set ID";
   static final String API_PROJECT_VALUE = "Project ID";
   static final String API_PROJECT_PARAM = "projectId";
   static final String API_OCCURRENCE_VALUE = "Occurrence ID";

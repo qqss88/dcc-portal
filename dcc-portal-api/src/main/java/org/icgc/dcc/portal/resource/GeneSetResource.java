@@ -19,9 +19,20 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.jetty.http.HttpStatus.NOT_FOUND_404;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_SET_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_GENE_SET_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_FILTERS;
+import static org.icgc.dcc.portal.resource.ResourceUtils.TOTAL;
+import static org.icgc.dcc.portal.resource.ResourceUtils.generateQueries;
+import static org.icgc.dcc.portal.resource.ResourceUtils.mergeFilters;
+import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 
 import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -29,14 +40,20 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.GeneSet;
+import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.GeneSetService;
+import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -53,6 +70,32 @@ import com.yammer.metrics.annotation.Timed;
 public class GeneSetResource {
 
   private final GeneSetService geneSetService;
+  private final GeneService geneService;
+
+  @Path("/{" + API_GENE_SET_PARAM + "}/genes/counts")
+  @GET
+  @Timed
+  @ApiOperation(value = "Find number of genes associated with each gene set")
+  public Map<String, Long> countGenes(
+      @ApiParam(value = API_GENE_SET_VALUE, required = true) @PathParam(API_GENE_SET_PARAM) IdsParam geneSetIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
+      ) {
+
+    ObjectNode filters = filtersParam.get();
+    val geneSetIdFilter = "{gene:{geneSetId:{is:['%s']}}}";
+
+    List<String> geneSets = geneSetIds.get();
+
+    val queries = generateQueries(filters, geneSetIdFilter, geneSets);
+    val counts = geneService.counts(queries);
+
+    filters = mergeFilters(filters, geneSetIdFilter, JsonUtils.join(geneSets));
+    long uniqueCount = geneService.count(query().filters(filters).build());
+
+    counts.put(TOTAL, uniqueCount);
+
+    return counts;
+  }
 
   @Path("/{Id}")
   @GET
