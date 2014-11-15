@@ -56,14 +56,13 @@
                           </span>
                      </li> 
                  </ul>
-                 <ul>
+                 <ul class="t_facets__facet__terms__active">
                      <li class="t_facets__facet__terms__active__term__label"
                          data-ng-if="hasPathwayTypePredicate === true"
-                         data-ng-click="removeGeneSetType('hasPathway')">
-                         <span class="t_facets__facet__terms__active__term__label__text">
-                             <i class="icon-ok"></i>
-                             Reactome Pathways
-                          </span>
+                         data-ng-click="removeGeneSetType('hasPathway')"
+                         data-ng-mouseover="toggleRemove=true"
+                         data-ng-mouseleave="toggleRemove=false">
+                          <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> Reactome Pathways
                           <span class="t_facets__facet__terms__active__term__count">
                              {{ allPathwayCounts | number}}
                           </span>

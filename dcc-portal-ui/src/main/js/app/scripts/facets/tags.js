@@ -64,7 +64,7 @@
         }
 
         activeIds = $scope.actives;
-        pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}}); 
+        pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}});
 
         Genes.handler.one('count').get({filters:pathwayTypeFilters}).then(function (result) {
           $scope.allPathwayCounts = result;

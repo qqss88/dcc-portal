@@ -48,10 +48,10 @@
                      <li data-ng-repeat="item in predefinedGO" 
                          data-ng-if="actives.indexOf(item.id) >= 0"
                          data-ng-click="removeTerm({'type':type, 'facetName': facetName, 'id':item.id})"
-                         class="t_facets__facet__terms__active__term__label">
-                         <span class="t_facets__facet__terms__active__term__label__text">
-                             <i class="icon-ok"></i> {{ item.name }}
-                         </span>
+                         class="t_facets__facet__terms__active__term__label"
+                         data-ng-mouseover="toggleRemove=true"
+                         data-ng-mouseleave="toggleRemove=false">
+                         <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> {{ item.name }}
                          <span class="t_facets__facet__terms__active__term__count">
                              {{GOIdCounts[item.id] | number}}
                          </span>
