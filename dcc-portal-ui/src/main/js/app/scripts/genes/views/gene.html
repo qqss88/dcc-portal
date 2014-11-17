@@ -74,41 +74,28 @@
             <tr> 
                 <th>Reactome Pathways</th>
                 <td>
-                    <ul> 
-                        <li data-ng-repeat="pathway in GeneCtrl.uiGeneSets.pathwayList | orderBy:'name'">
-                            <a href="genesets/{{pathway.id}}"><span>{{pathway.name}}</span></a>
-                        </li>
-                    </ul>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.pathwayList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
                 </td>
             </tr>
             <tr>
                 <th>GO Terms</th>
                 <td>
-                    <ul> 
-                        <li data-ng-repeat="go in GeneCtrl.uiGeneSets.goList | orderBy:'name'">
-                            <ul data-ng-if="go.qualifiers">
-                                <li data-ng-repeat="qualifier in go.qualifiers">
-                                    <span>{{qualifier | trans }} </span>
-                                    <a href="genesets/{{go.id}}">
-                                        <span>{{go.name}}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                            <div data-ng-if="!go.qualifiers">
-                                <a href="genesets/{{go.id}}"><span>{{go.name}}</span></a>
-                            </div>
-                        </li>
-                    </ul>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.goList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
                 </td>
             </tr>
             <tr>
                 <th>Curated Gene Set</th>
                 <td>
-                    <ul> 
-                        <li data-ng-repeat="curated in GeneCtrl.uiGeneSets.curatedList | orderBy:'name'">
-                            <a href="genesets/{{curated.id}}"><span>{{curated.name}}</span></a>
-                        </li>
-                    </ul>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.curatedList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
                 </td>
             </tr>
         </table>
