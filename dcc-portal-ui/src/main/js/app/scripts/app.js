@@ -167,10 +167,14 @@
   module.constant('Extensions', {
     GENE_LIST: 'uploadedGeneList',
     GENE_ID: 'id',
+    CURATE_SET_ROOTS: [
+      {id: 'GS1', name: 'Cancer Gene Census'}
+    ],
     GENE_ONTOLOGY_ROOTS: [
       {id: 'GO:0003674', name: 'Molecular Function'},
       {id: 'GO:0008150', name: 'Biological Process'},
-      {id: 'GO:0005575', name: 'Cellular Component'}]
+      {id: 'GO:0005575', name: 'Cellular Component'}
+    ]
   });
 
 
