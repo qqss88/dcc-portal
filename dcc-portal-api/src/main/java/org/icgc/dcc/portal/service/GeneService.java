@@ -6,6 +6,7 @@ import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -34,7 +35,7 @@ public class GeneService {
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
-  public Multimap<String, String> validateIdentifiers(List<String> ids) {
+  public Map<String, Multimap<String, String>> validateIdentifiers(List<String> ids) {
     return geneRepository.validateIdentifiers(ids);
   }
 

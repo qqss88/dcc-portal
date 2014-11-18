@@ -30,7 +30,6 @@
 
             <!-- body -->
             <div class="modal-body"> 
-               <br>
                <div>
                    <span>Type or copy-and-paste a list of genes</span> 
                    <span class="pull-right"
@@ -70,22 +69,36 @@
                           <i class="icon-attention-1"></i> {{ warning }}
                       </span>
                    </div>
+
+                   <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
+                      <span>Found {{totalMatches}} matches</span>
+                      <div data-ng-repeat="item in validIds" data-ng-if="validIds.length > 1">
+                          <span>
+                              <i class="{{item.selected? 'icon-check':'icon-check-empty'}}" data-ng-click="item.selected=!item.selected"></i>
+                              {{item.typeName}}: {{item.keys.length}} matches
+                         </span>
+                      </div>
+                      <br>
+                   </div>
+
                    <div data-ng-if="validIds.length === 0 && warnings.length === 0">
                       <span class="alert-error">
                          <i class="icon-attention-1"></i> No valid genes found
                       </span>
                    </div>
-                   <div data-ng-show="invalidIds.length > 0 && warnings.length === 0" data-ng-init="expanded=false"> 
+
+                   <div data-ng-show="validIds.length > 0 && invalidIds.length > 0 && warnings.length === 0" data-ng-init="expanded=false"> 
                        <a href="" data-ng-click="expanded=!expanded">
                            <span class="alert-warning">
                                <i class="icon-attention-1"></i>{{invalidIds.length}} gene(s) not recognized in the system
                                <i class="{{expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                            </span>
                        </a>
+                       <div style="max-height:25%; overflow:scroll" data-ng-hide="!expanded">
+                           {{ invalidIds.join(', ') }}
+                       </div>
                    </div>
-                   <div style="max-height:25%; overflow:scroll" data-ng-hide="!expanded">
-                       {{ invalidIds.join(', ') }}
-                   </div>
+
                </div>
 
             </div>

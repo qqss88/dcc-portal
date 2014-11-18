@@ -28,6 +28,7 @@ import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
+import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
@@ -63,6 +64,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -86,6 +88,9 @@ import com.google.common.collect.Multimap;
 public class GeneRepository implements Repository {
 
   private static final String SCORE = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";
+
+  public static final List<String> GENE_ID_SEARCH_FIELDS = ImmutableList.<String> of(
+      GENE_ID, GENE_SYMBOL, GENE_UNIPROT_IDS);
 
   private static final Type CENTRIC_TYPE = Type.GENE_CENTRIC;
   private static final Type TYPE = Type.GENE;
@@ -368,47 +373,54 @@ public class GeneRepository implements Repository {
    * 
    * @returns a map of matched identifiers
    */
-  public Multimap<String, String> validateIdentifiers(List<String> input) {
-    val boolFilter = FilterBuilders.boolFilter();
-    val idFilter = FilterBuilders.termsFilter(GENE_ID, input.toArray());
-    val symbolFilter = FilterBuilders.termsFilter(GENE_SYMBOL, input.toArray());
+  public Map<String, Multimap<String, String>> validateIdentifiers(List<String> input) {
 
-    // gene_id => symbol is many-to-one, so we need two lookup tables
-    val idLookup = Maps.<String, String> newHashMap();
-    val symbolLookup = ArrayListMultimap.<String, String> create();
+    val boolQuery = QueryBuilders.boolQuery();
 
-    boolFilter.should(idFilter, symbolFilter);
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(QUERY_THEN_FETCH)
-        .setFilter(boolFilter)
-        .addFields(GENE_ID, GENE_SYMBOL)
         .setSize(5000);
+    for (val searchField : GENE_ID_SEARCH_FIELDS) {
+      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
+      search.addHighlightedField(searchField);
+      search.addField(searchField);
+    }
+    search.setQuery(boolQuery);
 
-    // Get the valid lookups
-    log.info("Search is {}", search);
+    log.debug("Search is {}", search);
     val response = search.execute().actionGet();
+
+    // Initialize results container
+    val result = Maps.<String, Multimap<String, String>> newHashMap();
+    for (val searchField : GENE_ID_SEARCH_FIELDS) {
+      val typeResult = ArrayListMultimap.<String, String> create();
+      result.put(searchField, typeResult);
+    }
+
+    // Organize the results into the categories
     for (val hit : response.getHits()) {
-      val id = (String) hit.getFields().get(GENE_ID).getValue();
-      val symbol = (String) hit.getFields().get(GENE_SYMBOL).getValue();
+      val fields = hit.getFields();
+      val highlightedFields = hit.getHighlightFields();
+      val geneId = (String) fields.get(GENE_ID).getValue();
 
-      idLookup.put(id, symbol);
-      symbolLookup.put(symbol, id);
-    }
+      for (val searchField : GENE_ID_SEARCH_FIELDS) {
+        if (highlightedFields.containsKey(searchField)) {
+          if (searchField.equals(GENE_UNIPROT_IDS)) {
+            @SuppressWarnings("unchecked")
+            val keys = (List<String>) fields.get(searchField).getValue();
+            for (val key : keys) {
+              result.get(searchField).put(key, geneId);
+            }
+          } else {
+            val key = (String) fields.get(searchField).getValue();
+            result.get(searchField).put(key, geneId);
+          }
 
-    // Now match with input
-    val result = ArrayListMultimap.<String, String> create();
-    for (String key : input) {
-      if (idLookup.containsKey(key)) {
-        result.put(key, key);
-        continue;
+        }
       }
-      if (symbolLookup.containsKey(key)) {
-        result.putAll(key, symbolLookup.get(key));
-        continue;
-      }
     }
-
     return result;
   }
+
 }

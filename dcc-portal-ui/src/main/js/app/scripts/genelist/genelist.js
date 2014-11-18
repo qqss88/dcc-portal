@@ -39,7 +39,7 @@
 
       var data = 'geneIds=' + encodeURI($scope.rawText);
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, undefined, {'validateOnly':true}).then(function(result) {
+        .customPOST(data, undefined, {'validationOnly':true}).then(function(result) {
 
           var verifyResult = Restangular.stripRestangular(result);
           $scope.state = 'verified';
@@ -54,8 +54,34 @@
           }
 
           $scope.invalidIds = verifyResult.invalidGenes;
-          $scope.validIds = verifyResult.validGenes;
+          $scope.totalMatches = 0;
 
+          // Iterate over: search type -> search keys -> geneIds
+          angular.forEach(verifyResult.validGenes, function(type, typeName) {
+            var keys = [], idCount = 0, geneIdMap = {};
+            if (_.isEmpty(type)) {
+              return;
+            }
+            angular.forEach(type, function(list, idKey) {
+              if (list && list.length > 0) {
+                list.forEach(function(geneId) {
+                  if (! geneIdMap[geneId]) {
+                    idCount++;
+                    geneIdMap[geneId] = 1;
+                  }
+                });
+                $scope.totalMatches ++;
+                keys.push(idKey);
+              }
+            });
+
+            $scope.validIds.push({
+              typeName: typeName,
+              keys: keys,
+              idCount: idCount,
+              selected: true,
+            });
+          });
         });
     }
 
@@ -77,7 +103,17 @@
     }
 
     function createNewGeneList() {
-      var data = 'geneIds=' + encodeURI($scope.validIds.join(','));
+      var data, text = '';
+      $scope.validIds.forEach(function(validType, idx) {
+        if (validType.selected === true) {
+          text += validType.keys.join(',');
+          if (idx < ($scope.validIds.length - 1)) {
+            text += ',';
+          }
+        }
+      });
+      data = 'geneIds=' + encodeURI(text);
+
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
           var filters = LocationService.filters();
