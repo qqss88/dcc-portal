@@ -67,7 +67,7 @@ angular.module('app.download.controllers').controller('DownloadController',
 
         // Check file extension
         extension = file.name.split('.').pop();
-        if (_.contains(['txt', 'me'], extension.toLowerCase())) {
+        if (_.contains(['txt', 'md'], extension.toLowerCase())) {
           file.isText = true;
         } else {
           file.isText = false;
@@ -82,12 +82,12 @@ angular.module('app.download.controllers').controller('DownloadController',
 
         name = file.name.split('/').pop();
 
-        pattern = /notice\.txt$/i;
+        pattern = /notice\.(txt|md)$/i;
         if (pattern.test(name)) {
           return -4;
         }
 
-        pattern = /readme\.txt$/i;
+        pattern = /readme\.(txt|md)$/i;
         if (pattern.test(name)) {
           return -3;
         }
