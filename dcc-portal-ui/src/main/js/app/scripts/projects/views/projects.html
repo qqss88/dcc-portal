@@ -256,50 +256,51 @@
 <tr>
     <td colspan="4"><strong>Total</strong></td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{}"})'>{{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
+        <a href="/search?filters={{createAdvanceFilters()}}">
+            {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"ssm\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("ssm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"cnsm\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("cnsm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"stsm\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("stsm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"sgv\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("sgv")}}'>
             {{ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"meth_array\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("meth_array")}}'>
             {{ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"meth_seq\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("meth_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"exp_array\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("exp_array")}}'>
             {{ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"exp_seq\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("exp_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"pexp\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("pexp")}}'>
             {{ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"mirna_seq\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("mirna_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a data-ui-sref='advanced({filters:"{\"donor\":{\"availableDataTypes\":{\"is\":[\"jcn\"]}}}"})'>
+        <a href='/search?filters={{createAdvanceFilters("jcn")}}'>
             {{ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number}}</a>
     </td>
 </tr>
