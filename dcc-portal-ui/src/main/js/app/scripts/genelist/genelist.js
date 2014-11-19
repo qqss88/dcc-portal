@@ -139,10 +139,15 @@
     }
 
   
-    // Init
+    // Initialize
     $scope.rawText = '';
     $scope.state = '';
     $scope.hasGeneList = false;
+    $scope.typeNameMap = {
+      'symbol': 'Gene Symbol',
+      '_gene_id': 'Gene ID',
+      'external_db_ids.uniprotkb_swissprot': 'UniProtKB/Swiss-Prot'
+    };
 
 
     $scope.$watch(function () { return LocationService.search(); }, function() {
@@ -161,6 +166,19 @@
 
     $scope.newGeneList = function() {
       createNewGeneList();
+    };
+
+    $scope.toggleGeneType = function(type) {
+      if ($scope.validIds.length > 1) {
+        type.selected = !type.selected;
+      }
+    };
+
+    $scope.hasGeneTypeSelected = function() {
+      var selected = _.filter($scope.validIds, function(type) {
+        return type.selected === true;
+      });
+      return selected.length > 0;
     };
 
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 

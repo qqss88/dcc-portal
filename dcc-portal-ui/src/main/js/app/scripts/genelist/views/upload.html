@@ -71,26 +71,29 @@
                    </div>
 
                    <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
-                      <span>Found {{totalMatches}} matches</span>
-                      <div data-ng-repeat="item in validIds" data-ng-if="validIds.length > 1">
-                          <span>
-                              <i class="{{item.selected? 'icon-check':'icon-check-empty'}}" data-ng-click="item.selected=!item.selected"></i>
-                              {{item.typeName}}: {{item.keys.length}} matches
-                         </span>
-                      </div>
-                      <br>
+                      <table>
+                          <tbody>
+                              <tr><td>&nbsp;</td><td>Select</th></tr>
+                              <tr data-ng-repeat="item in validIds" data-ng-click="toggleGeneType(item)">
+                                  <td>{{item.keys.length}} entries recognized as {{typeNameMap[item.typeName]}}</td>
+                                  <td class="text-right">
+                                      <i class="{{item.selected ? 'icon-check':'icon-check-empty'}}"></i>
+                                  </td>
+                              </tr>
+                          </tbody>
+                      </table>
                    </div>
-
                    <div data-ng-if="validIds.length === 0 && warnings.length === 0">
                       <span class="alert-error">
                          <i class="icon-attention-1"></i> No valid genes found
                       </span>
                    </div>
 
+
                    <div data-ng-show="validIds.length > 0 && invalidIds.length > 0 && warnings.length === 0" data-ng-init="expanded=false"> 
                        <a href="" data-ng-click="expanded=!expanded">
                            <span class="alert-warning">
-                               <i class="icon-attention-1"></i>{{invalidIds.length}} gene(s) not recognized in the system
+                               <i class="icon-attention-1"></i>{{invalidIds.length}} entries not recognized in the system
                                <i class="{{expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                            </span>
                        </a>
@@ -107,7 +110,7 @@
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="genelistModal=false; reset();">Cancel</button>
                 <button class="t_button" data-ng-click="newGeneList()"
-                    data-ng-disabled="state !== 'verified' || validIds.length === 0">Submit</button> 
+                    data-ng-disabled="state !== 'verified' || validIds.length === 0 || !hasGeneTypeSelected()">Submit</button> 
             </div>
         </div>
     </div>
