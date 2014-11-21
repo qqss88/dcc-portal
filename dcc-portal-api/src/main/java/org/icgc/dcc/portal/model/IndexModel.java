@@ -1,6 +1,9 @@
 package org.icgc.dcc.portal.model;
 
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.AccessLevel;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 @Component
@@ -571,10 +575,13 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
   }
 
+  /**
+   * Internal gene set types
+   */
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum GeneSetType {
-    GENE_SET_TYPE_ALL("geneSetAll"),
+    GENE_SET_TYPE_ALL("geneSetId"),
     GENE_SET_TYPE_GO("go_term"),
     GENE_SET_TYPE_PATHWAY("pathway"),
     GENE_SET_TYPE_CURATED("curated_set");
@@ -582,16 +589,45 @@ public class IndexModel {
     private final String type;
   }
 
+  /**
+   * Mapping query ID fields to internal types
+   */
   public static final Map<String, String> GENE_SET_QUERY_ID_FIELDS = ImmutableMap.<String, String> builder()
       .put(GeneSetType.GENE_SET_TYPE_ALL.getType(), "geneSetId")
       .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(), "curatedSetId")
       .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "pathwayId")
       .put(GeneSetType.GENE_SET_TYPE_GO.getType(), "goTermId").build();
 
+  /**
+   * Mapping query type fields to internal type
+   */
   public static final Map<String, String> GENE_SET_QUERY_TYPE_FIELDS = ImmutableMap.<String, String> of(
       GeneSetType.GENE_SET_TYPE_CURATED.getType(), "hasCuratedSet",
       GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "hasPathway",
       GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
+
+  /**
+   * Mapping of gene set types to actual ES fields
+   */
+  public static final Map<String, List<String>> GENE_SET_INDEX_FIELDS = ImmutableMap
+      .<String, List<String>> builder()
+      .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(),
+          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_CURATED.getType()))
+      .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
+          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_PATHWAY.getType()))
+      .put(GeneSetType.GENE_SET_TYPE_GO.getType(),
+          ImmutableList.<String> of(
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+      .put(GeneSetType.GENE_SET_TYPE_ALL.getType(),
+          ImmutableList.<String> of(
+              GeneSetType.GENE_SET_TYPE_CURATED.getType(),
+              GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+      .build();
 
   private String index;
 

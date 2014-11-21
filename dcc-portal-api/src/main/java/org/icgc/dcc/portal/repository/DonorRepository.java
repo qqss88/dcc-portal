@@ -103,7 +103,7 @@ public class DonorRepository implements Repository {
       .put(Kind.PROJECT, "project")
       .put(Kind.GENE, "gene")
       .put(Kind.MUTATION, "gene.ssm")
-      .put(Kind.GENE_SET, "gene.sets")
+      .put(Kind.GENE_SET, "gene")
       .put(Kind.CONSEQUENCE, "gene.ssm.consequence")
       .put(Kind.OBSERVATION, "gene.ssm.observation")
       .build());
@@ -213,7 +213,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
 
     search.setQuery(buildQuery(query));
-    log.info("??? {}", search);
+    log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 
@@ -224,7 +224,7 @@ public class DonorRepository implements Repository {
   public SearchResponse findAll(Query query) {
     val search = buildFindAllRequest(query, TYPE);
 
-    log.info("!!! {}", search);
+    log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 
@@ -238,7 +238,6 @@ public class DonorRepository implements Repository {
             .setSize(query.getSize());
 
     ObjectNode filters = remapFilters(query.getFilters());
-    log.info("??? Filters {}", filters);
     search.setFilter(getFilters(filters));
 
     search.addFields(getFields(query, KIND));
@@ -368,7 +367,6 @@ public class DonorRepository implements Repository {
 
     if (!response.isExists()) {
       String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
       String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
       throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
           .entity(msg).build());

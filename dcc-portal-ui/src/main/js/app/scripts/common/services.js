@@ -466,7 +466,7 @@
 
           // Remap gene ontologies
           if (uiFacetKey === 'hasPathway') {
-            var uiTerm = 'Reactome Pathway';
+            var uiTerm = 'Reactome Pathways';
             uiFacetKey = 'pathwayId';
             display[typeKey][uiFacetKey] = {};
             display[typeKey][uiFacetKey].is = [];
@@ -495,6 +495,12 @@
               var predefinedGO = _.find(Extensions.GENE_ONTOLOGY_ROOTS, function(go) { return go.id === term; });
               if (predefinedGO) {
                 uiTerm = predefinedGO.name;
+                isPredefined = true;
+              }
+            } else if (typeKey === 'gene' && facetKey === 'curatedSetId') {
+              var predefinedCurated = _.find(Extensions.CURATE_SET_ROOTS, function(go) { return go.id === term; });
+              if (predefinedCurated) {
+                uiTerm = predefinedCurated.name;
                 isPredefined = true;
               }
             }

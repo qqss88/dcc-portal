@@ -84,7 +84,6 @@ public class OccurrenceRepository {
       .put(Kind.MUTATION, "ssm")
       .put(Kind.CONSEQUENCE, "ssm.consequence")
       .put(Kind.GENE, "ssm.consequence")
-      .put(Kind.GENE_SET, "ssm.consequence.gene.sets")
       .put(Kind.OBSERVATION, "ssm.observation")
       .build());
 
@@ -95,7 +94,7 @@ public class OccurrenceRepository {
       .put(Kind.MUTATION, "ssm")
       .put(Kind.CONSEQUENCE, "ssm.consequence")
       .put(Kind.GENE, "ssm.consequence.gene")
-      .put(Kind.GENE_SET, "ssm.consequence.gene.sets")
+      .put(Kind.GENE_SET, "ssm.consequence.gene")
       .put(Kind.OBSERVATION, "ssm.observation")
       .build());
 

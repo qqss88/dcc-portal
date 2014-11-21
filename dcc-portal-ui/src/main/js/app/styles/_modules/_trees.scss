@@ -24,7 +24,7 @@
 }
 
 .tree li::before {
-    border-left:1px solid #bbb;
+    border-left:1px solid $blue;
     bottom:50px;
     height:100%;
     top:0;
@@ -32,7 +32,7 @@
 }
 
 .tree li::after {
-    border-top:1px solid #bbb;
+    border-top:1px solid $blue;
     height:20px;
     top:20px;
     width:12px;
@@ -43,12 +43,17 @@
     -webkit-border-radius:3px;
     border-radius:3px;
 
-    border:1px solid #bbb;
+    border:1px solid $blue;
+    border-radius: 6px 6px;
+
+    background-color: $greyLightestEver;
+
     // border-left:1px solid #bbb;
+    // border-right:1px solid #bbb;
     // border-bottom:1px solid #bbb;
 
-    display:inline-block;
-    padding:1px 4px;
+    display: inline-block;
+    padding: 2px 5px;
     text-decoration:none;
 }
 

@@ -95,7 +95,6 @@ public class GeneRepository implements Repository {
   private static final Kind KIND = Kind.GENE;
 
   private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
-      Kind.GENE_SET, "sets",
       Kind.DONOR, "donor",
       Kind.MUTATION, "donor.ssm",
       Kind.CONSEQUENCE, "donor.ssm.consequence",

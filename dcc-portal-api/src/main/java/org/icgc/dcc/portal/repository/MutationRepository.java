@@ -103,7 +103,6 @@ public class MutationRepository implements Repository {
       .put(Kind.DONOR, "ssm_occurrence")
       .put(Kind.TRANSCRIPT, "transcript")
       .put(Kind.GENE, "transcript")
-      .put(Kind.GENE_SET, "transcript.gene.sets")
       .put(Kind.OBSERVATION, "ssm_occurrence.observation")
       .build());
 
@@ -115,7 +114,7 @@ public class MutationRepository implements Repository {
       .put(Kind.TRANSCRIPT, "transcript")
       .put(Kind.CONSEQUENCE, "transcript.consequence")
       .put(Kind.GENE, "transcript.gene")
-      .put(Kind.GENE_SET, "transcript.gene.sets")
+      .put(Kind.GENE_SET, "transcript.gene")
       .put(Kind.OBSERVATION, "ssm_occurrence.observation")
       .build());
 

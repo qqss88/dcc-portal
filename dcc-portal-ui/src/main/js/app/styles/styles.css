@@ -3133,7 +3133,7 @@ g.marker rect.selected {
 
 /* line 26, _modules/_trees.scss */
 .tree li::before {
-  border-left: 1px solid #bbb;
+  border-left: 1px solid #166aa2;
   bottom: 50px;
   height: 100%;
   top: 0;
@@ -3142,7 +3142,7 @@ g.marker rect.selected {
 
 /* line 34, _modules/_trees.scss */
 .tree li::after {
-  border-top: 1px solid #bbb;
+  border-top: 1px solid #166aa2;
   height: 20px;
   top: 20px;
   width: 12px;
@@ -3153,38 +3153,40 @@ g.marker rect.selected {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  border: 1px solid #bbb;
+  border: 1px solid #166aa2;
+  border-radius: 6px 6px;
+  background-color: #fafafa;
   display: inline-block;
-  padding: 1px 4px;
+  padding: 2px 5px;
   text-decoration: none;
 }
 
-/* line 55, _modules/_trees.scss */
+/* line 60, _modules/_trees.scss */
 .tree > ul > li::before, .tree > ul > li::after {
   border: 0;
 }
 
-/* line 59, _modules/_trees.scss */
+/* line 64, _modules/_trees.scss */
 .tree li:last-child::before {
   height: 20px;
 }
 
-/* line 64, _modules/_trees.scss */
+/* line 69, _modules/_trees.scss */
 .tree .goterm_part_of {
   color: #FF8800;
 }
 
-/* line 71, _modules/_trees.scss */
+/* line 76, _modules/_trees.scss */
 .tree .goterm_regulates {
   color: #FF8800;
 }
 
-/* line 75, _modules/_trees.scss */
+/* line 80, _modules/_trees.scss */
 .tree .goterm_positively_regulates {
   color: #0000FF;
 }
 
-/* line 79, _modules/_trees.scss */
+/* line 84, _modules/_trees.scss */
 .tree .goterm_negatively_regulates {
   color: #FF0000;
 }

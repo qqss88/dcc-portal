@@ -100,8 +100,8 @@
 
                    <div data-ng-repeat="hier in GeneSetCtrl.uiParentPathways">
                        <span>
-                           <i class="icon-external-link"></i>
-                           <a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{hier.diagramId}}&ID={{GeneSetCtrl.geneSet.id}}" target="_blank">View in Reactome Pathway Browser</a>
+                           <a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{hier.diagramId}}&ID={{GeneSetCtrl.geneSet.id}}" target="_blank">
+                               <i class="icon-external-link"></i> View in Reactome Pathway Browser</a>
                        </span>
                        <pathway-tree tree="[hier.root]"></pathway-tree>
                        <br>
@@ -114,39 +114,45 @@
     <div class="narrow omega">
         <h3>External References</h3>
         <table class="table table-info">
+
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'">
+                <td>Reactome Pathway</td>
                 <td>
                     <a href="http://www.reactome.org/content/detail/{{GeneSetCtrl.geneSet.id}}"
-                       target="_blank">Reactome Pathway ID Page</a>
+                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}</a>
                 </td>
             </tr>
 
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'COSMIC - Sanger'">
+                <td>COSMIC</td>
                 <td>
                     <a href="http://cancer.sanger.ac.uk/cancergenome/projects/census/"
-                       target="_blank">Cancer Gene Census Page on COSMIC</a>
+                       target="_blank"><i class="icon-external-link"></i>Cancer Gene Census</a>
                 </td>
             </tr>
 
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>Amigo2</td>
                 <td>
                     <a href="http://amigo.geneontology.org/amigo/term/{{GeneSetCtrl.geneSet.id}}"
-                       target="_blank">GO ID detailed Page on AMIGO2</a>
+                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
+                    </a>
                 </td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>EBI QuickGO</td>
                 <td>
                     <a href="http://www.ebi.ac.uk/QuickGO/GTerm?id={{GeneSetCtrl.geneSet.id}}"
-                       target="_blank">GO ID Page on EBI QuickGo</a>
+                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
+                   </a>
                 </td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
+                <td>Gene Ontology</td>
                 <td>
-                    <a href="http://geneontology.org/"
-                       target="_blank">GO Website</a>
+                    <a href="http://geneontology.org/" target="_blank">GO Website</a>
                 </td>
             </tr>
-
 
         </table>
     </div>
