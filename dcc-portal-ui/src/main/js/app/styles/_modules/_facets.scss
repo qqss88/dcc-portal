@@ -131,10 +131,10 @@
 }
 
 .t_facets__facet__label {
-  background: lighten($blue, 50);
+  background: lighten($greyDark, 50);
   color: $blue;
   &:hover {
-    background: lighten($blue, 47);
+    background: lighten($greyDark, 47);
   }
 }
 

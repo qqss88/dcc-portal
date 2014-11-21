@@ -26,10 +26,37 @@ angular.module('app.ui', [
   'app.ui.tpls',
   'app.ui.synonyms',
   'app.ui.dl',
-  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur',
+  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur', 'app.ui.autofocus',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2'
+  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2',
+  'app.ui.fileUpload'
 ]);
+
+
+// See: https://github.com/angular/angular.js/issues/1375
+// See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
+angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse) {
+  return {
+    restrict: 'A',
+    link: function($scope, $element, $attrs) {
+      var model = $parse($attrs.fileUpload);
+      var modelSetter = model.assign;
+
+      $element.bind('change', function() {
+        $scope.$apply(function() {
+          modelSetter($scope, $element[0].files[0]);
+
+          // Trick the input so the same file will trigger another 'change' event
+          // Used for gene list upload to textarea
+          if ($element[0].value) {
+            $element[0].value = '';
+          }
+
+        });
+      });
+    }
+  };
+});
 
 
 // Centralized tooltip directive. There should be only one per application
@@ -623,6 +650,17 @@ angular.module('app.ui.blur', []).directive('blur', function ($parse) {
     }
 
     element.on('blur', callback);
+  };
+});
+
+angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout) {
+  return {
+    restrict: 'A',
+    link: function($scope, $element) {
+      $timeout(function() {
+        $element[0].focus();
+      });
+    }
   };
 });
 

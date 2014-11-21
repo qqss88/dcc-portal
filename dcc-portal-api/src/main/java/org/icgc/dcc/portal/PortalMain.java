@@ -87,6 +87,7 @@ public class PortalMain extends SpringService<PortalProperties> {
     environment.addProvider(new ErrorMessageBodyWriter());
 
     environment.enableJerseyFeature(FEATURE_LOGGING_DISABLE_ENTITY);
+
     environment.setJerseyProperty(PROPERTY_CONTAINER_REQUEST_FILTERS,
         list(LoggingFilter.class.getName(),
             CachingFilter.class.getName()));
@@ -97,6 +98,7 @@ public class PortalMain extends SpringService<PortalProperties> {
             CachingFilter.class.getName()));
 
     removeDwExceptionMapper(environment, LoggingExceptionMapper.class);
+
     logInfo(config);
   }
 

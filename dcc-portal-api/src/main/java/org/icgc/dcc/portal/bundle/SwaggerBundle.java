@@ -17,16 +17,24 @@
 
 package org.icgc.dcc.portal.bundle;
 
+import java.util.List;
+import java.util.Map;
+
 import org.icgc.dcc.portal.util.VersionUtils;
 
 import com.wordnik.swagger.config.ConfigFactory;
+import com.wordnik.swagger.config.FilterFactory;
 import com.wordnik.swagger.config.ScannerFactory;
 import com.wordnik.swagger.config.SwaggerConfig;
+import com.wordnik.swagger.core.filter.SwaggerSpecFilter;
 import com.wordnik.swagger.jaxrs.config.DefaultJaxrsScanner;
 import com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider;
 import com.wordnik.swagger.jaxrs.listing.ApiListingResourceJSON;
 import com.wordnik.swagger.jaxrs.listing.ResourceListingProvider;
 import com.wordnik.swagger.jaxrs.reader.DefaultJaxrsApiReader;
+import com.wordnik.swagger.model.ApiDescription;
+import com.wordnik.swagger.model.Operation;
+import com.wordnik.swagger.model.Parameter;
 import com.wordnik.swagger.reader.ClassReaders;
 import com.yammer.dropwizard.assets.AssetsBundle;
 import com.yammer.dropwizard.config.Environment;
@@ -56,6 +64,9 @@ public class SwaggerBundle extends AssetsBundle {
     // getClasses()
     ScannerFactory.setScanner(new DefaultJaxrsScanner());
 
+    // Add a custom filter
+    FilterFactory.setFilter(new InternalFilter());
+
     // Add a reader, the DefaultJaxrsApiReader will scan @Api annotations and create the swagger spec from them
     ClassReaders.setReader(new DefaultJaxrsApiReader());
 
@@ -64,4 +75,24 @@ public class SwaggerBundle extends AssetsBundle {
     config.setApiVersion(VersionUtils.getApiVersion());
     config.setBasePath("/");
   }
+
+  private static class InternalFilter implements SwaggerSpecFilter {
+
+    @Override
+    public boolean isOperationAllowed(Operation arg0, ApiDescription arg1, Map<String, List<String>> arg2,
+        Map<String, String> arg3, Map<String, List<String>> arg4) {
+      return true;
+    }
+
+    @Override
+    public boolean isParamAllowed(Parameter parameter, Operation operation, ApiDescription api,
+        Map<String, List<String>> params, Map<String, String> cookies, Map<String, List<String>> headers) {
+      if (!parameter.paramAccess().isEmpty() && parameter.paramAccess().get().equals("internal")) {
+        return false;
+      }
+      return true;
+    }
+
+  }
+
 }

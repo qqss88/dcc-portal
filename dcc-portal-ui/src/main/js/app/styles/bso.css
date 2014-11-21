@@ -17,6 +17,63 @@
 }
 
 
+/* For file dialogs */
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+
+textarea {
+   display: block;
+   width: 100%;
+   margin: 0.2rem;
+}
+
+.alert-warning {
+   color: #c09853;
+   background-color: #fcf8e3
+}
+
+.alert-warning h4 {
+   color: #c09853;
+}
+
+
+
+/* Style showdown markup */
+.alert-error .release_notice * {
+   color: rgb(220, 50, 47) !important;
+}
+
+.markdown_container table th td {
+   border: 1px solid rgb(230, 230, 230); 
+   text-align: left;
+   padding: .2rem .4rem;
+   line-height: 1rem;
+}
+
+.markdown_container table td p {
+   margin: 0.5rem;
+}
+
+
 /* A slimmer pagination control */
 .pagination {
     margin-top: 0px;

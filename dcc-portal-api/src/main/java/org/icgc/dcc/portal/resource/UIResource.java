@@ -18,13 +18,18 @@
 package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -44,9 +49,15 @@ import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.io.CharStreams;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
+import com.yammer.metrics.annotation.Timed;
 
 @Component
 @Slf4j
@@ -56,7 +67,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
-
   private final DonorService donorService;
 
   /*
@@ -94,4 +104,21 @@ public class UIResource {
     log.debug("geneProjectDonorCounts {}", result);
     return result;
   }
+
+  @Path("/file")
+  @Consumes(MULTIPART_FORM_DATA)
+  @POST
+  @Timed
+  public Map<String, String> uploadIds(
+      @FormDataParam("filepath") InputStream inputStream,
+      @FormDataParam("filepath") FormDataContentDisposition fileDetail) throws Exception {
+
+    log.info("Input stream {}", inputStream);
+    log.info("Content disposition {}", fileDetail);
+
+    String content = CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
+
+    return ImmutableMap.<String, String> of("data", content);
+  }
+
 }

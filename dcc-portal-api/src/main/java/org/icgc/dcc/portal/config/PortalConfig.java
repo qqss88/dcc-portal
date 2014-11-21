@@ -44,8 +44,10 @@ import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
+import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.openid4java.consumer.ConsumerManager;
+import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -68,20 +70,19 @@ public class PortalConfig {
 
   @Bean
   public DynamicDownloader dynamicDownloader() {
-    val downloadConfig = properties.getDownload();
-    if (!downloadConfig.isEnabled()) {
+    val download = properties.getDownload();
+    if (!download.isEnabled()) {
       return null;
     }
 
     return new DynamicDownloader(
-        downloadConfig.getUri() + downloadConfig.getDynamicRootPath(),
-        downloadConfig.getQuorum(),
-        downloadConfig.getOozieUrl(),
-        downloadConfig.getAppPath(),
-        downloadConfig.getSupportEmailAddress(),
-        downloadConfig.getCapacityThreshold(),
-        downloadConfig.getReleaseName());
-
+        download.getUri() + download.getDynamicRootPath(),
+        download.getQuorum(),
+        download.getOozieUrl(),
+        download.getAppPath(),
+        download.getSupportEmailAddress(),
+        download.getCapacityThreshold(),
+        download.getReleaseName());
   }
 
   @Bean
@@ -115,6 +116,11 @@ public class PortalConfig {
   @Bean
   public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
     return new OpenIDAuthProvider(authenticator, "OpenID");
+  }
+
+  @Bean
+  public UserGeneSetRepository userGeneSetRepository(DBI dbi) {
+    return dbi.open(UserGeneSetRepository.class);
   }
 
   @Bean
