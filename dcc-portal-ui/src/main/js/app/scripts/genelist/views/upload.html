@@ -63,7 +63,6 @@
                <span data-ng-if="state==='verifying'"><i class="icon-spin icon-spinner"></i> Verifying Gene List ... </span>
                <span data-ng-if="state==='uploading'"><i class="icon-spin icon-spinner"></i> Loading Gene List file ... </span>
                <div data-ng-if="state==='verified'"> 
-                   <br>
                    <div data-ng-if="warnings.length > 0">
                       <span class="alert-error" data-ng-repeat="warning in warnings">
                           <i class="icon-attention-1"></i> {{ warning }}
@@ -73,12 +72,9 @@
                    <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
                       <table>
                           <tbody>
-                              <tr><td>&nbsp;</td><td>Select</th></tr>
-                              <tr data-ng-repeat="item in validIds" data-ng-click="toggleGeneType(item)">
+                              <tr><td>&nbsp;</td></tr>
+                              <tr data-ng-repeat="item in validIds"> 
                                   <td>{{item.keys.length}} entries recognized as {{typeNameMap[item.typeName]}}</td>
-                                  <td class="text-right">
-                                      <i class="{{item.selected ? 'icon-check':'icon-check-empty'}}"></i>
-                                  </td>
                               </tr>
                           </tbody>
                       </table>
