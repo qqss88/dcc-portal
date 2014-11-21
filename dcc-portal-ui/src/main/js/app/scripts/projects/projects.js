@@ -100,6 +100,13 @@
         _ctrl.stacked = [];
 
 
+        // Get project-donor-mutation distribution of exon impacted ssm
+        Restangular.one('ui', '').one('projectDonorMutationCounts', '').get({}).then(function(data) {
+          // Remove restangular attributes to make data easier to parse
+          data = Restangular.stripRestangular(data);
+          _ctrl.distribution = data;
+        });
+
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},

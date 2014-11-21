@@ -22,6 +22,10 @@
 <current></current>
 <div data-ng-show="ProjectsCtrl.projects">
 <section>
+    <div>
+       <project-mutation-distribution data-items="ProjectsCtrl.distribution" 
+           data-selected="ProjectsCtrl.projectIds"></project-mutation-distribution>   
+    </div>
     <div class="narrow">
         <donut height="250"
                data-items="ProjectsCtrl.donut"

@@ -57,6 +57,8 @@
     'icgc.keyword',
     'icgc.browser',
     'icgc.genelist',
+    'icgc.visualization',
+    
     
     // old
     'app.ui',

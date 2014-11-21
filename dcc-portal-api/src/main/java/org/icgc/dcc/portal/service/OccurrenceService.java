@@ -18,8 +18,8 @@
 package org.icgc.dcc.portal.service;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -32,6 +32,7 @@ import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.OccurrenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
@@ -39,10 +40,22 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
+
+  private final Map<String, Map<String, Integer>> projectMutationCache =
+      new ConcurrentHashMap<String, Map<String, Integer>>();
+
+  @Autowired
+  public OccurrenceService(OccurrenceRepository occurrenceRepository) {
+    this.occurrenceRepository = occurrenceRepository;
+  }
+
+  @Async
+  public void init() {
+    projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+  }
 
   public Occurrences findAll(Query query) {
     log.info("{}", query);
@@ -72,5 +85,12 @@ public class OccurrenceService {
 
   public Occurrence findOne(String occurrenceId, Query query) {
     return new Occurrence(occurrenceRepository.findOne(occurrenceId, query));
+  }
+
+  public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
+    if (projectMutationCache != null) {
+      return projectMutationCache;
+    }
+    return occurrenceRepository.getProjectDonorMutationDistribution();
   }
 }

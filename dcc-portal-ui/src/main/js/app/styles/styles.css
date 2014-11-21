@@ -3090,6 +3090,63 @@ g.marker rect.selected {
   stroke-width: 1px;
 }
 
+/* Bar charts styles */
+/* line 2, _modules/_vis.scss */
+.axis-label {
+  font-size: 0.65rem;
+}
+
+/* line 6, _modules/_vis.scss */
+.axis {
+  shape-rendering: crispEdges;
+}
+
+/* line 10, _modules/_vis.scss */
+.axis line {
+  stroke: #666;
+  stroke-width: 1px;
+}
+
+/* line 15, _modules/_vis.scss */
+.axis .tick line {
+  stroke: #666;
+  stroke-width: 1px;
+}
+
+/* line 20, _modules/_vis.scss */
+.axis .tick text {
+  font-size: 1.2ex;
+}
+
+/* line 24, _modules/_vis.scss */
+.graph_interactive {
+  cursor: pointer;
+}
+
+/* line 28, _modules/_vis.scss */
+.graph_title {
+  font-size: 1.1rem;
+  font-weight: 400;
+  stroke: none;
+  fill: #444444;
+  text-anchor: middle;
+}
+
+/* line 36, _modules/_vis.scss */
+.graph_subtitle {
+  font-size: 0.8rem;
+  font-weight: 300;
+  stroke: none;
+  fill: #666666;
+}
+
+/* line 43, _modules/_vis.scss */
+.debug {
+  font-size: 0.8rem;
+  stroke: none;
+  fill: #444444;
+}
+
 /* line 24, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
