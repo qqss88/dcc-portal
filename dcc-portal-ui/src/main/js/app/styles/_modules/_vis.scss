@@ -1,6 +1,7 @@
 /* Bar charts styles */
 .axis-label {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
+    color: hsl(0, 0%, 20%)
 }
 
 .axis {
@@ -18,7 +19,7 @@
 }
 
 .axis .tick text {
-    font-size: 1.2ex;
+    font-size: 0.75rem;
 }
 
 .graph_interactive {
@@ -26,10 +27,10 @@
 }
 
 .graph_title {
-   font-size: 1.1rem;
-   font-weight: 400;
+   font-size: 1.25rem;
+   font-weight: 300;
    stroke: none;
-   fill: #444444;
+   fill: hsl(0, 0%, 20%);
    text-anchor: middle;
 }
 

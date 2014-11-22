@@ -74,14 +74,25 @@
                           <tbody>
                               <tr><td>&nbsp;</td></tr>
                               <tr data-ng-repeat="item in validIds"> 
-                                  <td>{{item.keys.length}} entries recognized as {{typeNameMap[item.typeName]}}</td>
+                                  <td>
+                                      <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
+                                          <a href="">
+                                              {{item.keys.length}} entries recognized as {{typeNameMap[item.typeName]}}
+                                              <i class="{{expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
+                                          </a>
+                                      </span>
+                                      <div style="overflow:scroll" data-ng-hide="!expanded">
+                                          <em>{{ item.keys.join(', ') }}</em>
+                                      </div>
+
+                                  </td>
                               </tr>
                           </tbody>
                       </table>
                    </div>
                    <div data-ng-if="validIds.length === 0 && warnings.length === 0">
                       <span class="alert-error">
-                         <i class="icon-attention-1"></i> No valid genes found
+                         <i class="icon-attention-1"></i> No entry recognized in the system
                       </span>
                    </div>
 
@@ -94,7 +105,7 @@
                            </span>
                        </a>
                        <div style="max-height:25%; overflow:scroll" data-ng-hide="!expanded">
-                           {{ invalidIds.join(', ') }}
+                           <em>{{ invalidIds.join(', ') }}</em>
                        </div>
                    </div>
 

@@ -145,8 +145,8 @@
     $scope.hasGeneList = false;
     $scope.typeNameMap = {
       'symbol': 'Gene Symbol',
-      '_gene_id': 'Gene ID',
-      'external_db_ids.uniprotkb_swissprot': 'UniProtKB/Swiss-Prot'
+      '_gene_id': 'Ensembl ID',
+      'external_db_ids.uniprotkb_swissprot': 'UniProtKB/Swiss-Prot ID'
     };
 
 

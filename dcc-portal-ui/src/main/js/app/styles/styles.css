@@ -3093,46 +3093,47 @@ g.marker rect.selected {
 /* Bar charts styles */
 /* line 2, _modules/_vis.scss */
 .axis-label {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
+  color: #333333;
 }
 
-/* line 6, _modules/_vis.scss */
+/* line 7, _modules/_vis.scss */
 .axis {
   shape-rendering: crispEdges;
 }
 
-/* line 10, _modules/_vis.scss */
+/* line 11, _modules/_vis.scss */
 .axis line {
   stroke: #666;
   stroke-width: 1px;
 }
 
-/* line 15, _modules/_vis.scss */
+/* line 16, _modules/_vis.scss */
 .axis .tick line {
   stroke: #666;
   stroke-width: 1px;
 }
 
-/* line 20, _modules/_vis.scss */
+/* line 21, _modules/_vis.scss */
 .axis .tick text {
-  font-size: 1.2ex;
+  font-size: 0.75rem;
 }
 
-/* line 24, _modules/_vis.scss */
+/* line 25, _modules/_vis.scss */
 .graph_interactive {
   cursor: pointer;
 }
 
-/* line 28, _modules/_vis.scss */
+/* line 29, _modules/_vis.scss */
 .graph_title {
-  font-size: 1.1rem;
-  font-weight: 400;
+  font-size: 1.25rem;
+  font-weight: 300;
   stroke: none;
-  fill: #444444;
+  fill: #333333;
   text-anchor: middle;
 }
 
-/* line 36, _modules/_vis.scss */
+/* line 37, _modules/_vis.scss */
 .graph_subtitle {
   font-size: 0.8rem;
   font-weight: 300;
@@ -3140,7 +3141,7 @@ g.marker rect.selected {
   fill: #666666;
 }
 
-/* line 43, _modules/_vis.scss */
+/* line 44, _modules/_vis.scss */
 .debug {
   font-size: 0.8rem;
   stroke: none;

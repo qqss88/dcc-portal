@@ -20,7 +20,7 @@
   var ProjectMutationChart = function(data, config) {
     var defaultConfig = {
       width: 950,
-      height: 250,
+      height: 270,
       margin: 5,
       padding: 45,
       title: 'High impact mutation across projects',
@@ -177,7 +177,7 @@
   };
   
   
-  ProjectMutationChart.prototype.highlight = function( ids) {
+  ProjectMutationChart.prototype.highlight = function(ids) {
     var _this = this;
   
     d3.select(_this.element).selectAll('.project_control').style('opacity', 1.0);
@@ -197,7 +197,7 @@
   
     d3.select(_this.element).selectAll('.axis-label')
       .filter(function(node) {
-        return ids.indexOf(node.id) === -1;
+        return node && ids.indexOf(node.id) === -1;
       })
       .transition()
       .duration(400)
