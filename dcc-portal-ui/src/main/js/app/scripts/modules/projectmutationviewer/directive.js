@@ -8,7 +8,7 @@
     return {
       restrict: 'E',
       replace: 'true',
-      template: '<span></span>',
+      template: '<div></div>',
       scope: {
         items: '=',
         selected: '=',
@@ -18,7 +18,7 @@
         var chart, config;
 
         config = {
-          title: $scope.title || 'The prevalence of somatic mutations across cancer projects'
+          title: $scope.title || 'Prevalence of somatic mutations across cancer projects'
         };
 
         function transform(rawData) {

@@ -22,10 +22,6 @@
 <current></current>
 <div data-ng-show="ProjectsCtrl.projects">
 <section>
-    <div>
-       <project-mutation-distribution data-items="ProjectsCtrl.distribution" 
-           data-selected="ProjectsCtrl.projectIds"></project-mutation-distribution>   
-    </div>
     <div class="narrow">
         <donut height="250"
                data-items="ProjectsCtrl.donut"
@@ -37,7 +33,24 @@
     <div class="wide omega">
         <stacked height="250"
                  data-items="ProjectsCtrl.stacked"
-                 data-sub-title="{{ProjectsCtrl.ssmTotalDonors | number}} Unique SSM-Tested Donors"></stacked>
+                 data-sub-title="{{ProjectsCtrl.ssmTotalDonors | number}} Unique SSM-Tested Donors">
+        </stacked>
+    </div>
+</section>
+<section>
+    <div>
+       <div class="text-center graph_title">
+           Number of somatic mutations in donor's exomes across cancer projects
+           <span>&nbsp;<a href=""
+               data-tooltip="Each dot represents the number of somatic mutations per megabase in a given donor's exome. Donors are grouped by cancer projects. Horizontal red lines provide the average number of somatic and exomic mutations within each cancer project.">
+               <i class="icon-help"></i>
+               </a>
+           </span>
+       </div>
+       <project-mutation-distribution data-items="ProjectsCtrl.distribution"
+           data-selected="ProjectsCtrl.projectIds">
+       </project-mutation-distribution>
+       <div class="text-right"><small>Ref: <a href="http://www.nature.com/nature/journal/v500/n7463/full/nature12477.html" target="_blank">doi:10.1038/nature12477</a></small></div>
     </div>
 </section>
 <section>

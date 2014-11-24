@@ -1,6 +1,7 @@
 /* Bar charts styles */
-.axis-label {
+.axis_label {
     font-size: 0.75rem;
+    font-weight: 400;
     color: hsl(0, 0%, 20%)
 }
 
@@ -25,6 +26,7 @@
 .graph_interactive {
    cursor: pointer;
 }
+
 
 .graph_title {
    font-size: 1.25rem;

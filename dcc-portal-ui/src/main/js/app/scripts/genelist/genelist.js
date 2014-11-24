@@ -116,7 +116,7 @@
 
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
-          var filters = LocationService.filters();
+          var filters = LocationService.filters(), search = LocationService.search();
 
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
@@ -128,8 +128,10 @@
           $scope.genelistModal = false;
           filters.gene.uploadedGeneList.is = [result.geneListId];
 
-          $location.path('/search/g').search({'filters': angular.toJson(filters)});
-          // LocationService.setFilters(filters);
+          // Upload gene list redirects to gene tab, regardless of where we came from
+          search.filters = angular.toJson(filters);
+          $location.path('/search/g').search(search);
+          // $location.path('/search/g').search({'filters': angular.toJson(filters)});
         });
     }
 
