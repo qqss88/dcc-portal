@@ -4,7 +4,7 @@
 
   var module = angular.module('icgc.visualization', []);
 
-  module.directive('projectMutationDistribution', function () {
+  module.directive('projectMutationDistribution', function ($location) {
     return {
       restrict: 'E',
       replace: 'true',
@@ -18,7 +18,12 @@
         var chart, config;
 
         config = {
-          title: $scope.title || 'Prevalence of somatic mutations across cancer projects'
+          title: $scope.title || 'Prevalence of somatic mutations across cancer projects',
+          clickFunc: function(d) {
+            $scope.$apply(function() {
+              $location.path('/projects/' + d.id).search({});
+            });
+          }
         };
 
         function transform(rawData) {

@@ -29,6 +29,8 @@
       title: 'High impact mutation across projects',
       mapFunc: function(data) {
         return data;
+      },
+      clickFunc: function() {
       }
     };
 
@@ -85,7 +87,7 @@
   ProjectMutationChart.prototype.render = function(element) {
     var _this = this;
     var config = _this.config;
-    var svg, vis, chart, point;
+    var svg, vis, chart;
 
     _this.element = element;
 
@@ -102,12 +104,6 @@
       .style('stroke-width', 1)
       .style('opacity', 0.5)
       .style('fill', 'none');
-
-    // Register mouse
-    chart.on('mousemove', function() {
-      point = d3.mouse(this);
-    });
-
 
     /*
     vis.append('g')
@@ -129,7 +125,6 @@
       .call(_this.yAxis);
 
     _this.data.forEach(function(projData, idx) {
-      console.log(projData);
       var stripe, labelX, labelY;
       var projectControl = chart.append('g')
         .datum({
@@ -142,7 +137,7 @@
         .attr('transform', _this.translate(config.projectWidth*idx, 0));
 
 
-      // Interactive
+      // Interactions
       projectControl.on('mouseover', function(d) {
         var yOffset = config.paddingTop + config.chartHeight + config.paddingBottom;
 
@@ -174,6 +169,8 @@
         }).style('font-weight', 400);
         svg.selectAll('.project_summary').remove();
       });
+
+      projectControl.on('click', config.clickFunc);
 
 
       // Alternate stripe
