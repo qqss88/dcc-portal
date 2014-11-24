@@ -149,7 +149,6 @@ public class OccurrenceRepository {
         if (hasMutation) mMusts.add(buildMutationFilters(filters, PREFIX_MAPPING));
 
         if (hasObservation) {
-          log.info("Adding nested observation filter");
           mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.OBSERVATION),
               buildObservationFilters(filters, PREFIX_MAPPING)));
         }
@@ -188,7 +187,6 @@ public class OccurrenceRepository {
             .setSize(query.getSize()).addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
 
     ObjectNode filters = remapFilters(query.getFilters());
-    log.info("Remapped filters {}", filters);
     search.setFilter(getFilters(filters));
 
     search.addFields(getFields(query, KIND));
@@ -281,11 +279,8 @@ public class OccurrenceRepository {
             "3_prime_UTR_variant");
 
     String list = Joiner.on("\",\"").skipNulls().join(consequenceList);
-    log.info(" >>>> {}", list);
 
     val exonFilter = new FiltersParam("{mutation:{consequenceType:{is:[\"" + list + "\"]}}}");
-
-    // val filters = remapFilters(highImpactFilter.get());
     val filters = remapFilters(exonFilter.get());
 
     val result = Maps.<String, Map<String, Integer>> newHashMap();
@@ -329,10 +324,10 @@ public class OccurrenceRepository {
     // Print out some useful info now
     int totalDonors = 0;
     for (String key : result.keySet()) {
-      log.info("{} => {}", key, result.get(key).size());
+      log.debug("{} => {}", key, result.get(key).size());
       totalDonors += result.get(key).size();
     }
-    log.info("total {} ", totalDonors);
+    log.debug("total {} ", totalDonors);
     return result;
   }
 }

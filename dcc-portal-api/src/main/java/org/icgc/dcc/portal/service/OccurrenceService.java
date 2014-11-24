@@ -58,7 +58,6 @@ public class OccurrenceService {
   }
 
   public Occurrences findAll(Query query) {
-    log.info("{}", query);
 
     SearchResponse response = occurrenceRepository.findAllCentric(query);
     SearchHits hits = response.getHits();

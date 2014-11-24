@@ -131,7 +131,6 @@
           // Upload gene list redirects to gene tab, regardless of where we came from
           search.filters = angular.toJson(filters);
           $location.path('/search/g').search(search);
-          // $location.path('/search/g').search({'filters': angular.toJson(filters)});
         });
     }
 
