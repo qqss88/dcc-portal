@@ -1440,6 +1440,14 @@ header #brand img {
   background: white !important;
 }
 
+/* line 37, _sections/_advanced.scss */
+.gene-list-ids {
+  padding-left: 1rem;
+  max-height: 3rem;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
 /* line 8, _sections/_results.scss */
 .t_quick__hit__type {
   padding: 0 1rem;

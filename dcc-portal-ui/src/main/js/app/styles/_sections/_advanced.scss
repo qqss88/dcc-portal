@@ -33,3 +33,10 @@
     background: $white !important;
   }
 }
+
+.gene-list-ids {
+   padding-left: 1rem;
+   max-height: 3rem;
+   overflow-x: hidden;
+   overflow-y: scroll;
+}
