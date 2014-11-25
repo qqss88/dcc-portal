@@ -115,7 +115,6 @@
 
       // Interactions
       projectControl.on('mouseover', function(d) {
-        var yOffset = config.paddingTop + config.chartHeight + config.paddingBottom;
 
         d3.select(this).select('rect').style('stroke', '#228');
         svg.selectAll('.axis_label').filter(function(node) {

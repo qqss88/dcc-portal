@@ -28,8 +28,11 @@
   font-size: .9rem;
   @include opacity(0);
 
+  line-height: 1.6rem;
+
   &.in {
-    @include opacity(80);
+    // @include opacity(80);
+    @include opacity(0.90);
   }
   &.top {
     margin-top: -3px;
@@ -53,12 +56,14 @@
 .tooltip-inner {
   max-width: 30rem;
   white-space: normal;
-  padding: .5rem;
+  padding: .6rem;
   color: $white;
   text-align: left;
   text-decoration: none;
-  background-color: $blue;
+  //background-color: $blue;
+  background-color: $greyDarker;
   @include border-radius(.5rem);
+  border-color:j#FF9999;
 }
 
 .tooltip.replace .tooltip-inner,
@@ -79,7 +84,8 @@
 
 // Arrows
 $tooltipArrowWidth: .5rem;
-$tooltipArrowColor: $blue;
+// $tooltipArrowColor: $blue;
+$tooltipArrowColor: $greyDarker;
 .tooltip-arrow {
   position: absolute;
   width: 0;

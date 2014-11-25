@@ -22,10 +22,10 @@
               $location.path('/projects/' + d.id).search({});
             });
           },
-          tooltipShowFunc: function(elem, data, placement) {
+          tooltipShowFunc: function(elem, data) {
 
             function getLabel() {
-              return 'Project: ' + data.name + '<br>' +
+              return '<strong>' + data.name + '</strong><br>' +
                 'Medium: ' + $filter('number')(data.medium) + '<br>' +
                 '# Donors: ' + data.donorCount;
             }
