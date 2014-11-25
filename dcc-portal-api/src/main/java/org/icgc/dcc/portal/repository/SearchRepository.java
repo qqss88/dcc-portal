@@ -99,7 +99,7 @@ public class SearchRepository {
 
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
 
-    log.info("{}", search);
+    log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 

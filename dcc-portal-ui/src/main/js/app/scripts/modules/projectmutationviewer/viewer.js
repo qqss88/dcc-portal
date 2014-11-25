@@ -8,14 +8,6 @@
   *
   * Project mutation plot modelled after Gaddy Getz's mutation distrubtion chart
   *
-  * data: [
-  *   {  id: ProjId
-  *      outliers: [ {D1: M1}, {D2, M2} ... {DN, Mn} ]
-  *      points: [ P1, P2 ... Pk ]
-  *   }
-  *   ...
-  * ]
-  *
   *******************************************************************************/
   var ProjectMutationChart = function(data, config) {
     var defaultConfig = {
@@ -23,14 +15,17 @@
       height: 230,
       margin: 5,
       paddingTop: 40,
-      paddingBottom: 18,
+      paddingBottom: 0,
       paddingLeft: 45,
       paddingRight: 20,
-      title: 'High impact mutation across projects',
       mapFunc: function(data) {
         return data;
       },
       clickFunc: function() {
+      },
+      tooltipShowFunc: function() {
+      },
+      tooltipHideFunc: function() {
       }
     };
 
@@ -40,7 +35,6 @@
         config[key] = defaultConfig[key];
       }
     });
-
 
     // Helper functions
     this.translate = function(x, y) {
@@ -67,23 +61,13 @@
 
     // TODO: Should double check this and make it automatically itself out based on input
     this.yScale = d3.scale.log().base(10).domain([Math.pow(10, -2), Math.pow(10, 5)]).range([config.chartHeight, 0]);
-
-
     this.yAxis = d3.svg.axis().scale(this.yScale).orient('left').tickValues(this.tickValues).tickFormat(function(d) {
-      // return d;
       return d3.format('s')(d); // SI format
     }).tickSize(4);
 
     this.config = config;
   };
 
-
-  ////////////////////////////////////////////////////////////////////////////////
-  //
-  // The layout should be something like:
-  //   low outliers -> normal range -> high outliers
-  //
-  ////////////////////////////////////////////////////////////////////////////////
   ProjectMutationChart.prototype.render = function(element) {
     var _this = this;
     var config = _this.config;
@@ -105,14 +89,6 @@
       .style('opacity', 0.5)
       .style('fill', 'none');
 
-    /*
-    vis.append('g')
-      .attr('transform', _this.translate(0.5*config.chartWidth, 11))
-      .append('text')
-      .classed('graph_title', true)
-      .text(config.title);
-    */
-
     vis.append('g')
       .attr('transform', _this.translate(5, (config.paddingTop + config.chartHeight)*0.85) + ' rotate(-90)')
       .append('text')
@@ -129,11 +105,11 @@
       var projectControl = chart.append('g')
         .datum({
           id: projData.id,
+          name: projData.name,
           medium: projData.medium,
           donorCount: projData.points.length
         })
-        .attr('class', 'project_control')
-        .attr('class', 'graph_interactive')
+        .attr('class', 'project_control graph_interactive')
         .attr('transform', _this.translate(config.projectWidth*idx, 0));
 
 
@@ -146,30 +122,16 @@
           return node && node.id === d.id;
         }).style('font-weight', 600);
 
-        svg.append('text')
-          .attr('class', 'project_summary axis_label')
-          .attr('transform', _this.translate(20 + config.paddingLeft, yOffset))
-          .text('Project: ' + d.id);
-
-        svg.append('text')
-          .attr('class', 'project_summary axis_label')
-          .attr('transform', _this.translate(140 + config.paddingLeft, yOffset))
-          .text('Medium: ' + d.medium.toFixed(2));
-
-        svg.append('text')
-          .attr('class', 'project_summary axis_label')
-          .attr('transform', _this.translate(260 + config.paddingLeft, yOffset))
-          .text('Donor Count: ' + d.donorCount);
+        config.tooltipShowFunc(this, d, 'left');
       });
-
       projectControl.on('mouseout', function(d) {
-        d3.select(this).select('rect').style('stroke', '#EEE');
+        d3.select(this).select('rect').style('stroke', '#DDD');
         svg.selectAll('.axis_label').filter(function(node) {
           return node && node.id === d.id;
         }).style('font-weight', 400);
-        svg.selectAll('.project_summary').remove();
-      });
 
+        config.tooltipHideFunc();
+      });
       projectControl.on('click', config.clickFunc);
 
 
@@ -182,7 +144,7 @@
         .attr('y', 0)
         .attr('width', config.projectWidth)
         .attr('height', config.chartHeight)
-        .style('stroke', '#EEE')
+        .style('stroke', '#DDD')
         .style('fill', function(d) { return d.fill; })
         .style('opacity', 0.75);
 
@@ -204,7 +166,7 @@
         .style('fill', '#777')
         .style('opacity', 0.5);
 
-      // Statistics - TODO: check with Junjun
+      // Statistics - medium
       projectControl.append('rect')
         .attr('x', 2)
         .attr('y', _this.yScale(projData.medium))
@@ -216,7 +178,6 @@
 
       // Render labels
       labelX = (config.projectWidth / 2) + config.paddingLeft + (idx * config.projectWidth);
-      // labelY =  6 + config.paddingTop + config.chartHeight;
       labelY = config.paddingTop - 5;
       vis.append('text')
         .datum( { id: projData.id })
@@ -226,7 +187,6 @@
         .text(projData.id);
     });
   };
-
 
   ProjectMutationChart.prototype.highlight = function(ids) {
     var _this = this;
@@ -255,12 +215,10 @@
       .style('opacity', 0.1);
   };
 
-
   ProjectMutationChart.prototype.destroy = function() {
     this.data = null;
     d3.select(this.element).selectAll('*').remove();
   };
-
 
   dcc.ProjectMutationChart = ProjectMutationChart;
 })();

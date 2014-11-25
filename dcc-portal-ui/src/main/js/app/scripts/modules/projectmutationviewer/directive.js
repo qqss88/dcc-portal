@@ -4,25 +4,40 @@
 
   var module = angular.module('icgc.visualization', []);
 
-  module.directive('projectMutationDistribution', function ($location) {
+  module.directive('projectMutationDistribution', function ($location, $filter) {
     return {
       restrict: 'E',
       replace: 'true',
       template: '<div></div>',
       scope: {
         items: '=',
-        selected: '=',
-        title: '@'
+        selected: '='
       },
       link: function($scope, $element) {
         var chart, config;
 
         config = {
-          title: $scope.title || 'Prevalence of somatic mutations across cancer projects',
           clickFunc: function(d) {
             $scope.$apply(function() {
               $location.path('/projects/' + d.id).search({});
             });
+          },
+          tooltipShowFunc: function(elem, data, placement) {
+
+            function getLabel() {
+              return 'Project: ' + data.name + '<br>' +
+                'Medium: ' + $filter('number')(data.medium) + '<br>' +
+                '# Donors: ' + data.donorCount;
+            }
+
+            $scope.$emit('tooltip::show', {
+              element: angular.element(elem),
+              text: getLabel(),
+              placement: 'top'
+            });
+          },
+          tooltipHideFunc: function() {
+            $scope.$emit('tooltip::hide');
           }
         };
 
@@ -56,6 +71,7 @@
 
             chartData.push({
               id: projectKey,
+              name: $filter('define')(projectKey),
               mean: mean,
               medium: medium,
               points: points
@@ -69,6 +85,7 @@
         }
 
         $scope.$watch('items', function(newData) {
+          console.log('watcher', newData);
           if (newData && !chart) {
             chart = new dcc.ProjectMutationChart(transform($scope.items), config);
             chart.render( $element[0] );
