@@ -52,9 +52,8 @@
               $scope.warnings.push(msg);
             });
           }
-
           $scope.invalidIds = verifyResult.invalidGenes;
-          $scope.totalMatches = 0;
+          $scope.hasType = {};
 
 
           var uiResult = {}, uniqueEnsembl = {}, totalInput = 0;
@@ -78,6 +77,9 @@
                   }
                   if (row[typeName].indexOf(inputToken) === -1) {
                     row[typeName].push(inputToken);
+
+                    // Mark it for visibility test on the view
+                    $scope.hasType[typeName] = 1;
                   }
 
                   // Aggregate matched ensembl ids that match to the same symbol
@@ -99,6 +101,7 @@
           $scope.uiResult = uiResult;
           $scope.totalInput = totalInput;
           $scope.totalMatch = Object.keys(uniqueEnsembl).length;
+          $scope.totalColumns = Object.keys($scope.hasType).length;
         });
     }
 
