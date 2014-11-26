@@ -57,11 +57,12 @@
           $scope.totalMatches = 0;
 
 
-          var uiResult = {};
+          var uiResult = {}, uniqueEnsembl = {}, totalInput = 0;
 
           angular.forEach(verifyResult.validGenes, function(type, typeName) {
             angular.forEach(type, function(geneList, inputToken) {
               if (geneList && geneList.length > 0) {
+
                 geneList.forEach(function(gene) {
                   var symbol = gene.symbol, row;
 
@@ -87,41 +88,17 @@
                     row.matchedId.push(gene.id);
                     $scope.validIds.push(gene.id);
                   }
+
+                  // Total counts
+                  uniqueEnsembl[gene.id] = 1;
                 });
+                totalInput ++;
               }
             });
           });
           $scope.uiResult = uiResult;
-          console.log('Table:', uiResult);
-          return;
-
-
-          // Iterate over: search type -> search keys -> geneIds
-          angular.forEach(verifyResult.validGenes, function(type, typeName) {
-            var keys = [], idCount = 0, geneIdMap = {};
-            if (_.isEmpty(type)) {
-              return;
-            }
-            angular.forEach(type, function(list, idKey) {
-              if (list && list.length > 0) {
-                list.forEach(function(geneId) {
-                  if (! geneIdMap[geneId]) {
-                    idCount++;
-                    geneIdMap[geneId] = 1;
-                  }
-                });
-                $scope.totalMatches ++;
-                keys.push(idKey);
-              }
-            });
-
-            $scope.validIds.push({
-              typeName: typeName,
-              keys: keys,
-              idCount: idCount,
-              selected: true,
-            });
-          });
+          $scope.totalInput = totalInput;
+          $scope.totalMatch = Object.keys(uniqueEnsembl).length;
         });
     }
 

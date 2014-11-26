@@ -41,7 +41,7 @@
                <div style="padding:0.25rem">
                    <textarea 
                        rows="5" 
-                       placeholder="e.g. TTN, TP53, CSMD3, ENSG ENSG00000151952, ENSG00000133703"
+                       placeholder="e.g. TTN, TP53, CSMD3, ENSG ENSG00000151952, ENSG00000133703, Q9Y5I3"
                        data-autofocus
                        data-ng-model="rawText" 
                        data-ng-change="updateGenelist()"> 
@@ -72,7 +72,7 @@
                    <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
                       <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
                           <a href="">
-                              {{}} submitted gene identifiers mapped to {{}} gene Ensembl ID
+                               {{totalInput}} submitted gene identifiers mapped to {{totalMatch}} gene Ensembl ID
                               <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                           </a>
                       </span>
@@ -95,47 +95,16 @@
                               </thead>
                               <tbody>
                                   <tr data-ng-repeat="(symbol, row) in uiResult">
-                                      <td>
-                                          {{row['symbol'].join(', ')}}
-                                      </td>
-                                      <td>
-                                          {{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}
-                                      </td>
-                                      <td>
-                                          {{row['_gene_id'].join(', ')}}
-                                      </td>
-                                      <td>
-                                          {{row['matchedId'].join(', ')}}
-                                      </td>
+                                      <td>{{row['symbol'].join(', ')}}</td>
+                                      <td>{{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}</td>
+                                      <td>{{row['_gene_id'].join(', ')}}</td>
+                                      <td>{{row['matchedId'].join(', ')}}</td>
                                       <td>{{symbol}}</td>
                                   </tr>
                               </tbody>
                           </table>
                       </div>
                    </div>
-
-                   <!--
-                   <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
-                      <table>
-                          <tbody>
-                              <tr data-ng-repeat="item in validIds"> 
-                                  <td>
-                                      <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
-                                          <a href="">
-                                              {{item.keys.length}} entries recognized as {{typeNameMap[item.typeName]}}
-                                              <i class="{{expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
-                                          </a>
-                                      </span>
-                                      <div class="gene-list-ids" data-ng-hide="!expanded">
-                                          <em>{{ item.keys.join(', ') }}</em>
-                                      </div>
-
-                                  </td>
-                              </tr>
-                          </tbody>
-                      </table>
-                   </div>
-                   -->
 
                    <div data-ng-if="validIds.length === 0 && warnings.length === 0">
                       <span class="alert-error">
@@ -164,7 +133,7 @@
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="genelistModal=false; reset();">Cancel</button>
                 <button class="t_button" data-ng-click="newGeneList()"
-                    data-ng-disabled="state !== 'verified' || validIds.length === 0 || !hasGeneTypeSelected()">Submit</button> 
+                    data-ng-disabled="state !== 'verified' || validIds.length === 0">Submit</button> 
             </div>
         </div>
     </div>
