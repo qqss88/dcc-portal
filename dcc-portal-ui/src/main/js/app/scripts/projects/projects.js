@@ -101,7 +101,7 @@
 
 
         // Get project-donor-mutation distribution of exon impacted ssm
-        Restangular.one('ui', '').one('projectDonorMutationCounts', '').get({}).then(function(data) {
+        Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
@@ -155,7 +155,8 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+      if (dest.indexOf('projects') !== -1 && dest.indexOf('projects/') === -1) {
+        console.log('refreshing !!!!', dest, event);
         refresh();
       }
     });
