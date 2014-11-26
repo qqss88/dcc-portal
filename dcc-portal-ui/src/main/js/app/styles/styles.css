@@ -1440,6 +1440,14 @@ header #brand img {
   background: white !important;
 }
 
+/* line 37, _sections/_advanced.scss */
+.gene-list-ids {
+  padding-left: 1rem;
+  max-height: 3rem;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
 /* line 8, _sections/_results.scss */
 .t_quick__hit__type {
   padding: 0 1rem;
@@ -2650,50 +2658,52 @@ aside .t_tabs__tab {
   font-size: .9rem;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
   opacity: 0;
+  line-height: 1.6rem;
 }
-/* line 31, _modules/_tooltip.scss */
+/* line 33, _modules/_tooltip.scss */
 .tooltip.in {
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=8000);
-  opacity: 80;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  opacity: 0.9;
 }
-/* line 34, _modules/_tooltip.scss */
+/* line 37, _modules/_tooltip.scss */
 .tooltip.top {
   margin-top: -3px;
   padding: 5px 0;
 }
-/* line 38, _modules/_tooltip.scss */
+/* line 41, _modules/_tooltip.scss */
 .tooltip.right {
   margin-left: 3px;
   padding: 0 5px;
 }
-/* line 42, _modules/_tooltip.scss */
+/* line 45, _modules/_tooltip.scss */
 .tooltip.bottom {
   margin-top: 3px;
   padding: 5px 0;
 }
-/* line 46, _modules/_tooltip.scss */
+/* line 49, _modules/_tooltip.scss */
 .tooltip.left {
   margin-left: -3px;
   padding: 0 5px;
 }
 
-/* line 53, _modules/_tooltip.scss */
+/* line 56, _modules/_tooltip.scss */
 .tooltip-inner {
   max-width: 30rem;
   white-space: normal;
-  padding: .5rem;
+  padding: .6rem;
   color: white;
   text-align: left;
   text-decoration: none;
-  background-color: #166aa2;
+  background-color: #333333;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   -ms-border-radius: 0.5rem;
   -o-border-radius: 0.5rem;
   border-radius: 0.5rem;
+  border-color: j #ff9999;
 }
 
-/* line 65, _modules/_tooltip.scss */
+/* line 70, _modules/_tooltip.scss */
 .tooltip.replace .tooltip-inner,
 .tooltip.parent .tooltip-inner {
   font-size: .9rem;
@@ -2705,7 +2715,7 @@ aside .t_tabs__tab {
   border-collapse: separate;
 }
 
-/* line 83, _modules/_tooltip.scss */
+/* line 89, _modules/_tooltip.scss */
 .tooltip-arrow {
   position: absolute;
   width: 0;
@@ -2714,40 +2724,40 @@ aside .t_tabs__tab {
   border-style: solid;
 }
 
-/* line 92, _modules/_tooltip.scss */
+/* line 98, _modules/_tooltip.scss */
 .tooltip.top .tooltip-arrow {
   bottom: 0;
   left: 50%;
   margin-left: -0.5rem;
   border-width: 0.5rem 0.5rem 0;
-  border-top-color: #166aa2;
+  border-top-color: #333333;
 }
-/* line 99, _modules/_tooltip.scss */
+/* line 105, _modules/_tooltip.scss */
 .tooltip.right .tooltip-arrow {
   top: 50%;
   left: 0;
   margin-top: -0.5rem;
   border-width: 0.5rem 0.5rem 0.5rem 0;
-  border-right-color: #166aa2;
+  border-right-color: #333333;
 }
-/* line 106, _modules/_tooltip.scss */
+/* line 112, _modules/_tooltip.scss */
 .tooltip.left .tooltip-arrow {
   top: 50%;
   right: 0;
   margin-top: -0.5rem;
   border-width: 0.5rem 0 0.5rem 0.5rem;
-  border-left-color: #166aa2;
+  border-left-color: #333333;
 }
-/* line 113, _modules/_tooltip.scss */
+/* line 119, _modules/_tooltip.scss */
 .tooltip.bottom .tooltip-arrow {
   top: 0;
   left: 50%;
   margin-left: -0.5rem;
   border-width: 0 0.5rem 0.5rem;
-  border-bottom-color: #166aa2;
+  border-bottom-color: #333333;
 }
 
-/* line 122, _modules/_tooltip.scss */
+/* line 128, _modules/_tooltip.scss */
 .tooltip.hide {
   display: none;
 }
@@ -3088,6 +3098,70 @@ g.marker rect.selected {
 .proteinstructure .marker {
   stroke: #666;
   stroke-width: 1px;
+}
+
+/* Bar charts styles */
+/* line 2, _modules/_vis.scss */
+.axis_label {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #333333;
+}
+
+/* line 8, _modules/_vis.scss */
+.axis {
+  shape-rendering: crispEdges;
+}
+
+/* line 12, _modules/_vis.scss */
+.axis line {
+  stroke: #666;
+  stroke-width: 1px;
+}
+
+/* line 17, _modules/_vis.scss */
+.axis .domain {
+  opacity: 0.5;
+}
+
+/* line 21, _modules/_vis.scss */
+.axis .tick line {
+  stroke: #666;
+  stroke-width: 1px;
+}
+
+/* line 26, _modules/_vis.scss */
+.axis .tick text {
+  font-size: 0.75rem;
+}
+
+/* line 30, _modules/_vis.scss */
+.graph_interactive {
+  cursor: pointer;
+}
+
+/* line 35, _modules/_vis.scss */
+.graph_title {
+  font-size: 1.25rem;
+  font-weight: 300;
+  stroke: none;
+  fill: #333333;
+  text-anchor: middle;
+}
+
+/* line 43, _modules/_vis.scss */
+.graph_subtitle {
+  font-size: 0.8rem;
+  font-weight: 300;
+  stroke: none;
+  fill: #666666;
+}
+
+/* line 50, _modules/_vis.scss */
+.debug {
+  font-size: 0.8rem;
+  stroke: none;
+  fill: #444444;
 }
 
 /* line 24, styles.scss */

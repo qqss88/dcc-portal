@@ -240,7 +240,7 @@ public class QueryService {
       ImmutableMap<String, String> typeMapping, ImmutableMap<Kind, String> prefixMapping) {
     val locationFilters = FilterBuilders.boolFilter();
     for (String location : locations) {
-      locationFilters.must(locationFilter(kind, location, typeMapping, prefixMapping));
+      locationFilters.should(locationFilter(kind, location, typeMapping, prefixMapping));
     }
     return locationFilters;
   }

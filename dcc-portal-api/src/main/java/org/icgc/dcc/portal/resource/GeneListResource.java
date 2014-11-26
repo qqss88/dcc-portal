@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.util.List;
@@ -46,7 +47,7 @@ import org.elasticsearch.common.base.Joiner;
 import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.UploadedGeneList;
-import org.icgc.dcc.portal.service.BadRequestException;
+import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +95,7 @@ public class GeneListResource {
 
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
+  @Produces(APPLICATION_JSON)
   @Timed
   public UploadedGeneList processGeneList(
       @ApiParam(value = "The Ids to be saved as a Gene List") @FormParam("geneIds") String geneIds,
@@ -106,12 +108,21 @@ public class GeneListResource {
       return result;
     }
 
+    // Extract the set of unique ensembl ids for storage
     Set<String> uniqueIds = Sets.<String> newHashSet();
-    uniqueIds.addAll(result.getValidGenes());
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+      if (result.getValidGenes().containsKey(searchField)) {
+        for (val gene : result.getValidGenes().get(searchField).values()) {
+          uniqueIds.add(gene.getId());
+        }
+        // uniqueIds.addAll(result.getValidGenes().get(searchField).values());
+      }
+    }
 
     // Sanity check, we require at least one valid id in order to store
     if (uniqueIds.size() == 0) {
-      throw new BadRequestException("Request contains no valid gene Ids");
+      result.getWarnings().add("Request contains no valid gene Ids");
+      return result;
     }
 
     UUID id = userGeneSetService.save(Joiner.on(Separators.COMMA).skipNulls().join(uniqueIds));
@@ -119,7 +130,7 @@ public class GeneListResource {
     return result;
   }
 
-  public UploadedGeneList findGenesByIdentifiers(String data) {
+  private UploadedGeneList findGenesByIdentifiers(String data) {
 
     val geneList = new UploadedGeneList();
 
@@ -137,18 +148,27 @@ public class GeneListResource {
     for (val id : originalIds) {
       matchIds.add(id.toUpperCase());
     }
-
     val validResults = geneService.validateIdentifiers(matchIds.build());
 
+    log.debug("Search results {}", validResults);
+
+    // All matched identifiers
+    val allMatchedIdentifiers = Sets.<String> newHashSet();
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+      if (!validResults.get(searchField).isEmpty()) {
+        allMatchedIdentifiers.addAll(validResults.get(searchField).keySet());
+        geneList.getValidGenes().put(searchField, validResults.get(searchField));
+      }
+    }
+
+    // Construct valid and invalid gene matches
     for (val id : originalIds) {
-      val matchId = id.toUpperCase();
-      if (validResults.containsKey(matchId)) {
-        geneList.getValidGenes().addAll(validResults.get(matchId));
-      } else {
+      if (!allMatchedIdentifiers.contains(id.toUpperCase())) {
         geneList.getInvalidGenes().add(id);
       }
     }
-    return geneList;
 
+    return geneList;
   }
+
 }

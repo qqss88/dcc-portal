@@ -1,11 +1,13 @@
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -34,8 +37,47 @@ public class GeneService {
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
-  public Multimap<String, String> validateIdentifiers(List<String> ids) {
-    return geneRepository.validateIdentifiers(ids);
+  public Map<String, Multimap<String, Gene>> validateIdentifiers(List<String> ids) {
+    val response = geneRepository.validateIdentifiers(ids);
+
+    // Initialize results container
+    val result = Maps.<String, Multimap<String, Gene>> newHashMap();
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+      val typeResult = ArrayListMultimap.<String, Gene> create();
+      result.put(searchField, typeResult);
+    }
+
+    // Organize the results into the categories
+    for (val hit : response.getHits()) {
+      val fields = hit.getFields();
+      val highlightedFields = hit.getHighlightFields();
+
+      val fieldMap = Maps.<String, Object> newHashMap();
+      for (val field : hit.getFields().entrySet()) {
+        fieldMap.put(field.getKey(), field.getValue().getValue());
+      }
+      val matchedGene = new Gene(fieldMap);
+
+      for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+        if (highlightedFields.containsKey(searchField)) {
+          if (searchField.equals(GENE_UNIPROT_IDS)) {
+            @SuppressWarnings("unchecked")
+            val keys = (List<String>) fields.get(searchField).getValue();
+            for (val key : keys) {
+              if (ids.contains(key)) {
+                result.get(searchField).put(key, matchedGene);
+                break;
+              }
+            }
+          } else {
+            val key = (String) fields.get(searchField).getValue();
+            result.get(searchField).put(key, matchedGene);
+          }
+
+        }
+      }
+    }
+    return result;
   }
 
   public Genes findAllCentric(Query query) {

@@ -45,6 +45,7 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
+import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,6 +69,7 @@ public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
+  private final OccurrenceService occurrenceService;
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
@@ -119,6 +121,12 @@ public class UIResource {
     String content = CharStreams.toString(new InputStreamReader(inputStream, Charsets.UTF_8));
 
     return ImmutableMap.<String, String> of("data", content);
+  }
+
+  @Path("/projects/donor-mutation-counts")
+  @GET
+  public Map<String, Map<String, Integer>> getProjectDonorMutation() {
+    return occurrenceService.getProjectMutationDistribution();
   }
 
 }

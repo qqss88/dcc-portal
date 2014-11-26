@@ -48,6 +48,8 @@
     "saveAs": false,
     "NProgress": false,
     "base64": false,
-    "X2JS": false
+    "X2JS": false,
+    "dcc": false,
+    "d3": false
   }
 }
