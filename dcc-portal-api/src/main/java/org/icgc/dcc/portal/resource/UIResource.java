@@ -123,7 +123,7 @@ public class UIResource {
     return ImmutableMap.<String, String> of("data", content);
   }
 
-  @Path("/projectDonorMutationCounts")
+  @Path("/projects/donor-mutation-counts")
   @GET
   public Map<String, Map<String, Integer>> getProjectDonorMutation() {
     return occurrenceService.getProjectMutationDistribution();

@@ -108,10 +108,14 @@ public class GeneListResource {
       return result;
     }
 
+    // Extract the set of unique ensembl ids for storage
     Set<String> uniqueIds = Sets.<String> newHashSet();
     for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
       if (result.getValidGenes().containsKey(searchField)) {
-        uniqueIds.addAll(result.getValidGenes().get(searchField).values());
+        for (val gene : result.getValidGenes().get(searchField).values()) {
+          uniqueIds.add(gene.getId());
+        }
+        // uniqueIds.addAll(result.getValidGenes().get(searchField).values());
       }
     }
 

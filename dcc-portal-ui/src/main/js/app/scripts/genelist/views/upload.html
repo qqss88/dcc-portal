@@ -29,7 +29,7 @@
             </div>
 
             <!-- body -->
-            <div class="modal-body"> 
+            <div class="modal-body" style="height:60rem">
                <div>
                    <span>Type or copy-and-paste a list of genes</span> 
                    <span class="pull-right"
@@ -70,6 +70,52 @@
                    </div>
 
                    <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
+                      <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
+                          <a href="">
+                              {{}} submitted gene identifiers mapped to {{}} gene Ensembl ID
+                              <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
+                          </a>
+                      </span>
+                      <!--<div style="max-height:10rem; overflow-y:scroll; overflow-x: hidden">-->
+                      <div data-ng-show="expanded"> 
+                          <span data-toolbar data-dl="genelist"></span>
+                          <table class="table table-info" id="genelist">
+                              <thead>
+                                  <tr>
+                                      <th colspan="3">Submitted</th>
+                                      <th colspan="2">Mapped</th>
+                                  </tr>
+                                  <tr>
+                                      <td>Symbols</td>
+                                      <td>UniProt ID</td>
+                                      <td>Ensembl ID</td>
+                                      <td>Ensembl ID</td>
+                                      <td>Symbols</td>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr data-ng-repeat="(symbol, row) in uiResult">
+                                      <td>
+                                          {{row['symbol'].join(', ')}}
+                                      </td>
+                                      <td>
+                                          {{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}
+                                      </td>
+                                      <td>
+                                          {{row['_gene_id'].join(', ')}}
+                                      </td>
+                                      <td>
+                                          {{row['matchedId'].join(', ')}}
+                                      </td>
+                                      <td>{{symbol}}</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                   </div>
+
+                   <!--
+                   <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
                       <table>
                           <tbody>
                               <tr data-ng-repeat="item in validIds"> 
@@ -89,6 +135,8 @@
                           </tbody>
                       </table>
                    </div>
+                   -->
+
                    <div data-ng-if="validIds.length === 0 && warnings.length === 0">
                       <span class="alert-error">
                          <i class="icon-attention-1"></i> No entry recognized in the system

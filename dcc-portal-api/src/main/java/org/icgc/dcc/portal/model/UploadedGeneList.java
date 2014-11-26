@@ -34,7 +34,7 @@ import com.google.common.collect.Multimap;
 public class UploadedGeneList {
 
   @JsonProperty
-  Map<String, Multimap<String, String>> validGenes = Maps.<String, Multimap<String, String>> newHashMap();
+  Map<String, Multimap<String, Gene>> validGenes = Maps.<String, Multimap<String, Gene>> newHashMap();
 
   @JsonProperty
   List<String> invalidGenes = Lists.newArrayList();

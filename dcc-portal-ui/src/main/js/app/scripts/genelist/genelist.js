@@ -56,6 +56,46 @@
           $scope.invalidIds = verifyResult.invalidGenes;
           $scope.totalMatches = 0;
 
+
+          var uiResult = {};
+
+          angular.forEach(verifyResult.validGenes, function(type, typeName) {
+            angular.forEach(type, function(geneList, inputToken) {
+              if (geneList && geneList.length > 0) {
+                geneList.forEach(function(gene) {
+                  var symbol = gene.symbol, row;
+
+                  // Initialize row structure
+                  if (! uiResult.hasOwnProperty(symbol)) {
+                    uiResult[symbol] = {};
+                  }
+                  row = uiResult[symbol];
+
+                  // Aggregate input ids that match to the same symbol
+                  if (! row.hasOwnProperty(typeName)) {
+                    row[typeName] = [];
+                  }
+                  if (row[typeName].indexOf(inputToken) === -1) {
+                    row[typeName].push(inputToken);
+                  }
+
+                  // Aggregate matched ensembl ids that match to the same symbol
+                  if (! row.hasOwnProperty('matchedId')) {
+                    row.matchedId = [];
+                  }
+                  if (row.matchedId.indexOf(gene.id) === -1) {
+                    row.matchedId.push(gene.id);
+                    $scope.validIds.push(gene.id);
+                  }
+                });
+              }
+            });
+          });
+          $scope.uiResult = uiResult;
+          console.log('Table:', uiResult);
+          return;
+
+
           // Iterate over: search type -> search keys -> geneIds
           angular.forEach(verifyResult.validGenes, function(type, typeName) {
             var keys = [], idCount = 0, geneIdMap = {};

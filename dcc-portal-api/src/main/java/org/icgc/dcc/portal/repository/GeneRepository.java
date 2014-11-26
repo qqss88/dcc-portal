@@ -76,12 +76,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 
 @Slf4j
 @Component
@@ -373,7 +371,8 @@ public class GeneRepository implements Repository {
    * 
    * @returns a map of matched identifiers
    */
-  public Map<String, Multimap<String, String>> validateIdentifiers(List<String> input) {
+  // public Map<String, Multimap<String, String>> validateIdentifiers(List<String> input) {
+  public SearchResponse validateIdentifiers(List<String> input) {
 
     val boolQuery = QueryBuilders.boolQuery();
 
@@ -391,36 +390,8 @@ public class GeneRepository implements Repository {
     log.debug("Search is {}", search);
     val response = search.execute().actionGet();
 
-    // Initialize results container
-    val result = Maps.<String, Multimap<String, String>> newHashMap();
-    for (val searchField : GENE_ID_SEARCH_FIELDS) {
-      val typeResult = ArrayListMultimap.<String, String> create();
-      result.put(searchField, typeResult);
-    }
+    return response;
 
-    // Organize the results into the categories
-    for (val hit : response.getHits()) {
-      val fields = hit.getFields();
-      val highlightedFields = hit.getHighlightFields();
-      val geneId = (String) fields.get(GENE_ID).getValue();
-
-      for (val searchField : GENE_ID_SEARCH_FIELDS) {
-        if (highlightedFields.containsKey(searchField)) {
-          if (searchField.equals(GENE_UNIPROT_IDS)) {
-            @SuppressWarnings("unchecked")
-            val keys = (List<String>) fields.get(searchField).getValue();
-            for (val key : keys) {
-              result.get(searchField).put(key, geneId);
-            }
-          } else {
-            val key = (String) fields.get(searchField).getValue();
-            result.get(searchField).put(key, geneId);
-          }
-
-        }
-      }
-    }
-    return result;
   }
 
 }
