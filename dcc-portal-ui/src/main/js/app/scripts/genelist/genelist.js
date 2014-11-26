@@ -123,16 +123,8 @@
     }
 
     function createNewGeneList() {
-      var data, text = '';
-      $scope.validIds.forEach(function(validType, idx) {
-        if (validType.selected === true) {
-          text += validType.keys.join(',');
-          if (idx < ($scope.validIds.length - 1)) {
-            text += ',';
-          }
-        }
-      });
-      data = 'geneIds=' + encodeURI(text);
+      var data;
+      data = 'geneIds=' + encodeURI($scope.rawText);
 
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
