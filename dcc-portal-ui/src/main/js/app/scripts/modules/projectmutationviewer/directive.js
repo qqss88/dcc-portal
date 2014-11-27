@@ -18,7 +18,8 @@
         '</div>' +
         '<div class="canvas"></div>' +
         '<div class="text-right">' +
-             '<small>Ref: <a href="http://www.nature.com/nature/journal/v500/n7463/full/nature12477.html" target="_blank">doi:10.1038/nature12477</a></small>' +
+        '<small>Ref: <a href="http://www.nature.com/nature/journal/v500/n7463/full/nature12477.html" ' +
+        'target="_blank">doi:10.1038/nature12477</a></small>' +
         '</div>' +
         '</div>',
       scope: {
