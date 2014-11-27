@@ -66,7 +66,6 @@ public class GeneService {
             for (val key : keys) {
               if (ids.contains(key)) {
                 result.get(searchField).put(key, matchedGene);
-                break;
               }
             }
           } else {
