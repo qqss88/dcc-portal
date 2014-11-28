@@ -22,6 +22,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import lombok.SneakyThrows;
 import lombok.val;
 
@@ -46,6 +48,7 @@ import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.OccurrenceService;
 import org.openid4java.consumer.ConsumerManager;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.google.inject.Stage;
 import com.hazelcast.config.Config;
@@ -62,11 +66,15 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 
 @Lazy
+@EnableAsync
 @Configuration
 public class PortalConfig {
 
   @Autowired
   private PortalProperties properties;
+
+  @Autowired
+  private OccurrenceService service;
 
   @Bean
   public DynamicDownloader dynamicDownloader() {
@@ -83,6 +91,11 @@ public class PortalConfig {
         download.getSupportEmailAddress(),
         download.getCapacityThreshold(),
         download.getReleaseName());
+  }
+
+  @PostConstruct
+  public void initCache() {
+    service.init();
   }
 
   @Bean

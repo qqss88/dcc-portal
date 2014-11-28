@@ -83,8 +83,15 @@ angular.module('app.ui.tooltipControl', [])
           var position = $position.offset(target);
           var result = {};
 
+
           var ttWidth = element.prop('offsetWidth');
           var ttHeight = element.prop('offsetHeight');
+
+          // FIXME:
+          // Need to make this work better for SVG, maybe use d3-tip plugin for calc
+          // This is to avoid NaN
+          position.width = position.width || 0;
+          position.height = position.height || 0;
 
           switch(placement) {
           case 'right':
@@ -111,6 +118,7 @@ angular.module('app.ui.tooltipControl', [])
               left: position.left + position.width / 2
             };
           }
+
           return result;
         }
 

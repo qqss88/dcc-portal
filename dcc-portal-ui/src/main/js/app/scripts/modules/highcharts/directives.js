@@ -416,7 +416,9 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
           title: {
             text: $attrs.ylabel,
             style: {
-              color: 'hsl(0, 0%, 60%)'
+              color: 'hsl(0, 0%, 60%)',
+              fontSize: '0.75rem',
+              fontWeight: '300'
             },
             margin: 25
           },
@@ -553,7 +555,9 @@ angular.module('highcharts.directives').directive('stacked', function ($location
             text: 'Donors Affected',
             margin: 30,
             style: {
-              color: 'hsl(0, 0%, 60%)'
+              color: 'hsl(0, 0%, 60%)',
+              fontSize: '0.75rem',
+              fontWeight: '300'
             }
           },
           labels: {

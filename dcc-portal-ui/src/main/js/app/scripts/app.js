@@ -58,6 +58,7 @@
     'icgc.browser',
     'icgc.genelist',
     'icgc.genesets',
+    'icgc.visualization',
     
     // old
     'app.ui',

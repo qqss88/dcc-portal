@@ -39,7 +39,7 @@
 
       var data = 'geneIds=' + encodeURI($scope.rawText);
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, undefined, {'validateOnly':true}).then(function(result) {
+        .customPOST(data, undefined, {'validationOnly':true}).then(function(result) {
 
           var verifyResult = Restangular.stripRestangular(result);
           $scope.state = 'verified';
@@ -52,10 +52,56 @@
               $scope.warnings.push(msg);
             });
           }
-
           $scope.invalidIds = verifyResult.invalidGenes;
-          $scope.validIds = verifyResult.validGenes;
+          $scope.hasType = {};
 
+
+          var uiResult = {}, uniqueEnsembl = {}, totalInput = 0;
+
+          angular.forEach(verifyResult.validGenes, function(type, typeName) {
+            angular.forEach(type, function(geneList, inputToken) {
+              if (geneList && geneList.length > 0) {
+
+                geneList.forEach(function(gene) {
+                  var symbol = gene.symbol, row;
+
+                  // Initialize row structure
+                  if (! uiResult.hasOwnProperty(symbol)) {
+                    uiResult[symbol] = {};
+                  }
+                  row = uiResult[symbol];
+
+                  // Aggregate input ids that match to the same symbol
+                  if (! row.hasOwnProperty(typeName)) {
+                    row[typeName] = [];
+                  }
+                  if (row[typeName].indexOf(inputToken) === -1) {
+                    row[typeName].push(inputToken);
+
+                    // Mark it for visibility test on the view
+                    $scope.hasType[typeName] = 1;
+                  }
+
+                  // Aggregate matched ensembl ids that match to the same symbol
+                  if (! row.hasOwnProperty('matchedId')) {
+                    row.matchedId = [];
+                  }
+                  if (row.matchedId.indexOf(gene.id) === -1) {
+                    row.matchedId.push(gene.id);
+                    $scope.validIds.push(gene.id);
+                  }
+
+                  // Total counts
+                  uniqueEnsembl[gene.id] = 1;
+                });
+                totalInput ++;
+              }
+            });
+          });
+          $scope.uiResult = uiResult;
+          $scope.totalInput = totalInput;
+          $scope.totalMatch = Object.keys(uniqueEnsembl).length;
+          $scope.totalColumns = Object.keys($scope.hasType).length;
         });
     }
 
@@ -77,10 +123,12 @@
     }
 
     function createNewGeneList() {
-      var data = 'geneIds=' + encodeURI($scope.validIds.join(','));
+      var data;
+      data = 'geneIds=' + encodeURI($scope.rawText);
+
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
-          var filters = LocationService.filters();
+          var filters = LocationService.filters(), search = LocationService.search();
 
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
@@ -92,8 +140,9 @@
           $scope.genelistModal = false;
           filters.gene.uploadedGeneList.is = [result.geneListId];
 
-          $location.path('/search/g').search({'filters': angular.toJson(filters)});
-          // LocationService.setFilters(filters);
+          // Upload gene list redirects to gene tab, regardless of where we came from
+          search.filters = angular.toJson(filters);
+          $location.path('/search/g').search(search);
         });
     }
 
@@ -103,10 +152,15 @@
     }
 
   
-    // Init
+    // Initialize
     $scope.rawText = '';
     $scope.state = '';
     $scope.hasGeneList = false;
+    $scope.typeNameMap = {
+      'symbol': 'Gene Symbol',
+      '_gene_id': 'Ensembl ID',
+      'external_db_ids.uniprotkb_swissprot': 'UniProtKB/Swiss-Prot ID'
+    };
 
 
     $scope.$watch(function () { return LocationService.search(); }, function() {
@@ -125,6 +179,19 @@
 
     $scope.newGeneList = function() {
       createNewGeneList();
+    };
+
+    $scope.toggleGeneType = function(type) {
+      if ($scope.validIds.length > 1) {
+        type.selected = !type.selected;
+      }
+    };
+
+    $scope.hasGeneTypeSelected = function() {
+      var selected = _.filter($scope.validIds, function(type) {
+        return type.selected === true;
+      });
+      return selected.length > 0;
     };
 
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 

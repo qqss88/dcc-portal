@@ -19,8 +19,10 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
+import static org.elasticsearch.action.search.SearchType.SCAN;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
@@ -55,8 +57,11 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -65,6 +70,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -75,6 +82,7 @@ public class OccurrenceRepository {
 
   private static final Type CENTRIC_TYPE = Type.OCCURRENCE_CENTRIC;
   private static final Kind KIND = Kind.OCCURRENCE;
+  private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   // Type -> ES nested doc
   private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap
@@ -140,7 +148,6 @@ public class OccurrenceRepository {
         if (hasMutation) mMusts.add(buildMutationFilters(filters, PREFIX_MAPPING));
 
         if (hasObservation) {
-          log.info("Adding nested observation filter");
           mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.OBSERVATION),
               buildObservationFilters(filters, PREFIX_MAPPING)));
         }
@@ -182,7 +189,6 @@ public class OccurrenceRepository {
             .setSize(query.getSize()).addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
 
     ObjectNode filters = remapFilters(query.getFilters());
-    log.info("Remapped filters {}", filters);
     search.setFilter(getFilters(filters));
 
     search.addFields(getFields(query, KIND));
@@ -250,5 +256,80 @@ public class OccurrenceRepository {
     log.debug("{}", map);
 
     return map;
+  }
+
+  public Map<String, Map<String, Integer>> getProjectDonorMutationDistribution() {
+    // TODO: Move out
+    val consequenceList =
+        ImmutableList.<String> of(
+            "frameshift_variant",
+            "missense",
+            "non_conservative_missense_variant",
+            "initiator_codon_variant",
+            "stop_gained",
+            "stop_lost",
+            "start_gained",
+            "exon_lost",
+            "coding_sequence_variant",
+            "inframe_deletion",
+            "inframe_insertion",
+            "splice_region_variant",
+            "non_coding_exon_variant",
+            "5_prime_UTR_variant",
+            "synonymous_variant",
+            "stop_retained_variant",
+            "3_prime_UTR_variant");
+
+    String list = Joiner.on("\",\"").skipNulls().join(consequenceList);
+
+    val exonFilter = new FiltersParam("{mutation:{consequenceType:{is:[\"" + list + "\"]}}}");
+    val filters = remapFilters(exonFilter.get());
+
+    val result = Maps.<String, Map<String, Integer>> newHashMap();
+
+    SearchRequestBuilder search = client
+        .prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(SCAN)
+        .setSize(5000)
+        .setScroll(new TimeValue(10000))
+        .setFilter(getFilters(filters))
+        .setQuery(matchAllQuery())
+        .addFields("donor._donor_id", "project._project_id");
+
+    SearchResponse response = search.execute().actionGet();
+    while (true) {
+      response = client.prepareSearchScroll(response.getScrollId())
+          .setScroll(KEEP_ALIVE)
+          .execute().actionGet();
+
+      for (SearchHit hit : response.getHits()) {
+        val projectId = (String) hit.getFields().get("project._project_id").value();
+        val donorId = (String) hit.getFields().get("donor._donor_id").value();
+        if (result.get(projectId) == null) {
+          result.put(projectId, Maps.<String, Integer> newHashMap());
+        }
+        if (result.get(projectId).get(donorId) == null) {
+          result.get(projectId).put(donorId, 0);
+        }
+        result.get(projectId).put(donorId, result.get(projectId).get(donorId) + 1);
+      }
+
+      // Break condition: No hits are returned
+      if (response.getHits().hits().length == 0) {
+        response = client.prepareSearchScroll(response.getScrollId())
+            .setScroll(new TimeValue(0)).execute().actionGet();
+        break;
+      }
+    }
+
+    // Print out some useful info now
+    int totalDonors = 0;
+    for (String key : result.keySet()) {
+      log.debug("{} => {}", key, result.get(key).size());
+      totalDonors += result.get(key).size();
+    }
+    log.debug("total {} ", totalDonors);
+    return result;
   }
 }

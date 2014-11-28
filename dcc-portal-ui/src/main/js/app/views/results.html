@@ -60,8 +60,13 @@
                         </li>
                         <li data-ng-if="r.synonyms">
                             <span class="t_quick__hit__text__details__label">Synonyms</span>
-                        <span class="t_quick__hit__text__details__value"
-                              data-ng-bind-html="r.synonyms | highlight:activeQuery "></span>
+                            <span class="t_quick__hit__text__details__value"
+                                data-ng-bind-html="r.synonyms | highlight:activeQuery "></span>
+                        </li>
+                        <li data-ng-if="r.uniprotkbSwissprot">
+                            <span class="t_quick__hit__text__details__label">UniProtKB/<br>Swiss-Prot</span>
+                            <span class="t_quick__hit__text__details__value"
+                                data-ng-bind-html="r.uniprotkbSwissprot.join(', ')| highlight:activeQuery "></span>
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Ensembl ID</span>

@@ -45,21 +45,45 @@
 
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
-  module.controller('ProjectsCtrl', function ($q, $scope, Page, Projects, HighchartsService, Donors, Restangular) {
+  module.controller('ProjectsCtrl',
+    function ($q, $scope, Page, Projects, HighchartsService, Donors, Restangular, LocationService) {
+
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
     Page.setPage('projects');
 
+    // This is needed to translate projects filters to donor filters
+    $scope.createAdvanceFilters = function(dataType) {
+      var currentFilters = LocationService.filters();
+      var filters = {};
+
+      if (dataType || !_.isEmpty(currentFilters)) {
+        filters.donor = {};
+      }
+
+      if (dataType) {
+        filters.donor.availableDataTypes = {};
+        filters.donor.availableDataTypes.is = [dataType];
+      }
+      if (!_.isEmpty(currentFilters)) {
+        filters.donor.projectId = {};
+        filters.donor.projectId.is = _ctrl.projectIds;
+      }
+
+      return JSON.stringify(filters);
+    };
+
+
     function success(data) {
       if (data.hasOwnProperty('hits')) {
-        var totalDonors = 0, ssmTotalDonors = 0, projectIds = [];
+        var totalDonors = 0, ssmTotalDonors = 0;
 
         _ctrl.projects = data;
+        _ctrl.projectIds = _.pluck(data.hits, 'id');
 
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
-          projectIds.push(p.id);
         });
 
         _ctrl.totalDonors = totalDonors;
@@ -75,6 +99,13 @@
 
         _ctrl.stacked = [];
 
+
+        // Get project-donor-mutation distribution of exon impacted ssm
+        Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
+          // Remove restangular attributes to make data easier to parse
+          data = Restangular.stripRestangular(data);
+          _ctrl.distribution = data;
+        });
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
@@ -124,7 +155,8 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+      if (dest.indexOf('projects') !== -1 && dest.indexOf('projects/') === -1) {
+        console.log('refreshing !!!!', dest, event);
         refresh();
       }
     });

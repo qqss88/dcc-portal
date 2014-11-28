@@ -1,0 +1,54 @@
+/* Bar charts styles */
+.axis_label {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: hsl(0, 0%, 20%)
+}
+
+.axis {
+    shape-rendering: crispEdges;
+}
+
+.axis line {
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+.axis .domain {
+   opacity: 0.5;
+}
+
+.axis .tick line {
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+.axis .tick text {
+    font-size: 0.75rem;
+}
+
+.graph_interactive {
+   cursor: pointer;
+}
+
+
+.graph_title {
+   font-size: 1.25rem;
+   font-weight: 300;
+   stroke: none;
+   fill: hsl(0, 0%, 20%);
+   text-anchor: middle;
+}
+
+.graph_subtitle {
+  font-size: 0.8rem; 
+  font-weight: 300; 
+  stroke: none;
+  fill: #666666;
+}
+
+.debug {
+   font-size: 0.8rem;
+   stroke: none;
+   fill: #444444;
+}
