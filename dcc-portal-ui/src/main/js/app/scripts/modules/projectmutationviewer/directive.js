@@ -8,7 +8,19 @@
     return {
       restrict: 'E',
       replace: 'true',
-      template: '<div></div>',
+      template: '<div>' +
+        '<div class="text-center graph_title">' +
+        'Number of Somatic Mutations in Donor\'s Exomes Ccross Cancer Projects' +
+        '<span class="pull-right"><a href="">' +
+        '<small><i class="icon-help" data-tooltip="{{helpText}}" data-tooltip-placement="left"></i>' +
+        '</small></a></span>' +
+        '</div>' +
+        '<div class="canvas"></div>' +
+        '<div class="text-right">' +
+        '<small>Ref: <a href="http://www.nature.com/nature/journal/v500/n7463/full/nature12477.html" ' +
+        'target="_blank">doi:10.1038/nature12477</a></small>' +
+        '</div>' +
+        '</div>',
       scope: {
         items: '=',
         selected: '='
@@ -16,20 +28,25 @@
       link: function($scope, $element) {
         var chart, config;
 
+        $scope.helpText = 'Each dot represents the number of somatic mutations per megabase in ' +
+          'a given donor\'s exome. Donors are grouped by cancer projects. Horizontal red lines ' +
+          'provide the median number of somatic and exomic mutations within each cancer project.';
+
         config = {
+          height: 230,
+          width: 950,
           clickFunc: function(d) {
+            $scope.$emit('tooltip::hide');
             $scope.$apply(function() {
               $location.path('/projects/' + d.id).search({});
             });
           },
           tooltipShowFunc: function(elem, data) {
-
             function getLabel() {
               return '<strong>' + data.name + '</strong><br>' +
-                'Medium: ' + $filter('number')(data.medium) + '<br>' +
+                'Median: ' + $filter('number')(data.medium) + '<br>' +
                 '# Donors: ' + data.donorCount;
             }
-
             $scope.$emit('tooltip::show', {
               element: angular.element(elem),
               text: getLabel(),
@@ -85,10 +102,10 @@
         }
 
         $scope.$watch('items', function(newData) {
-          console.log('watcher', newData);
           if (newData && !chart) {
             chart = new dcc.ProjectMutationChart(transform($scope.items), config);
-            chart.render( $element[0] );
+            // chart.render( $element[0] );
+            chart.render( $element.find('.canvas')[0] );
             if (angular.isDefined($scope.selected)) {
               chart.highlight($scope.selected);
             }

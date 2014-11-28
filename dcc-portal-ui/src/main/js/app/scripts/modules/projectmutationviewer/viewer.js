@@ -75,7 +75,11 @@
 
     _this.element = element;
 
-    svg = d3.select(element).append('svg').attr('width' , config.width).attr('height', config.height);
+    svg = d3.select(element).append('svg')
+      //.attr('width' , config.width).attr('height', config.height)
+      .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
+      .attr('preserveAspectRatio', 'xMidYMid');
+
     vis = svg.append('g').attr('transform', _this.translate(config.margin, config.margin));
     chart = vis.append('g').attr('transform', _this.translate(config.paddingLeft, config.paddingTop));
 
@@ -90,7 +94,7 @@
       .style('fill', 'none');
 
     vis.append('g')
-      .attr('transform', _this.translate(5, (config.paddingTop + config.chartHeight)*0.85) + ' rotate(-90)')
+      .attr('transform', _this.translate(5, (config.paddingTop + config.chartHeight)*0.95) + ' rotate(-90)')
       .append('text')
       .classed('axis_label', true)
       .text('Number of mutations per Mb');
@@ -121,7 +125,7 @@
           return node && node.id === d.id;
         }).style('font-weight', 600);
 
-        config.tooltipShowFunc(this, d, 'left');
+        config.tooltipShowFunc(this, d);
       });
       projectControl.on('mouseout', function(d) {
         d3.select(this).select('rect').style('stroke', '#DDD');
