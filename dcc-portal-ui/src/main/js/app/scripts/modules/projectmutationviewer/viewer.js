@@ -125,7 +125,7 @@
           return node && node.id === d.id;
         }).style('font-weight', 600);
 
-        config.tooltipShowFunc(this, d, 'left');
+        config.tooltipShowFunc(this, d);
       });
       projectControl.on('mouseout', function(d) {
         d3.select(this).select('rect').style('stroke', '#DDD');

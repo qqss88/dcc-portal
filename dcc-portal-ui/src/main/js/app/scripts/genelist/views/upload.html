@@ -75,7 +75,7 @@
                    <div data-ng-if="validIds.length > 0 && warnings.length === 0"> 
                       <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
                           <a href="">
-                               {{totalInput}} submitted gene identifier(s) mapped to {{totalMatch}} gene Ensembl ID
+                               {{totalInput}} submitted gene identifier(s) mapped to {{totalMatch}} Ensembl ID
                               <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                           </a>
                       </span>
@@ -88,18 +88,18 @@
                                       <th colspan="2" class="text-center" style="border-left:1px solid">Mapped</th>
                                   </tr>
                                   <tr>
-                                      <td class="text-center" data-ng-show="hasType['symbol']">Symbol</td>
-                                      <td class="text-center" data-ng-show="hasType['external_db_ids.uniprotkb_swissprot']">UniProt ID</td>
-                                      <td class="text-center" data-ng-show="hasType['_gene_id']">Ensembl ID</td>
+                                      <td class="text-center" data-ng-if="hasType['symbol']">Symbol</td>
+                                      <td class="text-center" data-ng-if="hasType['external_db_ids.uniprotkb_swissprot']">UniProt ID</td>
+                                      <td class="text-center" data-ng-if="hasType['_gene_id']">Ensembl ID</td>
                                       <td style="border-left:1px solid">Ensembl ID</td>
                                       <td>Symbol</td>
                                   </tr>
                               </thead>
                               <tbody>
                                   <tr data-ng-repeat="(symbol, row) in uiResult">
-                                      <td data-ng-show="hasType['symbol']">{{row['symbol'].join(', ')}}</td>
-                                      <td data-ng-show="hasType['external_db_ids.uniprotkb_swissprot']">{{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}</td>
-                                      <td data-ng-show="hasType['_gene_id']">{{row['_gene_id'].join(', ')}}</td>
+                                      <td data-ng-if="hasType['symbol']">{{row['symbol'].join(', ')}}</td>
+                                      <td data-ng-if="hasType['external_db_ids.uniprotkb_swissprot']">{{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}</td>
+                                      <td data-ng-if="hasType['_gene_id']">{{row['_gene_id'].join(', ')}}</td>
                                       <td style="border-left:1px solid">{{row['matchedId'].join(', ')}}</td>
                                       <td>{{symbol}}</td>
                                   </tr>

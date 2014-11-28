@@ -10,11 +10,10 @@
       replace: 'true',
       template: '<div>' +
         '<div class="text-center graph_title">' +
-        'Number of somatic mutations in donor\'s exomes across cancer projects' +
-        '<span><a href="" data-tooltip="{{helpText}}">' +
-        '<small><i class="icon-help"></i></small>' +
-        '</a>' +
-        '</span>' +
+        'Number of Somatic Mutations in Donor\'s Exomes Ccross Cancer Projects' +
+        '<span class="pull-right"><a href="">' +
+        '<small><i class="icon-help" data-tooltip="{{helpText}}" data-tooltip-placement="left"></i>' +
+        '</small></a></span>' +
         '</div>' +
         '<div class="canvas"></div>' +
         '<div class="text-right">' +
@@ -31,7 +30,7 @@
 
         $scope.helpText = 'Each dot represents the number of somatic mutations per megabase in ' +
           'a given donor\'s exome. Donors are grouped by cancer projects. Horizontal red lines ' +
-          'provide the average number of somatic and exomic mutations within each cancer project.';
+          'provide the median number of somatic and exomic mutations within each cancer project.';
 
         config = {
           height: 230,
