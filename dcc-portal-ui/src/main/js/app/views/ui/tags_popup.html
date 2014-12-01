@@ -58,6 +58,7 @@
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="go_term">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
+                    <li data-ng-bind-html="r.altIds.join(', ') | highlight:activeQuery:true"></li>
                 </ul>
             </td>
         </tr>

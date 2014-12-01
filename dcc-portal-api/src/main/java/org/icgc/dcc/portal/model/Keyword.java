@@ -58,6 +58,8 @@ public class Keyword {
   List<String> entrezGene;
   @ApiModelProperty(required = false)
   List<String> hgnc;
+  @ApiModelProperty(required = false)
+  List<String> altIds;
 
   @ApiModelProperty(required = false)
   String projectId;
@@ -104,6 +106,7 @@ public class Keyword {
     omimGene = (List<String>) fieldMap.get(fields.get("omimGene"));
     entrezGene = (List<String>) fieldMap.get(fields.get("entrezGene"));
     hgnc = (List<String>) fieldMap.get(fields.get("hgnc"));
+    altIds = (List<String>) fieldMap.get(fields.get("altIds"));
 
     projectId = (String) fieldMap.get(fields.get("projectId"));
     submittedId = (String) fieldMap.get(fields.get("submittedId"));

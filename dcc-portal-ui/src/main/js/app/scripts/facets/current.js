@@ -47,6 +47,13 @@
           facet: 'uploadedGeneList'
         });
       }
+      if (type === 'gene' && facet === 'pathwayId') {
+        Facets.removeFacet({
+          type: type,
+          facet: 'hasPathway'
+        });
+      }
+
     };
 
     /**

@@ -164,6 +164,13 @@
           facet: 'uploadedGeneList'
         });
       }
+
+      if ($scope.type === 'pathway') {
+        Facets.removeFacet({
+          type: type,
+          facet: 'hasPathway'
+        });
+      }
     };
 
 

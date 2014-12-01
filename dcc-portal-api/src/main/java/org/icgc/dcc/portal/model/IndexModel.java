@@ -496,7 +496,7 @@ public class IndexModel {
           .put("projectId", "projectId")
 
           // GO Term
-          .put("altIds", "alt_ids")
+          .put("altIds", "altIds")
 
           // Pathway
           // .put("url", "url")

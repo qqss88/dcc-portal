@@ -123,8 +123,8 @@
       hide = hide || false;
       if (search) {
         text = angular.isArray(text) ? text.join(', ') : text.toString();
-        // Shrink extra spaces, removes non alpha-numeric chars
-        search = search.toString().replace(/\s+/g, ' ').replace(/[^a-zA-Z0-9\s]/g, '').split(' ');
+        // Shrink extra spaces, restrict to alpha-numeric chars and a few other special chars
+        search = search.toString().replace(/\s+/g, ' ').replace(/[^a-zA-Z0-9:\s]/g, '').split(' ');
         for (var i = 0; i < search.length; ++i) {
           text = text.replace(new RegExp(search[i], 'gi'), '^$&$');
         }

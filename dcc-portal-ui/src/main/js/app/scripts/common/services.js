@@ -468,8 +468,11 @@
           if (uiFacetKey === 'hasPathway') {
             var uiTerm = 'Reactome Pathways';
             uiFacetKey = 'pathwayId';
-            display[typeKey][uiFacetKey] = {};
-            display[typeKey][uiFacetKey].is = [];
+
+            if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+              display[typeKey][uiFacetKey] = {};
+              display[typeKey][uiFacetKey].is = [];
+            }
             display[typeKey][uiFacetKey].is.unshift({
               term: uiTerm,
               controlTerm: undefined,

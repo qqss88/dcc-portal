@@ -70,7 +70,10 @@
             </tr>
             <tr>
                 <th>Description</td>
-                <td>
+                <td data-ng-if="GeneSetCtrl.geneSet.description === '???' || GeneSetCtrl.geneSet.description === ''">
+                --
+                </td>
+                <td data-ng-if="GeneSetCtrl.geneSet.description !== '???'">
                     <hide-text text="{{ GeneSetCtrl.geneSet.description}}"></hide-text>
                 </td>
             </tr>
@@ -80,11 +83,15 @@
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Alt. ID</th>
-                <td>{{ GeneSetCtrl.geneSet.altIds.join(' ') }}</td>
+                <td data-ng-if="GeneSetCtrl.geneSet.altIds.length === 0">--</td>
+                <td data-ng-if="GeneSetCtrl.geneSet.altIds.length > 0">{{ GeneSetCtrl.geneSet.altIds.join(', ') }}</td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Synonyms</th>
-                <td>{{ GeneSetCtrl.geneSet.synonyms.join(' ') }}</td>
+
+                <td data-ng-if="GeneSetCtrl.geneSet.synonyms.length === 0">--</td>
+                <td data-ng-if="GeneSetCtrl.geneSet.synonyms.length > 0">{{ GeneSetCtrl.geneSet.synonyms.join(', ') }}</td>
+
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Inferred Tree</th>
