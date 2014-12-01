@@ -11,8 +11,15 @@
 
   angular.module('icgc.enrichment.controllers', []);
 
-  angular.module('icgc.enrichment.controllers').controller('enrichmentUploadController', function($scope, Extensions) {
+
+  /**
+   * Validates the gene set enrichment submission and updates the current url
+   */
+  angular.module('icgc.enrichment.controllers')
+    .controller('enrichmentUploadController', function($scope, Extensions) {
     $scope.Extensions = Extensions;
+
+    // Default values
     $scope.analysisParams = {
       geneSetCount: 50,
       fdr: 0.05,
@@ -23,11 +30,41 @@
     };
 
     $scope.hasValidParams = function() {
+      var params = $scope.analysisParams;
+
+      if ($scope.hasValidGeneCount(parseInt(params.geneCount, 10)) === false ||
+        $scope.hasValidFDR(parseFloat(params.fdr)) === false ||
+        angular.isDefined(params.background) === false) {
+        return false;
+      }
+      return true;
     };
 
+    $scope.hasValidFDR = function(val) {
+      if (angular.isNumber(val) === false) {
+        return false;
+      }
+      if (val >= 0.005 && val <= 0.5) {
+        return true;
+      }
+      return false;
+    };
+
+    $scope.hasValidGeneCount = function(val) {
+      if (angular.isNumber(val) === false) {
+        console.log('blah');
+        return false;
+      }
+      return true;
+    };
   });
 
-  angular.module('icgc.enrichment.controllers').controller('enrichmentResultController', function($scope) {
+
+  /**
+   * Displays gene set enrichment results
+   */
+  angular.module('icgc.enrichment.controllers')
+    .controller('enrichmentResultController', function($scope) {
   });
 
 })();
@@ -56,13 +93,24 @@
       scope: {
         collapsed: '='
       },
-      templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
+      templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       controller: 'enrichmentResultController'
     };
+  });
+
+})();
+
+
+(function () {
+  'use strict';
+
+  var module = angular.module('icgc.enrichment.models', []);
+
+  module.service('Enrichment', function (Restangular) {
+    // TODO:  API endpoints
   });
 
 
 
 })();
-
 

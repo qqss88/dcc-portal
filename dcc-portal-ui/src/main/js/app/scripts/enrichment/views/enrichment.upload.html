@@ -13,19 +13,16 @@
 
             <!-- body -->
             <div class="modal-body"> 
-               <span> debug: {{analysisParams}} </span>
-               <hr>
 
                <div>
                    <span>
-                       <strong>Number of top genes in gene result to be analyzed: </strong><br>
+                       <strong>Number of top genes in gene result to be analyzed (1000 maximum): </strong><br>
                        <input type="text" size="5" data-ng-model="analysisParams.geneCount">
                    </span>
                </div>
                <br>
                <div>
-                   <div><strong>Select Background</strong></div>
-
+                   <div><strong>Select Background: </strong></div>
                    <div data-ng-repeat="item in Extensions.PATHWAY_ROOTS">
                        <input type="radio"
                            data-ng-model="$parent.analysisParams.background"
@@ -44,23 +41,22 @@
                </div>
                <br>
                <div>
-                   <div>
-                       <span><strong>Show: </strong></span>
+                   <div class="text-right">
+                       <span>Show: </span>
                        <span>
                            <select data-ng-model="analysisParams.geneSetCount" 
                                data-ng-options="item for item in [10, 20, 50, 100]"></select>
-                           <span data-ng-init="geneSetCount=50"></span>
                        </span>
+                       <span> Gene Sets</span>
                    </div>
                </div>
-               <br>
             </div>
 
             <!-- footer -->
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="enrichmentModal=false; reset();">Cancel</button>
                 <button class="t_button" data-ng-click="newGeneSetEnrichment()"
-                    data-ng-disabled="state !== 'verified' || validIds.length === 0">Submit</button> 
+                    data-ng-disabled="! hasValidParams()">Submit</button> 
             </div>
         </div>
     </div>
