@@ -59,6 +59,7 @@
     'icgc.genelist',
     'icgc.genesets',
     'icgc.visualization',
+    'icgc.enrichment',
     
     // old
     'app.ui',
@@ -175,6 +176,9 @@
       {id: 'GO:0003674', name: 'Molecular Function'},
       {id: 'GO:0008150', name: 'Biological Process'},
       {id: 'GO:0005575', name: 'Cellular Component'}
+    ],
+    PATHWAY_ROOTS: [
+      {name: 'Reactome Pathways'}
     ]
   });
 
