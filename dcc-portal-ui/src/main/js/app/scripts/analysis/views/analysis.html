@@ -1,0 +1,18 @@
+<h1><i class="t_badge t_badge_icon"><i class="icon-chart"></i></i>Analysis</h1>
+<aside class="t_sidebar">
+    <div style="margin-right: -2rem">
+        <div style="max-height: 76rem; overflow-y: scroll;padding-bottom: 1rem">
+            <ul class="t_suggest_flyout__hits">
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-repeat="item in [1, 2, 3]"
+                    data-ng-class="{selected: item == analysisId}"> Analysis {{item}}
+                </li>
+            </ul>
+        </div>
+    </div>
+</aside>
+<article>
+    <div style="margin: 1rem">
+        <enrichment-result></enrichment-result>
+    </div>
+</article>
