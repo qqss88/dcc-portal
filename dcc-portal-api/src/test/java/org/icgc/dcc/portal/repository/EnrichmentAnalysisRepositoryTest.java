@@ -15,56 +15,55 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.repository;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Random;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import java.util.UUID;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.ElasticSearchException;
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 
-@Slf4j
-@Component
-@Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
+public class EnrichmentAnalysisRepositoryTest {
 
-  private final static Status STATUS = BAD_REQUEST;
-  private static final Random RANDOM = new Random();
+  EnrichmentAnalysisRepository repository;
 
-  @Override
-  public Response toResponse(ElasticSearchException e) {
-
-    val id = RANDOM.nextLong();
-    log.error(formatLogMessage(id), e);
-
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e, id))
-        .build();
+  @Before
+  public void setUp() {
+    val dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
+    this.repository = dbi.open(EnrichmentAnalysisRepository.class);
   }
 
-  protected String formatLogMessage(long id) {
-    return String.format("Error handling a request: %016x", id);
+  @After
+  public void tearDown() {
+    repository.close();
   }
 
-  private Error errorResponse(ElasticSearchException e, long id) {
-    return new Error(STATUS, message(e, id));
-  }
+  @Test
+  public void testAll() {
+    val id1 = UUID.randomUUID();
 
-  private String message(ElasticSearchException e, long id) {
-    return String.format("%s", formatLogMessage(id));
+    val analysis1 = new EnrichmentAnalysis().setId(id1);
+    val count1 = repository.save(analysis1);
+    assertThat(count1).isEqualTo(1);
+
+    val id2 = UUID.randomUUID();
+    val analysis2 = new EnrichmentAnalysis().setId(id2);
+    val count2 = repository.save(analysis2);
+    assertThat(count2).isEqualTo(1);
+
+    assertThat(id1).isNotEqualTo(id2);
+
+    val actualData1 = repository.find(id1).getId();
+    assertThat(id1).isEqualTo(actualData1);
+
+    val actualData2 = repository.find(id2).getId();
+    assertThat(id2).isEqualTo(actualData2);
   }
 
 }

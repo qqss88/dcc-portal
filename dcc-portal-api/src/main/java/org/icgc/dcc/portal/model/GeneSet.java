@@ -99,7 +99,6 @@ public class GeneSet {
     inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(fields.get("inferredTree")));
   }
 
-  @SuppressWarnings("unused")
   private List<List<Map<String, String>>> buildPathwayHierarchy(List<List<Map<String, Object>>> field) {
     val result = Lists.<List<Map<String, String>>> newArrayList();
 
@@ -121,7 +120,6 @@ public class GeneSet {
     return result;
   }
 
-  @SuppressWarnings("unused")
   private List<Map<String, String>> buildInferredTree(List<Map<String, Object>> field) {
     val result = Lists.<Map<String, String>> newArrayList();
 

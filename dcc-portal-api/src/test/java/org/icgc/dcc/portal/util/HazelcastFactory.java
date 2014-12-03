@@ -15,56 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.util;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-import java.util.Random;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.instance.HazelcastInstanceFactory;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+@NoArgsConstructor(access = PRIVATE)
+public final class HazelcastFactory {
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.elasticsearch.ElasticSearchException;
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
-
-@Slf4j
-@Component
-@Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
-
-  private final static Status STATUS = BAD_REQUEST;
-  private static final Random RANDOM = new Random();
-
-  @Override
-  public Response toResponse(ElasticSearchException e) {
-
-    val id = RANDOM.nextLong();
-    log.error(formatLogMessage(id), e);
-
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e, id))
-        .build();
+  /**
+   * Creates an instance of Hazelcast that does not communicate over the network.
+   */
+  public static HazelcastInstance createLocalHazelcastInstance() {
+    return HazelcastInstanceFactory.newHazelcastInstance(initConfig(new Config()));
   }
 
-  protected String formatLogMessage(long id) {
-    return String.format("Error handling a request: %016x", id);
-  }
+  private static Config initConfig(Config config) {
+    config.setProperty(GroupProperties.PROP_WAIT_SECONDS_BEFORE_JOIN, "0");
+    config.setProperty(GroupProperties.PROP_GRACEFUL_SHUTDOWN_MAX_WAIT, "120");
+    config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
 
-  private Error errorResponse(ElasticSearchException e, long id) {
-    return new Error(STATUS, message(e, id));
-  }
-
-  private String message(ElasticSearchException e, long id) {
-    return String.format("%s", formatLogMessage(id));
+    return config;
   }
 
 }

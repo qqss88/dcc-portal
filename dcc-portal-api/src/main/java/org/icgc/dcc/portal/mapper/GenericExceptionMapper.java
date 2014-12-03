@@ -17,8 +17,11 @@
 package org.icgc.dcc.portal.mapper;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static org.apache.commons.httpclient.HttpStatus.getStatusText;
+import static org.elasticsearch.common.base.Objects.firstNonNull;
 
 import java.util.Date;
 import java.util.Random;
@@ -59,18 +62,28 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   @Override
   public Response toResponse(Throwable t) {
+    val id = randomId();
     if (t instanceof WebApplicationException) {
-      return ((WebApplicationException) t).getResponse();
+      val response = ((WebApplicationException) t).getResponse();
+
+      log.error(t.getMessage());
+      return Response.fromResponse(response)
+          .type(APPLICATION_JSON_TYPE)
+          .entity(webErrorResponse(t, id, response.getStatus()))
+          .build();
     }
 
-    val id = randomId();
     logException(id, t);
     sendEmail(id, t);
 
     return serverError()
-        .type(headers.getMediaType())
+        .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(t, id))
         .build();
+  }
+
+  private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
+    return new Error(statusCode, firstNonNull(t.getMessage(), getStatusText(statusCode)));
   }
 
   private Error errorResponse(Throwable t, final long id) {

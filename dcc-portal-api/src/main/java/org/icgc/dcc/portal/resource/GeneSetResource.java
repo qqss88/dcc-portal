@@ -46,7 +46,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.GeneSet;
 import org.icgc.dcc.portal.model.IdsParam;
-import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.GeneSetService;
 import org.icgc.dcc.portal.util.JsonUtils;
@@ -108,7 +107,7 @@ public class GeneSetResource {
       ) {
     log.info("Request for gene set'{}'", id);
 
-    GeneSet geneSet = geneSetService.findOne(id, Query.builder().fields(fields).build());
+    GeneSet geneSet = geneSetService.findOne(id, fields);
 
     log.info("Returning '{}'", geneSet);
 

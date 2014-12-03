@@ -44,7 +44,6 @@ public class SearchRepository {
   private static final Type DONOR_TEXT = Type.DONOR_TEXT;
   private static final Type PROJECT_TEXT = Type.PROJECT_TEXT;
   private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
-  private static final Type PATHWAY_TEXT = Type.PATHWAY_TEXT;
   private static final Type GENESET_TEXT = Type.GENESET_TEXT;
 
   private final Client client;

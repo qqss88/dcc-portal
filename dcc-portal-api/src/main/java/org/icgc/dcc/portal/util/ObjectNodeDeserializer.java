@@ -15,32 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.utils;
+package org.icgc.dcc.portal.util;
 
-import static lombok.AccessLevel.PRIVATE;
-import lombok.NoArgsConstructor;
+import java.io.IOException;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.instance.GroupProperties;
-import com.hazelcast.instance.HazelcastInstanceFactory;
+import lombok.val;
 
-@NoArgsConstructor(access = PRIVATE)
-public final class HazelcastFactory {
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-  /**
-   * Creates an instance of Hazelcast that does not communicate over the network.
-   */
-  public static HazelcastInstance createLocalHazelcastInstance() {
-    return HazelcastInstanceFactory.newHazelcastInstance(initConfig(new Config()));
+public class ObjectNodeDeserializer extends JsonDeserializer<ObjectNode> {
+
+  @Override
+  public ObjectNode deserialize(JsonParser parser, DeserializationContext context) throws IOException,
+      JsonProcessingException {
+    val value = parser.readValueAsTree();
+
+    return value.isObject() ? (ObjectNode) value : null;
   }
-
-  private static Config initConfig(Config config) {
-    config.setProperty(GroupProperties.PROP_WAIT_SECONDS_BEFORE_JOIN, "0");
-    config.setProperty(GroupProperties.PROP_GRACEFUL_SHUTDOWN_MAX_WAIT, "120");
-    config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-
-    return config;
-  }
-
 }

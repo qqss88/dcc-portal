@@ -46,6 +46,7 @@ import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
+import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.icgc.dcc.portal.service.OccurrenceService;
@@ -134,6 +135,11 @@ public class PortalConfig {
   @Bean
   public UserGeneSetRepository userGeneSetRepository(DBI dbi) {
     return dbi.open(UserGeneSetRepository.class);
+  }
+
+  @Bean
+  public EnrichmentAnalysisRepository enrichmentAnalysisRepository(DBI dbi) {
+    return dbi.open(EnrichmentAnalysisRepository.class);
   }
 
   @Bean

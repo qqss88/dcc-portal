@@ -1,5 +1,5 @@
-/*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+/**
+ * Copyright 2012(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -14,40 +14,26 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.icgc.dcc.portal.model;
 
-import java.io.IOException;
-import java.io.Serializable;
+import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
-import javax.ws.rs.core.Response.StatusType;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis.Params;
 
-import lombok.Value;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.yammer.dropwizard.jersey.params.AbstractParam;
 
-@Value
-public class Error implements Serializable {
+public class ParamsParam extends AbstractParam<Params> {
 
-  private final int code;
-  private final String message;
+  private static final ObjectReader READER = MAPPER.reader(Params.class);
 
-  public Error(int code, IOException e) {
-    this.code = code;
-    this.message = e.getMessage();
+  public ParamsParam(String input) {
+    super(input);
   }
 
-  public Error(StatusType code, IOException e) {
-    this.code = code.getStatusCode();
-    this.message = e.getMessage();
-  }
-
-  public Error(int code, String message) {
-    this.code = code;
-    this.message = message;
-  }
-
-  public Error(StatusType code, String message) {
-    this.code = code.getStatusCode();
-    this.message = message;
+  @Override
+  protected Params parse(String input) throws Exception {
+    return READER.readValue(input);
   }
 
 }

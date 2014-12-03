@@ -54,7 +54,7 @@ public class Occurrence {
   String matchedSampleId;
   @ApiModelProperty(value = "Submitted Matched Sample ID", required = true)
   String submittedMatchedSampleId;
-  @ApiModelProperty(value = "Affected Project Id", required = true)
+  @ApiModelProperty(value = "Affected Project Identifiable", required = true)
   String projectId;
   @ApiModelProperty(value = "Sample ID", required = true)
   String sampleId;

@@ -17,10 +17,11 @@
  */
 package org.icgc.dcc.portal.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.GeneSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class GeneSetService {
 
+  /**
+   * Dependencies.
+   */
+  @NonNull
   private final GeneSetRepository geneSetRepository;
 
-  public GeneSet findOne(String id, Query query) {
-    return new GeneSet(geneSetRepository.findOne(id, query));
+  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
+    val document = geneSetRepository.findOne(id, fieldNames);
+
+    return new GeneSet(document);
   }
 
 }

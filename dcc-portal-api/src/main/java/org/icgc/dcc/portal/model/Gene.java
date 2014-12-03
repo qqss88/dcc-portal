@@ -124,15 +124,6 @@ public class Gene {
     return result;
   }
 
-  private List<Pathway> buildPathways(List<Map<String, Object>> field) {
-    if (field == null) return null;
-    List<Pathway> lst = Lists.newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Pathway(item));
-    }
-    return lst;
-  }
-
   @SuppressWarnings("unchecked")
   private List<Project> buildProjects(Map<String, Object> fieldMap) {
     val ps = (List<Map<String, Object>>) fieldMap.get("project");

@@ -15,56 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.util;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import java.lang.reflect.Type;
 
-import java.util.Random;
+import javax.ws.rs.core.Context;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+public class ContextInjectableProvider<T> extends SingletonTypeInjectableProvider<Context, T> {
 
-import org.elasticsearch.ElasticSearchException;
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
-
-@Slf4j
-@Component
-@Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
-
-  private final static Status STATUS = BAD_REQUEST;
-  private static final Random RANDOM = new Random();
-
-  @Override
-  public Response toResponse(ElasticSearchException e) {
-
-    val id = RANDOM.nextLong();
-    log.error(formatLogMessage(id), e);
-
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e, id))
-        .build();
+  public ContextInjectableProvider(Type type, T instance) {
+    super(type, instance);
   }
-
-  protected String formatLogMessage(long id) {
-    return String.format("Error handling a request: %016x", id);
-  }
-
-  private Error errorResponse(ElasticSearchException e, long id) {
-    return new Error(STATUS, message(e, id));
-  }
-
-  private String message(ElasticSearchException e, long id) {
-    return String.format("%s", formatLogMessage(id));
-  }
-
 }

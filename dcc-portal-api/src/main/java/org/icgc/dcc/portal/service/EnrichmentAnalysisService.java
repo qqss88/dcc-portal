@@ -15,56 +15,47 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.service;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import java.util.UUID;
 
-import java.util.Random;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+@Service
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+public class EnrichmentAnalysisService {
 
-import org.elasticsearch.ElasticSearchException;
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+  /**
+   * Dependencies
+   */
+  @NonNull
+  private final EnrichmentAnalysisExecutor executor;
+  @NonNull
+  private final EnrichmentAnalysisRepository repository;
 
-@Slf4j
-@Component
-@Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
+  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
+    analysis.setId(createAnalysisId());
 
-  private final static Status STATUS = BAD_REQUEST;
-  private static final Random RANDOM = new Random();
+    // Ensure persisted for polling
+    repository.save(analysis);
 
-  @Override
-  public Response toResponse(ElasticSearchException e) {
-
-    val id = RANDOM.nextLong();
-    log.error(formatLogMessage(id), e);
-
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e, id))
-        .build();
+    // Execute asynchronously
+    executor.execute(analysis);
   }
 
-  protected String formatLogMessage(long id) {
-    return String.format("Error handling a request: %016x", id);
+  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
+    return repository.find(analysisId);
   }
 
-  private Error errorResponse(ElasticSearchException e, long id) {
-    return new Error(STATUS, message(e, id));
-  }
-
-  private String message(ElasticSearchException e, long id) {
-    return String.format("%s", formatLogMessage(id));
+  private static UUID createAnalysisId() {
+    // Prevent "browser scanning" by using an opaque id
+    return UUID.randomUUID();
   }
 
 }

@@ -15,56 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.repository;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import java.util.UUID;
 
-import java.util.Random;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.repository.JsonRepository.JsonMapperFactory;
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+/**
+ * Data access for abstraction for working with user defined {@link EnrichmentAnalysis}.
+ */
+@RegisterMapperFactory(JsonMapperFactory.class)
+public interface EnrichmentAnalysisRepository extends JsonRepository {
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+  /**
+   * Schema constants.
+   */
+  static final String TABLE_NAME = "enrichment_analysis";
 
-import org.elasticsearch.ElasticSearchException;
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+  @SqlQuery("SELECT  " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
+  EnrichmentAnalysis find(@Bind(ID_FIELD_NAME) UUID id);
 
-@Slf4j
-@Component
-@Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
-
-  private final static Status STATUS = BAD_REQUEST;
-  private static final Random RANDOM = new Random();
-
-  @Override
-  public Response toResponse(ElasticSearchException e) {
-
-    val id = RANDOM.nextLong();
-    log.error(formatLogMessage(id), e);
-
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e, id))
-        .build();
-  }
-
-  protected String formatLogMessage(long id) {
-    return String.format("Error handling a request: %016x", id);
-  }
-
-  private Error errorResponse(ElasticSearchException e, long id) {
-    return new Error(STATUS, message(e, id));
-  }
-
-  private String message(ElasticSearchException e, long id) {
-    return String.format("%s", formatLogMessage(id));
-  }
+  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + " , " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
+  int save(@BindValue EnrichmentAnalysis analysis);
 
 }
