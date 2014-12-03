@@ -51,7 +51,7 @@ import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.NotFoundException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
-import org.icgc.dcc.portal.util.HazelcastFactory;
+import org.icgc.dcc.portal.test.HazelcastFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

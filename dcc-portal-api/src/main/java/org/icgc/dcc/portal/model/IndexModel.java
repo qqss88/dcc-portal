@@ -223,9 +223,8 @@ public class IndexModel {
           .put("pathways", "pathways")
           .put("sets", "sets")
           .put("geneSetId", "sets.id")
-          // .put("list", "list")
-          // .put("goTerms", "go_terms")
-          // .put("curatedSets", "curated_sets")
+          .put("analysisId", "analysisId") // Required for downstream QueryService
+
           .build();
 
   private static final ImmutableMap<String, String> MUTATIONS_FIELDS_MAPPING =

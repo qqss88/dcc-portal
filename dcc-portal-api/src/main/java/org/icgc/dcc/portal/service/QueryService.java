@@ -23,6 +23,7 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
+import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -409,19 +410,29 @@ public class QueryService {
                 items.add(item.textValue());
               }
               if (locationFields.contains(fieldName)) {
+                // Chromosome location
                 fb = locationFilters(kind, items, typeMapping, prefixMapping);
-              } else {
-                if (items.remove(MISSING)) {
-                  val bf = FilterBuilders.boolFilter();
-                  val mf = missingFilter(fieldName).existence(true).nullValue(false);
-                  bf.should(mf);
-                  if (!items.isEmpty()) {
-                    bf.should(termsFilter(fieldName, items));
-                  }
-                  fb = bf;
-                } else {
-                  fb = termsFilter(fieldName, items);
+              } else if (items.remove(MISSING)) {
+                // Missing
+                val bf = FilterBuilders.boolFilter();
+                val mf = missingFilter(fieldName).existence(true).nullValue(false);
+                bf.should(mf);
+                if (!items.isEmpty()) {
+                  bf.should(termsFilter(fieldName, items));
                 }
+                fb = bf;
+              } else if (fieldName.equals("analysisId")) {
+                // Term lookup for Enrichment Analysis
+                val analysisId = items.get(0);
+                fb = termsLookupFilter("_gene_id")
+                    .filterName("analysisId")
+                    .lookupId(analysisId)
+                    .lookupIndex("user")
+                    .lookupType("enrichment-analysis")
+                    .lookupPath("values");
+              } else {
+                // Catch all
+                fb = termsFilter(fieldName, items);
               }
             } else {
               String value = boolNode.get(bool).textValue();

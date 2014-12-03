@@ -31,6 +31,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @NoArgsConstructor(access = PRIVATE)
 public final class Filters {
 
+  public static ObjectNode emptyFilter() {
+    return MAPPER.createObjectNode();
+  }
+
   public static ObjectNode uploadedGeneListFilter(@NonNull String geneListId) {
     val geneFilter = geneFilter();
     geneFilter.with("gene").put("uploadedGeneList", is(geneListId));
@@ -47,14 +51,14 @@ public final class Filters {
 
   public static ObjectNode geneSetFilter(@NonNull String geneSetId) {
     val geneFilter = geneFilter();
-    geneFilter.with("gene").put("geneSetId", geneSetId);
+    geneFilter.with("gene").put("geneSetId", is(geneSetId));
 
     return geneFilter;
   }
 
   public static ObjectNode goTermFilter(@NonNull String goTermId) {
     val geneFilter = geneFilter();
-    geneFilter.with("gene").put("hasGoTerm", true).put("goTermId", goTermId);
+    geneFilter.with("gene").put("hasGoTerm", true).put("goTermId", is(goTermId));
 
     return geneFilter;
   }
@@ -65,7 +69,7 @@ public final class Filters {
 
   public static ObjectNode enrichmentAnalysisFilter(@NonNull UUID analysisId) {
     val analysisFilter = geneFilter();
-    analysisFilter.put("analysisId", analysisId.toString());
+    analysisFilter.with("gene").put("analysisId", is(analysisId.toString()));
 
     return analysisFilter;
   }

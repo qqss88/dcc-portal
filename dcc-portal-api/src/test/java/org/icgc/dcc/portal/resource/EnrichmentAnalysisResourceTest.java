@@ -34,7 +34,7 @@ import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.provider.ExpandingFormFilterParamsProvider;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
 import org.icgc.dcc.portal.service.UserGeneSetService;
-import org.icgc.dcc.portal.util.ContextInjectableProvider;
+import org.icgc.dcc.portal.test.ContextInjectableProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

@@ -25,6 +25,7 @@ import static org.elasticsearch.index.query.QueryBuilders.customScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
+import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
@@ -71,6 +72,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis.Universe;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -189,6 +191,27 @@ public class GeneRepository implements Repository {
     return response;
   }
 
+  public SearchResponse findGeneSets(ObjectNode filters) {
+    val search = client.prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setFrom(0)
+        .setSize(0);
+
+    for (val universe : Universe.values()) {
+      val facetName = universe.getGeneSetFacetName();
+      val termFacet = termsFacet(facetName).field(facetName).size(50000);
+      termFacet.facetFilter(getFilters(filters));
+
+      search.addFacet(termFacet);
+    }
+
+    log.debug("{}", search);
+    SearchResponse response = search.execute().actionGet();
+    log.debug("{}", response);
+
+    return response;
+  }
+
   @Override
   public SearchResponse findAll(Query query) {
     val search = buildFindAllRequest(query, TYPE);
@@ -203,7 +226,10 @@ public class GeneRepository implements Repository {
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
     val search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
+        client.prepareSearch(index)
+            .setTypes(type.getId())
+            .setSearchType(QUERY_THEN_FETCH)
+            .setFrom(query.getFrom())
             .setSize(query.getSize());
 
     ObjectNode filters = remapFilters(query.getFilters());
@@ -220,9 +246,12 @@ public class GeneRepository implements Repository {
       search.addFacet(facet);
     }
 
-    String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
-    search.addSort(fieldSort(sort).order(query.getOrder()));
-    if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
+    if (query.getSort() != null) {
+      String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
+      search.addSort(fieldSort(sort).order(query.getOrder()));
+      if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
+    }
+
     return search;
   }
 

@@ -15,17 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.util;
+package org.icgc.dcc.portal.test;
 
-import java.lang.reflect.Type;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-import javax.ws.rs.core.Context;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.instance.HazelcastInstanceFactory;
 
-import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
+@NoArgsConstructor(access = PRIVATE)
+public final class HazelcastFactory {
 
-public class ContextInjectableProvider<T> extends SingletonTypeInjectableProvider<Context, T> {
-
-  public ContextInjectableProvider(Type type, T instance) {
-    super(type, instance);
+  /**
+   * Creates an instance of Hazelcast that does not communicate over the network.
+   */
+  public static HazelcastInstance createLocalHazelcastInstance() {
+    return HazelcastInstanceFactory.newHazelcastInstance(initConfig(new Config()));
   }
+
+  private static Config initConfig(Config config) {
+    config.setProperty(GroupProperties.PROP_WAIT_SECONDS_BEFORE_JOIN, "0");
+    config.setProperty(GroupProperties.PROP_GRACEFUL_SHUTDOWN_MAX_WAIT, "120");
+    config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+
+    return config;
+  }
+
 }
