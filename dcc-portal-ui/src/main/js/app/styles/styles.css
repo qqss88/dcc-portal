@@ -1085,66 +1085,76 @@ header #brand img {
   background: #166aa2;
 }
 /* line 133, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__analysis a {
+  color: #666666;
+  border: 0.3rem solid #666666;
+}
+/* line 138, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__analysis a:hover {
+  color: white;
+  background: #666666;
+}
+/* line 143, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
   color: #1693c0;
   border: 0.3rem solid #1693c0;
 }
-/* line 138, _sections/_header.scss */
+/* line 148, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a:hover {
   color: white;
   background: #1693c0;
 }
-/* line 143, _sections/_header.scss */
+/* line 153, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a {
   background: #cccccc;
   border: 0.3rem solid #cccccc;
 }
-/* line 146, _sections/_header.scss */
+/* line 156, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a .icon-search {
   padding: 1rem;
 }
-/* line 150, _sections/_header.scss */
+/* line 160, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a form {
   opacity: 0;
 }
-/* line 155, _sections/_header.scss */
+/* line 165, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a:hover {
   background: #cccccc;
 }
-/* line 159, _sections/_header.scss */
+/* line 169, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open {
   border: 0.3rem solid #cccccc;
   text-align: left;
   background: white;
 }
-/* line 163, _sections/_header.scss */
+/* line 173, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open i {
   color: #cccccc;
 }
-/* line 166, _sections/_header.scss */
+/* line 176, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form {
   width: auto;
   opacity: 1;
 }
-/* line 169, _sections/_header.scss */
+/* line 179, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form input {
   border-radius: 1rem;
 }
-/* line 175, _sections/_header.scss */
+/* line 185, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open:hover {
   background: white;
 }
-/* line 179, _sections/_header.scss */
+/* line 189, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a {
   background: #6d72c5;
   border: 0.3rem solid #6d72c5;
 }
-/* line 184, _sections/_header.scss */
+/* line 194, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a:hover {
   background: #6d72c5;
 }
 
-/* line 190, _sections/_header.scss */
+/* line 200, _sections/_header.scss */
 .t_nav__items__item__icon i {
   position: relative;
   display: inline-block;
@@ -1154,35 +1164,35 @@ header #brand img {
   background: rgba(255, 255, 255, 0.1);
 }
 @media (min-width: 1025px) {
-  /* line 190, _sections/_header.scss */
+  /* line 200, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem 1rem .9rem;
   }
 }
 @media (min-width: 1535px) {
-  /* line 190, _sections/_header.scss */
+  /* line 200, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .9rem;
   }
 }
 
-/* line 233, _sections/_header.scss */
+/* line 243, _sections/_header.scss */
 .t_nav__items__item__title {
   display: none;
 }
 
-/* line 238, _sections/_header.scss */
+/* line 248, _sections/_header.scss */
 #home-page header {
   text-align: center;
   padding: 0;
 }
 @media (min-width: 721px) {
-  /* line 238, _sections/_header.scss */
+  /* line 248, _sections/_header.scss */
   #home-page header {
     padding-bottom: 2rem;
   }
 }
-/* line 245, _sections/_header.scss */
+/* line 255, _sections/_header.scss */
 #home-page header #brand {
   width: 100%;
   float: right;
@@ -1191,7 +1201,7 @@ header #brand img {
   clear: none;
   margin: 0;
 }
-/* line 248, _sections/_header.scss */
+/* line 258, _sections/_header.scss */
 #home-page header #brand a {
   line-height: 5rem;
   font-size: 3rem;
@@ -1199,7 +1209,7 @@ header #brand img {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 @media (min-width: 721px) {
-  /* line 248, _sections/_header.scss */
+  /* line 258, _sections/_header.scss */
   #home-page header #brand a {
     line-height: 7rem;
     font-size: 4rem;
@@ -1207,21 +1217,21 @@ header #brand img {
     font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
-/* line 265, _sections/_header.scss */
+/* line 275, _sections/_header.scss */
 #home-page header #brand img {
   height: 3rem;
   margin-bottom: -.4rem;
   width: 3rem;
 }
 @media (min-width: 721px) {
-  /* line 265, _sections/_header.scss */
+  /* line 275, _sections/_header.scss */
   #home-page header #brand img {
     height: 4rem;
     margin-bottom: -.6rem;
     width: 4rem;
   }
 }
-/* line 278, _sections/_header.scss */
+/* line 288, _sections/_header.scss */
 #home-page .t_nav__pages {
   width: 100%;
   float: right;
@@ -1230,93 +1240,110 @@ header #brand img {
   clear: none;
   margin-right: 0;
 }
-/* line 281, _sections/_header.scss */
+/* line 291, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item {
   text-align: left;
   margin: 0;
 }
 @media (min-width: 721px) {
-  /* line 281, _sections/_header.scss */
+  /* line 291, _sections/_header.scss */
   #home-page .t_nav__pages .t_nav__items__item {
-    margin: 0 2rem;
+    margin: 0 1.25rem;
   }
 }
-/* line 287, _sections/_header.scss */
+/* line 298, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item a {
   padding-right: 1rem;
 }
-/* line 294, _sections/_header.scss */
+/* line 305, _sections/_header.scss */
 #home-page .t_nav__actions {
   position: absolute;
   top: .4rem;
   right: 2rem;
 }
-/* line 300, _sections/_header.scss */
+/* line 311, _sections/_header.scss */
 #home-page .t_nav__items__item__title {
   font-weight: 300;
   display: inline-block;
 }
-/* line 305, _sections/_header.scss */
+/* line 316, _sections/_header.scss */
 #home-page .t_nav__items__item__home {
   display: none;
 }
-/* line 308, _sections/_header.scss */
+/* line 319, _sections/_header.scss */
 #home-page .t_nav__items__item__search {
   display: none;
 }
-/* line 311, _sections/_header.scss */
+/* line 322, _sections/_header.scss */
 #home-page .t_nav__items__item__projects a {
   background: #e9931c;
   color: white;
 }
-/* line 315, _sections/_header.scss */
+/* line 326, _sections/_header.scss */
 #home-page .t_nav__items__item__advanced a {
   background: #166aa2;
   color: white;
 }
-/* line 319, _sections/_header.scss */
+/* line 330, _sections/_header.scss */
+#home-page .t_nav__items__item__analysis a {
+  background: #666666;
+  color: white;
+}
+/* line 334, _sections/_header.scss */
 #home-page .t_nav__items__item__download a {
   background: #1693c0;
   color: white;
 }
 
-/* line 326, _sections/_header.scss */
+/* line 341, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a {
   cursor: default;
   background: #e9931c;
   color: white;
 }
-/* line 330, _sections/_header.scss */
+/* line 345, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 338, _sections/_header.scss */
+/* line 353, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a {
   cursor: default;
   background: #166aa2;
   color: white;
 }
-/* line 342, _sections/_header.scss */
+/* line 357, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 350, _sections/_header.scss */
+/* line 366, _sections/_header.scss */
+#analysis-page .t_nav__items__item__analysis a {
+  cursor: default;
+  background: #666666;
+  color: white;
+}
+/* line 370, _sections/_header.scss */
+#analysis-page .t_nav__items__item__analysis a i {
+  box-shadow: none;
+  background: none;
+}
+
+/* line 378, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a {
   cursor: default;
   background: #1693c0;
   color: white;
 }
-/* line 354, _sections/_header.scss */
+/* line 382, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 362, _sections/_header.scss */
+/* line 390, _sections/_header.scss */
 #q-page .t_nav__items__item__search {
   display: none;
 }
@@ -1324,14 +1351,14 @@ header #brand img {
 /* ************************************
  *   Suggest
  *********************************** */
-/* line 370, _sections/_header.scss */
+/* line 398, _sections/_header.scss */
 .t_suggest.t_suggest__header {
   color: #333333;
   width: 150%;
   float: right;
   margin: 0;
 }
-/* line 377, _sections/_header.scss */
+/* line 405, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__input {
   margin: .4rem 0 0 0;
   padding-top: .5rem;
@@ -1339,16 +1366,16 @@ header #brand img {
   padding-bottom: .5rem;
   padding-left: 0;
 }
-/* line 387, _sections/_header.scss */
+/* line 415, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest_flyout {
   margin-top: .5rem;
 }
-/* line 391, _sections/_header.scss */
+/* line 419, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__left {
   top: 1.1rem;
   left: 1rem;
 }
-/* line 396, _sections/_header.scss */
+/* line 424, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__right {
   top: 1rem;
   right: 1rem;
@@ -1358,16 +1385,16 @@ header #brand img {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 407, _sections/_header.scss */
+  /* line 435, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__left {
     top: 1.3rem;
   }
-  /* line 411, _sections/_header.scss */
+  /* line 439, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__right {
     top: 1.2rem;
   }
 
-  /* line 417, _sections/_header.scss */
+  /* line 445, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem;
   }
