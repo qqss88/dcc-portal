@@ -129,7 +129,13 @@ public class EnrichmentAnalysisExecutor {
     // Determine input gene ids
     val fields = ImmutableList.of(GENE_ID);
     val filters = query.getFilters();
-    val limitQuery = Query.builder().fields(fields).filters(filters).size(maxGeneCount).build();
+    val limitQuery = Query.builder()
+        .fields(fields)
+        .filters(filters)
+        .size(maxGeneCount)
+        .sort(query.getSort())
+        .order(query.getOrder().toString())
+        .build();
 
     val results = geneRepository.findAll(limitQuery);
 

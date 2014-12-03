@@ -30,9 +30,19 @@ public class Error implements Serializable {
   private final int code;
   private final String message;
 
+  public Error(int code, IOException e) {
+    this.code = code;
+    this.message = e.getMessage();
+  }
+
   public Error(StatusType code, IOException e) {
     this.code = code.getStatusCode();
     this.message = e.getMessage();
+  }
+
+  public Error(int code, String message) {
+    this.code = code;
+    this.message = message;
   }
 
   public Error(StatusType code, String message) {

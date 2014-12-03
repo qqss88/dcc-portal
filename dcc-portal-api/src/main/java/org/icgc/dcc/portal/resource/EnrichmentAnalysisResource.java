@@ -17,6 +17,9 @@
 
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Integer.parseInt;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
@@ -30,9 +33,11 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_PARAMS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_PARAMS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_FIELD;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
 
 import java.util.UUID;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -49,6 +54,7 @@ import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.ParamsParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,7 +64,8 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Slf4j
 @Component
-@Path("/analysis/enrichment")
+@Path("/v1/analysis/enrichment")
+@Consumes(APPLICATION_FORM_URLENCODED)
 @Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EnrichmentAnalysisResource {
@@ -71,6 +78,10 @@ public class EnrichmentAnalysisResource {
   @ApiOperation(value = "Retrieves an enrichment analysis by id", response = EnrichmentAnalysis.class)
   public EnrichmentAnalysis getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) UUID analysisId) {
+    if (analysisId == null) {
+      throw new BadRequestException("'analysisId' is empty");
+    }
+
     log.info("Getting analysis with id '{}'...", analysisId);
     return service.getAnalysis(analysisId);
   }
@@ -86,13 +97,31 @@ public class EnrichmentAnalysisResource {
 
     // TODO: Add @FormParam version of ExpandingFilterParamsProvider (type hierarchy?)
 
+    if (paramsParam == null) {
+      throw new BadRequestException("'params' empty");
+    }
+    if (filtersParam == null) {
+      throw new BadRequestException("'filters' empty");
+    }
+    if (isNullOrEmpty(sort)) {
+      throw new BadRequestException("'sort' is missing or empty");
+    }
+    if (isNullOrEmpty(order)) {
+      throw new BadRequestException("'order' is missing or empty");
+    }
+
     // Construct
-    val query = Query.builder().filters(filtersParam.get()).sort(sort).order(order).defaultLimit(10).build();
-    val params = paramsParam.get();
+    val query = Query.builder()
+        .filters(filtersParam.get())
+        .sort(sort)
+        .order(order)
+        .size(parseInt(DEFAULT_SIZE))
+        .build();
+
     val analysis = new EnrichmentAnalysis()
         .setState(EXECUTING)
         .setQuery(query)
-        .setParams(params);
+        .setParams(paramsParam.get());
 
     log.info("Submitting analysis '{}'...", analysis);
     service.submitAnalysis(analysis);

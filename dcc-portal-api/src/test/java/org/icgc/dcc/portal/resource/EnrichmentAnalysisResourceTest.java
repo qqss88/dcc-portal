@@ -51,7 +51,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
   /**
    * Endpoint.
    */
-  private final static String RESOURCE = "/analysis/enrichment";
+  private final static String RESOURCE = "/v1/analysis/enrichment";
 
   /**
    * Dependencies.
