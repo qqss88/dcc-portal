@@ -31,10 +31,8 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.NOT;
-import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
-import java.io.IOException;
 import java.util.List;
 
 import lombok.val;
@@ -49,14 +47,12 @@ import org.icgc.dcc.portal.model.IndexModel.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Slf4j
 public class QueryService {
@@ -167,23 +163,19 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.TRANSCRIPT, prefixMapping);
   }
 
-  public static void main(String args[]) throws JsonProcessingException, IOException {
-
-    ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
-        Kind.GENE_SET, "sets",
-        Kind.DONOR, "donor",
-        Kind.MUTATION, "donor.ssm",
-        Kind.CONSEQUENCE, "donor.ssm.consequence",
-        Kind.OBSERVATION, "donor.ssm.observation"));
-
-    ObjectNode objNode =
-        (ObjectNode) MAPPER.readTree(
-            "{'geneSet':{'goTermId':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}");
-
-    val filter = QueryService.buildGeneSetFilters(objNode, NESTED_MAPPING);
-    log.info("Filters {}", objNode);
-    log.info("Query {}", filter);
-  }
+  /*
+   * public static void main(String args[]) throws JsonProcessingException, IOException {
+   * 
+   * ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of( Kind.GENE_SET, "sets",
+   * Kind.DONOR, "donor", Kind.MUTATION, "donor.ssm", Kind.CONSEQUENCE, "donor.ssm.consequence", Kind.OBSERVATION,
+   * "donor.ssm.observation"));
+   * 
+   * ObjectNode objNode = (ObjectNode) MAPPER.readTree(
+   * "{'geneSet':{'goTermId':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}");
+   * 
+   * val filter = QueryService.buildGeneSetFilters(objNode, NESTED_MAPPING); log.info("Filters {}", objNode);
+   * log.info("Query {}", filter); }
+   */
 
   public static BoolFilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
     val resultFilter = FilterBuilders.boolFilter();
@@ -523,13 +515,12 @@ public class QueryService {
   // NOTE: This changes the filter structure so the Filter Building logic doesn't have to change.
   // Moves gene: {pathwayId} -> pathway: {id} because pathways are nested
   public static ObjectNode remapG2P(ObjectNode filters) {
-    log.info("Before {}", filters);
     if (filters.has("gene")) {
       val gene = (ObjectNode) filters.get("gene");
 
       val geneSet = new ObjectMapper().createObjectNode();
       val geneSetList =
-          ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId", "curatedSetId", "hasGOTerm", "hasPathway",
+          ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId", "curatedSetId", "hasGoTerm", "hasPathway",
               "hasCuratedSet");
 
       for (val geneSetIdentifier : geneSetList) {
@@ -548,7 +539,6 @@ public class QueryService {
       }
     }
 
-    log.info("After filters {}", filters);
     return filters;
   }
 

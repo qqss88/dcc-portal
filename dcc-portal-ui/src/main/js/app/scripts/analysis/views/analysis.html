@@ -1,0 +1,24 @@
+<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Analysis</h1>
+<aside class="t_sidebar">
+
+    <!-- testing -->
+    <span data-ng-init="test= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"></span>
+
+    <div style="margin-right: -2rem">
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
+            <ul class="t_suggest_flyout__hits">
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-repeat="item in test"
+                    data-ng-class="{selected: item == analysisId}"> 
+                    <span> Gene Set Analysis {{item}} </span><br>
+                    <small>yyyy-mm-dd</small>
+                </li>
+            </ul>
+        </div>
+    </div>
+</aside>
+<article>
+    <div style="margin: 1rem">
+        <enrichment-result></enrichment-result>
+    </div>
+</article>

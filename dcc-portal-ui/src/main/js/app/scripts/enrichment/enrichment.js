@@ -11,36 +11,41 @@
 
   angular.module('icgc.enrichment.controllers', []);
 
-
   /**
-   * Validates the gene set enrichment submission and updates the current url
+   * Validate and submit gene set analysis input
    */
   angular.module('icgc.enrichment.controllers')
-    .controller('enrichmentUploadController', function($scope, Extensions) {
+    .controller('EnrichmentUploadController', function($scope, Extensions, $location) {
+    var _ctrl = this;
+
+    _ctrl.hasValidParams = false;
+
     $scope.Extensions = Extensions;
 
     // Default values
-    $scope.analysisParams = {
+    _ctrl.analysisParams = {
       geneSetCount: 50,
       fdr: 0.05,
       geneCount: 1000
     };
 
-    $scope.newGeneSetEnrichment = function() {
+    _ctrl.newGeneSetEnrichment = function() {
+      $scope.enrichmentModal = false;
+      $location.path('/analysis/' + 1).search({});
     };
 
-    $scope.hasValidParams = function() {
-      var params = $scope.analysisParams;
+    _ctrl.checkInput = function() {
+      var params = _ctrl.analysisParams;
 
-      if ($scope.hasValidGeneCount(parseInt(params.geneCount, 10)) === false ||
-        $scope.hasValidFDR(parseFloat(params.fdr)) === false ||
+      if (_ctrl.hasValidGeneCount(parseInt(params.geneCount, 10)) === false ||
+        _ctrl.hasValidFDR(parseFloat(params.fdr)) === false ||
         angular.isDefined(params.background) === false) {
-        return false;
+        _ctrl.hasValidParams = false;
       }
-      return true;
+      _ctrl.hasValidParams = true;
     };
 
-    $scope.hasValidFDR = function(val) {
+    _ctrl.hasValidFDR = function(val) {
       if (angular.isNumber(val) === false) {
         return false;
       }
@@ -50,9 +55,8 @@
       return false;
     };
 
-    $scope.hasValidGeneCount = function(val) {
+    _ctrl.hasValidGeneCount = function(val) {
       if (angular.isNumber(val) === false) {
-        console.log('blah');
         return false;
       }
       return true;
@@ -64,7 +68,7 @@
    * Displays gene set enrichment results
    */
   angular.module('icgc.enrichment.controllers')
-    .controller('enrichmentResultController', function($scope) {
+    .controller('EnrichmentResultController', function($scope) {
   });
 
 })();
@@ -83,7 +87,7 @@
         totalGenes: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
-      controller: 'enrichmentUploadController'
+      controller: 'EnrichmentUploadController as EnrichmentUploadController'
     };
   });
 
@@ -94,7 +98,7 @@
         collapsed: '='
       },
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
-      controller: 'enrichmentResultController'
+      controller: 'EnrichmentResultController as EnrichmentResultController'
     };
   });
 
@@ -109,8 +113,6 @@
   module.service('Enrichment', function (Restangular) {
     // TODO:  API endpoints
   });
-
-
 
 })();
 

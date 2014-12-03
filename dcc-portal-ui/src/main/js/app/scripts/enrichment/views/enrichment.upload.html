@@ -17,7 +17,9 @@
                <div>
                    <span>
                        <strong>Number of top genes in gene result to be analyzed (1000 maximum): </strong><br>
-                       <input type="text" size="5" data-ng-model="analysisParams.geneCount">
+                       <input type="text" size="5" 
+                           data-ng-model="EnrichmentUploadController.analysisParams.geneCount"
+                           data-ng-change="EnrichmentUploadController.checkInput()">
                    </span>
                </div>
                <br>
@@ -25,26 +27,29 @@
                    <div><strong>Select Background: </strong></div>
                    <div data-ng-repeat="item in Extensions.PATHWAY_ROOTS">
                        <input type="radio"
-                           data-ng-model="$parent.analysisParams.background"
+                           data-ng-model="EnrichmentUploadController.analysisParams.background"
+                           data-ng-change="EnrichmentUploadController.checkInput()"
                            value="{{item.name}}"><span> {{item.name}}</span>
                    </div>
                    <div data-ng-repeat="item in Extensions.GENE_ONTOLOGY_ROOTS">
                        <input type="radio"
-                           data-ng-model="$parent.analysisParams.background"
+                           data-ng-model="EnrichmentUploadController.analysisParams.background"
+                           data-ng-change="EnrichmentUploadController.checkInput()"
                            value="{{item.name}}"><span> {{item.name}}</span>
                    </div>
                </div>
                <br>
                <div>
                    <div><strong>FDR q-value below: </strong><br>
-                   <input type="text" size="5" data-ng-model="analysisParams.fdr"></input></div>
+                   <input type="text" size="5" data-ng-model="EnrichmentUploadController.analysisParams.fdr"></input></div>
                </div>
                <br>
                <div>
                    <div class="text-right">
                        <span>Show: </span>
                        <span>
-                           <select data-ng-model="analysisParams.geneSetCount" 
+                           <select data-ng-model="EnrichmentUploadController.analysisParams.geneSetCount" 
+                               data-ng-change="EnrichmentUploadController.checkInput()"
                                data-ng-options="item for item in [10, 20, 50, 100]"></select>
                        </span>
                        <span> Gene Sets</span>
@@ -55,8 +60,8 @@
             <!-- footer -->
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="enrichmentModal=false; reset();">Cancel</button>
-                <button class="t_button" data-ng-click="newGeneSetEnrichment()"
-                    data-ng-disabled="! hasValidParams()">Submit</button> 
+                <button class="t_button" data-ng-click="EnrichmentUploadController.newGeneSetEnrichment()"
+                    data-ng-disabled="! EnrichmentUploadController.hasValidParams">Submit</button> 
             </div>
         </div>
     </div>
