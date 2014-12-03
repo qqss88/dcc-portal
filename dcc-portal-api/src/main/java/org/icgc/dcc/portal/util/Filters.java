@@ -15,31 +15,56 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.util;
 
+import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
+
+import java.util.UUID;
+
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+@NoArgsConstructor(access = PRIVATE)
+public final class Filters {
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
+  public static ObjectNode pathwayFilter() {
+    val geneFilter = geneFilter();
+    geneFilter.put("hasPathway", true);
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
+    return geneFilter;
+  }
 
-    return new GeneSet(document);
+  public static ObjectNode geneSetFilter(@NonNull String geneSetId) {
+    val geneFilter = geneFilter();
+    geneFilter.put("geneSetId", geneSetId);
+
+    return geneFilter;
+  }
+
+  public static ObjectNode goTermFilter(@NonNull String goTermId) {
+    val geneFilter = geneFilter();
+    geneFilter.put("hasGoTerm", true).put("goTermId", goTermId);
+
+    return geneFilter;
+  }
+
+  public static ObjectNode geneFilter() {
+    return entityFilter("gene");
+  }
+
+  public static ObjectNode enrichmentAnalysisFilter(@NonNull UUID analysisId) {
+    val analysisFilter = geneFilter();
+    analysisFilter.put("analysisId", analysisId.toString());
+
+    return analysisFilter;
+  }
+
+  public static ObjectNode entityFilter(@NonNull String entityName) {
+    return MAPPER.createObjectNode().with(entityName);
   }
 
 }

@@ -15,31 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.util;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.instance.HazelcastInstanceFactory;
 
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+@NoArgsConstructor(access = PRIVATE)
+public final class HazelcastFactory {
 
   /**
-   * Dependencies.
+   * Creates an instance of Hazelcast that does not communicate over the network.
    */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
+  public static HazelcastInstance createLocalHazelcastInstance() {
+    return HazelcastInstanceFactory.newHazelcastInstance(initConfig(new Config()));
+  }
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
+  private static Config initConfig(Config config) {
+    config.setProperty(GroupProperties.PROP_WAIT_SECONDS_BEFORE_JOIN, "0");
+    config.setProperty(GroupProperties.PROP_GRACEFUL_SHUTDOWN_MAX_WAIT, "120");
+    config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
 
-    return new GeneSet(document);
+    return config;
   }
 
 }

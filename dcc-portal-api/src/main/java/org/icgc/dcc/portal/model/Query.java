@@ -18,22 +18,31 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.util.JsonUtils;
+import org.icgc.dcc.portal.util.ObjectNodeDeserializer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Builder(chain = true, fluent = true)
-@Value
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class Query {
 
   private Integer defaultLimit = 100;
 
+  @JsonDeserialize(using = ObjectNodeDeserializer.class)
   ObjectNode filters;
+  @JsonDeserialize(using = ObjectNodeDeserializer.class)
   ObjectNode scoreFilters;
+
   List<String> fields;
   List<String> includes;
   int from;

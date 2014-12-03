@@ -36,7 +36,6 @@ import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -61,30 +60,6 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 public class QueryService {
-
-  // Gene set fields are "virtual", in the sense that they are not 1-to-1 with the index structure
-  private static List<String> geneSetFields = ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId",
-      "curatedSetId");
-
-  // TODO:
-  // resultFILter := must();
-  // For each type in [go_term, pathway, curated_set]
-  // idFilter := must( IS and NOT)
-  // existFilter := must( type = type)
-  // typeFilter := should(idFilter, existFilter)
-  // resultFilter := resultFIlter.must(shouldFilter)
-
-  private static Map<String, String> geneSetFieldTypeMap = ImmutableMap.<String, String> builder()
-      .put("pathwayId", "pathway")
-      .put("hasPathway", "pathway")
-      .put("goTermId", "go_term")
-      .put("hasGOTerm", "go_term")
-      .put("curatedSetId", "curated_set")
-      .put("hasCuratedSet", "curated_set")
-      .build();
-
-  private static List<String> geneSetExistFields = ImmutableList
-      .<String> of("hasPathway", "hasGOTerm", "hasCuratedSet");
 
   private static List<String> locationFields = Lists.newArrayList("location", "transcript.gene.location",
       "gene.location", "ssm.consequence.gene.location", "ssm.location", "donor.ssm.location", "gene.ssm.location");

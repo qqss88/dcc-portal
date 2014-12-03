@@ -11,7 +11,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.DistributedCacheService;
-import org.icgc.dcc.portal.utils.HazelcastFactory;
+import org.icgc.dcc.portal.util.HazelcastFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

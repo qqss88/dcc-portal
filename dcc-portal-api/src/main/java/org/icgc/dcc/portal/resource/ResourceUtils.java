@@ -45,8 +45,8 @@ public class ResourceUtils {
   static final String AFFECTED_BY_THE = " affected by the ";
   static final String FOR_THE = " for the ";
   static final String FIND_BY_ID_ERROR =
-      "If it does not exist with the specified Id an error will be returned";
-  static final String FIND_BY_ID = "Find by Id";
+      "If it does not exist with the specified Identifiable an error will be returned";
+  static final String FIND_BY_ID = "Find by Identifiable";
   static final String NOT_FOUND = " not found";
   static final String MULTIPLE_IDS = ". Multiple IDs can be separated by a comma";
 
@@ -80,6 +80,12 @@ public class ResourceUtils {
   static final String API_FILTER_VALUE = "Filter the search results";
   static final String API_SCORE_FILTERS_PARAM = "scoreFilters";
   static final String API_SCORE_FILTER_VALUE = "Used to filter scoring differently from results";
+  static final String API_ANALYSIS_VALUE = "Analysis";
+  static final String API_ANALYSIS_PARAM = "analysis";
+  static final String API_ANALYSIS_ID_VALUE = "Analysis ID";
+  static final String API_ANALYSIS_ID_PARAM = "analysisId";
+  static final String API_PARAMS_VALUE = "Params";
+  static final String API_PARAMS_PARAM = "params";
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();

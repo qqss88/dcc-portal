@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableMap;
 @Component
 public class IndexModel {
 
+  public static final String USER_INDEX_NAME = "user";
+
   public static final int MAX_FACET_TERM_COUNT = 1024;
 
   public static final String IS = "is";

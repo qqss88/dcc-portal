@@ -15,31 +15,55 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.repository;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
+
 import lombok.val;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.skife.jdbi.v2.DBI;
 
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+public class EnrichmentAnalysisRepositoryTest {
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
+  EnrichmentAnalysisRepository repository;
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
+  @Before
+  public void setUp() {
+    val dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
+    this.repository = dbi.open(EnrichmentAnalysisRepository.class);
+  }
 
-    return new GeneSet(document);
+  @After
+  public void tearDown() {
+    repository.close();
+  }
+
+  @Test
+  public void testAll() {
+    val id1 = UUID.randomUUID();
+
+    val analysis1 = new EnrichmentAnalysis().setId(id1);
+    val count1 = repository.save(analysis1);
+    assertThat(count1).isEqualTo(1);
+
+    val id2 = UUID.randomUUID();
+    val analysis2 = new EnrichmentAnalysis().setId(id2);
+    val count2 = repository.save(analysis2);
+    assertThat(count2).isEqualTo(1);
+
+    assertThat(id1).isNotEqualTo(id2);
+
+    val actualData1 = repository.find(id1).getId();
+    assertThat(id1).isEqualTo(actualData1);
+
+    val actualData2 = repository.find(id2).getId();
+    assertThat(id2).isEqualTo(actualData2);
   }
 
 }

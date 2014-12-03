@@ -15,31 +15,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.model;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+public interface Identifiable<T> {
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
-
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
-
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
-
-    return new GeneSet(document);
-  }
+  T getId();
 
 }

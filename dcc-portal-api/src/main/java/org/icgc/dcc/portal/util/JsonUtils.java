@@ -116,4 +116,16 @@ public final class JsonUtils {
 
     return (ObjectNode) node;
   }
+
+  public static ObjectNode merge(JsonNode... nodes) {
+    JsonNode left = nodes[0];
+    for (int i = 1; i < nodes.length; i++) {
+      val right = nodes[i];
+
+      left = merge(left, right);
+    }
+
+    return (ObjectNode) left;
+  }
+
 }

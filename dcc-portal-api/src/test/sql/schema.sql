@@ -6,9 +6,14 @@
 
 -- Clean
 DROP TABLE IF EXISTS user_gene_set;
+DROP TABLE IF EXISTS enrichment_analysis;
 
 -- Create
 CREATE TABLE user_gene_set(
+   id   UUID PRIMARY KEY,
+   data TEXT 
+);
+CREATE TABLE enrichment_analysis(
    id   UUID PRIMARY KEY,
    data TEXT 
 );

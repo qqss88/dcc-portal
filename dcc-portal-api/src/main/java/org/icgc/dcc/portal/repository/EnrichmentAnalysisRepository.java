@@ -15,31 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.repository;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import java.util.UUID;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.repository.JsonRepository.JsonMapperFactory;
+import org.skife.jdbi.v2.sqlobject.Bind;
+import org.skife.jdbi.v2.sqlobject.SqlQuery;
+import org.skife.jdbi.v2.sqlobject.SqlUpdate;
+import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+/**
+ * Data access for abstraction for working with user defined {@link EnrichmentAnalysis}.
+ */
+@RegisterMapperFactory(JsonMapperFactory.class)
+public interface EnrichmentAnalysisRepository extends JsonRepository {
 
   /**
-   * Dependencies.
+   * Schema constants.
    */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
+  static final String TABLE_NAME = "enrichment_analysis";
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
+  @SqlQuery("SELECT  " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
+  EnrichmentAnalysis find(@Bind(ID_FIELD_NAME) UUID id);
 
-    return new GeneSet(document);
-  }
+  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + " , " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
+  int save(@BindValue EnrichmentAnalysis analysis);
 
 }

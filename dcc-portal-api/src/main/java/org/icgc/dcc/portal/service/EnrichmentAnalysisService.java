@@ -17,29 +17,45 @@
  */
 package org.icgc.dcc.portal.service;
 
+import java.util.UUID;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
+import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+public class EnrichmentAnalysisService {
 
   /**
-   * Dependencies.
+   * Dependencies
    */
   @NonNull
-  private final GeneSetRepository geneSetRepository;
+  private final EnrichmentAnalysisExecutor executor;
+  @NonNull
+  private final EnrichmentAnalysisRepository repository;
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
+  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
+    analysis.setId(createAnalysisId());
 
-    return new GeneSet(document);
+    // Ensure persisted for polling
+    repository.save(analysis);
+
+    // Execute asynchronously
+    executor.execute(analysis);
+  }
+
+  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
+    return repository.find(analysisId);
+  }
+
+  private static UUID createAnalysisId() {
+    // Prevent "browser scanning" by using an opaque id
+    return UUID.randomUUID();
   }
 
 }

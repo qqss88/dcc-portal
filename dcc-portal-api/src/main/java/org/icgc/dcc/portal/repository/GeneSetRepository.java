@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Iterables.isEmpty;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +35,6 @@ import org.elasticsearch.index.get.GetField;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +58,11 @@ public class GeneSetRepository {
     this.client = client;
   }
 
-  public Map<String, Object> findOne(String id, Query query) {
+  public Map<String, Object> findOne(@NonNull String id, String... fieldNames) {
+    return findOne(id, ImmutableList.copyOf(fieldNames));
+  }
+
+  public Map<String, Object> findOne(String id, Iterable<String> fieldNames) {
     val fields = FIELDS_MAPPING.get(KIND);
     val fs = Lists.<String> newArrayList();
 
@@ -76,8 +81,8 @@ public class GeneSetRepository {
 
     val search = client.prepareGet(index, TYPE.getId(), id);
 
-    if (query.hasFields()) {
-      for (String field : query.getFields()) {
+    if (!isEmpty(fieldNames)) {
+      for (val field : fieldNames) {
         if (fields.containsKey(field)) {
           fs.add(fields.get(field));
         }

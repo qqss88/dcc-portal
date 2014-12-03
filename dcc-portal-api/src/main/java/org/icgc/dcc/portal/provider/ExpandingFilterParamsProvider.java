@@ -31,6 +31,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
+import lombok.Setter;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -53,6 +54,7 @@ import com.sun.jersey.spi.inject.InjectableProvider;
 /**
  * {@code InjectableProvider} that services {@link @QueryParam} annotated {@link FiltersParam}s in resource methods.
  */
+@Setter
 @Provider
 @Component
 public class ExpandingFilterParamsProvider implements InjectableProvider<QueryParam, Parameter> {

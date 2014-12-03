@@ -15,31 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.util;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
+import java.lang.reflect.Type;
 
-import org.icgc.dcc.portal.model.GeneSet;
-import org.icgc.dcc.portal.repository.GeneSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import javax.ws.rs.core.Context;
 
-@Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-public class GeneSetService {
+import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final GeneSetRepository geneSetRepository;
+public class ContextInjectableProvider<T> extends SingletonTypeInjectableProvider<Context, T> {
 
-  public GeneSet findOne(@NonNull String id, @NonNull Iterable<String> fieldNames) {
-    val document = geneSetRepository.findOne(id, fieldNames);
-
-    return new GeneSet(document);
+  public ContextInjectableProvider(Type type, T instance) {
+    super(type, instance);
   }
-
 }
