@@ -105,12 +105,7 @@ public class GeneService {
       val fieldMap = Maps.<String, Object> newHashMap();
       for (val field : hit.getFields().entrySet()) {
 
-        // Treat synonyms differently as it is a multi-field list,
-        if (field.getKey().equals("synonyms")) {
-          fieldMap.put(field.getKey(), field.getValue().getValues());
-        } else {
-          fieldMap.put(field.getKey(), field.getValue().getValue());
-        }
+        fieldMap.put(field.getKey(), field.getValue().getValue());
 
       }
       if (includeScore) fieldMap.put("_score", hit.getScore());
