@@ -31,23 +31,30 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @NoArgsConstructor(access = PRIVATE)
 public final class Filters {
 
+  public static ObjectNode uploadedGeneListFilter(@NonNull String geneListId) {
+    val geneFilter = geneFilter();
+    geneFilter.with("gene").put("uploadedGeneList", is(geneListId));
+
+    return geneFilter;
+  }
+
   public static ObjectNode pathwayFilter() {
     val geneFilter = geneFilter();
-    geneFilter.put("hasPathway", true);
+    geneFilter.with("gene").put("hasPathway", true);
 
     return geneFilter;
   }
 
   public static ObjectNode geneSetFilter(@NonNull String geneSetId) {
     val geneFilter = geneFilter();
-    geneFilter.put("geneSetId", geneSetId);
+    geneFilter.with("gene").put("geneSetId", geneSetId);
 
     return geneFilter;
   }
 
   public static ObjectNode goTermFilter(@NonNull String goTermId) {
     val geneFilter = geneFilter();
-    geneFilter.put("hasGoTerm", true).put("goTermId", goTermId);
+    geneFilter.with("gene").put("hasGoTerm", true).put("goTermId", goTermId);
 
     return geneFilter;
   }
@@ -64,7 +71,17 @@ public final class Filters {
   }
 
   public static ObjectNode entityFilter(@NonNull String entityName) {
-    return MAPPER.createObjectNode().with(entityName);
+    val entityFilter = MAPPER.createObjectNode();
+    entityFilter.with(entityName);
+
+    return entityFilter;
+  }
+
+  private static ObjectNode is(@NonNull String value) {
+    val is = MAPPER.createObjectNode();
+    is.withArray("is").add(value);
+
+    return is;
   }
 
 }

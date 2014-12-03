@@ -26,10 +26,8 @@ import static com.sun.jersey.core.spi.component.ComponentScope.PerRequest;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.Provider;
 
 import lombok.Setter;
 import lombok.val;
@@ -38,7 +36,6 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Splitter;
@@ -46,18 +43,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.model.Parameter;
-import com.sun.jersey.core.spi.component.ComponentContext;
 import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.spi.inject.Injectable;
-import com.sun.jersey.spi.inject.InjectableProvider;
 
 /**
  * {@code InjectableProvider} that services {@link @QueryParam} annotated {@link FiltersParam}s in resource methods.
  */
 @Setter
-@Provider
-@Component
-public class ExpandingFilterParamsProvider implements InjectableProvider<QueryParam, Parameter> {
+public abstract class AbstractExpandingFilterParamsProvider {
 
   /**
    * Field constants.
@@ -82,15 +75,12 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
   @Autowired
   private UserGeneSetService userGeneSetService;
 
-  @Override
   public ComponentScope getScope() {
     return PerRequest;
   }
 
-  @Override
-  public Injectable<FiltersParam> getInjectable(ComponentContext context, QueryParam meta, Parameter param) {
-    val expandable = FiltersParam.class == param.getParameterClass();
-    if (!expandable) {
+  protected Injectable<FiltersParam> getInjectable(Parameter param) {
+    if (!isExpandable(param)) {
       return null;
     }
 
@@ -98,12 +88,14 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
 
       @Override
       public FiltersParam getValue() {
-        val expandedFilterParams = expandFilterParams();
-
-        return expandedFilterParams;
+        return expandFilterParams();
       }
 
     };
+  }
+
+  private static boolean isExpandable(Parameter param) {
+    return FiltersParam.class == param.getParameterClass();
   }
 
   private FiltersParam expandFilterParams() {
@@ -152,11 +144,17 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
     return ImmutableList.copyOf(GENE_ID_SPLITTER.split(nullToEmpty(text)));
   }
 
-  private static FiltersParam parseFilterParams(HttpContext context) {
-    val params = context.getUriInfo().getQueryParameters();
+  protected abstract MultivaluedMap<String, String> resolveParameters(HttpContext context);
+
+  private FiltersParam parseFilterParams(HttpContext context) {
+    val params = resolveParameters(context);
     val value = getParam(params, FILTERS_QUERY_PARAM_NAME, DEFAULT_FILTERS);
 
     return new FiltersParam(value);
+  }
+
+  private static String getParam(MultivaluedMap<String, String> params, String name, String defaultValue) {
+    return firstNonNull(params.getFirst(name), defaultValue);
   }
 
   private static boolean hasGeneListIds(ObjectNode filters) {
@@ -176,10 +174,6 @@ public class ExpandingFilterParamsProvider implements InjectableProvider<QueryPa
 
   private static ObjectNode getGeneFilter(ObjectNode filters) {
     return filters.with(GENE_FILTER_FIELD_NAME);
-  }
-
-  private static String getParam(MultivaluedMap<String, String> params, String name, String defaultValue) {
-    return firstNonNull(params.getFirst(name), defaultValue);
   }
 
 }

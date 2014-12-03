@@ -20,6 +20,8 @@ package org.icgc.dcc.portal.resource;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
+import static org.icgc.dcc.portal.util.Filters.uploadedGeneListFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +31,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.provider.ExpandingFilterParamsProvider;
+import org.icgc.dcc.portal.provider.ExpandingFormFilterParamsProvider;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
 import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.icgc.dcc.portal.util.ContextInjectableProvider;
@@ -42,7 +44,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.api.representation.Form;
 import com.yammer.dropwizard.testing.ResourceTest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,13 +73,11 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
 
   @Override
   protected final void setUpResources() {
-    val provider = new ExpandingFilterParamsProvider();
-    provider.setUserGeneSetService(userGeneSetService);
-
-    when(service.getAnalysis(Mockito.any(UUID.class))).thenReturn(new EnrichmentAnalysis());
+    val formProvider = new ExpandingFormFilterParamsProvider();
+    formProvider.setUserGeneSetService(userGeneSetService);
 
     addResource(resource);
-    addProvider(provider);
+    addProvider(formProvider);
     addProvider(new ContextInjectableProvider<HttpContext>(HttpContext.class, context));
     addProvider(BadRequestExceptionMapper.class);
   }
@@ -85,28 +85,41 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
   @Test
   public void testGet() {
     // Resource id
-    val analysisId = UUID.randomUUID().toString();
+    val analysisId = UUID.randomUUID();
+    val state = FINISHED;
+    when(service.getAnalysis(analysisId))
+        .thenReturn(new EnrichmentAnalysis().setId(analysisId).setState(state));
 
     // Execute
     val response = client()
         .resource(RESOURCE)
-        .path(analysisId)
+        .path(analysisId.toString())
         .get(ClientResponse.class);
 
-    assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
+    val analysis = response.getEntity(EnrichmentAnalysis.class);
+    assertThat(analysis.getState()).isEqualTo(state);
+    assertThat(analysis.getId()).isEqualTo(analysisId);
   }
 
   @Test
   public void testSubmit() {
-    val formData = new MultivaluedMapImpl();
 
     // Analysis
+    val formData = new Form();
     formData.add("params", MAPPER.createObjectNode());
 
     // Query
-    formData.add("filters", MAPPER.createObjectNode());
+    val geneListId = UUID.randomUUID().toString();
+    formData.add("filters", uploadedGeneListFilter(geneListId));
     formData.add("sort", "affectedDonorCountFiltered");
     formData.add("order", "asc");
+
+    // Mock
+    val state = EXECUTING;
+    when(service.getAnalysis(Mockito.any(UUID.class)))
+        .thenReturn(new EnrichmentAnalysis().setState(state));
+    when(userGeneSetService.get(UUID.fromString(geneListId)))
+        .thenReturn("ENSG0000001");
 
     // Execute
     val response = client()
@@ -116,7 +129,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
 
     val analysis = response.getEntity(EnrichmentAnalysis.class);
-    assertThat(analysis.getState()).isEqualTo(EXECUTING);
+    assertThat(analysis.getState()).isEqualTo(state);
     assertThat(analysis.getQuery()).isNotNull();
   }
 

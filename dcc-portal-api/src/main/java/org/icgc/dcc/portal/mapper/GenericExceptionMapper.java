@@ -20,8 +20,6 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static org.apache.commons.httpclient.HttpStatus.getStatusText;
-import static org.elasticsearch.common.base.Objects.firstNonNull;
 
 import java.util.Date;
 import java.util.Random;
@@ -83,7 +81,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   }
 
   private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
-    return new Error(statusCode, firstNonNull(t.getMessage(), getStatusText(statusCode)));
+    return new Error(statusCode, t.getMessage());
   }
 
   private Error errorResponse(Throwable t, final long id) {

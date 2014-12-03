@@ -94,9 +94,6 @@ public class EnrichmentAnalysisResource {
       @ApiParam(value = API_SORT_VALUE) @FormParam(API_SORT_FIELD) String sort,
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @FormParam(API_ORDER_PARAM) String order
       ) {
-
-    // TODO: Add @FormParam version of ExpandingFilterParamsProvider (type hierarchy?)
-
     if (paramsParam == null) {
       throw new BadRequestException("'params' empty");
     }
