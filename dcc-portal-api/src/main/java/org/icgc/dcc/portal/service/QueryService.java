@@ -425,7 +425,7 @@ public class QueryService {
                 // Term lookup for Enrichment Analysis
                 val analysisId = items.get(0);
                 fb = termsLookupFilter("_gene_id")
-                    .filterName("analysisId")
+                    .cacheKey(analysisId)
                     .lookupId(analysisId)
                     .lookupIndex("user")
                     .lookupType("enrichment-analysis")
