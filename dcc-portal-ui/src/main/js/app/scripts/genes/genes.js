@@ -29,10 +29,6 @@
         gene: ['$stateParams', 'Genes', function ($stateParams, Genes) {
           return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
             'pathways']}).then(function (gene) {
-            gene.projects = _.map(gene.projects, function (p) {
-              p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
-              return p;
-            });
             return gene;
           });
         }]
@@ -71,13 +67,6 @@
         }).then(function (data) {
           _ctrl.totalMutations = data.Total;
 
-          _ctrl.bar = HighchartsService.bar({
-            hits: _.first(_.sortBy(gene.projects, function (p) {
-              return -p.uiAffectedDonorPercentage;
-            }),10),
-            xAxis: 'id',
-            yValue: 'uiAffectedDonorPercentage'
-          });
 
           gene.projects.forEach(function (p) {
             p.mutationCount = data[p.id];
@@ -91,11 +80,22 @@
         }).then(function (data) {
           gene.projects.forEach(function (proj) {
             proj.filteredDonorCount = data[proj.id];
+            proj.uiAffectedDonorPercentage = proj.filteredDonorCount / proj.ssmTestedDonorCount;
+
             proj.advQuery = LocationService.mergeIntoFilters({
               gene: {id: {is: [_ctrl.gene.id] }},
               donor: {projectId: {is: [proj.id]}}
             });
           });
+
+          _ctrl.bar = HighchartsService.bar({
+            hits: _.first(_.sortBy(gene.projects, function (p) {
+              return -p.uiAffectedDonorPercentage;
+            }),10),
+            xAxis: 'id',
+            yValue: 'uiAffectedDonorPercentage'
+          });
+
 
           _ctrl.gene.fprojects = _.filter(_ctrl.gene.projects, function (p) {
             return p.filteredDonorCount > 0;
