@@ -27,6 +27,7 @@ import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_TYPE_FIELDS;
+import static org.icgc.dcc.portal.model.IndexModel.INPUT_GENE_LIST_ID;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
@@ -408,10 +409,10 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
-              } else if (fieldName.equals("analysisId")) {
+              } else if (fieldName.equals(INPUT_GENE_LIST_ID)) {
                 // Term lookup for Enrichment Analysis
-                val analysisId = UUID.fromString(items.get(0));
-                fb = TermsLookupService.createTermsLookupFilter("_gene_id", GENE_IDS, analysisId);
+                val inputGeneListId = UUID.fromString(items.get(0));
+                fb = TermsLookupService.createTermsLookupFilter("_gene_id", GENE_IDS, inputGeneListId);
               } else {
                 // Catch all
                 fb = termsFilter(fieldName, items);

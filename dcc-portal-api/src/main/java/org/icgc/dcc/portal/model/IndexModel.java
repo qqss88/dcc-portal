@@ -28,6 +28,11 @@ public class IndexModel {
 
   public static final String MISSING = "_missing";
 
+  /**
+   * Special case for Enrichment Analysis
+   */
+  public static final String INPUT_GENE_LIST_ID = "inputGeneListId";
+
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {
@@ -147,6 +152,8 @@ public class IndexModel {
           .put("availableDataTypes", "_summary._available_data_type")
           .put("analysisTypes", "_summary.experimental_analysis_performed")
           .put("ssmAffectedGenes", "_score")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> SPECIMEN_FIELDS_MAPPING =
@@ -221,7 +228,7 @@ public class IndexModel {
           .put("pathways", "pathways")
           .put("sets", "sets")
           .put("geneSetId", "sets.id")
-          .put("analysisId", "analysisId") // Required for downstream QueryService
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
 
           .build();
 
@@ -252,6 +259,8 @@ public class IndexModel {
           .put("location", "location")
           .put("sequencingStrategy", "sequencing_strategy")
           .put("sequencingStrategyNested", "ssm_occurrence.observation.sequencing_strategy")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> TRANSCRIPT_FIELDS_MAPPING =
@@ -401,6 +410,8 @@ public class IndexModel {
           .put("xrefEnsemblVarId", "ssm.xref_ensembl_var_id")
           .put("mutation", "ssm.mutation")
           .put("observation", "ssm.observation")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> OBSERVATION_FIELDS_MAPPING =
@@ -440,6 +451,8 @@ public class IndexModel {
           .put("icgcSpecimenId", "_specimen_id")
           .put("submittedSampleId", "analyzed_sample_id")
           .put("submittedMatchedSampleId", "matched_sample_id")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =

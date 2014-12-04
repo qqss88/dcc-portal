@@ -18,6 +18,9 @@
 package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.portal.model.IndexModel.INPUT_GENE_LIST_ID;
+import static org.icgc.dcc.portal.model.IndexModel.IS;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
 import java.util.UUID;
@@ -26,7 +29,12 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 @NoArgsConstructor(access = PRIVATE)
 public final class Filters {
@@ -58,20 +66,101 @@ public final class Filters {
 
   public static ObjectNode goTermFilter(@NonNull String goTermId) {
     val geneFilter = geneFilter();
-    geneFilter.with("gene").put("hasGoTerm", true).put("goTermId", is(goTermId));
+    geneFilter.with(GENE.getId()).put("goTermId", is(goTermId));
 
     return geneFilter;
   }
 
   public static ObjectNode geneFilter() {
-    return entityFilter("gene");
+    return entityFilter(GENE.getId());
   }
 
   public static ObjectNode enrichmentAnalysisFilter(@NonNull UUID analysisId) {
     val analysisFilter = geneFilter();
-    analysisFilter.with("gene").put("analysisId", is(analysisId.toString()));
+    analysisFilter.with(GENE.getId()).put(INPUT_GENE_LIST_ID, is(analysisId.toString()));
 
     return analysisFilter;
+  }
+
+  public static ObjectNode andFilter(ObjectNode... filters) {
+    JsonNode left = filters[0];
+    for (int i = 1; i < filters.length; i++) {
+      val right = filters[i];
+
+      left = andFilter(left, right);
+    }
+
+    return (ObjectNode) left;
+  }
+
+  private static JsonNode andFilter(JsonNode left, JsonNode right) {
+    val and = MAPPER.createObjectNode();
+
+    if (right.getNodeType() == left.getNodeType()) {
+
+      //
+      // Same types
+      //
+
+      // Arbitrary
+      val field = left;
+
+      if (field.isObject()) {
+        val fieldNames = ImmutableSet.<String> builder().addAll(left.fieldNames()).addAll(right.fieldNames()).build();
+        for (val fieldName : fieldNames) {
+          val leftField = left.path(fieldName);
+          val rightField = right.path(fieldName);
+          val andField = andFilter(leftField, rightField);
+
+          and.put(fieldName, andField);
+        }
+      } else if (field.isArray()) {
+        val values = Sets.<Object> newLinkedHashSet();
+        for (val element : Iterables.concat(left, right)) {
+          if (element.isNumber()) {
+            values.add(element.asInt());
+          } else if (element.isBoolean()) {
+            values.add(element.asBoolean());
+          } else if (element.isTextual()) {
+            values.add(element.asText());
+          } else if (element.isPojo()) {
+            val pojo = (POJONode) element;
+            val value = pojo.getPojo();
+            values.add(value);
+          } else {
+            values.add(element);
+          }
+        }
+
+        val result = MAPPER.createArrayNode();
+        for (val value : values) {
+          result.addPOJO(value);
+        }
+
+        return result;
+      } else if (field.isValueNode()) {
+        val result = MAPPER.createArrayNode();
+        result.add(left);
+        result.add(right);
+
+        return result;
+      } else if (field.isMissingNode()) {
+        // Can't happen
+      }
+    } else {
+
+      //
+      // Different types
+      //
+
+      if (left.isMissingNode()) {
+        return right;
+      } else if (right.isMissingNode()) {
+        return left;
+      }
+    }
+
+    return and;
   }
 
   public static ObjectNode entityFilter(@NonNull String entityName) {
@@ -83,7 +172,7 @@ public final class Filters {
 
   private static ObjectNode is(@NonNull String value) {
     val is = MAPPER.createObjectNode();
-    is.withArray("is").add(value);
+    is.withArray(IS).add(value);
 
     return is;
   }

@@ -29,7 +29,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.Accessors;
-import lombok.experimental.Builder;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -84,7 +83,7 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
   }
 
   @Data
-  @Builder
+  @Accessors(chain = true)
   public static class Summary {
 
     /**
@@ -110,7 +109,7 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
   }
 
   @Data
-  @Builder
+  @Accessors(chain = true)
   public static class Result {
 
     /**
@@ -136,7 +135,7 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "#Donors in overlap"
      */
-    int intersectionDonorCountl;
+    int intersectionDonorCount;
 
     /**
      * UI: "#Mutations"

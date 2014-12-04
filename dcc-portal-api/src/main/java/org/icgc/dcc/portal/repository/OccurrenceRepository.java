@@ -110,7 +110,7 @@ public class OccurrenceRepository {
   private final String index;
 
   @Autowired
-  OccurrenceRepository(Client client, IndexModel indexModel) {
+  public OccurrenceRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
   }
