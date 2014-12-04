@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.GeneSetType.GO_TERM;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
-import static org.icgc.dcc.portal.model.IndexModel.USER_INDEX_NAME;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.util.EnrichmentAnalyses.adjustRawGeneSetResults;
 import static org.icgc.dcc.portal.util.EnrichmentAnalyses.calculateExpectedValue;
 import static org.icgc.dcc.portal.util.EnrichmentAnalyses.calculateHypergeometricTest;
@@ -37,7 +37,6 @@ import lombok.Value;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.GeneSetType;
@@ -57,6 +56,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+/**
+ * Technical specification for this feature may be found here:
+ * 
+ * https://wiki.oicr.on.ca/display/DCCSOFT/Data+Portal+-+Enrichment+Analysis+-+Technical+Specification
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
@@ -66,7 +70,7 @@ public class EnrichmentAnalysisExecutor {
    * Dependencies
    */
   @NonNull
-  private final Client client;
+  private final TermsLookupService termLookupService;
   @NonNull
   private final EnrichmentAnalysisRepository repository;
   @NonNull
@@ -168,6 +172,8 @@ public class EnrichmentAnalysisExecutor {
     val summary = Summary.builder();
     summary.intersectionGeneCount((int) geneRepository.count(intersectionQuery));
 
+    // TODO: Calculate summary.universeGeneSetCount
+
     if (universe.getGeneSetType() == GO_TERM) {
       // TODO:
       val GENE_COUNT_FIELD_NAME = "geneCount";
@@ -268,12 +274,7 @@ public class EnrichmentAnalysisExecutor {
 
   @SneakyThrows
   private void indexInputGeneIds(UUID id, List<String> inputGeneIds) {
-    // TODO: Create index with the following settings
-    // { "index.auto_expand_replicas": "0-all", "index.number_of_shards" : "1" }
-    client.prepareIndex(USER_INDEX_NAME, "enrichment-analysis")
-        .setId(id.toString())
-        .setSource("values", inputGeneIds).execute()
-        .get();
+    termLookupService.createTermsLookup(GENE_IDS, id, inputGeneIds);
   }
 
   private static Query resolveGeneSetIntersectionQuery(String geneSetId, Query intersectionQuery) {
@@ -289,6 +290,7 @@ public class EnrichmentAnalysisExecutor {
     val analysisFilter = enrichmentAnalysisFilter(analysisId);
 
     // Intersection
+    // TODO: Fix because this clobers!
     val filters = merge(queryFilter, universeFilter, analysisFilter);
 
     val includes = Lists.<String> newArrayList();

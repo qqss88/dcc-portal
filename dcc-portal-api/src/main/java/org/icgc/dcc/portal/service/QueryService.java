@@ -23,7 +23,6 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
-import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -32,9 +31,11 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.NOT;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.util.List;
+import java.util.UUID;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -423,13 +424,8 @@ public class QueryService {
                 fb = bf;
               } else if (fieldName.equals("analysisId")) {
                 // Term lookup for Enrichment Analysis
-                val analysisId = items.get(0);
-                fb = termsLookupFilter("_gene_id")
-                    .cacheKey(analysisId)
-                    .lookupId(analysisId)
-                    .lookupIndex("user")
-                    .lookupType("enrichment-analysis")
-                    .lookupPath("values");
+                val analysisId = UUID.fromString(items.get(0));
+                fb = TermsLookupService.createTermsLookupFilter("_gene_id", GENE_IDS, analysisId);
               } else {
                 // Catch all
                 fb = termsFilter(fieldName, items);

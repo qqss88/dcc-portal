@@ -9,7 +9,6 @@ import java.util.UUID;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Params;
 import org.icgc.dcc.portal.model.Query;
@@ -30,7 +29,7 @@ public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTes
    * Dependencies.
    */
   @Autowired
-  Client client;
+  TermsLookupService termLookupService;
   @Autowired
   EnrichmentAnalysisRepository repository;
   @Autowired
@@ -50,7 +49,7 @@ public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTes
   @Before
   public void setUp() {
     this.executor = new EnrichmentAnalysisExecutor(
-        client,
+        termLookupService,
         repository,
         geneRepository,
         geneSetRepository,
