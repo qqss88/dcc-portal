@@ -27,11 +27,7 @@
       controller: 'GeneSetCtrl as GeneSetCtrl',
       resolve: {
         geneSet: ['$stateParams', 'GeneSets', function ($stateParams, GeneSets) {
-          return GeneSets.one($stateParams.id).get({include: 'projects'}).then(function (geneSet) {
-            geneSet.projects = _.map(geneSet.projects, function (p) {
-              p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
-              return p;
-            });
+          return GeneSets.one($stateParams.id).get().then(function (geneSet) {
             return geneSet;
           });
         }]
@@ -46,7 +42,7 @@
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, FiltersUtil, geneSet) {
+    function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, Donors, FiltersUtil, geneSet) {
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
       Page.setPage('entity');
@@ -157,66 +153,93 @@
         });
 
 
-        if (_ctrl.geneSet.hasOwnProperty('projects')) {
-          _ctrl.geneSet.projectIds = _.pluck(_ctrl.geneSet.projects, 'id');
+        // Find out which projects are affected by this gene set, this data is used to generate cancer distribution
+        // 1) Find the impacted projects: genesetId -> {projectIds} -> {projects}
+        var geneSetProjectPromise = Donors.getList({
+          size: 0,
+          from: 1,
+          include: ['facets'],
+          filters: _filter
+        }).then(function(data) {
+          var ids = _.pluck(data.facets.projectId.terms, 'term');
+          return Projects.getList({
+            filters: {'project': {'id': { 'is': ids}}} 
+           });
+        });
 
-          if (_.isEmpty(_ctrl.geneSet.projectIds)) {
-            _ctrl.geneSet.fprojects = [];
+        // 2) Add mutation counts
+        geneSetProjectPromise.then(function(projects) {
+          var ids, mutationPromise;
+          if (! projects.hits || projects.hits.length === 0) {
             return;
           }
 
+          ids = _.pluck(projects.hits, 'id');
+          mutationPromise = Projects.one(ids).handler.one('mutations', 'counts').get({filters: _filter});
 
-          Projects.one(_ctrl.geneSet.projectIds.join(',')).handler.one('mutations',
-            'counts').get({filters: _filter}).then(function (data) {
-              _ctrl.geneSet.projects.forEach(function (p) {
-                p.mutationCount = data[p.id];
-                p.advQuery = LocationService.mergeIntoFilters({
-                  gene: geneSetFilter,
-                  donor: {projectId:{is:[p.id]}, availableDataTypes:{is:['ssm']}}
-                });
+          mutationPromise.then(function(projectMutations) {
+            projects.hits.forEach(function(proj) {
+              proj.mutationCount = projectMutations[proj.id];
+              proj.advQuery = LocationService.mergeIntoFilters({
+                gene: geneSetFilter,
+                donor: {projectId:{is:[proj.id]}, availableDataTypes:{is:['ssm']}}
               });
             });
+          });
+        });
 
-          Projects.one(_ctrl.geneSet.projectIds.join(',')).handler.one('donors',
-            'counts').get({filters: _filter}).then(function (data) {
-              _ctrl.totalDonors = 0;
-              _ctrl.geneSet.projects.forEach(function (p) {
-                p.affectedDonorCount = data[p.id];
-                _ctrl.totalDonors += p.affectedDonorCount;
-                p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
-              });
 
-              _ctrl.donorBar = HighchartsService.bar({
-                hits: _.first(_.sortBy(_ctrl.geneSet.projects, function (p) {
-                  return -p.uiAffectedDonorPercentage;
-                }), 10),
-                xAxis: 'id',
-                yValue: 'uiAffectedDonorPercentage'
-              });
+        // 3) Add donor counts, gene counts
+        geneSetProjectPromise.then(function(projects) {
+          var ids, donorPromise, genePromise;
+          if (! projects.hits || projects.hits.length === 0) {
+            return;
+          }
 
-              _ctrl.geneSet.fprojects = _.filter(_ctrl.geneSet.projects, function (p) {
-                return p.affectedDonorCount > 0;
-              });
+          ids = _.pluck(projects.hits, 'id');
+          donorPromise = Projects.one(ids).handler.one('donors', 'counts').get({filters: _filter});
+          genePromise = Projects.one(ids).handler.one('genes', 'counts').get({filters: _filter});
+          _ctrl.totalDonors = 0;
+
+          donorPromise.then(function(projectDonors) {
+            projects.hits.forEach(function(proj) {
+              proj.affectedDonorCount = projectDonors[proj.id];
+              proj.uiAffectedDonorPercentage = proj.affectedDonorCount / proj.ssmTestedDonorCount;
+              _ctrl.totalDonors += proj.affectedDonorCount;
             });
 
-          Projects.one(_ctrl.geneSet.projectIds).handler.one('genes',
-            'counts').get({filters: _filter}).then(function (data) {
-
-              _ctrl.geneSet.projects.forEach(function (p) {
-                p.geneCount = data[p.id];
-                p.uiAffectedGenePercentage = p.geneCount / _ctrl.geneSet.geneCount;
-              });
-
-              _ctrl.geneBar = HighchartsService.bar({
-                hits: _.first(_.sortBy(_ctrl.geneSet.projects, function (p) {
-                  return -p.uiAffectedGenePercentage;
-                }),10),
-                xAxis: 'id',
-                yValue: 'uiAffectedGenePercentage'
-              });
-
+            _ctrl.donorBar = HighchartsService.bar({
+              hits: _.first(_.sortBy(projects.hits, function (p) {
+                return -p.uiAffectedDonorPercentage;
+              }), 10),
+              xAxis: 'id',
+              yValue: 'uiAffectedDonorPercentage'
             });
-        }
+          });
+
+          genePromise.then(function(projectGenes) {
+            projects.hits.forEach(function(proj) {
+              proj.geneCount = projectGenes[proj.id];
+              proj.uiAffectedGenePercentage = proj.geneCount / _ctrl.geneSet.geneCount;
+            });
+
+            _ctrl.geneBar = HighchartsService.bar({
+              hits: _.first(_.sortBy(projects.hits, function (p) {
+                return -p.uiAffectedGenePercentage;
+              }),10),
+              xAxis: 'id',
+              yValue: 'uiAffectedGenePercentage'
+            });
+          });
+
+        });
+
+
+        // Assign projects to controller so it can be rendered in the view
+        geneSetProjectPromise.then(function(projects) {
+          _ctrl.geneSet.projects = projects.hits;
+        });
+
 
         var params = {
           filters: _filter,
@@ -267,7 +290,7 @@
     }
 
     function refresh() {
-      GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
+      GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
         _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Genes.getList({
@@ -301,7 +324,7 @@
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
           _ctrl.mutations.hits.forEach(function (mutation) {
-            console.log('mutation', mutation);
+            // console.log('mutation', mutation);
             Donors.getList({
               size: 0,
               include: 'facets',
@@ -340,7 +363,7 @@
     }
 
     function refresh() {
-      GeneSets.one().get({include: 'projects'}).then(function (p) {
+      GeneSets.one().get().then(function (p) {
         geneSet = p;
 
         Mutations.getList({
@@ -392,7 +415,7 @@
     }
 
     function refresh() {
-      GeneSets.one().get({include: 'projects'}).then(function (geneSet) {
+      GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
         _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Donors.getList({filters: _filter}).then(success);

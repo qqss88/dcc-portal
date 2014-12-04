@@ -27,14 +27,17 @@
       controller: 'GeneCtrl as GeneCtrl',
       resolve: {
         gene: ['$stateParams', 'Genes', function ($stateParams, Genes) {
-          return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
-            'pathways']}).then(function (gene) {
-            gene.projects = _.map(gene.projects, function (p) {
-              p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
-              return p;
-            });
+          return Genes.one($stateParams.id).get({include: ['projects', 'transcripts']}).then(function(gene) {
             return gene;
           });
+          // return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
+          //   'pathways']}).then(function (gene) {
+          //   gene.projects = _.map(gene.projects, function (p) {
+          //     p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
+          //     return p;
+          //   });
+          //   return gene;
+          // });
         }]
       }
     });
@@ -47,7 +50,7 @@
   var module = angular.module('icgc.genes.controllers', ['icgc.genes.models']);
 
   module.controller('GeneCtrl', function ($scope, HighchartsService, Page, Projects, Mutations,
-    LocationService, GMService, gene) {
+    LocationService, Donors, GMService, gene) {
     var _ctrl = this;
     Page.setTitle(gene.id);
     Page.setPage('entity');
@@ -74,7 +77,76 @@
 
 
     function refresh() {
-      if (_ctrl.gene.hasOwnProperty('projects') && _ctrl.gene.projects.length > 0) {
+      var geneProjectPromise = Donors.getList({
+        size: 0,
+        from: 1,
+        include: ['facets'],
+        filters: {'gene':{'id':{'is':[_ctrl.gene.id]}}}
+      }).then(function(data) {
+        var ids = _.pluck(data.facets.projectId.terms, 'term');
+        return Projects.getList({
+          filters: {'project': {'id': { 'is': ids}}}
+         });
+      });
+
+      _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});
+
+      // Fetch dynaimc mutations and donors
+      geneProjectPromise.then(function(projects) {
+        var mutationPromise, donorPromise;
+        if ( !projects.hits || projects.hits.length === 0) {
+          return;
+        }
+
+        mutationPromise = Projects.one(_.pluck(projects.hits, 'id').join(','))
+          .handler.one('mutations', 'counts').get({filters: _ctrl.gene.advQuery });
+
+        donorPromise = Projects.one(_.pluck(projects.hits, 'id').join(','))
+          .handler.one('donors', 'counts').get({filters: _ctrl.gene.advQuery });
+
+        mutationPromise.then(function(projectMutations) {
+          projects.hits.forEach(function(proj) {
+            proj.mutationCount = projectMutations[proj.id];
+          });
+          _ctrl.totalMutations = projectMutations.Total;
+        });
+
+        donorPromise.then(function(projectDonors) {
+          projects.hits.forEach(function(proj) {
+            proj.filteredDonorCount = projectDonors[proj.id];
+            proj.uiAffectedDonorPercentage = proj.filteredDonorCount / proj.ssmTestedDonorCount;
+            proj.advQuery = LocationService.mergeIntoFilters({
+              gene: {id: {is: [_ctrl.gene.id] }},
+              donor: {projectId: {is: [proj.id]}}
+            });
+          });
+          _ctrl.bar = HighchartsService.bar({
+            hits: _.first(_.sortBy(projects.hits, function (p) {
+              return -p.uiAffectedDonorPercentage;
+            }),10),
+            xAxis: 'id',
+            yValue: 'uiAffectedDonorPercentage'
+          });
+          _ctrl.totalDonors = projectDonors.Total;
+        });
+
+
+        _ctrl.gene.projects = projects.hits;
+        console.log(_ctrl.gene.projects);
+      });
+
+      var params = {
+        filters: {gene: {id: {is: [_ctrl.gene.id] }}},
+        size: 0,
+        include: ['facets']
+      };
+
+      Mutations.getList(params).then(function (d) {
+        _ctrl.mutationFacets = d.facets;
+      });
+
+
+      if ( 1==2 && _ctrl.gene.hasOwnProperty('projects') && _ctrl.gene.projects.length > 0) {
         _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});
 
 
@@ -117,15 +189,7 @@
           _ctrl.totalDonors = data.Total;
         });
 
-        var params = {
-          filters: {gene: {id: {is: [_ctrl.gene.id] }}},
-          size: 0,
-          include: ['facets']
-        };
 
-        Mutations.getList(params).then(function (d) {
-          _ctrl.mutationFacets = d.facets;
-        });
       }
     }
 
@@ -137,7 +201,10 @@
         hasProteinCoding = transcript.type === 'protein_coding';
 
         // 2) Check if transcript is affected
-        isAffected = _ctrl.gene.affectedTranscriptIds.indexOf(transcript.id) !== -1;
+        // FIXME: Use affectedTranscriptIds from gene-centric
+
+        // isAffected = _ctrl.gene.affectedTranscriptIds.indexOf(transcript.id) !== -1;
+        isAffected = false;
 
         if (hasProteinCoding && isAffected) {
           _ctrl.gene.uiProteinTranscript.push(transcript);
