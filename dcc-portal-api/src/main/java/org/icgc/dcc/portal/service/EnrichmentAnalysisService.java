@@ -17,16 +17,21 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.UUID;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EnrichmentAnalysisService {
@@ -43,9 +48,12 @@ public class EnrichmentAnalysisService {
     analysis.setId(createAnalysisId());
 
     // Ensure persisted for polling
-    repository.save(analysis);
+    log.info("Saving analysis '{}'...", analysis.getId());
+    val insertCount = repository.save(analysis);
+    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
     // Execute asynchronously
+    log.info("Executing analysis '{}'...", analysis.getId());
     executor.execute(analysis);
   }
 

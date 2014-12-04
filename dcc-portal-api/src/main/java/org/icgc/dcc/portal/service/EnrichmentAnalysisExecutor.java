@@ -231,7 +231,6 @@ public class EnrichmentAnalysisExecutor {
 
   private Result calculateRawGeneSetResult(Query query, Universe universe, String geneSetId, GeneSetType geneSetType,
       String geneSetName, UUID analysisId, int geneSetGeneCount, int intersectionGeneCount, int universeGeneCount) {
-
     val intersectionQuery = resolveIntersectionQuery(query, universe, analysisId, false);
     val geneSetIntersectionQuery = resolveGeneSetIntersectionQuery(geneSetId, intersectionQuery);
 
@@ -252,6 +251,7 @@ public class EnrichmentAnalysisExecutor {
         geneSetIntersectionGeneCount, intersectionGeneCount,
         geneSetGeneCount, universeGeneCount);
 
+    // Assemble
     return Result.builder()
         .geneSetId(geneSetId)
         .geneSetName(null) // TODO: Pass in
@@ -268,6 +268,8 @@ public class EnrichmentAnalysisExecutor {
 
   @SneakyThrows
   private void indexInputGeneIds(UUID id, List<String> inputGeneIds) {
+    // TODO: Create index with the following settings
+    // { "index.auto_expand_replicas": "0-all", "index.number_of_shards" : "1" }
     client.prepareIndex(USER_INDEX_NAME, "enrichment-analysis")
         .setId(id.toString())
         .setSource("values", inputGeneIds).execute()

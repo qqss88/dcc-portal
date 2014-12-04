@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.resource;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.ACCEPTED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
@@ -96,6 +97,8 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
         .path(analysisId.toString())
         .get(ClientResponse.class);
 
+    assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
+
     val analysis = response.getEntity(EnrichmentAnalysis.class);
     assertThat(analysis.getState()).isEqualTo(state);
     assertThat(analysis.getId()).isEqualTo(analysisId);
@@ -103,7 +106,6 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
 
   @Test
   public void testSubmit() {
-
     // Analysis
     val formData = new Form();
     formData.add("params", MAPPER.createObjectNode());
@@ -126,7 +128,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
         .resource(RESOURCE)
         .post(ClientResponse.class, formData);
 
-    assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
+    assertThat(response.getStatus()).isEqualTo(ACCEPTED.getStatusCode());
 
     val analysis = response.getEntity(EnrichmentAnalysis.class);
     assertThat(analysis.getState()).isEqualTo(state);
