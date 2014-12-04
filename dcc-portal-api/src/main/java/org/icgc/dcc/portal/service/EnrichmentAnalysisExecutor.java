@@ -53,6 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -89,6 +90,7 @@ public class EnrichmentAnalysisExecutor {
    */
   @Async
   public void execute(@NonNull EnrichmentAnalysis analysis) {
+    val watch = Stopwatch.createStarted();
     log.info("Starting analysis for {}...", analysis);
 
     // Shorthands
@@ -130,27 +132,16 @@ public class EnrichmentAnalysisExecutor {
     // Keep only the number of results that the user requested
     val limitedAdjustedResults = adjustedResults.subList(0, params.getMaxGeneSetCount());
 
-    for (val result : limitedAdjustedResults) {
-      val intersectionQuery = resolveIntersectionQuery(query, universe, inputGeneListId, false);
-      val geneSetIntersectionQuery = resolveGeneSetIntersectionQuery(result.getGeneSetId(), intersectionQuery);
-
-      // Update
-      result
-          .setGeneSetName(geneSetRepository.findOne(result.getGeneSetId(), "name").get("name").toString())
-
-          // "#Donors affected"
-          .setIntersectionDonorCount((int) donorRepository.count(geneSetIntersectionQuery))
-
-          // "#Mutations"
-          .setIntersectionMutationCount((int) mutationRepository.count(geneSetIntersectionQuery));
-    }
+    calculateFinalGeneSetResults(query, universe, inputGeneListId, limitedAdjustedResults);
 
     // Update state for UI polling
     analysis.setSummary(summary);
     analysis.setResults(limitedAdjustedResults);
     analysis.setState(FINISHED);
 
+    log.info("Saving analysis...");
     repository.save(analysis);
+    log.info("Finished executing in {}", watch);
   }
 
   private List<String> calculateInputGeneIds(Query query, int maxGeneCount) {
@@ -273,6 +264,28 @@ public class EnrichmentAnalysisExecutor {
         .setPValue(pValue);
   }
 
+  private void calculateFinalGeneSetResults(Query query, Universe universe, UUID inputGeneListId,
+      List<Result> limitedAdjustedResults) {
+    for (int i = 0; i < limitedAdjustedResults.size(); i++) {
+      val result = limitedAdjustedResults.get(i);
+
+      log.info("[{}/{}] Post-processing {}",
+          new Object[] { i + 1, limitedAdjustedResults.size(), result.getGeneSetId() });
+      val intersectionQuery = resolveIntersectionQuery(query, universe, inputGeneListId, false);
+      val geneSetIntersectionQuery = resolveGeneSetIntersectionQuery(result.getGeneSetId(), intersectionQuery);
+
+      // Update
+      result
+          .setGeneSetName(geneSetRepository.findOne(result.getGeneSetId(), "name").get("name").toString())
+
+          // "#Donors affected"
+          .setIntersectionDonorCount((int) donorRepository.count(geneSetIntersectionQuery))
+
+          // "#Mutations"
+          .setIntersectionMutationCount((int) mutationRepository.count(geneSetIntersectionQuery));
+    }
+  }
+
   @SneakyThrows
   private void indexInputGeneIds(UUID id, List<String> inputGeneIds) {
     termLookupService.createTermsLookup(GENE_IDS, id, inputGeneIds);
@@ -284,11 +297,11 @@ public class EnrichmentAnalysisExecutor {
     return intersectionQuery;
   }
 
-  private static Query resolveIntersectionQuery(Query query, Universe universe, UUID analysisId, boolean facets) {
+  private static Query resolveIntersectionQuery(Query query, Universe universe, UUID inputGeneListId, boolean facets) {
     // Components
     val queryFilter = query.getFilters();
     val universeFilter = universe.getFilter();
-    val analysisFilter = enrichmentAnalysisFilter(analysisId);
+    val analysisFilter = enrichmentAnalysisFilter(inputGeneListId);
 
     // Intersection
     val filters = andFilter(queryFilter, universeFilter, analysisFilter);

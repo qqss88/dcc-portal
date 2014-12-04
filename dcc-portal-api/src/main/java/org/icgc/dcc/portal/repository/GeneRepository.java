@@ -64,6 +64,7 @@ import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -194,6 +195,7 @@ public class GeneRepository implements Repository {
   public SearchResponse findGeneSets(ObjectNode filters) {
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(SearchType.COUNT)
         .setFrom(0)
         .setSize(0);
 
@@ -337,10 +339,17 @@ public class GeneRepository implements Repository {
     val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
 
     if (query.hasFilters()) {
-      ObjectNode filters = remapFilters(query.getFilters());
+      val filters = remapFilters(query.getFilters());
       search.setFilter(getFilters(filters));
-      search.setQuery(buildQuery(query));
+
+      // Remove score from below to significantly speed up results
+      val countQuery = nestedQuery(
+          "donor",
+          filteredQuery(matchAllQuery(), buildScoreFilters(query)));
+
+      search.setQuery(countQuery);
     }
+
     return search;
   }
 
