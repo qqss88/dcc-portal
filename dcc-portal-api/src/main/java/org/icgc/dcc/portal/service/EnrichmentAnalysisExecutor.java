@@ -90,6 +90,8 @@ public class EnrichmentAnalysisExecutor {
   @Async
   public void execute(@NonNull EnrichmentAnalysis analysis) {
 
+    log.info("Starting analysis for {}...", analysis);
+
     // FIXME: Somewhere this is being produced!
     // "bool" : {
     // "must" : {

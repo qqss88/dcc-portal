@@ -234,6 +234,7 @@ public class PortalConfig {
 
   private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {
     val config = new Config();
+    config.setProperty("hazelcast.logging.type", "slf4j");
     config.setGroupConfig(new GroupConfig(hazelcastConfig.getGroupName(), hazelcastConfig.getGroupPassword()));
     configureMapConfigs(hazelcastConfig, config.getMapConfigs());
 

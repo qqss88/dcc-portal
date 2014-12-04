@@ -165,20 +165,6 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.TRANSCRIPT, prefixMapping);
   }
 
-  /*
-   * public static void main(String args[]) throws JsonProcessingException, IOException {
-   * 
-   * ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of( Kind.GENE_SET, "sets",
-   * Kind.DONOR, "donor", Kind.MUTATION, "donor.ssm", Kind.CONSEQUENCE, "donor.ssm.consequence", Kind.OBSERVATION,
-   * "donor.ssm.observation"));
-   * 
-   * ObjectNode objNode = (ObjectNode) MAPPER.readTree(
-   * "{'geneSet':{'goTermId':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}");
-   * 
-   * val filter = QueryService.buildGeneSetFilters(objNode, NESTED_MAPPING); log.info("Filters {}", objNode);
-   * log.info("Query {}", filter); }
-   */
-
   public static BoolFilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
     val resultFilter = FilterBuilders.boolFilter();
     val geneSetNode = filters.path(Kind.GENE_SET.getId());
@@ -199,8 +185,8 @@ public class QueryService {
       val idFieldName = GENE_SET_QUERY_ID_FIELDS.get(geneSetType.getType());
       val typeFieldName = GENE_SET_QUERY_TYPE_FIELDS.get(geneSetType.getType());
 
-      log.info("idFieldName {}", idFieldName);
-      log.info("type {}", geneSetType);
+      log.debug("idFieldName {}", idFieldName);
+      log.debug("type {}", geneSetType);
 
       // Handles is and is_not cases
       if (geneSetNode.has(idFieldName)) {
@@ -282,7 +268,7 @@ public class QueryService {
       }
     }
 
-    log.info("result filter {}", resultFilter);
+    log.debug("result filter {}", resultFilter);
 
     return resultFilter;
   }
