@@ -37,9 +37,21 @@
   var module = angular.module('icgc.analysis.controllers', []);
 
   module.controller('AnalysisController',
-    function ($scope, $state, Page, analysisId) {
+    function ($scope, $state, $location, Page, analysisId) {
     Page.setPage('analysis');
     $scope.analysisId = analysisId;
+
+    $scope.getAnalysis = function(id) {
+      // Test
+      if (id) {
+        $scope.analysisId = id;
+        $location.path('analysis/'+id);
+      } else {
+        $scope.analysisId = null;
+        $location.path('analysis');
+      }
+    };
+
 
 
     // If has id in url
@@ -56,5 +68,5 @@
 
 
   });
-})();  
+})();
 

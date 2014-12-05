@@ -8,17 +8,29 @@
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
+                    data-ng-click="getAnalysis()"
+                    data-ng-class="{selected: !analysisId}"> 
+                    <span>Analysis Home</span>
+                    <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
+                    <small>........</small>
+                </>
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-click="getAnalysis(item)"
                     data-ng-repeat="item in test"
                     data-ng-class="{selected: item == analysisId}"> 
-                    <span> Gene Set Analysis {{item}} </span><br>
+                    <span> Gene Set Analysis {{item}} </span><i class="icon-caret-right" data-ng-if="item === analysisId"></i><br>
                     <small>yyyy-mm-dd</small>
                 </li>
             </ul>
         </div>
     </div>
 </aside>
+
 <article>
-    <div style="margin: 1rem">
+    <div style="margin: 1rem" data-ng-if="!analysisId">
+        <div> Placeholder for instructions</div>
+    </div>
+    <div style="margin: 1rem" data-ng-if="analysisId">
         <enrichment-result></enrichment-result>
     </div>
 </article>
