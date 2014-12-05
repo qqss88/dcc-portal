@@ -56,10 +56,11 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  indexName: dcc-release-dcc-etl-cli # Override using -Ddw.elastic.indexName=indexName for local development
+  indexName: test17-not-multi # Override using -Ddw.elastic.indexName=indexName for local development
   nodeAddresses:
-    - host: "localhost"
+    - host: "elasticsearch3.res.oicr.on.ca"
       port: 9300
+
 
 # Mail
 mail:

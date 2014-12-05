@@ -77,7 +77,7 @@ public enum Universe {
   private final String geneSetFacetName;
 
   /**
-   * @return a query filter the targes this {@code Universe} type.
+   * @return a query filter the targets this {@code Universe} type.
    */
   public abstract ObjectNode getFilter();
 

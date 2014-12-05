@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
 public class EnrichmentAnalysisService {
 
   /**
-   * Dependencies
+   * Dependencies.
    */
   @NonNull
   private final EnrichmentAnalysisExecutor executor;
