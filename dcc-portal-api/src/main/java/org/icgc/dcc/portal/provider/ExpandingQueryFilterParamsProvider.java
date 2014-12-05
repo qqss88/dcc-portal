@@ -15,55 +15,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.provider;
 
-import static com.google.common.base.Preconditions.checkState;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.Provider;
 
-import java.util.UUID;
+import org.icgc.dcc.portal.model.FiltersParam;
+import org.springframework.stereotype.Component;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import com.sun.jersey.api.core.HttpContext;
+import com.sun.jersey.api.model.Parameter;
+import com.sun.jersey.core.spi.component.ComponentContext;
+import com.sun.jersey.spi.inject.Injectable;
+import com.sun.jersey.spi.inject.InjectableProvider;
 
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+/**
+ * {@code InjectableProvider} that services {@link @QueryParam} annotated {@link FiltersParam}s in resource methods.
+ */
+@Provider
+@Component
+public class ExpandingQueryFilterParamsProvider extends AbstractExpandingFilterParamsProvider implements
+    InjectableProvider<QueryParam, Parameter> {
 
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
-
-  /**
-   * Dependencies
-   */
-  @NonNull
-  private final EnrichmentAnalysisExecutor executor;
-  @NonNull
-  private final EnrichmentAnalysisRepository repository;
-
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
-
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = repository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
-
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    executor.execute(analysis);
+  @Override
+  public Injectable<FiltersParam> getInjectable(ComponentContext context, QueryParam meta, Parameter param) {
+    return getInjectable(param);
   }
 
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return repository.find(analysisId);
-  }
-
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
+  @Override
+  protected MultivaluedMap<String, String> resolveParameters(HttpContext context) {
+    return context.getUriInfo().getQueryParameters();
   }
 
 }

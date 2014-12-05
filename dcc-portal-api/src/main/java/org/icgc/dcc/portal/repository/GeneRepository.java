@@ -25,6 +25,7 @@ import static org.elasticsearch.index.query.QueryBuilders.customScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
+import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
@@ -76,6 +77,7 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.Universe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -190,6 +192,33 @@ public class GeneRepository implements Repository {
     return response;
   }
 
+  public SearchResponse findGeneSets(ObjectNode filters) {
+    val search = client.prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(COUNT);
+
+    // FIXME: This method seems to oscillate between results. Possible culprits:
+    // - Node communication issues
+    // - Facet limits
+    // - Search Type
+    // - Others?
+    for (val universe : Universe.values()) {
+      val universeFacetName = universe.getGeneSetFacetName();
+
+      search.addFacet(
+          termsFacet(universeFacetName)
+              .field(universeFacetName)
+              .size(50000) // This has to be as big as the largest universe
+              .facetFilter(getFilters(filters)));
+    }
+
+    log.debug("{}", search);
+    SearchResponse response = search.execute().actionGet();
+    log.debug("{}", response);
+
+    return response;
+  }
+
   @Override
   public SearchResponse findAll(Query query) {
     val search = buildFindAllRequest(query, TYPE);
@@ -204,7 +233,10 @@ public class GeneRepository implements Repository {
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
     val search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
+        client.prepareSearch(index)
+            .setTypes(type.getId())
+            .setSearchType(QUERY_THEN_FETCH)
+            .setFrom(query.getFrom())
             .setSize(query.getSize());
 
     ObjectNode filters = remapFilters(query.getFilters());
@@ -221,9 +253,12 @@ public class GeneRepository implements Repository {
       search.addFacet(facet);
     }
 
-    String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
-    search.addSort(fieldSort(sort).order(query.getOrder()));
-    if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
+    if (query.getSort() != null) {
+      String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
+      search.addSort(fieldSort(sort).order(query.getOrder()));
+      if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
+    }
+
     return search;
   }
 
@@ -309,10 +344,17 @@ public class GeneRepository implements Repository {
     val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
 
     if (query.hasFilters()) {
-      ObjectNode filters = remapFilters(query.getFilters());
+      val filters = remapFilters(query.getFilters());
       search.setFilter(getFilters(filters));
-      search.setQuery(buildQuery(query));
+
+      // Remove score from below to significantly speed up results
+      val countQuery = nestedQuery(
+          "donor",
+          filteredQuery(matchAllQuery(), buildScoreFilters(query)));
+
+      search.setQuery(countQuery);
     }
+
     return search;
   }
 

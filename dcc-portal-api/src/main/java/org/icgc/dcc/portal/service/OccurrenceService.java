@@ -17,10 +17,13 @@
 
 package org.icgc.dcc.portal.service;
 
+import static org.elasticsearch.common.base.Throwables.propagate;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -38,6 +41,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+@Slf4j
 @Service
 public class OccurrenceService {
 
@@ -53,7 +57,14 @@ public class OccurrenceService {
 
   @Async
   public void init() {
-    projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+    try {
+      log.info("Caching...");
+      projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+    } catch (Exception e) {
+      log.error("Error caching: ", e);
+
+      propagate(e);
+    }
   }
 
   public Occurrences findAll(Query query) {

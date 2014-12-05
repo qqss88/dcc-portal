@@ -17,15 +17,54 @@
  */
 package org.icgc.dcc.portal.util;
 
-import java.lang.reflect.Type;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc.dcc.portal.test.JsonNodes.$;
+import static org.icgc.dcc.portal.util.Filters.andFilter;
+import lombok.val;
 
-import javax.ws.rs.core.Context;
+import org.junit.Test;
 
-import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class ContextInjectableProvider<T> extends SingletonTypeInjectableProvider<Context, T> {
+public class FiltersTest {
 
-  public ContextInjectableProvider(Type type, T instance) {
-    super(type, instance);
+  @Test
+  public void testAndFilterMulti() throws Exception {
+    val and = andFilter(
+        parse("{x: {y : [1]}}"),
+        parse("{x: {y : [2]}}"),
+        parse("{x: {y : [2]}}"));
+
+    assertThat(parse(and)).isEqualTo(
+        parse("{x: {y : [1, 2]}}"));
   }
+
+  @Test
+  public void testAndFilterCombineValues() throws Exception {
+    val and = andFilter(
+        parse("{x: 1}"),
+        parse("{x: 2}"));
+
+    assertThat(parse(and)).isEqualTo(
+        parse("{x: [1, 2]}"));
+  }
+
+  @Test
+  public void testAndFilterMissing() throws Exception {
+    val and = andFilter(
+        parse("{x: 1}"),
+        parse("{y: 2}"));
+
+    assertThat(parse(and)).isEqualTo(
+        parse("{x: 1, y: 2}"));
+  }
+
+  private static ObjectNode parse(String json) {
+    return (ObjectNode) $(json);
+  }
+
+  private static ObjectNode parse(ObjectNode objectNode) {
+    return (ObjectNode) $(objectNode);
+  }
+
 }

@@ -20,8 +20,6 @@ import com.google.common.collect.ImmutableMap;
 @Component
 public class IndexModel {
 
-  public static final String USER_INDEX_NAME = "user";
-
   public static final int MAX_FACET_TERM_COUNT = 1024;
 
   public static final String IS = "is";
@@ -29,6 +27,11 @@ public class IndexModel {
   public static final String NOT = "not";
 
   public static final String MISSING = "_missing";
+
+  /**
+   * Special case for Enrichment Analysis
+   */
+  public static final String INPUT_GENE_LIST_ID = "inputGeneListId";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -149,6 +152,8 @@ public class IndexModel {
           .put("availableDataTypes", "_summary._available_data_type")
           .put("analysisTypes", "_summary.experimental_analysis_performed")
           .put("ssmAffectedGenes", "_score")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> SPECIMEN_FIELDS_MAPPING =
@@ -223,9 +228,8 @@ public class IndexModel {
           .put("pathways", "pathways")
           .put("sets", "sets")
           .put("geneSetId", "sets.id")
-          // .put("list", "list")
-          // .put("goTerms", "go_terms")
-          // .put("curatedSets", "curated_sets")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> MUTATIONS_FIELDS_MAPPING =
@@ -255,6 +259,8 @@ public class IndexModel {
           .put("location", "location")
           .put("sequencingStrategy", "sequencing_strategy")
           .put("sequencingStrategyNested", "ssm_occurrence.observation.sequencing_strategy")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> TRANSCRIPT_FIELDS_MAPPING =
@@ -404,6 +410,8 @@ public class IndexModel {
           .put("xrefEnsemblVarId", "ssm.xref_ensembl_var_id")
           .put("mutation", "ssm.mutation")
           .put("observation", "ssm.observation")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> OBSERVATION_FIELDS_MAPPING =
@@ -443,6 +451,8 @@ public class IndexModel {
           .put("icgcSpecimenId", "_specimen_id")
           .put("submittedSampleId", "analyzed_sample_id")
           .put("submittedMatchedSampleId", "matched_sample_id")
+          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+
           .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =

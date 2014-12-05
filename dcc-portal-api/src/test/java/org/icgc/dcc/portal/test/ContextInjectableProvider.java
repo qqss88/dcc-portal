@@ -15,55 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.test;
 
-import static com.google.common.base.Preconditions.checkState;
+import java.lang.reflect.Type;
 
-import java.util.UUID;
+import javax.ws.rs.core.Context;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
 
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+public class ContextInjectableProvider<T> extends SingletonTypeInjectableProvider<Context, T> {
 
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
-
-  /**
-   * Dependencies
-   */
-  @NonNull
-  private final EnrichmentAnalysisExecutor executor;
-  @NonNull
-  private final EnrichmentAnalysisRepository repository;
-
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
-
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = repository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
-
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    executor.execute(analysis);
+  public ContextInjectableProvider(Type type, T instance) {
+    super(type, instance);
   }
-
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return repository.find(analysisId);
-  }
-
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
-  }
-
 }

@@ -27,13 +27,16 @@ import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_TYPE_FIELDS;
+import static org.icgc.dcc.portal.model.IndexModel.INPUT_GENE_LIST_ID;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.NOT;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.util.List;
+import java.util.UUID;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -163,20 +166,6 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.TRANSCRIPT, prefixMapping);
   }
 
-  /*
-   * public static void main(String args[]) throws JsonProcessingException, IOException {
-   * 
-   * ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of( Kind.GENE_SET, "sets",
-   * Kind.DONOR, "donor", Kind.MUTATION, "donor.ssm", Kind.CONSEQUENCE, "donor.ssm.consequence", Kind.OBSERVATION,
-   * "donor.ssm.observation"));
-   * 
-   * ObjectNode objNode = (ObjectNode) MAPPER.readTree(
-   * "{'geneSet':{'goTermId':{'is':['go1', 'go2'], 'not':['go3']}, hasPathway:false }}");
-   * 
-   * val filter = QueryService.buildGeneSetFilters(objNode, NESTED_MAPPING); log.info("Filters {}", objNode);
-   * log.info("Query {}", filter); }
-   */
-
   public static BoolFilterBuilder buildGeneSetFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
     val resultFilter = FilterBuilders.boolFilter();
     val geneSetNode = filters.path(Kind.GENE_SET.getId());
@@ -197,8 +186,8 @@ public class QueryService {
       val idFieldName = GENE_SET_QUERY_ID_FIELDS.get(geneSetType.getType());
       val typeFieldName = GENE_SET_QUERY_TYPE_FIELDS.get(geneSetType.getType());
 
-      log.info("idFieldName {}", idFieldName);
-      log.info("type {}", geneSetType);
+      log.debug("idFieldName {}", idFieldName);
+      log.debug("type {}", geneSetType);
 
       // Handles is and is_not cases
       if (geneSetNode.has(idFieldName)) {
@@ -280,7 +269,7 @@ public class QueryService {
       }
     }
 
-    log.info("result filter {}", resultFilter);
+    log.debug("result filter {}", resultFilter);
 
     return resultFilter;
   }
@@ -409,19 +398,24 @@ public class QueryService {
                 items.add(item.textValue());
               }
               if (locationFields.contains(fieldName)) {
+                // Chromosome location
                 fb = locationFilters(kind, items, typeMapping, prefixMapping);
-              } else {
-                if (items.remove(MISSING)) {
-                  val bf = FilterBuilders.boolFilter();
-                  val mf = missingFilter(fieldName).existence(true).nullValue(false);
-                  bf.should(mf);
-                  if (!items.isEmpty()) {
-                    bf.should(termsFilter(fieldName, items));
-                  }
-                  fb = bf;
-                } else {
-                  fb = termsFilter(fieldName, items);
+              } else if (items.remove(MISSING)) {
+                // Missing
+                val bf = FilterBuilders.boolFilter();
+                val mf = missingFilter(fieldName).existence(true).nullValue(false);
+                bf.should(mf);
+                if (!items.isEmpty()) {
+                  bf.should(termsFilter(fieldName, items));
                 }
+                fb = bf;
+              } else if (fieldName.equals(INPUT_GENE_LIST_ID)) {
+                // Term lookup for Enrichment Analysis
+                val inputGeneListId = UUID.fromString(items.get(0));
+                fb = TermsLookupService.createTermsLookupFilter("_gene_id", GENE_IDS, inputGeneListId);
+              } else {
+                // Catch all
+                fb = termsFilter(fieldName, items);
               }
             } else {
               String value = boolNode.get(bool).textValue();

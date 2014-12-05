@@ -21,6 +21,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
@@ -44,6 +45,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +80,7 @@ public class EnrichmentAnalysisResource {
   @ApiOperation(value = "Retrieves an enrichment analysis by id", response = EnrichmentAnalysis.class)
   public EnrichmentAnalysis getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) UUID analysisId) {
+    // Validate
     if (analysisId == null) {
       throw new BadRequestException("'analysisId' is empty");
     }
@@ -87,16 +90,14 @@ public class EnrichmentAnalysisResource {
   }
 
   @POST
-  @ApiOperation(value = "Submits an enrichment analysis request", response = EnrichmentAnalysis.class)
-  public EnrichmentAnalysis submitAnalysis(
+  @ApiOperation(value = "Submits an asynchronous enrichment analysis request. Users must poll the status using the GET resource", response = EnrichmentAnalysis.class)
+  public Response submitAnalysis(
       @ApiParam(value = API_PARAMS_VALUE) @FormParam(API_PARAMS_PARAM) ParamsParam paramsParam,
       @ApiParam(value = API_FILTER_VALUE) @FormParam(API_FILTER_PARAM) FiltersParam filtersParam,
       @ApiParam(value = API_SORT_VALUE) @FormParam(API_SORT_FIELD) String sort,
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @FormParam(API_ORDER_PARAM) String order
       ) {
-
-    // TODO: Add @FormParam version of ExpandingFilterParamsProvider (type hierarchy?)
-
+    // Validate
     if (paramsParam == null) {
       throw new BadRequestException("'params' empty");
     }
@@ -123,10 +124,12 @@ public class EnrichmentAnalysisResource {
         .setQuery(query)
         .setParams(paramsParam.get());
 
+    // Submit
     log.info("Submitting analysis '{}'...", analysis);
     service.submitAnalysis(analysis);
 
-    return analysis;
+    // In the RFC sense for asynchronous tasks
+    return Response.status(ACCEPTED).entity(analysis).build();
   }
 
 }

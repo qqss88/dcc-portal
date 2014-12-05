@@ -22,9 +22,6 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +32,7 @@ import org.elasticsearch.index.get.GetField;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.icgc.dcc.portal.service.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -98,9 +96,8 @@ public class GeneSetRepository {
     if (!response.isExists()) {
       String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
       log.info("{} {} not found.", type, id);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
+
+      throw new NotFoundException(id, type);
     }
 
     val map = Maps.<String, Object> newHashMap();
