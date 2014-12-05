@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.IndexModel.INPUT_GENE_LIST_ID;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
@@ -36,6 +37,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
+/**
+ * API filters, not to be confused with Elasticsearch filters.
+ */
 @NoArgsConstructor(access = PRIVATE)
 public final class Filters {
 
@@ -43,18 +47,26 @@ public final class Filters {
     return MAPPER.createObjectNode();
   }
 
-  public static ObjectNode uploadedGeneListFilter(@NonNull String geneListId) {
-    val geneFilter = geneFilter();
-    geneFilter.with("gene").put("uploadedGeneList", is(geneListId));
+  public static ObjectNode andFilter(@NonNull ObjectNode... filters) {
+    JsonNode left = filters[0];
+    for (int i = 1; i < filters.length; i++) {
+      val right = filters[i];
 
-    return geneFilter;
+      left = andFilter(left, right);
+    }
+
+    return (ObjectNode) left;
   }
 
-  public static ObjectNode pathwayFilter() {
-    val geneFilter = geneFilter();
-    geneFilter.with("gene").put("hasPathway", true);
+  public static ObjectNode entityFilter(@NonNull String entityName) {
+    val entityFilter = emptyFilter();
+    entityFilter.with(entityName);
 
-    return geneFilter;
+    return entityFilter;
+  }
+
+  public static ObjectNode geneFilter() {
+    return entityFilter(GENE.getId());
   }
 
   public static ObjectNode geneSetFilter(@NonNull String geneSetId) {
@@ -71,30 +83,29 @@ public final class Filters {
     return geneFilter;
   }
 
-  public static ObjectNode geneFilter() {
-    return entityFilter(GENE.getId());
+  public static ObjectNode pathwayFilter() {
+    val geneFilter = geneFilter();
+    geneFilter.with("gene").put("hasPathway", true);
+
+    return geneFilter;
   }
 
-  public static ObjectNode enrichmentAnalysisFilter(@NonNull UUID analysisId) {
-    val analysisFilter = geneFilter();
-    analysisFilter.with(GENE.getId()).put(INPUT_GENE_LIST_ID, is(analysisId.toString()));
+  public static ObjectNode uploadedGeneListFilter(@NonNull String geneListId) {
+    val geneFilter = geneFilter();
+    geneFilter.with("gene").put("uploadedGeneList", is(geneListId));
 
-    return analysisFilter;
+    return geneFilter;
   }
 
-  public static ObjectNode andFilter(ObjectNode... filters) {
-    JsonNode left = filters[0];
-    for (int i = 1; i < filters.length; i++) {
-      val right = filters[i];
+  public static ObjectNode inputGeneListFilter(@NonNull UUID inputGeneListId) {
+    val inputGeneListFilter = geneFilter();
+    inputGeneListFilter.with(GENE.getId()).put(INPUT_GENE_LIST_ID, is(inputGeneListId.toString()));
 
-      left = andFilter(left, right);
-    }
-
-    return (ObjectNode) left;
+    return inputGeneListFilter;
   }
 
   private static JsonNode andFilter(JsonNode left, JsonNode right) {
-    val and = MAPPER.createObjectNode();
+    val and = emptyFilter();
 
     if (right.getNodeType() == left.getNodeType()) {
 
@@ -157,21 +168,16 @@ public final class Filters {
         return right;
       } else if (right.isMissingNode()) {
         return left;
+      } else {
+        checkState(false, "Node type(s) not expected: %s, %s", left, right);
       }
     }
 
     return and;
   }
 
-  public static ObjectNode entityFilter(@NonNull String entityName) {
-    val entityFilter = MAPPER.createObjectNode();
-    entityFilter.with(entityName);
-
-    return entityFilter;
-  }
-
   private static ObjectNode is(@NonNull String value) {
-    val is = MAPPER.createObjectNode();
+    val is = emptyFilter();
     is.withArray(IS).add(value);
 
     return is;

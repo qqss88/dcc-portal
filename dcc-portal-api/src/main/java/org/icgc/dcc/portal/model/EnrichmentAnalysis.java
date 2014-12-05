@@ -44,7 +44,7 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   Params params;
 
-  Summary summary;
+  Overview overview;
 
   List<Result> results;
 
@@ -75,12 +75,12 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   @Data
   @Accessors(chain = true)
-  public static class Summary {
+  public static class Overview {
 
     /**
      * UI: "#Gene sets in overlap"
      */
-    int intersectionGeneSetCount;
+    int overlapGeneSetCount;
 
     /**
      * UI: "#Gene sets in Universe"
@@ -90,7 +90,7 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "#Genes in overlap"
      */
-    int intersectionGeneCount;
+    int overlapGeneCount;
 
     /**
      * UI: "#Genes in Universe"
@@ -121,17 +121,17 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "#Genes in overlap"
      */
-    int intersectionGeneCount;
+    int overlapGeneCount;
 
     /**
      * UI: "#Donors in overlap"
      */
-    int intersectionDonorCount;
+    int overlapDonorCount;
 
     /**
      * UI: "#Mutations"
      */
-    int intersectionMutationCount;
+    int overlapMutationCount;
 
     /**
      * UI: "Expected"

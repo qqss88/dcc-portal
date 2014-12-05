@@ -85,7 +85,19 @@ public final class EnrichmentAnalyses {
     return sortAdjustedResults(adjustedResults);
   }
 
-  public static List<Result> sortRawResults(@NonNull List<Result> rawResults) {
+  public static double calculateExpectedValue(int k, int m, int n) {
+    return k * ((double) m / n);
+  }
+
+  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
+    val distribution = new HypergeometricDistribution(n, m, k);
+    val pValue = 1.0 - distribution.cumulativeProbability(q);
+
+    return pValue;
+
+  }
+
+  private static List<Result> sortRawResults(@NonNull List<Result> rawResults) {
     sort(rawResults, new Comparator<Result>() {
 
       @Override
@@ -98,7 +110,7 @@ public final class EnrichmentAnalyses {
     return rawResults;
   }
 
-  public static List<Result> sortAdjustedResults(@NonNull List<Result> adjustedResults) {
+  private static List<Result> sortAdjustedResults(@NonNull List<Result> adjustedResults) {
     sort(adjustedResults, new Comparator<Result>() {
 
       @Override
@@ -109,18 +121,6 @@ public final class EnrichmentAnalyses {
     });
 
     return adjustedResults;
-  }
-
-  public static double calculateExpectedValue(int k, int m, int n) {
-    return k * ((double) m / n);
-  }
-
-  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
-    val distribution = new HypergeometricDistribution(n, m, k);
-    val pValue = 1.0 - distribution.cumulativeProbability(q);
-
-    return pValue;
-
   }
 
 }
