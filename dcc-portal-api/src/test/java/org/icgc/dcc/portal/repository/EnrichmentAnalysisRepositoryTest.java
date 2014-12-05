@@ -64,6 +64,10 @@ public class EnrichmentAnalysisRepositoryTest {
 
     val actualData2 = repository.find(id2).getId();
     assertThat(id2).isEqualTo(actualData2);
+
+    repository.update(analysis1);
+    val actualData3 = repository.find(id1).getId();
+    assertThat(actualData3).isEqualTo(actualData1);
   }
 
 }

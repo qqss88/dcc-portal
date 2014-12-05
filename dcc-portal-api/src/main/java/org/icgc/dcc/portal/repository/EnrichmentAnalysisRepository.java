@@ -43,4 +43,7 @@ public interface EnrichmentAnalysisRepository extends JsonRepository {
   @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + " , " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
   int save(@BindValue EnrichmentAnalysis analysis);
 
+  @SqlUpdate("UPDATE " + TABLE_NAME + " SET  " + DATA_FIELD_NAME + " = :data WHERE " + ID_FIELD_NAME + " = :id")
+  int update(@BindValue EnrichmentAnalysis analysis);
+
 }
