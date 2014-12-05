@@ -50,7 +50,7 @@
   var module = angular.module('icgc.genes.controllers', ['icgc.genes.models']);
 
   module.controller('GeneCtrl', function ($scope, HighchartsService, Page, Projects, Mutations,
-    LocationService, Donors, GMService, gene) {
+    LocationService, Donors, Genes, GMService, Restangular, gene) {
     var _ctrl = this;
     Page.setTitle(gene.id);
     Page.setPage('entity');
@@ -144,74 +144,30 @@
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
       });
-
-
-      if ( 1==2 && _ctrl.gene.hasOwnProperty('projects') && _ctrl.gene.projects.length > 0) {
-        _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});
-
-
-        // Fetch dynamic mutations
-        Projects.one(_.pluck(gene.projects, 'id').join(',')).handler.one('mutations', 'counts').get({
-          filters: _ctrl.gene.advQuery
-        }).then(function (data) {
-          _ctrl.totalMutations = data.Total;
-
-          _ctrl.bar = HighchartsService.bar({
-            hits: _.first(_.sortBy(gene.projects, function (p) {
-              return -p.uiAffectedDonorPercentage;
-            }),10),
-            xAxis: 'id',
-            yValue: 'uiAffectedDonorPercentage'
-          });
-
-          gene.projects.forEach(function (p) {
-            p.mutationCount = data[p.id];
-          });
-        });
-
-
-        // Fetch dynamic donor count
-        Projects.one(_.pluck(gene.projects, 'id').join(',')).handler.one('donors', 'counts').get({
-          filters: _ctrl.gene.advQuery
-        }).then(function (data) {
-          gene.projects.forEach(function (proj) {
-            proj.filteredDonorCount = data[proj.id];
-            proj.advQuery = LocationService.mergeIntoFilters({
-              gene: {id: {is: [_ctrl.gene.id] }},
-              donor: {projectId: {is: [proj.id]}}
-            });
-          });
-
-          _ctrl.gene.fprojects = _.filter(_ctrl.gene.projects, function (p) {
-            return p.filteredDonorCount > 0;
-          });
-
-          _ctrl.totalDonors = data.Total;
-        });
-
-
-      }
     }
+
 
     if (_ctrl.gene.hasOwnProperty('transcripts')) {
-      _ctrl.gene.transcripts.forEach(function (transcript) {
-        var hasProteinCoding, isAffected;
+      var geneTranscriptPromie = Genes.one().handler.one('affected-transcripts').get({});
 
-        // 1) Check if transcript has protein_coding
-        hasProteinCoding = transcript.type === 'protein_coding';
+      geneTranscriptPromie.then(function(data) {
+        var affectedTranscriptIds = Restangular.stripRestangular(data)[_ctrl.gene.id];
 
-        // 2) Check if transcript is affected
-        // FIXME: Use affectedTranscriptIds from gene-centric
+        _ctrl.gene.transcripts.forEach(function (transcript) {
+          var hasProteinCoding, isAffected;
 
-        // isAffected = _ctrl.gene.affectedTranscriptIds.indexOf(transcript.id) !== -1;
-        isAffected = false;
+          // 1) Check if transcript has protein_coding
+          hasProteinCoding = transcript.type === 'protein_coding';
 
-        if (hasProteinCoding && isAffected) {
-          _ctrl.gene.uiProteinTranscript.push(transcript);
-        }
+          // 2) Check if transcript is affected
+          isAffected = affectedTranscriptIds.indexOf(transcript.id) !== -1;
+
+          if (hasProteinCoding && isAffected) {
+            _ctrl.gene.uiProteinTranscript.push(transcript);
+          }
+        });
       });
     }
-
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
       if (dest.indexOf('genes') !== -1) {
