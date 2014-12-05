@@ -157,7 +157,7 @@ public class EnrichmentAnalysisExecutor {
     analysis.setState(FINISHED);
 
     log.info("Persisting analysis @ {} ...", watch);
-    repository.save(analysis);
+    repository.update(analysis);
 
     log.info("Finished executing in {}", watch);
   }
@@ -305,7 +305,7 @@ public class EnrichmentAnalysisExecutor {
         .order(query.getOrder().toString())
         .build();
 
-    val results = geneRepository.findAll(limitedGeneQuery);
+    val results = geneRepository.findAllCentric(limitedGeneQuery);
 
     // Pluck gene ids
     val inputGeneIds = Lists.<String> newArrayList();
