@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.Universe.GO_BIOLOGICAL_PROCESS;
+import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.util.Filters.emptyFilter;
 
 import java.util.UUID;

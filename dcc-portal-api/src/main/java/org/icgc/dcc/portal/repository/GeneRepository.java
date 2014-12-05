@@ -64,7 +64,6 @@ import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -73,11 +72,11 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis.Universe;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.Universe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -195,16 +194,21 @@ public class GeneRepository implements Repository {
   public SearchResponse findGeneSets(ObjectNode filters) {
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
-        .setSearchType(SearchType.COUNT)
-        .setFrom(0)
-        .setSize(0);
+        .setSearchType(COUNT);
 
+    // FIXME: This method seems to oscillate between results. Possible culprits:
+    // - Node communication issues
+    // - Facet limits
+    // - Search Type
+    // - Others?
     for (val universe : Universe.values()) {
-      val facetName = universe.getGeneSetFacetName();
-      val termFacet = termsFacet(facetName).field(facetName).size(50000);
-      termFacet.facetFilter(getFilters(filters));
+      val universeFacetName = universe.getGeneSetFacetName();
 
-      search.addFacet(termFacet);
+      search.addFacet(
+          termsFacet(universeFacetName)
+              .field(universeFacetName)
+              .size(50000) // This has to be as big as the largest universe
+              .facetFilter(getFilters(filters)));
     }
 
     log.debug("{}", search);

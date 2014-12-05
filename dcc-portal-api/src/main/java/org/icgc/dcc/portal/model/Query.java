@@ -29,12 +29,20 @@ import org.icgc.dcc.portal.util.ObjectNodeDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableList;
 
 @Builder(chain = true, fluent = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class Query {
+
+  /**
+   * Id is always returned, so this is a good way to emulate no fields semantics and not break anything
+   */
+  private static final List<String> NO_FIELDS = ImmutableList.of("_id");
+
+  private static final List<String> INCLUDE_FACETS = ImmutableList.of("facets");
 
   private Integer defaultLimit;
 
@@ -92,6 +100,14 @@ public class Query {
 
   public SortOrder getOrder() {
     return SortOrder.valueOf(order.toUpperCase());
+  }
+
+  public static List<String> noFields() {
+    return NO_FIELDS;
+  }
+
+  public static List<String> includeFacets() {
+    return INCLUDE_FACETS;
   }
 
 }
