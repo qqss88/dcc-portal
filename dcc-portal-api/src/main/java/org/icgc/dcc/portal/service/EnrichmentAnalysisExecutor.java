@@ -18,8 +18,10 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Stopwatch.createStarted;
+import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.Query.noFields;
+import static org.icgc.dcc.portal.service.EnrichmentAnalysisExecutor.Facets.universeTermsFacet;
 import static org.icgc.dcc.portal.service.EnrichmentAnalysisExecutor.Queries.geneSetOverlapQuery;
 import static org.icgc.dcc.portal.service.EnrichmentAnalysisExecutor.Queries.overlapQuery;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
@@ -33,6 +35,7 @@ import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -41,6 +44,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Overview;
@@ -73,8 +77,8 @@ public class EnrichmentAnalysisExecutor {
    * Constants.
    */
   private static final String API_GENE_COUNT_FIELD_NAME = "geneCount";
+  private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
   private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
-  private static final String INDEX_GENE_COUNT_FIELD_NAME = "_overview._gene_count";
 
   /**
    * Dependencies.
@@ -196,7 +200,7 @@ public class EnrichmentAnalysisExecutor {
     val response = geneRepository.findGeneSets(overlapQuery.getFilters());
 
     // Facets represent the GO
-    val geneSetFacet = resolveUniverseTermsFacet(universe, response);
+    val geneSetFacet = universeTermsFacet(response, universe);
 
     val geneSetCounts = ImmutableList.<GeneSetCount> builder();
     for (val entry : geneSetFacet.getEntries()) {
@@ -345,13 +349,22 @@ public class EnrichmentAnalysisExecutor {
     return results.subList(0, maxGeneSetCount);
   }
 
-  private static TermsFacet resolveUniverseTermsFacet(Universe universe, SearchResponse response) {
-    return (TermsFacet) response.getFacets().getFacets().get(universe.getGeneSetFacetName());
+  /**
+   * Enrichment analysis {@link Facet} utilities.
+   */
+  @NoArgsConstructor(access = PRIVATE)
+  static class Facets {
+
+    static TermsFacet universeTermsFacet(@NonNull SearchResponse response, @NonNull Universe universe) {
+      return (TermsFacet) response.getFacets().getFacets().get(universe.getGeneSetFacetName());
+    }
+
   }
 
   /**
    * Enrichment analysis {@link Query} utilities.
    */
+  @NoArgsConstructor(access = PRIVATE)
   static class Queries {
 
     static Query geneSetOverlapQuery(@NonNull String geneSetId, @NonNull Query overlapQuery) {
