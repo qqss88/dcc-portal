@@ -15,56 +15,33 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.util;
 
-import static com.google.common.base.Preconditions.checkState;
+import static lombok.AccessLevel.PRIVATE;
 
-import java.util.UUID;
+import java.util.List;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.elasticsearch.action.search.SearchResponse;
 
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
+import com.google.common.collect.Lists;
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final EnrichmentAnalyzer analyzer;
-  @NonNull
-  private final EnrichmentAnalysisRepository repository;
+/**
+ * Elasticsearch {@link SearchResponses} utilities.
+ */
+@NoArgsConstructor(access = PRIVATE)
+public final class SearchResponses {
 
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
+  public static List<String> getHitIds(@NonNull SearchResponse response) {
+    val ids = Lists.<String> newArrayList();
+    for (val hit : response.getHits()) {
+      ids.add(hit.getId());
+    }
 
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = repository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
-
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis);
-  }
-
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return repository.find(analysisId);
-  }
-
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
+    return ids;
   }
 
 }

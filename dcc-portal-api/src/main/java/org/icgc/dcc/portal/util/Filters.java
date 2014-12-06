@@ -38,7 +38,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 /**
- * API filters, not to be confused with Elasticsearch filters.
+ * API filter utilities, not to be confused with Elasticsearch filters.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class Filters {

@@ -20,10 +20,18 @@ package org.icgc.dcc.portal.model;
 import java.util.List;
 import java.util.UUID;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.wordnik.swagger.annotations.ApiModel;
+
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@ApiModel(value = "EnrichmentAnalysis")
 @Accessors(chain = true)
 public class EnrichmentAnalysis implements Identifiable<UUID> {
 
@@ -40,8 +48,10 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
   /**
    * Input from Advanced Search
    */
+  @NotNull
   Query query;
 
+  @NotNull
   Params params;
 
   Overview overview;
@@ -54,11 +64,13 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "# Input genes"
      */
+    @Max(1000)
     int maxGeneCount;
 
     /**
      * UI: "Top {{ analysis.params.maxGeneSetCount }} gene sets [...]"
      */
+    @Max(100)
     int maxGeneSetCount;
 
     /**

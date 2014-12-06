@@ -1,4 +1,4 @@
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.enrichment;
 
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
@@ -17,13 +17,14 @@ import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.repository.GeneSetRepository;
 import org.icgc.dcc.portal.repository.MutationRepository;
+import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.test.AbstractSpringIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTest {
+public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   /**
    * Dependencies.
@@ -44,11 +45,11 @@ public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTes
   /**
    * Subject.
    */
-  EnrichmentAnalysisExecutor executor;
+  EnrichmentAnalyzer analyzer;
 
   @Before
   public void setUp() {
-    this.executor = new EnrichmentAnalysisExecutor(
+    this.analyzer = new EnrichmentAnalyzer(
         termLookupService,
         repository,
         geneRepository,
@@ -58,7 +59,7 @@ public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTes
   }
 
   @Test
-  public void testExecute() {
+  public void testAnalyze() {
     val analysis =
         new EnrichmentAnalysis()
             .setId(UUID.randomUUID())
@@ -76,7 +77,7 @@ public class EnrichmentAnalysisExecutorTest extends AbstractSpringIntegrationTes
                 .build());
 
     log.info("Starting...");
-    executor.execute(analysis);
+    analyzer.analyze(analysis);
   }
 
 }

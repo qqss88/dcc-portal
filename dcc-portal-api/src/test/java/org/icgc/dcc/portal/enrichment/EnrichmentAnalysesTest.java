@@ -1,10 +1,10 @@
-package org.icgc.dcc.portal.util;
+package org.icgc.dcc.portal.enrichment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
 import lombok.val;
 
-import org.icgc.dcc.portal.util.EnrichmentAnalyses;
+import org.icgc.dcc.portal.enrichment.EnrichmentAnalyses;
 import org.junit.Test;
 
 public class EnrichmentAnalysesTest {
