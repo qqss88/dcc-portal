@@ -207,7 +207,7 @@ public class BaseRepositoryIntegrationTest {
   LinkedHashMap<String, Query> generateCountsQueries(String f, SearchResponse r, String sort, Kind kind) {
     val queries = Maps.<String, Query> newLinkedHashMap();
 
-    for (val hit : r.getHits().getHits()) { // Hits
+    for (val hit : r.getHits().getHits()) { // SearchResponses
       val updateNode = buildFilterNode("id", hit.getId(), kind.getId());
       val filter = JsonUtils.merge(new FiltersParam(f).get(), updateNode);
       val query = query(sort).filters(filter).build();
@@ -271,7 +271,7 @@ public class BaseRepositoryIntegrationTest {
       Kind kind) {
     val queries = Maps.<String, LinkedHashMap<String, Query>> newLinkedHashMap();
 
-    for (val facet : r.getFacets()) { // Facets
+    for (val facet : r.getFacets()) { // EnrichmentSearchResponses
       val termsFacet = (TermsFacet) facet;
 
       // Build map of Entry -> Query

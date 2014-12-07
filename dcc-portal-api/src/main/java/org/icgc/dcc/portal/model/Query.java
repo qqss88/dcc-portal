@@ -102,7 +102,7 @@ public class Query {
     return SortOrder.valueOf(order.toUpperCase());
   }
 
-  public static List<String> noFields() {
+  public static List<String> idField() {
     return NO_FIELDS;
   }
 

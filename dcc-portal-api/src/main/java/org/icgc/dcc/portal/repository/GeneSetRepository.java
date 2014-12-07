@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.isEmpty;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
@@ -29,6 +30,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.index.query.ExistsFilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
+import org.icgc.dcc.portal.model.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -36,6 +43,7 @@ import org.icgc.dcc.portal.service.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -51,9 +59,43 @@ public class GeneSetRepository {
   private final String index;
 
   @Autowired
-  GeneSetRepository(Client client, IndexModel indexModel) {
+  public GeneSetRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
+  }
+
+  public int countChildren(@NonNull GeneSetType type, @NonNull Optional<String> id) {
+    QueryBuilder query;
+    switch (type) {
+    case GO_TERM:
+      query =
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
+              new TermFilterBuilder("go_term.inferred_tree.id", id.get()) :
+              new ExistsFilterBuilder("go_term"));
+      break;
+    case PATHWAY:
+      query =
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
+              new TermFilterBuilder("pathway.hierarchy.id", id.get()) :
+              new ExistsFilterBuilder("pathway"));
+      break;
+    case CURATED_SET:
+      query =
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
+              new TermFilterBuilder("curated_set.id", id.get()) :
+              new ExistsFilterBuilder("curated_set"));
+      break;
+    default:
+      checkState(false, "Unexpected type %s", type);
+      return -1;
+    }
+
+    return (int) client.prepareCount(index)
+        .setTypes(TYPE.getId())
+        .setQuery(query)
+        .execute()
+        .actionGet()
+        .getCount();
   }
 
   public Map<String, Object> findOne(@NonNull String id, String... fieldNames) {

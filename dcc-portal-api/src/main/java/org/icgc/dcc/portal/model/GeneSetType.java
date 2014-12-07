@@ -15,56 +15,12 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.model;
 
-import static com.google.common.base.Preconditions.checkState;
+public enum GeneSetType {
 
-import java.util.UUID;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
-
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final EnrichmentAnalyzer analyzer;
-  @NonNull
-  private final EnrichmentAnalysisRepository analysisRepository;
-
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
-
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = analysisRepository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
-
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis);
-  }
-
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return analysisRepository.find(analysisId);
-  }
-
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
-  }
+  GO_TERM,
+  PATHWAY,
+  CURATED_SET;
 
 }
