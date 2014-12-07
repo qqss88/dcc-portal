@@ -34,6 +34,7 @@
     'angularytics',
     'chieffancypants.loadingBar',
     'btford.markdown',
+    'LocalStorageModule',
 
     // 3rd party
     'highcharts',
@@ -60,7 +61,8 @@
     'icgc.genesets',
     'icgc.visualization',
     'icgc.enrichment',
-    
+    'icgc.analysis',
+
     // old
     'app.ui',
     'app.common',
@@ -98,14 +100,15 @@
     });
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
-                          AngularyticsProvider, $httpProvider, RestangularProvider, markdownConverterProvider) {
+                          AngularyticsProvider, $httpProvider, RestangularProvider,
+                          markdownConverterProvider, localStorageServiceProvider) {
 
     // Use in production or when UI hosted by API
-    RestangularProvider.setBaseUrl('/api/v1');
+    // RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
+    RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
     // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
@@ -137,6 +140,8 @@
     markdownConverterProvider.config({
       extensions: ['table']
     });
+
+    localStorageServiceProvider.setPrefix('icgc');
   });
 
   module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {

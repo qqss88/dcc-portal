@@ -15,7 +15,7 @@
    * Validate and submit gene set analysis input
    */
   angular.module('icgc.enrichment.controllers')
-    .controller('EnrichmentUploadController', function($scope, Extensions, $location) {
+    .controller('EnrichmentUploadController', function($scope, Extensions, Restangular, LocationService, $location) {
     var _ctrl = this;
 
     _ctrl.hasValidParams = false;
@@ -24,22 +24,44 @@
 
     // Default values
     _ctrl.analysisParams = {
-      geneSetCount: 50,
+      maxGeneSetCount: 50,
       fdr: 0.05,
-      geneCount: 1000
+      maxGeneCount: 1000,
+      universe: ''
     };
 
     _ctrl.newGeneSetEnrichment = function() {
-      $scope.enrichmentModal = false;
-      $location.path('/analysis/' + 1).search({});
+      var promise, data;
+
+
+      // FIXME: need real values
+      _ctrl.analysisParams.universe = 'REACTOME_PATHWAYS';
+      data = 'params=' + JSON.stringify(_ctrl.analysisParams) + '&' +
+        'sort=affectedDonorCountFiltered' + '&' +
+        'order=ASC' + '&' +
+        'filters=' + JSON.stringify(LocationService.filters())
+
+
+      promise = Restangular.one('analysis')
+        .withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'enrichment');
+
+      // Send and forget, we really just need to get the analysis id
+      // to start the redirection
+      promise.then(function(result) {
+        var id = result.id;
+        $scope.enrichmentModal = false;
+        $location.path('/analysis/' + id).search({});
+      });
+
     };
 
     _ctrl.checkInput = function() {
       var params = _ctrl.analysisParams;
 
-      if (_ctrl.hasValidGeneCount(parseInt(params.geneCount, 10)) === false ||
+      if (_ctrl.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
         _ctrl.hasValidFDR(parseFloat(params.fdr)) === false ||
-        angular.isDefined(params.background) === false) {
+        angular.isDefined(params.universe) === false) {
         _ctrl.hasValidParams = false;
       }
       _ctrl.hasValidParams = true;
@@ -68,7 +90,8 @@
    * Displays gene set enrichment results
    */
   angular.module('icgc.enrichment.controllers')
-    .controller('EnrichmentResultController', function($scope) {
+    .controller('EnrichmentResultController', function($scope, Restangular) {
+    console.log($scope.item);
   });
 
 })();
@@ -95,12 +118,28 @@
     return {
       restrict: 'E',
       scope: {
-        collapsed: '='
+        item: '='
+      },
+      templateUrl: '/scripts/enrichment/views/enrichment.result.html',
+      link: function($scope) {
+        console.log('enrichment result', $scope.item);
+      }
+    };
+  });
+
+
+  /*
+  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function () {
+    return {
+      restrict: 'E',
+      scope: {
+        item: '='
       },
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       controller: 'EnrichmentResultController as EnrichmentResultController'
     };
   });
+  */
 
 })();
 
@@ -110,7 +149,7 @@
 
   var module = angular.module('icgc.enrichment.models', []);
 
-  module.service('Enrichment', function (Restangular) {
+  module.service('Enrichment', function () {
     // TODO:  API endpoints
   });
 

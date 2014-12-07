@@ -18,7 +18,7 @@
                    <span>
                        <strong>Number of top genes in gene result to be analyzed (1000 maximum): </strong><br>
                        <input type="text" size="5" 
-                           data-ng-model="EnrichmentUploadController.analysisParams.geneCount"
+                           data-ng-model="EnrichmentUploadController.analysisParams.maxGeneCount"
                            data-ng-change="EnrichmentUploadController.checkInput()">
                    </span>
                </div>
@@ -27,13 +27,13 @@
                    <div><strong>Select Background: </strong></div>
                    <div data-ng-repeat="item in Extensions.PATHWAY_ROOTS">
                        <input type="radio"
-                           data-ng-model="EnrichmentUploadController.analysisParams.background"
+                           data-ng-model="EnrichmentUploadController.analysisParams.universe"
                            data-ng-change="EnrichmentUploadController.checkInput()"
                            value="{{item.name}}"><span> {{item.name}}</span>
                    </div>
                    <div data-ng-repeat="item in Extensions.GENE_ONTOLOGY_ROOTS">
                        <input type="radio"
-                           data-ng-model="EnrichmentUploadController.analysisParams.background"
+                           data-ng-model="EnrichmentUploadController.analysisParams.universe"
                            data-ng-change="EnrichmentUploadController.checkInput()"
                            value="{{item.name}}"><span> {{item.name}}</span>
                    </div>
@@ -48,7 +48,7 @@
                    <div class="text-right">
                        <span>Show: </span>
                        <span>
-                           <select data-ng-model="EnrichmentUploadController.analysisParams.geneSetCount" 
+                           <select data-ng-model="EnrichmentUploadController.analysisParams.maxGeneSetCount" 
                                data-ng-change="EnrichmentUploadController.checkInput()"
                                data-ng-options="item for item in [10, 20, 50, 100]"></select>
                        </span>
