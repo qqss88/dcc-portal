@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.enrichment;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.util.Filters.emptyFilter;
@@ -78,6 +79,13 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
     log.info("Starting...");
     analyzer.analyze(analysis);
+
+    log.info("Result: {}", analysis);
+    val overview = analysis.getOverview();
+    assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
+    assertThat(overview.getOverlapGeneSetCount()).isGreaterThan(0);
+    assertThat(overview.getUniverseGeneCount()).isGreaterThan(0);
+    assertThat(overview.getUniverseGeneSetCount()).isGreaterThan(0);
   }
 
 }

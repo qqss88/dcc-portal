@@ -70,19 +70,19 @@ public class GeneSetRepository {
     case GO_TERM:
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("go_term.inferred_tree.id", id) :
+              new TermFilterBuilder("go_term.inferred_tree.id", id.get()) :
               new ExistsFilterBuilder("go_term"));
       break;
     case PATHWAY:
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("pathway.hierarchy.id", id) :
+              new TermFilterBuilder("pathway.hierarchy.id", id.get()) :
               new ExistsFilterBuilder("pathway"));
       break;
     case CURATED_SET:
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("curated_set.id", id) :
+              new TermFilterBuilder("curated_set.id", id.get()) :
               new ExistsFilterBuilder("curated_set"));
       break;
     default:
