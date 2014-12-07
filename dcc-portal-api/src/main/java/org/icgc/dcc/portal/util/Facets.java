@@ -15,56 +15,45 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.util;
 
-import static com.google.common.base.Preconditions.checkState;
+import static lombok.AccessLevel.PRIVATE;
 
-import java.util.UUID;
+import java.util.List;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.elasticsearch.search.facet.terms.TermsFacet;
 
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
+import com.google.common.collect.ImmutableList;
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final EnrichmentAnalyzer analyzer;
-  @NonNull
-  private final EnrichmentAnalysisRepository analysisRepository;
+/**
+ * Elasticsearch facet utilities, not to be confused with API facets.
+ */
+@NoArgsConstructor(access = PRIVATE)
+public final class Facets {
 
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
+  public static List<Count> getFacetCounts(@NonNull TermsFacet termsFacet) {
+    val facetCounts = ImmutableList.<Count> builder();
+    for (val entry : termsFacet.getEntries()) {
+      val geneSetId = entry.getTerm().string();
+      val count = entry.getCount();
 
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = analysisRepository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
+      facetCounts.add(new Count(geneSetId, count));
+    }
 
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis);
+    return facetCounts.build();
   }
 
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return analysisRepository.find(analysisId);
-  }
+  @Value
+  public static class Count {
 
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
+    String id;
+    int value;
+
   }
 
 }

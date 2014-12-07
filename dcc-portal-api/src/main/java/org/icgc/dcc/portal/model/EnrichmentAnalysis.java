@@ -169,11 +169,4 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   }
 
-  public enum GeneSetType {
-
-    GO_TERM,
-    PATHWAY;
-
-  }
-
 }

@@ -12,7 +12,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Data
 public class Paginated {
 
-  @ApiModelProperty(value = "EnrichmentFacets")
+  @ApiModelProperty(value = "EnrichmentSearchResponses")
   private ImmutableMap<String, TermFacet> facets;
 
   @ApiModelProperty(value = "Pagination Data", required = true)

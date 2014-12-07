@@ -271,7 +271,7 @@ public class BaseRepositoryIntegrationTest {
       Kind kind) {
     val queries = Maps.<String, LinkedHashMap<String, Query>> newLinkedHashMap();
 
-    for (val facet : r.getFacets()) { // EnrichmentFacets
+    for (val facet : r.getFacets()) { // EnrichmentSearchResponses
       val termsFacet = (TermsFacet) facet;
 
       // Build map of Entry -> Query

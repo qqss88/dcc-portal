@@ -37,6 +37,17 @@ import com.google.common.primitives.Doubles;
 @NoArgsConstructor(access = PRIVATE)
 public final class EnrichmentAnalyses {
 
+  public static double calculateExpectedValue(int k, int m, int n) {
+    return k * ((double) m / n);
+  }
+
+  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
+    val distribution = new HypergeometricDistribution(n, m, k);
+    val pValue = 1.0 - distribution.cumulativeProbability(q);
+
+    return pValue;
+  }
+
   public static List<Result> adjustRawGeneSetResults(double fdr, @NonNull List<Result> rawResults) {
     // Sort ascending by raw p-value
     val sortedRawResults = sortRawResults(rawResults);
@@ -83,18 +94,6 @@ public final class EnrichmentAnalyses {
 
     // Sort ascending by adjusted p-value
     return sortAdjustedResults(adjustedResults);
-  }
-
-  public static double calculateExpectedValue(int k, int m, int n) {
-    return k * ((double) m / n);
-  }
-
-  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
-    val distribution = new HypergeometricDistribution(n, m, k);
-    val pValue = 1.0 - distribution.cumulativeProbability(q);
-
-    return pValue;
-
   }
 
   private static List<Result> sortRawResults(@NonNull List<Result> rawResults) {

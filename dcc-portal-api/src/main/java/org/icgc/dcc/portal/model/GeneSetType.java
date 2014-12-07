@@ -15,29 +15,12 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.enrichment;
+package org.icgc.dcc.portal.model;
 
-import static lombok.AccessLevel.PRIVATE;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
+public enum GeneSetType {
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.facet.Facet;
-import org.elasticsearch.search.facet.terms.TermsFacet;
-import org.icgc.dcc.portal.model.Universe;
-
-/**
- * Enrichment analysis {@link Facet} utilities.
- */
-@NoArgsConstructor(access = PRIVATE)
-public class EnrichmentFacets {
-
-  public static TermsFacet universeTermsFacet(@NonNull SearchResponse response, @NonNull Universe universe) {
-    val facets = response.getFacets().getFacets();
-    val facet = facets.get(universe.getGeneSetFacetName());
-
-    return (TermsFacet) facet;
-  }
+  GO_TERM,
+  PATHWAY,
+  CURATED_SET;
 
 }

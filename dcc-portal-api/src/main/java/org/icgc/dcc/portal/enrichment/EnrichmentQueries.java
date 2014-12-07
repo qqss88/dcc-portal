@@ -49,7 +49,7 @@ public class EnrichmentQueries {
     // Overlap
     val filters = andFilter(queryFilter, universeFilter, analysisFilter);
 
-    // EnrichmentFacets?
+    // EnrichmentSearchResponses?
     val includes = Lists.<String> newArrayList();
 
     return Query.builder().filters(filters).fields(idField()).includes(includes).build();

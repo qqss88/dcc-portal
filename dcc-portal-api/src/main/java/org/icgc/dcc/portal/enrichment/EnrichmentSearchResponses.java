@@ -15,56 +15,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.enrichment;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.UUID;
-
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.facet.Facet;
+import org.elasticsearch.search.facet.terms.TermsFacet;
+import org.icgc.dcc.portal.model.Universe;
 
-@Slf4j
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class EnrichmentAnalysisService {
+/**
+ * Enrichment analysis {@link Facet} utilities.
+ */
+@NoArgsConstructor(access = PRIVATE)
+public class EnrichmentSearchResponses {
 
-  /**
-   * Dependencies.
-   */
-  @NonNull
-  private final EnrichmentAnalyzer analyzer;
-  @NonNull
-  private final EnrichmentAnalysisRepository analysisRepository;
+  public static TermsFacet getUniverseTermsFacet(@NonNull SearchResponse response, @NonNull Universe universe) {
+    val facets = response.getFacets().getFacets();
+    val facet = facets.get(universe.getGeneSetFacetName());
 
-  public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
-    analysis.setId(createAnalysisId());
-
-    // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = analysisRepository.save(analysis);
-    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
-
-    // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis);
-  }
-
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return analysisRepository.find(analysisId);
-  }
-
-  private static UUID createAnalysisId() {
-    // Prevent "browser scanning" by using an opaque id
-    return UUID.randomUUID();
+    return (TermsFacet) facet;
   }
 
 }

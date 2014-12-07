@@ -17,14 +17,12 @@
  */
 package org.icgc.dcc.portal.model;
 
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.GeneSetType.GO_TERM;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.GeneSetType.PATHWAY;
+import static org.icgc.dcc.portal.model.GeneSetType.GO_TERM;
+import static org.icgc.dcc.portal.model.GeneSetType.PATHWAY;
 import static org.icgc.dcc.portal.util.Filters.goTermFilter;
 import static org.icgc.dcc.portal.util.Filters.pathwayFilter;
 import lombok.Getter;
 import lombok.NonNull;
-
-import org.icgc.dcc.portal.model.EnrichmentAnalysis.GeneSetType;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -82,7 +80,7 @@ public enum Universe {
   public abstract ObjectNode getFilter();
 
   public boolean isGo() {
-    return geneSetType == GO_TERM;
+    return geneSetType == GeneSetType.GO_TERM;
   }
 
   // This seems to be needed for Lombok
