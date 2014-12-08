@@ -56,6 +56,30 @@
       fetch();
     };
 
+    $scope.remove = function(id) {
+      var confirmRemove, ids;
+
+      confirmRemove  = confirm('This action will remove this analyis, it cannot be undone!');
+      if (! confirmRemove) {
+        return;
+      }
+      console.log('Cleaning up');
+
+      $scope.analysisList = localStorageService.get('analysis') || [];
+      ids = _.pluck($scope.analysisList, 'id');
+
+      if (_.contains(ids, id)) {
+        var index = -1;
+        console.log('!!! deleting ...', id);
+        index = ids.indexOf(id);
+        $scope.analysisList.splice(index, 1);
+        localStorageService.set('analysis', $scope.analysisList);
+        $scope.analysisId = null;
+        $location.path('analysis');
+      }
+
+    };
+
     init();
     fetch();
 
