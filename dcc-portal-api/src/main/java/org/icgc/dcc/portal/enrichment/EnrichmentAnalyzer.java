@@ -204,12 +204,9 @@ public class EnrichmentAnalyzer {
     return rawResults;
   }
 
-  private Result calculateRawGeneSetResult(Query query, Universe universe, UUID inputGeneListId,
-      String geneSetId, int geneSetGeneCount, int overlapGeneCount, int universeGeneCount) {
-    val geneSetOverlapQuery = geneSetOverlapQuery(query, universe, inputGeneListId, geneSetId);
-
-    // "#Genes in overlap"
-    val geneSetOverlapGeneCount = countGenes(geneSetOverlapQuery);
+  private Result calculateRawGeneSetResult(Query query, Universe universe, UUID inputGeneListId, String geneSetId,
+      int geneSetOverlapGeneCount, int overlapGeneCount, int universeGeneCount) {
+    val geneSetGeneCount = countGeneSetGenes(geneSetId);
 
     // Statistics
     val expectedValue = calculateExpectedValue(
@@ -218,6 +215,9 @@ public class EnrichmentAnalyzer {
     val pValue = calculateHypergeometricTest(
         geneSetOverlapGeneCount, overlapGeneCount,
         geneSetGeneCount, universeGeneCount);
+
+    log.info("q = {}, k = {}, m = {}, n = {}, pValue = {}", new Object[] { geneSetOverlapGeneCount, overlapGeneCount,
+        geneSetGeneCount, universeGeneCount, pValue });
 
     // Assemble
     return new Result()
@@ -277,11 +277,15 @@ public class EnrichmentAnalyzer {
     return (int) mutationRepository.countIntersection(query);
   }
 
+  private int countGeneSetGenes(String geneSetId) {
+    val geneSet = geneSetRepository.findOne(geneSetId, API_GENE_COUNT_FIELD_NAME);
+
+    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+  }
+
   private int countUniverseGenes(Universe universe) {
     if (universe.isGo()) {
-      val geneSet = geneSetRepository.findOne(universe.getGeneSetId(), API_GENE_COUNT_FIELD_NAME);
-
-      return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+      return countGeneSetGenes(universe.getGeneSetId());
     } else {
       return (int) geneRepository.count(Query.builder().filters(universe.getFilter()).build());
     }

@@ -76,6 +76,13 @@ public final class Filters {
     return geneFilter;
   }
 
+  public static ObjectNode geneTypeFilter(@NonNull String type) {
+    val geneFilter = geneFilter();
+    geneFilter.with("gene").put("type", is(type));
+
+    return geneFilter;
+  }
+
   public static ObjectNode goTermFilter(@NonNull String goTermId) {
     val geneFilter = geneFilter();
     geneFilter.with(GENE.getId()).put("goTermId", is(goTermId));

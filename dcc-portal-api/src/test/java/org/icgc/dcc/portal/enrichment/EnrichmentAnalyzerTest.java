@@ -3,7 +3,7 @@ package org.icgc.dcc.portal.enrichment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
-import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
+import static org.icgc.dcc.portal.util.Filters.geneTypeFilter;
 
 import java.util.UUID;
 
@@ -63,7 +63,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val inputFilter = geneSetFilter("GO:0050794");
+    val inputFilter = geneTypeFilter("protein_coding");
 
     val analysis = execute(inputFilter);
 
