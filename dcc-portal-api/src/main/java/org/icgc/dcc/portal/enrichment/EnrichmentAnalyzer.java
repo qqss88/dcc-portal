@@ -39,6 +39,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Overview;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Result;
@@ -170,7 +171,7 @@ public class EnrichmentAnalyzer {
 
   private List<Count> calculateGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
-    val response = geneRepository.findGeneSetCounts(overlapQuery.getFilters());
+    val response = geneRepository.findGeneSetCounts(overlapQuery);
     val geneSetFacet = getUniverseTermsFacet(response, universe);
 
     return getFacetCounts(geneSetFacet);
@@ -241,8 +242,8 @@ public class EnrichmentAnalyzer {
       // Update
       geneSetResult
           .setGeneSetName(findGeneSetName(geneSetId))
-          .setOverlapDonorCount(findDonorCount(geneSetOverlapQuery))
-          .setOverlapMutationCount(findMutationCount(geneSetOverlapQuery));
+          .setOverlapDonorCount(countDonors(geneSetOverlapQuery))
+          .setOverlapMutationCount(countMutations(geneSetOverlapQuery));
     }
   }
 
@@ -258,22 +259,22 @@ public class EnrichmentAnalyzer {
     return getHitIds(geneRepository.findAllCentric(limitedGeneQuery));
   }
 
-  private int findDonorCount(Query query) {
-    return (int) donorRepository.count(query);
-  }
-
-  private int findMutationCount(Query query) {
-    return (int) mutationRepository.count(query);
-  }
-
   private String findGeneSetName(String geneSetId) {
     val nameField = INDEX_GENE_SETS_NAME_FIELD_NAME;
 
     return geneSetRepository.findOne(geneSetId, nameField).get(nameField).toString();
   }
 
-  private int countGenes(Query query) {
-    return (int) geneRepository.count(query);
+  private int countGenes(AndQuery query) {
+    return (int) geneRepository.countIntersection(query);
+  }
+
+  private int countDonors(AndQuery query) {
+    return (int) donorRepository.countIntersection(query);
+  }
+
+  private int countMutations(AndQuery query) {
+    return (int) mutationRepository.countIntersection(query);
   }
 
   private int countUniverseGenes(Universe universe) {

@@ -67,6 +67,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
@@ -74,6 +75,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -286,6 +288,26 @@ public class DonorRepository implements Repository {
   @Override
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
+
+    log.debug("{}", search);
+
+    return search.execute().actionGet().getHits().getTotalHits();
+  }
+
+  public long countIntersection(AndQuery query) {
+    val search = client.prepareSearch(index).setTypes(CENTRIC_TYPE.getId()).setSearchType(COUNT);
+
+    if (query.hasFilters()) {
+      // Require all filter components to be true
+      val boolFilter = new BoolFilterBuilder();
+      for (val filters : query.getAndFilters()) {
+        val remappedFilters = remapFilters(filters);
+
+        boolFilter.must(getFilters(remappedFilters));
+      }
+
+      search.setFilter(boolFilter);
+    }
 
     log.debug("{}", search);
 

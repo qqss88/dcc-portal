@@ -270,7 +270,7 @@ public class GeneRepositoryRequestTest extends BaseRepositoryRequestTest {
         .filters(filter.get())
         .build();
 
-    val request = $(repository.buildScoreFilters(query));
+    val request = $(repository.buildScoreFilters(query.getFilters()));
     log(filter.get(), request);
     return request;
   }

@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.enrichment;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.Query.idField;
-import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
 
@@ -29,9 +28,12 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
+import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Universe;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -40,28 +42,33 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class EnrichmentQueries {
 
-  public static Query overlapQuery(@NonNull Query query, @NonNull Universe universe, @NonNull UUID inputGeneListId) {
+  public static AndQuery overlapQuery(@NonNull Query query, @NonNull Universe universe, @NonNull UUID inputGeneListId) {
     // Components
     val queryFilter = query.getFilters();
     val universeFilter = universe.getFilter();
     val analysisFilter = inputGeneListFilter(inputGeneListId);
 
     // Overlap
-    val filters = andFilter(queryFilter, universeFilter, analysisFilter);
+    val filters = ImmutableList.of(queryFilter, universeFilter, analysisFilter);
 
     // EnrichmentSearchResponses?
     val includes = Lists.<String> newArrayList();
 
-    return Query.builder().filters(filters).fields(idField()).includes(includes).build();
+    val overlapQuery = new AndQuery().setAndFilters(filters);
+    overlapQuery.setFields(idField()).setIncludes(includes);
+
+    return overlapQuery;
   }
 
-  public static Query geneSetOverlapQuery(@NonNull Query query, @NonNull Universe universe,
+  public static AndQuery geneSetOverlapQuery(@NonNull Query query, @NonNull Universe universe,
       @NonNull UUID inputGeneListId, @NonNull String geneSetId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
 
     // TODO: Do not mutate, create a Query copy contructor instead
-    val overlapFilter = andFilter(overlapQuery.getFilters(), geneSetFilter(geneSetId));
-    overlapQuery.setFilters(overlapFilter);
+    val filters =
+        ImmutableList.<ObjectNode> builder().addAll(overlapQuery.getAndFilters()).add(geneSetFilter(geneSetId)).build();
+
+    overlapQuery.setAndFilters(filters);
 
     return overlapQuery;
   }

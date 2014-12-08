@@ -21,6 +21,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import lombok.experimental.Builder;
 
 import org.elasticsearch.search.sort.SortOrder;
@@ -35,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Accessors(chain = true)
 public class Query {
 
   /**
