@@ -36,8 +36,9 @@
 
   var module = angular.module('icgc.analysis.controllers', []);
 
-  module.controller('AnalysisController',
-    function ($scope, $state, $location, localStorageService, Page, Restangular, analysisId) {
+  module.controller('AnalysisController', function ($scope, $state, $location, $timeout, 
+    localStorageService, Page, Restangular, RestangularNoCache, analysisId) {
+
     Page.setPage('analysis');
 
     $scope.analysisId = analysisId;
@@ -58,26 +59,32 @@
     init();
     fetch();
 
-
     function fetch() {
       // 1) Check if analysis exist in the backend
       // 2) If analysis cannot be found, delete from local-list and display error
       if ($scope.analysisId) {
-        var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
+        console.log('fetching analysis ', $scope.analysisId);
+
+        // var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
+        var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
 
         resultPromise.then(function(data) {
           data = Restangular.stripRestangular(data);
           $scope.analysisResult = data;
-        });
 
+          // Check if we need to poll
+          if (data.state === 'EXECUTING') {
+            $timeout(fetch, 5000);
+          }
+        });
       }
     }
 
 
     function init() {
-      // 2) If not already exist in local-list, prepend it to local-list
-      // 3) Display list, ordered by something...
-      // 4) Render analysis result in content panel
+      // 1) If not already exist in local-list, prepend it to local-list
+      // 2) Display list, ordered by something...
+      // 3) Render analysis result in content panel
       if ($scope.analysisId) {
         var ids = _.pluck($scope.analysisList, 'id');
         if (!_.contains(ids, $scope.analysisId)) {

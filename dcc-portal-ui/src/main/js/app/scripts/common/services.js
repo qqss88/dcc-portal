@@ -21,6 +21,13 @@
   var module = angular.module('app.common.services', []);
 
 
+  module.factory('RestangularNoCache', function(Restangular) {
+    return Restangular.withConfig(function(RestangularConfigurer) {
+      RestangularConfigurer.setDefaultHttpFields({cache: false});
+    });
+  });
+
+
   module.factory('Page', function () {
     var title = 'Loading...',
       page = 'home',
