@@ -101,7 +101,7 @@ public final class EnrichmentAnalyses {
 
       @Override
       public int compare(Result a, Result b) {
-        return Doubles.compare(b.getPValue(), a.getPValue());
+        return Doubles.compare(a.getPValue(), b.getPValue());
       }
 
     });
@@ -114,7 +114,7 @@ public final class EnrichmentAnalyses {
 
       @Override
       public int compare(Result a, Result b) {
-        return Doubles.compare(b.getAdjustedPValue(), a.getAdjustedPValue());
+        return Doubles.compare(a.getAdjustedPValue(), b.getAdjustedPValue());
       }
 
     });
