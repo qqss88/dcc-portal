@@ -2,7 +2,6 @@ package org.icgc.dcc.portal.enrichment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
-import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 
 import java.util.UUID;
@@ -13,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Params;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.Universe;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
@@ -81,7 +81,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
             .setState(EXECUTING)
             .setParams(
                 new Params()
-                    .setUniverse(GO_BIOLOGICAL_PROCESS)
+                    .setUniverse(Universe.REACTOME_PATHWAYS)
                     .setFdr(0.05f)
                     .setMaxGeneCount(1000)
                     .setMaxGeneSetCount(100))

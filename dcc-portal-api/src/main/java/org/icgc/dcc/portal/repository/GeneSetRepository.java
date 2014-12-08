@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -72,19 +71,19 @@ public class GeneSetRepository {
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
               new TermFilterBuilder("go_term.inferred_tree.id", id.get()) :
-              new ExistsFilterBuilder("go_term"));
+              new TermFilterBuilder("type", "go_term"));
       break;
     case PATHWAY:
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
               new TermFilterBuilder("pathway.hierarchy.id", id.get()) :
-              new ExistsFilterBuilder("pathway"));
+              new TermFilterBuilder("type", "pathway"));
       break;
     case CURATED_SET:
       query =
           new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
               new TermFilterBuilder("curated_set.id", id.get()) :
-              new ExistsFilterBuilder("curated_set"));
+              new TermFilterBuilder("type", "curated_set"));
       break;
     default:
       checkState(false, "Unexpected type %s", type);
