@@ -200,7 +200,7 @@ public class QueryService {
           // 1) Add IS or NOT terms
           List<String> termList = Lists.newArrayList();
           for (val item : boolNode) {
-            termList.add(item.textValue());
+            termList.add(item.asText());
           }
 
           // 2) Special cases pending on type
