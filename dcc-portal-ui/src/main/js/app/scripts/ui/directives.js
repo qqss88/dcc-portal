@@ -24,7 +24,7 @@ angular.module('icgc.ui', [
   'icgc.ui.openin',
   'icgc.ui.trees',
   'icgc.ui.lists',
-  'icgc.ui.events'
+  'icgc.ui.query'
 ]);
 
 
