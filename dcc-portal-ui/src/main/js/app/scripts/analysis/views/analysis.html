@@ -2,23 +2,38 @@
 <aside class="t_sidebar">
 
     <!-- testing -->
-    <span data-ng-init="test= [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"></span>
+    <span data-ng-init="test=analysis"></span>
 
     <div style="margin-right: -2rem">
-        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem" data-scroll-to-selection>
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
-                    data-ng-repeat="item in test"
-                    data-ng-class="{selected: item == analysisId}"> 
-                    <span> Gene Set Analysis {{item}} </span><br>
+                    data-ng-click="getAnalysis()"
+                    data-ng-class="{selected: !analysisId}"> 
+                    <span>Analysis</span>
+                    <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
+                    <small>Home</small>
+                </>
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-click="getAnalysis(item.id)"
+                    data-ng-repeat="item in analysisList" 
+                    id="test_{{item}}"
+                    data-ng-class="{selected: item.id == analysisId}"> 
+                    <span> Gene Set Enrichment </span><i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
+                    <small>{{item.id.split('-')[0]}}</small><br>
                     <small>yyyy-mm-dd</small>
                 </li>
             </ul>
         </div>
     </div>
 </aside>
+
 <article>
-    <div style="margin: 1rem">
-        <enrichment-result></enrichment-result>
+    <div style="margin: 1rem" data-ng-if="!analysisId">
+        <div> Placeholder for instructions</div>
+    </div>
+    <div style="margin: 1rem" data-ng-if="analysisId">
+        <!--<enrichment-result data-item="analysisResult"></enrichment-result>-->
+        <enrichment-result data-item="analysisResult"></enrichment-result>
     </div>
 </article>

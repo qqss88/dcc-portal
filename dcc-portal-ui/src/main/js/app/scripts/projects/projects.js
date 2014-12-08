@@ -112,6 +112,11 @@
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
           }).then(function (genes) {
+            if ( !genes.hits || genes.hits.length === 0) {
+              Page.stopWork();
+              return;
+            }
+
             var params = {
               mutation: {functionalImpact:{is:['High']}}
             };

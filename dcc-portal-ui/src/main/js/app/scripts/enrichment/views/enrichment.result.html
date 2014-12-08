@@ -1,4 +1,8 @@
-<div> 
+<div data-ng-if="item.state === 'EXECUTING'">
+    <h3>Enrichment Result</h3>
+    <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
+</div>
+<div data-ng-if="item.state === 'FINISHED'"> 
     <h3>Enrichment Result</h3>
     <div>
         <h4>Overview</h4>
@@ -15,12 +19,12 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
+                    <td>{{item.params.universe}}</td>
+                    <td class="text-right">{{item.overview.universeGeneSetCount}}</td>
+                    <td class="text-right">{{item.overview.overlapGeneSetCount}}</td>
+                    <td class="text-right">{{item.overview.universeGeneCount}}</td>
+                    <td class="text-right">{{item.overview.overlapGeneCount}}</td>
+                    <td class="text-right">???</td>
                 </tr>
             </tbody>
         </table>
@@ -29,12 +33,12 @@
         <h4>Original Query:</h4>
         <div>
             <a href="/search">
-                <span>???</span>
+                <span>{{item.query.filters}}<span>
             </a>
         </div>
         <br>
         
-        <h4>Top ??? gene sets out of ??? enriched gene sets with FDR &lt;= ???</h4>
+        <h4>Top {{item.params.maxGeneSetCount}} gene sets out of {{item.overview.universeGeneSetCount}} enriched gene sets with FDR &lt;= {{item.params.fdr}}</h4>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -58,16 +62,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>???</td>
-                    <td>???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
-                    <td class="text-right">???</td>
+                <tr data-ng-repeat="row in item.results">
+                    <td>{{row.geneSetId}}</td>
+                    <td>{{row.geneSetName}}</td>
+                    <td class="text-right">{{row.geneCount | number}}</td>
+                    <td class="text-right">{{row.overlapGeneCount | number}}</td>
+                    <td class="text-right">{{row.overlapDonorCount | number}}</td>
+                    <td class="text-right">{{row.overlapMutationCount | number}}</td>
+                    <td class="text-right">{{row.expectedValue | number}}</td>
+                    <td class="text-right">{{row.pvalue | number}}</td>
+                    <td class="text-right">{{row.adjustedPValue | number}}</td>
                 </tr>
                 <tr>
                     <td>GO:123456</td>

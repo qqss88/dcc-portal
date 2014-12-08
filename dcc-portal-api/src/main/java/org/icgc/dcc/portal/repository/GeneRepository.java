@@ -71,6 +71,7 @@ import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
+import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -372,7 +373,7 @@ public class GeneRepository implements Repository {
     val fieldMapping = FIELDS_MAPPING.get(KIND);
     val fs = Lists.<String> newArrayList();
 
-    val search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
+    val search = client.prepareGet(index, TYPE.GENE.getId(), id);
 
     if (query.hasFields()) {
       for (String field : query.getFields()) {
@@ -415,9 +416,9 @@ public class GeneRepository implements Repository {
   }
 
   /*
-   * Lookup up genes by ensembl gene_id or gene symbol
+   * Lookup up genes by ensembl gene_id or gene symbol or uniprot
    * 
-   * @param input a list of string identifiers of either ensembl id or gene symbol
+   * @param input a list of string identifiers of either ensembl id or gene symbol or uniprot
    * 
    * @returns a map of matched identifiers
    */
@@ -441,7 +442,35 @@ public class GeneRepository implements Repository {
     val response = search.execute().actionGet();
 
     return response;
-
   }
 
+  /**
+   * Find transcripts for a specific gene that have mutations
+   * @param geneId
+   * @return unique list of transcript ids
+   */
+  public List<String> getAffectedTranscripts(String geneId) {
+    val transcriptField = "donor.ssm.consequence.transcript_affected";
+    val result = Lists.<String> newArrayList();
+    val search =
+        client
+            .prepareSearch(index)
+            .setTypes(CENTRIC_TYPE.getId())
+            .setSearchType(QUERY_THEN_FETCH)
+            .setSize(0)
+            .addFacet(
+                FacetBuilders.termsFacet("affectedTranscript")
+                    .nested("donor.ssm.consequence")
+                    .size(IndexModel.MAX_FACET_TERM_COUNT)
+                    .field(transcriptField)
+                    .facetFilter(FilterBuilders.termFilter("donor.ssm.consequence._gene_id", geneId)));
+
+    val response = search.execute().actionGet();
+    val facet = (InternalStringTermsFacet) response.getFacets().facet("affectedTranscript");
+
+    for (val entry : facet.getEntries()) {
+      result.add(entry.getTerm().toString());
+    }
+    return result;
+  }
 }

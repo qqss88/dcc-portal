@@ -166,12 +166,12 @@
 
 </section>
 <section id="projects"
-         data-ng-class="{'loading': !GeneSetCtrl.geneSet.fprojects, 'empty': GeneSetCtrl.geneSet.fprojects.length == 0}">
-    <h3 data-ng-if="!GeneSetCtrl.geneSet.fprojects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
+         data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
+    <h3 data-ng-if="!GeneSetCtrl.geneSet.projects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
 
-    <h3 data-ng-if="GeneSetCtrl.geneSet.fprojects.length == 0">No Donors Affected.</h3>
+    <h3 data-ng-if="GeneSetCtrl.geneSet.projects.length == 0">No Donors Affected.</h3>
 
-    <div data-ng-if="GeneSetCtrl.geneSet.fprojects.length > 0">
+    <div data-ng-if="GeneSetCtrl.geneSet.projects.length > 0">
         <h3>Cancer Distribution
             <span data-open-in-list='?filters={{GeneSetCtrl.baseAdvQuery}}' data-type='donor'></span>
         </h3>
@@ -183,8 +183,8 @@
             <a data-ng-href='/search/m?filters={{GeneSetCtrl.baseAdvQuery}}'>
                 <strong>{{GeneSetCtrl.totalMutations | number}}</strong></a>
             mutations across
-            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneSetCtrl.geneSet.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
-                <strong>{{GeneSetCtrl.geneSet.fprojects.length | number}}</strong></a>
+            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneSetCtrl.geneSet.projects|pluck:"id").join("\",\"")}}"]}}}'>
+                <strong>{{GeneSetCtrl.geneSet.projects.length | number}}</strong></a>
             projects
             <br>
 
@@ -195,8 +195,8 @@
                 <strong>{{GeneSetCtrl.geneSet.geneCount}}</strong>
             </a>
             genes in this gene set affected by mutations across
-            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneSetCtrl.geneSet.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
-                <strong>{{GeneSetCtrl.geneSet.fprojects.length | number}}</strong>
+            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneSetCtrl.geneSet.projects|pluck:"id").join("\",\"")}}"]}}}'>
+                <strong>{{GeneSetCtrl.geneSet.projects.length | number}}</strong>
             </a>
             cancer projects
         </h4>
@@ -214,7 +214,7 @@
                  format="percentage"></bar>
         </div>
         <span class="t_table_top">
-            Showing <strong>{{GeneSetCtrl.geneSet.fprojects.length | number}}</strong> projects
+            Showing <strong>{{GeneSetCtrl.geneSet.projects.length | number}}</strong> projects
             <span data-toolbar data-dl="{{GeneSetCtrl.geneSet.id}}_distribution"></span>
         </span>
         <table class="table table-bordered table-striped table-condensed">
@@ -233,7 +233,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat="project in GeneSetCtrl.geneSet.fprojects | orderBy:'uiAffectedDonorPercentage':true">
+            <tr data-ng-repeat="project in GeneSetCtrl.geneSet.projects | orderBy:'uiAffectedDonorPercentage':true">
                 <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
                     {{ project.id }}
                 </a></td>
@@ -294,7 +294,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat="project in GeneSetCtrl.geneSet.fprojects | orderBy:'uiAffectedDonorPercentage':true">
+            <tr data-ng-repeat="project in GeneSetCtrl.geneSet.projects | orderBy:'uiAffectedDonorPercentage':true">
                 <td>{{project.name}}</td>
                 <td>{{project.primarySite}}</td>
                 <td>{{project.tumourType}}</td>

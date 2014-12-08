@@ -23,20 +23,25 @@ angular.module('icgc.ui', [
   'icgc.ui.toolbar',
   'icgc.ui.openin',
   'icgc.ui.trees',
-  'icgc.ui.lists'
+  'icgc.ui.lists',
+  'icgc.ui.events'
 ]);
+
 
 angular.module('app.ui', [
   'app.ui.sortable',
   'app.ui.scrollto',
+  'app.ui.scrollSpy',
   'app.ui.pagination',
   'app.ui.tpls',
-  'app.ui.synonyms',
   'app.ui.dl',
-  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur', 'app.ui.autofocus',
-  'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2',
+  'app.ui.autofocus',
+  'app.ui.param', 'app.ui.nested', 'app.ui.mutation',
+  'app.ui.hidetext', 'app.ui.exists',
+  'app.ui.tooltip', 'app.ui.tooltipControl',
   'app.ui.fileUpload'
+  // 'app.ui.exists2',
+  // 'app.ui.scrolled',
 ]);
 
 
@@ -201,18 +206,6 @@ angular.module('app.ui.tooltip', [])
 
 
 
-angular.module('app.ui.exists2', []).directive('exists2', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    scope: {
-      exists2: '='
-    },
-    template: '<span><i data-ng-if="exists2" class="icon-ok"></i><span data-ng-if="!exists2">--</span></span>'
-  };
-});
-
-
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
     restrict: 'A',
@@ -249,24 +242,6 @@ angular.module('app.ui.exists', []).directive('exists', function () {
   };
 });
 
-
-angular.module('app.ui.es', []).directive('expandSearch', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    transclude: true,
-    template: '<a ng-class="{\'open\':o.open==true}" ng-transclude=""></a>',
-    link: function (scope, elem) {
-      scope.o = {};
-      scope.expand = function () {
-        scope.o.open = true;
-        jQuery(elem).find('input').focus();
-      };
-    }
-  };
-});
-
-
 angular.module('app.ui.hidetext', []).directive('hideText', function () {
   return {
     restrict: 'E',
@@ -300,6 +275,7 @@ angular.module('app.ui.hidetext', []).directive('hideText', function () {
   };
 });
 
+// This might be more confusing than helpful - DC
 angular.module('app.ui.nested', []).directive('nested', function ($location) {
   return function (scope, element, attrs) {
     element.bind('click', function (e) {
@@ -388,7 +364,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
   };
 });
 
-// Used in keyword search
+// Used in keyword search, rename - DC
 angular.module('app.ui.param', []).directive('param', function (LocationService) {
   return {
     restrict: 'A',
@@ -427,34 +403,6 @@ angular.module('app.ui.param', []).directive('param', function (LocationService)
   };
 });
 
-angular.module('app.ui.focus', []).directive('focus', function ($parse) {
-  return function (scope, element, attr) {
-    var fn = $parse(attr.focus);
-
-    function callback(event) {
-      scope.$apply(function () {
-        fn(scope, {$event: event});
-      });
-    }
-
-    element.on('focus', callback);
-  };
-});
-
-angular.module('app.ui.blur', []).directive('blur', function ($parse) {
-  return function (scope, element, attr) {
-    var fn = $parse(attr.blur);
-
-    function callback(event) {
-      scope.$apply(function () {
-        fn(scope, {$event: event});
-      });
-    }
-
-    element.on('blur', callback);
-  };
-});
-
 angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout) {
   return {
     restrict: 'A',
@@ -462,53 +410,6 @@ angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout
       $timeout(function() {
         $element[0].focus();
       });
-    }
-  };
-});
-
-angular.module('app.ui.scrolled', []).directive('scrolled', function ($window) {
-  return function (scope, elem) {
-    var w, oy;
-
-    w = angular.element($window);
-    oy = w.scrollTop();
-
-    function checkDelta() {
-      var top = w.scrollTop();
-
-      // only scroll down after top 100px
-      // only scroll if d > 50px
-      if (top > 150 && top > oy + 50) {
-        //scroll down
-        elem.stop(true, true).animate({
-          top: '-51'
-        }, 100);
-        oy = top;
-      } else if (top < oy - 50) {
-        //scroll up
-        elem.stop(true, true).animate({
-          top: '0'
-        }, 100);
-        oy = top;
-      }
-    }
-
-    w.on('scroll', checkDelta);
-    scope.$on('$destroy', function () {
-      w.off('scroll', checkDelta);
-    });
-  };
-});
-
-angular.module('app.ui.synonyms', []).directive('synonyms', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      item: '='
-    },
-    template: '<span>{{syn}}</span>',
-    link: function (scope) {
-      scope.syn = angular.isArray(scope.item) ? scope.item.join(', ') : scope.item;
     }
   };
 });
