@@ -3,7 +3,7 @@ package org.icgc.dcc.portal.enrichment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
-import static org.icgc.dcc.portal.util.Filters.emptyFilter;
+import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 
 import java.util.UUID;
 
@@ -23,6 +23,8 @@ import org.icgc.dcc.portal.test.AbstractSpringIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Slf4j
 public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
@@ -61,6 +63,18 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
+    val inputFilter = geneSetFilter("GO:0050794");
+
+    val analysis = execute(inputFilter);
+
+    val overview = analysis.getOverview();
+    assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
+    assertThat(overview.getOverlapGeneSetCount()).isGreaterThan(0);
+    assertThat(overview.getUniverseGeneCount()).isGreaterThan(0);
+    assertThat(overview.getUniverseGeneSetCount()).isGreaterThan(0);
+  }
+
+  private EnrichmentAnalysis execute(ObjectNode inputFilter) {
     val analysis =
         new EnrichmentAnalysis()
             .setId(UUID.randomUUID())
@@ -72,7 +86,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
                     .setMaxGeneCount(1000)
                     .setMaxGeneSetCount(100))
             .setQuery(Query.builder()
-                .filters(emptyFilter())
+                .filters(inputFilter)
                 .sort("affectedDonorCountFiltered")
                 .order("ASC")
                 .build());
@@ -81,11 +95,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
     analyzer.analyze(analysis);
 
     log.info("Result: {}", analysis);
-    val overview = analysis.getOverview();
-    assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
-    assertThat(overview.getOverlapGeneSetCount()).isGreaterThan(0);
-    assertThat(overview.getUniverseGeneCount()).isGreaterThan(0);
-    assertThat(overview.getUniverseGeneSetCount()).isGreaterThan(0);
+    return analysis;
   }
 
 }

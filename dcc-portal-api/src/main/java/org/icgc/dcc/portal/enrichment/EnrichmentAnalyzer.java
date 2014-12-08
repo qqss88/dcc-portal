@@ -287,7 +287,7 @@ public class EnrichmentAnalyzer {
   }
 
   private int countUniverseGeneSets(Universe universe) {
-    return geneSetRepository.countChildren(universe.getGeneSetType(), Optional.fromNullable(universe.getGeneSetId()));
+    return geneSetRepository.countDecendants(universe.getGeneSetType(), Optional.fromNullable(universe.getGeneSetId()));
   }
 
   @SneakyThrows
@@ -296,7 +296,7 @@ public class EnrichmentAnalyzer {
   }
 
   private static List<Result> limitGeneSetResults(List<Result> results, int maxGeneSetCount) {
-    return results.subList(0, maxGeneSetCount);
+    return results.size() < maxGeneSetCount ? results : results.subList(0, maxGeneSetCount);
   }
 
 }

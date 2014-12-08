@@ -64,8 +64,9 @@ public class GeneSetRepository {
     this.client = client;
   }
 
-  public int countChildren(@NonNull GeneSetType type, @NonNull Optional<String> id) {
+  public int countDecendants(@NonNull GeneSetType type, @NonNull Optional<String> id) {
     QueryBuilder query;
+
     switch (type) {
     case GO_TERM:
       query =

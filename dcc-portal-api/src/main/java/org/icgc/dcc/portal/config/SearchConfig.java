@@ -53,7 +53,7 @@ public class SearchConfig {
   @Autowired
   private PortalProperties properties;
 
-  @Bean
+  @Bean(destroyMethod = "close")
   public Client client() {
     // TransportClient is thread-safe so @Singleton is appropriate
     val configuration = properties.getElastic();
