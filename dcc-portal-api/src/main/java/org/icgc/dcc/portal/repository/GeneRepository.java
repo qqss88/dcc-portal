@@ -192,7 +192,7 @@ public class GeneRepository implements Repository {
     return response;
   }
 
-  public SearchResponse findGeneSets(ObjectNode filters) {
+  public SearchResponse findGeneSetCounts(ObjectNode filters) {
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(COUNT);
@@ -202,6 +202,8 @@ public class GeneRepository implements Repository {
     // - Facet limits
     // - Search Type
     // - Others?
+
+    val remappedFilters = getFilters(remapFilters(filters));
     for (val universe : Universe.values()) {
       val universeFacetName = universe.getGeneSetFacetName();
 
@@ -209,7 +211,7 @@ public class GeneRepository implements Repository {
           termsFacet(universeFacetName)
               .field(universeFacetName)
               .size(50000) // This has to be as big as the largest universe
-              .facetFilter(getFilters(filters)));
+              .facetFilter(remappedFilters));
     }
 
     log.debug("{}", search);

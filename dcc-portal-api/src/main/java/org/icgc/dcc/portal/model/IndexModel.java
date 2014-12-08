@@ -227,7 +227,6 @@ public class IndexModel {
           .put("pathwayName", "pathways.pathway_name")
           .put("pathways", "pathways")
           .put("sets", "sets")
-          .put("geneSetId", "sets.id")
           .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
 
           .build();

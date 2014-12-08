@@ -170,7 +170,7 @@ public class EnrichmentAnalyzer {
 
   private List<Count> calculateGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
-    val response = geneRepository.findGeneSets(overlapQuery.getFilters());
+    val response = geneRepository.findGeneSetCounts(overlapQuery.getFilters());
     val geneSetFacet = getUniverseTermsFacet(response, universe);
 
     return getFacetCounts(geneSetFacet);
