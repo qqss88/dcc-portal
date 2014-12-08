@@ -1,9 +1,9 @@
 <div data-ng-if="item.state === 'EXECUTING'">
-    <h3>Enrichment Result</h3>
+    <!--<h3>Enrichment Result</h3>-->
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
 <div data-ng-if="item.state === 'FINISHED'"> 
-    <h3>Enrichment Result</h3>
+    <!--<h3>Enrichment Result</h3>-->
     <div>
         <h4>Overview</h4>
         <table class="table table-bordered">
@@ -24,7 +24,7 @@
                     <td class="text-right">{{item.overview.overlapGeneSetCount}}</td>
                     <td class="text-right">{{item.overview.universeGeneCount}}</td>
                     <td class="text-right">{{item.overview.overlapGeneCount}}</td>
-                    <td class="text-right">???</td>
+                    <td class="text-right">{{item.params.maxGeneCount}}</td>
                 </tr>
             </tbody>
         </table>
@@ -38,7 +38,7 @@
         </div>
         <br>
         
-        <h4>Top {{item.params.maxGeneSetCount}} gene sets out of {{item.overview.universeGeneSetCount}} enriched gene sets with FDR &lt;= {{item.params.fdr}}</h4>
+        <h4>Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}</h4>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -63,7 +63,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in item.results">
-                    <td>{{row.geneSetId}}</td>
+                    <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>{{row.geneSetName}}</td>
                     <td class="text-right">{{row.geneCount | number}}</td>
                     <td class="text-right">{{row.overlapGeneCount | number}}</td>
@@ -72,17 +72,6 @@
                     <td class="text-right">{{row.expectedValue | number}}</td>
                     <td class="text-right">{{row.pvalue | number}}</td>
                     <td class="text-right">{{row.adjustedPValue | number}}</td>
-                </tr>
-                <tr>
-                    <td>GO:123456</td>
-                    <td>This is a go ontology name example</td>
-                    <td class="text-right">500</td>
-                    <td class="text-right">400</td>
-                    <td class="text-right">1,200</td>
-                    <td class="text-right">6,777</td>
-                    <td class="text-right">1.45e+02</td>
-                    <td class="text-right">1.234e-99</td>
-                    <td class="text-right">1.234e-99</td>
                 </tr>
             </tbody>
         </table>

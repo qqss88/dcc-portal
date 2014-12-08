@@ -35,12 +35,12 @@
 
 
       // FIXME: need real values
-      _ctrl.analysisParams.universe = 'REACTOME_PATHWAYS';
       data = 'params=' + JSON.stringify(_ctrl.analysisParams) + '&' +
         'sort=affectedDonorCountFiltered' + '&' +
         'order=ASC' + '&' +
         'filters=' + JSON.stringify(LocationService.filters())
 
+      console.log('payload', data);
 
       promise = Restangular.one('analysis')
         .withHttpConfig({transformRequest: angular.identity})
