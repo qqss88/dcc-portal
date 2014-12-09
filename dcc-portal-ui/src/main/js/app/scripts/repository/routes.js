@@ -22,7 +22,7 @@ angular.module('app.download', ['app.download.services', 'app.download.controlle
 angular.module('app.download').config(function ($stateProvider) {
   $stateProvider.state('download', {
     url: '/repository*path',
-    templateUrl: '/views/repository.html',
+    templateUrl: '/scripts/repository/views/repository.html',
     controller: 'DownloadController'
   });
 });
