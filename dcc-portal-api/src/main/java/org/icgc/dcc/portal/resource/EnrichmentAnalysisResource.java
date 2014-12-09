@@ -35,6 +35,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_PARAMS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_FIELD;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.validate;
 
 import java.util.UUID;
 
@@ -53,8 +54,8 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.model.EnrichmentParamsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
-import org.icgc.dcc.portal.model.ParamsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
@@ -92,11 +93,12 @@ public class EnrichmentAnalysisResource {
   @POST
   @ApiOperation(value = "Submits an asynchronous enrichment analysis request. Users must poll the status using the GET resource", response = EnrichmentAnalysis.class)
   public Response submitAnalysis(
-      @ApiParam(value = API_PARAMS_VALUE) @FormParam(API_PARAMS_PARAM) ParamsParam paramsParam,
+      @ApiParam(value = API_PARAMS_VALUE) @FormParam(API_PARAMS_PARAM) EnrichmentParamsParam paramsParam,
       @ApiParam(value = API_FILTER_VALUE) @FormParam(API_FILTER_PARAM) FiltersParam filtersParam,
       @ApiParam(value = API_SORT_VALUE) @FormParam(API_SORT_FIELD) String sort,
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @FormParam(API_ORDER_PARAM) String order
       ) {
+
     // Validate
     if (paramsParam == null) {
       throw new BadRequestException("'params' empty");
@@ -110,6 +112,9 @@ public class EnrichmentAnalysisResource {
     if (isNullOrEmpty(order)) {
       throw new BadRequestException("'order' is missing or empty");
     }
+
+    // JSR 303 resource parameters are not supported in DW 1
+    validate(paramsParam.get());
 
     // Construct
     val query = Query.builder()

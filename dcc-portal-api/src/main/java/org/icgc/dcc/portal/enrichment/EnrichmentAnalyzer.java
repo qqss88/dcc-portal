@@ -118,8 +118,8 @@ public class EnrichmentAnalyzer {
     indexInputGeneList(inputGeneListId, inputGeneList);
 
     // Get all gene-set gene counts of the input query
-    log.info("Calculating gene set counts @ {}...", watch);
-    val geneSetCounts = calculateGeneSetCounts(
+    log.info("Calculating overlap gene set counts @ {}...", watch);
+    val overlapGeneSetCounts = calculateOverlapGeneSetCounts(
         query,
         universe,
         inputGeneListId);
@@ -135,7 +135,7 @@ public class EnrichmentAnalyzer {
         universe,
         inputGeneListId,
 
-        geneSetCounts,
+        overlapGeneSetCounts,
         overview.getOverlapGeneCount(),
         overview.getUniverseGeneCount());
 
@@ -170,7 +170,7 @@ public class EnrichmentAnalyzer {
         .setUniverseGeneSetCount(countUniverseGeneSets(universe));
   }
 
-  private List<Count> calculateGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
+  private List<Count> calculateOverlapGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
     val response = geneRepository.findGeneSetCounts(overlapQuery);
     val geneSetFacet = getUniverseTermsFacet(response, universe);
@@ -179,14 +179,14 @@ public class EnrichmentAnalyzer {
   }
 
   private List<Result> calculateRawGeneSetsResults(Query query, Universe universe, UUID inputGeneListId,
-      List<Count> geneSetGeneCounts, int overlapGeneCount, int universeGeneCount) {
+      List<Count> overlapGeneSetGeneCounts, int overlapGeneCount, int universeGeneCount) {
     val rawResults = Lists.<Result> newArrayList();
-    for (int i = 0; i < geneSetGeneCounts.size(); i++) {
-      val geneSetCount = geneSetGeneCounts.get(i);
-      val geneSetId = geneSetCount.getId();
-      int geneSetOverlapGeneCount = geneSetCount.getValue();
+    for (int i = 0; i < overlapGeneSetGeneCounts.size(); i++) {
+      val overlapGeneSet = overlapGeneSetGeneCounts.get(i);
+      val geneSetId = overlapGeneSet.getId();
+      int geneSetOverlapGeneCount = overlapGeneSet.getValue();
 
-      log.info("[{}/{}] Processing {}", new Object[] { i + 1, geneSetGeneCounts.size(), geneSetId });
+      log.info("[{}/{}] Processing {}", new Object[] { i + 1, overlapGeneSetGeneCounts.size(), geneSetId });
       val rawResult = calculateRawGeneSetResult(
           query,
           universe,

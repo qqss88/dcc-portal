@@ -1,10 +1,10 @@
 package org.icgc.dcc.portal.enrichment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.DEFAULT_FDR;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.MAX_INPUT_GENES;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.MAX_OUTPUT_GENE_SETS;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
+import static org.icgc.dcc.portal.model.EnrichmentParams.DEFAULT_FDR;
+import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_INPUT_GENES;
+import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_OUTPUT_GENE_SETS;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.test.JsonNodes.$;
 import static org.icgc.dcc.portal.util.Filters.emptyFilter;
@@ -15,7 +15,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.model.EnrichmentAnalysis.Params;
+import org.icgc.dcc.portal.model.EnrichmentParams;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
@@ -84,7 +84,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
             .setId(UUID.randomUUID())
             .setState(EXECUTING)
             .setParams(
-                new Params()
+                new EnrichmentParams()
                     .setUniverse(GO_BIOLOGICAL_PROCESS)
                     .setFdr(DEFAULT_FDR)
                     .setMaxGeneCount(MAX_INPUT_GENES)

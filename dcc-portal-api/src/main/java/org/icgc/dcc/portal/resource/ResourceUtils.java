@@ -1,13 +1,20 @@
 package org.icgc.dcc.portal.resource;
 
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.validation.Validation;
+
+import lombok.NonNull;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Query.QueryBuilder;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.util.JsonUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -84,7 +91,7 @@ public class ResourceUtils {
   static final String API_ANALYSIS_PARAM = "analysis";
   static final String API_ANALYSIS_ID_VALUE = "Analysis ID";
   static final String API_ANALYSIS_ID_PARAM = "analysisId";
-  static final String API_PARAMS_VALUE = "Params";
+  static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
@@ -126,4 +133,23 @@ public class ResourceUtils {
   static QueryBuilder query() {
     return Query.builder();
   }
+
+  /**
+   * @see http://stackoverflow.com/questions/23704616/how-to-validate-a-single-parameter-in-dropwizard
+   */
+  static void validate(@NonNull Object object) {
+    val errorMessages = new ArrayList<String>();
+    val validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    val violations = validator.validate(object);
+    if (!violations.isEmpty()) {
+      for (val violation : violations) {
+        errorMessages.add("'" + violation.getPropertyPath() + "' " + violation.getMessage());
+      }
+
+      throw new BadRequestException(COMMA.join(errorMessages));
+    }
+
+  }
+
 }
