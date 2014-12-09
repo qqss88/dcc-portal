@@ -20,11 +20,11 @@
             <tbody>
                 <tr>
                     <td>{{item.params.universe}}</td>
-                    <td class="text-right">{{item.overview.universeGeneSetCount}}</td>
-                    <td class="text-right">{{item.overview.overlapGeneSetCount}}</td>
-                    <td class="text-right">{{item.overview.universeGeneCount}}</td>
-                    <td class="text-right">{{item.overview.overlapGeneCount}}</td>
-                    <td class="text-right">{{item.params.maxGeneCount}}</td>
+                    <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
+                    <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
+                    <td class="text-right">{{item.overview.universeGeneCount | number}}</td>
+                    <td class="text-right">{{item.overview.overlapGeneCount | number}}</td>
+                    <td class="text-right">{{item.params.maxGeneCount | number}}</td>
                 </tr>
             </tbody>
         </table>
@@ -32,13 +32,21 @@
 
         <h4>Original Query:</h4>
         <div>
-            <a href="/search">
-                <span>{{item.query.filters}}<span>
+            <a href="/search?filters={{item.query.filters}}">
+                <span>
+                    <query-display data-filters="item.query.filters"></query-display>
+                </span>
             </a>
         </div>
         <br>
         
-        <h4>Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}</h4>
+        <h4 data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
+            Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+        </h4>
+        <h4 data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
+            {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+        </h4>
+
         <table class="table table-bordered">
             <thead>
                 <tr>

@@ -25,7 +25,6 @@
         }]
       }
     });
-
   });
 
 })();
@@ -40,6 +39,7 @@
     localStorageService, Page, Restangular, RestangularNoCache, analysisId) {
 
     Page.setPage('analysis');
+    Page.setTitle('Analysis');
 
     $scope.analysisId = analysisId;
     $scope.analysisList = localStorageService.get('analysis') || [];
