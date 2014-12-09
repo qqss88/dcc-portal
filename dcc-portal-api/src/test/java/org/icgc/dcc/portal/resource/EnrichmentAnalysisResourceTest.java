@@ -22,6 +22,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
+import static org.icgc.dcc.portal.model.Universe.REACTOME_PATHWAYS;
 import static org.icgc.dcc.portal.util.Filters.uploadedGeneListFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.mockito.Mockito.when;
@@ -32,6 +33,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
+import org.icgc.dcc.portal.model.EnrichmentParams;
 import org.icgc.dcc.portal.provider.ExpandingFormFilterParamsProvider;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
 import org.icgc.dcc.portal.service.UserGeneSetService;
@@ -43,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.api.representation.Form;
@@ -105,10 +108,10 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
   }
 
   @Test
-  public void testSubmit() {
+  public void testSubmit() throws JsonProcessingException {
     // Analysis
     val formData = new Form();
-    formData.add("params", MAPPER.createObjectNode());
+    formData.add("params", MAPPER.writeValueAsString(new EnrichmentParams().setUniverse(REACTOME_PATHWAYS)));
 
     // Query
     val geneListId = UUID.randomUUID().toString();

@@ -113,7 +113,7 @@ public class EnrichmentAnalysisResource {
       throw new BadRequestException("'order' is missing or empty");
     }
 
-    // JSR 303 not supported in DW 1
+    // JSR 303 resource parameters are not supported in DW 1
     validate(paramsParam.get());
 
     // Construct

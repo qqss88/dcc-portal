@@ -134,6 +134,9 @@ public class ResourceUtils {
     return Query.builder();
   }
 
+  /**
+   * @see http://stackoverflow.com/questions/23704616/how-to-validate-a-single-parameter-in-dropwizard
+   */
   static void validate(@NonNull Object object) {
     val errorMessages = new ArrayList<String>();
     val validator = Validation.buildDefaultValidatorFactory().getValidator();
