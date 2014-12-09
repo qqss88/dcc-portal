@@ -57,12 +57,14 @@
                     <th># Donors affected</th>
                     <th># Mutations</th>
                     <th>Expected</th>
-                    <th>P-Value
-                        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='PValue'" class="icon-sort"></i>
-                        <i data-ng-if="predicate=='PValue'&&!reverse" class="icon-sort-up"></i>
-                        <i data-ng-if="predicate=='PValue'&&reverse" class="icon-sort-down"></i>
+                    <th style="cursor: pointer"
+                        data-ng-click="predicate='pvalue'; reverse=!reverse">P-Value
+                        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='pvalue'" class="icon-sort"></i>
+                        <i data-ng-if="predicate=='pvalue'&& !reverse" class="icon-sort-up"></i>
+                        <i data-ng-if="predicate=='pvalue'&& reverse" class="icon-sort-down"></i>
                     </th>
-                    <th>Adjusted P-Value
+                    <th style="cursor: pointer"
+                        data-ng-click="predicate='adjustedPValue'; reverse=!reverse">Adjusted P-Value
                         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='adjustedPValue'" class="icon-sort"></i>
                         <i data-ng-if="predicate=='adjustedPValue'&&!reverse" class="icon-sort-up"></i>
                         <i data-ng-if="predicate=='adjustedPValue'&&reverse" class="icon-sort-down"></i>
@@ -70,16 +72,16 @@
                 </tr>
             </thead>
             <tbody>
-                <tr data-ng-repeat="row in item.results">
+                <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>{{row.geneSetName}}</td>
                     <td class="text-right">{{row.geneCount | number}}</td>
                     <td class="text-right">{{row.overlapGeneCount | number}}</td>
                     <td class="text-right">{{row.overlapDonorCount | number}}</td>
                     <td class="text-right">{{row.overlapMutationCount | number}}</td>
-                    <td class="text-right">{{row.expectedValue | number}}</td>
-                    <td class="text-right">{{row.pvalue | number}}</td>
-                    <td class="text-right">{{row.adjustedPValue | number}}</td>
+                    <td class="text-right">{{row.expectedValue.toExponential(5) }}</td>
+                    <td class="text-right">{{row.pvalue.toExponential(5) }}</td>
+                    <td class="text-right">{{row.adjustedPValue.toExponential(5) }}</td>
                 </tr>
             </tbody>
         </table>

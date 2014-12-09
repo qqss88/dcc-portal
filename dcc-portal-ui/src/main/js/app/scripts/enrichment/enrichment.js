@@ -121,6 +121,9 @@
       },
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       link: function($scope) {
+        $scope.predicate = 'adjustedPValue';
+        $scope.reverse = false;
+
         console.log('enrichment result', $scope.item);
       }
     };
