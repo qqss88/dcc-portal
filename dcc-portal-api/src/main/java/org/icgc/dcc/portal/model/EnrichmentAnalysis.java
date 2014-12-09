@@ -17,11 +17,10 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.util.List;
 import java.util.UUID;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -29,70 +28,35 @@ import lombok.experimental.Accessors;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.wordnik.swagger.annotations.ApiModel;
 
+/**
+ * The total state of an enrichment analysis including its inputs, state and outputs.
+ */
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(NON_NULL)
 @ApiModel(value = "EnrichmentAnalysis")
 @Accessors(chain = true)
 public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   /**
-   * Constants.
-   */
-  public static final int MAX_INPUT_GENES = 1000;
-  public static final int MAX_OUTPUT_GENE_SETS = 100;
-  public static final float DEFAULT_FDR = 0.05f;
-  public static final float MIN_FDR = 0.005f;
-  public static final float MAX_FDR = 0.5f;
-
-  /**
    * Resource identifier
    */
-  UUID id;
+  private UUID id;
 
   /**
    * State of the analysis
    */
-  State state;
+  private State state;
 
   /**
    * Input from Advanced Search
    */
-  @NotNull
-  Query query;
+  private Query query;
 
-  @NotNull
-  Params params;
+  private EnrichmentParams params;
 
-  Overview overview;
+  private Overview overview;
 
-  List<Result> results;
-
-  @Data
-  public static class Params {
-
-    /**
-     * UI: "# Input genes"
-     */
-    @Max(MAX_INPUT_GENES)
-    int maxGeneCount;
-
-    /**
-     * UI: "Top {{ analysis.params.maxGeneSetCount }} gene sets [...]"
-     */
-    @Max(MAX_OUTPUT_GENE_SETS)
-    int maxGeneSetCount;
-
-    /**
-     * UI: "Top {{ analysis.params.maxGeneSetCount }} gene sets [...]"
-     */
-    float fdr = DEFAULT_FDR;
-
-    /**
-     * Background
-     */
-    Universe universe;
-
-  }
+  private List<Result> results;
 
   @Data
   @Accessors(chain = true)
@@ -101,22 +65,22 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "#Gene sets in overlap"
      */
-    int overlapGeneSetCount;
+    private int overlapGeneSetCount;
 
     /**
      * UI: "#Gene sets in Universe"
      */
-    int universeGeneSetCount;
+    private int universeGeneSetCount;
 
     /**
      * UI: "#Genes in overlap"
      */
-    int overlapGeneCount;
+    private int overlapGeneCount;
 
     /**
      * UI: "#Genes in Universe"
      */
-    int universeGeneCount;
+    private int universeGeneCount;
 
   }
 
@@ -127,50 +91,53 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "ID"
      */
-    String geneSetId;
+    private String geneSetId;
 
     /**
      * UI: "Name"
      */
-    String geneSetName;
+    private String geneSetName;
 
     /**
      * UI: "#Genes"
      */
-    int geneCount;
+    private int geneCount;
 
     /**
      * UI: "#Genes in overlap"
      */
-    int overlapGeneCount;
+    private int overlapGeneCount;
 
     /**
      * UI: "#Donors in overlap"
      */
-    int overlapDonorCount;
+    private int overlapDonorCount;
 
     /**
      * UI: "#Mutations"
      */
-    int overlapMutationCount;
+    private int overlapMutationCount;
 
     /**
      * UI: "Expected"
      */
-    double expectedValue;
+    private double expectedValue;
 
     /**
      * UI: "P-Value"
      */
-    double pValue;
+    private double pValue;
 
     /**
      * UI: "Adjusted P-Value"
      */
-    double adjustedPValue;
+    private double adjustedPValue;
 
   }
 
+  /**
+   * The state of an executing enrichment analysis.
+   */
   public enum State {
 
     EXECUTING,

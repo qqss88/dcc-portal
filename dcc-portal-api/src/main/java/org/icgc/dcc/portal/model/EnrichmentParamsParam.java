@@ -18,21 +18,19 @@ package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
-import org.icgc.dcc.portal.model.EnrichmentAnalysis.Params;
-
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.yammer.dropwizard.jersey.params.AbstractParam;
 
-public class ParamsParam extends AbstractParam<Params> {
+public class EnrichmentParamsParam extends AbstractParam<EnrichmentParams> {
 
-  private static final ObjectReader READER = MAPPER.reader(Params.class);
+  private static final ObjectReader READER = MAPPER.reader(EnrichmentParams.class);
 
-  public ParamsParam(String input) {
+  public EnrichmentParamsParam(String input) {
     super(input);
   }
 
   @Override
-  protected Params parse(String input) throws Exception {
+  protected EnrichmentParams parse(String input) throws Exception {
     return READER.readValue(input);
   }
 
