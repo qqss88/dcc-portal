@@ -24,7 +24,7 @@ angular.module('icgc.ui.toolbar', []).directive('toolbar', function ($filter, $t
     scope: {
       dl: '@'
     },
-    templateUrl: 'views/ui/toolbar.html',
+    templateUrl: '/scripts/ui/views/toolbar.html',
     link: function (scope) {
 
       scope.downloadHTMLTable = function(id, type) {

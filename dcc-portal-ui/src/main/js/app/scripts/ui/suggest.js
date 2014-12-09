@@ -172,7 +172,7 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: '/views/ui/suggest_popup.html',
+    templateUrl: '/scripts/ui/views/suggest_popup.html',
     link: function (scope) {
       scope.mouseover = function (i) {
         scope.setActive(i);
@@ -202,7 +202,7 @@ angular.module('icgc.ui.suggest').directive('tagsPopup', function () {
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: '/views/ui/tags_popup.html',
+    templateUrl: '/scripts/ui/views/tags_popup.html',
     link: function (scope) {
       scope.mouseover = function (i) {
         scope.setActive(i);
