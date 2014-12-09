@@ -25,7 +25,7 @@ angular.module('app.ui.dl', []).directive('dlButton',
       scope: {
         dlFilter: '@'
       },
-      templateUrl: 'views/common/dl.html',
+      templateUrl: '/scripts/ui/views/download.request.html',
       link: function (scope) {
 
         var emailRegex = /.+@.+\..+/i;
