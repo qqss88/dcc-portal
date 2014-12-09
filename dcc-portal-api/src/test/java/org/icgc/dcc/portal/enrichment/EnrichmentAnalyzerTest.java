@@ -1,9 +1,13 @@
 package org.icgc.dcc.portal.enrichment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.DEFAULT_FDR;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.MAX_INPUT_GENES;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.MAX_OUTPUT_GENE_SETS;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
-import static org.icgc.dcc.portal.util.Filters.geneTypeFilter;
+import static org.icgc.dcc.portal.test.JsonNodes.$;
+import static org.icgc.dcc.portal.util.Filters.emptyFilter;
 
 import java.util.UUID;
 
@@ -63,7 +67,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val inputFilter = geneTypeFilter("protein_coding");
+    val inputFilter = emptyFilter();
 
     val analysis = execute(inputFilter);
 
@@ -82,13 +86,13 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
             .setParams(
                 new Params()
                     .setUniverse(GO_BIOLOGICAL_PROCESS)
-                    .setFdr(0.05f)
-                    .setMaxGeneCount(1000)
-                    .setMaxGeneSetCount(100))
+                    .setFdr(DEFAULT_FDR)
+                    .setMaxGeneCount(MAX_INPUT_GENES)
+                    .setMaxGeneSetCount(MAX_OUTPUT_GENE_SETS))
             .setQuery(Query.builder()
                 .filters(inputFilter)
                 .sort("affectedDonorCountFiltered")
-                .order("ASC")
+                .order("DESC")
                 .build());
 
     log.info("Starting...");
@@ -96,6 +100,10 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
     log.info("Result: {}", analysis);
     return analysis;
+  }
+
+  protected ObjectNode allEntityFilter() {
+    return (ObjectNode) $("{'donor':{'primarySite':{'is':['Brain']},'gender':{'is':['male']}},'gene':{'type':{'is':['protein_coding']},'list':{'is':['Cancer Gene Census']}},'mutation':{'consequenceType':{'is':['missense']}}}");
   }
 
 }

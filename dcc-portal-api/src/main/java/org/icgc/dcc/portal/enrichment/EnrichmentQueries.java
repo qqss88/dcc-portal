@@ -54,7 +54,7 @@ public class EnrichmentQueries {
     // EnrichmentSearchResponses?
     val includes = Lists.<String> newArrayList();
 
-    val overlapQuery = new AndQuery().setAndFilters(filters);
+    val overlapQuery = new AndQuery(filters);
     overlapQuery.setFields(idField()).setIncludes(includes);
 
     return overlapQuery;
