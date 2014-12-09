@@ -31,8 +31,10 @@
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
             <li><br></li>
-            <li class="t_subnav__items__item"><span>Page Filters</span></li>
-            <li class="t_subnav__items__box">
+            <li data-ng-if="GeneSetCtrl.mutationFacets.functionalImpact.total > 0"
+                class="t_subnav__items__item"><span>Page Filters</span></li>
+            <li data-ng-if="GeneSetCtrl.mutationFacets.functionalImpact.total > 0"
+                class="t_subnav__items__box">
                 <ul class="t_facets">
                     <terms data-type="mutation"
                            data-facet-name="functionalImpact"
