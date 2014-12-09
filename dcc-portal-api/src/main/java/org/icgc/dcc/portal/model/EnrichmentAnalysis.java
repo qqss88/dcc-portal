@@ -36,6 +36,15 @@ import com.wordnik.swagger.annotations.ApiModel;
 public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   /**
+   * Constants.
+   */
+  public static final int MAX_INPUT_GENES = 1000;
+  public static final int MAX_OUTPUT_GENE_SETS = 100;
+  public static final float DEFAULT_FDR = 0.05f;
+  public static final float MIN_FDR = 0.005f;
+  public static final float MAX_FDR = 0.5f;
+
+  /**
    * Resource identifier
    */
   UUID id;
@@ -64,19 +73,19 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "# Input genes"
      */
-    @Max(1000)
+    @Max(MAX_INPUT_GENES)
     int maxGeneCount;
 
     /**
      * UI: "Top {{ analysis.params.maxGeneSetCount }} gene sets [...]"
      */
-    @Max(100)
+    @Max(MAX_OUTPUT_GENE_SETS)
     int maxGeneSetCount;
 
     /**
      * UI: "Top {{ analysis.params.maxGeneSetCount }} gene sets [...]"
      */
-    float fdr;
+    float fdr = DEFAULT_FDR;
 
     /**
      * Background

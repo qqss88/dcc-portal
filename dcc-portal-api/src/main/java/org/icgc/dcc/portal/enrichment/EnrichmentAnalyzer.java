@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.enrichment;
 
 import static com.google.common.base.Stopwatch.createStarted;
+import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
 import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.adjustRawGeneSetResults;
 import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.calculateExpectedValue;
 import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.calculateHypergeometricTest;
@@ -113,7 +114,7 @@ public class EnrichmentAnalyzer {
     val inputGeneList = findInputGeneList(query, params.getMaxGeneCount());
 
     // Save ids in index for efficient search using "term lookup"
-    log.info("Indexing input gene list @ {}...", watch);
+    log.info("Indexing input gene list ({} genes) @ {}...", formatCount(inputGeneList.size()), watch);
     indexInputGeneList(inputGeneListId, inputGeneList);
 
     // Get all gene-set gene counts of the input query
@@ -183,6 +184,7 @@ public class EnrichmentAnalyzer {
     for (int i = 0; i < geneSetGeneCounts.size(); i++) {
       val geneSetCount = geneSetGeneCounts.get(i);
       val geneSetId = geneSetCount.getId();
+      int geneSetOverlapGeneCount = geneSetCount.getValue();
 
       log.info("[{}/{}] Processing {}", new Object[] { i + 1, geneSetGeneCounts.size(), geneSetId });
       val rawResult = calculateRawGeneSetResult(
@@ -192,7 +194,7 @@ public class EnrichmentAnalyzer {
           geneSetId,
 
           // Formula inputs
-          geneSetCount.getValue(),
+          geneSetOverlapGeneCount,
           overlapGeneCount,
           universeGeneCount
           );
@@ -251,9 +253,12 @@ public class EnrichmentAnalyzer {
     val limitedGeneQuery = Query.builder()
         .fields(idField())
         .filters(query.getFilters())
-        .size(maxGeneCount)
         .sort(query.getSort())
         .order(query.getOrder().toString())
+
+        // This is non standard in terms of size of result set, but its just ids
+        .size(maxGeneCount)
+        .limit(maxGeneCount)
         .build();
 
     return getHitIds(geneRepository.findAllCentric(limitedGeneQuery));

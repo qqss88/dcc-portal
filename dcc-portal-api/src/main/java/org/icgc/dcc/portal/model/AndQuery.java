@@ -22,23 +22,17 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import org.icgc.dcc.portal.util.ObjectNodeDeserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Data
 @Accessors(chain = true)
+@Data
+@AllArgsConstructor
 public class AndQuery extends Query {
 
-  @JsonDeserialize(using = ObjectNodeDeserializer.class)
-  List<ObjectNode> andFilters;
+  private List<ObjectNode> andFilters;
 
   @Override
   public boolean hasFilters() {
