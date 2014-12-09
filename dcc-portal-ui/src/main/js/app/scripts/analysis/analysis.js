@@ -35,7 +35,7 @@
 
   var module = angular.module('icgc.analysis.controllers', []);
 
-  module.controller('AnalysisController', function ($scope, $state, $location, $timeout, 
+  module.controller('AnalysisController', function ($scope, $state, $location, $timeout,
     localStorageService, Page, Restangular, RestangularNoCache, analysisId) {
 
     Page.setPage('analysis');
@@ -43,45 +43,6 @@
 
     $scope.analysisId = analysisId;
     $scope.analysisList = localStorageService.get('analysis') || [];
-
-    $scope.getAnalysis = function(id) {
-      // Test
-      if (id) {
-        $scope.analysisId = id;
-        $location.path('analysis/'+id);
-      } else {
-        $scope.analysisId = null;
-        $location.path('analysis');
-      }
-      fetch();
-    };
-
-    $scope.remove = function(id) {
-      var confirmRemove, ids;
-
-      confirmRemove  = confirm('This action will remove this analyis, it cannot be undone!');
-      if (! confirmRemove) {
-        return;
-      }
-      console.log('Cleaning up');
-
-      $scope.analysisList = localStorageService.get('analysis') || [];
-      ids = _.pluck($scope.analysisList, 'id');
-
-      if (_.contains(ids, id)) {
-        var index = -1;
-        console.log('!!! deleting ...', id);
-        index = ids.indexOf(id);
-        $scope.analysisList.splice(index, 1);
-        localStorageService.set('analysis', $scope.analysisList);
-        $scope.analysisId = null;
-        $location.path('analysis');
-      }
-
-    };
-
-    init();
-    fetch();
 
     function fetch() {
       // 1) Check if analysis exist in the backend
@@ -120,6 +81,48 @@
         }
       }
     }
+
+
+
+
+    $scope.getAnalysis = function(id) {
+      // Test
+      if (id) {
+        $scope.analysisId = id;
+        $location.path('analysis/'+id);
+      } else {
+        $scope.analysisId = null;
+        $location.path('analysis');
+      }
+      fetch();
+    };
+
+    $scope.remove = function(id) {
+      var confirmRemove, ids;
+
+      confirmRemove  = window.confirm('This action will remove this analyis, it cannot be undone!');
+      if (! confirmRemove) {
+        return;
+      }
+      console.log('Cleaning up');
+
+      $scope.analysisList = localStorageService.get('analysis') || [];
+      ids = _.pluck($scope.analysisList, 'id');
+
+      if (_.contains(ids, id)) {
+        var index = -1;
+        console.log('!!! deleting ...', id);
+        index = ids.indexOf(id);
+        $scope.analysisList.splice(index, 1);
+        localStorageService.set('analysis', $scope.analysisList);
+        $scope.analysisId = null;
+        $location.path('analysis');
+      }
+
+    };
+
+    init();
+    fetch();
 
 
   });

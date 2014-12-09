@@ -38,7 +38,7 @@
       data = 'params=' + JSON.stringify(_ctrl.analysisParams) + '&' +
         'sort=affectedDonorCountFiltered' + '&' +
         'order=ASC' + '&' +
-        'filters=' + JSON.stringify(LocationService.filters())
+        'filters=' + JSON.stringify(LocationService.filters());
 
       console.log('payload', data);
 
@@ -90,8 +90,7 @@
    * Displays gene set enrichment results
    */
   angular.module('icgc.enrichment.controllers')
-    .controller('EnrichmentResultController', function($scope, Restangular) {
-    console.log($scope.item);
+    .controller('EnrichmentResultController', function() {
   });
 
 })();

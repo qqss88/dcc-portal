@@ -86,7 +86,7 @@
         var ids = _.pluck(data.facets.projectId.terms, 'term');
         return Projects.getList({
           filters: {'project': {'id': { 'is': ids}}}
-         });
+        });
       });
 
       _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});

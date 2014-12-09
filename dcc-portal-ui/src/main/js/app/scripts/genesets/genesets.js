@@ -42,7 +42,9 @@
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page, Genes, Projects, Mutations, Donors, FiltersUtil, geneSet) {
+    function ($scope, LocationService, HighchartsService, Page,
+      Genes, Projects, Mutations, Donors, FiltersUtil, geneSet) {
+
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
       Page.setPage('entity');
@@ -163,8 +165,8 @@
         }).then(function(data) {
           var ids = _.pluck(data.facets.projectId.terms, 'term');
           return Projects.getList({
-            filters: {'project': {'id': { 'is': ids}}} 
-           });
+            filters: {'project': {'id': { 'is': ids}}}
+          });
         });
 
         // 2) Add mutation counts

@@ -28,7 +28,7 @@
       scope: {
         filters: '='
       },
-      templateUrl: 'scripts/ui/views/query.html', 
+      templateUrl: 'scripts/ui/views/query.html',
       link: function(scope) {
         // Make a copy and clean up any non-meaningful fields
         var uiFilters = angular.copy(scope.filters);
@@ -44,7 +44,7 @@
           scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters);
         }
       }
-    }
+    };
   });
 })();
 
