@@ -18,12 +18,12 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.Cleanup;
@@ -40,6 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
+import com.beust.jcommander.internal.Lists;
+import com.google.common.base.Joiner;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
@@ -48,6 +51,7 @@ public class EnrichmentAnalysisService {
   /**
    * Constants.
    */
+  private static final Joiner REPORT_GENES_JOINER = Joiner.on('|');
   private static final String[] REPORT_HEADERS =
       {
           "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
@@ -103,7 +107,7 @@ public class EnrichmentAnalysisService {
       val result = results.get(i);
 
       log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
-      val overlapGeneSetGeneIds = geneRepository.findGeneIds(inputGeneListId, result.getGeneSetId());
+      val overlapGeneSetGeneIds = geneRepository.findGeneSymbolsById(inputGeneListId, result.getGeneSetId());
 
       writer.write(new Object[] {
           result.getGeneSetId(),
@@ -115,9 +119,23 @@ public class EnrichmentAnalysisService {
           result.getExpectedValue(),
           result.getPValue(),
           result.getAdjustedPValue(),
-          COMMA.join(overlapGeneSetGeneIds)
+          formatGenes(overlapGeneSetGeneIds)
       });
     }
+  }
+
+  private static String formatGenes(Map<String, String> genes) {
+    val values = Lists.<String> newArrayList();
+    for (val gene : genes.entrySet()) {
+      String symbol = gene.getValue();
+      String geneId = gene.getKey();
+
+      val value = symbol + ":" + geneId;
+
+      values.add(value);
+    }
+
+    return REPORT_GENES_JOINER.join(values);
   }
 
   private static UUID createAnalysisId() {

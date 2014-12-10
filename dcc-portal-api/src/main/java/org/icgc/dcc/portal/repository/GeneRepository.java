@@ -51,7 +51,6 @@ import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
-import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -194,25 +193,36 @@ public class GeneRepository implements Repository {
     search.setQuery(buildQuery(query));
 
     log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
+    val response = search.execute().actionGet();
     log.debug("{}", response);
 
     return response;
   }
 
-  public List<String> findGeneIds(@NonNull UUID inputGeneListId, @NonNull String geneSetId) {
+  public Map<String, String> findGeneSymbolsById(@NonNull UUID inputGeneListId, @NonNull String geneSetId) {
+    val maxGenes = 70000;
+    val symbolFieldName = "symbol";
     val filters = remapFilters(andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId)));
 
-    val search =
-        client.prepareSearch(index)
-            .setTypes(CENTRIC_TYPE.getId())
-            .setSearchType(QUERY_THEN_FETCH)
-            .setFrom(0)
-            .setSize(70000)
-            .setFilter(getFilters(filters))
-            .setNoFields();
+    val search = client.prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(maxGenes)
+        .setFilter(getFilters(filters))
+        .addField(symbolFieldName);
 
-    return getHitIds(search.execute().actionGet());
+    val response = search.execute().actionGet();
+
+    val map = Maps.<String, String> newLinkedHashMap();
+    for (val hit : response.getHits()) {
+      String id = hit.getId();
+      String symbol = hit.getFields().get(symbolFieldName).getValue();
+
+      map.put(id, symbol);
+    }
+
+    return map;
   }
 
   public SearchResponse findGeneSetCounts(AndQuery query) {
