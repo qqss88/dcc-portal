@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
@@ -34,9 +35,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
+import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.CsvListWriter;
 
 @Slf4j
 @Service
@@ -48,11 +50,7 @@ public class EnrichmentAnalysisService {
    */
   private static final String[] REPORT_HEADERS =
       {
-          "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value"
-      };
-  private static final String[] REPORT_FIELD_NAMES =
-      {
-          "geneSetId", "geneSetName", "geneCount", "overlapGeneCount", "overlapDonorCount", "overlapMutationCount", "expectedValue", "pValue", "adjustedPValue"
+          "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
       };
 
   /**
@@ -62,6 +60,8 @@ public class EnrichmentAnalysisService {
   private final EnrichmentAnalyzer analyzer;
   @NonNull
   private final EnrichmentAnalysisRepository analysisRepository;
+  @NonNull
+  private final GeneRepository geneRepository;
 
   public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
     val analysis = analysisRepository.find(analysisId);
@@ -93,11 +93,30 @@ public class EnrichmentAnalysisService {
     }
 
     @Cleanup
-    val writer = new CsvBeanWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
+    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
     writer.writeHeader(REPORT_HEADERS);
 
-    for (val result : results) {
-      writer.write(result, REPORT_FIELD_NAMES);
+    // Shorthands
+    val inputGeneListId = analysis.getId();
+
+    for (int i = 0; i < results.size(); i++) {
+      val result = results.get(i);
+
+      log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
+      val overlapGeneSetGeneIds = geneRepository.findGeneIds(inputGeneListId, result.getGeneSetId());
+
+      writer.write(new Object[] {
+          result.getGeneSetId(),
+          result.getGeneSetName(),
+          result.getGeneCount(),
+          result.getOverlapGeneSetGeneCount(),
+          result.getOverlapGeneSetDonorCount(),
+          result.getOverlapGeneSetMutationCount(),
+          result.getExpectedValue(),
+          result.getPValue(),
+          result.getAdjustedPValue(),
+          COMMA.join(overlapGeneSetGeneIds)
+      });
     }
   }
 

@@ -24,6 +24,7 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
+import java.util.List;
 import java.util.UUID;
 
 import lombok.NoArgsConstructor;
@@ -45,6 +46,10 @@ public final class Filters {
 
   public static ObjectNode emptyFilter() {
     return MAPPER.createObjectNode();
+  }
+
+  public static ObjectNode andFilter(@NonNull List<ObjectNode> filters) {
+    return andFilter(filters.toArray(new ObjectNode[filters.size()]));
   }
 
   public static ObjectNode andFilter(@NonNull ObjectNode... filters) {
@@ -109,6 +114,13 @@ public final class Filters {
     inputGeneListFilter.with(GENE.getId()).put(INPUT_GENE_LIST_ID, is(inputGeneListId.toString()));
 
     return inputGeneListFilter;
+  }
+
+  public static ObjectNode is(@NonNull String value) {
+    val is = emptyFilter();
+    is.withArray(IS).add(value);
+
+    return is;
   }
 
   private static JsonNode andFilter(JsonNode left, JsonNode right) {
@@ -181,13 +193,6 @@ public final class Filters {
     }
 
     return and;
-  }
-
-  private static ObjectNode is(@NonNull String value) {
-    val is = emptyFilter();
-    is.withArray(IS).add(value);
-
-    return is;
   }
 
 }

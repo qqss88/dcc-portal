@@ -106,17 +106,17 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     /**
      * UI: "#Genes in overlap"
      */
-    private int overlapGeneCount;
+    private int overlapGeneSetGeneCount;
 
     /**
      * UI: "#Donors in overlap"
      */
-    private int overlapDonorCount;
+    private int overlapGeneSetDonorCount;
 
     /**
      * UI: "#Mutations"
      */
-    private int overlapMutationCount;
+    private int overlapGeneSetMutationCount;
 
     /**
      * UI: "Expected"
