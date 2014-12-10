@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class EnrichmentAnalysisService {
   /**
    * Constants.
    */
-  private static final Joiner REPORT_GENES_JOINER = Joiner.on('|');
+  private static final Joiner REPORT_GENES_JOINER = COMMA; // RQ12
   private static final String[] REPORT_HEADERS =
       {
           "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
