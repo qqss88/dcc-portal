@@ -18,9 +18,14 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.UUID;
 
+import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -31,11 +36,24 @@ import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.supercsv.io.CsvBeanWriter;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EnrichmentAnalysisService {
+
+  /**
+   * Constants.
+   */
+  private static final String[] REPORT_HEADERS =
+      {
+          "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value"
+      };
+  private static final String[] REPORT_FIELD_NAMES =
+      {
+          "geneSetId", "geneSetName", "geneCount", "overlapGeneCount", "overlapDonorCount", "overlapMutationCount", "expectedValue", "pValue", "adjustedPValue"
+      };
 
   /**
    * Dependencies.
@@ -44,6 +62,15 @@ public class EnrichmentAnalysisService {
   private final EnrichmentAnalyzer analyzer;
   @NonNull
   private final EnrichmentAnalysisRepository analysisRepository;
+
+  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
+    val analysis = analysisRepository.find(analysisId);
+    if (analysis == null) {
+      throw new NotFoundException("enrichment analysis", analysisId.toString());
+    }
+
+    return analysis;
+  }
 
   public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
     analysis.setId(createAnalysisId());
@@ -58,8 +85,20 @@ public class EnrichmentAnalysisService {
     analyzer.analyze(analysis);
   }
 
-  public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    return analysisRepository.find(analysisId);
+  public void reportAnalysis(EnrichmentAnalysis analysis, OutputStream outputStream) throws IOException {
+    val results = analysis.getResults();
+    if (results == null) {
+      log.info("No results to report for analysis id '{}'", analysis.getId());
+      return;
+    }
+
+    @Cleanup
+    val writer = new CsvBeanWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
+    writer.writeHeader(REPORT_HEADERS);
+
+    for (val result : results) {
+      writer.write(result, REPORT_FIELD_NAMES);
+    }
   }
 
   private static UUID createAnalysisId() {

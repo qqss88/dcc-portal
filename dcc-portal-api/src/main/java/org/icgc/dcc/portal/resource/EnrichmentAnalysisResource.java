@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
+import static com.sun.jersey.core.header.ContentDisposition.type;
 import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -36,7 +38,11 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_FIELD;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.validate;
+import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
@@ -46,7 +52,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -68,29 +76,31 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Slf4j
 @Component
 @Path("/v1/analysis/enrichment")
-@Consumes(APPLICATION_FORM_URLENCODED)
-@Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EnrichmentAnalysisResource {
 
+  /**
+   * Dependencies
+   */
   @NonNull
   private final EnrichmentAnalysisService service;
 
   @GET
   @Path("/{" + API_ANALYSIS_ID_PARAM + "}")
+  @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Retrieves an enrichment analysis by id", response = EnrichmentAnalysis.class)
   public EnrichmentAnalysis getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) UUID analysisId) {
     // Validate
-    if (analysisId == null) {
-      throw new BadRequestException("'analysisId' is empty");
-    }
+    validateAnalysisId(analysisId);
 
     log.info("Getting analysis with id '{}'...", analysisId);
     return service.getAnalysis(analysisId);
   }
 
   @POST
+  @Consumes(APPLICATION_FORM_URLENCODED)
+  @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Submits an asynchronous enrichment analysis request. Users must poll the status using the GET resource", response = EnrichmentAnalysis.class)
   public Response submitAnalysis(
       @ApiParam(value = API_PARAMS_VALUE) @FormParam(API_PARAMS_PARAM) EnrichmentParamsParam paramsParam,
@@ -135,6 +145,37 @@ public class EnrichmentAnalysisResource {
 
     // In the RFC sense for asynchronous tasks
     return Response.status(ACCEPTED).entity(analysis).build();
+  }
+
+  @GET
+  @Path("/{" + API_ANALYSIS_ID_PARAM + "}")
+  @Produces(TEXT_TSV)
+  @ApiOperation(value = "Retrieves an enrichment analysis by id", response = EnrichmentAnalysis.class)
+  public Response reportAnalysis(
+      @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) final UUID analysisId) {
+    val analysis = getAnalysis(analysisId);
+
+    log.info("Generating analysis report with id '{}'...", analysisId);
+    return Response
+        .ok(new StreamingOutput() {
+
+          @Override
+          public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+            service.reportAnalysis(analysis, outputStream);
+          }
+
+        })
+        .header(CONTENT_DISPOSITION, type("attachment")
+            .fileName("analysis-" + analysisId + ".tsv")
+            .creationDate(new Date())
+            .build())
+        .build();
+  }
+
+  private static void validateAnalysisId(UUID analysisId) {
+    if (analysisId == null) {
+      throw new BadRequestException("'analysisId' is empty");
+    }
   }
 
 }
