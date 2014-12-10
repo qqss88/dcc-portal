@@ -71,13 +71,6 @@ import com.google.common.collect.Lists;
 public class EnrichmentAnalyzer {
 
   /**
-   * Constants.
-   */
-  private static final String API_GENE_COUNT_FIELD_NAME = "geneCount";
-  private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
-  private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
-
-  /**
    * Dependencies.
    */
   @NonNull
@@ -213,7 +206,7 @@ public class EnrichmentAnalyzer {
         overlapGeneCount,
         geneSetGeneCount, universeGeneCount);
     val pValue = calculateHypergeometricTest(
-        geneSetOverlapGeneCount, overlapGeneCount,
+        geneSetOverlapGeneCount, overlapGeneCount, // The "four numbers"
         geneSetGeneCount, universeGeneCount);
 
     log.info("q = {}, k = {}, m = {}, n = {}, pValue = {}", new Object[] { geneSetOverlapGeneCount, overlapGeneCount,
@@ -224,7 +217,7 @@ public class EnrichmentAnalyzer {
         .setGeneSetId(geneSetId)
 
         .setGeneCount(geneSetGeneCount)
-        .setOverlapGeneCount(overlapGeneCount)
+        .setOverlapGeneCount(geneSetOverlapGeneCount)
 
         .setExpectedValue(expectedValue)
         .setPValue(pValue);
@@ -271,9 +264,7 @@ public class EnrichmentAnalyzer {
   }
 
   private String findGeneSetName(String geneSetId) {
-    val nameField = INDEX_GENE_SETS_NAME_FIELD_NAME;
-
-    return geneSetRepository.findOne(geneSetId, nameField).get(nameField).toString();
+    return geneSetRepository.findName(geneSetId);
   }
 
   private int countGenes(AndQuery query) {
@@ -289,9 +280,7 @@ public class EnrichmentAnalyzer {
   }
 
   private int countGeneSetGenes(String geneSetId) {
-    val geneSet = geneSetRepository.findOne(geneSetId, API_GENE_COUNT_FIELD_NAME);
-
-    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+    return geneSetRepository.countGenes(geneSetId);
   }
 
   private int countUniverseGenes(Universe universe) {

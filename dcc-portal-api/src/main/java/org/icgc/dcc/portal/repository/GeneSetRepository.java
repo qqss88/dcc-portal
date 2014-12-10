@@ -51,6 +51,13 @@ import com.google.common.collect.Maps;
 @Component
 public class GeneSetRepository {
 
+  /**
+   * Constants.
+   */
+  private static final String API_GENE_COUNT_FIELD_NAME = "geneCount";
+  private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
+  private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
+
   private static final Type TYPE = Type.GENE_SET;
   private static final Kind KIND = Kind.GENE_SET;
 
@@ -61,6 +68,12 @@ public class GeneSetRepository {
   public GeneSetRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
+  }
+
+  public int countGenes(String id) {
+    val geneSet = findOne(id, API_GENE_COUNT_FIELD_NAME);
+
+    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
   }
 
   public int countDecendants(@NonNull GeneSetType type, @NonNull Optional<String> id) {
@@ -96,6 +109,12 @@ public class GeneSetRepository {
         .execute()
         .actionGet()
         .getCount();
+  }
+
+  public String findName(String id) {
+    val nameField = INDEX_GENE_SETS_NAME_FIELD_NAME;
+
+    return findOne(id, nameField).get(nameField).toString();
   }
 
   public Map<String, Object> findOne(@NonNull String id, String... fieldNames) {
