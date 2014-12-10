@@ -35,8 +35,10 @@
 
   var module = angular.module('icgc.analysis.controllers', []);
 
-  module.controller('AnalysisController', function ($scope, $state, $location, $timeout,
+  module.controller('AnalysisController', function ($scope, $state, $location, $timeout, $http,
     localStorageService, Page, Restangular, RestangularNoCache, analysisId) {
+
+    var pollPromise;
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -53,13 +55,19 @@
         // var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
         var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
 
+        // FIXME: Temporary, need to change restangular config
+        // var resultPromise = $http.get('/api/v1/analysis/enrichment/' + $scope.analysisId);
+
         resultPromise.then(function(data) {
           data = Restangular.stripRestangular(data);
-          $scope.analysisResult = data;
+
+          if (! _.isEmpty(data)) {
+            $scope.analysisResult = data;
+          }
 
           // Check if we need to poll
           if (data.state === 'EXECUTING') {
-            $timeout(fetch, 5000);
+            pollPromise = $timeout(fetch, 5000);
           }
         });
       }
@@ -83,10 +91,8 @@
     }
 
 
-
-
     $scope.getAnalysis = function(id) {
-      // Test
+      $timeout.cancel(pollPromise);
       if (id) {
         $scope.analysisId = id;
         $location.path('analysis/'+id);
@@ -97,6 +103,14 @@
       fetch();
     };
 
+
+    $scope.removeAllAnalyses = function() {
+      var confirmRemove;
+      confirmRemove  = window.confirm('This action will remove all analyses, it cannot be undone!');
+      localStorageService.set('analysis', []);
+      $scope.analysisList = localStorageService.get('analysis');
+    };
+
     $scope.remove = function(id) {
       var confirmRemove, ids;
 
@@ -104,14 +118,12 @@
       if (! confirmRemove) {
         return;
       }
-      console.log('Cleaning up');
 
       $scope.analysisList = localStorageService.get('analysis') || [];
       ids = _.pluck($scope.analysisList, 'id');
 
       if (_.contains(ids, id)) {
         var index = -1;
-        console.log('!!! deleting ...', id);
         index = ids.indexOf(id);
         $scope.analysisList.splice(index, 1);
         localStorageService.set('analysis', $scope.analysisList);
@@ -120,6 +132,11 @@
       }
 
     };
+
+    // Clea up
+    $scope.$on('destroy', function() {
+      $timeout.cancel(pollPromise);
+    });
 
     init();
     fetch();

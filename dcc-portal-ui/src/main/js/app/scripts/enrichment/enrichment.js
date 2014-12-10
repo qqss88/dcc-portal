@@ -26,8 +26,7 @@
     _ctrl.analysisParams = {
       maxGeneSetCount: 50,
       fdr: 0.05,
-      maxGeneCount: 1000,
-      universe: ''
+      maxGeneCount: 1000
     };
 
     _ctrl.newGeneSetEnrichment = function() {
@@ -59,13 +58,17 @@
     _ctrl.checkInput = function() {
       var params = _ctrl.analysisParams;
 
+      console.log('params', params);
+
       if (_ctrl.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
         _ctrl.hasValidFDR(parseFloat(params.fdr)) === false ||
         angular.isDefined(params.universe) === false) {
         _ctrl.hasValidParams = false;
+      } else {
+        _ctrl.hasValidParams = true;
       }
-      _ctrl.hasValidParams = true;
     };
+
 
     _ctrl.hasValidFDR = function(val) {
       if (angular.isNumber(val) === false) {
@@ -113,7 +116,8 @@
     };
   });
 
-  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function () {
+
+  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function (Restangular, ExportService) {
     return {
       restrict: 'E',
       scope: {
@@ -131,11 +135,23 @@
           var id = enrichment.id;
           var universe = enrichment.params.universe;
 
+          // No results yet, can't do anything
+          if (! enrichment.result) {
+            return;
+          }
+
           // Compute queries to go to advanced search page
           enrichment.results.forEach(function(row) {
             var baseFilter = enrichment.query.filters;
           });
         }
+
+        $scope.exportEnrichment = function(id) {
+          Restangular.one('analysis/enrichment', id).get({}, {'Accept': 'text/tsv'}).then(function(data) {
+            var filename = id + '.tsv';
+            ExportService.exportData(filename, data);
+          });
+        };
 
         $scope.$watch('item', function(n) {
           if (angular.isDefined(n) && !_.isEmpty(n)) {
