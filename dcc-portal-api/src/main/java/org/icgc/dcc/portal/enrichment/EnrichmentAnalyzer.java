@@ -217,7 +217,7 @@ public class EnrichmentAnalyzer {
         .setGeneSetId(geneSetId)
 
         .setGeneCount(geneSetGeneCount)
-        .setOverlapGeneCount(geneSetOverlapGeneCount)
+        .setOverlapGeneSetGeneCount(geneSetOverlapGeneCount)
 
         .setExpectedValue(expectedValue)
         .setPValue(pValue);
@@ -235,8 +235,8 @@ public class EnrichmentAnalyzer {
       // Update
       geneSetResult
           .setGeneSetName(findGeneSetName(geneSetId))
-          .setOverlapDonorCount(countDonors(geneSetOverlapQuery))
-          .setOverlapMutationCount(countMutations(geneSetOverlapQuery));
+          .setOverlapGeneSetDonorCount(countDonors(geneSetOverlapQuery))
+          .setOverlapGeneSetMutationCount(countMutations(geneSetOverlapQuery));
     }
   }
 

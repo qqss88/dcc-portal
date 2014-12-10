@@ -48,14 +48,20 @@ import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.Filters.andFilter;
+import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
+import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
+import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -192,6 +198,21 @@ public class GeneRepository implements Repository {
     log.debug("{}", response);
 
     return response;
+  }
+
+  public List<String> findGeneIds(@NonNull UUID inputGeneListId, @NonNull String geneSetId) {
+    val filters = remapFilters(andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId)));
+
+    val search =
+        client.prepareSearch(index)
+            .setTypes(CENTRIC_TYPE.getId())
+            .setSearchType(QUERY_THEN_FETCH)
+            .setFrom(0)
+            .setSize(70000)
+            .setFilter(getFilters(filters))
+            .setNoFields();
+
+    return getHitIds(search.execute().actionGet());
   }
 
   public SearchResponse findGeneSetCounts(AndQuery query) {
