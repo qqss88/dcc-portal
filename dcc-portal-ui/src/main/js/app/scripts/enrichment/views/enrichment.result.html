@@ -37,14 +37,24 @@
             </a>
         </div>
         <br>
-        
-        <h4 data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
-            Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
-        </h4>
-        <h4 data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
-            {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
-        </h4>
 
+        <h4>
+            <span  data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
+                Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+            </span>
+            <span data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
+                {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+            </span>
+
+            <span class="t_tools">
+                <span class="t_tools__tool"
+                      data-tooltip-placement="left"
+                      data-tooltip="Export Table as CSV"
+                      data-ng-click="exportEnrichment(item.id)"><i
+                      class="icon-file"></i></span>
+            </span>
+        </h4>
+        
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -77,9 +87,9 @@
                     <td class="text-right">{{row.overlapGeneCount | number}}</td>
                     <td class="text-right">{{row.overlapDonorCount | number}}</td>
                     <td class="text-right">{{row.overlapMutationCount | number}}</td>
-                    <td class="text-right">{{row.expectedValue.toExponential(5) }}</td>
-                    <td class="text-right">{{row.pvalue.toExponential(5) }}</td>
-                    <td class="text-right">{{row.adjustedPValue.toExponential(5) }}</td>
+                    <td class="text-right">{{row.expectedValue.toExponential(2) }}</td>
+                    <td class="text-right">{{row.pvalue.toExponential(2) }}</td>
+                    <td class="text-right">{{row.adjustedPValue.toExponential(2) }}</td>
                 </tr>
             </tbody>
         </table>

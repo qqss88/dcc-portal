@@ -541,4 +541,28 @@
 
   });
 
+
+
+  /**
+   * Client side export of content using Blob and File, with fall back to server-side content echoing
+   */
+  module.service('ExportService', function() {
+    this.exportData = function(filename, data) {
+      if (window.Blob && window.File) {
+        saveAs(new Blob([data], {type: 'text/plain;charset=utf-8'}), filename);
+      } else {
+        // Fallback (IE and other browsers that lack support), create a form and
+        // submit a post request to bounce the download content against the server
+        jQuery('<form method="POST" id="htmlDownload" action="/api/echo" style="display:none">' +
+               '<input type="hidden" name="fileName" value="' + filename + '"/>' +
+               '<input type="hidden" name="text" value="' + data + '"/>' +
+               '<input type="submit" value="Submit"/>' +
+               '</form>').appendTo('body');
+        jQuery('#htmlDownload').submit();
+        jQuery('#htmlDownload').remove();
+      }
+
+    };
+  });
+
 })();

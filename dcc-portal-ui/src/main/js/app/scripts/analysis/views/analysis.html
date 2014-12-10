@@ -38,6 +38,11 @@
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
         <div> Placeholder for instructions</div>
+            <br>
+            <div>
+                <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Remove all Analyses</button>
+            </div>
+        </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
         <h3>
