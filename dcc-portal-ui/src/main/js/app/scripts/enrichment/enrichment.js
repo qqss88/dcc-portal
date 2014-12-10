@@ -106,7 +106,7 @@
     return {
       restrict: 'E',
       scope: {
-        totalGenes: '@'
+        enrichmentModal: '='
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
       controller: 'EnrichmentUploadController as EnrichmentUploadController'
@@ -123,6 +123,25 @@
       link: function($scope) {
         $scope.predicate = 'adjustedPValue';
         $scope.reverse = false;
+
+        function refresh() {
+          console.log($scope.item);
+
+          var enrichment = $scope.item;
+          var id = enrichment.id;
+          var universe = enrichment.params.universe;
+
+          // Compute queries to go to advanced search page
+          enrichment.results.forEach(function(row) {
+            var baseFilter = enrichment.query.filters;
+          });
+        }
+
+        $scope.$watch('item', function(n) {
+          if (angular.isDefined(n) && !_.isEmpty(n)) {
+            refresh();
+          }
+        });
 
         console.log('enrichment result', $scope.item);
       }
