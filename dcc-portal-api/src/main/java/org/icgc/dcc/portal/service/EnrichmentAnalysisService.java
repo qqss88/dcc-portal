@@ -99,7 +99,10 @@ public class EnrichmentAnalysisService {
     // Shorthands
     val inputGeneListId = analysis.getId();
 
-    for (val result : results) {
+    for (int i = 0; i < results.size(); i++) {
+      val result = results.get(i);
+
+      log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
       val overlapGeneSetGeneIds = geneRepository.findGeneIds(inputGeneListId, result.getGeneSetId());
 
       writer.write(new Object[] {
