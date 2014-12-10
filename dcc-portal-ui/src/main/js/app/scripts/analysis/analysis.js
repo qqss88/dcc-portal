@@ -52,8 +52,8 @@
       if ($scope.analysisId) {
         console.log('fetching analysis ', $scope.analysisId);
 
-        var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
-        // var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
+        // var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
+        var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
 
         // FIXME: Temporary, need to change restangular config
         // var resultPromise = $http.get('/api/v1/analysis/enrichment/' + $scope.analysisId);
@@ -109,7 +109,7 @@
       confirmRemove  = window.confirm('This action will remove all analyses, it cannot be undone!');
       localStorageService.set('analysis', []);
       $scope.analysisList = localStorageService.get('analysis');
-    }
+    };
 
     $scope.remove = function(id) {
       var confirmRemove, ids;
