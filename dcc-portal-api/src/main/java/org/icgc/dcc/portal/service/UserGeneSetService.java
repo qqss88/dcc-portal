@@ -17,6 +17,10 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
+
+import java.util.Set;
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -34,16 +38,23 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UserGeneSetService {
 
+  /**
+   * Dependencies.
+   */
   @NonNull
   private final UserGeneSetRepository repository;
+  @NonNull
+  private final TermsLookupService termsLookupService;
 
   public String get(@NonNull UUID id) {
     return repository.find(id);
   }
 
-  public UUID save(@NonNull String data) {
+  public UUID save(@NonNull Set<String> geneIds) {
     val id = UUID.randomUUID();
-    repository.save(id, data);
+    termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
+
+    repository.save(id, COMMA.skipNulls().join(geneIds));
 
     return id;
   }

@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.enrichment.EnrichmentAnalyzer;
+import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;

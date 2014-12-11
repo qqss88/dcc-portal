@@ -20,18 +20,18 @@ import com.google.common.collect.ImmutableMap;
 @Component
 public class IndexModel {
 
+  /**
+   * Constants.
+   */
   public static final int MAX_FACET_TERM_COUNT = 1024;
-
   public static final String IS = "is";
-
   public static final String NOT = "not";
-
   public static final String MISSING = "_missing";
 
   /**
-   * Special case for Enrichment Analysis
+   * Special cases for term lookups
    */
-  public static final String INPUT_GENE_LIST_ID = "inputGeneListId";
+  public static final String API_INPUT_GENE_LIST_ID_FIELD_NAME = "inputGeneListId";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -152,7 +152,7 @@ public class IndexModel {
           .put("availableDataTypes", "_summary._available_data_type")
           .put("analysisTypes", "_summary.experimental_analysis_performed")
           .put("ssmAffectedGenes", "_score")
-          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
 
           .build();
 
@@ -227,7 +227,7 @@ public class IndexModel {
           .put("pathwayName", "pathways.pathway_name")
           .put("pathways", "pathways")
           .put("sets", "sets")
-          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
 
           .build();
 
@@ -258,7 +258,7 @@ public class IndexModel {
           .put("location", "location")
           .put("sequencingStrategy", "sequencing_strategy")
           .put("sequencingStrategyNested", "ssm_occurrence.observation.sequencing_strategy")
-          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
 
           .build();
 
@@ -409,7 +409,7 @@ public class IndexModel {
           .put("xrefEnsemblVarId", "ssm.xref_ensembl_var_id")
           .put("mutation", "ssm.mutation")
           .put("observation", "ssm.observation")
-          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
 
           .build();
 
@@ -450,7 +450,7 @@ public class IndexModel {
           .put("icgcSpecimenId", "_specimen_id")
           .put("submittedSampleId", "analyzed_sample_id")
           .put("submittedMatchedSampleId", "matched_sample_id")
-          .put(INPUT_GENE_LIST_ID, INPUT_GENE_LIST_ID)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
 
           .build();
 

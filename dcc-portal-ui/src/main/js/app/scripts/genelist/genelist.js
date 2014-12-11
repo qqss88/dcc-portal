@@ -133,12 +133,12 @@
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
           }
-          if (! filters.gene.hasOwnProperty('uploadedGeneList')) {
-            filters.gene.uploadedGeneList = {};
+          if (! filters.gene.hasOwnProperty('inputGeneListId')) {
+            filters.gene.inputGeneListId = {};
           }
 
           $scope.genelistModal = false;
-          filters.gene.uploadedGeneList.is = [result.geneListId];
+          filters.gene.inputGeneListId.is = [result.geneListId];
 
           // Upload gene list redirects to gene tab, regardless of where we came from
           search.filters = angular.toJson(filters);
@@ -167,7 +167,7 @@
       var filters = LocationService.filters();
       $scope.hasGeneList = false;
       if (filters.hasOwnProperty('gene')) {
-        if (filters.gene.hasOwnProperty('uploadedGeneList')) {
+        if (filters.gene.hasOwnProperty('inputGeneListId')) {
           $scope.hasGeneList = true;
         }
       }

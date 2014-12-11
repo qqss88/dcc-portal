@@ -15,16 +15,16 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.enrichment;
+package org.icgc.dcc.portal.analysis;
 
 import static com.google.common.base.Stopwatch.createStarted;
 import static org.icgc.dcc.common.core.util.FormatUtils.formatCount;
-import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.adjustRawGeneSetResults;
-import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.calculateExpectedValue;
-import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.calculateHypergeometricTest;
-import static org.icgc.dcc.portal.enrichment.EnrichmentQueries.geneSetOverlapQuery;
-import static org.icgc.dcc.portal.enrichment.EnrichmentQueries.overlapQuery;
-import static org.icgc.dcc.portal.enrichment.EnrichmentSearchResponses.getUniverseTermsFacet;
+import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.adjustRawGeneSetResults;
+import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.calculateExpectedValue;
+import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.calculateHypergeometricTest;
+import static org.icgc.dcc.portal.analysis.EnrichmentQueries.geneSetOverlapQuery;
+import static org.icgc.dcc.portal.analysis.EnrichmentQueries.overlapQuery;
+import static org.icgc.dcc.portal.analysis.EnrichmentSearchResponses.getUniverseTermsFacet;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.Query.idField;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;

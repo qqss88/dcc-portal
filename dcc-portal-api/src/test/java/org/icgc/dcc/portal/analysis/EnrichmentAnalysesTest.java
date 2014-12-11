@@ -1,8 +1,8 @@
-package org.icgc.dcc.portal.enrichment;
+package org.icgc.dcc.portal.analysis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.offset;
-import static org.icgc.dcc.portal.enrichment.EnrichmentAnalyses.calculateHypergeometricTest;
+import static org.icgc.dcc.portal.analysis.EnrichmentAnalyses.calculateHypergeometricTest;
 import lombok.val;
 
 import org.junit.Test;

@@ -172,7 +172,7 @@
 
 
   module.constant('Extensions', {
-    GENE_LIST: 'uploadedGeneList',
+    GENE_LIST: 'inputGeneListId',
     GENE_ID: 'id',
     CURATE_SET_ROOTS: [
       {id: 'GS1', name: 'Cancer Gene Census', universe: null}

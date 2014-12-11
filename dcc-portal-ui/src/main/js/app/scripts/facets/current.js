@@ -44,7 +44,7 @@
       if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
         Facets.removeFacet({
           type: type,
-          facet: 'uploadedGeneList'
+          facet: 'inputGeneListId'
         });
       }
       if (type === 'gene' && facet === 'pathwayId') {
