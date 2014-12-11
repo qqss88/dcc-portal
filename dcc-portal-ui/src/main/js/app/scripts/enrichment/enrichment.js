@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  angular.module('icgc.enrichment', ['icgc.enrichment.controllers', 'icgc.enrichment.directives']);
+  angular.module('icgc.enrichment', ['icgc.enrichment.directives']);
 })();
 
 
@@ -9,110 +9,92 @@
 (function () {
   'use strict';
 
-  angular.module('icgc.enrichment.controllers', []);
+  angular.module('icgc.enrichment.directives', []);
 
-  /**
-   * Validate and submit gene set analysis input
-   */
-  angular.module('icgc.enrichment.controllers')
-    .controller('EnrichmentUploadController', function($scope, Extensions, Restangular, LocationService, $location) {
-    var _ctrl = this;
+  angular.module('icgc.enrichment.directives').directive('enrichmentUpload',
+    function (Extensions, Restangular, LocationService, $location) {
 
-    _ctrl.hasValidParams = false;
-
-    $scope.Extensions = Extensions;
-
-    // Default values
-    _ctrl.analysisParams = {
-      maxGeneSetCount: 50,
-      fdr: 0.05,
-      maxGeneCount: 1000
-    };
-
-    _ctrl.newGeneSetEnrichment = function() {
-      var promise, data;
-
-
-      // FIXME: need real values
-      data = 'params=' + JSON.stringify(_ctrl.analysisParams) + '&' +
-        'sort=affectedDonorCountFiltered' + '&' +
-        'order=ASC' + '&' +
-        'filters=' + JSON.stringify(LocationService.filters());
-
-      console.log('payload', data);
-
-      promise = Restangular.one('analysis')
-        .withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'enrichment');
-
-      // Send and forget, we really just need to get the analysis id
-      // to start the redirection
-      promise.then(function(result) {
-        var id = result.id;
-        $scope.enrichmentModal = false;
-        $location.path('/analysis/' + id).search({});
-      });
-
-    };
-
-    _ctrl.checkInput = function() {
-      var params = _ctrl.analysisParams;
-
-      console.log('params', params);
-
-      if (_ctrl.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
-        _ctrl.hasValidFDR(parseFloat(params.fdr)) === false ||
-        angular.isDefined(params.universe) === false) {
-        _ctrl.hasValidParams = false;
-      } else {
-        _ctrl.hasValidParams = true;
-      }
-    };
-
-
-    _ctrl.hasValidFDR = function(val) {
-      if (angular.isNumber(val) === false) {
-        return false;
-      }
-      if (val >= 0.005 && val <= 0.5) {
-        return true;
-      }
-      return false;
-    };
-
-    _ctrl.hasValidGeneCount = function(val) {
-      if (angular.isNumber(val) === false) {
-        return false;
-      }
-      return true;
-    };
-  });
-
-
-  /**
-   * Displays gene set enrichment results
-   */
-  angular.module('icgc.enrichment.controllers')
-    .controller('EnrichmentResultController', function() {
-  });
-
-})();
-
-
-
-(function () {
-  'use strict';
-
-  angular.module('icgc.enrichment.directives', ['icgc.enrichment.controllers']);
-
-  angular.module('icgc.enrichment.directives').directive('enrichmentUpload', function () {
     return {
       restrict: 'E',
       scope: {
-        enrichmentModal: '='
+        enrichmentModal: '=',
+        total: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
-      controller: 'EnrichmentUploadController as EnrichmentUploadController'
+      link: function($scope) {
+
+        $scope.hasValidParams = false;
+        $scope.Extensions = Extensions;
+
+        // Default values
+        $scope.analysisParams = {
+          maxGeneSetCount: 50,
+          fdr: 0.05,
+          maxGeneCount: $scope.total || 1000
+        };
+
+
+        $scope.newGeneSetEnrichment = function() {
+          var promise, data;
+
+          // FIXME: need real values
+          data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+            'sort=affectedDonorCountFiltered' + '&' +
+            'order=ASC' + '&' +
+            'filters=' + JSON.stringify(LocationService.filters());
+
+          console.log('payload', data);
+
+          promise = Restangular.one('analysis')
+            .withHttpConfig({transformRequest: angular.identity})
+            .customPOST(data, 'enrichment');
+
+          // Send and forget, we really just need to get the analysis id
+          // to start the redirection
+          promise.then(function(result) {
+            var id = result.id;
+            $scope.enrichmentModal = false;
+            $location.path('/analysis/' + id).search({});
+          });
+        };
+
+        $scope.checkInput = function() {
+          var params = $scope.analysisParams;
+
+          if ($scope.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
+            $scope.hasValidFDR(parseFloat(params.fdr)) === false ||
+            angular.isDefined(params.universe) === false) {
+            $scope.hasValidParams = false;
+          } else {
+            $scope.hasValidParams = true;
+          }
+        };
+
+        $scope.hasValidFDR = function(val) {
+          if (angular.isNumber(val) === false) {
+            return false;
+          }
+          if (val >= 0.005 && val <= 0.5) {
+            return true;
+          }
+          return false;
+        };
+
+        $scope.hasValidGeneCount = function(val) {
+          if (angular.isNumber(val) === false ||
+              val > $scope.total) {
+            return false;
+          }
+          return true;
+        };
+
+        $scope.$watch('total', function(n) {
+          if (n) {
+            $scope.analysisParams.maxGeneCount = n;
+          }
+        });
+
+      }
     };
   });
 
@@ -131,6 +113,7 @@
         function refresh() {
           console.log($scope.item);
 
+          /*
           var enrichment = $scope.item;
           var id = enrichment.id;
           var universe = enrichment.params.universe;
@@ -144,6 +127,7 @@
           enrichment.results.forEach(function(row) {
             var baseFilter = enrichment.query.filters;
           });
+          */
         }
 
         $scope.exportEnrichment = function(id) {
@@ -163,20 +147,6 @@
       }
     };
   });
-
-
-  /*
-  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        item: '='
-      },
-      templateUrl: '/scripts/enrichment/views/enrichment.result.html',
-      controller: 'EnrichmentResultController as EnrichmentResultController'
-    };
-  });
-  */
 
 })();
 

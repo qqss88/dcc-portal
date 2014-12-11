@@ -4,12 +4,15 @@
 <div data-ng-if="AdvancedCtrl.Gene.genes.hits.length == 0" class="empty loading-text"><h3>No Genes Found.</h3></div>
 <section data-ng-show="AdvancedCtrl.Gene.genes.hits">
     <h3>Genes
-        <span class="open-in pull-right">OPEN IN 
+        <span class="open-in pull-right">OPEN IN
         <a href="" data-ng-click="enrichmentModal=true">Enrichment Analysis</a><span> | </span>
         <a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a></span></span>
     </h3>
 
-    <enrichment-upload data-enrichment-modal="enrichmentModal"></enrichment-upload>
+    <enrichment-upload 
+        data-total="{{AdvancedCtrl.Gene.genes.pagination.total}}"
+        data-enrichment-modal="enrichmentModal">
+    </enrichment-upload>
 
     <div class="t_table_top">
         <span data-table-counts data-label="genes" data-page="AdvancedCtrl.Gene.genes.pagination"></span>
