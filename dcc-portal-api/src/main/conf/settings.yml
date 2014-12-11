@@ -21,6 +21,8 @@ http:
 
 # Controls generation of "Last-Modified" and "ETag" HTTP headers
 cache:
+  enabled: true
+
   # Enable Last-Modified HTTP header generation
   enableLastModified: true
 

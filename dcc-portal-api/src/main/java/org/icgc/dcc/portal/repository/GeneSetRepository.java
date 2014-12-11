@@ -74,7 +74,9 @@ public class GeneSetRepository {
   }
 
   public int countGenes(@NonNull String id) {
-    return countGenes(ImmutableList.of(id)).values().iterator().next();
+    val geneSet = findOne(id, "geneCount");
+
+    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
   }
 
   public Map<String, Integer> countGenes(@NonNull Iterable<String> ids) {
