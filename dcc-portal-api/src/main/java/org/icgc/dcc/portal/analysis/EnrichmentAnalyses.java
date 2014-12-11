@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.enrichment;
+package org.icgc.dcc.portal.analysis;
 
 import static java.lang.Math.min;
 import static java.util.Collections.sort;
@@ -37,11 +37,11 @@ import com.google.common.primitives.Doubles;
 @NoArgsConstructor(access = PRIVATE)
 public final class EnrichmentAnalyses {
 
-  public static double calculateExpectedValue(int k, int m, int n) {
+  public static double calculateExpectedGeneCount(int k, int m, int n) {
     return k * ((double) m / n);
   }
 
-  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
+  public static double calculateGeneCountPValue(int q, int k, int m, int n) {
     val distribution = new HypergeometricDistribution(n, m, k);
     val pValue = 1.0 - distribution.cumulativeProbability(q);
 

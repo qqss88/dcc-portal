@@ -37,6 +37,8 @@ crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
 
 hazelcast:
+  enabled: false
+  
   # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset
 
   # Credentials to enter a group. E.g. dev, uat, prod groups

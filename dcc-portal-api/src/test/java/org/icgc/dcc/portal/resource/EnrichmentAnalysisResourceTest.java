@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.Universe.REACTOME_PATHWAYS;
-import static org.icgc.dcc.portal.util.Filters.uploadedGeneListFilter;
+import static org.icgc.dcc.portal.util.Filters.emptyFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.mockito.Mockito.when;
 
@@ -34,9 +34,7 @@ import lombok.val;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentParams;
-import org.icgc.dcc.portal.provider.ExpandingFormFilterParamsProvider;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
-import org.icgc.dcc.portal.service.UserGeneSetService;
 import org.icgc.dcc.portal.test.ContextInjectableProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,8 +63,6 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
   @Mock
   private EnrichmentAnalysisService service;
   @Mock
-  private UserGeneSetService userGeneSetService;
-  @Mock
   private HttpContext context;
 
   /**
@@ -77,11 +73,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
 
   @Override
   protected final void setUpResources() {
-    val formProvider = new ExpandingFormFilterParamsProvider();
-    formProvider.setUserGeneSetService(userGeneSetService);
-
     addResource(resource);
-    addProvider(formProvider);
     addProvider(new ContextInjectableProvider<HttpContext>(HttpContext.class, context));
     addProvider(BadRequestExceptionMapper.class);
   }
@@ -114,8 +106,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     formData.add("params", MAPPER.writeValueAsString(new EnrichmentParams().setUniverse(REACTOME_PATHWAYS)));
 
     // Query
-    val geneListId = UUID.randomUUID().toString();
-    formData.add("filters", uploadedGeneListFilter(geneListId));
+    formData.add("filters", emptyFilter());
     formData.add("sort", "affectedDonorCountFiltered");
     formData.add("order", "asc");
 
@@ -123,8 +114,6 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     val state = EXECUTING;
     when(service.getAnalysis(Mockito.any(UUID.class)))
         .thenReturn(new EnrichmentAnalysis().setState(state));
-    when(userGeneSetService.get(UUID.fromString(geneListId)))
-        .thenReturn("ENSG0000001");
 
     // Execute
     val response = client()

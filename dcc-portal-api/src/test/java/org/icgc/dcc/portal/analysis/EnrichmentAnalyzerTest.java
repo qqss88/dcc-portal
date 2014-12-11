@@ -1,4 +1,4 @@
-package org.icgc.dcc.portal.enrichment;
+package org.icgc.dcc.portal.analysis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
@@ -14,6 +14,7 @@ import java.util.UUID;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentParams;
 import org.icgc.dcc.portal.model.Query;

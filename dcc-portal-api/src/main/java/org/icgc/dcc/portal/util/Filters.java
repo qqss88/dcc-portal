@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.util;
 
 import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.portal.model.IndexModel.INPUT_GENE_LIST_ID;
+import static org.icgc.dcc.portal.model.IndexModel.API_INPUT_GENE_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
@@ -102,16 +102,16 @@ public final class Filters {
     return geneFilter;
   }
 
-  public static ObjectNode uploadedGeneListFilter(@NonNull String geneListId) {
+  public static ObjectNode inputGeneListIdFilter(@NonNull String inputGeneListId) {
     val geneFilter = geneFilter();
-    geneFilter.with("gene").put("uploadedGeneList", is(geneListId));
+    geneFilter.with("gene").put(API_INPUT_GENE_LIST_ID_FIELD_NAME, is(inputGeneListId));
 
     return geneFilter;
   }
 
   public static ObjectNode inputGeneListFilter(@NonNull UUID inputGeneListId) {
     val inputGeneListFilter = geneFilter();
-    inputGeneListFilter.with(GENE.getId()).put(INPUT_GENE_LIST_ID, is(inputGeneListId.toString()));
+    inputGeneListFilter.with(GENE.getId()).put(API_INPUT_GENE_LIST_ID_FIELD_NAME, is(inputGeneListId.toString()));
 
     return inputGeneListFilter;
   }

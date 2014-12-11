@@ -39,12 +39,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.common.base.Joiner;
-import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.UploadedGeneList;
 import org.icgc.dcc.portal.repository.GeneRepository;
@@ -61,14 +60,16 @@ import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+@Slf4j
 @Component
 @Path("/v1/genelists")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
-@Slf4j
 public class GeneListResource {
 
+  @NonNull
   private final UserGeneSetService userGeneSetService;
+  @NonNull
   private final GeneService geneService;
 
   // Spaces, tabs, commas, or new lines
@@ -115,18 +116,20 @@ public class GeneListResource {
         for (val gene : result.getValidGenes().get(searchField).values()) {
           uniqueIds.add(gene.getId());
         }
-        // uniqueIds.addAll(result.getValidGenes().get(searchField).values());
       }
     }
 
     // Sanity check, we require at least one valid id in order to store
     if (uniqueIds.size() == 0) {
       result.getWarnings().add("Request contains no valid gene Ids");
+
       return result;
     }
 
-    UUID id = userGeneSetService.save(Joiner.on(Separators.COMMA).skipNulls().join(uniqueIds));
+    val id = userGeneSetService.save(uniqueIds);
+
     result.setGeneListId(id.toString());
+
     return result;
   }
 

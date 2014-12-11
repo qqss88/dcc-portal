@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -29,14 +30,10 @@ import lombok.val;
 
 import org.icgc.dcc.portal.model.User;
 import org.openid4java.discovery.DiscoveryInformation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
-import com.hazelcast.core.HazelcastInstance;
 
-@Service
-public class DistributedCacheService {
+public class SessionService {
 
   public static final String USERS_CACHE_NAME = "users";
   public static final String DISCOVERY_INFO_CACHE_NAME = "openId_auth";
@@ -47,10 +44,14 @@ public class DistributedCacheService {
   // Stores session information about logged in users
   private final Map<UUID, User> usersCache;
 
-  @Autowired
-  public DistributedCacheService(HazelcastInstance hazelcast) {
-    this.usersCache = hazelcast.getMap(USERS_CACHE_NAME);
-    this.discoveryInfoCache = hazelcast.getMap(DISCOVERY_INFO_CACHE_NAME);
+  public SessionService() {
+    this.usersCache = newHashMap();
+    this.discoveryInfoCache = newHashMap();
+  }
+
+  public SessionService(Map<UUID, User> usersCache, Map<UUID, DiscoveryInformation> discoveryInfoCache) {
+    this.usersCache = usersCache;
+    this.discoveryInfoCache = discoveryInfoCache;
   }
 
   public void putUser(@NonNull UUID sessionToken, @NonNull User user) {

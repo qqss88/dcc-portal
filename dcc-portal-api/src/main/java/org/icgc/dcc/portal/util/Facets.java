@@ -19,16 +19,15 @@ package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import java.util.List;
+import java.util.Map;
 
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Value;
 import lombok.val;
 
 import org.elasticsearch.search.facet.terms.TermsFacet;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Elasticsearch facet utilities, not to be confused with API facets.
@@ -36,24 +35,16 @@ import com.google.common.collect.ImmutableList;
 @NoArgsConstructor(access = PRIVATE)
 public final class Facets {
 
-  public static List<Count> getFacetCounts(@NonNull TermsFacet termsFacet) {
-    val facetCounts = ImmutableList.<Count> builder();
+  public static Map<String, Integer> getFacetCounts(@NonNull TermsFacet termsFacet) {
+    val facetCounts = ImmutableMap.<String, Integer> builder();
     for (val entry : termsFacet.getEntries()) {
-      val geneSetId = entry.getTerm().string();
+      val value = entry.getTerm().string();
       val count = entry.getCount();
 
-      facetCounts.add(new Count(geneSetId, count));
+      facetCounts.put(value, count);
     }
 
     return facetCounts.build();
-  }
-
-  @Value
-  public static class Count {
-
-    String id;
-    int value;
-
   }
 
 }

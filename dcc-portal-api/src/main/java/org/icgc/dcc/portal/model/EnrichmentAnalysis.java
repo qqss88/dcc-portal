@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Data;
+import lombok.NonNull;
+import lombok.val;
 import lombok.experimental.Accessors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.collect.ImmutableList;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
@@ -132,6 +135,15 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
      * UI: "Adjusted P-Value"
      */
     private double adjustedPValue;
+
+    public static Iterable<String> getGeneSetIds(@NonNull Iterable<Result> results) {
+      val geneSetIds = ImmutableList.<String> builder();
+      for (val result : results) {
+        geneSetIds.add(result.getGeneSetId());
+      }
+
+      return geneSetIds.build();
+    }
 
   }
 

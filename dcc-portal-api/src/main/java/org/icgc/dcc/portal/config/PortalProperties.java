@@ -210,6 +210,9 @@ public class PortalProperties extends Configuration {
   public static class HazelcastProperties {
 
     @JsonProperty
+    boolean enabled = false;
+
+    @JsonProperty
     String groupName;
 
     @JsonProperty

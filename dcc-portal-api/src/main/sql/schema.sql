@@ -10,21 +10,17 @@
 -- 
 -- GRANT SELECT, INSERT ON user_gene_set TO dcc;
 
-/* Initialize */
-
-DROP TABLE IF EXISTS user_gene_set;
-DROP TABLE IF EXISTS enrichment_analysis;
 
 /* Create tables */
 
-CREATE TABLE user_gene_set(
+CREATE TABLE IF NOT EXISTS user_gene_set(
    id   UUID NOT NULL,
    data TEXT NOT NULL,
    
    PRIMARY KEY(id) 
 );
 
-CREATE TABLE enrichment_analysis(
+CREATE TABLE IF NOT EXISTS enrichment_analysis(
    id   UUID NOT NULL,
    data TEXT NOT NULL,
    

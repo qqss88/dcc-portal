@@ -420,7 +420,7 @@
   module.service('FiltersUtil', function(Extensions) {
     this.removeExtensions = function(filters) {
       if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
-        delete filters.gene.uploadedGeneList;
+        delete filters.gene.inputGeneListId;
         if (_.isEmpty(filters.gene)) {
           delete filters.gene;
         }
