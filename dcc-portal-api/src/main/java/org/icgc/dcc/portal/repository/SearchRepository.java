@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.DFS_QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +83,12 @@ public class SearchRepository {
 
       // Exact match fields (DCC-2324)
       if (baseKey.equals("start")) {
-        keys.add(baseKey);
+        // NOTE: This is a work around quirky ES issue.
+        // We need to prefix the document type here to prevent NumberFormatException, it appears that ES
+        // cannot determine what type 'start' is.
+        // This is for ES 0.9, later versions may not have this problem.
+        keys.add(_("%s.%s", MUTATION_TEXT.getId(), baseKey));
+
       } else if (!baseKey.equals("geneMutations")) {
         keys.add(baseKey + ".search^2");
         keys.add(baseKey + ".analyzed");

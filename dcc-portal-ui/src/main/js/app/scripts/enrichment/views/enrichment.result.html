@@ -8,11 +8,11 @@
             <thead>
                 <tr>
                     <th>Universe</th>
-                    <th># Gene set in Universe</th>
-                    <th># Gene set in overlap</th>
-                    <th># Genes in Universe</th>
-                    <th># Genes in overlap</th>
-                    <th># Input genes</th>
+                    <th class="text-right"># Gene set in Universe</th>
+                    <th class="text-right"># Gene set in overlap</th>
+                    <th class="text-right"># Genes in Universe</th>
+                    <th class="text-right"># Genes in overlap</th>
+                    <th class="text-right"># Input genes</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,7 +40,7 @@
 
         <h4>
             <span  data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
-                Top {{item.params.maxGeneSetCount | number}} gene sets out of {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
             </span>
             <span data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
                 {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}

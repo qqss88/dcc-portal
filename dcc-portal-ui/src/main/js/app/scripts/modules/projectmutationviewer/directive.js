@@ -10,7 +10,7 @@
       replace: 'true',
       template: '<div>' +
         '<div class="text-center graph_title">' +
-        'Number of Somatic Mutations in Donor\'s Exomes Ccross Cancer Projects' +
+        'Number of Somatic Mutations in Donor\'s Exomes Across Cancer Projects' +
         '<span class="pull-right"><a href="">' +
         '<small><i class="icon-help" data-tooltip="{{helpText}}" data-tooltip-placement="left"></i>' +
         '</small></a></span>' +

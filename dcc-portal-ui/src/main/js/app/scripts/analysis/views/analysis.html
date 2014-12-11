@@ -20,7 +20,16 @@
                     id="test_{{item}}"
                     data-ng-class="{selected: item.id == analysisId}"> 
                     <span> Gene Set Enrichment <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
-                        <small>{{item.id.split('-')[0]}}</small><br>
+                        <small>{{item.id.split('-')[0]}}</small>
+                        <span data-ng-mouseenter="hover=true" 
+                              data-ng-mouseleave="hover=false"
+                              data-ng-click="$event.stopPropagation(); remove(item.id)">
+                            <i class="icon-cancel pull-right" 
+                               style="background: {{hover===true? '#EE4411' : ''}}"></i>
+                               <!--
+                               style="font-size: {{hover===true? '1.5rem' : '1.25rem'}}; background: {{hover===true? '#FF0000' : 'inherit'}}"></i>
+                               -->
+                        </span>
                     </span>
                     <!--
                     <span class="pull-right">
