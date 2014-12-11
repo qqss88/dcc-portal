@@ -37,11 +37,11 @@ import com.google.common.primitives.Doubles;
 @NoArgsConstructor(access = PRIVATE)
 public final class EnrichmentAnalyses {
 
-  public static double calculateExpectedValue(int k, int m, int n) {
+  public static double calculateExpectedGeneCount(int k, int m, int n) {
     return k * ((double) m / n);
   }
 
-  public static double calculateHypergeometricTest(int q, int k, int m, int n) {
+  public static double calculateGeneCountPValue(int q, int k, int m, int n) {
     val distribution = new HypergeometricDistribution(n, m, k);
     val pValue = 1.0 - distribution.cumulativeProbability(q);
 
