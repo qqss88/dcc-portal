@@ -19,6 +19,8 @@ package org.icgc.dcc.portal.repository;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.isEmpty;
+import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
+import static org.elasticsearch.common.collect.Iterables.size;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.Map;
@@ -28,12 +30,14 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.TermFilterBuilder;
+import org.elasticsearch.index.query.TermsFilterBuilder;
 import org.icgc.dcc.portal.model.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -54,7 +58,6 @@ public class GeneSetRepository {
   /**
    * Constants.
    */
-  private static final String API_GENE_COUNT_FIELD_NAME = "geneCount";
   private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
   private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
 
@@ -65,15 +68,28 @@ public class GeneSetRepository {
   private final String index;
 
   @Autowired
-  public GeneSetRepository(Client client, IndexModel indexModel) {
+  public GeneSetRepository(@NonNull Client client, @NonNull IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
   }
 
-  public int countGenes(String id) {
-    val geneSet = findOne(id, API_GENE_COUNT_FIELD_NAME);
+  public int countGenes(@NonNull String id) {
+    return countGenes(ImmutableList.of(id)).values().iterator().next();
+  }
 
-    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+  public Map<String, Integer> countGenes(@NonNull Iterable<String> ids) {
+    val fieldName = INDEX_GENE_COUNT_FIELD_NAME;
+    val response = findField(ids, fieldName);
+
+    val map = Maps.<String, Integer> newLinkedHashMap();
+    for (val hit : response.getHits()) {
+      val id = hit.getId();
+      val count = (Integer) hit.getFields().get(fieldName).getValue();
+
+      map.put(id, count);
+    }
+
+    return map;
   }
 
   public int countDecendants(@NonNull GeneSetType type, @NonNull Optional<String> id) {
@@ -111,10 +127,19 @@ public class GeneSetRepository {
         .getCount();
   }
 
-  public String findName(String id) {
-    val nameField = INDEX_GENE_SETS_NAME_FIELD_NAME;
+  public Map<String, String> findName(@NonNull Iterable<String> ids) {
+    val fieldName = INDEX_GENE_SETS_NAME_FIELD_NAME;
+    val response = findField(ids, fieldName);
 
-    return findOne(id, nameField).get(nameField).toString();
+    val map = Maps.<String, String> newLinkedHashMap();
+    for (val hit : response.getHits()) {
+      val id = hit.getId();
+      val count = (String) hit.getFields().get(fieldName).getValue();
+
+      map.put(id, count);
+    }
+
+    return map;
   }
 
   public Map<String, Object> findOne(@NonNull String id, String... fieldNames) {
@@ -176,5 +201,19 @@ public class GeneSetRepository {
     log.debug("{}", map);
 
     return map;
+  }
+
+  private SearchResponse findField(Iterable<String> ids, String fieldName) {
+    val filters = new TermsFilterBuilder("_id", ids);
+
+    val search = client.prepareSearch(index)
+        .setTypes(TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(size(ids))
+        .setFilter(filters)
+        .addField(fieldName);
+
+    return search.execute().actionGet();
   }
 }

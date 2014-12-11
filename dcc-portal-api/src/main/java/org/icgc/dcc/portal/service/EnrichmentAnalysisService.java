@@ -52,7 +52,7 @@ public class EnrichmentAnalysisService {
   /**
    * Constants.
    */
-  private static final Joiner REPORT_GENES_JOINER = COMMA; // RQ12
+  private static final Joiner REPORT_GENES_JOINER = COMMA;
   private static final String[] REPORT_HEADERS =
       {
           "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
@@ -126,6 +126,7 @@ public class EnrichmentAnalysisService {
   }
 
   private static String formatGenes(Map<String, String> genes) {
+    // RQ12
     val values = Lists.<String> newArrayList();
     for (val gene : genes.entrySet()) {
       String symbol = gene.getValue();

@@ -230,12 +230,6 @@ public class GeneRepository implements Repository {
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(COUNT);
 
-    // FIXME: This method seems to oscillate between results. Possible culprits:
-    // - Node communication issues
-    // - Facet limits
-    // - Search Type
-    // - Others?
-
     val boolFilter = new BoolFilterBuilder();
     for (val filters : query.getAndFilters()) {
       val remappedFilters = remapFilters(filters);

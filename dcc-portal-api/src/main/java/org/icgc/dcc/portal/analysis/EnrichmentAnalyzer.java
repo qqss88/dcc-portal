@@ -32,6 +32,7 @@ import static org.icgc.dcc.portal.util.Facets.getFacetCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -52,7 +53,6 @@ import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.repository.GeneSetRepository;
 import org.icgc.dcc.portal.repository.MutationRepository;
 import org.icgc.dcc.portal.service.TermsLookupService;
-import org.icgc.dcc.portal.util.Facets.Count;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -121,6 +121,9 @@ public class EnrichmentAnalyzer {
     log.info("Calculating overview @ {}...", watch);
     val overview = calculateOverview(query, universe, inputGeneListId);
 
+    log.info("Finsined gene set gene counts @ {}...", watch);
+    val geneSetGeneCounts = findGeneSetGeneCounts(overlapGeneSetCounts.keySet());
+
     // Perform gene-set specific calculations
     log.info("Calculating raw gene set results @ {}...", watch);
     val rawResults = calculateRawGeneSetsResults(
@@ -128,6 +131,7 @@ public class EnrichmentAnalyzer {
         universe,
         inputGeneListId,
 
+        geneSetGeneCounts,
         overlapGeneSetCounts,
         overview.getOverlapGeneCount(),
         overview.getUniverseGeneCount());
@@ -164,13 +168,16 @@ public class EnrichmentAnalyzer {
   }
 
   private List<Result> calculateRawGeneSetsResults(Query query, Universe universe, UUID inputGeneListId,
-      List<Count> overlapGeneSetGeneCounts, int overlapGeneCount, int universeGeneCount) {
+      Map<String, Integer> geneSetGeneCounts, Map<String, Integer> overlapGeneSetGeneCounts, int overlapGeneCount,
+      int universeGeneCount) {
     val rawResults = Lists.<Result> newArrayList();
-    for (int i = 0; i < overlapGeneSetGeneCounts.size(); i++) {
-      val overlapGeneSet = overlapGeneSetGeneCounts.get(i);
-      val geneSetId = overlapGeneSet.getId();
-      int geneSetOverlapGeneCount = overlapGeneSet.getValue();
+    int i = 0;
+    for (val entry : overlapGeneSetGeneCounts.entrySet()) {
+      val geneSetId = entry.getKey();
+      val geneSetGeneCount = geneSetGeneCounts.get(geneSetId);
+      int geneSetOverlapGeneCount = entry.getValue();
 
+      i++;
       log.info("[{}/{}] Processing {}", new Object[] { i + 1, overlapGeneSetGeneCounts.size(), geneSetId });
       if (geneSetId.equals(universe.getGeneSetId())) {
         // T6: Skip universe as this will trivially be most enriched by definition
@@ -185,6 +192,7 @@ public class EnrichmentAnalyzer {
           geneSetId,
 
           // Formula inputs
+          geneSetGeneCount,
           geneSetOverlapGeneCount,
           overlapGeneCount,
           universeGeneCount
@@ -198,9 +206,7 @@ public class EnrichmentAnalyzer {
   }
 
   private Result calculateRawGeneSetResult(Query query, Universe universe, UUID inputGeneListId, String geneSetId,
-      int geneSetOverlapGeneCount, int overlapGeneCount, int universeGeneCount) {
-    val geneSetGeneCount = countGeneSetGenes(geneSetId);
-
+      int geneSetGeneCount, int geneSetOverlapGeneCount, int overlapGeneCount, int universeGeneCount) {
     // Statistics
     val expectedValue = calculateExpectedValue(
         overlapGeneCount,
@@ -225,6 +231,16 @@ public class EnrichmentAnalyzer {
 
   private void calculateFinalGeneSetResults(Query query, Universe universe, UUID inputGeneListId,
       List<Result> limitedAdjustedResults) {
+
+    // Resolve the set of gene set ids remaining
+    val geneSetIds = Lists.<String> newArrayList();
+    for (val result : limitedAdjustedResults) {
+      geneSetIds.add(result.getGeneSetId());
+    }
+
+    log.info("Finding gene set names...");
+    val geneSetNames = findGeneSetNames(geneSetIds);
+
     for (int i = 0; i < limitedAdjustedResults.size(); i++) {
       val geneSetResult = limitedAdjustedResults.get(i);
       val geneSetId = geneSetResult.getGeneSetId();
@@ -234,7 +250,7 @@ public class EnrichmentAnalyzer {
 
       // Update
       geneSetResult
-          .setGeneSetName(findGeneSetName(geneSetId))
+          .setGeneSetName(geneSetNames.get(geneSetId))
           .setOverlapGeneSetDonorCount(countDonors(geneSetOverlapQuery))
           .setOverlapGeneSetMutationCount(countMutations(geneSetOverlapQuery));
     }
@@ -255,7 +271,11 @@ public class EnrichmentAnalyzer {
     return getHitIds(geneRepository.findAllCentric(limitedGeneQuery));
   }
 
-  private List<Count> findOverlapGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
+  private Map<String, Integer> findGeneSetGeneCounts(Iterable<String> geneSetIds) {
+    return geneSetRepository.countGenes(geneSetIds);
+  }
+
+  private Map<String, Integer> findOverlapGeneSetCounts(Query query, Universe universe, UUID inputGeneListId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
     val response = geneRepository.findGeneSetCounts(overlapQuery);
     val geneSetFacet = getUniverseTermsFacet(response, universe);
@@ -263,8 +283,8 @@ public class EnrichmentAnalyzer {
     return getFacetCounts(geneSetFacet);
   }
 
-  private String findGeneSetName(String geneSetId) {
-    return geneSetRepository.findName(geneSetId);
+  private Map<String, String> findGeneSetNames(Iterable<String> geneSetIds) {
+    return geneSetRepository.findName(geneSetIds);
   }
 
   private int countGenes(AndQuery query) {
