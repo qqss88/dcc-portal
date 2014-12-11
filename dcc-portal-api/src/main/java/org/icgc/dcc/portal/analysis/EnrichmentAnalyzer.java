@@ -214,7 +214,7 @@ public class EnrichmentAnalyzer {
         geneSetOverlapGeneCount, overlapGeneCount, // The "four numbers"
         geneSetGeneCount, universeGeneCount);
 
-    log.debug("q = {}, k = {}, m = {}, n = {}, pValue = {}", new Object[] { geneSetOverlapGeneCount, overlapGeneCount,
+    log.info("q = {}, k = {}, m = {}, n = {}, pValue = {}", new Object[] { geneSetOverlapGeneCount, overlapGeneCount,
         geneSetGeneCount, universeGeneCount, pValue });
 
     // Assemble

@@ -7,14 +7,12 @@ import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_INPUT_GENES;
 import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_OUTPUT_GENE_SETS;
 import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.test.JsonNodes.$;
-import static org.icgc.dcc.portal.util.Filters.emptyFilter;
 
 import java.util.UUID;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentParams;
 import org.icgc.dcc.portal.model.Query;
@@ -68,7 +66,8 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val inputFilter = emptyFilter();
+    val inputFilter =
+        (ObjectNode) $("{'gene':{'curatedSetId':{'is':['GS1']},'hasPathway':true}}");
 
     val analysis = execute(inputFilter);
 
