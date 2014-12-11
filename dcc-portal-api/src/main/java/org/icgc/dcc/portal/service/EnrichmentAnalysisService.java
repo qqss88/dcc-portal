@@ -18,31 +18,22 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
-import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Map;
 import java.util.UUID;
 
-import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
+import org.icgc.dcc.portal.analysis.EnrichmentReporter;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
-import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.supercsv.io.CsvListWriter;
-
-import com.beust.jcommander.internal.Lists;
-import com.google.common.base.Joiner;
 
 @Slf4j
 @Service
@@ -50,26 +41,18 @@ import com.google.common.base.Joiner;
 public class EnrichmentAnalysisService {
 
   /**
-   * Constants.
-   */
-  private static final Joiner REPORT_GENES_JOINER = COMMA;
-  private static final String[] REPORT_HEADERS =
-      {
-          "ID", "Name", "# Genes", "# Genes in overlap", "# Donors affected", "# Mutations", "Expected", "P-Value", "Adjusted P-Value", "Gene IDs in overlap"
-      };
-
-  /**
    * Dependencies.
    */
   @NonNull
   private final EnrichmentAnalyzer analyzer;
   @NonNull
-  private final EnrichmentAnalysisRepository analysisRepository;
+  private final EnrichmentReporter reporter;
   @NonNull
-  private final GeneRepository geneRepository;
+  private final EnrichmentAnalysisRepository repository;
 
+  @NonNull
   public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
-    val analysis = analysisRepository.find(analysisId);
+    val analysis = repository.find(analysisId);
     if (analysis == null) {
       throw new NotFoundException("enrichment analysis", analysisId.toString());
     }
@@ -82,7 +65,7 @@ public class EnrichmentAnalysisService {
 
     // Ensure persisted for polling
     log.info("Saving analysis '{}'...", analysis.getId());
-    val insertCount = analysisRepository.save(analysis);
+    val insertCount = repository.save(analysis);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
     // Execute asynchronously
@@ -90,54 +73,15 @@ public class EnrichmentAnalysisService {
     analyzer.analyze(analysis);
   }
 
-  public void reportAnalysis(EnrichmentAnalysis analysis, OutputStream outputStream) throws IOException {
+  public void reportAnalysis(@NonNull EnrichmentAnalysis analysis, @NonNull OutputStream outputStream)
+      throws IOException {
     val results = analysis.getResults();
     if (results == null) {
       log.info("No results to report for analysis id '{}'", analysis.getId());
       return;
     }
 
-    @Cleanup
-    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
-    writer.writeHeader(REPORT_HEADERS);
-
-    // Shorthands
-    val inputGeneListId = analysis.getId();
-
-    for (int i = 0; i < results.size(); i++) {
-      val result = results.get(i);
-
-      log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
-      val overlapGeneSetGeneIds = geneRepository.findGeneSymbolsById(inputGeneListId, result.getGeneSetId());
-
-      writer.write(new Object[] {
-          result.getGeneSetId(),
-          result.getGeneSetName(),
-          result.getGeneCount(),
-          result.getOverlapGeneSetGeneCount(),
-          result.getOverlapGeneSetDonorCount(),
-          result.getOverlapGeneSetMutationCount(),
-          result.getExpectedValue(),
-          result.getPValue(),
-          result.getAdjustedPValue(),
-          formatGenes(overlapGeneSetGeneIds)
-      });
-    }
-  }
-
-  private static String formatGenes(Map<String, String> genes) {
-    // RQ12
-    val values = Lists.<String> newArrayList();
-    for (val gene : genes.entrySet()) {
-      String symbol = gene.getValue();
-      String geneId = gene.getKey();
-
-      val value = symbol + ":" + geneId;
-
-      values.add(value);
-    }
-
-    return REPORT_GENES_JOINER.join(values);
+    reporter.report(analysis, outputStream);
   }
 
   private static UUID createAnalysisId() {
