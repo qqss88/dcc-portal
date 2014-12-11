@@ -24,10 +24,10 @@ import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static org.icgc.dcc.portal.model.IndexModel.API_INPUT_GENE_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_TYPE_FIELDS;
-import static org.icgc.dcc.portal.model.IndexModel.API_INPUT_GENE_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
@@ -409,10 +409,12 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
-              } else if (fieldName.equals(API_INPUT_GENE_LIST_ID_FIELD_NAME)) {
+              } else if (fieldName.endsWith(API_INPUT_GENE_LIST_ID_FIELD_NAME)) {
+                val mappedFieldName = fieldName.replace(API_INPUT_GENE_LIST_ID_FIELD_NAME, "_gene_id");
+
                 // Term lookup for Enrichment Analysis
                 val inputGeneListId = UUID.fromString(items.get(0));
-                fb = TermsLookupService.createTermsLookupFilter("_gene_id", GENE_IDS, inputGeneListId);
+                fb = TermsLookupService.createTermsLookupFilter(mappedFieldName, GENE_IDS, inputGeneListId);
               } else {
                 // Catch all
                 fb = termsFilter(fieldName, items);
