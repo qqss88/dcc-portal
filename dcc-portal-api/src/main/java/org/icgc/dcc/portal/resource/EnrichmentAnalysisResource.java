@@ -25,6 +25,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
+import static org.icgc.dcc.portal.model.IndexModel.GENES_SORT_FIELD_NAMES;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
@@ -37,6 +38,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_PARAMS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_FIELD;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.ORDER_VALUES;
 import static org.icgc.dcc.portal.resource.ResourceUtils.validate;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
@@ -119,8 +121,14 @@ public class EnrichmentAnalysisResource {
     if (isNullOrEmpty(sort)) {
       throw new BadRequestException("'sort' is missing or empty");
     }
+    if (!GENES_SORT_FIELD_NAMES.contains(sort)) {
+      throw new BadRequestException("'sort' must be one of " + GENES_SORT_FIELD_NAMES);
+    }
     if (isNullOrEmpty(order)) {
       throw new BadRequestException("'order' is missing or empty");
+    }
+    if (!ORDER_VALUES.contains(order.toLowerCase())) {
+      throw new BadRequestException("'order' must be one of " + ORDER_VALUES);
     }
 
     // JSR 303 resource parameters are not supported in DW 1

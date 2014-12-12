@@ -5,6 +5,7 @@ import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Validation;
 
@@ -18,9 +19,12 @@ import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.util.JsonUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class ResourceUtils {
+
+  static final Set<String> ORDER_VALUES = ImmutableSet.of("asc", "desc");
 
   static final String DEFAULT_FILTERS = "{}";
   static final String DEFAULT_SIZE = "10";
