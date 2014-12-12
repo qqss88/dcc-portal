@@ -157,6 +157,7 @@
             geneInputGeneListIdFilter.is.push(id);
 
             console.log('baseFilter', JSON.stringify(baseFilter));
+            row.advFilter = baseFilter;
           });
           
         }

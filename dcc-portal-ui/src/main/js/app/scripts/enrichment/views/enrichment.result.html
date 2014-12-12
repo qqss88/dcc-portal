@@ -86,9 +86,15 @@
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>{{row.geneSetName}}</td>
                     <td class="text-right">{{row.geneCount | number}}</td>
-                    <td class="text-right">{{row.overlapGeneSetGeneCount | number}}</td>
-                    <td class="text-right">{{row.overlapGeneSetDonorCount | number}}</td>
-                    <td class="text-right">{{row.overlapGeneSetMutationCount | number}}</td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{row.advFilter}}">{{row.overlapGeneSetGeneCount | number}}</a>
+                    </td>
+                    <td class="text-right">
+                        <a href="/search?filters={{row.advFilter}}">{{row.overlapGeneSetDonorCount | number}}</a>
+                    </td>
+                    <td class="text-right">
+                        <a href="/search/m?filters={{row.advFilter}}">{{row.overlapGeneSetMutationCount | number}}</a>
+                    </td>
                     <td class="text-right">{{row.expectedValue.toExponential(2) }}</td>
                     <td class="text-right">{{row.pvalue.toExponential(2) }}</td>
                     <td class="text-right">{{row.adjustedPValue.toExponential(2) }}</td>
