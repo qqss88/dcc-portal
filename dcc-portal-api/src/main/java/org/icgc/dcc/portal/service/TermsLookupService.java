@@ -102,7 +102,7 @@ public class TermsLookupService {
       @NonNull TermLookupType type, @NonNull UUID id) {
     val key = id.toString();
     return termsLookupFilter(fieldName)
-        .cacheKey(key)
+        // .cacheKey(key)
         .lookupId(key)
         .lookupIndex(TERMS_LOOKUP_INDEX_NAME)
         .lookupType(type.getName())

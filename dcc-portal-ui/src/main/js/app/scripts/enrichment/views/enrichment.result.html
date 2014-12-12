@@ -1,7 +1,7 @@
 <div data-ng-if="item.state === 'EXECUTING'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
-<div data-ng-if="item.state === 'FINISHED'"> 
+<div data-ng-if="item.state === 'FINISHED'">
     <div>
         <h4>Overview</h4>
         <table class="table table-bordered">
@@ -38,10 +38,12 @@
         </div>
         <br>
 
+
         <h4>
-            <span  data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
+            <span data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
                 Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
             </span>
+
             <span data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
                 {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
             </span>
@@ -50,11 +52,11 @@
                 <span class="t_tools__tool"
                       data-tooltip-placement="left"
                       data-tooltip="Export Table as CSV"
-                      data-ng-click="exportEnrichment(item.id)"><i
-                      class="icon-file"></i></span>
+                      data-ng-click="exportEnrichment(item.id)"><i class="icon-file"></i></span>
             </span>
         </h4>
-        
+
+
         <table class="table table-bordered">
             <thead>
                 <tr>

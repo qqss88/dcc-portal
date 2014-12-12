@@ -466,6 +466,11 @@
         angular.forEach(typeFilters, function(facetFilters, facetKey) {
           var uiFacetKey = facetKey;
 
+          // FIXME: no logic to handle "all" clause
+          if (facetFilters.all) {
+            return;
+          }
+
           // Genelist expansion maps to gene id
           if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || facetKey === Extensions.GENE_LIST)) {
             uiFacetKey = 'id';
@@ -531,7 +536,6 @@
                 controlType: typeKey
               });
             }
-
 
           });
         });

@@ -259,6 +259,24 @@ public class QueryService {
         }
       }
 
+      // Handles special case "all" for intersecting gene sets
+      if (geneSetNode.has(idFieldName) && !geneSetNode.path(idFieldName).path("all").isMissingNode()) {
+        val allNode = geneSetNode.path(idFieldName).path("all");
+        val allFilter = FilterBuilders.boolFilter();
+
+        for (val value : allNode) {
+          val valueStr = value.asText();
+          val valueFilter = FilterBuilders.boolFilter();
+          valueFilter.should(termFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), valueStr));
+          valueFilter.should(termFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), valueStr));
+          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "cellular_component"), valueStr));
+          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "biological_process"), valueStr));
+          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "molecular_function"), valueStr));
+          allFilter.must(valueFilter);
+        }
+        resultFilter.must(allFilter);
+      }
+
       // Build overall filter a geneset type
       if (hasType && hasIds) {
         resultFilter.must(FilterBuilders.boolFilter().should(geneSetIdFilter).should(geneSetTypeFilter));
@@ -269,7 +287,7 @@ public class QueryService {
       }
     }
 
-    log.debug("result filter {}", resultFilter);
+    log.info("result geneset filter {}", resultFilter);
 
     return resultFilter;
   }
@@ -281,85 +299,85 @@ public class QueryService {
   // existFilter := must( type = type)
   // typeFilter := should(idFilter, existFilter)
   // resultFilter := resultFIlter.must(shouldFilter)
-  public static BoolFilterBuilder buildGeneSetFilters_nestedVersion(ObjectNode filters,
-      ImmutableMap<Kind, String> prefixMapping) {
-    val resultFilter = FilterBuilders.boolFilter();
-    val prefix = prefixMapping.get(Kind.GENE_SET);
-    val geneSetNode = filters.path(Kind.GENE_SET.getId());
-
-    for (val geneSetType : GeneSetType.values()) {
-      val geneSetIdFilter = FilterBuilders.boolFilter();
-      val geneSetTypeFilter = FilterBuilders.boolFilter();
-
-      boolean hasIds = false;
-      boolean hasType = false;
-
-      val idFieldName = GENE_SET_QUERY_ID_FIELDS.get(geneSetType.getType());
-      val typeFieldName = GENE_SET_QUERY_TYPE_FIELDS.get(geneSetType.getType());
-
-      val typeFilter = termFilter(_("%s.%s", prefix, "type"), geneSetType.getType());
-
-      // If ids are set to be filtered
-      if (geneSetNode.has(idFieldName)) {
-        for (String bool : Lists.newArrayList(IS, NOT)) {
-          val boolNode = geneSetNode.path(idFieldName).path(bool);
-          if (boolNode.isMissingNode() || !boolNode.isArray()) continue;
-
-          hasIds = true;
-
-          // 1) Add IS or NOT terms
-          List<String> termList = Lists.newArrayList();
-          for (val item : boolNode) {
-            termList.add(item.textValue());
-          }
-
-          // 2) Gene sets are nested documents
-          val idFilter = termsFilter(_("%s.%s", prefix, "id"), termList);
-
-          // 3) Must or must not
-          if (bool.equals(IS)) {
-            geneSetIdFilter.must(idFilter);
-          } else {
-            geneSetIdFilter.mustNot(idFilter);
-          }
-
-        }
-
-        // Don't attach for geneset itself
-        if (!geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
-          geneSetIdFilter.must(typeFilter);
-        }
-      }
-
-      // If types are set to be filtered
-      if (geneSetNode.has(typeFieldName)) {
-        val type = geneSetNode.path(typeFieldName).asBoolean();
-        hasType = true;
-
-        // Determine must or must not
-        if (type == true) {
-          geneSetTypeFilter.must(typeFilter);
-        } else {
-          geneSetTypeFilter.mustNot(typeFilter);
-        }
-      }
-
-      // Build overall filter a geneset type
-      if (hasType && hasIds) {
-        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
-            .should(geneSetIdFilter)
-            .should(geneSetTypeFilter)));
-      } else if (hasIds) {
-        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
-            .must(geneSetIdFilter)));
-      } else if (hasType) {
-        resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
-            .must(geneSetTypeFilter)));
-      }
-
-    }
-    return resultFilter;
-  }
+  // public static BoolFilterBuilder buildGeneSetFilters_nestedVersion(ObjectNode filters,
+  // ImmutableMap<Kind, String> prefixMapping) {
+  // val resultFilter = FilterBuilders.boolFilter();
+  // val prefix = prefixMapping.get(Kind.GENE_SET);
+  // val geneSetNode = filters.path(Kind.GENE_SET.getId());
+  //
+  // for (val geneSetType : GeneSetType.values()) {
+  // val geneSetIdFilter = FilterBuilders.boolFilter();
+  // val geneSetTypeFilter = FilterBuilders.boolFilter();
+  //
+  // boolean hasIds = false;
+  // boolean hasType = false;
+  //
+  // val idFieldName = GENE_SET_QUERY_ID_FIELDS.get(geneSetType.getType());
+  // val typeFieldName = GENE_SET_QUERY_TYPE_FIELDS.get(geneSetType.getType());
+  //
+  // val typeFilter = termFilter(_("%s.%s", prefix, "type"), geneSetType.getType());
+  //
+  // // If ids are set to be filtered
+  // if (geneSetNode.has(idFieldName)) {
+  // for (String bool : Lists.newArrayList(IS, NOT)) {
+  // val boolNode = geneSetNode.path(idFieldName).path(bool);
+  // if (boolNode.isMissingNode() || !boolNode.isArray()) continue;
+  //
+  // hasIds = true;
+  //
+  // // 1) Add IS or NOT terms
+  // List<String> termList = Lists.newArrayList();
+  // for (val item : boolNode) {
+  // termList.add(item.textValue());
+  // }
+  //
+  // // 2) Gene sets are nested documents
+  // val idFilter = termsFilter(_("%s.%s", prefix, "id"), termList);
+  //
+  // // 3) Must or must not
+  // if (bool.equals(IS)) {
+  // geneSetIdFilter.must(idFilter);
+  // } else {
+  // geneSetIdFilter.mustNot(idFilter);
+  // }
+  //
+  // }
+  //
+  // // Don't attach for geneset itself
+  // if (!geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
+  // geneSetIdFilter.must(typeFilter);
+  // }
+  // }
+  //
+  // // If types are set to be filtered
+  // if (geneSetNode.has(typeFieldName)) {
+  // val type = geneSetNode.path(typeFieldName).asBoolean();
+  // hasType = true;
+  //
+  // // Determine must or must not
+  // if (type == true) {
+  // geneSetTypeFilter.must(typeFilter);
+  // } else {
+  // geneSetTypeFilter.mustNot(typeFilter);
+  // }
+  // }
+  //
+  // // Build overall filter a geneset type
+  // if (hasType && hasIds) {
+  // resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+  // .should(geneSetIdFilter)
+  // .should(geneSetTypeFilter)));
+  // } else if (hasIds) {
+  // resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+  // .must(geneSetIdFilter)));
+  // } else if (hasType) {
+  // resultFilter.must(nestedFilter(prefix, FilterBuilders.boolFilter()
+  // .must(geneSetTypeFilter)));
+  // }
+  //
+  // }
+  // return resultFilter;
+  // }
 
   public static BoolFilterBuilder buildEmbOccurrenceFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
     return buildTypeFilters(filters, Kind.EMB_OCCURRENCE, prefixMapping);

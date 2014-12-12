@@ -90,6 +90,7 @@
 
         $scope.$watch('total', function(n) {
           if (n) {
+            $scope.total = Math.min(n, 1000);
             $scope.analysisParams.maxGeneCount = n;
           }
         });
@@ -111,23 +112,53 @@
         $scope.reverse = false;
 
         function refresh() {
-          console.log($scope.item);
+          console.log('enrichment refreshing', $scope.item);
 
-          /*
           var enrichment = $scope.item;
           var id = enrichment.id;
           var universe = enrichment.params.universe;
 
           // No results yet, can't do anything
-          if (! enrichment.result) {
+          if (! enrichment.results) {
             return;
           }
 
+
           // Compute queries to go to advanced search page
+          // 1) Add inputGeneList
+          // 2) Add genesetId
           enrichment.results.forEach(function(row) {
-            var baseFilter = enrichment.query.filters;
+            var geneFilter, geneSetIdFilter, geneInputGeneListIdFilter;
+            var baseFilter = angular.copy(enrichment.query.filters);
+
+            if (! baseFilter.gene) {
+              baseFilter.gene = {};
+            }
+
+            geneFilter = baseFilter.gene;
+            if (! geneFilter.geneSet) {
+              geneFilter.geneSetId = {};
+            }
+            if (! geneFilter.inputGeneListId) {
+              geneFilter.inputGeneListId = {};
+            }
+
+            geneSetIdFilter = geneFilter.geneSetId;
+            if (! geneSetIdFilter.all) {
+              geneSetIdFilter.all = [];
+            }
+
+            geneInputGeneListIdFilter = geneFilter.inputGeneListId;
+            if (! geneInputGeneListIdFilter.is) {
+              geneInputGeneListIdFilter.is = [];
+            }
+
+            geneSetIdFilter.all.push( row.geneSetId );
+            geneInputGeneListIdFilter.is.push(id);
+
+            console.log('baseFilter', JSON.stringify(baseFilter));
           });
-          */
+          
         }
 
         $scope.exportEnrichment = function(id) {
