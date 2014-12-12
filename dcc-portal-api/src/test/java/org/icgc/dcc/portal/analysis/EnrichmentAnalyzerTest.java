@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal.analysis;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 import static org.icgc.dcc.portal.model.EnrichmentParams.DEFAULT_FDR;
 import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_INPUT_GENES;
 import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_OUTPUT_GENE_SETS;
@@ -79,10 +79,11 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
   }
 
   private EnrichmentAnalysis execute(ObjectNode inputFilter) {
+    log.info("Creating...");
     val analysis =
         new EnrichmentAnalysis()
             .setId(UUID.randomUUID())
-            .setState(EXECUTING)
+            .setState(PENDING)
             .setParams(
                 new EnrichmentParams()
                     .setUniverse(GO_BIOLOGICAL_PROCESS)
@@ -95,8 +96,11 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
                 .order("DESC")
                 .build());
 
+    log.info("Saving...");
+    repository.save(analysis);
+
     log.info("Starting...");
-    analyzer.analyze(analysis);
+    analyzer.analyze(analysis.getId());
 
     log.info("Result: {}", analysis);
     return analysis;

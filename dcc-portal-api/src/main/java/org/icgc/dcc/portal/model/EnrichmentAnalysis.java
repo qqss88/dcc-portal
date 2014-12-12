@@ -152,7 +152,9 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
    */
   public enum State {
 
-    EXECUTING,
+    PENDING,
+    ANALYZING,
+    POST_PROCESSING,
     FINISHED;
 
   }
