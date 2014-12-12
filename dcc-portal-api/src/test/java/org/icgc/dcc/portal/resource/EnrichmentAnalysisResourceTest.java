@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.resource;
 import static com.sun.jersey.api.client.ClientResponse.Status.ACCEPTED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.EXECUTING;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.ANALYZING;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
 import static org.icgc.dcc.portal.model.Universe.REACTOME_PATHWAYS;
 import static org.icgc.dcc.portal.util.Filters.emptyFilter;
@@ -111,7 +111,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     formData.add("order", "asc");
 
     // Mock
-    val state = EXECUTING;
+    val state = ANALYZING;
     when(service.getAnalysis(Mockito.any(UUID.class)))
         .thenReturn(new EnrichmentAnalysis().setState(state));
 

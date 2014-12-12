@@ -70,7 +70,7 @@ public class EnrichmentAnalysisService {
 
     // Execute asynchronously
     log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis);
+    analyzer.analyze(analysis.getId());
   }
 
   public void reportAnalysis(@NonNull EnrichmentAnalysis analysis, @NonNull OutputStream outputStream)
