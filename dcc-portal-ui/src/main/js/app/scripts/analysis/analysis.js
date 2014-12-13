@@ -40,6 +40,10 @@
 
     var pollPromise;
 
+    // TODO: Move this out
+    var REMOVE_ONE = 'Are you sure you want to remove Analysis';
+    var REMOVE_ALL = 'Are you sure you want to remove all Analyses';
+
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
@@ -50,13 +54,7 @@
       // 1) Check if analysis exist in the backend
       // 2) If analysis cannot be found, delete from local-list and display error
       if ($scope.analysisId) {
-        console.log('fetching analysis ', $scope.analysisId);
-
-        // var resultPromise = Restangular.one('analysis/enrichment', $scope.analysisId).get();
         var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
-
-        // FIXME: Temporary, need to change restangular config
-        // var resultPromise = $http.get('/api/v1/analysis/enrichment/' + $scope.analysisId);
 
         resultPromise.then(function(data) {
           data = Restangular.stripRestangular(data);
@@ -66,7 +64,7 @@
           }
 
           // Check if we need to poll
-          if (data.state === 'EXECUTING') {
+          if (data.state !== 'FINISHED') {
             pollPromise = $timeout(fetch, 5000);
           }
         });
@@ -106,15 +104,16 @@
 
     $scope.removeAllAnalyses = function() {
       var confirmRemove;
-      confirmRemove  = window.confirm('This action will remove all analyses, it cannot be undone!');
+      confirmRemove  = window.confirm(REMOVE_ALL);
       localStorageService.set('analysis', []);
       $scope.analysisList = localStorageService.get('analysis');
     };
 
+
     $scope.remove = function(id) {
       var confirmRemove, ids;
 
-      confirmRemove  = window.confirm('This action will remove this analyis, it cannot be undone!');
+      confirmRemove  = window.confirm(REMOVE_ONE);
       if (! confirmRemove) {
         return;
       }

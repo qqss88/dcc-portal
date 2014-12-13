@@ -1,7 +1,7 @@
-<div data-ng-if="item.state === 'EXECUTING'">
+<div data-ng-if="!item.state || item.state === 'ANALYZING'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
-<div data-ng-if="item.state === 'FINISHED'">
+<div data-ng-if="item.state !== 'ANALYZING'">
     <div>
         <h4>Overview</h4>
         <table class="table table-bordered">
@@ -21,8 +21,26 @@
                     <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
                     <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
                     <td class="text-right">{{item.overview.universeGeneCount | number}}</td>
-                    <td class="text-right">{{item.overview.overlapGeneCount | number}}</td>
-                    <td class="text-right">{{item.params.maxGeneCount | number}}</td>
+                    <td class="text-right">
+                       <span data-ng-if="!overviewGeneOverlapFilters">
+                       {{item.overview.overlapGeneCount | number}}
+                       </span>
+                       <span data-ng-if="overviewGeneOverlapFilters">
+                           <a href="/search/g?filters={{overviewGeneOverlapFilters}}">{{item.overview.overlapGeneCount | number}}</a>
+                       </span>
+
+                    </td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{overviewInputFilters}}">{{item.params.maxGeneCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{""}}</td>
+                    <td>{{overviewGeneOverlapFilters}}</td>
+                    <td>{{overviewInputFilters}}</td>
                 </tr>
             </tbody>
         </table>
@@ -85,7 +103,9 @@
                 <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>{{row.geneSetName}}</td>
-                    <td class="text-right">{{row.geneCount | number}}</td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{row.advFilterNoOverlap}}">{{row.geneCount | number}}</a>
+                    </td>
                     <td class="text-right">
                         <a href="/search/g?filters={{row.advFilter}}">{{row.overlapGeneSetGeneCount | number}}</a>
                     </td>

@@ -104,11 +104,11 @@
                           markdownConverterProvider, localStorageServiceProvider) {
 
     // Use in production or when UI hosted by API
-    RestangularProvider.setBaseUrl('/api/v1');
+    // RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
+    RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
     // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
@@ -184,6 +184,14 @@
     ],
     PATHWAY_ROOTS: [
       {id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'}
+    ],
+
+    GENE_SET_ROOTS: [
+      {type: 'go_term', id: 'GO:0003674', name: 'Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
+      {type: 'go_term', id: 'GO:0008150', name: 'Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
+      {type: 'go_term', id: 'GO:0005575', name: 'Cellular Component', universe: 'GO_CELLULAR_COMPONENT'},
+      {type: 'curated_set', id: 'GS1', name: 'Cancer Gene Census', universe: null},
+      {type: 'pathway', id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'}
     ]
   });
 

@@ -30,19 +30,29 @@
       },
       templateUrl: 'scripts/ui/views/query.html',
       link: function(scope) {
-        // Make a copy and clean up any non-meaningful fields
-        var uiFilters = angular.copy(scope.filters);
-        ['gene', 'donor', 'mutation'].forEach(function(type) {
-          if (uiFilters.hasOwnProperty(type) && _.isEmpty(uiFilters[type])) {
-            delete uiFilters[type];
+
+        function refresh() {
+          // Make a copy and clean up any non-meaningful fields
+          var uiFilters = angular.copy(scope.filters);
+          ['gene', 'donor', 'mutation'].forEach(function(type) {
+            if (uiFilters.hasOwnProperty(type) && _.isEmpty(uiFilters[type])) {
+              delete uiFilters[type];
+            }
+          });
+
+          if (_.isEmpty(uiFilters)) {
+            scope.uiFilters = null;
+          } else {
+            scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters);
+          }
+        }
+
+        scope.$watch('filters', function(n) {
+          if (n) {
+            refresh();
           }
         });
 
-        if (_.isEmpty(uiFilters)) {
-          scope.uiFilters = null;
-        } else {
-          scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters);
-        }
       }
     };
   });

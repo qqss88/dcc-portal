@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  angular.module('icgc.enrichment', ['icgc.enrichment.directives']);
+  angular.module('icgc.enrichment', ['icgc.enrichment.directives', 'icgc.enrichment.services']);
 })();
 
 
@@ -22,6 +22,7 @@
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
       link: function($scope) {
+
 
         $scope.hasValidParams = false;
         $scope.Extensions = Extensions;
@@ -100,7 +101,7 @@
   });
 
 
-  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function (Restangular, ExportService) {
+  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function (Extensions, Restangular, EnrichmentService, ExportService) {
     return {
       restrict: 'E',
       scope: {
@@ -108,6 +109,7 @@
       },
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       link: function($scope) {
+
         $scope.predicate = 'adjustedPValue';
         $scope.reverse = false;
 
@@ -117,11 +119,20 @@
           var enrichment = $scope.item;
           var id = enrichment.id;
           var universe = enrichment.params.universe;
+          var baseFilter = angular.copy(enrichment.query.filters);
 
           // No results yet, can't do anything
           if (! enrichment.results) {
             return;
           }
+
+          // Create links for overview
+          var overviewUniverseFilter = {};
+          var overviewGeneOverlapFilter = {};
+
+          $scope.overviewInputFilters = EnrichmentService.overviewInputFilters(enrichment);
+          $scope.overviewGeneOverlapFilters = EnrichmentService.overviewGeneOverlapFilters(enrichment);
+
 
 
           // Compute queries to go to advanced search page
@@ -129,37 +140,36 @@
           // 2) Add genesetId
           enrichment.results.forEach(function(row) {
             var geneFilter, geneSetIdFilter, geneInputGeneListIdFilter;
-            var baseFilter = angular.copy(enrichment.query.filters);
 
             if (! baseFilter.gene) {
               baseFilter.gene = {};
             }
-
             geneFilter = baseFilter.gene;
+
+
+            // Set filter
             if (! geneFilter.geneSet) {
               geneFilter.geneSetId = {};
             }
-            if (! geneFilter.inputGeneListId) {
-              geneFilter.inputGeneListId = {};
-            }
-
             geneSetIdFilter = geneFilter.geneSetId;
             if (! geneSetIdFilter.all) {
               geneSetIdFilter.all = [];
             }
+            geneSetIdFilter.all.push( row.geneSetId );
+            row.advFilterNoOverlap = angular.copy(baseFilter);
 
+
+            // List filter
+            if (! geneFilter.inputGeneListId) {
+              geneFilter.inputGeneListId = {};
+            }
             geneInputGeneListIdFilter = geneFilter.inputGeneListId;
             if (! geneInputGeneListIdFilter.is) {
               geneInputGeneListIdFilter.is = [];
             }
-
-            geneSetIdFilter.all.push( row.geneSetId );
             geneInputGeneListIdFilter.is.push(id);
-
-            console.log('baseFilter', JSON.stringify(baseFilter));
             row.advFilter = baseFilter;
           });
-          
         }
 
         $scope.exportEnrichment = function(id) {
@@ -181,6 +191,90 @@
   });
 
 })();
+
+
+
+(function () {
+  'use strict';
+
+  var module = angular.module('icgc.enrichment.services', []);
+
+  /**
+   * Encapsulates some of the cringe-worthy filter manipulations in one place
+   */
+  module.service('EnrichmentService', function(Extensions) {
+
+    function ensureGeneExist(filters) {
+      if (! filters.gene) {
+        filters.gene = {};
+      }
+      return filters;
+    }
+
+
+    this.overviewUniverseFilters = function(enrichment) {
+    };
+
+
+    /**
+     * FIXME: 
+     * Return empty filters if there are overlapping pathway ids or goTerm ids
+     */
+    this.overviewGeneOverlapFilters = function(enrichment) {
+      var filters = angular.copy(enrichment.query.filters);
+      var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
+        return go.universe === enrichment.params.universe; 
+      });
+
+      // Disallow goTerm ids overlapping
+      if (filters.gene && filters.gene.goTermId && universe.type === 'go_term') {
+        return null;
+      }
+
+      // Disallow pathway ids overlapping
+      if (filters.gene && filters.gene.pathwayId && universe.type === 'pathway') {
+        return null;
+      }
+
+
+      // Replace list with input limit
+      delete filters.gene.uploadGeneList; //FIXME: check name
+      filters.gene.inputGeneListId = {
+        is: [enrichment.id]
+      };
+
+      // Add type specific conditions
+      if (universe.type === 'go_term') {
+        filters.gene.goTermId = { 'all': [universe.id] };
+      } else if (universe.type === 'pathway') {
+        filters.gene.hasPathway = true;
+      }
+
+      return filters;
+    };
+
+
+    this.overviewInputFilters = function(enrichment) {
+      var filters = angular.copy(enrichment.query.filters);
+      filters = ensureGeneExist(filters);
+      filters.gene.inputGeneListId = {
+        is: [ enrichment.id]
+      };
+      return filters;
+    };
+
+
+    this.resultFilters = function() {
+    };
+
+    this.resultOverlapFilters = function() {
+    };
+
+  });
+
+})();
+
+
 
 
 (function () {
