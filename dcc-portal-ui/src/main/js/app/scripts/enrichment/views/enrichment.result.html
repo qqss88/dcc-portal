@@ -20,27 +20,18 @@
                     <td>{{item.params.universe}}</td>
                     <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
                     <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
-                    <td class="text-right">{{item.overview.universeGeneCount | number}}</td>
                     <td class="text-right">
-                       <span data-ng-if="!overviewGeneOverlapFilters">
-                       {{item.overview.overlapGeneCount | number}}
-                       </span>
+                        <a href="/search/g?filters={{overviewUniverseFilters}}">{{item.overview.universeGeneCount | number}}</a>
+                    </td>
+                    <td class="text-right">
+                       <span data-ng-if="!overviewGeneOverlapFilters">{{item.overview.overlapGeneCount | number}}</span>
                        <span data-ng-if="overviewGeneOverlapFilters">
                            <a href="/search/g?filters={{overviewGeneOverlapFilters}}">{{item.overview.overlapGeneCount | number}}</a>
                        </span>
-
                     </td>
                     <td class="text-right">
                         <a href="/search/g?filters={{overviewInputFilters}}">{{item.params.maxGeneCount | number}}</a>
                     </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>{{""}}</td>
-                    <td>{{overviewGeneOverlapFilters}}</td>
-                    <td>{{overviewInputFilters}}</td>
                 </tr>
             </tbody>
         </table>
@@ -104,16 +95,25 @@
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>{{row.geneSetName}}</td>
                     <td class="text-right">
-                        <a href="/search/g?filters={{row.advFilterNoOverlap}}">{{row.geneCount | number}}</a>
+                        <a href="/search/g?filters={{row.geneSetFilters}}">{{row.geneCount | number}}</a>
                     </td>
                     <td class="text-right">
-                        <a href="/search/g?filters={{row.advFilter}}">{{row.overlapGeneSetGeneCount | number}}</a>
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetGeneCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search/g?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetGeneCount | number}}</a>
+                        </span>
                     </td>
                     <td class="text-right">
-                        <a href="/search?filters={{row.advFilter}}">{{row.overlapGeneSetDonorCount | number}}</a>
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetDonorCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetDonorCount | number}}</a>
+                        </span>
                     </td>
                     <td class="text-right">
-                        <a href="/search/m?filters={{row.advFilter}}">{{row.overlapGeneSetMutationCount | number}}</a>
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetMutationCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search/m?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetMutationCount | number}}</a>
+                        </span>
                     </td>
                     <td class="text-right">{{row.expectedValue.toExponential(2) }}</td>
                     <td class="text-right">{{row.pvalue.toExponential(2) }}</td>

@@ -128,8 +128,7 @@
 
           // Create links for overview
           var overviewUniverseFilter = {};
-          var overviewGeneOverlapFilter = {};
-
+          $scope.overviewUniverseFilters = EnrichmentService.overviewUniverseFilters(enrichment);
           $scope.overviewInputFilters = EnrichmentService.overviewInputFilters(enrichment);
           $scope.overviewGeneOverlapFilters = EnrichmentService.overviewGeneOverlapFilters(enrichment);
 
@@ -139,6 +138,11 @@
           // 1) Add inputGeneList
           // 2) Add genesetId
           enrichment.results.forEach(function(row) {
+
+           row.geneSetFilters = EnrichmentService.geneSetFilters(enrichment, row);
+           row.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(enrichment, row);
+
+
             var geneFilter, geneSetIdFilter, geneInputGeneListIdFilter;
 
             if (! baseFilter.gene) {
@@ -169,6 +173,8 @@
             }
             geneInputGeneListIdFilter.is.push(id);
             row.advFilter = baseFilter;
+
+            console.log('testing', row.id, JSON.stringify(baseFilter));
           });
         }
 
@@ -213,18 +219,36 @@
 
 
     this.overviewUniverseFilters = function(enrichment) {
+      var filters = {};
+      var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
+        return go.universe === enrichment.params.universe;
+      });
+
+      filters = ensureGeneExist(filters);
+
+      // Add universe type specific conditions
+      if (universe.type === 'go_term') {
+        filters.gene.goTermId = {
+          is: [universe.id]
+        };
+      } else if (universe.type === 'pathway') {
+        filters.gene.hasPathway = true;
+      }
+      return filters;
     };
 
 
     /**
-     * FIXME: 
+     * FIXME:
      * Return empty filters if there are overlapping pathway ids or goTerm ids
      */
     this.overviewGeneOverlapFilters = function(enrichment) {
       var filters = angular.copy(enrichment.query.filters);
       var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
-        return go.universe === enrichment.params.universe; 
+        return go.universe === enrichment.params.universe;
       });
+
+      filters = ensureGeneExist(filters);
 
       // Disallow goTerm ids overlapping
       if (filters.gene && filters.gene.goTermId && universe.type === 'go_term') {
@@ -236,14 +260,13 @@
         return null;
       }
 
-
       // Replace list with input limit
-      delete filters.gene.uploadGeneList; //FIXME: check name
+      delete filters.gene.uploadGeneListId; //TODO: check name
       filters.gene.inputGeneListId = {
         is: [enrichment.id]
       };
 
-      // Add type specific conditions
+      // Add universe type specific conditions
       if (universe.type === 'go_term') {
         filters.gene.goTermId = { 'all': [universe.id] };
       } else if (universe.type === 'pathway') {
@@ -264,10 +287,57 @@
     };
 
 
-    this.resultFilters = function() {
+    this.geneSetFilters = function(enrichment, row) {
+      var filters = {};
+      var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
+        return go.universe === enrichment.params.universe;
+      });
+      filters = ensureGeneExist(filters);
+
+      // Route based on universe type
+      if (universe.type === 'go_term') {
+        filters.gene.goTermId = {
+          is: [row.geneSetId]
+        };
+      } else if (universe.type === 'pathway') {
+        filters.gene.pathwayId = {
+          is: [row.geneSetId]
+        };
+      }
+      return filters;
     };
 
-    this.resultOverlapFilters = function() {
+
+    this.geneSetOverlapFilters = function(enrichment, row) {
+      var filters = angular.copy(enrichment.query.filters);
+      var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
+        return go.universe === enrichment.params.universe;
+      });
+
+      filters = ensureGeneExist(filters);
+
+      // Disallow goTerm ids overlapping
+      if (filters.gene && filters.gene.goTermId && universe.type === 'go_term') {
+        return null;
+      }
+
+      // Disallow pathway ids overlapping
+      if (filters.gene && filters.gene.pathwayId && universe.type === 'pathway') {
+        return null;
+      }
+
+      delete filters.gene.uploadGeneListId; //TODO: check name
+      filters.gene.inputGeneListId = {
+        is: [enrichment.id]
+      };
+
+      // Add universe type specific conditions
+      if (universe.type === 'go_term') {
+        filters.gene.goTermId = { 'all': [row.geneSetId] };
+      } else if (universe.type === 'pathway') {
+        filters.gene.pathwayId = { 'all': [row.geneSetId] };
+      }
+      return filters;
     };
 
   });
