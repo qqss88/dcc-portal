@@ -157,6 +157,7 @@ public class IndexModel {
           .put("survivalTime", "donor_survival_time")
           .put("availableDataTypes", "_summary._available_data_type")
           .put("analysisTypes", "_summary.experimental_analysis_performed")
+          .put("studies", "_summary._studies")
           .put("ssmAffectedGenes", "_score")
           .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
           .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
