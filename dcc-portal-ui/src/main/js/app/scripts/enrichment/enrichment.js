@@ -35,15 +35,30 @@
         };
 
 
+        function buildEnrichmentRequest() {
+          var data, geneSortParam;
+
+          data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+            'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+
+          geneSortParam = LocationService.getJsonParam('genes');
+
+          if (!_.isEmpty(geneSortParam)) {
+            var sort, order;
+            sort = geneSortParam['sort'];
+            order = geneSortParam['order'] === 'asc'? 'ASC' : 'DESC';
+            data += 'sort=' + sort + '&order=' + order;
+          } else {
+            data += 'sort=affectedDonorCountFiltered&order=ASC';
+          }
+          return data;
+        }
+
+
         $scope.newGeneSetEnrichment = function() {
           var promise, data;
 
-          // FIXME: need real values
-          data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
-            'sort=affectedDonorCountFiltered' + '&' +
-            'order=ASC' + '&' +
-            'filters=' + JSON.stringify(LocationService.filters());
-
+          data = buildEnrichmentRequest();
           console.log('payload', data);
 
           promise = Restangular.one('analysis')
@@ -101,7 +116,9 @@
   });
 
 
-  angular.module('icgc.enrichment.directives').directive('enrichmentResult', function (Extensions, Restangular, EnrichmentService, ExportService) {
+  angular.module('icgc.enrichment.directives').directive('enrichmentResult',
+    function (Extensions, Restangular, EnrichmentService, ExportService) {
+
     return {
       restrict: 'E',
       scope: {
@@ -117,9 +134,6 @@
           console.log('enrichment refreshing', $scope.item);
 
           var enrichment = $scope.item;
-          var id = enrichment.id;
-          var universe = enrichment.params.universe;
-          var baseFilter = angular.copy(enrichment.query.filters);
 
           // No results yet, can't do anything
           if (! enrichment.results) {
@@ -127,54 +141,14 @@
           }
 
           // Create links for overview
-          var overviewUniverseFilter = {};
           $scope.overviewUniverseFilters = EnrichmentService.overviewUniverseFilters(enrichment);
           $scope.overviewInputFilters = EnrichmentService.overviewInputFilters(enrichment);
           $scope.overviewGeneOverlapFilters = EnrichmentService.overviewGeneOverlapFilters(enrichment);
 
-
-
           // Compute queries to go to advanced search page
-          // 1) Add inputGeneList
-          // 2) Add genesetId
           enrichment.results.forEach(function(row) {
-
-           row.geneSetFilters = EnrichmentService.geneSetFilters(enrichment, row);
-           row.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(enrichment, row);
-
-
-            var geneFilter, geneSetIdFilter, geneInputGeneListIdFilter;
-
-            if (! baseFilter.gene) {
-              baseFilter.gene = {};
-            }
-            geneFilter = baseFilter.gene;
-
-
-            // Set filter
-            if (! geneFilter.geneSet) {
-              geneFilter.geneSetId = {};
-            }
-            geneSetIdFilter = geneFilter.geneSetId;
-            if (! geneSetIdFilter.all) {
-              geneSetIdFilter.all = [];
-            }
-            geneSetIdFilter.all.push( row.geneSetId );
-            row.advFilterNoOverlap = angular.copy(baseFilter);
-
-
-            // List filter
-            if (! geneFilter.inputGeneListId) {
-              geneFilter.inputGeneListId = {};
-            }
-            geneInputGeneListIdFilter = geneFilter.inputGeneListId;
-            if (! geneInputGeneListIdFilter.is) {
-              geneInputGeneListIdFilter.is = [];
-            }
-            geneInputGeneListIdFilter.is.push(id);
-            row.advFilter = baseFilter;
-
-            console.log('testing', row.id, JSON.stringify(baseFilter));
+            row.geneSetFilters = EnrichmentService.geneSetFilters(enrichment, row);
+            row.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(enrichment, row);
           });
         }
 
