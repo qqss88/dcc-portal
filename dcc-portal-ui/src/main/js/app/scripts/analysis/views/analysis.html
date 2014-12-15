@@ -1,9 +1,5 @@
 <h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Analysis</h1>
 <aside class="t_sidebar">
-
-    <!-- testing -->
-    <span data-ng-init="test=analysis"></span>
-
     <div style="margin-right: -2rem">
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem" data-scroll-to-selection>
             <ul class="t_suggest_flyout__hits">
@@ -17,7 +13,6 @@
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id)"
                     data-ng-repeat="item in analysisList" 
-                    id="test_{{item}}"
                     data-ng-class="{selected: item.id == analysisId}"> 
                     <span> Gene Set Enrichment <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
                         <small>{{item.id.split('-')[0]}}</small>
@@ -29,18 +24,8 @@
                                data-tooltip="Delete Analysis"
                                data-tooltip-placement="right">
                             </i>
-                               <!--
-                               style="font-size: {{hover===true? '1.5rem' : '1.25rem'}}; background: {{hover===true? '#FF0000' : 'inherit'}}"></i>
-                               -->
                         </span>
                     </span>
-                    <!--
-                    <span class="pull-right">
-                       <a href="" class="t_tools__tool">
-                           <i class="icon-cancel"></i>
-                       </a>
-                    </span>
-                    -->
                 </li>
             </ul>
         </div>

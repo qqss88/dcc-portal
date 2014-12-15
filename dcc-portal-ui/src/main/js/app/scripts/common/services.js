@@ -418,9 +418,20 @@
 
 
   module.service('FiltersUtil', function(Extensions) {
+
+    // Gene id extensions
+    var geneListKeys = _.pluck(Extensions.GENE_LISTS, 'id');
+
     this.removeExtensions = function(filters) {
-      if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
-        delete filters.gene.inputGeneListId;
+      if (filters.hasOwnProperty('gene')) {
+
+        geneListKeys.forEach(function(key) {
+          if (filters.gene.hasOwnProperty(key)) {
+            delete filters.gene[key];
+          }
+        });
+
+        // delete filters.gene.inputGeneListId;
         if (_.isEmpty(filters.gene)) {
           delete filters.gene;
         }
@@ -429,12 +440,15 @@
     };
 
     this.hasGeneListExtension = function(filters) {
+      var hasGeneListExtension = false;
       if (filters.hasOwnProperty('gene')) {
-        if (filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
-          return true;
-        }
+        geneListKeys.forEach(function(key) {
+          if (filters.gene.hasOwnProperty(key)) {
+            hasGeneListExtension = true;
+          }
+        });
       }
-      return false;
+      return hasGeneListExtension;
     };
 
 
@@ -472,7 +486,7 @@
           }
 
           // Genelist expansion maps to gene id
-          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || facetKey === Extensions.GENE_LIST)) {
+          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || _.contains(geneListKeys, facetKey))) {
             uiFacetKey = 'id';
           }
 
@@ -503,8 +517,13 @@
 
           facetFilters.is.forEach(function(term) {
             var uiTerm = term, isPredefined = false;
-            if (typeKey === 'gene' && facetKey === Extensions.GENE_LIST) {
-              uiTerm = 'Uploaded Gene List';
+            if (typeKey === 'gene' && _.contains(geneListKeys, facetKey)) {
+
+              uiTerm = _.find(Extensions.GENE_LISTS, function(gl) {
+                return gl.id === facetKey;
+              }).label;
+
+              // 'Uploaded Gene List';
               isPredefined = true;
             } else if (typeKey === 'gene' && facetKey === 'goTermId') {
               var predefinedGO = _.find(Extensions.GENE_ONTOLOGY_ROOTS, function(go) { return go.id === term; });
@@ -568,5 +587,25 @@
 
     };
   });
+
+
+  /*
+  module.service('GeneSetService', function() {
+
+    this.getGeneOntologies = function() {
+    };
+
+    this.getCuratedSets = function() {
+    };
+
+    this.getPathways = function() {
+    };
+
+    this.getAll = function() {
+    };
+
+    this.is
+  });
+  */
 
 })();

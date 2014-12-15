@@ -24,7 +24,7 @@
                     </span>
 
                     <span class="t_current__or">
-                        {{ terms.is.length !== 1? "IN (" : ['inputGeneListId'].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
+                        {{ terms.is.length !== 1? "IN (" : ['inputGeneListId', 'uploadGeneListId'].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
                     </span>
 
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
@@ -43,7 +43,7 @@
                         </li>
                     </ul> 
                     <span class="t_current__or"> 
-                        {{ terms.is.length !== 1? ")" : ['inputGeneListId'].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
+                        {{ terms.is.length !== 1? ")" : ['inputGeneListId', 'uploadGeneListId'].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
                     </span>
 
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>

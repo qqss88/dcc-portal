@@ -42,9 +42,16 @@
       });
 
       if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
+
+        // FIXME: Grab facet keys from Extensions
         Facets.removeFacet({
           type: type,
           facet: 'inputGeneListId'
+        });
+
+        Facets.removeFacet({
+          type: type,
+          facet: 'uploadGeneListId'
         });
       }
       if (type === 'gene' && facet === 'pathwayId') {

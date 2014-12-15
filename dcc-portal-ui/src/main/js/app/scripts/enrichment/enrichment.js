@@ -45,11 +45,11 @@
 
           if (!_.isEmpty(geneSortParam)) {
             var sort, order;
-            sort = geneSortParam['sort'];
-            order = geneSortParam['order'] === 'asc'? 'ASC' : 'DESC';
+            sort = geneSortParam.sort;
+            order = geneSortParam.order === 'asc'? 'ASC' : 'DESC';
             data += 'sort=' + sort + '&order=' + order;
           } else {
-            data += 'sort=affectedDonorCountFiltered&order=ASC';
+            data += 'sort=affectedDonorCountFiltered&order=DESC';
           }
           return data;
         }
@@ -174,6 +174,7 @@
 
 
 
+
 (function () {
   'use strict';
 
@@ -191,7 +192,9 @@
       return filters;
     }
 
-
+    /**
+     * Reverse lookup the universe criteria
+     */
     this.overviewUniverseFilters = function(enrichment) {
       var filters = {};
       var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
@@ -242,7 +245,8 @@
 
       // Add universe type specific conditions
       if (universe.type === 'go_term') {
-        filters.gene.goTermId = { 'all': [universe.id] };
+        // filters.gene.goTermId = { 'all': [universe.id] };
+        filters.gene.goTermId = { 'is': [universe.id] };
       } else if (universe.type === 'pathway') {
         filters.gene.hasPathway = true;
       }
@@ -307,9 +311,11 @@
 
       // Add universe type specific conditions
       if (universe.type === 'go_term') {
-        filters.gene.goTermId = { 'all': [row.geneSetId] };
+        // filters.gene.goTermId = { 'all': [row.geneSetId] };
+        filters.gene.goTermId = { 'is': [row.geneSetId] };
       } else if (universe.type === 'pathway') {
-        filters.gene.pathwayId = { 'all': [row.geneSetId] };
+        // filters.gene.pathwayId = { 'all': [row.geneSetId] };
+        filters.gene.pathwayId = { 'is': [row.geneSetId] };
       }
       return filters;
     };
