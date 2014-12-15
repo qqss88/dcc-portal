@@ -18,7 +18,9 @@
 package org.icgc.dcc.portal.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,9 +48,14 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
   private UUID id;
 
   /**
+   * Creation timestamp
+   */
+  private long timestamp = new Date().getTime();
+
+  /**
    * State of the analysis
    */
-  private State state;
+  private State state = PENDING;
 
   /**
    * Input from Advanced Search
@@ -57,8 +64,14 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
 
   private EnrichmentParams params;
 
+  /**
+   * Summary of analysis
+   */
   private Overview overview;
 
+  /**
+   * Detailed Gene-set results
+   */
   private List<Result> results;
 
   @Data
