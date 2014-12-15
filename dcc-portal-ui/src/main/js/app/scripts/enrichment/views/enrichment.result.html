@@ -1,4 +1,4 @@
-<div data-ng-if="!item.state || item.state === 'ANALYZING'">
+<div data-ng-if="item.state === 'ANALYZING'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
 <div data-ng-if="item.state !== 'ANALYZING'">
@@ -47,10 +47,10 @@
         </div>
         <br>
 
-
         <h4>
             <span data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
-                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+                <!--Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>-->
+                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> enriched gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
             </span>
 
             <span data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
@@ -93,7 +93,10 @@
             <tbody>
                 <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
-                    <td>{{row.geneSetName}}</td>
+                    <td>
+                        <span data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) === -1">{{row.geneSetName}}</span>
+                        <i data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) >= 0" class="icon-spinner icon-spin"></i>
+                    </td>
                     <td class="text-right">
                         <a href="/search/g?filters={{row.geneSetFilters}}">{{row.geneCount | number}}</a>
                     </td>
@@ -103,13 +106,25 @@
                             <a href="/search/g?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetGeneCount | number}}</a>
                         </span>
                     </td>
-                    <td class="text-right">
+
+                    <!--
+                    <td data-ng-if="item.state !== 'ANALYZING' && $index % 1 === 0"
+                        colspan="2" rowspan="{{$index + 5 <= item.results.length? 1 : $index % 1}}"
+                        class="text-center" style="vertical-align:middle">
+                        <i class="icon-spinner icon-spin"></i>
+                    </td>
+                    -->
+                    <td data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) >= 0" colspan="2" class="text-center">
+                        <i class="icon-spinner icon-spin"></i>
+                    </td> 
+                    
+                    <td class="text-right" data-ng-if="item.state === 'FINISHED'">
                         <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetDonorCount | number}}</span>
                         <span data-ng-if="row.geneSetOverlapFilters">
                             <a href="/search?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetDonorCount | number}}</a>
                         </span>
                     </td>
-                    <td class="text-right">
+                    <td class="text-right" data-ng-if="item.state === 'FINISHED'">
                         <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetMutationCount | number}}</span>
                         <span data-ng-if="row.geneSetOverlapFilters">
                             <a href="/search/m?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetMutationCount | number}}</a>

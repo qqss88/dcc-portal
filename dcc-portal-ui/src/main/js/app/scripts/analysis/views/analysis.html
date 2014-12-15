@@ -5,21 +5,21 @@
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
-                    data-ng-class="{selected: !analysisId}"> 
+                    data-ng-class="{selected: !analysisId}">
                     <span>Analysis</span>
                     <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
                     <small>Home</small>
                 </>
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id)"
-                    data-ng-repeat="item in analysisList" 
-                    data-ng-class="{selected: item.id == analysisId}"> 
+                    data-ng-repeat="item in analysisList"
+                    data-ng-class="{selected: item.id == analysisId}">
                     <span> Gene Set Enrichment <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
-                        <small>{{item.id.split('-')[0]}}</small>
-                        <span data-ng-mouseenter="hover=true" 
+                        <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
+                        <span data-ng-mouseenter="hover=true"
                               data-ng-mouseleave="hover=false"
                               data-ng-click="$event.stopPropagation(); remove(item.id)">
-                            <i class="icon-cancel pull-right" 
+                            <i class="icon-cancel pull-right"
                                style="background: {{hover===true? '#EE4411' : ''}}"
                                data-tooltip="Delete Analysis"
                                data-tooltip-placement="right">
@@ -54,7 +54,7 @@
             <enrichment-result data-item="analysisResult"></enrichment-result>
         </div>
         <div data-ng-if="error === 404">
-            <span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. <br>It may no longer be valid with respect to current portal data.</span> 
+            <span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. <br>It may no longer be valid with respect to current portal data.</span>
         </div>
     </div>
 </article>

@@ -3548,25 +3548,36 @@ h3:hover .pilcrow {
 }
 
 /* line 249, styles.scss */
+.t_notify_link {
+  cursor: pointer;
+  color: #FFF;
+}
+
+/* line 254, styles.scss */
+.t_notify_link:hover {
+  text-decoration: underline;
+}
+
+/* line 259, styles.scss */
 .t_notify_body {
   font-size: 1rem;
 }
 
-/* line 253, styles.scss */
+/* line 263, styles.scss */
 .t_notify_warning {
   background: #e9931c;
 }
 
-/* line 257, styles.scss */
+/* line 267, styles.scss */
 .t_notify_success {
   background: #1a9900;
 }
 
-/* line 263, styles.scss */
+/* line 273, styles.scss */
 #buorg div {
   padding: 0;
 }
-/* line 267, styles.scss */
+/* line 277, styles.scss */
 #buorg #buorgclose {
   position: relative;
   float: right;
@@ -3580,7 +3591,7 @@ h3:hover .pilcrow {
   padding-right: 1rem;
 }
 
-/* line 281, styles.scss */
+/* line 291, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -3594,18 +3605,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 295, styles.scss */
+/* line 305, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 300, styles.scss */
+/* line 310, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 304, styles.scss */
+/* line 314, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

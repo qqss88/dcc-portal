@@ -5,8 +5,9 @@
                 data-ng-if="hasGeneList"
                 data-ng-click="remove()"
                 data-ng-mouseover="toggleRemove=true"
-                data-ng-mouseleave="toggleRemove=false" >
-                <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> Uploaded Gene List
+                data-ng-mouseleave="toggleRemove=false">
+                <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i> 
+                {{geneListType === "uploadGeneListId"? "Uploaded Gene List" : "Input Gene List"}} 
             </li>
             <li class="text-right" data-ng-hide="collapsed">
                 <button type="button" class="t_button" data-ng-click="genelistModal=!genelistModal; reset();">

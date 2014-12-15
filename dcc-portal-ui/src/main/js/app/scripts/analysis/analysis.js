@@ -56,12 +56,17 @@
       // 2) If analysis cannot be found, delete from local-list and display error
       if ($scope.analysisId) {
         var resultPromise = RestangularNoCache.one('analysis/enrichment', $scope.analysisId).get();
+        var sync = false;
 
         resultPromise.then(function(data) {
           data = Restangular.stripRestangular(data);
 
           if (! _.isEmpty(data)) {
             $scope.analysisResult = data;
+            if (sync === false) {
+              updateMetaData(data);
+              sync = true;
+            }
           }
 
           // Check if we need to poll
@@ -74,6 +79,19 @@
       }
     }
 
+    function updateMetaData(data) {
+      var id, analysis;
+      id = data.id;
+      analysis = _.find($scope.analysisList, function(d) {
+        return d.id === id;
+      });
+
+      // Update
+      if (analysis) {
+        analysis.timestamp = data.timestamp;
+      }
+      localStorageService.set('analysis', $scope.analysisList);
+    }
 
     function init() {
       // 1) If not already exist in local-list, prepend it to local-list
@@ -83,8 +101,11 @@
         var ids = _.pluck($scope.analysisList, 'id');
         if (!_.contains(ids, $scope.analysisId)) {
           var newAnalysis = {
-            id: analysisId
+            id: analysisId,
+            timestamp: '--'
           };
+
+          // Store
           $scope.analysisList.unshift(newAnalysis);
           localStorageService.set('analysis', $scope.analysisList);
         }
