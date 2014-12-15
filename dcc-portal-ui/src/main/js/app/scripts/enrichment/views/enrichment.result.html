@@ -17,7 +17,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{item.params.universe}}</td>
+                    <td>{{item.params.universe | define}}</td>
                     <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
                     <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
                     <td class="text-right">

@@ -144,7 +144,7 @@
   });
 
 
-  module.service('DefinitionService', function() {
+  module.service('DefinitionService', function(Extensions) {
     var definitions = {
       // Projects
       'ALL-US': 'Acute Lymphoblastic Leukemia - US',
@@ -301,6 +301,11 @@
       'ChIA-PET': 'Direct sequencing of proximity-ligated chromatin immunoprecipitates.',
       'OTHER': 'Library strategy not listed.'
     };
+
+    // Gene Set universe mapping
+    Extensions.GENE_ONTOLOGY_ROOTS.forEach(function(root) {
+      definitions[root.universe] = root.name;
+    });
 
 
     this.getDefinitions = function() {
