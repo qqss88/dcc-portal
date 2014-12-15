@@ -24,7 +24,6 @@ import static java.lang.Integer.parseInt;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 import static org.icgc.dcc.portal.model.IndexModel.GENES_SORT_FIELD_NAMES;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
@@ -135,16 +134,13 @@ public class EnrichmentAnalysisResource {
     validate(paramsParam.get());
 
     // Construct
-    val query = Query.builder()
-        .filters(filtersParam.get())
-        .sort(sort)
-        .order(order)
-        .size(parseInt(DEFAULT_SIZE))
-        .build();
-
     val analysis = new EnrichmentAnalysis()
-        .setState(PENDING)
-        .setQuery(query)
+        .setQuery(Query.builder()
+            .filters(filtersParam.get())
+            .sort(sort)
+            .order(order)
+            .size(parseInt(DEFAULT_SIZE))
+            .build())
         .setParams(paramsParam.get());
 
     // Submit

@@ -65,7 +65,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val analysis = execute(dcc2747());
+    val analysis = execute(curatedAndHasPathway());
 
     val overview = analysis.getOverview();
     assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
