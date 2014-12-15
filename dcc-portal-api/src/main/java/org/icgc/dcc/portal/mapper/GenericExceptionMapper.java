@@ -34,6 +34,7 @@ import javax.ws.rs.ext.Provider;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,16 +60,23 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   private HttpServletRequest request;
 
   @Override
+  @SneakyThrows
   public Response toResponse(Throwable t) {
     val id = randomId();
     if (t instanceof WebApplicationException) {
       val response = ((WebApplicationException) t).getResponse();
 
-      log.error(t.getMessage());
-      return Response.fromResponse(response)
-          .type(APPLICATION_JSON_TYPE)
-          .entity(webErrorResponse(t, id, response.getStatus()))
-          .build();
+      val ok = response.getStatus() >= 200 && response.getStatus() < 400;
+      if (ok) {
+        return Response.fromResponse(response).build();
+      } else {
+        // Add an error response payload
+        log.error(t.getMessage());
+        return Response.fromResponse(response)
+            .type(APPLICATION_JSON_TYPE)
+            .entity(webErrorResponse(t, id, response.getStatus()))
+            .build();
+      }
     }
 
     logException(id, t);
