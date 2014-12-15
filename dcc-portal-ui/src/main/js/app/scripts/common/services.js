@@ -303,8 +303,10 @@
     };
 
     // Gene Set universe mapping
-    Extensions.GENE_ONTOLOGY_ROOTS.forEach(function(root) {
-      definitions[root.universe] = root.name;
+    Extensions.GENE_SET_ROOTS.forEach(function(root) {
+      if (root.universe) {
+        definitions[root.universe] = root.name;
+      }
     });
 
 
