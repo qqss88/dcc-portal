@@ -287,8 +287,6 @@ public class QueryService {
       }
     }
 
-    log.info("result geneset filter {}", resultFilter);
-
     return resultFilter;
   }
 

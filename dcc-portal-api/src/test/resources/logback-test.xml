@@ -11,6 +11,8 @@
     </encoder>
   </appender>
 
+  <logger name="org.icgc.dcc" level="DEBUG" />
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>

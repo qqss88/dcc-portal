@@ -3,9 +3,8 @@ package org.icgc.dcc.portal.analysis;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 import static org.icgc.dcc.portal.model.EnrichmentParams.DEFAULT_FDR;
-import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_INPUT_GENES;
 import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_OUTPUT_GENE_SETS;
-import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
+import static org.icgc.dcc.portal.model.Universe.GO_MOLECULAR_FUNCTION;
 import static org.icgc.dcc.portal.test.JsonNodes.$;
 
 import java.util.UUID;
@@ -66,10 +65,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val inputFilter =
-        (ObjectNode) $("{'gene':{'curatedSetId':{'is':['GS1']},'hasPathway':true}}");
-
-    val analysis = execute(inputFilter);
+    val analysis = execute(dcc2747());
 
     val overview = analysis.getOverview();
     assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
@@ -86,9 +82,9 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
             .setState(PENDING)
             .setParams(
                 new EnrichmentParams()
-                    .setUniverse(GO_BIOLOGICAL_PROCESS)
+                    .setUniverse(GO_MOLECULAR_FUNCTION)
                     .setFdr(DEFAULT_FDR)
-                    .setMaxGeneCount(MAX_INPUT_GENES)
+                    .setMaxGeneCount(950)
                     .setMaxGeneSetCount(MAX_OUTPUT_GENE_SETS))
             .setQuery(Query.builder()
                 .filters(inputFilter)
@@ -102,12 +98,27 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
     log.info("Starting...");
     analyzer.analyze(analysis.getId());
 
-    log.info("Result: {}", analysis);
-    return analysis;
+    log.info("Saving...");
+    val result = repository.find(analysis.getId());
+
+    log.info("Result: {}", result);
+    return result;
+  }
+
+  protected ObjectNode dcc2747() {
+    return filter("{'mutation':{'consequenceType':{'is':['frameshift']}}}");
+  }
+
+  protected ObjectNode curatedAndHasPathway() {
+    return filter("{'gene':{'curatedSetId':{'is':['GS1']},'hasPathway':true}}");
   }
 
   protected ObjectNode allEntityFilter() {
-    return (ObjectNode) $("{'donor':{'primarySite':{'is':['Brain']},'gender':{'is':['male']}},'gene':{'type':{'is':['protein_coding']},'list':{'is':['Cancer Gene Census']}},'mutation':{'consequenceType':{'is':['missense']}}}");
+    return filter("{'donor':{'primarySite':{'is':['Brain']},'gender':{'is':['male']}},'gene':{'type':{'is':['protein_coding']},'list':{'is':['Cancer Gene Census']}},'mutation':{'consequenceType':{'is':['missense']}}}");
+  }
+
+  protected ObjectNode filter(String json) {
+    return (ObjectNode) $(json);
   }
 
 }
