@@ -25,7 +25,10 @@
                               data-ng-mouseleave="hover=false"
                               data-ng-click="$event.stopPropagation(); remove(item.id)">
                             <i class="icon-cancel pull-right" 
-                               style="background: {{hover===true? '#EE4411' : ''}}"></i>
+                               style="background: {{hover===true? '#EE4411' : ''}}"
+                               data-tooltip="Delete Analysis"
+                               data-tooltip-placement="right">
+                            </i>
                                <!--
                                style="font-size: {{hover===true? '1.5rem' : '1.25rem'}}; background: {{hover===true? '#FF0000' : 'inherit'}}"></i>
                                -->
@@ -62,6 +65,11 @@
             </span>
             -->
         </h3>
-        <enrichment-result data-item="analysisResult"></enrichment-result>
+        <div data-ng-if="!error">
+            <enrichment-result data-item="analysisResult"></enrichment-result>
+        </div>
+        <div data-ng-if="error === 404">
+            <span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. <br>It may no longer be valid with respect to current portal data.</span> 
+        </div>
     </div>
 </article>

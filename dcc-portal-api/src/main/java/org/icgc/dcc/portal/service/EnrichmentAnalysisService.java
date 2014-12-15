@@ -54,7 +54,7 @@ public class EnrichmentAnalysisService {
   public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
     val analysis = repository.find(analysisId);
     if (analysis == null) {
-      throw new NotFoundException("enrichment analysis", analysisId.toString());
+      throw new NotFoundException(analysisId.toString(), "enrichment analysis");
     }
 
     return analysis;

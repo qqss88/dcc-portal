@@ -51,6 +51,7 @@
     $scope.analysisList = localStorageService.get('analysis') || [];
 
     function fetch() {
+      $scope.error = null;
       // 1) Check if analysis exist in the backend
       // 2) If analysis cannot be found, delete from local-list and display error
       if ($scope.analysisId) {
@@ -67,6 +68,8 @@
           if (data.state !== 'FINISHED') {
             pollPromise = $timeout(fetch, 5000);
           }
+        }, function(error) {
+          $scope.error = error.status;
         });
       }
     }
