@@ -45,11 +45,11 @@
 
           if (!_.isEmpty(geneSortParam)) {
             var sort, order;
-            sort = geneSortParam['sort'];
-            order = geneSortParam['order'] === 'asc'? 'ASC' : 'DESC';
+            sort = geneSortParam.sort;
+            order = geneSortParam.order === 'asc'? 'ASC' : 'DESC';
             data += 'sort=' + sort + '&order=' + order;
           } else {
-            data += 'sort=affectedDonorCountFiltered&order=ASC';
+            data += 'sort=affectedDonorCountFiltered&order=DESC';
           }
           return data;
         }
