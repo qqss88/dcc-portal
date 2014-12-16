@@ -187,7 +187,7 @@ angular.module('app.ui.dl', []).directive('dlButton',
                   scope.modal = false;
                   scope.reset();
 
-                  $location.path('/downloader/' + job.data.downloadId).search('');
+                  $location.path('/downloader/' + job.downloadId).search('');
                 });
 
 

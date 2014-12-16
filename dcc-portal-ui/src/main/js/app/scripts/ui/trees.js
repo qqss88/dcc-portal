@@ -81,6 +81,8 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
           return element.text('R')
             .attr('data-tooltip', hasGrandChild? 'Inferred negatively regulates' : 'Negatively regulates')
             .attr('class', 'goterm_regulates');
+        } else if (relation === 'self') {
+          return element.text('');
         } else {
           // FIXME: need to find out how to resolve unknowns
           return element.text('?');
