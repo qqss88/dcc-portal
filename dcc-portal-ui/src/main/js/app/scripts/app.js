@@ -172,18 +172,11 @@
 
 
   module.constant('Extensions', {
-    GENE_LIST: 'inputGeneListId',
     GENE_ID: 'id',
-    CURATE_SET_ROOTS: [
-      {id: 'GS1', name: 'Cancer Gene Census', universe: null}
-    ],
-    GENE_ONTOLOGY_ROOTS: [
-      {id: 'GO:0003674', name: 'Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
-      {id: 'GO:0008150', name: 'Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
-      {id: 'GO:0005575', name: 'Cellular Component', universe: 'GO_CELLULAR_COMPONENT'}
-    ],
-    PATHWAY_ROOTS: [
-      {id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'}
+
+    GENE_LISTS: [
+      {id: 'uploadGeneListId', label: 'Uploaded Gene List'},
+      {id: 'inputGeneListId', label: 'Input Gene List'}
     ],
 
     GENE_SET_ROOTS: [

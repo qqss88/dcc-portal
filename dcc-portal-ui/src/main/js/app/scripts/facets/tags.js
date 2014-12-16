@@ -45,10 +45,11 @@
       //   pathway has predefined type, searchableIds, Id counts and type counts
       //   curated_set has predefined Ids and Id counts
       if ($scope.type === 'go_term') {
-        $scope.predefinedGO = Extensions.GENE_ONTOLOGY_ROOTS;
-        $scope.predefinedGOIds = Extensions.GENE_ONTOLOGY_ROOTS.map(function(go) {
-          return go.id;
+        $scope.predefinedGO = _.filter(Extensions.GENE_SET_ROOTS, function(set) {
+          return set.type === 'go_term';
         });
+        $scope.predefinedGOIds = _.pluck($scope.predefinedGO, 'id');
+
         activeIds = $scope.actives.concat($scope.predefinedGOIds);
 
         GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
@@ -75,10 +76,11 @@
           });
         }
       } else if ($scope.type === 'curated_set') {
-        $scope.predefinedCurated = Extensions.CURATE_SET_ROOTS;
-        $scope.predefinedCuratedIds = Extensions.CURATE_SET_ROOTS.map(function(curated) {
-          return curated.id;
+        $scope.predefinedCurated = _.filter(Extensions.GENE_SET_ROOTS, function(set) {
+          return set.type === 'curated_set';
         });
+        $scope.predefinedCuratedIds = _.pluck($scope.predefinedCurated, 'id');
+
         activeIds = $scope.predefinedCuratedIds;
 
         GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {

@@ -27,13 +27,8 @@
                <br>
                <div>
                    <div>Select Background: </div>
-                   <div data-ng-repeat="item in Extensions.PATHWAY_ROOTS">
-                       <input type="radio"
-                           data-ng-model="analysisParams.universe"
-                           data-ng-change="checkInput()"
-                           value="{{item.universe}}"><span> {{item.name}}</span>
-                   </div>
-                   <div data-ng-repeat="item in Extensions.GENE_ONTOLOGY_ROOTS">
+                   <div data-ng-repeat="item in Extensions.GENE_SET_ROOTS"
+                        data-ng-if="['go_term', 'pathway'].indexOf(item.type) >= 0">
                        <input type="radio"
                            data-ng-model="analysisParams.universe"
                            data-ng-change="checkInput()"

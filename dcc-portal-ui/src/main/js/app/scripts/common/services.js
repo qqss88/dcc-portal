@@ -533,13 +533,18 @@
               // 'Uploaded Gene List';
               isPredefined = true;
             } else if (typeKey === 'gene' && facetKey === 'goTermId') {
-              var predefinedGO = _.find(Extensions.GENE_ONTOLOGY_ROOTS, function(go) { return go.id === term; });
+              var predefinedGO = _.find(Extensions.GENE_SET_ROOTS, function(set) {
+                return go.id === term && set.type === 'go_term';
+              });
+
               if (predefinedGO) {
                 uiTerm = predefinedGO.name;
                 isPredefined = true;
               }
             } else if (typeKey === 'gene' && facetKey === 'curatedSetId') {
-              var predefinedCurated = _.find(Extensions.CURATE_SET_ROOTS, function(go) { return go.id === term; });
+              var predefinedCurated = _.find(Extensions.GENE_SET_ROOTS, function(set) {
+                return set.id === term && set.type === 'curated_set';
+              });
               if (predefinedCurated) {
                 uiTerm = predefinedCurated.name;
                 isPredefined = true;
