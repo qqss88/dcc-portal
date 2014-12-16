@@ -534,7 +534,7 @@
               isPredefined = true;
             } else if (typeKey === 'gene' && facetKey === 'goTermId') {
               var predefinedGO = _.find(Extensions.GENE_SET_ROOTS, function(set) {
-                return go.id === term && set.type === 'go_term';
+                return set.id === term && set.type === 'go_term';
               });
 
               if (predefinedGO) {
