@@ -164,6 +164,10 @@ public class EnrichmentAnalyzer {
     // Keep only the number of results that the user requested
     val limitedAdjustedResults = limitGeneSetResults(adjustedResults, params.getMaxGeneSetCount());
 
+    // Add additional descriptive data
+    log.info("Setting gene set names...");
+    setGeneSetNames(limitedAdjustedResults);
+
     // Update state for UI polling
     analysis.setOverview(overview);
     analysis.setResults(limitedAdjustedResults);
@@ -260,11 +264,18 @@ public class EnrichmentAnalyzer {
     return results.size() < maxGeneSetCount ? results : results.subList(0, maxGeneSetCount);
   }
 
-  private void postProcessGeneSetResults(Query query, Universe universe, UUID inputGeneListId, List<Result> results) {
-    // Resolve the set of gene set ids remaining
-    log.info("Finding gene set names...");
-    val geneSetNames = findGeneSetNames(Result.getGeneSetIds(results));
+  private void setGeneSetNames(List<Result> results) {
 
+    val geneSetNames = findGeneSetNames(Result.getGeneSetIds(results));
+    for (val result : results) {
+      val geneSetId = result.getGeneSetId();
+
+      // Update
+      result.setGeneSetName(geneSetNames.get(geneSetId));
+    }
+  }
+
+  private void postProcessGeneSetResults(Query query, Universe universe, UUID inputGeneListId, List<Result> results) {
     for (int i = 0; i < results.size(); i++) {
       val geneSetResult = results.get(i);
       val geneSetId = geneSetResult.getGeneSetId();
@@ -274,7 +285,6 @@ public class EnrichmentAnalyzer {
 
       // Update
       geneSetResult
-          .setGeneSetName(geneSetNames.get(geneSetId))
           .setOverlapGeneSetDonorCount(countDonors(geneSetOverlapQuery))
           .setOverlapGeneSetMutationCount(countMutations(geneSetOverlapQuery));
     }
