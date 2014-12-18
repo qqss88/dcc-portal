@@ -98,6 +98,11 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
      */
     private int universeGeneCount;
 
+    /**
+     * UI: #Gene sets in overlap and <= FDR"
+     */
+    private int overlapFdrGeneSetCount;
+
   }
 
   @Data

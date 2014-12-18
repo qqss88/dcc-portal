@@ -3,13 +3,13 @@
 </div>
 <div data-ng-if="item.state !== 'ANALYZING'">
     <div>
-        <h4>Overview</h4>
+        <span>Overview</span>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Universe</th>
-                    <th class="text-right"># Gene set in Universe</th>
-                    <th class="text-right"># Gene set in overlap</th>
+                    <th class="text-right"># Gene sets in Universe</th>
+                    <th class="text-right"># Gene sets in overlap</th>
                     <th class="text-right"># Genes in Universe</th>
                     <th class="text-right"># Genes in overlap</th>
                     <th class="text-right"># Input genes</th>
@@ -37,7 +37,7 @@
         </table>
         <br>
 
-        <h4>Original Query:</h4>
+        <span>Original Query:</span>
         <div>
             <a href="/search?filters={{item.query.filters}}">
                 <span>
@@ -47,14 +47,13 @@
         </div>
         <br>
 
-        <h4>
-            <span data-ng-if="item.params.maxGeneCount <= item.overview.universeGeneCount">
-                <!--Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>-->
-                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> enriched gene sets out of <strong>{{item.overview.universeGeneSetCount | number}}</strong> gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+        <span>
+            <span data-ng-if="item.params.maxGeneSetCount < item.overview.overlapFdrGeneSetCount">
+                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
             </span>
 
-            <span data-ng-if="item.params.maxGeneCount > item.overview.universeGeneCount">
-                {{item.overview.universeGeneSetCount | number}} enriched gene sets with FDR &lt;= {{item.params.fdr}}
+            <span data-ng-if="item.params.maxGeneSetCount >= item.overview.overlapFdrGeneSetCount">
+                <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
             </span>
 
             <span class="t_tools">
@@ -63,7 +62,7 @@
                       data-tooltip="Export Table as CSV"
                       data-ng-click="exportEnrichment(item.id)"><i class="icon-file"></i></span>
             </span>
-        </h4>
+        </span>
 
 
         <table class="table table-bordered">
@@ -94,8 +93,7 @@
                 <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
                     <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>
-                        <span data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) === -1">{{row.geneSetName}}</span>
-                        <i data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) >= 0" class="icon-spinner icon-spin"></i>
+                        {{row.geneSetName}}
                     </td>
                     <td class="text-right">
                         <a href="/search/g?filters={{row.geneSetFilters}}">{{row.geneCount | number}}</a>
@@ -106,14 +104,6 @@
                             <a href="/search/g?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetGeneCount | number}}</a>
                         </span>
                     </td>
-
-                    <!--
-                    <td data-ng-if="item.state !== 'ANALYZING' && $index % 1 === 0"
-                        colspan="2" rowspan="{{$index + 5 <= item.results.length? 1 : $index % 1}}"
-                        class="text-center" style="vertical-align:middle">
-                        <i class="icon-spinner icon-spin"></i>
-                    </td>
-                    -->
                     <td data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) >= 0" colspan="2" class="text-center">
                         <i class="icon-spinner icon-spin"></i>
                     </td> 

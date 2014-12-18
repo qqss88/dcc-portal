@@ -18,7 +18,7 @@
                         <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
                         <span data-ng-mouseenter="hover=true"
                               data-ng-mouseleave="hover=false"
-                              data-ng-click="$event.stopPropagation(); remove(item.id)">
+                              data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
                             <i class="icon-cancel pull-right"
                                style="background: {{hover===true? '#EE4411' : ''}}"
                                data-tooltip="Delete Analysis"
@@ -43,12 +43,7 @@
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
         <h3>
-            Enrichment Analysis
-            <!--
-            <span class="pull-right">
-                <a href="" data-ng-click="remove(analysisId)"><i class="icon-cancel"></i></a>
-            </span>
-            -->
+            Enrichment Analysis Result
         </h3>
         <div data-ng-if="!error">
             <enrichment-result data-item="analysisResult"></enrichment-result>

@@ -161,6 +161,9 @@ public class EnrichmentAnalyzer {
     log.info("Adjusting raw gene set results @ {}...", watch);
     val adjustedResults = adjustRawGeneSetResults(params.getFdr(), rawResults);
 
+    // Log the number of gene sets that are in overlap and fits the FDR criteria
+    overview.setOverlapFdrGeneSetCount(adjustedResults.size());
+
     // Keep only the number of results that the user requested
     val limitedAdjustedResults = limitGeneSetResults(adjustedResults, params.getMaxGeneSetCount());
 

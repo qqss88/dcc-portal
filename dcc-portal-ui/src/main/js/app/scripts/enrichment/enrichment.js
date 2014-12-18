@@ -31,7 +31,8 @@
         $scope.analysisParams = {
           maxGeneSetCount: 50,
           fdr: 0.05,
-          maxGeneCount: $scope.total || 1000
+          maxGeneCount: $scope.total || 1000,
+          universe: 'REACTOME_PATHWAYS'
         };
 
 
@@ -76,7 +77,6 @@
 
         $scope.checkInput = function() {
           var params = $scope.analysisParams;
-
           if ($scope.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
             $scope.hasValidFDR(parseFloat(params.fdr)) === false ||
             angular.isDefined(params.universe) === false) {
@@ -110,6 +110,8 @@
             $scope.analysisParams.maxGeneCount = n;
           }
         });
+
+        $scope.checkInput();
 
       }
     };

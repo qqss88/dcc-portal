@@ -71,7 +71,11 @@
 
           // Check if we need to poll
           if (data.state !== 'FINISHED') {
-            pollPromise = $timeout(fetch, 5000);
+            var pollRate = 1000;
+            if (data.state === 'POST_PROCESSING') {
+              pollRate = 4000;
+            }
+            pollPromise = $timeout(fetch, pollRate);
           }
         }, function(error) {
           $scope.error = error.status;

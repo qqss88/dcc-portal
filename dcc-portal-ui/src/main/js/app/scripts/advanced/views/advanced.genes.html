@@ -3,11 +3,19 @@
 </h3></div>
 <div data-ng-if="AdvancedCtrl.Gene.genes.hits.length == 0" class="empty loading-text"><h3>No Genes Found.</h3></div>
 <section data-ng-show="AdvancedCtrl.Gene.genes.hits">
+
     <h3>Genes
         <span class="open-in pull-right">OPEN IN
-        <a href="" data-ng-click="enrichmentModal=true">Enrichment Analysis</a><span> | </span>
-        <a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a></span></span>
+        <a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a>
+        </span>
     </h3>
+
+
+    <div class="text-right">
+        <button href="" class="t_button" data-ng-click="enrichmentModal=true"><i class="icon-beaker"></i>Enrichment Analysis</button>
+    </div>
+
+
 
     <enrichment-upload 
         data-total="{{AdvancedCtrl.Gene.genes.pagination.total}}"
