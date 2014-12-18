@@ -25,6 +25,7 @@ import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.model.IndexModel.API_INPUT_GENE_LIST_ID_FIELD_NAME;
+import static org.icgc.dcc.portal.model.IndexModel.API_UPLOAD_GENE_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_TYPE_FIELDS;
@@ -397,6 +398,9 @@ public class QueryService {
       val typeMapping = FIELDS_MAPPING.get(kind);
       if (typeMapping.containsKey(facetField.getKey())) {
         String fieldName = typeMapping.get(facetField.getKey());
+
+        boolean isGeneId = fieldName.equals("_gene_id");
+
         if (prefixMapping != null && prefixMapping.containsKey(kind)) {
           fieldName = String.format("%s.%s", prefixMapping.get(kind), fieldName);
         }
@@ -425,10 +429,45 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
+              } else if (fieldName.endsWith(API_UPLOAD_GENE_LIST_ID_FIELD_NAME) || isGeneId) {
+                // This will get generated twice if both upload-gene-list and gene-id are present,
+                // but that may be ok, it will be like saying: (a or b) and (a or b)
+
+                // HACK: we need to "OR" together gene-id and upload-gene-list, since they all translate
+                // to gene-ids in the end. Note we implicitly assume that gene-id and upload-gene-list are
+                // either both "IS" or both "NOT", they cannot have different boolean clauses.
+                val geneIdGeneListFilter = FilterBuilders.boolFilter();
+
+                if (filters.path(kind.getId()).path("id").path(bool).isMissingNode() == false) {
+                  val idNode = filters.get(kind.getId()).get("id").get(bool);
+                  val geneIds = Lists.<String> newArrayList();
+
+                  for (val geneId : idNode) {
+                    geneIds.add(geneId.asText());
+                  }
+
+                  String geneIdFieldName = "_gene_id";
+                  if (prefixMapping != null && prefixMapping.containsKey(kind)) {
+                    geneIdFieldName = String.format("%s.%s", prefixMapping.get(kind), geneIdFieldName);
+                  }
+                  geneIdGeneListFilter.should(termsFilter(geneIdFieldName, geneIds));
+                }
+                if (filters.path(kind.getId()).path(API_UPLOAD_GENE_LIST_ID_FIELD_NAME).path(bool).isMissingNode() == false) {
+                  val listNode = filters.get(kind.getId()).get(API_UPLOAD_GENE_LIST_ID_FIELD_NAME).get(bool);
+                  val listId = UUID.fromString(listNode.get(0).asText());
+
+                  String geneListFieldName = "_gene_id"; // Because genelist is geneId
+                  if (prefixMapping != null && prefixMapping.containsKey(kind)) {
+                    geneListFieldName = String.format("%s.%s", prefixMapping.get(kind), geneListFieldName);
+                  }
+                  geneIdGeneListFilter.should(TermsLookupService.createTermsLookupFilter(geneListFieldName, GENE_IDS,
+                      listId));
+                }
+                fb = geneIdGeneListFilter;
               } else if (fieldName.endsWith(API_INPUT_GENE_LIST_ID_FIELD_NAME)) {
+                // Hack hack
                 val mappedFieldName = fieldName.replace(API_INPUT_GENE_LIST_ID_FIELD_NAME, "_gene_id");
 
-                // Term lookup for Enrichment Analysis
                 val inputGeneListId = UUID.fromString(items.get(0));
                 fb = TermsLookupService.createTermsLookupFilter(mappedFieldName, GENE_IDS, inputGeneListId);
               } else {

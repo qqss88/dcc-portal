@@ -31,6 +31,7 @@ import lombok.val;
 import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Universe;
+import org.icgc.dcc.portal.util.Filters;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
@@ -49,12 +50,17 @@ public class EnrichmentQueries {
     val analysisFilter = inputGeneListFilter(inputGeneListId);
 
     // Overlap
-    val filters = ImmutableList.of(queryFilter, universeFilter, analysisFilter);
+    // val filters = ImmutableList.of(queryFilter, universeFilter, analysisFilter);
+    ObjectNode mergeResultFilter = queryFilter.deepCopy();
+    mergeResultFilter = Filters.mergeAnalysisInputGeneList(mergeResultFilter, analysisFilter);
+    mergeResultFilter = Filters.mergeAnalysisUniverse(mergeResultFilter, universeFilter);
 
     // EnrichmentSearchResponses?
     val includes = Lists.<String> newArrayList();
 
-    val overlapQuery = new AndQuery(filters);
+    // val overlapQuery = new AndQuery(filters);
+    val overlapQuery = new AndQuery(ImmutableList.of(mergeResultFilter));
+
     overlapQuery.setFields(idField()).setIncludes(includes);
 
     return overlapQuery;
@@ -65,10 +71,21 @@ public class EnrichmentQueries {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
 
     // TODO: Do not mutate, create a Query copy contructor instead
-    val filters =
-        ImmutableList.<ObjectNode> builder().addAll(overlapQuery.getAndFilters()).add(geneSetFilter(geneSetId)).build();
+    // val filters =
+    // ImmutableList.<ObjectNode> builder().addAll(overlapQuery.getAndFilters()).add(geneSetFilter(geneSetId)).build();
 
-    overlapQuery.setAndFilters(filters);
+    // Components
+    ObjectNode filters = query.getFilters().deepCopy();
+    val universeFilter = universe.getFilter();
+    val analysisFilter = inputGeneListFilter(inputGeneListId);
+    val geneSetFilter = geneSetFilter(geneSetId);
+
+    // Merge everything into filters
+    filters = Filters.mergeAnalysisInputGeneList(filters, analysisFilter);
+    filters = Filters.mergeAnalysisUniverse(filters, universeFilter);
+    filters = Filters.mergeAnalysisGeneSetFilter(filters, geneSetFilter);
+
+    overlapQuery.setAndFilters(ImmutableList.of(filters));
 
     return overlapQuery;
   }
