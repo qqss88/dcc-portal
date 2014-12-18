@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 import static org.icgc.dcc.portal.model.EnrichmentParams.DEFAULT_FDR;
 import static org.icgc.dcc.portal.model.EnrichmentParams.MAX_OUTPUT_GENE_SETS;
-import static org.icgc.dcc.portal.model.Universe.GO_MOLECULAR_FUNCTION;
+import static org.icgc.dcc.portal.model.Universe.GO_BIOLOGICAL_PROCESS;
 import static org.icgc.dcc.portal.test.JsonNodes.$;
 
 import java.util.UUID;
@@ -65,7 +65,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   @Test
   public void testAnalyze() {
-    val analysis = execute(curatedAndHasPathway());
+    val analysis = execute(dcc2747());
 
     val overview = analysis.getOverview();
     assertThat(overview.getOverlapGeneCount()).isGreaterThan(0);
@@ -82,7 +82,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
             .setState(PENDING)
             .setParams(
                 new EnrichmentParams()
-                    .setUniverse(GO_MOLECULAR_FUNCTION)
+                    .setUniverse(GO_BIOLOGICAL_PROCESS)
                     .setFdr(DEFAULT_FDR)
                     .setMaxGeneCount(950)
                     .setMaxGeneSetCount(MAX_OUTPUT_GENE_SETS))
@@ -106,7 +106,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
   }
 
   protected ObjectNode dcc2747() {
-    return filter("{'mutation':{'consequenceType':{'is':['frameshift']}}}");
+    return filter("{'mutation':{'consequenceType':{'is':['frameshift_variant']}}}");
   }
 
   protected ObjectNode curatedAndHasPathway() {
