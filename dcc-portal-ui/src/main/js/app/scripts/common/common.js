@@ -117,6 +117,14 @@
     };
   });
 
+  // a filter used to provide a tooltip (descriptive name) for a gene-set
+  module.filter ( 'geneSetNameLookup', function (GeneSetNameLookupService) {
+    return function (id) {
+      return GeneSetNameLookupService.get ( id );
+    }
+  });
+
+
   module.filter('highlight', function () {
     return function (text, search, hide) {
       text = text || '';

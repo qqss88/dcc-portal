@@ -423,6 +423,64 @@
 
   });
 
+  // a function that returns an Angular 'structure' that represents a resuable service which provides a simple hash/lookup function as well as fetching data via ajax.
+  var KeyValueLookupServiceFactory = function ( fetch ) {
+
+    return ['Restangular', '$log', function (Restangular, $log) {
+
+      var _lookup = {};
+
+      var _retrieve = function ( id ) {
+        return _lookup [id];
+      };
+      var _echoOrDefault = function ( value, defaultValue ) {
+        return ( value ) ?
+          value :
+          defaultValue || '';
+      };
+      var _noop = function () {};
+      var _fetch = ( angular.isFunction (fetch) ) ? fetch : _noop; 
+
+      this.put = function ( id, name ) {
+        if ( id && name ) {
+          _lookup [id + ''] = name + '';
+
+          $log.debug ( "Updated lookup table is:" + JSON.stringify (_lookup) );
+        }
+      };
+      this.get = function ( id ) {
+        var result = _retrieve ( id );
+
+        return _echoOrDefault ( result, id );
+      };
+      this.batchFetch = function ( ids ) {
+         if ( angular.isArray (ids) ) {
+          var missings = _.difference ( ids, _.keys (_lookup) );
+
+          var setter = this.put;
+          missings.forEach ( function (id) {
+            _fetch ( Restangular, setter, id );
+          });
+        }
+      };
+    }];
+  };
+
+  // callback handler for gene-set name lookup
+  var _fetchGeneSetNameById = function ( rest, setter, id ) {
+    rest 
+      .one ( 'genesets', id )
+      .get ( {field: ['id', 'name']} )
+      .then ( function (geneSet) {
+
+        if ( id == geneSet.id ) {
+          setter ( id, geneSet.name );
+        }
+      });
+  };
+
+  module.service ( 'GeneSetNameLookupService', KeyValueLookupServiceFactory (_fetchGeneSetNameById) );
+
 
   module.service('FiltersUtil', function(Extensions) {
 

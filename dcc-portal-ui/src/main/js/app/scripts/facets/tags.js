@@ -21,13 +21,26 @@
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
-    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions, GeneSets, Genes) {
+    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
 
     $scope.projects = HighchartsService.projectColours;
 
 
+    var _fetchNameForSelections = function ( selections ) {
+
+      if ( selections ) {
+        [ 'goTermId', 'pathwayId' ].forEach ( function (s) {
+          if ( selections [s] ) {
+            GeneSetNameLookupService.batchFetch ( selections[ s ].is );
+          }
+        });
+      } 
+    };
+
     function setup() {
       var type = $scope.type, filters = LocationService.filters(), activeIds = [];
+
+      _fetchNameForSelections ( filters.gene );
 
       // Remap logical types to index type
       if (_.contains(['go_term', 'pathway', 'curated_set'], type)) {
@@ -118,8 +131,29 @@
       LocationService.setFilters(filters);
     };
 
+    var _captureTermInfo = function ( term ) {
+      if ( ! term ) return;
+
+      var _type = term.type;
+      var _id = term.id;
+      var _name = term.name;
+
+      var isGeneSet = function () {
+        return _.contains ( ['go_term', 'pathway'], _type );
+      };
+      var isGene = function () {
+        return ( 'gene' == _type );
+      };
+
+      if ( isGeneSet () ) {
+        GeneSetNameLookupService.put ( _id, _name );
+      }
+    };
 
     $scope.addTerm = function (term) {
+
+      _captureTermInfo ( term );
+
       var type, name;
       if (_.contains(['go_term', 'pathway', 'curated_set'], $scope.type)) {
         type = 'gene';
