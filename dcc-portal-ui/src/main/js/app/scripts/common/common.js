@@ -121,7 +121,7 @@
   module.filter ( 'geneSetNameLookup', function (GeneSetNameLookupService) {
     return function (id) {
       return GeneSetNameLookupService.get ( id );
-    }
+    };
   });
 
 

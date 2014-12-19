@@ -21,7 +21,8 @@
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
-    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
+    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, 
+      Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
 
     $scope.projects = HighchartsService.projectColours;
 
@@ -34,7 +35,7 @@
             GeneSetNameLookupService.batchFetch ( selections[ s ].is );
           }
         });
-      } 
+      }
     };
 
     function setup() {
@@ -132,7 +133,7 @@
     };
 
     var _captureTermInfo = function ( term ) {
-      if ( ! term ) return;
+      if ( ! term ) { return; }
 
       var _type = term.type;
       var _id = term.id;
@@ -140,9 +141,6 @@
 
       var isGeneSet = function () {
         return _.contains ( ['go_term', 'pathway'], _type );
-      };
-      var isGene = function () {
-        return ( 'gene' == _type );
       };
 
       if ( isGeneSet () ) {
