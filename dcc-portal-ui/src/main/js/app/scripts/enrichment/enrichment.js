@@ -58,10 +58,7 @@
 
         $scope.newGeneSetEnrichment = function() {
           var promise, data;
-
           data = buildEnrichmentRequest();
-          console.log('payload', data);
-
           promise = Restangular.one('analysis')
             .withHttpConfig({transformRequest: angular.identity})
             .customPOST(data, 'enrichment');
@@ -77,8 +74,8 @@
 
         $scope.checkInput = function() {
           var params = $scope.analysisParams;
-          if ($scope.hasValidGeneCount(parseInt(params.maxGeneCount, 10)) === false ||
-            $scope.hasValidFDR(parseFloat(params.fdr)) === false ||
+          if ($scope.hasValidGeneCount(params.maxGeneCount) === false ||
+            $scope.hasValidFDR(params.fdr) === false ||
             angular.isDefined(params.universe) === false) {
             $scope.hasValidParams = false;
           } else {
@@ -87,18 +84,26 @@
         };
 
         $scope.hasValidFDR = function(val) {
-          if (angular.isNumber(val) === false) {
+          var v = parseFloat(val);
+
+          if (isNaN(val) === true) {
             return false;
           }
-          if (val >= 0.005 && val <= 0.5) {
+          if (angular.isNumber(v) === false) {
+            return false;
+          }
+          if (v >= 0.005 && v <= 0.5) {
             return true;
           }
           return false;
         };
 
         $scope.hasValidGeneCount = function(val) {
-          if (angular.isNumber(val) === false ||
-              val > $scope.total) {
+          var v = parseInt(val, 10);
+          if (isNaN(val) === true) {
+            return false;
+          }
+          if (angular.isNumber(v) === false || v > $scope.total) {
             return false;
           }
           return true;
@@ -108,10 +113,10 @@
           if (n) {
             $scope.total = Math.min(n, 1000);
             $scope.analysisParams.maxGeneCount = n;
+            $scope.checkInput();
           }
         });
 
-        $scope.checkInput();
 
       }
     };
@@ -133,7 +138,6 @@
         $scope.reverse = false;
 
         function refresh() {
-          console.log('enrichment refreshing', $scope.item);
 
           var enrichment = $scope.item;
 
@@ -141,6 +145,9 @@
           if (! enrichment.results) {
             return;
           }
+
+          // Get original sort and order
+          $scope.sortParams = EnrichmentService.sortParams(enrichment);
 
           // Create links for overview
           $scope.overviewUniverseFilters = EnrichmentService.overviewUniverseFilters(enrichment);
@@ -167,7 +174,6 @@
           }
         });
 
-        console.log('enrichment result', $scope.item);
       }
     };
   });
@@ -195,7 +201,35 @@
     }
 
     /**
-     * Reverse lookup the universe criteria
+     * Replace list with the input gene list limit
+     * Input gene list takes precedence over gene identifiers (id, uploadGeneListId)
+     * 1) Remove gene.uploadGeneListId
+     * 2) Remove gene.id
+     */
+    function mergeInputGeneList(filters, geneListId) {
+      delete filters.gene.uploadGeneListId;
+      delete filters.gene.id;
+      filters.gene.inputGeneListId = {
+        is: [geneListId]
+      };
+      return filters;
+    }
+
+    /**
+     * Returns original gene sort information
+     */
+    this.sortParams = function(enrichment) {
+      var sortResult = {};
+      if (enrichment.query.sort && enrichment.query.order) {
+        sortResult.sort = enrichment.query.sort;
+        sortResult.order = enrichment.query.order.toLowerCase();
+      }
+      return sortResult;
+    };
+
+
+    /**
+     * Returns a filter to specify the selected universe
      */
     this.overviewUniverseFilters = function(enrichment) {
       var filters = {};
@@ -218,8 +252,10 @@
 
 
     /**
-     * FIXME:
-     * Return empty filters if there are overlapping pathway ids or goTerm ids
+     * Returns a filters to specify genes in the original request (original query intersect gene-limit)
+     * with the genes in the selected universe
+     *
+     * Empty filters if there are overlapping pathway ids or goTerm ids
      */
     this.overviewGeneOverlapFilters = function(enrichment) {
       var filters = angular.copy(enrichment.query.filters);
@@ -240,14 +276,10 @@
       }
 
       // Replace list with input limit
-      delete filters.gene.uploadGeneListId; //TODO: check name
-      filters.gene.inputGeneListId = {
-        is: [enrichment.id]
-      };
+      filters = mergeInputGeneList(filters, enrichment.id);
 
       // Add universe type specific conditions
       if (universe.type === 'go_term') {
-        // filters.gene.goTermId = { 'all': [universe.id] };
         filters.gene.goTermId = { 'is': [universe.id] };
       } else if (universe.type === 'pathway') {
         filters.gene.hasPathway = true;
@@ -257,16 +289,20 @@
     };
 
 
+    /**
+     * Returns a filters to specify genes in the original request (original query intersect gene-limit)
+     */
     this.overviewInputFilters = function(enrichment) {
       var filters = angular.copy(enrichment.query.filters);
       filters = ensureGeneExist(filters);
-      filters.gene.inputGeneListId = {
-        is: [ enrichment.id]
-      };
+      filters = mergeInputGeneList(filters, enrichment.id);
       return filters;
     };
 
 
+    /**
+     * Returns a filters to specify genes in the given gene set
+     */
     this.geneSetFilters = function(enrichment, row) {
       var filters = {};
       var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
@@ -288,6 +324,10 @@
     };
 
 
+    /**
+     * Returns a filters to specify genes in in original request (original query intersects gene-limit)
+     * with the genes in the selected universe with a given gene set
+     */
     this.geneSetOverlapFilters = function(enrichment, row) {
       var filters = angular.copy(enrichment.query.filters);
       var universe = _.find(Extensions.GENE_SET_ROOTS, function(go) {
@@ -306,10 +346,8 @@
         return null;
       }
 
-      delete filters.gene.uploadGeneListId; //TODO: check name
-      filters.gene.inputGeneListId = {
-        is: [enrichment.id]
-      };
+      // Replace list with input limit
+      filters = mergeInputGeneList(filters, enrichment.id);
 
       // Add universe type specific conditions
       if (universe.type === 'go_term') {
