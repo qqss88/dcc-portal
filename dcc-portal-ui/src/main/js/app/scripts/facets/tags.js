@@ -21,7 +21,7 @@
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
-    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil, 
+    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
 
     $scope.projects = HighchartsService.projectColours;
