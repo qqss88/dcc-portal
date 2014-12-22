@@ -12,14 +12,14 @@
                         <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
                         <span data-ng-switch-default="">{{facet | trans:true}}</span>
                     </span>
-                    {{ terms.is.length !== 1? "IN (" : terms.is[0].controlFacet === "inputGeneListId"? "IN (" : "IS" }}
+                    {{ terms.is.length !== 1? "IN (" : ['inputGeneListId', 'uploadGeneListId'].indexOf(terms.is[0].controlFacet) !== -1 ? "IN (" : "IS" }}
                     <ul style="display:inline">
                         <li data-ng-repeat="term in terms.is track by term.term" style="display:inline">
                         {{ term.term | trans:true }}
                         <span data-ng-if="!$last">, </span>
                         </li>
                     </ul>
-                    {{ terms.is.length !== 1? ")" : terms.is[0].controlFacet === "inputGeneListId"?  ")" : ""}}
+                    {{ terms.is.length !== 1? ")" : ['inputGeneListId', 'uploadGeneListId'].indexOf(terms.is[0].controlFacet) !== -1 ?  ")" : ""}}
                     <span data-ng-if="!$last"> AND </span>
                 </li>
             </ul>
