@@ -119,7 +119,7 @@ sub vcl_recv {
                 return(pipe);
         }
 
-	if (req.request == "GET" && req.url ~ "^/api/short\?.*$") {
+	if (req.request == "GET" && req.url ~ "^/api/.*/short\?.*$") {
 		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
 		set req.http.Connection = "close";
 
@@ -127,7 +127,7 @@ sub vcl_recv {
 		return(pipe);
 	}
 
-	if (req.request == "GET" && req.url ~ "^/api/analysis/.*$") {
+	if (req.request == "GET" && req.url ~ "^/api/.*/analysis.*$") {
 		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
 		set req.http.Connection = "close";
 
