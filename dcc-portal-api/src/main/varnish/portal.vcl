@@ -52,12 +52,13 @@ backend www2 {
 }
 
 # URL hash based round-robin director
+/*
 director www round-robin {
 	{ .backend = www1; }
 	{ .backend = www2; }
 }
+*/
 
-/*
 director member client {
    {
       .backend = www1;
@@ -68,7 +69,6 @@ director member client {
       .weight = 1;
    }
 }
-*/
 
 acl banners {
         "localhost";
@@ -84,12 +84,12 @@ acl banners {
 # - Executing re-write rules needed for specific web applications.
 # - Deciding which Web server to use.
 sub vcl_recv {
+        /*
         set req.backend = www;
+        */
 
-	/*
         set req.backend = member;
         set client.identity = client.ip;
-	*/
 
         /* Force banning for remote application cache coherence */
         if (req.request == "BAN") {
@@ -124,6 +124,14 @@ sub vcl_recv {
 		set req.http.Connection = "close";
 
 		/* Never cache short URL API */
+		return(pipe);
+	}
+
+	if (req.request == "GET" && req.url ~ "^/api/analysis/.*$") {
+		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
+		set req.http.Connection = "close";
+
+		/* Never cache analysis path */
 		return(pipe);
 	}
 
