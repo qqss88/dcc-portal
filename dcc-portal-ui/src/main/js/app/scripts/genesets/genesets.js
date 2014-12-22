@@ -98,6 +98,8 @@
           var root = {}, node = root, diagramId = '';
 
           // Add all ancestors
+          var geneSetId = _ctrl.geneSet.id;
+
           path.forEach(function(n, idx) {
             node.id = n.id;
             node.name = n.name;
@@ -127,7 +129,8 @@
 
           hierarchyList.push({
             'root': root,
-            'diagramId': diagramId
+            'diagramId': diagramId,
+            'geneSetId': geneSetId
           });
         });
         return hierarchyList;
