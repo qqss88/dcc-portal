@@ -52,13 +52,12 @@ backend www2 {
 }
 
 # URL hash based round-robin director
-/*
 director www round-robin {
 	{ .backend = www1; }
 	{ .backend = www2; }
 }
-*/
 
+/*
 director member client {
    {
       .backend = www1;
@@ -69,6 +68,7 @@ director member client {
       .weight = 1;
    }
 }
+*/
 
 acl banners {
         "localhost";
@@ -84,12 +84,12 @@ acl banners {
 # - Executing re-write rules needed for specific web applications.
 # - Deciding which Web server to use.
 sub vcl_recv {
-        /*
         set req.backend = www;
-        */
 
+	/*
         set req.backend = member;
         set client.identity = client.ip;
+	*/
 
         /* Force banning for remote application cache coherence */
         if (req.request == "BAN") {
