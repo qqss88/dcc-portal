@@ -61,7 +61,7 @@
             <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
             <td>{{ gene.type | trans }}</td>
             <td class="text-right" style="display:block; position: relative; white-space: nowrap">
-                        <span style="position: relative">
+                        <span style="position: relative" data-ng-if="gene.affectedDonorCountFiltered > 0">
                         <a href='/search?filters={{gene.embedQuery}}'>
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
@@ -72,6 +72,7 @@
                         <em>({{gene.affectedDonorCountFiltered/gene.affectedDonorCountTotal *
                             100 | number:2}}%)</em>
                         </span>
+                        <span style="position: relative" data-ng-if="gene.affectedDonorCountFiltered === 0">0</span>
 
             </td>
             <td class="text-right" style="white-space: nowrap">
