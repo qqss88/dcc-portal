@@ -158,7 +158,7 @@ public class GeneParser {
             "end",
             "strand",
             "description")
-        .setFilter(filter)
+        .setPostFilter(filter)
         .setFrom(0)
         .setSize(size);
 
@@ -186,7 +186,7 @@ public class GeneParser {
     val request = client.prepareSearch(indexName)
         .setTypes(TYPE_NAME)
         .setSearchType(QUERY_AND_FETCH)
-        .setFilter(filter)
+        .setPostFilter(filter)
         .addFacet(histogramFacet)
         .setSize(0);
 
@@ -296,7 +296,7 @@ public class GeneParser {
     return biotypeFilter;
   }
 
-  private static void logRequest(ActionRequestBuilder<?, ?, ?> builder) {
+  private static void logRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
     String requestType = builder.request().getClass().getSimpleName();
     String message = formatRequest(builder);
 

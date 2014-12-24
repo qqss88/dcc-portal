@@ -57,7 +57,7 @@ public class DonorService {
     for (val hit : hits) {
       val fieldMap = Maps.<String, Object> newHashMap();
       for (val field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValue());
+        fieldMap.put(field.getKey(), field.getValue().getValues());
       }
       if (includeScore) fieldMap.put("_score", hit.getScore());
       list.add(new Donor(fieldMap));

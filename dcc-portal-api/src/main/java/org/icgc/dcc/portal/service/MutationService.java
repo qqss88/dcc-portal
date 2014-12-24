@@ -2,6 +2,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
+import static org.icgc.dcc.portal.util.ElasticsearchUtils.addResponseIncludes;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,7 +42,7 @@ public class MutationService {
     val response = mutationRepository.findAllCentric(query);
     val hits = response.getHits();
 
-    // Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
+    // FIXME: Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
     boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
 
     val list = ImmutableList.<Mutation> builder();
@@ -54,17 +55,7 @@ public class MutationService {
 
       if (includeScore) map.put("_score", hit.getScore());
 
-      if (query.hasInclude("consequences")) {
-        if (query.hasInclude("transcripts")) {
-          // TODO redundant
-          map.put("consequences", map.get("transcript"));
-        } else {
-          // TODO redundant
-          map.put("consequences", map.get("transcript"));
-          map.remove("transcript");
-        }
-      }
-
+      addResponseIncludes(query, hit, map);
       list.add(new Mutation(map));
     }
 

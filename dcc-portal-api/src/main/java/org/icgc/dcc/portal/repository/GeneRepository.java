@@ -21,8 +21,8 @@ import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.customScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
+import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
@@ -44,6 +44,7 @@ import static org.icgc.dcc.portal.service.QueryService.hasMutation;
 import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchUtils.flattenFieldsMap;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,6 +66,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -194,12 +196,15 @@ public class GeneRepository implements Repository {
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
-            .setSize(query.getSize());
+    val search = client
+        .prepareSearch(index)
+        .setTypes(type.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize());
 
     ObjectNode filters = remapFilters(query.getFilters());
-    search.setFilter(getFilters(filters));
+    search.setPostFilter(getFilters(filters));
 
     search.addFields(getFields(query, KIND));
 
@@ -301,7 +306,7 @@ public class GeneRepository implements Repository {
 
     if (query.hasFilters()) {
       ObjectNode filters = remapFilters(query.getFilters());
-      search.setFilter(getFilters(filters));
+      search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
     }
     return search;
@@ -311,7 +316,8 @@ public class GeneRepository implements Repository {
   public NestedQueryBuilder buildQuery(Query query) {
     return nestedQuery(
         "donor",
-        customScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query))).script(SCORE)).scoreMode("total");
+        functionScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query)),
+            ScoreFunctionBuilders.scriptFunction(SCORE))).scoreMode("total");
   }
 
   public ObjectNode remapFilters(ObjectNode filters) {
@@ -349,16 +355,7 @@ public class GeneRepository implements Repository {
           .entity(msg).build());
     }
 
-    val map = Maps.<String, Object> newHashMap();
-    for (val f : response.getFields().values()) {
-      if (Lists.newArrayList(fieldMapping.get("affectedTranscriptIds"), fieldMapping.get("synonyms"), "transcripts",
-          "project", fieldMapping.get("list"), "pathways").contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
+    val map = flattenFieldsMap(response.getSource());
     log.debug("{}", map);
 
     return map;

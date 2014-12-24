@@ -21,7 +21,7 @@ http:
 # Controls generation of "Last-Modified" and "ETag" HTTP headers
 cache:
   # Enable Last-Modified HTTP header generation
-  enableLastModified: true
+  enableLastModified: false
 
   # List of resources for which Last-Modified HTTP header should not be generated. Format: regex accepted by java.lang.String
   excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$"]
@@ -56,9 +56,9 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  indexName: dcc-release-dcc-etl-cli # Override using -Ddw.elastic.indexName=indexName for local development
+  indexName: icgc17-0-9 # Override using -Ddw.elastic.indexName=indexName for local development
   nodeAddresses:
-    - host: "localhost"
+    - host: "10.5.74.81"
       port: 9300
 
 # Mail

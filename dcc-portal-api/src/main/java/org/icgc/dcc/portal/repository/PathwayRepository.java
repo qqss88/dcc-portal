@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.repository;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchUtils.flattenFieldsMap;
 
 import java.util.Map;
 
@@ -29,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.get.GetField;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
@@ -73,7 +72,8 @@ public class PathwayRepository {
 
     if (query.hasInclude("projects")) fs.add("projects");
 
-    search.setFields(fs.toArray(new String[fs.size()]));
+    String[] excludeFields = null;
+    search.setFetchSource(fs.toArray(new String[fs.size()]), excludeFields);
 
     GetResponse response = search.execute().actionGet();
 
@@ -85,20 +85,7 @@ public class PathwayRepository {
           .entity(msg).build());
     }
 
-    val map = Maps.<String, Object> newHashMap();
-    for (GetField f : response.getFields().values()) {
-      map.put(f.getName(), f.getValue());
-    }
-    for (val f : response.getFields().values()) {
-      if (Lists.newArrayList(fields.get("projects"), fields.get("geneList"), fields.get("parentPathways"),
-          fields.get("linkOut")).contains(
-          f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
+    val map = flattenFieldsMap(response.getSource());
     log.debug("{}", map);
 
     return map;

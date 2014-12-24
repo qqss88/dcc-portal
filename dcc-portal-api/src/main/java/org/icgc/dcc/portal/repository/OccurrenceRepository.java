@@ -43,6 +43,7 @@ import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchUtils.flattenFieldsMap;
 
 import java.util.Map;
 
@@ -187,7 +188,7 @@ public class OccurrenceRepository {
             .setSize(query.getSize()).addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
 
     ObjectNode filters = remapFilters(query.getFilters());
-    search.setFilter(getFilters(filters));
+    search.setPostFilter(getFilters(filters));
 
     search.addFields(getFields(query, KIND));
     return search;
@@ -205,7 +206,7 @@ public class OccurrenceRepository {
 
     if (query.hasFilters()) {
       ObjectNode filters = remapFilters(query.getFilters());
-      search.setFilter(getFilters(filters));
+      search.setPostFilter(getFilters(filters));
     }
     return search;
   }
@@ -241,15 +242,7 @@ public class OccurrenceRepository {
           .entity(msg).build());
     }
 
-    val map = Maps.<String, Object> newHashMap();
-    for (val f : response.getFields().values()) {
-      if (Lists.newArrayList(fieldMapping.get("platform"), fieldMapping.get("consequenceType"),
-          fieldMapping.get("verificationStatus"), "transcript", "ssm_occurrence").contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
+    val map = flattenFieldsMap(response.getSource());
 
     log.debug("{}", map);
 
@@ -291,7 +284,7 @@ public class OccurrenceRepository {
         .setSearchType(SCAN)
         .setSize(5000)
         .setScroll(new TimeValue(10000))
-        .setFilter(getFilters(filters))
+        .setPostFilter(getFilters(filters))
         .setQuery(matchAllQuery())
         .addFields("donor._donor_id", "project._project_id");
 

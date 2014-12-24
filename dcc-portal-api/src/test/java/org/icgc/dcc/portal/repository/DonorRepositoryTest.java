@@ -245,4 +245,5 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     Query query = Query.builder().build();
     donorRepository.findOne(MISSING_ID, query);
   }
+
 }

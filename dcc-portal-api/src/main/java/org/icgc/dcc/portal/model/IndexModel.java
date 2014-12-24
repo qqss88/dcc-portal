@@ -93,8 +93,8 @@ public class IndexModel {
           .put("jcnTestedDonorCount", "_summary._jcn_tested_donor_count")
           .put("totalDonorCount", "_summary._total_donor_count")
           .put("affectedDonorCount", "_summary._affected_donor_count")
-          .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
-          .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
+          .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count.*")
+          .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count.*")
           .put("repository", "_summary.repository")
           .build();
 
@@ -200,14 +200,14 @@ public class IndexModel {
           .put("strand", "strand")
           .put("description", "description")
           .put("synonyms", "synonyms")
-          .put("externalDbIds", "external_db_ids")
+          .put("externalDbIds", "external_db_ids.*")
           .put("affectedDonorCountTotal", "_summary._affected_donor_count")
           .put("affectedDonorCountFiltered", "_score")
           .put("affectedTranscriptIds", "_summary._affected_transcript_id")
           .put("location", "location")
           .put("pathwayId", "pathways.pathway_id")
           .put("pathwayName", "pathways.pathway_name")
-          .put("pathways", "pathways")
+          .put("pathways", "pathways.*")
           .put("list", "list")
           .build();
 

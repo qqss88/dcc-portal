@@ -39,11 +39,11 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.util.ElasticsearchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
@@ -98,7 +98,8 @@ public class ReleaseRepository {
     } else
       fs.addAll(fieldMapping.values().asList());
 
-    search.setFields(fs.toArray(new String[fs.size()]));
+    String[] excludeFields = null;
+    search.setFetchSource(fs.toArray(new String[fs.size()]), excludeFields);
 
     GetResponse response = search.execute().actionGet();
 
@@ -110,15 +111,7 @@ public class ReleaseRepository {
           .entity(msg).build());
     }
 
-    val map = Maps.<String, Object> newHashMap();
-    for (val f : response.getFields().values()) {
-      if (Lists.newArrayList().contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
+    val map = ElasticsearchUtils.flattenFieldsMap(response.getSource());
     log.debug("{}", map);
 
     return map;

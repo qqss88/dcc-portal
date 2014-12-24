@@ -134,7 +134,7 @@ public class MutationParser {
     val request = client.prepareSearch(indexName)
         .setTypes(INDEX_TYPE)
         .setSearchType(QUERY_AND_FETCH)
-        .setFilter(filter)
+        .setPostFilter(filter)
         .addFields(
             "_mutation_id",
             "chromosome",
@@ -177,7 +177,7 @@ public class MutationParser {
     val request = client.prepareSearch(indexName)
         .setTypes(INDEX_TYPE)
         .setSearchType(QUERY_AND_FETCH)
-        .setFilter(filter)
+        .setPostFilter(filter)
         .addFacet(histogramFacet)
         .setFrom(0)
         .setSize(0);
@@ -210,7 +210,7 @@ public class MutationParser {
     }
 
     List<List<String>> consequences = newArrayList();
-    for (val transcript : hit.get("transcript").get("transcript")) {
+    for (val transcript : hit.get("transcript").get(0).get("transcript")) {
       List<String> consequence = getConsequence(
           transcript.path("consequence"),
           transcript.path("gene"));
@@ -374,7 +374,7 @@ public class MutationParser {
     return consequenceFilter;
   }
 
-  private static void logRequest(ActionRequestBuilder<?, ?, ?> builder) {
+  private static void logRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
     String requestType = builder.request().getClass().getSimpleName();
     String message = formatRequest(builder);
 

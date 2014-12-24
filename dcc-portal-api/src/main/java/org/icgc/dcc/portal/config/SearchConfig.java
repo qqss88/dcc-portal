@@ -21,6 +21,7 @@ import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.icgc.dcc.portal.util.VersionUtils.getApiVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getApplicationVersion;
 import static org.icgc.dcc.portal.util.VersionUtils.getCommitId;
@@ -35,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.ClusterState;
-import org.elasticsearch.cluster.metadata.AliasMetaData;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -78,9 +78,9 @@ public class SearchConfig {
         .actionGet()
         .getState();
 
-    Map<String, AliasMetaData> aliases = clusterState.getMetaData().aliases().get(indexName);
+    val aliases = clusterState.getMetaData().aliases().get(indexName);
     if (aliases != null) {
-      Set<String> indexNames = aliases.keySet();
+      Set<String> indexNames = newHashSet(aliases.keys().toArray(String.class));
       checkState(indexNames.size() == 1, "Expected alias to point to a single index but instead it points to '%s'",
           indexNames);
 
@@ -99,7 +99,7 @@ public class SearchConfig {
     // Get cluster state
     ClusterState clusterState = client().admin().cluster()
         .prepareState()
-        .setFilterIndices(indexName())
+        .setIndices(indexName())
         .execute()
         .actionGet()
         .getState();
@@ -108,7 +108,7 @@ public class SearchConfig {
     checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName());
 
     // Get the first mappings. This is arbitrary since they all contain the same metadata
-    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().asList().get(0);
+    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
 
     Map<String, Object> source = mappingMetaData.sourceAsMap();
     Map<String, String> meta = (Map<String, String>) source.get("_meta");

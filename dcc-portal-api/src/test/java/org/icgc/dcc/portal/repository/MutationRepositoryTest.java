@@ -260,4 +260,5 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     Query query = Query.builder().build();
     mutationRepository.findOne(MISSING_ID, query);
   }
+
 }
