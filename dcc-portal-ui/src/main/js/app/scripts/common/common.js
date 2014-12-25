@@ -183,6 +183,7 @@
     };
   });
 
+  /*
   module.filter('typecv', function () {
     return function (type) {
       var types = {
@@ -193,6 +194,7 @@
       return types[type];
     };
   });
+  */
 
   module.filter('unique', function () {
     return function (items) {
@@ -224,6 +226,7 @@
 
 // Join parallel arrays into a single array
 // eg. [ ['a', 'b', 'c'], ['d', 'e', 'f'] ] | joinFields:''  => ['ad', 'be', 'cf']
+/*
   module.filter('joinFields', function () {
     return function (items, delim, checkEmpty) {
       var i, j, list, tempList, joinedItem, hasEmpty;
@@ -261,6 +264,7 @@
       return list;
     };
   });
+  */
 
   module.filter('bytes', function () {
     return function (input) {

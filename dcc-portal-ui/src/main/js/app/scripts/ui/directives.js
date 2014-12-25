@@ -296,7 +296,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-                '<abbr data-tooltip="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+                '<abbr data-tooltip="SO term: {{ c.consequence }}">{{c.consequence | trans}}</abbr>' +
                 '<span data-ng-repeat="(gk, gv) in c.data">' +
                   '<span>{{ $first==true? ": " : ""}}</span>' +
                   '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
