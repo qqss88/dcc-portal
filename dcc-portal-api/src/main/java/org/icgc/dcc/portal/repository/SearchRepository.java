@@ -23,7 +23,6 @@ import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Sets;
@@ -56,7 +55,8 @@ public class SearchRepository {
   }
 
   public SearchResponse findAll(Query query, String type) {
-    SearchRequestBuilder search = client.prepareSearch(index)
+    val search = client
+        .prepareSearch(index)
         .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize());

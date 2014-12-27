@@ -71,18 +71,18 @@ public class GeneParser {
     for (JsonNode hit : embeddedHit(response.get("hits"), "hits")) {
       JsonNode fields = hit.path("fields");
 
-      List<Transcript> transcripts = withTranscripts ? getTranscript(fields) : null;
+      List<Transcript> transcripts = withTranscripts ? getTranscript(hit.path("_source")) : null;
 
       genes.add(Gene.builder()
           .geneId(geneId)
-          .stableId(fields.path("_gene_id").asText())
-          .externalName(fields.path("name").asText())
-          .biotype(fields.path("biotype").asText())
-          .chromosome(fields.path("chromosome").asText())
-          .start(fields.path("start").asLong())
-          .end(fields.path("end").asLong())
-          .strand(fields.path("strand").asText())
-          .description(fields.path("description").asText())
+          .stableId(fields.path("_gene_id").get(0).asText())
+          .externalName(fields.path("name").get(0).asText())
+          .biotype(fields.path("biotype").get(0).asText())
+          .chromosome(fields.path("chromosome").get(0).asText())
+          .start(fields.path("start").get(0).asLong())
+          .end(fields.path("end").get(0).asLong())
+          .strand(fields.path("strand").get(0).asText())
+          .description(fields.path("description").isMissingNode() ? "" : fields.path("description").get(0).asText())
           .transcripts(transcripts)
           .build());
 
@@ -163,7 +163,7 @@ public class GeneParser {
         .setSize(size);
 
     if (withTranscripts) {
-      request.addField("transcripts");
+      request.setFetchSource("transcripts", null);
     }
 
     logRequest(request);

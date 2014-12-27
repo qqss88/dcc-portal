@@ -18,8 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.getLong;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.getString;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +41,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "Mutation")
 public class Mutation {
+
+  private static final int DEFAULT_SSM_OCCURRENCE_FIELDS_NUM = 3;
 
   @ApiModelProperty(value = "Mutation ID", required = true)
   String id;
@@ -127,8 +129,8 @@ public class Mutation {
     val occurrenceObject = occurrences.get(0);
     if (occurrenceObject == null) return false;
 
-    // by default only 3 occurrence fields are requests
-    return occurrenceObject.keySet().size() > 3;
+    // If request was made with ssm_occurrences included fields number will be significantly greater
+    return occurrenceObject.keySet().size() > DEFAULT_SSM_OCCURRENCE_FIELDS_NUM;
   }
 
   private List<Transcript> buildTranscripts(List<Map<String, Object>> transcripts) {

@@ -43,18 +43,14 @@ import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.flattenFieldsMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Map;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -183,14 +179,18 @@ public class OccurrenceRepository {
   }
 
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    SearchRequestBuilder search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
-            .setSize(query.getSize()).addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
+    SearchRequestBuilder search = client
+        .prepareSearch(index)
+        .setTypes(type.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize())
+        .addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
 
-    ObjectNode filters = remapFilters(query.getFilters());
+    val filters = remapFilters(query.getFilters());
     search.setPostFilter(getFilters(filters));
-
     search.addFields(getFields(query, KIND));
+
     return search;
   }
 
@@ -216,34 +216,13 @@ public class OccurrenceRepository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val fieldMapping = FIELDS_MAPPING.get(KIND);
-    val fs = Lists.<String> newArrayList();
+    val search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
+    search.setFields(getFields(query, KIND));
 
-    GetRequestBuilder search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
+    val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (query.hasFields()) {
-      for (String field : query.getFields()) {
-        if (fieldMapping.containsKey(field)) {
-          fs.add(fieldMapping.get(field));
-        }
-      }
-    } else
-      fs.addAll(fieldMapping.values());
-
-    search.setFields(fs.toArray(new String[fs.size()]));
-
-    GetResponse response = search.execute().actionGet();
-
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
-    }
-
-    val map = flattenFieldsMap(response.getSource());
-
+    val map = createResponseMap(response, query);
     log.debug("{}", map);
 
     return map;

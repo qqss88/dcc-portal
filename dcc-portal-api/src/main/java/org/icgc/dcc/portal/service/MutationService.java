@@ -2,7 +2,8 @@ package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.addResponseIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.addResponseIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createMapFromSearchFields;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,17 +43,13 @@ public class MutationService {
     val response = mutationRepository.findAllCentric(query);
     val hits = response.getHits();
 
-    // FIXME: Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
+    // Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
     boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
 
     val list = ImmutableList.<Mutation> builder();
 
     for (val hit : hits) {
-      val map = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        map.put(field.getKey(), field.getValue().getValue());
-      }
-
+      val map = createMapFromSearchFields(hit.getFields());
       if (includeScore) map.put("_score", hit.getScore());
 
       addResponseIncludes(query, hit, map);
@@ -109,18 +106,16 @@ public class MutationService {
       map.put("mutation", hit.getFields().get("mutation").getValue());
       map.put("_summary._affected_donor_count", hit.getFields().get("_summary._affected_donor_count").getValue());
       map.put("functional_impact_prediction_summary", hit.getFields().get("functional_impact_prediction_summary")
-          .getValue());
+          .getValues());
 
-      List<Object> c = hit.getFields().get("transcript.id").getValue();
+      List<Object> transcriptIds = hit.getFields().get("transcript.id").getValues();
+      val predictionSummary = hit.getFields().get("transcript.functional_impact_prediction_summary").getValues();
 
-      for (int i = 0; i < c.size(); ++i) {
+      for (int i = 0; i < transcriptIds.size(); ++i) {
         val transcript = Maps.<String, Object> newHashMap();
 
-        List<String> f1 = hit.getFields().get("transcript.id").getValue();
-        transcript.put("id", f1.get(i));
-
-        List<String> f2 = hit.getFields().get("transcript.functional_impact_prediction_summary").getValue();
-        transcript.put("functional_impact_prediction_summary", f2.get(i));
+        transcript.put("id", transcriptIds.get(i));
+        transcript.put("functional_impact_prediction_summary", predictionSummary.get(i));
 
         // FIXME: This part is weird, but works
         val consequence = Maps.<String, Object> newHashMap();

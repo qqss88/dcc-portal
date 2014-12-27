@@ -17,18 +17,16 @@
  */
 package org.icgc.dcc.portal.repository;
 
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.flattenFieldsMap;
+import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Map;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -36,8 +34,6 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
 
 @Slf4j
 @Component
@@ -56,36 +52,14 @@ public class PathwayRepository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val fields = FIELDS_MAPPING.get(KIND);
-    val fs = Lists.<String> newArrayList();
-
     val search = client.prepareGet(index, TYPE.getId(), id);
+    search.setFields(getFields(query, KIND));
+    addIncludes(search, query, KIND);
 
-    if (query.hasFields()) {
-      for (String field : query.getFields()) {
-        if (fields.containsKey(field)) {
-          fs.add(fields.get(field));
-        }
-      }
-    } else
-      fs.addAll(fields.values().asList());
+    val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (query.hasInclude("projects")) fs.add("projects");
-
-    String[] excludeFields = null;
-    search.setFetchSource(fs.toArray(new String[fs.size()]), excludeFields);
-
-    GetResponse response = search.execute().actionGet();
-
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
-    }
-
-    val map = flattenFieldsMap(response.getSource());
+    val map = createResponseMap(response, query);
     log.debug("{}", map);
 
     return map;

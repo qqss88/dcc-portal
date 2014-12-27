@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.processSource;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
@@ -41,8 +42,11 @@ public class ProjectService {
       for (val field : hit.getFields().entrySet()) {
         fieldMap.put(field.getKey(), field.getValue().getValues());
       }
+      processSource(hit.getSource(), fieldMap);
+
       projectList.add(new Project(fieldMap));
     }
+
     return projectList.build();
   }
 

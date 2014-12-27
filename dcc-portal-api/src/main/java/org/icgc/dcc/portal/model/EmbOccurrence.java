@@ -18,8 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.getLong;
-import static org.icgc.dcc.portal.util.ElasticsearchUtils.getString;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -134,7 +134,6 @@ public class EmbOccurrence {
     experimentalProtocol = getString(fieldMap.get(fields.get("experimentalProtocol")));
     expressedAllele = getString(fieldMap.get(fields.get("expressedAllele")));
     platform = getString(fieldMap.get(fields.get("platform")));
-    // TODO: make a wrapper for Double
     probability = (Double) fieldMap.get(fields.get("probability"));
     qualityScore = (Double) fieldMap.get(fields.get("qualityScore"));
     rawDataAccession = getString(fieldMap.get(fields.get("rawDataAccession")));
