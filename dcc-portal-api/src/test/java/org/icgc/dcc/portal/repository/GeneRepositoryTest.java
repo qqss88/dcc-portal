@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -192,14 +193,14 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
   public void testFind() throws Exception {
     Query query = Query.builder().build();
     Map<String, Object> response = geneRepository.findOne(GENEID, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(GENEID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(GENEID);
   }
 
   @Test
   public void testFindWithFields() throws Exception {
     Query query = Query.builder().fields(Lists.newArrayList("id", "symbol")).build();
     Map<String, Object> response = geneRepository.findOne(GENEID, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(GENEID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(GENEID);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("symbol")));
   }
 
@@ -209,7 +210,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> response = geneRepository.findOne(GENEID, query);
 
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(GENEID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(GENEID);
     assertThat(response.containsKey("transcripts")).isFalse();
 
     Query queryInclude =
@@ -218,7 +219,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = geneRepository.findOne(GENEID, queryInclude);
 
-    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(GENEID);
+    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(GENEID);
     assertThat(responseInclude.containsKey("transcripts")).isTrue();
   }
 

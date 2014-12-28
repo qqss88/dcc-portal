@@ -89,7 +89,7 @@ public final class ElasticsearchResponseUtils {
   }
 
   public static void addResponseIncludes(Query query, GetResponse response, Map<String, Object> map) {
-    if (!query.getIncludes().isEmpty()) {
+    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
       map.putAll(response.getSource());
       processConsequences(map, query);
     }
