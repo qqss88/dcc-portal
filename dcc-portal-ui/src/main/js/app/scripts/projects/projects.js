@@ -52,6 +52,8 @@
     Page.setTitle('Cancer Projects');
     Page.setPage('projects');
 
+    _ctrl.Page = Page;
+
     // This is needed to translate projects filters to donor filters
     $scope.createAdvanceFilters = function(dataType) {
       var currentFilters = LocationService.filters();
@@ -161,7 +163,6 @@
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
       if (dest.indexOf('projects') !== -1 && dest.indexOf('projects/') === -1) {
-        console.log('refreshing !!!!', dest, event);
         refresh();
       }
     });
