@@ -96,7 +96,7 @@ public final class ElasticsearchResponseUtils {
   }
 
   public static void addResponseIncludes(Query query, SearchHit searchHit, Map<String, Object> map) {
-    if (!query.getIncludes().isEmpty()) {
+    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
       val source = searchHit.getSource();
       if (source == null) {
         return;

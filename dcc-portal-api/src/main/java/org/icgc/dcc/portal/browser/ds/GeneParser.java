@@ -71,7 +71,7 @@ public class GeneParser {
     for (JsonNode hit : embeddedHit(response.get("hits"), "hits")) {
       JsonNode fields = hit.path("fields");
 
-      List<Transcript> transcripts = withTranscripts ? getTranscript(hit.path("_source")) : null;
+      List<Transcript> transcripts = withTranscripts ? getTranscript(hit) : null;
 
       genes.add(Gene.builder()
           .geneId(geneId)
@@ -201,9 +201,10 @@ public class GeneParser {
   private static List<Transcript> getTranscript(JsonNode hit) {
     List<Transcript> transcripts = newArrayList();
     Integer transcriptId = 1;
-    for (val trans : hit.path("transcripts")) {
+    val fields = hit.path("fields");
+    for (val trans : hit.path("_source").path("transcripts")) {
 
-      List<ExonToTranscript> exonToTranscripts = getExonToTranscripts(hit, trans);
+      List<ExonToTranscript> exonToTranscripts = getExonToTranscripts(fields, trans);
       long transcriptStart = getTranscriptStart(trans);
       long transcriptEnd = getTranscriptEnd(trans);
 
@@ -215,7 +216,7 @@ public class GeneParser {
           .chromosome(trans.path("chromosome").asText())
           .start(transcriptStart)
           .end(transcriptEnd)
-          .strand(hit.path("strand").asText())
+          .strand(fields.path("strand").get(0).asText())
           .codingRegionStart(trans.path("coding_region_start").asLong())
           .codingRegionEnd(trans.path("coding_region_end").asLong())
           .cdnaCodingStart(trans.path("cdna_coding_start").asLong())
@@ -232,7 +233,7 @@ public class GeneParser {
   /**
    * Build a fully completed list of ExonToTranscript objects.
    */
-  private static List<ExonToTranscript> getExonToTranscripts(JsonNode hit, JsonNode trans) {
+  private static List<ExonToTranscript> getExonToTranscripts(JsonNode fields, JsonNode trans) {
     List<ExonToTranscript> exonToTranscripts = newArrayList();
     int exonId = 1;
     for (val exon : trans.path("exons")) {
@@ -246,10 +247,10 @@ public class GeneParser {
           .cdnaEnd(exon.path("cdna_end").asInt())
           .exon(Exon.builder()
               .stableId(trans.path("id").asText() + EXON_ID_SEPERATOR + exonId)
-              .chromosome(hit.path("chromosome").asText())
+              .chromosome(fields.path("chromosome").get(0).asText())
               .start(exon.path("start").asText())
               .end(exon.path("end").asText())
-              .strand(hit.path("strand").asText())
+              .strand(fields.path("strand").get(0).asText())
               .build())
           .build();
 

@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -92,34 +93,34 @@ public class Keyword {
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
     ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.KEYWORD);
-    id = (String) fieldMap.get(fields.get("id"));
-    type = (String) fieldMap.get(fields.get("type"));
-    name = (String) fieldMap.get(fields.get("name"));
+    id = getString(fieldMap.get(fields.get("id")));
+    type = getString(fieldMap.get(fields.get("type")));
+    name = getString(fieldMap.get(fields.get("name")));
 
-    symbol = (String) fieldMap.get(fields.get("symbol"));
-    ensemblTranscriptId = (String) fieldMap.get(fields.get("ensemblTranscriptId"));
-    ensemblTranslationId = (String) fieldMap.get(fields.get("ensemblTranslationId"));
+    symbol = getString(fieldMap.get(fields.get("symbol")));
+    ensemblTranscriptId = getString(fieldMap.get(fields.get("ensemblTranscriptId")));
+    ensemblTranslationId = getString(fieldMap.get(fields.get("ensemblTranslationId")));
     synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
     uniprotkbSwissprot = (List<String>) fieldMap.get(fields.get("uniprotkbSwissprot"));
     omimGene = (List<String>) fieldMap.get(fields.get("omimGene"));
     entrezGene = (List<String>) fieldMap.get(fields.get("entrezGene"));
     hgnc = (List<String>) fieldMap.get(fields.get("hgnc"));
 
-    projectId = (String) fieldMap.get(fields.get("projectId"));
-    submittedId = (String) fieldMap.get(fields.get("submittedId"));
+    projectId = getString(fieldMap.get(fields.get("projectId")));
+    submittedId = getString(fieldMap.get(fields.get("submittedId")));
     specimenIds = (List<String>) fieldMap.get(fields.get("specimenIds"));
     submittedSpecimenIds = (List<String>) fieldMap.get(fields.get("submittedSpecimenIds"));
     sampleIds = (List<String>) fieldMap.get(fields.get("sampleIds"));
     submittedSampleIds = (List<String>) fieldMap.get(fields.get("submittedSampleIds"));
 
-    primarySite = (String) fieldMap.get(fields.get("primarySite"));
-    tumourType = (String) fieldMap.get(fields.get("tumourType"));
-    tumourSubtype = (String) fieldMap.get(fields.get("tumourSubtype"));
+    primarySite = getString(fieldMap.get(fields.get("primarySite")));
+    tumourType = getString(fieldMap.get(fields.get("tumourType")));
+    tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
 
-    mutation = (String) fieldMap.get(fields.get("mutation"));
+    mutation = getString(fieldMap.get(fields.get("mutation")));
     geneMutations = (List<String>) fieldMap.get(fields.get("geneMutations"));
 
-    url = (String) fieldMap.get(fields.get("url"));
-    source = (String) fieldMap.get(fields.get("source"));
+    url = getString(fieldMap.get(fields.get("url")));
+    source = getString(fieldMap.get(fields.get("source")));
   }
 }
