@@ -23,12 +23,14 @@ import org.icgc.dcc.portal.repository.MutationRepository;
 import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.test.AbstractSpringIntegrationTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Slf4j
+@Ignore("Need elasticsearch index dependencies to be present on jenkins")
 public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
 
   /**
