@@ -30,9 +30,9 @@
     'ui.bootstrap.position',
     'ui.router',
     'infinite-scroll',
-    'angular-underscore',
+    'angular-lodash',
     'angularytics',
-    'chieffancypants.loadingBar',
+    'angular-loading-bar',
     'btford.markdown',
     'LocalStorageModule',
 
@@ -99,14 +99,21 @@
       $rootScope.$on('$stateChangeSuccess', scroll);
     });
 
-  module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
+  module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
                           markdownConverterProvider, localStorageServiceProvider) {
+
+    // Disables debugging information
+    $compileProvider.debugInfoEnabled(false);
+
+    // Combine calls - not working
+    // $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
     // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');

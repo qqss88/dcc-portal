@@ -50,6 +50,7 @@ module.exports = function (grunt) {
     connect: {
       options: {
         port: 9000,
+        protocol: 'http',
         // Change this to '0.0.0.0' to access the server from outside.
         hostname: 'localhost'
       },
@@ -231,8 +232,9 @@ module.exports = function (grunt) {
             src: [
               '*.{ico,png,txt}',
               '.htaccess',
-              'bower_components/**/*',
-              'vendor/scripts/angularjs/*',
+              'bower_components/**',
+
+              // 'vendor/scripts/angularjs/*',
               'vendor/styles/genomeviewer/**/*',
               'styles/images/{,*/}*.{gif,webp,svg,png}',
               'styles/fonts/*',
@@ -275,7 +277,7 @@ module.exports = function (grunt) {
     },
     karma: {
       unit: {
-        configFile: 'karma.conf.js',
+        configFile: './karma.conf.js',
         singleRun: true
       }
     },

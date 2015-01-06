@@ -1,0 +1,48 @@
+{
+  "name": "icgc-dcc",
+  "version": "3.5.12",
+  "homepage": "https://github.com/icgc-dcc/dcc-portal",
+  "authors": [
+    " <>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angularjs": "1.3.8",
+    "angular-sanitize": "~1.3.8",
+    "angular-animate": "~1.3.8",
+    "angular-cookies": "~1.3.8",
+    "angular-loading-bar": "~0.6.0",
+    "restangular": "~1.4.0",
+    "angular-ui-router": "~0.2.13",
+    "ngInfiniteScroll": "~1.2.0",
+    "angular-bootstrap": "0.5.0",
+    "angular-local-storage": "~0.1.5",
+    "angularytics": "~0.3.0",
+    "angular-ui-utils": "bower-scrollfix",
+    "angular-markdown-directive": "~0.3.1",
+    "FileSaver": "*",
+    "Blob": "*",
+    "highcharts": "3.0.10",
+    "d3": "3.5.2",
+    "x2js": "https://x2js.googlecode.com/files/x2js-v1.1.5.zip",
+    "angular-underscore": "~0.5.0",
+    "angular-lodash": "~0.1.2",
+    "lodash": "~2.4.1",
+    "jquery": "~2.1.3"
+  },
+  "devDependencies": {
+    "angular-scenario": "~1.3.8",
+    "angular-mocks": "~1.3.8"
+  },
+  "resolutions": {
+    "angular": "1.3.8",
+    "angular-bootstrap": "0.5.0"
+  }
+}
