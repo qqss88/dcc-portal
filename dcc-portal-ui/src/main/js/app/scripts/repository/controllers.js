@@ -22,7 +22,7 @@ angular.module('app.download.controllers', ['app.download.services']);
 // Note download may result in unwarranted warnings, see:
 // http://stackoverflow.com/questions/15393210/chrome-showing-canceled-on-successful-file-download-200-status
 angular.module('app.download.controllers').controller('DownloadController',
-  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular) {
+  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular, ProjectCache) {
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
@@ -59,10 +59,14 @@ angular.module('app.download.controllers').controller('DownloadController',
         // Check if there is a translation code for directories (projects)
         if (file.type === 'd') {
           name = (file.name).split('/').pop();
-          tName = $filter('define')(name);
-          if (name !== tName) {
-            file.translation = tName;
-          }
+
+          //tName = $filter('define')(name);
+          ProjectCache.getData().then(function(cache) {
+            tName = cache[name];
+            if (tName) {
+              file.translation = tName;
+            }
+          });
         }
 
         // Check file extension

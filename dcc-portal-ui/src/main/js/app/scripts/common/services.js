@@ -143,74 +143,28 @@
     };
   });
 
+  module.service('ProjectCache', function(Projects) {
+    var promise = null;
+    var cache = {};
+
+    function getData() {
+      if (promise !== null)  {
+        return promise;
+      }
+      promise = Projects.getList().then(function(data) {
+        data.hits.forEach(function(project) {
+          cache[project.id] = project.name;
+        });
+        return cache;
+      });
+      return promise;
+    }
+
+    this.getData = getData;
+  });
 
   module.service('DefinitionService', function(Extensions) {
     var definitions = {
-      // Projects
-      'ALL-US': 'Acute Lymphoblastic Leukemia - US',
-      'BLCA-CN': 'Bladder Cancer - CN',
-      'BLCA-US': 'Bladder Urothelial Cancer - TGCA, US',
-      'BOCA-UK': 'Bone Cancer - UK',
-      'BRCA-EU': 'Breast ER+ and HER2- Cancer - EU/UK',
-      'BRCA-FR': 'Breast Cancer - FR',
-      'BRCA-KR': 'Breast Cancer - KR',
-      'BRCA-MX': 'Breast Cancer - SIGMA, MX',
-      'BRCA-UK': 'Breast Triple Negative/Lobular Cancer - UK',
-      'BRCA-US': 'Breast Cancer - TCGA, US',
-      'CESC-US': 'Cervical Squamous Cell Carcinoma - TCGA, US',
-      'CLLE-ES': 'Chronic Lymphocyclic Leukemia - ES',
-      'CMDI-UK': 'Chronic Myeloid Disorders - UK',
-      'COAD-US': 'Colon Adenocarcinoma - TCGA, US',
-      'COCA-CN': 'Colorectal Cancer - CN',
-      'EOPC-DE': 'Early Onset Prostate Cancer - DE',
-      'ESAD-UK': 'Esophageal Adenocarcinoma - UK',
-      'ESCA-CN': 'Esophageal Cancer - CN',
-      'GACA-CN': 'Gastric Cancer - CN',
-      'GBM-US': 'Brain Glioblastoma Multiforme - TCGA, US',
-      'HNCA-MX': 'Head and Neck Cancer - SIGMA, MX',
-      'HNSC-US': 'Head and Neck Squamous Cell Carcinoma - TCGA, US',
-      'KIRC-US': 'Kidney Renal Clear Cell Carcinoma - TCGA, US',
-      'KIRP-US': 'Kidney Renal Papillary Cell Carcinoma - TCGA, US',
-      'LAML-KR': 'Acute Myeloid Leukemia - KR',
-      'LAML-US': 'Acute Myeloid Leukemia - TCGA, US',
-      'LGG-US': 'Brain Lower Grade Gliona - TCGA, US',
-      'LIAD-FR': 'Benign Liver Tumour - FR',
-      'LICA-CN': 'Liver Cancer - CN',
-      'LICA-FR': 'Liver Cancer - FR',
-      'LIHC-US': 'Liver Hepatocellular carcinoma - TCGA, US',
-      'LINC-JP': 'Liver Cancer - NCC, JP',
-      'LIRI-JP': 'Liver Cancer - RIKEN, JP',
-      'LUAD-US': 'Lung Adenocarcinoma - TCGA, US',
-      'LUCA-DE': 'Lung Cancer - DE',
-      'LUSC-KR': 'Lung Cancer - KR',
-      'LUSC-US': 'Lung Squamous Cell Carcinoma - TCGA, US',
-      'MALY-DE': 'Malignant Lymphoma - DE',
-      'NACA-CN': 'Nasopharyngeal cancer - CN',
-      'NBL-US': 'Brain Neuroblastoma - US',
-      'NHLY-MX': 'Non Hodgkin Lymphoma - SIGMA, MX',
-      'ORCA-IN': 'Oral Cancer - IN',
-      'OV-AU': 'Ovarian Cancer - AU',
-      'OV-US': 'Ovarian Serous Cystadenocarcinoma - TCGA, US',
-      'PAAD-US': 'Pancreatic Cancer - TCGA, US',
-      'PACA-AU': 'Pancreatic Cancer - AU',
-      'PACA-CA': 'Pancreatic Cancer - CA',
-      'PACA-IT': 'Pancreatic Cancer - IT',
-      'PAEN-AU': 'Pancreatic Cancer Endocrine neoplasms - AU',
-      'PBCA-DE': 'Pediatric Brain Cancer - DE',
-      'PEME-CA': 'Pediatric Medulloblastoma - CA',
-      'PRAD-CA': 'Prostate Adenocarcinoma - CA',
-      'PRAD-UK': 'Prostate Adenocarcinoma - UK',
-      'PRAD-US': 'Prostate Adenocarcinoma - TCGA, US',
-      'PRCA-FR': 'Prostate Cancer - FR',
-      'READ-US': 'Rectum Adenocarcinoma - TCGA, US',
-      'RECA-CN': 'Renal cancer - CN',
-      'RECA-EU': 'Renal Cell Cancer - EU/FR',
-      'SKCA-BR': 'Skin Adenocarcinoma - BR',
-      'SKCM-US': 'Skin Cutaneous melanoma - TCGA, US',
-      'STAD-US': 'Gastric Adenocarcinoma - TCGA, US',
-      'THCA-SA': 'Thyroid Cancer - SA',
-      'THCA-US': 'Head and Neck Thyroid Carcinoma - TCGA, US',
-      'UCEC-US': 'Uterine Corpus Endometrial Carcinoma- TCGA, US',
 
       // Data Types
       'Clinical': 'Clinical Data',

@@ -48,8 +48,9 @@ angular.module('template/lists', []).run(function ($templateCache) {
     '<a href="genesets/{{item.id}}"><span>{{item.name}}</span></a>' +
     '</span>');
 
-  $templateCache.put ( 'template/reactomePathway.html', 
-    '<span><a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{item.diagramId}}&ID={{item.geneSetId}}" target="_blank">' +
+  $templateCache.put ( 'template/reactomePathway.html',
+    '<span><a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{item.diagramId}}&ID={{item.geneSetId}}"' +
+    ' target="_blank">' +
     '<i class="icon-external-link"></i> View in Reactome Pathway Browser</a>' +
     '</span><pathway-tree tree="[item.root]"></pathway-tree><br>'
   );

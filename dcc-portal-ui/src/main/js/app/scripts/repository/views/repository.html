@@ -47,7 +47,7 @@
                     <td data-ng-if="file.type=='d'"
                         data-ng-style="deprecatedReleases.indexOf(file.baseName) >= 0?{'text-decoration':'line-through'}:{}">
                         <i class="icon-folder-open"></i>
-                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">[{{ file.baseName }}] {{ file.baseName | define }}</a>
+                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">[{{ file.baseName }}] {{ file.translation }}</a>
                         <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{ file.baseName }}</a>
                     </td>
                     <td data-ng-if="file.type=='f'" class="text-right">{{ file.size | bytes }}</td>
