@@ -86,10 +86,13 @@
     };
 
     refresh();
-    $scope.$on('$locationChangeSuccess', function () {
-      refresh();
-
+    $scope.$on('$locationChangeSuccess', function (evt, next, current) {
+      // FIXME: Only applicable on search page. Should have a cleaner solution
+      if (next.indexOf('search') !== -1) {
+        refresh();
+      }
     });
+
   });
 
   module.directive('current', function () {
