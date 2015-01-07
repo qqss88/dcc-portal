@@ -3145,7 +3145,7 @@ g.marker rect.selected {
 /* line 3, _modules/_trees.scss */
 .tree {
   font-size: 0.85rem;
-  line-height: 150%;
+  line-height: 155%;
 }
 
 /* line 8, _modules/_trees.scss */
@@ -3162,7 +3162,7 @@ g.marker rect.selected {
 .tree li {
   list-style-type: none;
   margin: 0;
-  padding: 7px 5px 0 5px !important;
+  padding: 4px 5px 0 5px !important;
   position: relative;
 }
 
@@ -3186,8 +3186,8 @@ g.marker rect.selected {
 /* line 39, _modules/_trees.scss */
 .tree li::after {
   border-top: 1px solid #166aa2;
-  height: 20px;
-  top: 20px;
+  height: 17px;
+  top: 17px;
   width: 12px;
 }
 
@@ -3200,7 +3200,7 @@ g.marker rect.selected {
   border-radius: 6px 6px;
   background-color: #fafafa;
   display: inline-block;
-  padding: 2px 5px;
+  padding: 1px 4px;
   text-decoration: none;
 }
 
@@ -3211,7 +3211,7 @@ g.marker rect.selected {
 
 /* line 69, _modules/_trees.scss */
 .tree li:last-child::before {
-  height: 20px;
+  height: 17px;
 }
 
 /* line 74, _modules/_trees.scss */

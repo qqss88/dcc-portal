@@ -215,7 +215,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
 
     search.setQuery(buildQuery(query));
-    log.info("{}", search);
+    log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 
