@@ -2,7 +2,7 @@
 
 .tree {
    font-size: 0.85rem;
-   line-height: 150%;
+   line-height: 155%;
 }
 
 .tree ul {
@@ -16,39 +16,39 @@
 
 .tree li {
     list-style-type:none;
-    margin:0;
-    padding:7px 5px 0 5px !important;
-    position:relative
+    margin: 0;
+    padding: 4px 5px 0 5px !important;
+    position: relative
 }
 
 .tree li::before, .tree li::after {
-    content:'';
-    left:-7px;
-    position:absolute;
-    right:auto;
+    content: '';
+    left: -7px;
+    position: absolute;
+    right: auto;
 }
 
 .tree li::before {
-    border-left:1px solid $blue;
-    bottom:50px;
-    height:100%;
-    top:0;
-    width:1px;
+    border-left: 1px solid $blue;
+    bottom: 50px;
+    height: 100%;
+    top: 0;
+    width: 1px;
 }
 
 .tree li::after {
-    border-top:1px solid $blue;
-    height:20px;
-    top:20px;
-    width:12px;
+    border-top: 1px solid $blue;
+    height: 17px;
+    top: 17px;
+    width: 12px;
 }
 
 .tree li span {
-    -moz-border-radius:3px;
-    -webkit-border-radius:3px;
-    border-radius:3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
 
-    border:1px solid $blue;
+    border: 1px solid $blue;
     border-radius: 6px 6px;
 
     background-color: $greyLightestEver;
@@ -58,8 +58,8 @@
     // border-bottom:1px solid #bbb;
 
     display: inline-block;
-    padding: 2px 5px;
-    text-decoration:none;
+    padding: 1px 4px;
+    text-decoration: none;
 }
 
 .tree>ul>li::before, .tree>ul>li::after {
@@ -67,7 +67,7 @@
 }
 
 .tree li:last-child::before {
-    height:20px;
+    height: 17px;
 }
 
 
