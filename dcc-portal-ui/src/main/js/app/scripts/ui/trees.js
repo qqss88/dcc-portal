@@ -137,13 +137,6 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         }
       }
 
-      function buildToggle(e) {
-        var toggleControl = angular.element('<input>').attr('type', 'checkbox');
-        var toggleLabel = angular.element('<span>').text(' Show ID');
-        toggleControl.appendTo(e);
-        toggleLabel.appendTo(e);
-      }
-
       addNesting($element.find('div')[0], $scope.tree);
 
       // Dynamically generated contents need compilation

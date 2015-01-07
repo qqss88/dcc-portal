@@ -20,8 +20,8 @@ package org.icgc.dcc.portal.resource;
 import static com.sun.jersey.api.client.ClientResponse.Status.ACCEPTED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.ANALYZING;
 import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.FINISHED;
+import static org.icgc.dcc.portal.model.EnrichmentAnalysis.State.PENDING;
 import static org.icgc.dcc.portal.model.Universe.REACTOME_PATHWAYS;
 import static org.icgc.dcc.portal.util.Filters.emptyFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -111,9 +110,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     formData.add("order", "asc");
 
     // Mock
-    val state = ANALYZING;
-    when(service.getAnalysis(Mockito.any(UUID.class)))
-        .thenReturn(new EnrichmentAnalysis().setState(state));
+    val state = PENDING;
 
     // Execute
     val response = client()

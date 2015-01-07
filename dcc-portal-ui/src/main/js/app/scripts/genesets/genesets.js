@@ -69,7 +69,10 @@
 
         node.goTerms = [];
         inferredTree.forEach(function(goTerm) {
-          if (goTerm.level !== current) {
+          // if (goTerm.level !== current) {
+          // FIXME: Temporary fix to get around the issue where level can be 0 and self is also
+          // 0 in the ETL
+          if (goTerm.level !== current || goTerm.relation === 'self') {
             current = goTerm.level;
             node.child = {};
             node.child .goTerms = [];
