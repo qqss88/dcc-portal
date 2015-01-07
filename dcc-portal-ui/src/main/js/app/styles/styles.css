@@ -3216,22 +3216,22 @@ g.marker rect.selected {
 
 /* line 74, _modules/_trees.scss */
 .tree .goterm_part_of {
-  color: #0000FF;
+  color: #0000fe;
 }
 
 /* line 81, _modules/_trees.scss */
 .tree .goterm_regulates {
-  color: #FF8800;
+  color: #feb40b;
 }
 
 /* line 85, _modules/_trees.scss */
 .tree .goterm_positively_regulates {
-  color: #00FF00;
+  color: #1fff09;
 }
 
 /* line 89, _modules/_trees.scss */
 .tree .goterm_negatively_regulates {
-  color: #FF0000;
+  color: #fc0008;
 }
 
 /* line 93, _modules/_trees.scss */
