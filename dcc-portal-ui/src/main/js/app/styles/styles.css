@@ -3143,16 +3143,22 @@ g.marker rect.selected {
 
 /* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
 /* line 3, _modules/_trees.scss */
+.tree {
+  font-size: 0.85rem;
+  line-height: 150%;
+}
+
+/* line 8, _modules/_trees.scss */
 .tree ul {
   padding: 0 0 0 15px;
 }
 
-/* line 7, _modules/_trees.scss */
+/* line 12, _modules/_trees.scss */
 .tree > ul {
   padding: 0;
 }
 
-/* line 12, _modules/_trees.scss */
+/* line 17, _modules/_trees.scss */
 .tree li {
   list-style-type: none;
   margin: 0;
@@ -3160,7 +3166,7 @@ g.marker rect.selected {
   position: relative;
 }
 
-/* line 19, _modules/_trees.scss */
+/* line 24, _modules/_trees.scss */
 .tree li::before, .tree li::after {
   content: '';
   left: -7px;
@@ -3168,7 +3174,7 @@ g.marker rect.selected {
   right: auto;
 }
 
-/* line 26, _modules/_trees.scss */
+/* line 31, _modules/_trees.scss */
 .tree li::before {
   border-left: 1px solid #166aa2;
   bottom: 50px;
@@ -3177,7 +3183,7 @@ g.marker rect.selected {
   width: 1px;
 }
 
-/* line 34, _modules/_trees.scss */
+/* line 39, _modules/_trees.scss */
 .tree li::after {
   border-top: 1px solid #166aa2;
   height: 20px;
@@ -3185,7 +3191,7 @@ g.marker rect.selected {
   width: 12px;
 }
 
-/* line 41, _modules/_trees.scss */
+/* line 46, _modules/_trees.scss */
 .tree li span {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -3198,34 +3204,39 @@ g.marker rect.selected {
   text-decoration: none;
 }
 
-/* line 60, _modules/_trees.scss */
+/* line 65, _modules/_trees.scss */
 .tree > ul > li::before, .tree > ul > li::after {
   border: 0;
 }
 
-/* line 64, _modules/_trees.scss */
+/* line 69, _modules/_trees.scss */
 .tree li:last-child::before {
   height: 20px;
 }
 
-/* line 69, _modules/_trees.scss */
+/* line 74, _modules/_trees.scss */
 .tree .goterm_part_of {
-  color: #FF8800;
+  color: #0000FF;
 }
 
-/* line 76, _modules/_trees.scss */
+/* line 81, _modules/_trees.scss */
 .tree .goterm_regulates {
   color: #FF8800;
 }
 
-/* line 80, _modules/_trees.scss */
+/* line 85, _modules/_trees.scss */
 .tree .goterm_positively_regulates {
-  color: #0000FF;
+  color: #00FF00;
 }
 
-/* line 84, _modules/_trees.scss */
+/* line 89, _modules/_trees.scss */
 .tree .goterm_negatively_regulates {
   color: #FF0000;
+}
+
+/* line 93, _modules/_trees.scss */
+.tree .goterm_unknown {
+  color: #888888;
 }
 
 /* Bar charts styles */

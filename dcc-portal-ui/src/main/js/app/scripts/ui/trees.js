@@ -54,8 +54,14 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
     scope: {
       tree: '='
     },
-    template: '<div class="tree"></div>',
+    template: '<div><span data-ng-click="toggle()">' +
+      '<i data-ng-class="{\'icon-check-empty\':!showID, \'icon-check\':showID}"></i> Show GO IDs</span>' +
+      '<div class="tree"></div></div>',
     link: function($scope, $element) {
+
+      $scope.toggle = function() {
+        $scope.showID = !$scope.showID;
+      };
 
       // If grand child exist, this is inferred.
       function getRelation(relation, hasGrandChild) {
@@ -76,18 +82,20 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         } else if (relation === 'positively_regulates') {
           return element.text('R')
             .attr('data-tooltip', hasGrandChild? 'Inferred positively regulates' : 'Positively regulates')
-            .attr('class', 'goterm_regulates');
+            .attr('class', 'goterm_positively_regulates');
         } else if (relation === 'negatively_regulates') {
           return element.text('R')
             .attr('data-tooltip', hasGrandChild? 'Inferred negatively regulates' : 'Negatively regulates')
-            .attr('class', 'goterm_regulates');
+            .attr('class', 'goterm_negatively_regulates');
         } else if (relation === 'self') {
           return element.text('');
         } else {
           // FIXME: need to find out how to resolve unknowns
-          return element.text('?');
+          // return element.text('?');
+          return element.text('U')
+            .attr('data-tooltip', 'Unknown - Not possible to infer relation')
+            .attr('class', 'goterm_unknown');
         }
-        // return null;
       }
 
       function addNesting(e, current) {
@@ -97,13 +105,12 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         li = angular.element('<li>');
         span = angular.element('<span>');
 
-
         if (current.child && current.child.child) {
           hasGrandChild = true;
         }
 
         current.goTerms.forEach(function(goTerm) {
-          label = ' ' + goTerm.id + ' ' + goTerm.name;
+          label = ' {{showID? "' + goTerm.id + ' ' + goTerm.name + '":"' + goTerm.name + '"}}';
           anchor = angular.element('<a>').attr('data-ng-href', '/genesets/' + goTerm.id).text(label);
           relation = getRelation(goTerm.relation, hasGrandChild);
 
@@ -130,10 +137,17 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         }
       }
 
-      addNesting($element[0], $scope.tree);
+      function buildToggle(e) {
+        var toggleControl = angular.element('<input>').attr('type', 'checkbox');
+        var toggleLabel = angular.element('<span>').text(' Show ID');
+        toggleControl.appendTo(e);
+        toggleLabel.appendTo(e);
+      }
+
+      addNesting($element.find('div')[0], $scope.tree);
 
       // Dynamically generated contents need compilation
-      $compile($element.contents())($scope);
+      $compile($element.find('div').contents())($scope);
 
     }
   };

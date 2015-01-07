@@ -1,5 +1,10 @@
 /* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
 
+.tree {
+   font-size: 0.85rem;
+   line-height: 150%;
+}
+
 .tree ul {
    padding: 0 0 0 15px; 
 }
@@ -67,7 +72,7 @@
 
 
 .tree .goterm_part_of {
-   color: #FF8800;
+   color: #0000FF;
 }
 
 .tree .goterm_is_a {
@@ -78,10 +83,14 @@
 }
 
 .tree .goterm_positively_regulates {
-   color: #0000FF;
+   color: #00FF00;
 }
 
 .tree .goterm_negatively_regulates {
    color: #FF0000;
+}
+
+.tree .goterm_unknown {
+   color: #888888;
 }
 
