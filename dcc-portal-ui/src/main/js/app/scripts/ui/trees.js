@@ -118,7 +118,7 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
             relation.appendTo(span);
           }
 
-          if (goTerm.level === 0) {
+          if (goTerm.relation === 'self') {
             angular.element('<strong>').text(label).appendTo(span);
           } else {
             anchor.appendTo(span);
@@ -135,13 +135,6 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         if (current.child) {
           addNesting(li, current.child);
         }
-      }
-
-      function buildToggle(e) {
-        var toggleControl = angular.element('<input>').attr('type', 'checkbox');
-        var toggleLabel = angular.element('<span>').text(' Show ID');
-        toggleControl.appendTo(e);
-        toggleLabel.appendTo(e);
       }
 
       addNesting($element.find('div')[0], $scope.tree);

@@ -21,6 +21,7 @@ import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -78,7 +79,7 @@ public @interface FloatRange {
         if (!isValid) {
           context.disableDefaultConstraintViolation();
           context.buildConstraintViolationWithTemplate(
-              "must be in range [" + min + ", " + max + "] inclusive")
+              "must be in range [" + _("%f", min) + ", " + _("%f", max) + "] inclusive")
               .addConstraintViolation();
         }
       }

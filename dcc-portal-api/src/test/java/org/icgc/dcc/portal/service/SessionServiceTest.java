@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.User;
+import org.icgc.dcc.portal.test.HazelcastFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,7 @@ public class SessionServiceTest {
 
   @Before
   public void setUp() throws Exception {
+    hazelcast = HazelcastFactory.createLocalHazelcastInstance();
     Map<UUID, User> usersCache = hazelcast.getMap(SessionService.USERS_CACHE_NAME);
     Map<UUID, DiscoveryInformation> discoveryInfoCache = hazelcast.getMap(DISCOVERY_INFO_CACHE_NAME);
 
