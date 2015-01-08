@@ -277,16 +277,17 @@ public class OpenIDAuthService {
   }
 
   private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
+    val redirectBuilder = UriBuilder.fromPath("/");
+    val returnBuilder = UriBuilder.fromPath("api");
 
-    UriBuilder redirectBuilder = UriBuilder.fromPath("/");
-    UriBuilder returnBuilder = UriBuilder.fromPath("api");
+    // The end-user and an HTTPS termination point(portal or load balancer) always communicate over HTTPS in OpenID
+    // authentication scenario, that's why scheme in a return_to URL always must be set to HTTPS
+    redirectBuilder.scheme(Scheme.HTTPS.getId());
+    returnBuilder.scheme(Scheme.HTTPS.getId());
 
-    if (port == DEFAULT_HTTP_PORT) {
-      redirectBuilder.scheme(Scheme.HTTP.getId());
-      returnBuilder.scheme(Scheme.HTTP.getId());
-    } else {
-      redirectBuilder.scheme(Scheme.HTTPS.getId()).port(port);
-      returnBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+    if (port != DEFAULT_HTTP_PORT) {
+      redirectBuilder.port(port);
+      returnBuilder.port(port);
     }
 
     redirectBuilder.host(hostname)
