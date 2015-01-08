@@ -54,14 +54,14 @@ public class EnrichmentParamsTest extends AbstractValidationTest<EnrichmentParam
   public void testTooSmallFdr() {
     val violations = validate(validParams().setFdr(0.0f));
 
-    assertSingleViolation(violations, "must be in range [0.0050, 0.5] inclusive");
+    assertSingleViolation(violations, "must be in range [0.005000, 0.500000] inclusive");
   }
 
   @Test
   public void testTooBigFdr() {
     val violations = validate(validParams().setFdr(1.0f));
 
-    assertSingleViolation(violations, "must be in range [0.0050, 0.5] inclusive");
+    assertSingleViolation(violations, "must be in range [0.005000, 0.500000] inclusive");
   }
 
   private static EnrichmentParams validParams() {
