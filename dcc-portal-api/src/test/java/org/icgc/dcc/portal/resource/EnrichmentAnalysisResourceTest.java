@@ -29,6 +29,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import javax.ws.rs.core.MediaType;
+
 import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
@@ -89,6 +91,7 @@ public class EnrichmentAnalysisResourceTest extends ResourceTest {
     val response = client()
         .resource(RESOURCE)
         .path(analysisId.toString())
+        .accept(MediaType.APPLICATION_JSON)
         .get(ClientResponse.class);
 
     assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());

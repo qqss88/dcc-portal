@@ -118,7 +118,7 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
             relation.appendTo(span);
           }
 
-          if (goTerm.level === 0) {
+          if (goTerm.relation === 'self') {
             angular.element('<strong>').text(label).appendTo(span);
           } else {
             anchor.appendTo(span);

@@ -70,9 +70,8 @@
         node.goTerms = [];
         inferredTree.forEach(function(goTerm) {
           // if (goTerm.level !== current) {
-          // FIXME: Temporary fix to get around the issue where level can be 0 and self is also
-          // 0 in the ETL
-          if (goTerm.level !== current || goTerm.relation === 'self') {
+          // FIXME: Temporary fix to get around the issue where root level can be 0 and self is also 0
+          if ( (goTerm.level !== current || goTerm.relation === 'self') && !_.isEmpty(node.goTerms)) {
             current = goTerm.level;
             node.child = {};
             node.child .goTerms = [];
@@ -332,7 +331,6 @@
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
           _ctrl.mutations.hits.forEach(function (mutation) {
-            // console.log('mutation', mutation);
             Donors.getList({
               size: 0,
               include: 'facets',
