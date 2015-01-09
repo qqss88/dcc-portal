@@ -60,8 +60,8 @@
     'icgc.genelist',
     'icgc.genesets',
     'icgc.visualization',
-    'icgc.enrichment',
-    'icgc.analysis',
+    //'icgc.enrichment',
+    //'icgc.analysis',
 
     // old
     'app.ui',
@@ -108,8 +108,8 @@
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
-    // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
