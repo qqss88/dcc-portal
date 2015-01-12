@@ -76,7 +76,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.icgc.dcc.data.common.ExportedDataFileSystem;
 import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
@@ -571,8 +570,6 @@ public class DownloadResource {
       @DefaultValue("") String filePath
 
       ) throws IOException {
-
-    if (StringUtils.isBlank(filePath)) throw new NotFoundException(filePath, "download");
 
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
