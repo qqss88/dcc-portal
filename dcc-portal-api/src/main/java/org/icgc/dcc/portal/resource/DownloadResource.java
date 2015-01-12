@@ -17,7 +17,6 @@
 
 package org.icgc.dcc.portal.resource;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
@@ -569,22 +568,24 @@ public class DownloadResource {
 
       @ApiParam(value = "filename to download", required = true)//
       @QueryParam("fn")//
-      @DefaultValue("/") String filePath
+      @DefaultValue("") String filePath
 
       ) throws IOException {
+
+    if (StringUtils.isBlank(filePath)) throw new NotFoundException(filePath, "download");
+
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
     StreamingOutput archiveStream = null;
     String filename = null;
 
-    checkArgument(StringUtils.isNotBlank(filePath));
-
     File downloadFile = new File(filePath);
     Predicate<File> predicate =
         (isLogin ? new LoginUserAccessiblePredicate() : new EveryoneAccessiblePredicate());
-    if (predicate.apply(downloadFile)) {
+
+    if (fs.isFile(downloadFile) && predicate.apply(downloadFile)) {
       long contentLength = fs.getSize(downloadFile);
-      archiveStream = archiveStream(filePath);
+      archiveStream = archiveStream(downloadFile);
       rb.header(CONTENT_LENGTH, contentLength);
       filename = downloadFile.getName();
     } else {
@@ -754,14 +755,14 @@ public class DownloadResource {
     };
   }
 
-  private StreamingOutput archiveStream(final String relativePath) {
+  private StreamingOutput archiveStream(final File relativePath) {
     return new StreamingOutput() {
 
       @Override
       public void write(final OutputStream out) throws IOException, WebApplicationException {
         try {
           @Cleanup
-          InputStream in = fs.createInputStream(new File(relativePath), 0);
+          InputStream in = fs.createInputStream(relativePath, 0);
           IOUtils.copy(in, out);
         } catch (Exception e) {
           log.warn("Exception thrown from Dynamic Download Resource.", e);
