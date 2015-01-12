@@ -49,6 +49,7 @@
     <link rel="stylesheet" href="styles/icgc-icons.css"/>
     <link rel="stylesheet" href="vendor/styles/slider.css"/>
     <link rel="stylesheet" href="vendor/styles/angular-loading-bar.css"/>
+    <link rel="stylesheet" href="bower_components/angularjs-toaster/toaster.css"/>
     <!-- endbuild -->
 
     <!-- Genome Browser -->
@@ -114,6 +115,7 @@
 
 
 <notify></notify>
+<toaster-container></toaster-container>
 <div data-ng-if="!AppCtrl.appLoaded || AppCtrl.Page.working() || AppCtrl.Page.getError()" id="loading-screen">
     <div data-ng-if="(!AppCtrl.appLoaded || AppCtrl.Page.working()) && ! AppCtrl.Page.getError()">
         <i class="icon-spin icon-spinner"></i>
@@ -152,6 +154,7 @@
 <script src="bower_components/angular-markdown-directive/markdown.js"></script>
 <script src="bower_components/angular-lodash/angular-lodash.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="bower_components/angularjs-toaster/toaster.js"></script>
 
 
 
@@ -249,6 +252,7 @@
 <script src="scripts/genelist/genelist.js"></script>
 <script src="scripts/enrichment/enrichment.js"></script>
 <script src="scripts/analysis/analysis.js"></script>
+<script src="scripts/analysis/bench.js"></script>
 <!-- endbuild -->
 
 <script>

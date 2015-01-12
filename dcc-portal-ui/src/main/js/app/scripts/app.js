@@ -35,6 +35,8 @@
     'angular-loading-bar',
     'btford.markdown',
     'LocalStorageModule',
+    'toaster',
+
 
     // 3rd party
     'highcharts',
@@ -61,6 +63,7 @@
     'icgc.genesets',
     'icgc.visualization',
     'icgc.enrichment',
+    'icgc.bench',
     'icgc.analysis',
 
     // old
@@ -116,7 +119,7 @@
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
-    // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:53421/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 

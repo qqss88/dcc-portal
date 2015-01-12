@@ -1,14 +1,31 @@
 <h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Analysis</h1>
 <aside class="t_sidebar">
     <div style="margin-right: -2rem">
+
+        <div>
+            <span class="t_tabs__tab t_tabs__tab__analysis active"> 
+                <span>Analyses</span>
+            </span>
+            <span class="pull-right" style="margin: 0.5rem">
+                <button class="t_button"><i class="icon-cancel"></i>Clear all</button>
+            </span>
+        </div>
+        <!--
+        <ul>
+            <li class="text-right" style="margin-right:0.5rem">
+               <button class="t_button"><i class="icon-cancel"></i>Clear all</button>
+           </li>
+        </ul>
+        <hr>
+        -->
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem" data-scroll-to-selection>
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
                     data-ng-class="{selected: !analysisId}">
-                    <span>Analysis</span>
+                    <span>Home</span>
                     <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
-                    <small>Home</small>
+                    <small>--</small>
                 </>
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id)"
@@ -34,11 +51,69 @@
 
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
-        <div> Placeholder for instructions</div>
+        <div>?????????????</div>
             <br>
+
+            <button class="t_button" data-ng-click="createTestList('donor')">Test Donor</button>
+            <button class="t_button" data-ng-click="createTestList('gene')">Test Gene</button>
+            <button class="t_button" data-ng-click="createTestList('mutation')">Test Mutations</button>
+            <br><br>
+
             <div>
-                <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Remove all Analyses</button>
+                <span>
+                    <button class="t_button" data-ng-disabled="!setop">
+                    Set Operations
+                    </button>
+                </span>
+                <span>|</span>
+                <span>
+                    <button class="t_button" data-ng-disabled="!enrichment">
+                    Enrichment Analysis
+                    </button>
+                </span>
             </div>
+            <br>
+            <span>
+                <span>Select list(s) below to activate available analysis</span>
+                <span class="pull-right">Create a new list from <a href="/search">Advanced Search</a></span>
+            </span>
+            <table class="table">
+                <thead>
+                    <th>&nbsp;</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th># of items</th>
+                    <th>Created Date</th>
+                    <th>&nbsp;</th>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="item in entityLists">
+                        <td>
+                            <span style="cursor:pointer" data-ng-click="item.checked = !item.checked; updateAvailableAnalysis()">
+                                <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
+                            </span>
+                        </td>
+                        <td>{{item.type}}</td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.note}}</td>
+                        <td class="text-right">
+                            <a href="/search">{{item.count | number}}</a>
+                        </td>
+                        <td>
+                            YYYY-MM-DD
+                        </td>
+                        <td>
+                            <span class="t_tools" style="float:left"> 
+                                <span class="t_tools__tool">
+                                    <i class="icon-file" data-ng-click="exportList(item.id)"></i>
+                                    <i class="icon-cancel" data-ng-click="removeList(item.id)"></i>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
