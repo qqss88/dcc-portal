@@ -17,44 +17,40 @@
  */
 package org.dcc.portal.pql.es.builder;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ExpressionType;
-import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.node.TerminalNode;
 import org.junit.Test;
 
 public class TermBuilderTest {
 
   @Test
   public void termBuilderTest() {
-    val termBuilder = Builders.createTermBuilder();
-    val node = termBuilder.name("sex").value("male").build();
+    val node = Builders.termNode("sex", "male");
 
     assertThat(node.getChildrenCount()).isEqualTo(2);
 
-    val name = node.getChild(0);
+    val name = node.getName();
     assertThat(name).isInstanceOf(TerminalNode.class);
     assertThat(name.getParent()).isEqualTo(node);
     assertThat(name.getPayload().toString()).isEqualTo("sex");
 
-    val value = node.getChild(1);
+    val value = node.getValue();
     assertThat(value).isInstanceOf(TerminalNode.class);
     assertThat(value.getParent()).isEqualTo(node);
     assertThat(value.getPayload().toString()).isEqualTo("male");
 
     assertThat(node.getParent()).isNull();
-    assertThat((ExpressionType) node.getPayload()).isEqualTo(ExpressionType.TERM);
   }
 
-  @Test
-  public void partialTermNodeTest() {
-    catchException(Builders.createTermBuilder().name("sex")).build();
-    assertThat(caughtException()).isInstanceOf(NullPointerException.class);
-    catchException(Builders.createTermBuilder().value("male")).build();
-    assertThat(caughtException()).isInstanceOf(NullPointerException.class);
+  @Test(expected = NullPointerException.class)
+  public void partialConstructorTest_name() {
+    Builders.termNode("sex", null);
   }
 
+  @Test(expected = NullPointerException.class)
+  public void partialConstructorTest_value() {
+    Builders.termNode(null, "male");
+  }
 }

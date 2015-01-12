@@ -15,68 +15,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.internal.builder;
+package org.dcc.portal.pql.es.node;
 
-import java.util.List;
+import java.util.Collection;
 
-import lombok.NonNull;
-import lombok.val;
+import lombok.Getter;
 
-import org.assertj.core.util.Lists;
-import org.dcc.portal.pql.es.builder.BoolBuilder;
-import org.dcc.portal.pql.es.builder.Builders;
-import org.dcc.portal.pql.es.node.BoolExpressionNode;
-import org.dcc.portal.pql.es.node.ExpressionNode;
-import org.dcc.portal.pql.es.node.MustExpressionNode;
-import org.dcc.portal.pql.es.utils.Helpers;
+import org.dcc.portal.pql.es.visitor.ExpressionNodeVisitor;
 
-public class BoolBuilderImpl implements BoolBuilder {
+@Getter
+public class TerminalNode extends ExpressionNode {
 
-  private BoolExpressionNode result;
-  private List<ExpressionNode> children = Lists.newArrayList();
+  private Object payload;
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull MustExpressionNode mustNode) {
-    children.add(mustNode);
-
-    return this;
+  public TerminalNode(Node parent, Object payload) {
+    super(parent, new ExpressionNode[] {});
+    this.payload = payload;
   }
 
   @Override
-  public BoolBuilder mustTerm(@NonNull String name, @NonNull Object value) {
-    MustExpressionNode mustNode = Helpers.getChildByType(children, MustExpressionNode.class);
-    val termNode = Builders.termNode(name, value);
-    if (mustNode == null) {
-      mustNode = Builders.mustNode(null, termNode);
-      children.add(mustNode);
-    } else {
-      mustNode.addChild(termNode);
-    }
-
-    return this;
+  public Collection<ExpressionNode> getChildren() {
+    throw new UnsupportedOperationException("Terminal Nodes do not have children");
   }
 
   @Override
-  public BoolBuilder shouldTerm() {
-    return this;
-
+  public int getChildrenCount() {
+    throw new UnsupportedOperationException("Terminal Nodes do not have children");
   }
 
   @Override
-  public BoolBuilder shouldNotTerm() {
-    return this;
-
-  }
-
-  @Override
-  public BoolExpressionNode build() {
-    result = new BoolExpressionNode(null, children);
-
-    for (val child : children) {
-      child.setParent(null);
-    }
-
-    return result;
+  public <T> T accept(ExpressionNodeVisitor<T> visitor) {
+    throw new UnsupportedOperationException("Terminal Nodes do not implement accept methods");
   }
 
 }

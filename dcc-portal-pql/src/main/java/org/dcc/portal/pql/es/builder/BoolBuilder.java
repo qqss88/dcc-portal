@@ -17,16 +17,19 @@
  */
 package org.dcc.portal.pql.es.builder;
 
-import org.dcc.portal.pql.es.internal.ast.ExpressionNodeImpl;
+import org.dcc.portal.pql.es.node.BoolExpressionNode;
+import org.dcc.portal.pql.es.node.MustExpressionNode;
 
 public interface BoolBuilder {
 
-  BoolBuilder mustTerm(ExpressionNodeImpl termNode);
+  BoolBuilder mustTerm(MustExpressionNode termNode);
 
-  TermBuilder shouldTerm();
+  BoolBuilder mustTerm(String name, Object value);
 
-  TermBuilder shouldNotTerm();
+  BoolBuilder shouldTerm();
 
-  ExpressionNodeImpl build();
+  BoolBuilder shouldNotTerm();
+
+  BoolExpressionNode build();
 
 }

@@ -15,68 +15,50 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.internal.builder;
+package org.dcc.portal.pql.es.utils;
 
-import java.util.List;
+import static com.google.common.base.Preconditions.checkState;
 
-import lombok.NonNull;
+import java.util.Collection;
+
 import lombok.val;
 
-import org.assertj.core.util.Lists;
-import org.dcc.portal.pql.es.builder.BoolBuilder;
-import org.dcc.portal.pql.es.builder.Builders;
-import org.dcc.portal.pql.es.node.BoolExpressionNode;
 import org.dcc.portal.pql.es.node.ExpressionNode;
-import org.dcc.portal.pql.es.node.MustExpressionNode;
-import org.dcc.portal.pql.es.utils.Helpers;
+import org.elasticsearch.common.collect.Lists;
 
-public class BoolBuilderImpl implements BoolBuilder {
+import com.google.common.collect.Iterables;
 
-  private BoolExpressionNode result;
-  private List<ExpressionNode> children = Lists.newArrayList();
+// FIXME: make DRYer
+public class Helpers {
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull MustExpressionNode mustNode) {
-    children.add(mustNode);
+  /**
+   * Gets a child by {@code childType}.
+   * @throws IllegalStateException if there are more than one child of type {@code childType}
+   */
+  public static <T> T getChildByType(ExpressionNode node, Class<T> childType) {
+    val children = getChildrenByType(node, childType);
+    checkState(children.size() == 1,
+        "A BoolExpressionNode can contain only a single node of type MustExpressionNode");
 
-    return this;
+    return children.iterator().next();
   }
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull String name, @NonNull Object value) {
-    MustExpressionNode mustNode = Helpers.getChildByType(children, MustExpressionNode.class);
-    val termNode = Builders.termNode(name, value);
-    if (mustNode == null) {
-      mustNode = Builders.mustNode(null, termNode);
-      children.add(mustNode);
-    } else {
-      mustNode.addChild(termNode);
+  public static <T> Collection<T> getChildrenByType(ExpressionNode node, Class<T> childType) {
+    val children = Iterables.filter(node.getChildren(), childType);
+
+    return Lists.<T> newArrayList(children);
+  }
+
+  public static <T> T getChildByType(Collection<ExpressionNode> nodes, Class<T> childType) {
+    val children = Iterables.filter(nodes, childType);
+    val filtered = Lists.<T> newArrayList(children);
+    if (filtered.isEmpty()) {
+      return null;
     }
 
-    return this;
-  }
+    checkState(filtered.size() == 1, "The collection contains more that one child of the type");
 
-  @Override
-  public BoolBuilder shouldTerm() {
-    return this;
-
-  }
-
-  @Override
-  public BoolBuilder shouldNotTerm() {
-    return this;
-
-  }
-
-  @Override
-  public BoolExpressionNode build() {
-    result = new BoolExpressionNode(null, children);
-
-    for (val child : children) {
-      child.setParent(null);
-    }
-
-    return result;
+    return filtered.get(0);
   }
 
 }

@@ -15,68 +15,62 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.internal.builder;
+package org.dcc.portal.pql.es.visitor;
 
-import java.util.List;
-
-import lombok.NonNull;
+import static com.google.common.base.Preconditions.checkState;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.assertj.core.util.Lists;
-import org.dcc.portal.pql.es.builder.BoolBuilder;
-import org.dcc.portal.pql.es.builder.Builders;
 import org.dcc.portal.pql.es.node.BoolExpressionNode;
-import org.dcc.portal.pql.es.node.ExpressionNode;
 import org.dcc.portal.pql.es.node.MustExpressionNode;
-import org.dcc.portal.pql.es.utils.Helpers;
+import org.dcc.portal.pql.es.node.TermExpressionNode;
+import org.elasticsearch.common.collect.Lists;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 
-public class BoolBuilderImpl implements BoolBuilder {
+import com.google.common.collect.Iterables;
 
-  private BoolExpressionNode result;
-  private List<ExpressionNode> children = Lists.newArrayList();
+@Slf4j
+public class ExpressionNodeVisitorImpl implements ExpressionNodeVisitor<FilterBuilder> {
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.ExpressionNodeVisitor#visitBool(org.dcc.portal.pql.es.node.BoolExpressionNode)
+   */
   @Override
-  public BoolBuilder mustTerm(@NonNull MustExpressionNode mustNode) {
-    children.add(mustNode);
-
-    return this;
-  }
-
-  @Override
-  public BoolBuilder mustTerm(@NonNull String name, @NonNull Object value) {
-    MustExpressionNode mustNode = Helpers.getChildByType(children, MustExpressionNode.class);
-    val termNode = Builders.termNode(name, value);
-    if (mustNode == null) {
-      mustNode = Builders.mustNode(null, termNode);
-      children.add(mustNode);
-    } else {
-      mustNode.addChild(termNode);
+  public FilterBuilder visitBool(BoolExpressionNode node) {
+    BoolFilterBuilder resultBuilder = FilterBuilders.boolFilter();
+    val mustNode = getMustNode(node);
+    for (val child : mustNode.getChildren()) {
+      val termNode = child.accept(this);
+      resultBuilder = resultBuilder.must(termNode);
     }
 
-    return this;
+    return resultBuilder;
   }
 
   @Override
-  public BoolBuilder shouldTerm() {
-    return this;
+  public FilterBuilder visitTerm(TermExpressionNode node) {
+    val name = node.getName().getPayload().toString();
+    val value = node.getValue().getPayload();
+    log.info("Visiting term. Name: '{}', Value: '{}'", name, value);
 
+    // FIXME: Make terminal node generic so a correct type could be applied
+    return FilterBuilders.termFilter(name, value);
   }
 
   @Override
-  public BoolBuilder shouldNotTerm() {
-    return this;
-
+  public FilterBuilder visitMust(MustExpressionNode node) {
+    return null;
   }
 
-  @Override
-  public BoolExpressionNode build() {
-    result = new BoolExpressionNode(null, children);
+  private static MustExpressionNode getMustNode(BoolExpressionNode boolExpression) {
+    val mustNodes = Lists.newArrayList(Iterables.filter(boolExpression.getChildren(), MustExpressionNode.class));
+    checkState(mustNodes.size() == 1, "A BoolExpressionNode can contain only a single node of type MustExpressionNode");
 
-    for (val child : children) {
-      child.setParent(null);
-    }
-
-    return result;
+    return mustNodes.get(0);
   }
 
 }

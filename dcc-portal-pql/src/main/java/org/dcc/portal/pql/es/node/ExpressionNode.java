@@ -15,68 +15,62 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.internal.builder;
+package org.dcc.portal.pql.es.node;
 
-import java.util.List;
+import java.util.Collection;
 
 import lombok.NonNull;
-import lombok.val;
 
-import org.assertj.core.util.Lists;
-import org.dcc.portal.pql.es.builder.BoolBuilder;
-import org.dcc.portal.pql.es.builder.Builders;
-import org.dcc.portal.pql.es.node.BoolExpressionNode;
-import org.dcc.portal.pql.es.node.ExpressionNode;
-import org.dcc.portal.pql.es.node.MustExpressionNode;
-import org.dcc.portal.pql.es.utils.Helpers;
+import org.dcc.portal.pql.es.visitor.ExpressionNodeVisitor;
+import org.elasticsearch.common.collect.Lists;
 
-public class BoolBuilderImpl implements BoolBuilder {
+public abstract class ExpressionNode extends Node {
 
-  private BoolExpressionNode result;
-  private List<ExpressionNode> children = Lists.newArrayList();
+  protected Node parent;
+  protected Collection<ExpressionNode> children;
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull MustExpressionNode mustNode) {
-    children.add(mustNode);
+  public ExpressionNode(Node parent, ExpressionNode[] children) {
+    this.parent = parent;
+    this.children = Lists.newArrayList(children);
+  }
 
-    return this;
+  public ExpressionNode(Node parent, @NonNull Collection<ExpressionNode> children) {
+    this.parent = parent;
+    this.children = children;
   }
 
   @Override
-  public BoolBuilder mustTerm(@NonNull String name, @NonNull Object value) {
-    MustExpressionNode mustNode = Helpers.getChildByType(children, MustExpressionNode.class);
-    val termNode = Builders.termNode(name, value);
-    if (mustNode == null) {
-      mustNode = Builders.mustNode(null, termNode);
-      children.add(mustNode);
-    } else {
-      mustNode.addChild(termNode);
-    }
+  public Node getParent() {
+    return parent;
+  }
 
-    return this;
+  public void setParent(ExpressionNode parent) {
+    this.parent = parent;
   }
 
   @Override
-  public BoolBuilder shouldTerm() {
-    return this;
+  public abstract <T> T accept(ExpressionNodeVisitor<T> visitor);
 
+  /**
+   * Not implemented yet, because can't think of usage in ExpressionNode
+   */
+  @Override
+  public Object getPayload() {
+    throw new UnsupportedOperationException();
+  }
+
+  public void addChild(@NonNull ExpressionNode child) {
+    children.add(child);
   }
 
   @Override
-  public BoolBuilder shouldNotTerm() {
-    return this;
-
+  public Collection<ExpressionNode> getChildren() {
+    return children;
   }
 
   @Override
-  public BoolExpressionNode build() {
-    result = new BoolExpressionNode(null, children);
-
-    for (val child : children) {
-      child.setParent(null);
-    }
-
-    return result;
+  public int getChildrenCount() {
+    return children.size();
   }
 
 }

@@ -17,21 +17,33 @@
  */
 package org.dcc.portal.pql.es.builder;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
 
 import org.dcc.portal.pql.es.internal.builder.BoolBuilderImpl;
-import org.dcc.portal.pql.es.internal.builder.TermBuilderImpl;
+import org.dcc.portal.pql.es.node.ExpressionNode;
+import org.dcc.portal.pql.es.node.MustExpressionNode;
+import org.dcc.portal.pql.es.node.TermExpressionNode;
+import org.dcc.portal.pql.es.node.TerminalNode;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class Builders {
+public abstract class Builders {
 
-  public static BoolBuilder createRoot() {
+  public static BoolBuilder boolNode() {
     return new BoolBuilderImpl();
   }
 
-  public static TermBuilder createTermBuilder() {
-    return new TermBuilderImpl();
+  public static TermExpressionNode termNode(@NonNull String name, @NonNull Object value) {
+    val nameNode = new TerminalNode(null, name);
+    val valueNode = new TerminalNode(null, value);
+    val result = new TermExpressionNode(null, nameNode, valueNode);
+    nameNode.setParent(result);
+    valueNode.setParent(result);
+
+    return result;
+  }
+
+  public static MustExpressionNode mustNode(ExpressionNode parent, TermExpressionNode... children) {
+    return new MustExpressionNode(parent, children);
   }
 
 }

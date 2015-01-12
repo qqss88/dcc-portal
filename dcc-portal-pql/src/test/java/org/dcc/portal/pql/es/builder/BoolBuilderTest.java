@@ -18,35 +18,51 @@
 package org.dcc.portal.pql.es.builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.ExpressionType;
-import org.dcc.portal.pql.es.internal.ast.ExpressionNodeImpl;
+import org.dcc.portal.pql.es.node.MustExpressionNode;
+import org.dcc.portal.pql.es.utils.Helpers;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BoolBuilderTest {
 
   @Test
   public void mustTermTest() {
-    ExpressionNodeImpl maleTermNode = Builders.createTermBuilder().name("sex").value("male").build();
-    ExpressionNodeImpl femaleTermNode = Builders.createTermBuilder().name("sex").value("female").build();
+    val maleTermNode = Builders.termNode("sex", "male");
+    val femaleTermNode = Builders.termNode("sex", "female");
+    val mustTerm = Builders.mustNode(null, maleTermNode, femaleTermNode);
 
-    val boolNode = Builders.createRoot()
-        .mustTerm(maleTermNode)
-        .mustTerm(femaleTermNode)
+    val boolNode = Builders.boolNode()
+        .mustTerm(mustTerm)
         .build();
-    assertThat(boolNode.getType()).isEqualTo(ExpressionType.BOOL);
 
     // One
     assertThat(boolNode.getParent()).isNull();
     assertThat(boolNode.getChildrenCount()).isEqualTo(1);
 
-    val mustNode = (ExpressionNode) boolNode.getChild(0);
-    assertThat(mustNode.getType()).isEqualTo(ExpressionType.MUST);
+    val mustNode = boolNode.getChildren().iterator().next();
+    assertThat(mustNode).isEqualTo(mustTerm);
     assertThat(mustNode.getChildrenCount()).isEqualTo(2);
-    assertThat(mustNode.getChild(0)).isEqualTo(maleTermNode);
-    assertThat(mustNode.getChild(1)).isEqualTo(femaleTermNode);
+    assertThat(mustNode.getChildren().contains(maleTermNode)).isTrue();
+    assertThat(mustNode.getChildren().contains(femaleTermNode)).isTrue();
   }
 
+  @Test
+  @Ignore
+  public void mustWithoutTermNodeTest() {
+    fail("Not implemented");
+  }
+
+  @Test
+  public void doubleMustNodeTest() {
+    val boolNode = Builders.boolNode()
+        .mustTerm("sex", "male")
+        .mustTerm("sex", "female")
+        .build();
+
+    assertThat(boolNode.getChildrenCount()).isEqualTo(1);
+    assertThat(Helpers.getChildByType(boolNode, MustExpressionNode.class)).isInstanceOf(MustExpressionNode.class);
+  }
 }

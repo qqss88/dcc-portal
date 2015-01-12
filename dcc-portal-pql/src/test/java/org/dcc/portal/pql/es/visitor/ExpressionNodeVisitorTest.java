@@ -15,68 +15,46 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.internal.builder;
+package org.dcc.portal.pql.es.visitor;
 
-import java.util.List;
-
-import lombok.NonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.assertj.core.util.Lists;
-import org.dcc.portal.pql.es.builder.BoolBuilder;
 import org.dcc.portal.pql.es.builder.Builders;
-import org.dcc.portal.pql.es.node.BoolExpressionNode;
-import org.dcc.portal.pql.es.node.ExpressionNode;
-import org.dcc.portal.pql.es.node.MustExpressionNode;
-import org.dcc.portal.pql.es.utils.Helpers;
+import org.dcc.portal.pql.utils.TestingHelper;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.junit.Test;
 
-public class BoolBuilderImpl implements BoolBuilder {
+@Slf4j
+public class ExpressionNodeVisitorTest {
 
-  private BoolExpressionNode result;
-  private List<ExpressionNode> children = Lists.newArrayList();
+  ExpressionNodeVisitor<FilterBuilder> visitor = new ExpressionNodeVisitorImpl();
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull MustExpressionNode mustNode) {
-    children.add(mustNode);
-
-    return this;
+  @Test
+  public void visitTermTest() {
+    val termNode = Builders.termNode("sex", "male");
+    val json = TestingHelper.getJson(termNode.accept(visitor));
+    val value = json.path("term").path("sex").asText();
+    assertThat(value).isEqualTo("male");
   }
 
-  @Override
-  public BoolBuilder mustTerm(@NonNull String name, @NonNull Object value) {
-    MustExpressionNode mustNode = Helpers.getChildByType(children, MustExpressionNode.class);
-    val termNode = Builders.termNode(name, value);
-    if (mustNode == null) {
-      mustNode = Builders.mustNode(null, termNode);
-      children.add(mustNode);
-    } else {
-      mustNode.addChild(termNode);
-    }
-
-    return this;
+  @Test
+  public void visitMustTest() {
+    val termNode = Builders.termNode("sex", "male");
+    val mustNode = Builders.mustNode(null, termNode);
+    val json = mustNode.accept(visitor);
+    assertThat(json).isNull();
   }
 
-  @Override
-  public BoolBuilder shouldTerm() {
-    return this;
-
-  }
-
-  @Override
-  public BoolBuilder shouldNotTerm() {
-    return this;
-
-  }
-
-  @Override
-  public BoolExpressionNode build() {
-    result = new BoolExpressionNode(null, children);
-
-    for (val child : children) {
-      child.setParent(null);
-    }
-
-    return result;
+  @Test
+  public void visitBoolTest() {
+    val boolNode = TestingHelper.createTwoTermsTree();
+    val json = TestingHelper.getJson(boolNode.accept(visitor));
+    log.info("{}", json);
+    val mustArray = json.path("bool").path("must");
+    assertThat(mustArray.isArray()).isTrue();
+    // FIXME: FINISH
   }
 
 }
