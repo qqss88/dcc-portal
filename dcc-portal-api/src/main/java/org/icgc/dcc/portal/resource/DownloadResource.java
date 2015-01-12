@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
@@ -76,6 +77,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.icgc.dcc.data.common.ExportedDataFileSystem;
 import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
@@ -565,16 +567,18 @@ public class DownloadResource {
 
       @Auth(required = false) User user,
 
-      @ApiParam(value = "filename to download", required = false)//
+      @ApiParam(value = "filename to download", required = true)//
       @QueryParam("fn")//
-      @DefaultValue("") String filePath
+      @DefaultValue("/") String filePath
 
       ) throws IOException {
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
     StreamingOutput archiveStream = null;
     String filename = null;
-    // static download
+
+    checkArgument(StringUtils.isNotBlank(filePath));
+
     File downloadFile = new File(filePath);
     Predicate<File> predicate =
         (isLogin ? new LoginUserAccessiblePredicate() : new EveryoneAccessiblePredicate());
