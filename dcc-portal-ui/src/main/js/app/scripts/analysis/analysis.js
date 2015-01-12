@@ -229,7 +229,7 @@
     this.update = function(analysis) {
       var analysisList = this.getAll();
       var analysis = _.find(analysisList, function(d) {
-        return d.id === id;
+        return d.id === analysis.id;
       });
       if (analysis) {
         analysis.timestamp = data.timestamp;
