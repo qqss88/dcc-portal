@@ -133,12 +133,12 @@
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
           }
-          if (! filters.gene.hasOwnProperty('uploadGeneListId')) {
-            filters.gene.uploadGeneListId = {};
+          if (! filters.gene.hasOwnProperty('entityListId')) {
+            filters.gene.entityListId = {};
           }
 
           $scope.genelistModal = false;
-          filters.gene.uploadGeneListId.is = [result.geneListId];
+          filters.gene.entityListId.is = [result.geneListId];
 
           // Upload gene list redirects to gene tab, regardless of where we came from
           search.filters = angular.toJson(filters);

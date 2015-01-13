@@ -48,11 +48,6 @@
           type: type,
           facet: 'entityListId'
         });
-
-        Facets.removeFacet({
-          type: type,
-          facet: 'uploadGeneListId'
-        });
       }
       if (type === 'gene' && facet === 'pathwayId') {
         Facets.removeFacet({

@@ -202,12 +202,12 @@
 
     /**
      * Replace list with the input gene list limit
-     * Input gene list takes precedence over gene identifiers (id, uploadGeneListId)
-     * 1) Remove gene.uploadGeneListId
+     * Input gene list takes precedence over gene identifiers (id, entityListId)
+     * 1) Replace gene.entityListId
      * 2) Remove gene.id
      */
     function mergeInputGeneList(filters, geneListId) {
-      delete filters.gene.uploadGeneListId;
+      delete filters.gene.entityListId;
       delete filters.gene.id;
       filters.gene.entityListId = {
         is: [geneListId]
