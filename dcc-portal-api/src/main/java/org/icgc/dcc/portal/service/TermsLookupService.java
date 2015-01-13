@@ -125,7 +125,9 @@ public class TermsLookupService {
   @RequiredArgsConstructor(access = PRIVATE)
   public enum TermLookupType {
 
-    GENE_IDS("gene-ids");
+    GENE_IDS("gene-ids"),
+    MUTATION_IDS("mutation-ids"),
+    DONOR_IDS("donor-ids");
 
     @NonNull
     private final String name;
