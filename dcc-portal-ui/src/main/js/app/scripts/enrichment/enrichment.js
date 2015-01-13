@@ -68,7 +68,7 @@
           promise.then(function(result) {
             var id = result.id;
             $scope.enrichmentModal = false;
-            $location.path('/analysis/' + id).search({});
+            $location.path('/analysis/enrichment/' + id).search({});
           });
         };
 
