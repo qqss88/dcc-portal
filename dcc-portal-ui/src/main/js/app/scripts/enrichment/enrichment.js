@@ -209,7 +209,7 @@
     function mergeInputGeneList(filters, geneListId) {
       delete filters.gene.uploadGeneListId;
       delete filters.gene.id;
-      filters.gene.inputGeneListId = {
+      filters.gene.entityListId = {
         is: [geneListId]
       };
       return filters;

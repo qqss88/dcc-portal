@@ -167,14 +167,6 @@
       $scope.hasGeneList = false;
       if (FiltersUtil.hasGeneListExtension(filters)) {
         $scope.hasGeneList = true;
-
-
-        if (filters.gene.inputGeneListId) {
-          $scope.geneListType = 'inputGeneListId';
-        } else {
-          $scope.geneListType = 'uploadGeneListId';
-        }
-
       }
     }, true);
 

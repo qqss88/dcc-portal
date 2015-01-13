@@ -195,7 +195,7 @@
       if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(filters) === true) {
         Facets.removeFacet({
           type: type,
-          facet: 'inputGeneListId'
+          facet: 'entityListId'
         });
       }
 

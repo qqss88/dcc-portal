@@ -205,7 +205,8 @@
 
     GENE_LISTS: [
       {id: 'uploadGeneListId', label: 'Uploaded Gene List'},
-      {id: 'inputGeneListId', label: 'Input Gene List'}
+      {id: 'inputGeneListId', label: 'Input Gene List'},
+      {id: 'entityListId', label: 'Gene List'}
     ],
 
 

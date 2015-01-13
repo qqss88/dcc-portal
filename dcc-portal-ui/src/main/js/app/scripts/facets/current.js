@@ -46,7 +46,7 @@
         // FIXME: Grab facet keys from Extensions
         Facets.removeFacet({
           type: type,
-          facet: 'inputGeneListId'
+          facet: 'entityListId'
         });
 
         Facets.removeFacet({
