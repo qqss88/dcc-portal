@@ -48,10 +48,12 @@
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
     Page, ListManagerService, AnalysisService, toaster) {
 
-
     // Testing
     ListManagerService.seedTestData();
     $scope.entityLists = ListManagerService.getAll();
+
+    $scope.listItemTotal = 0;
+    $scope.listItemUUIDs = [];
 
     $scope.createTestList = function(type) {
       var list = {
@@ -68,7 +70,30 @@
     // End testing
 
 
+
+    // Send IDs generate new set operations analysis
+    $scope.launchSetAnalysis = function() {
+      var id = (new Date()).getTime(); // FIXME
+      $location.path('analysis/set/' + id);
+    };
+
+
+    $scope.updateCurrentState = function(item) {
+      // FIXME: Might want to move this out
+      if (item.checked === true) {
+        $scope.listItemTotal += item.count;
+        $scope.listItemUUIDs.push(item.id);
+      } else {
+        $scope.listItemTotal -= item.count;
+        _.remove($scope.listItemUUIDs, function(id) {
+          return id === item.id;
+        });
+      }
+    };
+
+
     $scope.updateAvailableAnalysis = function() {
+
       var selected, uniqued;
       selected = _.filter($scope.entityLists, function(item) {
         return item.checked === true;

@@ -3,12 +3,12 @@
     <div style="margin-right: -2rem">
 
         <div>
-            <span class="t_tabs__tab t_tabs__tab__analysis active"> 
+            <div class="t_tabs__tab t_tabs__tab__analysis active"> 
                 <span>Analyses</span>
-            </span>
-            <span class="pull-right" style="margin: 0.5rem">
+            </div>
+            <div class="pull-right" style="margin: 0.5rem">
                 <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
-            </span>
+            </div>
         </div>
         <!--
         <ul>
@@ -18,7 +18,7 @@
         </ul>
         <hr>
         -->
-        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem" data-scroll-to-selection>
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem"> 
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
@@ -53,7 +53,12 @@
 
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
-        <div>?????????????</div>
+        <div>
+            <span>?????????????</span>
+            <br>
+            <span>debug selected total: {{listItemTotal}}</span>
+            <br>
+            <span>debug selected ids: {{listItemUUIDs}}</span>
             <br>
 
             <button class="t_button" data-ng-click="createTestList('donor')">Test Donor</button>
@@ -61,15 +66,20 @@
             <button class="t_button" data-ng-click="createTestList('mutation')">Test Mutations</button>
             <br><br>
 
+            <enrichment-upload 
+                data-total="1"
+                data-enrichment-modal="enrichmentModal">
+            </enrichment-upload>
+
             <div>
                 <span>
-                    <button class="t_button" data-ng-disabled="!setop">
+                    <button class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
                     Set Operations
                     </button>
                 </span>
                 <span>|</span>
                 <span>
-                    <button class="t_button" data-ng-disabled="!enrichment">
+                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">
                     Enrichment Analysis
                     </button>
                 </span>
@@ -92,7 +102,7 @@
                 <tbody>
                     <tr data-ng-repeat="item in entityLists">
                         <td>
-                            <span style="cursor:pointer" data-ng-click="item.checked = !item.checked; updateAvailableAnalysis()">
+                            <span style="cursor:pointer" data-ng-click="item.checked = !item.checked; updateCurrentState(item); updateAvailableAnalysis()">
                                 <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                             </span>
                         </td>
@@ -119,14 +129,22 @@
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
+        <span>debug {{analysisType}} </span>
         <h3>
             Enrichment Analysis Result
         </h3>
-        <div data-ng-if="!error">
+        <div data-ng-if="!error" >
             <enrichment-result data-item="analysisResult"></enrichment-result>
         </div>
+
+        <div data-ng-if="analysisType === 'set'">
+            <set-operation data-item="analysisResult"></set-operation>
+        </div>
+
+        <!--
         <div data-ng-if="error === 404">
             <span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. <br>It may no longer be valid with respect to current portal data.</span>
         </div>
+        -->
     </div>
 </article>

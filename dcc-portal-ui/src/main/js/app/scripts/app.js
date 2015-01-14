@@ -63,6 +63,7 @@
     'icgc.genesets',
     'icgc.visualization',
     'icgc.enrichment',
+    'icgc.sets',
     'icgc.bench',
     'icgc.analysis',
 

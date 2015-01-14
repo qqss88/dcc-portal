@@ -1,0 +1,49 @@
+<div data-ng-if="item.state === 'ANALYZING'">
+    <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
+</div>
+<span data-ng-if="item.state !== 'ANALYZING'">
+    <div class="canvas half"></div>
+    <div class="narrow"> 
+        <span><i class="icon-check-empty"></i> Select all</span>
+        <table class="table">
+            <thead>
+                <th>&nbsp;</th>
+                <th>Set operations</th>
+                <th>Counts</th>
+                <th>Actions</th>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="item in data">
+                    <td>
+                        <i class="icon-check-empty"></i>
+                    </td>
+                    <!--<td>{{item.intersections}} {{displaySetOperation(item)}}</td>-->
+                    <td>
+                        <span style="font-size:1.00rem" data-ng-bind-html="displaySetOperation(item)"></span>
+                    </td>
+                    <td class="text-right">{{item.count | number}}</td>
+                    <td>
+                        <span class="t_tools" style="float:left"> 
+                            <span class="t_tools__tool">
+                                <i class="icon-file" data-tooltip="Export"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list"></i> 
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">Union of selected sets</td>
+                    <td class="text-right">???</td>
+                    <td>
+                        <span class="t_tools" style="float:left"> 
+                            <span class="t_tools__tool">
+                                <i class="icon-file" data-tooltip="Export"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list"></i> 
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</span>
