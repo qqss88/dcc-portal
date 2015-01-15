@@ -45,7 +45,6 @@
           vennDiagram.toggle(ids);
         };
 
-
         $scope.isSelected = function(ids) {
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
@@ -53,8 +52,8 @@
           return existIdex >= 0;
         };
 
-
         $scope.checkRow = function(ids) {
+          /*
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
           });
@@ -62,12 +61,12 @@
           if (existIdex >= 0) {
             return true;
           }
+          */
           return SetOperationService.isEqual($scope.current, ids);
         };
 
-        $scope.displaySetOperation = function(item) {
-          return SetOperationService.displaySetOperation(item);
-        };
+        $scope.displaySetOperation = SetOperationService.displaySetOperation;
+        $scope.getSetShortHand = SetOperationService.getSetShortHand;
 
         $scope.tableMouseEnter = function(ids) {
           vennDiagram.toggleHighlight(ids, true);
@@ -83,39 +82,39 @@
           var testData = [
              // 1 int
              {
-                intersections: ['A'],
-                exclusions: ['B', 'C'],
+                intersections: ['AAA'],
+                exclusions: ['BBB', 'CCC'],
                 count: 150
              },
              {
-                intersections: ['B'],
-                exclusions: ['A', 'C'],
+                intersections: ['BBB'],
+                exclusions: ['AAA', 'CCC'],
                 count: 50
              },
              {
-                intersections: ['C'],
-                exclusions: ['B', 'A'],
+                intersections: ['CCC'],
+                exclusions: ['BBB', 'AAA'],
                 count: 5
              },
              // 2 int
              {
-                intersections: ['A', 'B'],
-                exclusions: ['C'],
+                intersections: ['AAA', 'BBB'],
+                exclusions: ['CCC'],
                 count: 50
              },
              {
-                intersections: ['A', 'C'],
-                exclusions: ['B'],
+                intersections: ['AAA', 'CCC'],
+                exclusions: ['BBB'],
                 count: 50
              },
              {
-                intersections: ['B', 'C'],
-                exclusions: ['A'],
+                intersections: ['BBB', 'CCC'],
+                exclusions: ['AAA'],
                 count: 50
              },
              // 3 int
              {
-                intersections: ['A', 'B', 'C'],
+                intersections: ['AAA', 'BBB', 'CCC'],
                 exclusions: [],
                 count: 150
              },
@@ -153,16 +152,29 @@
               });
             }
           };
-          
 
-          // TEST
+          // TEST - Additional annotation to make life easier
           $scope.data = testData;
           $scope.vennData = SetOperationService.transform(testData);
 
 
+          var prefix = 'S';
+          $scope.setList = [];
+          $scope.data.forEach(function(set) {
+            set.intersections.forEach(function(id) {
+              if (_.contains($scope.setList, id) === false) {
+                $scope.setList.push(id);
+              }
+            });
+          });
+          console.log('unique', $scope.setIds);
+
+          config.labelFunc = function(d) {
+            return SetOperationService.getSetShortHand(d, $scope.setList);
+          };
+
           vennDiagram = new dcc.Venn23($scope.vennData, config);
           vennDiagram.render( $element.find('.canvas')[0]);
-          
         }
 
         // Force a digest cycle first so we can locate canvas, not the best way to do it, but it works
@@ -181,6 +193,8 @@
   var module = angular.module('icgc.sets.services', []);
 
   module.service('SetOperationService', function(Restangular) {
+    var shortHandPrefix = 'S';
+
     this.getSetAnalysis = function(id) {
     };
 
@@ -216,11 +230,22 @@
     };
 
 
+    function _getSetShortHand(setId, setList) {
+      if (setList) {
+        return shortHandPrefix + (setList.indexOf(setId) + 1);
+      }
+      return setId;
+    }
+
+    this.getSetShortHand = _getSetShortHand;
+
+
+
     /**
      * Transforms internal set prepresentation into UI display format
      * with proper set notations
      */
-    this.displaySetOperation = function(item) {
+    this.displaySetOperation = function(item, setList) {
       var displayStr = '';
       var intersections = item.intersections;
       var exclusions = item.exclusions;
@@ -229,14 +254,14 @@
       if (intersections.length > 1) {
         displayStr += '( ';
         for (var i=0; i < intersections.length; i++) {
-          displayStr += intersections[i];
+          displayStr += _getSetShortHand(intersections[i], setList);
           if (i < intersections.length-1) {
             displayStr += ' &cap; ';
           }
         }
         displayStr += ' )';
       } else {
-        displayStr += intersections[0];
+        displayStr += _getSetShortHand(intersections[0], setList);
       }
 
       // Subtractions
@@ -244,7 +269,7 @@
         displayStr += ' - ';
         displayStr += '(';
         for (var i=0; i < exclusions.length; i++) {
-          displayStr += exclusions[i];
+          displayStr += _getSetShortHand(exclusions[i], setList);
           if (i < exclusions.length-1) {
             displayStr += ' &cup; ';
           }
@@ -252,7 +277,7 @@
         displayStr += ')';
       } else if (exclusions.length > 0) {
         displayStr += ' - ';
-        displayStr += exclusions[0];
+        displayStr += _getSetShortHand(exclusions[0], setList);
       }
       return displayStr;
     };

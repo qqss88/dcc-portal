@@ -54,13 +54,20 @@
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
         <div>
-            <span>?????????????</span>
+            <span>
+            Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the Advanced Search. Then
+            launch analysis here. <br>
+            For more information on the Bench, please refer to <a href="">documentation</a>.
+            </span>
+            <!--
             <br>
             <span>debug selected total: {{listItemTotal}}</span>
             <br>
             <span>debug selected ids: {{listItemUUIDs}}</span>
             <br>
+            -->
 
+            <br>
             <button class="t_button" data-ng-click="createTestList('donor')">Test Donor</button>
             <button class="t_button" data-ng-click="createTestList('gene')">Test Gene</button>
             <button class="t_button" data-ng-click="createTestList('mutation')">Test Mutations</button>
@@ -129,7 +136,6 @@
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
-        <span>debug {{analysisType}} </span>
         <h3>
             Enrichment Analysis Result
         </h3>

@@ -44,7 +44,7 @@
       paddingBottom: 10,
       paddingLeft: 10,
       paddingRight: 10,
-      outlineColour: '#FFFFFF',
+      outlineColour: '#555',
       hoverColour: '#88BB00',
       urlPath: '',
       mapFunc: function(data) {
@@ -55,6 +55,9 @@
       mouseoverFunc: function() {
       },
       mouseoutFunc: function() {
+      },
+      labelFunc: function(d) {
+        return d;
       }
     };
 
@@ -121,9 +124,6 @@
     var factor = 0.60;
     var uniqueIds = this.getDistinctIds();
 
-    var colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
-    var ramp = d3.scale.linear().domain([0, 180]).range([0, colours.length-1]);
-
     defs.append('svg:clipPath')
       .attr('id', 'circle1-set2')
       .append('svg:circle')
@@ -143,14 +143,14 @@
       .append('svg:circle')
       .attr('cx', cx - radius * factor)
       .attr('cy', cy)
-      .attr('r', radius+4);
+      .attr('r', radius+3);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out-set2')
       .append('svg:circle')
       .attr('cx', cx + radius * factor)
       .attr('cy', cy)
-      .attr('r', radius+4);
+      .attr('r', radius+3);
 
 
     // 1 intersection
@@ -212,30 +212,33 @@
       .attr('y', cy)
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
-      .text('Set:' + uniqueIds[0]);
+      .text(uniqueIds[0]);
 
     svg.append('text')
       .attr('x', cx + 2.8*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
-      .text('Set:' + uniqueIds[1]);
+      .text(uniqueIds[1]);
 
 
     // Label - value
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx -  1.1*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'end')
       .text(_this.getValueBySetIds([uniqueIds[0]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + 1.1*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'start')
       .text(_this.getValueBySetIds([uniqueIds[1]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx)
       .attr('y', cy)
       .attr('text-anchor', 'middle')
@@ -256,12 +259,6 @@
     var radius = 100;
     var factor = 0.75;
     var uniqueIds = this.getDistinctIds();
-
-    var colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
-    var ramp = d3.scale.linear().domain([0, 180]).range([0, colours.length-1]);
-    // var colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
-    // var ramp = d3.scale.linear().domain(d3.range(0, 180, 25)).range(colours);
-
 
     defs.append('svg:clipPath')
       .attr('id', 'circle1')
@@ -289,21 +286,21 @@
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 300/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 300/180) * radius * factor)
-      .attr('r', radius+4);
+      .attr('r', radius+3);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 60/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 60/180) * radius * factor)
-      .attr('r', radius+4);
+      .attr('r', radius+3);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle3_out')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 180/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 180/180) * radius * factor)
-      .attr('r', radius+4);
+      .attr('r', radius+3);
 
 
     // 1 intersection
@@ -436,65 +433,78 @@
 
     // Label - name
     svg.append('text')
-      .attr('x', cx + Math.sin(Math.PI * 300/180) * 2.4*radius * factor)
+      .attr('x', cx + Math.sin(Math.PI * 300/180) * 2.5*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 300/180) * 2.5*radius * factor)
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
-      .text('Set:' + uniqueIds[0]);
+      .text(function() {
+         return config.labelFunc(uniqueIds[0]);
+      });
 
     svg.append('text')
-      .attr('x', cx + Math.sin(Math.PI * 60/180) * 2.4*radius * factor)
-      .attr('y', cy - Math.cos(Math.PI * 60/180) * 2.4*radius * factor)
+      .attr('x', cx + Math.sin(Math.PI * 60/180) * 2.5*radius * factor)
+      .attr('y', cy - Math.cos(Math.PI * 60/180) * 2.5*radius * factor)
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
-      .text('Set:' + uniqueIds[1]);
+      .text(function() {
+        return config.labelFunc(uniqueIds[1]);
+      });
 
     svg.append('text')
       .attr('x', cx + Math.sin(Math.PI * 180/180) * 2.6*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 180/180) * 2.6*radius * factor)
       .attr('text-anchor', 'middle')
       .style('fill', '#333333')
-      .text('Set:' + uniqueIds[2]);
+      .text(function() {
+        return config.labelFunc(uniqueIds[2]);
+      });
 
 
     // Label - value
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 300/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 300/180) * 1.1*radius * factor)
       .attr('text-anchor', 'end')
       .text(_this.getValueBySetIds([uniqueIds[0]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 60/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 60/180) * 1.1*radius * factor)
       .attr('text-anchor', 'start')
       .text(_this.getValueBySetIds([uniqueIds[1]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 180/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 180/180) * 1.1*radius * factor)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[2]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 360/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 360/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 120/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 120/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[1], uniqueIds[2]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 240/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 240/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[2], uniqueIds[0]]));
 
     svg.append('text')
+      .classed('venn-count', true)
       .attr('x', cx)
       .attr('y', cy)
       .attr('text-anchor', 'middle')
@@ -553,6 +563,11 @@
         _this.toggleHighlight(d.data, d.selected);
         config.clickFunc(d);
       });
+
+
+    // Global setting
+    _this.svg.selectAll('text').style('pointer-events', 'none');
+    _this.svg.selectAll('.inner').style('cursor', 'pointer');
 
 
     // Add legend
