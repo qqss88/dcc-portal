@@ -5,12 +5,12 @@
 
   /********************************************************************************
   *
-  * Venn diagram for 2 or 3 sets. 
+  * Venn diagram for 2 or 3 sets.
   *
-  * This version uses SVG clipping areas to achieve the effect of indivisual 'exploded' 
+  * This version uses SVG clipping areas to achieve the effect of indivisual 'exploded'
   * pieces. The position of the circles are place into SVG-defs and clipped against each
-  * other. 
-  * 
+  * other.
+  *
   * Use arc diagrams for 4 or more sets, it scales much better and should be much easier
   * to interact with. Also note arc diagrams do not suffer from degenerated cases of using
   * circular geometry.
@@ -18,7 +18,7 @@
   * Venn23 rendering consumes a data array of arrays, where each subarray is used to
   * denote specific ownership groups. For exaple:
   *
-  *   [ {id:A, count:10}, {id:B, count:10}] 
+  *   [ {id:A, count:10}, {id:B, count:10}]
   *
   * indicates that there are 10 elments that exists in BOTH A and B, and
   *
@@ -45,13 +45,16 @@
       paddingLeft: 10,
       paddingRight: 10,
       outlineColour: '#FFFFFF',
+      hoverColour: '#88BB00',
       urlPath: '',
       mapFunc: function(data) {
         return data;
       },
       clickFunc: function() {
       },
-      hoverFunc: function() {
+      mouseoverFunc: function() {
+      },
+      mouseoutFunc: function() {
       }
     };
 
@@ -78,16 +81,24 @@
       var val = 0;
       this.data.forEach(function(group) {
         var groupIds = _.pluck(group, 'id');
-        if (_.difference(groupIds, ids).length === 0) {
+        if (_.difference(groupIds, ids).length === 0 && _.difference(groupIds, ids).length === 0) {
           val = group[0].count;
         }
       });
       return val;
     };
 
+    this.max = 0;
+    for (var i=0; i < this.data.length; i++) {
+      if (this.data[i][0].count > this.max) {
+        this.max = this.data[i][0].count;
+      }
+    }
+    console.log('max', this.max);
+
     // Scale function - FIXME: need to find max
     this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
-    this.ramp = d3.scale.linear().domain([0, 180]).range([0, this.colours.length-1]);
+    this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
     this.getColourBySetIds = function(ids) {
       return this.colours[Math.ceil(this.ramp(this.getValueBySetIds(ids)))];
     };
@@ -117,28 +128,28 @@
       .attr('id', 'circle1-set2')
       .append('svg:circle')
       .attr('cx', cx - radius * factor)
-      .attr('cy', cy) 
+      .attr('cy', cy)
       .attr('r', radius);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle2-set2')
       .append('svg:circle')
       .attr('cx', cx + radius * factor)
-      .attr('cy', cy) 
+      .attr('cy', cy)
       .attr('r', radius);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle1_out-set2')
       .append('svg:circle')
       .attr('cx', cx - radius * factor)
-      .attr('cy', cy) 
+      .attr('cy', cy)
       .attr('r', radius+4);
-    
+
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out-set2')
       .append('svg:circle')
       .attr('cx', cx + radius * factor)
-      .attr('cy', cy) 
+      .attr('cy', cy)
       .attr('r', radius+4);
 
 
@@ -155,22 +166,22 @@
       .style('fill', config.outlineColour);
 
     svg.append('svg:rect')
-      .datum([uniqueIds[0]])
+      .datum({selected: false, data:[uniqueIds[0]]})
       .attr('clip-path', 'url(' + config.urlPath + '#circle1-set2)')
       .attr('class', 'inner')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) { 
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+      .style('fill', function(d) {
+        return _this.getColourBySetIds(d.data);
       });
     svg.append('svg:rect')
-      .datum([uniqueIds[1]])
+      .datum({selected:false, data:[uniqueIds[1]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2-set2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
 
 
@@ -185,27 +196,27 @@
     svg.append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle1-set2)')
       .append('svg:rect')
-      .datum([uniqueIds[0], uniqueIds[1]])
+      .datum({selected: false, data:[uniqueIds[0], uniqueIds[1]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2-set2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
 
 
     // Label - name
     svg.append('text')
       .attr('x', cx - 2.8*radius * factor)
-      .attr('y', cy) 
+      .attr('y', cy)
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
       .text('Set:' + uniqueIds[0]);
 
     svg.append('text')
       .attr('x', cx + 2.8*radius * factor)
-      .attr('y', cy) 
+      .attr('y', cy)
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
       .text('Set:' + uniqueIds[1]);
@@ -214,19 +225,19 @@
     // Label - value
     svg.append('text')
       .attr('x', cx -  1.1*radius * factor)
-      .attr('y', cy) 
+      .attr('y', cy)
       .attr('text-anchor', 'end')
       .text(_this.getValueBySetIds([uniqueIds[0]]));
 
     svg.append('text')
       .attr('x', cx + 1.1*radius * factor)
-      .attr('y', cy) 
+      .attr('y', cy)
       .attr('text-anchor', 'start')
       .text(_this.getValueBySetIds([uniqueIds[1]]));
 
     svg.append('text')
       .attr('x', cx)
-      .attr('y', cy) 
+      .attr('y', cy)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]]));
 
@@ -250,7 +261,7 @@
     var ramp = d3.scale.linear().domain([0, 180]).range([0, colours.length-1]);
     // var colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
     // var ramp = d3.scale.linear().domain(d3.range(0, 180, 25)).range(colours);
-   
+
 
     defs.append('svg:clipPath')
       .attr('id', 'circle1')
@@ -258,14 +269,14 @@
       .attr('cx', cx + Math.sin(Math.PI * 300/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 300/180) * radius * factor)
       .attr('r', radius);
-    
+
     defs.append('svg:clipPath')
       .attr('id', 'circle2')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 60/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 60/180) * radius * factor)
       .attr('r', radius);
-    
+
     defs.append('svg:clipPath')
       .attr('id', 'circle3')
       .append('svg:circle')
@@ -279,14 +290,14 @@
       .attr('cx', cx + Math.sin(Math.PI * 300/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 300/180) * radius * factor)
       .attr('r', radius+4);
-    
+
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 60/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 60/180) * radius * factor)
       .attr('r', radius+4);
-    
+
     defs.append('svg:clipPath')
       .attr('id', 'circle3_out')
       .append('svg:circle')
@@ -313,31 +324,31 @@
       .style('fill', config.outlineColour);
 
     svg.append('svg:rect')
-      .datum([uniqueIds[0]])
+      .datum({selected:false, data:[uniqueIds[0]]})
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .attr('class', 'inner')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) { 
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+      .style('fill', function(d) {
+        return _this.getColourBySetIds(d.data);
       });
     svg.append('svg:rect')
-      .datum([uniqueIds[1]])
+      .datum({selected:false, data:[uniqueIds[1]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
     svg.append('svg:rect')
-      .datum([uniqueIds[2]])
+      .datum({selected:false, data:[uniqueIds[2]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle3)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
 
     // 2 intersections
@@ -351,13 +362,13 @@
     svg.append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .append('svg:rect')
-      .datum([uniqueIds[0], uniqueIds[1]])
+      .datum({selected:false, data:[uniqueIds[0], uniqueIds[1]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
 
     svg.append('svg:g')
@@ -370,15 +381,15 @@
     svg.append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .append('svg:rect')
-      .datum([uniqueIds[1], uniqueIds[2]])
+      .datum({selected:false, data:[uniqueIds[1], uniqueIds[2]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle3)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
-    
+
     svg.append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle3_out)')
       .append('svg:rect')
@@ -389,15 +400,15 @@
     svg.append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle3)')
       .append('svg:rect')
-      .datum([uniqueIds[2], uniqueIds[0]])
+      .datum({selected:false, data:[uniqueIds[2], uniqueIds[0]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
-    
+
 
     // 3 intersections
     svg.append('svg:g')
@@ -414,13 +425,13 @@
       .append('svg:g')
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .append('svg:rect')
-      .datum([uniqueIds[0], uniqueIds[1], uniqueIds[2]])
+      .datum({selected:false, data:[uniqueIds[0], uniqueIds[1], uniqueIds[2]]})
       .attr('class', 'inner')
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
       .style('fill', function(d) {
-        return colours[Math.ceil(ramp(_this.getValueBySetIds(d)))];
+        return _this.getColourBySetIds(d.data);
       });
 
     // Label - name
@@ -484,13 +495,10 @@
       .text(_this.getValueBySetIds([uniqueIds[2], uniqueIds[0]]));
 
     svg.append('text')
-      .attr('x', cx) 
+      .attr('x', cx)
       .attr('y', cy)
       .attr('text-anchor', 'middle')
       .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1], uniqueIds[2]]));
-
-
-    console.log(config.chartWidth, config.chartHeight);
   };
 
 
@@ -500,7 +508,7 @@
     _this.data.forEach(function(subset) {
       subset.forEach(function(item) {
         if (result.indexOf(item.id) === -1) {
-          result.push(item.id); 
+          result.push(item.id);
         }
       });
     });
@@ -516,8 +524,6 @@
     console.log('uniqueIds', uniqueIds);
 
     _this.svg = d3.select(element).append('svg')
-      //.attr('width', config.width)
-      //.attr('height', config.height)
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
       .attr('preserveAspectRatio', 'xMidYMid');
 
@@ -533,11 +539,78 @@
     // Add interactions
     _this.svg.selectAll('.inner')
       .on('mouseover', function(d) {
-        console.log(d, _this.getValueBySetIds(d));
-        d3.select(this).style('fill', '#88BB00');
+        d3.select(this).style('fill', config.hoverColour);
+        config.mouseoverFunc(d);
       })
       .on('mouseout', function(d) {
-        d3.select(this).style('fill', _this.getColourBySetIds(d));
+        if (d.selected === false) {
+          d3.select(this).style('fill', _this.getColourBySetIds(d.data));
+        }
+        config.mouseoutFunc(d);
+      })
+      .on('click', function(d) {
+        d.selected = !d.selected;
+        _this.toggleHighlight(d.data, d.selected);
+        config.clickFunc(d);
+      });
+
+
+    // Add legend
+    _this.svg.append('text').attr('x', 25).attr('y', 15).text(0);
+    _this.svg.append('text').attr('x', 25 + _this.colours.length*15).attr('y', 15).text(_this.max);
+    _this.svg.selectAll('.legend')
+      .data(_this.colours)
+      .enter()
+      .append('rect')
+      .classed('legend', true)
+      .attr('x', function(d, i) {
+         return 30 + 15*i;
+      })
+      .attr('y', function(d, i) {
+        return 15;
+      })
+      .attr('width', 15)
+      .attr('height', 15)
+      .style('stroke', '#FFFFFF')
+      .style('fill', function(d) {
+        return d;
+      });
+
+  };
+
+
+  Venn23.prototype.toggle = function(ids) {
+    var _this = this;
+
+    d3.selectAll('.inner')
+      .filter(function(d) {
+        return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
+      })
+      .each(function(d) {
+        d.selected = !d.selected;
+        _this.toggleHighlight(d.data, d.selected);
+      });
+  };
+
+
+  Venn23.prototype.toggleHighlight = function(ids, bool) {
+    var _this = this;
+    var config = _this.config;
+
+    d3.selectAll('.inner')
+      .filter(function(d) {
+         return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
+      })
+      .style('fill', function(d) {
+        if (d.selected === true) {
+          return config.hoverColour;
+        }
+
+        if (bool === true) {
+          return config.hoverColour;
+        } else {
+          return _this.getColourBySetIds(d.data);
+        }
       });
   };
 

@@ -5,7 +5,7 @@
     <div class="canvas half"></div>
     <div class="narrow"> 
         <span><i class="icon-check-empty"></i> Select all</span>
-        <table class="table">
+        <table class="table table-setop">
             <thead>
                 <th>&nbsp;</th>
                 <th>Set operations</th>
@@ -13,11 +13,14 @@
                 <th>Actions</th>
             </thead>
             <tbody>
-                <tr data-ng-repeat="item in data">
+                <tr style="cursor:pointer; background-color: {{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"
+                    data-ng-repeat="item in data" 
+                    data-ng-mouseenter="tableMouseEnter(item.intersections)" 
+                    data-ng-mouseleave="tableMouseOut(item.intersections)"
+                    data-ng-click="checked=!checked; toggle(item.intersections)">
                     <td>
-                        <i class="icon-check-empty"></i>
+                        <i class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
-                    <!--<td>{{item.intersections}} {{displaySetOperation(item)}}</td>-->
                     <td>
                         <span style="font-size:1.00rem" data-ng-bind-html="displaySetOperation(item)"></span>
                     </td>

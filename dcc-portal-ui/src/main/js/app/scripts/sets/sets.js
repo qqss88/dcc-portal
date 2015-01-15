@@ -20,38 +20,72 @@
         item: '='
       },
       templateUrl: '/scripts/sets/views/sets.html',
-      // template: '<div><span class="canvas"></span></div>',
       link: function($scope, $element, $attrs) {
         var vennDiagram;
+
+        $scope.current = [];
+        $scope.selected = [];
+
+        $scope.toggle = function(ids) {
+          var existIdex = _.findIndex($scope.selected, function(subset) {
+            return SetOperationService.isEqual(ids, subset);
+          });
+
+          if (existIdex === -1) {
+            $scope.selected.push(ids);
+          } else {
+            // FIXME: this is repeated, move out
+            _.remove($scope.selected, function(subset) {
+              return SetOperationService.isEqual(ids, subset);
+            });
+            if (SetOperationService.isEqual(ids, $scope.current) === true) {
+              $scope.current = [];
+            };
+          }
+          vennDiagram.toggle(ids);
+        };
+
+
+        $scope.isSelected = function(ids) {
+          var existIdex = _.findIndex($scope.selected, function(subset) {
+            return SetOperationService.isEqual(ids, subset);
+          });
+          return existIdex >= 0;
+        };
+
+
+        $scope.checkRow = function(ids) {
+          var existIdex = _.findIndex($scope.selected, function(subset) {
+            return SetOperationService.isEqual(ids, subset);
+          });
+
+          if (existIdex >= 0) {
+            return true;
+          }
+          return SetOperationService.isEqual($scope.current, ids);
+        };
 
         $scope.displaySetOperation = function(item) {
           return SetOperationService.displaySetOperation(item);
         };
 
+        $scope.tableMouseEnter = function(ids) {
+          vennDiagram.toggleHighlight(ids, true);
+          $scope.current = ids;
+        };
+
+        $scope.tableMouseOut = function(ids) {
+          vennDiagram.toggleHighlight(ids, false);
+          $scope.current = [];
+        };
+
         function initVennDiagram() {
-
-          // TEST
-          var data3 = [
-             [{id: '1', count: 180}],
-             [{id: '2', count: 110}],
-             [{id: '3', count: 90}],
-             [{id: '3', count: 60}, {id: '2', count: 60}],
-             [{id: '1', count: 20}, {id: '2', count: 20}],
-             [{id: '1', count: 50}, {id: '3', count: 50}],
-             [{id: '3', count: 10}, {id: '1', count: 10}, {id: '2', count: 10}]
-          ];
-          var data2 = [
-             [{id: '1', count: 100}],
-             [{id: '2', count: 150}],
-             [{id: '1', count: 50}, {id: '2', count:50}]
-          ];
-
           var testData = [
              // 1 int
              {
                 intersections: ['A'],
                 exclusions: ['B', 'C'],
-                count: 50
+                count: 150
              },
              {
                 intersections: ['B'],
@@ -61,7 +95,7 @@
              {
                 intersections: ['C'],
                 exclusions: ['B', 'A'],
-                count: 50
+                count: 5
              },
              // 2 int
              {
@@ -75,21 +109,49 @@
                 count: 50
              },
              {
-                intersections: ['A', 'B'],
-                exclusions: ['C'],
+                intersections: ['B', 'C'],
+                exclusions: ['A'],
                 count: 50
              },
              // 3 int
              {
                 intersections: ['A', 'B', 'C'],
                 exclusions: [],
-                count: 50
+                count: 150
              },
           ];
 
 
           var config = {
-            urlPath: $location.path() // Because SVG urls are based on <base> tag, we need absolute path
+            // Because SVG urls are based on <base> tag, we need absolute path
+            urlPath: $location.path(),
+
+            mouseoverFunc: function(d) {
+              $scope.$apply(function() {
+                $scope.current = d.data;
+              });
+            },
+
+            mouseoutFunc: function(d) {
+              $scope.$apply(function() {
+                $scope.current = [];
+              });
+            },
+
+            clickFunc: function(d) {
+              $scope.$apply(function() {
+                if (d.selected === true) {
+                  $scope.selected.push(d.data);
+                } else {
+                  _.remove($scope.selected, function(subset) {
+                    return SetOperationService.isEqual(d.data, subset);
+                  });
+                  if (SetOperationService.isEqual(d.data, $scope.current) === true) {
+                    $scope.current = [];
+                  };
+                }
+              });
+            }
           };
           
 
@@ -127,6 +189,14 @@
 
 
     /**
+     * Check set/list equality ... is there a better way?
+     */
+    this.isEqual = function(s1, s2) {
+      return (_.difference(s1, s2).length === 0 && _.difference(s2, s1).length === 0);
+    };
+
+
+    /**
      * Transform data array to be consumed by venn-diagram visualization
      */
     this.transform = function(data) {
@@ -148,12 +218,14 @@
 
     /**
      * Transforms internal set prepresentation into UI display format
+     * with proper set notations
      */
     this.displaySetOperation = function(item) {
       var displayStr = '';
       var intersections = item.intersections;
       var exclusions = item.exclusions;
 
+      // Intersection
       if (intersections.length > 1) {
         displayStr += '( ';
         for (var i=0; i < intersections.length; i++) {
@@ -167,6 +239,7 @@
         displayStr += intersections[0];
       }
 
+      // Subtractions
       if (exclusions.length > 1) {
         displayStr += ' - ';
         displayStr += '(';
@@ -181,12 +254,9 @@
         displayStr += ' - ';
         displayStr += exclusions[0];
       }
-
       return displayStr;
     };
-
   });
 
 })();
-
 
