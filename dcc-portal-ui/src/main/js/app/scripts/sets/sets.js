@@ -20,19 +20,41 @@
         item: '='
       },
       templateUrl: '/scripts/sets/views/sets.html',
-      link: function($scope, $element, $attrs) {
+      link: function($scope, $element) {
         var vennDiagram;
 
+        $scope.selectedTotalCount = 0;
         $scope.current = [];
         $scope.selected = [];
 
-        $scope.toggle = function(ids) {
+        $scope.selectAll = function() {
+          $scope.selected = [];
+          $scope.selectedTotalCount = 0;
+
+          $scope.data.forEach(function(set) {
+            $scope.selected.push(set.intersections);
+            vennDiagram.toggle(set.intersections, true);
+            $scope.selectedTotalCount += set.count;
+          });
+        };
+
+        $scope.selectNone = function() {
+          $scope.data.forEach(function(set) {
+            vennDiagram.toggle(set.intersections, false);
+          });
+          $scope.selected = [];
+          $scope.selectedTotalCount = 0;
+        };
+
+        $scope.toggleSelection = function(item) {
+          var ids = item.intersections;
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
           });
 
           if (existIdex === -1) {
             $scope.selected.push(ids);
+            $scope.selectedTotalCount += item.count;
           } else {
             // FIXME: this is repeated, move out
             _.remove($scope.selected, function(subset) {
@@ -40,7 +62,8 @@
             });
             if (SetOperationService.isEqual(ids, $scope.current) === true) {
               $scope.current = [];
-            };
+            }
+            $scope.selectedTotalCount -= item.count;
           }
           vennDiagram.toggle(ids);
         };
@@ -53,15 +76,6 @@
         };
 
         $scope.checkRow = function(ids) {
-          /*
-          var existIdex = _.findIndex($scope.selected, function(subset) {
-            return SetOperationService.isEqual(ids, subset);
-          });
-
-          if (existIdex >= 0) {
-            return true;
-          }
-          */
           return SetOperationService.isEqual($scope.current, ids);
         };
 
@@ -121,6 +135,27 @@
           ];
 
 
+          /*
+          testData = [
+             {
+                intersections: ['dchang'],
+                exclusions: ['jlam'],
+                count: 100
+             },
+             {
+                intersections: ['jlam'],
+                exclusions: ['dchang'],
+                count: 100
+             },
+             {
+                intersections: ['dchang', 'jlam'],
+                exclusions: [],
+                count: 0
+             },
+          ];
+          */
+
+
           var config = {
             // Because SVG urls are based on <base> tag, we need absolute path
             urlPath: $location.path(),
@@ -131,7 +166,7 @@
               });
             },
 
-            mouseoutFunc: function(d) {
+            mouseoutFunc: function() {
               $scope.$apply(function() {
                 $scope.current = [];
               });
@@ -141,13 +176,15 @@
               $scope.$apply(function() {
                 if (d.selected === true) {
                   $scope.selected.push(d.data);
+                  $scope.selectedTotalCount += d.count;
                 } else {
                   _.remove($scope.selected, function(subset) {
                     return SetOperationService.isEqual(d.data, subset);
                   });
                   if (SetOperationService.isEqual(d.data, $scope.current) === true) {
                     $scope.current = [];
-                  };
+                  }
+                  $scope.selectedTotalCount -= d.count;
                 }
               });
             }
@@ -157,8 +194,6 @@
           $scope.data = testData;
           $scope.vennData = SetOperationService.transform(testData);
 
-
-          var prefix = 'S';
           $scope.setList = [];
           $scope.data.forEach(function(set) {
             set.intersections.forEach(function(id) {
@@ -167,7 +202,6 @@
               }
             });
           });
-          console.log('unique', $scope.setIds);
 
           config.labelFunc = function(d) {
             return SetOperationService.getSetShortHand(d, $scope.setList);
@@ -195,10 +229,19 @@
   module.service('SetOperationService', function(Restangular) {
     var shortHandPrefix = 'S';
 
+    /*
     this.getSetAnalysis = function(id) {
     };
 
     this.saveNewList = function(sets) {
+    };
+    */
+
+
+    this.export = function(setList) {
+      console.log('exporting', setList);
+      if (setList) {
+      }
     };
 
 
@@ -240,26 +283,26 @@
     this.getSetShortHand = _getSetShortHand;
 
 
-
     /**
      * Transforms internal set prepresentation into UI display format
      * with proper set notations
      */
     this.displaySetOperation = function(item, setList) {
+      var i = 0;
       var displayStr = '';
       var intersections = item.intersections;
       var exclusions = item.exclusions;
 
       // Intersection
       if (intersections.length > 1) {
-        displayStr += '( ';
-        for (var i=0; i < intersections.length; i++) {
+        displayStr += '(';
+        for (i=0; i < intersections.length; i++) {
           displayStr += _getSetShortHand(intersections[i], setList);
           if (i < intersections.length-1) {
             displayStr += ' &cap; ';
           }
         }
-        displayStr += ' )';
+        displayStr += ')';
       } else {
         displayStr += _getSetShortHand(intersections[0], setList);
       }
@@ -268,7 +311,7 @@
       if (exclusions.length > 1) {
         displayStr += ' - ';
         displayStr += '(';
-        for (var i=0; i < exclusions.length; i++) {
+        for (i=0; i < exclusions.length; i++) {
           displayStr += _getSetShortHand(exclusions[i], setList);
           if (i < exclusions.length-1) {
             displayStr += ' &cup; ';

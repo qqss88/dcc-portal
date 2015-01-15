@@ -45,7 +45,7 @@
       paddingLeft: 10,
       paddingRight: 10,
       outlineColour: '#555',
-      hoverColour: '#88BB00',
+      hoverColour: '#33BBBB',
       urlPath: '',
       mapFunc: function(data) {
         return data;
@@ -100,7 +100,8 @@
     console.log('max', this.max);
 
     // Scale function - FIXME: need to find max
-    this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
+    // this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
+    this.colours = ['rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'];
     this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
     this.getColourBySetIds = function(ids) {
       return this.colours[Math.ceil(this.ramp(this.getValueBySetIds(ids)))];
@@ -568,6 +569,9 @@
     // Global setting
     _this.svg.selectAll('text').style('pointer-events', 'none');
     _this.svg.selectAll('.inner').style('cursor', 'pointer');
+    _this.svg.selectAll('.inner').each(function(d) {
+      d.count = _this.getValueBySetIds(d.data);
+    });
 
 
     // Add legend
@@ -594,7 +598,7 @@
   };
 
 
-  Venn23.prototype.toggle = function(ids) {
+  Venn23.prototype.toggle = function(ids, forcedState){
     var _this = this;
 
     d3.selectAll('.inner')
@@ -602,7 +606,11 @@
         return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
       })
       .each(function(d) {
-        d.selected = !d.selected;
+        if (typeof forcedState === 'undefined') {
+          d.selected = !d.selected;
+        } else {
+          d.selected = forcedState;
+        }
         _this.toggleHighlight(d.data, d.selected);
       });
   };

@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Page, ListManagerService, AnalysisService, toaster) {
+    Page, ListManagerService, AnalysisService) {
 
     // Testing
     ListManagerService.seedTestData();
@@ -64,7 +64,7 @@
          count: Math.floor(Math.random()*100)
       };
       ListManagerService.addTest(list);
-      $scope.entityLists = ListManagerService.getAll()
+      $scope.entityLists = ListManagerService.getAll();
       $scope.updateAvailableAnalysis();
     };
     // End testing
@@ -235,6 +235,7 @@
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
 
     var ANALYSIS_ENTITY = 'analysis';
+    var _this = this;
 
     this.getAnalysis = function(id, type) {
       return RestangularNoCache.one('analysis/' + type , id).get();
@@ -265,12 +266,12 @@
     };
 
     this.update = function(analysis) {
-      var analysisList = this.getAll();
-      var analysis = _.find(analysisList, function(d) {
+      var analysisList = _this.getAll();
+      var cachedAnalysis = _.find(analysisList, function(d) {
         return d.id === analysis.id;
       });
-      if (analysis) {
-        analysis.timestamp = data.timestamp;
+      if (cachedAnalysis) {
+        cachedAnalysis.timestamp = analysis.timestamp;
         localStorageService.set(ANALYSIS_ENTITY, analysisList);
         return true;
       }

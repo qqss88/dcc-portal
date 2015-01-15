@@ -5,8 +5,7 @@
     <div class="canvas half"></div>
     <div class="narrow">
 
-        <span><i class="icon-check-empty"></i> Select all</span>
-        <!--<table class="table table-setop">-->
+        <span data-ng-click="checked=!checked; checked? selectAll() : selectNone()"><i class="{{checked? 'icon-check':'icon-check-empty'}}"></i> Select all</span>
         <table class="table">
             <thead>
                 <th>&nbsp;</th>
@@ -16,12 +15,11 @@
             </thead>
             <tbody>
                 <!--<tr style="cursor:pointer; background-color: {{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"-->
-                <tr style="cursor:pointer"
-                    data-ng-repeat="item in data"
+                <tr data-ng-repeat="item in data"
                     data-ng-mouseenter="tableMouseEnter(item.intersections)"
-                    data-ng-mouseleave="tableMouseOut(item.intersections)"
-                    data-ng-click="checked=!checked; toggle(item.intersections)">
-                    <td>
+                    data-ng-mouseleave="tableMouseOut(item.intersections)">
+                    <td style="cursor:pointer"
+                        data-ng-click="toggleSelection(item)">
                         <!--
                         <i style="-color:{{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"
                            class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
@@ -30,9 +28,11 @@
                            class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
                     <td>
-                        <span style="font-size:1.0rem" data-ng-bind-html="displaySetOperation(item, setList)"></span>
+                        <span data-ng-bind-html="displaySetOperation(item, setList)"></span>
                     </td>
-                    <td class="text-right">{{item.count | number}}</td>
+                    <td class="text-right">
+                        <a href="">{{item.count | number}}</a>
+                    </td>
                     <td>
                         <span class="t_tools" style="float:left">
                             <span class="t_tools__tool">
@@ -44,9 +44,12 @@
                 </tr>
                 <tr>
                     <td colspan="2">Union of selected sets</td>
-                    <td class="text-right">???</td>
+                    <td class="text-right">
+                        <a data-ng-if="selectedTotalCount > 0" href="">{{selectedTotalCount}}</a>
+                        <span data-ng-if="selectedTotalCount===0">0</span>
+                    </td>
                     <td>
-                        <span class="t_tools" style="float:left">
+                        <span class="t_tools" style="float:left" data-ng-hide="selectedTotalCount===0">
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
                                 <i class="icon-upload" data-tooltip="Save as new list"></i>
