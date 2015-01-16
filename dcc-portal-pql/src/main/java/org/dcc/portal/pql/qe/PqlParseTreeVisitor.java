@@ -17,37 +17,30 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.es.utils.ParseTrees.getPair;
 import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldNameNode;
+import org.dcc.portal.pql.es.ast.FromNode;
 import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.ToNode;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GtContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 
 public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
-
-  /**
-   * Index of value in a 'equal' or 'not equal' node
-   */
-  private static final int EQ_NE_NODE_VALUE_INDEX = 4;
-
-  /**
-   * Index of name in a 'equal' or 'not equal' node
-   */
-  private static final int EQ_NE_NODE_NAME_INDEX = 2;
-
-  /**
-   * Number of children in a valid 'equal' or 'not equal' parse tree node
-   */
-  private static final int EQ_NE_NODE_CHILDREN_COUNT = 6;
 
   /**
    * @return {@link ShouldBoolNode}
@@ -79,14 +72,10 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   private ExpressionNode visitEqualityNodes(FilterContext nodeContext) {
-    checkState(nodeContext.getChildCount() == EQ_NE_NODE_CHILDREN_COUNT,
-        "Equal node is malformed. Expected {} children, but found {}", EQ_NE_NODE_CHILDREN_COUNT,
-        nodeContext.getChildCount());
-    val name = nodeContext.getChild(EQ_NE_NODE_NAME_INDEX).getText();
-    val value = nodeContext.getChild(EQ_NE_NODE_VALUE_INDEX).getText();
+    val pair = getPair(nodeContext);
 
-    val nameNode = new TerminalNode(name);
-    val valueNode = new TerminalNode(getTypeSafeValue(value));
+    val nameNode = new TerminalNode(pair.getKey());
+    val valueNode = new TerminalNode(pair.getValue());
     ExpressionNode result = new TermNode(nameNode, valueNode);
 
     if (nodeContext instanceof NeContext) {
@@ -94,6 +83,48 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     }
 
     return result;
+  }
+
+  @Override
+  public ExpressionNode visitGe(GeContext nodeContext) {
+    val pair = getPair(nodeContext);
+
+    return createGreaterNode(pair.getKey(), pair.getValue());
+  }
+
+  @Override
+  public ExpressionNode visitGt(GtContext nodeContext) {
+    val pair = getPair(nodeContext);
+    val value = ((Integer) pair.getValue()) + 1;
+
+    return createGreaterNode(pair.getKey(), value);
+  }
+
+  @Override
+  public ExpressionNode visitLe(LeContext nodeContext) {
+    val pair = getPair(nodeContext);
+
+    return createLessNode(pair.getKey(), pair.getValue());
+  }
+
+  @Override
+  public ExpressionNode visitLt(LtContext nodeContext) {
+    val pair = getPair(nodeContext);
+    val value = ((Integer) pair.getValue()) - 1;
+
+    return createLessNode(pair.getKey(), value);
+  }
+
+  private static RangeNode createLessNode(@NonNull String name, @NonNull Object value) {
+    val fieldNameNode = new FieldNameNode(name, new ToNode(value));
+
+    return new RangeNode(fieldNameNode);
+  }
+
+  private static RangeNode createGreaterNode(@NonNull String name, @NonNull Object value) {
+    val fieldNameNode = new FieldNameNode(name, new FromNode(value));
+
+    return new RangeNode(fieldNameNode);
   }
 
   /**
@@ -105,21 +136,6 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     }
 
     return neNode;
-  }
-
-  // TODO: any lib exist?
-  private static final Object getTypeSafeValue(String value) {
-    try {
-      return Integer.parseInt(value);
-    } catch (NumberFormatException e) {
-    }
-
-    try {
-      return Double.parseDouble(value);
-    } catch (NumberFormatException e) {
-    }
-
-    return value;
   }
 
 }

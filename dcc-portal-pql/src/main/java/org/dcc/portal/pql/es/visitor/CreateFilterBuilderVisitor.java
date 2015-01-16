@@ -24,15 +24,19 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldNameNode;
+import org.dcc.portal.pql.es.ast.FromNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
+import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
+import org.dcc.portal.pql.es.ast.ToNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -81,8 +85,8 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
   @Override
   public FilterBuilder visitTerm(TermNode node) {
-    val name = node.getNameNode().getPayload().toString();
-    val value = node.getValueNode().getPayload();
+    val name = node.getNameNode().getValue().toString();
+    val value = node.getValueNode().getValue();
 
     return FilterBuilders.termFilter(name, value);
   }
@@ -149,6 +153,50 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   @Override
   public FilterBuilder visitMustNotBool(MustNotBoolNode node) {
     throw new UnsupportedOperationException();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitRange(org.dcc.portal.pql.es.ast.RangeNode)
+   */
+  @Override
+  public FilterBuilder visitRange(RangeNode node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitFrom(org.dcc.portal.pql.es.ast.FromNode)
+   */
+  @Override
+  public FilterBuilder visitFrom(FromNode node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitTo(org.dcc.portal.pql.es.ast.ToNode)
+   */
+  @Override
+  public FilterBuilder visitTo(ToNode node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitFieldName(org.dcc.portal.pql.es.ast.FieldNameNode)
+   */
+  @Override
+  public FilterBuilder visitFieldName(FieldNameNode node) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

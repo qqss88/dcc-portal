@@ -15,34 +15,28 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.utils;
 
-import java.util.List;
-
-import lombok.EqualsAndHashCode;
 import lombok.Value;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
-
+/**
+ * A data structure that hold two values.
+ * <p>
+ * Note: Move to dcc-commons?
+ * </p>
+ */
 @Value
-@EqualsAndHashCode(callSuper = false)
-public class TerminalNode extends ExpressionNode {
+public class Pair<L, R> {
 
-  Object value;
+  L left;
+  R right;
 
-  public TerminalNode(Object payload) {
-    super(new ExpressionNode[] {});
-    this.value = payload;
+  public L getKey() {
+    return left;
   }
 
-  @Override
-  public List<ExpressionNode> getChildren() {
-    throw new UnsupportedOperationException("Terminal Nodes do not have children");
-  }
-
-  @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException("Terminal Nodes do not implement accept methods");
+  public R getValue() {
+    return right;
   }
 
 }

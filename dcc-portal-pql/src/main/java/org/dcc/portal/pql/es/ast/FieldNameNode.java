@@ -17,32 +17,38 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import java.util.List;
-
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+/**
+ * Represents field name in range search. May contain {@link FromNode} and/or {@link ToNode}.
+ * <p>
+ * Note: Possibly could be used in other contexts.
+ * </p>
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class TerminalNode extends ExpressionNode {
+public class FieldNameNode extends ExpressionNode {
 
-  Object value;
+  String name;
 
-  public TerminalNode(Object payload) {
-    super(new ExpressionNode[] {});
-    this.value = payload;
-  }
-
-  @Override
-  public List<ExpressionNode> getChildren() {
-    throw new UnsupportedOperationException("Terminal Nodes do not have children");
+  public FieldNameNode(@NonNull String name, ExpressionNode... children) {
+    super(children);
+    this.name = name;
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException("Terminal Nodes do not implement accept methods");
+    return visitor.visitFieldName(this);
+  }
+
+  @Override
+  public String toString() {
+    return _("[%s]", name) + super.toString();
   }
 
 }

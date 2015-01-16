@@ -17,32 +17,29 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import java.util.List;
-
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+/**
+ * Used in ranges. Not supported in ranges since ES 1.x
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class TerminalNode extends ExpressionNode {
+public class FromNode extends ExpressionNode {
 
   Object value;
 
-  public TerminalNode(Object payload) {
-    super(new ExpressionNode[] {});
-    this.value = payload;
-  }
-
-  @Override
-  public List<ExpressionNode> getChildren() {
-    throw new UnsupportedOperationException("Terminal Nodes do not have children");
+  public FromNode(@NonNull Object value) {
+    this.value = value;
+    addChildren(new TerminalNode(value));
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException("Terminal Nodes do not implement accept methods");
+    return visitor.visitFrom(this);
   }
 
 }
