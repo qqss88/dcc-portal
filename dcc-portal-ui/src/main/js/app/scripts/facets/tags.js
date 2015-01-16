@@ -53,6 +53,12 @@
         facet: $scope.facetName
       });
 
+      $scope.activeEntityIds = Facets.getActiveTags({
+        type: type,
+        facet: Extensions.ENTITY
+      });
+
+
 
       // Grab predefined geneset fields: each gene set type require specialized logic
       //   go has predefined Ids, searchable Ids, and Id counts
@@ -181,6 +187,18 @@
       });
     };
 
+
+    /* Used for special cases where the relation is one-to-many instead of one-to-one */
+    $scope.removeSpecificTerm = function(type, facet, term) {
+      console.log('specific term removal', term, type, facet);
+      Facets.removeTerm({
+        type: type,
+        facet: facet,
+        term: term
+      });
+    };
+
+
     $scope.removeFacet = function () {
       var type = $scope.type, filters = LocationService.filters();
       if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
@@ -192,10 +210,11 @@
         facet: $scope.facetName
       });
 
-      if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(filters) === true) {
+      // Remove secondary facet - entity
+      if (_.contains(['gene', 'donor', 'mutation'], type) === true && $scope.facetName === 'id') {
         Facets.removeFacet({
           type: type,
-          facet: 'entityListId'
+          facet: Extensions.ENTITY
         });
       }
 

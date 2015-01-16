@@ -23,7 +23,7 @@
       lists.unshift(list);
       localStorageService.set(LIST_ENTITY, lists);
 
-      toaster.pop('', 'ICGC Portal', '<a href="/search">New list created</a>', 4000, 'trustedHtml');
+      toaster.pop('', list.name  + ' was saved', 'View it in the <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
       return true;
     };
 

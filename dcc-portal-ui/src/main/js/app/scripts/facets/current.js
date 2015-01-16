@@ -22,7 +22,7 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil) {
+  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions) {
     $scope.Facets = Facets;
 
     function refresh() {
@@ -36,19 +36,23 @@
      * like facets but are structured in different ways
      */
     $scope.removeFacet = function(type, facet) {
+
+      // Remove primary facet
       Facets.removeFacet({
         type: type,
         facet: facet
       });
 
-      if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
 
-        // FIXME: Grab facet keys from Extensions
+      // Remove secondary facet - entity
+      if (_.contains(['gene', 'donor', 'mutation'], type) === true && facet === 'id') {
         Facets.removeFacet({
           type: type,
-          facet: 'entityListId'
+          facet: Extensions.ENTITY
         });
       }
+
+      // Remove secondary facet - existing conditions
       if (type === 'gene' && facet === 'pathwayId') {
         Facets.removeFacet({
           type: type,
