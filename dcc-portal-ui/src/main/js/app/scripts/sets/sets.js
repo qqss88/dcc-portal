@@ -238,13 +238,6 @@
     */
 
 
-    this.export = function(setList) {
-      console.log('exporting', setList);
-      if (setList) {
-      }
-    };
-
-
     /**
      * Check set/list equality ... is there a better way?
      */

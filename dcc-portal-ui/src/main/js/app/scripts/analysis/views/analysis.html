@@ -1,4 +1,4 @@
-<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Analysis</h1>
+<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Bench</h1>
 <aside class="t_sidebar">
     <div style="margin-right: -2rem">
 
@@ -10,14 +10,6 @@
                 <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
             </div>
         </div>
-        <!--
-        <ul>
-            <li class="text-right" style="margin-right:0.5rem">
-               <button class="t_button"><i class="icon-cancel"></i>Clear all</button>
-           </li>
-        </ul>
-        <hr>
-        -->
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
@@ -94,7 +86,7 @@
             <br>
             <span>
                 <span>Select set(s) below to activate available analysis</span>
-                <span class="pull-right">Create a new list from <a href="/search">Advanced Search</a></span>
+                <span class="pull-right">Create a new set from <a href="/search">Advanced Search</a></span>
             </span>
             <table class="table">
                 <thead>
@@ -115,12 +107,12 @@
                         </td>
                         <td>{{item.type}}</td>
                         <td>{{item.name}}</td>
-                        <td>{{item.note}}</td>
+                        <td>{{item.description}}</td>
                         <td class="text-right">
-                            <a href="/search">{{item.count | number}}</a>
+                            <a href="{{item.advLink}}">{{item.count | number}}</a>
                         </td>
                         <td>
-                            YYYY-MM-DD
+                            {{item.timestamp | date:'yyyy-MM-dd'}}
                         </td>
                         <td>
                             <span class="t_tools" style="float:left">
@@ -142,7 +134,6 @@
         </div>
         <div data-ng-if="analysisType === 'set'">
             <h3>Set Operations</h3>
-            </h3>
             <set-operation data-item="analysisResult"></set-operation>
         </div>
         <div class="clearfix"></div>

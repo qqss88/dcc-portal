@@ -3308,6 +3308,11 @@ g.marker rect.selected {
   fill: #444444;
 }
 
+/* line 58, _modules/_vis.scss */
+.venn-count {
+  fill: #EEE;
+}
+
 /* line 24, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

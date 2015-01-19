@@ -49,7 +49,7 @@
     Page, ListManagerService, AnalysisService) {
 
     // Testing
-    ListManagerService.seedTestData();
+    // ListManagerService.seedTestData();
     $scope.entityLists = ListManagerService.getAll();
 
     $scope.listItemTotal = 0;
@@ -60,8 +60,9 @@
          id: new Date(),
          type: type,
          name: type + ' ' + new Date(),
-         note: 'This is a test',
-         count: Math.floor(Math.random()*100)
+         description: 'This is a test',
+         count: Math.floor(Math.random()*100),
+         timestamp: (new Date()).getTime()
       };
       ListManagerService.addTest(list);
       $scope.entityLists = ListManagerService.getAll();
@@ -131,7 +132,7 @@
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
 
-    function fetch() {
+    function getAnalysis() {
       $scope.error = null;
       // 1) Check if analysis exist in the backend
       // 2) If analysis cannot be found, delete from local-list and display error
@@ -158,7 +159,7 @@
           if (data.state === 'POST_PROCESSING') {
             pollRate = 4000;
           }
-          pollPromise = $timeout(fetch, pollRate);
+          pollPromise = $timeout(getAnalysis, pollRate);
         }
       }, function(error) {
         $scope.error = error.status;
@@ -221,7 +222,7 @@
       $timeout.cancel(pollPromise);
     });
     init();
-    fetch();
+    getAnalysis();
 
   });
 })();
@@ -230,7 +231,7 @@
 
 (function () {
   'use strict';
-  var module = angular.module('icgc.analysis.services', ['restangular', 'icgc.common.location']);
+  var module = angular.module('icgc.analysis.services', ['restangular']);
 
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
 
