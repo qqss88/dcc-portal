@@ -17,38 +17,26 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-/**
- * Represents field name in range search. May contain {@link FromNode} and/or {@link ToNode}.
- * <p>
- * Note: Possibly could be used in other contexts.
- * </p>
- */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class FieldNameNode extends ExpressionNode {
+public class GreaterEqualNode extends ExpressionNode {
 
-  String name;
+  Object value;
 
-  public FieldNameNode(@NonNull String name, ExpressionNode... children) {
-    super(children);
-    this.name = name;
+  public GreaterEqualNode(@NonNull Object value) {
+    this.value = value;
+    addChildren(new TerminalNode(value));
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitFieldName(this);
-  }
-
-  @Override
-  public String toString() {
-    return _("[%s]", name) + super.toString();
+    return visitor.visitGreaterEqual(this);
   }
 
 }

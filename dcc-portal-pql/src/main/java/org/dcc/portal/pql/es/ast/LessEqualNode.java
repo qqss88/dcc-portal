@@ -23,23 +23,20 @@ import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-/**
- * Used in ranges. Not supported in ranges since ES 1.x
- */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class ToNode extends ExpressionNode {
+public class LessEqualNode extends ExpressionNode {
 
   Object value;
 
-  public ToNode(@NonNull Object value) {
+  public LessEqualNode(@NonNull Object value) {
     this.value = value;
     addChildren(new TerminalNode(value));
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitTo(this);
+    return visitor.visitLessEqual(this);
   }
 
 }

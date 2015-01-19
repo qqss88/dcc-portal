@@ -74,6 +74,11 @@ public class PqlParseListener extends PqlBaseListener {
 
   private static void processOrFilters(Collection<ParseTree> filterNodes, BoolNode parent) {
     val orFilters = filter(filterNodes, OrContext.class);
+    if (Iterables.isEmpty(orFilters)) {
+      log.debug("No 'OR' filters found.");
+      return;
+    }
+
     val shouldNode = new ShouldBoolNode();
     parent.addChildren(shouldNode);
     visitCommonChildren(shouldNode, orFilters);

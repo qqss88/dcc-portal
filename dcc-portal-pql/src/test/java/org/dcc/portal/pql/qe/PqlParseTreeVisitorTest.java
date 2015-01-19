@@ -19,14 +19,15 @@ package org.dcc.portal.pql.qe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FieldNameNode;
-import org.dcc.portal.pql.es.ast.FromNode;
+import org.dcc.portal.pql.es.ast.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.LessEqualNode;
+import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.ToNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
@@ -36,6 +37,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 import org.junit.Test;
 
+@Slf4j
 public class PqlParseTreeVisitorTest {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor();
@@ -76,8 +78,17 @@ public class PqlParseTreeVisitorTest {
     val parseTree = ParseTrees.createParseTree(query);
     // program - query
     val geContext = (GeContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = VISITOR.visitGe(geContext);
-    visitGreater(rangeNode, "weight", 10);
+    val rangeNode = (RangeNode) VISITOR.visitGe(geContext);
+    log.info("RangeNode: {}", rangeNode);
+    assertThat(rangeNode.getChildren().size()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+
+    val geNode = (GreaterEqualNode) rangeNode.getChild(0);
+    assertThat(geNode.getChildren().size()).isEqualTo(1);
+    assertThat(geNode.getValue()).isEqualTo(10);
+
+    val terminalNode = (TerminalNode) geNode.getChild(0);
+    assertThat(terminalNode.getValue()).isEqualTo(10);
   }
 
   @Test
@@ -87,24 +98,16 @@ public class PqlParseTreeVisitorTest {
     val parseTree = ParseTrees.createParseTree(query);
     // program - query
     val gtContext = (GtContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = VISITOR.visitGt(gtContext);
-    visitGreater(rangeNode, "weight", 11);
-  }
-
-  private void visitGreater(ExpressionNode rangeNode, String expectedName, int exprectedValue) {
-    assertThat(rangeNode).isExactlyInstanceOf(RangeNode.class);
+    val rangeNode = (RangeNode) VISITOR.visitGt(gtContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
 
-    val fieldNameNode = (FieldNameNode) rangeNode.getChild(0);
-    assertThat(fieldNameNode.getChildren().size()).isEqualTo(1);
-    assertThat(fieldNameNode.getName()).isEqualTo(expectedName);
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getChildren().size()).isEqualTo(1);
+    assertThat(gtNode.getValue()).isEqualTo(10);
 
-    val fromNode = (FromNode) fieldNameNode.getChild(0);
-    assertThat(fromNode.getChildren().size()).isEqualTo(1);
-    assertThat(fromNode.getValue()).isEqualTo(exprectedValue);
-
-    val terminalNode = (TerminalNode) fromNode.getChild(0);
-    assertThat(terminalNode.getValue()).isEqualTo(exprectedValue);
+    val terminalNode = (TerminalNode) gtNode.getChild(0);
+    assertThat(terminalNode.getValue()).isEqualTo(10);
   }
 
   @Test
@@ -113,8 +116,16 @@ public class PqlParseTreeVisitorTest {
     val parseTree = ParseTrees.createParseTree("le(weight, 10)");
     // program - query
     val leContext = (LeContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = VISITOR.visitLe(leContext);
-    visitLess(rangeNode, "weight", 10);
+    val rangeNode = (RangeNode) VISITOR.visitLe(leContext);
+    assertThat(rangeNode.getChildren().size()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+
+    val leNode = (LessEqualNode) rangeNode.getChild(0);
+    assertThat(leNode.getChildren().size()).isEqualTo(1);
+    assertThat(leNode.getValue()).isEqualTo(10);
+
+    val terminalNode = (TerminalNode) leNode.getChild(0);
+    assertThat(terminalNode.getValue()).isEqualTo(10);
   }
 
   @Test
@@ -123,24 +134,16 @@ public class PqlParseTreeVisitorTest {
     val parseTree = ParseTrees.createParseTree("lt(weight, 10)");
     // program - query
     val ltContext = (LtContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = VISITOR.visitLt(ltContext);
-    visitLess(rangeNode, "weight", 9);
-  }
-
-  private static void visitLess(ExpressionNode rangeNode, String expectedName, int exprectedValue) {
-    assertThat(rangeNode).isExactlyInstanceOf(RangeNode.class);
+    val rangeNode = (RangeNode) VISITOR.visitLt(ltContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
 
-    val fieldNameNode = (FieldNameNode) rangeNode.getChild(0);
-    assertThat(fieldNameNode.getChildren().size()).isEqualTo(1);
-    assertThat(fieldNameNode.getName()).isEqualTo(expectedName);
-
-    val toNode = (ToNode) fieldNameNode.getChild(0);
+    val toNode = (LessThanNode) rangeNode.getChild(0);
     assertThat(toNode.getChildren().size()).isEqualTo(1);
-    assertThat(toNode.getValue()).isEqualTo(exprectedValue);
+    assertThat(toNode.getValue()).isEqualTo(10);
 
     val terminalNode = (TerminalNode) toNode.getChild(0);
-    assertThat(terminalNode.getValue()).isEqualTo(exprectedValue);
+    assertThat(terminalNode.getValue()).isEqualTo(10);
   }
 
 }

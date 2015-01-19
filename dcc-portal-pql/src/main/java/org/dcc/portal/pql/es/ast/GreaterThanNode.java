@@ -17,79 +17,26 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import java.util.Collection;
-import java.util.List;
-
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.val;
+import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-import com.google.common.collect.Lists;
+@Value
+@EqualsAndHashCode(callSuper = false)
+public class GreaterThanNode extends ExpressionNode {
 
-public abstract class ExpressionNode implements Node {
+  Object value;
 
-  protected Node parent;
-  protected List<ExpressionNode> children;
-
-  public ExpressionNode(ExpressionNode... children) {
-    this.children = Lists.newArrayList(children);
-    assignParent(this.children, this);
-  }
-
-  private static void assignParent(Collection<ExpressionNode> children, ExpressionNode parent) {
-    for (val child : children) {
-      child.setParent(parent);
-    }
+  public GreaterThanNode(@NonNull Object value) {
+    this.value = value;
+    addChildren(new TerminalNode(value));
   }
 
   @Override
-  public Node getParent() {
-    return parent;
-  }
-
-  public void setParent(@NonNull ExpressionNode parent) {
-    this.parent = parent;
-  }
-
-  @Override
-  public abstract <T> T accept(NodeVisitor<T> visitor);
-
-  @Override
-  public int childrenCount() {
-    return children.size();
-  }
-
-  public void addChildren(@NonNull ExpressionNode... children) {
-    val childrenList = Lists.newArrayList(children);
-    this.children.addAll(childrenList);
-    assignParent(childrenList, this);
-  }
-
-  @Override
-  public List<ExpressionNode> getChildren() {
-    return children;
-  }
-
-  @Override
-  public ExpressionNode getChild(int index) {
-    return children.get(index);
-  }
-
-  @Override
-  public String toString() {
-    val stringBuffer = new StringBuffer();
-    stringBuffer.append(this.getClass().getSimpleName() + " ( ");
-
-    for (int i = 0; i < children.size(); i++) {
-      stringBuffer.append(children.get(i).toString());
-      if (i < children.size() - 1) {
-        stringBuffer.append(", ");
-      }
-    }
-    stringBuffer.append(")");
-
-    return stringBuffer.toString();
+  public <T> T accept(NodeVisitor<T> visitor) {
+    return visitor.visitGreaterThan(this);
   }
 
 }

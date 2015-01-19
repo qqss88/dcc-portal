@@ -17,15 +17,22 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+
+import java.util.Stack;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FieldNameNode;
-import org.dcc.portal.pql.es.ast.FromNode;
+import org.dcc.portal.pql.es.ast.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.LessEqualNode;
+import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
@@ -36,7 +43,6 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.ast.ToNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -44,14 +50,18 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 
 import com.google.common.collect.Lists;
 
+@Slf4j
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
   private final QueryContext queryContext;
   private final Client client;
+
+  private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
 
   @Override
   public FilterBuilder visitBool(BoolNode node) {
@@ -155,48 +165,52 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitRange(org.dcc.portal.pql.es.ast.RangeNode)
-   */
   @Override
-  public FilterBuilder visitRange(RangeNode node) {
-    // TODO Auto-generated method stub
-    return null;
+  public FilterBuilder visitRange(@NonNull RangeNode node) {
+    checkState(node.childrenCount() > 0, "RangeNode has no children");
+
+    stack.push(FilterBuilders.rangeFilter(node.getName()));
+    for (val child : node.getChildren()) {
+      child.accept(this);
+    }
+
+    return stack.pop();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitFrom(org.dcc.portal.pql.es.ast.FromNode)
-   */
   @Override
-  public FilterBuilder visitFrom(FromNode node) {
-    // TODO Auto-generated method stub
-    return null;
+  public FilterBuilder visitGreaterEqual(GreaterEqualNode node) {
+    val rangeFilter = (RangeFilterBuilder) stack.peek();
+    checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
+    rangeFilter.gte(node.getValue());
+
+    return rangeFilter;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitTo(org.dcc.portal.pql.es.ast.ToNode)
-   */
   @Override
-  public FilterBuilder visitTo(ToNode node) {
-    // TODO Auto-generated method stub
-    return null;
+  public FilterBuilder visitGreaterThan(GreaterThanNode node) {
+    val rangeFilter = (RangeFilterBuilder) stack.peek();
+    checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
+    rangeFilter.gt(node.getValue());
+
+    return rangeFilter;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitFieldName(org.dcc.portal.pql.es.ast.FieldNameNode)
-   */
   @Override
-  public FilterBuilder visitFieldName(FieldNameNode node) {
-    // TODO Auto-generated method stub
-    return null;
+  public FilterBuilder visitLessEqual(LessEqualNode node) {
+    val rangeFilter = (RangeFilterBuilder) stack.peek();
+    checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
+    rangeFilter.lte(node.getValue());
+
+    return rangeFilter;
+  }
+
+  @Override
+  public FilterBuilder visitLessThan(LessThanNode node) {
+    val rangeFilter = (RangeFilterBuilder) stack.peek();
+    checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
+    rangeFilter.lt(node.getValue());
+
+    return rangeFilter;
   }
 
 }

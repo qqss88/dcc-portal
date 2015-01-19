@@ -111,6 +111,17 @@ public class PqlParseListenerTest {
     childrenContainValue(mustNotNode, 2);
   }
 
+  @Test
+  public void getEsAstTest_greater() {
+    val query = "and(lt(age, 60), gt(age, 20))&eq(age, 10)";
+    val parser = ParseTrees.getParser(query);
+    parser.addParseListener(listener);
+    parser.program();
+
+    val esAst = listener.getEsAst();
+    log.info("{}", esAst);
+  }
+
   /**
    * Checks if one of the children contains {@code value}. Fails if the value was found in more that one child.
    */

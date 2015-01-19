@@ -31,4 +31,6 @@ public interface Node {
 
   <T> T accept(NodeVisitor<T> visitor);
 
+  int childrenCount();
+
 }

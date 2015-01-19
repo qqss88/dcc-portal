@@ -22,14 +22,15 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FieldNameNode;
-import org.dcc.portal.pql.es.ast.FromNode;
+import org.dcc.portal.pql.es.ast.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.LessEqualNode;
+import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.ToNode;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
@@ -89,42 +90,28 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   public ExpressionNode visitGe(GeContext nodeContext) {
     val pair = getPair(nodeContext);
 
-    return createGreaterNode(pair.getKey(), pair.getValue());
+    return new RangeNode(pair.getKey(), new GreaterEqualNode(pair.getValue()));
   }
 
   @Override
   public ExpressionNode visitGt(GtContext nodeContext) {
     val pair = getPair(nodeContext);
-    val value = ((Integer) pair.getValue()) + 1;
 
-    return createGreaterNode(pair.getKey(), value);
+    return new RangeNode(pair.getKey(), new GreaterThanNode(pair.getValue()));
   }
 
   @Override
   public ExpressionNode visitLe(LeContext nodeContext) {
     val pair = getPair(nodeContext);
 
-    return createLessNode(pair.getKey(), pair.getValue());
+    return new RangeNode(pair.getKey(), new LessEqualNode(pair.getValue()));
   }
 
   @Override
   public ExpressionNode visitLt(LtContext nodeContext) {
     val pair = getPair(nodeContext);
-    val value = ((Integer) pair.getValue()) - 1;
 
-    return createLessNode(pair.getKey(), value);
-  }
-
-  private static RangeNode createLessNode(@NonNull String name, @NonNull Object value) {
-    val fieldNameNode = new FieldNameNode(name, new ToNode(value));
-
-    return new RangeNode(fieldNameNode);
-  }
-
-  private static RangeNode createGreaterNode(@NonNull String name, @NonNull Object value) {
-    val fieldNameNode = new FieldNameNode(name, new FromNode(value));
-
-    return new RangeNode(fieldNameNode);
+    return new RangeNode(pair.getKey(), new LessThanNode(pair.getValue()));
   }
 
   /**

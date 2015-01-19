@@ -17,17 +17,32 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.Value;
+
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+@Value
+@EqualsAndHashCode(callSuper = false)
 public class RangeNode extends ExpressionNode {
 
-  public RangeNode(ExpressionNode... children) {
+  String name;
+
+  public RangeNode(@NonNull String name, ExpressionNode... children) {
     super(children);
+    this.name = name;
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
     return visitor.visitRange(this);
+  }
+
+  @Override
+  public String toString() {
+    return _("[%s]", name) + super.toString();
   }
 
 }

@@ -18,8 +18,10 @@
 package org.dcc.portal.pql.es.visitor;
 
 import org.dcc.portal.pql.es.ast.BoolNode;
-import org.dcc.portal.pql.es.ast.FieldNameNode;
-import org.dcc.portal.pql.es.ast.FromNode;
+import org.dcc.portal.pql.es.ast.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.LessEqualNode;
+import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
@@ -30,7 +32,6 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.ast.ToNode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 
 public interface NodeVisitor<T> {
@@ -57,10 +58,12 @@ public interface NodeVisitor<T> {
 
   T visitRange(RangeNode node);
 
-  T visitFieldName(FieldNameNode node);
+  T visitGreaterEqual(GreaterEqualNode node);
 
-  T visitFrom(FromNode node);
+  T visitGreaterThan(GreaterThanNode node);
 
-  T visitTo(ToNode node);
+  T visitLessEqual(LessEqualNode node);
+
+  T visitLessThan(LessThanNode node);
 
 }
