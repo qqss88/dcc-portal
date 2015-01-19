@@ -17,12 +17,11 @@
 package org.icgc.dcc.portal.mapper;
 
 import static java.lang.String.format;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.apache.commons.lang.StringUtils.capitalize;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -38,13 +37,10 @@ public class NotFoundExceptionMapper implements ExceptionMapper<NotFoundExceptio
 
   private final static Status STATUS = NOT_FOUND;
 
-  @Context
-  private HttpHeaders headers;
-
   @Override
   public Response toResponse(NotFoundException e) {
     return status(STATUS)
-        .type(headers.getMediaType())
+        .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(e))
         .build();
   }

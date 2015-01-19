@@ -20,10 +20,13 @@
 
   var module = angular.module('app.common.services', []);
 
-  module.constant('Extensions', {
-    'GENE_LIST': 'uploadedGeneList',
-    'GENE_ID': 'id'
+
+  module.factory('RestangularNoCache', function(Restangular) {
+    return Restangular.withConfig(function(RestangularConfigurer) {
+      RestangularConfigurer.setDefaultHttpFields({cache: false});
+    });
   });
+
 
   module.factory('Page', function () {
     var title = 'Loading...',
@@ -140,74 +143,28 @@
     };
   });
 
+  module.service('ProjectCache', function(Projects) {
+    var promise = null;
+    var cache = {};
 
-  module.service('DefinitionService', function() {
+    function getData() {
+      if (promise !== null)  {
+        return promise;
+      }
+      promise = Projects.getList().then(function(data) {
+        data.hits.forEach(function(project) {
+          cache[project.id] = project.name;
+        });
+        return cache;
+      });
+      return promise;
+    }
+
+    this.getData = getData;
+  });
+
+  module.service('DefinitionService', function(Extensions) {
     var definitions = {
-      // Projects
-      'ALL-US': 'Acute Lymphoblastic Leukemia - US',
-      'BLCA-CN': 'Bladder Cancer - CN',
-      'BLCA-US': 'Bladder Urothelial Cancer - TGCA, US',
-      'BOCA-UK': 'Bone Cancer - UK',
-      'BRCA-EU': 'Breast ER+ and HER2- Cancer - EU/UK',
-      'BRCA-FR': 'Breast Cancer - FR',
-      'BRCA-KR': 'Breast Cancer - KR',
-      'BRCA-MX': 'Breast Cancer - SIGMA, MX',
-      'BRCA-UK': 'Breast Triple Negative/Lobular Cancer - UK',
-      'BRCA-US': 'Breast Cancer - TCGA, US',
-      'CESC-US': 'Cervical Squamous Cell Carcinoma - TCGA, US',
-      'CLLE-ES': 'Chronic Lymphocyclic Leukemia - ES',
-      'CMDI-UK': 'Chronic Myeloid Disorders - UK',
-      'COAD-US': 'Colon Adenocarcinoma - TCGA, US',
-      'COCA-CN': 'Colorectal Cancer - CN',
-      'EOPC-DE': 'Early Onset Prostate Cancer - DE',
-      'ESAD-UK': 'Esophageal Adenocarcinoma - UK',
-      'ESCA-CN': 'Esophageal Cancer - CN',
-      'GACA-CN': 'Gastric Cancer - CN',
-      'GBM-US': 'Brain Glioblastoma Multiforme - TCGA, US',
-      'HNCA-MX': 'Head and Neck Cancer - SIGMA, MX',
-      'HNSC-US': 'Head and Neck Squamous Cell Carcinoma - TCGA, US',
-      'KIRC-US': 'Kidney Renal Clear Cell Carcinoma - TCGA, US',
-      'KIRP-US': 'Kidney Renal Papillary Cell Carcinoma - TCGA, US',
-      'LAML-KR': 'Acute Myeloid Leukemia - KR',
-      'LAML-US': 'Acute Myeloid Leukemia - TCGA, US',
-      'LGG-US': 'Brain Lower Grade Gliona - TCGA, US',
-      'LIAD-FR': 'Benign Liver Tumour - FR',
-      'LICA-CN': 'Liver Cancer - CN',
-      'LICA-FR': 'Liver Cancer - FR',
-      'LIHC-US': 'Liver Hepatocellular carcinoma - TCGA, US',
-      'LINC-JP': 'Liver Cancer - NCC, JP',
-      'LIRI-JP': 'Liver Cancer - RIKEN, JP',
-      'LUAD-US': 'Lung Adenocarcinoma - TCGA, US',
-      'LUCA-DE': 'Lung Cancer - DE',
-      'LUSC-KR': 'Lung Cancer - KR',
-      'LUSC-US': 'Lung Squamous Cell Carcinoma - TCGA, US',
-      'MALY-DE': 'Malignant Lymphoma - DE',
-      'NACA-CN': 'Nasopharyngeal cancer - CN',
-      'NBL-US': 'Brain Neuroblastoma - US',
-      'NHLY-MX': 'Non Hodgkin Lymphoma - SIGMA, MX',
-      'ORCA-IN': 'Oral Cancer - IN',
-      'OV-AU': 'Ovarian Cancer - AU',
-      'OV-US': 'Ovarian Serous Cystadenocarcinoma - TCGA, US',
-      'PAAD-US': 'Pancreatic Cancer - TCGA, US',
-      'PACA-AU': 'Pancreatic Cancer - AU',
-      'PACA-CA': 'Pancreatic Cancer - CA',
-      'PACA-IT': 'Pancreatic Cancer - IT',
-      'PAEN-AU': 'Pancreatic Cancer Endocrine neoplasms - AU',
-      'PBCA-DE': 'Pediatric Brain Cancer - DE',
-      'PEME-CA': 'Pediatric Medulloblastoma - CA',
-      'PRAD-CA': 'Prostate Adenocarcinoma - CA',
-      'PRAD-UK': 'Prostate Adenocarcinoma - UK',
-      'PRAD-US': 'Prostate Adenocarcinoma - TCGA, US',
-      'PRCA-FR': 'Prostate Cancer - FR',
-      'READ-US': 'Rectum Adenocarcinoma - TCGA, US',
-      'RECA-CN': 'Renal cancer - CN',
-      'RECA-EU': 'Renal Cell Cancer - EU/FR',
-      'SKCA-BR': 'Skin Adenocarcinoma - BR',
-      'SKCM-US': 'Skin Cutaneous melanoma - TCGA, US',
-      'STAD-US': 'Gastric Adenocarcinoma - TCGA, US',
-      'THCA-SA': 'Thyroid Cancer - SA',
-      'THCA-US': 'Head and Neck Thyroid Carcinoma - TCGA, US',
-      'UCEC-US': 'Uterine Corpus Endometrial Carcinoma- TCGA, US',
 
       // Data Types
       'Clinical': 'Clinical Data',
@@ -232,32 +189,46 @@
       'MSub': 'multiple base substitution (>=2bp and <=200bp)',
 
       // SSM mutation consequences
-      'Consequence': 'SO term:consequence_type',
+      // FIXME: This gets translated/defined twice...
+      'Consequence': 'SO term: consequence_type',
       'Frameshift': 'SO term: frameshift_variant',
-      'Missense': 'SO term: missense',
-      'Non Conservative Missense': 'SO term: non_conservative_missense_variant',
+      'Missense': 'SO term: missense_variant',
+      'Start Lost': 'SO term: start_lost',
       'Initiator Codon': 'SO term: initiator_codon_variant',
       'Stop Gained': 'SO term: stop_gained',
       'Stop Lost': 'SO term: stop_lost',
-      'Start Gained': 'SO term: start_gained',
-      'Exon Lost': 'SO term: exon_lost',
-      'Coding Seq': 'SO term: coding_sequence_variant',
-      'Inframe Del': 'SO term: inframe_deletion',
-      'Inframe Ins': 'SO term: inframe_insertion',
-      'Splice': 'SO term: splice_region_variant',
-      'Regulatory': 'SO term: regulatory_region_variant',
-      'micro RNA': 'SO term: micro_rna',
-      'NC Exon': 'SO term: non_coding_exon_variant',
-      'NC Transcript': 'SO term: nc_transcript_variant',
-      '5\' UTR': 'SO term: 5_prime_UTR_variant',
+      'Exon Loss': 'SO term: exon_loss_variant',
+      'Splice Acceptor': 'SO term: splice_acceptor_variant',
+      'Splice Donor': 'SO term: splice_donor_variant',
+      'Splice Region': 'SO term: splice_region_variant',
+      'Rare Amino Acid': 'SO term: rare_amino_acid_variant',
+      'Start Gained': 'SO term: 5_prime_UTR_premature_start_codon_gain_variant',
+      'Coding Sequence': 'SO term: coding_sequence_variant',
+      '5 UTR Truncation': 'SO term: 5_prime_UTR_truncation',
+      '3 UTR Truncation': 'SO term: 3_prime_UTR_truncation',
+      'Non ATG Start': 'SO term: non_canonical_start_codon',
+      'Disruptive Inframe Deletion': 'SO term: disruptive_inframe_deletion',
+      'Inframe Deletion': 'SO term: inframe_deletion',
+      'Disruptive Inframe Insertion': 'SO term: disruptive_inframe_insertion',
+      'Inframe Insertion': 'SO term: inframe_insertion',
+      'Regulatory Region': 'SO term: regulatory_region_variant',
+      'miRNA': 'SO term: miRNA',
+      'Conserved Intron': 'SO term: conserved_intron_variant',
+      'Conserved Intergenic': 'SO term: conserved_intergenic_variant',
+      '5 UTR': 'SO term: 5_prime_UTR_variant',
       'Upstream': 'SO term: upstream_gene_variant',
-      'Syn': 'SO term: synonymous_variant',
+      'Synonymous': 'SO term: synonymous_variant',
       'Stop Retained': 'SO term: stop_retained_variant',
-      '3\' UTR': 'SO term: 3_prime_UTR_variant',
+      '3 UTR': 'SO term: 3_prime_UTR_variant',
+      'Exon': 'SO term: exon_variant',
       'Downstream': 'SO term: downstream_gene_variant',
       'Intron': 'SO term: intron_variant',
-      'intergenic': 'SO term: intergenic_variant',
+      'Transcript': 'SO term: transcript_variant',
+      'Gene': 'SO term: gene_variant',
       'Intragenic': 'SO term: intragenic_variant',
+      'Intergenic': 'SO term: intergenic_region',
+      'Chromosome': 'SO term: chromosome',
+
 
       // Sequencing analysis types (Sequencing strategy)
       'WGS': 'Whole Genome Sequencing - random sequencing of the whole genome.',
@@ -299,6 +270,13 @@
       'OTHER': 'Library strategy not listed.'
     };
 
+    // Gene Set universe mapping
+    Extensions.GENE_SET_ROOTS.forEach(function(root) {
+      if (root.universe) {
+        definitions[root.universe] = root.name;
+      }
+    });
+
 
     this.getDefinitions = function() {
       return definitions;
@@ -310,6 +288,10 @@
     var translations = {
       // No Data
       '_missing': 'No Data',
+
+      // GO Ontology
+      'colocalizes_with': 'Colocalizes With',
+      'contributes_to': 'Contributes To',
 
       // OOZIE worflow status
       'NOT_FOUND': 'Not Found',
@@ -373,30 +355,43 @@
       // SSM mutation consequences
       'consequence_type': 'Consequence',
       'frameshift_variant': 'Frameshift',
-      'missense': 'Missense',
-      'non_conservative_missense_variant': 'Non Conservative Missense',
+      'missense_variant': 'Missense',
+      'start_lost': 'Start Lost',
       'initiator_codon_variant': 'Initiator Codon',
       'stop_gained': 'Stop Gained',
       'stop_lost': 'Stop Lost',
-      'start_gained': 'Start Gained',
-      'exon_lost': 'Exon Lost',
-      'coding_sequence_variant': 'Coding Seq',
-      'inframe_deletion': 'Inframe Del',
-      'inframe_insertion': 'Inframe Ins',
-      'splice_region_variant': 'Splice',
-      'regulatory_region_variant': 'Regulatory',
-      'micro_rna': 'micro RNA',
-      'non_coding_exon_variant': 'NC Exon',
-      'nc_transcript_variant': 'NC Transcript',
-      '5_prime_UTR_variant': '5\' UTR',
+      'exon_loss_variant': 'Exon Loss',
+      'splice_acceptor_variant': 'Splice Acceptor',
+      'splice_donor_variant': 'Splice Donor',
+      'splice_region_variant': 'Splice Region',
+      'rare_amino_acid_variant': 'Rare Amino Acid',
+      '5_prime_UTR_premature_start_codon_gain_variant': 'Start Gained',
+      'coding_sequence_variant': 'Coding Sequence',
+      '5_prime_UTR_truncation': '5 UTR Truncation',
+      '3_prime_UTR_truncation': '3 UTR Truncation',
+      'non_canonical_start_codon': 'Non ATG Start',
+      'disruptive_inframe_deletion': 'Disruptive Inframe Deletion',
+      'inframe_deletion': 'Inframe Deletion',
+      'disruptive_inframe_insertion': 'Disruptive Inframe Insertion',
+      'inframe_insertion': 'Inframe Insertion',
+      'regulatory_region_variant': 'Regulatory Region',
+      // 'miRNA': 'miRNA',   /* Same translation as biotype */
+      'conserved_intron_variant': 'Conserved Intron',
+      'conserved_intergenic_variant': 'Conserved Intergenic',
+      '5_prime_UTR_variant': '5 UTR',
       'upstream_gene_variant': 'Upstream',
-      'synonymous_variant': 'Syn',
+      'synonymous_variant': 'Synonymous',
       'stop_retained_variant': 'Stop Retained',
-      '3_prime_UTR_variant': '3\' UTR',
+      '3_prime_UTR_variant': '3 UTR',
+      'exon_variant': 'Exon',
       'downstream_gene_variant': 'Downstream',
       'intron_variant': 'Intron',
-      'intergenic_region': 'Intergenic',
+      'transcript_variant': 'Transcript',
+      'gene_variant': 'Gene',
       'intragenic_variant': 'Intragenic',
+      'intergenic_region': 'Intergenic',
+      'chromosome': 'Chromosome',
+
 
       // Functional Impact prediction categories
       'TOLERATED': 'Tolerated',
@@ -409,11 +404,81 @@
 
   });
 
+  // a function that returns an Angular 'structure' that represents a resuable
+  // service which provides a simple hash/lookup function as well as fetching data via ajax.
+  var KeyValueLookupServiceFactory = function ( fetch ) {
+
+    return ['Restangular', '$log', function (Restangular, $log) {
+
+      var _lookup = {};
+
+      var _retrieve = function ( id ) {
+        return _lookup [id];
+      };
+      var _echoOrDefault = function ( value, defaultValue ) {
+        return ( value ) ?
+          value :
+          defaultValue || '';
+      };
+      var _noop = function () {};
+      var _fetch = ( angular.isFunction (fetch) ) ? fetch : _noop;
+
+      this.put = function ( id, name ) {
+        if ( id && name ) {
+          _lookup [id + ''] = name + '';
+
+          $log.debug ( 'Updated lookup table is:' + JSON.stringify (_lookup) );
+        }
+      };
+      this.get = function ( id ) {
+        var result = _retrieve ( id );
+
+        return _echoOrDefault ( result, id );
+      };
+      this.batchFetch = function ( ids ) {
+        if ( angular.isArray (ids) ) {
+          var missings = _.difference ( ids, _.keys (_lookup) );
+
+          var setter = this.put;
+          missings.forEach ( function (id) {
+            _fetch ( Restangular, setter, id );
+          });
+        }
+      };
+    }];
+  };
+
+  // callback handler for gene-set name lookup
+  var _fetchGeneSetNameById = function ( rest, setter, id ) {
+    rest
+      .one ( 'genesets', id )
+      .get ( {field: ['id', 'name']} )
+      .then ( function (geneSet) {
+
+        if ( id === geneSet.id ) {
+          setter ( id, geneSet.name );
+        }
+      });
+  };
+
+  module.service ( 'GeneSetNameLookupService', new KeyValueLookupServiceFactory (_fetchGeneSetNameById) );
+
 
   module.service('FiltersUtil', function(Extensions) {
+
+    // Gene id extensions
+    var geneListKeys = _.pluck(Extensions.GENE_LISTS, 'id');
+
     this.removeExtensions = function(filters) {
-      if (filters.hasOwnProperty('gene') && filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
-        delete filters.gene.uploadedGeneList;
+      if (filters.hasOwnProperty('gene')) {
+
+        geneListKeys.forEach(function(key) {
+          if (filters.gene.hasOwnProperty(key)) {
+            delete filters.gene[key];
+          }
+        });
+
+        // delete filters.gene.inputGeneListId;
         if (_.isEmpty(filters.gene)) {
           delete filters.gene;
         }
@@ -422,13 +487,37 @@
     };
 
     this.hasGeneListExtension = function(filters) {
+      var hasGeneListExtension = false;
       if (filters.hasOwnProperty('gene')) {
-        if (filters.gene.hasOwnProperty(Extensions.GENE_LIST)) {
-          return true;
-        }
+        geneListKeys.forEach(function(key) {
+          if (filters.gene.hasOwnProperty(key)) {
+            hasGeneListExtension = true;
+          }
+        });
       }
-      return false;
+      return hasGeneListExtension;
     };
+
+
+    this.getGeneSetQueryType = function(type) {
+      if (type === 'go_term') {
+        return 'goTermId';
+      } else if (type === 'curated_set') {
+        return 'curatedSetId';
+      } else if (type === 'pathway') {
+        return 'pathwayId';
+      }
+      return 'geneSetId';
+    };
+
+
+    this.buildGeneSetFilterByType = function(type, geneSetIds) {
+      var filter = {gene:{}};
+      filter.gene[type] = {is: geneSetIds};
+      console.log('building', JSON.stringify(filter));
+      return filter;
+    };
+
 
     this.buildUIFilters = function(filters) {
       var display = {};
@@ -438,9 +527,32 @@
         angular.forEach(typeFilters, function(facetFilters, facetKey) {
           var uiFacetKey = facetKey;
 
+          // FIXME: no logic to handle "all" clause
+          if (facetFilters.all) {
+            return;
+          }
+
           // Genelist expansion maps to gene id
-          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || facetKey === Extensions.GENE_LIST)) {
+          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || _.contains(geneListKeys, facetKey))) {
             uiFacetKey = 'id';
+          }
+
+          // Remap gene ontologies
+          if (uiFacetKey === 'hasPathway') {
+            var uiTerm = 'Reactome Pathways';
+            uiFacetKey = 'pathwayId';
+
+            if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+              display[typeKey][uiFacetKey] = {};
+              display[typeKey][uiFacetKey].is = [];
+            }
+            display[typeKey][uiFacetKey].is.unshift({
+              term: uiTerm,
+              controlTerm: undefined,
+              controlFacet: facetKey,
+              controlType: typeKey
+            });
+            return;
           }
 
           // Allocate terms
@@ -449,14 +561,38 @@
             display[typeKey][uiFacetKey].is = [];
           }
 
+
           facetFilters.is.forEach(function(term) {
-            var uiTerm = term;
-            if (typeKey === 'gene' && facetKey === Extensions.GENE_LIST) {
-              uiTerm = 'Uploaded Gene List';
+            var uiTerm = term, isPredefined = false;
+            if (typeKey === 'gene' && _.contains(geneListKeys, facetKey)) {
+
+              uiTerm = _.find(Extensions.GENE_LISTS, function(gl) {
+                return gl.id === facetKey;
+              }).label;
+
+              // 'Uploaded Gene List';
+              isPredefined = true;
+            } else if (typeKey === 'gene' && facetKey === 'goTermId') {
+              var predefinedGO = _.find(Extensions.GENE_SET_ROOTS, function(set) {
+                return set.id === term && set.type === 'go_term';
+              });
+
+              if (predefinedGO) {
+                uiTerm = predefinedGO.name;
+                isPredefined = true;
+              }
+            } else if (typeKey === 'gene' && facetKey === 'curatedSetId') {
+              var predefinedCurated = _.find(Extensions.GENE_SET_ROOTS, function(set) {
+                return set.id === term && set.type === 'curated_set';
+              });
+              if (predefinedCurated) {
+                uiTerm = predefinedCurated.name;
+                isPredefined = true;
+              }
             }
 
             // Extension terms goes first
-            if (facetKey === Extensions.GENE_LIST) {
+            if (isPredefined) {
               display[typeKey][uiFacetKey].is.unshift({
                 term: uiTerm,
                 controlTerm: term,
@@ -479,5 +615,49 @@
     };
 
   });
+
+
+
+  /**
+   * Client side export of content using Blob and File, with fall back to server-side content echoing
+   */
+  module.service('ExportService', function() {
+    this.exportData = function(filename, data) {
+      if (window.Blob && window.File) {
+        saveAs(new Blob([data], {type: 'text/plain;charset=utf-8'}), filename);
+      } else {
+        // Fallback (IE and other browsers that lack support), create a form and
+        // submit a post request to bounce the download content against the server
+        jQuery('<form method="POST" id="htmlDownload" action="/api/echo" style="display:none">' +
+               '<input type="hidden" name="fileName" value="' + filename + '"/>' +
+               '<input type="hidden" name="text" value="' + data + '"/>' +
+               '<input type="submit" value="Submit"/>' +
+               '</form>').appendTo('body');
+        jQuery('#htmlDownload').submit();
+        jQuery('#htmlDownload').remove();
+      }
+
+    };
+  });
+
+
+  /*
+  module.service('GeneSetService', function() {
+
+    this.getGeneOntologies = function() {
+    };
+
+    this.getCuratedSets = function() {
+    };
+
+    this.getPathways = function() {
+    };
+
+    this.getAll = function() {
+    };
+
+    this.is
+  });
+  */
 
 })();

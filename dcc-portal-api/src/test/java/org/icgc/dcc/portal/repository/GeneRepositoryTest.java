@@ -174,19 +174,19 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void testCount() throws Exception {
-    assertThat(geneRepository.count(Query.builder().build())).isEqualTo(4);
-  }
+    public void testCountIntersection() throws Exception {
+      assertThat(geneRepository.count(Query.builder().build())).isEqualTo(4);
+    }
 
   @Test
-  public void testCountWithFilters() throws Exception {
-    assertThat(
-        geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_FILTER)).get()).build()))
-        .isEqualTo(1);
-    assertThat(
-        geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
-            .build())).isEqualTo(3);
-  }
+    public void testCountIntersectionWithFilters() throws Exception {
+      assertThat(
+          geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_FILTER)).get()).build()))
+          .isEqualTo(1);
+      assertThat(
+          geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
+              .build())).isEqualTo(3);
+    }
 
   @Test
   public void testFind() throws Exception {

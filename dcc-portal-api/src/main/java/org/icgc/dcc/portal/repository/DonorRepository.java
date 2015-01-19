@@ -33,16 +33,16 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
+import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildPathwayFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
 import static org.icgc.dcc.portal.service.QueryService.hasDonor;
 import static org.icgc.dcc.portal.service.QueryService.hasGene;
+import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
 import static org.icgc.dcc.portal.service.QueryService.hasMutation;
 import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.hasPathway;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
@@ -67,6 +67,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
@@ -74,6 +75,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -103,7 +105,7 @@ public class DonorRepository implements Repository {
       .put(Kind.PROJECT, "project")
       .put(Kind.GENE, "gene")
       .put(Kind.MUTATION, "gene.ssm")
-      .put(Kind.PATHWAY, "gene.pathways")
+      .put(Kind.GENE_SET, "gene")
       .put(Kind.CONSEQUENCE, "gene.ssm.consequence")
       .put(Kind.OBSERVATION, "gene.ssm.observation")
       .build());
@@ -160,19 +162,19 @@ public class DonorRepository implements Repository {
     boolean matchAll = true;
     boolean hasDonor = hasDonor(filters);
     boolean hasGene = hasGene(filters);
-    boolean hasPathway = hasPathway(filters);
+    boolean hasGeneSet = hasGeneSet(filters);
     boolean hasMutation = hasMutation(filters);
     boolean hasConsequence = hasConsequence(filters);
     boolean hasObservation = hasObservation(filters);
 
-    if (hasDonor || hasGene || hasPathway || hasMutation || hasConsequence || hasObservation) {
+    if (hasDonor || hasGene || hasGeneSet || hasMutation || hasConsequence || hasObservation) {
       matchAll = false;
       if (hasDonor) {
         musts.add(buildDonorFilters(filters, PREFIX_MAPPING));
       }
-      if (hasGene || hasPathway || hasMutation || hasConsequence || hasObservation) {
+      if (hasGene || hasGeneSet || hasMutation || hasConsequence || hasObservation) {
         val gb = FilterBuilders.boolFilter();
-        val gMusts = buildGeneNestedFilters(filters, hasGene, hasPathway, hasMutation, hasConsequence, hasObservation);
+        val gMusts = buildGeneNestedFilters(filters, hasGene, hasGeneSet, hasMutation, hasConsequence, hasObservation);
         gb.must(gMusts.toArray(new FilterBuilder[gMusts.size()]));
         musts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE), gb));
       }
@@ -181,13 +183,16 @@ public class DonorRepository implements Repository {
     return matchAll ? matchAllFilter() : qb;
   }
 
-  private List<FilterBuilder> buildGeneNestedFilters(ObjectNode filters, boolean hasGene, boolean hasPathway,
+  private List<FilterBuilder> buildGeneNestedFilters(ObjectNode filters, boolean hasGene, boolean hasGeneSet,
       boolean hasMutation, boolean hasConsequence, boolean hasObservation) {
     val gMusts = Lists.<FilterBuilder> newArrayList();
     if (hasGene) gMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-    if (hasPathway) {
-      gMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.PATHWAY), buildPathwayFilters(filters, PREFIX_MAPPING)));
-    }
+    if (hasGeneSet) gMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+    /*
+     * if (hasGeneSet) { gMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET), buildGeneSetFilters(filters,
+     * PREFIX_MAPPING))); }
+     */
+
     if (hasMutation || hasConsequence || hasObservation) {
       val nb = FilterBuilders.boolFilter();
       val nMusts = Lists.<FilterBuilder> newArrayList();
@@ -266,14 +271,14 @@ public class DonorRepository implements Repository {
     boolean matchAll = true;
 
     boolean hasGene = hasGene(filters);
-    boolean hasPathway = hasPathway(filters);
+    boolean hasGeneSet = hasGeneSet(filters);
     boolean hasMutation = hasMutation(filters);
     boolean hasConsequence = hasConsequence(filters);
     boolean hasObservation = hasObservation(filters);
 
-    if (hasGene || hasPathway || hasMutation || hasConsequence || hasObservation) {
+    if (hasGene || hasGeneSet || hasMutation || hasConsequence || hasObservation) {
       matchAll = false;
-      val gMusts = buildGeneNestedFilters(filters, hasGene, hasPathway, hasMutation, hasConsequence, hasObservation);
+      val gMusts = buildGeneNestedFilters(filters, hasGene, hasGeneSet, hasMutation, hasConsequence, hasObservation);
       qb.must(gMusts.toArray(new FilterBuilder[gMusts.size()]));
     }
 
@@ -283,6 +288,26 @@ public class DonorRepository implements Repository {
   @Override
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
+
+    log.debug("{}", search);
+
+    return search.execute().actionGet().getHits().getTotalHits();
+  }
+
+  public long countIntersection(AndQuery query) {
+    val search = client.prepareSearch(index).setTypes(CENTRIC_TYPE.getId()).setSearchType(COUNT);
+
+    if (query.hasFilters()) {
+      // Require all filter components to be true
+      val boolFilter = new BoolFilterBuilder();
+      for (val filters : query.getAndFilters()) {
+        val remappedFilters = remapFilters(filters);
+
+        boolFilter.must(getFilters(remappedFilters));
+      }
+
+      search.setFilter(boolFilter);
+    }
 
     log.debug("{}", search);
 
@@ -364,7 +389,6 @@ public class DonorRepository implements Repository {
 
     if (!response.isExists()) {
       String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
       String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
       throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
           .entity(msg).build());

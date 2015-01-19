@@ -117,14 +117,22 @@
     };
   });
 
+  // a filter used to provide a tooltip (descriptive name) for a gene-set
+  module.filter ( 'geneSetNameLookup', function (GeneSetNameLookupService) {
+    return function (id) {
+      return GeneSetNameLookupService.get ( id );
+    };
+  });
+
+
   module.filter('highlight', function () {
     return function (text, search, hide) {
       text = text || '';
       hide = hide || false;
       if (search) {
         text = angular.isArray(text) ? text.join(', ') : text.toString();
-        // Shrink extra spaces, removes non alpha-numeric chars
-        search = search.toString().replace(/\s+/g, ' ').replace(/[^a-zA-Z0-9\s]/g, '').split(' ');
+        // Shrink extra spaces, restrict to alpha-numeric chars and a few other special chars
+        search = search.toString().replace(/\s+/g, ' ').replace(/[^a-zA-Z0-9:\s]/g, '').split(' ');
         for (var i = 0; i < search.length; ++i) {
           text = text.replace(new RegExp(search[i], 'gi'), '^$&$');
         }
@@ -175,6 +183,7 @@
     };
   });
 
+  /*
   module.filter('typecv', function () {
     return function (type) {
       var types = {
@@ -185,6 +194,7 @@
       return types[type];
     };
   });
+  */
 
   module.filter('unique', function () {
     return function (items) {
@@ -216,6 +226,7 @@
 
 // Join parallel arrays into a single array
 // eg. [ ['a', 'b', 'c'], ['d', 'e', 'f'] ] | joinFields:''  => ['ad', 'be', 'cf']
+/*
   module.filter('joinFields', function () {
     return function (items, delim, checkEmpty) {
       var i, j, list, tempList, joinedItem, hasEmpty;
@@ -253,6 +264,7 @@
       return list;
     };
   });
+  */
 
   module.filter('bytes', function () {
     return function (input) {

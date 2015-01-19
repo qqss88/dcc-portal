@@ -27,10 +27,17 @@
       controller: 'GeneCtrl as GeneCtrl',
       resolve: {
         gene: ['$stateParams', 'Genes', function ($stateParams, Genes) {
-          return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
-            'pathways']}).then(function (gene) {
+          return Genes.one($stateParams.id).get({include: ['projects', 'transcripts']}).then(function(gene) {
             return gene;
           });
+          // return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
+          //   'pathways']}).then(function (gene) {
+          //   gene.projects = _.map(gene.projects, function (p) {
+          //     p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
+          //     return p;
+          //   });
+          //   return gene;
+          // });
         }]
       }
     });
@@ -43,7 +50,7 @@
   var module = angular.module('icgc.genes.controllers', ['icgc.genes.models']);
 
   module.controller('GeneCtrl', function ($scope, HighchartsService, Page, Projects, Mutations,
-    LocationService, GMService, gene) {
+    LocationService, Donors, Genes, GMService, Restangular, gene) {
     var _ctrl = this;
     Page.setTitle(gene.id);
     Page.setPage('entity');
@@ -56,82 +63,114 @@
     _ctrl.totalDonors = 0;
     _ctrl.gene.hasGVChromosome = GMService.isValidChromosome(_ctrl.gene.chromosome);
 
+    function extractAndSort(list, type) {
+      var filtered =  _.filter(list, function(set) {
+        return set.type === type && set.annotation === 'direct';
+      });
+      return _.sortBy(filtered, function(set) {
+        return set.name;
+      });
+    }
+
+    // Extract to make it easier to handle on the view
+    _ctrl.uiGeneSets = {};
+    _ctrl.uiGeneSets.pathwayList = extractAndSort(_ctrl.gene.sets, 'pathway');
+    _ctrl.uiGeneSets.goList = extractAndSort(_ctrl.gene.sets, 'go_term');
+    _ctrl.uiGeneSets.curatedList = extractAndSort(_ctrl.gene.sets, 'curated');
+
+
     function refresh() {
-      if (_ctrl.gene.hasOwnProperty('projects') && _ctrl.gene.projects.length > 0) {
-        _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});
+      var geneProjectPromise = Donors.getList({
+        size: 0,
+        from: 1,
+        include: ['facets'],
+        filters: {'gene':{'id':{'is':[_ctrl.gene.id]}}}
+      }).then(function(data) {
+        var ids = _.pluck(data.facets.projectId.terms, 'term');
+        return Projects.getList({
+          filters: {'project': {'id': { 'is': ids}}}
+        });
+      });
 
+      _ctrl.gene.advQuery = LocationService.mergeIntoFilters({gene: {id: {is: [_ctrl.gene.id] }}});
 
-        // Fetch dynamic mutations
-        Projects.one(_.pluck(gene.projects, 'id').join(',')).handler.one('mutations', 'counts').get({
-          filters: _ctrl.gene.advQuery
-        }).then(function (data) {
-          _ctrl.totalMutations = data.Total;
+      // Fetch dynaimc mutations and donors
+      geneProjectPromise.then(function(projects) {
+        var mutationPromise, donorPromise;
+        if ( !projects.hits || projects.hits.length === 0) {
+          return;
+        }
 
+        mutationPromise = Projects.one(_.pluck(projects.hits, 'id').join(','))
+          .handler.one('mutations', 'counts').get({filters: _ctrl.gene.advQuery });
 
-          gene.projects.forEach(function (p) {
-            p.mutationCount = data[p.id];
+        donorPromise = Projects.one(_.pluck(projects.hits, 'id').join(','))
+          .handler.one('donors', 'counts').get({filters: _ctrl.gene.advQuery });
+
+        mutationPromise.then(function(projectMutations) {
+          projects.hits.forEach(function(proj) {
+            proj.mutationCount = projectMutations[proj.id];
           });
+          _ctrl.totalMutations = projectMutations.Total;
         });
 
-
-        // Fetch dynamic donor count
-        Projects.one(_.pluck(gene.projects, 'id').join(',')).handler.one('donors', 'counts').get({
-          filters: _ctrl.gene.advQuery
-        }).then(function (data) {
-          gene.projects.forEach(function (proj) {
-            proj.filteredDonorCount = data[proj.id];
+        donorPromise.then(function(projectDonors) {
+          projects.hits.forEach(function(proj) {
+            proj.filteredDonorCount = projectDonors[proj.id];
             proj.uiAffectedDonorPercentage = proj.filteredDonorCount / proj.ssmTestedDonorCount;
-
             proj.advQuery = LocationService.mergeIntoFilters({
               gene: {id: {is: [_ctrl.gene.id] }},
               donor: {projectId: {is: [proj.id]}}
             });
           });
-
           _ctrl.bar = HighchartsService.bar({
-            hits: _.first(_.sortBy(gene.projects, function (p) {
+            hits: _.first(_.sortBy(projects.hits, function (p) {
               return -p.uiAffectedDonorPercentage;
             }),10),
             xAxis: 'id',
             yValue: 'uiAffectedDonorPercentage'
           });
-
-
-          _ctrl.gene.fprojects = _.filter(_ctrl.gene.projects, function (p) {
-            return p.filteredDonorCount > 0;
-          });
-
-          _ctrl.totalDonors = data.Total;
+          _ctrl.totalDonors = projectDonors.Total;
         });
 
-        var params = {
-          filters: {gene: {id: {is: [_ctrl.gene.id] }}},
-          size: 0,
-          include: ['facets']
-        };
 
-        Mutations.getList(params).then(function (d) {
-          _ctrl.mutationFacets = d.facets;
-        });
-      }
-    }
+        _ctrl.gene.projects = projects.hits;
+        console.log(_ctrl.gene.projects);
+      });
 
-    if (_ctrl.gene.hasOwnProperty('transcripts')) {
-      _ctrl.gene.transcripts.forEach(function (transcript) {
-        var hasProteinCoding, isAffected;
+      var params = {
+        filters: {gene: {id: {is: [_ctrl.gene.id] }}},
+        size: 0,
+        include: ['facets']
+      };
 
-        // 1) Check if transcript has protein_coding
-        hasProteinCoding = transcript.type === 'protein_coding';
-
-        // 2) Check if transcript is affected
-        isAffected = _ctrl.gene.affectedTranscriptIds.indexOf(transcript.id) !== -1;
-
-        if (hasProteinCoding && isAffected) {
-          _ctrl.gene.uiProteinTranscript.push(transcript);
-        }
+      Mutations.getList(params).then(function (d) {
+        _ctrl.mutationFacets = d.facets;
       });
     }
 
+
+    if (_ctrl.gene.hasOwnProperty('transcripts')) {
+      var geneTranscriptPromie = Genes.one().handler.one('affected-transcripts').get({});
+
+      geneTranscriptPromie.then(function(data) {
+        var affectedTranscriptIds = Restangular.stripRestangular(data)[_ctrl.gene.id];
+
+        _ctrl.gene.transcripts.forEach(function (transcript) {
+          var hasProteinCoding, isAffected;
+
+          // 1) Check if transcript has protein_coding
+          hasProteinCoding = transcript.type === 'protein_coding';
+
+          // 2) Check if transcript is affected
+          isAffected = affectedTranscriptIds.indexOf(transcript.id) !== -1;
+
+          if (hasProteinCoding && isAffected) {
+            _ctrl.gene.uiProteinTranscript.push(transcript);
+          }
+        });
+      });
+    }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
       if (dest.indexOf('genes') !== -1) {
