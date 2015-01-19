@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Page, ListManagerService, AnalysisService) {
+    Restangular, Page, ListManagerService, AnalysisService) {
 
     // Testing
     // ListManagerService.seedTestData();
@@ -71,9 +71,22 @@
     // End testing
 
 
-
     // Send IDs generate new set operations analysis
     $scope.launchSetAnalysis = function() {
+      console.log('selected', $scope.listItemUUIDs);
+
+      var data = $scope.listItemUUIDs;
+      var promise = Restangular.one('analysis')
+        .withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'set');
+
+      // FIXME
+      promise.then(function(data) {
+        var analysisId = data.id;
+        $location.path('analysis/set/' + analysis);
+      });
+
+      // TODO: testing only
       var id = (new Date()).getTime(); // FIXME
       $location.path('analysis/set/' + id);
     };

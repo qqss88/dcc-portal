@@ -19,7 +19,7 @@
       scope: {
         item: '='
       },
-      templateUrl: '/scripts/sets/views/sets.html',
+      templateUrl: '/scripts/sets/views/sets.result.html',
       link: function($scope, $element) {
         var vennDiagram;
 

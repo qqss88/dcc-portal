@@ -6,9 +6,9 @@
             <div class="t_tabs__tab t_tabs__tab__analysis active">
                 <span>Bench</span>
             </div>
-            <div class="pull-right" style="margin: 0.5rem">
+            <span class="ipull-right" style="margin-left: 1.5rem">
                 <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
-            </div>
+            </span>
         </div>
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
             <ul class="t_suggest_flyout__hits">
@@ -24,7 +24,7 @@
                     data-ng-repeat="item in analysisList"
                     data-ng-class="{selected: item.id == analysisId}">
                     <span>
-                        <span>{{item.type}}</span>
+                        <span>{{item.type === "set"? "Set Operations" : "Enrichment Analysis"}}</span>
                         <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
                         <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
                         <span data-ng-mouseenter="hover=true"

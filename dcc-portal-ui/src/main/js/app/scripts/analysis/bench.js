@@ -30,13 +30,13 @@
       // TODO: untested
 
       var data = ''; promise = null;
-      data += 'type=' + params.type + '&';
+      data += 'type=' + type + '&';
       data += 'filters=' + JSON.stringify(params.filters) + '&';
       data += 'sort=' + params.sort + '&';
       data += 'order=' + params.order + '&';
       data += 'name=' + encodeURIComponent(params.name) + '&';
       if (angular.isDefined(params.description)) {
-        data += 'description=' + encodeURIComponent(params.name) + '&';
+        data += 'description=' + encodeURIComponent(params.name);
       }
 
 
@@ -75,16 +75,40 @@
     */
     this.addDerivedSet = function(type, params) {
       // TODO: stub
+      var data = ''; promise = null;
+
+      data += 'type=' + type + '&';
+      data += 'name=' + params.name;
+      data += 'union' + Json.stringify(params.union);
+
+      if (angular.isDefined(params.description)) {
+        data += 'description=' + encodeURIComponent(params.name);
+      }
+
+      promise = Restangular.one('list/union').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
+      promise.then(function(data) {
+        if (! data.id) {
+          return;
+        }
+      });
+    };
+
+
+    this.getMetaData = function( ids ) {
+      // TODO: stub
+      console.log('getting meta data for', ids);
     };
 
 
     this.exportSet = function(sets) {
       // TODO: stub
+      console.log('exporting', sets);
     };
 
 
 
 
+    /****** Local storage related API ******/
     this.addTest = function(list) {
       var lists = this.getAll();
       lists.unshift(list);
