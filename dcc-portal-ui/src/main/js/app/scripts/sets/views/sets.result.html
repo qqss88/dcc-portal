@@ -2,6 +2,9 @@
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
 <span data-ng-if="item.state !== 'ANALYZING'">
+
+    <set-upload data-set-modal="setModal" data-set-type="'donor'"></set-upload>
+
     <div class="canvas half"></div>
     <div class="narrow">
 
@@ -16,16 +19,11 @@
                 <th>Actions</th>
             </thead>
             <tbody>
-                <!--<tr style="cursor:pointer; background-color: {{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"-->
                 <tr data-ng-repeat="item in data"
                     data-ng-mouseenter="tableMouseEnter(item.intersections)"
                     data-ng-mouseleave="tableMouseOut(item.intersections)">
                     <td style="cursor:pointer"
                         data-ng-click="toggleSelection(item)">
-                        <!--
-                        <i style="-color:{{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"
-                           class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
-                        -->
                         <i style="-color:{{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"
                            class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
@@ -39,7 +37,7 @@
                         <span class="t_tools" style="float:left">
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-upload" data-tooltip="Save as new list"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="$parent.setModal=true"></i>
                             </span>
                         </span>
                     </td>
@@ -54,7 +52,7 @@
                         <span class="t_tools" style="float:left" data-ng-hide="selectedTotalCount===0">
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-upload" data-tooltip="Save as new list"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="setModal=true"></i>
                             </span>
                         </span>
                     </td>

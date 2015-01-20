@@ -145,6 +145,7 @@
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
 
+
     function getAnalysis() {
       $scope.error = null;
       // 1) Check if analysis exist in the backend
@@ -225,7 +226,9 @@
       }
 
       if (AnalysisService.remove(id) === true) {
+        console.log('removed', id);
         $scope.analysis = null;
+        $scope.analysisList = AnalysisService.getAll();
         $location.path('analysis');
       }
     };
