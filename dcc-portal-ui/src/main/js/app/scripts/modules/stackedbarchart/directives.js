@@ -19,7 +19,7 @@
 
 	var module = angular.module('icgc.visualization.stackedbar', []);
 	
-	module.directive('stacked', function () {
+	module.directive('stacked', function ($location, HighchartsService) {
 	    return {
 		    restrict: 'E',
 		    replace: true,
@@ -39,7 +39,13 @@
                     var config = {
                         margin:{top: 5, right: 20, bottom: 50, left: 50},
                         height: 250,
-                        width: 500
+                        width: 500,
+                        colours: HighchartsService.projectColours,
+                        yaxis:{label:'Donors Affected',ticks:4},
+                        onClick: function(geneid){
+                          $location.path('/genes/' + geneid).search({});
+                          $scope.$apply();
+                        }
                       };
                     chart = new dcc.StackedBarChart($scope.items,config);
                     chart.render($element[0]);
