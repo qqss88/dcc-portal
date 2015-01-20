@@ -51,6 +51,8 @@ import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
+import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.service.SessionService;
@@ -147,6 +149,16 @@ public class PortalConfig {
   @Bean
   public EnrichmentAnalysisRepository enrichmentAnalysisRepository(DBI dbi) {
     return dbi.open(EnrichmentAnalysisRepository.class);
+  }
+
+  @Bean
+  public EntityListRepository entityListRepository(final DBI dbi) {
+    return dbi.open(EntityListRepository.class);
+  }
+
+  @Bean
+  public UnionAnalysisRepository unionAnalysisRepository(final DBI dbi) {
+    return dbi.open(UnionAnalysisRepository.class);
   }
 
   @Bean

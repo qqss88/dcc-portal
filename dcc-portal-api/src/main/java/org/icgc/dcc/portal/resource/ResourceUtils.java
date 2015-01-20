@@ -98,6 +98,12 @@ public class ResourceUtils {
   static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
 
+  static final String API_ENTITY_LIST_ID_VALUE = "Entity List ID";
+  static final String API_ENTITY_LIST_ID_PARAM = "entityListId";
+
+  static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity List Definition";
+  static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
+
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();
 

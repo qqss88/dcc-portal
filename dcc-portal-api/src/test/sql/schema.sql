@@ -7,6 +7,8 @@
 -- Clean
 DROP TABLE IF EXISTS user_gene_set;
 DROP TABLE IF EXISTS enrichment_analysis;
+DROP TABLE IF EXISTS union_analysis;
+DROP TABLE IF EXISTS entity_list;
 
 -- Create
 CREATE TABLE user_gene_set(
@@ -17,3 +19,12 @@ CREATE TABLE enrichment_analysis(
    id   UUID PRIMARY KEY,
    data TEXT 
 );
+CREATE TABLE union_analysis (
+   id   UUID PRIMARY KEY,
+   data TEXT
+);
+CREATE TABLE entity_list (
+   id   UUID PRIMARY KEY,
+   data TEXT
+);
+
