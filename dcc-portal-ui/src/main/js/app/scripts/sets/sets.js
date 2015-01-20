@@ -13,6 +13,47 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
+  module.directive('setUpload', function(ListManagerService) {
+    return {
+      restruct: 'E',
+      scope: {
+        setModal: '=',
+        setType: '=',
+        setLimit: '@',
+      },
+      templateUrl: '/scripts/sets/views/sets.upload.html',
+      link: function($scope) {
+
+        $scope.setDescription = null;
+        $scope.submitNewSet = function() {
+          console.log('name', $scope.setName);
+          console.log('description', $scope.setDescription);
+
+          // TODO: real save
+          var params = {};
+          params.type = $scope.setType;
+          params.name = $scope.setName;
+          params.description = $scope.setDescription;
+          params.filters = {};
+          params.sort = '';
+          params.order = '';
+
+          ListManagerService.addSet($scope.setType, params);
+
+          // Reset
+          $scope.setDescription = null;
+          $scope.setType = null;
+        };
+
+        $scope.$watch('setType', function(n) {
+          if (n) {
+            $scope.setName = n;
+          }
+        });
+      }
+    };
+  });
+
   module.directive('setOperation', function($location, $timeout, SetOperationService) {
     return {
       restrict: 'E',
@@ -226,7 +267,7 @@
 
   var module = angular.module('icgc.sets.services', []);
 
-  module.service('SetOperationService', function(Restangular) {
+  module.service('SetOperationService', function() {
     var shortHandPrefix = 'S';
 
     /*

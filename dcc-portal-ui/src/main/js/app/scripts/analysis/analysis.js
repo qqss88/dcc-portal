@@ -83,7 +83,7 @@
       // FIXME
       promise.then(function(data) {
         var analysisId = data.id;
-        $location.path('analysis/set/' + analysis);
+        $location.path('analysis/set/' + analysisId);
       });
 
       // TODO: testing only

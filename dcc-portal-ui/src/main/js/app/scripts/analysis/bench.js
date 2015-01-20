@@ -29,7 +29,7 @@
     this.addSet = function(type, params) {
       // TODO: untested
 
-      var data = ''; promise = null;
+      var data = '', promise = null;
       data += 'type=' + type + '&';
       data += 'filters=' + JSON.stringify(params.filters) + '&';
       data += 'sort=' + params.sort + '&';
@@ -38,7 +38,6 @@
       if (angular.isDefined(params.description)) {
         data += 'description=' + encodeURIComponent(params.name);
       }
-
 
       promise = Restangular.one('list').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
       promise.then(function(data) {
@@ -58,9 +57,26 @@
         };
 
         var lists = _this.getAll();
-        lists.unshift(list);
+        lists.unshift(localSet);
         localStorageService.set(LIST_ENTITY, lists);
-        toaster.pop('', list.name  + ' was saved', 'View in the <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+      }, function(err) {
+
+        // FIXME: testing, remove
+        console.log(err);
+        var localSet = {
+          id: (new Date()),
+          type: params.type,
+          name: params.name,
+          description: params.description,
+          count: params.count
+        };
+
+        var lists = _this.getAll();
+        lists.unshift(localSet);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+
 
       });
     };
@@ -75,11 +91,11 @@
     */
     this.addDerivedSet = function(type, params) {
       // TODO: stub
-      var data = ''; promise = null;
+      var data = '', promise = null;
 
       data += 'type=' + type + '&';
       data += 'name=' + params.name;
-      data += 'union' + Json.stringify(params.union);
+      data += 'union' + JSON.stringify(params.union);
 
       if (angular.isDefined(params.description)) {
         data += 'description=' + encodeURIComponent(params.name);
