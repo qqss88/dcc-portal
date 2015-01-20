@@ -24,7 +24,18 @@
     $stateProvider.state('projects', {
       url: '/projects?filters',
       templateUrl: 'scripts/projects/views/projects.html',
-      controller: 'ProjectsCtrl as ProjectsCtrl'
+      controller: 'ProjectsCtrl as ProjectsCtrl',
+      data: {tab: 'charts'}
+    });
+      
+    $stateProvider.state('projects.table', {
+      url: '/table',
+      data: {tab:'table'}
+    });
+      
+    $stateProvider.state('projects.charts', {
+      url: '/charts',
+      data: {tab:'charts'}
     });
 
     $stateProvider.state('project', {
@@ -46,14 +57,28 @@
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
-    function ($q, $scope, Page, Projects, HighchartsService, Donors, Restangular, LocationService) {
+    function ($q, $scope, $state, ProjectState, Page, Projects,
+               HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
     Page.setPage('projects');
-
+      
     _ctrl.Page = Page;
-
+    _ctrl.state = ProjectState;
+    
+    _ctrl.setTab = function (tab) {
+        _ctrl.state.setTab(tab);
+      };
+    _ctrl.setTab($state.current.data.tab);
+      
+    
+    $scope.$watch(function () {
+        return $state.current.data.tab;
+      }, function () {
+        _ctrl.setTab($state.current.data.tab);
+      });
+      
     // This is needed to translate projects filters to donor filters
     $scope.createAdvanceFilters = function(dataType) {
       var currentFilters = LocationService.filters();
@@ -147,10 +172,8 @@
 
                 gene.uiFIProjects = uiFIProjects;
               });
-
-              _ctrl.stacked = HighchartsService.stacked({
-                genes: genes.hits
-              });
+              
+              _ctrl.stacked = genes.hits;
             });
           });
       }
@@ -413,7 +436,6 @@
 
   module.service('Projects', function (Restangular, LocationService, Project) {
     var _this = this;
-
     this.all = function () {
       return Restangular.all('projects');
     };
@@ -499,6 +521,7 @@
       };
       return this.handler.one('mutations', '').get(angular.extend(defaults, params));
     };
+      
   });
 
   module.value('X2JS', new X2JS());
@@ -534,4 +557,26 @@
       });
     };
   });
+    
+  module.service('ProjectState', function () {
+      
+    this.visitedTab = {};
+
+    this.hasVisitedTab = function(tab) {
+      return this.visitedTab[tab];
+    };
+      
+    this.setTab = function (tab) {
+      this.tab = tab;
+      this.visitedTab[tab] = true;
+    };
+    this.getTab = function () {
+      return this.tab;
+    };
+    this.isTab = function (tab) {
+      return this.tab === tab;
+    };
+      
+  });
+    
 })();

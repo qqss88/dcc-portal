@@ -52,3 +52,50 @@
    stroke: none;
    fill: #444444;
 }
+
+/* Stacked bar chart style */
+.stacked.y.axis path,
+.stacked.y.axis line {
+  fill: none;
+  stroke: gray;
+    sharp-rengering: crispEdges;
+}
+
+.stacked.bar {
+  fill: gray;
+}
+
+.stacked.x.axis path {
+  display: none;
+}
+            
+div.stacked.tooltip {   
+  position: absolute;           
+  text-align: left;               
+  padding: 4px;             
+  font: 12px sans-serif;        
+  background: white;   
+  border: 0px;      
+  border-radius: 5px;           
+  pointer-events: none;    
+-moz-box-shadow: 1px 1px 2px #999;
+-webkit-box-shadow: 1px 1px 2px #999;
+box-shadow: 1px 1px 2px #999;
+}
+
+.stackedsubtitle {
+    font-weight:normal;
+    color: #999999;
+    font-size: 13px;
+}
+
+/* modify the container of the stacked bar chart */
+.wide.omega {
+    text-align: right;
+    margin-right: 30px;
+    min-width: 500px;
+}
+
+#svgcontainer {
+    min-width: 500px;
+}
