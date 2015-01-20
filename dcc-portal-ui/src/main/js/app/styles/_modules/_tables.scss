@@ -66,6 +66,15 @@
        }
     }
   }
+
+  &.table-setop {
+    tbody {
+       tr {
+          background-color: rgba(0, 0, 0, 0);
+          border-top: 1px solid $greyLighter;
+       }
+    }
+  }
 }
 
 .t_table_top {

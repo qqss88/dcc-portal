@@ -11,17 +11,27 @@
       resolve: {
         analysisId: function() {
           return null;
+        },
+        analysisType: function() {
+          return null;
         }
       }
     });
 
+    /**
+    * :id is a UUID generated server-side
+    * :type can be one of "enrichment", "setop"
+    */
     $stateProvider.state('analysis', {
-      url: '/analysis/:id',
+      url: '/analysis/:type/:id',
       templateUrl: 'scripts/analysis/views/analysis.html',
       controller: 'AnalysisController',
       resolve: {
         analysisId: ['$stateParams', function($stateParams) {
           return $stateParams.id;
+        }],
+        analysisType: ['$stateParams', function($stateParams) {
+          return $stateParams.type;
         }]
       }
     });
@@ -35,37 +45,74 @@
 
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
-  module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId,
-    Page, ListManagerService, AnalysisService, toaster) {
-
+  module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
+    Restangular, Page, ListManagerService, AnalysisService) {
 
     // Testing
-    ListManagerService.seedTestData();
+    // ListManagerService.seedTestData();
     $scope.entityLists = ListManagerService.getAll();
 
-    // toaster.pop('', 'Test', '<a href="/search">hello link</a>', 4000, 'trustedHtml');
-    // toaster.pop('', 'ICGC Portal', '<a href="/search">New list created</a>', 4000, 'trustedHtml');
+    $scope.listItemTotal = 0;
+    $scope.listItemUUIDs = [];
 
     $scope.createTestList = function(type) {
       var list = {
          id: new Date(),
          type: type,
          name: type + ' ' + new Date(),
-         note: 'This is a test',
-         count: Math.floor(Math.random()*100)
+         description: 'This is a test',
+         count: Math.floor(Math.random()*100),
+         timestamp: (new Date()).getTime()
       };
       ListManagerService.addTest(list);
-      $scope.entityLists = ListManagerService.getAll()
+      $scope.entityLists = ListManagerService.getAll();
       $scope.updateAvailableAnalysis();
     };
+    // End testing
+
+
+    // Send IDs generate new set operations analysis
+    $scope.launchSetAnalysis = function() {
+      console.log('selected', $scope.listItemUUIDs);
+
+      var data = $scope.listItemUUIDs;
+      var promise = Restangular.one('analysis')
+        .withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'set');
+
+      // FIXME
+      promise.then(function(data) {
+        var analysisId = data.id;
+        $location.path('analysis/set/' + analysis);
+      });
+
+      // TODO: testing only
+      var id = (new Date()).getTime(); // FIXME
+      $location.path('analysis/set/' + id);
+    };
+
+
+    $scope.updateCurrentState = function(item) {
+      // FIXME: Might want to move this out
+      if (item.checked === true) {
+        $scope.listItemTotal += item.count;
+        $scope.listItemUUIDs.push(item.id);
+      } else {
+        $scope.listItemTotal -= item.count;
+        _.remove($scope.listItemUUIDs, function(id) {
+          return id === item.id;
+        });
+      }
+    };
+
 
     $scope.updateAvailableAnalysis = function() {
+
       var selected, uniqued;
       selected = _.filter($scope.entityLists, function(item) {
         return item.checked === true;
       });
       uniqued = _.uniq(_.pluck(selected, 'type'));
-
 
       $scope.enrichment = null;
       $scope.setop = null;
@@ -73,7 +120,7 @@
       if (selected.length === 1 && uniqued[0] === 'gene') {
         $scope.enrichment = true;
       }
-      if (selected.length > 1 && uniqued.length === 1) {
+      if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
         $scope.setop = true;
       }
     };
@@ -95,16 +142,17 @@
     Page.setTitle('Analysis');
 
     $scope.analysisId = analysisId;
+    $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
 
-    function fetch() {
+    function getAnalysis() {
       $scope.error = null;
       // 1) Check if analysis exist in the backend
       // 2) If analysis cannot be found, delete from local-list and display error
       if (! $scope.analysisId) {
         return;
       }
-      var resultPromise = AnalysisService.getAnalysis($scope.analysisId);
+      var resultPromise = AnalysisService.getAnalysis($scope.analysisId, $scope.analysisType);
       var sync = false;
 
       resultPromise.then(function(data) {
@@ -124,7 +172,7 @@
           if (data.state === 'POST_PROCESSING') {
             pollRate = 4000;
           }
-          pollPromise = $timeout(fetch, pollRate);
+          pollPromise = $timeout(getAnalysis, pollRate);
         }
       }, function(error) {
         $scope.error = error.status;
@@ -135,36 +183,41 @@
       // 1) If not already exist in local-list, prepend it to local-list
       // 2) Display list, ordered by something...
       // 3) Render analysis result in content panel
-      if ($scope.analysisId) {
-        AnalysisService.add( $scope.analysisId);
+      if ($scope.analysisId && $scope.analysisType) {
+        AnalysisService.add( $scope.analysisId, $scope.analysisType);
         $scope.analysisList = AnalysisService.getAll();
       }
     }
 
-
-    $scope.getAnalysis = function(id) {
+    $scope.getAnalysis = function(id, type) {
       $timeout.cancel(pollPromise);
       if (id) {
         $scope.analysisId = id;
-        $location.path('analysis/'+id);
+        $location.path('analysis/' + type + '/' + id);
       } else {
         $scope.analysisId = null;
         $location.path('analysis');
       }
-      fetch();
     };
 
 
+    /**
+     * Remove all analyses, this includes both enrichment and set ops
+     */
     $scope.removeAllAnalyses = function() {
       var confirmRemove;
       confirmRemove  = window.confirm(REMOVE_ALL);
       if (confirmRemove) {
         AnalysisService.removeAll();
         $scope.analysisList = AnalysisService.getAll();
+        $location.path('analysis');
       }
     };
 
 
+    /**
+     * Remove a single analysis by UUID
+     */
     $scope.remove = function(id) {
       var confirmRemove = window.confirm(REMOVE_ONE);
       if (! confirmRemove) {
@@ -181,10 +234,8 @@
     $scope.$on('destroy', function() {
       $timeout.cancel(pollPromise);
     });
-
     init();
-    fetch();
-
+    getAnalysis();
 
   });
 })();
@@ -193,14 +244,15 @@
 
 (function () {
   'use strict';
-  var module = angular.module('icgc.analysis.services', ['restangular', 'icgc.common.location']);
+  var module = angular.module('icgc.analysis.services', ['restangular']);
 
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
 
     var ANALYSIS_ENTITY = 'analysis';
+    var _this = this;
 
-    this.getAnalysis = function(id) {
-      return RestangularNoCache.one('analysis/enrichment', id).get();
+    this.getAnalysis = function(id, type) {
+      return RestangularNoCache.one('analysis/' + type , id).get();
     };
 
     this.getAll = function() {
@@ -211,13 +263,14 @@
       localStorageService.set(ANALYSIS_ENTITY, []);
     };
 
-    this.add = function(id) {
+    this.add = function(id, type) {
       var analysisList = this.getAll();
       var ids = _.pluck(analysisList, 'id');
       if (_.contains(ids, id) === false) {
         var newAnalysis = {
           id: id,
-          timestamp: '--'
+          timestamp: '--',
+          type: type
         };
         analysisList.unshift(newAnalysis);
         localStorageService.set(ANALYSIS_ENTITY, analysisList);
@@ -227,12 +280,12 @@
     };
 
     this.update = function(analysis) {
-      var analysisList = this.getAll();
-      var analysis = _.find(analysisList, function(d) {
+      var analysisList = _this.getAll();
+      var cachedAnalysis = _.find(analysisList, function(d) {
         return d.id === analysis.id;
       });
-      if (analysis) {
-        analysis.timestamp = data.timestamp;
+      if (cachedAnalysis) {
+        cachedAnalysis.timestamp = analysis.timestamp;
         localStorageService.set(ANALYSIS_ENTITY, analysisList);
         return true;
       }

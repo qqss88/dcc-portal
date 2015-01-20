@@ -1821,8 +1821,13 @@ input.valid:focus {
 .table.table-download tbody tr {
   background: None;
 }
+/* line 72, _modules/_tables.scss */
+.table.table-setop tbody tr {
+  background-color: rgba(0, 0, 0, 0);
+  border-top: 1px solid #e6e6e6;
+}
 
-/* line 71, _modules/_tables.scss */
+/* line 80, _modules/_tables.scss */
 .t_table_top {
   margin-top: 1rem;
   padding: .5rem 0;
@@ -1830,14 +1835,14 @@ input.valid:focus {
   font-weight: 300;
 }
 
-/* line 79, _modules/_tables.scss */
+/* line 88, _modules/_tables.scss */
 .t_cell_line_break {
   word-wrap: break-word;
   max-width: 15em;
 }
 
 /* IE has crummy support for table-cell overflow, so we need to apply this to the element in the cell instead */
-/* line 86, _modules/_tables.scss */
+/* line 95, _modules/_tables.scss */
 .t_cell_overflow {
   margin: 0;
   padding: 0;
@@ -3365,6 +3370,11 @@ div.stacked.tooltip {
 /* line 99, _modules/_vis.scss */
 #svgcontainer {
   min-width: 500px;
+}
+
+/* line 103, _modules/_vis.scss */
+.venn-count {
+  fill: #EEE;
 }
 
 /* line 24, styles.scss */

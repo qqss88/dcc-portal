@@ -63,6 +63,7 @@
     'icgc.genesets',
     'icgc.visualization',
     'icgc.enrichment',
+    'icgc.sets',
     'icgc.bench',
     'icgc.analysis',
 
@@ -119,7 +120,7 @@
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:53421/api/v1');
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -207,6 +208,8 @@
       {id: 'entityListId', label: 'Gene List'}
     ],
 
+    // Donor, mutation or gene lists
+    ENTITY: 'entityListId',
 
     // Order matters, this is in most important to least important
     GENE_SET_ROOTS: [

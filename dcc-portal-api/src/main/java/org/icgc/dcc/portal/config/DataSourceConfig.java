@@ -17,9 +17,15 @@
 
 package org.icgc.dcc.portal.config;
 
+import lombok.SneakyThrows;
+import lombok.val;
+
 import org.skife.jdbi.v2.DBI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.yammer.dropwizard.config.Environment;
+import com.yammer.dropwizard.jdbi.DBIFactory;
 
 /**
  * Configuration relating to data access.
@@ -28,8 +34,15 @@ import org.springframework.context.annotation.Configuration;
 public class DataSourceConfig {
 
   @Bean
+  // TODO: remove this method and fix the spring init error
   public DBI dbi(PortalProperties properties) {
     return new DBI(properties.getDatabase().getUrl());
   }
 
+  @SneakyThrows
+  public DBI dbi2(PortalProperties properties, Environment environment) {
+    val factory = new DBIFactory();
+
+    return null;// factory.build(environment, properties.getDatabase(), "postgresql");
+  }
 }

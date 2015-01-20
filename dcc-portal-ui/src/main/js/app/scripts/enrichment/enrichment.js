@@ -18,6 +18,7 @@
       restrict: 'E',
       scope: {
         enrichmentModal: '=',
+        filters: '=',
         total: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
@@ -39,8 +40,14 @@
         function buildEnrichmentRequest() {
           var data, geneSortParam;
 
-          data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
-            'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+          // Check if we should use a provided filter or the default (LocationService)
+          if (angular.isDefined($scope.filters)) {
+            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+              'filters=' + JSON.stringify($scope.filters) + '&' ;
+          } else {
+            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+              'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+          }
 
           geneSortParam = LocationService.getJsonParam('genes');
 
@@ -68,7 +75,7 @@
           promise.then(function(result) {
             var id = result.id;
             $scope.enrichmentModal = false;
-            $location.path('/analysis/' + id).search({});
+            $location.path('/analysis/enrichment/' + id).search({});
           });
         };
 
@@ -117,6 +124,11 @@
           }
         });
 
+        $scope.$watch('filters', function(n) {
+          if (n) {
+            $scope.filters = n;
+          }
+        });
 
       }
     };
