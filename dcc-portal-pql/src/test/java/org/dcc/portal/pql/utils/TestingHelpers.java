@@ -46,7 +46,7 @@ public class TestingHelpers {
   public static ParseTree createPqlAst(String query) {
     val parser = getParser(query);
 
-    return parser.program();
+    return parser.statement();
   }
 
   private static PqlParser getParser(String query) {

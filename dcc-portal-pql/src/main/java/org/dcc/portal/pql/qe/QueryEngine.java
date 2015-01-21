@@ -34,12 +34,12 @@ public class QueryEngine {
     val parser = ParseTrees.getParser(query);
     val pqlListener = new PqlParseListener();
     parser.addParseListener(pqlListener);
-    parser.program();
+    parser.statement();
 
     val esAst = pqlListener.getEsAst();
-    val esVisitor = new CreateFilterBuilderVisitor(context, client);
+    val esVisitor = new CreateFilterBuilderVisitor(client);
 
-    return esVisitor.visit(esAst);
+    return esVisitor.visit(esAst, context);
   }
 
 }

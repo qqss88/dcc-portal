@@ -17,28 +17,36 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
+import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 
 public interface NodeVisitor<T> {
 
-  SearchRequestBuilder visit(Node node);
+  SearchRequestBuilder visit(Node node, QueryContext queryContext);
 
   T visitRootFilter(RootNode node);
+
+  T visitField(FieldsNode node);
 
   T visitPostFilter(PostFilterNode node);
 
@@ -65,5 +73,13 @@ public interface NodeVisitor<T> {
   T visitLessEqual(LessEqualNode node);
 
   T visitLessThan(LessThanNode node);
+
+  T visitAnd(AndNode node);
+
+  T visitOr(OrNode node);
+
+  T visitSort(SortNode node);
+
+  T visitLimit(LimitNode node);
 
 }

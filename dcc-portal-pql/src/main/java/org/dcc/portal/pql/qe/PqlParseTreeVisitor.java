@@ -17,112 +17,207 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static org.dcc.portal.pql.es.utils.ParseTrees.getPair;
+import static com.google.common.base.Preconditions.checkState;
 import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
-import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
 
+@Slf4j
 public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
-  /**
-   * @return {@link ShouldBoolNode}
-   */
+  private static final String SINGLE_QUOTE = "'";
+  private static final String DOUBLE_QUOTE = "\"";
+
   @Override
   public ExpressionNode visitOr(@NonNull OrContext context) {
-    val shouldBoolNode = new ShouldBoolNode();
-    for (val child : context.children) {
-      if (child instanceof EqContext) {
-        val termNode = visitEq((EqContext) child);
-        shouldBoolNode.addChildren(termNode);
-      } else if (child instanceof NeContext) {
-        val termNode = visitNe((NeContext) child);
-        shouldBoolNode.addChildren(termNode);
-      }
+    val orNode = new OrNode();
+    for (val filter : context.filter()) {
+      orNode.addChildren(filter.accept(this));
     }
+    log.debug("OrNode: {}", orNode);
 
-    return shouldBoolNode;
+    return orNode;
   }
 
   @Override
-  public ExpressionNode visitEq(EqContext nodeContext) {
-    return visitEqualityNodes(nodeContext);
-  }
-
-  @Override
-  public ExpressionNode visitNe(NeContext nodeContext) {
-    return visitEqualityNodes(nodeContext);
-  }
-
-  private ExpressionNode visitEqualityNodes(FilterContext nodeContext) {
-    val pair = getPair(nodeContext);
-
-    val nameNode = new TerminalNode(pair.getKey());
-    val valueNode = new TerminalNode(pair.getValue());
-    ExpressionNode result = new TermNode(nameNode, valueNode);
-
-    if (nodeContext instanceof NeContext) {
-      result = checkOrParent(result, (NeContext) nodeContext);
+  public ExpressionNode visitAnd(@NonNull AndContext context) {
+    val andNode = new AndNode();
+    for (val filter : context.filter()) {
+      andNode.addChildren(filter.accept(this));
     }
+    log.debug("AndNode: {}", andNode);
 
-    return result;
+    return andNode;
   }
 
   @Override
-  public ExpressionNode visitGe(GeContext nodeContext) {
-    val pair = getPair(nodeContext);
-
-    return new RangeNode(pair.getKey(), new GreaterEqualNode(pair.getValue()));
+  public ExpressionNode visitEqual(EqualContext nodeContext) {
+    return nodeContext.eq().accept(this);
   }
 
   @Override
-  public ExpressionNode visitGt(GtContext nodeContext) {
-    val pair = getPair(nodeContext);
+  public ExpressionNode visitEq(EqContext context) {
+    val nameNode = new TerminalNode(context.ID().getText());
+    val valueNode = (TerminalNode) context.value().accept(this);
+    val termNode = new TermNode(nameNode, valueNode);
+    log.debug("TermNode: {}", termNode);
 
-    return new RangeNode(pair.getKey(), new GreaterThanNode(pair.getValue()));
+    return termNode;
   }
 
   @Override
-  public ExpressionNode visitLe(LeContext nodeContext) {
-    val pair = getPair(nodeContext);
-
-    return new RangeNode(pair.getKey(), new LessEqualNode(pair.getValue()));
-  }
-
-  @Override
-  public ExpressionNode visitLt(LtContext nodeContext) {
-    val pair = getPair(nodeContext);
-
-    return new RangeNode(pair.getKey(), new LessThanNode(pair.getValue()));
-  }
-
-  /**
-   * If parent of the 'ne' node is 'or' wraps {@code result} in {@link NotNode}.
-   */
-  private ExpressionNode checkOrParent(ExpressionNode neNode, NeContext nodeContext) {
-    if (nodeContext.parent instanceof OrContext) {
-      return new NotNode(neNode);
+  public ExpressionNode visitValue(ValueContext context) {
+    if (context.STRING() != null) {
+      return new TerminalNode(cleanString(context.STRING().getText()));
+    } else if (context.FLOAT() != null) {
+      val value = Double.parseDouble(context.FLOAT().getText());
+      return new TerminalNode(value);
+    } else {
+      val value = Integer.parseInt(context.INT().getText());
+      return new TerminalNode(value);
     }
+  }
 
-    return neNode;
+  private static String cleanString(@NonNull String original) {
+    checkState(
+        original.startsWith(SINGLE_QUOTE) && original.endsWith(SINGLE_QUOTE) ||
+            original.startsWith(DOUBLE_QUOTE) && original.endsWith(DOUBLE_QUOTE),
+        "Incorrectly quoted string: %s", original);
+
+    return original.substring(1, original.length() - 1);
+
+  }
+
+  @Override
+  public ExpressionNode visitNotEqual(NotEqualContext nodeContext) {
+    return nodeContext.ne().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitNe(NeContext context) {
+    val nameNode = new TerminalNode(context.ID().getText());
+    val valueNode = (TerminalNode) context.value().accept(this);
+    val notNode = new NotNode(new TermNode(nameNode, valueNode));
+    log.debug("NotNode: {}", notNode);
+
+    return notNode;
+  }
+
+  @Override
+  public ExpressionNode visitGreaterEqual(GreaterEqualContext nodeContext) {
+    return nodeContext.ge().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitGe(GeContext context) {
+    val id = context.ID().getText();
+    val value = context.value().accept(this);
+    val rangeNode = new RangeNode(id, new GreaterEqualNode(value));
+    log.debug("RangeNode: {}", rangeNode);
+
+    return rangeNode;
+  }
+
+  @Override
+  public ExpressionNode visitGreaterThan(GreaterThanContext nodeContext) {
+    return nodeContext.gt().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitGt(GtContext context) {
+    val id = context.ID().getText();
+    val value = context.value().accept(this);
+    val rangeNode = new RangeNode(id, new GreaterThanNode(value));
+    log.debug("RangeNode: {}", rangeNode);
+
+    return rangeNode;
+  }
+
+  @Override
+  public ExpressionNode visitLessEqual(LessEqualContext nodeContext) {
+    return nodeContext.le().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitLe(LeContext context) {
+    val id = context.ID().getText();
+    val value = context.value().accept(this);
+    val rangeNode = new RangeNode(id, new LessEqualNode(value));
+    log.debug("RangeNode: {}", rangeNode);
+
+    return rangeNode;
+  }
+
+  @Override
+  public ExpressionNode visitLessThan(LessThanContext nodeContext) {
+    return nodeContext.lt().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitLt(LtContext context) {
+    val id = context.ID().getText();
+    val value = context.value().accept(this);
+    val rangeNode = new RangeNode(id, new LessThanNode(value));
+    log.debug("RangeNode: {}", rangeNode);
+
+    return rangeNode;
+  }
+
+  @Override
+  public ExpressionNode visitSelect(@NonNull SelectContext nodeContext) {
+    val fieldsNode = new FieldsNode();
+    for (val field : nodeContext.ID()) {
+      fieldsNode.addChildren(new TerminalNode(field));
+    }
+    log.debug("FieldsNode: {}", fieldsNode);
+
+    return fieldsNode;
+  }
+
+  @Override
+  public ExpressionNode visitRange(@NonNull RangeContext nodeContext) {
+    int size = Integer.parseInt(nodeContext.INT(0).getText());
+    int from = 0;
+    if (nodeContext.INT().size() == 2) {
+      from = Integer.parseInt(nodeContext.INT(0).getText());
+      size = Integer.parseInt(nodeContext.INT(1).getText());
+    }
+    val limitNode = new LimitNode(from, size);
+    log.debug("{}", limitNode);
+
+    return limitNode;
   }
 
 }

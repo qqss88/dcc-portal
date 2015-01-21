@@ -17,28 +17,13 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
-
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class GreaterThanNode extends ExpressionNode {
-
-  Object value;
-
-  public GreaterThanNode(@NonNull ExpressionNode node) {
-    val castedNode = (TerminalNode) node;
-    this.value = castedNode.getValue();
-    addChildren(node);
-  }
+public class SortNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitGreaterThan(this);
+    return visitor.visitSort(this);
   }
 
 }

@@ -17,38 +17,22 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Collection;
 
 import lombok.Getter;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
-import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.ast.ShouldBoolNode;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.GtContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.ProgramContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.QueryContext;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.FunctionContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 
 @Slf4j
 @Getter
@@ -56,41 +40,40 @@ public class PqlParseListener extends PqlBaseListener {
 
   private static final PqlParseTreeVisitor PQL_VISITOR = new PqlParseTreeVisitor();
 
-  private final ExpressionNode esAst = createRootNode();
+  private final ExpressionNode esAst = new RootNode();
 
   @Override
-  public void exitProgram(ProgramContext context) {
+  public void exitStatement(StatementContext context) {
     log.debug("Starting to process query - {}", context.toStringTree());
-    val filterNodes = getFilterNodes(context);
-    log.debug("Found {} filter nodes", filterNodes.size());
+    val filters = context.filter();
+    log.debug("Found {} filter nodes", filters.size());
 
-    val boolNode = new BoolNode();
-
-    processOrFilters(filterNodes, boolNode);
-    processAndFilters(filterNodes, boolNode);
-    val postFilterNode = esAst.getChild(0);
-    postFilterNode.addChildren(boolNode);
-  }
-
-  private static void processOrFilters(Collection<ParseTree> filterNodes, BoolNode parent) {
-    val orFilters = filter(filterNodes, OrContext.class);
-    if (Iterables.isEmpty(orFilters)) {
-      log.debug("No 'OR' filters found.");
-      return;
+    // process filters
+    if (!filters.isEmpty()) {
+      val boolNode = new BoolNode();
+      val postFilterNode = new PostFilterNode(boolNode);
+      esAst.addChildren(postFilterNode);
+      processFilters(filters, boolNode);
     }
 
-    val shouldNode = new ShouldBoolNode();
-    parent.addChildren(shouldNode);
-    visitCommonChildren(shouldNode, orFilters);
-    shouldNode.addChildren(visitChildren(orFilters, NeContext.class));
+    // process functions
+    val functions = context.function();
+    if (!functions.isEmpty()) {
+      processFunctions(functions, esAst);
+    }
+
+    // process limit
+    val rangeContext = context.range();
+    if (rangeContext != null) {
+      esAst.addChildren(rangeContext.accept(PQL_VISITOR));
+    }
+
   }
 
-  private static ExpressionNode createRootNode() {
-    val root = new RootNode();
-    val postFilter = new PostFilterNode();
-    root.addChildren(postFilter);
-
-    return root;
+  private static void processFunctions(Collection<FunctionContext> functions, ExpressionNode rootNode) {
+    for (val child : functions) {
+      rootNode.addChildren(child.accept(PQL_VISITOR));
+    }
   }
 
   /**
@@ -98,85 +81,15 @@ public class PqlParseListener extends PqlBaseListener {
    * @param filterNodes - {@link FilterContext} nodes that represent a filter expression
    * @param parent - parent for all the nodes to be processed
    */
-  private static void processAndFilters(Collection<ParseTree> filterNodes, BoolNode parent) {
-    val andFilters = filter(filterNodes, AndContext.class);
+  private static void processFilters(Collection<FilterContext> filterNodes, BoolNode parent) {
     val mustNode = new MustBoolNode();
     parent.addChildren(mustNode);
-    visitCommonChildren(mustNode, andFilters);
 
-    val neTerms = visitChildren(andFilters, NeContext.class);
-    if (neTerms.length > 0) {
-      val mustNotNode = new MustNotBoolNode();
-      parent.addChildren(mustNotNode);
-      mustNotNode.addChildren(neTerms);
+    for (val filter : filterNodes) {
+      val expressionNode = filter.accept(PQL_VISITOR);
+      log.debug("Filter {} generated {}", filter.toStringTree(), expressionNode);
+      mustNode.addChildren(expressionNode);
     }
-  }
-
-  /**
-   * Visits children with common processing rules. E.g. those that are the same for queries like and(...), or(...), and
-   * adds results of all the processed node to {@code parent}.
-   */
-  private static void visitCommonChildren(ExpressionNode parent, Iterable<ParseTree> filters) {
-    parent.addChildren(visitChildren(filters, EqContext.class));
-    parent.addChildren(visitChildren(filters, GeContext.class));
-    parent.addChildren(visitChildren(filters, GtContext.class));
-    parent.addChildren(visitChildren(filters, LeContext.class));
-    parent.addChildren(visitChildren(filters, LtContext.class));
-  }
-
-  /**
-   * Finds children of every {@code filters} of type {@code type}, and visits those children.
-   * @return built children nodes
-   */
-  private static <T extends FilterContext> ExpressionNode[] visitChildren(Iterable<ParseTree> filters, Class<T> type) {
-    val childrenTerms = processChildren(filters, type);
-
-    return Iterables.toArray(childrenTerms, ExpressionNode.class);
-  }
-
-  /**
-   * Filters children who have filter nodes as their children.
-   */
-  private Collection<ParseTree> getFilterNodes(ProgramContext context) {
-    val result = ImmutableList.<ParseTree> builder();
-    val queryNodes = Iterables.filter(context.children, QueryContext.class);
-
-    for (val queryNode : queryNodes) {
-      val childrenNum = queryNode.children.size();
-      checkState(childrenNum == 1, "QueryNode has incorrect number of children. Should be 1, found " + childrenNum);
-      val queryNodeChild = queryNode.children.get(0);
-      if (queryNodeChild instanceof FilterContext) {
-        result.add(queryNodeChild);
-      }
-    }
-
-    return result.build();
-  }
-
-  /**
-   * 
-   */
-  private static <T> Collection<ExpressionNode> processChildren(Iterable<ParseTree> booleanFilters, Class<T> type) {
-    val result = ImmutableList.<ExpressionNode> builder();
-    for (val item : booleanFilters) {
-      val childrenByType = filter(ParseTrees.getChildren(item), type);
-      for (val child : childrenByType) {
-        result.add(child.accept(PQL_VISITOR));
-      }
-    }
-
-    return result.build();
-  }
-
-  private static <T> Iterable<ParseTree> filter(Iterable<ParseTree> items, Class<T> type) {
-    val result = ImmutableList.<ParseTree> builder();
-    for (val item : items) {
-      if (type.isAssignableFrom(item.getClass())) {
-        result.add(item);
-      }
-    }
-
-    return result.build();
   }
 
 }

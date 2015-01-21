@@ -1,100 +1,108 @@
 grammar Pql;
 
-program  
- : EOF
- | query (BOOLOP_SHORT query)* EOF
- ;
-
-query
- : filter
- | function
- | function (BOOLOP_SHORT filter)* (BOOLOP_SHORT function)*
- | filter (BOOLOP_SHORT filter)* (BOOLOP_SHORT function)*
- ;
-
+statement
+	: (filter | function) (COMMA (filter | function))*
+	| (filter | function) (COMMA (filter | function))* COMMA order
+	| (filter | function) (COMMA (filter | function))* COMMA range
+	| (filter | function) (COMMA (filter | function))* COMMA order COMMA range
+	;
+	
 function
- : 'count' OPAR CPAR					# count
- | 'distinct' OPAR CPAR					# distinct
- | 'first' OPAR CPAR					# first
- | 'limit' OPAR INT CPAR				# limit
- | 'select' OPAR ID (COMMA ID)* CPAR	# select
- | 'sort' OPAR SORT_ORDER ID CPAR		# sort
- ;
+	: 'count' OPAR CPAR							# count
+	| 'select' OPAR ID (COMMA ID)* CPAR			# select
+	;
 
 filter
- : 'eq' OPAR ID COMMA VALUE CPAR						# eq 
- | 'ne' OPAR ID COMMA VALUE CPAR						# ne
- | 'gt' OPAR ID COMMA VALUE CPAR						# gt
- | 'ge' OPAR ID COMMA VALUE CPAR						# ge
- | 'lt' OPAR ID COMMA VALUE CPAR						# lt
- | 'le' OPAR ID COMMA VALUE CPAR						# le
- | 'in' OPAR ID COMMA VALUE_ARRAY CPAR					# in
- | 'and' OPAR filter COMMA filter (COMMA filter)* CPAR	# and
- | 'or' OPAR filter COMMA filter (COMMA filter)* CPAR	# or
- ;
+    : eq										# equal
+    | ne										# notEqual
+    | gt										# greaterThan
+    | ge										# greaterEqual
+    | lt										# lessThan
+    | le										# lessEqual
+    | in										# inArray
+    | OPAR filter CPAR							# group
+    | 'and' OPAR filter (COMMA filter)+ CPAR	# and
+    | filter '&' filter							# and
+    | 'or' OPAR filter (COMMA filter)+ CPAR		# or
+    | filter '|' filter							# or
+    ;
 
-VALUE
- : STRING
- | INT
- | FLOAT
- ;
+eq
+    : 'eq' OPAR ID COMMA value CPAR
+    | ID '=' value
+    ;
+ne
+    : 'ne' OPAR ID COMMA value CPAR
+    | ID '!=' value
+    ;
+gt
+    : 'gt' OPAR ID COMMA value CPAR
+    | ID '=gt=' value
+    ;
+ge
+    : 'ge' OPAR ID COMMA value CPAR
+    | ID '=ge=' value
+    ;
+lt
+    : 'lt' OPAR ID COMMA value CPAR
+    | ID '=lt=' value
+    ;
+le
+    : 'le' OPAR ID COMMA value CPAR
+    | ID '=le=' value
+    ;
+in
+    : 'in' OPAR ID COMMA value (COMMA value)+ CPAR
+    | ID '=' value (COMMA value)+
+    ;
 
-SORT_ORDER
- : PLUS
- | MINUS
- ;
+order
+    : 'sort' OPAR (SIGN)? ID (COMMA (SIGN)? ID)* CPAR
+    ;
 
-VALUE_ARRAY
- : OBRK VALUE* CBRK
- ;
+range
+    : 'limit' OPAR INT CPAR
+    | 'limit' OPAR INT COMMA INT CPAR
+    ;
 
-BOOLOP_SHORT 
- : '&' 
- | '|'
- ;
+ 
+value
+    : STRING
+    | FLOAT
+    | INT
+    ;
+ 
+/*------------------------------------------------------------------------------
+ * LEXER RULES
+ *----------------------------------------------------------------------------*/
 
-OR : '||';
-AND : '&&';
-EQ : '==';
-NEQ : '!=';
-GT : '>';
-LT : '<';
-GTEQ : '>=';
-LTEQ : '<=';
-PLUS : '+';
-MINUS : '-';
-ASSIGN : '=';
-OBRK : '[';
-CBRK : ']';
-OPAR : '(';
-CPAR : ')';
-COMMA : ',';
-
-TRUE : 'true';
-FALSE : 'false';
+COMMA: ',' ;
+OPAR : '(' ;
+CPAR : ')' ;
 
 ID
- : [a-zA-Z_] [a-zA-Z_0-9]*
- ;
+	: [a-zA-Z_] [a-zA-Z_0-9]*
+	;
 
-
-INT
- : [0-9]+
- ;
-
-FLOAT
- : [0-9]+ '.' [0-9]* 
- | '.' [0-9]+
- ;
-
-SPACE
- : [ \t\r\n] -> skip
- ;
+SIGN
+    : '-'
+    | '+'
+    ;
 
 STRING
- : '"' (~["\r\n] | '""')* '"'
- ;
+    : '"' ('*'|'%')? (~[*%"\r\n])* ('*'|'%')? '"'
+    | '\'' ('*'|'%')? (~[*%'\r\n])* ('*'|'%')? '\''
+    ;
 
-OTHER
- : . 
- ;
+FLOAT
+    : (SIGN)? INT '.' [0-9]* 
+    | (SIGN)? '.' [0-9]+
+    ;
+    
+INT
+    : (SIGN)? [0-9]+
+    ;
+
+WS
+    : [ \t\r\n]+ -> skip
+    ;

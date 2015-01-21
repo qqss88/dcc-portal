@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.ast;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
@@ -29,9 +30,10 @@ public class GreaterEqualNode extends ExpressionNode {
 
   Object value;
 
-  public GreaterEqualNode(@NonNull Object value) {
-    this.value = value;
-    addChildren(new TerminalNode(value));
+  public GreaterEqualNode(@NonNull ExpressionNode node) {
+    val castedNode = (TerminalNode) node;
+    this.value = castedNode.getValue();
+    addChildren(node);
   }
 
   @Override

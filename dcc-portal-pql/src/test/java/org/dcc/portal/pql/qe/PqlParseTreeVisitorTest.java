@@ -19,52 +19,204 @@ package org.dcc.portal.pql.qe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.AndNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.LimitNode;
+import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.GtContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.junit.Test;
 
-@Slf4j
 public class PqlParseTreeVisitorTest {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor();
 
   @Test
-  public void visitOrTest() {
-    val query = "or(eq(age, 10), eq(grade, 20))";
+  public void visitOrTest_simple() {
+    val query = "or(gt(weight, 10), lt(age, 50), eq(sex, 'male'))";
     val parseTree = ParseTrees.createParseTree(query);
-    val orContext = (OrContext) parseTree.getChild(0).getChild(0);
-    val shouldBoolNode = VISITOR.visitOr(orContext);
-    assertThat(shouldBoolNode.getChildren().size()).isEqualTo(2);
+    val orContext = (OrContext) parseTree.getChild(0);
+    val orNode = (OrNode) VISITOR.visitOr(orContext);
+    assertThat(orNode.getChildren().size()).isEqualTo(3);
 
-    val leftChild = (TermNode) shouldBoolNode.getChildren().get(0);
-    assertThat(leftChild.getNameNode().getValue()).isEqualTo("age");
-    assertThat(leftChild.getValueNode().getValue()).isEqualTo(10);
+    // gt(weight, 10)
+    RangeNode rangeNode = (RangeNode) orNode.getChild(0);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getValue()).isEqualTo(10);
 
-    val rightChild = (TermNode) shouldBoolNode.getChildren().get(1);
-    assertThat(rightChild.getNameNode().getValue()).isEqualTo("grade");
-    assertThat(rightChild.getValueNode().getValue()).isEqualTo(20);
+    // lt(age, 50)
+    rangeNode = (RangeNode) orNode.getChild(1);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("age");
+    val ltNode = (LessThanNode) rangeNode.getChild(0);
+    assertThat(ltNode.getValue()).isEqualTo(50);
+
+    // eq(sex, 'male')
+    val termNode = (TermNode) orNode.getChild(2);
+    assertThat(termNode.childrenCount()).isEqualTo(2);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("sex");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
   }
 
   @Test
-  public void visitEqTest() {
+  public void visitOrTest_withAnd() {
+    val query = "or(eq(sex, 'male'), and(gt(weight, 10), lt(age, 50)))";
+    val parseTree = ParseTrees.createParseTree(query);
+    val orContext = (OrContext) parseTree.getChild(0);
+    val orNode = (OrNode) VISITOR.visitOr(orContext);
+    assertThat(orNode.getChildren().size()).isEqualTo(2);
+
+    // eq(sex, 'male')
+    val termNode = (TermNode) orNode.getChild(0);
+    assertThat(termNode.childrenCount()).isEqualTo(2);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("sex");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
+
+    val andNode = (AndNode) orNode.getChild(1);
+    assertThat(andNode.childrenCount()).isEqualTo(2);
+
+    // gt(weight, 10)
+    RangeNode rangeNode = (RangeNode) andNode.getChild(0);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getValue()).isEqualTo(10);
+
+    // lt(age, 50)
+    rangeNode = (RangeNode) andNode.getChild(1);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("age");
+    val ltNode = (LessThanNode) rangeNode.getChild(0);
+    assertThat(ltNode.getValue()).isEqualTo(50);
+  }
+
+  @Test
+  public void visitValueTest_string_single_quote() {
+    val query = "eq(sex, 'male')";
+    val parseTree = ParseTrees.createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val valueContext = eqContext.eq().value();
+    val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
+    assertThat(termNode.getValue()).isEqualTo("male");
+  }
+
+  @Test
+  public void visitValueTest_string_double_quote() {
+    val query = "eq(sex, \"male\")";
+    val parseTree = ParseTrees.createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val valueContext = eqContext.eq().value();
+    val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
+    assertThat(termNode.getValue()).isEqualTo("male");
+  }
+
+  @Test
+  public void visitValueTest_int() {
+    val query = "eq(age, 20)";
+    val parseTree = ParseTrees.createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val valueContext = eqContext.eq().value();
+    val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
+    assertThat(termNode.getValue()).isEqualTo(20);
+  }
+
+  @Test
+  public void visitValueTest_double() {
+    val query = "eq(age, 20.555)";
+    val parseTree = ParseTrees.createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val valueContext = eqContext.eq().value();
+    val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
+    assertThat(termNode.getValue()).isEqualTo(20.555);
+  }
+
+  @Test
+  public void visitAndTest_simple() {
+    val query = "and(gt(weight, 10), lt(age, 50), eq(sex, 'male'))";
+    val parseTree = ParseTrees.createParseTree(query);
+    val andContext = (AndContext) parseTree.getChild(0);
+    val andNode = (AndNode) VISITOR.visitAnd(andContext);
+    assertThat(andNode.getChildren().size()).isEqualTo(3);
+
+    // gt(weight, 10)
+    RangeNode rangeNode = (RangeNode) andNode.getChild(0);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getValue()).isEqualTo(10);
+
+    // lt(age, 50)
+    rangeNode = (RangeNode) andNode.getChild(1);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("age");
+    val ltNode = (LessThanNode) rangeNode.getChild(0);
+    assertThat(ltNode.getValue()).isEqualTo(50);
+
+    // eq(sex, 'male')
+    val termNode = (TermNode) andNode.getChild(2);
+    assertThat(termNode.childrenCount()).isEqualTo(2);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("sex");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
+  }
+
+  @Test
+  public void visitAndTest_withOr() {
+    val query = "and(eq(sex, 'male'), or(gt(weight, 10), lt(age, 50)))";
+    val parseTree = ParseTrees.createParseTree(query);
+    val andContext = (AndContext) parseTree.getChild(0);
+    val andNode = (AndNode) VISITOR.visitAnd(andContext);
+    assertThat(andNode.getChildren().size()).isEqualTo(2);
+
+    // eq(sex, 'male')
+    val termNode = (TermNode) andNode.getChild(0);
+    assertThat(termNode.childrenCount()).isEqualTo(2);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("sex");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
+
+    val orNode = (OrNode) andNode.getChild(1);
+    assertThat(orNode.childrenCount()).isEqualTo(2);
+
+    // gt(weight, 10)
+    RangeNode rangeNode = (RangeNode) orNode.getChild(0);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("weight");
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getValue()).isEqualTo(10);
+
+    // lt(age, 50)
+    rangeNode = (RangeNode) orNode.getChild(1);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("age");
+    val ltNode = (LessThanNode) rangeNode.getChild(0);
+    assertThat(ltNode.getValue()).isEqualTo(50);
+  }
+
+  @Test
+  public void visitEqualTest() {
     val query = "eq(weight, 10.1)";
     val parseTree = ParseTrees.createParseTree(query);
-    val eqContext = (EqContext) parseTree.getChild(0).getChild(0);
-    val termNode = (TermNode) VISITOR.visitEq(eqContext);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("weight");
@@ -72,14 +224,27 @@ public class PqlParseTreeVisitorTest {
   }
 
   @Test
-  public void visitGeTest() {
+  public void visitNotEqualTest() {
+    val query = "ne(age, 10)";
+    val parseTree = ParseTrees.createParseTree(query);
+    val notEqContext = (NotEqualContext) parseTree.getChild(0);
+    val notNode = (NotNode) VISITOR.visitNotEqual(notEqContext);
+    val termNode = (TermNode) notNode.getChild(0);
+
+    assertThat(termNode.getChildren().size()).isEqualTo(2);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("age");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo(10);
+  }
+
+  @Test
+  public void visitGreaterEqualTest() {
     val query = "ge(weight, 10)";
     // root - postFilter - bool - must - range - from
     val parseTree = ParseTrees.createParseTree(query);
     // program - query
-    val geContext = (GeContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = (RangeNode) VISITOR.visitGe(geContext);
-    log.info("RangeNode: {}", rangeNode);
+    val geContext = (GreaterEqualContext) parseTree.getChild(0);
+    val rangeNode = (RangeNode) VISITOR.visitGreaterEqual(geContext);
+
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
     assertThat(rangeNode.getName()).isEqualTo("weight");
 
@@ -92,13 +257,13 @@ public class PqlParseTreeVisitorTest {
   }
 
   @Test
-  public void visitGtTest() {
+  public void visitGreaterThanTest() {
     val query = "gt(weight, 10)";
     // root - postFilter - bool - must - range - from
     val parseTree = ParseTrees.createParseTree(query);
     // program - query
-    val gtContext = (GtContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = (RangeNode) VISITOR.visitGt(gtContext);
+    val gtContext = (GreaterThanContext) parseTree.getChild(0);
+    val rangeNode = (RangeNode) VISITOR.visitGreaterThan(gtContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
     assertThat(rangeNode.getName()).isEqualTo("weight");
 
@@ -111,12 +276,12 @@ public class PqlParseTreeVisitorTest {
   }
 
   @Test
-  public void visitLeTest() {
+  public void visitLessEqualTest() {
     // root - postFilter - bool - must - range - from
     val parseTree = ParseTrees.createParseTree("le(weight, 10)");
     // program - query
-    val leContext = (LeContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = (RangeNode) VISITOR.visitLe(leContext);
+    val leContext = (LessEqualContext) parseTree.getChild(0);
+    val rangeNode = (RangeNode) VISITOR.visitLessEqual(leContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
     assertThat(rangeNode.getName()).isEqualTo("weight");
 
@@ -129,12 +294,10 @@ public class PqlParseTreeVisitorTest {
   }
 
   @Test
-  public void visitLtTest() {
-    // root - postFilter - bool - must - range - from
+  public void visitLessThanTest() {
     val parseTree = ParseTrees.createParseTree("lt(weight, 10)");
-    // program - query
-    val ltContext = (LtContext) parseTree.getChild(0).getChild(0);
-    val rangeNode = (RangeNode) VISITOR.visitLt(ltContext);
+    val ltContext = (LessThanContext) parseTree.getChild(0);
+    val rangeNode = (RangeNode) VISITOR.visitLessThan(ltContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
     assertThat(rangeNode.getName()).isEqualTo("weight");
 
@@ -144,6 +307,24 @@ public class PqlParseTreeVisitorTest {
 
     val terminalNode = (TerminalNode) toNode.getChild(0);
     assertThat(terminalNode.getValue()).isEqualTo(10);
+  }
+
+  @Test
+  public void visitSelectTest() {
+    val parseTree = ParseTrees.createParseTree("select(age, gender)");
+    val selectContext = (SelectContext) parseTree.getChild(0);
+    val fieldsNode = (FieldsNode) VISITOR.visitSelect(selectContext);
+    assertThat(fieldsNode.childrenCount()).isEqualTo(2);
+    assertThat(fieldsNode.getFields()).containsOnly("age", "gender");
+  }
+
+  @Test
+  public void visitLimitTest() {
+    val parseTree = ParseTrees.createParseTree("count(),limit(1, 5)");
+    val rangeContext = (RangeContext) parseTree.getChild(2);
+    val limitNode = (LimitNode) VISITOR.visitRange(rangeContext);
+    assertThat(limitNode.getFrom()).isEqualTo(1);
+    assertThat(limitNode.getSize()).isEqualTo(5);
   }
 
 }

@@ -53,7 +53,7 @@ public class ParseTrees {
   public static ParseTree createParseTree(String query) {
     val parser = getParser(query);
 
-    return parser.program();
+    return parser.statement();
   }
 
   public static PqlParser getParser(String query) {
@@ -74,7 +74,7 @@ public class ParseTrees {
   }
 
   public static Pair<String, Object> getPair(FilterContext nodeContext) {
-    ParseTrees.checkNodeValidity(nodeContext);
+    // ParseTrees.checkNodeValidity(nodeContext);
     val name = nodeContext.getChild(ParseTrees.NODE_NAME_INDEX).getText();
     val value = nodeContext.getChild(ParseTrees.NODE_VALUE_INDEX).getText();
     checkState(!isNullOrEmpty(name), "Could not get name from the expression %s", nodeContext.toStringTree());

@@ -17,19 +17,14 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
-import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.junit.Test;
 
@@ -40,86 +35,52 @@ public class PqlParseListenerTest {
 
   @Test
   public void getEsAstTest() {
-    val query =
-        "and(eq(one, 1), ne(two, 2), eq(five, 5))&or(ne(six, 6), eq(three, 3), ne(four, 4))&and(eq(seven, 7), eq(eight, 8))&or(eq(nine, 9), eq(ten, 10))";
+    val query = "select(gender, age), ne(gender, 'no_date'), and(gt(age, 20), lt(age, 60)), limit(5, 10)";
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
-    parser.program();
+    parser.statement();
 
     val esAst = listener.getEsAst();
     log.info("{}", esAst);
 
     val boolNode = esAst.getChild(0).getChild(0);
-    // must, mustNot, should
-    assertThat(boolNode.getChildren().size()).isEqualTo(3);
 
-    val shouldNode = (ShouldBoolNode) boolNode.getChild(0);
-    assertThat(shouldNode.getChildren().size()).isEqualTo(5);
-
-    val shouldTermChildren = Nodes.filterChildren(shouldNode, TermNode.class);
-    assertThat(shouldTermChildren.size()).isEqualTo(3);
-    val shouldNotChildren = Nodes.filterChildren(shouldNode, NotNode.class);
-    assertThat(shouldNotChildren.size()).isEqualTo(2);
-
-    childrenContainValue(shouldNode, "six");
-    childrenContainValue(shouldNode, 6);
-
-    // ne(six, 6)
-    childrenContainValue(shouldNode, "six");
-    childrenContainValue(shouldNode, 6);
-
-    // eq(three, 3)
-    childrenContainValue(shouldNode, "three");
-    childrenContainValue(shouldNode, 3);
-
-    // ne(four, 4)
-    childrenContainValue(shouldNode, "four");
-    childrenContainValue(shouldNode, 4);
-
-    // eq(nine, 9)
-    childrenContainValue(shouldNode, "nine");
-    childrenContainValue(shouldNode, 9);
-
-    // eq(ten, 10)
-    childrenContainValue(shouldNode, "ten");
-    childrenContainValue(shouldNode, 10);
-
-    val mustNode = (MustBoolNode) boolNode.getChild(1);
-    assertThat(mustNode.getChildren().size()).isEqualTo(4);
-
-    // eq(one, 1)
-    childrenContainValue(mustNode, "one");
-    childrenContainValue(mustNode, 1);
-
-    // eq(five, 5)
-    childrenContainValue(mustNode, "five");
-    childrenContainValue(mustNode, 5);
-
-    // eq(seven, 7)
-    childrenContainValue(mustNode, "seven");
-    childrenContainValue(mustNode, 7);
-
-    // eq(eight, 8)
-    childrenContainValue(mustNode, "eight");
-    childrenContainValue(mustNode, 8);
-
-    val mustNotNode = (MustNotBoolNode) boolNode.getChild(2);
-    assertThat(mustNotNode.getChildren().size()).isEqualTo(1);
-
-    // ne(two, 2)
-    childrenContainValue(mustNotNode, "two");
-    childrenContainValue(mustNotNode, 2);
+    // childrenContainValue(shouldNode, "six");
+    // childrenContainValue(shouldNode, 6);
   }
 
   @Test
-  public void getEsAstTest_greater() {
-    val query = "and(lt(age, 60), gt(age, 20))&eq(age, 10)";
+  public void getEsAstTest_equal() {
+    val query = "eq(age, 100)";
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
-    parser.program();
+    parser.statement();
 
     val esAst = listener.getEsAst();
     log.info("{}", esAst);
+  }
+
+  @Test
+  public void getEsAstTest_filter() {
+    val query = "or(gt(age, 10), le(age, 55)), eq(age, 100)";
+    val parser = ParseTrees.getParser(query);
+    parser.addParseListener(listener);
+    parser.statement();
+
+    val esAst = listener.getEsAst();
+    log.info("{}", esAst);
+  }
+
+  @Test
+  public void getEsAstTest_select() {
+    val query = "select(sex, drugs, rocknroll)";
+    val parser = ParseTrees.getParser(query);
+    parser.addParseListener(listener);
+    parser.statement();
+
+    val esAst = listener.getEsAst();
+    log.info("{}", esAst);
+    // FIXME: finish
   }
 
   /**

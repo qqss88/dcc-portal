@@ -27,21 +27,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.MustNotBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ShouldBoolNode;
+import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -58,7 +63,6 @@ import com.google.common.collect.Lists;
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
-  private final QueryContext queryContext;
   private final Client client;
 
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
@@ -85,8 +89,10 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   private FilterBuilder[] visitChildren(ExpressionNode node) {
+    log.debug("Visiting Bool child: {}", node);
     val result = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
+      log.debug("Sub-child: {}", child);
       result.add(child.accept(this));
     }
 
@@ -139,13 +145,22 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public SearchRequestBuilder visit(Node node) {
+  public SearchRequestBuilder visit(Node node, QueryContext queryContext) {
     // FIXME: get index from QueryContext
-    val result = client.prepareSearch("");
+    val result = client.prepareSearch("dcc-release-etl-cli").setTypes("gene-centric");
+
     for (val child : node.getChildren()) {
       if (child instanceof PostFilterNode) {
         val boolFilter = child.accept(this);
         result.setFilter(boolFilter);
+      } else if (child instanceof FieldsNode) {
+        val castedChild = (FieldsNode) child;
+        String[] children = castedChild.getFields().toArray(new String[castedChild.getFields().size()]);
+        result.addFields(children);
+      } else if (child instanceof LimitNode) {
+        val castedChild = (LimitNode) child;
+        result.setFrom(castedChild.getFrom());
+        result.setSize(castedChild.getSize());
       }
     }
 
@@ -211,6 +226,55 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
     rangeFilter.lt(node.getValue());
 
     return rangeFilter;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitField(org.dcc.portal.pql.es.ast.FieldsNode)
+   */
+  @Override
+  public FilterBuilder visitField(FieldsNode node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public FilterBuilder visitAnd(AndNode node) {
+    log.debug("Visiting And: {}", node);
+    val childrenFilters = Lists.<FilterBuilder> newArrayList();
+    for (val child : node.getChildren()) {
+      childrenFilters.add(child.accept(this));
+    }
+
+    return FilterBuilders.andFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
+  }
+
+  @Override
+  public FilterBuilder visitOr(OrNode node) {
+    log.debug("Visiting Or: {}", node);
+    val childrenFilters = Lists.<FilterBuilder> newArrayList();
+    for (val child : node.getChildren()) {
+      childrenFilters.add(child.accept(this));
+    }
+
+    return FilterBuilders.orFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
+  }
+
+  @Override
+  public FilterBuilder visitSort(SortNode node) {
+    throw new UnsupportedOperationException();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.dcc.portal.pql.es.visitor.NodeVisitor#visitLimit(org.dcc.portal.pql.es.ast.LimitNode)
+   */
+  @Override
+  public FilterBuilder visitLimit(LimitNode node) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

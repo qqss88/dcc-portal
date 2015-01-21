@@ -18,27 +18,25 @@
 package org.dcc.portal.pql.es.ast;
 
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import lombok.Value;
-import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.PqlParseTreeVisitor;
 
+/**
+ * Encapsulates {@code from} and {@code size}, because of the requirement that {@link PqlParseTreeVisitor} returns an
+ * {@link ExpressionNode}
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class GreaterThanNode extends ExpressionNode {
+public class LimitNode extends ExpressionNode {
 
-  Object value;
-
-  public GreaterThanNode(@NonNull ExpressionNode node) {
-    val castedNode = (TerminalNode) node;
-    this.value = castedNode.getValue();
-    addChildren(node);
-  }
+  int from;
+  int size;
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitGreaterThan(this);
+    return visitor.visitLimit(this);
   }
 
 }

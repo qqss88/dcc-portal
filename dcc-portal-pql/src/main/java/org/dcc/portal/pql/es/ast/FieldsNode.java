@@ -17,28 +17,37 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import java.util.List;
+
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+import com.google.common.collect.Lists;
+
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class GreaterThanNode extends ExpressionNode {
+public class FieldsNode extends ExpressionNode {
 
-  Object value;
+  private List<String> fields = Lists.newArrayList();
 
-  public GreaterThanNode(@NonNull ExpressionNode node) {
-    val castedNode = (TerminalNode) node;
-    this.value = castedNode.getValue();
-    addChildren(node);
+  public FieldsNode(ExpressionNode... children) {
+    super(children);
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitGreaterThan(this);
+    throw new UnsupportedOperationException();
   }
 
+  @Override
+  public void addChildren(ExpressionNode... children) {
+    super.addChildren(children);
+    for (val child : children) {
+      val value = ((TerminalNode) child).getValue().toString();
+      fields.add(value);
+    }
+  }
 }
