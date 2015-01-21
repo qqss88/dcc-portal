@@ -24,30 +24,30 @@
     <div class="t_tabs">
         <div class="t_tabs__tab t_tabs__tab__charts"
              data-nested
-             data-ng-click="ProjectsCtrl.state.setTab('charts')"
-             data-ng-class="{active: ProjectsCtrl.state.isTab('charts')}"
-              data-href="projects/charts">
-            Charts
+             data-ng-click="ProjectsCtrl.state.setTab('summary')"
+             data-ng-class="{active: ProjectsCtrl.state.isTab('summary')}"
+              data-href="projects/summary">
+            Summary
         </div>
         <div class="t_tabs__tab t_tabs__tab__table"
              data-nested
-             data-ng-click="ProjectsCtrl.state.setTab('table')"
-             data-ng-class="{active: ProjectsCtrl.state.isTab('table')}"
-             data-href="projects/table" >
-            Table
+             data-ng-click="ProjectsCtrl.state.setTab('details')"
+             data-ng-class="{active: ProjectsCtrl.state.isTab('details')}"
+             data-href="projects/details" >
+            Details
         </div>
     </div>
 
     <section>
         <div class='t_tab_pane'
-             data-ng-if="ProjectsCtrl.state.hasVisitedTab('charts')"
-             data-ng-class="{active: ProjectsCtrl.state.isTab('charts')}"
-             data-ng-include="'scripts/projects/views/projects.charts.html'">
+             data-ng-if="ProjectsCtrl.state.hasVisitedTab('summary')"
+             data-ng-class="{active: ProjectsCtrl.state.isTab('summary')}"
+             data-ng-include="'scripts/projects/views/projects.summary.html'">
              </div>
        <div class='t_tab_pane'
-             data-ng-if="ProjectsCtrl.state.hasVisitedTab('table')"
-             data-ng-class="{active: ProjectsCtrl.state.isTab('table')}"
-             data-ng-include="'scripts/projects/views/projects.table.html'">
+             data-ng-if="ProjectsCtrl.state.hasVisitedTab('details')"
+             data-ng-class="{active: ProjectsCtrl.state.isTab('details')}"
+             data-ng-include="'scripts/projects/views/projects.details.html'">
         </div>
     </section> 
 </div>
