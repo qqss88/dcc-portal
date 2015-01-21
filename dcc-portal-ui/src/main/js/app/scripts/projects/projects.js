@@ -25,17 +25,17 @@
       url: '/projects?filters',
       templateUrl: 'scripts/projects/views/projects.html',
       controller: 'ProjectsCtrl as ProjectsCtrl',
-      data: {tab: 'charts'}
+      data: {tab: 'summary'}
     });
       
-    $stateProvider.state('projects.table', {
-      url: '/table',
-      data: {tab:'table'}
+    $stateProvider.state('projects.details', {
+      url: '/details',
+      data: {tab:'details'}
     });
       
-    $stateProvider.state('projects.charts', {
-      url: '/charts',
-      data: {tab:'charts'}
+    $stateProvider.state('projects.summary', {
+      url: '/summary',
+      data: {tab:'summary'}
     });
 
     $stateProvider.state('project', {
