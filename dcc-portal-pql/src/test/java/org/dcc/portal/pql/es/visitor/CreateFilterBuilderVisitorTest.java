@@ -35,13 +35,14 @@ import org.junit.Test;
 @Slf4j
 public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
 
-  private static final PqlParseListener LISTENER = new PqlParseListener();
+  private PqlParseListener listener;
   private CreateFilterBuilderVisitor visitor;
 
   @Before
   public void setUp() {
     es.execute(createIndexMappings(Type.GENE, Type.GENE_CENTRIC).withData(bulkFile(getClass())));
     visitor = new CreateFilterBuilderVisitor(es.client());
+    listener = new PqlParseListener();
   }
 
   @Test
@@ -93,12 +94,12 @@ public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
     // FIXME: Finish
   }
 
-  private static ExpressionNode createTree(String query) {
+  private ExpressionNode createTree(String query) {
     val parser = ParseTrees.getParser(query);
-    parser.addParseListener(LISTENER);
+    parser.addParseListener(listener);
     parser.statement();
 
-    return LISTENER.getEsAst();
+    return listener.getEsAst();
   }
 
 }
