@@ -1,0 +1,135 @@
+<div data-ng-if="item.state === 'ANALYZING'">
+    <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
+</div>
+<div data-ng-if="item.state !== 'ANALYZING'">
+    <div>
+        <span>Overview</span>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Universe</th>
+                    <th class="text-right"># Gene sets in Universe</th>
+                    <th class="text-right"># Gene sets in overlap</th>
+                    <th class="text-right"># Genes in Universe</th>
+                    <th class="text-right"># Genes in overlap</th>
+                    <th class="text-right"># Input genes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{item.params.universe | define}}</td>
+                    <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
+                    <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{overviewUniverseFilters}}">{{item.overview.universeGeneCount | number}}</a>
+                    </td>
+                    <td class="text-right">
+                       <span data-ng-if="!overviewGeneOverlapFilters">{{item.overview.overlapGeneCount | number}}</span>
+                       <span data-ng-if="overviewGeneOverlapFilters">
+                           <a href="/search/g?filters={{overviewGeneOverlapFilters}}">{{item.overview.overlapGeneCount | number}}</a>
+                       </span>
+                    </td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{overviewInputFilters}}">{{item.params.maxGeneCount | number}}</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+
+        <span>Original Query:</span>
+        <div>
+            <a href="/search?filters={{item.query.filters}}&genes={{sortParams}}">
+                <span>
+                    <query-display data-filters="item.query.filters"></query-display>
+                </span>
+            </a>
+        </div>
+        <br>
+
+        <span>
+            <span data-ng-if="item.params.maxGeneSetCount < item.overview.overlapFdrGeneSetCount">
+                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+            </span>
+
+            <span data-ng-if="item.params.maxGeneSetCount >= item.overview.overlapFdrGeneSetCount">
+                <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+            </span>
+
+            <span class="t_tools">
+                <span class="t_tools__tool"
+                      data-tooltip-placement="left"
+                      data-tooltip="Export Table as CSV"
+                      data-ng-click="exportEnrichment(item.id)"><i class="icon-file"></i></span>
+            </span>
+        </span>
+
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th># Genes</th>
+                    <th># Genes in overlap</th>
+                    <th># Donors affected</th>
+                    <th># Mutations</th>
+                    <th>Expected</th>
+                    <th style="cursor: pointer"
+                        data-ng-click="predicate='pvalue'; reverse=!reverse">P-Value
+                        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='pvalue'" class="icon-sort"></i>
+                        <i data-ng-if="predicate=='pvalue'&& !reverse" class="icon-sort-up"></i>
+                        <i data-ng-if="predicate=='pvalue'&& reverse" class="icon-sort-down"></i>
+                    </th>
+                    <th style="cursor: pointer"
+                        data-ng-click="predicate='adjustedPValue'; reverse=!reverse">Adjusted P-Value
+                        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='adjustedPValue'" class="icon-sort"></i>
+                        <i data-ng-if="predicate=='adjustedPValue'&&!reverse" class="icon-sort-up"></i>
+                        <i data-ng-if="predicate=='adjustedPValue'&&reverse" class="icon-sort-down"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
+                    <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
+                    <td>
+                        {{row.geneSetName}}
+                    </td>
+                    <td class="text-right">
+                        <a href="/search/g?filters={{row.geneSetFilters}}">{{row.geneCount | number}}</a>
+                    </td>
+                    <td class="text-right">
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetGeneCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search/g?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetGeneCount | number}}</a>
+                        </span>
+                    </td>
+                    <td data-ng-if="['ANALYZING', 'POST_PROCESSING'].indexOf(item.state) >= 0" colspan="2" class="text-center">
+                        <i class="icon-spinner icon-spin"></i>
+                    </td> 
+                    
+                    <td class="text-right" data-ng-if="item.state === 'FINISHED'">
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetDonorCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetDonorCount | number}}</a>
+                        </span>
+                    </td>
+                    <td class="text-right" data-ng-if="item.state === 'FINISHED'">
+                        <span data-ng-if="! row.geneSetOverlapFilters">{{row.overlapGeneSetMutationCount | number}}</span>
+                        <span data-ng-if="row.geneSetOverlapFilters">
+                            <a href="/search/m?filters={{row.geneSetOverlapFilters}}">{{row.overlapGeneSetMutationCount | number}}</a>
+                        </span>
+                    </td>
+                    <td class="text-right">{{row.expectedValue.toExponential(2) }}</td>
+                    <td class="text-right">{{row.pvalue.toExponential(2) }}</td>
+                    <td class="text-right">{{row.adjustedPValue.toExponential(2) }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <span>
+            Documentation for Enrichment analysis is available on this link: 
+            <a href="">Enrichment Analysis Documentation</a>
+        </span>
+    </div>
+</div>

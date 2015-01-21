@@ -17,9 +17,12 @@
 
 package org.icgc.dcc.portal.service;
 
+import static org.elasticsearch.common.base.Throwables.propagate;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -54,15 +57,21 @@ public class OccurrenceService {
 
   @Async
   public void init() {
-    projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+    try {
+      log.info("Caching...");
+      projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+    } catch (Exception e) {
+      log.error("Error caching: ", e);
+
+      propagate(e);
+    }
   }
 
   public Occurrences findAll(Query query) {
-
     SearchResponse response = occurrenceRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
-    ImmutableList.Builder<Occurrence> list = ImmutableList.builder();
+    val list = ImmutableList.<Occurrence> builder();
 
     for (SearchHit hit : hits) {
       Map<String, Object> fieldMap = Maps.newHashMap();
@@ -72,7 +81,7 @@ public class OccurrenceService {
       list.add(new Occurrence(fieldMap));
     }
 
-    Occurrences occurrences = new Occurrences(list.build());
+    val occurrences = new Occurrences(list.build());
     occurrences.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return occurrences;

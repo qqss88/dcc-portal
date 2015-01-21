@@ -38,7 +38,7 @@ import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
-import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +59,7 @@ public class AuthResource extends BaseResource {
   @NonNull
   private final AuthService authService;
   @NonNull
-  private final DistributedCacheService cacheService;
+  private final SessionService sessionService;
 
   /**
    * This is only used by UI.
@@ -100,7 +100,7 @@ public class AuthResource extends BaseResource {
   private User getAuthenticatedUser(String sessionToken) {
     val token = stringToUuid(sessionToken);
     log.info("Verifying if user with session token '{}' already logged in.", sessionToken);
-    val tempUserOptional = cacheService.getUserBySessionToken(token);
+    val tempUserOptional = sessionService.getUserBySessionToken(token);
 
     if (!tempUserOptional.isPresent()) {
       throwAuthenticationException(
@@ -133,7 +133,7 @@ public class AuthResource extends BaseResource {
       throwAuthenticationException("Failed to grant DACO access", e.getMessage());
     }
 
-    cacheService.putUser(sessionToken, user);
+    sessionService.putUser(sessionToken, user);
 
     return user;
   }
@@ -149,7 +149,7 @@ public class AuthResource extends BaseResource {
     log.info("Logging into CUD as {}", username);
 
     log.info("Checking if user '{}' has already authenticated.", username);
-    val userOptional = cacheService.getUserByEmail(username);
+    val userOptional = sessionService.getUserByEmail(username);
     if (userOptional.isPresent()) {
       log.info("User '{}' is already authenticated.", username);
 
@@ -172,10 +172,10 @@ public class AuthResource extends BaseResource {
     val sessionToken = getSessionToken(request);
 
     if (sessionToken != null) {
-      val userOptional = cacheService.getUserBySessionToken(sessionToken);
+      val userOptional = sessionService.getUserBySessionToken(sessionToken);
 
       if (userOptional.isPresent()) {
-        cacheService.removeUser(userOptional.get());
+        sessionService.removeUser(userOptional.get());
       }
 
       log.info("Successfully terminated session {}", sessionToken);

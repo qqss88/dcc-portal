@@ -25,6 +25,6 @@ angular.module('icgc.ui.openin', []).directive('openInList', function () {
       openInList: '@',
       type: '@'
     },
-    templateUrl: '/views/ui/open_in.html'
+    templateUrl: '/scripts/ui/views/open_in.html'
   };
 });

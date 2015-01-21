@@ -17,6 +17,8 @@
 
 package org.icgc.dcc.portal.model;
 
+import static org.apache.commons.httpclient.HttpStatus.getStatusText;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -30,14 +32,24 @@ public class Error implements Serializable {
   private final int code;
   private final String message;
 
+  public Error(int code, String message) {
+    this.code = code;
+    this.message = formatMessage(this.code, message);
+  }
+
+  public Error(int code, IOException e) {
+    this(code, e.getMessage());
+  }
+
   public Error(StatusType code, IOException e) {
-    this.code = code.getStatusCode();
-    this.message = e.getMessage();
+    this(code.getStatusCode(), e.getMessage());
   }
 
   public Error(StatusType code, String message) {
-    this.code = code.getStatusCode();
-    this.message = message;
+    this(code.getStatusCode(), message);
   }
 
+  private static String formatMessage(int code, String message) {
+    return getStatusText(code) + (message == null ? "." : ". " + message);
+  }
 }

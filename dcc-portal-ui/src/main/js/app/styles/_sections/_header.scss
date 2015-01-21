@@ -130,6 +130,16 @@ header {
     background: $blue;
   }
 
+  &.t_nav__items__item__analysis a {
+    color: $greyDark;
+    border: .3rem solid $greyDark;
+  }
+
+  &.t_nav__items__item__analysis a:hover {
+    color: $white;
+    background: $greyDark;
+  }
+
   &.t_nav__items__item__download a {
     color: $cyan;
     border: .3rem solid $cyan;
@@ -282,7 +292,8 @@ header {
       text-align: left;
       margin: 0;
       @include breakpoint($break-tablet) {
-        margin: 0 2rem;
+        // margin: 0 2rem;
+        margin: 0 1.25rem;
       }
       a {
         padding-right: 1rem;
@@ -316,6 +327,10 @@ header {
     background: $blue;
     color: $white;
   }
+  .t_nav__items__item__analysis a {
+    background: $greyDark;
+    color: $white;
+  }
   .t_nav__items__item__download a {
     background: $cyan;
     color: $white;
@@ -338,6 +353,19 @@ header {
   .t_nav__items__item__advanced a {
     cursor: default;
     background: $blue;
+    color: $white;
+    i {
+      box-shadow: none;
+      background: none;
+    }
+  }
+}
+
+
+#analysis-page {
+  .t_nav__items__item__analysis a {
+    cursor: default;
+    background: $greyDark;
     color: $white;
     i {
       box-shadow: none;

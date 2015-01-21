@@ -115,7 +115,11 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
         }
 
         function url(item) {
-          return '/' + item.type + 's/' + item.id;
+          var resourceType = item.type;
+          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
+            resourceType = 'geneset';
+          }
+          return '/' + resourceType + 's/' + item.id;
         }
 
         // Go the the 'active' hit
@@ -168,7 +172,7 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: '/views/ui/suggest_popup.html',
+    templateUrl: '/scripts/ui/views/suggest_popup.html',
     link: function (scope) {
       scope.mouseover = function (i) {
         scope.setActive(i);
@@ -180,7 +184,12 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
 
       scope.click = function (item) {
         if (item) {
-          $location.path('/' + item.type + 's/' + item.id).search({});
+          var resourceType = item.type;
+          if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
+            resourceType = 'geneset';
+          }
+
+          $location.path('/' + resourceType + 's/' + item.id).search({});
         } else {
           $location.path('/q').search({q: scope.query});
         }
@@ -193,7 +202,7 @@ angular.module('icgc.ui.suggest').directive('tagsPopup', function () {
   return {
     restrict: 'E',
     replace: true,
-    templateUrl: '/views/ui/tags_popup.html',
+    templateUrl: '/scripts/ui/views/tags_popup.html',
     link: function (scope) {
       scope.mouseover = function (i) {
         scope.setActive(i);

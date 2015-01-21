@@ -21,19 +21,44 @@
 
   var module = angular.module('icgc.facets.terms', ['icgc.facets.helpers']);
 
-  module.controller('termsCtrl', function ($scope, Facets, HighchartsService) {
+  module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache) {
     function setActiveTerms() {
       $scope.actives = Facets.getActiveTerms({
         type: $scope.type,
         facet: $scope.facetName,
         terms: $scope.facet.terms
       });
+
+      // Transltion on UI is slow, do in here
+      $scope.actives.forEach(function(term) {
+        term.label = $filter('trans')(term.term, true);
+        if ($scope.facetName === 'projectId') {
+          ProjectCache.getData().then(function(cache) {
+            term.tooltip = cache[term.term];
+          });
+        } else {
+          term.tooltip = $scope.defined? $filter('define')(term.label) : term.label;
+        }
+      });
+
     }
 
     function setInactiveTerms() {
       $scope.inactives = Facets.getInactiveTerms({
         actives: $scope.actives,
         terms: $scope.facet.terms
+      });
+
+      // Transltion on UI is slow, do in here
+      $scope.inactives.forEach(function(term) {
+        term.label = $filter('trans')(term.term, true);
+        if ($scope.facetName === 'projectId') {
+          ProjectCache.getData().then(function(cache) {
+            term.tooltip = cache[term.term];
+          });
+        } else {
+          term.tooltip = $scope.defined? $filter('define')(term.label) : term.label;
+        }
       });
     }
 

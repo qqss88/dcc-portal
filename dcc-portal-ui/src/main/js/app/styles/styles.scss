@@ -246,6 +246,16 @@ h3:hover {
   font-family: inherit;
 }
 
+.t_notify_link {
+  cursor: pointer;
+  color: #FFF;
+}
+
+.t_notify_link:hover {
+  text-decoration: underline;
+}
+
+
 .t_notify_body {
   font-size: 1rem;
 }

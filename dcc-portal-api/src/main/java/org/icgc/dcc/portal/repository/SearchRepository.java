@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.DFS_QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Sets;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -43,7 +45,7 @@ public class SearchRepository {
   private static final Type DONOR_TEXT = Type.DONOR_TEXT;
   private static final Type PROJECT_TEXT = Type.PROJECT_TEXT;
   private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
-  private static final Type PATHWAY_TEXT = Type.PATHWAY_TEXT;
+  private static final Type GENESET_TEXT = Type.GENESET_TEXT;
 
   private final Client client;
 
@@ -65,10 +67,13 @@ public class SearchRepository {
     else if (type.equals("mutation")) search.setTypes(MUTATION_TEXT.getId());
     else if (type.equals("donor")) search.setTypes(DONOR_TEXT.getId());
     else if (type.equals("project")) search.setTypes(PROJECT_TEXT.getId());
-    else if (type.equals("pathway")) search.setTypes(PATHWAY_TEXT.getId());
+    else if (type.equals("pathway")) search.setTypes(GENESET_TEXT.getId());
+    else if (type.equals("geneSet")) search.setTypes(GENESET_TEXT.getId());
+    else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
+    else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
     else
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
-          PATHWAY_TEXT.getId());
+          GENESET_TEXT.getId());
 
     search.addFields(getFields(query, KIND));
 
@@ -78,7 +83,12 @@ public class SearchRepository {
 
       // Exact match fields (DCC-2324)
       if (baseKey.equals("start")) {
-        keys.add(baseKey);
+        // NOTE: This is a work around quirky ES issue.
+        // We need to prefix the document type here to prevent NumberFormatException, it appears that ES
+        // cannot determine what type 'start' is.
+        // This is for ES 0.9, later versions may not have this problem.
+        keys.add(_("%s.%s", MUTATION_TEXT.getId(), baseKey));
+
       } else if (!baseKey.equals("geneMutations")) {
         keys.add(baseKey + ".search^2");
         keys.add(baseKey + ".analyzed");
@@ -98,6 +108,14 @@ public class SearchRepository {
     String[] aKeys = keys.toArray(new String[keys.size()]);
 
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
+
+    if (type.equals("pathway")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "pathway")));
+    } else if (type.equals("curated_set")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
+    } else if (type.equals("go_term")) {
+      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
+    }
 
     log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();

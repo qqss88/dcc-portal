@@ -1085,66 +1085,76 @@ header #brand img {
   background: #166aa2;
 }
 /* line 133, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__analysis a {
+  color: #666666;
+  border: 0.3rem solid #666666;
+}
+/* line 138, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__analysis a:hover {
+  color: white;
+  background: #666666;
+}
+/* line 143, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
   color: #1693c0;
   border: 0.3rem solid #1693c0;
 }
-/* line 138, _sections/_header.scss */
+/* line 148, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a:hover {
   color: white;
   background: #1693c0;
 }
-/* line 143, _sections/_header.scss */
+/* line 153, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a {
   background: #cccccc;
   border: 0.3rem solid #cccccc;
 }
-/* line 146, _sections/_header.scss */
+/* line 156, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a .icon-search {
   padding: 1rem;
 }
-/* line 150, _sections/_header.scss */
+/* line 160, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a form {
   opacity: 0;
 }
-/* line 155, _sections/_header.scss */
+/* line 165, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a:hover {
   background: #cccccc;
 }
-/* line 159, _sections/_header.scss */
+/* line 169, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open {
   border: 0.3rem solid #cccccc;
   text-align: left;
   background: white;
 }
-/* line 163, _sections/_header.scss */
+/* line 173, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open i {
   color: #cccccc;
 }
-/* line 166, _sections/_header.scss */
+/* line 176, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form {
   width: auto;
   opacity: 1;
 }
-/* line 169, _sections/_header.scss */
+/* line 179, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form input {
   border-radius: 1rem;
 }
-/* line 175, _sections/_header.scss */
+/* line 185, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open:hover {
   background: white;
 }
-/* line 179, _sections/_header.scss */
+/* line 189, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a {
   background: #6d72c5;
   border: 0.3rem solid #6d72c5;
 }
-/* line 184, _sections/_header.scss */
+/* line 194, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a:hover {
   background: #6d72c5;
 }
 
-/* line 190, _sections/_header.scss */
+/* line 200, _sections/_header.scss */
 .t_nav__items__item__icon i {
   position: relative;
   display: inline-block;
@@ -1154,35 +1164,35 @@ header #brand img {
   background: rgba(255, 255, 255, 0.1);
 }
 @media (min-width: 1025px) {
-  /* line 190, _sections/_header.scss */
+  /* line 200, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem 1rem .9rem;
   }
 }
 @media (min-width: 1535px) {
-  /* line 190, _sections/_header.scss */
+  /* line 200, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .9rem;
   }
 }
 
-/* line 233, _sections/_header.scss */
+/* line 243, _sections/_header.scss */
 .t_nav__items__item__title {
   display: none;
 }
 
-/* line 238, _sections/_header.scss */
+/* line 248, _sections/_header.scss */
 #home-page header {
   text-align: center;
   padding: 0;
 }
 @media (min-width: 721px) {
-  /* line 238, _sections/_header.scss */
+  /* line 248, _sections/_header.scss */
   #home-page header {
     padding-bottom: 2rem;
   }
 }
-/* line 245, _sections/_header.scss */
+/* line 255, _sections/_header.scss */
 #home-page header #brand {
   width: 100%;
   float: right;
@@ -1191,7 +1201,7 @@ header #brand img {
   clear: none;
   margin: 0;
 }
-/* line 248, _sections/_header.scss */
+/* line 258, _sections/_header.scss */
 #home-page header #brand a {
   line-height: 5rem;
   font-size: 3rem;
@@ -1199,7 +1209,7 @@ header #brand img {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 @media (min-width: 721px) {
-  /* line 248, _sections/_header.scss */
+  /* line 258, _sections/_header.scss */
   #home-page header #brand a {
     line-height: 7rem;
     font-size: 4rem;
@@ -1207,21 +1217,21 @@ header #brand img {
     font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
-/* line 265, _sections/_header.scss */
+/* line 275, _sections/_header.scss */
 #home-page header #brand img {
   height: 3rem;
   margin-bottom: -.4rem;
   width: 3rem;
 }
 @media (min-width: 721px) {
-  /* line 265, _sections/_header.scss */
+  /* line 275, _sections/_header.scss */
   #home-page header #brand img {
     height: 4rem;
     margin-bottom: -.6rem;
     width: 4rem;
   }
 }
-/* line 278, _sections/_header.scss */
+/* line 288, _sections/_header.scss */
 #home-page .t_nav__pages {
   width: 100%;
   float: right;
@@ -1230,93 +1240,110 @@ header #brand img {
   clear: none;
   margin-right: 0;
 }
-/* line 281, _sections/_header.scss */
+/* line 291, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item {
   text-align: left;
   margin: 0;
 }
 @media (min-width: 721px) {
-  /* line 281, _sections/_header.scss */
+  /* line 291, _sections/_header.scss */
   #home-page .t_nav__pages .t_nav__items__item {
-    margin: 0 2rem;
+    margin: 0 1.25rem;
   }
 }
-/* line 287, _sections/_header.scss */
+/* line 298, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item a {
   padding-right: 1rem;
 }
-/* line 294, _sections/_header.scss */
+/* line 305, _sections/_header.scss */
 #home-page .t_nav__actions {
   position: absolute;
   top: .4rem;
   right: 2rem;
 }
-/* line 300, _sections/_header.scss */
+/* line 311, _sections/_header.scss */
 #home-page .t_nav__items__item__title {
   font-weight: 300;
   display: inline-block;
 }
-/* line 305, _sections/_header.scss */
+/* line 316, _sections/_header.scss */
 #home-page .t_nav__items__item__home {
   display: none;
 }
-/* line 308, _sections/_header.scss */
+/* line 319, _sections/_header.scss */
 #home-page .t_nav__items__item__search {
   display: none;
 }
-/* line 311, _sections/_header.scss */
+/* line 322, _sections/_header.scss */
 #home-page .t_nav__items__item__projects a {
   background: #e9931c;
   color: white;
 }
-/* line 315, _sections/_header.scss */
+/* line 326, _sections/_header.scss */
 #home-page .t_nav__items__item__advanced a {
   background: #166aa2;
   color: white;
 }
-/* line 319, _sections/_header.scss */
+/* line 330, _sections/_header.scss */
+#home-page .t_nav__items__item__analysis a {
+  background: #666666;
+  color: white;
+}
+/* line 334, _sections/_header.scss */
 #home-page .t_nav__items__item__download a {
   background: #1693c0;
   color: white;
 }
 
-/* line 326, _sections/_header.scss */
+/* line 341, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a {
   cursor: default;
   background: #e9931c;
   color: white;
 }
-/* line 330, _sections/_header.scss */
+/* line 345, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 338, _sections/_header.scss */
+/* line 353, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a {
   cursor: default;
   background: #166aa2;
   color: white;
 }
-/* line 342, _sections/_header.scss */
+/* line 357, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 350, _sections/_header.scss */
+/* line 366, _sections/_header.scss */
+#analysis-page .t_nav__items__item__analysis a {
+  cursor: default;
+  background: #666666;
+  color: white;
+}
+/* line 370, _sections/_header.scss */
+#analysis-page .t_nav__items__item__analysis a i {
+  box-shadow: none;
+  background: none;
+}
+
+/* line 378, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a {
   cursor: default;
   background: #1693c0;
   color: white;
 }
-/* line 354, _sections/_header.scss */
+/* line 382, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 362, _sections/_header.scss */
+/* line 390, _sections/_header.scss */
 #q-page .t_nav__items__item__search {
   display: none;
 }
@@ -1324,14 +1351,14 @@ header #brand img {
 /* ************************************
  *   Suggest
  *********************************** */
-/* line 370, _sections/_header.scss */
+/* line 398, _sections/_header.scss */
 .t_suggest.t_suggest__header {
   color: #333333;
   width: 150%;
   float: right;
   margin: 0;
 }
-/* line 377, _sections/_header.scss */
+/* line 405, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__input {
   margin: .4rem 0 0 0;
   padding-top: .5rem;
@@ -1339,16 +1366,16 @@ header #brand img {
   padding-bottom: .5rem;
   padding-left: 0;
 }
-/* line 387, _sections/_header.scss */
+/* line 415, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest_flyout {
   margin-top: .5rem;
 }
-/* line 391, _sections/_header.scss */
+/* line 419, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__left {
   top: 1.1rem;
   left: 1rem;
 }
-/* line 396, _sections/_header.scss */
+/* line 424, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__right {
   top: 1rem;
   right: 1rem;
@@ -1358,16 +1385,16 @@ header #brand img {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 407, _sections/_header.scss */
+  /* line 435, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__left {
     top: 1.3rem;
   }
-  /* line 411, _sections/_header.scss */
+  /* line 439, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__right {
     top: 1.2rem;
   }
 
-  /* line 417, _sections/_header.scss */
+  /* line 445, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem;
   }
@@ -1475,7 +1502,7 @@ header #brand img {
   /* line 20, _sections/_results.scss */
   .t_quick__hit__text__details__label {
     text-align: right;
-    width: 7rem;
+    width: 8rem;
     border-right: 1px solid #f2f2f2;
   }
 }
@@ -2193,27 +2220,41 @@ h1 .t_badge_icon {
   content: "P";
 }
 
-/* line 68, _modules/_badges.scss */
+/* line 69, _modules/_badges.scss */
+.t_badge__geneset {
+  background: #1a9900;
+}
+
+/* line 73, _modules/_badges.scss */
+.t_badge__geneset:after {
+  content: "S";
+}
+
+/*
+.t_badge__geneset::first-letter {
+  vertical-align: super;
+} */
+/* line 84, _modules/_badges.scss */
 .t_badge__project, .t_badge__projects {
   background: #e9931c;
 }
 
-/* line 72, _modules/_badges.scss */
+/* line 88, _modules/_badges.scss */
 .t_badge__project:after {
   content: "P";
 }
 
-/* line 76, _modules/_badges.scss */
+/* line 92, _modules/_badges.scss */
 .t_badge__advanced {
   background: #166aa2;
 }
 
-/* line 80, _modules/_badges.scss */
+/* line 96, _modules/_badges.scss */
 .t_badge__download {
   background: #1693c0;
 }
 
-/* line 84, _modules/_badges.scss */
+/* line 100, _modules/_badges.scss */
 .t_badge__q {
   background: #d33682;
 }
@@ -2470,7 +2511,7 @@ aside .t_tabs__tab {
 .t_facets__facet__terms__inactive__term__label,
 .t_facets__facet__terms__active__term__label__text {
   position: relative;
-  max-width: 65%;
+  max-width: 70%;
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
@@ -3100,6 +3141,104 @@ g.marker rect.selected {
   stroke-width: 1px;
 }
 
+/* Adapated from http://jsfiddle.net/jhfrench/GpdgF/ */
+/* line 3, _modules/_trees.scss */
+.tree {
+  font-size: 0.85rem;
+  line-height: 155%;
+}
+
+/* line 8, _modules/_trees.scss */
+.tree ul {
+  padding: 0 0 0 15px;
+}
+
+/* line 12, _modules/_trees.scss */
+.tree > ul {
+  padding: 0;
+}
+
+/* line 17, _modules/_trees.scss */
+.tree li {
+  list-style-type: none;
+  margin: 0;
+  padding: 4px 5px 0 5px !important;
+  position: relative;
+}
+
+/* line 24, _modules/_trees.scss */
+.tree li::before, .tree li::after {
+  content: '';
+  left: -7px;
+  position: absolute;
+  right: auto;
+}
+
+/* line 31, _modules/_trees.scss */
+.tree li::before {
+  border-left: 1px solid #166aa2;
+  bottom: 50px;
+  height: 100%;
+  top: 0;
+  width: 1px;
+}
+
+/* line 39, _modules/_trees.scss */
+.tree li::after {
+  border-top: 1px solid #166aa2;
+  height: 17px;
+  top: 17px;
+  width: 12px;
+}
+
+/* line 46, _modules/_trees.scss */
+.tree li span {
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border: 1px solid #166aa2;
+  border-radius: 6px 6px;
+  background-color: #fafafa;
+  display: inline-block;
+  padding: 1px 4px;
+  text-decoration: none;
+}
+
+/* line 65, _modules/_trees.scss */
+.tree > ul > li::before, .tree > ul > li::after {
+  border: 0;
+}
+
+/* line 69, _modules/_trees.scss */
+.tree li:last-child::before {
+  height: 17px;
+}
+
+/* line 74, _modules/_trees.scss */
+.tree .goterm_part_of {
+  color: #0000fe;
+}
+
+/* line 81, _modules/_trees.scss */
+.tree .goterm_regulates {
+  color: #feb40b;
+}
+
+/* line 85, _modules/_trees.scss */
+.tree .goterm_positively_regulates {
+  color: #1fff09;
+}
+
+/* line 89, _modules/_trees.scss */
+.tree .goterm_negatively_regulates {
+  color: #fc0008;
+}
+
+/* line 93, _modules/_trees.scss */
+.tree .goterm_unknown {
+  color: #888888;
+}
+
 /* Bar charts styles */
 /* line 2, _modules/_vis.scss */
 .axis_label {
@@ -3420,25 +3559,36 @@ h3:hover .pilcrow {
 }
 
 /* line 249, styles.scss */
+.t_notify_link {
+  cursor: pointer;
+  color: #FFF;
+}
+
+/* line 254, styles.scss */
+.t_notify_link:hover {
+  text-decoration: underline;
+}
+
+/* line 259, styles.scss */
 .t_notify_body {
   font-size: 1rem;
 }
 
-/* line 253, styles.scss */
+/* line 263, styles.scss */
 .t_notify_warning {
   background: #e9931c;
 }
 
-/* line 257, styles.scss */
+/* line 267, styles.scss */
 .t_notify_success {
   background: #1a9900;
 }
 
-/* line 263, styles.scss */
+/* line 273, styles.scss */
 #buorg div {
   padding: 0;
 }
-/* line 267, styles.scss */
+/* line 277, styles.scss */
 #buorg #buorgclose {
   position: relative;
   float: right;
@@ -3452,7 +3602,7 @@ h3:hover .pilcrow {
   padding-right: 1rem;
 }
 
-/* line 281, styles.scss */
+/* line 291, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -3466,18 +3616,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 295, styles.scss */
+/* line 305, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 300, styles.scss */
+/* line 310, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 304, styles.scss */
+/* line 314, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

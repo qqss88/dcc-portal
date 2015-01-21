@@ -88,6 +88,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableMap;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -447,7 +448,6 @@ public class GeneResource {
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, geneId, projectId });
 
     filters = mergeFilters(filters, PROJECT_GENE_FILTER_TEMPLATE, geneId, projectId);
-
     return donorService.count(query().filters(filters).build());
   }
 
@@ -478,4 +478,12 @@ public class GeneResource {
 
     return counts;
   }
+
+  @Path("/{" + API_GENE_PARAM + "}/affected-transcripts")
+  @GET
+  public Map<String, List<String>> getAffectedTranscripts(
+      @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId) {
+    return ImmutableMap.<String, List<String>> of(geneId, geneService.getAffectedTranscripts(geneId));
+  }
+
 }

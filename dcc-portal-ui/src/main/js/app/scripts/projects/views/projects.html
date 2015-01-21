@@ -24,6 +24,7 @@
 <section>
     <div class="narrow">
         <donut height="250"
+               width="400"
                data-items="ProjectsCtrl.donut"
                data-sub-title="{{ProjectsCtrl.totalDonors | number}} Unique Donors"
                inner-label="Donors"
@@ -59,33 +60,28 @@
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='id'; reverse=!reverse">
         Code
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='id'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='id'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='id'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='id'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='name'; reverse=!reverse">
         Name
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='name'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='name'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='name'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='name'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='primarySite'; reverse=!reverse">
         Site
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primarySite'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='primarySite'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='primarySite'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='primarySite'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='primaryCountries'; reverse=!reverse">
         <abbr data-tooltip="Lead country of the cancer project">Country</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primaryCountries'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='primaryCountries'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='primaryCountries'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='primaryCountries'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Total number of donors">Donors</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalDonorCount'"
            class="icon-sort"></i>
-        <i data-ng-if="predicate=='totalDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='totalDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='totalDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th colspan="11" class="text-center">Available Data Types</th>
 </tr>
@@ -95,84 +91,69 @@
               class="tiny-header">SSM</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='ssmTestedDonorCount'"
            class="icon-sort"></i>
-        <i data-ng-if="predicate=='ssmTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='ssmTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+
+        <i data-ng-if="predicate==='ssmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='cnsmTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'CNSM' | define }}"
               class="tiny-header">CNSM</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='cnsmTestedDonorCount'"
            class="icon-sort"></i>
-        <i data-ng-if="predicate=='cnsmTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='cnsmTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='cnsmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='stsmTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'StSM' | define }}"
               class="tiny-header">StSM</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='stsmTestedDonorCount'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='stsmTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='stsmTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='stsmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='sgvTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'SGV' | define }}"
               class="tiny-header">SGV</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='sgvTestedDonorCount'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='sgvTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='sgvTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='sgvTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='methArrayTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'METH-A' | define }}"
               class="tiny-header">METH-A</abbr>
-        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methArrayTestedDonorCount'"
-           class="icon-sort"></i>
-        <i data-ng-if="predicate=='methArrayTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='methArrayTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methArrayTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='methArrayTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='methSeqTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'METH-S' | define }}"
               class="tiny-header">METH-S</abbr>
-        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methSeqTestedDonorCount'"
-           class="icon-sort"></i>
-        <i data-ng-if="predicate=='methSeqTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='methSeqTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='methSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='expArrayTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'EXP-A' | define }}"
               class="tiny-header">EXP-A</abbr>
-        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expArrayTestedDonorCount'"
-           class="icon-sort"></i>
-        <i data-ng-if="predicate=='expArrayTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='expArrayTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expArrayTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='expArrayTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='expSeqTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'EXP-S' | define }}"
               class="tiny-header">EXP-S</abbr>
-        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expSeqTestedDonorCount'"
-           class="icon-sort"></i>
-        <i data-ng-if="predicate=='expSeqTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='expSeqTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='expSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='pexpTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'PEXP' | define }}"
               class="tiny-header">PEXP</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='pexpTestedDonorCount'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='pexpTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='pexpTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='pexpTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='mirnaSeqTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'miRNA-S' | define }}"
               class="tiny-header">miRNA-S</abbr>
-        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='mirnaSeqTestedDonorCount'"
-           class="icon-sort"></i>
-        <i data-ng-if="predicate=='mirnaSeqTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='mirnaSeqTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='mirnaSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='mirnaSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th style="cursor: pointer" data-ng-click="predicate='jcnTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'JCN' | define }}"
               class="tiny-header">JCN</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='jcnTestedDonorCount'" class="icon-sort"></i>
-        <i data-ng-if="predicate=='jcnTestedDonorCount'&&!reverse" class="icon-sort-up"></i>
-        <i data-ng-if="predicate=='jcnTestedDonorCount'&&reverse" class="icon-sort-down"></i>
+        <i data-ng-if="predicate==='jcnTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
 </tr>
 </thead>
@@ -316,7 +297,7 @@
 </tbody>
 </table>
 
-<table id="projects" class="hidden">
+<table id="projects" class="hidden" data-ng-if="PagectsCt.Page.isExporting()">
     <thead>
     <tr>
         <th>Project Code</th>

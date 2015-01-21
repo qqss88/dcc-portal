@@ -1,0 +1,74 @@
+<h1><span class="t_badge t_badge_icon t_badge__download"><span class="icon-database"></span></span>Data Repository</h1>
+<section style="padding-top:0">
+    <div class="alert alert-info" data-ng-if="slugs.length===0">
+        <p>Data Repository provides access to all ICGC cancer project data, including uniformly
+            processed/annotated data files.</p>
+    </div>
+
+    <div data-ng-repeat="file in textFiles | filter:{name:'notice.txt'}" class="alert alert-error">
+       <div btf-markdown="file.textContent" class="release_notice"></div>
+    </div>
+
+    <div class="wide">
+        <span data-ng-init="predicate='name'"></span>
+        <span data-ng-init="reverse=false"></span>
+
+        <section class="loading" data-ng-if="!files">
+            <h3><i class="icon-spin icon-spinner"></i>Loading data repository</h3>
+        </section>
+
+        <div data-ng-if="files">
+            <ul class="breadcrumb" style="background:#fff;font-size:1.25rem">
+                <li><a href="/repository">~</a></li>
+                <li data-ng-repeat="p in slugs">
+                    <span class="divider">/</span>
+                    <a data-ng-if="!$last"
+                       data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}"
+                       href="/repository/{{ p.url }}">{{ p.name }}</a>
+                    <span data-ng-if="$last"
+                          data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}">{{ p.name }}</span>
+                </li>
+            </ul>
+
+            <table class="table" style="font-size: 1.1rem">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th class="text-right">File Size</th>
+                    <th class="text-right">Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-ng-repeat="file in files">
+                    <td data-ng-if="file.type=='f'">
+                        <i class="icon-file"></i>
+                        <a target="_self" href="/api/v1/download?fn={{file.name}}">{{ file.baseName }}</a>
+                    </td>
+                    <td data-ng-if="file.type=='d'"
+                        data-ng-style="deprecatedReleases.indexOf(file.baseName) >= 0?{'text-decoration':'line-through'}:{}">
+                        <i class="icon-folder-open"></i>
+                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">[{{ file.baseName }}] {{ file.translation }}</a>
+                        <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{ file.baseName }}</a>
+                    </td>
+                    <td data-ng-if="file.type=='f'" class="text-right">{{ file.size | bytes }}</td>
+                    <td data-ng-if="file.type=='d'" class="text-right">--</td>
+                    <td class="text-right">{{ file.date | date }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+           <br>
+           <div data-ng-repeat="file in textFiles | filter:{name : '!notice.txt'}"> 
+               <div class="well well-small">
+                   <div><a target="_self" href="/api/v1/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
+                   <hr>
+                   <div class="markdown_container">
+                       <div btf-markdown="file.textContent"></div>
+                   </div>
+               </div>
+           </div>
+        </div>
+    </div>
+</section>

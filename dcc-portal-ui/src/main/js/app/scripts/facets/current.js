@@ -30,6 +30,11 @@
       $scope.isActive = _.keys($scope.filters).length;
     }
 
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
     $scope.removeFacet = function(type, facet) {
       Facets.removeFacet({
         type: type,
@@ -37,18 +42,57 @@
       });
 
       if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
+
+        // FIXME: Grab facet keys from Extensions
         Facets.removeFacet({
           type: type,
-          facet: 'uploadedGeneList'
+          facet: 'inputGeneListId'
+        });
+
+        Facets.removeFacet({
+          type: type,
+          facet: 'uploadGeneListId'
         });
       }
+      if (type === 'gene' && facet === 'pathwayId') {
+        Facets.removeFacet({
+          type: type,
+          facet: 'hasPathway'
+        });
+      }
+
+    };
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
+    $scope.removeTerm = function(type, facet, term) {
+      console.log('current remove term', type, facet, term);
+
+      if (type === 'gene' && facet === 'hasPathway') {
+        Facets.removeFacet({
+          type: type,
+          facet: facet
+        });
+      } else {
+        Facets.removeTerm({
+          type: type,
+          facet: facet,
+          term: term
+        });
+      }
+
     };
 
     refresh();
-    $scope.$on('$locationChangeSuccess', function () {
-      refresh();
-
+    $scope.$on('$locationChangeSuccess', function (evt, next) {
+      // FIXME: Only applicable on search page. Should have a cleaner solution
+      if (next.indexOf('search') !== -1) {
+        refresh();
+      }
     });
+
   });
 
   module.directive('current', function () {

@@ -62,13 +62,19 @@ public class SearchService {
             fields.get("omimGene"),
             fields.get("entrezGene"),
             fields.get("hgnc"),
+
             // Donor
             fields.get("specimenIds"),
             fields.get("submittedSpecimenIds"),
             fields.get("sampleIds"),
             fields.get("submittedSampleIds"),
+
             // Mutation
-            fields.get("geneMutations")
+            fields.get("geneMutations"),
+
+            // Gene Set
+            fields.get("altlds")
+
             ).contains(field.getKey())) {
           fieldMap.put(field.getKey(), field.getValue().getValues().get(0));
         } else {

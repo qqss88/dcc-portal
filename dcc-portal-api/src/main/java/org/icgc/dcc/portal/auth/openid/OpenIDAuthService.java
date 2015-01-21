@@ -22,7 +22,7 @@ import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
-import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.SessionService;
 import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.VerificationResult;
@@ -55,7 +55,7 @@ public class OpenIDAuthService {
   private static final String DEFAULT_USER_MESSAGE = "An error occurred while trying to log in.";
 
   @NonNull
-  private final DistributedCacheService cacheService;
+  private final SessionService sessionService;
   @NonNull
   private final ConsumerManager consumerManager;
   @NonNull
@@ -86,7 +86,7 @@ public class OpenIDAuthService {
     val discoveryInfo = consumerManager.associate(discoveries);
 
     // Persist the discovery info in the cache for further verification
-    cacheService.putDiscoveryInfo(sessionToken, discoveryInfo);
+    sessionService.putDiscoveryInfo(sessionToken, discoveryInfo);
 
     // Build the AuthRequest message to be sent to the OpenID provider
     val authRequest = consumerManager.authenticate(discoveryInfo, returnToUrl);
@@ -126,8 +126,8 @@ public class OpenIDAuthService {
     checkState(!isNullOrEmpty(sessionToken), "Null or empty token", redirect);
     val sessionTokenUuid = stringToUuid(sessionToken, redirect);
 
-    val discoveryInfoOptional = cacheService.getDiscoveryInfo(sessionTokenUuid);
-    cacheService.removeDiscoveryInfo(sessionTokenUuid);
+    val discoveryInfoOptional = sessionService.getDiscoveryInfo(sessionTokenUuid);
+    sessionService.removeDiscoveryInfo(sessionTokenUuid);
 
     checkState(discoveryInfoOptional.isPresent(), "Authentication failed due to no discovery information matching "
         + "session token " + sessionToken, redirect);
@@ -163,7 +163,7 @@ public class OpenIDAuthService {
     user.setSessionToken(sessionTokenUuid);
 
     // Persist the user in the cache with the authentication token
-    cacheService.putUser(sessionTokenUuid, user);
+    sessionService.putUser(sessionTokenUuid, user);
 
     return user;
   }
@@ -216,7 +216,7 @@ public class OpenIDAuthService {
    */
   private User checkOtherSessions(User lookupUser, URI redirect) {
     // Search for already logged-in user (another browser?)
-    val userByIdentifierOptional = cacheService.getUserByOpenidIdentifier(lookupUser.getOpenIDIdentifier());
+    val userByIdentifierOptional = sessionService.getUserByOpenidIdentifier(lookupUser.getOpenIDIdentifier());
     if (userByIdentifierOptional.isPresent()) {
       log.info("Found an existing User using OpenID identifier {}", lookupUser);
 
@@ -225,7 +225,7 @@ public class OpenIDAuthService {
 
     // This is either a new registration or the user's OpenID URL(XRI) has changed
     if (lookupUser.getEmailAddress() != null) {
-      val userOptional = cacheService.getUserByEmail(lookupUser.getEmailAddress());
+      val userOptional = sessionService.getUserByEmail(lookupUser.getEmailAddress());
       if (!userOptional.isPresent()) {
         log.info("No authenticated users found. Registering a new {}", lookupUser);
 
@@ -277,16 +277,17 @@ public class OpenIDAuthService {
   }
 
   private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
+    val redirectBuilder = UriBuilder.fromPath("/");
+    val returnBuilder = UriBuilder.fromPath("api");
 
-    UriBuilder redirectBuilder = UriBuilder.fromPath("/");
-    UriBuilder returnBuilder = UriBuilder.fromPath("api");
+    // The end-user and an HTTPS termination point(portal or load balancer) always communicate over HTTPS in OpenID
+    // authentication scenario, that's why scheme in a return_to URL always must be set to HTTPS
+    redirectBuilder.scheme(Scheme.HTTPS.getId());
+    returnBuilder.scheme(Scheme.HTTPS.getId());
 
-    if (port == DEFAULT_HTTP_PORT) {
-      redirectBuilder.scheme(Scheme.HTTP.getId());
-      returnBuilder.scheme(Scheme.HTTP.getId());
-    } else {
-      redirectBuilder.scheme(Scheme.HTTPS.getId()).port(port);
-      returnBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+    if (port != DEFAULT_HTTP_PORT) {
+      redirectBuilder.port(port);
+      returnBuilder.port(port);
     }
 
     redirectBuilder.host(hostname)

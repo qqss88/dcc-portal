@@ -1,6 +1,11 @@
 package org.icgc.dcc.portal.model;
 
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,18 +15,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 @Component
 public class IndexModel {
 
+  /**
+   * Constants.
+   */
   public static final int MAX_FACET_TERM_COUNT = 1024;
-
   public static final String IS = "is";
-
+  public static final String ALL = "all";
   public static final String NOT = "not";
-
   public static final String MISSING = "_missing";
+
+  public static final Set<String> GENES_SORT_FIELD_NAMES = ImmutableSet.of("symbol", "name", "start", "type",
+      "affectedDonorCountFiltered");
+
+  /**
+   * Special cases for term lookups
+   */
+  public static final String API_INPUT_GENE_LIST_ID_FIELD_NAME = "inputGeneListId";
+  public static final String API_UPLOAD_GENE_LIST_ID_FIELD_NAME = "uploadGeneListId";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -31,6 +48,9 @@ public class IndexModel {
     GENE("gene"),
     MUTATION("mutation"),
     PATHWAY("pathway"),
+
+    GENE_SET("geneSet"),
+
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
     OCCURRENCE("occurrence"),
@@ -47,6 +67,7 @@ public class IndexModel {
     private final String id;
   }
 
+  // Index document type
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Type {
@@ -56,6 +77,7 @@ public class IndexModel {
     MUTATION("mutation"),
     RELEASE("release"),
     PATHWAY("pathway"),
+    GENE_SET("gene-set"), // FIXME: Double check name with Bob
     DONOR_CENTRIC("donor-centric"),
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
@@ -64,6 +86,7 @@ public class IndexModel {
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
+    GENESET_TEXT("gene-set-text"), // FIXME: Double check name with Bob
     PROJECT_TEXT("project-text");
 
     private final String id;
@@ -135,7 +158,11 @@ public class IndexModel {
           .put("survivalTime", "donor_survival_time")
           .put("availableDataTypes", "_summary._available_data_type")
           .put("analysisTypes", "_summary.experimental_analysis_performed")
+          .put("studies", "_summary._studies")
           .put("ssmAffectedGenes", "_score")
+          .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_UPLOAD_GENE_LIST_ID_FIELD_NAME)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
+
           .build();
 
   private static final ImmutableMap<String, String> SPECIMEN_FIELDS_MAPPING =
@@ -199,7 +226,7 @@ public class IndexModel {
           .put("end", "end")
           .put("strand", "strand")
           .put("description", "description")
-          .put("synonyms", "synonyms")
+          .put("synonyms", "synonyms") // Is a multi field
           .put("externalDbIds", "external_db_ids")
           .put("affectedDonorCountTotal", "_summary._affected_donor_count")
           .put("affectedDonorCountFiltered", "_score")
@@ -208,7 +235,10 @@ public class IndexModel {
           .put("pathwayId", "pathways.pathway_id")
           .put("pathwayName", "pathways.pathway_name")
           .put("pathways", "pathways")
-          .put("list", "list")
+          .put("sets", "sets")
+          .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_UPLOAD_GENE_LIST_ID_FIELD_NAME)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
+
           .build();
 
   private static final ImmutableMap<String, String> MUTATIONS_FIELDS_MAPPING =
@@ -238,6 +268,9 @@ public class IndexModel {
           .put("location", "location")
           .put("sequencingStrategy", "sequencing_strategy")
           .put("sequencingStrategyNested", "ssm_occurrence.observation.sequencing_strategy")
+          .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_UPLOAD_GENE_LIST_ID_FIELD_NAME)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
+
           .build();
 
   private static final ImmutableMap<String, String> TRANSCRIPT_FIELDS_MAPPING =
@@ -387,6 +420,9 @@ public class IndexModel {
           .put("xrefEnsemblVarId", "ssm.xref_ensembl_var_id")
           .put("mutation", "ssm.mutation")
           .put("observation", "ssm.observation")
+          .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_UPLOAD_GENE_LIST_ID_FIELD_NAME)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
+
           .build();
 
   private static final ImmutableMap<String, String> OBSERVATION_FIELDS_MAPPING =
@@ -426,6 +462,9 @@ public class IndexModel {
           .put("icgcSpecimenId", "_specimen_id")
           .put("submittedSampleId", "analyzed_sample_id")
           .put("submittedMatchedSampleId", "matched_sample_id")
+          .put(API_UPLOAD_GENE_LIST_ID_FIELD_NAME, API_UPLOAD_GENE_LIST_ID_FIELD_NAME)
+          .put(API_INPUT_GENE_LIST_ID_FIELD_NAME, API_INPUT_GENE_LIST_ID_FIELD_NAME)
+
           .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =
@@ -480,9 +519,12 @@ public class IndexModel {
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
+          // GO Term
+          .put("altIds", "altIds")
+
           // Pathway
-          .put("url", "url")
-          .put("source", "source")
+          // .put("url", "url")
+          // .put("source", "source")
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
@@ -500,6 +542,39 @@ public class IndexModel {
           .put("linkOut", "link_out")
           .put("geneCount", "gene_count")
           .build();
+
+  private static final ImmutableMap<String, String> GENESET_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "id")
+          .put("name", "name")
+          .put("type", "type")
+          .put("source", "source")
+          .put("description", "description")
+          .put("geneCount", "_summary._gene_count")
+          .put("projects", "projects")
+
+          // Pathway
+          .put("hierarchy", "pathway.hierarchy")
+          .put("diagrammed", "pathway.diagrammed")
+
+          // Gene Ontology
+          .put("ontology", "go_term.ontology")
+          .put("altIds", "go_term.alt_ids")
+          .put("synonyms", "go_term.synonyms")
+          .put("inferredTree", "go_term.inferred_tree")
+
+          // Curated gene set
+          // ???
+          .build();
+
+  /*
+   * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
+   * String>() .put("ontology", "ontology") .put("altIds", "alt_ids") .put("synonyms", "synonyms") .put("inferredTree",
+   * "inferred_tree") .build();
+   * 
+   * private static final ImmutableMap<String, String> PATHWAY_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
+   * String>() .put("hierarchy", "hierarchy") .build();
+   */
 
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
@@ -521,7 +596,62 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.RELEASE, RELEASE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
   }
+
+  /**
+   * Internal gene set types
+   */
+  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+  @Getter
+  public static enum GeneSetType {
+    GENE_SET_TYPE_ALL("geneSetId"),
+    GENE_SET_TYPE_GO("go_term"),
+    GENE_SET_TYPE_PATHWAY("pathway"),
+    GENE_SET_TYPE_CURATED("curated_set");
+
+    private final String type;
+  }
+
+  /**
+   * Mapping query ID fields to internal types
+   */
+  public static final Map<String, String> GENE_SET_QUERY_ID_FIELDS = ImmutableMap.<String, String> builder()
+      .put(GeneSetType.GENE_SET_TYPE_ALL.getType(), "geneSetId")
+      .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(), "curatedSetId")
+      .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "pathwayId")
+      .put(GeneSetType.GENE_SET_TYPE_GO.getType(), "goTermId").build();
+
+  /**
+   * Mapping query type fields to internal type
+   */
+  public static final Map<String, String> GENE_SET_QUERY_TYPE_FIELDS = ImmutableMap.<String, String> of(
+      GeneSetType.GENE_SET_TYPE_CURATED.getType(), "hasCuratedSet",
+      GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "hasPathway",
+      GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
+
+  /**
+   * Mapping of gene set types to actual ES fields
+   */
+  public static final Map<String, List<String>> GENE_SET_INDEX_FIELDS = ImmutableMap
+      .<String, List<String>> builder()
+      .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(),
+          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_CURATED.getType()))
+      .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
+          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_PATHWAY.getType()))
+      .put(GeneSetType.GENE_SET_TYPE_GO.getType(),
+          ImmutableList.<String> of(
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+      .put(GeneSetType.GENE_SET_TYPE_ALL.getType(),
+          ImmutableList.<String> of(
+              GeneSetType.GENE_SET_TYPE_CURATED.getType(),
+              GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+      .build();
 
   private String index;
 
