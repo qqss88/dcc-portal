@@ -33,8 +33,10 @@ import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
+import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.utils.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
@@ -50,6 +52,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
@@ -218,6 +221,32 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", limitNode);
 
     return limitNode;
+  }
+
+  @Override
+  public ExpressionNode visitOrder(@NonNull OrderContext nodeContext) {
+    val sortNode = new SortNode();
+    for (val id : nodeContext.ID()) {
+      val order = getOrderAt(nodeContext, id.getSymbol().getCharPositionInLine() - 1);
+      if (order != null) {
+        sortNode.addField(id.getText(), order);
+      } else {
+        sortNode.addField(id.getText(), Order.ASC);
+      }
+    }
+    log.debug("{}", sortNode);
+
+    return sortNode;
+  }
+
+  private static Order getOrderAt(OrderContext parent, int position) {
+    for (val sign : parent.SIGN()) {
+      if (sign.getSymbol().getCharPositionInLine() == position) {
+        return Order.bySign(sign.getText());
+      }
+    }
+
+    return null;
   }
 
 }

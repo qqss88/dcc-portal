@@ -68,6 +68,12 @@ public class PqlParseListener extends PqlBaseListener {
       esAst.addChildren(rangeContext.accept(PQL_VISITOR));
     }
 
+    // process sort
+    val sortContext = context.order();
+    if (sortContext != null) {
+      esAst.addChildren(sortContext.accept(PQL_VISITOR));
+    }
+
   }
 
   private static void processFunctions(Collection<FunctionContext> functions, ExpressionNode rootNode) {

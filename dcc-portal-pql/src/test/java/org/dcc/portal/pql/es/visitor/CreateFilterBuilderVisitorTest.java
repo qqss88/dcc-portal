@@ -46,7 +46,7 @@ public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
 
   @Test
   public void visitTest() {
-    val query = "or(eq(one, 1), ne(two, 2))&and(eq(three, 3), ne(four, 4))";
+    val query = "select(a),sort(-age, weight)";
     val esAst = createTree(query);
     val result = visitor.visit(esAst, null);
 
@@ -56,7 +56,11 @@ public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
 
   @Test
   public void visitTest_demo() {
-    val query = "select(gender, age), ne(gender, 'no_date'), and(gt(age, 20), lt(age, 60)), limit(5, 10)";
+    val query =
+        "select(donor_age_at_diagnosis, donor_vital_status), "
+            + "or(eq(donor_vital_status, 'alive'), and(gt(donor_age_at_diagnosis, 100), lt(donor_age_at_diagnosis, 200))), "
+            + "sort(-donor_age_at_diagnosis),"
+            + " limit(5)";
     val esAst = createTree(query);
     log.info("ES AST: {}", esAst);
     val request = visitor.visit(esAst, null);

@@ -56,6 +56,7 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import com.google.common.collect.Lists;
 
@@ -147,7 +148,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   @Override
   public SearchRequestBuilder visit(Node node, QueryContext queryContext) {
     // FIXME: get index from QueryContext
-    val result = client.prepareSearch("dcc-release-etl-cli").setTypes("gene-centric");
+    val result = client.prepareSearch("dcc-release-etl-cli").setTypes("donor-centric");
 
     for (val child : node.getChildren()) {
       if (child instanceof PostFilterNode) {
@@ -161,6 +162,11 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
         val castedChild = (LimitNode) child;
         result.setFrom(castedChild.getFrom());
         result.setSize(castedChild.getSize());
+      } else if (child instanceof SortNode) {
+        val castedChild = (SortNode) child;
+        for (val entry : castedChild.getFields().entrySet()) {
+          result.addSort(entry.getKey(), SortOrder.valueOf(entry.getValue().toString()));
+        }
       }
     }
 

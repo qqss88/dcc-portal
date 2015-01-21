@@ -30,8 +30,10 @@ import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
+import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.utils.Order;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
@@ -41,6 +43,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.junit.Test;
@@ -325,6 +328,16 @@ public class PqlParseTreeVisitorTest {
     val limitNode = (LimitNode) VISITOR.visitRange(rangeContext);
     assertThat(limitNode.getFrom()).isEqualTo(1);
     assertThat(limitNode.getSize()).isEqualTo(5);
+  }
+
+  @Test
+  public void visitSortTest() {
+    val parseTree = ParseTrees.createParseTree("count(),sort(-age, weight)");
+    val orderContext = (OrderContext) parseTree.getChild(2);
+    val sortNode = (SortNode) VISITOR.visitOrder(orderContext);
+    assertThat(sortNode.getFields().size()).isEqualTo(2);
+    assertThat(sortNode.getFields().get("age")).isEqualTo(Order.DESC);
+    assertThat(sortNode.getFields().get("weight")).isEqualTo(Order.ASC);
   }
 
 }

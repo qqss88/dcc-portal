@@ -15,32 +15,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.utils;
 
-import java.util.Map;
-
-import lombok.EqualsAndHashCode;
+import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.NonNull;
-import lombok.Value;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
-import org.dcc.portal.pql.es.utils.Order;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.icgc.dcc.common.core.model.Identifiable;
 
-import com.beust.jcommander.internal.Maps;
+@RequiredArgsConstructor(access = PRIVATE)
+public enum Order implements Identifiable {
+  ASC("+"), DESC("-");
 
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class SortNode extends ExpressionNode {
+  private final String sign;
 
-  Map<String, Order> fields = Maps.newHashMap();
+  public static Order bySign(@NonNull String sign) {
+    for (val value : values()) {
+      if (sign.equals(value.sign)) {
+        return value;
+      }
+    }
 
-  @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitSort(this);
+    throw new IllegalArgumentException(_("No sign '%s' found", sign));
   }
 
-  public void addField(@NonNull String field, @NonNull Order order) {
-    fields.put(field, order);
+  @Override
+  public String getId() {
+    return name().toLowerCase();
   }
 
 }
