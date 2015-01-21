@@ -63,17 +63,20 @@
     _ctrl.totalDonors = 0;
     _ctrl.gene.hasGVChromosome = GMService.isValidChromosome(_ctrl.gene.chromosome);
 
+    function extractAndSort(list, type) {
+      var filtered =  _.filter(list, function(set) {
+        return set.type === type && set.annotation === 'direct';
+      });
+      return _.sortBy(filtered, function(set) {
+        return set.name;
+      });
+    }
+
     // Extract to make it easier to handle on the view
     _ctrl.uiGeneSets = {};
-    _ctrl.uiGeneSets.pathwayList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'pathway' && set.annotation === 'direct';
-    });
-    _ctrl.uiGeneSets.goList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'go_term' && set.annotation === 'direct';
-    });
-    _ctrl.uiGeneSets.curatedList = _.filter(_ctrl.gene.sets, function(set) {
-      return set.type === 'curated' && set.annotation === 'direct';
-    });
+    _ctrl.uiGeneSets.pathwayList = extractAndSort(_ctrl.gene.sets, 'pathway');
+    _ctrl.uiGeneSets.goList = extractAndSort(_ctrl.gene.sets, 'go_term');
+    _ctrl.uiGeneSets.curatedList = extractAndSort(_ctrl.gene.sets, 'curated');
 
 
     function refresh() {

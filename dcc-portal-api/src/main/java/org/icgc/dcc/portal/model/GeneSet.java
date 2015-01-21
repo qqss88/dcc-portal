@@ -61,10 +61,7 @@ public class GeneSet {
   @ApiModelProperty(value = "Has Reactome Diagram")
   String diagrammed;
 
-  @ApiModelProperty(value = "Projects affected")
-  List<Project> projects;
-
-  // Reactome pathway - FIXME: model project-donor for pathway
+  // Reactome pathway
   List<List<Map<String, String>>> hierarchy;
 
   // Gene Ontology
@@ -73,7 +70,6 @@ public class GeneSet {
   List<String> synonyms;
   List<Map<String, String>> inferredTree;
 
-  // @SuppressWarnings("unchecked")
   @SuppressWarnings("unchecked")
   @JsonCreator
   public GeneSet(Map<String, Object> fieldMap) {
@@ -85,10 +81,7 @@ public class GeneSet {
     description = (String) fieldMap.get(fields.get("description"));
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
-    projects = buildProjects(fieldMap);
-
     // Reactome pathway specific fields
-    // hierarchy = (List<List<Map<String, String>>>) fieldMap.get(fields.get("hierarchy"));
     hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(fields.get("hierarchy")));
     diagrammed = String.valueOf(fieldMap.get(fields.get("diagrammed")));
 
@@ -145,24 +138,4 @@ public class GeneSet {
       return null;
   }
 
-  @SuppressWarnings("unchecked")
-  private List<Project> buildProjects(Map<String, Object> fieldMap) {
-    val ps = (List<Map<String, Object>>) fieldMap.get("projects");
-    val projects = Lists.<Project> newArrayList();
-
-    if (ps != null) {
-      for (val p : ps) {
-        p.put("_summary._total_donor_count", ((Map<String, Object>) p.get("_summary")).get("_total_donor_count"));
-        p.put("_summary._affected_donor_count",
-            ((Map<String, Object>) p.get("_summary")).get("_affected_donor_count"));
-        p.put("_summary._available_data_type", ((Map<String, Object>) p.get("_summary")).get("_available_data_type"));
-        p.put("_summary._ssm_tested_donor_count",
-            ((Map<String, Object>) p.get("_summary")).get("_ssm_tested_donor_count"));
-        projects.add(new Project(p));
-      }
-      return projects;
-    } else {
-      return null;
-    }
-  }
 }

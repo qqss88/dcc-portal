@@ -28,9 +28,9 @@ import lombok.val;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableMap;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableMap;
 
 @RequiredArgsConstructor
 public class MappingsSourceResolver {

@@ -101,6 +101,7 @@ public class DownloadResourceTest extends ResourceTest {
   @Test
   public void testPublicDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.UNCHECKED);
+    when(fs.isFile(any(File.class))).thenReturn(true);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
 
     ClientResponse response = client()
@@ -117,6 +118,7 @@ public class DownloadResourceTest extends ResourceTest {
   public void testOpenDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.OPEN);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
+    when(fs.isFile(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -132,6 +134,7 @@ public class DownloadResourceTest extends ResourceTest {
   public void testControlledDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.CONTROLLED);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
+    when(fs.isFile(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)

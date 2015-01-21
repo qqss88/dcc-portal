@@ -114,13 +114,13 @@
     // $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
-   // RestangularProvider.setBaseUrl('/api/v1');
+    RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
-    RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
+    // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
+    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
