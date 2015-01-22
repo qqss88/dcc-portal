@@ -45,9 +45,20 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   private final UUID id;
 
   @NonNull
-  private final Status status;
+  private Status status;
 
-  private final Integer count;
+  private Long count;
+
+  public EntityList inProgress() {
+    this.status = Status.IN_PROGRESS;
+    return this;
+  }
+
+  public EntityList finished(final long count) {
+    this.status = Status.FINISHED;
+    this.count = count;
+    return this;
+  }
 
   private final static class JsonPropertyName {
 
@@ -63,7 +74,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   public EntityList(
       @JsonProperty(JsonPropertyName.id) final UUID id,
       @JsonProperty(JsonPropertyName.status) final Status status,
-      @JsonProperty(JsonPropertyName.count) final Integer count,
+      @JsonProperty(JsonPropertyName.count) final Long count,
       @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
       @JsonProperty(JsonPropertyName.type) final Type type) {
@@ -82,7 +93,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
       final String description,
       @NonNull final Type type,
       final Status status,
-      final Integer count) {
+      final Long count) {
 
     super(name, description, type);
 
@@ -91,32 +102,47 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     this.count = count;
   }
 
-  // for creating an instance with only id and status having non-null values
-  private EntityList(
-      final UUID id,
-      final Status status) {
-
-    super(null, null, null);
-
-    this.id = id;
-    this.status = status;
-    this.count = null;
-  }
-
   // static constructors
-  // Each enum value should have its own class constructor.
-  public static EntityList forNewlyCreated() {
+  public static EntityList createFromDefinition(
+      @NonNull final BaseEntityList definition) {
 
     return new EntityList(
         UUID.randomUUID(),
-        Status.PENDING);
+        definition.getName(),
+        definition.getDescription(),
+        definition.getType(),
+        Status.PENDING,
+        null);
   }
 
-  public static EntityList forStatusInProgress(final UUID id) {
+  // Each enum value should have its own class constructor.
+  public static EntityList forNewlyCreated(
+      @NonNull final String name,
+      final String description,
+      @NonNull final Type type) {
+
+    return new EntityList(
+        UUID.randomUUID(),
+        name,
+        description,
+        type,
+        Status.PENDING,
+        null);
+  }
+
+  public static EntityList forStatusInProgress(
+      final UUID id,
+      @NonNull final String name,
+      final String description,
+      @NonNull final Type type) {
 
     return new EntityList(
         id,
-        Status.IN_PROGRESS);
+        name,
+        description,
+        type,
+        Status.IN_PROGRESS,
+        null);
   }
 
   public static EntityList forStatusFinished(
@@ -124,7 +150,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
       final String name,
       final String description,
       final Type type,
-      final int count) {
+      final long count) {
 
     if (count < 0) {
       throw new IllegalArgumentException("The count argument must be a positive number.");

@@ -22,10 +22,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.Value;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
@@ -37,7 +39,7 @@ import com.wordnik.swagger.annotations.ApiModel;
 public class EntityListDefinition extends BaseEntityList {
 
   @NonNull
-  private final FiltersParam filters;
+  private final ObjectNode filters;
 
   @NonNull
   private final String sortBy;
@@ -56,8 +58,9 @@ public class EntityListDefinition extends BaseEntityList {
   }
 
   @JsonCreator
+  @SneakyThrows
   public EntityListDefinition(
-      @JsonProperty(JsonPropertyName.filters) final FiltersParam filters,
+      @JsonProperty(JsonPropertyName.filters) final String filters,
       @JsonProperty(JsonPropertyName.sortBy) final String sortBy,
       @JsonProperty(JsonPropertyName.sortOrder) final SortOrder sortOrder,
       @NonNull @JsonProperty(JsonPropertyName.name) final String name,
@@ -70,7 +73,7 @@ public class EntityListDefinition extends BaseEntityList {
       throw new IllegalArgumentException("The sortBy argument must contain a valid expression.");
     }
     this.sortBy = sortBy;
-    this.filters = filters;
+    this.filters = FiltersParam.parseFilters(filters);
     this.sortOrder = sortOrder;
   }
 

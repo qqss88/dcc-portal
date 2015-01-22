@@ -25,6 +25,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -37,12 +39,20 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class UnionUnitWithCount extends UnionUnit {
 
   @ApiModelProperty(value = "todo", required = true)
-  private final int count;
+  private final long count;
 
+  private final static class JsonPropertyName {
+
+    final static String intersection = "intersection";
+    final static String exclusions = "exclusions";
+    final static String count = "count";
+  }
+
+  @JsonCreator
   public UnionUnitWithCount(
-      final Set<UUID> intersection,
-      final Set<UUID> exclusions,
-      final int count) {
+      @JsonProperty(JsonPropertyName.intersection) final Set<UUID> intersection,
+      @JsonProperty(JsonPropertyName.exclusions) final Set<UUID> exclusions,
+      @JsonProperty(JsonPropertyName.count) final long count) {
 
     super(intersection, exclusions);
 
@@ -55,7 +65,7 @@ public class UnionUnitWithCount extends UnionUnit {
   // static constructors
   public static UnionUnitWithCount copyOf(
       @NonNull final UnionUnit unionUnit,
-      final int count) {
+      final long count) {
 
     return new UnionUnitWithCount(
         unionUnit.getIntersection(),

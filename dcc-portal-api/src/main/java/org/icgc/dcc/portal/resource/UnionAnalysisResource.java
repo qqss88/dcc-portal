@@ -23,7 +23,6 @@ import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
 
-import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
@@ -39,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.UnionAnalysisService;
@@ -76,26 +76,17 @@ public class UnionAnalysisResource {
     return service.getAnalysis(analysisId);
   }
 
-  private final static int MIN_ENTITY_PARAM_ARRAY_SIZE = 2;
-
   @POST
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an union analysis asynchronously. Status can be retrieved by polling the /{id} GET endpoint.",
       response = UnionAnalysisResult.class)
   public Response sumbitAnalysis(
-      final Set<UUID> entityLists) {
+      final UnionAnalysisRequest request) {
 
-    if (null == entityLists ||
-        entityLists.size() < MIN_ENTITY_PARAM_ARRAY_SIZE) {
+    log.info("Received union analysis request: '{}'", request);
 
-      throw new BadRequestException(
-          "The minimum number of UNIQUE entity lists required to perform an union analysis is "
-              + MIN_ENTITY_PARAM_ARRAY_SIZE);
-    }
-    log.info("Received request with entity lists of '{}'", entityLists);
-
-    val newAnalysis = service.submitAnalysis(entityLists);
+    val newAnalysis = service.submitAnalysis(request);
 
     return Response.status(ACCEPTED)
         .entity(newAnalysis)

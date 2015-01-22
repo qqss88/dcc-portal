@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.service;
 
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -25,8 +25,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
+import org.icgc.dcc.portal.model.UnionUnitWithCount;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
+import org.icgc.dcc.portal.repository.UnionAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +43,9 @@ public class UnionAnalysisService {
 
   @NonNull
   private final UnionAnalysisRepository repository;
+
+  @NonNull
+  private final UnionAnalyzer analyzer;
 
   public UnionAnalysisResult getAnalysis(
       @NonNull final UUID analysisId) {
@@ -56,14 +62,29 @@ public class UnionAnalysisService {
     }
     // TODO: temp
     return result;
-
   }
 
   public UnionAnalysisResult submitAnalysis(
-      @NonNull final Set<UUID> entityLists) {
+      @NonNull final UnionAnalysisRequest request) {
 
-    val newAnalysis = UnionAnalysisResult.forNewlyCreated();
+    val entityType = request.getType();
+
+    val newAnalysis = UnionAnalysisResult.forNewlyCreated(entityType);
     repository.save(newAnalysis);
+
+    val definitions = request.toUnionSets();
+
+    val result = new ArrayList<UnionUnitWithCount>(definitions.size());
+
+    for (val def : definitions) {
+
+      val count = analyzer.getUnionCount(def, entityType);
+      result.add(UnionUnitWithCount.copyOf(def, count));
+    }
+    log.info("Result of Union Analysis is: " + result);
+
+    val updatedAnalysis = UnionAnalysisResult.withResult(newAnalysis.getId(), entityType, result);
+    repository.update(updatedAnalysis);
 
     return newAnalysis;
   }

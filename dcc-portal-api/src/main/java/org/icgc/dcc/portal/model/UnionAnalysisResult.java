@@ -48,6 +48,9 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   @NonNull
   private final Status status;
 
+  @NonNull
+  private final BaseEntityList.Type type;
+
   private final List<UnionUnitWithCount> result;
 
   // had to use this approach because of using 'final' for the instance vars
@@ -56,36 +59,45 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
     final static String id = "id";
     final static String status = "status";
     final static String result = "result";
+    final static String type = "type";
   }
 
   @JsonCreator
   public UnionAnalysisResult(
       @JsonProperty(JsonPropertyName.id) final UUID id,
       @JsonProperty(JsonPropertyName.status) final Status status,
+      @JsonProperty(JsonPropertyName.type) final BaseEntityList.Type type,
       @JsonProperty(JsonPropertyName.result) final List<UnionUnitWithCount> result) {
 
     this.id = id;
     this.status = status;
+    this.type = type;
     this.result = result;
   }
 
   // static constructors
-  public static UnionAnalysisResult forNewlyCreated() {
+  public static UnionAnalysisResult forNewlyCreated(final BaseEntityList.Type entityType) {
     return new UnionAnalysisResult(
         UUID.randomUUID(),
         Status.PENDING,
+        entityType,
         null);
   }
 
-  public static UnionAnalysisResult forInProgress(final UUID id) {
+  public static UnionAnalysisResult forInProgress(
+      final UUID id,
+      final BaseEntityList.Type entityType) {
+
     return new UnionAnalysisResult(
         id,
         Status.IN_PROGRESS,
+        entityType,
         null);
   }
 
   public static UnionAnalysisResult withResult(
       final UUID id,
+      final BaseEntityList.Type entityType,
       @NonNull List<UnionUnitWithCount> result) {
 
     if (result.isEmpty()) {
@@ -94,6 +106,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
     return new UnionAnalysisResult(
         id,
         Status.FINISHED,
+        entityType,
         result);
   }
 

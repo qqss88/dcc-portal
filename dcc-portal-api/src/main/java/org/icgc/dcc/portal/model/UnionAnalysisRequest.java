@@ -25,6 +25,8 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.val;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -39,12 +41,23 @@ public class UnionAnalysisRequest {
   private static final int REQUIRED_ELEMENT_COUNT = 2;
 
   @NonNull
-  private final ImmutableSet<UUID> entitySet;
+  private final ImmutableSet<UUID> lists;
 
+  @NonNull
+  private final BaseEntityList.Type type;
+
+  private final static class JsonPropertyName {
+
+    final static String lists = "lists";
+    final static String type = "type";
+  }
+
+  @JsonCreator
   public UnionAnalysisRequest(
-      @NonNull final Collection<UUID> entityLists) {
+      @NonNull @JsonProperty(JsonPropertyName.lists) final Collection<UUID> lists,
+      @NonNull @JsonProperty(JsonPropertyName.type) final BaseEntityList.Type type) {
 
-    val uniqueItems = ImmutableSet.copyOf(entityLists);
+    val uniqueItems = ImmutableSet.copyOf(lists);
 
     if (uniqueItems.size() < REQUIRED_ELEMENT_COUNT) {
 
@@ -53,7 +66,8 @@ public class UnionAnalysisRequest {
               REQUIRED_ELEMENT_COUNT +
               " unique elements.");
     }
-    this.entitySet = uniqueItems;
+    this.lists = uniqueItems;
+    this.type = type;
   }
 
   /*
@@ -61,8 +75,8 @@ public class UnionAnalysisRequest {
    */
   public ImmutableList<UnionUnit> toUnionSets() {
 
-    val setSize = entitySet.size();
-    val subsets = Sets.powerSet(this.entitySet);
+    val setSize = lists.size();
+    val subsets = Sets.powerSet(this.lists);
 
     val predicate = new Predicate<Collection<?>>() {
 
@@ -80,10 +94,10 @@ public class UnionAnalysisRequest {
 
     for (val subset : filteredSubsets) {
 
-      val unionUnit = new UnionUnit(Sets.difference(this.entitySet, subset), subset);
+      val unionUnit = new UnionUnit(Sets.difference(this.lists, subset), subset);
       result.add(unionUnit);
     }
-    result.add(UnionUnit.noExclusionInstance(this.entitySet));
+    result.add(UnionUnit.noExclusionInstance(this.lists));
 
     return ImmutableList.copyOf(result);
   }
