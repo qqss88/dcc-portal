@@ -60,13 +60,6 @@
             <br>
             -->
 
-            <!--
-            <br>
-            <button class="t_button" data-ng-click="createTestList('donor')">Test Donor</button>
-            <button class="t_button" data-ng-click="createTestList('gene')">Test Gene</button>
-            <button class="t_button" data-ng-click="createTestList('mutation')">Test Mutations</button>
-            <br><br>
-            -->
 
             <enrichment-upload
                 data-total="{{listItemTotal}}"
@@ -74,18 +67,24 @@
             </enrichment-upload>
 
             <div>
+                <div><strong>Available analyses</strong></div>
                 <span>
-                    <span class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
+                    <button class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
+                    <i class="icon-beaker"></i>
                     Set Operations
-                    </span>
+                    <br><small>Create new set from 2 or 3 sets of the same type</small>
+                    </button>
                 </span>
-                <span>|</span>
+                <span>&nbsp;</span>
                 <span>
-                    <span class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">
+                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">
+                    <i class="icon-beaker"></i>
                     Enrichment Analysis
-                    </span>
+                    <br><small>Create enrichment analysis from a set of genes</small>
+                    </button>
                 </span>
             </div>
+            <br>
             <span>
                 <span>Select set(s) below to activate available analysis</span>
                 <span class="pull-right">Create a new set from <a href="/search">Advanced Search</a></span>
@@ -130,11 +129,11 @@
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
-        <div data-ng-if="!error" >
+        <div data-ng-if="analysisType === 'enrichment'" >
             <h3>Enrichment Analysis</h3>
             <enrichment-result data-item="analysisResult"></enrichment-result>
         </div>
-        <div data-ng-if="analysisType === 'set'">
+        <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
             <h3>Set Operations</h3>
             <set-operation data-item="analysisResult"></set-operation>
         </div>

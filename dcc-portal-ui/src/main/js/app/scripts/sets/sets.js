@@ -31,7 +31,7 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
-  module.directive('setUpload', function(SetService) {
+  module.directive('setUpload', function(LocationService, FiltersUtil, SetService) {
     return {
       restruct: 'E',
       scope: {
@@ -43,6 +43,7 @@
       link: function($scope) {
 
         $scope.setDescription = null;
+
         $scope.submitNewSet = function() {
           console.log('name', $scope.setName);
           console.log('description', $scope.setDescription);
@@ -52,10 +53,14 @@
           params.type = $scope.setType;
           params.name = $scope.setName;
           params.description = $scope.setDescription;
-          params.filters = {};
-          params.sort = '';
-          params.order = '';
+          //params.filters = {};
+          params.filters = LocationService.filters();
 
+          // TODO: Terry should make these optional
+          params.sortBy = 'ssmAffectedGenes';
+          params.sortOrder = 'ASCENDING';
+
+          console.log('before', params);
           SetService.addSet($scope.setType, params);
 
           // Reset
@@ -63,9 +68,12 @@
           $scope.setType = null;
         };
 
-        $scope.$watch('setType', function(n) {
+        $scope.$watch('setModal', function(n) {
           if (n) {
-            $scope.setName = n;
+            $scope.setName = $scope.setType;
+            // $scope.uiFilters = FiltersUtil.buildUIFilters(LocationService.filters());
+            $scope.uiFilters = LocationService.filters();
+            console.log($scope.setName, $scope.uiFilters);
           }
         });
       }
@@ -375,9 +383,74 @@
   /**
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
-  module.service('SetService', function(Restangular, localStorageService, toaster) {
+  module.service('SetService', function($timeout, Restangular, localStorageService, toaster) {
     var LIST_ENTITY = 'entity';
     var _this = this;
+
+
+
+    // For application/json format
+    function params2JSON(type, params) {
+      var data = {};
+      data.filters = encodeURI(JSON.stringify(params.filters));
+      data.type = type.toUpperCase();
+      data.name = encodeURIComponent(params.name);
+      if (angular.isDefined(params.description)) {
+        data.description = encodeURIComponent(params.description);
+      }
+
+      if (type === 'donor') {
+        data.sortBy = 'ssmAffectedGenes';
+      } else if (type === 'gene') {
+        data.sortBy = 'affectedDonorCountFiltered';
+      } else {
+        data.sortBy = 'affectedDonorCountFiltered';
+      }
+      data.sortOrder = 'ASCENDING';
+
+      /*
+      data.sortBy = params.sortBy;
+      data.sortOrder = params.sortOrder;
+      */
+
+      return data;
+    }
+
+    function params2URLEncoded(type, params) {
+      var data = '';
+      data += 'type=' + type.toUpperCase() + '&';
+      data += 'filters=' + encodeURIComponent(JSON.stringify(params.filters)) + '&';
+      data += 'sortBy=' + params.sortBy + '&';
+      data += 'sortOrder=' + params.sortOrder + '&';
+      data += 'name=' + encodeURIComponent(params.name) + '&';
+      if (angular.isDefined(params.description)) {
+        data += 'description=' + encodeURIComponent(params.name);
+      }
+      return data;
+    }
+
+    // Wait for list to materialize
+    function wait(id) {
+      console.log('polling....', id);
+
+      var promise = Restangular.one('entitylist', id).get({});
+      promise.then(function(data) {
+        if (! data.status || data.status !== 'FINISHED') {
+          $timeout(function() {
+            wait(id);
+          }, 2000);
+        }
+
+        // FIXME: sync with terry
+        data.type = data.type.toLowerCase();
+
+
+        var lists = _this.getAll();
+        lists.unshift(data);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', data.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+      });
+    }
 
 
     /**
@@ -391,57 +464,24 @@
     * Create a new set from
     */
     this.addSet = function(type, params) {
-      // TODO: untested
+      var promise = null;
+      var data = params2JSON(type, params)
+      promise = Restangular.one('entitylist').post(undefined, data, {}, {'Content-Type': 'application/json'});
 
-      var data = '', promise = null;
-      data += 'type=' + type + '&';
-      data += 'filters=' + JSON.stringify(params.filters) + '&';
-      data += 'sort=' + params.sort + '&';
-      data += 'order=' + params.order + '&';
-      data += 'name=' + encodeURIComponent(params.name) + '&';
-      if (angular.isDefined(params.description)) {
-        data += 'description=' + encodeURIComponent(params.name);
-      }
-
-      promise = Restangular.one('list').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
+      /*
+      promise = Restangular.one('entitylist')
+        .withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, undefined, {}, { 'Content-Type': 'application/json' });
+      */
       promise.then(function(data) {
         if (! data.id) {
+          console.log('there is no id!!!!');
           return;
         }
 
-        // FIXME: should poll to make sure the list is ready to be used before saving to storage
-
-        // Success, now save it locally
-        var localSet = {
-          id: data.id,
-          type: params.type,
-          name: params.name,
-          description: params.description,
-          count: params.count
-        };
-
-        var lists = _this.getAll();
-        lists.unshift(localSet);
-        localStorageService.set(LIST_ENTITY, lists);
-        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+        wait(data.id);
       }, function(err) {
-
-        // FIXME: testing, remove
-        console.log(err);
-        var localSet = {
-          id: (new Date()),
-          type: params.type,
-          name: params.name,
-          description: params.description,
-          count: params.count
-        };
-
-        var lists = _this.getAll();
-        lists.unshift(localSet);
-        localStorageService.set(LIST_ENTITY, lists);
-        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
-
-
+        console.log('error', err);
       });
     };
 

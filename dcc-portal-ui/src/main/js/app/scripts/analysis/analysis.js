@@ -60,20 +60,38 @@
     $scope.launchSetAnalysis = function() {
       console.log('selected', $scope.listItemUUIDs);
 
+      var selected = _.filter($scope.entityLists, function(d) {
+        return d.checked === true;
+      });
+
+      // FIXME: sync with terry
+      var type = selected[0].type.toUpperCase();
+      var ids  = _.pluck(selected, 'id');
+
+      console.log('about to subimit', type, ids);
+
+      var payload = {
+        lists: ids,
+        type: type
+      };
+      var promise = Restangular.one('analysis').post('union', payload, {}, {'Content-Type': 'application/json'});
+
+      promise.then(function(data) {
+        if (!data.id) {
+          console.log('cannot create set operation');
+        }
+        $location.path('analysis/union/' + data.id);
+      });
+
+
+      /*
       var data = $scope.listItemUUIDs;
       var promise = Restangular.one('analysis')
         .withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, 'set');
 
-      // FIXME
-      promise.then(function(data) {
-        var analysisId = data.id;
-        $location.path('analysis/set/' + analysisId);
-      });
+      */
 
-      // TODO: testing only
-      var id = (new Date()).getTime(); // FIXME
-      $location.path('analysis/set/' + id);
     };
 
 
@@ -150,14 +168,19 @@
           }
         }
 
+        // FIXME: sync with bob and terry
+        var currentState = data.state || data.status;
+        data.state = currentState;
+
         // Check if we need to poll
-        if (data.state !== 'FINISHED') {
+        if (currentState !== 'FINISHED') {
           var pollRate = 1000;
-          if (data.state === 'POST_PROCESSING') {
+          if (currentState === 'POST_PROCESSING') {
             pollRate = 4000;
           }
           pollPromise = $timeout(getAnalysis, pollRate);
         }
+
       }, function(error) {
         $scope.error = error.status;
       });
