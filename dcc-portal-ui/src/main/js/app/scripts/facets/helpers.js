@@ -215,7 +215,7 @@
 
       if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
         // TODO make is possible to use 'is' or 'not'
-        list = filters[params.type][params.facet].is;
+        list = filters[params.type][params.facet].is || [];
       }
 
       return list;

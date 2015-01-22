@@ -16,11 +16,10 @@
  */
 package org.icgc.dcc.portal.mapper;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -36,13 +35,10 @@ public class BadRequestExceptionMapper implements ExceptionMapper<BadRequestExce
 
   private final static Status STATUS = BAD_REQUEST;
 
-  @Context
-  private HttpHeaders headers;
-
   @Override
   public Response toResponse(BadRequestException e) {
     return status(STATUS)
-        .type(headers.getMediaType())
+        .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(e))
         .build();
   }

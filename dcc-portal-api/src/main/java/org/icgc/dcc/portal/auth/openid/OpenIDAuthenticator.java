@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.User;
-import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ import com.yammer.dropwizard.auth.Authenticator;
 public class OpenIDAuthenticator implements Authenticator<OpenIDCredentials, User> {
 
   @NonNull
-  private final DistributedCacheService cacheService;
+  private final SessionService sessionService;
 
   @Override
   public Optional<User> authenticate(OpenIDCredentials credentials) throws AuthenticationException {
@@ -55,7 +55,7 @@ public class OpenIDAuthenticator implements Authenticator<OpenIDCredentials, Use
   }
 
   private Optional<User> findUserBySessionToken(OpenIDCredentials credentials) {
-    return cacheService.getUserBySessionToken(credentials.getSessionToken());
+    return sessionService.getUserBySessionToken(credentials.getSessionToken());
   }
 
 }

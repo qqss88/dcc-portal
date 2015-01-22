@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.mapper;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
@@ -65,7 +66,7 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
    */
   private static Response createUnauthenticatedResponse(AuthenticationException e, HttpHeaders headers) {
     val response = status(STATUS)
-        .type(headers.getMediaType())
+        .type(APPLICATION_JSON_TYPE)
         .cookie(deleteCookie(CrowdProperties.SESSION_TOKEN_NAME))
         .entity(errorResponse(e));
 

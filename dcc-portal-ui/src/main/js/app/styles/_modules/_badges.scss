@@ -65,6 +65,22 @@ h1 {
   content: "P";
 }
 
+
+.t_badge__geneset {
+  background: $pathway;
+}
+
+.t_badge__geneset:after {
+  content: "S";
+}
+
+/*
+.t_badge__geneset::first-letter {
+  vertical-align: super;
+} */
+
+
+
 .t_badge__project, .t_badge__projects {
   background: $project;
 }

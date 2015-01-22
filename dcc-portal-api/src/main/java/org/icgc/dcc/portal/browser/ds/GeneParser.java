@@ -140,7 +140,7 @@ public class GeneParser {
   }
 
   /**
-   * Queries elasticsearch for appropriate data.
+   * EnrichmentQueries elasticsearch for appropriate data.
    */
   private SearchResponse getResponse(String segmentId, Long start, Long stop, List<String> biotypes,
       boolean withTranscripts, Integer size) {
@@ -172,7 +172,7 @@ public class GeneParser {
   }
 
   /**
-   * Queries elasticsearch with a histogram facet.
+   * EnrichmentQueries elasticsearch with a histogram facet.
    */
   private SearchResponse getHistogramResponse(Long interval, String segmentId, Long start, Long stop,
       List<String> biotypes) {

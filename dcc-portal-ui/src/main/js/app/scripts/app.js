@@ -34,6 +34,7 @@
     'angularytics',
     'chieffancypants.loadingBar',
     'btford.markdown',
+    'LocalStorageModule',
 
     // 3rd party
     'highcharts',
@@ -57,9 +58,11 @@
     'icgc.keyword',
     'icgc.browser',
     'icgc.genelist',
+    'icgc.genesets',
     'icgc.visualization',
-    
-    
+    //'icgc.enrichment',
+    //'icgc.analysis',
+
     // old
     'app.ui',
     'app.common',
@@ -97,15 +100,16 @@
     });
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
-                          AngularyticsProvider, $httpProvider, RestangularProvider, markdownConverterProvider) {
+                          AngularyticsProvider, $httpProvider, RestangularProvider,
+                          markdownConverterProvider, localStorageServiceProvider) {
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl('/api/v1');
     // Use to connect to production API regardless of setup
     // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
     // Use to connect to local API when running UI using JS dev server
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
     // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
-    // RestangularProvider.setBaseUrl('https://localhost:55555/api/v1');
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -136,9 +140,16 @@
     markdownConverterProvider.config({
       extensions: ['table']
     });
+
+    localStorageServiceProvider.setPrefix('icgc');
   });
 
   module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {
+
+    var ignoreNotFound = [
+      '/analysis/'
+    ];
+
     Restangular.setErrorInterceptor(function (response) {
         console.error('Response Error: ', response);
 
@@ -146,6 +157,20 @@
           Notify.setMessage('' + response.data.message);
           Notify.showErrors();
         } else if (response.status === 404) {
+
+          // Ignore 404's from specific end-points, they are handled locally
+          // FIXME: Is there a better way to handle this within restangular framework?
+          var ignore = false;
+          ignoreNotFound.forEach(function(endpoint) {
+            if (response.config && response.config.url.indexOf(endpoint) >= 0) {
+              ignore = true;
+            }
+          });
+          if (ignore === true) {
+            return true;
+          }
+
+
           if (response.data.message) {
             Notify.setMessage(response.data.message);
             Notify.showErrors();
@@ -163,6 +188,27 @@
     // Browser compatibility tests
     Compatibility.run();
   });
+
+
+  module.constant('Extensions', {
+    GENE_ID: 'id',
+
+    GENE_LISTS: [
+      {id: 'uploadGeneListId', label: 'Uploaded Gene List'},
+      {id: 'inputGeneListId', label: 'Input Gene List'}
+    ],
+
+
+    // Order matters, this is in most important to least important
+    GENE_SET_ROOTS: [
+      {type: 'pathway', id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'},
+      {type: 'go_term', id: 'GO:0003674', name: 'Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
+      {type: 'go_term', id: 'GO:0008150', name: 'Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
+      {type: 'go_term', id: 'GO:0005575', name: 'Cellular Component', universe: 'GO_CELLULAR_COMPONENT'},
+      {type: 'curated_set', id: 'GS1', name: 'Cancer Gene Census', universe: null}
+    ]
+  });
+
 
   module.constant('DataTypes', {
     'mapping': {
@@ -194,6 +240,7 @@
       'meth_seq'
     ]
   });
+
 
   module.controller('AppCtrl', function ($scope, Page) {
     var _ctrl = this;

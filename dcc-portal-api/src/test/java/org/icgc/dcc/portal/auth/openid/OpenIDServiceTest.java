@@ -10,8 +10,8 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 import org.icgc.dcc.portal.service.AuthService;
-import org.icgc.dcc.portal.service.DistributedCacheService;
-import org.icgc.dcc.portal.utils.HazelcastFactory;
+import org.icgc.dcc.portal.service.SessionService;
+import org.icgc.dcc.portal.test.HazelcastFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class OpenIDServiceTest {
   @SuppressWarnings("unused")
   private OpenIDAuthService openidService;
   private final HazelcastInstance hazelcast = HazelcastFactory.createLocalHazelcastInstance();
-  private final DistributedCacheService distributedCacheService = new DistributedCacheService(hazelcast);
+  private final SessionService distributedCacheService = new SessionService();
 
   @Mock
   private ConsumerManager consumerManager;

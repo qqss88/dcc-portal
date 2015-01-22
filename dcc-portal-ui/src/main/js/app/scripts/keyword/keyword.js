@@ -24,7 +24,7 @@
     $stateProvider.state('q', {
       url: '/q?q',
       reloadOnSearch: false,
-      templateUrl: 'views/results.html',
+      templateUrl: '/scripts/keyword/views/results.html',
       controller: 'KeywordController'
     });
   });

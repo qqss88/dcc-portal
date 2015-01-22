@@ -26,7 +26,7 @@
       data: {
         tab: 'genes'
       },
-      templateUrl: 'views/browser.html',
+      templateUrl: '/scripts/browser/views/browser.html',
       controller: 'BrowserController'
     });
     $stateProvider.state('browser.genes', {
