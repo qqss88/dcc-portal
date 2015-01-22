@@ -571,6 +571,9 @@ public class DownloadResource {
 
       ) throws IOException {
 
+    // resolve ambiguity about empty string
+    if (filePath.trim().equals("")) filePath = "/";
+
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
     StreamingOutput archiveStream = null;
