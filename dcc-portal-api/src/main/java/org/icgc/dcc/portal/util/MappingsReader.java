@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.util;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.repeat;
-import static org.elasticsearch.common.base.Throwables.propagate;
+import static com.google.common.base.Throwables.propagate;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,11 +33,10 @@ import lombok.Value;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.common.collect.ImmutableMap;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 @Slf4j
 @RequiredArgsConstructor

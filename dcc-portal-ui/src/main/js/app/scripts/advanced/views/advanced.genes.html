@@ -12,10 +12,9 @@
 
 
     <div class="text-right">
+        <button class="t_button" data-ng-click="AdvancedCtrl.setType='gene'; AdvancedCtrl.setModal=true"><i class="icon-upload"></i> Save Gene Set</button>
         <button href="" class="t_button" data-ng-click="enrichmentModal=true"><i class="icon-beaker"></i>Enrichment Analysis</button>
     </div>
-
-
 
     <enrichment-upload 
         data-total="{{AdvancedCtrl.Gene.genes.pagination.total}}"

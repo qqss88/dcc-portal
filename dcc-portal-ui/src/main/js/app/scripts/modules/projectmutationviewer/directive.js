@@ -2,7 +2,7 @@
 (function() {
   'use strict';
 
-  var module = angular.module('icgc.visualization', []);
+  var module = angular.module('icgc.visualization.projectmutationviewer', []);
 
   module.directive('projectMutationDistribution', function ($location, $filter) {
     return {

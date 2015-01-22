@@ -200,7 +200,7 @@
 
 
     $scope.removeFacet = function () {
-      var type = $scope.type, filters = LocationService.filters();
+      var type = $scope.type;
       if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
         type = 'gene';
       }

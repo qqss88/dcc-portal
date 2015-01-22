@@ -46,29 +46,14 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, Page, ListManagerService, AnalysisService) {
+    Restangular, Page, SetService, AnalysisService) {
 
-    // Testing
-    // ListManagerService.seedTestData();
-    $scope.entityLists = ListManagerService.getAll();
+    Page.setPage('analysis');
+    Page.setTitle('Analysis');
 
     $scope.listItemTotal = 0;
     $scope.listItemUUIDs = [];
-
-    $scope.createTestList = function(type) {
-      var list = {
-         id: new Date(),
-         type: type,
-         name: type + ' ' + new Date(),
-         description: 'This is a test',
-         count: Math.floor(Math.random()*100),
-         timestamp: (new Date()).getTime()
-      };
-      ListManagerService.addTest(list);
-      $scope.entityLists = ListManagerService.getAll();
-      $scope.updateAvailableAnalysis();
-    };
-    // End testing
+    $scope.entityLists = SetService.getAll();
 
 
     // Send IDs generate new set operations analysis
@@ -83,7 +68,7 @@
       // FIXME
       promise.then(function(data) {
         var analysisId = data.id;
-        $location.path('analysis/set/' + analysis);
+        $location.path('analysis/set/' + analysisId);
       });
 
       // TODO: testing only
@@ -126,8 +111,8 @@
     };
 
     $scope.removeList = function(id) {
-      ListManagerService.remove(id);
-      $scope.entityLists = ListManagerService.getAll();
+      SetService.remove(id);
+      $scope.entityLists = SetService.getAll();
       $scope.updateAvailableAnalysis();
     };
 
@@ -138,12 +123,11 @@
     var REMOVE_ONE = 'Are you sure you want to remove Analysis';
     var REMOVE_ALL = 'Are you sure you want to remove all Analyses';
 
-    Page.setPage('analysis');
-    Page.setTitle('Analysis');
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
+
 
     function getAnalysis() {
       $scope.error = null;
@@ -226,6 +210,7 @@
 
       if (AnalysisService.remove(id) === true) {
         $scope.analysis = null;
+        $scope.analysisList = AnalysisService.getAll();
         $location.path('analysis');
       }
     };

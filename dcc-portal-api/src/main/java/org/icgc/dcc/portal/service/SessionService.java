@@ -17,10 +17,10 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Maps.newHashMap;
 
 import java.util.Map;
 import java.util.UUID;
