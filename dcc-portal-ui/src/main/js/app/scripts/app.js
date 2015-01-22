@@ -64,7 +64,6 @@
     'icgc.visualization',
     'icgc.enrichment',
     'icgc.sets',
-    'icgc.bench',
     'icgc.analysis',
 
     // old
@@ -158,7 +157,8 @@
   module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {
 
     var ignoreNotFound = [
-      '/analysis/'
+      '/analysis/',
+      '/list'
     ];
 
     Restangular.setErrorInterceptor(function (response) {

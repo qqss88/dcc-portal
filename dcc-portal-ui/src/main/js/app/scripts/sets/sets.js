@@ -1,3 +1,21 @@
+/*
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Public
+ * License v3.0. You should have received a copy of the GNU General Public License along with this
+ * program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
 (function () {
   'use strict';
 
@@ -13,7 +31,7 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
-  module.directive('setUpload', function(ListManagerService) {
+  module.directive('setUpload', function(SetService) {
     return {
       restruct: 'E',
       scope: {
@@ -38,7 +56,7 @@
           params.sort = '';
           params.order = '';
 
-          ListManagerService.addSet($scope.setType, params);
+          SetService.addSet($scope.setType, params);
 
           // Reset
           $scope.setDescription = null;
@@ -270,14 +288,6 @@
   module.service('SetOperationService', function() {
     var shortHandPrefix = 'S';
 
-    /*
-    this.getSetAnalysis = function(id) {
-    };
-
-    this.saveNewList = function(sets) {
-    };
-    */
-
 
     /**
      * Check set/list equality ... is there a better way?
@@ -359,6 +369,161 @@
       return displayStr;
     };
   });
+
+
+
+  /**
+   * Abstracts CRUD operations on entity lists (gene, donor, mutation)
+   */
+  module.service('SetService', function(Restangular, localStorageService, toaster) {
+    var LIST_ENTITY = 'entity';
+    var _this = this;
+
+
+    /**
+    * params.filters
+    * params.sort
+    * params.order
+    * params.name
+    * params.description - optional
+    * params.count - limit (max 1000) ???
+    *
+    * Create a new set from
+    */
+    this.addSet = function(type, params) {
+      // TODO: untested
+
+      var data = '', promise = null;
+      data += 'type=' + type + '&';
+      data += 'filters=' + JSON.stringify(params.filters) + '&';
+      data += 'sort=' + params.sort + '&';
+      data += 'order=' + params.order + '&';
+      data += 'name=' + encodeURIComponent(params.name) + '&';
+      if (angular.isDefined(params.description)) {
+        data += 'description=' + encodeURIComponent(params.name);
+      }
+
+      promise = Restangular.one('list').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
+      promise.then(function(data) {
+        if (! data.id) {
+          return;
+        }
+
+        // FIXME: should poll to make sure the list is ready to be used before saving to storage
+
+        // Success, now save it locally
+        var localSet = {
+          id: data.id,
+          type: params.type,
+          name: params.name,
+          description: params.description,
+          count: params.count
+        };
+
+        var lists = _this.getAll();
+        lists.unshift(localSet);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+      }, function(err) {
+
+        // FIXME: testing, remove
+        console.log(err);
+        var localSet = {
+          id: (new Date()),
+          type: params.type,
+          name: params.name,
+          description: params.description,
+          count: params.count
+        };
+
+        var lists = _this.getAll();
+        lists.unshift(localSet);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', localSet.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+
+
+      });
+    };
+
+
+    /**
+    * params.union
+    * params.name
+    * params.description - optional
+    *
+    * Create a new set from the union of various subsets of the same type
+    */
+    this.addDerivedSet = function(type, params) {
+      // TODO: stub
+      var data = '', promise = null;
+
+      data += 'type=' + type + '&';
+      data += 'name=' + params.name;
+      data += 'union' + JSON.stringify(params.union);
+
+      if (angular.isDefined(params.description)) {
+        data += 'description=' + encodeURIComponent(params.name);
+      }
+
+      promise = Restangular.one('list/union').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
+      promise.then(function(data) {
+        if (! data.id) {
+          return;
+        }
+      });
+    };
+
+
+    this.getMetaData = function( ids ) {
+      // TODO: stub
+      console.log('getting meta data for', ids);
+    };
+
+
+    this.exportSet = function(sets) {
+      // TODO: stub
+      console.log('exporting', sets);
+    };
+
+
+
+    /****** Local storage related API ******/
+    this.addTest = function(list) {
+      var lists = this.getAll();
+      lists.unshift(list);
+      localStorageService.set(LIST_ENTITY, lists);
+
+      toaster.pop('', list.name  + ' was saved', 'View it in the <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+      return true;
+    };
+
+
+    this.getAll = function() {
+      var sets = localStorageService.get(LIST_ENTITY) || [];
+      sets.forEach(function(set) {
+        var prefix = set.type.charAt(0), filters = {};
+        filters[set.type] = {
+          entityListId: {is: [ set.id ]}
+        };
+        set.advLink = '/search/' + prefix + '?filters=' + JSON.stringify(filters);
+      });
+      return sets;
+    };
+
+    this.remove = function(id) {
+      var lists = localStorageService.get(LIST_ENTITY);
+      _.remove(lists, function(list) {
+        return list.id === id;
+      });
+      localStorageService.set(LIST_ENTITY, lists);
+      return true;
+    };
+
+
+  });
+
+
+
 
 })();
 
