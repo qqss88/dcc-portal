@@ -567,7 +567,7 @@ public class DownloadResource {
 
       @ApiParam(value = "filename to download", required = true)//
       @QueryParam("fn")//
-      @DefaultValue("") String filePath
+      @DefaultValue("/") String filePath
 
       ) throws IOException {
 
