@@ -17,70 +17,157 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.AndNode;
+import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.LessEqualNode;
+import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NotNode;
+import org.dcc.portal.pql.es.ast.PostFilterNode;
+import org.dcc.portal.pql.es.ast.RangeNode;
+import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.es.utils.RequestType;
 import org.junit.Test;
 
 @Slf4j
 public class PqlParseListenerTest {
 
-  PqlParseListener listener = new PqlParseListener();
+  PqlParseListener listener = new PqlParseListener(new QueryContext());
 
   @Test
-  public void getEsAstTest() {
-    val query = "select(gender, age), ne(gender, 'no_date'), and(gt(age, 20), lt(age, 60)), limit(5, 10)";
+  public void filtersTest() {
+    val query =
+        "or(gt(a, 10), ge(b, 20.2)), eq(c, 100), ne(d, 200), and(lt(e, 30), le(f, 40)), in(sex, 'male', 'female')";
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
     parser.statement();
 
     val esAst = listener.getEsAst();
     log.info("{}", esAst);
+    assertFilterStructure(esAst);
+    val mustNode = (MustBoolNode) esAst.getChild(0).getChild(0).getChild(0);
+    assertThat(mustNode.childrenCount()).isEqualTo(5);
 
-    val boolNode = esAst.getChild(0).getChild(0);
+    val orNode = mustNode.getChild(0);
+    assertThat(orNode.childrenCount()).isEqualTo(2);
 
-    // childrenContainValue(shouldNode, "six");
-    // childrenContainValue(shouldNode, 6);
+    // gt(age, 10)
+    val gtRangeNode = (RangeNode) orNode.getChild(0);
+    assertThat(gtRangeNode.childrenCount()).isEqualTo(1);
+    assertThat(gtRangeNode.getName()).isEqualTo("a");
+    val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getChild(0);
+    assertThat(gtRangeNode1Child.childrenCount()).isEqualTo(1);
+    assertThat(gtRangeNode1Child.getValue()).isEqualTo(10);
+
+    // ge(age, 20)
+    val geRangeNode = (RangeNode) orNode.getChild(1);
+    assertThat(geRangeNode.childrenCount()).isEqualTo(1);
+    assertThat(geRangeNode.getName()).isEqualTo("b");
+    val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getChild(0);
+    assertThat(gtRangeNode2Child.childrenCount()).isEqualTo(1);
+    assertThat(gtRangeNode2Child.getValue()).isEqualTo(20.2);
+
+    // eq(c, 100)
+    val eqNode = (TermNode) mustNode.getChild(1);
+    assertThat(eqNode.childrenCount()).isEqualTo(2);
+    assertThat(eqNode.getNameNode().getValue()).isEqualTo("c");
+    assertThat(eqNode.getValueNode().getValue()).isEqualTo(100);
+
+    // ne(d, 200)
+    val notNode = (NotNode) mustNode.getChild(2);
+    assertThat(notNode.childrenCount()).isEqualTo(1);
+    childrenContainValue(notNode, "d");
+    childrenContainValue(notNode, 200);
+
+    val andNode = (AndNode) mustNode.getChild(3);
+    assertThat(andNode.childrenCount()).isEqualTo(2);
+
+    // lt(e, 30)
+    val ltRangeNode = (RangeNode) andNode.getChild(0);
+    assertThat(ltRangeNode.childrenCount()).isEqualTo(1);
+    assertThat(ltRangeNode.getName()).isEqualTo("e");
+    val ltRangeNodeChild = (LessThanNode) ltRangeNode.getChild(0);
+    assertThat(ltRangeNodeChild.childrenCount()).isEqualTo(1);
+    assertThat(ltRangeNodeChild.getValue()).isEqualTo(30);
+
+    // le(f, 40)
+    val leRangeNode = (RangeNode) andNode.getChild(1);
+    assertThat(leRangeNode.childrenCount()).isEqualTo(1);
+    assertThat(leRangeNode.getName()).isEqualTo("f");
+    val leRangeNodeChild = (LessEqualNode) leRangeNode.getChild(0);
+    assertThat(leRangeNodeChild.childrenCount()).isEqualTo(1);
+    assertThat(leRangeNodeChild.getValue()).isEqualTo(40);
+
+    // in(sex, 'male', 'female')
+    val termsNode = (TermsNode) mustNode.getChild(4);
+    assertThat(termsNode.childrenCount()).isEqualTo(2);
+    assertThat(termsNode.getField()).isEqualTo("sex");
+    val maleNode = (TerminalNode) termsNode.getChild(0);
+    assertThat(maleNode.getValue()).isEqualTo("male");
+    val femaleNode = (TerminalNode) termsNode.getChild(1);
+    assertThat(femaleNode.getValue()).isEqualTo("female");
   }
 
   @Test
-  public void getEsAstTest_equal() {
-    val query = "eq(age, 100)";
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-
-    val esAst = listener.getEsAst();
-    log.info("{}", esAst);
+  public void selectTest() {
+    val esAst = buildEsAst("select(age, gender)");
+    assertThat(esAst.childrenCount()).isEqualTo(1);
+    val fieldsNode = (FieldsNode) esAst.getChild(0);
+    assertThat(fieldsNode.childrenCount()).isEqualTo(2);
+    assertThat(fieldsNode.getFields()).containsOnly("age", "gender");
   }
 
   @Test
-  public void getEsAstTest_filter() {
-    val query = "or(gt(age, 10), le(age, 55)), eq(age, 100)";
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-
-    val esAst = listener.getEsAst();
-    log.info("{}", esAst);
+  public void countTest() {
+    val esAst = buildEsAst("count()");
+    assertThat(listener.getQueryContext().getRequestType()).isEqualTo(RequestType.COUNT);
+    assertThat(esAst).isExactlyInstanceOf(RootNode.class);
+    assertThat(esAst.childrenCount()).isEqualTo(0);
   }
 
   @Test
-  public void getEsAstTest_select() {
-    val query = "select(sex, drugs, rocknroll)";
+  public void countTest_withFilters() {
+    val esAst = buildEsAst("count(),eq(age, 10)");
+    assertThat(esAst).isExactlyInstanceOf(RootNode.class);
+    assertThat(esAst.getChild(0)).isExactlyInstanceOf(PostFilterNode.class);
+    assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
+    assertThat(esAst.getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
+    val mustNode = esAst.getChild(0).getChild(0).getChild(0);
+    assertThat(mustNode.getChild(0).childrenCount()).isEqualTo(2);
+    childrenContainValue(mustNode, "age");
+    childrenContainValue(mustNode, 10);
+  }
+
+  private static void assertFilterStructure(ExpressionNode esAst) {
+    assertThat(esAst).isExactlyInstanceOf(RootNode.class);
+    assertThat(esAst.childrenCount()).isEqualTo(1);
+    val postFilterNode = (PostFilterNode) esAst.getChild(0);
+    assertThat(postFilterNode.childrenCount()).isEqualTo(1);
+    val boolNode = (BoolNode) postFilterNode.getChild(0);
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+    assertThat(boolNode.getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
+  }
+
+  private ExpressionNode buildEsAst(String query) {
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
     parser.statement();
 
-    val esAst = listener.getEsAst();
-    log.info("{}", esAst);
-    // FIXME: finish
+    return listener.getEsAst();
   }
 
   /**

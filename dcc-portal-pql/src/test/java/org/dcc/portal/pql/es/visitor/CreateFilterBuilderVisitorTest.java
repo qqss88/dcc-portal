@@ -18,19 +18,21 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.getJson;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.es.utils.RequestType;
 import org.dcc.portal.pql.qe.PqlParseListener;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseRepositoryTest;
-import org.dcc.portal.pql.utils.TestingHelpers;
+import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 @Slf4j
 public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
@@ -40,58 +42,157 @@ public class CreateFilterBuilderVisitorTest extends BaseRepositoryTest {
 
   @Before
   public void setUp() {
-    es.execute(createIndexMappings(Type.GENE, Type.GENE_CENTRIC).withData(bulkFile(getClass())));
+    es.execute(createIndexMappings(Type.DONOR_CENTRIC).withData(bulkFile(getClass())));
     visitor = new CreateFilterBuilderVisitor(es.client());
-    listener = new PqlParseListener();
+    listener = new PqlParseListener(new QueryContext());
   }
 
   @Test
-  public void visitTest() {
-    val query = "select(a),sort(-age, weight)";
-    val esAst = createTree(query);
-    val result = visitor.visit(esAst, null);
+  public void sortTest() {
+    val result = executeQuery("select(donor_age_at_enrollment),sort(-donor_age_at_enrollment)");
+    assertThat(result.getHits().getAt(0).getSortValues()[0]).isEqualTo(173L);
 
-    assertThat(result).isNotNull();
-    log.info("{}", result);
   }
 
   @Test
-  public void visitTest_demo() {
-    val query =
-        "select(donor_age_at_diagnosis, donor_vital_status), "
-            + "or(eq(donor_vital_status, 'alive'), and(gt(donor_age_at_diagnosis, 100), lt(donor_age_at_diagnosis, 200))), "
-            + "sort(-donor_age_at_diagnosis),"
-            + " limit(5)";
-    val esAst = createTree(query);
-    log.info("ES AST: {}", esAst);
-    val request = visitor.visit(esAst, null);
+  public void selectTest() {
+    val result = executeQuery("select(donor_age_at_enrollment)");
+    val hit = result.getHits().getAt(0);
+    assertThat(hit.fields().size()).isEqualTo(1);
+    assertThat(hit.field("donor_age_at_enrollment").getValue()).isEqualTo(77);
+  }
 
-    assertThat(request).isNotNull();
-    log.info("ES Request: {}", request);
+  @Test
+  public void countTest() {
+    val esAst = createTree("count()");
+    val queryContext = new QueryContext();
+    queryContext.setRequestType(RequestType.COUNT);
+    val request = visitor.visit(esAst, queryContext);
     val result = request.execute().actionGet();
-    log.info("SearchResult: {}", result);
+    assertThat(result.getHits().getTotalHits()).isEqualTo(9);
   }
 
   @Test
-  public void visitTermTest() {
-    val termNode = new TermNode("sex", "male");
-    val json = getJson(termNode.accept(visitor));
-    val value = json.path("term").path("sex").asText();
-    assertThat(value).isEqualTo("male");
+  public void countTest_withFilter() {
+    val esAst = createTree("count(), gt(donor_age_at_enrollment, 100)");
+    val queryContext = new QueryContext();
+    queryContext.setRequestType(RequestType.COUNT);
+    val request = visitor.visit(esAst, queryContext);
+    val result = request.execute().actionGet();
+    assertThat(result.getHits().getTotalHits()).isEqualTo(4);
   }
 
   @Test
-  public void visitBoolTest() {
-    val query =
-        "and(eq(one, 1), ne(two, 2), gt(five, 5))&or(ge(six, 6), eq(three, 3), ne(four, 4))&and(lt(seven, 7), le(eight, 8))&or(lt(nine, 9), le(ten, 10))";
-    val tree = createTree(query);
-    val boolNode = tree.getChild(0).getChild(0);
-    log.info("Bool Tree: {}", boolNode);
-    val json = TestingHelpers.getJson(boolNode.accept(visitor));
-    log.info("{}", json);
-    val mustArray = json.path("bool").path("must");
-    log.info("{}", mustArray);
-    // FIXME: Finish
+  public void inTest() {
+    val result = executeQuery("in(_donor_id, 'DO1', 'DO2')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO1", "DO2");
+  }
+
+  @Test
+  public void eqTest() {
+    val result = executeQuery("eq(_donor_id, 'DO1')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO1");
+  }
+
+  @Test
+  public void neTest() {
+    val result = executeQuery("ne(_donor_id, 'DO1')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(8);
+    for (val hit : result.getHits()) {
+      assertThat(hit.getId()).isNotEqualTo("DO1");
+    }
+
+  }
+
+  @Test
+  public void gtTest() {
+    val result = executeQuery("gt(_donor_id, 'DO5')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(4);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO6", "DO7", "DO8", "DO9");
+  }
+
+  @Test
+  public void geTest() {
+    val result = executeQuery("ge(_donor_id, 'DO5')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(5);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO5", "DO6", "DO7", "DO8", "DO9");
+  }
+
+  @Test
+  public void leTest() {
+    val result = executeQuery("le(_donor_id, 'DO5')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(5);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO1", "DO2", "DO3", "DO4", "DO5");
+  }
+
+  @Test
+  public void ltTest() {
+    val result = executeQuery("lt(_donor_id, 'DO5')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(4);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO1", "DO2", "DO3", "DO4");
+  }
+
+  @Test
+  public void andTest() {
+    val result = executeQuery("and(eq(project._project_id, 'OV-AU'), gt(donor_age_at_diagnosis, 100)))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO2");
+  }
+
+  @Test
+  public void andTest_rootLevel() {
+    val result = executeQuery("eq(project._project_id, 'OV-AU'), gt(donor_age_at_diagnosis, 100))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO2");
+  }
+
+  @Test
+  public void orTest() {
+    val result = executeQuery("or(eq(project._project_id, 'PACA-AU'), lt(donor_age_at_diagnosis, 100))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(5);
+    val ids = Lists.<String> newArrayList();
+
+    for (val hit : result.getHits()) {
+      ids.add(hit.getId());
+    }
+    assertThat(ids).containsOnly("DO1", "DO4", "DO5", "DO7", "DO9");
+  }
+
+  private SearchResponse executeQuery(String query) {
+    val esAst = createTree(query);
+    val request = visitor.visit(esAst, new QueryContext());
+    log.debug("Request - {}", request);
+    val result = request.execute().actionGet();
+    log.debug("Result - {}", result);
+
+    return result;
   }
 
   private ExpressionNode createTree(String query) {

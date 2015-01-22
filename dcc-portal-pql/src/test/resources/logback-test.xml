@@ -4,7 +4,8 @@
       <pattern>%date [%thread] %level %logger{35} - %msg%n</pattern>
     </encoder>
   </appender>
-  <root level="DEBUG">
+  <logger name="org.dcc" level="INFO" />
+  <root level="WARN">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration> 

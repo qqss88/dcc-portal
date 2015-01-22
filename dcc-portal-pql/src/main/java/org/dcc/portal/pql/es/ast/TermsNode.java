@@ -17,17 +17,26 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class ShouldBoolNode extends ExpressionNode {
+@Value
+@EqualsAndHashCode(callSuper = false)
+public class TermsNode extends ExpressionNode {
 
-  public ShouldBoolNode(ExpressionNode... children) {
-    super(children);
-  }
+  String field;
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitShouldBool(this);
+    return visitor.visitTerms(this);
+  }
+
+  @Override
+  public String toString() {
+    return _("[%s]", field) + super.toString();
   }
 
 }

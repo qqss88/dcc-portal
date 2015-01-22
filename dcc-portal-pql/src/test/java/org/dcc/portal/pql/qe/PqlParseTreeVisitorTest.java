@@ -33,12 +33,14 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.utils.Order;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
@@ -323,7 +325,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitLimitTest() {
-    val parseTree = ParseTrees.createParseTree("count(),limit(1, 5)");
+    val parseTree = ParseTrees.createParseTree("select(s),limit(1, 5)");
     val rangeContext = (RangeContext) parseTree.getChild(2);
     val limitNode = (LimitNode) VISITOR.visitRange(rangeContext);
     assertThat(limitNode.getFrom()).isEqualTo(1);
@@ -332,12 +334,25 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitSortTest() {
-    val parseTree = ParseTrees.createParseTree("count(),sort(-age, weight)");
+    val parseTree = ParseTrees.createParseTree("select(s),sort(-age, weight)");
     val orderContext = (OrderContext) parseTree.getChild(2);
     val sortNode = (SortNode) VISITOR.visitOrder(orderContext);
     assertThat(sortNode.getFields().size()).isEqualTo(2);
     assertThat(sortNode.getFields().get("age")).isEqualTo(Order.DESC);
     assertThat(sortNode.getFields().get("weight")).isEqualTo(Order.ASC);
+  }
+
+  @Test
+  public void visitInTest() {
+    val parseTree = ParseTrees.createParseTree("in(sex, 'male', 'female')");
+    val inContext = (InArrayContext) parseTree.getChild(0);
+    val termsNode = (TermsNode) VISITOR.visitInArray(inContext);
+    assertThat(termsNode.getField()).isEqualTo("sex");
+    assertThat(termsNode.childrenCount()).isEqualTo(2);
+    val maleNode = (TerminalNode) termsNode.getChild(0);
+    assertThat(maleNode.getValue()).isEqualTo("male");
+    val femaleNode = (TerminalNode) termsNode.getChild(1);
+    assertThat(femaleNode.getValue()).isEqualTo("female");
   }
 
 }

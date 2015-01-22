@@ -27,7 +27,7 @@ public class RootNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitRootFilter(this);
+    throw new UnsupportedOperationException();
   }
 
 }

@@ -19,7 +19,8 @@ package org.dcc.portal.pql.qe;
 
 import java.util.Collection;
 
-import lombok.Getter;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +29,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.utils.RequestType;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
@@ -35,25 +37,32 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.FunctionContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 
 @Slf4j
-@Getter
+@Value
+@EqualsAndHashCode(callSuper = false)
 public class PqlParseListener extends PqlBaseListener {
 
   private static final PqlParseTreeVisitor PQL_VISITOR = new PqlParseTreeVisitor();
 
-  private final ExpressionNode esAst = new RootNode();
+  ExpressionNode esAst = new RootNode();
+  QueryContext queryContext;
 
   @Override
   public void exitStatement(StatementContext context) {
     log.debug("Starting to process query - {}", context.toStringTree());
+    if (context.count() != null) {
+      log.debug("Processing count() type query");
+      queryContext.setRequestType(RequestType.COUNT);
+    } else {
+      queryContext.setRequestType(RequestType.SEARCH);
+    }
+
     val filters = context.filter();
     log.debug("Found {} filter nodes", filters.size());
 
     // process filters
     if (!filters.isEmpty()) {
-      val boolNode = new BoolNode();
-      val postFilterNode = new PostFilterNode(boolNode);
-      esAst.addChildren(postFilterNode);
-      processFilters(filters, boolNode);
+      val parentNode = new PostFilterNode(processFilters(filters));
+      esAst.addChildren(parentNode);
     }
 
     // process functions
@@ -85,17 +94,20 @@ public class PqlParseListener extends PqlBaseListener {
   /**
    * Visits all the nodes of type {@link AndContext} and processes them.
    * @param filterNodes - {@link FilterContext} nodes that represent a filter expression
-   * @param parent - parent for all the nodes to be processed
+   * @param boolNode - parent for all the nodes to be processed
    */
-  private static void processFilters(Collection<FilterContext> filterNodes, BoolNode parent) {
+  private static BoolNode processFilters(Collection<FilterContext> filterNodes) {
+    val boolNode = new BoolNode();
     val mustNode = new MustBoolNode();
-    parent.addChildren(mustNode);
+    boolNode.addChildren(mustNode);
 
     for (val filter : filterNodes) {
       val expressionNode = filter.accept(PQL_VISITOR);
       log.debug("Filter {} generated {}", filter.toStringTree(), expressionNode);
       mustNode.addChildren(expressionNode);
     }
+
+    return boolNode;
   }
 
 }

@@ -36,7 +36,7 @@ public class LimitNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitLimit(this);
+    throw new UnsupportedOperationException();
   }
 
 }

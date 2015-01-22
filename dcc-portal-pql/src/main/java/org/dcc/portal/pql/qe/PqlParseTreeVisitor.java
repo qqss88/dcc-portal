@@ -36,6 +36,7 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.utils.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
@@ -45,6 +46,8 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GtContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.InContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
@@ -247,6 +250,22 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     }
 
     return null;
+  }
+
+  @Override
+  public ExpressionNode visitInArray(@NonNull InArrayContext nodeContext) {
+    return nodeContext.in().accept(this);
+  }
+
+  @Override
+  public ExpressionNode visitIn(@NonNull InContext nodeContext) {
+    val termsNode = new TermsNode(nodeContext.ID().getText());
+    for (val child : nodeContext.value()) {
+      termsNode.addChildren(child.accept(this));
+    }
+    log.debug("{}", termsNode);
+
+    return termsNode;
   }
 
 }

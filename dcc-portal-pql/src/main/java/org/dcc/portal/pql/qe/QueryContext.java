@@ -17,6 +17,13 @@
  */
 package org.dcc.portal.pql.qe;
 
+import lombok.Data;
+
+import org.dcc.portal.pql.es.utils.RequestType;
+
+@Data
 public class QueryContext {
+
+  private RequestType requestType;
 
 }

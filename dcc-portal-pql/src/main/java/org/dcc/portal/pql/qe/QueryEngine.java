@@ -32,7 +32,7 @@ public class QueryEngine {
 
   public SearchRequestBuilder execute(String query, QueryContext context) {
     val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener();
+    val pqlListener = new PqlParseListener(context);
     parser.addParseListener(pqlListener);
     parser.statement();
 

@@ -2,14 +2,18 @@ grammar Pql;
 
 statement
 	: (filter | function) (COMMA (filter | function))*
+	| count (COMMA filter)*
 	| (filter | function) (COMMA (filter | function))* COMMA order
 	| (filter | function) (COMMA (filter | function))* COMMA range
 	| (filter | function) (COMMA (filter | function))* COMMA order COMMA range
 	;
 	
+count
+	: 'count' OPAR CPAR
+	;
+
 function
-	: 'count' OPAR CPAR							# count
-	| 'select' OPAR ID (COMMA ID)* CPAR			# select
+	: 'select' OPAR ID (COMMA ID)* CPAR			# select
 	;
 
 filter

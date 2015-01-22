@@ -15,19 +15,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.utils;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+public enum RequestType {
 
-public class QueryNode extends ExpressionNode {
-
-  public QueryNode(ExpressionNode... children) {
-    super(children);
-  }
-
-  @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitQuery(this);
-  }
+  COUNT, SEARCH, GET
 
 }
