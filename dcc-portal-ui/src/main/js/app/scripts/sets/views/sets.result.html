@@ -3,7 +3,7 @@
 </div>
 <span data-ng-if="item.state !== 'ANALYZING'">
 
-    <set-upload data-set-modal="setModal" data-set-type="'donor'"></set-upload>
+    <set-upload data-set-modal="setModal" data-set-union="setUnion" data-set-type="'donor'"></set-upload>
 
     <div class="canvas half"></div>
     <div class="narrow">
@@ -11,6 +11,9 @@
         <span data-ng-click="checked=!checked; checked? selectAll() : selectNone()">
             <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i> Select all
         </span>
+
+        <br>
+
         <table class="table">
             <thead>
                 <th>&nbsp;</th>
@@ -20,12 +23,11 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="item in data"
-                    data-ng-mouseenter="tableMouseEnter(item.intersections)"
-                    data-ng-mouseleave="tableMouseOut(item.intersections)">
-                    <td style="cursor:pointer"
-                        data-ng-click="toggleSelection(item)">
-                        <i style="-color:{{ checkRow(item.intersections)? '#88BB00' : 'inherit' }}"
-                           class="{{ isSelected(item.intersections)? 'icon-check' : 'icon-check-empty'}}"></i>
+                    data-ng-mouseenter="tableMouseEnter(item.intersection)"
+                    data-ng-mouseleave="tableMouseOut(item.intersection)">
+
+                    <td style="cursor:pointer" data-ng-click="toggleSelection(item)">
+                        <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
                     <td>
                         <span data-ng-bind-html="displaySetOperation(item, setList)"></span>
@@ -34,10 +36,11 @@
                         <a href="">{{item.count | number}}</a>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left">
+                        <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="$parent.setModal=true"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list" 
+                                  data-ng-click="$parent.setUnion=[{'intersection': item.intersection, 'exclusions':item.exclusions}]; $parent.setModal=true"></i>
                             </span>
                         </span>
                     </td>
@@ -49,10 +52,10 @@
                         <span data-ng-if="selectedTotalCount===0">0</span>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left" data-ng-hide="selectedTotalCount===0">
+                        <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="setModal=true"></i>
+                                <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="calculateUnion(); setModal=true;"></i>
                             </span>
                         </span>
                     </td>

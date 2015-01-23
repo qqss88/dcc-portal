@@ -24,7 +24,7 @@
                     data-ng-repeat="item in analysisList"
                     data-ng-class="{selected: item.id == analysisId}">
                     <span>
-                        <span>{{item.type === "set"? "Set Operations" : "Enrichment Analysis"}}</span>
+                        <span>{{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}</span>
                         <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
                         <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
                         <span data-ng-mouseenter="hover=true"

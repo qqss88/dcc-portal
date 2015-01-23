@@ -21,8 +21,8 @@
 
   angular.module('icgc.sets', [
     'icgc.sets.directives',
-    'icgc.sets.services']
-  );
+    'icgc.sets.services'
+  ]);
 })();
 
 
@@ -31,12 +31,13 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
-  module.directive('setUpload', function(LocationService, FiltersUtil, SetService) {
+  module.directive('setUpload', function(LocationService, SetService) {
     return {
       restruct: 'E',
       scope: {
         setModal: '=',
         setType: '=',
+        setUnion: '=',
         setLimit: '@',
       },
       templateUrl: '/scripts/sets/views/sets.upload.html',
@@ -45,23 +46,40 @@
         $scope.setDescription = null;
 
         $scope.submitNewSet = function() {
-          console.log('name', $scope.setName);
-          console.log('description', $scope.setDescription);
+          var params = {}, sortParam;
 
-          // TODO: real save
-          var params = {};
+          // FIXME
           params.type = $scope.setType;
           params.name = $scope.setName;
           params.description = $scope.setDescription;
-          //params.filters = {};
-          params.filters = LocationService.filters();
 
-          // TODO: Terry should make these optional
-          params.sortBy = 'ssmAffectedGenes';
-          params.sortOrder = 'ASCENDING';
+          if (angular.isDefined($scope.setLimit)) {
+            params.filters = LocationService.filters();
+            sortParam = LocationService.getJsonParam($scope.setType + 's');
 
-          console.log('before', params);
-          SetService.addSet($scope.setType, params);
+            if (angular.isDefined(sortParam)) {
+              params.sortBy = sortParam.sort;
+              if (sortParam.order === 'asc') {
+                params.sortOrder = 'ASCENDING';
+              } else {
+                params.sortOrder = 'DESCENDING';
+              }
+            }
+          }
+
+          if (angular.isDefined($scope.setUnion)) {
+            params.union = $scope.setUnion;
+          }
+
+          console.log('param payload', params);
+
+          if (angular.isDefined($scope.setLimit)) {
+            console.log('saving new list');
+            SetService.addSet($scope.setType, params);
+          } else {
+            console.log('saving derived list');
+            SetService.addDerivedSet($scope.setType, params);
+          }
 
           // Reset
           $scope.setDescription = null;
@@ -71,9 +89,7 @@
         $scope.$watch('setModal', function(n) {
           if (n) {
             $scope.setName = $scope.setType;
-            // $scope.uiFilters = FiltersUtil.buildUIFilters(LocationService.filters());
             $scope.uiFilters = LocationService.filters();
-            console.log($scope.setName, $scope.uiFilters);
           }
         });
       }
@@ -94,10 +110,22 @@
         $scope.current = [];
         $scope.selected = [];
 
+
+        $scope.calculateUnion = function() {
+          $scope.setUnion = [];
+          $scope.selected.forEach(function(selectedIntersection) {
+            for (var i2=0; i2 < $scope.data.length; i2++) {
+              if (SetOperationService.isEqual($scope.data[i2].intersection, selectedIntersection)) {
+                $scope.setUnion.push( $scope.data[i2] );
+                break;
+              }
+            }
+          });
+        };
+
         $scope.selectAll = function() {
           $scope.selected = [];
           $scope.selectedTotalCount = 0;
-
           $scope.data.forEach(function(set) {
             $scope.selected.push(set.intersection);
             vennDiagram.toggle(set.intersection, true);
@@ -142,10 +170,6 @@
           return existIdex >= 0;
         };
 
-        $scope.checkRow = function(ids) {
-          return SetOperationService.isEqual($scope.current, ids);
-        };
-
         $scope.displaySetOperation = SetOperationService.displaySetOperation;
         $scope.getSetShortHand = SetOperationService.getSetShortHand;
 
@@ -160,7 +184,6 @@
         };
 
         function initVennDiagram() {
-
           var config = {
             // Because SVG urls are based on <base> tag, we need absolute path
             urlPath: $location.path(),
@@ -195,10 +218,8 @@
             }
           };
 
-          // TEST - Additional annotation to make life easier
           $scope.data = $scope.item.result;
           $scope.vennData = SetOperationService.transform($scope.data);
-
           $scope.setList = [];
           $scope.data.forEach(function(set) {
             set.intersection.forEach(function(id) {
@@ -216,12 +237,8 @@
             data.forEach(function(set) {
               $scope.setNameMap[set.id] = set.name;
             });
-
-
-            console.log('data is', data);
             config.labelFunc = function(id) {
-              return $scope.setNameMap[id];
-              // return SetOperationService.getSetShortHand(d, $scope.setList);
+              return SetOperationService.getSetShortHand(id, $scope.setList);
             };
 
             vennDiagram = new dcc.Venn23($scope.vennData, config);
@@ -346,7 +363,7 @@
   /**
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
-  module.service('SetService', function($timeout, Restangular, localStorageService, toaster) {
+  module.service('SetService', function($timeout, Restangular, RestangularNoCache, localStorageService, toaster) {
     var LIST_ENTITY = 'entity';
     var _this = this;
 
@@ -357,28 +374,32 @@
       var data = {};
       data.filters = encodeURI(JSON.stringify(params.filters));
       data.type = type.toUpperCase();
+      data.name = params.name;
+      data.description = params.description || '';
+
+      /*
       data.name = encodeURIComponent(params.name);
       if (angular.isDefined(params.description)) {
         data.description = encodeURIComponent(params.description);
-      }
+      } */
 
-      if (type === 'donor') {
-        data.sortBy = 'ssmAffectedGenes';
-      } else if (type === 'gene') {
-        data.sortBy = 'affectedDonorCountFiltered';
-      } else {
-        data.sortBy = 'affectedDonorCountFiltered';
+      // Set default sort values if necessary
+      if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
+        if (type === 'donor') {
+          data.sortBy = 'ssmAffectedGenes';
+        } else if (type === 'gene') {
+          data.sortBy = 'affectedDonorCountFiltered';
+        } else {
+          data.sortBy = 'affectedDonorCountFiltered';
+        }
+        data.sortOrder = 'DESCENDING';
       }
-      data.sortOrder = 'ASCENDING';
-
-      /*
-      data.sortBy = params.sortBy;
-      data.sortOrder = params.sortOrder;
-      */
+      data.union = params.union;
 
       return data;
     }
 
+    /*
     function params2URLEncoded(type, params) {
       var data = '';
       data += 'type=' + type.toUpperCase() + '&';
@@ -390,18 +411,19 @@
         data += 'description=' + encodeURIComponent(params.name);
       }
       return data;
-    }
+    } */
 
     // Wait for list to materialize
     function wait(id) {
       console.log('polling....', id);
 
-      var promise = Restangular.one('entitylist', id).get({});
+      var promise = RestangularNoCache.one('entitylist', id).get({});
       promise.then(function(data) {
         if (! data.status || data.status !== 'FINISHED') {
           $timeout(function() {
             wait(id);
           }, 2000);
+          return;
         }
 
         // FIXME: sync with terry
@@ -428,7 +450,7 @@
     */
     this.addSet = function(type, params) {
       var promise = null;
-      var data = params2JSON(type, params)
+      var data = params2JSON(type, params);
       promise = Restangular.one('entitylist').post(undefined, data, {}, {'Content-Type': 'application/json'});
 
       /*
@@ -441,10 +463,7 @@
           console.log('there is no id!!!!');
           return;
         }
-
         wait(data.id);
-      }, function(err) {
-        console.log('error', err);
       });
     };
 
@@ -457,22 +476,17 @@
     * Create a new set from the union of various subsets of the same type
     */
     this.addDerivedSet = function(type, params) {
-      // TODO: stub
-      var data = '', promise = null;
+      var promise = null;
+      var data = params2JSON(type, params);
 
-      data += 'type=' + type + '&';
-      data += 'name=' + params.name;
-      data += 'union' + JSON.stringify(params.union);
 
-      if (angular.isDefined(params.description)) {
-        data += 'description=' + encodeURIComponent(params.name);
-      }
-
-      promise = Restangular.one('list/union').withHttpConfig({transformRequest: angular.identity}).customPOST(data);
+      promise = Restangular.one('entitylist').post('union', data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         if (! data.id) {
+          console.log('there is an error in creating derived set');
           return;
         }
+        wait(data.id);
       });
     };
 
@@ -504,11 +518,18 @@
     this.getAll = function() {
       var sets = localStorageService.get(LIST_ENTITY) || [];
       sets.forEach(function(set) {
-        var prefix = set.type.charAt(0), filters = {};
+        var filters = {};
+
         filters[set.type] = {
           entityListId: {is: [ set.id ]}
         };
-        set.advLink = '/search/' + prefix + '?filters=' + JSON.stringify(filters);
+
+        if (['gene', 'mutation'].indexOf(set.type) !== -1) {
+          set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
+        } else {
+          set.advLink = '/search?filters=' + JSON.stringify(filters);
+        }
+
       });
       return sets;
     };
@@ -522,9 +543,7 @@
       return true;
     };
 
-
   });
-
 
 
 

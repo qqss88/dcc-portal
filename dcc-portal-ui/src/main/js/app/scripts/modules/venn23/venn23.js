@@ -84,7 +84,7 @@
       var val = 0;
       this.data.forEach(function(group) {
         var groupIds = _.pluck(group, 'id');
-        if (_.difference(groupIds, ids).length === 0 && _.difference(groupIds, ids).length === 0) {
+        if (_.difference(groupIds, ids).length === 0 && _.difference(ids, groupIds).length === 0) {
           val = group[0].count;
         }
       });
@@ -439,7 +439,7 @@
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
       .text(function() {
-         return config.labelFunc(uniqueIds[0]);
+        return config.labelFunc(uniqueIds[0]);
       });
 
     svg.append('text')
@@ -583,9 +583,9 @@
       .append('rect')
       .classed('legend', true)
       .attr('x', function(d, i) {
-         return 30 + 15*i;
+        return 30 + 15*i;
       })
-      .attr('y', function(d, i) {
+      .attr('y', function() {
         return 15;
       })
       .attr('width', 15)
@@ -622,7 +622,7 @@
 
     d3.selectAll('.inner')
       .filter(function(d) {
-         return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
+        return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
       })
       .style('fill', function(d) {
         if (d.selected === true) {
