@@ -213,14 +213,14 @@
       .attr('y', cy)
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
-      .text(uniqueIds[0]);
+      .text(config.labelFunc(uniqueIds[0]));
 
     svg.append('text')
       .attr('x', cx + 2.8*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
-      .text(uniqueIds[1]);
+      .text(config.labelFunc(uniqueIds[1]));
 
 
     // Label - value

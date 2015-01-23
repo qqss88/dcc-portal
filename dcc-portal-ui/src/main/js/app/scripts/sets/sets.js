@@ -80,7 +80,7 @@
     };
   });
 
-  module.directive('setOperation', function($location, $timeout, SetOperationService) {
+  module.directive('setOperation', function($location, $timeout, Restangular, SetOperationService) {
     return {
       restrict: 'E',
       scope: {
@@ -99,22 +99,22 @@
           $scope.selectedTotalCount = 0;
 
           $scope.data.forEach(function(set) {
-            $scope.selected.push(set.intersections);
-            vennDiagram.toggle(set.intersections, true);
+            $scope.selected.push(set.intersection);
+            vennDiagram.toggle(set.intersection, true);
             $scope.selectedTotalCount += set.count;
           });
         };
 
         $scope.selectNone = function() {
           $scope.data.forEach(function(set) {
-            vennDiagram.toggle(set.intersections, false);
+            vennDiagram.toggle(set.intersection, false);
           });
           $scope.selected = [];
           $scope.selectedTotalCount = 0;
         };
 
         $scope.toggleSelection = function(item) {
-          var ids = item.intersections;
+          var ids = item.intersection;
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
           });
@@ -160,68 +160,6 @@
         };
 
         function initVennDiagram() {
-          var testData = [
-             // 1 int
-             {
-                intersections: ['AAA'],
-                exclusions: ['BBB', 'CCC'],
-                count: 150
-             },
-             {
-                intersections: ['BBB'],
-                exclusions: ['AAA', 'CCC'],
-                count: 50
-             },
-             {
-                intersections: ['CCC'],
-                exclusions: ['BBB', 'AAA'],
-                count: 5
-             },
-             // 2 int
-             {
-                intersections: ['AAA', 'BBB'],
-                exclusions: ['CCC'],
-                count: 50
-             },
-             {
-                intersections: ['AAA', 'CCC'],
-                exclusions: ['BBB'],
-                count: 50
-             },
-             {
-                intersections: ['BBB', 'CCC'],
-                exclusions: ['AAA'],
-                count: 50
-             },
-             // 3 int
-             {
-                intersections: ['AAA', 'BBB', 'CCC'],
-                exclusions: [],
-                count: 150
-             },
-          ];
-
-
-          /*
-          testData = [
-             {
-                intersections: ['dchang'],
-                exclusions: ['jlam'],
-                count: 100
-             },
-             {
-                intersections: ['jlam'],
-                exclusions: ['dchang'],
-                count: 100
-             },
-             {
-                intersections: ['dchang', 'jlam'],
-                exclusions: [],
-                count: 0
-             },
-          ];
-          */
-
 
           var config = {
             // Because SVG urls are based on <base> tag, we need absolute path
@@ -258,30 +196,55 @@
           };
 
           // TEST - Additional annotation to make life easier
-          $scope.data = testData;
-          $scope.vennData = SetOperationService.transform(testData);
+          $scope.data = $scope.item.result;
+          $scope.vennData = SetOperationService.transform($scope.data);
 
           $scope.setList = [];
           $scope.data.forEach(function(set) {
-            set.intersections.forEach(function(id) {
+            set.intersection.forEach(function(id) {
               if (_.contains($scope.setList, id) === false) {
                 $scope.setList.push(id);
               }
             });
           });
 
-          config.labelFunc = function(d) {
-            return SetOperationService.getSetShortHand(d, $scope.setList);
-          };
+          // Grab set meta data - do not use localstorage, it may not be there if the link was shared!!!
+          var metaPromise = Restangular.several('entitylist/lists', $scope.setList).get('', {});
+          $scope.setNameMap = {};
+          metaPromise.then(function(data) {
+            data = Restangular.stripRestangular(data);
+            data.forEach(function(set) {
+              $scope.setNameMap[set.id] = set.name;
+            });
 
-          vennDiagram = new dcc.Venn23($scope.vennData, config);
-          vennDiagram.render( $element.find('.canvas')[0]);
+
+            console.log('data is', data);
+            config.labelFunc = function(id) {
+              return $scope.setNameMap[id];
+              // return SetOperationService.getSetShortHand(d, $scope.setList);
+            };
+
+            vennDiagram = new dcc.Venn23($scope.vennData, config);
+            vennDiagram.render( $element.find('.canvas')[0]);
+
+          });
+
+
         }
 
+        $scope.$watch('item', function(n) {
+          if (n) {
+            console.log('item', n);
+            initVennDiagram();
+          }
+        });
+
         // Force a digest cycle first so we can locate canvas, not the best way to do it, but it works
+        /*
         $timeout(function() {
           initVennDiagram();
         }, 10);
+        */
       }
     };
   });
@@ -313,7 +276,7 @@
 
       data.forEach(function(set) {
         var subset = [];
-        set.intersections.forEach(function(sid) {
+        set.intersection.forEach(function(sid) {
           subset.push({
             id: sid,
             count: set.count
@@ -342,21 +305,21 @@
     this.displaySetOperation = function(item, setList) {
       var i = 0;
       var displayStr = '';
-      var intersections = item.intersections;
+      var intersection = item.intersection;
       var exclusions = item.exclusions;
 
       // Intersection
-      if (intersections.length > 1) {
+      if (intersection.length > 1) {
         displayStr += '(';
-        for (i=0; i < intersections.length; i++) {
-          displayStr += _getSetShortHand(intersections[i], setList);
-          if (i < intersections.length-1) {
+        for (i=0; i < intersection.length; i++) {
+          displayStr += _getSetShortHand(intersection[i], setList);
+          if (i < intersection.length-1) {
             displayStr += ' &cap; ';
           }
         }
         displayStr += ')';
       } else {
-        displayStr += _getSetShortHand(intersections[0], setList);
+        displayStr += _getSetShortHand(intersection[0], setList);
       }
 
       // Subtractions
