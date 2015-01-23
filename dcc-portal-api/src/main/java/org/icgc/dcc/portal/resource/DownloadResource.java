@@ -567,12 +567,11 @@ public class DownloadResource {
 
       @ApiParam(value = "filename to download", required = true)//
       @QueryParam("fn")//
-      @DefaultValue("/") String filePath
+      @DefaultValue("") String filePath
 
       ) throws IOException {
 
-    // resolve ambiguity about empty string
-    if (filePath.trim().equals("")) filePath = "/";
+    if (filePath.trim().equals("")) throw new BadRequestException("Missing argument fn");
 
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
