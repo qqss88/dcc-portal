@@ -17,7 +17,8 @@
  */
 package org.icgc.dcc.portal.service;
 
-import java.util.List;
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -25,19 +26,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.analysis.UnionAnalyzer;
 import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityList;
 import org.icgc.dcc.portal.model.EntityListDefinition;
-import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.repository.EntityListRepository;
-import org.icgc.dcc.portal.repository.GeneRepository;
-import org.icgc.dcc.portal.repository.MutationRepository;
-import org.icgc.dcc.portal.repository.Repository;
-import org.icgc.dcc.portal.repository.UnionAnalyzer;
-import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
-import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,92 +49,27 @@ public class EntityListService {
   @NonNull
   private final UnionAnalyzer analyzer;
 
-  @NonNull
-  private final TermsLookupService termLookupService;
-
-  @NonNull
-  private final GeneRepository geneRepository;
-  @NonNull
-  private final MutationRepository mutationRepository;
-  @NonNull
-  private final DonorRepository donorRepository;
-
-  private List<String> executeQuery(final EntityListDefinition definition) {
-
-    val maxGeneCount = 1000;
-
-    log.info("List def is: " + definition);
-
-    val limitedGeneQuery = Query.builder()
-        // .fields(idField())
-        .filters(definition.getFilters())
-        .sort(definition.getSortBy())
-        .order(definition.getSortOrder().getName())
-
-        // This is non standard in terms of size of result set, but its just ids
-        .size(maxGeneCount)
-        .limit(maxGeneCount)
-        .build();
-
-    Repository repo = geneRepository;
-    switch (definition.getType()) {
-    case DONOR: {
-      repo = donorRepository;
-      break;
-    }
-    case MUTATION: {
-      repo = mutationRepository;
-      break;
-    }
-    }
-
-    return SearchResponses.getHitIds(repo.findAllCentric(limitedGeneQuery));
-  }
-
   public EntityList getEntityList(@NonNull final UUID listId) {
 
     val list = repository.find(listId);
 
     if (null == list) {
 
-      log.info("No list is found for id: '{}'.", listId);
+      log.error("No list is found for id: '{}'.", listId);
 
     } else {
 
-      log.info("Got enity list: '{}'.", list);
+      log.debug("Got enity list: '{}'.", list);
     }
     return list;
-  }
-
-  // TODO: temp
-  private static TermLookupType getLookupTypeFrom(final BaseEntityList.Type type) {
-
-    TermLookupType result = TermLookupType.GENE_IDS;
-
-    switch (type) {
-
-    case DONOR: {
-      result = TermLookupType.DONOR_IDS;
-      break;
-    }
-    case MUTATION: {
-      result = TermLookupType.MUTATION_IDS;
-      break;
-    }
-    }
-    return result;
   }
 
   public EntityList createEntityList(
       @NonNull final EntityListDefinition listDefinition) {
 
-    val newList = EntityList.createFromDefinition(listDefinition);
-    repository.save(newList);
+    val newList = createNewListFrom(listDefinition);
 
-    val listIds = executeQuery(listDefinition);
-    termLookupService.createTermsLookup(getLookupTypeFrom(listDefinition.getType()), newList.getId(), listIds);
-
-    repository.update(newList.finished(listIds.size()));
+    analyzer.createList(newList.getId(), listDefinition);
 
     return newList;
   }
@@ -148,17 +77,19 @@ public class EntityListService {
   public EntityList deriveEntityList(
       @NonNull final DerivedEntityListDefinition listDefinition) {
 
+    val newList = createNewListFrom(listDefinition);
+
+    analyzer.combineLists(newList.getId(), listDefinition);
+
+    return newList;
+  }
+
+  private EntityList createNewListFrom(final BaseEntityList listDefinition) {
+
     val newList = EntityList.createFromDefinition(listDefinition);
-    repository.save(newList);
 
-    val definitions = listDefinition.getUnion();
-    val entityType = listDefinition.getType();
-
-    val count = analyzer.unionAll(definitions, entityType,
-        // TODO: temp
-        newList.getId(), termLookupService);
-
-    repository.update(newList.finished(count));
+    val insertCount = repository.save(newList);
+    checkState(insertCount == 1, "Could not save list - Insert count: %s", insertCount);
 
     return newList;
   }

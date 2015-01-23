@@ -46,12 +46,25 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   private final UUID id;
 
   @NonNull
-  private final Status status;
+  private Status status;
 
   @NonNull
   private final BaseEntityList.Type type;
 
-  private final List<UnionUnitWithCount> result;
+  private List<UnionUnitWithCount> result;
+
+  public UnionAnalysisResult inProgress() {
+    this.status = Status.IN_PROGRESS;
+    return this;
+  }
+
+  public UnionAnalysisResult finished(
+      @NonNull List<UnionUnitWithCount> result) {
+
+    this.status = Status.FINISHED;
+    this.result = result;
+    return this;
+  }
 
   // had to use this approach because of using 'final' for the instance vars
   private final static class JsonPropertyName {

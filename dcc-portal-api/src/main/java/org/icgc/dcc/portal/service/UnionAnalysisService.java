@@ -17,7 +17,8 @@
  */
 package org.icgc.dcc.portal.service;
 
-import java.util.ArrayList;
+import static com.google.common.base.Preconditions.checkState;
+
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -25,11 +26,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.analysis.UnionAnalyzer;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
-import org.icgc.dcc.portal.model.UnionUnitWithCount;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
-import org.icgc.dcc.portal.repository.UnionAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,13 +54,12 @@ public class UnionAnalysisService {
 
     if (null == result) {
 
-      log.info("No analysis is found for id: '{}'.", analysisId);
+      log.error("No analysis is found for id: '{}'.", analysisId);
 
     } else {
 
-      log.info("Got analysis: '{}'", result);
+      log.debug("Got analysis: '{}'", result);
     }
-    // TODO: temp
     return result;
   }
 
@@ -70,21 +69,11 @@ public class UnionAnalysisService {
     val entityType = request.getType();
 
     val newAnalysis = UnionAnalysisResult.forNewlyCreated(entityType);
-    repository.save(newAnalysis);
 
-    val definitions = request.toUnionSets();
+    val insertCount = repository.save(newAnalysis);
+    checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
-    val result = new ArrayList<UnionUnitWithCount>(definitions.size());
-
-    for (val def : definitions) {
-
-      val count = analyzer.getUnionCount(def, entityType);
-      result.add(UnionUnitWithCount.copyOf(def, count));
-    }
-    log.info("Result of Union Analysis is: " + result);
-
-    val updatedAnalysis = UnionAnalysisResult.withResult(newAnalysis.getId(), entityType, result);
-    repository.update(updatedAnalysis);
+    analyzer.determineUnionUnitCounts(newAnalysis.getId(), request);
 
     return newAnalysis;
   }
