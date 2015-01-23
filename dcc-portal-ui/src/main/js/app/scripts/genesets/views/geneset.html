@@ -221,7 +221,7 @@
                 <th>Site</th>
                 <th>Tumour Type</th>
                 <th>Tumour Subtype</th>
-                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Pathway contains SSM">#
+                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Gene Set contains SSM">#
                     Donors affected</abbr> <i class="icon-sort-down"></i></th>
                 <th><abbr data-tooltip="Number of SSM observed in {{ GeneSetCtrl.geneSet.id }}"
                           data-tooltip-placement="left"># Mutations</abbr></th>
@@ -341,7 +341,7 @@
                 <th>Name</th>
                 <th><abbr data-tooltip="Gene location on the genome, chr:start-end">Location</abbr></th>
                 <th>Type</th>
-                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Pathway contains SSM">#
+                <th><abbr data-tooltip="Number of Donors where a Gene involved in the Gene Set contains SSM">#
                     Donors affected</abbr> <i class="icon-sort-down"></i></th>
                 <th class="text-center">
                     <abbr data-tooltip="Number of SSM in the Gene" data-tooltip-placement="left"># Mutations</abbr>
@@ -363,7 +363,8 @@
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
                         /
-                        <a data-ng-href='/search?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>
+                        <!--<a data-ng-href='/search?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>-->
+                        <a data-ng-href='/search?filters={{GeneSetCtrl.baseAdvQuery}}'>
                             {{GeneSetCtrl.totalDonors | number}}</a>
                         <em>({{gene.affectedDonorCountFiltered/GeneSetCtrl.totalDonors * 100 | number:2}}%)</em>
                     </span>
