@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class GreaterThanNode extends ExpressionNode {
 
+  @NonNull
   Object value;
 
   public GreaterThanNode(@NonNull ExpressionNode node) {
@@ -37,7 +38,7 @@ public class GreaterThanNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitGreaterThan(this);
   }
 

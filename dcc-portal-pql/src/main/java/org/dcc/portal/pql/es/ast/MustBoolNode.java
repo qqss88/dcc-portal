@@ -27,7 +27,7 @@ public class MustBoolNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    return visitor.visitMustBool(this);
+    throw new UnsupportedOperationException();
   }
 
 }

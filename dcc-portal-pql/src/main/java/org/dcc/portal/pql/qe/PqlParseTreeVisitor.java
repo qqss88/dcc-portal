@@ -37,7 +37,7 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.es.utils.Order;
+import org.dcc.portal.pql.es.model.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
@@ -89,12 +89,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitEqual(EqualContext nodeContext) {
+  public ExpressionNode visitEqual(@NonNull EqualContext nodeContext) {
     return nodeContext.eq().accept(this);
   }
 
   @Override
-  public ExpressionNode visitEq(EqContext context) {
+  public ExpressionNode visitEq(@NonNull EqContext context) {
     val nameNode = new TerminalNode(context.ID().getText());
     val valueNode = (TerminalNode) context.value().accept(this);
     val termNode = new TermNode(nameNode, valueNode);
@@ -104,7 +104,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitValue(ValueContext context) {
+  public ExpressionNode visitValue(@NonNull ValueContext context) {
     if (context.STRING() != null) {
       return new TerminalNode(cleanString(context.STRING().getText()));
     } else if (context.FLOAT() != null) {
@@ -127,12 +127,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitNotEqual(NotEqualContext nodeContext) {
+  public ExpressionNode visitNotEqual(@NonNull NotEqualContext nodeContext) {
     return nodeContext.ne().accept(this);
   }
 
   @Override
-  public ExpressionNode visitNe(NeContext context) {
+  public ExpressionNode visitNe(@NonNull NeContext context) {
     val nameNode = new TerminalNode(context.ID().getText());
     val valueNode = (TerminalNode) context.value().accept(this);
     val notNode = new NotNode(new TermNode(nameNode, valueNode));
@@ -142,12 +142,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitGreaterEqual(GreaterEqualContext nodeContext) {
+  public ExpressionNode visitGreaterEqual(@NonNull GreaterEqualContext nodeContext) {
     return nodeContext.ge().accept(this);
   }
 
   @Override
-  public ExpressionNode visitGe(GeContext context) {
+  public ExpressionNode visitGe(@NonNull GeContext context) {
     val id = context.ID().getText();
     val value = context.value().accept(this);
     val rangeNode = new RangeNode(id, new GreaterEqualNode(value));
@@ -157,12 +157,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitGreaterThan(GreaterThanContext nodeContext) {
+  public ExpressionNode visitGreaterThan(@NonNull GreaterThanContext nodeContext) {
     return nodeContext.gt().accept(this);
   }
 
   @Override
-  public ExpressionNode visitGt(GtContext context) {
+  public ExpressionNode visitGt(@NonNull GtContext context) {
     val id = context.ID().getText();
     val value = context.value().accept(this);
     val rangeNode = new RangeNode(id, new GreaterThanNode(value));
@@ -172,12 +172,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitLessEqual(LessEqualContext nodeContext) {
+  public ExpressionNode visitLessEqual(@NonNull LessEqualContext nodeContext) {
     return nodeContext.le().accept(this);
   }
 
   @Override
-  public ExpressionNode visitLe(LeContext context) {
+  public ExpressionNode visitLe(@NonNull LeContext context) {
     val id = context.ID().getText();
     val value = context.value().accept(this);
     val rangeNode = new RangeNode(id, new LessEqualNode(value));
@@ -187,12 +187,12 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitLessThan(LessThanContext nodeContext) {
+  public ExpressionNode visitLessThan(@NonNull LessThanContext nodeContext) {
     return nodeContext.lt().accept(this);
   }
 
   @Override
-  public ExpressionNode visitLt(LtContext context) {
+  public ExpressionNode visitLt(@NonNull LtContext context) {
     val id = context.ID().getText();
     val value = context.value().accept(this);
     val rangeNode = new RangeNode(id, new LessThanNode(value));

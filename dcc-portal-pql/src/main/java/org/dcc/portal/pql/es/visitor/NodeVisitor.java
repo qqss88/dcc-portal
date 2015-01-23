@@ -23,7 +23,6 @@ import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
@@ -47,8 +46,6 @@ public interface NodeVisitor<T> {
   T visitTerms(TermsNode node);
 
   T visitNot(NotNode node);
-
-  T visitMustBool(MustBoolNode node);
 
   T visitRange(RangeNode node);
 

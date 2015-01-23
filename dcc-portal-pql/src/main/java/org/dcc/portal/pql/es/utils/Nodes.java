@@ -17,47 +17,26 @@
  */
 package org.dcc.portal.pql.es.utils;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.filter;
+import static lombok.AccessLevel.PRIVATE;
 
-import java.util.Collection;
 import java.util.List;
 
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+@NoArgsConstructor(access = PRIVATE)
 public class Nodes {
 
-  /**
-   * Gets a child by type {@code childType}.
-   * @throws IllegalStateException if there are more than one child of type {@code childType}
-   */
-  public static <T> T filterChild(ExpressionNode node, Class<T> childType) {
-    val children = filterChildren(node, childType);
-    checkState(children.size() == 1, "The result contains more than one child. Size: %d", children.size());
-
-    return Iterables.get(children, 0);
-  }
-
-  public static <T> List<T> filterChildren(ExpressionNode node, Class<T> childType) {
-    val children = Iterables.filter(node.getChildren(), childType);
+  public static <T> List<T> filterChildren(@NonNull ExpressionNode node, @NonNull Class<T> childType) {
+    val children = filter(node.getChildren(), childType);
 
     return Lists.<T> newArrayList(children);
-  }
-
-  public static <T> T filterSingle(Collection<ExpressionNode> nodes, Class<T> childType) {
-    val children = Iterables.filter(nodes, childType);
-    val filtered = Lists.<T> newArrayList(children);
-    if (filtered.isEmpty()) {
-      return null;
-    }
-
-    checkState(filtered.size() == 1, "The result contains more than one child. Size: %d", filtered.size());
-
-    return filtered.get(0);
   }
 
 }

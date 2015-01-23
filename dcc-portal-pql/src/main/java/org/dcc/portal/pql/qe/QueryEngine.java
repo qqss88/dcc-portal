@@ -17,7 +17,8 @@
  */
 package org.dcc.portal.pql.qe;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
+import lombok.Value;
 import lombok.val;
 
 import org.dcc.portal.pql.es.utils.ParseTrees;
@@ -25,12 +26,17 @@ import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
-@RequiredArgsConstructor
+@Value
 public class QueryEngine {
 
-  private final Client client;
+  @NonNull
+  Client client;
 
-  public SearchRequestBuilder execute(String query, QueryContext context) {
+  @NonNull
+  String index;
+
+  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
+    context.setIndex(index);
     val parser = ParseTrees.getParser(query);
     val pqlListener = new PqlParseListener(context);
     parser.addParseListener(pqlListener);

@@ -78,18 +78,18 @@ public abstract class ExpressionNode implements Node {
 
   @Override
   public String toString() {
-    val stringBuffer = new StringBuffer();
-    stringBuffer.append(this.getClass().getSimpleName() + " ( ");
+    val buffer = new StringBuffer();
+    buffer.append(this.getClass().getSimpleName() + " ( ");
 
     for (int i = 0; i < children.size(); i++) {
-      stringBuffer.append(children.get(i).toString());
+      buffer.append(children.get(i).toString());
       if (i < children.size() - 1) {
-        stringBuffer.append(", ");
+        buffer.append(", ");
       }
     }
-    stringBuffer.append(")");
+    buffer.append(")");
 
-    return stringBuffer.toString();
+    return buffer.toString();
   }
 
 }

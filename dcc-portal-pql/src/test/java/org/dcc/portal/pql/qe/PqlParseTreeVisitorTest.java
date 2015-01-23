@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.qe;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.AndNode;
@@ -34,8 +35,7 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.es.utils.Order;
-import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.es.model.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
@@ -57,7 +57,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitOrTest_simple() {
     val query = "or(gt(weight, 10), lt(age, 50), eq(sex, 'male'))";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val orNode = (OrNode) VISITOR.visitOr(orContext);
     assertThat(orNode.getChildren().size()).isEqualTo(3);
@@ -86,7 +86,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitOrTest_withAnd() {
     val query = "or(eq(sex, 'male'), and(gt(weight, 10), lt(age, 50)))";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val orNode = (OrNode) VISITOR.visitOr(orContext);
     assertThat(orNode.getChildren().size()).isEqualTo(2);
@@ -118,7 +118,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitValueTest_string_single_quote() {
     val query = "eq(sex, 'male')";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val valueContext = eqContext.eq().value();
     val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
@@ -128,7 +128,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitValueTest_string_double_quote() {
     val query = "eq(sex, \"male\")";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val valueContext = eqContext.eq().value();
     val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
@@ -138,7 +138,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitValueTest_int() {
     val query = "eq(age, 20)";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val valueContext = eqContext.eq().value();
     val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
@@ -148,7 +148,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitValueTest_double() {
     val query = "eq(age, 20.555)";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val valueContext = eqContext.eq().value();
     val termNode = (TerminalNode) VISITOR.visitValue(valueContext);
@@ -158,7 +158,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitAndTest_simple() {
     val query = "and(gt(weight, 10), lt(age, 50), eq(sex, 'male'))";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
     val andNode = (AndNode) VISITOR.visitAnd(andContext);
     assertThat(andNode.getChildren().size()).isEqualTo(3);
@@ -187,7 +187,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitAndTest_withOr() {
     val query = "and(eq(sex, 'male'), or(gt(weight, 10), lt(age, 50)))";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
     val andNode = (AndNode) VISITOR.visitAnd(andContext);
     assertThat(andNode.getChildren().size()).isEqualTo(2);
@@ -219,7 +219,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitEqualTest() {
     val query = "eq(weight, 10.1)";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
@@ -231,7 +231,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitNotEqualTest() {
     val query = "ne(age, 10)";
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     val notEqContext = (NotEqualContext) parseTree.getChild(0);
     val notNode = (NotNode) VISITOR.visitNotEqual(notEqContext);
     val termNode = (TermNode) notNode.getChild(0);
@@ -245,7 +245,7 @@ public class PqlParseTreeVisitorTest {
   public void visitGreaterEqualTest() {
     val query = "ge(weight, 10)";
     // root - postFilter - bool - must - range - from
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     // program - query
     val geContext = (GreaterEqualContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitGreaterEqual(geContext);
@@ -265,7 +265,7 @@ public class PqlParseTreeVisitorTest {
   public void visitGreaterThanTest() {
     val query = "gt(weight, 10)";
     // root - postFilter - bool - must - range - from
-    val parseTree = ParseTrees.createParseTree(query);
+    val parseTree = createParseTree(query);
     // program - query
     val gtContext = (GreaterThanContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitGreaterThan(gtContext);
@@ -283,7 +283,7 @@ public class PqlParseTreeVisitorTest {
   @Test
   public void visitLessEqualTest() {
     // root - postFilter - bool - must - range - from
-    val parseTree = ParseTrees.createParseTree("le(weight, 10)");
+    val parseTree = createParseTree("le(weight, 10)");
     // program - query
     val leContext = (LessEqualContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitLessEqual(leContext);
@@ -300,7 +300,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitLessThanTest() {
-    val parseTree = ParseTrees.createParseTree("lt(weight, 10)");
+    val parseTree = createParseTree("lt(weight, 10)");
     val ltContext = (LessThanContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitLessThan(ltContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
@@ -316,7 +316,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitSelectTest() {
-    val parseTree = ParseTrees.createParseTree("select(age, gender)");
+    val parseTree = createParseTree("select(age, gender)");
     val selectContext = (SelectContext) parseTree.getChild(0);
     val fieldsNode = (FieldsNode) VISITOR.visitSelect(selectContext);
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
@@ -325,7 +325,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitLimitTest() {
-    val parseTree = ParseTrees.createParseTree("select(s),limit(1, 5)");
+    val parseTree = createParseTree("select(s),limit(1, 5)");
     val rangeContext = (RangeContext) parseTree.getChild(2);
     val limitNode = (LimitNode) VISITOR.visitRange(rangeContext);
     assertThat(limitNode.getFrom()).isEqualTo(1);
@@ -334,7 +334,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitSortTest() {
-    val parseTree = ParseTrees.createParseTree("select(s),sort(-age, weight)");
+    val parseTree = createParseTree("select(s),sort(-age, weight)");
     val orderContext = (OrderContext) parseTree.getChild(2);
     val sortNode = (SortNode) VISITOR.visitOrder(orderContext);
     assertThat(sortNode.getFields().size()).isEqualTo(2);
@@ -344,7 +344,7 @@ public class PqlParseTreeVisitorTest {
 
   @Test
   public void visitInTest() {
-    val parseTree = ParseTrees.createParseTree("in(sex, 'male', 'female')");
+    val parseTree = createParseTree("in(sex, 'male', 'female')");
     val inContext = (InArrayContext) parseTree.getChild(0);
     val termsNode = (TermsNode) VISITOR.visitInArray(inContext);
     assertThat(termsNode.getField()).isEqualTo("sex");

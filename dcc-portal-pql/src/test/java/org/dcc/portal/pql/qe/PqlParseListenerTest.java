@@ -39,8 +39,8 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.model.RequestType;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.utils.RequestType;
 import org.junit.Test;
 
 @Slf4j

@@ -46,7 +46,7 @@ import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.io.Files;
 
-public class BaseRepositoryTest {
+public class BaseVisitorTest {
 
   /**
    * Test configuration.

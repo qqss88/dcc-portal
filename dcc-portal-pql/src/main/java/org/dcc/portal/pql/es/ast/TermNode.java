@@ -29,7 +29,9 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class TermNode extends ExpressionNode {
 
+  @NonNull
   TerminalNode nameNode;
+  @NonNull
   TerminalNode valueNode;
 
   public TermNode(@NonNull TerminalNode name, @NonNull TerminalNode value) {
@@ -49,7 +51,7 @@ public class TermNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitTerm(this);
   }
 

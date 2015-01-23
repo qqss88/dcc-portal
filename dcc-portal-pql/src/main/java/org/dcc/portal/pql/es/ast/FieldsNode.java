@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.ast;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
@@ -38,7 +39,7 @@ public class FieldsNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     throw new UnsupportedOperationException();
   }
 
@@ -50,4 +51,5 @@ public class FieldsNode extends ExpressionNode {
       fields.add(value);
     }
   }
+
 }

@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.ast;
 
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -27,10 +28,11 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class TermsNode extends ExpressionNode {
 
+  @NonNull
   String field;
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitTerms(this);
   }
 

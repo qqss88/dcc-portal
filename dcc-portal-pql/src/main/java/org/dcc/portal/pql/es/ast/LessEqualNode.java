@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class LessEqualNode extends ExpressionNode {
 
+  @NonNull
   Object value;
 
   public LessEqualNode(@NonNull ExpressionNode node) {
@@ -37,7 +38,7 @@ public class LessEqualNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitLessEqual(this);
   }
 

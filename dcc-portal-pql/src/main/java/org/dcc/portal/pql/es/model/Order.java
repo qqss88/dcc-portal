@@ -15,28 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.utils;
+package org.dcc.portal.pql.es.model;
 
-import lombok.Value;
+import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
-/**
- * A data structure that hold two values.
- * <p>
- * Note: Move to dcc-commons?
- * </p>
- */
-@Value
-public class Pair<L, R> {
+import org.icgc.dcc.common.core.model.Identifiable;
 
-  L left;
-  R right;
+@RequiredArgsConstructor(access = PRIVATE)
+public enum Order implements Identifiable {
 
-  public L getKey() {
-    return left;
+  ASC("+"), DESC("-");
+
+  private final String sign;
+
+  public static Order bySign(@NonNull String sign) {
+    for (val value : values()) {
+      if (sign.equals(value.sign)) {
+        return value;
+      }
+    }
+
+    throw new IllegalArgumentException(_("No sign '%s' found", sign));
   }
 
-  public R getValue() {
-    return right;
+  @Override
+  public String getId() {
+    return name().toLowerCase();
   }
 
 }

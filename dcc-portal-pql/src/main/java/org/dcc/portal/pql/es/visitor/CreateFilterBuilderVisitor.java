@@ -19,6 +19,15 @@ package org.dcc.portal.pql.es.visitor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.es.model.RequestType.COUNT;
+import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
+import static org.elasticsearch.index.query.FilterBuilders.andFilter;
+import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.elasticsearch.index.query.FilterBuilders.notFilter;
+import static org.elasticsearch.index.query.FilterBuilders.orFilter;
+import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
+import static org.elasticsearch.index.query.FilterBuilders.termFilter;
+import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 
 import java.util.Stack;
 
@@ -46,15 +55,12 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.utils.RequestType;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -64,13 +70,13 @@ import com.google.common.collect.Lists;
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
+  @NonNull
   private final Client client;
-
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
 
   @Override
-  public FilterBuilder visitBool(BoolNode node) {
-    BoolFilterBuilder resultBuilder = FilterBuilders.boolFilter();
+  public FilterBuilder visitBool(@NonNull BoolNode node) {
+    BoolFilterBuilder resultBuilder = boolFilter();
     val mustNode = getChild(node, MustBoolNode.class);
     if (mustNode != null) {
       resultBuilder = resultBuilder.must(visitChildren(mustNode));
@@ -91,20 +97,15 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitTerm(TermNode node) {
+  public FilterBuilder visitTerm(@NonNull TermNode node) {
     val name = node.getNameNode().getValue().toString();
     val value = node.getValueNode().getValue();
 
-    return FilterBuilders.termFilter(name, value);
-  }
-
-  @Override
-  public FilterBuilder visitMustBool(MustBoolNode node) {
-    throw new UnsupportedOperationException();
+    return termFilter(name, value);
   }
 
   private static <T> T getChild(BoolNode boolNode, Class<T> type) {
-    val children = Nodes.filterChildren(boolNode, type);
+    val children = filterChildren(boolNode, type);
     checkState(children.size() < 2, "A BoolExpressionNode can contain only a single node of type %s",
         type.getSimpleName());
 
@@ -116,23 +117,24 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitPostFilter(PostFilterNode node) {
+  public FilterBuilder visitPostFilter(@NonNull PostFilterNode node) {
     return visitBool((BoolNode) node.getChild(0));
   }
 
   @Override
-  public SearchRequestBuilder visit(Node node, QueryContext queryContext) {
-    // FIXME: get index from QueryContext
-    SearchRequestBuilder result = client.prepareSearch("dcc-release-etl-cli").setTypes("donor-centric");
-    if (queryContext.getRequestType() == RequestType.COUNT) {
+  public SearchRequestBuilder visit(@NonNull Node node, @NonNull QueryContext queryContext) {
+    SearchRequestBuilder result = client
+        .prepareSearch(queryContext.getIndex())
+        .setTypes(queryContext.getType().getId());
+
+    if (queryContext.getRequestType() == COUNT) {
       log.debug("Setting search type to count");
       result = result.setSearchType(SearchType.COUNT);
     }
 
     for (val child : node.getChildren()) {
       if (child instanceof PostFilterNode) {
-        val boolFilter = child.accept(this);
-        result.setFilter(boolFilter);
+        result.setFilter(child.accept(this));
       } else if (child instanceof FieldsNode) {
         val castedChild = (FieldsNode) child;
         String[] children = castedChild.getFields().toArray(new String[castedChild.getFields().size()]);
@@ -154,17 +156,17 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
   @Override
   public FilterBuilder visitNot(@NonNull NotNode node) {
-    val childrenCount = node.getChildren().size();
+    val childrenCount = node.childrenCount();
     checkState(childrenCount == 1, "NotNode can have only one child. Found {}", childrenCount);
 
-    return FilterBuilders.notFilter(node.getChild(0).accept(this));
+    return notFilter(node.getChild(0).accept(this));
   }
 
   @Override
   public FilterBuilder visitRange(@NonNull RangeNode node) {
     checkState(node.childrenCount() > 0, "RangeNode has no children");
 
-    stack.push(FilterBuilders.rangeFilter(node.getName()));
+    stack.push(rangeFilter(node.getName()));
     for (val child : node.getChildren()) {
       child.accept(this);
     }
@@ -173,7 +175,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitGreaterEqual(GreaterEqualNode node) {
+  public FilterBuilder visitGreaterEqual(@NonNull GreaterEqualNode node) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.gte(node.getValue());
@@ -182,7 +184,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitGreaterThan(GreaterThanNode node) {
+  public FilterBuilder visitGreaterThan(@NonNull GreaterThanNode node) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.gt(node.getValue());
@@ -191,7 +193,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitLessEqual(LessEqualNode node) {
+  public FilterBuilder visitLessEqual(@NonNull LessEqualNode node) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.lte(node.getValue());
@@ -200,7 +202,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitLessThan(LessThanNode node) {
+  public FilterBuilder visitLessThan(@NonNull LessThanNode node) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.lt(node.getValue());
@@ -209,35 +211,35 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitAnd(AndNode node) {
+  public FilterBuilder visitAnd(@NonNull AndNode node) {
     log.debug("Visiting And: {}", node);
     val childrenFilters = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
       childrenFilters.add(child.accept(this));
     }
 
-    return FilterBuilders.andFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
+    return andFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
   }
 
   @Override
-  public FilterBuilder visitOr(OrNode node) {
+  public FilterBuilder visitOr(@NonNull OrNode node) {
     log.debug("Visiting Or: {}", node);
     val childrenFilters = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
       childrenFilters.add(child.accept(this));
     }
 
-    return FilterBuilders.orFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
+    return orFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
   }
 
   @Override
-  public FilterBuilder visitTerms(TermsNode node) {
+  public FilterBuilder visitTerms(@NonNull TermsNode node) {
     val values = Lists.newArrayList();
     for (val child : node.getChildren()) {
       values.add(((TerminalNode) child).getValue());
     }
 
-    return FilterBuilders.termsFilter(node.getField(), values);
+    return termsFilter(node.getField(), values);
   }
 
 }

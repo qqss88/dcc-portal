@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class RangeNode extends ExpressionNode {
 
+  @NonNull
   String name;
 
   public RangeNode(@NonNull String name, ExpressionNode... children) {
@@ -36,7 +37,7 @@ public class RangeNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitRange(this);
   }
 

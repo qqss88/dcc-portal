@@ -17,44 +17,20 @@
  */
 package org.dcc.portal.pql.utils;
 
-import lombok.AccessLevel;
+import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.val;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.icgc.dcc.portal.pql.antlr4.PqlLexer;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class TestingHelpers {
 
-  private static final ObjectReader READER = new ObjectMapper().reader();
-
-  @SneakyThrows
-  public static JsonNode getJson(FilterBuilder builder) {
-    return TestingHelpers.READER.readTree(builder.toString());
-  }
-
-  public static ParseTree createPqlAst(String query) {
+  public static ParseTree createParseTree(String query) {
     val parser = getParser(query);
 
     return parser.statement();
-  }
-
-  private static PqlParser getParser(String query) {
-    val inputStream = new ANTLRInputStream(query);
-    val lexer = new PqlLexer(inputStream);
-    val tokenStream = new CommonTokenStream((lexer));
-
-    return new PqlParser(tokenStream);
   }
 
 }

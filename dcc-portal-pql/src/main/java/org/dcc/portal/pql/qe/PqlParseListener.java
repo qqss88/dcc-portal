@@ -20,6 +20,7 @@ package org.dcc.portal.pql.qe;
 import java.util.Collection;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.utils.RequestType;
+import org.dcc.portal.pql.es.model.RequestType;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
@@ -44,10 +45,11 @@ public class PqlParseListener extends PqlBaseListener {
   private static final PqlParseTreeVisitor PQL_VISITOR = new PqlParseTreeVisitor();
 
   ExpressionNode esAst = new RootNode();
+  @NonNull
   QueryContext queryContext;
 
   @Override
-  public void exitStatement(StatementContext context) {
+  public void exitStatement(@NonNull StatementContext context) {
     log.debug("Starting to process query - {}", context.toStringTree());
     if (context.count() != null) {
       log.debug("Processing count() type query");

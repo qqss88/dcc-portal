@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.ast;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -28,6 +29,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = false)
 public class TerminalNode extends ExpressionNode {
 
+  @NonNull
   Object value;
 
   public TerminalNode(Object payload) {

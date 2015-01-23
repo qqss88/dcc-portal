@@ -19,11 +19,14 @@ package org.dcc.portal.pql.qe;
 
 import lombok.Data;
 
-import org.dcc.portal.pql.es.utils.RequestType;
+import org.dcc.portal.pql.es.model.RequestType;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @Data
 public class QueryContext {
 
+  private String index;
+  private Type type;
   private RequestType requestType;
 
 }
