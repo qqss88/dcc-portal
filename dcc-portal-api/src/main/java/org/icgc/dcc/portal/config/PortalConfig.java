@@ -207,7 +207,11 @@ public class PortalConfig {
 
   @Bean
   public HazelcastInstance hazelcastInstance() {
-    return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
+    if (isDistributed()) {
+      return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
+    } else {
+      return null;
+    }
   }
 
   @Bean

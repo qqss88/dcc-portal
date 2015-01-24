@@ -17,7 +17,6 @@
 
 package org.icgc.dcc.portal.health;
 
-import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +41,7 @@ public final class HazelcastHealthCheck extends HealthCheck {
   private final HazelcastInstance hazelcastInstance;
 
   @Autowired
-  public HazelcastHealthCheck(@NonNull HazelcastInstance hazelcastInstance) {
+  public HazelcastHealthCheck(HazelcastInstance hazelcastInstance) {
     super(CHECK_NAME);
     this.hazelcastInstance = hazelcastInstance;
   }
