@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.config;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.inject.Stage.DEVELOPMENT;
 import static org.icgc.dcc.data.archive.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
 
@@ -28,6 +29,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -41,8 +43,8 @@ import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
 import com.yammer.dropwizard.db.DatabaseConfiguration;
 
-@Getter
-@ToString
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class PortalProperties extends Configuration {
 
   @Valid
@@ -90,8 +92,7 @@ public class PortalProperties extends Configuration {
   @JsonProperty
   DatabaseConfiguration database = new DatabaseConfiguration();
 
-  @Getter
-  @ToString
+  @Data
   public static class BrowserProperties {
 
     @JsonProperty
@@ -106,18 +107,17 @@ public class PortalProperties extends Configuration {
     boolean enableLastModified;
 
     @JsonProperty
-    List<String> excludeLastModified;
+    List<String> excludeLastModified = newArrayList();
 
     @JsonProperty
     boolean enableETag;
 
     @JsonProperty
-    List<String> excludeETag;
+    List<String> excludeETag = newArrayList();
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class CrowdProperties {
 
     /**
@@ -135,8 +135,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class DownloadProperties {
 
     @JsonProperty
@@ -183,15 +182,14 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class ElasticSearchProperties {
 
     @JsonProperty
     String indexName = "dcc-release-release5";
 
     @JsonProperty
-    List<ElasticSearchNodeAddress> nodeAddresses;
+    List<ElasticSearchNodeAddress> nodeAddresses = newArrayList();
 
     @Getter
     @ToString
@@ -270,8 +268,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class MailProperties {
 
     boolean enabled = false;
