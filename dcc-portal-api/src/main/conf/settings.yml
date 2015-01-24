@@ -31,7 +31,7 @@ database:
   password: dcc
   
   # the JDBC URL
-  url: jdbc:postgresql://***REMOVED***/dcc_identifier
+  url: jdbc:postgresql://***REMOVED***/dcc_portal
   
   # any properties specific to your JDBC driver:
   properties:
@@ -41,7 +41,7 @@ database:
   maxWaitForConnection: 1s
 
   # the SQL query to run when validating a connection's liveness
-  validationQuery: "/* MyService Health Check */ SELECT 1"
+  validationQuery: "/* Portal DB Health Check */ SELECT 1"
 
   # the minimum number of connections to keep open
   minSize: 8
