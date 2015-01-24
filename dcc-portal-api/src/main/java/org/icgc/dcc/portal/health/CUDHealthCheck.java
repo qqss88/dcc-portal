@@ -17,10 +17,12 @@
 
 package org.icgc.dcc.portal.health;
 
+import static org.fest.util.Strings.isNullOrEmpty;
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
+import org.icgc.dcc.portal.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,30 +30,39 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class ElasticSearchHealthCheck extends HealthCheck {
+public final class CUDHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "elasticsearch";
+  private static final String CHECK_NAME = "cud";
 
   /**
    * Dependencies
    */
-  private final Client client;
+  private final AuthService authService;
 
   @Autowired
-  public ElasticSearchHealthCheck(Client client) {
+  public CUDHealthCheck(@NonNull AuthService authService) {
     super(CHECK_NAME);
-    this.client = client;
+    this.authService = authService;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of ElasticSearch...");
-    val status = client.admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
+    log.info("Checking the health of CUD...");
 
-    return Result.healthy(status);
+    try {
+      val token = authService.getAuthToken();
+      val healthy = !isNullOrEmpty(token);
+      if (healthy) {
+        return Result.healthy();
+      } else {
+        return Result.unhealthy("Token empty");
+      }
+    } catch (Exception e) {
+      return Result.unhealthy(e);
+    }
   }
 
 }
