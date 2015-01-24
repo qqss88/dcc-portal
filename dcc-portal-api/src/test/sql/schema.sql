@@ -4,16 +4,12 @@
 
 /* Script for setting up the dcc-portal schema using H2 1.3.x */
 
--- Clean
-DROP TABLE IF EXISTS user_gene_set;
-DROP TABLE IF EXISTS enrichment_analysis;
-
 -- Create
-CREATE TABLE user_gene_set(
+CREATE TABLE IF NOT EXISTS user_gene_set(
    id   UUID PRIMARY KEY,
    data TEXT 
 );
-CREATE TABLE enrichment_analysis(
+CREATE TABLE IF NOT EXISTS enrichment_analysis(
    id   UUID PRIMARY KEY,
    data TEXT 
 );

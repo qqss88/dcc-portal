@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.spring;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -33,6 +34,7 @@ import com.yammer.dropwizard.config.Environment;
  * 
  * @param <T>
  */
+@Slf4j
 public abstract class SpringService<T extends Configuration> extends Service<T> {
 
   private final AnnotationConfigApplicationContext context;
@@ -45,15 +47,32 @@ public abstract class SpringService<T extends Configuration> extends Service<T> 
 
   @Override
   public void initialize(Bootstrap<T> bootstrap) {
-    bootstrap.addBundle(new SpringBundle<T>(context, true, true));
-  }
+    bootstrap.addBundle(new SpringBundle<T>(context, true, true) {
 
-  @Override
-  public void run(T configuration, Environment environment) throws Exception {
-    // This is required for ContainerRequestFilter, ContainerResponseFilter, etc injection
-    val springProvider = new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context);
+      @Override
+      public void run(T configuration, Environment environment) throws Exception {
+        // Order matters
+        registerEnvironment(environment);
+        super.run(configuration, environment);
 
-    environment.addProvider(springProvider);
+        registerJerseyProvider(environment);
+      }
+
+      private void registerEnvironment(Environment environment) {
+        // This is needed to work with Dropwizard components
+        log.info("Registering Dropwizard Environment under name : dwEnv");
+        val beanFactory = context.getBeanFactory();
+        beanFactory.registerSingleton("dwEnv", environment);
+      }
+
+      private void registerJerseyProvider(Environment environment) {
+        // This is required for ContainerRequestFilter, ContainerResponseFilter, etc injection
+        log.info("Registering SpringComponentProviderFactory");
+        val springProvider = new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context);
+        environment.addProvider(springProvider);
+      }
+
+    });
   }
 
 }
