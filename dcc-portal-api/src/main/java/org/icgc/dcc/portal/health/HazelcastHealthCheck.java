@@ -52,6 +52,8 @@ public final class HazelcastHealthCheck extends HealthCheck {
     log.info("Checking the health of Hazelcast...");
     val memberCount = hazelcastInstance.getCluster().getMembers().size();
 
+    // TODO: Compare with expected count
+
     return Result.healthy("%s members", memberCount);
   }
 

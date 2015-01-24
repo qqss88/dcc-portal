@@ -17,7 +17,7 @@
 
 package org.icgc.dcc.portal.health;
 
-import static org.fest.util.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
