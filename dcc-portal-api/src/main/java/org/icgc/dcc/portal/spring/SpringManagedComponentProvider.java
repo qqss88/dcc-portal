@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (type) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,42 +17,49 @@
  */
 package org.icgc.dcc.portal.spring;
 
+import static org.springframework.aop.support.AopUtils.isAopProxy;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.aop.framework.Advised;
+import org.springframework.context.ConfigurableApplicationContext;
 
-import com.github.nhuray.dropwizard.spring.SpringBundle;
-import com.yammer.dropwizard.Service;
-import com.yammer.dropwizard.config.Bootstrap;
-import com.yammer.dropwizard.config.Configuration;
-import com.yammer.dropwizard.config.Environment;
+import com.sun.jersey.core.spi.component.ComponentScope;
+import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
 
-/**
- * Base class for Dropwizard Spring integration.
- * 
- * @param <T>
- */
-public abstract class SpringService<T extends Configuration> extends Service<T> {
+@Slf4j
+@RequiredArgsConstructor
+public class SpringManagedComponentProvider implements IoCManagedComponentProvider {
 
-  private final AnnotationConfigApplicationContext context;
+  private final ConfigurableApplicationContext context;
+  private final ComponentScope scope;
+  private final String beanName;
+  private final Class<?> type;
 
-  public SpringService() {
-    this.context = new AnnotationConfigApplicationContext();
-
-    context.scan(this.getClass().getPackage().getName());
+  @Override
+  public ComponentScope getScope() {
+    return scope;
   }
 
   @Override
-  public void initialize(Bootstrap<T> bootstrap) {
-    bootstrap.addBundle(new SpringBundle<T>(context, true, true));
+  public Object getInjectableInstance(Object o) {
+    if (isAopProxy(o)) {
+      val aopResource = (Advised) o;
+      try {
+        return aopResource.getTargetSource().getTarget();
+      } catch (Exception e) {
+        log.error("Could not get target object from proxy.", e);
+        throw new RuntimeException("Could not get target object from proxy.", e);
+      }
+    } else {
+      return o;
+    }
   }
 
   @Override
-  public void run(T configuration, Environment environment) throws Exception {
-    // This is required for ContainerRequestFilter, ContainerResponseFilter, etc. injection
-    val springProvider = new SpringComponentProviderFactory(environment.getJerseyResourceConfig(), context);
-
-    environment.addProvider(springProvider);
+  public Object getInstance() {
+    return context.getBean(beanName, type);
   }
 
 }
