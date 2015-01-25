@@ -23,8 +23,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.sun.jersey.spi.inject.SingletonTypeInjectableProvider;
 
-public class SpringContextInjectableProvider extends
-    SingletonTypeInjectableProvider<Context, ApplicationContext> {
+public class SpringContextInjectableProvider extends SingletonTypeInjectableProvider<Context, ApplicationContext> {
 
   SpringContextInjectableProvider(ApplicationContext instance) {
     super(ApplicationContext.class, instance);

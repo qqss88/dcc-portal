@@ -23,7 +23,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.aop.framework.Advised;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.beans.factory.BeanFactory;
 
 import com.sun.jersey.core.spi.component.ComponentScope;
 import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
@@ -32,7 +32,7 @@ import com.sun.jersey.core.spi.component.ioc.IoCManagedComponentProvider;
 @RequiredArgsConstructor
 public class SpringManagedComponentProvider implements IoCManagedComponentProvider {
 
-  private final ConfigurableApplicationContext context;
+  private final BeanFactory factory;
   private final ComponentScope scope;
   private final String beanName;
   private final Class<?> type;
@@ -59,7 +59,7 @@ public class SpringManagedComponentProvider implements IoCManagedComponentProvid
 
   @Override
   public Object getInstance() {
-    return context.getBean(beanName, type);
+    return factory.getBean(beanName, type);
   }
 
 }

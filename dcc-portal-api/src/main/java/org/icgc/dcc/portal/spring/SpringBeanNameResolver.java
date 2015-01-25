@@ -23,7 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.ClassUtils;
 
 import com.sun.jersey.api.core.InjectParam;
@@ -33,7 +33,7 @@ import com.sun.jersey.core.spi.component.ComponentContext;
 public class SpringBeanNameResolver {
 
   @NonNull
-  private final AnnotationConfigApplicationContext context;
+  private final ConfigurableApplicationContext context;
 
   public String resolveBeanName(ComponentContext componentContext, Class<?> type) {
     boolean annotatedWithInject = false;

@@ -7,7 +7,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.core.spi.component.ComponentContext;
@@ -19,12 +19,12 @@ import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
 public class SpringComponentProviderFactory implements IoCComponentProviderFactory {
 
   @NonNull
-  private final AnnotationConfigApplicationContext context;
-  private final SpringBeanNameResolver beanNameResolver;
+  private final GenericApplicationContext context;
+  private final SpringBeanNameResolver resolver;
 
-  public SpringComponentProviderFactory(ResourceConfig config, AnnotationConfigApplicationContext context) {
+  public SpringComponentProviderFactory(ResourceConfig config, GenericApplicationContext context) {
     this.context = context;
-    this.beanNameResolver = new SpringBeanNameResolver(context);
+    this.resolver = new SpringBeanNameResolver(context);
 
     config.getSingletons().add(new SpringContextInjectableProvider(context));
   }
@@ -36,7 +36,7 @@ public class SpringComponentProviderFactory implements IoCComponentProviderFacto
 
   @Override
   public IoCComponentProvider getComponentProvider(ComponentContext componentContext, Class<?> type) {
-    val beanName = beanNameResolver.resolveBeanName(componentContext, type);
+    val beanName = resolver.resolveBeanName(componentContext, type);
     if (beanName == null) {
       return null;
     }
