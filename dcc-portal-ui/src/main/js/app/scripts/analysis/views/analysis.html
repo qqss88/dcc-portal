@@ -63,6 +63,7 @@
 
             <enrichment-upload
                 data-total="{{listItemTotal}}"
+                data-filters="enrichmentFilters"
                 data-enrichment-modal="enrichmentModal">
             </enrichment-upload>
 
@@ -77,7 +78,8 @@
                 </span>
                 <span>&nbsp;</span>
                 <span>
-                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">
+                    <!--<button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">-->
+                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="launchEnrichmentAnalysis()">
                     <i class="icon-beaker"></i>
                     Enrichment Analysis
                     <br><small>Create enrichment analysis from a set of genes</small>

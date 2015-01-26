@@ -246,12 +246,10 @@
 
           });
 
-
         }
 
         $scope.$watch('item', function(n) {
-          if (n) {
-            console.log('item', n);
+          if (n && n.result) {
             initVennDiagram();
           }
         });
@@ -420,6 +418,7 @@
       var promise = RestangularNoCache.one('entitylist', id).get({});
       promise.then(function(data) {
         if (! data.status || data.status !== 'FINISHED') {
+          console.log(id, data.status);
           $timeout(function() {
             wait(id);
           }, 2000);

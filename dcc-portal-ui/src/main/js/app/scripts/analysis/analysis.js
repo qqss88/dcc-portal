@@ -82,16 +82,19 @@
         }
         $location.path('analysis/union/' + data.id);
       });
+    };
 
+    $scope.launchEnrichmentAnalysis = function() {
+      var geneList = $scope.entityLists[0];
 
-      /*
-      var data = $scope.listItemUUIDs;
-      var promise = Restangular.one('analysis')
-        .withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'set');
-
-      */
-
+      $scope.enrichmentFilters = {
+        gene: {
+          entityListId: {
+            is: [ geneList.id ]
+          }
+        }
+      };
+      $scope.enrichmentModal = true;
     };
 
 
@@ -171,6 +174,8 @@
         // FIXME: sync with bob and terry
         var currentState = data.state || data.status;
         data.state = currentState;
+
+        console.log('data state', data.state);
 
         // Check if we need to poll
         if (currentState !== 'FINISHED') {
