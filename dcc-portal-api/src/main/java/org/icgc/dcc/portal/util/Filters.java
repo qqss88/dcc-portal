@@ -32,8 +32,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.Universe;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
@@ -131,9 +129,13 @@ public final class Filters {
     if (universe.path("gene").path("goTermId").isMissingNode() == false) {
       val universeId = universe.get("gene").get("goTermId").withArray("is").get(0).asText();
       result.with("gene").with("goTermId").withArray(ALL).add(universeId);
-    } else if (universe.path("gene").path(Universe.REACTOME_PATHWAYS.getGeneSetFacetName()).isMissingNode() == false) {
-      result.with("gene").put(Universe.REACTOME_PATHWAYS.getGeneSetFacetName(), true);
+    } else if (universe.path("gene").path("hasPathway").isMissingNode() == false) {
+      result.with("gene").put("hasPathway", "true");
     }
+    // } else if (universe.path("gene").path(Universe.REACTOME_PATHWAYS.getGeneSetFacetName()).isMissingNode() == false)
+    // {
+    // result.with("gene").put(Universe.REACTOME_PATHWAYS.getGeneSetFacetName(), true);
+    // }
     return result;
   }
 
