@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.net.URI;
 import java.util.UUID;
@@ -60,6 +61,7 @@ public final class AuthUtils {
   }
 
   public static NewCookie createSessionCookie(@NonNull String cookieName, @NonNull String cookieValue) {
+    log.debug("Creating new session cookie: {}={}", cookieName, cookieValue);
     return new NewCookie(
         cookieName,
         cookieValue,
@@ -125,11 +127,10 @@ public final class AuthUtils {
    * @param redirect - redirection URL
    * @throws AuthenticationException
    */
-  // TODO check if there is a better way to communicate error to a user at redirect
   public static void throwRedirectException(@NonNull String userMessage, @NonNull String logMessage,
       @NonNull URI redirect) {
 
-    log.info(userMessage);
+    log.info(logMessage);
     throw new AuthenticationException(userMessage, false, redirect);
   }
 
@@ -140,7 +141,6 @@ public final class AuthUtils {
    * @param redirect - redirection URL
    * @throws AuthenticationException
    */
-  // TODO check if there is a better way to communicate error to a user at redirect
   public static void throwRedirectException(@NonNull String userMessage, @NonNull URI redirect) {
     throwRedirectException(userMessage, userMessage, redirect);
   }
@@ -166,7 +166,8 @@ public final class AuthUtils {
     try {
       result = UUID.fromString(source);
     } catch (IllegalArgumentException e) {
-      throwRedirectException(DEFAULT_USER_MESSAGE, e.getMessage(), redirect);
+      throwRedirectException(DEFAULT_USER_MESSAGE,
+          _("Failed to convert string '%s' to UUID. Exception: %s", source, e.getMessage()), redirect);
     }
 
     return result;
