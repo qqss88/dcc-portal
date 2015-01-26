@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import com.github.nhuray.dropwizard.spring.SpringBundle;
-import com.sun.jersey.spi.spring.container.SpringComponentProviderFactory;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Configuration;
