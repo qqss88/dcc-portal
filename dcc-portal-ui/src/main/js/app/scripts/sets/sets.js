@@ -86,6 +86,13 @@
           $scope.setType = null;
         };
 
+        $scope.cancel = function() {
+          console.log('... cancelling ...');
+          $scope.setDescription = null;
+          $scope.setType = null;
+          $scope.setModal = false;
+        };
+
         $scope.$watch('setModal', function(n) {
           if (n) {
             $scope.setName = $scope.setType;
@@ -218,6 +225,7 @@
             }
           };
 
+          $scope.setType = $scope.item.type.toLowerCase();
           $scope.data = $scope.item.result;
           $scope.vennData = SetOperationService.transform($scope.data);
           $scope.setList = [];

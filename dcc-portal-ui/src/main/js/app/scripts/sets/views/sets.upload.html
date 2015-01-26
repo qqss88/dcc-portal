@@ -3,7 +3,9 @@
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 class="pull-left">Save {{setType}} set</h3>
+                <h3 data-ng-if="!setLimit" class="pull-left">Save {{setType}} set</h3>
+                <h3 data-ng-if="setLimit" class="pull-left">Save Query Results</h3>
+
                 <button class="pull-right t_button" data-ng-click="setModal=false"><i class="icon-cancel"></i>
                 </button>
             </div>
@@ -11,11 +13,13 @@
             <!-- body -->
             <div class="modal-body"> 
 
+                <!--
                 <div data-ng-if="setLimit">
                     <br>
                     <div>Query:</div>
                     <query-display data-filters="uiFilters"><query-display>
                 </div>
+                -->
 
                 <br>
                 <div>Name:</div>
@@ -34,8 +38,8 @@
 
             <!-- footer -->
             <div class="modal-footer">
-                <button class="t_button" data-ng-click="setModal=false">Cancel</button>
-                <button class="t_button" data-ng-click="submitNewSet(); setModal=false">Submit</button> 
+                <button class="t_button" data-ng-click="cancel()">Cancel</button>
+                <button class="t_button" data-ng-click="submitNewSet(); setModal=false">Save</button> 
             </div>
         </div>
     </div>

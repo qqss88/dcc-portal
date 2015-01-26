@@ -3,20 +3,21 @@
 </div>
 <span data-ng-if="item.state === 'FINISHED'">
 
-    <set-upload data-set-modal="setModal" data-set-union="setUnion" data-set-type="'donor'"></set-upload>
+    <set-upload data-set-modal="setModal" data-set-union="setUnion" data-set-type="setType"></set-upload>
 
     <div class="canvas half"></div>
     <div class="narrow">
 
-        <span data-ng-click="checked=!checked; checked? selectAll() : selectNone()">
-            <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i> Select all
-        </span>
 
         <br>
 
         <table class="table">
             <thead>
-                <th>&nbsp;</th>
+                <th>
+                    <span data-ng-click="checked=!checked; checked? selectAll() : selectNone()">
+                        <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i>
+                    </span>
+                </th>
                 <th>Set operations</th>
                 <th>Counts</th>
                 <th>Actions</th>

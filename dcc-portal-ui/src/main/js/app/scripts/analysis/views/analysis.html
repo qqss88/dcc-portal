@@ -6,9 +6,11 @@
             <div class="t_tabs__tab t_tabs__tab__analysis active">
                 <span>Bench</span>
             </div>
-            <span class="ipull-right" style="margin-left: 1.5rem">
+            <!--
+            <span style="margin-left: 3.0rem">
                 <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
             </span>
+            -->
         </div>
         <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
             <ul class="t_suggest_flyout__hits">
@@ -17,7 +19,7 @@
                     data-ng-class="{selected: !analysisId}">
                     <span>Home</span>
                     <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
-                    <small>--</small>
+                    <small>&nbsp;</small>
                 </>
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id, item.type)"
@@ -41,6 +43,9 @@
             </ul>
         </div>
     </div>
+    <div class="pull-right" data-ng-if="analysisList.length > 0">
+       <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
+    </div>
 </aside>
 
 <article>
@@ -52,14 +57,6 @@
             For more information on the Bench, please refer to <a href="">documentation</a>.
             </span>
             <br><br>
-            <!--
-            <br>
-            <span>debug selected total: {{listItemTotal}}</span>
-            <br>
-            <span>debug selected ids: {{listItemUUIDs}}</span>
-            <br>
-            -->
-
 
             <enrichment-upload
                 data-total="{{listItemTotal}}"
