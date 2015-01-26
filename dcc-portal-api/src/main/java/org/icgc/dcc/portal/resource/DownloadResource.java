@@ -571,6 +571,8 @@ public class DownloadResource {
 
       ) throws IOException {
 
+    if (filePath.trim().equals("")) throw new BadRequestException("Missing argument fn");
+
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
     StreamingOutput archiveStream = null;

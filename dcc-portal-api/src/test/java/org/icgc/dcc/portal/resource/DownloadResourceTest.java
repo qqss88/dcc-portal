@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anySetOf;
@@ -185,6 +186,23 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
   }
 
+  @Test
+  public void testNoArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
+  @Test
+  public void testEmptyArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .queryParam("fn", "")
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
   @Test(expected = NotFoundException.class)
   public void testDeniedControlledDataAccessStream() throws IOException {
     when(
@@ -195,8 +213,7 @@ public class DownloadResourceTest extends ResourceTest {
     // // try to access control data without proper authentication
     client()
         .resource(RESOURCE)
-        .queryParam("filters", "")
-        .queryParam("info", "[{\"key\":\"SGV\",\"value\":\"TSV\"}]")
+        .queryParam("fn", "somefiles")
         .get(ClientResponse.class);
   }
 

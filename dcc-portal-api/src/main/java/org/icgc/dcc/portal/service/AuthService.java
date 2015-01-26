@@ -82,7 +82,7 @@ public class AuthService {
    * @return session token
    * @throws ICGCException and its sub-classes
    */
-  private String getAuthToken() {
+  public String getAuthToken() {
     return loginUser(icgcConfig.getCudUser(), icgcConfig.getCudPassword());
   }
 
