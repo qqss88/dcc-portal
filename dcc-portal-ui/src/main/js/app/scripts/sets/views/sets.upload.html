@@ -23,11 +23,11 @@
 
                 <br>
                 <div>Name:</div>
-                <input type="text" data-ng-model="setName" maxlength="64"></input>
+                <input type="text" data-ng-model="setName" maxlength="64" data-select-on-click></input>
 
                 <br>
                 <div>Note:</div>
-                <textarea cols="50" rows="3" data-ng-model="setDescription" placeholder="(Optional)" maxlength="256"></textarea>
+                <textarea cols="50" rows="3" data-ng-model="setDescription" placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
                 <small>{{256 - setDescription.length}} chars left</small>
 
                 <br>
@@ -39,7 +39,7 @@
             <!-- footer -->
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="cancel()">Cancel</button>
-                <button class="t_button" data-ng-click="submitNewSet(); setModal=false">Save</button> 
+                <button class="t_button" data-ng-click="submitNewSet(); setModal=false">Submit</button> 
             </div>
         </div>
     </div>

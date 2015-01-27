@@ -24,7 +24,8 @@ angular.module('icgc.ui', [
   'icgc.ui.openin',
   'icgc.ui.trees',
   'icgc.ui.lists',
-  'icgc.ui.query'
+  'icgc.ui.query',
+  'icgc.ui.events'
 ]);
 
 
@@ -43,6 +44,20 @@ angular.module('app.ui', [
   // 'app.ui.exists2',
   // 'app.ui.scrolled',
 ]);
+
+
+
+// Select content on click
+angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, element) {
+      element.on('click', function() {
+        this.select();
+      });
+    }
+  };
+});
 
 
 // See: https://github.com/angular/angular.js/issues/1375

@@ -1,18 +1,17 @@
-<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Bench</h1>
+<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Set Analysis</h1>
 <aside class="t_sidebar">
-    <div style="margin-right: -2rem">
-
-        <div>
+    <div>
+        <div class="t_tabs" style="margin-right: -2rem">
             <div class="t_tabs__tab t_tabs__tab__analysis active">
                 <span>Bench</span>
             </div>
-            <!--
-            <span style="margin-left: 3.0rem">
-                <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
-            </span>
-            -->
         </div>
-        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem; margin-right:-2rem">
+            <section class="text-right">
+                <span>
+                    <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all analyses</button>
+                </span>
+            </section>
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
@@ -20,7 +19,7 @@
                     <span>Home</span>
                     <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
                     <small>&nbsp;</small>
-                </>
+                </li>
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id, item.type)"
                     data-ng-repeat="item in analysisList"
@@ -43,16 +42,18 @@
             </ul>
         </div>
     </div>
+    <!--
     <div class="pull-right" data-ng-if="analysisList.length > 0">
        <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
     </div>
+    -->
 </aside>
 
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
         <div>
             <span>
-            Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the Advanced Search. Then
+            Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the <a href="/search/">Advanced Search</a>. Then
             launch analysis here. <br>
             For more information on the Bench, please refer to <a href="">documentation</a>.
             </span>
@@ -79,14 +80,16 @@
                     <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="launchEnrichmentAnalysis()">
                     <i class="icon-beaker"></i>
                     Enrichment Analysis
-                    <br><small>Create enrichment analysis from a set of genes</small>
+                    <br><small>Perform enrichment analysis from a set of genes</small>
                     </button>
                 </span>
             </div>
             <br>
             <span>
                 <span>Select set(s) below to activate available analysis</span>
+                <!--
                 <span class="pull-right">Create a new set from <a href="/search">Advanced Search</a></span>
+                -->
             </span>
             <table class="table">
                 <thead>
@@ -106,7 +109,7 @@
                         </td>
                         <td>{{item.type}}</td>
                         <td>{{item.name}}</td>
-                        <td>{{item.description}}</td>
+                        <td style="max-width: 30rem">{{item.description}}</td>
                         <td class="text-right" data-ng-if="item.status==='FINISHED'">
                             <a href="{{item.advLink}}">{{item.count | number}}</a>
                         </td>

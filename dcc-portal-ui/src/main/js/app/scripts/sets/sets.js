@@ -38,7 +38,7 @@
         setModal: '=',
         setType: '=',
         setUnion: '=',
-        setLimit: '@',
+        setLimit: '@'
       },
       templateUrl: '/scripts/sets/views/sets.upload.html',
       link: function($scope) {
@@ -95,7 +95,7 @@
 
         $scope.$watch('setModal', function(n) {
           if (n) {
-            $scope.setName = $scope.setType;
+            $scope.setName = 'my ' + $scope.setType + ' set';
             $scope.uiFilters = LocationService.filters();
           }
         });
@@ -374,7 +374,6 @@
     var _this = this;
 
 
-
     // For application/json format
     function params2JSON(type, params) {
       var data = {};
@@ -401,49 +400,8 @@
         data.sortOrder = 'DESCENDING';
       }
       data.union = params.union;
-
       return data;
     }
-
-    /*
-    function params2URLEncoded(type, params) {
-      var data = '';
-      data += 'type=' + type.toUpperCase() + '&';
-      data += 'filters=' + encodeURIComponent(JSON.stringify(params.filters)) + '&';
-      data += 'sortBy=' + params.sortBy + '&';
-      data += 'sortOrder=' + params.sortOrder + '&';
-      data += 'name=' + encodeURIComponent(params.name) + '&';
-      if (angular.isDefined(params.description)) {
-        data += 'description=' + encodeURIComponent(params.name);
-      }
-      return data;
-    } */
-
-    // Wait for list to materialize
-    function wait(id) {
-      console.log('polling....', id);
-
-      var promise = RestangularNoCache.one('entitylist', id).get({});
-      promise.then(function(data) {
-        if (! data.status || data.status !== 'FINISHED') {
-          console.log(id, data.status);
-          $timeout(function() {
-            wait(id);
-          }, 2000);
-          return;
-        }
-
-        // FIXME: sync with terry
-        data.type = data.type.toLowerCase();
-
-
-        var lists = _this.getAll();
-        lists.unshift(data);
-        localStorageService.set(LIST_ENTITY, lists);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
-      });
-    }
-
 
     this.saveAll = function(lists) {
       localStorageService.set(LIST_ENTITY, lists);
@@ -476,15 +434,10 @@
           return;
         }
 
-        var lists = _this.getAll();
         data.type = data.type.toLowerCase();
-        lists.unshift(data);
-        localStorageService.set(LIST_ENTITY, lists);
+        setList.unshift(data);
+        localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
-
-
-
-        // wait(data.id);
       });
     };
 
@@ -500,7 +453,6 @@
       var promise = null;
       var data = params2JSON(type, params);
 
-
       promise = Restangular.one('entitylist').post('union', data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         if (! data.id) {
@@ -508,14 +460,65 @@
           return;
         }
 
-        var lists = _this.getAll();
         data.type = data.type.toLowerCase();
-        lists.unshift(data);
-        localStorageService.set(LIST_ENTITY, lists);
+        setList.unshift(data);
+        localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+      });
+    };
 
 
-        // wait(data.id);
+
+    /*
+     * Attemp to sync with the server - fires only once, up to controller to do polling
+     */
+    this.sync = function() {
+      var pendingLists, pendingListsIDs, promise;
+
+      pendingLists = _.filter(setList, function(d) {
+        return d.status !== 'FINISHED';
+      });
+      pendingListsIDs = _.pluck(pendingLists, 'id');
+
+      // No need to update
+      if (pendingListsIDs.length === 0) {
+        return;
+      }
+      promise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
+
+      promise.then(function(updatedList) {
+        updatedList.forEach(function(item) {
+          var index = _.findIndex(setList, function(d) {
+            return item.id === d.id;
+          });
+          if (index >= 0) {
+            setList[index].count = item.count;
+            setList[index].status = item.status;
+          }
+        });
+
+        // Save update back
+        localStorageService.set(LIST_ENTITY, setList);
+        _this.refreshList();
+      });
+
+
+    };
+
+
+    this.refreshList = function() {
+      setList.forEach(function(set) {
+        var filters = {};
+
+        filters[set.type] = {
+          entityListId: {is: [ set.id ]}
+        };
+
+        if (['gene', 'mutation'].indexOf(set.type) !== -1) {
+          set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
+        } else {
+          set.advLink = '/search?filters=' + JSON.stringify(filters);
+        }
       });
     };
 
@@ -534,43 +537,23 @@
 
 
     /****** Local storage related API ******/
-    this.addTest = function(list) {
-      var lists = this.getAll();
-      lists.unshift(list);
-      localStorageService.set(LIST_ENTITY, lists);
-
-      toaster.pop('', list.name  + ' was saved', 'View it in the <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
-      return true;
-    };
-
-
     this.getAll = function() {
-      var sets = localStorageService.get(LIST_ENTITY) || [];
-      sets.forEach(function(set) {
-        var filters = {};
-
-        filters[set.type] = {
-          entityListId: {is: [ set.id ]}
-        };
-
-        if (['gene', 'mutation'].indexOf(set.type) !== -1) {
-          set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
-        } else {
-          set.advLink = '/search?filters=' + JSON.stringify(filters);
-        }
-
-      });
-      return sets;
+      setList = localStorageService.get(LIST_ENTITY) || [];
+      _this.refreshList();
+      return setList;
     };
 
     this.remove = function(id) {
-      var lists = localStorageService.get(LIST_ENTITY);
-      _.remove(lists, function(list) {
+      _.remove(setList, function(list) {
         return list.id === id;
       });
-      localStorageService.set(LIST_ENTITY, lists);
+      localStorageService.set(LIST_ENTITY, setList);
       return true;
     };
+
+    // Initialize
+    console.log('hello');
+    var setList = _this.getAll();
 
   });
 

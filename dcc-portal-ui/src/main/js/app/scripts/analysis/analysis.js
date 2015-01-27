@@ -138,55 +138,37 @@
     };
 
 
-    var analysisPromise, entityPromise;
+    var analysisPromise;
 
 
     // TODO: Move this out
-    var REMOVE_ONE = 'Are you sure you want to remove Analysis';
-    var REMOVE_ALL = 'Are you sure you want to remove all Analyses';
-
+    var REMOVE_ONE = 'Are you sure you want to remove Analysis?';
+    var REMOVE_ALL = 'Are you sure you want to remove all Analyses?';
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
 
 
-
     /**
      * Check status of any entityLists that are not in FINISHED stated
      */
     function pollEntityLists() {
-      var pendingLists, pendingListsIDs;
+      var unfinished = 0;
+      console.log($scope.entityLists);
+      SetService.sync();
 
-      pendingLists = _.filter($scope.entityLists, function(d) {
+      unfinished = _.filter($scope.entityLists, function(d) {
+        console.log('....', d);
         return d.status !== 'FINISHED';
-      });
-      pendingListsIDs = _.pluck(pendingLists, 'id');
+      }).length;
 
-      // All items are resolved
-      if (pendingListsIDs.length === 0) {
-        return;
-      }
+      console.log('unfinished', unfinished);
 
-      entityPromise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
-      entityPromise.then(function(statusList) {
-        statusList = Restangular.stripRestangular(statusList);
-        console.log(pendingListsIDs);
-        console.log('data', statusList);
-
-        statusList.forEach(function(item) {
-          var index = _.findIndex($scope.entityLists, function(d) {
-            return item.id === d.id;
-          });
-          if (index >= 0) {
-            $scope.entityLists[index] = item;
-          }
-        });
-        SetService.saveAll($scope.entityLists);
+      if (unfinished > 0) {
         $timeout(pollEntityLists, 4000);
-      });
+      }
     }
-    pollEntityLists();
 
 
     function getAnalysis() {
@@ -284,11 +266,13 @@
 
     // Clea up
     $scope.$on('destroy', function() {
-      $timeout.cancel(entityPromise);
       $timeout.cancel(analysisPromise);
     });
+
+
     init();
     getAnalysis();
+    pollEntityLists();
 
   });
 })();

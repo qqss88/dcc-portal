@@ -8,8 +8,13 @@
     <div class="canvas half"></div>
     <div class="narrow">
 
-
-        <br>
+        <div>
+            <ul>
+                <li data-ng-repeat="item in setList">
+                {{getSetShortHand(item, setList)}} - {{setNameMap[item]}}
+                </li>
+            </ul>
+        </div>
 
         <table class="table">
             <thead>
@@ -64,13 +69,6 @@
             </tbody>
         </table>
 
-        <div>
-            <ul>
-                <li data-ng-repeat="item in setList">
-                {{getSetShortHand(item, setList)}} - {{setNameMap[item]}}
-                </li>
-            </ul>
-        </div>
 
     </div>
 </span>
