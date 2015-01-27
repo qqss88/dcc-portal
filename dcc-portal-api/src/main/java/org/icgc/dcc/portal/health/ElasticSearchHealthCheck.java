@@ -16,9 +16,11 @@
  */
 package org.icgc.dcc.portal.health;
 
+import static org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus.RED;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,9 +50,20 @@ public final class ElasticSearchHealthCheck extends HealthCheck {
   @Override
   protected Result check() throws Exception {
     log.info("Checking the health of ElasticSearch...");
-    val status = client.admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
+    if (client == null) {
+      return Result.unhealthy("Service missing");
+    }
 
-    return Result.healthy(status);
+    val status = getStatus();
+    if (status == RED) {
+      return Result.unhealthy("Cluster health status is %s", status.name());
+    }
+
+    return Result.healthy("Cluster health status is %s", status.name());
+  }
+
+  private ClusterHealthStatus getStatus() {
+    return client.admin().cluster().prepareHealth().execute().actionGet().getStatus();
   }
 
 }

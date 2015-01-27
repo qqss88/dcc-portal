@@ -30,7 +30,7 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class IcgcHealthCheck extends HealthCheck {
+public final class ICGCHealthCheck extends HealthCheck {
 
   /**
    * Constants.
@@ -44,7 +44,7 @@ public final class IcgcHealthCheck extends HealthCheck {
   private final AuthService authService;
 
   @Autowired
-  public IcgcHealthCheck(@NonNull AuthService authService) {
+  public ICGCHealthCheck(@NonNull AuthService authService) {
     super(CHECK_NAME);
     this.authService = authService;
   }
@@ -52,18 +52,16 @@ public final class IcgcHealthCheck extends HealthCheck {
   @Override
   protected Result check() throws Exception {
     log.info("Checking the health of ICGC...");
-
-    try {
-      val token = authService.getAuthToken();
-      val healthy = (!isNullOrEmpty(token) && authService.hasDacoAccess(DACO_ENABLED_CUD_USER, CUD));
-      if (healthy) {
-        return Result.healthy();
-      } else {
-        return Result.unhealthy("Token empty");
-      }
-    } catch (Exception e) {
-      return Result.unhealthy(e);
+    val token = authService.getAuthToken();
+    if (isNullOrEmpty(token)) {
+      return Result.unhealthy("Token empty");
     }
+
+    if (!authService.hasDacoAccess(DACO_ENABLED_CUD_USER, CUD)) {
+      return Result.unhealthy("Invalid DACO account");
+    }
+
+    return Result.healthy("CUD and DACO valid");
   }
 
 }
