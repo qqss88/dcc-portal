@@ -95,7 +95,6 @@
                     <th>Name</th>
                     <th>Note</th>
                     <th># of items</th>
-                    <th>Created Date</th>
                     <th>&nbsp;</th>
                 </thead>
                 <tbody>
@@ -108,13 +107,10 @@
                         <td>{{item.type}}</td>
                         <td>{{item.name}}</td>
                         <td>{{item.description}}</td>
-                        <td class="text-right">
+                        <td class="text-right" data-ng-if="item.status==='FINISHED'">
                             <a href="{{item.advLink}}">{{item.count | number}}</a>
                         </td>
-                        <td>
-                            {{item.timestamp | date:'yyyy-MM-dd'}}
-                        </td>
-                        <td>
+                        <td data-ng-if="item.status==='FINISHED'">
                             <span class="t_tools" style="float:left">
                                 <span class="t_tools__tool">
                                     <i class="icon-file" data-ng-click="exportList(item.id)"></i>
@@ -122,19 +118,27 @@
                                 </span>
                             </span>
                         </td>
+                        <td colspan="2" data-ng-if="item.status !== 'FINISHED'">
+                            Processing ... <i class="icon-spinner icon-spin"></i>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
+
         <div data-ng-if="analysisType === 'enrichment'" >
             <h3>Enrichment Analysis</h3>
-            <enrichment-result data-item="analysisResult"></enrichment-result>
+            <div data-ng-if="!error">
+                <enrichment-result data-item="analysisResult"></enrichment-result>
+            </div>
         </div>
         <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
             <h3>Set Operations</h3>
-            <set-operation data-item="analysisResult"></set-operation>
+            <div data-ng-if="!error">
+                <set-operation data-item="analysisResult"></set-operation>
+            </div>
         </div>
         <div class="clearfix"></div>
 

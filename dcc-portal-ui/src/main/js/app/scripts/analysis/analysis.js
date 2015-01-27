@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, Page, SetService, AnalysisService) {
+    Restangular, RestangularNoCache, Page, SetService, AnalysisService) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -138,7 +138,8 @@
     };
 
 
-    var pollPromise;
+    var analysisPromise, entityPromise;
+
 
     // TODO: Move this out
     var REMOVE_ONE = 'Are you sure you want to remove Analysis';
@@ -148,6 +149,44 @@
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
+
+
+
+    /**
+     * Check status of any entityLists that are not in FINISHED stated
+     */
+    function pollEntityLists() {
+      var pendingLists, pendingListsIDs;
+
+      pendingLists = _.filter($scope.entityLists, function(d) {
+        return d.status !== 'FINISHED';
+      });
+      pendingListsIDs = _.pluck(pendingLists, 'id');
+
+      // All items are resolved
+      if (pendingListsIDs.length === 0) {
+        return;
+      }
+
+      entityPromise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
+      entityPromise.then(function(statusList) {
+        statusList = Restangular.stripRestangular(statusList);
+        console.log(pendingListsIDs);
+        console.log('data', statusList);
+
+        statusList.forEach(function(item) {
+          var index = _.findIndex($scope.entityLists, function(d) {
+            return item.id === d.id;
+          });
+          if (index >= 0) {
+            $scope.entityLists[index] = item;
+          }
+        });
+        SetService.saveAll($scope.entityLists);
+        $timeout(pollEntityLists, 4000);
+      });
+    }
+    pollEntityLists();
 
 
     function getAnalysis() {
@@ -183,7 +222,7 @@
           if (currentState === 'POST_PROCESSING') {
             pollRate = 4000;
           }
-          pollPromise = $timeout(getAnalysis, pollRate);
+          analysisPromise = $timeout(getAnalysis, pollRate);
         }
 
       }, function(error) {
@@ -202,7 +241,7 @@
     }
 
     $scope.getAnalysis = function(id, type) {
-      $timeout.cancel(pollPromise);
+      $timeout.cancel(analysisPromise);
       if (id) {
         $scope.analysisId = id;
         $location.path('analysis/' + type + '/' + id);
@@ -245,7 +284,8 @@
 
     // Clea up
     $scope.$on('destroy', function() {
-      $timeout.cancel(pollPromise);
+      $timeout.cancel(entityPromise);
+      $timeout.cancel(analysisPromise);
     });
     init();
     getAnalysis();

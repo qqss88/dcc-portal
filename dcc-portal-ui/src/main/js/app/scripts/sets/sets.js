@@ -440,9 +440,14 @@
         var lists = _this.getAll();
         lists.unshift(data);
         localStorageService.set(LIST_ENTITY, lists);
-        toaster.pop('', data.name  + ' was saved', 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
       });
     }
+
+
+    this.saveAll = function(lists) {
+      localStorageService.set(LIST_ENTITY, lists);
+    };
 
 
     /**
@@ -470,7 +475,16 @@
           console.log('there is no id!!!!');
           return;
         }
-        wait(data.id);
+
+        var lists = _this.getAll();
+        data.type = data.type.toLowerCase();
+        lists.unshift(data);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+
+
+
+        // wait(data.id);
       });
     };
 
@@ -493,7 +507,15 @@
           console.log('there is an error in creating derived set');
           return;
         }
-        wait(data.id);
+
+        var lists = _this.getAll();
+        data.type = data.type.toLowerCase();
+        lists.unshift(data);
+        localStorageService.set(LIST_ENTITY, lists);
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+
+
+        // wait(data.id);
       });
     };
 
