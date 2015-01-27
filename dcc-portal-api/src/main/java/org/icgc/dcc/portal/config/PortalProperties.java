@@ -26,6 +26,7 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,6 +41,7 @@ import org.icgc.dcc.portal.browser.model.DataSource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
+import com.yammer.dropwizard.db.DatabaseConfiguration;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -86,8 +88,9 @@ public class PortalProperties extends Configuration {
   ReleaseProperties release = new ReleaseProperties();
 
   @Valid
+  @NotNull
   @JsonProperty
-  DatabaseProperties database = new DatabaseProperties();
+  DatabaseConfiguration database = new DatabaseConfiguration();
 
   @Data
   public static class BrowserProperties {
@@ -298,14 +301,6 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     @URL
     String baseUrl;
-
-  }
-
-  @Data
-  public static class DatabaseProperties {
-
-    @JsonProperty
-    String url;
 
   }
 
