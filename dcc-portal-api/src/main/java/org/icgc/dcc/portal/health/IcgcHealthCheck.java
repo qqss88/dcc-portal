@@ -17,6 +17,7 @@
 package org.icgc.dcc.portal.health;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.icgc.dcc.common.client.api.daco.DACOClient.UserType.CUD;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,13 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class CUDHealthCheck extends HealthCheck {
+public final class IcgcHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "cud";
+  private static final String CHECK_NAME = "icgc";
+  private static final String DACO_ENABLED_CUD_USER = "btiernay";
 
   /**
    * Dependencies
@@ -42,18 +44,18 @@ public final class CUDHealthCheck extends HealthCheck {
   private final AuthService authService;
 
   @Autowired
-  public CUDHealthCheck(@NonNull AuthService authService) {
+  public IcgcHealthCheck(@NonNull AuthService authService) {
     super(CHECK_NAME);
     this.authService = authService;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of CUD...");
+    log.info("Checking the health of ICGC...");
 
     try {
       val token = authService.getAuthToken();
-      val healthy = !isNullOrEmpty(token);
+      val healthy = (!isNullOrEmpty(token) && authService.hasDacoAccess(DACO_ENABLED_CUD_USER, CUD));
       if (healthy) {
         return Result.healthy();
       } else {

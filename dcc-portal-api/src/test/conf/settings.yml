@@ -130,6 +130,9 @@ logging:
     # ERRORs should be converted to WARNs in Swagger 1.2.2
     "com.wordnik.swagger.jaxrs.HelpApi": OFF
 
+    # OpenId authenticator
+    "org.openid4java": WARN
+
 # ICGC Client configuration
 icgc:
 
