@@ -41,6 +41,7 @@ import org.icgc.dcc.portal.browser.model.DataSource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
+import com.yammer.dropwizard.db.DatabaseConfiguration;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
