@@ -16,54 +16,48 @@
  */
 package org.icgc.dcc.portal.health;
 
-import static org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus.RED;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class ElasticSearchHealthCheck extends HealthCheck {
+public final class HazelcastHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "elasticsearch";
+  private static final String CHECK_NAME = "hazelcast";
 
   /**
    * Dependencies
    */
-  private final Client client;
+  private final HazelcastInstance hazelcastInstance;
 
   @Autowired
-  public ElasticSearchHealthCheck(Client client) {
+  public HazelcastHealthCheck(HazelcastInstance hazelcastInstance) {
     super(CHECK_NAME);
-    this.client = client;
+    this.hazelcastInstance = hazelcastInstance;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of ElasticSearch...");
-    if (client == null) {
+    log.info("Checking the health of Hazelcast...");
+    if (hazelcastInstance == null) {
       return Result.unhealthy("Service missing");
     }
 
-    val status = getStatus();
-    if (status == RED) {
-      return Result.unhealthy("Cluster health status is %s", status.name());
+    val memberCount = hazelcastInstance.getCluster().getMembers().size();
+    if (memberCount == 0) {
+      return Result.unhealthy("No members");
     }
 
-    return Result.healthy("Cluster health status is %s", status.name());
-  }
-
-  private ClusterHealthStatus getStatus() {
-    return client.admin().cluster().prepareHealth().execute().actionGet().getStatus();
+    return Result.healthy("%s members available", memberCount);
   }
 
 }

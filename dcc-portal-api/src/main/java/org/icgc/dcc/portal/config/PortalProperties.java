@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.config;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.inject.Stage.DEVELOPMENT;
 import static org.icgc.dcc.data.archive.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
 
@@ -25,8 +26,10 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -39,8 +42,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
 
-@Getter
-@ToString
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class PortalProperties extends Configuration {
 
   @Valid
@@ -88,13 +91,11 @@ public class PortalProperties extends Configuration {
   SetOperationProperties setOperation = new SetOperationProperties();
 
   @Valid
+  @NotNull
   @JsonProperty
-  DatabaseProperties database = new DatabaseProperties();
+  DatabaseConfiguration database = new DatabaseConfiguration();
 
-  // private DatabaseConfiguration database2 = new DatabaseConfiguration();
-
-  @Getter
-  @ToString
+  @Data
   public static class BrowserProperties {
 
     @JsonProperty
@@ -109,18 +110,17 @@ public class PortalProperties extends Configuration {
     boolean enableLastModified;
 
     @JsonProperty
-    List<String> excludeLastModified;
+    List<String> excludeLastModified = newArrayList();
 
     @JsonProperty
     boolean enableETag;
 
     @JsonProperty
-    List<String> excludeETag;
+    List<String> excludeETag = newArrayList();
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class CrowdProperties {
 
     /**
@@ -138,8 +138,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class DownloadProperties {
 
     @JsonProperty
@@ -186,15 +185,14 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class ElasticSearchProperties {
 
     @JsonProperty
     String indexName = "dcc-release-release5";
 
     @JsonProperty
-    List<ElasticSearchNodeAddress> nodeAddresses;
+    List<ElasticSearchNodeAddress> nodeAddresses = newArrayList();
 
     @Getter
     @ToString
@@ -273,8 +271,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class MailProperties {
 
     boolean enabled = false;
@@ -322,14 +319,6 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     @URL
     String baseUrl;
-
-  }
-
-  @Data
-  public static class DatabaseProperties {
-
-    @JsonProperty
-    String url;
 
   }
 

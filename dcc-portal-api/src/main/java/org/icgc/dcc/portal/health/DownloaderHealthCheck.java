@@ -16,12 +16,9 @@
  */
 package org.icgc.dcc.portal.health;
 
-import static org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus.RED;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.client.Client;
+import org.icgc.dcc.data.downloader.DynamicDownloader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,41 +26,40 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class ElasticSearchHealthCheck extends HealthCheck {
+public final class DownloaderHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "elasticsearch";
+  private static final String CHECK_NAME = "downloader";
 
   /**
    * Dependencies
    */
-  private final Client client;
+  private final DynamicDownloader downloader;
 
   @Autowired
-  public ElasticSearchHealthCheck(Client client) {
+  public DownloaderHealthCheck(DynamicDownloader downloader) {
     super(CHECK_NAME);
-    this.client = client;
+    this.downloader = downloader;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of ElasticSearch...");
-    if (client == null) {
+    log.info("Checking the health of Downloader...");
+    if (downloader == null) {
       return Result.unhealthy("Service missing");
     }
 
-    val status = getStatus();
-    if (status == RED) {
-      return Result.unhealthy("Cluster health status is %s", status.name());
+    if (!downloader.isServiceAvailable()) {
+      return Result.unhealthy("Service unavailable");
     }
 
-    return Result.healthy("Cluster health status is %s", status.name());
-  }
+    if (downloader.isOverCapacity()) {
+      return Result.unhealthy("Over capacity");
+    }
 
-  private ClusterHealthStatus getStatus() {
-    return client.admin().cluster().prepareHealth().execute().actionGet().getStatus();
+    return Result.healthy();
   }
 
 }

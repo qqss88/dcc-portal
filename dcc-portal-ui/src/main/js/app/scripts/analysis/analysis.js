@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, Page, SetService, AnalysisService) {
+    Restangular, RestangularNoCache, Page, SetService, AnalysisService) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -82,16 +82,19 @@
         }
         $location.path('analysis/union/' + data.id);
       });
+    };
 
+    $scope.launchEnrichmentAnalysis = function() {
+      var geneList = $scope.entityLists[0];
 
-      /*
-      var data = $scope.listItemUUIDs;
-      var promise = Restangular.one('analysis')
-        .withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, 'set');
-
-      */
-
+      $scope.enrichmentFilters = {
+        gene: {
+          entityListId: {
+            is: [ geneList.id ]
+          }
+        }
+      };
+      $scope.enrichmentModal = true;
     };
 
 
@@ -135,16 +138,37 @@
     };
 
 
-    var pollPromise;
+    var analysisPromise;
+
 
     // TODO: Move this out
-    var REMOVE_ONE = 'Are you sure you want to remove Analysis';
-    var REMOVE_ALL = 'Are you sure you want to remove all Analyses';
-
+    var REMOVE_ONE = 'Are you sure you want to remove Analysis?';
+    var REMOVE_ALL = 'Are you sure you want to remove all Analyses?';
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
+
+
+    /**
+     * Check status of any entityLists that are not in FINISHED stated
+     */
+    function pollEntityLists() {
+      var unfinished = 0;
+      console.log($scope.entityLists);
+      SetService.sync();
+
+      unfinished = _.filter($scope.entityLists, function(d) {
+        console.log('....', d);
+        return d.status !== 'FINISHED';
+      }).length;
+
+      console.log('unfinished', unfinished);
+
+      if (unfinished > 0) {
+        $timeout(pollEntityLists, 4000);
+      }
+    }
 
 
     function getAnalysis() {
@@ -172,13 +196,15 @@
         var currentState = data.state || data.status;
         data.state = currentState;
 
+        console.log('data state', data.state);
+
         // Check if we need to poll
         if (currentState !== 'FINISHED') {
           var pollRate = 1000;
           if (currentState === 'POST_PROCESSING') {
             pollRate = 4000;
           }
-          pollPromise = $timeout(getAnalysis, pollRate);
+          analysisPromise = $timeout(getAnalysis, pollRate);
         }
 
       }, function(error) {
@@ -197,7 +223,7 @@
     }
 
     $scope.getAnalysis = function(id, type) {
-      $timeout.cancel(pollPromise);
+      $timeout.cancel(analysisPromise);
       if (id) {
         $scope.analysisId = id;
         $location.path('analysis/' + type + '/' + id);
@@ -240,10 +266,13 @@
 
     // Clea up
     $scope.$on('destroy', function() {
-      $timeout.cancel(pollPromise);
+      $timeout.cancel(analysisPromise);
     });
+
+
     init();
     getAnalysis();
+    pollEntityLists();
 
   });
 })();

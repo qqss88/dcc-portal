@@ -45,7 +45,7 @@
       paddingLeft: 10,
       paddingRight: 10,
       outlineColour: '#555',
-      hoverColour: '#33BBBB',
+      hoverColour: '#e9931c',
       urlPath: '',
       mapFunc: function(data) {
         return data;
@@ -84,7 +84,7 @@
       var val = 0;
       this.data.forEach(function(group) {
         var groupIds = _.pluck(group, 'id');
-        if (_.difference(groupIds, ids).length === 0 && _.difference(groupIds, ids).length === 0) {
+        if (_.difference(groupIds, ids).length === 0 && _.difference(ids, groupIds).length === 0) {
           val = group[0].count;
         }
       });
@@ -97,11 +97,14 @@
         this.max = this.data[i][0].count;
       }
     }
-    console.log('max', this.max);
+    //console.log('max', this.max);
 
     // Scale function - FIXME: need to find max
     // this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
     this.colours = ['rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'];
+    this.colours = ['rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,69,148)'];
+
+    this.colours = ['rgb(180,180,180)'];
     this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
     this.getColourBySetIds = function(ids) {
       return this.colours[Math.ceil(this.ramp(this.getValueBySetIds(ids)))];
@@ -439,7 +442,7 @@
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
       .text(function() {
-         return config.labelFunc(uniqueIds[0]);
+        return config.labelFunc(uniqueIds[0]);
       });
 
     svg.append('text')
@@ -532,7 +535,7 @@
     var config = _this.config;
 
     var uniqueIds = this.getDistinctIds();
-    console.log('uniqueIds', uniqueIds);
+    //console.log('uniqueIds', uniqueIds);
 
     _this.svg = d3.select(element).append('svg')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
@@ -575,6 +578,7 @@
 
 
     // Add legend
+    /*
     _this.svg.append('text').attr('x', 25).attr('y', 15).text(0);
     _this.svg.append('text').attr('x', 25 + _this.colours.length*15).attr('y', 15).text(_this.max);
     _this.svg.selectAll('.legend')
@@ -583,9 +587,9 @@
       .append('rect')
       .classed('legend', true)
       .attr('x', function(d, i) {
-         return 30 + 15*i;
+        return 30 + 15*i;
       })
-      .attr('y', function(d, i) {
+      .attr('y', function() {
         return 15;
       })
       .attr('width', 15)
@@ -594,6 +598,7 @@
       .style('fill', function(d) {
         return d;
       });
+      */
 
   };
 
@@ -622,7 +627,7 @@
 
     d3.selectAll('.inner')
       .filter(function(d) {
-         return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
+        return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
       })
       .style('fill', function(d) {
         if (d.selected === true) {

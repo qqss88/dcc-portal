@@ -16,12 +16,13 @@
  */
 package org.icgc.dcc.portal.health;
 
-import static org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus.RED;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.icgc.dcc.common.client.api.daco.DACOClient.UserType.CUD;
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
-import org.elasticsearch.client.Client;
+import org.icgc.dcc.portal.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,41 +30,38 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class ElasticSearchHealthCheck extends HealthCheck {
+public final class ICGCHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "elasticsearch";
+  private static final String CHECK_NAME = "icgc";
+  private static final String DACO_ENABLED_CUD_USER = "btiernay";
 
   /**
    * Dependencies
    */
-  private final Client client;
+  private final AuthService authService;
 
   @Autowired
-  public ElasticSearchHealthCheck(Client client) {
+  public ICGCHealthCheck(@NonNull AuthService authService) {
     super(CHECK_NAME);
-    this.client = client;
+    this.authService = authService;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of ElasticSearch...");
-    if (client == null) {
-      return Result.unhealthy("Service missing");
+    log.info("Checking the health of ICGC...");
+    val token = authService.getAuthToken();
+    if (isNullOrEmpty(token)) {
+      return Result.unhealthy("Token empty");
     }
 
-    val status = getStatus();
-    if (status == RED) {
-      return Result.unhealthy("Cluster health status is %s", status.name());
+    if (!authService.hasDacoAccess(DACO_ENABLED_CUD_USER, CUD)) {
+      return Result.unhealthy("Invalid DACO account");
     }
 
-    return Result.healthy("Cluster health status is %s", status.name());
-  }
-
-  private ClusterHealthStatus getStatus() {
-    return client.admin().cluster().prepareHealth().execute().actionGet().getStatus();
+    return Result.healthy("CUD and DACO valid");
   }
 
 }

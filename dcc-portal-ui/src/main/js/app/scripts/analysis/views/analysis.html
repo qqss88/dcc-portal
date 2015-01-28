@@ -1,30 +1,31 @@
-<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Bench</h1>
+<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Set Analysis</h1>
 <aside class="t_sidebar">
-    <div style="margin-right: -2rem">
-
-        <div>
+    <div>
+        <div class="t_tabs" style="margin-right: -2rem">
             <div class="t_tabs__tab t_tabs__tab__analysis active">
                 <span>Bench</span>
             </div>
-            <span class="ipull-right" style="margin-left: 1.5rem">
-                <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all</button>
-            </span>
         </div>
-        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem">
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem; margin-right:-2rem">
+            <section class="text-right">
+                <span>
+                    <button class="t_button" data-ng-click="removeAllAnalyses()"><i class="icon-cancel"></i>Clear all analyses</button>
+                </span>
+            </section>
             <ul class="t_suggest_flyout__hits">
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
                     data-ng-class="{selected: !analysisId}">
                     <span>Home</span>
                     <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
-                    <small>--</small>
-                </>
+                    <small>&nbsp;</small>
+                </li>
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis(item.id, item.type)"
                     data-ng-repeat="item in analysisList"
                     data-ng-class="{selected: item.id == analysisId}">
                     <span>
-                        <span>{{item.type === "set"? "Set Operations" : "Enrichment Analysis"}}</span>
+                        <span>{{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}</span>
                         <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
                         <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
                         <span data-ng-mouseenter="hover=true"
@@ -47,22 +48,15 @@
     <div style="margin: 1rem" data-ng-if="!analysisId">
         <div>
             <span>
-            Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the Advanced Search. Then
+            Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the <a href="/search">Advanced Search</a>. Then
             launch analysis here. <br>
             For more information on the Bench, please refer to <a href="">documentation</a>.
             </span>
             <br><br>
-            <!--
-            <br>
-            <span>debug selected total: {{listItemTotal}}</span>
-            <br>
-            <span>debug selected ids: {{listItemUUIDs}}</span>
-            <br>
-            -->
-
 
             <enrichment-upload
                 data-total="{{listItemTotal}}"
+                data-filters="enrichmentFilters"
                 data-enrichment-modal="enrichmentModal">
             </enrichment-upload>
 
@@ -77,17 +71,20 @@
                 </span>
                 <span>&nbsp;</span>
                 <span>
-                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">
+                    <!--<button class="t_button" data-ng-disabled="!enrichment" data-ng-click="enrichmentModal=!enrichmentModal">-->
+                    <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="launchEnrichmentAnalysis()">
                     <i class="icon-beaker"></i>
                     Enrichment Analysis
-                    <br><small>Create enrichment analysis from a set of genes</small>
+                    <br><small>Perform enrichment analysis from a set of genes</small>
                     </button>
                 </span>
             </div>
             <br>
             <span>
                 <span>Select set(s) below to activate available analysis</span>
+                <!--
                 <span class="pull-right">Create a new set from <a href="/search">Advanced Search</a></span>
+                -->
             </span>
             <table class="table">
                 <thead>
@@ -96,7 +93,6 @@
                     <th>Name</th>
                     <th>Note</th>
                     <th># of items</th>
-                    <th>Created Date</th>
                     <th>&nbsp;</th>
                 </thead>
                 <tbody>
@@ -108,14 +104,11 @@
                         </td>
                         <td>{{item.type}}</td>
                         <td>{{item.name}}</td>
-                        <td>{{item.description}}</td>
-                        <td class="text-right">
+                        <td style="max-width: 30rem">{{item.description}}</td>
+                        <td class="text-right" data-ng-if="item.status==='FINISHED'">
                             <a href="{{item.advLink}}">{{item.count | number}}</a>
                         </td>
-                        <td>
-                            {{item.timestamp | date:'yyyy-MM-dd'}}
-                        </td>
-                        <td>
+                        <td data-ng-if="item.status==='FINISHED'">
                             <span class="t_tools" style="float:left">
                                 <span class="t_tools__tool">
                                     <i class="icon-file" data-ng-click="exportList(item.id)"></i>
@@ -123,19 +116,27 @@
                                 </span>
                             </span>
                         </td>
+                        <td colspan="2" data-ng-if="item.status !== 'FINISHED'">
+                            Processing ... <i class="icon-spinner icon-spin"></i>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
     <div style="margin: 1rem" data-ng-if="analysisId">
+
         <div data-ng-if="analysisType === 'enrichment'" >
             <h3>Enrichment Analysis</h3>
-            <enrichment-result data-item="analysisResult"></enrichment-result>
+            <div data-ng-if="!error">
+                <enrichment-result data-item="analysisResult"></enrichment-result>
+            </div>
         </div>
         <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
             <h3>Set Operations</h3>
-            <set-operation data-item="analysisResult"></set-operation>
+            <div data-ng-if="!error">
+                <set-operation data-item="analysisResult"></set-operation>
+            </div>
         </div>
         <div class="clearfix"></div>
 
