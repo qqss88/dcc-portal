@@ -54,6 +54,7 @@ import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
+import org.icgc.dcc.portal.service.EntityListService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.service.SessionService;
 import org.openid4java.consumer.ConsumerManager;
@@ -86,6 +87,9 @@ public class PortalConfig {
   @Autowired
   private OccurrenceService service;
 
+  @Autowired
+  private EntityListService entityListService;
+
   @Bean
   public DynamicDownloader dynamicDownloader() {
     val download = properties.getDownload();
@@ -106,6 +110,12 @@ public class PortalConfig {
   @PostConstruct
   public void initCache() {
     service.init();
+
+  }
+
+  @PostConstruct
+  public void createDemoEntityList() {
+    entityListService.createDemoEntityList();
   }
 
   @Bean
@@ -163,9 +173,12 @@ public class PortalConfig {
 
   @Bean
   public Settings settings() {
+    val setOperationConfig = properties.getSetOperation();
+
     return Settings.builder()
         .ssoUrl(properties.getCrowd().getSsoUrl())
         .releaseDate(properties.getRelease().getReleaseDate())
+        .demoListUuid(setOperationConfig.demoListUuid)
         .build();
   }
 

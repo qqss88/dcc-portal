@@ -53,11 +53,8 @@ public class UnionAnalysisService {
     val result = repository.find(analysisId);
 
     if (null == result) {
-
       log.error("No analysis is found for id: '{}'.", analysisId);
-
     } else {
-
       log.debug("Got analysis: '{}'", result);
     }
     return result;
@@ -73,7 +70,7 @@ public class UnionAnalysisService {
     val insertCount = repository.save(newAnalysis);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
-    analyzer.determineUnionUnitCounts(newAnalysis.getId(), request);
+    analyzer.calculateUnionUnitCounts(newAnalysis.getId(), request);
 
     return newAnalysis;
   }

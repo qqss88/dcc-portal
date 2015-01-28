@@ -32,7 +32,7 @@ public class ResourceUtils {
   static final String DEFAULT_ORDER = "desc";
   static final String DEFAULT_PROJECT_SORT = "totalDonorCount";
   static final String DEFAULT_DONOR_SORT = "ssmAffectedGenes";
-  static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
+  public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
 
   static final String COUNT_TEMPLATE = "Request for a count of {} with filters '{}";

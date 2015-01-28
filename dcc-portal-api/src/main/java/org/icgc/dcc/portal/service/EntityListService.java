@@ -17,23 +17,38 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
+import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.URLEncoder;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
+import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityList;
+import org.icgc.dcc.portal.model.EntityList.Status;
 import org.icgc.dcc.portal.model.EntityListDefinition;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 /**
  * TODO
@@ -49,16 +64,68 @@ public class EntityListService {
   @NonNull
   private final UnionAnalyzer analyzer;
 
+  @NonNull
+  private final PortalProperties properties;
+
+  private DemoEntityList demoEntityList;
+
+  @PostConstruct
+  private void init() {
+    val config = properties.getSetOperation();
+    val uuid = config.getDemoListUuid();
+    val filter = config.getDemoListFilterParam();
+
+    demoEntityList = new DemoEntityList(uuid, filter);
+  }
+
+  @SneakyThrows
+  private static String toFilterParamForGeneSymbols(@NonNull final String symbolList) {
+    // Build the ObjectNode to represent this filterParam: { "gene": "symbol": {"is": ["s1", "s2", ...]}
+    val nodeFactory = new JsonNodeFactory(false);
+    val root = nodeFactory.objectNode();
+    val gene = nodeFactory.objectNode();
+    root.put("gene", gene);
+    val symbol = nodeFactory.objectNode();
+    gene.put("symbol", symbol);
+    val isNode = nodeFactory.arrayNode();
+    symbol.put("is", isNode);
+
+    final String[] symbols = symbolList.split(",");
+    for (val s : symbols) {
+      isNode.add(s);
+    }
+    val result = root.toString();
+
+    return URLEncoder.encode(result, UTF_8.name());
+  }
+
+  private final class DemoEntityList {
+
+    private static final String NAME = "DEMO set of genes";
+    private static final String DESCRIPTION = "A set of genes for demo purpose";
+    private static final String SORT_BY = DEFAULT_GENE_MUTATION_SORT;
+
+    private final EntityListDefinition.SortOrder SORT_ORDER = EntityListDefinition.SortOrder.ASCENDING;
+    private final BaseEntityList.Type TYPE = BaseEntityList.Type.GENE;
+
+    private final EntityListDefinition definition;
+    private final EntityList demoList;
+
+    private DemoEntityList(@NonNull final String uuid, @NonNull final String geneSymbols) {
+      this.demoList = new EntityList(UUID.fromString(uuid), Status.PENDING, 0L, NAME, DESCRIPTION, TYPE);
+      this.definition =
+          new EntityListDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
+              TYPE);
+    }
+  }
+
   public EntityList getEntityList(@NonNull final UUID listId) {
 
     val list = repository.find(listId);
 
     if (null == list) {
-
       log.error("No list is found for id: '{}'.", listId);
-
     } else {
-
       log.debug("Got enity list: '{}'.", list);
     }
     return list;
@@ -69,9 +136,27 @@ public class EntityListService {
 
     val newList = createNewListFrom(listDefinition);
 
-    analyzer.createList(newList.getId(), listDefinition);
+    analyzer.materializeList(newList.getId(), listDefinition);
 
     return newList;
+  }
+
+  @Async
+  public void createDemoEntityList() {
+
+    val newList = demoEntityList.demoList;
+    val listId = newList.getId();
+
+    val list = repository.find(listId);
+    if (null == list) {
+      // create if the demo record doesn't exist in the relational database.
+      log.info(
+          "The demo record in the relational store does not exist therefore is now being recreated: '{}'",
+          newList);
+      val insertCount = repository.save(newList);
+    }
+
+    analyzer.materializeList(listId, demoEntityList.definition);
   }
 
   public EntityList deriveEntityList(
@@ -85,7 +170,6 @@ public class EntityListService {
   }
 
   private EntityList createNewListFrom(final BaseEntityList listDefinition) {
-
     val newList = EntityList.createFromDefinition(listDefinition);
 
     val insertCount = repository.save(newList);

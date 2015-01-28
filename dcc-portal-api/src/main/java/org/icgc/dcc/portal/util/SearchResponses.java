@@ -44,4 +44,11 @@ public final class SearchResponses {
     return ids;
   }
 
+  /*
+   * A convenience helper to get the count of total hits in an ElasticSearch query result.
+   */
+  public static long getTotalHitCount(@NonNull SearchResponse response) {
+    return response.getHits().totalHits();
+  }
+
 }

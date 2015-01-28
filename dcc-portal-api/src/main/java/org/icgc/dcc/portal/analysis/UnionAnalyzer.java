@@ -22,6 +22,8 @@ import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -34,6 +36,7 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityListDefinition;
@@ -65,61 +68,52 @@ public class UnionAnalyzer {
 
   @NonNull
   private final Client client;
-
   @NonNull
   private final IndexModel index;
+  @NonNull
+  private final PortalProperties properties;
 
   @NonNull
-  private final UnionAnalysisRepository unionAnalysisDao;
-
+  private final UnionAnalysisRepository unionAnalysisRepository;
   @NonNull
-  private final EntityListRepository entityListDao;
-
+  private final EntityListRepository entityListRepository;
   @NonNull
   private final TermsLookupService termLookupService;
-
   @NonNull
   private final GeneRepository geneRepository;
-
   @NonNull
   private final DonorRepository donorRepository;
-
   @NonNull
   private final MutationRepository mutationRepository;
+
+  @PostConstruct
+  private void init() {
+    maxNumberOfHits = properties.getSetOperation().getMaxNumberOfHits();
+    log.info("post construct: '{}'", maxNumberOfHits);
+  }
 
   private final static String FIELD_NAME = "_id";
   private final static MatchAllQueryBuilder MATCH_ALL = QueryBuilders.matchAllQuery();
 
-  private final static int MAX_LIST_ELEMENT_COUNT = 5000;
-
-  private static TermsLookupFilterBuilder buildTermsFilter(
-      final TermLookupType type,
-      final UUID id) {
-
+  private static TermsLookupFilterBuilder buildTermsFilter(final TermLookupType type, final UUID id) {
     return TermsLookupService.createTermsLookupFilter(FIELD_NAME, type, id);
   }
 
   private static String getIndexTypeNameFrom(final BaseEntityList.Type type) {
-
     return type.getName() + "-centric";
   }
 
-  private static TermLookupType getLookupTypeFrom(final BaseEntityList.Type type) {
-
-    TermLookupType result = TermLookupType.GENE_IDS;
-
-    switch (type) {
-
-    case DONOR: {
-      result = TermLookupType.DONOR_IDS;
-      break;
+  private static TermLookupType getLookupTypeFrom(final BaseEntityList.Type entityType) {
+    if (entityType == BaseEntityList.Type.DONOR) {
+      return TermLookupType.DONOR_IDS;
+    } else if (entityType == BaseEntityList.Type.GENE) {
+      return TermLookupType.GENE_IDS;
+    } else if (entityType == BaseEntityList.Type.MUTATION) {
+      return TermLookupType.MUTATION_IDS;
     }
-    case MUTATION: {
-      result = TermLookupType.MUTATION_IDS;
-      break;
-    }
-    }
-    return result;
+
+    log.error("No mapping for enum value '{}' of BaseEntityList.Type.", entityType);
+    throw new IllegalStateException("No mapping for enum value: " + entityType);
   }
 
   private static BoolFilterBuilder toBoolFilterFrom(
@@ -129,17 +123,16 @@ public class UnionAnalyzer {
     val lookupType = getLookupTypeFrom(entityType);
     val boolFilter = boolFilter();
 
-    // adding Musts
+    // Adding Musts
     val intersectionUnits = unionDefinition.getIntersection();
     for (val mustId : intersectionUnits) {
 
       boolFilter.must(buildTermsFilter(lookupType, mustId));
     }
 
-    // adding MustNots
+    // Adding MustNots
     val exclusionUnits = unionDefinition.getExclusions();
     for (val notId : exclusionUnits) {
-
       boolFilter.mustNot(buildTermsFilter(lookupType, notId));
     }
     return boolFilter;
@@ -152,32 +145,34 @@ public class UnionAnalyzer {
     val boolFilter = boolFilter();
 
     for (val def : definitions) {
-
       boolFilter.should(toBoolFilterFrom(def, entityType));
     }
     return boolFilter;
   }
 
-  private static long getCountFrom(
-      @NonNull final SearchResponse response) {
+  private int maxNumberOfHits;
 
-    return response.getHits().totalHits();
+  private long getCountFrom(@NonNull final SearchResponse response) {
+    long result = SearchResponses.getTotalHitCount(response);
+
+    return (result > maxNumberOfHits) ?
+        maxNumberOfHits :
+        result;
   }
 
   private String getIndexName() {
-
     return this.index.getIndex();
   }
 
   @Async
-  public void determineUnionUnitCounts(
+  public void calculateUnionUnitCounts(
       @NonNull final UUID id,
       @NonNull final UnionAnalysisRequest request) {
 
-    val analysis = unionAnalysisDao.find(id);
+    val analysis = unionAnalysisRepository.find(id);
 
-    // set status to 'in progress' for browser polling
-    unionAnalysisDao.update(analysis.inProgress());
+    // Set status to 'in progress' for browser polling
+    unionAnalysisRepository.update(analysis.inProgress());
 
     val entityType = request.getType();
     val definitions = request.toUnionSets();
@@ -188,10 +183,10 @@ public class UnionAnalyzer {
       val count = getUnionCount(def, entityType);
       result.add(UnionUnitWithCount.copyOf(def, count));
     }
-    log.info("Result of Union Analysis is: " + result);
+    log.debug("Result of Union Analysis is: '{}'", result);
 
-    // done - update status to finished
-    unionAnalysisDao.update(analysis.finished(result));
+    // Done - update status to finished
+    unionAnalysisRepository.update(analysis.finished(result));
   }
 
   private long getUnionCount(
@@ -201,10 +196,11 @@ public class UnionAnalyzer {
     val response = runEsQuery(
         getIndexTypeNameFrom(entityType),
         SearchType.COUNT,
-        toBoolFilterFrom(unionDefinition, entityType));
+        toBoolFilterFrom(unionDefinition, entityType),
+        maxNumberOfHits);
 
     val count = getCountFrom(response);
-    log.info("Total hits: {}", count);
+    log.debug("Total hits: {}", count);
 
     return count;
   }
@@ -214,10 +210,10 @@ public class UnionAnalyzer {
       @NonNull final UUID newListId,
       @NonNull final DerivedEntityListDefinition listDefinition) {
 
-    val newList = entityListDao.find(newListId);
+    val newList = entityListRepository.find(newListId);
 
-    // set status to 'in progress' for browser polling
-    entityListDao.update(newList.inProgress());
+    // Set status to 'in progress' for browser polling
+    entityListRepository.update(newList.inProgress());
 
     val definitions = listDefinition.getUnion();
     val entityType = listDefinition.getType();
@@ -230,8 +226,8 @@ public class UnionAnalyzer {
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
 
     val count = getCountFrom(response);
-    // done - update status to finished
-    entityListDao.update(newList.finished(count));
+    // Done - update status to finished
+    entityListRepository.update(newList.finished(count));
   }
 
   private SearchResponse unionAll(
@@ -241,32 +237,26 @@ public class UnionAnalyzer {
     val response = runEsQuery(
         getIndexTypeNameFrom(entityType),
         SearchType.QUERY_THEN_FETCH,
-        toBoolFilterFrom(definitions, entityType));
+        toBoolFilterFrom(definitions, entityType),
+        maxNumberOfHits);
 
     return response;
   }
 
   private Repository getRepositoryByEntityType(final BaseEntityList.Type entityType) {
+    if (entityType == BaseEntityList.Type.DONOR) {
+      return donorRepository;
+    } else if (entityType == BaseEntityList.Type.GENE) {
+      return geneRepository;
+    } else if (entityType == BaseEntityList.Type.MUTATION) {
+      return mutationRepository;
+    }
 
-    Repository repo = geneRepository;
-
-    switch (entityType) {
-    case DONOR: {
-      repo = donorRepository;
-      break;
-    }
-    case MUTATION: {
-      repo = mutationRepository;
-      break;
-    }
-    }
-    return repo;
+    log.error("No mapping for enum value '{}' of BaseEntityList.Type.", entityType);
+    throw new IllegalStateException("No mapping for enum value: " + entityType);
   }
 
-  private SearchResponse executeFilterQuery(
-      @NonNull final EntityListDefinition definition) {
-
-    val maxCount = 1000;
+  private SearchResponse executeFilterQuery(@NonNull final EntityListDefinition definition, final int max) {
 
     log.info("List def is: " + definition);
 
@@ -276,8 +266,8 @@ public class UnionAnalyzer {
         .sort(definition.getSortBy())
         .order(definition.getSortOrder().getName())
 
-        .size(maxCount)
-        .limit(maxCount)
+        .size(max)
+        .limit(max)
         .build();
 
     val repo = getRepositoryByEntityType(definition.getType());
@@ -285,32 +275,33 @@ public class UnionAnalyzer {
   }
 
   @Async
-  public void createList(
+  public void materializeList(
       @NonNull final UUID newListId,
       @NonNull final EntityListDefinition listDefinition) {
 
-    val newList = entityListDao.find(newListId);
+    val newList = entityListRepository.find(newListId);
 
-    // set status to 'in progress' for browser polling
-    entityListDao.update(newList.inProgress());
+    // Set status to 'in progress' for browser polling
+    entityListRepository.update(newList.inProgress());
 
-    val response = executeFilterQuery(listDefinition);
+    val response = executeFilterQuery(listDefinition, maxNumberOfHits);
 
     val entityIds = SearchResponses.getHitIds(response);
-    log.info("Union result is: '{}'", entityIds);
+    log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
     val entityType = listDefinition.getType();
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
 
     val count = getCountFrom(response);
-    // done - update status to finished
-    entityListDao.update(newList.finished(count));
+    // Done - update status to finished
+    entityListRepository.update(newList.finished(count));
   }
 
   private SearchResponse runEsQuery(
       final String indexTypeName,
-      final SearchType searchType,
-      final BoolFilterBuilder boolFilter) {
+      @NonNull final SearchType searchType,
+      @NonNull final BoolFilterBuilder boolFilter,
+      final int max) {
 
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
 
@@ -319,14 +310,14 @@ public class UnionAnalyzer {
         .setTypes(indexTypeName)
         .setSearchType(searchType)
         .setQuery(query)
-        .setSize(MAX_LIST_ELEMENT_COUNT)
+        .setSize(max)
         .setNoFields();
 
-    log.info("ElasticSearch query is: '{}'", search);
+    log.debug("ElasticSearch query is: '{}'", search);
 
     val response = search.execute().actionGet();
 
-    log.info("ElasticSearch result is: '{}'", response);
+    log.debug("ElasticSearch result is: '{}'", response);
 
     return response;
   }

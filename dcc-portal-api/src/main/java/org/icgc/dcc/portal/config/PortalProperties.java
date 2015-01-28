@@ -38,7 +38,6 @@ import org.icgc.dcc.portal.browser.model.DataSource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
-import com.yammer.dropwizard.db.DatabaseConfiguration;
 
 @Getter
 @ToString
@@ -86,9 +85,13 @@ public class PortalProperties extends Configuration {
 
   @Valid
   @JsonProperty
+  SetOperationProperties setOperation = new SetOperationProperties();
+
+  @Valid
+  @JsonProperty
   DatabaseProperties database = new DatabaseProperties();
 
-  private DatabaseConfiguration database2 = new DatabaseConfiguration();
+  // private DatabaseConfiguration database2 = new DatabaseConfiguration();
 
   @Getter
   @ToString
@@ -295,6 +298,21 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     String releaseDate;
 
+  }
+
+  @Data
+  public static class SetOperationProperties {
+
+    @JsonProperty
+    @NotEmpty
+    String demoListUuid;
+
+    @JsonProperty
+    @NotEmpty
+    String demoListFilterParam;
+
+    @JsonProperty
+    int maxNumberOfHits;
   }
 
   @Data
