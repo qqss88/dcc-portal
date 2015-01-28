@@ -11,7 +11,9 @@
         <div>
             <ul>
                 <li data-ng-repeat="item in setList">
-                {{getSetShortHand(item, setList)}} - {{setNameMap[item]}}
+                    <span>
+                        {{getSetShortHand(item, setList)}} - {{setNameMap[item]}}
+                    </span>
                 </li>
             </ul>
         </div>
@@ -43,7 +45,7 @@
                     </td>
                     <td>
                         <span class="t_tools" style="float:left"> 
-                            <span class="t_tools__tool">
+                            <span class="t_tools__tool" data-ng-if="item.count > 0">
                                 <i class="icon-file" data-tooltip="Export"></i>
                                 <i class="icon-upload" data-tooltip="Save as new list" 
                                   data-ng-click="$parent.setUnion=[{'intersection': item.intersection, 'exclusions':item.exclusions}]; $parent.setModal=true"></i>
@@ -58,7 +60,7 @@
                         <span data-ng-if="selectedTotalCount===0">0</span>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left"> 
+                        <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0"> 
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
                                 <i class="icon-upload" data-tooltip="Save as new list" data-ng-click="calculateUnion(); setModal=true;"></i>

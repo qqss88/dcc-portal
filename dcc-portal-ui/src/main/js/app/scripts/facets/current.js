@@ -22,12 +22,22 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions) {
+  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService) {
     $scope.Facets = Facets;
 
     function refresh() {
-      $scope.filters = FiltersUtil.buildUIFilters(LocationService.filters());
-      $scope.isActive = _.keys($scope.filters).length;
+      var currentFilters = LocationService.filters();
+      var ids = LocationService.extractSetIds(currentFilters);
+
+      if (ids.length > 0) {
+        SetService.getMetaData(ids).then(function(results) {
+          $scope.filters = FiltersUtil.buildUIFilters(currentFilters, SetService.lookupTable(results));
+        });
+      } else {
+        $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
+      }
+      //$scope.isActive = _.keys($scope.filters).length;
+      $scope.isActive = _.keys(currentFilters).length;
     }
 
 

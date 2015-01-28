@@ -484,7 +484,9 @@
       if (pendingListsIDs.length === 0) {
         return;
       }
-      promise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
+
+      //promise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
+      promise = _this.getMetaData(pendingListsIDs);
 
       promise.then(function(updatedList) {
         updatedList.forEach(function(item) {
@@ -501,9 +503,8 @@
         localStorageService.set(LIST_ENTITY, setList);
         _this.refreshList();
       });
-
-
     };
+
 
 
     this.refreshList = function() {
@@ -523,10 +524,20 @@
     };
 
 
+    // FIXME: Add cached version
     this.getMetaData = function( ids ) {
-      // TODO: stub
       console.log('getting meta data for', ids);
+      return RestangularNoCache.several('entitylist/lists', ids).get('', {});
     };
+
+    this.lookupTable = function(metaData) {
+      var map = {};
+      metaData.forEach(function(d) {
+        map[d.id] = d.name;
+      });
+      return map;
+    };
+
 
 
     this.exportSet = function(sets) {

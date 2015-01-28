@@ -22,7 +22,8 @@
     'app.common.footer',
     'icgc.common.version',
     'icgc.common.notify',
-    'icgc.common.location'
+    'icgc.common.location',
+    'icgc.common.display'
   ]);
 
 

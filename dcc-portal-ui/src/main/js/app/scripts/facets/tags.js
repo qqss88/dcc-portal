@@ -22,7 +22,7 @@
 
   module.controller('tagsFacetCtrl',
     function ($scope, Facets, LocationService, HighchartsService, FiltersUtil,
-      Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
+      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
     $scope.projects = HighchartsService.projectColours;
 
@@ -53,11 +53,19 @@
         facet: $scope.facetName
       });
 
+      // There are only 'active' entity ids
       $scope.activeEntityIds = Facets.getActiveTags({
         type: type,
         facet: Extensions.ENTITY
       });
 
+      // Fetch display names for entity lists
+      $scope.entityIdMap = {};
+      if ($scope.activeEntityIds.length > 0) {
+        SetService.getMetaData($scope.activeEntityIds).then(function(results) {
+          $scope.entityIdMap = SetService.lookupTable(results);
+        });
+      }
 
 
       // Grab predefined geneset fields: each gene set type require specialized logic

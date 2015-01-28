@@ -20,7 +20,7 @@
 
   var module = angular.module('icgc.common.location', []);
 
-  module.factory('LocationService', function ($location, Notify) {
+  module.factory('LocationService', function ($location, Notify, Extensions) {
 
     return {
       path: function () {
@@ -125,6 +125,25 @@
         var s = this.search();
         delete s[param];
         $location.search(s);
+      },
+
+      // Extract UUIDs from filters
+      extractSetIds: function(filters) {
+        var result = [];
+        ['donor', 'gene', 'mutation'].forEach(function(type) {
+          if (filters.hasOwnProperty(type) === false) {
+            return;
+          }
+
+          if (filters[type].hasOwnProperty(Extensions.ENTITY)) {
+            var entityFilters = filters[type][Extensions.ENTITY];
+            if (entityFilters.hasOwnProperty('is')) {
+              result = result.concat( entityFilters.is );
+            }
+          }
+
+        });
+        return result;
       }
 
     };

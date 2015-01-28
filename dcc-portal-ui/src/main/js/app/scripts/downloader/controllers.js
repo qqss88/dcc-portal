@@ -23,7 +23,7 @@ angular.module('app.downloader.controllers', ['app.downloader.services']);
 // Note: We try to preemptitively determine status as a way improve UX and reduce polls
 angular.module('app.downloader.controllers').controller('DownloaderController',
   function ($window, $filter, $timeout, $scope, Page, DownloaderService,
-    DataTypes, Restangular, RestangularNoCache, FiltersUtil, ids) {
+    DataTypes, Restangular, RestangularNoCache, ids) {
 
     var cancelTimeout;
     var dataTypeOrder = DataTypes.order;
@@ -163,12 +163,6 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
               // Filter is the expanded query, uiFilter is what user sees
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
-
-              /*
-              job.uiQueryFilter = FiltersUtil.buildUIFilters(
-                cleanFilter(JSON.parse(decodeURIComponent(jobInfo.uiQueryStr)))
-              );
-              */
               job.uiQueryFilter = cleanFilter(JSON.parse(decodeURIComponent(jobInfo.uiQueryStr)));
 
               if (_.isEmpty(job.filter)) {
