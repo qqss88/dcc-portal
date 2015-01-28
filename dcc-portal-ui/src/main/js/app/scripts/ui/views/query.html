@@ -1,29 +1,30 @@
 <span>
-    <span data-ng-if="!uiFilters">All</span>
-    <ul style="display:inline" data-ng-if="uiFilters">
-        <li data-ng-repeat="(typeName, type) in uiFilters" style="display:inline">
-            <ul style="display:inline">
-                <li data-ng-repeat="(facet, terms) in type track by facet" style="display:inline">
-                    <span data-ng-switch="facet">
-                        <span data-ng-switch-when="id">{{typeName | trans:true}}</span>
-                        <span data-ng-switch-when="pathwayId">Pathway</span>
-                        <span data-ng-switch-when="goTermId">GO</span>
-                        <span data-ng-switch-when="curatedSetId">Curated Gene Set</span>
-                        <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
-                        <span data-ng-switch-default="">{{facet | trans:true}}</span>
-                    </span>
-                    {{ terms.is.length !== 1? "IN (" : ['entityListId'].indexOf(terms.is[0].controlFacet) !== -1 ? "IN (" : "IS" }}
-                    <ul style="display:inline">
-                        <li data-ng-repeat="term in terms.is track by term.term" style="display:inline">
-                        {{ term.term | trans:true }}
-                        <span data-ng-if="!$last">, </span>
-                        </li>
-                    </ul>
-                    {{ terms.is.length !== 1? ")" : ['entityListId'].indexOf(terms.is[0].controlFacet) !== -1 ?  ")" : ""}}
-                    <span data-ng-if="!$last"> AND </span>
-                </li>
-            </ul>
+    <span data-ng-repeat="(typeName, type) in uiFilters">
+        <span data-ng-repeat="(facet, terms) in type track by facet"> 
+
+            <span data-ng-switch="facet">
+                <span data-ng-switch-when="id">{{typeName | trans:true}}</span>
+                <span data-ng-switch-when="pathwayId">Pathway</span>
+                <span data-ng-switch-when="goTermId">GO</span>
+                <span data-ng-switch-when="curatedSetId">Curated Gene Set</span>
+                <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
+                <span data-ng-switch-default="">{{facet | trans:true}}</span>
+            </span>
+
+            <span> 
+                {{ terms.is.length !== 1? "IN (" : ['entityListId'].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
+            </span>
+
+            <span data-ng-repeat="termObj in terms.is track by termObj.term">
+                <span data-ng-style="hoverStyle">{{termObj.term | trans:true}}</span>
+                <span data-ng-if="!$last">,&nbsp;</span>  
+            </span>
+            <span> 
+                {{ terms.is.length !== 1? ")" : ['entityListId'].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
+            </span>
+
+            <span data-ng-if="!$last"> AND </span>
+        </span>
         <span data-ng-if="!$last"> AND </span>
-        </li>
-    </ul>
+    </span>
 </span>

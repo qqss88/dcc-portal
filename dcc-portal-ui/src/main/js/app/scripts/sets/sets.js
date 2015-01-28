@@ -117,6 +117,9 @@
         $scope.current = [];
         $scope.selected = [];
 
+        $scope.saveSubSet = function() {
+          $scope.setModal = true;
+        };
 
         $scope.calculateUnion = function() {
           $scope.setUnion = [];
@@ -435,7 +438,8 @@
         }
 
         data.type = data.type.toLowerCase();
-        setList.unshift(data);
+        //setList.unshift(data);
+        setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
       });
@@ -461,7 +465,8 @@
         }
 
         data.type = data.type.toLowerCase();
-        setList.unshift(data);
+        //setList.unshift(data);
+        setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
       });
@@ -562,9 +567,43 @@
       return true;
     };
 
+
+    // Make sure the demo is in place
+    this.initDemo = function() {
+      var settingsPromise = Restangular.one('settings').get();
+
+      function addDemo(demo) {
+        demo.type = demo.type.toLowerCase();
+        demo.readonly = true;
+
+        // Check if already exist
+        var exist = _.some(setList, function(set) {
+          return set.id === demo.id;
+        });
+        if (exist === false){
+          setList.unshift(demo); // Demo always goes first
+          localStorageService.set(LIST_ENTITY, setList);
+        }
+      }
+
+      settingsPromise.then(function(settings) {
+        if (settings.hasOwnProperty('demoListUuid')) {
+          var uuid = settings.demoListUuid;
+          var demoPromise = _this.getMetaData([uuid]);
+
+          demoPromise.then(function(results) {
+            addDemo(results[0]);
+            _this.refreshList();
+          });
+        }
+      });
+
+    };
+
+
     // Initialize
-    console.log('hello');
     var setList = _this.getAll();
+    _this.initDemo();
 
   });
 

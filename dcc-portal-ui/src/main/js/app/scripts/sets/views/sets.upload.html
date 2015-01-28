@@ -3,8 +3,7 @@
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 data-ng-if="!setLimit" class="pull-left">Save {{setType}} set</h3>
-                <h3 data-ng-if="setLimit" class="pull-left">Save Query Results</h3>
+                <h3 class="pull-left">Save {{setType}} set</h3>
 
                 <button class="pull-right t_button" data-ng-click="setModal=false"><i class="icon-cancel"></i>
                 </button>
@@ -20,20 +19,29 @@
                     <query-display data-filters="uiFilters"><query-display>
                 </div>
                 -->
+                <div data-ng-if="setLimit">
+                    <br>
+                    <div>Save top: <span>(Only the top {{setLimit}} will be saved)</span></div>
+                    <input type="text" maxlength="9" size="9">
+                </div>
 
-                <br>
-                <div>Name:</div>
-                <input type="text" data-ng-model="setName" maxlength="64" data-select-on-click></input>
 
-                <br>
-                <div>Note:</div>
-                <textarea cols="50" rows="3" data-ng-model="setDescription" placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
-                <small>{{256 - setDescription.length}} chars left</small>
+                <div>
+                    <div>Name:</div>
+                    <input type="text" data-ng-model="setName" maxlength="64" data-select-on-click></input>
+                </div>
 
-                <br>
+                <div>
+                    <div>Note:</div>
+                    <textarea cols="50" rows="3" data-ng-model="setDescription" placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
+                    <small>{{256 - setDescription.length}} chars left</small>
+                </div>
+
+                <!--
                 <div data-ng-if="setLimit">
                 Note: Only the top {{setLimit}} {{setType}} will be saved.
                 </div>
+                -->
             </div>
 
             <!-- footer -->

@@ -88,12 +88,12 @@
             </span>
             <table class="table">
                 <thead>
-                    <th>&nbsp;</th>
+                    <th></th>
                     <th>Type</th>
                     <th>Name</th>
                     <th>Note</th>
                     <th># of items</th>
-                    <th>&nbsp;</th>
+                    <th></th>
                 </thead>
                 <tbody>
                     <tr data-ng-repeat="item in entityLists">
@@ -112,7 +112,7 @@
                             <span class="t_tools" style="float:left">
                                 <span class="t_tools__tool">
                                     <i class="icon-file" data-ng-click="exportList(item.id)"></i>
-                                    <i class="icon-cancel" data-ng-click="removeList(item.id)"></i>
+                                    <i class="icon-cancel" data-ng-click="removeList(item.id)" data-ng-if="! item.readonly"></i>
                                 </span>
                             </span>
                         </td>

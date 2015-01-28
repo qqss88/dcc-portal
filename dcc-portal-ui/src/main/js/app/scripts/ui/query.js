@@ -47,7 +47,7 @@
 
             if (ids.length > 0) {
               SetService.getMetaData(ids).then(function(results) {
-                scope.filters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
+                scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
               });
             } else {
               scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, {});
