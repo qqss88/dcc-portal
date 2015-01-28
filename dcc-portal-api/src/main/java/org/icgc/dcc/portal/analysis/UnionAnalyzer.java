@@ -89,7 +89,6 @@ public class UnionAnalyzer {
   @PostConstruct
   private void init() {
     maxNumberOfHits = properties.getSetOperation().getMaxNumberOfHits();
-    log.info("post construct: '{}'", maxNumberOfHits);
   }
 
   private final static String FIELD_NAME = "_id";
@@ -152,12 +151,10 @@ public class UnionAnalyzer {
 
   private int maxNumberOfHits;
 
-  private long getCountFrom(@NonNull final SearchResponse response) {
+  private long getCountFrom(@NonNull final SearchResponse response, final long max) {
     long result = SearchResponses.getTotalHitCount(response);
 
-    return (result > maxNumberOfHits) ?
-        maxNumberOfHits :
-        result;
+    return (result > max) ? max : result;
   }
 
   private String getIndexName() {
@@ -199,7 +196,7 @@ public class UnionAnalyzer {
         toBoolFilterFrom(unionDefinition, entityType),
         maxNumberOfHits);
 
-    val count = getCountFrom(response);
+    val count = getCountFrom(response, maxNumberOfHits);
     log.debug("Total hits: {}", count);
 
     return count;
@@ -225,7 +222,7 @@ public class UnionAnalyzer {
 
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
 
-    val count = getCountFrom(response);
+    val count = getCountFrom(response, maxNumberOfHits);
     // Done - update status to finished
     entityListRepository.update(newList.finished(count));
   }
@@ -284,7 +281,8 @@ public class UnionAnalyzer {
     // Set status to 'in progress' for browser polling
     entityListRepository.update(newList.inProgress());
 
-    val response = executeFilterQuery(listDefinition, maxNumberOfHits);
+    val max = listDefinition.getLimit(maxNumberOfHits);
+    val response = executeFilterQuery(listDefinition, max);
 
     val entityIds = SearchResponses.getHitIds(response);
     log.debug("The result of running a FilterParam query is: '{}'", entityIds);
@@ -292,7 +290,7 @@ public class UnionAnalyzer {
     val entityType = listDefinition.getType();
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
 
-    val count = getCountFrom(response);
+    val count = getCountFrom(response, max);
     // Done - update status to finished
     entityListRepository.update(newList.finished(count));
   }

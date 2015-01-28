@@ -21,15 +21,11 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
-import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -115,7 +111,7 @@ public class EntityListService {
       this.demoList = new EntityList(UUID.fromString(uuid), Status.PENDING, 0L, NAME, DESCRIPTION, TYPE);
       this.definition =
           new EntityListDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
-              TYPE);
+              TYPE, 0);
     }
   }
 

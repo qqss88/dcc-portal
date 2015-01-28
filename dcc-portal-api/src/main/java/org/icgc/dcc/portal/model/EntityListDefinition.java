@@ -40,12 +40,11 @@ public class EntityListDefinition extends BaseEntityList {
 
   @NonNull
   private final ObjectNode filters;
-
   @NonNull
   private final String sortBy;
-
   @NonNull
   private final SortOrder sortOrder;
+  private final int size;
 
   private final static class JsonPropertyName {
 
@@ -55,6 +54,7 @@ public class EntityListDefinition extends BaseEntityList {
     final static String name = "name";
     final static String description = "description";
     final static String type = "type";
+    final static String size = "size";
   }
 
   @JsonCreator
@@ -65,7 +65,8 @@ public class EntityListDefinition extends BaseEntityList {
       @JsonProperty(JsonPropertyName.sortOrder) final SortOrder sortOrder,
       @NonNull @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
-      @NonNull @JsonProperty(JsonPropertyName.type) final Type type) {
+      @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
+      @JsonProperty(JsonPropertyName.size) final int limit) {
 
     super(name, description, type);
 
@@ -75,6 +76,11 @@ public class EntityListDefinition extends BaseEntityList {
     this.sortBy = sortBy;
     this.filters = FiltersParam.parseFilters(filters);
     this.sortOrder = sortOrder;
+    this.size = (limit < 0) ? 0 : limit;
+  }
+
+  public int getLimit(final int cap) {
+    return (this.size > cap) ? cap : this.size;
   }
 
   @RequiredArgsConstructor
