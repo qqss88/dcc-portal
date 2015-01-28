@@ -46,9 +46,9 @@
             var ids = LocationService.extractSetIds(uiFilters);
 
             if (ids.length > 0) {
-               SetService.getMetaData(ids).then(function(results) {
-                 $scope.filters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
-               });
+              SetService.getMetaData(ids).then(function(results) {
+                scope.filters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
+              });
             } else {
               scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, {});
             }

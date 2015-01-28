@@ -17,7 +17,24 @@ http:
 
       # If true, log requests to a file.
       enabled: false
+      
+# Database
+database:
+  # The name of the JDBC driver
+  driverClass: org.h2.Driver
 
+  # The username
+  user:
+
+  # The password
+  password:
+  
+  # The JDBC URL
+  url: jdbc:h2:mem:genelist;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=runscript from 'src/test/sql/schema.sql'
+
+  # The maximum number of connections to keep open
+  maxSize: 10
+ 
 # Controls generation of "Last-Modified" and "ETag" HTTP headers
 cache:
   # Enable Last-Modified HTTP header generation
@@ -113,6 +130,9 @@ logging:
     # ERRORs should be converted to WARNs in Swagger 1.2.2
     "com.wordnik.swagger.jaxrs.HelpApi": OFF
 
+    # OpenId authenticator
+    "org.openid4java": WARN
+
 # ICGC Client configuration
 icgc:
 
@@ -142,10 +162,6 @@ icgc:
 
   # Disallow self-signed SSL certificates
   enableStrictSSL: false
-
-# Persistence layer configuration
-database:
-  url: "jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'"
 
 # Portal release configuration
 release:

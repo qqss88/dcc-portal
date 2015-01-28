@@ -120,7 +120,7 @@ import com.yammer.metrics.annotation.Timed;
 public class DownloadResource {
 
   /**
-   *
+   * Constants.
    */
   private static final String IS_CONTROLLED = "isControlled";
   private static final String APPLICATION_GZIP = "application/x-gzip";

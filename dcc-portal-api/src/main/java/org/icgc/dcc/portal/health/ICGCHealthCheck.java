@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  * 
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -14,10 +14,10 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.icgc.dcc.portal.health;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.icgc.dcc.common.client.api.daco.DACOClient.UserType.CUD;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +30,13 @@ import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class CUDHealthCheck extends HealthCheck {
+public final class ICGCHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "cud";
+  private static final String CHECK_NAME = "icgc";
+  private static final String DACO_ENABLED_CUD_USER = "btiernay";
 
   /**
    * Dependencies
@@ -43,26 +44,24 @@ public final class CUDHealthCheck extends HealthCheck {
   private final AuthService authService;
 
   @Autowired
-  public CUDHealthCheck(@NonNull AuthService authService) {
+  public ICGCHealthCheck(@NonNull AuthService authService) {
     super(CHECK_NAME);
     this.authService = authService;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of CUD...");
-
-    try {
-      val token = authService.getAuthToken();
-      val healthy = !isNullOrEmpty(token);
-      if (healthy) {
-        return Result.healthy();
-      } else {
-        return Result.unhealthy("Token empty");
-      }
-    } catch (Exception e) {
-      return Result.unhealthy(e);
+    log.info("Checking the health of ICGC...");
+    val token = authService.getAuthToken();
+    if (isNullOrEmpty(token)) {
+      return Result.unhealthy("Token empty");
     }
+
+    if (!authService.hasDacoAccess(DACO_ENABLED_CUD_USER, CUD)) {
+      return Result.unhealthy("Invalid DACO account");
+    }
+
+    return Result.healthy("CUD and DACO valid");
   }
 
 }

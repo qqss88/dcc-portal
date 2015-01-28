@@ -111,7 +111,9 @@ public class OpenIDResource extends BaseResource {
 
     // Extract the parameters from the authentication response which comes in as a HTTP request from the OpenID provider
     val parameterList = new ParameterList(request.getParameterMap());
-    val user = openidService.verify(token, getReceivingUrl(request), parameterList, redirect);
+    val receivingUrl = getReceivingUrl(request);
+    log.debug("[{}] ReceivingUrl - {}", token, receivingUrl);
+    val user = openidService.verify(token, receivingUrl, parameterList, redirect);
 
     return Response
         .seeOther(redirect)
@@ -126,7 +128,6 @@ public class OpenIDResource extends BaseResource {
     if (!isNullOrEmpty(queryString)) {
       receivingURL.append("?").append(request.getQueryString());
     }
-    log.info("Receiving URL = '{}'", receivingURL.toString());
 
     // If the portal is behind a load-balancer the response will always come through HTTP. Rewrite to HTTPS to match the
     // return_to URL generated in the previous step
@@ -135,7 +136,6 @@ public class OpenIDResource extends BaseResource {
 
   private static NewCookie setSessionCookie(User user) {
     val sessionToken = user.getSessionToken().toString();
-    log.info("Replacing session token with {}", sessionToken);
 
     return createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, sessionToken);
   }

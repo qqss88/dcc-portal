@@ -16,48 +16,50 @@
  */
 package org.icgc.dcc.portal.health;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.data.downloader.DynamicDownloader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.yammer.metrics.core.HealthCheck;
 
 @Slf4j
 @Component
-public final class HazelcastHealthCheck extends HealthCheck {
+public final class DownloaderHealthCheck extends HealthCheck {
 
   /**
    * Constants.
    */
-  private static final String CHECK_NAME = "hazelcast";
+  private static final String CHECK_NAME = "downloader";
 
   /**
    * Dependencies
    */
-  private final HazelcastInstance hazelcastInstance;
+  private final DynamicDownloader downloader;
 
   @Autowired
-  public HazelcastHealthCheck(HazelcastInstance hazelcastInstance) {
+  public DownloaderHealthCheck(DynamicDownloader downloader) {
     super(CHECK_NAME);
-    this.hazelcastInstance = hazelcastInstance;
+    this.downloader = downloader;
   }
 
   @Override
   protected Result check() throws Exception {
-    log.info("Checking the health of Hazelcast...");
-    if (hazelcastInstance == null) {
+    log.info("Checking the health of Downloader...");
+    if (downloader == null) {
       return Result.unhealthy("Service missing");
     }
 
-    val memberCount = hazelcastInstance.getCluster().getMembers().size();
-    if (memberCount == 0) {
-      return Result.unhealthy("No members");
+    if (!downloader.isServiceAvailable()) {
+      return Result.unhealthy("Service unavailable");
     }
 
-    return Result.healthy("%s members available", memberCount);
+    if (downloader.isOverCapacity()) {
+      return Result.unhealthy("Over capacity");
+    }
+
+    return Result.healthy();
   }
 
 }

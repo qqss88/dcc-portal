@@ -20,7 +20,7 @@
 
   var module = angular.module('icgc.common.display', []);
 
-  module.service('FiltersUtil', function(Extensions, SetService) {
+  module.service('FiltersUtil', function(Extensions) {
 
     this.removeExtensions = function(filters) {
       if (filters.hasOwnProperty('gene')) {

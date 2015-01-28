@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  * 
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -14,12 +14,13 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.icgc.dcc.portal.health;
 
+import static org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus.RED;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.client.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,9 +50,20 @@ public final class ElasticSearchHealthCheck extends HealthCheck {
   @Override
   protected Result check() throws Exception {
     log.info("Checking the health of ElasticSearch...");
-    val status = client.admin().cluster().prepareHealth().execute().actionGet().getStatus().name();
+    if (client == null) {
+      return Result.unhealthy("Service missing");
+    }
 
-    return Result.healthy(status);
+    val status = getStatus();
+    if (status == RED) {
+      return Result.unhealthy("Cluster health status is %s", status.name());
+    }
+
+    return Result.healthy("Cluster health status is %s", status.name());
+  }
+
+  private ClusterHealthStatus getStatus() {
+    return client.admin().cluster().prepareHealth().execute().actionGet().getStatus();
   }
 
 }
