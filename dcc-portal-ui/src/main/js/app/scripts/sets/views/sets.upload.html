@@ -21,8 +21,8 @@
                 -->
                 <div data-ng-if="setLimit">
                     <br>
-                    <div>Save top: <span>(Only the top {{setLimit}} will be saved)</span></div>
-                    <input type="text" maxlength="9" size="9">
+                    <div>Save top: <span>(Only the top {{setSize}} will be saved)</span></div>
+                    <input type="text" maxlength="9" size="9" data-ng-model="$parent.setSize">
                 </div>
 
 
@@ -37,11 +37,6 @@
                     <small>{{256 - setDescription.length}} chars left</small>
                 </div>
 
-                <!--
-                <div data-ng-if="setLimit">
-                Note: Only the top {{setLimit}} {{setType}} will be saved.
-                </div>
-                -->
             </div>
 
             <!-- footer -->

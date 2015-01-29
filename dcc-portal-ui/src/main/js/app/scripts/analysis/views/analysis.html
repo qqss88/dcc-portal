@@ -1,4 +1,7 @@
-<h1><i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Set Analysis</h1>
+<h1>
+    <i class="t_badge t_badge_icon"><i class="icon-beaker"></i></i>Set Analysis
+    <button data-ng-click="debugReset()">Reset</button>
+</h1>
 <aside class="t_sidebar">
     <div>
         <div class="t_tabs" style="margin-right: -2rem">
@@ -80,12 +83,12 @@
                 </span>
             </div>
             <br>
-            <span>
+            <div style="padding:.5rem 0">
                 <span>Select set(s) below to activate available analysis</span>
-                <!--
-                <span class="pull-right">Create a new set from <a href="/search">Advanced Search</a></span>
-                -->
-            </span>
+                <span class="pull-right">
+                    <button class="t_button" data-ng-click="removeLists()"><i class="icon-cancel"></i>Remove selected</button>   
+                </span>
+            </div>
             <table class="table">
                 <thead>
                     <th></th>
@@ -112,7 +115,9 @@
                             <span class="t_tools" style="float:left">
                                 <span class="t_tools__tool">
                                     <i class="icon-file" data-ng-click="exportList(item.id)"></i>
+                                    <!--
                                     <i class="icon-cancel" data-ng-click="removeList(item.id)" data-ng-if="! item.readonly"></i>
+                                    -->
                                 </span>
                             </span>
                         </td>

@@ -41,7 +41,8 @@
                         <span data-ng-bind-html="displaySetOperation(item, setList)"></span>
                     </td>
                     <td class="text-right">
-                        <a href="">{{item.count | number}}</a>
+                        <a data-ng-if="item.count > 0" href="">{{item.count | number}}</a>
+                        <span data-ng-if="item.count === 0">{{item.count | number}}</a>
                     </td>
                     <td>
                         <span class="t_tools" style="float:left"> 

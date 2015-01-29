@@ -1,6 +1,7 @@
 <ul class="t_facets__facet">
     <li class="t_facets__facet__terms">
         <ul class="t_facets__facet__terms__active">
+            <!--
             <li class="t_facets__facet__terms__active__term__label"
                 data-ng-if="hasGeneList"
                 data-ng-click="remove()"
@@ -8,8 +9,9 @@
                 data-ng-mouseleave="toggleRemove=false">
                 <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i>
                 Gene List
-                <!--{{geneListType === "uploadGeneListId"? "Uploaded Gene List" : "Input Gene List"}} -->
+                {{geneListType === "uploadGeneListId"? "Uploaded Gene List" : "Input Gene List"}}
             </li>
+            -->
             <li class="text-right" data-ng-hide="collapsed">
                 <button type="button" class="t_button" data-ng-click="genelistModal=!genelistModal; reset();">
                     <i class="icon-upload"></i> Upload Gene Set

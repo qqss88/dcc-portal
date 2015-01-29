@@ -38,20 +38,21 @@
         setModal: '=',
         setType: '=',
         setUnion: '=',
-        setLimit: '@'
+        setLimit: '='
       },
       templateUrl: '/scripts/sets/views/sets.upload.html',
       link: function($scope) {
 
         $scope.setDescription = null;
+        $scope.setSize = 0;
 
         $scope.submitNewSet = function() {
           var params = {}, sortParam;
 
-          // FIXME
           params.type = $scope.setType;
           params.name = $scope.setName;
           params.description = $scope.setDescription;
+          params.size = $scope.setSize;
 
           if (angular.isDefined($scope.setLimit)) {
             params.filters = LocationService.filters();
@@ -71,13 +72,9 @@
             params.union = $scope.setUnion;
           }
 
-          console.log('param payload', params);
-
           if (angular.isDefined($scope.setLimit)) {
-            console.log('saving new list');
             SetService.addSet($scope.setType, params);
           } else {
-            console.log('saving derived list');
             SetService.addDerivedSet($scope.setType, params);
           }
 
@@ -87,7 +84,6 @@
         };
 
         $scope.cancel = function() {
-          console.log('... cancelling ...');
           $scope.setDescription = null;
           $scope.setType = null;
           $scope.setModal = false;
@@ -95,6 +91,9 @@
 
         $scope.$watch('setModal', function(n) {
           if (n) {
+            // FIXME: get absolute max(new/derived) from settings
+            $scope.setSize = Math.min($scope.setLimit || 0, 20000);
+            $scope.setSizeLimit = $scope.setSize;
             $scope.setName = 'my ' + $scope.setType + ' set';
             $scope.uiFilters = LocationService.filters();
           }
@@ -384,6 +383,7 @@
       data.type = type.toUpperCase();
       data.name = params.name;
       data.description = params.description || '';
+      data.size = params.size || 0;
 
       /*
       data.name = encodeURIComponent(params.name);
@@ -531,7 +531,7 @@
 
     // FIXME: Add cached version
     this.getMetaData = function( ids ) {
-      console.log('getting meta data for', ids);
+      // console.log('getting meta data for', ids);
       return RestangularNoCache.several('entitylist/lists', ids).get('', {});
     };
 
@@ -582,6 +582,9 @@
         });
         if (exist === false){
           setList.unshift(demo); // Demo always goes first
+          localStorageService.set(LIST_ENTITY, setList);
+        } else {
+          setList[0] = demo;
           localStorageService.set(LIST_ENTITY, setList);
         }
       }

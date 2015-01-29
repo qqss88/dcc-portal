@@ -3,7 +3,10 @@
         <a href="/browser/m?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a></span>
 </h3>
 <div class="text-right">
-    <button class="t_button" data-ng-click="AdvancedCtrl.setType='mutation'; AdvancedCtrl.setModal=true"><i class="icon-upload"></i> Save Mutation Set</button>
+    <button class="t_button" 
+        data-ng-click="AdvancedCtrl.saveSet('mutation', AdvancedCtrl.Mutation.mutations.pagination.total)">
+        <i class="icon-upload"></i> Save Mutation Set
+    </button>
 </div>
 
 <div class="t_table_top">

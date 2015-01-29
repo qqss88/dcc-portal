@@ -82,6 +82,12 @@
         _ctrl.Mutation.ajax();
       }
 
+      _ctrl.saveSet = function(type, limit) {
+        _ctrl.setLimit = limit;
+        _ctrl.setType = type;
+        _ctrl.setModal = true;
+      };
+
       _ctrl.setTab = function (tab) {
         _ctrl.state.setTab(tab);
         ajax();

@@ -55,6 +55,13 @@
     $scope.listItemUUIDs = [];
     $scope.entityLists = SetService.getAll();
 
+    // FIXME: Debug - remove
+    $scope.debugReset = function() {
+      window.localStorage.clear();
+      window.location.reload();
+    };
+
+
 
     // Send IDs generate new set operations analysis
     $scope.launchSetAnalysis = function() {
@@ -131,6 +138,22 @@
       }
     };
 
+
+    $scope.removeLists = function() {
+      var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
+      if (!confirmRemove || confirmRemove === false) {
+        return;
+      }
+
+      $scope.entityLists.forEach(function(d) {
+        if (d.checked === true && ! d.readonly) {
+          SetService.remove(d.id);
+        }
+      });
+      $scope.entityLists = SetService.getAll();
+      $scope.updateAvailableAnalysis();
+    };
+
     $scope.removeList = function(id) {
       SetService.remove(id);
       $scope.entityLists = SetService.getAll();
@@ -159,7 +182,6 @@
       SetService.sync();
 
       unfinished = _.filter($scope.entityLists, function(d) {
-        console.log('....', d);
         return d.status !== 'FINISHED';
       }).length;
 
