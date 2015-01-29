@@ -102,7 +102,8 @@
     };
   });
 
-  module.directive('setOperation', function($location, $timeout, Restangular, SetOperationService) {
+
+  module.directive('setOperation', function($location, $timeout, SetService, SetOperationService) {
     return {
       restrict: 'E',
       scope: {
@@ -228,8 +229,20 @@
           };
 
           $scope.setType = $scope.item.type.toLowerCase();
-          $scope.data = $scope.item.result;
+
+
+          // Normalize and sort for tabluar display
+          $scope.item.result.forEach(function(subset) {
+            subset.intersection.sort();
+            subset.exclusions.sort();
+          });
+          $scope.data = _.sortBy($scope.item.result, function(subset) {
+            var secondary = subset.exclusions.length > 0 ? subset.exclusions[0] : '';
+            return subset.intersection.length + '' + secondary;
+          }).reverse();
+
           $scope.vennData = SetOperationService.transform($scope.data);
+
           $scope.setList = [];
           $scope.data.forEach(function(set) {
             set.intersection.forEach(function(id) {
@@ -239,22 +252,17 @@
             });
           });
 
-          // Grab set meta data - do not use localstorage, it may not be there if the link was shared!!!
-          var metaPromise = Restangular.several('entitylist/lists', $scope.setList).get('', {});
-          $scope.setNameMap = {};
-          metaPromise.then(function(data) {
-            data = Restangular.stripRestangular(data);
-            data.forEach(function(set) {
-              $scope.setNameMap[set.id] = set.name;
-            });
-            config.labelFunc = function(id) {
-              return SetOperationService.getSetShortHand(id, $scope.setList);
-            };
+          config.labelFunc = function(id) {
+            return SetOperationService.getSetShortHand(id, $scope.setList);
+          };
+
+          SetService.getMetaData($scope.setList).then(function(results) {
+            $scope.setNameMap = SetService.lookupTable(results);
 
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);
-
           });
+
 
         }
 
