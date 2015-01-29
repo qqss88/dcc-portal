@@ -21,11 +21,15 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -116,7 +120,6 @@ public class EntityListService {
   }
 
   public EntityList getEntityList(@NonNull final UUID listId) {
-
     val list = repository.find(listId);
 
     if (null == list) {
@@ -172,5 +175,15 @@ public class EntityListService {
     checkState(insertCount == 1, "Could not save list - Insert count: %s", insertCount);
 
     return newList;
+  }
+
+  public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream stream) throws IOException {
+    val content = analyzer.retriveListItems(entityList);
+
+    @Cleanup
+    val writer = new OutputStreamWriter(stream);
+
+    writer.write(content);
+    writer.flush();
   }
 }

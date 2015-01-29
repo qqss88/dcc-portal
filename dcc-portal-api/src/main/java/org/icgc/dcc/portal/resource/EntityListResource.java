@@ -18,13 +18,19 @@
 
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
+import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;//.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_VALUE;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +41,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +71,8 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Path("/v1/entitylist")
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EntityListResource {
+
+  private final static String TYPE_ATTACHMENT = "attachment";
 
   @NonNull
   private final EntityListService service;
@@ -92,7 +102,6 @@ public class EntityListResource {
 
     Set<UUID> listIds;
     try {
-
       listIds = entityListIds.get();
 
     } catch (Exception e) {
@@ -108,7 +117,6 @@ public class EntityListResource {
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
-  // TODO
   public EntityList getEntityList(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
 
@@ -120,7 +128,6 @@ public class EntityListResource {
       // return null; // this return 204 - perhaps it's more appropriate?
     }
     else {
-
       return result.get(0);
     }
   }
@@ -152,9 +159,38 @@ public class EntityListResource {
   }
 
   private static Response newListResponse(final EntityList newList) {
-
     return Response.status(CREATED)
         .entity(newList)
+        .build();
+  }
+
+  private static String getFileName(final String entityType, final UUID id) {
+    return entityType + "-ids-for-set-" + id + ".csv";
+  }
+
+  @GET
+  @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}/export")
+  @Produces(APPLICATION_OCTET_STREAM)
+  public Response exportListItems(
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
+
+    val list = getEntityList(entityListId);
+
+    val streamingHandler = new StreamingOutput() {
+
+      @Override
+      public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+        service.exportListItems(list, outputStream);
+      }
+    };
+    val attechmentType = type(TYPE_ATTACHMENT)
+        .fileName(getFileName(list.getType().getName(), entityListId))
+        .creationDate(new Date())
+        .build();
+
+    return Response
+        .ok(streamingHandler)
+        .header(CONTENT_DISPOSITION, attechmentType)
         .build();
   }
 }

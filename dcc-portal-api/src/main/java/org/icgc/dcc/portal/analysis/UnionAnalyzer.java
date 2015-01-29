@@ -39,6 +39,7 @@ import org.elasticsearch.index.query.TermsLookupFilterBuilder;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
+import org.icgc.dcc.portal.model.EntityList;
 import org.icgc.dcc.portal.model.EntityListDefinition;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.Query;
@@ -318,4 +319,17 @@ public class UnionAnalyzer {
 
     return response;
   }
+
+  public String retriveListItems(final EntityList entityList) {
+    val lookupType = getLookupTypeFrom(entityList.getType());
+    val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
+        lookupType.getName(), entityList.getId().toString());
+    val response = query.execute().actionGet();
+    val values = response.getSource().get(TermsLookupService.TERMS_LOOKUP_PATH).toString();
+    val length = values.length();
+
+    // Remove the square brackets before we return - a bit hacky here - will refactor when we finalize the file format.
+    return (length > 1) ? values.substring(1, length - 1) : values;
+  }
+
 }

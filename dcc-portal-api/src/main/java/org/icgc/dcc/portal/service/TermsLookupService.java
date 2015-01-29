@@ -50,8 +50,8 @@ public class TermsLookupService {
   /**
    * Constants.
    */
-  private static final String TERMS_LOOKUP_PATH = "values";
-  private static final String TERMS_LOOKUP_INDEX_NAME = "terms-lookup";
+  public static final String TERMS_LOOKUP_PATH = "values";
+  public static final String TERMS_LOOKUP_INDEX_NAME = "terms-lookup";
 
   /**
    * Dependencies.
