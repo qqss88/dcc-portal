@@ -262,7 +262,6 @@ public class UnionAnalyzer {
         .filters(definition.getFilters())
         .sort(definition.getSortBy())
         .order(definition.getSortOrder().getName())
-
         .size(max)
         .limit(max)
         .build();

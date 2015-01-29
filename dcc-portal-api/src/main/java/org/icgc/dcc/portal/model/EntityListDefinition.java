@@ -38,6 +38,9 @@ import com.wordnik.swagger.annotations.ApiModel;
 @ApiModel(value = "EntityListDefinition")
 public class EntityListDefinition extends BaseEntityList {
 
+  private final static int MIN_SIZE = 1;
+  private final static int MAX_SIZE = Integer.MAX_VALUE;
+
   @NonNull
   private final ObjectNode filters;
   @NonNull
@@ -76,7 +79,7 @@ public class EntityListDefinition extends BaseEntityList {
     this.sortBy = sortBy;
     this.filters = FiltersParam.parseFilters(filters);
     this.sortOrder = sortOrder;
-    this.size = (limit < 0) ? 0 : limit;
+    this.size = (limit < MIN_SIZE) ? MAX_SIZE : limit;
   }
 
   public int getLimit(final int cap) {
