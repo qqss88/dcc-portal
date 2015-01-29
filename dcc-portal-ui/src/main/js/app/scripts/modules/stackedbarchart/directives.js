@@ -53,7 +53,9 @@
                 }, true);
 	
                 $scope.$on('$destroy', function () {
-                  chart.destroy();
+                  if (chart) {
+                    chart.destroy();
+                  }
                 });
               }
       };
