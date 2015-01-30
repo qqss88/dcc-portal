@@ -383,7 +383,7 @@
   /**
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
-  module.service('SetService', function($window, Restangular, RestangularNoCache, localStorageService, toaster) {
+  module.service('SetService', function($window, Restangular, RestangularNoCache, API, localStorageService, toaster) {
     var LIST_ENTITY = 'entity';
     var _this = this;
 
@@ -556,7 +556,7 @@
 
 
     this.exportSet = function(id) {
-      $window.location.href = '/api/v1/entitylist/' + id + '/export';
+      $window.location.href = API.BASE_URL + '/entitylist/' + id + '/export';
     };
 
 

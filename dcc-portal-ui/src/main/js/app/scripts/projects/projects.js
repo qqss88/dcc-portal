@@ -193,7 +193,7 @@
     refresh();
   });
 
-  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations) {
+  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API) {
     var _ctrl = this;
     Page.setTitle(project.id);
     Page.setPage('entity');
@@ -218,7 +218,7 @@
     }
 
     _ctrl.downloadSample = function () {
-      $window.location.href = '/api/v1/projects/' + project.id + '/samples';
+      $window.location.href = API.BASE_URL + '/projects/' + project.id + '/samples';
     };
 
     function refresh() {

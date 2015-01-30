@@ -102,9 +102,15 @@
       $rootScope.$on('$stateChangeSuccess', scroll);
     });
 
+
+  module.constant('API', {
+    BASE_URL: '/api/v1'
+  });
+
+
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider) {
+                          markdownConverterProvider, localStorageServiceProvider, API) {
 
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
@@ -113,13 +119,12 @@
     // $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
-    RestangularProvider.setBaseUrl('/api/v1');
+    RestangularProvider.setBaseUrl(API.BASE_URL);
     // Use to connect to production API regardless of setup
-    // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
+    // RestangularProvider.setBaseUrl('https://dcc.icgc.org' + API.BASE_URL);
+    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
-    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
+    // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -128,6 +133,7 @@
     $locationProvider.html5Mode(true);
 
     AngularyticsProvider.setEventHandlers(['Google']);
+
 
     $stateProvider.state(
       'team', {
