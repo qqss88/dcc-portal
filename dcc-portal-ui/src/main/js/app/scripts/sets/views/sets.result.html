@@ -6,17 +6,23 @@
     <set-upload data-set-modal="setModal" data-set-union="setUnion" data-set-type="setType"></set-upload>
 
     <div class="canvas half"></div>
-    <div class="narrow">
+    <div class="half omega">
 
-        <div>
-            <ul>
-                <li data-ng-repeat="item in setList">
-                    <span>
-                        {{getSetShortHand(item, setList)}} - {{setNameMap[item]}}
-                    </span>
-                </li>
-            </ul>
-        </div>
+        <table class="table">
+            <thead>
+                <th>Alias</th>
+                <th>Set name</th>
+                <th>Type</th>
+                <th># of items</th>
+            </thead>
+            <tr data-ng-repeat="item in setList">
+                <td>{{getSetShortHand(item, setList)}}</td>
+                <td>{{setMap[item].name}}</td>
+                <td>{{setMap[item].type.toLowerCase()}}</td>
+                <td class="text-right">{{setMap[item].count | number}}</td>
+            </tr>
+        </table>
+        <br>
 
         <table class="table">
             <thead>
@@ -42,13 +48,13 @@
                     </td>
                     <td class="text-right">
                         <a data-ng-if="item.count > 0" href="">{{item.count | number}}</a>
-                        <span data-ng-if="item.count === 0">{{item.count | number}}</a>
+                        <span data-ng-if="item.count === 0">{{item.count | number}}</span>
                     </td>
                     <td>
                         <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-upload" data-tooltip="Save as new list" 
+                                <i class="icon-floppy" data-tooltip="Save as new list" 
                                   data-ng-click="$parent.setUnion=[{'intersection': item.intersection, 'exclusions':item.exclusions}]; saveSubSet()"></i>
                             </span>
                         </span>

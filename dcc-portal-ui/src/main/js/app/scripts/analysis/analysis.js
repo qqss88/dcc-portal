@@ -61,6 +61,9 @@
       window.location.reload();
     };
 
+    $scope.exportSet = function(id) {
+      SetService.exportSet(id);
+    };
 
 
     // Send IDs generate new set operations analysis
@@ -145,13 +148,20 @@
         return;
       }
 
+      console.log('list length', $scope.entityLists.length);
+      var toRemove = [];
       $scope.entityLists.forEach(function(d) {
+        console.log(d.id, d.checked, d.readonly);
         if (d.checked === true && ! d.readonly) {
-          SetService.remove(d.id);
+          toRemove.push(d.id);
         }
       });
-      $scope.entityLists = SetService.getAll();
-      $scope.updateAvailableAnalysis();
+
+      if (toRemove.length > 0) {
+        SetService.removeSeveral(toRemove);
+      }
+      //$scope.entityLists = SetService.getAll();
+      //$scope.updateAvailableAnalysis();
     };
 
     $scope.removeList = function(id) {
@@ -212,6 +222,9 @@
             $scope.analysisList = AnalysisService.getAll();
             sync = true;
           }
+        } else {
+          $scope.error = '404';
+          return;
         }
 
         // FIXME: sync with bob and terry

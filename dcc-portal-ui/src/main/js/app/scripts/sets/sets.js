@@ -257,7 +257,11 @@
           };
 
           SetService.getMetaData($scope.setList).then(function(results) {
-            $scope.setNameMap = SetService.lookupTable(results);
+            $scope.setMap = {};
+            results.forEach(function(set) {
+              $scope.setMap[set.id] = set;
+            });
+            //$scope.setNameMap = SetService.lookupTable(results);
 
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);
@@ -379,7 +383,7 @@
   /**
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
-  module.service('SetService', function($timeout, Restangular, RestangularNoCache, localStorageService, toaster) {
+  module.service('SetService', function($window, Restangular, RestangularNoCache, localStorageService, toaster) {
     var LIST_ENTITY = 'entity';
     var _this = this;
 
@@ -449,7 +453,7 @@
         //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
       });
     };
 
@@ -476,7 +480,7 @@
         //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Bench</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
       });
     };
 
@@ -539,7 +543,6 @@
 
     // FIXME: Add cached version
     this.getMetaData = function( ids ) {
-      // console.log('getting meta data for', ids);
       return RestangularNoCache.several('entitylist/lists', ids).get('', {});
     };
 
@@ -552,12 +555,9 @@
     };
 
 
-
-    this.exportSet = function(sets) {
-      // TODO: stub
-      console.log('exporting', sets);
+    this.exportSet = function(id) {
+      $window.location.href = '/api/v1/entitylist/' + id + '/export';
     };
-
 
 
     /****** Local storage related API ******/
@@ -565,6 +565,14 @@
       setList = localStorageService.get(LIST_ENTITY) || [];
       _this.refreshList();
       return setList;
+    };
+
+    this.removeSeveral = function(ids) {
+      _.remove(setList, function(list) {
+        return ids.indexOf(list.id) >= 0;
+      });
+      localStorageService.set(LIST_ENTITY, setList);
+      return true;
     };
 
     this.remove = function(id) {
@@ -595,6 +603,7 @@
           setList[0] = demo;
           localStorageService.set(LIST_ENTITY, setList);
         }
+        console.log(setList.length, setList);
       }
 
       settingsPromise.then(function(settings) {
