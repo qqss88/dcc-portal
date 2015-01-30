@@ -21,7 +21,7 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;//.TEXT_PLAIN;
+import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
@@ -175,6 +175,10 @@ public class EntityListResource {
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
 
     val list = getEntityList(entityListId);
+
+    if (EntityList.Status.FINISHED != list.getStatus()) {
+      return null;
+    }
 
     val streamingHandler = new StreamingOutput() {
 

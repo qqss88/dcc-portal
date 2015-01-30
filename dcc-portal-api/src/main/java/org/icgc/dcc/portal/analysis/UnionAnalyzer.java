@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.analysis;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -59,6 +60,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * TODO
  */
@@ -66,6 +69,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UnionAnalyzer {
+
+  private static final List<String> NO_FIELDS = ImmutableList.of("_id");
 
   @NonNull
   private final Client client;
@@ -219,9 +224,15 @@ public class UnionAnalyzer {
     val response = unionAll(definitions, entityType);
 
     val entityIds = SearchResponses.getHitIds(response);
-    log.info("Union result is: '{}'", entityIds);
+    log.debug("Union result is: '{}'", entityIds);
+
+    // val watch = Stopwatch.createStarted();
 
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
+
+    // watch.stop();
+    // log.info("createTermsLookup took {} nanoseconds for creating a derived list for entity type - {}",
+    // watch.elapsed(TimeUnit.NANOSECONDS), entityType);
 
     val count = getCountFrom(response, maxNumberOfHits);
     // Done - update status to finished
@@ -259,7 +270,7 @@ public class UnionAnalyzer {
     log.info("List def is: " + definition);
 
     val limitedGeneQuery = Query.builder()
-        // .fields(idField())
+        .fields(NO_FIELDS)
         .filters(definition.getFilters())
         .sort(definition.getSortBy())
         .order(definition.getSortOrder().getName())
@@ -268,7 +279,15 @@ public class UnionAnalyzer {
         .build();
 
     val repo = getRepositoryByEntityType(definition.getType());
-    return repo.findAllCentric(limitedGeneQuery);
+
+    // val watch = Stopwatch.createStarted();
+
+    val result = repo.findAllCentric(limitedGeneQuery);
+
+    // watch.stop();
+    // log.info("executeFilterQuery took {} nanoseconds.", watch.elapsed(TimeUnit.NANOSECONDS));
+
+    return result;
   }
 
   @Async
@@ -288,7 +307,14 @@ public class UnionAnalyzer {
     log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
     val entityType = listDefinition.getType();
+
+    // val watch = Stopwatch.createStarted();
+
     termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
+
+    // watch.stop();
+    // log.info("createTermsLookup took {} nanoseconds for creating a new list for entity type - {}",
+    // watch.elapsed(TimeUnit.NANOSECONDS), entityType);
 
     val count = getCountFrom(response, max);
     // Done - update status to finished
@@ -313,7 +339,13 @@ public class UnionAnalyzer {
 
     log.debug("ElasticSearch query is: '{}'", search);
 
+    // val watch = Stopwatch.createStarted();
+
     val response = search.execute().actionGet();
+
+    // watch.stop();
+    // log.info("runEsQuery took {} nanoseconds for searchType - '{}'", watch.elapsed(TimeUnit.NANOSECONDS),
+    // searchType);
 
     log.debug("ElasticSearch result is: '{}'", response);
 
