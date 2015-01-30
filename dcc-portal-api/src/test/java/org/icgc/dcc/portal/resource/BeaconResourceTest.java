@@ -113,6 +113,14 @@ public class BeaconResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
+  @Test
+  public void testInvalidPositionArgs() {
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+        .thenReturn(generateDummyBeaconResponse());
+    val response = generateResponse("MT", "1111111111", "GRCh37", "A");
+    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+  }
+
   private ClientResponse generateResponse(String chr, String pos, String ref, String ale) {
     return client()
         .resource(RESOURCE)

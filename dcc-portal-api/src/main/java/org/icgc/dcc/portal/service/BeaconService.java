@@ -40,6 +40,7 @@ public class BeaconService {
 
   private final Client client;
   private final String index;
+  private final int POSITION_BUFFER = 1000; // must be larger than any single mutation
 
   @Autowired
   public BeaconService(Client client, @Value("#{indexName}") String index) {
@@ -53,8 +54,8 @@ public class BeaconService {
         .setSearchType(QUERY_THEN_FETCH);
 
     val boolQuery = QueryBuilders.boolQuery();
-    boolQuery.must(QueryBuilders.rangeQuery("chromosome_start").gte(position - 1000).lte(position));
-    boolQuery.must(QueryBuilders.rangeQuery("chromosome_end").lte(position + 1000));
+    boolQuery.must(QueryBuilders.rangeQuery("chromosome_start").gte(position - POSITION_BUFFER).lte(position));
+    boolQuery.must(QueryBuilders.rangeQuery("chromosome_end").lte(position + POSITION_BUFFER));
     boolQuery.must(QueryBuilders.termQuery("chromosome", chromosome));
     search.setQuery(boolQuery);
 
@@ -63,21 +64,21 @@ public class BeaconService {
     params.put("allele", allele);
     params.put("position", position);
 
-    if (allele.equals("D")) {
-      search.addScriptField("result",
-          "doc['mutation'].value.endsWith('.')");
-    } else if (allele.equals("I")) {
-      search.addScriptField("result",
-          "doc['mutation'].value.startsWith('.')");
-    } else {
-      search.addScriptField("result",
-          "var m = doc['mutation'].value;"
-              + "var offset = position - doc['chromosome_start'].value;"
-              + "var begin = m.indexOf('>') + 1 + offset;"
-              + "var end = Math.min(begin + allelelength, m.length());"
-              + "m = m.substring(begin,end);"
-              + "m==allele", params);
-    }
+    // Incomplete wildcard work (blocked)
+    // if (allele.equals("D")) {
+    // search.addScriptField("result",
+    // "doc['mutation'].value.endsWith('.')");
+    // } else if (allele.equals("I")) {
+    // search.addScriptField("result",
+    // "doc['mutation'].value.startsWith('.')");
+    // }
+    search.addScriptField("result",
+        "var m = doc['mutation'].value;"
+            + "var offset = position - doc['chromosome_start'].value;"
+            + "var begin = m.indexOf('>') + 1 + offset;"
+            + "var end = Math.min(begin + allelelength, m.length());"
+            + "m = m.substring(begin,end);"
+            + "m==allele", params);
 
     val filter = FilterBuilders.scriptFilter(
         "var m = doc['mutation'].value;"

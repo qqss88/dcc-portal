@@ -78,7 +78,7 @@ public class BeaconResource extends BaseResource {
     if (!isValidChromosome(chromosome)) {
       throw new BadRequestException("'chromosome' is empty or invalid (must be 1-22, X, Y or MT)");
     } else if (!isValidPosition(position.get(), chromosome)) {
-      throw new BadRequestException("'position' is missing, invalid or exceeds chromosome size");
+      throw new BadRequestException("'position' is empty, invalid or exceeds chromosome size");
     } else if (!isValidReference(reference)) {
       throw new BadRequestException("'reference' is empty or invalid (must be GRCh?)");
     } else if (Strings.isNullOrEmpty(allele)) {
