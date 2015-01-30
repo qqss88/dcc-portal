@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.primitives.Ints.tryParse;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -33,7 +34,6 @@ import javax.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.elasticsearch.common.primitives.Ints;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.BeaconService;
@@ -54,7 +54,7 @@ import com.yammer.metrics.annotation.Timed;
 public class BeaconResource extends BaseResource {
 
   private final BeaconService beaconService;
-  private final Map<String, Integer> CHR_LENGTHS =
+  private final Map<String, Integer> CHROMOSOME_LENGTHS =
       new ImmutableMap.Builder<String, Integer>()
           .put("1", 249250621).put("2", 243199373).put("3", 198022430).put("4", 191154276).put("5", 180915260)
           .put("6", 171115067).put("7", 159138663).put("8", 146364022).put("9.", 141213431).put("10", 135534747)
@@ -107,7 +107,7 @@ public class BeaconResource extends BaseResource {
       return false;
     }
     chromosome = chromosome.trim();
-    val chr = Ints.tryParse(chromosome);
+    val chr = tryParse(chromosome);
     if (chr == null) return false;
 
     return (chr <= 22 && chr >= 1)
@@ -121,7 +121,7 @@ public class BeaconResource extends BaseResource {
       return false;
     }
     ref = ref.trim();
-    return ref.startsWith("GRCh") && Ints.tryParse(ref.substring(4)) != null;
+    return ref.startsWith("GRCh") && tryParse(ref.substring(4)) != null;
   }
 
   private Boolean isValidAllele(String allele) {
@@ -130,7 +130,7 @@ public class BeaconResource extends BaseResource {
   }
 
   private Boolean isValidPosition(int pos, String chr) {
-    return pos >= 0 && CHR_LENGTHS.get(chr) >= pos;
+    return pos >= 0 && CHROMOSOME_LENGTHS.get(chr) >= pos;
   }
 
 }
