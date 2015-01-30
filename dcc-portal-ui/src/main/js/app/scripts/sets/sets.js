@@ -45,6 +45,26 @@
 
         $scope.setDescription = null;
         $scope.setSize = 0;
+        $scope.isValid = true;
+
+        // Validate size, name
+        $scope.validateInput = function() {
+          if (_.isEmpty($scope.setName) === true) {
+            $scope.isValid = false;
+            return;
+          }
+
+          if (isNaN($scope.setSize) === true) {
+            $scope.isValid = false;
+            return;
+          }
+
+          if ($scope.setSize > $scope.setSizeLimit) {
+            $scope.isValid = false;
+            return;
+          }
+          $scope.isValid = true;
+        };
 
         $scope.submitNewSet = function() {
           var params = {}, sortParam;
@@ -413,6 +433,9 @@
           data.sortBy = 'affectedDonorCountFiltered';
         }
         data.sortOrder = 'DESCENDING';
+      } else {
+        data.sortBy = params.sortBy;
+        data.sortOrder = params.sortOrder;
       }
       data.union = params.union;
       return data;

@@ -10,7 +10,7 @@
             </div>
 
             <!-- body -->
-            <div class="modal-body"> 
+            <div class="modal-body">
 
                 <!--
                 <div data-ng-if="setLimit">
@@ -21,19 +21,26 @@
                 -->
                 <div data-ng-if="setLimit">
                     <br>
-                    <div>Save top: <span>(Only the top {{setSize}} will be saved)</span></div>
-                    <input type="text" maxlength="9" size="9" data-ng-model="$parent.setSize">
+                    <div>Save top: </div>
+                    <input type="text" maxlength="9" size="9"
+                        data-select-on-click
+                        data-ng-model="$parent.setSize" data-ng-change="validateInput()">
+                    <br>
+                    <small>You can save up to the top {{setSizeLimit | number}} {{setType}}s</small>
                 </div>
 
 
                 <div>
                     <div>Name:</div>
-                    <input type="text" data-ng-model="setName" maxlength="64" data-select-on-click></input>
+                    <input type="text" data-ng-model="setName" maxlength="32" data-select-on-click data-ng-change="validateInput()"></input>
                 </div>
 
                 <div>
                     <div>Note:</div>
-                    <textarea cols="50" rows="3" data-ng-model="setDescription" placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
+                    <textarea cols="50" rows="3"
+                        data-ng-model="setDescription"
+                        data-ng-change="validateInput()"
+                        placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
                     <small>{{256 - setDescription.length}} chars left</small>
                 </div>
 
@@ -42,7 +49,7 @@
             <!-- footer -->
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="cancel()">Cancel</button>
-                <button class="t_button" data-ng-click="submitNewSet(); setModal=false">Submit</button> 
+                <button class="t_button" data-ng-disabled="!isValid" data-ng-click="submitNewSet(); setModal=false">Submit</button>
             </div>
         </div>
     </div>

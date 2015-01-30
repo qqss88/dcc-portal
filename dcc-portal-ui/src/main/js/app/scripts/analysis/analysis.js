@@ -95,12 +95,10 @@
     };
 
     $scope.launchEnrichmentAnalysis = function() {
-      var geneList = $scope.entityLists[0];
-
       $scope.enrichmentFilters = {
         gene: {
           entityListId: {
-            is: [ geneList.id ]
+            is: [ $scope.enrichmentSet ]
           }
         }
       };
@@ -130,11 +128,11 @@
       });
       uniqued = _.uniq(_.pluck(selected, 'type'));
 
-      $scope.enrichment = null;
+      $scope.enrichmentSet = null;
       $scope.setop = null;
 
       if (selected.length === 1 && uniqued[0] === 'gene') {
-        $scope.enrichment = true;
+        $scope.enrichmentSet = selected[0].id;
       }
       if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
         $scope.setop = true;

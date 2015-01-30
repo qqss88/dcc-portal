@@ -13,7 +13,7 @@
             <section class="text-right">
                 <span>
                     <button class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0">
-                        <i class="icon-trash"></i>Clear all analyses
+                        <i class="icon-trash"></i>Delete
                     </button>
                 </span>
             </section>
@@ -32,7 +32,8 @@
                     <span>
                         <span>{{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}</span>
                         <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
-                        <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
+                        <!--<small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>-->
+                        <small>&nbsp;</small>
                         <span data-ng-mouseenter="hover=true"
                               data-ng-mouseleave="hover=false"
                               data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
@@ -51,11 +52,12 @@
 
 <article>
     <div style="margin: 1rem" data-ng-if="!analysisId">
+        <h3>Saved Sets</h3>
         <div>
             <span>
             Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the <a href="/search">Advanced Search</a>. Then
             launch analysis here. <br>
-            For more information on the Bench, please refer to <a href="">documentation</a>.
+            <small>For more information on the Bench, please refer to <a href="">documentation</a>. </small>
             </span>
             <br><br>
 
@@ -67,24 +69,23 @@
 
 
             <div style="padding:.5rem 0">
-                <span>Select set(s) below to activate available analysis</span>
                 <div>
+                    <span>Select set(s) below to activate available analysis: </span>
                     <span>
                         <button class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
                         <i class="icon-beaker"></i>
                         Set Operations
                         </button>
                     </span>
-                    <span>&nbsp;</span>
                     <span>
-                        <button class="t_button" data-ng-disabled="!enrichment" data-ng-click="launchEnrichmentAnalysis()">
+                        <button class="t_button" data-ng-disabled="!enrichmentSet" data-ng-click="launchEnrichmentAnalysis()">
                         <i class="icon-beaker"></i>
                         Enrichment Analysis
                         </button>
                     </span>
                     <span class="pull-right">
                         <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="listItemTotal===0">
-                            <i class="icon-trash"></i>Remove selected
+                            <i class="icon-trash"></i>Delete
                         </button>   
                     </span>
                 </div>
