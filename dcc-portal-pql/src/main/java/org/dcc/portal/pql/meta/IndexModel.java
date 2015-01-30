@@ -15,28 +15,34 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta;
 
-public class BooleanFieldModel extends FieldModel {
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+import lombok.NonNull;
+import lombok.Value;
 
-  private BooleanFieldModel(String name) {
-    this(name, null);
+import org.icgc.dcc.portal.model.IndexModel.Type;
+
+@Value
+public class IndexModel {
+
+  DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
+
+  public boolean isNested(@NonNull String field, Type type) {
+    return getTypeModel(type).isNested(field);
   }
 
-  private BooleanFieldModel(String name, String uiAlias) {
-    this(name, uiAlias, false);
+  public String getNestedPath(@NonNull String field, Type type) {
+    return getTypeModel(type).getNestedPath(field);
   }
 
-  private BooleanFieldModel(String name, boolean nested) {
-    this(name, null, nested);
-  }
+  private AbstractTypeModel getTypeModel(Type type) {
+    switch (type) {
+    case DONOR_CENTRIC:
+      return donorCentric;
+    }
 
-  private BooleanFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, FieldModel.FieldType.BOOLEAN, nested);
-  }
-
-  public static BooleanFieldModel bool(String name) {
-    return new BooleanFieldModel(name);
+    throw new IllegalArgumentException(_("Type %s was not found", type.getId()));
   }
 
 }

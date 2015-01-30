@@ -15,38 +15,38 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.meta.field;
 
+import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.DOUBLE;
 import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
 
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.Client;
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
-@Value
-public class QueryEngine {
+public class DoubleFieldModel extends FieldModel {
 
-  @NonNull
-  Client client;
+  private DoubleFieldModel(String name) {
+    this(name, null);
+  }
 
-  @NonNull
-  String index;
+  private DoubleFieldModel(String name, String uiAlias) {
+    this(name, uiAlias, false);
+  }
 
-  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
-    context.setIndex(index);
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
+  private DoubleFieldModel(String name, boolean nested) {
+    this(name, null, nested);
+  }
 
-    val esAst = pqlListener.getEsAst();
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
+  private DoubleFieldModel(String name, String uiAlias, boolean nested) {
+    super(name, uiAlias, DOUBLE, nested);
+  }
 
-    return esVisitor.visit(esAst, context);
+  public static DoubleFieldModel double_(@NonNull String name) {
+    return new DoubleFieldModel(name);
+  }
+
+  @Override
+  public <T> T accept(FieldVisitor<T> visitor) {
+    return visitor.visitDoubleField(this);
   }
 
 }

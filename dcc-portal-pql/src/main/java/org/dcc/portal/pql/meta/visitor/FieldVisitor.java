@@ -15,13 +15,27 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta.visitor;
 
-import lombok.Value;
+import org.dcc.portal.pql.meta.field.ArrayFieldModel;
+import org.dcc.portal.pql.meta.field.BooleanFieldModel;
+import org.dcc.portal.pql.meta.field.DoubleFieldModel;
+import org.dcc.portal.pql.meta.field.LongFieldModel;
+import org.dcc.portal.pql.meta.field.ObjectFieldModel;
+import org.dcc.portal.pql.meta.field.StringFieldModel;
 
-@Value
-public class IndexMode {
+public interface FieldVisitor<T> {
 
-  DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
+  T visitArrayField(ArrayFieldModel field);
+
+  T visitBooleanField(BooleanFieldModel field);
+
+  T visitDoubleField(DoubleFieldModel field);
+
+  T visitLongField(LongFieldModel field);
+
+  T visitObjectField(ObjectFieldModel field);
+
+  T visitStringField(StringFieldModel field);
 
 }

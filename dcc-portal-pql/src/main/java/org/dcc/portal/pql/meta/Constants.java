@@ -15,42 +15,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta;
 
-import lombok.Getter;
+import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
+import lombok.NoArgsConstructor;
 
-@Getter
-public class ArrayFieldModel extends FieldModel {
+import org.dcc.portal.pql.meta.field.StringFieldModel;
 
-  private final FieldModel element;
+@NoArgsConstructor(access = PRIVATE)
+public final class Constants {
 
-  private ArrayFieldModel(String name, FieldModel element) {
-    this(name, null, element);
-  }
-
-  private ArrayFieldModel(String name, String uiAlias, FieldModel element) {
-    this(name, uiAlias, false, element);
-  }
-
-  private ArrayFieldModel(String name, boolean nested, FieldModel element) {
-    this(name, null, nested, element);
-  }
-
-  private ArrayFieldModel(String name, String uiAlias, boolean nested, FieldModel element) {
-    super(name, uiAlias, FieldModel.FieldType.ARRAY, nested);
-    this.element = element;
-  }
-
-  public static ArrayFieldModel arrayOfStrings(String name) {
-    return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
-  }
-
-  public static ArrayFieldModel arrayOfObjects(String name, ObjectFieldModel element) {
-    return new ArrayFieldModel(name, element);
-  }
-
-  public static ArrayFieldModel nestedArrayOfObjects(String name, ObjectFieldModel element) {
-    return new ArrayFieldModel(name, true, element);
-  }
+  public static final String NO_NAME = "";
+  public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
+  public static final String EMPTY_UI_ALIAS = null;
+  public static final String FIELD_SEPARATOR = ".";
 
 }

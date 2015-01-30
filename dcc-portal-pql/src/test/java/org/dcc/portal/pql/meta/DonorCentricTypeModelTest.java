@@ -15,24 +15,28 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta;
 
-public class StringFieldModel extends FieldModel {
+import static org.assertj.core.api.Assertions.assertThat;
+import lombok.extern.slf4j.Slf4j;
 
-  private StringFieldModel(String name) {
-    super(name, null, FieldModel.FieldType.STRING, false);
+import org.junit.Test;
+
+@Slf4j
+public class DonorCentricTypeModelTest {
+
+  DonorCentricTypeModel model = new DonorCentricTypeModel();
+
+  @Test
+  public void isNestedTest() {
+    assertThat(model.isNested("gene.ssm.observation.matched_sample_id")).isTrue();
+    assertThat(model.isNested("_summary._cngv_exists")).isFalse();
+
   }
 
-  private StringFieldModel(String name, String uiAlias) {
-    super(name, uiAlias, FieldModel.FieldType.STRING, false);
-  }
-
-  private StringFieldModel(String name, boolean nested) {
-    super(name, null, FieldModel.FieldType.STRING, nested);
-  }
-
-  public static StringFieldModel string(String name) {
-    return new StringFieldModel(name);
+  @Test
+  public void tmpTest() {
+    log.info("{}", model.getFullName(""));
   }
 
 }

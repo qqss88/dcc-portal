@@ -15,38 +15,51 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.meta.field;
 
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
+import static org.dcc.portal.pql.meta.Constants.EMPTY_STRING_FIELD;
+import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
+import lombok.Getter;
 
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.Client;
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
-@Value
-public class QueryEngine {
+@Getter
+public class ArrayFieldModel extends FieldModel {
 
-  @NonNull
-  Client client;
+  private final FieldModel element;
 
-  @NonNull
-  String index;
+  private ArrayFieldModel(String name, FieldModel element) {
+    this(name, null, element);
+  }
 
-  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
-    context.setIndex(index);
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
+  private ArrayFieldModel(String name, String uiAlias, FieldModel element) {
+    this(name, uiAlias, false, element);
+  }
 
-    val esAst = pqlListener.getEsAst();
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
+  private ArrayFieldModel(String name, boolean nested, FieldModel element) {
+    this(name, null, nested, element);
+  }
 
-    return esVisitor.visit(esAst, context);
+  private ArrayFieldModel(String name, String uiAlias, boolean nested, FieldModel element) {
+    super(name, uiAlias, ARRAY, nested);
+    this.element = element;
+  }
+
+  public static ArrayFieldModel arrayOfStrings(String name) {
+    return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
+  }
+
+  public static ArrayFieldModel arrayOfObjects(String name, ObjectFieldModel element) {
+    return new ArrayFieldModel(name, element);
+  }
+
+  public static ArrayFieldModel nestedArrayOfObjects(String name, ObjectFieldModel element) {
+    return new ArrayFieldModel(name, true, element);
+  }
+
+  @Override
+  public <T> T accept(FieldVisitor<T> visitor) {
+    return visitor.visitArrayField(this);
   }
 
 }

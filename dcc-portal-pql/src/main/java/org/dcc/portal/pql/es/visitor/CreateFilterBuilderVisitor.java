@@ -55,12 +55,14 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -72,7 +74,10 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
   @NonNull
   private final Client client;
+  @NonNull
+  private final IndexModel indexModel;
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
+  private QueryContext queryContext;
 
   @Override
   public FilterBuilder visitBool(@NonNull BoolNode node) {
@@ -99,9 +104,19 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   @Override
   public FilterBuilder visitTerm(@NonNull TermNode node) {
     val name = node.getNameNode().getValue().toString();
+    log.debug("[visitTerm] Name: {}", name);
     val value = node.getValueNode().getValue();
+    val result = termFilter(name, value);
+    if (indexModel.isNested(name, queryContext.getType())) {
+      return FilterBuilders.nestedFilter(getNestedPath(name), result);
+    }
 
-    return termFilter(name, value);
+    return result;
+  }
+
+  private String getNestedPath(String name) {
+    // TODO Auto-generated method stub
+    return "gene";
   }
 
   private static <T> T getChild(BoolNode boolNode, Class<T> type) {
@@ -123,6 +138,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
 
   @Override
   public SearchRequestBuilder visit(@NonNull Node node, @NonNull QueryContext queryContext) {
+    this.queryContext = queryContext;
     SearchRequestBuilder result = client
         .prepareSearch(queryContext.getIndex())
         .setTypes(queryContext.getType().getId());
@@ -150,6 +166,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
         }
       }
     }
+    this.queryContext = null;
 
     return result;
   }

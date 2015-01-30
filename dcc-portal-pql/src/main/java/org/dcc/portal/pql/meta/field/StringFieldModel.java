@@ -15,38 +15,33 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.meta.field;
 
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
+import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.STRING;
 
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.Client;
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
-@Value
-public class QueryEngine {
+public class StringFieldModel extends FieldModel {
 
-  @NonNull
-  Client client;
+  private StringFieldModel(String name) {
+    super(name, null, STRING, false);
+  }
 
-  @NonNull
-  String index;
+  private StringFieldModel(String name, String uiAlias) {
+    super(name, uiAlias, STRING, false);
+  }
 
-  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
-    context.setIndex(index);
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
+  private StringFieldModel(String name, boolean nested) {
+    super(name, null, STRING, nested);
+  }
 
-    val esAst = pqlListener.getEsAst();
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
+  public static StringFieldModel string(String name) {
+    return new StringFieldModel(name);
+  }
 
-    return esVisitor.visit(esAst, context);
+  @Override
+  public <T> T accept(FieldVisitor<T> visitor) {
+    return visitor.visitStringField(this);
   }
 
 }

@@ -15,12 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta.field;
+
+import static org.dcc.portal.pql.meta.Constants.NO_NAME;
+import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
 import java.util.List;
 
 import lombok.Getter;
 import lombok.val;
+
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
 import com.google.common.collect.ImmutableList;
 
@@ -42,7 +47,7 @@ public class ObjectFieldModel extends FieldModel {
   }
 
   private ObjectFieldModel(String name, String uiAlias, boolean nested, List<? extends FieldModel> fields) {
-    super(name, null, FieldType.OBJECT, nested);
+    super(name, null, OBJECT, nested);
     this.fields = fields;
   }
 
@@ -57,7 +62,22 @@ public class ObjectFieldModel extends FieldModel {
     val fieldsList = new ImmutableList.Builder<T>();
     fieldsList.add(fields);
 
-    return new ObjectFieldModel(FieldModel.NO_NAME, fieldsList.build());
+    return new ObjectFieldModel(NO_NAME, fieldsList.build());
+  }
+
+  public static <T extends FieldModel> ObjectFieldModel nestedObject(T... fields) {
+    val fieldsList = new ImmutableList.Builder<T>();
+    for (val field : fields) {
+      field.setNested(true);
+      fieldsList.add(field);
+    }
+
+    return new ObjectFieldModel(NO_NAME, true, fieldsList.build());
+  }
+
+  @Override
+  public <T> T accept(FieldVisitor<T> visitor) {
+    return visitor.visitObjectField(this);
   }
 
 }

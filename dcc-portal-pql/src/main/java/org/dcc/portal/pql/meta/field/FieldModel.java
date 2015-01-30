@@ -15,18 +15,16 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta.field;
 
-import static meta.StringFieldModel.string;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
+
+@Data
 @AllArgsConstructor
 public abstract class FieldModel {
-
-  public static final String NO_NAME = "";
-  public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
 
   String name;
   String uiAlias;
@@ -41,5 +39,7 @@ public abstract class FieldModel {
     BOOLEAN,
     OBJECT
   }
+
+  public abstract <T> T accept(FieldVisitor<T> visitor);
 
 }

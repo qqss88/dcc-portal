@@ -25,9 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.dcc.portal.pql.utils.BaseVisitorTest;
+import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 @Slf4j
-public class CreateFilterBuilderVisitorTest extends BaseVisitorTest {
+public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   private PqlParseListener listener;
   private CreateFilterBuilderVisitor visitor;
@@ -44,7 +45,7 @@ public class CreateFilterBuilderVisitorTest extends BaseVisitorTest {
   @Before
   public void setUp() {
     es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new CreateFilterBuilderVisitor(es.client());
+    visitor = new CreateFilterBuilderVisitor(es.client(), new IndexModel());
     queryContext = new QueryContext();
     queryContext.setType(DONOR_CENTRIC);
     queryContext.setIndex(INDEX_NAME);
@@ -181,6 +182,13 @@ public class CreateFilterBuilderVisitorTest extends BaseVisitorTest {
       resopnseIds.add(hit.getId());
     }
     assertThat(resopnseIds).containsOnly(ids);
+  }
+
+  @Test
+  public void tmpTest() {
+    val result = executeQuery("eq(gene._gene_id, 'ENSG00000215529')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
+    containsOnlyIds(result, "DO1", "DO2");
   }
 
 }

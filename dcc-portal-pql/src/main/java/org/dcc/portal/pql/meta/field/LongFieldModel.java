@@ -15,24 +15,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta.field;
 
-public class DoubleFieldModel extends FieldModel {
+import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
 
-  public DoubleFieldModel(String name) {
+import org.dcc.portal.pql.meta.visitor.FieldVisitor;
+
+public class LongFieldModel extends FieldModel {
+
+  private LongFieldModel(String name) {
     this(name, null);
   }
 
-  public DoubleFieldModel(String name, String uiAlias) {
+  private LongFieldModel(String name, String uiAlias) {
     this(name, uiAlias, false);
   }
 
-  public DoubleFieldModel(String name, boolean nested) {
+  private LongFieldModel(String name, boolean nested) {
     this(name, null, nested);
   }
 
-  public DoubleFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, FieldModel.FieldType.DOUBLE, nested);
+  private LongFieldModel(String name, String uiAlias, boolean nested) {
+    super(name, uiAlias, LONG, nested);
+  }
+
+  public static LongFieldModel long_(String name) {
+    return new LongFieldModel(name);
+  }
+
+  @Override
+  public <T> T accept(FieldVisitor<T> visitor) {
+    return visitor.visitLongField(this);
   }
 
 }

@@ -15,47 +15,48 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package meta;
+package org.dcc.portal.pql.meta;
 
-import static meta.ArrayFieldModel.arrayOfObjects;
-import static meta.ArrayFieldModel.arrayOfStrings;
-import static meta.ArrayFieldModel.nestedArrayOfObjects;
-import static meta.BooleanFieldModel.bool;
-import static meta.LongFieldModel._long;
-import static meta.ObjectFieldModel.object;
-import static meta.StringFieldModel.string;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
+import static org.dcc.portal.pql.meta.field.BooleanFieldModel.bool;
+import static org.dcc.portal.pql.meta.field.DoubleFieldModel.double_;
+import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
+import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
+import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
 
-import lombok.Value;
 import lombok.val;
+
+import org.dcc.portal.pql.meta.field.ArrayFieldModel;
+import org.dcc.portal.pql.meta.field.FieldModel;
+import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
 import com.google.common.collect.ImmutableList;
 
-@Value
-public class DonorCentricTypeModel {
-
-  private final List<FieldModel> fields;
+public class DonorCentricTypeModel extends AbstractTypeModel {
 
   public DonorCentricTypeModel() {
-    fields = initializeFields();
+    super(initializeFields());
   }
 
-  private List<FieldModel> initializeFields() {
+  private static List<FieldModel> initializeFields() {
     val fields = new ImmutableList.Builder<FieldModel>();
     fields.add(string("_donor_id"));
     fields.add(string("_project_id"));
     fields.add(initSummary());
-    fields.add(_long("donor_age_at_diagnosis"));
-    fields.add(_long("donor_age_at_enrollment"));
-    fields.add(_long("donor_age_at_last_followup"));
+    fields.add(long_("donor_age_at_diagnosis"));
+    fields.add(long_("donor_age_at_enrollment"));
+    fields.add(long_("donor_age_at_last_followup"));
     fields.add(string("donor_diagnosis_icd10"));
     fields.add(string("donor_id"));
-    fields.add(_long("donor_interval_of_last_followup"));
-    fields.add(_long("donor_relapse_interval"));
+    fields.add(long_("donor_interval_of_last_followup"));
+    fields.add(long_("donor_relapse_interval"));
     fields.add(string("donor_relapse_type"));
     fields.add(string("donor_sex"));
-    fields.add(_long("donor_survival_time"));
+    fields.add(long_("donor_survival_time"));
     fields.add(string("donor_tumour_stage_at_diagnosis"));
     fields.add(string("donor_tumour_stage_at_diagnosis_supplemental"));
     fields.add(string("donor_tumour_staging_system_at_diagnosis"));
@@ -66,9 +67,9 @@ public class DonorCentricTypeModel {
     return fields.build();
   }
 
-  private ObjectFieldModel initSummary() {
+  private static ObjectFieldModel initSummary() {
     return object("_summary",
-        _long("_affected_gene_count"),
+        long_("_affected_gene_count"),
         string("_age_at_diagnosis_group"),
         arrayOfStrings("_available_data_type"),
         bool("_cngv_exists"),
@@ -90,26 +91,26 @@ public class DonorCentricTypeModel {
         arrayOfStrings("repository"));
   }
 
-  private ObjectFieldModel initExperimentalAnalysisPerformedSampleCount() {
+  private static ObjectFieldModel initExperimentalAnalysisPerformedSampleCount() {
     return object("experimental_analysis_performed_sample_count",
-        _long("AMPLICON"),
-        _long("Bisulfite-Seq"),
-        _long("RNA-Seq"),
-        _long("WGA"),
-        _long("WGS"),
-        _long("WXS"),
-        _long("miRNA-Seq"),
-        _long("non-NGS"));
+        long_("AMPLICON"),
+        long_("Bisulfite-Seq"),
+        long_("RNA-Seq"),
+        long_("WGA"),
+        long_("WGS"),
+        long_("WXS"),
+        long_("miRNA-Seq"),
+        long_("non-NGS"));
   }
 
-  private ArrayFieldModel initGene() {
+  private static ArrayFieldModel initGene() {
     val element = object(
         string("_gene_id"),
-        object("_summary", _long("_ssm_count")),
+        object("_summary", long_("_ssm_count")),
         string("biotype"),
         string("chromosome"),
-        _long("end"),
-        _long("start"),
+        long_("end"),
+        long_("start"),
         string("symbol"),
         arrayOfStrings("pathway"),
         object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component")),
@@ -118,20 +119,20 @@ public class DonorCentricTypeModel {
     return nestedArrayOfObjects("gene", element);
   }
 
-  private ObjectFieldModel initSmm() {
+  private static ObjectFieldModel initSmm() {
     return object(
         string("_mutation_id"),
         string("_type"),
         string("chromosome"),
-        _long("chromosome_end"),
-        _long("chromosome_start"),
+        long_("chromosome_end"),
+        long_("chromosome_start"),
         arrayOfObjects("consequence",
             object(string("consequence_type"), string("functional_impact_prediction_summary"))),
         string("mutation_type"),
         arrayOfObjects("observation", initObservation()));
   }
 
-  private ObjectFieldModel initObservation() {
+  private static ObjectFieldModel initObservation() {
     return object(
         string("_matched_sample_id"),
         string("_sample_id"),
@@ -145,23 +146,23 @@ public class DonorCentricTypeModel {
         string("experimental_protocol"),
         string("marking"),
         string("matched_sample_id"),
-        _long("mutant_allele_read_count"),
+        long_("mutant_allele_read_count"),
         string("observation_id"),
         string("other_analysis_algorithm"),
         string("platform"),
-        _long("probability"), // FIXME: double?
-        _long("quality_score"), // FIXME: double?
+        double_("probability"),
+        double_("quality_score"),
         string("raw_data_accession"),
         string("raw_data_repository"),
-        _long("seq_coverage"), // FIXME: double?
+        double_("seq_coverage"),
         string("sequencing_strategy"),
-        _long("total_read_count"), // FIXME: double?
+        long_("total_read_count"),
         string("variation_calling_algorithm"),
         string("verification_platform"),
         string("verification_status"));
   }
 
-  private ObjectFieldModel initProject() {
+  private static ObjectFieldModel initProject() {
     return object("project",
         string("_project_id"),
         string("primary_site"),
