@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.BeaconResponse;
+import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.repository.BaseRepositoryTest;
 import org.junit.Before;
@@ -40,15 +40,20 @@ public class BeaconServiceTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void test() throws Exception {
-    BeaconResponse result = service.query("19", 1207014, "GRCh37", "T");
-
+  public void testSuccesfullyFound() {
+    Beacon result = service.query("19", 1207014, "GRCh37", "T");
     assertThat(result.getResponse().exists).isEqualTo("true");
+  }
 
-    result = service.query("19", 1207014, "GRCh37", "C");
+  @Test
+  public void testWrongAlleleFound() {
+    Beacon result = service.query("19", 1207014, "GRCh37", "C");
     assertThat(result.getResponse().exists).isEqualTo("false");
+  }
 
-    result = service.query("11", 11111, "GRCh37", "T");
+  @Test
+  public void testNothingFound() {
+    Beacon result = service.query("11", 11111, "GRCh37", "T");
     assertThat(result.getResponse().exists).isEqualTo("null");
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.service;
 
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import lombok.val;
@@ -27,20 +26,31 @@ import lombok.val;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.icgc.dcc.portal.model.BeaconQueryResponse;
+import org.icgc.dcc.common.core.model.FieldNames;
+import org.icgc.dcc.portal.model.Beacon;
+import org.icgc.dcc.portal.model.BeaconQuery;
 import org.icgc.dcc.portal.model.BeaconResponse;
-import org.icgc.dcc.portal.model.BeaconResponseResponse;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableMap;
+
+/**
+ * The Beacon searches the dataset for mutation in a given position and chromosome. The result is null if no mutations
+ * are found at the given position, false if the mutation doesn't match the expected allele and true otherwise.
+ * @see org.icgc.dcc.portal.resource.BeaconResource
+ * @see org.icgc.dcc.portal.model.Beacon
+ */
 @Service
 public class BeaconService {
 
+  private final int POSITION_BUFFER = 1000; // must be larger than any single mutation
+  private final String BEACON_ID = "What's the id?";
+
   private final Client client;
   private final String index;
-  private final int POSITION_BUFFER = 1000; // must be larger than any single mutation
 
   @Autowired
   public BeaconService(Client client, @Value("#{indexName}") String index) {
@@ -48,21 +58,22 @@ public class BeaconService {
     this.client = client;
   }
 
-  public BeaconResponse query(String chromosome, int position, String reference, String allele) {
+  public Beacon query(String chromosome, int position, String reference, String allele) {
     val search = client.prepareSearch(index)
         .setTypes(IndexModel.Type.MUTATION_CENTRIC.getId())
         .setSearchType(QUERY_THEN_FETCH);
 
     val boolQuery = QueryBuilders.boolQuery();
-    boolQuery.must(QueryBuilders.rangeQuery("chromosome_start").gte(position - POSITION_BUFFER).lte(position));
-    boolQuery.must(QueryBuilders.rangeQuery("chromosome_end").lte(position + POSITION_BUFFER));
-    boolQuery.must(QueryBuilders.termQuery("chromosome", chromosome));
+    boolQuery.must(QueryBuilders.rangeQuery(FieldNames.MUTATION_CHROMOSOME_START).gte(position - POSITION_BUFFER)
+        .lte(position));
+    boolQuery.must(QueryBuilders.rangeQuery(FieldNames.MUTATION_CHROMOSOME_END).lte(position + POSITION_BUFFER));
+    boolQuery.must(QueryBuilders.termQuery(FieldNames.MUTATION_CHROMOSOME, chromosome));
     search.setQuery(boolQuery);
 
-    Map<String, Object> params = new HashMap<String, Object>();
-    params.put("allelelength", allele.length());
-    params.put("allele", allele);
-    params.put("position", position);
+    Map<String, Object> params = new ImmutableMap.Builder<String, Object>()
+        .put("allelelength", allele.length())
+        .put("allele", allele)
+        .put("position", position).build();
 
     // Incomplete wildcard work (blocked)
     // if (allele.equals("D")) {
@@ -103,9 +114,9 @@ public class BeaconService {
     return createBeaconResponse(finalResult, chromosome, position, reference, allele);
   }
 
-  private BeaconResponse createBeaconResponse(String exists, String chr, int pos, String ref, String ale) {
-    val queryResp = new BeaconQueryResponse(ale, chr, pos, ref);
-    val respResp = new BeaconResponseResponse(exists);
-    return new BeaconResponse("whats the id", queryResp, respResp);
+  private Beacon createBeaconResponse(String exists, String chromosome, int position, String reference, String allele) {
+    val queryResp = new BeaconQuery(allele, chromosome, position, reference);
+    val respResp = new BeaconResponse(exists);
+    return new Beacon(BEACON_ID, queryResp, respResp);
   }
 }

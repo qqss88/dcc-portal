@@ -26,15 +26,31 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @Data
 @NoArgsConstructor
-public class BeaconResponseResponse {
+public class BeaconQuery {
 
   @JsonProperty
   @ApiModelProperty(required = true)
-  public String exists;
+  String allele;
+  @JsonProperty
+  @ApiModelProperty(required = true)
+  String chromosome;
+  @JsonProperty
+  @ApiModelProperty(required = true)
+  int position;
+  @JsonProperty
+  @ApiModelProperty(required = true)
+  String reference;
 
   @JsonCreator
-  public BeaconResponseResponse(@JsonProperty("exists") String exists) {
-    this.exists = exists;
+  public BeaconQuery(
+      @JsonProperty("allele") String allele,
+      @JsonProperty("chromosome") String chromosome,
+      @JsonProperty("position") int position,
+      @JsonProperty("reference") String reference) {
+    this.allele = allele;
+    this.position = position;
+    this.chromosome = chromosome;
+    this.reference = reference;
   }
 
 }

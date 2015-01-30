@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -28,9 +28,9 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
-import org.icgc.dcc.portal.model.BeaconQueryResponse;
+import org.icgc.dcc.portal.model.Beacon;
+import org.icgc.dcc.portal.model.BeaconQuery;
 import org.icgc.dcc.portal.model.BeaconResponse;
-import org.icgc.dcc.portal.model.BeaconResponseResponse;
 import org.icgc.dcc.portal.service.BeaconService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +68,6 @@ public class BeaconResourceTest extends ResourceTest {
   protected final void setUpResources() {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
-
   }
 
   @Test
@@ -78,7 +77,7 @@ public class BeaconResourceTest extends ResourceTest {
         .thenReturn(expected);
     val response = generateResponse("1", "1111", "GRCh37", "A");
     assertThat(response.getStatus()).isEqualTo(OK_CODE);
-    assertThat(response.getEntity(BeaconResponse.class)).isEqualTo(expected);
+    assertThat(response.getEntity(Beacon.class)).isEqualTo(expected);
   }
 
   @Test
@@ -121,21 +120,21 @@ public class BeaconResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
-  private ClientResponse generateResponse(String chr, String pos, String ref, String ale) {
+  private ClientResponse generateResponse(String chromosome, String position, String reference, String allele) {
     return client()
         .resource(RESOURCE)
-        .queryParam("chromosome", chr)
-        .queryParam("position", pos)
-        .queryParam("reference", ref)
-        .queryParam("allele", ale)
+        .queryParam("chromosome", chromosome)
+        .queryParam("position", position)
+        .queryParam("reference", reference)
+        .queryParam("allele", allele)
         .accept(MediaType.APPLICATION_JSON)
         .get(ClientResponse.class);
   }
 
-  private BeaconResponse generateDummyBeaconResponse() {
-    val queryResp = new BeaconQueryResponse("A", "1", 111, "GRCh37");
-    val respResp = new BeaconResponseResponse("true");
-    return new BeaconResponse("whats the id", queryResp, respResp);
+  private Beacon generateDummyBeaconResponse() {
+    val queryResp = new BeaconQuery("A", "1", 111, "GRCh37");
+    val respResp = new BeaconResponse("true");
+    return new Beacon("whats the id", queryResp, respResp);
   }
 
 }
