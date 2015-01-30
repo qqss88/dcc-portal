@@ -59,7 +59,7 @@
             return;
           }
 
-          if ($scope.setSize > $scope.setSizeLimit) {
+          if ($scope.setSize <= 0 || $scope.setSize > $scope.setSizeLimit) {
             $scope.isValid = false;
             return;
           }
@@ -626,7 +626,7 @@
           setList[0] = demo;
           localStorageService.set(LIST_ENTITY, setList);
         }
-        console.log(setList.length, setList);
+        // console.log(setList.length, setList);
       }
 
       settingsPromise.then(function(settings) {

@@ -13,7 +13,7 @@
             <section class="text-right">
                 <span>
                     <button class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0">
-                        <i class="icon-trash"></i>Delete
+                        <i class="icon-trash"></i>Delete All Analyses
                     </button>
                 </span>
             </section>
@@ -84,7 +84,7 @@
                         </button>
                     </span>
                     <span class="pull-right">
-                        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="listItemTotal===0">
+                        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="canBeDeleted >= 0">
                             <i class="icon-trash"></i>Delete
                         </button>   
                     </span>
@@ -102,7 +102,7 @@
                 <tbody>
                     <tr data-ng-repeat="item in entityLists">
                         <td>
-                            <span data-ng-if="item.status === 'FINISHED'" style="cursor:pointer" data-ng-click="item.checked = !item.checked; updateCurrentState(item); updateAvailableAnalysis()">
+                            <span data-ng-if="item.status === 'FINISHED'" style="cursor:pointer" data-ng-click="item.checked = !item.checked; update()">
                                 <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                             </span>
                         </td>

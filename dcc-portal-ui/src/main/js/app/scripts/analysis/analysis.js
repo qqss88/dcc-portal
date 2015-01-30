@@ -51,9 +51,8 @@
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
-    $scope.listItemTotal = 0;
-    $scope.listItemUUIDs = [];
     $scope.entityLists = SetService.getAll();
+    $scope.canBeDeleted = 0;
 
     // FIXME: Debug - remove
     $scope.debugReset = function() {
@@ -68,8 +67,6 @@
 
     // Send IDs generate new set operations analysis
     $scope.launchSetAnalysis = function() {
-      console.log('selected', $scope.listItemUUIDs);
-
       var selected = _.filter($scope.entityLists, function(d) {
         return d.checked === true;
       });
@@ -77,8 +74,6 @@
       // FIXME: sync with terry
       var type = selected[0].type.toUpperCase();
       var ids  = _.pluck(selected, 'id');
-
-      console.log('about to subimit', type, ids);
 
       var payload = {
         lists: ids,
@@ -106,21 +101,14 @@
     };
 
 
-    $scope.updateCurrentState = function(item) {
-      // FIXME: Might want to move this out
-      if (item.checked === true) {
-        $scope.listItemTotal += item.count;
-        $scope.listItemUUIDs.push(item.id);
-      } else {
-        $scope.listItemTotal -= item.count;
-        _.remove($scope.listItemUUIDs, function(id) {
-          return id === item.id;
-        });
-      }
-    };
-
-
-    $scope.updateAvailableAnalysis = function() {
+    $scope.update = function() {
+      // Check if delete should be enabled
+      $scope.canBeDeleted = _.filter($scope.entityLists, function(item) {
+        if (item.readonly && item.readonly === true) {
+          return false;
+        }
+        return item.checked === true;
+      });
 
       var selected, uniqued;
       selected = _.filter($scope.entityLists, function(item) {
@@ -157,9 +145,8 @@
 
       if (toRemove.length > 0) {
         SetService.removeSeveral(toRemove);
+        $scope.update();
       }
-      //$scope.entityLists = SetService.getAll();
-      //$scope.updateAvailableAnalysis();
     };
 
     $scope.removeList = function(id) {
