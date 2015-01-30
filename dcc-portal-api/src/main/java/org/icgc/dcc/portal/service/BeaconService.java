@@ -31,7 +31,6 @@ import org.icgc.dcc.portal.model.BeaconQuery;
 import org.icgc.dcc.portal.model.BeaconResponse;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.resource.BeaconResource;
-import org.junit.Ignore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -128,7 +127,7 @@ public class BeaconService {
   /**
    * Ignored until more detail is given about wildcard behaviour
    */
-  @Ignore
+  @SuppressWarnings("unused")
   private String generateInsertionScriptField() {
     return "doc['mutation'].value.startsWith('.')";
   }
@@ -136,7 +135,7 @@ public class BeaconService {
   /**
    * Ignored until more detail is given about wildcard behaviour
    */
-  @Ignore
+  @SuppressWarnings("unused")
   private String generateDeletionScriptField() {
     return "doc['mutation'].value.endsWith('.')";
   }
