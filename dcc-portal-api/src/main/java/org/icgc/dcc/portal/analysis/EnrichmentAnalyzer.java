@@ -72,6 +72,11 @@ import com.google.common.collect.Lists;
 public class EnrichmentAnalyzer {
 
   /**
+   * DCC-2856: Gene set cardinality threshold.
+   */
+  private static final int GENE_SET_GENE_COUNT_THRESHOLD = 3;
+
+  /**
    * Dependencies.
    */
   @NonNull
@@ -216,6 +221,13 @@ public class EnrichmentAnalyzer {
       if (geneSetId.equals(universe.getGeneSetId())) {
         // T6: Skip universe as this will trivially be most enriched by definition
         log.info("Skipping universe gene set: {}", geneSetId);
+        continue;
+      }
+
+      if (geneSetGeneCount < GENE_SET_GENE_COUNT_THRESHOLD) {
+        // DCC-2856: Any of the candidate gene sets must have c or more total genes. i.e., gene sets with m >= c.
+        // Otherwise, the gene set will be simply ignored
+        log.info("Skipping gene set due to cardinality threshold: {}", geneSetId);
         continue;
       }
 
