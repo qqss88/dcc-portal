@@ -27,7 +27,6 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.assertj.core.util.Maps;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.visitor.CreateAliasVisitor;
 import org.dcc.portal.pql.meta.visitor.CreateFullNameVisitor;
@@ -35,6 +34,7 @@ import org.dcc.portal.pql.meta.visitor.CreateFullNameVisitor;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 @Slf4j
 public abstract class AbstractTypeModel {
