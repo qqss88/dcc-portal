@@ -136,7 +136,7 @@
 
 
   angular.module('icgc.enrichment.directives').directive('enrichmentResult',
-    function (Extensions, Restangular, EnrichmentService, ExportService) {
+    function (Extensions, Restangular, EnrichmentService, ExportService, TooltipText) {
 
     return {
       restrict: 'E',
@@ -148,6 +148,8 @@
 
         $scope.predicate = 'adjustedPValue';
         $scope.reverse = false;
+
+        $scope.TooltipText = TooltipText;
 
         function refresh() {
 
