@@ -43,7 +43,7 @@ public final class EnrichmentAnalyses {
 
   public static double calculateGeneCountPValue(int q, int k, int m, int n) {
     val distribution = new HypergeometricDistribution(n, m, k);
-    val pValue = 1.0 - distribution.cumulativeProbability(q - 1);
+    val pValue = 1.0 - min(1.0, distribution.cumulativeProbability(q - 1)); // min is needed to prevent negatives
 
     return pValue;
   }
