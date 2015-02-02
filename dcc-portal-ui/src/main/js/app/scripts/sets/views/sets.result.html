@@ -3,7 +3,7 @@
 </div>
 <span data-ng-if="item.state === 'FINISHED'">
 
-    <set-upload data-set-modal="setModal" data-set-union="setUnion" data-set-type="setType"></set-upload>
+    <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
 
     <div class="canvas half"></div>
     <div class="half omega">
@@ -55,7 +55,7 @@
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
                                 <i class="icon-file" data-tooltip="Export"></i>
                                 <i class="icon-floppy" data-tooltip="Save as new list" 
-                                  data-ng-click="$parent.setUnion=[{'intersection': item.intersection, 'exclusions':item.exclusions}]; saveSubSet()"></i>
+                                  data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                             </span>
                         </span>
                     </td>
@@ -70,7 +70,7 @@
                         <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0"> 
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export"></i>
-                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); saveSubSet()"></i>
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnionSelected(); dialog.setModal=true"></i>
                             </span>
                         </span>
                     </td>

@@ -114,6 +114,8 @@
       selected = _.filter($scope.entityLists, function(item) {
         return item.checked === true;
       });
+
+
       uniqued = _.uniq(_.pluck(selected, 'type'));
 
       $scope.enrichmentSet = null;
@@ -121,6 +123,7 @@
 
       if (selected.length === 1 && uniqued[0] === 'gene') {
         $scope.enrichmentSet = selected[0].id;
+        $scope.totalCount = selected[0].count;
       }
       if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
         $scope.setop = true;

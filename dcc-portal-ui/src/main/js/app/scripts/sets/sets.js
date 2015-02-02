@@ -54,14 +54,16 @@
             return;
           }
 
-          if (isNaN($scope.setSize) === true) {
-            $scope.isValid = false;
-            return;
-          }
+          if ($scope.setLimit) {
+            if (isNaN($scope.setSize) === true) {
+              $scope.isValid = false;
+              return;
+            }
 
-          if ($scope.setSize <= 0 || $scope.setSize > $scope.setSizeLimit) {
-            $scope.isValid = false;
-            return;
+            if ($scope.setSize <= 0 || $scope.setSize > $scope.setSizeLimit) {
+              $scope.isValid = false;
+              return;
+            }
           }
           $scope.isValid = true;
         };
@@ -137,20 +139,31 @@
         $scope.current = [];
         $scope.selected = [];
 
-        $scope.saveSubSet = function() {
-          $scope.setModal = true;
+        $scope.dialog = {
+          setModal: false
         };
 
-        $scope.calculateUnion = function() {
-          $scope.setUnion = [];
+        $scope.calculateUnion = function(item) {
+          $scope.dialog.setUnion = [];
+          console.log('item', item);
+          $scope.dialog.setUnion.push({
+            intersection: item.intersection,
+            exclusions: item.exclusions
+          });
+          $scope.dialog.setType = $scope.item.type.toLowerCase();
+        };
+
+        $scope.calculateUnionSelected = function() {
+          $scope.dialog.setUnion = [];
           $scope.selected.forEach(function(selectedIntersection) {
             for (var i2=0; i2 < $scope.data.length; i2++) {
               if (SetOperationService.isEqual($scope.data[i2].intersection, selectedIntersection)) {
-                $scope.setUnion.push( $scope.data[i2] );
+                $scope.dialog.setUnion.push( $scope.data[i2] );
                 break;
               }
             }
           });
+          $scope.dialog.setType = $scope.item.type.toLowerCase();
         };
 
         $scope.selectAll = function() {
@@ -525,9 +538,7 @@
         return;
       }
 
-      //promise = RestangularNoCache.several('entitylist/lists', pendingListsIDs).get('', {});
       promise = _this.getMetaData(pendingListsIDs);
-
       promise.then(function(updatedList) {
         updatedList.forEach(function(item) {
           var index = _.findIndex(setList, function(d) {
