@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -26,7 +25,6 @@ import org.icgc.dcc.portal.repository.BaseRepositoryTest;
 import org.junit.Before;
 import org.junit.Test;
 
-@Slf4j
 public class BeaconServiceTest extends BaseRepositoryTest {
 
   private BeaconService service;
@@ -56,4 +54,5 @@ public class BeaconServiceTest extends BaseRepositoryTest {
     Beacon result = service.query("11", 11111, "GRCh37", "T");
     assertThat(result.getResponse().exists).isEqualTo("null");
   }
+
 }

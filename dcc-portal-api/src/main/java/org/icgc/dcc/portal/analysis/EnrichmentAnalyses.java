@@ -31,7 +31,7 @@ import lombok.val;
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Result;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 
 @NoArgsConstructor(access = PRIVATE)

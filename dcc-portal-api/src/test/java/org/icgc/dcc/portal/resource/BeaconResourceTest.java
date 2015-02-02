@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import javax.ws.rs.core.MediaType;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.Beacon;
@@ -41,7 +40,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.sun.jersey.api.client.ClientResponse;
 import com.yammer.dropwizard.testing.ResourceTest;
 
-@Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class BeaconResourceTest extends ResourceTest {
 
