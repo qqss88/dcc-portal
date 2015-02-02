@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.meta;
 
 import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,8 @@ import com.google.common.collect.ImmutableMap;
 @Slf4j
 public abstract class AbstractTypeModel {
 
-  private final Map<String, FieldModel> fieldsByFullPath;
-  private final Map<String, String> fieldsByAlias;
+  protected final Map<String, FieldModel> fieldsByFullPath;
+  protected final Map<String, String> fieldsByAlias;
 
   public AbstractTypeModel(List<? extends FieldModel> fields) {
     fieldsByFullPath = initFieldsByFullPath(fields);
@@ -89,13 +90,12 @@ public abstract class AbstractTypeModel {
       prefix = prefix + list.get(i) + FIELD_SEPARATOR;
     }
 
-    return result.build();
+    return result.build().reverse();
   }
 
   public final String getNestedPath(@NonNull String field) {
     val fullName = getFullName(field);
-    val tokens = split(fullName);
-    for (val token : tokens) {
+    for (val token : split(fullName)) {
       val tokenByFullPath = fieldsByFullPath.get(token);
       if (tokenByFullPath.isNested()) {
         return token;
@@ -110,6 +110,19 @@ public abstract class AbstractTypeModel {
 
     return uiAlias == null ? path : uiAlias;
 
+  }
+
+  @Override
+  public String toString() {
+    val buffer = new StringBuffer();
+    val newLine = System.getProperty("line.separator");
+    for (val entity : fieldsByFullPath.entrySet()) {
+      val value = entity.getValue();
+      buffer.append(_("Path: %s, Type: %s, Nested: %s", entity.getKey(), value.getType(), value.isNested()));
+      buffer.append(newLine);
+    }
+
+    return buffer.toString();
   }
 
 }

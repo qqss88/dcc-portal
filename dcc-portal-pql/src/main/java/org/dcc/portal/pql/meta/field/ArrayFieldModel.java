@@ -18,6 +18,9 @@
 package org.dcc.portal.pql.meta.field;
 
 import static org.dcc.portal.pql.meta.Constants.EMPTY_STRING_FIELD;
+import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
+import static org.dcc.portal.pql.meta.Constants.NESTED;
+import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
 import lombok.Getter;
 
@@ -29,15 +32,15 @@ public class ArrayFieldModel extends FieldModel {
   private final FieldModel element;
 
   private ArrayFieldModel(String name, FieldModel element) {
-    this(name, null, element);
+    this(name, EMPTY_UI_ALIAS, element);
   }
 
   private ArrayFieldModel(String name, String uiAlias, FieldModel element) {
-    this(name, uiAlias, false, element);
+    this(name, uiAlias, NOT_NESTED, element);
   }
 
   private ArrayFieldModel(String name, boolean nested, FieldModel element) {
-    this(name, null, nested, element);
+    this(name, EMPTY_UI_ALIAS, nested, element);
   }
 
   private ArrayFieldModel(String name, String uiAlias, boolean nested, FieldModel element) {
@@ -49,12 +52,16 @@ public class ArrayFieldModel extends FieldModel {
     return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
   }
 
+  public static ArrayFieldModel nestedArrayOfStrings(String name) {
+    return new ArrayFieldModel(name, NESTED, EMPTY_STRING_FIELD);
+  }
+
   public static ArrayFieldModel arrayOfObjects(String name, ObjectFieldModel element) {
     return new ArrayFieldModel(name, element);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(String name, ObjectFieldModel element) {
-    return new ArrayFieldModel(name, true, element);
+    return new ArrayFieldModel(name, NESTED, element);
   }
 
   @Override

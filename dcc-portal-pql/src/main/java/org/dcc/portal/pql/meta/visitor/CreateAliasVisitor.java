@@ -31,6 +31,7 @@ import lombok.val;
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.BooleanFieldModel;
 import org.dcc.portal.pql.meta.field.DoubleFieldModel;
+import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.LongFieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.dcc.portal.pql.meta.field.StringFieldModel;
@@ -45,11 +46,11 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   @Override
   public Map<String, String> visitArrayField(ArrayFieldModel field) {
     if (field.getElement().getType() != OBJECT) {
-      return singletonMap(field.getUiAlias(), field.getName());
+      return getAlias(field);
     }
 
     val result = new ImmutableMap.Builder<String, String>();
-    result.put(field.getUiAlias(), field.getName());
+    result.putAll(getAlias(field));
     result.putAll(prefix(field.getName(), field.getElement().accept(this)));
 
     return result.build();
@@ -57,20 +58,17 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
 
   @Override
   public Map<String, String> visitBooleanField(BooleanFieldModel field) {
-    return field.getUiAlias().equals(EMPTY_UI_ALIAS) ?
-        Collections.<String, String> emptyMap() : singletonMap(field.getUiAlias(), field.getName());
+    return getAlias(field);
   }
 
   @Override
   public Map<String, String> visitDoubleField(DoubleFieldModel field) {
-    return field.getUiAlias().equals(EMPTY_UI_ALIAS) ?
-        Collections.<String, String> emptyMap() : singletonMap(field.getUiAlias(), field.getName());
+    return getAlias(field);
   }
 
   @Override
   public Map<String, String> visitLongField(LongFieldModel field) {
-    return field.getUiAlias().equals(EMPTY_UI_ALIAS) ?
-        Collections.<String, String> emptyMap() : singletonMap(field.getUiAlias(), field.getName());
+    return getAlias(field);
   }
 
   @Override
@@ -98,6 +96,10 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
 
   @Override
   public Map<String, String> visitStringField(StringFieldModel field) {
+    return getAlias(field);
+  }
+
+  private static Map<String, String> getAlias(FieldModel field) {
     return field.getUiAlias().equals(EMPTY_UI_ALIAS) ?
         Collections.<String, String> emptyMap() : singletonMap(field.getUiAlias(), field.getName());
   }

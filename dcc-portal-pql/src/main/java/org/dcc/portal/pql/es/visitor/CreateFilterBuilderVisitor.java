@@ -23,6 +23,7 @@ import static org.dcc.portal.pql.es.model.RequestType.COUNT;
 import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
 import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.notFilter;
 import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
@@ -46,6 +47,7 @@ import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
@@ -62,7 +64,6 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -104,19 +105,29 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   @Override
   public FilterBuilder visitTerm(@NonNull TermNode node) {
     val name = node.getNameNode().getValue().toString();
-    log.debug("[visitTerm] Name: {}", name);
     val value = node.getValueNode().getValue();
+    log.debug("[visitTerm] Name: {}, Value: {}", name, value);
     val result = termFilter(name, value);
-    if (indexModel.isNested(name, queryContext.getType())) {
-      return FilterBuilders.nestedFilter(getNestedPath(name), result);
-    }
 
-    return result;
+    return createNestedFilter(node, name, result);
   }
 
-  private String getNestedPath(String name) {
-    // TODO Auto-generated method stub
-    return "gene";
+  /**
+   * Wraps {@code field} in a {@code nested} query if the {@code node} which contains the {@code field} does not have a
+   * {@link NestedNode} parent.
+   */
+  private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter) {
+    if (indexModel.isNested(field, queryContext.getType())) {
+      if (!node.hasNestedParent()) {
+        val nestedPath = indexModel.getNestedPath(field, queryContext.getType());
+        log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'",
+            node, nestedPath);
+
+        return nestedFilter(nestedPath, sourceFilter);
+      }
+    }
+
+    return sourceFilter;
   }
 
   private static <T> T getChild(BoolNode boolNode, Class<T> type) {
@@ -257,6 +268,13 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
     }
 
     return termsFilter(node.getField(), values);
+  }
+
+  @Override
+  public FilterBuilder visitNested(NestedNode node) {
+    log.debug("Visiting Nested: {}", node);
+
+    return nestedFilter(node.getPath(), node.getChild(0).accept(this));
   }
 
 }

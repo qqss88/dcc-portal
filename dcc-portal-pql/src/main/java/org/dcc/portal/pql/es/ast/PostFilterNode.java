@@ -32,4 +32,9 @@ public class PostFilterNode extends ExpressionNode {
     return visitor.visitPostFilter(this);
   }
 
+  @Override
+  public boolean hasNestedParent() {
+    return false;
+  }
+
 }

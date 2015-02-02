@@ -17,6 +17,9 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
+import static org.dcc.portal.pql.meta.Constants.NESTED;
+import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.Constants.NO_NAME;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
@@ -35,19 +38,19 @@ public class ObjectFieldModel extends FieldModel {
   private final List<? extends FieldModel> fields;
 
   private ObjectFieldModel(String name, List<? extends FieldModel> fields) {
-    this(name, null, fields);
+    this(name, EMPTY_UI_ALIAS, fields);
   }
 
   private ObjectFieldModel(String name, String uiAlias, List<? extends FieldModel> fields) {
-    this(name, uiAlias, false, fields);
+    this(name, uiAlias, NOT_NESTED, fields);
   }
 
   private ObjectFieldModel(String name, boolean nested, List<? extends FieldModel> fields) {
-    this(name, null, nested, fields);
+    this(name, EMPTY_UI_ALIAS, nested, fields);
   }
 
   private ObjectFieldModel(String name, String uiAlias, boolean nested, List<? extends FieldModel> fields) {
-    super(name, null, OBJECT, nested);
+    super(name, uiAlias, OBJECT, nested);
     this.fields = fields;
   }
 
@@ -68,11 +71,11 @@ public class ObjectFieldModel extends FieldModel {
   public static <T extends FieldModel> ObjectFieldModel nestedObject(T... fields) {
     val fieldsList = new ImmutableList.Builder<T>();
     for (val field : fields) {
-      field.setNested(true);
+      field.setNested(NESTED);
       fieldsList.add(field);
     }
 
-    return new ObjectFieldModel(NO_NAME, true, fieldsList.build());
+    return new ObjectFieldModel(NO_NAME, NESTED, fieldsList.build());
   }
 
   @Override

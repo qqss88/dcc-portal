@@ -33,4 +33,6 @@ public interface Node {
 
   int childrenCount();
 
+  boolean hasNestedParent();
+
 }

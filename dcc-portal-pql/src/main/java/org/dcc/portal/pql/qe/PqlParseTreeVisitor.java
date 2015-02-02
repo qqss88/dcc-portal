@@ -23,6 +23,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.AndNode;
+import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
@@ -30,6 +31,8 @@ import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
@@ -53,6 +56,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
@@ -266,6 +270,18 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", termsNode);
 
     return termsNode;
+  }
+
+  @Override
+  public ExpressionNode visitNested(@NonNull NestedContext nodeContext) {
+    val mustNode = new MustBoolNode();
+    val nestedNode = new NestedNode(nodeContext.ID().getText(), new BoolNode(mustNode));
+    for (val child : nodeContext.filter()) {
+      mustNode.addChildren(child.accept(this));
+    }
+    log.debug("{}", nestedNode);
+
+    return nestedNode;
   }
 
 }

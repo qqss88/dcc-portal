@@ -17,9 +17,9 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfStrings;
 import static org.dcc.portal.pql.meta.field.BooleanFieldModel.bool;
 import static org.dcc.portal.pql.meta.field.DoubleFieldModel.double_;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
@@ -112,9 +112,9 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         long_("end"),
         long_("start"),
         string("symbol"),
-        arrayOfStrings("pathway"),
+        nestedArrayOfStrings("pathways"),
         object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component")),
-        arrayOfObjects("ssm", initSmm()));
+        nestedArrayOfObjects("ssm", initSmm()));
 
     return nestedArrayOfObjects("gene", element);
   }
@@ -126,10 +126,10 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         string("chromosome"),
         long_("chromosome_end"),
         long_("chromosome_start"),
-        arrayOfObjects("consequence",
+        nestedArrayOfObjects("consequence",
             object(string("consequence_type"), string("functional_impact_prediction_summary"))),
         string("mutation_type"),
-        arrayOfObjects("observation", initObservation()));
+        nestedArrayOfObjects("observation", initObservation()));
   }
 
   private static ObjectFieldModel initObservation() {

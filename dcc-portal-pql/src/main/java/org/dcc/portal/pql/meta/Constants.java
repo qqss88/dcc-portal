@@ -26,9 +26,11 @@ import org.dcc.portal.pql.meta.field.StringFieldModel;
 @NoArgsConstructor(access = PRIVATE)
 public final class Constants {
 
+  public static final boolean NESTED = true;
+  public static final boolean NOT_NESTED = false;
   public static final String NO_NAME = "";
   public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
-  public static final String EMPTY_UI_ALIAS = null;
+  public static final String EMPTY_UI_ALIAS = "";
   public static final String FIELD_SEPARATOR = ".";
 
 }

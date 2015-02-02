@@ -32,6 +32,7 @@ import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
@@ -152,6 +153,20 @@ public class PqlParseListenerTest {
     childrenContainValue(mustNode, 10);
   }
 
+  @Test
+  public void nestedTest() {
+    val esAst = buildEsAst("nested(gene, eq(gene._donor_id, 'D01'))");
+    assertThat(esAst).isExactlyInstanceOf(RootNode.class);
+    assertThat(esAst.childrenCount()).isEqualTo(1);
+    assertThat(esAst.getChild(0)).isExactlyInstanceOf(PostFilterNode.class);
+    assertThat(esAst.getChild(0).childrenCount()).isEqualTo(1);
+    assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
+    assertThat(esAst.getChild(0).getChild(0).childrenCount()).isEqualTo(1);
+    assertThat(esAst.getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(esAst.getChild(0).getChild(0).getChild(0).childrenCount()).isEqualTo(1);
+    assertThat(esAst.getChild(0).getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(NestedNode.class);
+  }
+
   private static void assertFilterStructure(ExpressionNode esAst) {
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
@@ -166,8 +181,10 @@ public class PqlParseListenerTest {
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
     parser.statement();
+    val esAst = listener.getEsAst();
+    log.debug("ES AST: - {}", esAst);
 
-    return listener.getEsAst();
+    return esAst;
   }
 
   /**

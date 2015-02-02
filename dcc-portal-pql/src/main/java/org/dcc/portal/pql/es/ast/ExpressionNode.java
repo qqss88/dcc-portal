@@ -92,4 +92,9 @@ public abstract class ExpressionNode implements Node {
     return buffer.toString();
   }
 
+  @Override
+  public boolean hasNestedParent() {
+    return parent.hasNestedParent();
+  }
+
 }

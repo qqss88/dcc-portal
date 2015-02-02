@@ -23,6 +23,7 @@ import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
@@ -38,6 +39,8 @@ public interface NodeVisitor<T> {
   SearchRequestBuilder visit(Node node, QueryContext queryContext);
 
   T visitPostFilter(PostFilterNode node);
+
+  T visitNested(NestedNode node);
 
   T visitBool(BoolNode node);
 

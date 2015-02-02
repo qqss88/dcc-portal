@@ -15,39 +15,40 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.meta.field;
+package org.dcc.portal.pql.es.ast;
 
-import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
-import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
-import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.Value;
 
-import org.dcc.portal.pql.meta.visitor.FieldVisitor;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class LongFieldModel extends FieldModel {
+@Value
+@EqualsAndHashCode(callSuper = false)
+public class NestedNode extends ExpressionNode {
 
-  private LongFieldModel(String name) {
-    this(name, EMPTY_UI_ALIAS);
-  }
+  @NonNull
+  String path;
 
-  private LongFieldModel(String name, String uiAlias) {
-    this(name, uiAlias, NOT_NESTED);
-  }
-
-  private LongFieldModel(String name, boolean nested) {
-    this(name, EMPTY_UI_ALIAS, nested);
-  }
-
-  private LongFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, LONG, nested);
-  }
-
-  public static LongFieldModel long_(String name) {
-    return new LongFieldModel(name);
+  public NestedNode(@NonNull String path, ExpressionNode... children) {
+    super(children);
+    this.path = path;
   }
 
   @Override
-  public <T> T accept(FieldVisitor<T> visitor) {
-    return visitor.visitLongField(this);
+  public <T> T accept(NodeVisitor<T> visitor) {
+    return visitor.visitNested(this);
+  }
+
+  @Override
+  public boolean hasNestedParent() {
+    return true;
+  };
+
+  @Override
+  public String toString() {
+    return _("[%s]", path) + super.toString();
   }
 
 }

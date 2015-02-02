@@ -17,7 +17,8 @@ function
 	;
 
 filter
-    : eq										# equal
+	: 'nested' OPAR ID (COMMA filter)+ CPAR		# nested
+	| eq										# equal
     | ne										# notEqual
     | gt										# greaterThan
     | ge										# greaterEqual

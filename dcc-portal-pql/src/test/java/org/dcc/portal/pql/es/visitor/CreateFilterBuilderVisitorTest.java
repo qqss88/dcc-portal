@@ -30,6 +30,8 @@ import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -100,12 +102,26 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
+  public void eqTest_nested() {
+    val result = executeQuery("eq(gene.ssm.observation._sample_id, 'SA35')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO7");
+  }
+
+  @Test
   public void neTest() {
     val result = executeQuery("ne(_donor_id, 'DO1')");
     assertThat(result.getHits().getTotalHits()).isEqualTo(8);
     for (val hit : result.getHits()) {
       assertThat(hit.getId()).isNotEqualTo("DO1");
     }
+  }
+
+  @Test
+  public void neTest_nested() {
+    val result = executeQuery("ne(gene._summary._ssm_count, 1)");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(3);
+    containsOnlyIds(result, "DO3", "DO6", "DO7");
   }
 
   @Test
@@ -185,10 +201,13 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
-  public void tmpTest() {
-    val result = executeQuery("eq(gene._gene_id, 'ENSG00000215529')");
-    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
-    containsOnlyIds(result, "DO1", "DO2");
+  public void nestedTest() {
+    val result = executeQuery("or(" +
+        "nested(gene.ssm.observation, " +
+        "and(eq(gene.ssm.observation._sample_id, 'SA35'), eq(gene.ssm.observation._specimen_id, 'SP12')))," +
+        "nested(gene.ssm.consequence, eq(gene.ssm.consequence.consequence_type, 'missense')))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(3);
+    containsOnlyIds(result, "DO1", "DO2", "DO7");
   }
 
 }

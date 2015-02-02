@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
+import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.STRING;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
@@ -24,19 +26,23 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class StringFieldModel extends FieldModel {
 
   private StringFieldModel(String name) {
-    super(name, null, STRING, false);
+    this(name, EMPTY_UI_ALIAS, NOT_NESTED);
   }
 
-  private StringFieldModel(String name, String uiAlias) {
-    super(name, uiAlias, STRING, false);
+  private StringFieldModel(String name, String alias) {
+    this(name, alias, NOT_NESTED);
   }
 
-  private StringFieldModel(String name, boolean nested) {
-    super(name, null, STRING, nested);
+  private StringFieldModel(String name, String alias, boolean nested) {
+    super(name, alias, STRING, nested);
   }
 
   public static StringFieldModel string(String name) {
     return new StringFieldModel(name);
+  }
+
+  public static StringFieldModel string(String name, String alias) {
+    return new StringFieldModel(name, alias);
   }
 
   @Override

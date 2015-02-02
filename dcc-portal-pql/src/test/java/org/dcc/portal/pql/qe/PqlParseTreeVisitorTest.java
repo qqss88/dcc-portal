@@ -22,12 +22,15 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.AndNode;
+import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
@@ -43,6 +46,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
@@ -60,7 +64,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val orNode = (OrNode) VISITOR.visitOr(orContext);
-    assertThat(orNode.getChildren().size()).isEqualTo(3);
+    assertThat(orNode.childrenCount()).isEqualTo(3);
 
     // gt(weight, 10)
     RangeNode rangeNode = (RangeNode) orNode.getChild(0);
@@ -89,7 +93,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val orNode = (OrNode) VISITOR.visitOr(orContext);
-    assertThat(orNode.getChildren().size()).isEqualTo(2);
+    assertThat(orNode.childrenCount()).isEqualTo(2);
 
     // eq(sex, 'male')
     val termNode = (TermNode) orNode.getChild(0);
@@ -353,6 +357,29 @@ public class PqlParseTreeVisitorTest {
     assertThat(maleNode.getValue()).isEqualTo("male");
     val femaleNode = (TerminalNode) termsNode.getChild(1);
     assertThat(femaleNode.getValue()).isEqualTo("female");
+  }
+
+  @Test
+  public void visitNestedTest() {
+    val parseTree = createParseTree("nested(gene, eq(gene._donor_id, 'D01'), gt(gene.start, 50000))");
+    val nestedContext = (NestedContext) parseTree.getChild(0);
+    val nestedNode = (NestedNode) VISITOR.visitNested(nestedContext);
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+    assertThat(nestedNode.getPath()).isEqualTo("gene");
+    val boolNode = (BoolNode) nestedNode.getChild(0);
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+    val mustNode = (MustBoolNode) boolNode.getChild(0);
+    assertThat(mustNode.childrenCount()).isEqualTo(2);
+
+    val termNode = (TermNode) mustNode.getChild(0);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("gene._donor_id");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("D01");
+
+    val rangeNode = (RangeNode) mustNode.getChild(1);
+    assertThat(rangeNode.childrenCount()).isEqualTo(1);
+    assertThat(rangeNode.getName()).isEqualTo("gene.start");
+    val gtNode = (GreaterThanNode) rangeNode.getChild(0);
+    assertThat(gtNode.getValue()).isEqualTo(50000);
   }
 
 }
