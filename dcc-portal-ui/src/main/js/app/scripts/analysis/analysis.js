@@ -54,6 +54,8 @@
     $scope.entityLists = SetService.getAll();
     $scope.canBeDeleted = 0;
 
+    $scope.enrichment = {};
+
     // FIXME: Debug - remove
     $scope.debugReset = function() {
       window.localStorage.clear();
@@ -90,14 +92,14 @@
     };
 
     $scope.launchEnrichmentAnalysis = function() {
-      $scope.enrichmentFilters = {
+      $scope.enrichment.filters = {
         gene: {
           entityListId: {
             is: [ $scope.enrichmentSet ]
           }
         }
       };
-      $scope.enrichmentModal = true;
+      $scope.enrichment.modal = true;
     };
 
 
