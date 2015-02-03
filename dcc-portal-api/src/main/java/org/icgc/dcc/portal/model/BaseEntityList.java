@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.model;
 
+import java.util.Date;
+
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,8 @@ public abstract class BaseEntityList {
 
   @ApiModelProperty(value = "TODO")
   private final Type type;
+
+  private final long timestamp = new Date().getTime();
 
   @RequiredArgsConstructor
   @Getter
