@@ -56,7 +56,7 @@ public class UserGeneSetService {
 
   public UUID save(@NonNull Set<String> geneIds) {
     val id = UUID.randomUUID();
-    val newList = EntityList.forStatusFinished(id, "UserGeneSet-" + id, "", Type.GENE, geneIds.size());
+    val newList = EntityList.forStatusFinished(id, "Upload gene set", "", Type.GENE, geneIds.size());
     newList.setSubtype(SubType.UPLOAD);
 
     termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
