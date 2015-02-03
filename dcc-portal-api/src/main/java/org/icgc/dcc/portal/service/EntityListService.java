@@ -183,7 +183,9 @@ public class EntityListService {
     @Cleanup
     val writer = new OutputStreamWriter(stream);
 
-    writer.write(content);
+    for (val s : content) {
+      writer.write(s);
+    }
     writer.flush();
   }
 }

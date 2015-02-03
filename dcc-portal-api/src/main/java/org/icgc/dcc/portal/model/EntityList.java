@@ -49,6 +49,9 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
 
   private Long count;
 
+  @NonNull
+  private SubType subtype = SubType.NORMAL;
+
   public EntityList inProgress() {
     this.status = Status.IN_PROGRESS;
     return this;
@@ -87,13 +90,8 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   }
 
   // static constructors
-  private EntityList(
-      final UUID id,
-      @NonNull final String name,
-      final String description,
-      @NonNull final Type type,
-      final Status status,
-      final Long count) {
+  private EntityList(final UUID id, @NonNull final String name, final String description,
+      @NonNull final Type type, final Status status, final Long count) {
 
     super(name, description, type);
 
@@ -145,23 +143,13 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  public static EntityList forStatusFinished(
-      final UUID id,
-      final String name,
-      final String description,
-      final Type type,
-      final long count) {
+  public static EntityList forStatusFinished(final UUID id, final String name, final String description,
+      final Type type, final long count) {
 
     if (count < 0) {
       throw new IllegalArgumentException("The count argument must be a positive number.");
     }
-    return new EntityList(
-        id,
-        name,
-        description,
-        type,
-        Status.FINISHED,
-        count);
+    return new EntityList(id, name, description, type, Status.FINISHED, count);
   }
 
   @RequiredArgsConstructor
@@ -171,6 +159,15 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     PENDING("pending"),
     IN_PROGRESS("in progess"),
     FINISHED("finished");
+
+    private final String name;
+  }
+
+  @RequiredArgsConstructor
+  @Getter
+  public enum SubType {
+    NORMAL("normal"),
+    UPLOAD("upload");
 
     private final String name;
   }

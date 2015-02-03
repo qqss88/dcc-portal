@@ -169,6 +169,7 @@ setOperation:
 
   # Limit for number of items to return from ElasticSearch
   maxNumberOfHits: 20000
+  maxMultiplier: 3
 
   # Settings related to the demo record (don't change)
   demoListUuid: "de305d54-75b4-431b-adb2-eb6b9e386023"
