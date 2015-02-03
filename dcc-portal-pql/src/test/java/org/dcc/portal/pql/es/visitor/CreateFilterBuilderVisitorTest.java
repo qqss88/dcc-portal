@@ -30,8 +30,6 @@ import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,6 +93,13 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
+  public void inTest_nested() {
+    val result = executeQuery("in(gene.ssm._mutation_id, 'MU7', 'MU27')");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
+    containsOnlyIds(result, "DO5", "DO8");
+  }
+
+  @Test
   public void eqTest() {
     val result = executeQuery("eq(_donor_id, 'DO1')");
     assertThat(result.getHits().getTotalHits()).isEqualTo(1);
@@ -132,10 +137,24 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
+  public void gtTest_nested() {
+    val result = executeQuery("gt(gene.ssm.chromosome_start, 238855352)");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    containsOnlyIds(result, "DO5");
+  }
+
+  @Test
   public void geTest() {
-    val result = executeQuery("ge(_donor_id, 'DO5')");
-    assertThat(result.getHits().getTotalHits()).isEqualTo(5);
-    containsOnlyIds(result, "DO5", "DO6", "DO7", "DO8", "DO9");
+    val result = executeQuery("ge(gene.ssm.observation.quality_score, 49)");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(3);
+    containsOnlyIds(result, "DO2", "DO3", "DO9");
+  }
+
+  @Test
+  public void geTest_nested() {
+    val result = executeQuery("ge(gene.ssm.chromosome_start, 238855352)");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
+    containsOnlyIds(result, "DO5", "DO7");
   }
 
   @Test
@@ -146,6 +165,13 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
+  public void leTest_nested() {
+    val result = executeQuery("le(gene.ssm.chromosome_start, 1672334)");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(2);
+    containsOnlyIds(result, "DO2", "DO9");
+  }
+
+  @Test
   public void ltTest() {
     val result = executeQuery("lt(_donor_id, 'DO5')");
     assertThat(result.getHits().getTotalHits()).isEqualTo(4);
@@ -153,24 +179,33 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   @Test
-  public void andTest() {
-    val result = executeQuery("and(eq(project._project_id, 'OV-AU'), gt(donor_age_at_diagnosis, 100)))");
+  public void ltTest_nested() {
+    val result = executeQuery("lt(gene.ssm.chromosome_start, 1672334)");
     assertThat(result.getHits().getTotalHits()).isEqualTo(1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO2");
+    containsOnlyIds(result, "DO9");
+  }
+
+  @Test
+  public void andTest() {
+    val result =
+        executeQuery("and(ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO9");
   }
 
   @Test
   public void andTest_rootLevel() {
-    val result = executeQuery("eq(project._project_id, 'OV-AU'), gt(donor_age_at_diagnosis, 100))");
+    val result = executeQuery("ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)");
     assertThat(result.getHits().getTotalHits()).isEqualTo(1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO2");
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO9");
   }
 
   @Test
   public void orTest() {
-    val result = executeQuery("or(eq(project._project_id, 'PACA-AU'), lt(donor_age_at_diagnosis, 100))");
-    assertThat(result.getHits().getTotalHits()).isEqualTo(5);
-    containsOnlyIds(result, "DO1", "DO4", "DO5", "DO7", "DO9");
+    val result =
+        executeQuery("or(ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(6);
+    containsOnlyIds(result, "DO2", "DO3", "DO4", "DO5", "DO8", "DO9");
   }
 
   private SearchResponse executeQuery(String query) {
@@ -202,12 +237,10 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   @Test
   public void nestedTest() {
-    val result = executeQuery("or(" +
-        "nested(gene.ssm.observation, " +
-        "and(eq(gene.ssm.observation._sample_id, 'SA35'), eq(gene.ssm.observation._specimen_id, 'SP12')))," +
-        "nested(gene.ssm.consequence, eq(gene.ssm.consequence.consequence_type, 'missense')))");
-    assertThat(result.getHits().getTotalHits()).isEqualTo(3);
-    containsOnlyIds(result, "DO1", "DO2", "DO7");
+    val result = executeQuery("nested(gene.ssm.observation, " +
+        "ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 27))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    containsOnlyIds(result, "DO2");
   }
 
 }

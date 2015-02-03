@@ -39,10 +39,10 @@ import com.google.common.collect.ImmutableList;
 public class DonorCentricTypeModel extends AbstractTypeModel {
 
   public DonorCentricTypeModel() {
-    super(initializeFields());
+    super(initFields());
   }
 
-  private static List<FieldModel> initializeFields() {
+  private static List<FieldModel> initFields() {
     val fields = new ImmutableList.Builder<FieldModel>();
     fields.add(string("_donor_id"));
     fields.add(string("_project_id"));

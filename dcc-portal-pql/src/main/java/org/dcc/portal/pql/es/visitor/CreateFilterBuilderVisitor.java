@@ -199,7 +199,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
       child.accept(this);
     }
 
-    return stack.pop();
+    return createNestedFilter(node, node.getName(), stack.pop());
   }
 
   @Override
@@ -267,7 +267,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
       values.add(((TerminalNode) child).getValue());
     }
 
-    return termsFilter(node.getField(), values);
+    return createNestedFilter(node, node.getField(), termsFilter(node.getField(), values));
   }
 
   @Override
