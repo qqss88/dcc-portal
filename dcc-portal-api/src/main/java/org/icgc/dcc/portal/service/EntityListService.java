@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
+import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,6 +48,7 @@ import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.supercsv.io.CsvListWriter;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
@@ -177,14 +179,14 @@ public class EntityListService {
     return newList;
   }
 
-  public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream stream) throws IOException {
+  public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream outputStream) throws IOException {
     val content = analyzer.retriveListItems(entityList);
 
     @Cleanup
-    val writer = new OutputStreamWriter(stream);
+    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
 
     for (val s : content) {
-      writer.write(s);
+      writer.write(new Object[] { s });
     }
     writer.flush();
   }
