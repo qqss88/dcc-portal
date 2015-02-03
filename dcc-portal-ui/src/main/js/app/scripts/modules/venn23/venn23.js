@@ -56,9 +56,17 @@
       },
       mouseoutFunc: function() {
       },
-      labelFunc: function(d) {
+
+      // Set label
+      setLabelFunc: function(d) {
+        return d;
+      },
+
+      // Value label
+      valueLabelFunc: function(d) {
         return d;
       }
+
     };
 
 
@@ -216,14 +224,14 @@
       .attr('y', cy)
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
-      .text(config.labelFunc(uniqueIds[0]));
+      .text(config.setLabelFunc(uniqueIds[0]));
 
     svg.append('text')
       .attr('x', cx + 2.8*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
-      .text(config.labelFunc(uniqueIds[1]));
+      .text(config.setLabelFunc(uniqueIds[1]));
 
 
     // Label - value
@@ -232,21 +240,21 @@
       .attr('x', cx -  1.1*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'end')
-      .text(_this.getValueBySetIds([uniqueIds[0]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[0]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + 1.1*radius * factor)
       .attr('y', cy)
       .attr('text-anchor', 'start')
-      .text(_this.getValueBySetIds([uniqueIds[1]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[1]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx)
       .attr('y', cy)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]])));
 
 
 
@@ -442,7 +450,7 @@
       .attr('text-anchor', 'end')
       .style('fill', '#333333')
       .text(function() {
-        return config.labelFunc(uniqueIds[0]);
+        return config.setLabelFunc(uniqueIds[0]);
       });
 
     svg.append('text')
@@ -451,7 +459,7 @@
       .attr('text-anchor', 'start')
       .style('fill', '#333333')
       .text(function() {
-        return config.labelFunc(uniqueIds[1]);
+        return config.setLabelFunc(uniqueIds[1]);
       });
 
     svg.append('text')
@@ -460,7 +468,7 @@
       .attr('text-anchor', 'middle')
       .style('fill', '#333333')
       .text(function() {
-        return config.labelFunc(uniqueIds[2]);
+        return config.setLabelFunc(uniqueIds[2]);
       });
 
 
@@ -470,49 +478,49 @@
       .attr('x', cx + Math.sin(Math.PI * 300/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 300/180) * 1.1*radius * factor)
       .attr('text-anchor', 'end')
-      .text(_this.getValueBySetIds([uniqueIds[0]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[0]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 60/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 60/180) * 1.1*radius * factor)
       .attr('text-anchor', 'start')
-      .text(_this.getValueBySetIds([uniqueIds[1]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[1]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 180/180) * 1.1*radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 180/180) * 1.1*radius * factor)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[2]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[2]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 360/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 360/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 120/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 120/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[1], uniqueIds[2]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[1], uniqueIds[2]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx + Math.sin(Math.PI * 240/180) * 0.85 * radius * factor)
       .attr('y', cy - Math.cos(Math.PI * 240/180) * 0.85 * radius * factor)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[2], uniqueIds[0]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[2], uniqueIds[0]])));
 
     svg.append('text')
       .classed('venn-count', true)
       .attr('x', cx)
       .attr('y', cy)
       .attr('text-anchor', 'middle')
-      .text(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1], uniqueIds[2]]));
+      .text(config.valueLabelFunc(_this.getValueBySetIds([uniqueIds[0], uniqueIds[1], uniqueIds[2]])));
   };
 
 

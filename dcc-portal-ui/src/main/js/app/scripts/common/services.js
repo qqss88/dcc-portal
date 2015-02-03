@@ -171,11 +171,11 @@
     this.ENRICHMENT = {
       OVERVIEW_GENES_OVERLAP: 'Intersection between genes involved in Universe and input genes.',
       INPUT_GENES: 'Number of genes resulting from original query with upper limit. <br>' +
-        'Input genes from this enrichment analysis.',
+        'Input genes for this enrichment analysis result.',
       FDR: 'False Discovery Rate',
       GENESET_GENES: 'Number of genes involved in this gene set.',
       GENESET_GENES_OVERLAP: 'Intersection between genes involved in this gene set and input genes.',
-      GENESET_DONORS: 'Number of donors filterd by genes in overlap',
+      GENESET_DONORS: 'Number of donors filtered by genes in overlap',
       GENESET_MUTATIONS: 'Number of simple somatic mutations filtered by genes in overlap.',
       GENESET_EXPECTED: 'Number of genes expected by chance',
       GENESET_PVALUE: 'P-Value using hypergeometric test',

@@ -63,7 +63,7 @@
                 <tr>
                     <td colspan="2">Union of selected sets</td>
                     <td class="text-right">
-                        <a data-ng-if="selectedTotalCount > 0" href="">{{selectedTotalCount}}</a>
+                        <a data-ng-if="selectedTotalCount > 0" href="">{{selectedTotalCount | number}}</a>
                         <span data-ng-if="selectedTotalCount===0">0</span>
                     </td>
                     <td>

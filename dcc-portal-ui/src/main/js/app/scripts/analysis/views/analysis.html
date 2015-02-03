@@ -100,7 +100,8 @@
                     <th></th>
                 </thead>
                 <tbody>
-                    <tr data-ng-repeat="item in entityLists">
+                    <tr data-ng-repeat="item in entityLists" data-ng-style="{'color': $index===0?'#4488BB':''}">
+                    <!--<tr data-ng-repeat="item in entityLists"> -->
                         <td>
                             <span data-ng-if="item.status === 'FINISHED'" style="cursor:pointer" data-ng-click="item.checked = !item.checked; update()">
                                 <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>

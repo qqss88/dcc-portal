@@ -202,6 +202,13 @@
 
       donors.hits.forEach(function (donor) {
         donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
+
+        // Remove gene entity set because gene id is the key
+        if (donor.embedQuery.hasOwnProperty('donor')) {
+          var donorFilters = donor.embedQuery.donor;
+          delete donorFilters.entityListId;
+        }
+
       });
       _this.donors = donors;
       _this.ajax();
@@ -279,6 +286,13 @@
       genes.hits.forEach(function (gene) {
         var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
         gene.embedQuery = LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet');
+
+        // Remove gene entity set because gene id is the key
+        if (gene.embedQuery.hasOwnProperty('gene')) {
+          var geneFilters = gene.embedQuery.gene;
+          delete geneFilters.entityListId;
+        }
+
       });
       _this.genes = genes;
       _this.ajax();
@@ -367,6 +381,13 @@
         mutations.hits.forEach(function (mutation) {
           var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
+
+          // Remove gene entity set because gene id is the key
+          if (mutation.embedQuery.hasOwnProperty('mutation')) {
+            var mutationFilters = mutation.embedQuery.mutation;
+            delete mutationFilters.entityListId;
+          }
+
         });
         _this.mutations = mutations;
         _this.ajax();

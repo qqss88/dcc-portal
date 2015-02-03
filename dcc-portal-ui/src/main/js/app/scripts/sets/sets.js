@@ -116,7 +116,7 @@
             // FIXME: get absolute max(new/derived) from settings
             $scope.setSize = Math.min($scope.setLimit || 0, 20000);
             $scope.setSizeLimit = $scope.setSize;
-            $scope.setName = 'my ' + $scope.setType + ' set';
+            $scope.setName = 'My ' + $scope.setType + ' set';
             $scope.uiFilters = LocationService.filters();
           }
         });
@@ -125,7 +125,7 @@
   });
 
 
-  module.directive('setOperation', function($location, $timeout, SetService, SetOperationService) {
+  module.directive('setOperation', function($location, $timeout, $filter, SetService, SetOperationService) {
     return {
       restrict: 'E',
       scope: {
@@ -285,7 +285,11 @@
             });
           });
 
-          config.labelFunc = function(id) {
+          config.valueLabelFunc = function(val) {
+            return $filter('number')(val);
+          };
+
+          config.setLabelFunc = function(id) {
             return SetOperationService.getSetShortHand(id, $scope.setList);
           };
 
