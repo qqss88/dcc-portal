@@ -367,13 +367,12 @@ public class UnionAnalyzer {
   public List<String> retriveListItems(final EntityList entityList) {
     val lookupType = getLookupTypeFrom(entityList.getType());
     val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
-        lookupType.getName(), entityList.getId().toString()).setFields(TERMS_LOOKUP_PATH);
+        lookupType.getName(), entityList.getId().toString());
 
     val response = query.execute().actionGet();
+    val rawValues = response.getSource().get(TERMS_LOOKUP_PATH);
+    log.info("Raw values are: '{}'", rawValues);
 
-    List<String> values = MAPPER.convertValue(response.getField(TERMS_LOOKUP_PATH).getValue(), LIST_TYPE_REFERENCE);
-    log.debug("values is: {}", values);
-
-    return values;
+    return MAPPER.convertValue(rawValues, LIST_TYPE_REFERENCE);
   }
 }
