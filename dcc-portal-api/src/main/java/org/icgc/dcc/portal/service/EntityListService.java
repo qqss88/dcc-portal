@@ -43,6 +43,7 @@ import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityList;
 import org.icgc.dcc.portal.model.EntityList.Status;
+import org.icgc.dcc.portal.model.EntityList.SubType;
 import org.icgc.dcc.portal.model.EntityListDefinition;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +136,7 @@ public class EntityListService {
   public EntityList createEntityList(
       @NonNull final EntityListDefinition listDefinition) {
 
-    val newList = createNewListFrom(listDefinition);
+    val newList = createAndSaveNewListFrom(listDefinition);
 
     analyzer.materializeList(newList.getId(), listDefinition);
 
@@ -163,20 +164,28 @@ public class EntityListService {
   public EntityList deriveEntityList(
       @NonNull final DerivedEntityListDefinition listDefinition) {
 
-    val newList = createNewListFrom(listDefinition);
+    val newList =
+        (listDefinition.isTemp()) ? createAndSaveNewListFrom(listDefinition, SubType.TEMP) : createAndSaveNewListFrom(listDefinition);
 
     analyzer.combineLists(newList.getId(), listDefinition);
 
     return newList;
   }
 
-  private EntityList createNewListFrom(final BaseEntityList listDefinition) {
+  private EntityList createAndSaveNewListFrom(final BaseEntityList listDefinition, final SubType subtype) {
     val newList = EntityList.createFromDefinition(listDefinition);
+    if (null != subtype) {
+      newList.setSubtype(subtype);
+    }
 
     val insertCount = repository.save(newList);
     checkState(insertCount == 1, "Could not save list - Insert count: %s", insertCount);
 
     return newList;
+  }
+
+  private EntityList createAndSaveNewListFrom(final BaseEntityList listDefinition) {
+    return createAndSaveNewListFrom(listDefinition, null);
   }
 
   public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream outputStream) throws IOException {

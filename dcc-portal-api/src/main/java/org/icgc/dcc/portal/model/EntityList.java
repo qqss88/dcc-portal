@@ -168,7 +168,8 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   public enum SubType {
     NORMAL("normal"),
     UPLOAD("upload"),
-    ENRICHMENT("enrichment");
+    ENRICHMENT("enrichment"),
+    TEMP("temp");
 
     private final String name;
   }
