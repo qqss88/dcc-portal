@@ -311,6 +311,9 @@ public class PortalProperties extends Configuration {
 
     @JsonProperty
     int maxNumberOfHits;
+
+    @JsonProperty
+    int maxMultiplier;
   }
 
   @Data

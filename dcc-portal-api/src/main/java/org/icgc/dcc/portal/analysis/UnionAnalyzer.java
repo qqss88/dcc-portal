@@ -18,6 +18,9 @@
 package org.icgc.dcc.portal.analysis;
 
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
+import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
+import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,6 +98,13 @@ public class UnionAnalyzer {
   @PostConstruct
   private void init() {
     maxNumberOfHits = properties.getSetOperation().getMaxNumberOfHits();
+    maxMultiplier = properties.getSetOperation().getMaxMultiplier();
+
+    if (maxMultiplier > 1) {
+      maxUnionCount = maxNumberOfHits * maxMultiplier;
+    } else {
+      maxUnionCount = maxNumberOfHits;
+    }
   }
 
   private final static String FIELD_NAME = "_id";
@@ -156,6 +166,8 @@ public class UnionAnalyzer {
   }
 
   private int maxNumberOfHits;
+  private int maxMultiplier;
+  private int maxUnionCount;
 
   private long getCountFrom(@NonNull final SearchResponse response, final long max) {
     long result = SearchResponses.getTotalHitCount(response);
@@ -200,9 +212,9 @@ public class UnionAnalyzer {
         getIndexTypeNameFrom(entityType),
         SearchType.COUNT,
         toBoolFilterFrom(unionDefinition, entityType),
-        maxNumberOfHits);
+        maxUnionCount);
 
-    val count = getCountFrom(response, maxNumberOfHits);
+    val count = getCountFrom(response, maxUnionCount);
     log.debug("Total hits: {}", count);
 
     return count;
@@ -234,7 +246,7 @@ public class UnionAnalyzer {
     // log.info("createTermsLookup took {} nanoseconds for creating a derived list for entity type - {}",
     // watch.elapsed(TimeUnit.NANOSECONDS), entityType);
 
-    val count = getCountFrom(response, maxNumberOfHits);
+    val count = getCountFrom(response, maxUnionCount);
     // Done - update status to finished
     entityListRepository.update(newList.finished(count));
   }
@@ -247,7 +259,7 @@ public class UnionAnalyzer {
         getIndexTypeNameFrom(entityType),
         SearchType.QUERY_THEN_FETCH,
         toBoolFilterFrom(definitions, entityType),
-        maxNumberOfHits);
+        maxUnionCount);
 
     return response;
   }
@@ -352,16 +364,16 @@ public class UnionAnalyzer {
     return response;
   }
 
-  public String retriveListItems(final EntityList entityList) {
+  public List<String> retriveListItems(final EntityList entityList) {
     val lookupType = getLookupTypeFrom(entityList.getType());
     val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
-        lookupType.getName(), entityList.getId().toString());
+        lookupType.getName(), entityList.getId().toString()).setFields(TERMS_LOOKUP_PATH);
+
     val response = query.execute().actionGet();
-    val values = response.getSource().get(TermsLookupService.TERMS_LOOKUP_PATH).toString();
-    val length = values.length();
 
-    // Remove the square brackets before we return - a bit hacky here - will refactor when we finalize the file format.
-    return (length > 1) ? values.substring(1, length - 1) : values;
+    List<String> values = MAPPER.convertValue(response.getField(TERMS_LOOKUP_PATH).getValue(), LIST_TYPE_REFERENCE);
+    log.debug("values is: {}", values);
+
+    return values;
   }
-
 }

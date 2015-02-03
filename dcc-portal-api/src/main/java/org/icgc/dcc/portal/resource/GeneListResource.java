@@ -17,24 +17,18 @@
  */
 package org.icgc.dcc.portal.resource;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -44,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.UploadedGeneList;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.icgc.dcc.portal.service.GeneService;
@@ -55,8 +48,6 @@ import org.springframework.stereotype.Component;
 import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
@@ -76,23 +67,20 @@ public class GeneListResource {
   private final static Pattern GENE_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_GENE_LIST_SIZE = 1000;
 
-  @Path("/{genelistIds}")
-  @GET
-  public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) {
-    val result = Lists.<Map<String, String>> newLinkedList();
-    for (val value : geneListIds.get()) {
-      val id = UUID.fromString(value);
-      val geneList = userGeneSetService.get(id);
-
-      if (isNullOrEmpty(geneList)) {
-        result.add(ImmutableMap.of(value, ""));
-      } else {
-        result.add(ImmutableMap.of(value, geneList));
-      }
-    }
-
-    return result;
-  }
+  /*
+   * This endpoint was not used at all. To be removed.
+   * 
+   * @Path("/{genelistIds}")
+   * 
+   * @GET public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) { val result =
+   * Lists.<Map<String, String>> newLinkedList(); for (val value : geneListIds.get()) { val id = UUID.fromString(value);
+   * val geneList = userGeneSetService.get(id);
+   * 
+   * if (isNullOrEmpty(geneList)) { result.add(ImmutableMap.of(value, "")); } else { result.add(ImmutableMap.of(value,
+   * geneList)); } }
+   * 
+   * return result; }
+   */
 
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
