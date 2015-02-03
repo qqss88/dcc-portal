@@ -23,6 +23,7 @@ import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -240,7 +241,18 @@ public class UnionAnalyzer {
 
     // val watch = Stopwatch.createStarted();
 
-    termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
+    if (listDefinition.isTemp()) {
+      val additionalAttribute = new HashMap<String, Object>() {
+
+        {
+          put("transient", true);
+        }
+      };
+      termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds,
+          additionalAttribute);
+    } else {
+      termLookupService.createTermsLookup(getLookupTypeFrom(entityType), newList.getId(), entityIds);
+    }
 
     // watch.stop();
     // log.info("createTermsLookup took {} nanoseconds for creating a derived list for entity type - {}",
