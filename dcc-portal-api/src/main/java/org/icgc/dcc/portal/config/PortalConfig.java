@@ -179,6 +179,9 @@ public class PortalConfig {
         .ssoUrl(properties.getCrowd().getSsoUrl())
         .releaseDate(properties.getRelease().getReleaseDate())
         .demoListUuid(setOperationConfig.demoListUuid)
+        .maxNumberOfHits(setOperationConfig.maxNumberOfHits)
+        .maxMultiplier(setOperationConfig.maxMultiplier)
+        // .enrichmentGeneLimit(setOperationConfig.enrichmentGeneLimit)
         .build();
   }
 

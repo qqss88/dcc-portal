@@ -35,7 +35,7 @@ public class EnrichmentParams {
   /**
    * Limits.
    */
-  public static final int MAX_INPUT_GENES = 1000;
+  public static final int MAX_INPUT_GENES = 10000;
   public static final int MAX_OUTPUT_GENE_SETS = 100;
   public static final float MIN_FDR = 0.005f;
   public static final float MAX_FDR = 0.5f;
