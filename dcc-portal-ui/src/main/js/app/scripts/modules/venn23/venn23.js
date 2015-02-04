@@ -571,8 +571,10 @@
         config.mouseoutFunc(d);
       })
       .on('click', function(d) {
+        /*
         d.selected = !d.selected;
         _this.toggleHighlight(d.data, d.selected);
+        */
         config.clickFunc(d);
       });
 

@@ -32,8 +32,8 @@
                     <span>
                         <span>{{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}</span>
                         <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
-                        <!--<small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>-->
-                        <small>&nbsp;</small>
+                        <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
+                        <!--<small>&nbsp;</small>-->
                         <span data-ng-mouseenter="hover=true"
                               data-ng-mouseleave="hover=false"
                               data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">

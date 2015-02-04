@@ -125,7 +125,8 @@
   });
 
 
-  module.directive('setOperation', function($location, $timeout, $filter, SetService, SetOperationService) {
+  module.directive('setOperation',
+    function($location, $timeout, $filter, Page, LocationService, SetService, SetOperationService) {
     return {
       restrict: 'E',
       scope: {
@@ -143,26 +144,117 @@
           setModal: false
         };
 
-        $scope.calculateUnion = function(item) {
-          $scope.dialog.setUnion = [];
-          console.log('item', item);
-          $scope.dialog.setUnion.push({
-            intersection: item.intersection,
-            exclusions: item.exclusions
+        function toggleSelection(intersection, count) {
+          var existIdex = _.findIndex($scope.selected, function(subset) {
+            return SetOperationService.isEqual(intersection, subset);
           });
-          $scope.dialog.setType = $scope.item.type.toLowerCase();
-        };
 
-        $scope.calculateUnionSelected = function() {
-          $scope.dialog.setUnion = [];
-          $scope.selected.forEach(function(selectedIntersection) {
-            for (var i2=0; i2 < $scope.data.length; i2++) {
-              if (SetOperationService.isEqual($scope.data[i2].intersection, selectedIntersection)) {
-                $scope.dialog.setUnion.push( $scope.data[i2] );
-                break;
-              }
+          if (existIdex === -1) {
+            $scope.selected.push(intersection);
+            $scope.selectedTotalCount += count;
+          } else {
+            _.remove($scope.selected, function(subset) {
+              return SetOperationService.isEqual(intersection, subset);
+            });
+            if (SetOperationService.isEqual(intersection, $scope.current) === true) {
+              $scope.current = [];
+            }
+            $scope.selectedTotalCount -= count;
+          }
+          vennDiagram.toggle(intersection);
+        }
+
+        function wait(id, numTries, callback) {
+          console.log('trying .... ', numTries);
+          if (numTries > 30) {
+            return;
+          }
+
+          SetService.getMetaData([id]).then(function(data) {
+            if (data[0].status === 'FINISHED') {
+              Page.stopWork();
+              callback();
+            } else {
+              $timeout( function() {
+                wait(id, ++numTries, callback);
+              }, 800);
             }
           });
+        }
+
+
+        // Compute the union of single item, of currently selected
+        function computeUnion(item) {
+          var union = [];
+          if (angular.isDefined(item) ) {
+            union.push({
+              intersection: item.intersection,
+              exclusions: item.exclusions
+            });
+          } else {
+            $scope.selected.forEach(function(selectedIntersection) {
+              for (var i2=0; i2 < $scope.data.length; i2++) {
+                if (SetOperationService.isEqual($scope.data[i2].intersection, selectedIntersection)) {
+                  union.push( $scope.data[i2] );
+                  break;
+                }
+              }
+            });
+          }
+          return union;
+        }
+
+
+        // Export the subset(s), materialize the set along the way
+        $scope.export = function(item) {
+          var params, type, name;
+          type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
+          Page.startWork();
+          SetService.materialize(type, params).then(function(data) {
+            function exportSet() {
+              SetService.exportSet(data.id);
+            }
+            wait(data.id, 0, exportSet);
+          });
+        };
+
+
+        // Redirect to advanced search to show the subset(s), materialize the set along the way
+        $scope.redirect = function(item) {
+          var params, type, name;
+          type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
+
+          Page.startWork();
+          SetService.materialize(type, params).then(function(data) {
+            function redirect2Advanced() {
+              var filters = {};
+              filters[type] = {
+                entityListId: {
+                  is: [data.id]
+                }
+              };
+              $location.path('/search').search({filters: angular.toJson(filters)});
+            }
+            wait(data.id, 0, redirect2Advanced);
+          });
+        };
+
+        $scope.calculateUnion = function(item) {
+          $scope.dialog.setUnion = computeUnion(item);
           $scope.dialog.setType = $scope.item.type.toLowerCase();
         };
 
@@ -184,27 +276,9 @@
           $scope.selectedTotalCount = 0;
         };
 
-        $scope.toggleSelection = function(item) {
-          var ids = item.intersection;
-          var existIdex = _.findIndex($scope.selected, function(subset) {
-            return SetOperationService.isEqual(ids, subset);
-          });
 
-          if (existIdex === -1) {
-            $scope.selected.push(ids);
-            $scope.selectedTotalCount += item.count;
-          } else {
-            // FIXME: this is repeated, move out
-            _.remove($scope.selected, function(subset) {
-              return SetOperationService.isEqual(ids, subset);
-            });
-            if (SetOperationService.isEqual(ids, $scope.current) === true) {
-              $scope.current = [];
-            }
-            $scope.selectedTotalCount -= item.count;
-          }
-          vennDiagram.toggle(ids);
-        };
+        $scope.toggleSelection = toggleSelection;
+
 
         $scope.isSelected = function(ids) {
           var existIdex = _.findIndex($scope.selected, function(subset) {
@@ -245,18 +319,7 @@
 
             clickFunc: function(d) {
               $scope.$apply(function() {
-                if (d.selected === true) {
-                  $scope.selected.push(d.data);
-                  $scope.selectedTotalCount += d.count;
-                } else {
-                  _.remove($scope.selected, function(subset) {
-                    return SetOperationService.isEqual(d.data, subset);
-                  });
-                  if (SetOperationService.isEqual(d.data, $scope.current) === true) {
-                    $scope.current = [];
-                  }
-                  $scope.selectedTotalCount -= d.count;
-                }
+                toggleSelection(d.data, d.count);
               });
             }
           };
@@ -298,13 +361,10 @@
             results.forEach(function(set) {
               $scope.setMap[set.id] = set;
             });
-            //$scope.setNameMap = SetService.lookupTable(results);
 
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);
           });
-
-
         }
 
         $scope.$watch('item', function(n) {
@@ -313,359 +373,10 @@
           }
         });
 
-        // Force a digest cycle first so we can locate canvas, not the best way to do it, but it works
-        /*
-        $timeout(function() {
-          initVennDiagram();
-        }, 10);
-        */
       }
     };
   });
 })();
 
 
-(function () {
-  'use strict';
-
-  var module = angular.module('icgc.sets.services', []);
-
-  module.service('SetOperationService', function() {
-    var shortHandPrefix = 'S';
-
-
-    /**
-     * Check set/list equality ... is there a better way?
-     */
-    this.isEqual = function(s1, s2) {
-      return (_.difference(s1, s2).length === 0 && _.difference(s2, s1).length === 0);
-    };
-
-
-    /**
-     * Transform data array to be consumed by venn-diagram visualization
-     */
-    this.transform = function(data) {
-      var result = [];
-
-      data.forEach(function(set) {
-        var subset = [];
-        set.intersection.forEach(function(sid) {
-          subset.push({
-            id: sid,
-            count: set.count
-          });
-        });
-        result.push(subset);
-      });
-      return result;
-    };
-
-
-    function _getSetShortHand(setId, setList) {
-      if (setList) {
-        return shortHandPrefix + (setList.indexOf(setId) + 1);
-      }
-      return setId;
-    }
-
-    this.getSetShortHand = _getSetShortHand;
-
-
-    /**
-     * Transforms internal set prepresentation into UI display format
-     * with proper set notations
-     */
-    this.displaySetOperation = function(item, setList) {
-      var i = 0;
-      var displayStr = '';
-      var intersection = item.intersection;
-      var exclusions = item.exclusions;
-
-      // Intersection
-      if (intersection.length > 1) {
-        displayStr += '(';
-        for (i=0; i < intersection.length; i++) {
-          displayStr += _getSetShortHand(intersection[i], setList);
-          if (i < intersection.length-1) {
-            displayStr += ' &cap; ';
-          }
-        }
-        displayStr += ')';
-      } else {
-        displayStr += _getSetShortHand(intersection[0], setList);
-      }
-
-      // Subtractions
-      if (exclusions.length > 1) {
-        displayStr += ' - ';
-        displayStr += '(';
-        for (i=0; i < exclusions.length; i++) {
-          displayStr += _getSetShortHand(exclusions[i], setList);
-          if (i < exclusions.length-1) {
-            displayStr += ' &cup; ';
-          }
-        }
-        displayStr += ')';
-      } else if (exclusions.length > 0) {
-        displayStr += ' - ';
-        displayStr += _getSetShortHand(exclusions[0], setList);
-      }
-      return displayStr;
-    };
-  });
-
-
-
-  /**
-   * Abstracts CRUD operations on entity lists (gene, donor, mutation)
-   */
-  module.service('SetService', function($window, Restangular, RestangularNoCache, API, localStorageService, toaster) {
-    var LIST_ENTITY = 'entity';
-    var _this = this;
-
-
-    // For application/json format
-    function params2JSON(type, params) {
-      var data = {};
-      data.filters = encodeURI(JSON.stringify(params.filters));
-      data.type = type.toUpperCase();
-      data.name = params.name;
-      data.description = params.description || '';
-      data.size = params.size || 0;
-
-      /*
-      data.name = encodeURIComponent(params.name);
-      if (angular.isDefined(params.description)) {
-        data.description = encodeURIComponent(params.description);
-      } */
-
-      // Set default sort values if necessary
-      if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
-        if (type === 'donor') {
-          data.sortBy = 'ssmAffectedGenes';
-        } else if (type === 'gene') {
-          data.sortBy = 'affectedDonorCountFiltered';
-        } else {
-          data.sortBy = 'affectedDonorCountFiltered';
-        }
-        data.sortOrder = 'DESCENDING';
-      } else {
-        data.sortBy = params.sortBy;
-        data.sortOrder = params.sortOrder;
-      }
-      data.union = params.union;
-      return data;
-    }
-
-    this.saveAll = function(lists) {
-      localStorageService.set(LIST_ENTITY, lists);
-    };
-
-
-    /**
-    * params.filters
-    * params.sort
-    * params.order
-    * params.name
-    * params.description - optional
-    * params.count - limit (max 1000) ???
-    *
-    * Create a new set from
-    */
-    this.addSet = function(type, params) {
-      var promise = null;
-      var data = params2JSON(type, params);
-      promise = Restangular.one('entitylist').post(undefined, data, {}, {'Content-Type': 'application/json'});
-
-      /*
-      promise = Restangular.one('entitylist')
-        .withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, undefined, {}, { 'Content-Type': 'application/json' });
-      */
-      promise.then(function(data) {
-        if (! data.id) {
-          console.log('there is no id!!!!');
-          return;
-        }
-
-        data.type = data.type.toLowerCase();
-        //setList.unshift(data);
-        setList.splice(1, 0, data);
-        localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
-      });
-    };
-
-
-    /**
-    * params.union
-    * params.name
-    * params.description - optional
-    *
-    * Create a new set from the union of various subsets of the same type
-    */
-    this.addDerivedSet = function(type, params) {
-      var promise = null;
-      var data = params2JSON(type, params);
-
-      promise = Restangular.one('entitylist').post('union', data, {}, {'Content-Type': 'application/json'});
-      promise.then(function(data) {
-        if (! data.id) {
-          console.log('there is an error in creating derived set');
-          return;
-        }
-
-        data.type = data.type.toLowerCase();
-        //setList.unshift(data);
-        setList.splice(1, 0, data);
-        localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
-      });
-    };
-
-
-
-    /*
-     * Attemp to sync with the server - fires only once, up to controller to do polling
-     */
-    this.sync = function() {
-      var pendingLists, pendingListsIDs, promise;
-
-      pendingLists = _.filter(setList, function(d) {
-        return d.status !== 'FINISHED';
-      });
-      pendingListsIDs = _.pluck(pendingLists, 'id');
-
-      // No need to update
-      if (pendingListsIDs.length === 0) {
-        return;
-      }
-
-      promise = _this.getMetaData(pendingListsIDs);
-      promise.then(function(updatedList) {
-        updatedList.forEach(function(item) {
-          var index = _.findIndex(setList, function(d) {
-            return item.id === d.id;
-          });
-          if (index >= 0) {
-            setList[index].count = item.count;
-            setList[index].status = item.status;
-          }
-        });
-
-        // Save update back
-        localStorageService.set(LIST_ENTITY, setList);
-        _this.refreshList();
-      });
-    };
-
-
-
-    this.refreshList = function() {
-      setList.forEach(function(set) {
-        var filters = {};
-
-        filters[set.type] = {
-          entityListId: {is: [ set.id ]}
-        };
-
-        if (['gene', 'mutation'].indexOf(set.type) !== -1) {
-          set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
-        } else {
-          set.advLink = '/search?filters=' + JSON.stringify(filters);
-        }
-      });
-    };
-
-
-    // FIXME: Add cached version
-    this.getMetaData = function( ids ) {
-      return RestangularNoCache.several('entitylist/lists', ids).get('', {});
-    };
-
-    this.lookupTable = function(metaData) {
-      var map = {};
-      metaData.forEach(function(d) {
-        map[d.id] = d.name;
-      });
-      return map;
-    };
-
-
-    this.exportSet = function(id) {
-      $window.location.href = API.BASE_URL + '/entitylist/' + id + '/export';
-    };
-
-
-    /****** Local storage related API ******/
-    this.getAll = function() {
-      setList = localStorageService.get(LIST_ENTITY) || [];
-      _this.refreshList();
-      return setList;
-    };
-
-    this.removeSeveral = function(ids) {
-      _.remove(setList, function(list) {
-        return ids.indexOf(list.id) >= 0;
-      });
-      localStorageService.set(LIST_ENTITY, setList);
-      return true;
-    };
-
-    this.remove = function(id) {
-      _.remove(setList, function(list) {
-        return list.id === id;
-      });
-      localStorageService.set(LIST_ENTITY, setList);
-      return true;
-    };
-
-
-    // Make sure the demo is in place
-    this.initDemo = function() {
-      var settingsPromise = Restangular.one('settings').get();
-
-      function addDemo(demo) {
-        demo.type = demo.type.toLowerCase();
-        demo.readonly = true;
-
-        // Check if already exist
-        var exist = _.some(setList, function(set) {
-          return set.id === demo.id;
-        });
-        if (exist === false){
-          setList.unshift(demo); // Demo always goes first
-          localStorageService.set(LIST_ENTITY, setList);
-        } else {
-          setList[0] = demo;
-          localStorageService.set(LIST_ENTITY, setList);
-        }
-        // console.log(setList.length, setList);
-      }
-
-      settingsPromise.then(function(settings) {
-        if (settings.hasOwnProperty('demoListUuid')) {
-          var uuid = settings.demoListUuid;
-          var demoPromise = _this.getMetaData([uuid]);
-
-          demoPromise.then(function(results) {
-            addDemo(results[0]);
-            _this.refreshList();
-          });
-        }
-      });
-
-    };
-
-
-    // Initialize
-    var setList = _this.getAll();
-    _this.initDemo();
-
-  });
-
-
-
-})();
 

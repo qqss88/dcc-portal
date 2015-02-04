@@ -46,15 +46,22 @@
         <br>
 
         <span>
-            <span data-ng-if="item.params.maxGeneSetCount < item.overview.overlapFdrGeneSetCount">
-                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+            <span class="alert-error" data-ng-if="item.overview.overlapGeneCount === 0 && item.results.length === 0">
+                Your input genes are not annotated in any of the gene sets involved in the selected Universe. 
+            </span>
+            <span class="alert-error" data-ng-if="item.overview.overlapGeneCount > 0 && item.results.length === 0">
+                0 enriched gene set with FDR &le; {{item.params.fdr}}. You may increase the FDR q-value threshold and launch Enrichment Analysis again.
             </span>
 
-            <span data-ng-if="item.params.maxGeneSetCount >= item.overview.overlapFdrGeneSetCount">
+
+            <span data-ng-if="item.params.maxGeneSetCount < item.overview.overlapFdrGeneSetCount && item.results.length > 0">
+                Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
+            </span>
+            <span data-ng-if="item.params.maxGeneSetCount >= item.overview.overlapFdrGeneSetCount && item.results.length > 0">
                 <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with <abbr data-tooltip="{{TooltipText.ENRICHMENT.FDR}}">FDR</abbr> &le; <strong>{{item.params.fdr}}</strong>
             </span>
 
-            <span class="t_tools">
+            <span class="t_tools" data-ng-if="item.results.length > 0">
                 <span class="t_tools__tool"
                       data-tooltip-placement="left"
                       data-tooltip="Export Table as CSV"
@@ -63,7 +70,7 @@
         </span>
 
 
-        <table class="table table-bordered">
+        <table class="table table-bordered" data-ng-if="item.results.length > 0">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -126,6 +133,7 @@
                 </tr>
             </tbody>
         </table>
+        <br>
         <br>
         <span>
             Documentation for Enrichment analysis is available on this link: 

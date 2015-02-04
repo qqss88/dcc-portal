@@ -41,7 +41,7 @@ cache:
   enableLastModified: true
 
   # List of resources for which Last-Modified HTTP header should not be generated. Format: regex accepted by java.lang.String
-  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$", "^v\\d+/analysis.*$"]
+  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$", "^v\\d+/analysis.*$", "^v\\d+/entitylist.*$" ]
 
   # Enable ETag HTTP header generation
   enableETag: false
@@ -75,10 +75,11 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  indexName: icgc18-0-2
+  # indexName: icgc18-0-2
+  indexName: etl-test-release17-0-0
   nodeAddresses:
     - host: "localhost"
-      port: 9999
+      port: 9300
 
 # Mail
 mail:
