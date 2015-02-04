@@ -108,8 +108,8 @@ public class EntityListService {
 
   private final class DemoEntityList {
 
-    private static final String NAME = "DEMO set of genes";
-    private static final String DESCRIPTION = "A set of genes for demo purpose";
+    private static final String NAME = "DEMO gene set";
+    private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";
     private static final String SORT_BY = DEFAULT_GENE_MUTATION_SORT;
 
     private final EntityListDefinition.SortOrder SORT_ORDER = EntityListDefinition.SortOrder.ASCENDING;

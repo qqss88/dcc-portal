@@ -10,17 +10,21 @@
 
         <table class="table">
             <thead>
-                <th>Alias</th>
-                <th>Set name</th>
-                <th>Type</th>
-                <th># of items</th>
+                <tr>
+                    <th>Alias</th>
+                    <th>Set name</th>
+                    <th class="text-right"># of items</th>
+                    <th>Item type</th>
+                </tr>
             </thead>
-            <tr data-ng-repeat="item in setList">
-                <td>{{getSetShortHand(item, setList)}}</td>
-                <td>{{setMap[item].name}}</td>
-                <td>{{setMap[item].type.toLowerCase()}}</td>
-                <td class="text-right">{{setMap[item].count | number}}</td>
-            </tr>
+            <tbody>
+                <tr data-ng-repeat="item in setList">
+                    <td>{{getSetShortHand(item, setList)}}</td>
+                    <td>{{setMap[item].name}}</td>
+                    <td class="text-right">{{setMap[item].count | number}}</td>
+                    <td>{{setMap[item].type.toLowerCase()}}</td>
+                </tr>
+            </tbody>
         </table>
         <br>
 
@@ -32,8 +36,8 @@
                     </span>
                 </th>
                 <th>Set operations</th>
-                <th>Counts</th>
-                <th>Actions</th>
+                <th># of items</th>
+                <th></th>
             </thead>
             <tbody>
                 <tr data-ng-repeat="item in data"
