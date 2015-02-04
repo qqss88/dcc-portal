@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,12 +45,12 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
 
   @NonNull
   private final UUID id;
-
   @NonNull
   private Status status;
-
   @NonNull
   private final BaseEntityList.Type type;
+
+  private final long timestamp = new Date().getTime();
 
   private List<UnionUnitWithCount> result;
 
