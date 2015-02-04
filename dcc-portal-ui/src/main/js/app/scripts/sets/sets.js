@@ -228,14 +228,21 @@
 
         // Redirect to advanced search to show the subset(s), materialize the set along the way
         $scope.redirect = function(item) {
-          var params, type, name;
+          var params, type, name, path = '/search';
+
           type = $scope.item.type.toLowerCase();
           name = 'Input ' + type + ' set';
+
+          // Determine which tab we should land on
+          if (['gene', 'mutation'].indexOf(type) >= 0) {
+            path += '/' + type.charAt(0);
+          }
 
           params = {
             union: computeUnion(item),
             type: $scope.item.type.toLowerCase(),
-            name: name
+            name: name,
+            isTransient: true
           };
 
           Page.startWork();
@@ -247,7 +254,7 @@
                   is: [data.id]
                 }
               };
-              $location.path('/search').search({filters: angular.toJson(filters)});
+              $location.path(path).search({filters: angular.toJson(filters)});
             }
             wait(data.id, 0, redirect2Advanced);
           });

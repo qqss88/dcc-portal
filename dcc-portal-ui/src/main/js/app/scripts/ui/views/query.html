@@ -1,4 +1,5 @@
 <span>
+    <span data-ng-if="!uiFilters">All</span>
     <span data-ng-repeat="(typeName, type) in uiFilters">
         <span data-ng-repeat="(facet, terms) in type track by facet"> 
 
