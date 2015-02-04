@@ -25,6 +25,7 @@ import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -383,8 +384,13 @@ public class UnionAnalyzer {
 
     val response = query.execute().actionGet();
     val rawValues = response.getSource().get(TERMS_LOOKUP_PATH);
-    log.info("Raw values are: '{}'", rawValues);
+    log.debug("Raw values are: '{}'", rawValues);
 
     return MAPPER.convertValue(rawValues, LIST_TYPE_REFERENCE);
+  }
+
+  public Map<String, String> retrieveGeneIdsAndSymbolsByListId(final UUID listId) {
+
+    return geneRepository.findGeneSymbolsByGeneListId(listId);
   }
 }
