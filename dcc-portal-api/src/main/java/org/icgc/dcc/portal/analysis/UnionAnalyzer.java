@@ -241,7 +241,7 @@ public class UnionAnalyzer {
 
     // val watch = Stopwatch.createStarted();
 
-    if (listDefinition.isTemp()) {
+    if (listDefinition.isTransient()) {
       val additionalAttribute = new HashMap<String, Object>() {
 
         {

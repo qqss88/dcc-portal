@@ -169,7 +169,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     NORMAL("normal"),
     UPLOAD("upload"),
     ENRICHMENT("enrichment"),
-    TEMP("temp");
+    TRANSIENT("transient");
 
     private final String name;
   }

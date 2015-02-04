@@ -165,7 +165,7 @@ public class EntityListService {
       @NonNull final DerivedEntityListDefinition listDefinition) {
 
     val newList =
-        (listDefinition.isTemp()) ? createAndSaveNewListFrom(listDefinition, SubType.TEMP) : createAndSaveNewListFrom(listDefinition);
+        (listDefinition.isTransient()) ? createAndSaveNewListFrom(listDefinition, SubType.TRANSIENT) : createAndSaveNewListFrom(listDefinition);
 
     analyzer.combineLists(newList.getId(), listDefinition);
 

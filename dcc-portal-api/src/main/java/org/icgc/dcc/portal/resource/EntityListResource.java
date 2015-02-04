@@ -177,6 +177,7 @@ public class EntityListResource {
     val list = getEntityList(entityListId);
 
     if (EntityList.Status.FINISHED != list.getStatus()) {
+      // We return a 204 if the list is not ready.
       return null;
     }
 

@@ -40,7 +40,7 @@ public class DerivedEntityListDefinition extends BaseEntityList {
   private final List<UnionUnit> union;
 
   // This flag indicates whether the resulting list is meant to be temporary.
-  private boolean isTemp;
+  private boolean isTransient;
 
   private final static class JsonPropertyName {
 
@@ -57,13 +57,13 @@ public class DerivedEntityListDefinition extends BaseEntityList {
       @NonNull @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
       @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
-      @JsonProperty(JsonPropertyName.isTemp) final boolean isTemp) {
+      @JsonProperty(JsonPropertyName.isTemp) final boolean isTransient) {
 
     super(name, description, type);
 
     validateUnion(union);
     this.union = union;
-    this.isTemp = isTemp;
+    this.isTransient = isTransient;
   }
 
   /**
