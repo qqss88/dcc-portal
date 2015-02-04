@@ -199,10 +199,9 @@ public class GeneRepository implements Repository {
     return response;
   }
 
-  public Map<String, String> findGeneSymbolsById(@NonNull UUID inputGeneListId, @NonNull String geneSetId) {
+  private Map<String, String> findGeneSymbolsByFilters(@NonNull ObjectNode filters) {
     val maxGenes = 70000;
     val symbolFieldName = "symbol";
-    val filters = remapFilters(andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId)));
 
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
@@ -223,6 +222,17 @@ public class GeneRepository implements Repository {
     }
 
     return map;
+  }
+
+  public Map<String, String> findGeneSymbolsByGeneListIdAndGeneSetId(@NonNull UUID inputGeneListId,
+      @NonNull String geneSetId) {
+    val filters = remapFilters(andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId)));
+    return findGeneSymbolsByFilters(filters);
+  }
+
+  public Map<String, String> findGeneSymbolsByGeneListId(@NonNull UUID inputGeneListId) {
+    val filters = remapFilters(inputGeneListFilter(inputGeneListId));
+    return findGeneSymbolsByFilters(filters);
   }
 
   public SearchResponse findGeneSetCounts(AndQuery query) {

@@ -62,6 +62,8 @@ import com.google.common.collect.Lists;
 @Slf4j
 public class QueryService {
 
+  private final static ObjectMapper MAPPER = new ObjectMapper();
+
   private static List<String> locationFields = Lists.newArrayList("location", "transcript.gene.location",
       "gene.location", "ssm.consequence.gene.location", "ssm.location", "donor.ssm.location", "gene.ssm.location");
 
@@ -464,7 +466,8 @@ public class QueryService {
   public static ObjectNode remapD2P(ObjectNode filters) {
     if (filters.has("donor")) {
       val donor = (ObjectNode) filters.get("donor");
-      val project = new ObjectMapper().createObjectNode();
+      val project = MAPPER.createObjectNode();
+
       if (donor.has("primarySite")) {
         project.put("primarySite", donor.remove("primarySite"));
       }
@@ -488,8 +491,8 @@ public class QueryService {
   public static ObjectNode remapG2P(ObjectNode filters) {
     if (filters.has("gene")) {
       val gene = (ObjectNode) filters.get("gene");
+      val geneSet = MAPPER.createObjectNode();
 
-      val geneSet = new ObjectMapper().createObjectNode();
       val geneSetList =
           ImmutableList.<String> of("geneSetId", "pathwayId", "goTermId", "curatedSetId", "hasGoTerm", "hasPathway",
               "hasCuratedSet");
@@ -519,7 +522,8 @@ public class QueryService {
     // Needed only if both mutation and gene filters found, otherwise consequence can be on its own.
     if (filters.has("mutation")) {
       val mutation = (ObjectNode) filters.get("mutation");
-      val consequence = new ObjectMapper().createObjectNode();
+      val consequence = MAPPER.createObjectNode();
+
       if (mutation.has("consequenceType")) {
         consequence.put("type", mutation.remove("consequenceType"));
       }
@@ -546,7 +550,8 @@ public class QueryService {
     // Needed only if both mutation and donor filters found, otherwise they can be on their own.
     if (filters.has("mutation")) {
       val mutation = (ObjectNode) filters.get("mutation");
-      val observation = new ObjectMapper().createObjectNode();
+      val observation = MAPPER.createObjectNode();
+
       if (mutation.has("platform")) {
         observation.put("platform", mutation.remove("platform"));
       }

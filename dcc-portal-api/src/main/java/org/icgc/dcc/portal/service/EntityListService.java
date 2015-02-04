@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -188,14 +192,37 @@ public class EntityListService {
     return createAndSaveNewListFrom(listDefinition, null);
   }
 
+  // Helpers to facilitate exportListItems() only. They should be used in anywhere else.
+  private List<List<String>> convertToListOfList(@NonNull final List<String> list) {
+    val result = new ArrayList<List<String>>(list.size());
+    for (val v : list) {
+      result.add(Arrays.asList(v));
+    }
+    return result;
+  }
+
+  private List<List<String>> convertToListOfListForGene(@NonNull final Map<String, String> map) {
+    val result = new ArrayList<List<String>>(map.size());
+    val entrySet = map.entrySet();
+    for (val v : entrySet) {
+      result.add(Arrays.asList(v.getKey(), v.getValue()));
+    }
+    return result;
+  }
+
   public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream outputStream) throws IOException {
-    val content = analyzer.retriveListItems(entityList);
+    val content =
+        // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
+        // overload.
+        (BaseEntityList.Type.GENE == entityList.getType()) ? convertToListOfListForGene(analyzer
+            .retrieveGeneIdsAndSymbolsByListId(entityList.getId())) : convertToListOfList(analyzer
+            .retriveListItems(entityList));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
 
-    for (val s : content) {
-      writer.write(new Object[] { s });
+    for (val v : content) {
+      writer.write(v);
     }
     writer.flush();
   }

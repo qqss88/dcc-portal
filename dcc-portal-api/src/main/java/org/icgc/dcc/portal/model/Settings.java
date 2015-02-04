@@ -28,6 +28,10 @@ public class Settings {
   String releaseDate;
 
   String demoListUuid;
+  int maxNumberOfHits;
+  int maxMultiplier;
+
+  // int enrichmentGeneLimit;
 
   public static SettingsBuilder builder() {
     return new SettingsBuilder();

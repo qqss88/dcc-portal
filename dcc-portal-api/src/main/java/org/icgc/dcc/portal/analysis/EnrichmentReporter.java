@@ -74,7 +74,7 @@ public class EnrichmentReporter {
       val result = results.get(i);
 
       log.info("[{}/{}] Reporting {}", new Object[] { i + 1, results.size(), result.getGeneSetId() });
-      val overlapGeneSetGeneIds = geneRepository.findGeneSymbolsById(inputGeneListId, result.getGeneSetId());
+      val overlapGeneSetGeneIds = geneRepository.findGeneSymbolsByGeneListIdAndGeneSetId(inputGeneListId, result.getGeneSetId());
 
       writer.write(new Object[] {
           result.getGeneSetId(),
