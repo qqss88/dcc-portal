@@ -29,7 +29,10 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class BeaconResponse {
 
   @JsonProperty
-  @ApiModelProperty(required = true)
+  @ApiModelProperty(
+      value = "Whether or not the beacon has observed the allele"
+          + " at the given position. True if observerd, false"
+          + " if it has data but different allele and null otherwise", required = true)
   public String exists;
 
   @JsonCreator

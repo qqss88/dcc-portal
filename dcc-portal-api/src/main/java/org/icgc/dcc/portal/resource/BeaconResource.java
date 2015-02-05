@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Doubles;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -81,7 +82,7 @@ public class BeaconResource extends BaseResource {
 
       @ApiParam(value = "Coordinate (0-based)", required = true) @QueryParam("position") IntParam position,
 
-      @ApiParam(value = "Genome ID: GRCh?", required = true) @QueryParam("reference") String reference,
+      @ApiParam(value = "Genome ID: GRCh\\d", required = true) @QueryParam("reference") String reference,
 
       @ApiParam(value = "Alleles: [ACTG]+, D, I") @QueryParam("allele") String allele
 
@@ -121,7 +122,7 @@ public class BeaconResource extends BaseResource {
       return false;
     }
     ref = ref.trim();
-    return ref.startsWith("GRCh") && tryParse(ref.substring(4)) != null;
+    return ref.startsWith("GRCh") && Doubles.tryParse(ref.substring(4)) != null;
   }
 
   private Boolean isValidAllele(String allele) {
