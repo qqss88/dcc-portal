@@ -46,7 +46,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   @NonNull
   private final UUID id;
   @NonNull
-  private Status status;
+  private State state;
   @NonNull
   private final BaseEntityList.Type type;
 
@@ -54,16 +54,19 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
 
   private List<UnionUnitWithCount> result;
 
-  public UnionAnalysisResult inProgress() {
-    this.status = Status.IN_PROGRESS;
+  public UnionAnalysisResult updateStateToInProgress() {
+    this.state = State.IN_PROGRESS;
     return this;
   }
 
-  public UnionAnalysisResult finished(
-      @NonNull List<UnionUnitWithCount> result) {
-
-    this.status = Status.FINISHED;
+  public UnionAnalysisResult updateStateToFinished(@NonNull List<UnionUnitWithCount> result) {
+    this.state = State.FINISHED;
     this.result = result;
+    return this;
+  }
+
+  public UnionAnalysisResult updateStateToError() {
+    this.state = State.ERROR;
     return this;
   }
 
@@ -71,7 +74,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   private final static class JsonPropertyName {
 
     final static String id = "id";
-    final static String status = "status";
+    final static String state = "state";
     final static String result = "result";
     final static String type = "type";
   }
@@ -79,12 +82,12 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   @JsonCreator
   public UnionAnalysisResult(
       @JsonProperty(JsonPropertyName.id) final UUID id,
-      @JsonProperty(JsonPropertyName.status) final Status status,
+      @JsonProperty(JsonPropertyName.state) final State state,
       @JsonProperty(JsonPropertyName.type) final BaseEntityList.Type type,
       @JsonProperty(JsonPropertyName.result) final List<UnionUnitWithCount> result) {
 
     this.id = id;
-    this.status = status;
+    this.state = state;
     this.type = type;
     this.result = result;
   }
@@ -93,7 +96,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   public static UnionAnalysisResult forNewlyCreated(final BaseEntityList.Type entityType) {
     return new UnionAnalysisResult(
         UUID.randomUUID(),
-        Status.PENDING,
+        State.PENDING,
         entityType,
         null);
   }
@@ -104,7 +107,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
 
     return new UnionAnalysisResult(
         id,
-        Status.IN_PROGRESS,
+        State.IN_PROGRESS,
         entityType,
         null);
   }
@@ -119,18 +122,19 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
     }
     return new UnionAnalysisResult(
         id,
-        Status.FINISHED,
+        State.FINISHED,
         entityType,
         result);
   }
 
   @RequiredArgsConstructor
   @Getter
-  public enum Status {
+  public enum State {
 
     PENDING("pending"),
     IN_PROGRESS("in progess"),
-    FINISHED("finished");
+    FINISHED("finished"),
+    ERROR("error");
 
     private final String name;
   }

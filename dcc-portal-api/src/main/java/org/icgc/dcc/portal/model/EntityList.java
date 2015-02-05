@@ -45,28 +45,33 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   private final UUID id;
 
   @NonNull
-  private Status status;
+  private State state;
 
   private Long count;
 
   @NonNull
   private SubType subtype = SubType.NORMAL;
 
-  public EntityList inProgress() {
-    this.status = Status.IN_PROGRESS;
+  public EntityList updateStateToInProgress() {
+    this.state = State.IN_PROGRESS;
     return this;
   }
 
-  public EntityList finished(final long count) {
-    this.status = Status.FINISHED;
+  public EntityList updateStateToFinished(final long count) {
+    this.state = State.FINISHED;
     this.count = count;
+    return this;
+  }
+
+  public EntityList updateStateToError() {
+    this.state = State.ERROR;
     return this;
   }
 
   private final static class JsonPropertyName {
 
     final static String id = "id";
-    final static String status = "status";
+    final static String state = "state";
     final static String count = "count";
     final static String name = "name";
     final static String description = "description";
@@ -76,7 +81,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   @JsonCreator
   public EntityList(
       @JsonProperty(JsonPropertyName.id) final UUID id,
-      @JsonProperty(JsonPropertyName.status) final Status status,
+      @JsonProperty(JsonPropertyName.state) final State state,
       @JsonProperty(JsonPropertyName.count) final Long count,
       @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
@@ -85,18 +90,18 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     super(name, description, type);
 
     this.id = id;
-    this.status = status;
+    this.state = state;
     this.count = count;
   }
 
   // static constructors
   private EntityList(final UUID id, @NonNull final String name, final String description,
-      @NonNull final Type type, final Status status, final Long count) {
+      @NonNull final Type type, final State status, final Long count) {
 
     super(name, description, type);
 
     this.id = id;
-    this.status = status;
+    this.state = status;
     this.count = count;
   }
 
@@ -109,7 +114,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         definition.getName(),
         definition.getDescription(),
         definition.getType(),
-        Status.PENDING,
+        State.PENDING,
         null);
   }
 
@@ -124,7 +129,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         name,
         description,
         type,
-        Status.PENDING,
+        State.PENDING,
         null);
   }
 
@@ -139,7 +144,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         name,
         description,
         type,
-        Status.IN_PROGRESS,
+        State.IN_PROGRESS,
         null);
   }
 
@@ -149,16 +154,17 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     if (count < 0) {
       throw new IllegalArgumentException("The count argument must be a positive number.");
     }
-    return new EntityList(id, name, description, type, Status.FINISHED, count);
+    return new EntityList(id, name, description, type, State.FINISHED, count);
   }
 
   @RequiredArgsConstructor
   @Getter
-  public enum Status {
+  public enum State {
 
     PENDING("pending"),
     IN_PROGRESS("in progess"),
-    FINISHED("finished");
+    FINISHED("finished"),
+    ERROR("error");
 
     private final String name;
   }
