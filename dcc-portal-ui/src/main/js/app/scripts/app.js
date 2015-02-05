@@ -65,6 +65,7 @@
     'icgc.enrichment',
     'icgc.sets',
     'icgc.analysis',
+    'icgc.beacon',
 
     // old
     'app.ui',
