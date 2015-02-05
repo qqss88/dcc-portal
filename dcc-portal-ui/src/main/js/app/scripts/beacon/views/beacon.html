@@ -1,32 +1,53 @@
 <h1>
     <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Beacon
 </h1>
-<article class="full">
     <section>
-        <div class="wide">
-        Column 1
+        <h3>Query</h3>
+        <div class="half">
+            <span>Chromosome</span><br>
+            <!--<input type="text">-->
+            <input type="text">
+            <br>
+
+            <span>Position</span><br>
+            <input type="text">
+            <br>
+
+            <span>Reference</span><br>
+            <input type="text">
+            <br>
+
+            <span>Allele</span><br>
+            <input type="text">
+            <br>
+            <br>
+            <button class="t_button">Submit</button>
         </div>
-        <div class="narrow omega">
+        <div class="narrow">
             <ul>
                 <li><a href=""><i class="icon-external-link"></i>link 1</a></li> 
                 <li><a href=""><i class="icon-external-link"></i>link 2</a></li>
             </ul>
         </div>
-        <br>
-        <br>
+    </section>
+    <section>
         <div class="full">
-            <span>Results</span> 
             <div class="t_tabs">
-                <div class="t_tabs__tab"> Tab 1 </div>
-                <div class="t_tabs__tab"> Tab 2 </div>
+                <div class="t_tabs__tab active">Results</div>
+                <div class="t_tabs__tab">Raw</div>
             </div>
             <div> 
             Result goes in here
+            <pre>
+            {
+               blah: 'abc',
+               blah: ['1', '2']
+            }
+            </pre>
             </div>
         </div>
         <br>
         <div class="wide">
         Notes
         </div>
-    </section>
-</article> 
+    <section>
