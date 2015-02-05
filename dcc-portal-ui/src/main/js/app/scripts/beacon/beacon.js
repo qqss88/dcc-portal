@@ -40,8 +40,6 @@
   var module = angular.module('icgc.beacon.controllers', []);
 
   module.controller('BeaconCtrl', function ($scope, Page) {
-    var _ctrl = this;
-
     Page.setTitle('Global Alliance Beacon');
     Page.setPage('beacon');
 
