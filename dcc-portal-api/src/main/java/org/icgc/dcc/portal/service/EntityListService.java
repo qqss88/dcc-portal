@@ -46,7 +46,7 @@ import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityList;
-import org.icgc.dcc.portal.model.EntityList.Status;
+import org.icgc.dcc.portal.model.EntityList.State;
 import org.icgc.dcc.portal.model.EntityList.SubType;
 import org.icgc.dcc.portal.model.EntityListDefinition;
 import org.icgc.dcc.portal.repository.EntityListRepository;
@@ -119,7 +119,7 @@ public class EntityListService {
     private final EntityList demoList;
 
     private DemoEntityList(@NonNull final String uuid, @NonNull final String geneSymbols) {
-      this.demoList = new EntityList(UUID.fromString(uuid), Status.PENDING, 0L, NAME, DESCRIPTION, TYPE);
+      this.demoList = new EntityList(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE);
       this.definition =
           new EntityListDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
               TYPE, 0);
