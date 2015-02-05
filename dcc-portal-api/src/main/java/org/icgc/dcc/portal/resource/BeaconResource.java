@@ -45,7 +45,6 @@ import com.google.common.primitives.Doubles;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
-import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
@@ -84,7 +83,7 @@ public class BeaconResource extends BaseResource {
 
       @ApiParam(value = "Chromosome ID: 1-22, X, Y, MT", required = true) @QueryParam("chromosome") String chromosome,
 
-      @ApiParam(value = "Coordinate (0-based)", required = true) @QueryParam("position") IntParam position,
+      @ApiParam(value = "Coordinate (0-based)", required = true) @QueryParam("position") String position,
 
       @ApiParam(value = "Genome ID: GRCh\\d+", required = true) @QueryParam("reference") String reference,
 
@@ -94,17 +93,17 @@ public class BeaconResource extends BaseResource {
     // Validate
     if (!isValidChromosome(chromosome)) {
       throw new BadRequestException("'chromosome' is empty or invalid (must be 1-22, X, Y or MT)");
-    } else if (!isValidPosition(position.get(), chromosome)) {
+    } else if (!isValidPosition(position, chromosome)) {
       throw new BadRequestException("'position' is empty, invalid or exceeds chromosome size");
     } else if (!isValidReference(reference)) {
-      throw new BadRequestException("'reference' is empty or invalid (must be GRCh?)");
+      throw new BadRequestException("'reference' is empty or invalid (must be GRCh\\d+)");
     } else if (isNullOrEmpty(allele)) {
       allele = WILDCARD_ANY;
     } else if (!isValidAllele(allele)) {
       throw new BadRequestException("'allele' is invalid (must be [ACTG]+, D or I)");
     }
 
-    return beaconService.query(chromosome.trim(), position.get(), reference.trim(), allele.trim());
+    return beaconService.query(chromosome.trim(), tryParse(position.trim()), reference.trim(), allele.trim());
   }
 
   private Boolean isValidChromosome(String chromosome) {
@@ -134,8 +133,11 @@ public class BeaconResource extends BaseResource {
     return ALLELE_REGEX.matcher(allele).matches() || allele.equals(WILDCARD_DEL) || allele.equals(WILDCARD_INS);
   }
 
-  private Boolean isValidPosition(int pos, String chr) {
-    return pos >= 0 && CHROMOSOME_LENGTHS.get(chr) >= pos;
+  private Boolean isValidPosition(String position, String chromosome) {
+    position = position.trim();
+    val pos = tryParse(position);
+    if (pos == null) return false;
+    return pos >= 0 && CHROMOSOME_LENGTHS.get(chromosome) >= pos;
   }
 
 }
