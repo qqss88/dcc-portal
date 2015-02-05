@@ -172,7 +172,7 @@
           }
 
           SetService.getMetaData([id]).then(function(data) {
-            if (data[0].status === 'FINISHED') {
+            if (data[0].state === 'FINISHED') {
               Page.stopWork();
               callback();
             } else {

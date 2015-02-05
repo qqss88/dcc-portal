@@ -183,7 +183,7 @@
       SetService.sync();
 
       unfinished = _.filter($scope.entityLists, function(d) {
-        return d.status !== 'FINISHED';
+        return d.state !== 'FINISHED';
       }).length;
 
       console.log('unfinished', unfinished);
@@ -219,7 +219,7 @@
         }
 
         // FIXME: sync with bob and terry
-        var currentState = data.state || data.status;
+        var currentState = data.state;
         data.state = currentState;
 
         console.log('data state', data.state);

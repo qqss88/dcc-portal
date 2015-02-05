@@ -234,7 +234,7 @@
       var pendingLists, pendingListsIDs, promise;
 
       pendingLists = _.filter(setList, function(d) {
-        return d.status !== 'FINISHED';
+        return d.state !== 'FINISHED';
       });
       pendingListsIDs = _.pluck(pendingLists, 'id');
 
@@ -251,7 +251,7 @@
           });
           if (index >= 0) {
             setList[index].count = item.count;
-            setList[index].status = item.status;
+            setList[index].state = item.state;
           }
         });
 
