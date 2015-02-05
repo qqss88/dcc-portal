@@ -73,6 +73,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class EntityListResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";
+  private static final String EXPORT_FILE_EXTENSION = ".csv";
 
   @NonNull
   private final EntityListService service;
@@ -164,9 +165,8 @@ public class EntityListResource {
         .build();
   }
 
-  private static String getFileName(final String entityType, final UUID id) {
-    val fileExtension = ".csv";
-    return entityType + "-ids-for-set-" + id + fileExtension;
+  private static String getFileName(final EntityList list) {
+    return list.getType().getName() + "-ids-for-set-" + list.getName() + EXPORT_FILE_EXTENSION;
   }
 
   @GET
@@ -190,7 +190,7 @@ public class EntityListResource {
       }
     };
     val attechmentType = type(TYPE_ATTACHMENT)
-        .fileName(getFileName(list.getType().getName(), entityListId))
+        .fileName(getFileName(list))
         .creationDate(new Date())
         .build();
 
