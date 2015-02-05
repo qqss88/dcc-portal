@@ -38,7 +38,7 @@ public class BeaconQuery {
   @ApiModelProperty(value = "Position 0-based", required = true)
   int position;
   @JsonProperty
-  @ApiModelProperty(value = "Reference ID: GRCh\\d", required = true)
+  @ApiModelProperty(value = "Reference ID: GRCh\\d+", required = true)
   String reference;
 
   @JsonCreator
