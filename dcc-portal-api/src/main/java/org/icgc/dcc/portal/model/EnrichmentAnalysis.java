@@ -173,7 +173,8 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
     PENDING,
     ANALYZING,
     POST_PROCESSING,
-    FINISHED;
+    FINISHED,
+    ERROR;
 
   }
 
