@@ -67,11 +67,12 @@
                 <tr>
                     <td colspan="2">Union of selected sets</td>
                     <td class="text-right">
-                        <a data-ng-if="selectedTotalCount > 0" data-ng-click="redirect()" href="">{{selectedTotalCount | number}}</a>
+                        <a data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit" data-ng-click="redirect()" href="">{{selectedTotalCount | number}}</a>
                         <span data-ng-if="selectedTotalCount===0">0</span>
+                        <span data-ng-if="selectedTotalCount > unionMaxLimit">{{selectedTotalCount}}</span>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0"> 
+                        <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                                 <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
@@ -81,7 +82,6 @@
                 </tr>
             </tbody>
         </table>
-
-
+        <small>Set Operations has an upper limit of managing {{unionMaxLimit | number }} items.</small>
     </div>
 </span>

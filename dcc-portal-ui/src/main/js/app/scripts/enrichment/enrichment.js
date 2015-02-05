@@ -19,7 +19,7 @@
       scope: {
         enrichmentModal: '=',
         filters: '=',
-        total: '@'
+        geneLimit: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
       link: function($scope) {
@@ -32,7 +32,7 @@
         $scope.analysisParams = {
           maxGeneSetCount: 50,
           fdr: 0.05,
-          maxGeneCount: $scope.total || 1000,
+          maxGeneCount: $scope.geneLimit || 10000,
           universe: 'REACTOME_PATHWAYS'
         };
 
@@ -110,15 +110,15 @@
           if (isNaN(val) === true) {
             return false;
           }
-          if (angular.isNumber(v) === false || v > $scope.total) {
+          if (angular.isNumber(v) === false || v > $scope.geneLimit || v <= 0) {
             return false;
           }
           return true;
         };
 
-        $scope.$watch('total', function(n) {
+        $scope.$watch('geneLimit', function(n) {
           if (n) {
-            $scope.total = Math.min(n, 1000);
+            $scope.geneLimit = Math.min(n, 10000);
             $scope.analysisParams.maxGeneCount = n;
             $scope.checkInput();
           }
@@ -146,7 +146,8 @@
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       link: function($scope) {
 
-        $scope.predicate = 'adjustedPValue';
+        // $scope.predicate = 'adjustedPValue';
+        $scope.predicate = 'pvalue';
         $scope.reverse = false;
 
         $scope.TooltipText = TooltipText;
@@ -374,20 +375,6 @@
       return filters;
     };
 
-  });
-
-})();
-
-
-
-
-(function () {
-  'use strict';
-
-  var module = angular.module('icgc.enrichment.models', []);
-
-  module.service('Enrichment', function () {
-    // TODO:  API endpoints
   });
 
 })();

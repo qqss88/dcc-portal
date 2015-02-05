@@ -1,6 +1,5 @@
 <h1>
     <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Set Analysis
-    <button data-ng-click="debugReset()">Reset</button>
 </h1>
 <aside class="t_sidebar">
     <div>
@@ -57,12 +56,14 @@
             <span>
             Create and save <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the <a href="/search">Advanced Search</a>. Then
             launch analysis here. <br>
+            <small>Note: Enrichment Analysis has an upper limit of 10,000 genes, Set Operations supports up to 3 sets of the same type.</small>
+            <br>
             <small>For more information on the Bench, please refer to <a href="">documentation</a>. </small>
             </span>
             <br><br>
 
             <enrichment-upload
-                data-total="{{totalCount}}"
+                data-gene-limit="{{totalCount}}"
                 data-filters="enrichment.filters"
                 data-enrichment-modal="enrichment.modal">
             </enrichment-upload>
@@ -75,17 +76,20 @@
                         <button class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
                         <i class="icon-beaker"></i>
                         Set Operations
+                        <!--<br>&nbsp;-->
                         </button>
                     </span>
                     <span>
-                        <button class="t_button" data-ng-disabled="!enrichmentSet" data-ng-click="launchEnrichmentAnalysis()">
+                        <button class="t_button" data-ng-disabled="!enrichmentSet || totalCount > 10000" data-ng-click="launchEnrichmentAnalysis()">
                         <i class="icon-beaker"></i>
-                        Enrichment Analysis
+                        Enrichment Analysis 
+                        <!--<br> <small>Max 10,000 genes</small>-->
                         </button>
                     </span>
                     <span class="pull-right">
-                        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="canBeDeleted >= 0">
-                            <i class="icon-trash"></i>Delete
+                        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="canBeDeleted === 0">
+                            <i class="icon-trash"></i>Delete <br>
+                            <!--<small>{{canBeDeleted}} selected</small>-->
                         </button>   
                     </span>
                 </div>
@@ -101,7 +105,6 @@
                 </thead>
                 <tbody>
                     <tr data-ng-repeat="item in entityLists" data-ng-style="{'color': $index===0?'#4488BB':''}">
-                    <!--<tr data-ng-repeat="item in entityLists"> -->
                         <td>
                             <span data-ng-if="item.status === 'FINISHED'" style="cursor:pointer" data-ng-click="item.checked = !item.checked; update()">
                                 <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
@@ -117,9 +120,6 @@
                             <span class="t_tools" style="float:left">
                                 <span class="t_tools__tool">
                                     <i class="icon-file" data-ng-click="exportSet(item.id)"></i>
-                                    <!--
-                                    <i class="icon-cancel" data-ng-click="removeList(item.id)" data-ng-if="! item.readonly"></i>
-                                    -->
                                 </span>
                             </span>
                         </td>

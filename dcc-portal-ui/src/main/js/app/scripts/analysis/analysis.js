@@ -110,7 +110,8 @@
           return false;
         }
         return item.checked === true;
-      });
+      }).length;
+
 
       var selected, uniqued;
       selected = _.filter($scope.entityLists, function(item) {

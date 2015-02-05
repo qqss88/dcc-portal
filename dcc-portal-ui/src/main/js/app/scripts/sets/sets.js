@@ -31,7 +31,7 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
-  module.directive('setUpload', function(LocationService, SetService) {
+  module.directive('setUpload', function(LocationService, SetService, Settings) {
     return {
       restruct: 'E',
       scope: {
@@ -113,11 +113,12 @@
 
         $scope.$watch('setModal', function(n) {
           if (n) {
-            // FIXME: get absolute max(new/derived) from settings
-            $scope.setSize = Math.min($scope.setLimit || 0, 20000);
-            $scope.setSizeLimit = $scope.setSize;
-            $scope.setName = 'My ' + $scope.setType + ' set';
-            $scope.uiFilters = LocationService.filters();
+            Settings.get().then(function(settings) {
+              $scope.setSize = Math.min($scope.setLimit || 0, settings.maxNumberOfHits);
+              $scope.setSizeLimit = $scope.setSize;
+              $scope.setName = 'My ' + $scope.setType + ' set';
+              $scope.uiFilters = LocationService.filters();
+            });
           }
         });
       }
@@ -126,7 +127,7 @@
 
 
   module.directive('setOperation',
-    function($location, $timeout, $filter, Page, LocationService, SetService, SetOperationService) {
+    function($location, $timeout, $filter, Page, LocationService, Settings, SetService, SetOperationService) {
     return {
       restrict: 'E',
       scope: {
@@ -376,7 +377,12 @@
 
         $scope.$watch('item', function(n) {
           if (n && n.result) {
-            initVennDiagram();
+            Settings.get().then(function(settings) {
+
+              // The maximum allowed items from union operation
+              $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
+              initVennDiagram();
+            });
           }
         });
 

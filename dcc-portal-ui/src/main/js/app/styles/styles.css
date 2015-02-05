@@ -1087,13 +1087,13 @@ header #brand img {
 }
 /* line 133, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a {
-  color: #e8c0e8;
-  border: 0.3rem solid #e8c0e8;
+  color: #9b315b;
+  border: 0.3rem solid #9b315b;
 }
 /* line 138, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a:hover {
   color: white;
-  background: #e8c0e8;
+  background: #9b315b;
 }
 /* line 143, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
@@ -1287,7 +1287,7 @@ header #brand img {
 }
 /* line 330, _sections/_header.scss */
 #home-page .t_nav__items__item__analysis a {
-  background: #e8c0e8;
+  background: #9b315b;
   color: white;
 }
 /* line 334, _sections/_header.scss */
@@ -1323,7 +1323,7 @@ header #brand img {
 /* line 366, _sections/_header.scss */
 #analysis-page .t_nav__items__item__analysis a {
   cursor: default;
-  background: #e8c0e8;
+  background: #9b315b;
   color: white;
 }
 /* line 370, _sections/_header.scss */
@@ -2267,7 +2267,7 @@ h1 .t_badge_icon {
 
 /* line 96, _modules/_badges.scss */
 .t_badge__analysis {
-  background: #e8c0e8;
+  background: #9b315b;
 }
 
 /* line 100, _modules/_badges.scss */
