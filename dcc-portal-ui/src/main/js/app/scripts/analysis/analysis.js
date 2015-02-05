@@ -179,14 +179,14 @@
      */
     function pollEntityLists() {
       var unfinished = 0;
-      console.log($scope.entityLists);
+      // console.log($scope.entityLists);
       SetService.sync();
 
       unfinished = _.filter($scope.entityLists, function(d) {
         return d.state !== 'FINISHED';
       }).length;
 
-      console.log('unfinished', unfinished);
+      // console.log('unfinished', unfinished);
 
       if (unfinished > 0) {
         $timeout(pollEntityLists, 4000);

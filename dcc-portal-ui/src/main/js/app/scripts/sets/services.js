@@ -23,14 +23,12 @@
   module.service('SetOperationService', function() {
     var shortHandPrefix = 'S';
 
-
     /**
      * Check set/list equality ... is there a better way?
      */
     this.isEqual = function(s1, s2) {
       return (_.difference(s1, s2).length === 0 && _.difference(s2, s1).length === 0);
     };
-
 
     /**
      * Transform data array to be consumed by venn-diagram visualization
@@ -50,7 +48,6 @@
       });
       return result;
     };
-
 
     function _getSetShortHand(setId, setList) {
       if (setList) {
@@ -154,6 +151,23 @@
 
     this.saveAll = function(lists) {
       localStorageService.set(LIST_ENTITY, lists);
+    };
+
+
+    this.createAdvLink = function(set) {
+      var type = set.type.toLowerCase(), filters = {};
+      filters[type] = {
+        entityListId: {
+          is: [set.id]
+        }
+      };
+
+      if (['gene', 'mutation'].indexOf(type) >= 0) {
+        return '/search/' + type.charAt(0) + '?filters=' + angular.toJson(filters);
+      } else {
+        return '/search?filters=' + angular.toJson(filters);
+      }
+
     };
 
 
@@ -334,7 +348,7 @@
         var exist = _.some(setList, function(set) {
           return set.id === demo.id;
         });
-        if (exist === false){
+        if (exist === false) {
           setList.unshift(demo); // Demo always goes first
           localStorageService.set(LIST_ENTITY, setList);
         } else {

@@ -261,6 +261,9 @@
           });
         };
 
+
+        // $scope.createAdvLink = SetService.createAdvLink;
+
         $scope.calculateUnion = function(item) {
           $scope.dialog.setUnion = computeUnion(item);
           $scope.dialog.setType = $scope.item.type.toLowerCase();
@@ -367,6 +370,7 @@
           SetService.getMetaData($scope.setList).then(function(results) {
             $scope.setMap = {};
             results.forEach(function(set) {
+              set.advLink = SetService.createAdvLink(set);
               $scope.setMap[set.id] = set;
             });
 
