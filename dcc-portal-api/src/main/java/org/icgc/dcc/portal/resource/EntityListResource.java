@@ -165,13 +165,13 @@ public class EntityListResource {
   }
 
   private static String getFileName(final String entityType, final UUID id) {
-    return entityType + "-ids-for-set-" + id + ".tsv";
+    val fileExtension = ".csv";
+    return entityType + "-ids-for-set-" + id + fileExtension;
   }
 
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}/export")
   @Produces(APPLICATION_OCTET_STREAM)
-  // @Produces(TEXT_TSV)
   public Response exportListItems(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
 
