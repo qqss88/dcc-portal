@@ -27,15 +27,15 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class Beacon {
 
   @JsonProperty
-  @ApiModelProperty(required = true)
+  @ApiModelProperty(value = "Beacon ID", required = true)
   String beacon_id;
 
   @JsonProperty
-  @ApiModelProperty(required = true)
+  @ApiModelProperty(value = "Query as processed by the beacon", required = true)
   BeaconQuery query;
 
   @JsonProperty
-  @ApiModelProperty(required = true)
+  @ApiModelProperty(value = "Response of the beacon", required = true)
   BeaconResponse response;
 
   @JsonCreator
