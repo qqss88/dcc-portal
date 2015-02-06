@@ -241,6 +241,7 @@
 
 
 
+
     /*
      * Attemp to sync with the server - fires only once, up to controller to do polling
      */
@@ -312,12 +313,30 @@
       // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/entitylist/' + id + '/export';
     };
 
+
+
     /****** Local storage related API ******/
     this.getAll = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
       _this.refreshList();
       return setList;
     };
+
+
+    this.updateSets = function(sets) {
+      sets.forEach(function(item) {
+        var index = _.findIndex(setList, function(d) {
+          return item.id === d.id;
+        });
+        if (index >= 0) {
+          setList[index].count = item.count;
+          setList[index].state = item.state;
+        }
+      });
+      localStorageService.set(LIST_ENTITY, setList);
+      _this.refreshList();
+    };
+
 
     this.removeSeveral = function(ids) {
       _.remove(setList, function(list) {
@@ -334,6 +353,14 @@
       localStorageService.set(LIST_ENTITY, setList);
       return true;
     };
+
+    /*
+    this.findSetIdsByState = function(state) {
+      var filtered = _.filter(setList, function(d) {
+        return d.state === state;
+      });
+      return _.pluck(filtered, 'id');
+    }; */
 
 
     // Make sure the demo is in place

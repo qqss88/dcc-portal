@@ -31,23 +31,23 @@
         </table>
         <br>
 
-        <table class="table">
+        <table class="table table-selectable">
             <thead>
-                <th>
-                    <span data-ng-click="checked=!checked; checked? selectAll() : selectNone()">
+                <tr>
+                    <th data-ng-click="checked=!checked; checked? selectAll() : selectNone()" class="text-center">
                         <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i>
-                    </span>
-                </th>
-                <th>Set operations</th>
-                <th class="text-right"># of items</th>
-                <th></th>
+                    </th>
+                    <th>Set operations</th>
+                    <th class="text-right"># of items</th>
+                    <th></th>
+                </tr>
             </thead>
             <tbody>
                 <tr data-ng-repeat="item in data"
                     data-ng-mouseenter="tableMouseEnter(item.intersection)"
                     data-ng-mouseleave="tableMouseOut(item.intersection)">
 
-                    <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)">
+                    <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
                         <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
                     <td>
@@ -60,7 +60,7 @@
                     <td>
                         <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
-                                <i class="icon-file" data-tooltip="Export" data-ng-click="export(item)"></i>
+                                <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
                                 <i class="icon-floppy" data-tooltip="Save as new list" 
                                   data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                             </span>

@@ -69,6 +69,11 @@
             </enrichment-upload>
 
 
+            <span class="alert-error" data-ng-if="syncError">
+                <i class="icon-attention"></i>Synchronization has timed out or has failed. Please refresh this page to try again, or delete the sets that are in bad states.
+            </span>
+
+
             <div style="padding:.5rem 0">
                 <div>
                     <span>Select set(s) below to activate available analysis: </span>
@@ -105,8 +110,9 @@
                 </thead>
                 <tbody>
                     <tr data-ng-repeat="item in entityLists" data-ng-style="{'color': $index===0?'#4488BB':''}">
-                        <td>
-                            <span data-ng-if="item.state === 'FINISHED'" style="cursor:pointer" data-ng-click="item.checked = !item.checked; update()">
+                        <td class="text-center">
+                            <span data-ng-if="item.state === 'FINISHED' || syncError" style="cursor:pointer" 
+                                  data-ng-click="item.checked = !item.checked; update()">
                                 <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                             </span>
                         </td>
@@ -118,7 +124,7 @@
                         </td>
                         <td data-ng-if="item.state === 'FINISHED'">
                             <span class="t_tools" style="float:left">
-                                <span class="t_tools__tool">
+                                <span class="t_tools__tool" data-tooltip="Export as TSV">
                                     <i class="icon-file" data-ng-click="exportSet(item.id)"></i>
                                 </span>
                             </span>

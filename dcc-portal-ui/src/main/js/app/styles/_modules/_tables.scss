@@ -50,6 +50,16 @@
     //border: 1px solid $greyLighter;
   }
 
+  
+  // Table with icon check-boxes
+  &.table-selectable {
+     thead {
+         [class^="icon-"]:before, [class*=" icon-"]:before {
+           width: auto;
+         }
+     }
+  }
+
   &.table-info {
     margin-bottom: 1rem;
 
