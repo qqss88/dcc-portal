@@ -3479,6 +3479,30 @@ td {
   height: 80px;
 }
 
+/*
+.beaconheader-container{
+  width: 50px;
+  height: 50px;
+  position: relative;
+}
+.beaconheader,.beaconimage{
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.beaconheader{
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid gray;
+  z-index: 10;
+  margin-left: 10px;
+}
+
+.beaconimage{
+margin-left: 9px;
+margin-top: 11px;
+}*/
 /* line 24, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

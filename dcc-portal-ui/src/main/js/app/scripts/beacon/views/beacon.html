@@ -1,17 +1,44 @@
 <h1>
-    <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>ICGC GA4GH Beacon
+    <i class="t_badge t_badge_icon t_badge__search"><i class="icon-search"></i></i>ICGC GA4GH Beacon
+</h1><!--
+<div class="beaconheader-container">
+  <img class="beaconimage" height="35px" src="http://ga4gh.org/images/work/beacon-icon.jpg"></img>
+  <div class="beaconheader"></div>
+<h1>
+    &nbsp;&nbsp;ICGC GA4GH Beacon
 </h1>
+</div>-->
+
+
     <section class="beaconquery">
         <div class="narrow">
           <h3>Query</h3><br>
           <table>
             <tr>
               <td align="right">
+                <span>Dataset</span>
+              </td>
+              <td>
+                <div class="dropdown">
+                <button class="t_button chr-dropdown dropdown-toggle"
+                        toggle="dropdown" data-toggle="dropdown" >
+                  PACA-CA&nbsp;<span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a role="menuitem" tabindex="-1" href="#">What</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">are</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">the</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">projects???</a></li>
+                </ul>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td align="right">
                 <span>Chromosome ID *</span>
               </td>
               <td>
                 <div class="dropdown">
-                <button id="chrbutton" class="t_button chr-dropdown dropdown-toggle"
+                <button class="t_button chr-dropdown dropdown-toggle"
                         toggle="dropdown" data-toggle="dropdown" >
                   22&nbsp;<span class="caret"></span></button>
                 <ul class="dropdown-menu" role="menu">
@@ -21,7 +48,7 @@
                   <li><a role="menuitem" tabindex="-1" href="#">X</a></li>
                 </ul>
                 </div>
-            </td>
+              </td>
             </tr>
             <tr>
               <td align="right">
@@ -48,14 +75,6 @@
               </td>
             </tr>
             <tr>
-              <td align="right">
-                <span>Dataset</span>
-              </td>
-              <td>
-                 <input placeholder="eg. PACA-CA" type="text">
-              </td>
-            </tr>
-            <tr>
               <td></td>
               <td align="right" >
                 <button class="t_button beaconsubmit">Reset</button>&nbsp;
@@ -65,7 +84,7 @@
           </table>
           <br>
           <br>
-          <h4>Result</h4>
+          <h3>Result</h3><br>
           <div class="beacon-result">
             <div class="beacon-icon-container"><i class="icon-ok beacon-icon"></i></div>
             <div class="beacon-icon-text">TRUE</div>
@@ -79,7 +98,7 @@
           <h3>Notes</h3><br>
         <div>
           <h4>information</h4>
-            A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The beacon
+            A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The Beacon
             is designed to accept a query and responds with <code>true</code> if it finds such an allele, <code>false</code> if its data doesn't match
           the allele and <code>null</code> if nothing is found.<br><br>
 
@@ -104,11 +123,12 @@
                   </tr>
                   <tr>
                     <td>Dataset <span class=beaconquestion>- Optional</span></td>
-                      <td>The dataset to query with the beacon request</td>
+                      <td>The dataset to query with the Beacon request</td>
                   </tr>
                 </tdread>
               </table>
           <br><h4>Links</h4>
+      For more information about each dataset, visit our <a href="/projects"><i class="icon-external-link"></i>project page</a>.<br><br>
             Beacon is a project of the <a href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>.<br><br>
             You can read more about Beacons at:
             <ul>
@@ -118,7 +138,7 @@
         </div><br><br>
 
     </section>
-
+<!--
     <section>
         <h3>Response</h3><br>
             <div class="narrow">
@@ -149,7 +169,7 @@
               </div>
               <div class="half">
                 <div class="well beaconquery">
-                  <!-- Weird formatting needed for it to show up properly - temporary -->
+                  <!-- Weird formatting needed for it to show up properly - temporary
                   <pre class="beaconquery">{
   "beacon_id": "ICGC GA4GH Beacon",
   "response": {
@@ -165,4 +185,4 @@
                   </div>
               </div>
         </div>
-    </section>
+    </section> -->
