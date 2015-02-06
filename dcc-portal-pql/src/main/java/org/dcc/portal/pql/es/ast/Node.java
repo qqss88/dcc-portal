@@ -29,6 +29,8 @@ public interface Node {
 
   ExpressionNode getChild(int index);
 
+  void removeChild(int index);
+
   <T> T accept(NodeVisitor<T> visitor);
 
   int childrenCount();

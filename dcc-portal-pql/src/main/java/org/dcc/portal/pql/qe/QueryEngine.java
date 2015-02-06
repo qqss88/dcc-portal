@@ -21,14 +21,18 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
+import org.dcc.portal.pql.es.visitor.FacetsResolverVisitor;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
 @Value
 public class QueryEngine {
+
+  private static final FacetsResolverVisitor FACETS_PROCESSING_VISITOR = new FacetsResolverVisitor();
 
   @NonNull
   Client client;
@@ -43,7 +47,9 @@ public class QueryEngine {
     parser.addParseListener(pqlListener);
     parser.statement();
 
-    val esAst = pqlListener.getEsAst();
+    ExpressionNode esAst = pqlListener.getEsAst();
+    esAst = FACETS_PROCESSING_VISITOR.resolveFacets(esAst, context.getType());
+    // FIXME: cache
     val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
 
     return esVisitor.visit(esAst, context);

@@ -17,9 +17,13 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import java.util.Collection;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.val;
 
@@ -27,6 +31,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 import com.google.common.collect.Lists;
 
+@EqualsAndHashCode(exclude = { "parent" })
 public abstract class ExpressionNode implements Node {
 
   protected Node parent;
@@ -74,6 +79,13 @@ public abstract class ExpressionNode implements Node {
   @Override
   public ExpressionNode getChild(int index) {
     return children.get(index);
+  }
+
+  @Override
+  public void removeChild(int index) {
+    checkArgument(index >= 0 && index < childrenCount(),
+        _("Index %d does is out of children bounds. Children cound: %d", index, childrenCount()));
+    children.remove(index);
   }
 
   @Override

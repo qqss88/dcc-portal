@@ -17,8 +17,11 @@
  */
 package org.dcc.portal.pql.es.utils;
 
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.collect.Iterables.filter;
 import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.util.List;
 
@@ -28,6 +31,7 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -37,6 +41,23 @@ public class Nodes {
     val children = filter(node.getChildren(), childType);
 
     return Lists.<T> newArrayList(children);
+  }
+
+  /**
+   * Get an {@link Optional} of type {@code childType}. Ensures that the {@code parent} has only a single child of that
+   * type if any.
+   */
+  public static <T extends ExpressionNode> Optional<T> getChildOptional(@NonNull ExpressionNode parent,
+      @NonNull Class<T> childType) {
+
+    val childrenList = filterChildren(parent, childType);
+    if (childrenList.isEmpty()) {
+      return absent();
+    } else if (childrenList.size() > 1) {
+      throw new IllegalStateException(_("RootNode contains more that one child of type %s. %s", childType, parent));
+    }
+
+    return fromNullable(childrenList.get(0));
   }
 
 }

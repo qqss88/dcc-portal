@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
-import org.dcc.portal.pql.es.ast.PostFilterNode;
+import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.model.RequestType;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
@@ -63,7 +63,7 @@ public class PqlParseListener extends PqlBaseListener {
 
     // process filters
     if (!filters.isEmpty()) {
-      val parentNode = new PostFilterNode(processFilters(filters));
+      val parentNode = new FilterNode(processFilters(filters));
       esAst.addChildren(parentNode);
     }
 

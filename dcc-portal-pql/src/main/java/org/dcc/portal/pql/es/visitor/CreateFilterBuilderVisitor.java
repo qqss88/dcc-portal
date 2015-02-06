@@ -40,7 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
@@ -51,11 +53,11 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
-import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -71,7 +73,7 @@ import com.google.common.collect.Lists;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
+public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
 
   @NonNull
   private final Client client;
@@ -143,11 +145,10 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
   }
 
   @Override
-  public FilterBuilder visitPostFilter(@NonNull PostFilterNode node) {
+  public FilterBuilder visitFilter(@NonNull FilterNode node) {
     return visitBool((BoolNode) node.getChild(0));
   }
 
-  @Override
   public SearchRequestBuilder visit(@NonNull Node node, @NonNull QueryContext queryContext) {
     this.queryContext = queryContext;
     SearchRequestBuilder result = client
@@ -160,7 +161,7 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
     }
 
     for (val child : node.getChildren()) {
-      if (child instanceof PostFilterNode) {
+      if (child instanceof FilterNode) {
         result.setFilter(child.accept(this));
       } else if (child instanceof FieldsNode) {
         val castedChild = (FieldsNode) child;
@@ -275,6 +276,18 @@ public class CreateFilterBuilderVisitor implements NodeVisitor<FilterBuilder> {
     log.debug("Visiting Nested: {}", node);
 
     return nestedFilter(node.getPath(), node.getChild(0).accept(this));
+  }
+
+  @Override
+  public FilterBuilder visitFacets(FacetsNode node) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public FilterBuilder visitTermsFacet(TermsFacetNode node) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

@@ -20,9 +20,11 @@ package org.dcc.portal.pql.qe;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
+import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
@@ -37,10 +39,12 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.FacetsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
@@ -54,6 +58,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.junit.Test;
 
+@Slf4j
 public class PqlParseTreeVisitorTest {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor();
@@ -380,6 +385,18 @@ public class PqlParseTreeVisitorTest {
     assertThat(rangeNode.getName()).isEqualTo("gene.start");
     val gtNode = (GreaterThanNode) rangeNode.getChild(0);
     assertThat(gtNode.getValue()).isEqualTo(50000);
+  }
+
+  @Test
+  public void visitFacetsTest() {
+    val parseTree = createParseTree("facets(gender)");
+    val facetsContext = (FacetsContext) parseTree.getChild(0);
+    val facetsNode = (FacetsNode) VISITOR.visitFacets(facetsContext);
+    log.debug("Facets node: {}", facetsNode);
+    assertThat(facetsNode.childrenCount()).isEqualTo(1);
+    val termsFacetNode = (TermsFacetNode) facetsNode.getChild(0);
+    assertThat(termsFacetNode.getField()).isEqualTo("gender");
+    assertThat(termsFacetNode.isGlobal()).isFalse();
   }
 
 }

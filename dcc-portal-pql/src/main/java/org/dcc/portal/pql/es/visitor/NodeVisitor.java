@@ -19,49 +19,121 @@ package org.dcc.portal.pql.es.visitor;
 
 import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
+import org.dcc.portal.pql.es.ast.FacetsNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
 import org.dcc.portal.pql.es.ast.LessThanNode;
+import org.dcc.portal.pql.es.ast.LimitNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
-import org.dcc.portal.pql.es.ast.PostFilterNode;
+import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
+import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.qe.QueryContext;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 
-public interface NodeVisitor<T> {
+public abstract class NodeVisitor<T> {
 
-  SearchRequestBuilder visit(Node node, QueryContext queryContext);
+  private static final String DEFAULT_ERROR_MESSAGE = "The method is not implemented by the subclass";
 
-  T visitPostFilter(PostFilterNode node);
+  public T visitFilter(FilterNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitNested(NestedNode node);
+  public T visitNested(NestedNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitBool(BoolNode node);
+  public T visitBool(BoolNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitTerm(TermNode node);
+  public T visitMustBool(MustBoolNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitTerms(TermsNode node);
+  public T visitTerm(TermNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitNot(NotNode node);
+  public T visitTerms(TermsNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitRange(RangeNode node);
+  public T visitNot(NotNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitGreaterEqual(GreaterEqualNode node);
+  public T visitRoot(RootNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitGreaterThan(GreaterThanNode node);
+  public T visitSort(SortNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitLessEqual(LessEqualNode node);
+  public T visitTerminal(TerminalNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitLessThan(LessThanNode node);
+  public T visitRange(RangeNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitAnd(AndNode node);
+  public T visitGreaterEqual(GreaterEqualNode node) {
+    return defaultUnimplementedMethod();
+  }
 
-  T visitOr(OrNode node);
+  public T visitGreaterThan(GreaterThanNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitLessEqual(LessEqualNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitLessThan(LessThanNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitLimit(LimitNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitAnd(AndNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitOr(OrNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitFacets(FacetsNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitFields(FieldsNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitQuery(QueryNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitTermsFacet(TermsFacetNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  private T defaultUnimplementedMethod() {
+    throw new UnsupportedOperationException(DEFAULT_ERROR_MESSAGE);
+  }
 
 }

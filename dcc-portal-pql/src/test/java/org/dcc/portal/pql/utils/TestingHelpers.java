@@ -20,17 +20,44 @@ package org.dcc.portal.pql.utils;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.qe.PqlParseListener;
+import org.dcc.portal.pql.qe.QueryContext;
 
+@Slf4j
 @NoArgsConstructor(access = PRIVATE)
 public class TestingHelpers {
+
+  private static final CloneNodeVisitor CLONE_VISITOR = new CloneNodeVisitor();
 
   public static ParseTree createParseTree(String query) {
     val parser = getParser(query);
 
     return parser.statement();
+  }
+
+  public static ExpressionNode createEsAst(@NonNull String query, PqlParseListener listener) {
+    val parser = ParseTrees.getParser(query);
+    parser.addParseListener(listener);
+    parser.statement();
+    val esAst = listener.getEsAst();
+    log.debug("ES AST: - {}", esAst);
+
+    return esAst;
+  }
+
+  public static ExpressionNode createEsAst(@NonNull String query) {
+    return createEsAst(query, new PqlParseListener(new QueryContext()));
+  }
+
+  public static ExpressionNode cloneNode(ExpressionNode original) {
+    return original.accept(CLONE_VISITOR);
   }
 
 }

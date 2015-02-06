@@ -29,7 +29,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import com.google.common.collect.Lists;
 
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class FieldsNode extends ExpressionNode {
 
   private List<String> fields = Lists.newArrayList();

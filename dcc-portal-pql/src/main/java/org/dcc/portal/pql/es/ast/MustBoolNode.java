@@ -21,13 +21,13 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 public class MustBoolNode extends ExpressionNode {
 
-  public MustBoolNode(TermNode... children) {
+  public MustBoolNode(ExpressionNode... children) {
     super(children);
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException();
+    return visitor.visitMustBool(this);
   }
 
 }

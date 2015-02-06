@@ -17,26 +17,48 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.EqualsAndHashCode;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.PqlParseTreeVisitor;
 
-/**
- * Encapsulates {@code from} and {@code size}, because of the requirement that {@link PqlParseTreeVisitor} returns an
- * {@link ExpressionNode}
- */
-@Value
+@Getter
 @EqualsAndHashCode(callSuper = true)
-public class LimitNode extends ExpressionNode {
+public class TermsFacetNode extends ExpressionNode {
 
-  int from;
-  int size;
+  private static final String GLOBAL = "global";
+  private static final String NON_GLOBAL = "non-global";
+
+  @NonNull
+  private final String field;
+  @Setter
+  private boolean global;
+
+  public TermsFacetNode(@NonNull String field) {
+    this.field = field;
+    this.global = false;
+  }
+
+  public TermsFacetNode(@NonNull String field, boolean global, ExpressionNode... children) {
+    super(children);
+    this.field = field;
+    this.global = global;
+  }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException();
+    return visitor.visitTermsFacet(this);
+  }
+
+  @Override
+  public String toString() {
+    val scope = global ? GLOBAL : NON_GLOBAL;
+
+    return _("[%s Scope: %s]", field, scope) + super.toString();
   }
 
 }

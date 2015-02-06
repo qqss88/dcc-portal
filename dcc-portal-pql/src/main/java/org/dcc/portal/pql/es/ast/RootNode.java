@@ -27,7 +27,12 @@ public class RootNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException();
+    return visitor.visitRoot(this);
+  }
+
+  @Override
+  public boolean hasNestedParent() {
+    return false;
   }
 
 }

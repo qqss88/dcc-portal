@@ -19,6 +19,7 @@ package org.dcc.portal.pql.qe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.LessEqualNode;
@@ -34,14 +36,12 @@ import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.PostFilterNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.model.RequestType;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.junit.Test;
 
 @Slf4j
@@ -53,11 +53,7 @@ public class PqlParseListenerTest {
   public void filtersTest() {
     val query =
         "or(gt(a, 10), ge(b, 20.2)), eq(c, 100), ne(d, 200), and(lt(e, 30), le(f, 40)), in(sex, 'male', 'female')";
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-
-    val esAst = listener.getEsAst();
+    val esAst = createEsAst(query);
     log.info("{}", esAst);
     assertFilterStructure(esAst);
     val mustNode = (MustBoolNode) esAst.getChild(0).getChild(0).getChild(0);
@@ -125,7 +121,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void selectTest() {
-    val esAst = buildEsAst("select(age, gender)");
+    val esAst = createEsAst("select(age, gender)", listener);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     val fieldsNode = (FieldsNode) esAst.getChild(0);
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
@@ -134,7 +130,7 @@ public class PqlParseListenerTest {
 
   @Test
   public void countTest() {
-    val esAst = buildEsAst("count()");
+    val esAst = createEsAst("count()", listener);
     assertThat(listener.getQueryContext().getRequestType()).isEqualTo(RequestType.COUNT);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(0);
@@ -142,9 +138,9 @@ public class PqlParseListenerTest {
 
   @Test
   public void countTest_withFilters() {
-    val esAst = buildEsAst("count(),eq(age, 10)");
+    val esAst = createEsAst("count(),eq(age, 10)", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
-    assertThat(esAst.getChild(0)).isExactlyInstanceOf(PostFilterNode.class);
+    assertThat(esAst.getChild(0)).isExactlyInstanceOf(FilterNode.class);
     assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
     assertThat(esAst.getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
     val mustNode = esAst.getChild(0).getChild(0).getChild(0);
@@ -155,10 +151,10 @@ public class PqlParseListenerTest {
 
   @Test
   public void nestedTest() {
-    val esAst = buildEsAst("nested(gene, eq(gene._donor_id, 'D01'))");
+    val esAst = createEsAst("nested(gene, eq(gene._donor_id, 'D01'))", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    assertThat(esAst.getChild(0)).isExactlyInstanceOf(PostFilterNode.class);
+    assertThat(esAst.getChild(0)).isExactlyInstanceOf(FilterNode.class);
     assertThat(esAst.getChild(0).childrenCount()).isEqualTo(1);
     assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
     assertThat(esAst.getChild(0).getChild(0).childrenCount()).isEqualTo(1);
@@ -170,21 +166,11 @@ public class PqlParseListenerTest {
   private static void assertFilterStructure(ExpressionNode esAst) {
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    val postFilterNode = (PostFilterNode) esAst.getChild(0);
+    val postFilterNode = (FilterNode) esAst.getChild(0);
     assertThat(postFilterNode.childrenCount()).isEqualTo(1);
     val boolNode = (BoolNode) postFilterNode.getChild(0);
     assertThat(boolNode.childrenCount()).isEqualTo(1);
     assertThat(boolNode.getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
-  }
-
-  private ExpressionNode buildEsAst(String query) {
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-    val esAst = listener.getEsAst();
-    log.debug("ES AST: - {}", esAst);
-
-    return esAst;
   }
 
   /**

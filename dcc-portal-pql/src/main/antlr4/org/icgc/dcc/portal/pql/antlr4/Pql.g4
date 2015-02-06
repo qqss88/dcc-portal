@@ -14,6 +14,7 @@ count
 
 function
 	: 'select' OPAR ID (COMMA ID)* CPAR			# select
+	| 'facets' OPAR ID (COMMA ID)* CPAR			# facets
 	;
 
 filter

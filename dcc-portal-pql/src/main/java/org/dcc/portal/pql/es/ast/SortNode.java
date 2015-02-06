@@ -29,7 +29,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import com.beust.jcommander.internal.Maps;
 
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class SortNode extends ExpressionNode {
 
   Map<String, Order> fields = Maps.newHashMap();

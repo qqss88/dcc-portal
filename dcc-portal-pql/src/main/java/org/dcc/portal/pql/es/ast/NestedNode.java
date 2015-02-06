@@ -25,7 +25,7 @@ import lombok.Value;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class NestedNode extends ExpressionNode {
 
   @NonNull

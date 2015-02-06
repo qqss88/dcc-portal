@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static java.util.Collections.emptyList;
+
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
@@ -26,7 +28,7 @@ import lombok.Value;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class TerminalNode extends ExpressionNode {
 
   @NonNull
@@ -39,12 +41,12 @@ public class TerminalNode extends ExpressionNode {
 
   @Override
   public List<ExpressionNode> getChildren() {
-    throw new UnsupportedOperationException("Terminal Nodes do not have children");
+    return emptyList();
   }
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException("Terminal Nodes do not implement accept methods");
+    return visitor.visitTerminal(this);
   }
 
 }

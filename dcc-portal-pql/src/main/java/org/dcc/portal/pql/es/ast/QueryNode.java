@@ -17,24 +17,17 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import lombok.NonNull;
-
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class PostFilterNode extends ExpressionNode {
+public class QueryNode extends ExpressionNode {
 
-  public PostFilterNode(ExpressionNode... children) {
+  public QueryNode(ExpressionNode... children) {
     super(children);
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitPostFilter(this);
-  }
-
-  @Override
-  public boolean hasNestedParent() {
-    return false;
+  public <T> T accept(NodeVisitor<T> visitor) {
+    return visitor.visitQuery(this);
   }
 
 }

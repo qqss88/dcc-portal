@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.GreaterThanNode;
@@ -39,12 +40,14 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.FacetsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
@@ -282,6 +285,17 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", nestedNode);
 
     return nestedNode;
+  }
+
+  @Override
+  public ExpressionNode visitFacets(@NonNull FacetsContext nodeContext) {
+    val facetsNode = new FacetsNode();
+    for (val child : nodeContext.ID()) {
+      facetsNode.addChildren(new TermsFacetNode(child.getText()));
+    }
+    log.debug("{}", facetsNode);
+
+    return facetsNode;
   }
 
 }

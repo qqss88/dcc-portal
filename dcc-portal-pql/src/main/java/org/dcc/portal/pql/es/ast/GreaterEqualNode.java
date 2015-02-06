@@ -25,7 +25,7 @@ import lombok.val;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 public class GreaterEqualNode extends ExpressionNode {
 
   @NonNull
