@@ -122,8 +122,8 @@
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
     // Use to connect to production API regardless of setup
-    // RestangularProvider.setBaseUrl('https://dcc.icgc.org' + API.BASE_URL);
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
+ //   // RestangularProvider.setBaseUrl('https://dcc.icgc.org' + API.BASE_URL);
+ //    RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
 
