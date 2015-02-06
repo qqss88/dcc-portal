@@ -53,8 +53,8 @@
 
     $scope.entityLists = SetService.getAll();
     $scope.canBeDeleted = 0;
-
     $scope.enrichment = {};
+    $scope.syncError = false;
 
     // FIXME: Debug - remove
     $scope.debugReset = function() {
@@ -177,20 +177,51 @@
     /**
      * Check status of any entityLists that are not in FINISHED stated
      */
-    function pollEntityLists() {
+     /*
+    function synchronizeSets(numTries) {
+
       var unfinished = 0;
-      // console.log($scope.entityLists);
       SetService.sync();
+
 
       unfinished = _.filter($scope.entityLists, function(d) {
         return d.state !== 'FINISHED';
       }).length;
 
-      // console.log('unfinished', unfinished);
-
       if (unfinished > 0) {
-        $timeout(pollEntityLists, 4000);
+        $timeout(function() {
+          synchronizeSets();
+        }, 4000);
       }
+    }*/
+
+
+    function synchronizeSets(numTries) {
+      console.log('synchronizing', numTries + ' tries remaining...');
+
+      var pendingLists, pendingListsIDs, promise;
+      pendingLists = _.filter($scope.entityLists, function(d) {
+        return d.state !== 'FINISHED';
+      });
+      pendingListsIDs = _.pluck(pendingLists, 'id');
+
+      if (pendingLists.length <= 0) {
+        return;
+      }
+
+      if (numTries <= 0) {
+        console.log('Stopping, numTries runs out');
+        $scope.syncError = true;
+        return;
+      }
+
+      promise = SetService.getMetaData(pendingListsIDs);
+      promise.then(function(results) {
+        SetService.updateSets(results);
+        $timeout(function() {
+          synchronizeSets(--numTries);
+        }, 3000);
+      });
     }
 
 
@@ -214,7 +245,7 @@
             sync = true;
           }
         } else {
-          $scope.error = '404';
+          $scope.error = true;
           return;
         }
 
@@ -222,7 +253,7 @@
         var currentState = data.state;
         data.state = currentState;
 
-        console.log('data state', data.state);
+        // console.log('data state', data.state);
 
         // Check if we need to poll
         if (currentState !== 'FINISHED') {
@@ -295,18 +326,20 @@
       $timeout.cancel(analysisPromise);
     });
 
-
     init();
     getAnalysis();
-    pollEntityLists();
 
+    // Sync any unfinished sets that are still in the process of materialization
+    synchronizeSets(5);
   });
+
 })();
 
 
 
 (function () {
   'use strict';
+
   var module = angular.module('icgc.analysis.services', ['restangular']);
 
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {

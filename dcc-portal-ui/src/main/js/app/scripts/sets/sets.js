@@ -167,7 +167,8 @@
 
         function wait(id, numTries, callback) {
           console.log('trying .... ', numTries);
-          if (numTries > 30) {
+          if (numTries <= 0) {
+            Page.stopWork();
             return;
           }
 
@@ -177,7 +178,7 @@
               callback();
             } else {
               $timeout( function() {
-                wait(id, ++numTries, callback);
+                wait(id, --numTries, callback);
               }, 800);
             }
           });
@@ -222,7 +223,7 @@
             function exportSet() {
               SetService.exportSet(data.id);
             }
-            wait(data.id, 0, exportSet);
+            wait(data.id, 10, exportSet);
           });
         };
 
@@ -257,7 +258,7 @@
               };
               $location.path(path).search({filters: angular.toJson(filters)});
             }
-            wait(data.id, 0, redirect2Advanced);
+            wait(data.id, 10, redirect2Advanced);
           });
         };
 
