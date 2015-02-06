@@ -1,53 +1,168 @@
 <h1>
-    <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Beacon
+    <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>ICGC GA4GH Beacon
 </h1>
-    <section>
-        <h3>Query</h3>
-        <div class="half">
-            <span>Chromosome</span><br>
-            <!--<input type="text">-->
-            <input type="text">
-            <br>
-
-            <span>Position</span><br>
-            <input type="text">
-            <br>
-
-            <span>Reference</span><br>
-            <input type="text">
-            <br>
-
-            <span>Allele</span><br>
-            <input type="text">
-            <br>
-            <br>
-            <button class="t_button">Submit</button>
-        </div>
+    <section class="beaconquery">
         <div class="narrow">
+          <h3>Query</h3><br>
+          <table>
+            <tr>
+              <td align="right">
+                <span>Chromosome ID *</span>
+              </td>
+              <td>
+                <div class="dropdown">
+                <button id="chrbutton" class="t_button chr-dropdown dropdown-toggle"
+                        toggle="dropdown" data-toggle="dropdown" >
+                  22&nbsp;<span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a role="menuitem" tabindex="-1" href="#">1</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">2</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">3</a></li>
+                  <li><a role="menuitem" tabindex="-1" href="#">X</a></li>
+                </ul>
+                </div>
+            </td>
+            </tr>
+            <tr>
+              <td align="right">
+                <span>Position *</span>
+              </td>
+              <td>
+                 <input placeholder="eg. 29885594" type="text">
+              </td>
+            </tr>
+            <tr>
+              <td align="right">
+                <span>Reference *</span>
+              </td>
+              <td>
+                 <input placeholder="eg. GRCh37" type="text">
+              </td>
+            </tr>
+            <tr>
+              <td align="right">
+                <span>Allele(s) *</span>
+              </td>
+              <td>
+                 <input placeholder="eg. T, CCACG, GG" type="text">
+              </td>
+            </tr>
+            <tr>
+              <td align="right">
+                <span>Dataset</span>
+              </td>
+              <td>
+                 <input placeholder="eg. PACA-CA" type="text">
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td align="right" >
+                <button class="t_button beaconsubmit">Reset</button>&nbsp;
+                <button class="t_button beaconsubmit">Submit</button>
+              </td>
+            </tr>
+          </table>
+          <br>
+          <br>
+          <h4>Result</h4>
+          <div class="beacon-result">
+            <div class="beacon-icon-container"><i class="icon-ok beacon-icon"></i></div>
+            <div class="beacon-icon-text">TRUE</div>
+          </div><br>
+          <div class="beacon-result" style="visibility:hidden">
+            <div class="beacon-icon-container"><i class="icon-cancel beacon-icon"></i></div>
+            <div class="beacon-icon-text">FALSE</div>
+          </div>
+        </div>
+        <div class="half">
+          <h3>Notes</h3><br>
+        <div>
+          <h4>information</h4>
+            A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The beacon
+            is designed to accept a query and responds with <code>true</code> if it finds such an allele, <code>false</code> if its data doesn't match
+          the allele and <code>null</code> if nothing is found.<br><br>
+
+          <h4>parameters</h4>
+           <table class="table table-bordered table-striped">
+                </thread>
+                  <tr>
+                      <td>Chromosome ID</td>
+                      <td>1-22, X, Y or MT</td>
+                  </tr>
+                  <tr>
+                      <td>Position</td>
+                      <td>The position of the allele in the chromosome</td>
+                  </tr>
+                  <tr>
+                      <td>Reference</td>
+                      <td>Genome ID (Currently only GRCh37)</td>
+                  </tr>
+                  <tr>
+                      <td>Allele(s)</td>
+                      <td>The allele being searched for: [ACTG]+</td>
+                  </tr>
+                  <tr>
+                    <td>Dataset <span class=beaconquestion>- Optional</span></td>
+                      <td>The dataset to query with the beacon request</td>
+                  </tr>
+                </tdread>
+              </table>
+          <br><h4>Links</h4>
+            Beacon is a project of the <a href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>.<br><br>
+            You can read more about Beacons at:
             <ul>
-                <li><a href=""><i class="icon-external-link"></i>link 1</a></li> 
-                <li><a href=""><i class="icon-external-link"></i>link 2</a></li>
+              <li><a href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Project Site</a></li>
+              <li><a href="https://docs.google.com/document/d/154GBOixuZxpoPykGKcPOyrYUcgEXVe2NvKx61P4Ybn4/edit?usp=sharing"><i class="icon-external-link"></i>Beacon v0.2 Specification</a><small>&emsp;In Progress - Subject to change without notice</small></li>
             </ul>
+        </div><br><br>
+
+    </section>
+
+    <section>
+        <h3>Response</h3><br>
+            <div class="narrow">
+              <table class="table table-bordered table-striped">
+                </thread>
+                  <tr>
+                      <td>Chromosome</td>
+                      <td>22</td>
+                  </tr>
+                  <tr>
+                      <td>Position</td>
+                      <td>29885594</td>
+                  </tr>
+                  <tr>
+                      <td>Reference</td>
+                      <td>GRCh37</td>
+                  </tr>
+                  <tr>
+                      <td>Allele</td>
+                      <td>T</td>
+                  </tr>
+                  <tr>
+                      <td>Result</td>
+                      <td><code>true</code></td>
+                  </tr>
+                </tdread>
+              </table>
+              </div>
+              <div class="half">
+                <div class="well beaconquery">
+                  <!-- Weird formatting needed for it to show up properly - temporary -->
+                  <pre class="beaconquery">{
+  "beacon_id": "ICGC GA4GH Beacon",
+  "response": {
+      "exists": "true"
+    },
+  "query": {
+      "allele": "T",
+      "chromosome": "22",
+      "position": 29885594,
+      "reference": "GRCh37"
+    }
+}</pre>
+                  </div>
+              </div>
         </div>
     </section>
-    <section>
-        <div class="full">
-            <div class="t_tabs">
-                <div class="t_tabs__tab active">Results</div>
-                <div class="t_tabs__tab">Raw</div>
-            </div>
-            <div> 
-            Result goes in here
-            <pre>
-            {
-               blah: 'abc',
-               blah: ['1', '2']
-            }
-            </pre>
-            </div>
-        </div>
-        <br>
-        <div class="wide">
-        Notes
-        </div>
-    <section>

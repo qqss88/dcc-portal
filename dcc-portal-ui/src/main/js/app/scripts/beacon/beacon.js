@@ -25,7 +25,7 @@
    
   module.config(function ($stateProvider) {
     $stateProvider.state('beacon', {
-      url: '/GA4GH/beacon',
+      url: '/ga4gh/beacon',
       templateUrl: 'scripts/beacon/views/beacon.html',
       controller: 'BeaconCtrl as BeaconCtrl'
     });
@@ -40,11 +40,9 @@
   var module = angular.module('icgc.beacon.controllers', []);
 
   module.controller('BeaconCtrl', function ($scope, Page) {
-    Page.setTitle('Global Alliance Beacon');
+    Page.setTitle('Beacon');
     Page.setPage('beacon');
 
   });
 
 })();
-
-
