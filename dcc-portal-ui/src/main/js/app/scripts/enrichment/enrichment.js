@@ -222,9 +222,9 @@
      * 2) Remove gene.id
      */
     function mergeInputGeneList(filters, geneListId) {
-      delete filters.gene.entityListId;
+      delete filters.gene[Extensions.ENTITY];
       delete filters.gene.id;
-      filters.gene.entityListId = {
+      filters.gene[Extensions.ENTITY] = {
         is: [geneListId]
       };
       return filters;

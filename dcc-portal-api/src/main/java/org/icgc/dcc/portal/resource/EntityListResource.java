@@ -95,7 +95,7 @@ public class EntityListResource {
   }
 
   @GET
-  @Path("/lists/{" + API_ENTITY_LIST_ID_PARAM + "}")
+  @Path("/sets/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
   public List<EntityList> getEntityLists(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UuidListParam entityListIds

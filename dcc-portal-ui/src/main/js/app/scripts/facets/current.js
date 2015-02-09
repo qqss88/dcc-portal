@@ -24,6 +24,7 @@
 
   module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService) {
     $scope.Facets = Facets;
+    $scope.Extensions = Extensions;
 
     function refresh() {
       var currentFilters = LocationService.filters();

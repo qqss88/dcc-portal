@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, RestangularNoCache, Page, SetService, AnalysisService) {
+    Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -97,13 +97,12 @@
     };
 
     $scope.launchEnrichmentAnalysis = function() {
-      $scope.enrichment.filters = {
-        gene: {
-          entityListId: {
-            is: [ $scope.enrichmentSet ]
-          }
-        }
+      var filters = {
+        gene: {}
       };
+      filters.gene[Extensions.ENTITY] = { is: [$scope.enrichmentSet] };
+
+      $scope.enrichment.filters = filters;
       $scope.enrichment.modal = true;
     };
 
@@ -146,11 +145,12 @@
       }
 
       var toRemove = _.filter($scope.selectedSets, function(set) {
-        return !set.readonly;
+        return !angular.isDefined(set.readonly);
       });
 
+
       if (toRemove.length > 0) {
-        SetService.removeSeveral(toRemove);
+        SetService.removeSeveral(_.pluck(toRemove, 'id'));
         $scope.update();
       }
     };

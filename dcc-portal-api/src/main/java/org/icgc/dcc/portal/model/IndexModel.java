@@ -37,7 +37,7 @@ public class IndexModel {
   /**
    * Special cases for term lookups
    */
-  public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entityListId";
+  public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entitySetId";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter

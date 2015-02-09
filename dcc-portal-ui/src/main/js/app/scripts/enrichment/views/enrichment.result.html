@@ -1,7 +1,7 @@
-<div data-ng-if="item.state === 'ANALYZING'">
+<div data-ng-if="!item || item.state === 'ANALYZING'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
-<div data-ng-if="item.state !== 'ANALYZING'">
+<div data-ng-if="item && item.state !== 'ANALYZING'">
     <div>
         <span>Overview</span>
         <table class="table table-bordered">
