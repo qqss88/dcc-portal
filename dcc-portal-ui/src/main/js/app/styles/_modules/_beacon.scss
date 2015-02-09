@@ -41,7 +41,6 @@ td{
 }
 
 .beacon-icon-container{
-  background: #2D832D;
   float:left;
   width: 30%;
   padding-top: 1.8rem;
@@ -60,13 +59,38 @@ td{
   float:left;
   width:70%;
   height:inherit;
-  border: 3px solid #2D832D ;
   border-bottom-right-radius: .5rem;
   border-top-right-radius: .5rem;
-  color: #2D832D;
   background: white;
 }
 
+/** Different colors for each response */
+.beacon-true-container{
+   background: #2D832D;
+}
+.beacon-true-text{
+  color: #2D832D;
+  border: 3px solid #2D832D ;
+}
+
+.beacon-false-container{
+   background: #D31313;
+}
+.beacon-false-text{
+  color: #D31313;
+  border: 3px solid #D31313 ;
+}
+
+
+.beacon-null-container{
+   background: #D31313;
+}
+.beacon-null-text{
+  color: #D31313;
+  border: 3px solid #D31313 ;
+}
+
+/** end of different color options */
 
 .beacon-result{
   padding-right: 8rem;
@@ -74,7 +98,22 @@ td{
   height: 80px;
 }
 
-/*
+.beacon-api-link{
+  padding-top: 0;
+  margin-bottom: 2px;
+  padding-bottom: 0;
+  padding-left: 1px;
+  padding-right: 3px;
+  width: 90%;
+}
+.beacon-api-link:focus{
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e3e3e3;
+}
+/**
+
 .beaconheader-container{
   width: 50px;
   height: 50px;
@@ -97,4 +136,4 @@ td{
 .beaconimage{
 margin-left: 9px;
 margin-top: 11px;
-}*/
+} */
