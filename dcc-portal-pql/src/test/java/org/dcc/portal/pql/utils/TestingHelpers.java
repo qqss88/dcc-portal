@@ -34,8 +34,6 @@ import org.dcc.portal.pql.qe.QueryContext;
 @NoArgsConstructor(access = PRIVATE)
 public class TestingHelpers {
 
-  private static final CloneNodeVisitor CLONE_VISITOR = new CloneNodeVisitor();
-
   public static ParseTree createParseTree(String query) {
     val parser = getParser(query);
 
@@ -54,10 +52,6 @@ public class TestingHelpers {
 
   public static ExpressionNode createEsAst(@NonNull String query) {
     return createEsAst(query, new PqlParseListener(new QueryContext()));
-  }
-
-  public static ExpressionNode cloneNode(ExpressionNode original) {
-    return original.accept(CLONE_VISITOR);
   }
 
 }

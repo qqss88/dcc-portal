@@ -29,12 +29,13 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 @EqualsAndHashCode(exclude = { "parent" })
-public abstract class ExpressionNode implements Node {
+public abstract class ExpressionNode {
 
-  protected Node parent;
+  protected ExpressionNode parent;
   protected List<ExpressionNode> children;
 
   public ExpressionNode(ExpressionNode... children) {
@@ -48,8 +49,7 @@ public abstract class ExpressionNode implements Node {
     }
   }
 
-  @Override
-  public Node getParent() {
+  public ExpressionNode getParent() {
     return parent;
   }
 
@@ -57,10 +57,8 @@ public abstract class ExpressionNode implements Node {
     this.parent = parent;
   }
 
-  @Override
   public abstract <T> T accept(NodeVisitor<T> visitor);
 
-  @Override
   public int childrenCount() {
     return children.size();
   }
@@ -71,17 +69,26 @@ public abstract class ExpressionNode implements Node {
     assignParent(childrenList, this);
   }
 
-  @Override
   public List<ExpressionNode> getChildren() {
     return children;
   }
 
-  @Override
   public ExpressionNode getChild(int index) {
     return children.get(index);
   }
 
-  @Override
+  public ExpressionNode getFirstChild() {
+    return children.get(0);
+  }
+
+  public Optional<ExpressionNode> getOptionalFirstChild() {
+    if (childrenCount() == 0) {
+      return Optional.absent();
+    }
+
+    return Optional.fromNullable(children.get(0));
+  }
+
   public void removeChild(int index) {
     checkArgument(index >= 0 && index < childrenCount(),
         _("Index %d does is out of children bounds. Children cound: %d", index, childrenCount()));
@@ -104,7 +111,6 @@ public abstract class ExpressionNode implements Node {
     return buffer.toString();
   }
 
-  @Override
   public boolean hasNestedParent() {
     return parent.hasNestedParent();
   }

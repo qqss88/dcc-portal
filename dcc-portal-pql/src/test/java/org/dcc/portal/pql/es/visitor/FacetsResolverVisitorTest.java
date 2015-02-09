@@ -18,13 +18,13 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.cloneNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FilterNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
@@ -51,7 +51,7 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitRoot_noFacetsNode() {
     val originalRoot = (RootNode) createEsAst("eq(gender, 'male')");
-    val clone = cloneNode(originalRoot);
+    val clone = Nodes.cloneNode(originalRoot);
     val rootNode = resolver.visitRoot(originalRoot);
     assertThat(clone).isEqualTo(rootNode);
   }
@@ -59,9 +59,24 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitRoot_noFilters() {
     val originalRoot = (RootNode) createEsAst("facets(gender)");
-    val clone = cloneNode(originalRoot);
+    val clone = Nodes.cloneNode(originalRoot);
     val result = resolver.visitRoot(originalRoot);
     assertThat(clone).isEqualTo(result);
+  }
+
+  @Test
+  public void visitRoot_match() {
+    val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male')");
+    val filterNode = Nodes.cloneNode(Nodes.getChildOptional(originalRoot, FilterNode.class).get());
+    val result = resolver.visitRoot(originalRoot);
+    log.info("{}", result);
+
+    val queryNode = Nodes.getChildOptional(result, QueryNode.class).get();
+    assertThat(queryNode.getFirstChild()).isEqualTo(filterNode);
+
+    val facetsNode = Nodes.getChildOptional(result, FacetsNode.class).get();
+    val mustNode = (MustBoolNode) facetsNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(mustNode.childrenCount()).isEqualTo(0);
   }
 
   /**
@@ -71,16 +86,18 @@ public class FacetsResolverVisitorTest {
   public void visitRoot_moveFilters() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male')");
     val originalFilterNode = (FilterNode) originalRoot.getChild(0);
+    val clonedFilterNode = Nodes.cloneNode(originalFilterNode);
     val rootNode = resolver.visitRoot(originalRoot);
 
     assertThat(rootNode.childrenCount()).isEqualTo(2);
     val facetsNode = (FacetsNode) rootNode.getChild(0);
-    log.info("Facets Node: {}", facetsNode);
+    log.debug("Facets Node: {}", facetsNode);
     assertThat(facetsNode.childrenCount()).isEqualTo(1);
-    assertThat(facetsNode.getChild(0).getChild(0)).isEqualTo(originalFilterNode);
+    assertThat(facetsNode.getChild(0).getChild(0)).isEqualTo(clonedFilterNode);
 
     val queryNode = (QueryNode) rootNode.getChild(1);
-    assertThat(queryNode.getChild(0)).isEqualTo(originalFilterNode);
+    log.debug("QueryNode: {}", queryNode);
+    assertThat(queryNode.getChild(0)).isEqualTo(clonedFilterNode);
     assertThat(queryNode.childrenCount()).isEqualTo(1);
     assertThat(Nodes.getChildOptional(rootNode, FilterNode.class).isPresent()).isFalse();
   }
@@ -94,10 +111,11 @@ public class FacetsResolverVisitorTest {
     val facetsNodeOpt = Nodes.getChildOptional(originalRoot, FacetsNode.class);
     assertThat(facetsNodeOpt.isPresent()).isTrue();
     val originalFilterNode = (FilterNode) originalRoot.getChild(0);
-    val clone = cloneNode(originalFilterNode);
-    val termsFacet = resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getChild(0));
+    val clone = Nodes.cloneNode(originalFilterNode);
+    val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getChild(0));
     assertThat(termsFacet.childrenCount()).isEqualTo(1);
     assertThat(termsFacet.getChild(0)).isEqualTo(clone);
+    assertThat(termsFacet.isGlobal()).isFalse();
   }
 
   /**
@@ -109,10 +127,11 @@ public class FacetsResolverVisitorTest {
     val facetsNodeOpt = Nodes.getChildOptional(originalRoot, FacetsNode.class);
     assertThat(facetsNodeOpt.isPresent()).isTrue();
     val originalFilterNode = (FilterNode) originalRoot.getChild(0);
-    val clone = cloneNode(originalFilterNode);
-    val termsFacet = resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getChild(0));
+    val clone = Nodes.cloneNode(originalFilterNode);
+    val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getChild(0));
     assertThat(termsFacet.childrenCount()).isEqualTo(1);
     assertThat(termsFacet.getChild(0)).isNotEqualTo(clone);
+    assertThat(termsFacet.isGlobal()).isTrue();
   }
 
   @Test

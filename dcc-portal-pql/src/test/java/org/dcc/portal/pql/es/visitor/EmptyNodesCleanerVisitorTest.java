@@ -15,43 +15,37 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.es.visitor;
 
-import lombok.NonNull;
-import lombok.Value;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor.REMOVE_NODE;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.utils.EsAstTransformator;
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.Client;
+import org.dcc.portal.pql.es.ast.BoolNode;
+import org.dcc.portal.pql.es.ast.FilterNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
+import org.dcc.portal.pql.es.ast.RootNode;
+import org.junit.Before;
+import org.junit.Test;
 
-@Value
-public class QueryEngine {
+public class EmptyNodesCleanerVisitorTest {
 
-  @NonNull
-  Client client;
+  EmptyNodesCleanerVisitor visitor;
 
-  @NonNull
-  String index;
-  private final EsAstTransformator esAstTransformator = new EsAstTransformator();
+  @Before
+  public void setUp() {
+    visitor = new EmptyNodesCleanerVisitor();
+  }
 
-  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
-    context.setIndex(index);
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
+  @Test
+  public void visitRootTest() {
+    val result = visitor.visitRoot(new RootNode(new FilterNode(new BoolNode(new MustBoolNode()))));
+    assertThat(result.childrenCount()).isEqualTo(0);
+  }
 
-    ExpressionNode esAst = pqlListener.getEsAst();
-    esAst = esAstTransformator.process(esAst, context.getType());
-    // FIXME: cache
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
-
-    return esVisitor.visit(esAst, context);
+  @Test
+  public void visitMustBoolTest() {
+    assertThat(visitor.visitMustBool(new MustBoolNode())).isEqualTo(REMOVE_NODE);
   }
 
 }

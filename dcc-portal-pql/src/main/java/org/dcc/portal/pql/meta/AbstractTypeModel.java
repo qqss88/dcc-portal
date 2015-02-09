@@ -44,7 +44,9 @@ public abstract class AbstractTypeModel {
 
   public AbstractTypeModel(List<? extends FieldModel> fields) {
     fieldsByFullPath = initFieldsByFullPath(fields);
+    log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
     fieldsByAlias = initFieldsByAlias(fields);
+    log.debug("FieldsByAlias Map: {}", fieldsByAlias);
   }
 
   private static Map<String, FieldModel> initFieldsByFullPath(List<? extends FieldModel> fields) {
@@ -72,6 +74,7 @@ public abstract class AbstractTypeModel {
     val tokens = split(fullName);
     log.debug("Tokens: {}", tokens);
     for (val token : tokens) {
+      log.debug("Processing token: {}", token);
       val tokenByFullPath = fieldsByFullPath.get(token);
       if (tokenByFullPath.isNested()) {
         return true;

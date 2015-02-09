@@ -18,18 +18,21 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
+import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +44,7 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   private PqlParseListener listener;
   private CreateFilterBuilderVisitor visitor;
   private QueryContext queryContext;
+  private EsAstTransformator esAstTransformator;
 
   @Before
   public void setUp() {
@@ -50,6 +54,7 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     queryContext.setType(DONOR_CENTRIC);
     queryContext.setIndex(INDEX_NAME);
     listener = new PqlParseListener(new QueryContext());
+    esAstTransformator = new EsAstTransformator();
   }
 
   @Test
@@ -208,8 +213,50 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     containsOnlyIds(result, "DO2", "DO3", "DO4", "DO5", "DO8", "DO9");
   }
 
+  @Test
+  public void nestedTest() {
+    val result = executeQuery("nested(gene.ssm.observation, " +
+        "ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 27))");
+    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
+    containsOnlyIds(result, "DO2");
+  }
+
+  @Test
+  public void facetsTest_noFilters() {
+    val result = executeQuery("facets(donor_sex)");
+    val facet = result.getFacets().facet("donor_sex");
+    log.info("Facet - {}", facet);
+    fail("Implement");
+  }
+
+  @Test
+  public void facetsTest_noMatchFilter() {
+    val result = executeQuery("facets(donor_sex), eq(project._project_id, 'PACA-AU')");
+    val facet = result.getFacets().facet("donor_sex");
+    log.info("Facet - {}", facet);
+    fail("Implement");
+  }
+
+  @Test
+  public void facetsTest_matchFilter() {
+    val result = executeQuery("facets(donor_sex), eq(donor_sex, 'female')");
+    val facet = result.getFacets().facet("donor_sex");
+    log.info("Facet - {}", facet);
+    fail("Implement");
+  }
+
+  @Test
+  public void facetsTest_multiFilters() {
+    val result = executeQuery("facets(donor_sex), eq(donor_sex, 'female'), eq(project._project_id, 'PACA-AU')");
+    val facet = result.getFacets().facet("donor_sex");
+    log.info("Facet - {}", facet);
+    fail("Implement");
+  }
+
   private SearchResponse executeQuery(String query) {
-    val esAst = createTree(query);
+    ExpressionNode esAst = createTree(query);
+    esAst = esAstTransformator.process(esAst, Type.DONOR_CENTRIC);
+    log.debug("ES AST: {}", esAst);
     val request = visitor.visit(esAst, queryContext);
     log.debug("Request - {}", request);
     val result = request.execute().actionGet();
@@ -233,14 +280,6 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
       resopnseIds.add(hit.getId());
     }
     assertThat(resopnseIds).containsOnly(ids);
-  }
-
-  @Test
-  public void nestedTest() {
-    val result = executeQuery("nested(gene.ssm.observation, " +
-        "ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 27))");
-    assertThat(result.getHits().getTotalHits()).isEqualTo(1);
-    containsOnlyIds(result, "DO2");
   }
 
 }

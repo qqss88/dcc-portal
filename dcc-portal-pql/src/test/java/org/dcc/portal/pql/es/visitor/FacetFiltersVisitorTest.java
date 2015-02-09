@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.cloneNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 
@@ -30,6 +29,7 @@ import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,7 +47,7 @@ public class FacetFiltersVisitorTest {
   @Test
   public void visitTerm_noMatch() {
     val original = (TermNode) getMustNode("eq(age, 60)").getChild(0);
-    val clone = cloneNode(original);
+    val clone = Nodes.cloneNode(original);
     val result = visitor.visitTerm(original);
     assertThat(result).isEqualTo(clone);
   }
@@ -62,7 +62,7 @@ public class FacetFiltersVisitorTest {
   @Test
   public void visitRange_noMatch() {
     val original = (RangeNode) getMustNode("gt(age, 60)").getChild(0);
-    val clone = cloneNode(original);
+    val clone = Nodes.cloneNode(original);
     val result = visitor.visitRange(original);
     assertThat(result).isEqualTo(clone);
   }
@@ -77,7 +77,7 @@ public class FacetFiltersVisitorTest {
   @Test
   public void visitTerms_noMatch() {
     val original = (TermsNode) getMustNode("in(age, 60, 70)").getChild(0);
-    val clone = cloneNode(original);
+    val clone = Nodes.cloneNode(original);
     val result = visitor.visitTerms(original);
     assertThat(result).isEqualTo(clone);
   }
@@ -92,7 +92,7 @@ public class FacetFiltersVisitorTest {
   @Test
   public void visitAnd_noMatch() {
     val original = (AndNode) getMustNode("or(and(gt(age, 60), eq(gender, 70)), eq(a, 1))").getChild(0).getChild(0);
-    val clone = cloneNode(original);
+    val clone = Nodes.cloneNode(original);
     val result = visitor.visitAnd(original);
     assertThat(clone).isNotEqualTo(result);
     assertThat(result.childrenCount()).isEqualTo(1);
@@ -106,7 +106,7 @@ public class FacetFiltersVisitorTest {
   @Test
   public void visitOr_noMatch() {
     val original = (OrNode) getMustNode("or(gt(age, 60), eq(gender, 70))").getChild(0);
-    val clone = cloneNode(original);
+    val clone = Nodes.cloneNode(original);
     val result = visitor.visitOr(original);
     assertThat(result).isNotEqualTo(clone);
     assertThat(result.childrenCount()).isEqualTo(1);

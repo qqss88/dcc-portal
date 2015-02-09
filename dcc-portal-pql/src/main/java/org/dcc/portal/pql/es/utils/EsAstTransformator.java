@@ -15,26 +15,39 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.utils;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
+import org.dcc.portal.pql.es.visitor.FacetsResolverVisitor;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
-public interface Node {
+/**
+ * Performs series of transformations to optimize the AST
+ */
+@Slf4j
+public class EsAstTransformator {
 
-  Node getParent();
+  private final EmptyNodesCleanerVisitor emptyNodesCleaner = new EmptyNodesCleanerVisitor();
+  private final FacetsResolverVisitor facetsResolver = new FacetsResolverVisitor();
 
-  List<? extends ExpressionNode> getChildren();
+  public ExpressionNode process(ExpressionNode esAst, Type type) {
+    log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
+    esAst = resolveFacets(esAst, type);
+    esAst = optimize(esAst);
+    log.debug("ES AST after the transformations: {}", esAst);
 
-  ExpressionNode getChild(int index);
+    return esAst;
+  }
 
-  void removeChild(int index);
+  public ExpressionNode optimize(ExpressionNode esAst) {
+    return esAst.accept(emptyNodesCleaner);
+  }
 
-  <T> T accept(NodeVisitor<T> visitor);
-
-  int childrenCount();
-
-  boolean hasNestedParent();
+  public ExpressionNode resolveFacets(ExpressionNode esAst, Type type) {
+    return facetsResolver.resolveFacets(esAst, type);
+  }
 
 }

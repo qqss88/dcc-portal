@@ -29,6 +29,8 @@ import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
+import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 import java.util.Stack;
 
@@ -50,15 +52,16 @@ import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.Node;
 import org.dcc.portal.pql.es.ast.NotNode;
 import org.dcc.portal.pql.es.ast.OrNode;
+import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -74,6 +77,8 @@ import com.google.common.collect.Lists;
 @Slf4j
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
+
+  private static final CreateFacetBuilderVisitor FACET_BUILDER_VISITOR = new CreateFacetBuilderVisitor();
 
   @NonNull
   private final Client client;
@@ -149,7 +154,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     return visitBool((BoolNode) node.getChild(0));
   }
 
-  public SearchRequestBuilder visit(@NonNull Node node, @NonNull QueryContext queryContext) {
+  public SearchRequestBuilder visit(@NonNull ExpressionNode node, @NonNull QueryContext queryContext) {
     this.queryContext = queryContext;
     SearchRequestBuilder result = client
         .prepareSearch(queryContext.getIndex())
@@ -163,6 +168,16 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     for (val child : node.getChildren()) {
       if (child instanceof FilterNode) {
         result.setFilter(child.accept(this));
+      } else if (child instanceof QueryNode) {
+        val filtersNode = child.getOptionalFirstChild();
+        FilterBuilder queryFilters = null;
+        if (filtersNode.isPresent()) {
+          queryFilters = filtersNode.get().accept(this);
+        }
+
+        result.setQuery(filteredQuery(matchAllQuery(), queryFilters));
+      } else if (child instanceof FacetsNode) {
+        addFacets(child, result);
       } else if (child instanceof FieldsNode) {
         val castedChild = (FieldsNode) child;
         String[] children = castedChild.getFields().toArray(new String[castedChild.getFields().size()]);
@@ -288,6 +303,21 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   public FilterBuilder visitTermsFacet(TermsFacetNode node) {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  private void addFacets(ExpressionNode facetsNode, SearchRequestBuilder result) {
+    log.debug("Adding facets for FacetsNode: {}", facetsNode);
+    for (val child : facetsNode.getChildren()) {
+      val facetBuilder = child.accept(FACET_BUILDER_VISITOR);
+      val facetFilterNode = Nodes.getChildOptional(child, FilterNode.class);
+      if (facetFilterNode.isPresent()) {
+        log.debug("Adding facet filter: {}", facetFilterNode.get());
+        val facetFilter = facetFilterNode.get().accept(this);
+        facetBuilder.facetFilter(facetFilter);
+      }
+
+      result.addFacet(facetBuilder);
+    }
   }
 
 }

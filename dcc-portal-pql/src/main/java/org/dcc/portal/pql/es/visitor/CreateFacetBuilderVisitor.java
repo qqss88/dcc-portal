@@ -15,43 +15,28 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.es.visitor;
 
-import lombok.NonNull;
-import lombok.Value;
+import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.utils.EsAstTransformator;
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.Client;
+import org.dcc.portal.pql.es.ast.TermsFacetNode;
+import org.elasticsearch.search.facet.FacetBuilder;
 
-@Value
-public class QueryEngine {
+public class CreateFacetBuilderVisitor extends NodeVisitor<FacetBuilder> {
 
-  @NonNull
-  Client client;
+  private static int DEFAULT_FACETS_SIZE = 100;
 
-  @NonNull
-  String index;
-  private final EsAstTransformator esAstTransformator = new EsAstTransformator();
+  @Override
+  public FacetBuilder visitTermsFacet(TermsFacetNode node) {
+    val result = termsFacet(node.getField())
+        .field(node.getField())
+        .size(DEFAULT_FACETS_SIZE);
+    if (node.isGlobal()) {
+      result.global(true);
+    }
 
-  public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
-    context.setIndex(index);
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
-
-    ExpressionNode esAst = pqlListener.getEsAst();
-    esAst = esAstTransformator.process(esAst, context.getType());
-    // FIXME: cache
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
-
-    return esVisitor.visit(esAst, context);
+    return result;
   }
 
 }

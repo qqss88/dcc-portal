@@ -32,6 +32,7 @@ import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.base.Optional;
@@ -52,7 +53,6 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
     checkArgument(sourceAst instanceof RootNode, "Source AST must be an instance of RootNode");
     this.type = type;
     val result = sourceAst.accept(this);
-    this.type = null;
 
     return result;
   }
@@ -72,11 +72,13 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
       return rootNode;
     }
 
+    // FilterNode is altered during the facets processing. We need to clone the structure to have the original filter.
+    val filterNodeClone = Nodes.cloneNode(filterNodeOpt.get());
     val facetsNode = getFacetsNodeOptional(rootNode).get();
     for (val child : facetsNode.getChildren()) {
       child.accept(this);
     }
-    moveFiltersToQuery(rootNode, filterNodeOpt.get());
+    moveFiltersToQuery(rootNode, filterNodeClone);
 
     return rootNode;
   }
@@ -84,17 +86,22 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
   @Override
   public ExpressionNode visitTermsFacet(TermsFacetNode node) {
     log.debug("Visiting TermsFacetNode. {}", node);
-    val rootNode = (ExpressionNode) node.getParent().getParent();
+    val rootNode = node.getParent().getParent();
     val filtersNodeOpt = getChildOptional(rootNode, FilterNode.class);
     if (filtersNodeOpt.isPresent()) {
-      node.addChildren(processFilter(node.getField(), filtersNodeOpt.get()));
+
+      // The FilterNode must be added to the TermsFacetNode before FilterNode processing. During the FilterNode
+      // processing we are looking for TermsFilterNode to set the global scope of the query. If FilterNode is not added
+      // it's not possible to find TermsFacetNode.
+      node.addChildren(filtersNodeOpt.get());
+      processFilter(node.getField(), filtersNodeOpt.get());
     }
 
     return node;
   }
 
-  private ExpressionNode processFilter(String facetField, FilterNode filterNode) {
-    return facetsFilterVisitor.visit(facetField, filterNode);
+  private void processFilter(String facetField, FilterNode filterNode) {
+    facetsFilterVisitor.visit(facetField, filterNode);
   }
 
   private Optional<FacetsNode> getFacetsNodeOptional(ExpressionNode rootNode) {
@@ -105,7 +112,7 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
     return getChildOptional(rootNode, FacetsNode.class).isPresent() ? true : false;
   }
 
-  private static void moveFiltersToQuery(ExpressionNode rootNode, FilterNode filters) {
+  private static void moveFiltersToQuery(ExpressionNode rootNode, ExpressionNode filters) {
     val filterNodeIndex = getFilterNodeIndex(rootNode);
     rootNode.removeChild(filterNodeIndex);
     rootNode.addChildren(new QueryNode(filters));
