@@ -41,7 +41,7 @@ cache:
   enableLastModified: true
 
   # List of resources for which Last-Modified HTTP header should not be generated. Format: regex accepted by java.lang.String
-  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$", "^v\\d+/analysis.*$", "^v\\d+/entitylist.*$" ]
+  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$", "^v\\d+/analysis.*$", "^v\\d+/entityset.*$" ]
 
   # Enable ETag HTTP header generation
   enableETag: false
