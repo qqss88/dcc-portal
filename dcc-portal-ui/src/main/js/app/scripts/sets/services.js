@@ -149,9 +149,12 @@
       return data;
     }
 
+
+    /*
     this.saveAll = function(lists) {
       localStorageService.set(LIST_ENTITY, lists);
     };
+    */
 
 
     this.createAdvLink = function(set) {
@@ -319,6 +322,7 @@
     this.getAll = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
       _this.refreshList();
+
       return setList;
     };
 
