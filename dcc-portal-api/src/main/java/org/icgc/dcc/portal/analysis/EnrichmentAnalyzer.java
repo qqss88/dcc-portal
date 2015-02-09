@@ -75,7 +75,7 @@ public class EnrichmentAnalyzer {
   /**
    * DCC-2856: Gene set cardinality threshold.
    */
-  private static final int GENE_SET_GENE_COUNT_THRESHOLD = 5;
+  private static final int GENE_SET_GENE_COUNT_THRESHOLD = 0;
 
   /**
    * Dependencies.
