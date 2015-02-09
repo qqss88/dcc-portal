@@ -128,7 +128,9 @@
       });
     });
 
-  module.service('AdvancedDonorService', function (Page, LocationService, HighchartsService, Donors, State) {
+  module.service('AdvancedDonorService',
+    function(Page, LocationService, HighchartsService, Donors, State, Extensions) {
+
     var _this = this;
 
     _this.ajax = function () {
@@ -206,7 +208,7 @@
         // Remove gene entity set because gene id is the key
         if (donor.embedQuery.hasOwnProperty('donor')) {
           var donorFilters = donor.embedQuery.donor;
-          delete donorFilters.entityListId;
+          delete donorFilters[Extensions.ENTITY];
         }
 
       });
@@ -223,7 +225,9 @@
     };
   });
 
-  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State, FiltersUtil) {
+  module.service('AdvancedGeneService',
+    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions) {
+
     var _this = this;
 
     _this.ajax = function () {
@@ -290,7 +294,7 @@
         // Remove gene entity set because gene id is the key
         if (gene.embedQuery.hasOwnProperty('gene')) {
           var geneFilters = gene.embedQuery.gene;
-          delete geneFilters.entityListId;
+          delete geneFilters[Extensions.ENTITY];
         }
 
       });
@@ -308,7 +312,7 @@
   });
 
   module.service('AdvancedMutationService',
-    function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State) {
+    function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State, Extensions) {
       var _this = this;
 
       _this.ajax = function () {
@@ -385,7 +389,7 @@
           // Remove gene entity set because gene id is the key
           if (mutation.embedQuery.hasOwnProperty('mutation')) {
             var mutationFilters = mutation.embedQuery.mutation;
-            delete mutationFilters.entityListId;
+            delete mutationFilters[Extensions.ENTITY];
           }
 
         });

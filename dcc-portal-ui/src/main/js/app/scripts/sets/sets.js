@@ -126,8 +126,9 @@
   });
 
 
-  module.directive('setOperation',
-    function($location, $timeout, $filter, Page, LocationService, Settings, SetService, SetOperationService) {
+  module.directive('setOperation', function($location, $timeout, $filter, Page, LocationService,
+    Settings, SetService, SetOperationService, Extensions) {
+
     return {
       restrict: 'E',
       scope: {
@@ -251,11 +252,9 @@
           SetService.materialize(type, params).then(function(data) {
             function redirect2Advanced() {
               var filters = {};
-              filters[type] = {
-                entityListId: {
-                  is: [data.id]
-                }
-              };
+              filters[type] = {};
+              filters[type][Extensions.ENTITY] = { is: [data.id] };
+
               $location.path(path).search({filters: angular.toJson(filters)});
             }
             wait(data.id, 10, redirect2Advanced);

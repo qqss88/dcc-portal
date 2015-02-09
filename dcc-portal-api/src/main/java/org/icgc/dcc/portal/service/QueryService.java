@@ -315,7 +315,7 @@ public class QueryService {
       if (typeMapping.containsKey(facetField.getKey())) {
         String fieldName = typeMapping.get(facetField.getKey());
 
-        boolean isGeneId = fieldName.equals("_gene_id");
+        // boolean isGeneId = fieldName.equals("_gene_id");
 
         if (prefixMapping != null && prefixMapping.containsKey(kind)) {
           fieldName = String.format("%s.%s", prefixMapping.get(kind), fieldName);

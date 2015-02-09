@@ -13,7 +13,7 @@
             </span>
 
             <span> 
-                {{ terms.is.length !== 1? "IN (" : ['entityListId'].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
+                {{ terms.is.length !== 1? "IN (" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
             </span>
 
             <span data-ng-repeat="termObj in terms.is track by termObj.term">
@@ -21,7 +21,7 @@
                 <span data-ng-if="!$last">,&nbsp;</span>  
             </span>
             <span> 
-                {{ terms.is.length !== 1? ")" : ['entityListId'].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
+                {{ terms.is.length !== 1? ")" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
             </span>
 
             <span data-ng-if="!$last"> AND </span>

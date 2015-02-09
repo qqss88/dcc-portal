@@ -310,8 +310,9 @@ public class PortalProperties extends Configuration {
     String demoListFilterParam;
 
     @JsonProperty
+    int maxPreviewNumberOfHits;
+    @JsonProperty
     int maxNumberOfHits;
-
     @JsonProperty
     int maxMultiplier;
   }

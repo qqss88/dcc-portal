@@ -46,7 +46,7 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
   module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, RestangularNoCache, Page, SetService, AnalysisService) {
+    Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -56,22 +56,27 @@
     $scope.enrichment = {};
     $scope.syncError = false;
 
-    // FIXME: Debug - remove
-    $scope.debugReset = function() {
-      window.localStorage.clear();
-      window.location.reload();
+    // Selected sets
+    $scope.selectedSets = [];
+    $scope.addSelection = function(set) {
+      // console.log('adding set', set);
+      $scope.selectedSets.push(set);
+    };
+
+    $scope.removeSelection = function(set) {
+      // console.log('removeng set', set);
+      _.remove($scope.selectedSets, function(s) {
+        return s.id === set.id;
+      });
     };
 
     $scope.exportSet = function(id) {
       SetService.exportSet(id);
     };
 
-
     // Send IDs generate new set operations analysis
     $scope.launchSetAnalysis = function() {
-      var selected = _.filter($scope.entityLists, function(d) {
-        return d.checked === true;
-      });
+      var selected = $scope.selectedSets;
 
       // FIXME: sync with terry
       var type = selected[0].type.toUpperCase();
@@ -92,42 +97,41 @@
     };
 
     $scope.launchEnrichmentAnalysis = function() {
-      $scope.enrichment.filters = {
-        gene: {
-          entityListId: {
-            is: [ $scope.enrichmentSet ]
-          }
-        }
+      var filters = {
+        gene: {}
       };
+      filters.gene[Extensions.ENTITY] = { is: [$scope.enrichmentSet] };
+
+      $scope.enrichment.filters = filters;
       $scope.enrichment.modal = true;
     };
 
 
     $scope.update = function() {
-      // Check if delete should be enabled
-      $scope.canBeDeleted = _.filter($scope.entityLists, function(item) {
-        if (item.readonly && item.readonly === true) {
+
+      // Check if delete button should be enabled
+      $scope.canBeDeleted = _.filter($scope.selectedSets, function(set) {
+        if (set.readonly && set.readonly === true) {
           return false;
         }
-        return item.checked === true;
+        return true;
       }).length;
 
 
-      var selected, uniqued;
-      selected = _.filter($scope.entityLists, function(item) {
-        return item.checked === true;
-      });
-
-
+      // Check which analyses are applicable
+      var selected = $scope.selectedSets, uniqued = [];
       uniqued = _.uniq(_.pluck(selected, 'type'));
 
       $scope.enrichmentSet = null;
       $scope.setop = null;
 
+      // Enrichment analysis takes only ONE gene set
       if (selected.length === 1 && uniqued[0] === 'gene') {
         $scope.enrichmentSet = selected[0].id;
         $scope.totalCount = selected[0].count;
       }
+
+      // Set operations takes up to 3 sets of the same type
       if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
         $scope.setop = true;
       }
@@ -140,17 +144,13 @@
         return;
       }
 
-      console.log('list length', $scope.entityLists.length);
-      var toRemove = [];
-      $scope.entityLists.forEach(function(d) {
-        console.log(d.id, d.checked, d.readonly);
-        if (d.checked === true && ! d.readonly) {
-          toRemove.push(d.id);
-        }
+      var toRemove = _.filter($scope.selectedSets, function(set) {
+        return !angular.isDefined(set.readonly);
       });
 
+
       if (toRemove.length > 0) {
-        SetService.removeSeveral(toRemove);
+        SetService.removeSeveral(_.pluck(toRemove, 'id'));
         $scope.update();
       }
     };
@@ -166,34 +166,12 @@
 
 
     // TODO: Move this out
-    var REMOVE_ONE = 'Are you sure you want to remove Analysis?';
-    var REMOVE_ALL = 'Are you sure you want to remove all Analyses?';
+    var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
+    var REMOVE_ALL = 'Are you sure you want to remove all analyses?';
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
     $scope.analysisList = AnalysisService.getAll();
-
-
-    /**
-     * Check status of any entityLists that are not in FINISHED stated
-     */
-     /*
-    function synchronizeSets(numTries) {
-
-      var unfinished = 0;
-      SetService.sync();
-
-
-      unfinished = _.filter($scope.entityLists, function(d) {
-        return d.state !== 'FINISHED';
-      }).length;
-
-      if (unfinished > 0) {
-        $timeout(function() {
-          synchronizeSets();
-        }, 4000);
-      }
-    }*/
 
 
     function synchronizeSets(numTries) {
@@ -253,7 +231,6 @@
         var currentState = data.state;
         data.state = currentState;
 
-        // console.log('data state', data.state);
 
         // Check if we need to poll
         if (currentState !== 'FINISHED') {

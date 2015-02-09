@@ -107,7 +107,9 @@
   /**
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
-  module.service('SetService', function($window, Restangular, RestangularNoCache, API, localStorageService, toaster) {
+  module.service('SetService',
+    function($window, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions) {
+
     var LIST_ENTITY = 'entity';
     var _this = this;
 
@@ -149,18 +151,18 @@
       return data;
     }
 
+
+    /*
     this.saveAll = function(lists) {
       localStorageService.set(LIST_ENTITY, lists);
     };
+    */
 
 
     this.createAdvLink = function(set) {
       var type = set.type.toLowerCase(), filters = {};
-      filters[type] = {
-        entityListId: {
-          is: [set.id]
-        }
-      };
+      filters[type] = {};
+      filters[type][Extensions.ENTITY] = {is: [set.id]};
 
       if (['gene', 'mutation'].indexOf(type) >= 0) {
         return '/search/' + type.charAt(0) + '?filters=' + angular.toJson(filters);
@@ -174,7 +176,7 @@
 
     this.materialize = function(type, params) {
       var data = params2JSON(type, params);
-      return Restangular.one('entitylist').post('union', data, {}, {'Content-Type': 'application/json'});
+      return Restangular.one('entityset').post('union', data, {}, {'Content-Type': 'application/json'});
     };
 
 
@@ -191,13 +193,8 @@
     this.addSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
-      promise = Restangular.one('entitylist').post(undefined, data, {}, {'Content-Type': 'application/json'});
+      promise = Restangular.one('entityset').post(undefined, data, {}, {'Content-Type': 'application/json'});
 
-      /*
-      promise = Restangular.one('entitylist')
-        .withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, undefined, {}, { 'Content-Type': 'application/json' });
-      */
       promise.then(function(data) {
         if (! data.id) {
           console.log('there is no id!!!!');
@@ -224,7 +221,7 @@
       var promise = null;
       var data = params2JSON(type, params);
 
-      promise = Restangular.one('entitylist').post('union', data, {}, {'Content-Type': 'application/json'});
+      promise = Restangular.one('entityset').post('union', data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         if (! data.id) {
           console.log('there is an error in creating derived set');
@@ -281,10 +278,8 @@
     this.refreshList = function() {
       setList.forEach(function(set) {
         var filters = {};
-
-        filters[set.type] = {
-          entityListId: {is: [ set.id ]}
-        };
+        filters[set.type] = {};
+        filters[set.type][Extensions.ENTITY] = {is: [set.id]};
 
         if (['gene', 'mutation'].indexOf(set.type) !== -1) {
           set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
@@ -297,7 +292,7 @@
 
     // FIXME: Add cached version
     this.getMetaData = function( ids ) {
-      return RestangularNoCache.several('entitylist/lists', ids).get('', {});
+      return RestangularNoCache.several('entityset/sets', ids).get('', {});
     };
 
     this.lookupTable = function(metaData) {
@@ -309,16 +304,15 @@
     };
 
     this.exportSet = function(id) {
-      $window.location.href = API.BASE_URL + '/entitylist/' + id + '/export';
-      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/entitylist/' + id + '/export';
+      $window.location.href = API.BASE_URL + '/entityset/' + id + '/export';
     };
-
 
 
     /****** Local storage related API ******/
     this.getAll = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
       _this.refreshList();
+
       return setList;
     };
 

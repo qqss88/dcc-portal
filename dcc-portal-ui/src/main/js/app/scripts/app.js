@@ -211,12 +211,8 @@
   module.constant('Extensions', {
     GENE_ID: 'id',
 
-    GENE_LISTS: [
-      {id: 'entityListId', label: 'Gene List'}
-    ],
-
     // Donor, mutation or gene lists
-    ENTITY: 'entityListId',
+    ENTITY: 'entitySetId',
 
     // Order matters, this is in most important to least important
     GENE_SET_ROOTS: [

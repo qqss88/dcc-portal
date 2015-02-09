@@ -99,7 +99,7 @@ public class ResourceUtils {
   static final String API_PARAMS_PARAM = "params";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity List ID";
-  static final String API_ENTITY_LIST_ID_PARAM = "entityListId";
+  static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
 
   static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity List Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";

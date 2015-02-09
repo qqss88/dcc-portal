@@ -75,7 +75,7 @@ public class EnrichmentAnalyzer {
   /**
    * DCC-2856: Gene set cardinality threshold.
    */
-  private static final int GENE_SET_GENE_COUNT_THRESHOLD = 5;
+  private static final int GENE_SET_GENE_COUNT_THRESHOLD = 0;
 
   /**
    * Dependencies.
@@ -99,6 +99,7 @@ public class EnrichmentAnalyzer {
    * @param analysis the definition
    */
   @Async
+  @SneakyThrows
   public void analyze(@NonNull UUID analysisId) {
     val watch = createStarted();
 
@@ -202,12 +203,14 @@ public class EnrichmentAnalyzer {
       analysisRepository.update(analysis);
 
       log.info("Finished analyzing in {}", watch);
-    } catch (Exception e) {
-      // Update state for UI polling
+    } catch (Throwable t) {
+      // Update state for UI termination
       analysis.setState(ERROR);
 
-      log.error("[{}] Error analyzing @ {} ...", analysisId, watch);
+      log.error("[{}] Error analyzing @ {}: {}", new Object[] { analysisId, watch, t.getMessage() });
       analysisRepository.update(analysis);
+
+      throw t;
     }
   }
 
@@ -306,7 +309,7 @@ public class EnrichmentAnalyzer {
       val geneSetResult = results.get(i);
       val geneSetId = geneSetResult.getGeneSetId();
 
-      log.info("[{}/{}] Post-processing {}", new Object[] { i + 1, results.size(), geneSetId });
+      log.debug("[{}/{}] Post-processing {}", new Object[] { i + 1, results.size(), geneSetId });
       val geneSetOverlapQuery = geneSetOverlapQuery(query, universe, inputGeneListId, geneSetId);
 
       // Update

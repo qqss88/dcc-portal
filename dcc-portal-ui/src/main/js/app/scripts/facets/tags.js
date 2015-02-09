@@ -26,6 +26,7 @@
 
     $scope.projects = HighchartsService.projectColours;
 
+    $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {
 

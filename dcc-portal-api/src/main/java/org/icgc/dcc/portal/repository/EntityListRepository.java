@@ -32,7 +32,7 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 @RegisterMapperFactory(JsonMapperFactory.class)
 public interface EntityListRepository extends JsonRepository {
 
-  public final static String TABLE_NAME = "entity_list";
+  public final static String TABLE_NAME = "entity_set";
 
   @SqlQuery("SELECT " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
   EntityList find(@Bind(ID_FIELD_NAME) UUID id);

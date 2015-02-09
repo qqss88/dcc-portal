@@ -21,7 +21,9 @@
   /**
    * Display the JSON filter in more user friendly format
    */
-  angular.module('icgc.ui.query', []).directive('queryDisplay', function(FiltersUtil, LocationService, SetService) {
+  angular.module('icgc.ui.query', []).directive('queryDisplay',
+    function(FiltersUtil, LocationService, SetService, Extensions) {
+
     return {
       restrict: 'E',
       replace: true,
@@ -60,6 +62,8 @@
             refresh();
           }
         });
+
+        scope.Extensions = Extensions;
 
       }
     };

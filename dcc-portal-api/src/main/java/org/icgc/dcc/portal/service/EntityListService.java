@@ -155,11 +155,12 @@ public class EntityListService {
 
     val list = repository.find(listId);
     if (null == list) {
-      // create if the demo record doesn't exist in the relational database.
+      // Create the demo record if it doesn't exist in the relational database.
       log.info(
           "The demo record in the relational store does not exist therefore is now being recreated: '{}'",
           newList);
       val insertCount = repository.save(newList);
+      checkState(insertCount == 1, "Could not save the demo list - Insert count: %s", insertCount);
     }
 
     analyzer.materializeList(listId, demoEntityList.definition);
@@ -192,7 +193,7 @@ public class EntityListService {
     return createAndSaveNewListFrom(listDefinition, null);
   }
 
-  // Helpers to facilitate exportListItems() only. They should be used in anywhere else.
+  // Helpers to facilitate exportListItems() only. They should not be used in anywhere else.
   private List<List<String>> convertToListOfList(@NonNull final List<String> list) {
     val result = new ArrayList<List<String>>(list.size());
     for (val v : list) {

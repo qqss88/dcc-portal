@@ -37,7 +37,7 @@ public class IndexModel {
   /**
    * Special cases for term lookups
    */
-  public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entityListId";
+  public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entitySetId";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -591,17 +591,6 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
-  }
-
-  /**
-   * Map each entity type to its corresponding elastic search list type FIXME: Update mapping when available
-   */
-  public static final EnumMap<Kind, String> ENTITY_LIST_TYPE_MAPPING =
-      new EnumMap<Kind, String>(Kind.class);
-  static {
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.GENE, "gene-ids");
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.DONOR, "donor-ids");
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.MUTATION, "mutation-ids");
   }
 
   /**

@@ -72,8 +72,7 @@ public class DerivedEntityListDefinition extends BaseEntityList {
   private void validateUnion(final List<UnionUnit> union) {
     if (union.isEmpty()) {
       throw new IllegalArgumentException("The union argument must not be empty.");
-    }
-    else {
+    } else {
       for (val unionUnit : union) {
         if (!unionUnit.isValid()) {
           throw new IllegalArgumentException("Not all union units in the union argument are valid.");
