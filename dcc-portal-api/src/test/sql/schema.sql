@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS union_analysis (
    id   UUID PRIMARY KEY,
    data TEXT
 );
-CREATE TABLE IF NOT EXISTS entity_list (
+CREATE TABLE IF NOT EXISTS entity_set(
    id   UUID PRIMARY KEY,
    data TEXT
 );

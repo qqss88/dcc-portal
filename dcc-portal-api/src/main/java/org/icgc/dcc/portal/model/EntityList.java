@@ -133,7 +133,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  public static EntityList forStatusInProgress(
+  public static EntityList createForStatusInProgress(
       final UUID id,
       @NonNull final String name,
       final String description,
@@ -148,7 +148,7 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  public static EntityList forStatusFinished(final UUID id, final String name, final String description,
+  public static EntityList createForStatusFinished(final UUID id, final String name, final String description,
       final Type type, final long count) {
 
     if (count < 0) {

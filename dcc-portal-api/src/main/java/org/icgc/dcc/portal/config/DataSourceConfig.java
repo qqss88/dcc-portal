@@ -17,7 +17,6 @@
 
 package org.icgc.dcc.portal.config;
 
-import lombok.SneakyThrows;
 import lombok.val;
 
 import org.skife.jdbi.v2.DBI;
@@ -41,12 +40,5 @@ public class DataSourceConfig {
     val factory = new DBIFactory();
 
     return factory.build(environment, properties.getDatabase(), name);
-  }
-
-  @SneakyThrows
-  public DBI dbi2(PortalProperties properties, Environment environment) {
-    val factory = new DBIFactory();
-
-    return null;// factory.build(environment, properties.getDatabase(), "postgresql");
   }
 }

@@ -594,17 +594,6 @@ public class IndexModel {
   }
 
   /**
-   * Map each entity type to its corresponding elastic search list type FIXME: Update mapping when available
-   */
-  public static final EnumMap<Kind, String> ENTITY_LIST_TYPE_MAPPING =
-      new EnumMap<Kind, String>(Kind.class);
-  static {
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.GENE, "gene-ids");
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.DONOR, "donor-ids");
-    ENTITY_LIST_TYPE_MAPPING.put(Kind.MUTATION, "mutation-ids");
-  }
-
-  /**
    * Internal gene set types
    */
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

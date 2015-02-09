@@ -31,8 +31,6 @@ public class Settings {
   int maxNumberOfHits;
   int maxMultiplier;
 
-  // int enrichmentGeneLimit;
-
   public static SettingsBuilder builder() {
     return new SettingsBuilder();
   }

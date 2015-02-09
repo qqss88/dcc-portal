@@ -17,7 +17,9 @@
  */
 package org.icgc.dcc.portal.analysis;
 
+import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.icgc.dcc.portal.model.Query.NO_FIELDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Min;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +50,6 @@ import org.icgc.dcc.portal.model.BaseEntityList;
 import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.EntityList;
 import org.icgc.dcc.portal.model.EntityListDefinition;
-import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
@@ -63,10 +65,9 @@ import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * TODO
@@ -76,12 +77,10 @@ import com.google.common.collect.ImmutableList;
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UnionAnalyzer {
 
-  private static final List<String> NO_FIELDS = ImmutableList.of("_id");
-
   @NonNull
   private final Client client;
-  @NonNull
-  private final IndexModel index;
+  @Value("#{indexName}")
+  private final String indexName;
   @NonNull
   private final PortalProperties properties;
 
@@ -98,16 +97,25 @@ public class UnionAnalyzer {
   @NonNull
   private final MutationRepository mutationRepository;
 
+  @Min(1)
+  private int maxNumberOfHits;
+  @Min(1)
+  private int maxMultiplier;
+  @Min(1)
+  private int maxUnionCount;
+  @Min(1)
+  private int maxPreviewNumberOfHits;
+
   @PostConstruct
   private void init() {
-    maxNumberOfHits = properties.getSetOperation().getMaxNumberOfHits();
-    maxMultiplier = properties.getSetOperation().getMaxMultiplier();
+    val setOpSettings = properties.getSetOperation();
+    maxNumberOfHits = setOpSettings.getMaxNumberOfHits();
+    maxMultiplier = setOpSettings.getMaxMultiplier();
 
-    if (maxMultiplier > 1) {
-      maxUnionCount = maxNumberOfHits * maxMultiplier;
-    } else {
-      maxUnionCount = maxNumberOfHits;
-    }
+    maxUnionCount = maxNumberOfHits * maxMultiplier;
+
+    maxPreviewNumberOfHits = min(setOpSettings.getMaxPreviewNumberOfHits(), maxUnionCount);
+
   }
 
   private final static String FIELD_NAME = "_id";
@@ -168,18 +176,10 @@ public class UnionAnalyzer {
     return boolFilter;
   }
 
-  private int maxNumberOfHits;
-  private int maxMultiplier;
-  private int maxUnionCount;
-
   private long getCountFrom(@NonNull final SearchResponse response, final long max) {
     long result = SearchResponses.getTotalHitCount(response);
 
-    return (result > max) ? max : result;
-  }
-
-  private String getIndexName() {
-    return this.index.getIndex();
+    return min(max, result);
   }
 
   @Async
@@ -232,6 +232,15 @@ public class UnionAnalyzer {
     return count;
   }
 
+  public List<String> previewSetUnion(@NonNull final DerivedEntityListDefinition definition) {
+    val definitions = definition.getUnion();
+    val entityType = definition.getType();
+
+    val response = unionAll(definitions, entityType, maxPreviewNumberOfHits);
+
+    return SearchResponses.getHitIds(response);
+  }
+
   @Async
   public void combineLists(
       @NonNull final UUID newListId,
@@ -247,7 +256,7 @@ public class UnionAnalyzer {
       val definitions = listDefinition.getUnion();
       val entityType = listDefinition.getType();
 
-      val response = unionAll(definitions, entityType);
+      val response = unionAll(definitions, entityType, maxUnionCount);
 
       val totalHits = SearchResponses.getTotalHitCount(response);
       if (totalHits > maxUnionCount) {
@@ -293,15 +302,14 @@ public class UnionAnalyzer {
     }
   }
 
-  private SearchResponse unionAll(
-      final Iterable<UnionUnit> definitions,
-      final BaseEntityList.Type entityType) {
+  private SearchResponse unionAll(final Iterable<UnionUnit> definitions, final BaseEntityList.Type entityType,
+      final int max) {
 
     val response = runEsQuery(
         getIndexTypeNameFrom(entityType),
         SearchType.QUERY_THEN_FETCH,
         toBoolFilterFrom(definitions, entityType),
-        maxUnionCount);
+        max);
 
     return response;
   }
@@ -321,7 +329,7 @@ public class UnionAnalyzer {
 
   private SearchResponse executeFilterQuery(@NonNull final EntityListDefinition definition, final int max) {
 
-    log.info("List def is: " + definition);
+    log.debug("List def is: " + definition);
 
     val limitedGeneQuery = Query.builder()
         .fields(NO_FIELDS)
@@ -393,7 +401,7 @@ public class UnionAnalyzer {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
 
     val search = client
-        .prepareSearch(getIndexName())
+        .prepareSearch(indexName)
         .setTypes(indexTypeName)
         .setSearchType(searchType)
         .setQuery(query)
@@ -415,14 +423,15 @@ public class UnionAnalyzer {
     return response;
   }
 
-  public List<String> retriveListItems(final EntityList entityList) {
+  public List<String> retriveListItems(@NonNull final EntityList entityList) {
     val lookupType = getLookupTypeFrom(entityList.getType());
+    val lookupTypeName = lookupType.getName();
     val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
-        lookupType.getName(), entityList.getId().toString());
+        lookupTypeName, entityList.getId().toString());
 
     val response = query.execute().actionGet();
     val rawValues = response.getSource().get(TERMS_LOOKUP_PATH);
-    log.debug("Raw values are: '{}'", rawValues);
+    log.debug("Raw values of {} are: '{}'", lookupTypeName, rawValues);
 
     return MAPPER.convertValue(rawValues, LIST_TYPE_REFERENCE);
   }

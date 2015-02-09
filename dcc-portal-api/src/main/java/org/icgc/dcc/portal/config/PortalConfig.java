@@ -181,7 +181,6 @@ public class PortalConfig {
         .demoListUuid(setOperationConfig.demoListUuid)
         .maxNumberOfHits(setOperationConfig.maxNumberOfHits)
         .maxMultiplier(setOperationConfig.maxMultiplier)
-        // .enrichmentGeneLimit(setOperationConfig.enrichmentGeneLimit)
         .build();
   }
 

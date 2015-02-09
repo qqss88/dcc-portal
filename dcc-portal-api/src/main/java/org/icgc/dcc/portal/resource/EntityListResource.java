@@ -68,7 +68,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 
 @Slf4j
 @Component
-@Path("/v1/entitylist")
+@Path("/v1/entityset")
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class EntityListResource {
 

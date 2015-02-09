@@ -22,7 +22,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
@@ -38,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.service.BadRequestException;
@@ -91,5 +94,16 @@ public class UnionAnalysisResource {
     return Response.status(ACCEPTED)
         .entity(newAnalysis)
         .build();
+  }
+
+  @POST
+  @Path("/preview")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  public List<String> previewSetUnion(
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntityListDefinition listDefinition
+      ) {
+
+    return service.previewSetUnion(listDefinition);
   }
 }

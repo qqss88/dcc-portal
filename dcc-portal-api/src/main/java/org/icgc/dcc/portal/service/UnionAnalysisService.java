@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import java.util.List;
 import java.util.UUID;
 
 import lombok.NonNull;
@@ -27,6 +28,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
+import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
@@ -65,7 +67,7 @@ public class UnionAnalysisService {
 
     val entityType = request.getType();
 
-    val newAnalysis = UnionAnalysisResult.forNewlyCreated(entityType);
+    val newAnalysis = UnionAnalysisResult.createForNewlyCreated(entityType);
 
     val insertCount = repository.save(newAnalysis);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
@@ -73,5 +75,9 @@ public class UnionAnalysisService {
     analyzer.calculateUnionUnitCounts(newAnalysis.getId(), request);
 
     return newAnalysis;
+  }
+
+  public List<String> previewSetUnion(@NonNull final DerivedEntityListDefinition listDefinition) {
+    return analyzer.previewSetUnion(listDefinition);
   }
 }

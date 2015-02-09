@@ -169,6 +169,7 @@ icgc:
 setOperation:
 
   # Limit for number of items to return from ElasticSearch
+  maxPreviewNumberOfHits: 1000
   maxNumberOfHits: 20000
   maxMultiplier: 3
 

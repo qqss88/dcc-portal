@@ -38,8 +38,6 @@ import com.wordnik.swagger.annotations.ApiModel;
  */
 @Data
 @ApiModel(value = "UnionAnalysisResult")
-// @AllArgsConstructor
-// (access = AccessLevel.PRIVATE)
 @JsonInclude(NON_NULL)
 public class UnionAnalysisResult implements Identifiable<UUID> {
 
@@ -93,7 +91,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   }
 
   // static constructors
-  public static UnionAnalysisResult forNewlyCreated(final BaseEntityList.Type entityType) {
+  public static UnionAnalysisResult createForNewlyCreated(final BaseEntityList.Type entityType) {
     return new UnionAnalysisResult(
         UUID.randomUUID(),
         State.PENDING,
@@ -101,7 +99,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
         null);
   }
 
-  public static UnionAnalysisResult forInProgress(
+  public static UnionAnalysisResult createForInProgress(
       final UUID id,
       final BaseEntityList.Type entityType) {
 
@@ -112,7 +110,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
         null);
   }
 
-  public static UnionAnalysisResult withResult(
+  public static UnionAnalysisResult createWithResult(
       final UUID id,
       final BaseEntityList.Type entityType,
       @NonNull List<UnionUnitWithCount> result) {
