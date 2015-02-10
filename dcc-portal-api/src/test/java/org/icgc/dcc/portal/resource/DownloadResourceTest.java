@@ -306,7 +306,7 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.get("serviceStatus")).isEqualTo(false);
   }
 
-  private final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
+  private static final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
 
     List<DataType> selection;
 
