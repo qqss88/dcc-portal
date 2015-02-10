@@ -1,168 +1,123 @@
 <h1>
     <i class="t_badge t_badge_icon t_badge__search"><i class="icon-fire"></i></i>ICGC GA4GH Beacon
 </h1>
-    <section class="beaconquery">
-        <div class="narrow">
-          <h3>Query</h3><br>
-          <div>Enter your search criteria below and then click 'Search' to see the result.</div>
-          <table>
+<section class="beaconquery">
+    <div class="narrow">
+        <h3>Query</h3>
+        <br>
+        <div>Enter your search criteria below and then click 'Search' to see the result.</div>
+        <table>
             <tr>
-              <td align="right">
-                <span>Dataset</span>
-              </td>
-              <td>
-                <select data-ng-model="params.project" data-ng-options="project.id for project in projects" ></select>
-              </td>
+                <td align="right">
+                    <span>Dataset</span>
+                </td>
+                <td>
+                    <select data-ng-model="params.project" data-ng-options="project.id for project in projects" ></select>
+                </td>
             </tr>
             <tr>
-              <td align="right">
-                <span>Chromosome ID *</span>
-              </td>
-              <td>
-                <select data-ng-model="params.chr" data-ng-options="item for item in ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y','MT']" data-ng-change="checkParams();"></select>
-              </td>
+                <td align="right">
+                    <span>Chromosome ID *</span>
+                </td>
+                <td>
+                    <select data-ng-model="params.chr"
+                            data-ng-options="item for item in ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y','MT']" data-ng-change="checkParams();"></select>
+                </td>
             </tr>
             <tr>
-              <td align="right">
-                <span>Position *</span>
-              </td>
-              <td>
-                 <input placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position" data-ng-change="checkParams();">
-              </td>
+                <td align="right">
+                    <span>Position *</span>
+                </td>
+                <td>
+                    <input placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position" data-ng-change="checkParams();">
+                </td>
             </tr>
             <tr>
-              <td align="right">
-                <span>Reference *</span>
-              </td>
-              <td>
-                 <input type="text" placeholder="eg. GRCh37" data-ng-model="params.reference" data-ng-change="checkParams();">
-              </td>
+                <td align="right">
+                    <span>Reference *</span>
+                </td>
+                <td>
+                    <input type="text" placeholder="eg. GRCh37" data-ng-model="params.reference" data-ng-change="checkParams();">
+                </td>
             </tr>
             <tr>
-              <td align="right">
-                <span>Allele(s)</span>
-              </td>
-              <td>
-                 <input placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele" data-ng-change="checkParams();">
-              </td>
+                <td align="right">
+                    <span>Allele(s) *</span>
+                </td>
+                <td>
+                    <input allele-validator placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele" data-ng-change="checkParams();">
+                </td>
             </tr>
             <tr>
-              <td></td>
-              <td align="right" >
-                <button class="t_button beaconsubmit" data-ng-click="resetQuery();">Reset</button>&nbsp;
-                <button class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
-              </td>
+                <td></td>
+                <td align="right" >
+                    <button class="t_button beaconsubmit" data-ng-click="resetQuery();">Reset</button>&nbsp;
+                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
+                </td>
             </tr>
-            </table>
-
-            <div  data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></div><br>
-
-          <div data-ng-if="result.exists">
-          <h3>Result</h3>
-          <div>The result of your Beacon query was:</div><br>
-          <div class="beacon-result" data-ng-if="result.value == 'true'">
-            <div class="beacon-icon-container beacon-true-container"><i class="icon-ok beacon-icon"></i></div>
-            <div class="beacon-icon-text beacon-true-text">TRUE</div>
-          </div>
-          <div class="beacon-result" data-ng-if="result.value == 'false'">
-            <div class="beacon-icon-container beacon-false-container"><i class="icon-cancel beacon-icon"></i></div>
-            <div class="beacon-icon-text beacon-false-text">FALSE</div>
-          </div>
-          <div class="beacon-result" data-ng-if="result.value == 'null'">
-            <div class="beacon-icon-container beacon-null-container"><i class="icon-cancel beacon-icon"></i></div>
-            <div class="beacon-icon-text beacon-null-text">NOT FOUND</div>
-          </div>
-          <br>
-          <input class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>
+        </table>
+        <span data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></span><br>
+        <div data-ng-if="result.exists">
+            <h3>Result</h3>
+            <div>The result of your Beacon query was:</div>
+            <br>
+            <div class="beacon-result" data-ng-if="result.value == 'true'">
+                <div class="beacon-icon-container beacon-true-container"><i class="icon-ok beacon-icon"></i></div>
+                <div class="beacon-icon-text beacon-true-text">TRUE</div>
+            </div>
+            <div class="beacon-result" data-ng-if="result.value == 'false'">
+                <div class="beacon-icon-container beacon-false-container"><i class="icon-cancel beacon-icon"></i></div>
+                <div class="beacon-icon-text beacon-false-text">FALSE</div>
+            </div>
+            <div class="beacon-result" data-ng-if="result.value == 'null'">
+                <div class="beacon-icon-container beacon-null-container"><i class="icon-cancel beacon-icon"></i></div>
+                <div class="beacon-icon-text beacon-null-text">NOT FOUND</div>
+            </div>
+            <br>
+            <input class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>
         </div>
         <br>
-        </div>
-        <div class="half">
-          <h3>Notes</h3><br>
-        <div>
-          <h4>information</h4>
-            A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The Beacon
-            is designed to accept a query and responds with <code>true</code> if it finds such an allele, <code>false</code> if its data doesn't match
-          the allele and <code>null</code> if nothing is found.<br>This Beacon searches for alleles observed in ICGC's somatic
-mutations only.<br><br>
-
-          <h4>parameters</h4>
-           <table class="table table-bordered table-striped">
-                </thread>
-                  <tr>
-                    <td>Dataset <span class=beaconquestion>- Optional</span></td>
-                      <td>The dataset to query with the Beacon request. Default is all datasets.</td>
-                  </tr>
-                  <tr>
-                      <td>Chromosome ID</td>
-                      <td><code>1-22, X, Y or MT</code></td>
-                  </tr>
-                  <tr>
-                      <td>Position</td>
-                      <td>The position of the allele in the chromosome (0-based)</td>
-                  </tr>
-                  <tr>
-                      <td>Reference</td>
-                      <td>Genome ID (Currently only <code>GRCH37</code>)</td>
-                  </tr>
-                  <tr>
-                      <td>Allele(s) <span class=beaconquestion>- Optional</span></td>
-                      <td>The allele being searched for: <code>[ACTG]+</code></td>
-                  </tr>
-                </tdread>
-              </table>
-          <br><h4>Links</h4>
-      For more information about each dataset, please visit our <a href="/projects">Cancer Projects page</a>.<br>
-      Read the <a target="_blank" href="/docs/#!/beacon/query_get_0">ICGC API documentation</a> for programmatic access to this
-Beacon.<br>Beacon is a project of the <a  target="_blank" href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>. You can read more about Beacons at <a  target="_blank" href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Project Site</a> and see the details on the <a target="_blank" href="https://docs.google.com/document/d/154GBOixuZxpoPykGKcPOyrYUcgEXVe2NvKx61P4Ybn4/edit?usp=sharing"><i class="icon-external-link"></i>v0.2 Specification Document</a>.<br><small></small>
-        </div><br>
-<div class="alert alert-warning beacon-alert">Note: The v0.2 Specification is still in progress and is subject to change without notice</div>
-    </section>
-<!--
-    <section>
-        <h3>Response</h3><br>
-            <div class="narrow">
-              <table class="table table-bordered table-striped">
-                </thread>
-                  <tr>
-                      <td>Chromosome</td>
-                      <td>22</td>
-                  </tr>
-                  <tr>
-                      <td>Position</td>
-                      <td>29885594</td>
-                  </tr>
-                  <tr>
-                      <td>Reference</td>
-                      <td>GRCh37</td>
-                  </tr>
-                  <tr>
-                      <td>Allele</td>
-                      <td>T</td>
-                  </tr>
-                  <tr>
-                      <td>Result</td>
-                      <td><code>true</code></td>
-                  </tr>
-                </tdread>
-              </table>
-              </div>
-              <div class="half">
-                <div class="well beaconquery">
-                  <!-- Weird formatting needed for it to show up properly - temporary
-                  <pre class="beaconquery">{
-  "beacon_id": "ICGC GA4GH Beacon",
-  "response": {
-      "exists": "true"
-    },
-  "query": {
-      "allele": "T",
-      "chromosome": "22",
-      "position": 29885594,
-      "reference": "GRCh37"
-    }
-}</pre>
-                  </div>
-              </div>
-        </div>
-    </section> -->
+    </div>
+    <div class="half beacon-notes">
+    <h3>Notes</h3>
+    <br>
+    <div>
+        <h4>information</h4>
+        A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The Beacon
+        is designed to accept a query and responds with <code>true</code> if it finds such an allele, <code>false</code> if its data doesn't match
+        the allele and <code>null</code> if nothing is found.<br>This Beacon searches for alleles observed in ICGC's somatic
+        mutations only.<br><br>
+        <h4>parameters</h4>
+        <table class="table table-bordered table-striped">
+            </thread>
+            <tr>
+                <td>Dataset <span class=beaconquestion>- Optional</span></td>
+                <td>The dataset to query with the Beacon request. Default is all datasets.</td>
+            </tr>
+            <tr>
+                <td>Chromosome ID</td>
+                <td><code>1-22, X, Y or MT</code></td>
+            </tr>
+            <tr>
+                <td>Position</td>
+                <td>The position of the allele in the chromosome (1-based)</td>
+            </tr>
+            <tr>
+                <td>Reference</td>
+                <td>Genome ID (Currently only <code>GRCH37</code>)</td>
+            </tr>
+            <tr>
+                <td>Allele(s)</td>
+                <td>The allele being searched for: <code>[ACTG]+</code></td>
+            </tr>
+            </tdread>
+        </table>
+        <br>
+        <h4>Links</h4>
+        For more information about each dataset, please visit our <a href="/projects">Cancer Projects page</a>.<br>
+        Read the <a target="_blank" href="/docs/#!/beacon/query_get_0">ICGC API documentation</a> for programmatic access to this
+        Beacon.<br>Beacon is a project of the <a  target="_blank" href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>. You can read more about Beacons at <a  target="_blank" href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Project Site</a> and see the details on the <a target="_blank" href="https://docs.google.com/document/d/154GBOixuZxpoPykGKcPOyrYUcgEXVe2NvKx61P4Ybn4/edit?usp=sharing"><i class="icon-external-link"></i>v0.2 Specification Document</a>.<br><small></small>
+    </div>
+    <br>
+    <div class="alert alert-warning beacon-alert">Note: The v0.2 Specification is still in progress and is subject to change without notice</div>
+</section>

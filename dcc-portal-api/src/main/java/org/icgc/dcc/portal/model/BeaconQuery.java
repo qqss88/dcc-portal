@@ -29,28 +29,33 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class BeaconQuery {
 
   @JsonProperty
-  @ApiModelProperty(value = "Allele String: [ACTG]+, D or I (Wildcards not yet supported)", required = true)
+  @ApiModelProperty(value = "Allele String: [ACTG]+, D or I (Wildcards not yet supported)")
   String allele;
   @JsonProperty
   @ApiModelProperty(value = "Chromosome ID: 1-22, X, Y, MT", required = true)
   String chromosome;
   @JsonProperty
-  @ApiModelProperty(value = "Position 0-based", required = true)
+  @ApiModelProperty(value = "Position 1-based", required = true)
   int position;
   @JsonProperty
   @ApiModelProperty(value = "Reference ID: GRCh\\d+", required = true)
   String reference;
+  @JsonProperty
+  @ApiModelProperty(value = "The dataset to query against")
+  String dataset;
 
   @JsonCreator
   public BeaconQuery(
       @JsonProperty("allele") String allele,
       @JsonProperty("chromosome") String chromosome,
       @JsonProperty("position") int position,
-      @JsonProperty("reference") String reference) {
+      @JsonProperty("reference") String reference,
+      @JsonProperty("dataset_id") String dataset) {
     this.allele = allele;
     this.position = position;
     this.chromosome = chromosome;
     this.reference = reference;
+    this.dataset = dataset;
   }
 
 }
