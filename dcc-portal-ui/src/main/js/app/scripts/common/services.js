@@ -177,7 +177,8 @@
       GENESET_GENES_OVERLAP: 'Intersection between genes involved in this gene set and input genes.',
       GENESET_DONORS: 'Number of donors filtered by genes in overlap',
       GENESET_MUTATIONS: 'Number of simple somatic mutations filtered by genes in overlap.',
-      GENESET_EXPECTED: 'Number of genes expected by chance',
+      // GENESET_EXPECTED: 'Number of genes expected by chance',
+      GENESET_EXPECTED: 'Number of genes in overlap expected by chance',
       GENESET_PVALUE: 'P-Value using hypergeometric test',
       GENESET_ADJUSTED_PVALUE: 'Adjusted P-Value using the Benjamini-Hochberg procedure'
     };
