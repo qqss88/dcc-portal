@@ -127,7 +127,7 @@ public class DownloadResource {
   private static final String APPLICATION_TAR = "application/x-tar";
 
   @Data
-  public class ServiceStatus {
+  public static class ServiceStatus {
 
     private final boolean serviceStatus;
   }
@@ -520,7 +520,7 @@ public class DownloadResource {
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public List<FileInfo> ListDirectory(
+  public List<FileInfo> listDirectory(
 
       @Auth(required = false) User user,
 
@@ -690,9 +690,10 @@ public class DownloadResource {
     Set<DataType> selectedType = Sets.filter(downloadableTypes, new Predicate<DataType>() {
 
       @Override
-      public boolean apply(@Nullable DataType input) {
+      public boolean apply(DataType input) {
         return input.name.equals(dataType);
       }
+
     });
     if (selectedType.isEmpty()) {
       log.error("permission denied for download type that needs access control: " + dataType

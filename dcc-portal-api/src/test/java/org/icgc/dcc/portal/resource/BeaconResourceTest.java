@@ -71,7 +71,7 @@ public class BeaconResourceTest extends ResourceTest {
   @Test
   public void testNormal() {
     val expected = generateDummyBeaconResponse();
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(expected);
     val response = generateResponse("1", "1111", "GRCh37", "A");
     assertThat(response.getStatus()).isEqualTo(OK_CODE);
@@ -80,7 +80,7 @@ public class BeaconResourceTest extends ResourceTest {
 
   @Test
   public void testInvalidChromosomeArgs() {
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("39", "1111", "GRCh37", "A");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
@@ -88,7 +88,7 @@ public class BeaconResourceTest extends ResourceTest {
 
   @Test
   public void testInvalidAlleleArgs() {
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("1", "1111", "GRCh37", "WTWT");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
@@ -96,7 +96,7 @@ public class BeaconResourceTest extends ResourceTest {
 
   @Test
   public void testInvalidReferenceArgs() {
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("1", "1111", "OMG", "A");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
@@ -104,7 +104,7 @@ public class BeaconResourceTest extends ResourceTest {
 
   @Test
   public void testEmptyArgs() {
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("", "1111", "GRCh37", "A");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
@@ -112,7 +112,7 @@ public class BeaconResourceTest extends ResourceTest {
 
   @Test
   public void testInvalidPositionArgs() {
-    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class)))
+    when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("MT", "1111111111", "GRCh37", "A");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
@@ -130,7 +130,7 @@ public class BeaconResourceTest extends ResourceTest {
   }
 
   private Beacon generateDummyBeaconResponse() {
-    val queryResp = new BeaconQuery("A", "1", 111, "GRCh37");
+    val queryResp = new BeaconQuery("A", "1", 111, "GRCh37", "");
     val respResp = new BeaconResponse("true");
     return new Beacon("whats the id", queryResp, respResp);
   }

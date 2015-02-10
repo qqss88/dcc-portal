@@ -39,19 +39,28 @@ public class BeaconServiceTest extends BaseRepositoryTest {
 
   @Test
   public void testSuccesfullyFound() {
-    Beacon result = service.query("19", 1207014, "GRCh37", "T");
+    Beacon result = service.query("19", 1207014, "GRCh37", "T", "");
     assertThat(result.getResponse().exists).isEqualTo("true");
   }
 
   @Test
   public void testWrongAlleleFound() {
-    Beacon result = service.query("19", 1207014, "GRCh37", "C");
+    Beacon result = service.query("19", 1207014, "GRCh37", "C", "");
     assertThat(result.getResponse().exists).isEqualTo("false");
   }
 
   @Test
   public void testNothingFound() {
-    Beacon result = service.query("11", 11111, "GRCh37", "T");
+    Beacon result = service.query("11", 11111, "GRCh37", "T", "");
+    assertThat(result.getResponse().exists).isEqualTo("null");
+  }
+
+  @Test
+  public void testSpecificDataset() {
+    Beacon result = service.query("11", 11111, "GRCh37", "T", "53049.0");
+    assertThat(result.getResponse().exists).isEqualTo("null");
+
+    result = service.query("11", 1207014, "GRCh37", "T", "MADE-UP");
     assertThat(result.getResponse().exists).isEqualTo("null");
   }
 
