@@ -21,11 +21,11 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_VALUE;
+import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -73,7 +73,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class EntityListResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";
-  private static final String EXPORT_FILE_EXTENSION = ".csv";
+  private static final String EXPORT_FILE_EXTENSION = ".tsv";
 
   @NonNull
   private final EntityListService service;
@@ -86,9 +86,7 @@ public class EntityListResource {
       // should implement @BindIn to allow the IN clause instead of doing a loop here
       val list = service.getEntityList(id);
       if (null != list) {
-
         result.add(list);
-
       }
     }
     return result;
@@ -171,7 +169,7 @@ public class EntityListResource {
 
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}/export")
-  @Produces(APPLICATION_OCTET_STREAM)
+  @Produces(TEXT_TSV)
   public Response exportListItems(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
 

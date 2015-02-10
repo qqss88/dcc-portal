@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
-import static org.supercsv.prefs.CsvPreference.STANDARD_PREFERENCE;
+import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -106,7 +106,7 @@ public class EntityListService {
     return URLEncoder.encode(result, UTF_8.name());
   }
 
-  private final class DemoEntityList {
+  private final static class DemoEntityList {
 
     private static final String NAME = "DEMO gene set";
     private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";
@@ -220,7 +220,7 @@ public class EntityListService {
             .retriveListItems(entityList));
 
     @Cleanup
-    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), STANDARD_PREFERENCE);
+    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
 
     for (val v : content) {
       writer.write(v);
