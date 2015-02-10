@@ -98,31 +98,6 @@ public class DistributedConsumerAssociationStoreTest {
     verify(map).remove(OP_URL, olderAssociation);
   }
 
-  @Test
-  public void argumentsTest() {
-    catchException(associationStore).remove("", "");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).remove(null, null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).load("", "");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).load(null, null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).load("");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).load(null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).save("", mock(Association.class));
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).save(null, mock(Association.class));
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).save(null, null);
-    assertThat(caughtException()).isInstanceOf(NullPointerException.class);
-  }
-
   private void setupAssociations() {
     when(olderAssociation.getExpiry()).thenReturn(new Date(0L));
     when(olderAssociation.getHandle()).thenReturn(OLDER_ASSOCIATION_HANDLE);
