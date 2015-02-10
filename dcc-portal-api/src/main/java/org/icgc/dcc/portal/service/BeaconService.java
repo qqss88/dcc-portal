@@ -55,8 +55,8 @@ import com.google.common.collect.ImmutableMap;
 @Service
 public class BeaconService {
 
-  private final int POSITION_BUFFER = 1000; // Must be larger than any single mutation.
-  private final String BEACON_ID = "ICGC";
+  private static final int POSITION_BUFFER = 1000; // Must be larger than any single mutation.
+  private static final String BEACON_ID = "ICGC";
 
   private final Client client;
   private final String index;

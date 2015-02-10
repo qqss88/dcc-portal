@@ -41,5 +41,4 @@ public class DataSourceConfig {
 
     return factory.build(environment, properties.getDatabase(), name);
   }
-
 }

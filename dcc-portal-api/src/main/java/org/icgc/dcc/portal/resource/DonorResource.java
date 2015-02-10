@@ -76,6 +76,7 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Genes;
 import org.icgc.dcc.portal.model.IdsParam;
+import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.GeneService;
@@ -108,6 +109,13 @@ public class DonorResource {
   private final DonorService donorService;
   private final GeneService geneService;
   private final MutationService mutationService;
+
+  // When the query is keyed by donor id, it makes little sense to use entity set.
+  private void removeDonorEntitySet(ObjectNode filters) {
+    if (filters.path("donor").path(IndexModel.API_ENTITY_LIST_ID_FIELD_NAME).isMissingNode() == false) {
+      ((ObjectNode) filters.get("donor")).remove(IndexModel.API_ENTITY_LIST_ID_FIELD_NAME);
+    }
+  }
 
   @GET
   @Timed
@@ -178,6 +186,8 @@ public class DonorResource {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
 
+    removeDonorEntitySet(filters);
+
     log.info(NESTED_FIND_TEMPLATE, GENE, donors);
 
     filters = mergeFilters(filters, DONOR_FILTER_TEMPLATE, JsonUtils.join(donors));
@@ -196,6 +206,8 @@ public class DonorResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeDonorEntitySet(filters);
+
     log.info(NESTED_COUNT_TEMPLATE, GENE, donorId);
 
     filters = mergeFilters(filters, DONOR_FILTER_TEMPLATE, donorId);
@@ -213,6 +225,8 @@ public class DonorResource {
       ) {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
+
+    removeDonorEntitySet(filters);
 
     log.info(NESTED_COUNT_TEMPLATE, GENE, donors);
 
@@ -238,6 +252,7 @@ public class DonorResource {
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
       ) {
     ObjectNode filters = filtersParam.get();
+    removeDonorEntitySet(filters);
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { MUTATION, donorId, geneId });
 
@@ -258,6 +273,8 @@ public class DonorResource {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
     List<String> genes = geneIds.get();
+
+    removeDonorEntitySet(filters);
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { MUTATION, donors, genes });
 
@@ -292,6 +309,8 @@ public class DonorResource {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
 
+    removeDonorEntitySet(filters);
+
     log.info(NESTED_FIND_TEMPLATE, MUTATION, donors);
 
     filters = mergeFilters(filters, DONOR_FILTER_TEMPLATE, JsonUtils.join(donors));
@@ -310,6 +329,8 @@ public class DonorResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeDonorEntitySet(filters);
+
     log.info(NESTED_COUNT_TEMPLATE, MUTATION, donorId);
 
     filters = mergeFilters(filters, DONOR_FILTER_TEMPLATE, donorId);
@@ -327,6 +348,8 @@ public class DonorResource {
       ) {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
+
+    removeDonorEntitySet(filters);
 
     log.info(NESTED_COUNT_TEMPLATE, MUTATION, donors);
 
@@ -353,6 +376,8 @@ public class DonorResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeDonorEntitySet(filters);
+
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { GENE, donorId, mutationId });
 
     filters = mergeFilters(filters, MUTATION_DONOR_FILTER_TEMPLATE, mutationId, donorId);
@@ -372,6 +397,8 @@ public class DonorResource {
     List<String> donors = donorIds.get();
     List<String> mutations = mutationIds.get();
     ObjectNode filters = filtersParam.get();
+
+    removeDonorEntitySet(filters);
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { GENE, donors, mutations });
 

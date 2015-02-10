@@ -18,7 +18,8 @@
       restrict: 'E',
       scope: {
         enrichmentModal: '=',
-        total: '@'
+        filters: '=',
+        geneLimit: '@'
       },
       templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
       link: function($scope) {
@@ -31,7 +32,7 @@
         $scope.analysisParams = {
           maxGeneSetCount: 50,
           fdr: 0.05,
-          maxGeneCount: $scope.total || 1000,
+          maxGeneCount: $scope.geneLimit || 10000,
           universe: 'REACTOME_PATHWAYS'
         };
 
@@ -39,8 +40,14 @@
         function buildEnrichmentRequest() {
           var data, geneSortParam;
 
-          data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
-            'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+          // Check if we should use a provided filter or the default (LocationService)
+          if (angular.isDefined($scope.filters)) {
+            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+              'filters=' + JSON.stringify($scope.filters) + '&' ;
+          } else {
+            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
+              'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+          }
 
           geneSortParam = LocationService.getJsonParam('genes');
 
@@ -68,7 +75,7 @@
           promise.then(function(result) {
             var id = result.id;
             $scope.enrichmentModal = false;
-            $location.path('/analysis/' + id).search({});
+            $location.path('/analysis/enrichment/' + id).search({});
           });
         };
 
@@ -103,20 +110,25 @@
           if (isNaN(val) === true) {
             return false;
           }
-          if (angular.isNumber(v) === false || v > $scope.total) {
+          if (angular.isNumber(v) === false || v > $scope.geneLimit || v <= 0) {
             return false;
           }
           return true;
         };
 
-        $scope.$watch('total', function(n) {
+        $scope.$watch('geneLimit', function(n) {
           if (n) {
-            $scope.total = Math.min(n, 1000);
+            $scope.geneLimit = Math.min(n, 10000);
             $scope.analysisParams.maxGeneCount = n;
             $scope.checkInput();
           }
         });
 
+        $scope.$watch('filters', function(n) {
+          if (n) {
+            $scope.filters = n;
+          }
+        });
 
       }
     };
@@ -124,7 +136,7 @@
 
 
   angular.module('icgc.enrichment.directives').directive('enrichmentResult',
-    function (Extensions, Restangular, EnrichmentService, ExportService) {
+    function (Extensions, Restangular, EnrichmentService, ExportService, TooltipText) {
 
     return {
       restrict: 'E',
@@ -134,8 +146,11 @@
       templateUrl: '/scripts/enrichment/views/enrichment.result.html',
       link: function($scope) {
 
-        $scope.predicate = 'adjustedPValue';
+        // $scope.predicate = 'adjustedPValue';
+        $scope.predicate = 'pvalue';
         $scope.reverse = false;
+
+        $scope.TooltipText = TooltipText;
 
         function refresh() {
 
@@ -202,14 +217,14 @@
 
     /**
      * Replace list with the input gene list limit
-     * Input gene list takes precedence over gene identifiers (id, uploadGeneListId)
-     * 1) Remove gene.uploadGeneListId
+     * Input gene list takes precedence over gene identifiers (id, entityListId)
+     * 1) Replace gene.entityListId
      * 2) Remove gene.id
      */
     function mergeInputGeneList(filters, geneListId) {
-      delete filters.gene.uploadGeneListId;
+      delete filters.gene[Extensions.ENTITY];
       delete filters.gene.id;
-      filters.gene.inputGeneListId = {
+      filters.gene[Extensions.ENTITY] = {
         is: [geneListId]
       };
       return filters;
@@ -360,20 +375,6 @@
       return filters;
     };
 
-  });
-
-})();
-
-
-
-
-(function () {
-  'use strict';
-
-  var module = angular.module('icgc.enrichment.models', []);
-
-  module.service('Enrichment', function () {
-    // TODO:  API endpoints
   });
 
 })();

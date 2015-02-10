@@ -2,7 +2,7 @@
     Loading Donors...
 </h3></div>
 <div data-ng-if="AdvancedCtrl.Donor.donors.hits.length == 0" class="empty loading-text"><h3>No Donors Found.</h3></div>
-<div data-ng-show="AdvancedCtrl.Donor.donors.hits">
+<div data-ng-show="AdvancedCtrl.Donor.donors.hits.length">
     <section style="position: relative">
         <div data-ng-class="{'graphs-collapsed': !donorExpand}" class="graphs">
             <pie items='AdvancedCtrl.Donor.pieProjectId' heading="Project" label="Donors" type="pie" width="195" group-percent="3"
@@ -36,8 +36,17 @@
     <section>
         <h3>
             Donors
-            <span class="pull-right" style="font-size: 1rem"><dl-button></dl-button></span>
+            <span class="pull-right" style="font-size: 1rem">
+                <button class="t_button" 
+                    data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">
+                    <i class="icon-floppy"></i> Save Donor Set
+                </button>
+                <dl-button></dl-button>
+            </span>
         </h3>
+
+
+
         <div class="t_table_top">
             <span data-table-counts data-label="donors" data-page="AdvancedCtrl.Donor.donors.pagination"></span>
             <span data-toolbar data-dl="donors"></span>

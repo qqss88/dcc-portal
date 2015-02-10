@@ -59,6 +59,18 @@
   }
 }
 
+.t_tabs__tab__charts {
+  &.active, &:hover {
+    border-top-color: $charts;
+  }
+}
+
+.t_tabs__tab__table {
+  &.active, &:hover {
+    border-top-color: $table;
+  }
+}
+
 aside {
   .t_tabs {
     margin-top: 0;

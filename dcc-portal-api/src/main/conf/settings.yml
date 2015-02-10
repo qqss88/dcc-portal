@@ -66,7 +66,7 @@ cache:
   enableLastModified: true
 
   # List of resources for which Last-Modified HTTP header should not be generated. Format: regex accepted by java.lang.String
-  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$"]
+  excludeLastModified: ["^v\\d+/short$", "^v\\d+/auth/.*$", "^v\\d+/download.*$", "^v\\d+/analysis.*$", "^v\\d+/entityset.*$"]
 
   # Enable ETag HTTP header generation
   enableETag: false
@@ -213,6 +213,19 @@ icgc:
 
   # Disallow self-signed SSL certificates
   enableStrictSSL: true
+
+# Set analysis configuration
+setOperation:
+
+  # Limit for number of items to return from ElasticSearch
+  maxPreviewNumberOfHits: 1000
+  maxNumberOfHits: 20000
+  maxMultiplier: 3
+
+  # Settings related to the demo record
+  demoListUuid: "de305d54-75b4-431b-adb2-eb6b9e386023"
+  # Gene demo list - top 50 mutated genes in Cancer Gene census. See https://wiki.oicr.on.ca/download/attachments/60561081/Cancer_Gene_Census_Top50.txt?version=1&modificationDate=1422392030000&api=v2
+  demoListFilterParam: "TP53,NRG1,FIP1L1,CAMTA1,FHIT,PIK3CA,ALK,RUNX1,NTRK3,PDE4DIP,LPP,KRAS,PTPRK,BRAF,ZNF521,FOXP1,STAG2,GPHN,EBF1,CUX1,RANBP17,PRDM16,NF1,SETBP1,CDH11,MAML2,GOPC,ERC1,PTEN,ATRX,APC,PBX1,EGFR,ARID1A,GAS7,NCOA2,CACNA1D,ERG,SRGAP3,AKAP9,CTNNB1,EIF3E,EXT1,LHFP,RSPO2,PTPRB,NOTCH2,KMT2D,PTPRC,GPC3"
 
 release:
   releaseDate: "placeholder"

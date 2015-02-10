@@ -131,13 +131,13 @@ header {
   }
 
   &.t_nav__items__item__analysis a {
-    color: $greyDark;
-    border: .3rem solid $greyDark;
+    color: $mauve;
+    border: .3rem solid $mauve;
   }
 
   &.t_nav__items__item__analysis a:hover {
     color: $white;
-    background: $greyDark;
+    background: $mauve;
   }
 
   &.t_nav__items__item__download a {
@@ -328,7 +328,7 @@ header {
     color: $white;
   }
   .t_nav__items__item__analysis a {
-    background: $greyDark;
+    background: $mauve;
     color: $white;
   }
   .t_nav__items__item__download a {
@@ -365,7 +365,7 @@ header {
 #analysis-page {
   .t_nav__items__item__analysis a {
     cursor: default;
-    background: $greyDark;
+    background: $mauve;
     color: $white;
     i {
       box-shadow: none;

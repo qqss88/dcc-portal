@@ -134,7 +134,15 @@ sub vcl_recv {
 		/* Never cache analysis path */
 		return(pipe);
 	}
+	
+	if (req.url ~ "^/api/.*/entityset.*$") {
+		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
+		set req.http.Connection = "close";
 
+		/* Never cache analysis path */
+		return(pipe);
+	}
+	
         if (req.http.X-Bypass) {
                 /* Never cache bypass requests for load testing */
                 return(pipe);

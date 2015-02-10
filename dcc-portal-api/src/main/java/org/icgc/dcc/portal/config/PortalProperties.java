@@ -88,6 +88,10 @@ public class PortalProperties extends Configuration {
   ReleaseProperties release = new ReleaseProperties();
 
   @Valid
+  @JsonProperty
+  SetOperationProperties setOperation = new SetOperationProperties();
+
+  @Valid
   @NotNull
   @JsonProperty
   DatabaseConfiguration database = new DatabaseConfiguration();
@@ -292,6 +296,25 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     String releaseDate;
 
+  }
+
+  @Data
+  public static class SetOperationProperties {
+
+    @JsonProperty
+    @NotEmpty
+    String demoListUuid;
+
+    @JsonProperty
+    @NotEmpty
+    String demoListFilterParam;
+
+    @JsonProperty
+    int maxPreviewNumberOfHits;
+    @JsonProperty
+    int maxNumberOfHits;
+    @JsonProperty
+    int maxMultiplier;
   }
 
   @Data

@@ -30,11 +30,13 @@
     'ui.bootstrap.position',
     'ui.router',
     'infinite-scroll',
-    'angular-underscore',
+    'angular-lodash',
     'angularytics',
-    'chieffancypants.loadingBar',
+    'angular-loading-bar',
     'btford.markdown',
     'LocalStorageModule',
+    'toaster',
+
 
     // 3rd party
     'highcharts',
@@ -60,8 +62,10 @@
     'icgc.genelist',
     'icgc.genesets',
     'icgc.visualization',
-    //'icgc.enrichment',
-    //'icgc.analysis',
+    'icgc.enrichment',
+    'icgc.sets',
+    'icgc.analysis',
+    'icgc.beacon',
 
     // old
     'app.ui',
@@ -99,17 +103,29 @@
       $rootScope.$on('$stateChangeSuccess', scroll);
     });
 
-  module.config(function ($locationProvider, $stateProvider, $urlRouterProvider,
+
+  module.constant('API', {
+    BASE_URL: '/api/v1'
+  });
+
+
+  module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider) {
+                          markdownConverterProvider, localStorageServiceProvider, API) {
+
+    // Disables debugging information
+    $compileProvider.debugInfoEnabled(false);
+
+    // Combine calls - not working
+    // $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
-    RestangularProvider.setBaseUrl('/api/v1');
+    RestangularProvider.setBaseUrl(API.BASE_URL);
     // Use to connect to production API regardless of setup
-    // RestangularProvider.setBaseUrl('https://dcc.icgc.org/api/v1');
+ //   // RestangularProvider.setBaseUrl('https://dcc.icgc.org' + API.BASE_URL);
+ //    RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321/api/v1');
-    // RestangularProvider.setBaseUrl('http://localhost:8080/api/v1');
+    // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -118,6 +134,7 @@
     $locationProvider.html5Mode(true);
 
     AngularyticsProvider.setEventHandlers(['Google']);
+
 
     $stateProvider.state(
       'team', {
@@ -147,7 +164,8 @@
   module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {
 
     var ignoreNotFound = [
-      '/analysis/'
+      '/analysis/',
+      '/list'
     ];
 
     Restangular.setErrorInterceptor(function (response) {
@@ -193,11 +211,8 @@
   module.constant('Extensions', {
     GENE_ID: 'id',
 
-    GENE_LISTS: [
-      {id: 'uploadGeneListId', label: 'Uploaded Gene List'},
-      {id: 'inputGeneListId', label: 'Input Gene List'}
-    ],
-
+    // Donor, mutation or gene lists
+    ENTITY: 'entitySetId',
 
     // Order matters, this is in most important to least important
     GENE_SET_ROOTS: [

@@ -1,0 +1,94 @@
+td{
+   padding:6px;
+}
+
+.beaconquery{
+ padding-top: 0;
+  padding-bottom: 0;
+}
+
+.beaconquestion{
+  font-style: italic;
+}
+
+.beacon-icon{
+  font-size: xx-large;
+  color: white;
+}
+
+.beacon-icon-container{
+  float:left;
+  width: 30%;
+  padding-top: 1.8rem;
+  height: inherit;
+  border-bottom-left-radius: .5rem;
+  border-top-left-radius: .5rem;
+  text-align: center;
+}
+
+.beacon-icon-text{
+  font-size: x-large;
+  padding-top: 1.7rem;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 550;
+  text-align: center;
+  float:left;
+  width:70%;
+  height:inherit;
+  border-bottom-right-radius: .5rem;
+  border-top-right-radius: .5rem;
+  background: white;
+}
+
+/** Different colors for each response */
+.beacon-true-container{
+   background: #2D832D;
+}
+.beacon-true-text{
+  color: #2D832D;
+  border: 3px solid #2D832D ;
+}
+
+.beacon-false-container{
+   background: #FFC200;
+}
+.beacon-false-text{
+  color: #FFC200;
+  border: 3px solid #FFC200;
+}
+
+
+.beacon-null-container{
+   background: #D31313;
+}
+.beacon-null-text{
+  color: #D31313;
+  border: 3px solid #D31313 ;
+}
+
+/** end of different color options */
+
+.beacon-result{
+  padding-right: 8rem;
+  width: 100%;
+  height: 80px;
+}
+
+.beacon-api-link{
+  padding-top: 0;
+  margin-bottom: 2px;
+  padding-bottom: 0;
+  padding-left: 1px;
+  padding-right: 3px;
+  width: 90%;
+}
+.beacon-api-link:focus{
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e3e3e3;
+}
+
+.beacon-alert{
+  margin-bottom: 2rem;
+}
