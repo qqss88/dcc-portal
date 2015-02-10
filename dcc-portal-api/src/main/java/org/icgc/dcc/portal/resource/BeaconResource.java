@@ -73,8 +73,7 @@ public class BeaconResource extends BaseResource {
 
   @GET
   @ApiOperation(value = "Beacon", nickname = "Beacon", response = Beacon.class,
-      notes = "A GA4GH Beacon based off of the <a href=https://docs.google.com/document/d/"
-          + "154GBOixuZxpoPykGKcPOyrYUcgEXVe2NvKx61P4Ybn4/edit#>v0.2 spec</a>. Given a position in a chromosome and an alllele,"
+      notes = "A GA4GH Beacon based off of the v0.2 specification. Given a position in a chromosome and an alllele,"
           + " the beacon looks for matching mutations at that location and returns a response accordingly.<br/><br/> Read "
           + "more about beacons and see other beacons at <a href=http://ga4gh.org/#/beacon>GAG4GH's Beacon Project Site</a>.")
   @Consumes(APPLICATION_FORM_URLENCODED)
