@@ -29,7 +29,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 public class BeaconQuery {
 
   @JsonProperty
-  @ApiModelProperty(value = "Allele String: [ACTG]+, D or I (Wildcards not yet supported)")
+  @ApiModelProperty(value = "Allele String: [ACTG]+, D or I (Wildcards not yet supported)", required = true)
   String allele;
   @JsonProperty
   @ApiModelProperty(value = "Chromosome ID: 1-22, X, Y, MT", required = true)
