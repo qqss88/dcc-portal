@@ -33,6 +33,13 @@
 
 })();
 
+// Chromosome lengths
+var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
+               '5': 180915260, '6': 171115067, '7': 159138663, '8': 146364022,
+               '9': 141213431, '10': 135534747, '11': 135006516, '12': 133851895,
+               '13': 115169878, '14': 107349540, '15': 102531392, '16': 90354753,
+               '17': 81195210, '18': 78077248, '19': 59128983, '20': 63025520,
+               '21': 48129895, '22': 51304566, 'X': 155270560, 'Y': 59373566, 'MT': 16569};
 
 (function() {
   'use strict';
@@ -60,22 +67,44 @@
     });
 
     $scope.hasInvalidParams = true;
+    $scope.errorMessage = '';
     $scope.result = {
       exists:false,
       value:''
     };
 
     $scope.checkParams = function(){
+      //reset error messages
+      $scope.errorMessage = '';
+
       //first if anything required is empty or missing, stop checking
       if(!($scope.params.reference && $scope.params.position)){
         $scope.hasInvalidParams = true;
         return;
       }
 
+      // check that the position is less than length of chromosome
+      if($scope.params.position > lengths[$scope.params.chr]){
+        $scope.errorMessage = 'Position must be less than chromosome length: '+lengths[$scope.params.chr];
+        return;
+      }
+
+      // check that the reference is GRCh37 (all we support)
+      if($scope.params.reference !== 'GRCh37'){
+        $scope.errorMessage = 'Currently, only GRCh37 is supported';
+        return;
+      }
+
+      // check that allele is in form [ACTG]+
+      if(($scope.params.allele)&&!(/^[ACTG]+$/.test($scope.params.allele))){
+        $scope.errorMessage = 'Allele must be of form [ACTG]+';
+        return;
+      }
+
+      //made it to the end, no errors found
       $scope.hasInvalidParams = false;
     };
 
-    $scope.errorMessage='error error';
     $scope.submitQuery = function() {
       var promise = Restangular.one('beacon', 'query')
       .get({
@@ -99,7 +128,8 @@
         chr:'1',
         reference:'GRCh37',
       };
-      $scope.hasEmptyParams = true;
+      $scope.hasInvalidParams = true;
+      $scope.errorMessage = '';
       $scope.result = {
         exists:false,
         value:''
