@@ -74,6 +74,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
       exists:false,
       value:''
     };
+    $scope.chromosomes = Object.keys(lengths);
 
     $scope.checkParams = function(){
       $scope.hasInvalidParams = true;

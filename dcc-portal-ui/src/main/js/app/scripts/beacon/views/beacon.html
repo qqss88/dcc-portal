@@ -21,7 +21,7 @@
                 </td>
                 <td>
                     <select data-ng-model="params.chr"
-                            data-ng-options="item for item in ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','X','Y','MT']" data-ng-change="checkParams();"></select>
+                            data-ng-options="item for item in chromosomes" data-ng-change="checkParams();"></select>
                 </td>
             </tr>
             <tr>
@@ -74,7 +74,7 @@
                 <div class="beacon-icon-text beacon-null-text">NOT FOUND</div>
             </div>
             <br>
-            <input class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>
+            <input onClick="this.select();" class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>
         </div>
         <br>
     </div>
