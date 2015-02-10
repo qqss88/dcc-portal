@@ -27,20 +27,20 @@ import static java.lang.System.currentTimeMillis;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CLINICAL;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CLINICALSAMPLE;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CNSM;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.EXP_ARRAY;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.EXP_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.JCN;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.METH_ARRAY;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.METH_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.MIRNA_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.PEXP;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SGV_CONTROLLED;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SSM_CONTROLLED;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SSM_OPEN;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.STSM;
+import static org.icgc.dcc.downloader.core.DataType.CLINICAL;
+import static org.icgc.dcc.downloader.core.DataType.CLINICALSAMPLE;
+import static org.icgc.dcc.downloader.core.DataType.CNSM;
+import static org.icgc.dcc.downloader.core.DataType.EXP_ARRAY;
+import static org.icgc.dcc.downloader.core.DataType.EXP_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.JCN;
+import static org.icgc.dcc.downloader.core.DataType.METH_ARRAY;
+import static org.icgc.dcc.downloader.core.DataType.METH_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.MIRNA_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.PEXP;
+import static org.icgc.dcc.downloader.core.DataType.SGV_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SSM_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SSM_OPEN;
+import static org.icgc.dcc.downloader.core.DataType.STSM;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -77,14 +77,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
-import org.icgc.dcc.data.common.FileInfo;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobProgress;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobStatus;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
-import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
-import org.icgc.dcc.data.downloader.SelectionEntry;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
+import org.icgc.dcc.downloader.core.DataType;
+import org.icgc.dcc.downloader.core.FileInfo;
+import org.icgc.dcc.downloader.core.SelectionEntry;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
@@ -141,7 +141,7 @@ public class DownloadResource {
   private static final String FULL_ARCHIVE_EXTENSION = ".tar";
 
   private final DonorService donorService;
-  private final DynamicDownloader downloader;
+  private final DownloaderClient downloader;
   private final ExportedDataFileSystem fs;
   private Stage env;
 
@@ -220,7 +220,7 @@ public class DownloadResource {
   }
 
   @Autowired
-  public DownloadResource(DonorService donorService, DynamicDownloader downloader, ExportedDataFileSystem fs, Stage env) {
+  public DownloadResource(DonorService donorService, DownloaderClient downloader, ExportedDataFileSystem fs, Stage env) {
     this.donorService = donorService;
     this.downloader = downloader;
     this.fs = fs;

@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.icgc.dcc.data.downloader.SelectionEntry;
+import org.icgc.dcc.downloader.core.SelectionEntry;
 import org.icgc.dcc.portal.service.BadRequestException;
 
 import com.fasterxml.jackson.core.type.TypeReference;

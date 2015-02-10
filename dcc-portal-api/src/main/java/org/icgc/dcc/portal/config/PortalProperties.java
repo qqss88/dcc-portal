@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.config;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.inject.Stage.DEVELOPMENT;
-import static org.icgc.dcc.data.archive.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
+import static org.icgc.dcc.downloader.core.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
 
 import java.util.List;
 
