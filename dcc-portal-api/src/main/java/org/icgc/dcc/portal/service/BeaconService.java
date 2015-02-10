@@ -17,10 +17,13 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME_END;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CHROMOSOME_START;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_OCCURRENCES;
+import static org.icgc.dcc.common.core.model.FieldNames.PROJECT_ID;
 import lombok.val;
 
 import org.elasticsearch.client.Client;
@@ -67,7 +70,7 @@ public class BeaconService {
     this.client = client;
   }
 
-  public Beacon query(String chromosome, int position, String reference, String allele) {
+  public Beacon query(String chromosome, int position, String reference, String allele, String dataset) {
     val search = client.prepareSearch(index)
         .setTypes(IndexModel.Type.MUTATION_CENTRIC.getId())
         .setSearchType(QUERY_THEN_FETCH);
@@ -77,6 +80,8 @@ public class BeaconService {
         .lte(position));
     boolQuery.must(QueryBuilders.rangeQuery(MUTATION_CHROMOSOME_END).lte(position + POSITION_BUFFER));
     boolQuery.must(QueryBuilders.termQuery(MUTATION_CHROMOSOME, chromosome));
+    if (!isNullOrEmpty(dataset)) boolQuery.must(QueryBuilders.nestedQuery(MUTATION_OCCURRENCES,
+        QueryBuilders.termQuery(MUTATION_OCCURRENCES + '.' + PROJECT_ID, dataset)));
     search.setQuery(boolQuery);
 
     val params = new ImmutableMap.Builder<String, Object>()
@@ -106,7 +111,7 @@ public class BeaconService {
       }
     }
 
-    return createBeaconResponse(finalResult, chromosome, position, reference, allele);
+    return createBeaconResponse(finalResult, chromosome, position, reference, allele, dataset);
   }
 
   private String generateDefaultScriptField() {
@@ -118,8 +123,9 @@ public class BeaconService {
         + "m==allele";
   }
 
-  private Beacon createBeaconResponse(String exists, String chromosome, int position, String reference, String allele) {
-    val queryResp = new BeaconQuery(allele, chromosome, position, reference);
+  private Beacon createBeaconResponse(String exists, String chromosome, int position, String reference, String allele,
+      String dataset) {
+    val queryResp = new BeaconQuery(allele, chromosome, position, reference, dataset);
     val respResp = new BeaconResponse(exists);
     return new Beacon(BEACON_ID, queryResp, respResp);
   }
