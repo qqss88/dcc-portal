@@ -53,6 +53,8 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
     var projectsPromise = Restangular.one('projects')
       .get({
         'field' : 'id',
+        'sort':'id',
+        'order':'asc',
         'size' : 100
       },{'Accept':'application/json'});
 
@@ -72,6 +74,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
       exists:false,
       value:''
     };
+    $scope.chromosomes = Object.keys(lengths);
 
     $scope.checkParams = function(){
       $scope.hasInvalidParams = true;
@@ -79,7 +82,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
       $scope.errorMessage = '';
 
       //first if anything required is empty or missing, stop checking
-      if(!($scope.params.reference && $scope.params.position)){
+      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
         $scope.hasInvalidParams = true;
         return;
       }
@@ -92,13 +95,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
       // check that the reference is GRCh37 (all we support)
       if($scope.params.reference !== 'GRCh37'){
-        $scope.errorMessage = 'Currently, only GRCh37 is supported';
-        return;
-      }
-
-      // check that allele is in form [ACTG]+
-      if(($scope.params.allele)&&!(/^[ACTG]+$/.test($scope.params.allele))){
-        $scope.errorMessage = 'Allele must be of form [ACTG]+';
+        $scope.errorMessage = 'Currently only GRCh37 is supported';
         return;
       }
 
@@ -112,7 +109,8 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
         'chromosome' : $scope.params.chr,
         'reference':$scope.params.reference,
         'position':$scope.params.position.replace(/^0+/,''),
-        'allele':$scope.params.allele ? $scope.params.allele : ''
+        'allele':$scope.params.allele ? $scope.params.allele : '',
+        'dataset':$scope.params.project.id === 'ALL' ? '':$scope.params.project.id
       },{'Accept':'application/json'});
 
       promise.then(function(data){
@@ -152,6 +150,36 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
             val = '';
           }
           var clean = val.replace( /[^0-9]+/g, '');
+          if (val !== clean) {
+            ngModelCtrl.$setViewValue(clean);
+            ngModelCtrl.$render();
+          }
+          return clean;
+        });
+
+        element.bind('keypress', function(event) {
+          if(event.keyCode === 32) {
+            event.preventDefault();
+          }
+        });
+      }
+    };
+  });
+
+  module.directive('alleleValidator', function() {
+    return {
+      require: '?ngModel',
+      link: function(scope, element, attrs, ngModelCtrl) {
+        if(!ngModelCtrl) {
+          return;
+        }
+
+        ngModelCtrl.$parsers.push(function(val) {
+          if (angular.isUndefined(val)) {
+            val = '';
+          }
+          var clean = val.replace( /[^ACTGactg]+/g, '');
+          clean = clean.toUpperCase();
           if (val !== clean) {
             ngModelCtrl.$setViewValue(clean);
             ngModelCtrl.$render();

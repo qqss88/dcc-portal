@@ -69,11 +69,11 @@ public class BeaconResource extends BaseResource {
   private static final String CHROMOSOME_X = "X";
   private static final String CHROMOSOME_Y = "Y";
   private static final String CHROMOSOME_MT = "MT";
+  private static final String ANY_DATASET = " ";
 
   @GET
   @ApiOperation(value = "Beacon", nickname = "Beacon", response = Beacon.class,
-      notes = "A GA4GH Beacon based off of the <a href=https://docs.google.com/document/d/"
-          + "154GBOixuZxpoPykGKcPOyrYUcgEXVe2NvKx61P4Ybn4/edit#>v0.2 spec</a>. Given a position in a chromosome and an alllele,"
+      notes = "A GA4GH Beacon based off of the v0.2 specification. Given a position in a chromosome and an alllele,"
           + " the beacon looks for matching mutations at that location and returns a response accordingly.<br/><br/> Read "
           + "more about beacons and see other beacons at <a href=http://ga4gh.org/#/beacon>GAG4GH's Beacon Project Site</a>.")
   @Consumes(APPLICATION_FORM_URLENCODED)
@@ -83,11 +83,13 @@ public class BeaconResource extends BaseResource {
 
       @ApiParam(value = "Chromosome ID: 1-22, X, Y, MT", required = true) @QueryParam("chromosome") String chromosome,
 
-      @ApiParam(value = "Coordinate (0-based)", required = true) @QueryParam("position") String position,
+      @ApiParam(value = "Position (1-based)", required = true) @QueryParam("position") String position,
 
       @ApiParam(value = "Genome ID: GRCh\\d+", required = true) @QueryParam("reference") String reference,
 
-      @ApiParam(value = "Alleles: [ACTG]+, D, I") @QueryParam("allele") String allele
+      @ApiParam(value = "Alleles: [ACTG]+", required = true) @QueryParam("allele") String allele,
+
+      @ApiParam(value = "Dataset to be queried (Project ID)") @QueryParam("dataset") String dataset
 
       ) {
     // Validate
@@ -100,10 +102,13 @@ public class BeaconResource extends BaseResource {
     } else if (isNullOrEmpty(allele)) {
       allele = WILDCARD_ANY;
     } else if (!isValidAllele(allele)) {
-      throw new BadRequestException("'allele' is invalid (must be [ACTG]+, D or I)");
+      throw new BadRequestException("'allele' is invalid (must be [ACTG]+)");
+    } else if (isNullOrEmpty(dataset)) {
+      dataset = ANY_DATASET;
     }
 
-    return beaconService.query(chromosome.trim(), tryParse(position.trim()), reference.trim(), allele.trim());
+    return beaconService.query(chromosome.trim(), tryParse(position.trim()), reference.trim(), allele.trim(),
+        dataset.trim());
   }
 
   private Boolean isValidChromosome(String chromosome) {
@@ -112,12 +117,11 @@ public class BeaconResource extends BaseResource {
     }
     chromosome = chromosome.trim();
     val chr = tryParse(chromosome);
-    if (chr == null) return false;
+    if (chr != null && (chr <= 22 && chr >= 1)) return true;
 
-    return (chr <= 22 && chr >= 1)
-        || chromosome.equals(CHROMOSOME_X)
-        || chromosome.equals(CHROMOSOME_Y)
-        || chromosome.equals(CHROMOSOME_MT);
+    return chromosome.equalsIgnoreCase(CHROMOSOME_X)
+        || chromosome.equalsIgnoreCase(CHROMOSOME_Y)
+        || chromosome.equalsIgnoreCase(CHROMOSOME_MT);
   }
 
   private Boolean isValidReference(String ref) {

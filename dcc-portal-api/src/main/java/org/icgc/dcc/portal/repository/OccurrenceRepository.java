@@ -43,6 +43,7 @@ import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.Map;
 
@@ -315,10 +316,8 @@ public class OccurrenceRepository {
         result.get(projectId).put(donorId, result.get(projectId).get(donorId) + 1);
       }
 
-      // Break condition: No hits are returned
-      if (response.getHits().hits().length == 0) {
-        response = client.prepareSearchScroll(response.getScrollId())
-            .setScroll(new TimeValue(0)).execute().actionGet();
+      val finished = !hasHits(response);
+      if (finished) {
         break;
       }
     }

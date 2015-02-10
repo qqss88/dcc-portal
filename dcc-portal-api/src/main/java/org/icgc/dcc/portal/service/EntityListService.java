@@ -106,7 +106,7 @@ public class EntityListService {
     return URLEncoder.encode(result, UTF_8.name());
   }
 
-  private final class DemoEntityList {
+  private static final class DemoEntityList {
 
     private static final String NAME = "DEMO gene set";
     private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";

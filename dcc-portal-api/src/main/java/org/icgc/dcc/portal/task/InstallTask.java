@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.List;
 
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -101,7 +102,8 @@ public class InstallTask extends Task {
         .redirectErrorStream(true)
         .start();
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    @Cleanup
+    val reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String line = null;
     while ((line = reader.readLine()) != null) {
       log.info("'install': {}", line);
