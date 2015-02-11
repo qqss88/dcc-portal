@@ -124,7 +124,15 @@
                 <td class="text-center"><span data-exists="DonorCtrl.donor.jcnExists"></span></td>
             </tr>
         </table>
-        <dl-button dl-filter='{"donor":{"id":{"is":["{{DonorCtrl.donor.id}}"]}}}'></dl-button>
+
+        <span data-ng-init="calc=false"></span>
+        <button class="t_button" type="button" data-ng-click="calc=!calc">
+            <i data-ng-class="{'icon-download':!calc, 'icon-spin icon-spinner':calc}"></i>
+            <span data-ng-show="!calc"> Download Donor Data</span>
+            <span data-ng-show="calc"> Calculating file sizes...</span>
+        </button>
+
+        <dl-button dl-filter='{"donor":{"id":{"is":["{{DonorCtrl.donor.id}}"]}}}' data-calc="calc"></dl-button>
     </div>
 </section>
 <section id="clinical">

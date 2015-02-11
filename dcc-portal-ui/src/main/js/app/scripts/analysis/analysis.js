@@ -31,6 +31,9 @@
           return $stateParams.id;
         }],
         analysisType: ['$stateParams', function($stateParams) {
+          if ($stateParams.type === 'set') {
+            return 'union';
+          }
           return $stateParams.type;
         }]
       }
@@ -92,7 +95,7 @@
         if (!data.id) {
           console.log('cannot create set operation');
         }
-        $location.path('analysis/union/' + data.id);
+        $location.path('analysis/set/' + data.id);
       });
     };
 
@@ -254,10 +257,16 @@
     }
 
     $scope.getAnalysis = function(id, type) {
+      var routeType = type;
       $timeout.cancel(analysisPromise);
+
+      if (type === 'union') {
+        routeType = 'set';
+      }
+
       if (id) {
         $scope.analysisId = id;
-        $location.path('analysis/' + type + '/' + id);
+        $location.path('analysis/' + routeType + '/' + id);
       } else {
         $scope.analysisId = null;
         $location.path('analysis');
