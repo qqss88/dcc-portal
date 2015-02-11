@@ -25,7 +25,7 @@
                     <td class="text-right">
                         <a href="{{setMap[item].advLink}}">{{setMap[item].count | number}}</a>
                     </td>
-                    <td>{{setMap[item].type.toLowerCase()}}</td>
+                    <td>{{setMap[item].type.toLowerCase() | trans:true}}</td>
                 </tr>
             </tbody>
         </table>
@@ -50,8 +50,8 @@
                     <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
                         <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
-                    <td class="set_symbol">
-                        <span data-ng-bind-html="displaySetOperation(item, setList)"></span>
+                    <td>
+                        <set-notation data-item="item" data-set-list="setList"></set-notation>
                     </td>
                     <td class="text-right">
                         <a data-ng-if="item.count > 0" data-ng-click="redirect(item)" href="">{{item.count | number}}</a>
@@ -60,9 +60,8 @@
                     <td>
                         <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
-                                <i class="icon-floppy" data-tooltip="Save as new list" 
-                                  data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                             </span>
                         </span>
                     </td>
@@ -77,8 +76,8 @@
                     <td>
                         <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
-                                <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                                 <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
+                                <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
                         </span>
                     </td>
