@@ -112,14 +112,14 @@
                     <th></th>
                 </thead>
                 <tbody>
-                    <tr data-ng-repeat="item in entityLists" data-ng-style="{'color': $index===0?'#4488BB':''}" data-ng-init="checked=false">
+                    <tr data-ng-repeat="item in entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
                         <td class="text-center">
                             <span data-ng-if="item.state === 'FINISHED' || syncError" style="cursor:pointer" 
                                   data-ng-click="checked = !checked; checked === true? addSelection(item) : removeSelection(item); update();">
                                 <i class="{{checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                             </span>
                         </td>
-                        <td>{{item.type}}</td>
+                        <td>{{item.type | trans:true}}</td>
                         <td>{{item.name}}</td>
                         <td style="max-width: 30rem">{{item.description}}</td>
                         <td class="text-right" data-ng-if="item.state === 'FINISHED'">

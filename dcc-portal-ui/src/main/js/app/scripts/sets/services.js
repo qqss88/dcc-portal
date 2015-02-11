@@ -30,6 +30,37 @@
       return (_.difference(s1, s2).length === 0 && _.difference(s2, s1).length === 0);
     };
 
+
+    /**
+     *  Pull out the unique sets involved in the set operations analysis result
+     */
+    this.extractUniqueSets = function(items) {
+      var result = [];
+      items.forEach(function(set) {
+        set.intersection.forEach(function(id) {
+          if (_.contains(result, id) === false) {
+            result.push(id);
+          }
+        });
+      });
+      return result;
+    };
+
+
+    /**
+     * Sort set operations analysis results
+     */
+    this.sortData = function(items) {
+      items.forEach(function(subset) {
+        subset.intersection.sort();
+        subset.exclusions.sort();
+      });
+      return _.sortBy(items, function(subset) {
+          var secondary = subset.exclusions.length > 0 ? subset.exclusions[0] : '';
+          return subset.intersection.length + '' + secondary;
+        }).reverse();
+    };
+
     /**
      * Transform data array to be consumed by venn-diagram visualization
      */
@@ -59,47 +90,6 @@
     this.getSetShortHand = _getSetShortHand;
 
 
-    /**
-     * Transforms internal set prepresentation into UI display format
-     * with proper set notations
-     */
-    this.displaySetOperation = function(item, setList) {
-      var i = 0;
-      var displayStr = '';
-      var intersection = item.intersection;
-      var exclusions = item.exclusions;
-
-      // Intersection
-      if (intersection.length > 1) {
-        displayStr += '(';
-        for (i=0; i < intersection.length; i++) {
-          displayStr += _getSetShortHand(intersection[i], setList);
-          if (i < intersection.length-1) {
-            displayStr += ' &cap; ';
-          }
-        }
-        displayStr += ')';
-      } else {
-        displayStr += _getSetShortHand(intersection[0], setList);
-      }
-
-      // Subtractions
-      if (exclusions.length > 1) {
-        displayStr += ' - ';
-        displayStr += '(';
-        for (i=0; i < exclusions.length; i++) {
-          displayStr += _getSetShortHand(exclusions[i], setList);
-          if (i < exclusions.length-1) {
-            displayStr += ' &cup; ';
-          }
-        }
-        displayStr += ')';
-      } else if (exclusions.length > 0) {
-        displayStr += ' - ';
-        displayStr += _getSetShortHand(exclusions[0], setList);
-      }
-      return displayStr;
-    };
   });
 
 
