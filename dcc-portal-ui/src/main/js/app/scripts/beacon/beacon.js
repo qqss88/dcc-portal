@@ -40,6 +40,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
                '13': 115169878, '14': 107349540, '15': 102531392, '16': 90354753,
                '17': 81195210, '18': 78077248, '19': 59128983, '20': 63025520,
                '21': 48129895, '22': 51304566, 'X': 155270560, 'Y': 59373566, 'MT': 16569};
+var DATASET_ALL = 'ALL DATASETS';
 
 (function() {
   'use strict';
@@ -60,7 +61,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
-      $scope.projects.unshift({id:'-- ALL DATASETS'});
+      $scope.projects.unshift({id:DATASET_ALL});
       $scope.params = {
         project:$scope.projects[0],
         chr:'1',
@@ -111,7 +112,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
         'reference':$scope.params.reference,
         'position':$scope.params.position,
         'allele':$scope.params.allele ? $scope.params.allele : '',
-        'dataset':$scope.params.project.id === 'ALL' ? '':$scope.params.project.id
+        'dataset':$scope.params.project.id === DATASET_ALL ? '':$scope.params.project.id
       },{'Accept':'application/json'});
 
       promise.then(function(data){
