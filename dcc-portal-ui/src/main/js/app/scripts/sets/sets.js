@@ -126,6 +126,38 @@
   });
 
 
+  /**
+   * Display s subset from set operations using set notation
+   */
+  module.directive('setNotation', function(SetOperationService) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        item: '=',
+        setList: '='
+      },
+      template: '<div>' +
+        '(<span data-ng-repeat="setId in item.intersection">' +
+        ' {{getName(setId)}} ' +
+        '<span data-ng-if="!$last" class="set-symbol">&cap;</span>' +
+        '</span>)' +
+        '<span data-ng-if="item.exclusions.length > 0" class="set-symbol"> &minus; </span>' +
+        '<span data-ng-if="item.exclusions.length > 0">(</span>' +
+        '<span data-ng-repeat="setId in item.exclusions">' +
+        ' {{getName(setId)}} ' +
+        '<span data-ng-if="!$last" class="set-symbol">&cup;</span>' +
+        '</span>' +
+        '<span data-ng-if="item.exclusions.length > 0">)</span>' +
+        '</div>',
+      link: function($scope) {
+        $scope.getName = function(setId) {
+          return SetOperationService.getSetShortHand(setId, $scope.setList);
+        };
+      }
+    };
+  });
+
   module.directive('setOperation', function($location, $timeout, $filter, Page, LocationService,
     Settings, SetService, SetOperationService, Extensions) {
 
@@ -262,8 +294,6 @@
         };
 
 
-        // $scope.createAdvLink = SetService.createAdvLink;
-
         $scope.calculateUnion = function(item) {
           $scope.dialog.setUnion = computeUnion(item);
           $scope.dialog.setType = $scope.item.type.toLowerCase();
@@ -287,19 +317,12 @@
           $scope.selectedTotalCount = 0;
         };
 
-
-        $scope.toggleSelection = toggleSelection;
-
-
         $scope.isSelected = function(ids) {
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
           });
           return existIdex >= 0;
         };
-
-        $scope.displaySetOperation = SetOperationService.displaySetOperation;
-        $scope.getSetShortHand = SetOperationService.getSetShortHand;
 
         $scope.tableMouseEnter = function(ids) {
           vennDiagram.toggleHighlight(ids, true);
@@ -311,61 +334,46 @@
           $scope.current = [];
         };
 
+        $scope.getSetShortHand = SetOperationService.getSetShortHand;
+        $scope.toggleSelection = toggleSelection;
+
+        var config = {
+          // Because SVG urls are based on <base> tag, we need absolute path
+          urlPath: $location.path(),
+
+          mouseoverFunc: function(d) {
+            $scope.$apply(function() {
+              $scope.current = d.data;
+            });
+          },
+
+          mouseoutFunc: function() {
+            $scope.$apply(function() {
+              $scope.current = [];
+            });
+          },
+          clickFunc: function(d) {
+            $scope.$apply(function() {
+              toggleSelection(d.data, d.count);
+            });
+          },
+
+          valueLabelFunc: function(val) {
+            return $filter('number')(val);
+          },
+          setLabelFunc: function(id) {
+            return SetOperationService.getSetShortHand(id, $scope.setList);
+          }
+        };
+
+
         function initVennDiagram() {
-          var config = {
-            // Because SVG urls are based on <base> tag, we need absolute path
-            urlPath: $location.path(),
-
-            mouseoverFunc: function(d) {
-              $scope.$apply(function() {
-                $scope.current = d.data;
-              });
-            },
-
-            mouseoutFunc: function() {
-              $scope.$apply(function() {
-                $scope.current = [];
-              });
-            },
-
-            clickFunc: function(d) {
-              $scope.$apply(function() {
-                toggleSelection(d.data, d.count);
-              });
-            }
-          };
-
           $scope.setType = $scope.item.type.toLowerCase();
 
-
           // Normalize and sort for tabluar display
-          $scope.item.result.forEach(function(subset) {
-            subset.intersection.sort();
-            subset.exclusions.sort();
-          });
-          $scope.data = _.sortBy($scope.item.result, function(subset) {
-            var secondary = subset.exclusions.length > 0 ? subset.exclusions[0] : '';
-            return subset.intersection.length + '' + secondary;
-          }).reverse();
-
+          $scope.data = SetOperationService.sortData($scope.item.result);
           $scope.vennData = SetOperationService.transform($scope.data);
-
-          $scope.setList = [];
-          $scope.data.forEach(function(set) {
-            set.intersection.forEach(function(id) {
-              if (_.contains($scope.setList, id) === false) {
-                $scope.setList.push(id);
-              }
-            });
-          });
-
-          config.valueLabelFunc = function(val) {
-            return $filter('number')(val);
-          };
-
-          config.setLabelFunc = function(id) {
-            return SetOperationService.getSetShortHand(id, $scope.setList);
-          };
+          $scope.setList = SetOperationService.extractUniqueSets($scope.data);
 
           SetService.getMetaData($scope.setList).then(function(results) {
             $scope.setMap = {};
@@ -394,6 +402,4 @@
     };
   });
 })();
-
-
 

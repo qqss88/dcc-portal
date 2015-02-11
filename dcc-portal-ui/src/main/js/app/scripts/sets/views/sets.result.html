@@ -50,8 +50,8 @@
                     <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
                         <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
                     </td>
-                    <td class="set_symbol">
-                        <span data-ng-bind-html="displaySetOperation(item, setList)"></span>
+                    <td>
+                        <set-notation data-item="item" data-set-list="setList"></set-notation>
                     </td>
                     <td class="text-right">
                         <a data-ng-if="item.count > 0" data-ng-click="redirect(item)" href="">{{item.count | number}}</a>
