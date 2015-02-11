@@ -151,7 +151,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
 
   @Override
   public FilterBuilder visitFilter(@NonNull FilterNode node) {
-    return visitBool((BoolNode) node.getChild(0));
+    return visitBool((BoolNode) node.getFirstChild());
   }
 
   public SearchRequestBuilder visit(@NonNull ExpressionNode node, @NonNull QueryContext queryContext) {
@@ -203,7 +203,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     val childrenCount = node.childrenCount();
     checkState(childrenCount == 1, "NotNode can have only one child. Found {}", childrenCount);
 
-    return notFilter(node.getChild(0).accept(this));
+    return notFilter(node.getFirstChild().accept(this));
   }
 
   @Override
@@ -290,7 +290,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   public FilterBuilder visitNested(NestedNode node) {
     log.debug("Visiting Nested: {}", node);
 
-    return nestedFilter(node.getPath(), node.getChild(0).accept(this));
+    return nestedFilter(node.getPath(), node.getFirstChild().accept(this));
   }
 
   @Override

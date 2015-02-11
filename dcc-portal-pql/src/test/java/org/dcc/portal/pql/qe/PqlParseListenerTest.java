@@ -56,17 +56,17 @@ public class PqlParseListenerTest {
     val esAst = createEsAst(query);
     log.info("{}", esAst);
     assertFilterStructure(esAst);
-    val mustNode = (MustBoolNode) esAst.getChild(0).getChild(0).getChild(0);
+    val mustNode = (MustBoolNode) esAst.getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(5);
 
-    val orNode = mustNode.getChild(0);
+    val orNode = mustNode.getFirstChild();
     assertThat(orNode.childrenCount()).isEqualTo(2);
 
     // gt(age, 10)
-    val gtRangeNode = (RangeNode) orNode.getChild(0);
+    val gtRangeNode = (RangeNode) orNode.getFirstChild();
     assertThat(gtRangeNode.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode.getName()).isEqualTo("a");
-    val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getChild(0);
+    val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getFirstChild();
     assertThat(gtRangeNode1Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode1Child.getValue()).isEqualTo(10);
 
@@ -74,7 +74,7 @@ public class PqlParseListenerTest {
     val geRangeNode = (RangeNode) orNode.getChild(1);
     assertThat(geRangeNode.childrenCount()).isEqualTo(1);
     assertThat(geRangeNode.getName()).isEqualTo("b");
-    val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getChild(0);
+    val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getFirstChild();
     assertThat(gtRangeNode2Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode2Child.getValue()).isEqualTo(20.2);
 
@@ -94,10 +94,10 @@ public class PqlParseListenerTest {
     assertThat(andNode.childrenCount()).isEqualTo(2);
 
     // lt(e, 30)
-    val ltRangeNode = (RangeNode) andNode.getChild(0);
+    val ltRangeNode = (RangeNode) andNode.getFirstChild();
     assertThat(ltRangeNode.childrenCount()).isEqualTo(1);
     assertThat(ltRangeNode.getName()).isEqualTo("e");
-    val ltRangeNodeChild = (LessThanNode) ltRangeNode.getChild(0);
+    val ltRangeNodeChild = (LessThanNode) ltRangeNode.getFirstChild();
     assertThat(ltRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(ltRangeNodeChild.getValue()).isEqualTo(30);
 
@@ -105,7 +105,7 @@ public class PqlParseListenerTest {
     val leRangeNode = (RangeNode) andNode.getChild(1);
     assertThat(leRangeNode.childrenCount()).isEqualTo(1);
     assertThat(leRangeNode.getName()).isEqualTo("f");
-    val leRangeNodeChild = (LessEqualNode) leRangeNode.getChild(0);
+    val leRangeNodeChild = (LessEqualNode) leRangeNode.getFirstChild();
     assertThat(leRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(leRangeNodeChild.getValue()).isEqualTo(40);
 
@@ -113,7 +113,7 @@ public class PqlParseListenerTest {
     val termsNode = (TermsNode) mustNode.getChild(4);
     assertThat(termsNode.childrenCount()).isEqualTo(2);
     assertThat(termsNode.getField()).isEqualTo("sex");
-    val maleNode = (TerminalNode) termsNode.getChild(0);
+    val maleNode = (TerminalNode) termsNode.getFirstChild();
     assertThat(maleNode.getValue()).isEqualTo("male");
     val femaleNode = (TerminalNode) termsNode.getChild(1);
     assertThat(femaleNode.getValue()).isEqualTo("female");
@@ -123,7 +123,7 @@ public class PqlParseListenerTest {
   public void selectTest() {
     val esAst = createEsAst("select(age, gender)", listener);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    val fieldsNode = (FieldsNode) esAst.getChild(0);
+    val fieldsNode = (FieldsNode) esAst.getFirstChild();
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
     assertThat(fieldsNode.getFields()).containsOnly("age", "gender");
   }
@@ -140,11 +140,11 @@ public class PqlParseListenerTest {
   public void countTest_withFilters() {
     val esAst = createEsAst("count(),eq(age, 10)", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
-    assertThat(esAst.getChild(0)).isExactlyInstanceOf(FilterNode.class);
-    assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
-    assertThat(esAst.getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
-    val mustNode = esAst.getChild(0).getChild(0).getChild(0);
-    assertThat(mustNode.getChild(0).childrenCount()).isEqualTo(2);
+    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
+    assertThat(esAst.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
+    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
+    val mustNode = esAst.getFirstChild().getFirstChild().getFirstChild();
+    assertThat(mustNode.getFirstChild().childrenCount()).isEqualTo(2);
     childrenContainValue(mustNode, "age");
     childrenContainValue(mustNode, 10);
   }
@@ -154,23 +154,24 @@ public class PqlParseListenerTest {
     val esAst = createEsAst("nested(gene, eq(gene._donor_id, 'D01'))", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    assertThat(esAst.getChild(0)).isExactlyInstanceOf(FilterNode.class);
-    assertThat(esAst.getChild(0).childrenCount()).isEqualTo(1);
-    assertThat(esAst.getChild(0).getChild(0)).isExactlyInstanceOf(BoolNode.class);
-    assertThat(esAst.getChild(0).getChild(0).childrenCount()).isEqualTo(1);
-    assertThat(esAst.getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
-    assertThat(esAst.getChild(0).getChild(0).getChild(0).childrenCount()).isEqualTo(1);
-    assertThat(esAst.getChild(0).getChild(0).getChild(0).getChild(0)).isExactlyInstanceOf(NestedNode.class);
+    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
+    assertThat(esAst.getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(esAst.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
+    assertThat(esAst.getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(
+        NestedNode.class);
   }
 
   private static void assertFilterStructure(ExpressionNode esAst) {
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    val postFilterNode = (FilterNode) esAst.getChild(0);
+    val postFilterNode = (FilterNode) esAst.getFirstChild();
     assertThat(postFilterNode.childrenCount()).isEqualTo(1);
-    val boolNode = (BoolNode) postFilterNode.getChild(0);
+    val boolNode = (BoolNode) postFilterNode.getFirstChild();
     assertThat(boolNode.childrenCount()).isEqualTo(1);
-    assertThat(boolNode.getChild(0)).isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(boolNode.getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
   }
 
   /**
@@ -186,7 +187,7 @@ public class PqlParseListenerTest {
         }
       }
       else if (child instanceof NotNode) {
-        if (termNodeContainsValue((TermNode) child.getChild(0), value, found)) {
+        if (termNodeContainsValue((TermNode) child.getFirstChild(), value, found)) {
           found = true;
         }
       }

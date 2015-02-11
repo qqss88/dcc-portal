@@ -105,7 +105,7 @@ public class FacetFiltersVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   private ExpressionNode visitChild(ExpressionNode parent) {
-    return parent.getChild(0).accept(this);
+    return parent.getFirstChild().accept(this);
   }
 
   // FIXME: give some more meaningful name

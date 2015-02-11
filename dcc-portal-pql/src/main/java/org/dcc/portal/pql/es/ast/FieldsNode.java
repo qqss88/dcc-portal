@@ -40,7 +40,7 @@ public class FieldsNode extends ExpressionNode {
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException();
+    return visitor.visitFields(this);
   }
 
   @Override

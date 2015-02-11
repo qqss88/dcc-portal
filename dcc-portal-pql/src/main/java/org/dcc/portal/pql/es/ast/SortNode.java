@@ -36,7 +36,7 @@ public class SortNode extends ExpressionNode {
 
   @Override
   public <T> T accept(NodeVisitor<T> visitor) {
-    throw new UnsupportedOperationException();
+    return visitor.visitSort(this);
   }
 
   public void addField(@NonNull String field, @NonNull Order order) {
