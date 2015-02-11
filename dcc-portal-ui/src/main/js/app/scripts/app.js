@@ -217,9 +217,9 @@
     // Order matters, this is in most important to least important
     GENE_SET_ROOTS: [
       {type: 'pathway', id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'},
-      {type: 'go_term', id: 'GO:0003674', name: 'Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
-      {type: 'go_term', id: 'GO:0008150', name: 'Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
-      {type: 'go_term', id: 'GO:0005575', name: 'Cellular Component', universe: 'GO_CELLULAR_COMPONENT'},
+      {type: 'go_term', id: 'GO:0003674', name: 'GO Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
+      {type: 'go_term', id: 'GO:0008150', name: 'GO Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
+      {type: 'go_term', id: 'GO:0005575', name: 'GO Cellular Component', universe: 'GO_CELLULAR_COMPONENT'},
       {type: 'curated_set', id: 'GS1', name: 'Cancer Gene Census', universe: null}
     ]
   });
