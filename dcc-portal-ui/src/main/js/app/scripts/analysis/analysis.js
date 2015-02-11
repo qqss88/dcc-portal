@@ -150,20 +150,17 @@
 
 
       if (toRemove.length > 0) {
+
+        _.remove($scope.selectedSets, function(set) {
+          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
+        });
+
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         $scope.update();
       }
     };
 
-    $scope.removeList = function(id) {
-      SetService.remove(id);
-      $scope.entityLists = SetService.getAll();
-      $scope.updateAvailableAnalysis();
-    };
-
-
     var analysisPromise;
-
 
     // TODO: Move this out
     var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
