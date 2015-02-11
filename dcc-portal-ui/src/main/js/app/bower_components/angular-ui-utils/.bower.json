@@ -1,0 +1,17 @@
+{
+  "name": "angular-ui-scrollfix",
+  "main": "./scrollfix.js",
+  "dependencies": {
+    "angular": ">= 1.0.2"
+  },
+  "homepage": "https://github.com/angular-ui/ui-utils",
+  "_release": "a2dc459e8e",
+  "_resolution": {
+    "type": "branch",
+    "branch": "bower-scrollfix",
+    "commit": "a2dc459e8e41720f3eefe3ea4ef2e21d61f7dad7"
+  },
+  "_source": "git://github.com/angular-ui/ui-utils.git",
+  "_target": "bower-scrollfix",
+  "_originalSource": "angular-ui-utils"
+}
