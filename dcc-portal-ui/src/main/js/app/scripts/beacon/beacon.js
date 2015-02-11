@@ -89,7 +89,8 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
       // check that the position is less than length of chromosome
       if($scope.params.position > lengths[$scope.params.chr]){
-        $scope.errorMessage = 'Position must be less than Chromosome '+$scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
+        $scope.errorMessage = 'Position must be less than Chromosome '+
+          $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
         return;
       }
 
