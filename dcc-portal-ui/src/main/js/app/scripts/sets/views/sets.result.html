@@ -25,7 +25,7 @@
                     <td class="text-right">
                         <a href="{{setMap[item].advLink}}">{{setMap[item].count | number}}</a>
                     </td>
-                    <td>{{setMap[item].type.toLowerCase()}}</td>
+                    <td>{{setMap[item].type.toLowerCase() | trans:true}}</td>
                 </tr>
             </tbody>
         </table>
@@ -60,9 +60,8 @@
                     <td>
                         <span class="t_tools" style="float:left"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
-                                <i class="icon-floppy" data-tooltip="Save as new list" 
-                                  data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                             </span>
                         </span>
                     </td>
@@ -77,8 +76,8 @@
                     <td>
                         <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
-                                <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                                 <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
+                                <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
                         </span>
                     </td>
