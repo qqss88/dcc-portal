@@ -60,9 +60,9 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
-      $scope.projects.push({id:'ALL'});
+      $scope.projects.unshift({id:'-- ALL DATASETS'});
       $scope.params = {
-        project:$scope.projects[$scope.projects.length-1],
+        project:$scope.projects[0],
         chr:'1',
         reference:'GRCh37',
       };
@@ -89,7 +89,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
       // check that the position is less than length of chromosome
       if($scope.params.position > lengths[$scope.params.chr]){
-        $scope.errorMessage = 'Position must be less than chromosome length: '+lengths[$scope.params.chr];
+        $scope.errorMessage = 'Position must be less than Chromosome '+$scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
         return;
       }
 
@@ -108,7 +108,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
       .get({
         'chromosome' : $scope.params.chr,
         'reference':$scope.params.reference,
-        'position':$scope.params.position.replace(/^0+/,''),
+        'position':$scope.params.position,
         'allele':$scope.params.allele ? $scope.params.allele : '',
         'dataset':$scope.params.project.id === 'ALL' ? '':$scope.params.project.id
       },{'Accept':'application/json'});
@@ -123,7 +123,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
 
     $scope.resetQuery = function() {
       $scope.params = {
-        project:$scope.projects[$scope.projects.length-1],
+        project:$scope.projects[0],
         chr:'1',
         reference:'GRCh37',
       };
@@ -150,6 +150,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
             val = '';
           }
           var clean = val.replace( /[^0-9]+/g, '');
+          clean = clean.replace(/^0+/,'');
           if (val !== clean) {
             ngModelCtrl.$setViewValue(clean);
             ngModelCtrl.$render();
