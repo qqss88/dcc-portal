@@ -26,7 +26,7 @@
 #   /etc/default/varnish
 #
 # SCM:
-#  https://github.com/icgc-dcc/dcc/blob/develop/dcc-portal/dcc-portal-api/src/main/varnish/varnish
+#  git@hproxy-dcc.res.oicr.on.ca:/srv/git/dcc-cache.git/identifier.vcl
 #
 
 # Should we start varnishd at boot?  Set to "no" to disable.
@@ -43,7 +43,7 @@ MEMLOCK=82000
 # Listen on port 5381, administration on localhost:5383, and forward to
 # one content server selected by the vcl file, based on the request.  Use a 6GB
 # in-memory cache.
-DAEMON_OPTS="-a :5381 \
+DAEMON_OPTS="-a :5381,:5391 \
              -T localhost:5383 \
-             -f /etc/varnish/portal.vcl \
-             -s malloc,8G"
+             -f /etc/varnish/main.vcl \
+             -s malloc,32G"

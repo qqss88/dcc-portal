@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 
@@ -31,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
@@ -53,17 +53,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Path("/v1/auth/openid")
-@Produces(MediaType.TEXT_PLAIN)
+@Produces(TEXT_PLAIN)
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class OpenIDResource extends BaseResource {
 
+  /**
+   * Constants.
+   */
   private static final String IDENTIFIER_PARAM_NAME = "identifier";
   private static final String CURRENT_URL_PARAM_NAME = "currentUrl";
   private static final String TOKEN_PARAM_NAME = "token";
   private static final String REDIRECT_PARAM_NAME = "redirect";
   private static final String RESPONSE_HEADER_VALUE_TEMPLATE = "%s;HttpOnly";
 
+  /**
+   * Dependencies
+   */
   @NonNull
   private final OpenIDAuthService openidService;
 
