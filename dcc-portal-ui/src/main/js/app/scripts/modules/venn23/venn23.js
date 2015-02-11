@@ -112,7 +112,7 @@
     this.colours = ['rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'];
     this.colours = ['rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,69,148)'];
 
-    this.colours = ['rgb(180,180,180)'];
+    this.colours = ['rgb(230, 230, 230)'];
     this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
     this.getColourBySetIds = function(ids) {
       return this.colours[Math.ceil(this.ramp(this.getValueBySetIds(ids)))];

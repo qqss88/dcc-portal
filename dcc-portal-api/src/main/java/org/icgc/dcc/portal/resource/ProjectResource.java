@@ -650,7 +650,7 @@ public class ProjectResource {
 
     filters = mergeFilters(filters, MUTATION_PROJECT_FILTER_TEMPLATE, mutationId, projectId);
 
-    return donorService.count(query().filters(filtersParam.get()).build());
+    return geneService.count(query().filters(filters).build());
   }
 
   @Path("/{" + API_PROJECT_PARAM + "}/mutations/{" + API_MUTATION_PARAM + "}/genes/counts")
