@@ -43,7 +43,7 @@ MEMLOCK=82000
 # Listen on port 5381, administration on localhost:5383, and forward to
 # one content server selected by the vcl file, based on the request.  Use a 6GB
 # in-memory cache.
-DAEMON_OPTS="-a :5381,5391 \
+DAEMON_OPTS="-a :5381,:5391 \
              -T localhost:5383 \
              -f /etc/varnish/main.vcl \
              -s malloc,32G"
