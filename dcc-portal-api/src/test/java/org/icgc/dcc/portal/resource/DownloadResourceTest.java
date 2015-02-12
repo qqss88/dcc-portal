@@ -38,12 +38,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.oozie.client.WorkflowJob.Status;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobProgress;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobStatus;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
-import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
+import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
@@ -78,7 +78,7 @@ public class DownloadResourceTest extends ResourceTest {
   @Mock
   private DonorService donorService;
   @Mock
-  private DynamicDownloader downloader;
+  private DownloaderClient downloader;
 
   @Mock
   private ExportedDataFileSystem fs;

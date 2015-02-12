@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.icgc.dcc.data.downloader.SelectionEntry;
+import org.icgc.dcc.downloader.core.SelectionEntry;
 import org.icgc.dcc.portal.service.BadRequestException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -49,7 +49,7 @@ public final class JsonUtils {
 
   // @formatter:off
   public static final TypeReference<ArrayList<String>> LIST_TYPE_REFERENCE = new TypeReference<ArrayList<String>>() {{}};
-  public static final TypeReference<ArrayList<SelectionEntry<String,String>>> LIST_ENTRY_TYPE_REFERENCE = new TypeReference<ArrayList<SelectionEntry<String,String>>>() {{}};
+  public static final TypeReference<ArrayList<org.icgc.dcc.downloader.core.SelectionEntry<String,String>>> LIST_ENTRY_TYPE_REFERENCE = new TypeReference<ArrayList<SelectionEntry<String,String>>>() {{}};
   // @formatter:on
 
   public static final ObjectMapper MAPPER = new ObjectMapper()
