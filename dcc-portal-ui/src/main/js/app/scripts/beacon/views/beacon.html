@@ -12,7 +12,7 @@
                     <span>Dataset</span>
                 </td>
                 <td>
-                    <select data-ng-model="params.project" data-ng-options="project.id for project in projects" ></select>
+                    <select data-ng-model="params.project" data-ng-options="project.id for project in projects" data-ng-change="checkParams();"></select>
                 </td>
             </tr>
             <tr>
@@ -83,7 +83,7 @@
     <br>
     <div>
         <h4>summary</h4>
-        A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The Beacon
+        A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this mutated allele?</span><br>The Beacon
         is designed to accept a query and responds with <code class="beacon-true-code">true</code> if it finds such an allele, <code class="beacon-false-code" >false</code> if its data doesn't match
         the allele and <code code class="beacon-null-code">not found</code> (null) if nothing is found.<br>The ICGC Beacon searches for alleles observed in somatic mutations only.<br><br>
         <h4>parameters</h4>

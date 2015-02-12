@@ -47,27 +47,9 @@ var DATASET_ALL = 'All Projects';
 
   var module = angular.module('icgc.beacon.controllers', []);
 
-  module.controller('BeaconCtrl', function ($scope, Page, Restangular) {
+  module.controller('BeaconCtrl', function ($scope, LocationService, Page, Restangular) {
     Page.setTitle('Beacon');
     Page.setPage('beacon');
-
-    var projectsPromise = Restangular.one('projects')
-      .get({
-        'field' : 'id',
-        'sort':'id',
-        'order':'asc',
-        'size' : 100
-      },{'Accept':'application/json'});
-
-    projectsPromise.then(function(data){
-      $scope.projects = data.hits;
-      $scope.projects.unshift({id:DATASET_ALL});
-      $scope.params = {
-        project:$scope.projects[0],
-        chr:'1',
-        reference:'GRCh37',
-      };
-    });
 
     $scope.hasInvalidParams = true;
     $scope.errorMessage = '';
@@ -78,7 +60,43 @@ var DATASET_ALL = 'All Projects';
     $scope.chromosomes = Object.keys(lengths);
     $scope.inProgress = false;
 
+    var saveParameters = function(){
+      LocationService.setParam('proj',$scope.params.project.id);
+      LocationService.setParam('chr',$scope.params.chr);
+      LocationService.setParam('pos',$scope.params.position);
+      LocationService.setParam('ref',$scope.params.reference);
+      LocationService.setParam('ale',$scope.params.allele);
+      LocationService.setParam('result',$scope.result.exists?'true':'false');
+    };
+
+    var loadParameters = function(){
+      var loadedProject = LocationService.getParam('proj');
+      $scope.projects.forEach(function (p) {
+        if(p.id == loadedProject)
+          $scope.params.project = p;
+      });
+
+      $scope.params.chr = $scope.chromosomes.indexOf(LocationService.getParam('chr'))>-1?
+        LocationService.getParam('chr'):'1';
+      $scope.params.position = LocationService.getParam('pos')?
+        LocationService.getParam('pos').replace( /[^0-9]+/g, '').replace(/^0+/,''):'';
+      $scope.params.reference = LocationService.getParam('ref');
+      $scope.params.allele = LocationService.getParam('ale')?
+        LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
+    };
+
+    var projectsPromise = Restangular.one('projects')
+      .get({
+        'field' : 'id',
+        'sort':'id',
+        'order':'asc',
+        'size' : 100
+      },{'Accept':'application/json'});
+
     $scope.checkParams = function(){
+      //Save state of things
+      saveParameters();
+
       $scope.hasInvalidParams = true;
       //reset error messages
       $scope.errorMessage = '';
@@ -126,8 +144,9 @@ var DATASET_ALL = 'All Projects';
           $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
         }
         $scope.inProgress = false;
-
+        saveParameters();
       });
+
     };
 
     $scope.resetQuery = function() {
@@ -143,7 +162,24 @@ var DATASET_ALL = 'All Projects';
         value:''
       };
       $scope.requestedUrl = null;
+      saveParameters();
     };
+
+    projectsPromise.then(function(data){
+      $scope.projects = data.hits;
+      $scope.projects.unshift({id:DATASET_ALL});
+      $scope.params = {
+        project:$scope.projects[0],
+        chr:'1',
+        reference:'GRCh37',
+      };
+
+      loadParameters();
+      if(LocationService.getParam('result') === 'true')
+        $scope.submitQuery();
+      else
+        $scope.checkParams();
+    });
   });
 
   module.directive('positionValidator', function() {
