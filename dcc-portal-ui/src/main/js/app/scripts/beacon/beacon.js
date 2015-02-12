@@ -40,7 +40,7 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
                '13': 115169878, '14': 107349540, '15': 102531392, '16': 90354753,
                '17': 81195210, '18': 78077248, '19': 59128983, '20': 63025520,
                '21': 48129895, '22': 51304566, 'X': 155270560, 'Y': 59373566, 'MT': 16569};
-var DATASET_ALL = 'ALL DATASETS';
+var DATASET_ALL = 'All Projects';
 
 (function() {
   'use strict';
@@ -76,28 +76,27 @@ var DATASET_ALL = 'ALL DATASETS';
       value:''
     };
     $scope.chromosomes = Object.keys(lengths);
+    $scope.inProgress = false;
 
     $scope.checkParams = function(){
       $scope.hasInvalidParams = true;
       //reset error messages
       $scope.errorMessage = '';
 
-      //first if anything required is empty or missing, stop checking
-      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
-        $scope.hasInvalidParams = true;
-        return;
-      }
-
       // check that the position is less than length of chromosome
-      if($scope.params.position > lengths[$scope.params.chr]){
+      if($scope.params.position && ($scope.params.position > lengths[$scope.params.chr])){
         $scope.errorMessage = 'Position must be less than Chromosome '+
           $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
         return;
       }
 
       // check that the reference is GRCh37 (all we support)
-      if($scope.params.reference !== 'GRCh37'){
+      if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
         $scope.errorMessage = 'Currently only GRCh37 is supported';
+        return;
+      }
+
+      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
         return;
       }
 
@@ -119,7 +118,15 @@ var DATASET_ALL = 'ALL DATASETS';
         $scope.result.exists = true;
         $scope.result.value = data.response.exists;
         var url = data.getRequestedUrl();
-        $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+
+        if(url.indexOf(location.protocol) !== 0){
+          $scope.requestedUrl = location.protocol + '//' + location.host +
+            url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }else{
+          $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }
+        $scope.inProgress = false;
+
       });
     };
 
