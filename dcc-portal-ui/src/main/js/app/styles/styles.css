@@ -1479,6 +1479,28 @@ header #brand img {
   overflow-y: scroll;
 }
 
+/* Advanced search tab toolbar */
+/* line 46, _sections/_advanced.scss */
+.action-toolbar {
+  line-height: 1.25rem;
+  font-size: 1rem;
+  color: #999999;
+  text-transform: uppercase;
+}
+/* line 52, _sections/_advanced.scss */
+.action-toolbar .action-item {
+  display: inline-block;
+  padding-right: 0.5rem;
+  padding-left: 0.25rem;
+  border-right-width: 1px;
+  border-right-style: solid;
+}
+
+/* line 60, _sections/_advanced.scss */
+.action-toolbar > .action-item:last-child {
+  border: 0;
+}
+
 /* line 8, _sections/_results.scss */
 .t_quick__hit__type {
   padding: 0 1rem;
