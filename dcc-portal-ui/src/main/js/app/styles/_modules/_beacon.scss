@@ -106,4 +106,17 @@ td{
   margin-bottom: 2rem;
 }
 
+.bs-callout {
+    padding: 15px;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
 
+.bs-callout-default {
+    border-left-color: #2D832D;
+}
+.bs-callout-default h4 {
+    color: #2D832D;
+    margin-bottom: 0.4rem;
+}

@@ -72,15 +72,18 @@ var DATASET_ALL = 'All Projects';
     var loadParameters = function(){
       var loadedProject = LocationService.getParam('proj');
       $scope.projects.forEach(function (p) {
-        if(p.id == loadedProject)
+        if(p.id === loadedProject){
           $scope.params.project = p;
+        }
       });
 
       $scope.params.chr = $scope.chromosomes.indexOf(LocationService.getParam('chr'))>-1?
         LocationService.getParam('chr'):'1';
       $scope.params.position = LocationService.getParam('pos')?
         LocationService.getParam('pos').replace( /[^0-9]+/g, '').replace(/^0+/,''):'';
-      $scope.params.reference = LocationService.getParam('ref');
+      if(LocationService.getParam('ref')){
+        $scope.params.reference = LocationService.getParam('ref');
+      }
       $scope.params.allele = LocationService.getParam('ale')?
         LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
     };
@@ -175,10 +178,11 @@ var DATASET_ALL = 'All Projects';
       };
 
       loadParameters();
-      if(LocationService.getParam('result') === 'true')
+      if(LocationService.getParam('result') === 'true'){
         $scope.submitQuery();
-      else
+      }else{
         $scope.checkParams();
+      }
     });
   });
 
