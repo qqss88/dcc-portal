@@ -5,13 +5,16 @@
 <section data-ng-show="AdvancedCtrl.Gene.genes.hits.length">
 
     <h3>Genes
-
-        <span class="open-in pull-right">
-           <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('gene', AdvancedCtrl.Gene.genes.pagination.total)">Save Gene Set</a>
-           <span>|</span>
-           <i class="icon-beaker"></i><a href="" data-ng-click="enrichmentModal=true">Enrichment Analysis</a>
-           <span>|</span>
-           <i class="icon-chart"></i><a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a>
+        <span class="action-toolbar pull-right">
+            <span class="action-item">
+                <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('gene', AdvancedCtrl.Gene.genes.pagination.total)">Save Gene Set</a>
+            </span>
+            <span class="action-item">
+               <i class="icon-beaker"></i><a href="" data-ng-click="enrichmentModal=true">Enrichment Analysis</a>
+            </span>
+            <span class="action-item">
+               <i class="icon-chart"></i><a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a>
+            </span>
         </span>
     </h3>
 

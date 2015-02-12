@@ -37,31 +37,22 @@
         <h3>
             Donors
 
-            <span class="open-in pull-right">
-                <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">Save Donor Set</a>
-                <span>|</span>
-                <span data-ng-init="calc=false"></span>
+            <span data-ng-init="calc=false"></span>
+            <dl-button data-calc="calc"></dl-button>
 
-                <span data-ng-show="calc===false">
-                   <i class="icon-download"></i><a href="" data-ng-click="calc=!calc">Download Donor Data</a>
-                </span>
-                <span data-ng-show="calc===true">
-                   <i class="icon-spin icon-spinner"></i><span>Calculating File Size</span>
-                </span>
-
-                <dl-button data-calc="calc"></dl-button>
-
+            <span class="action-toolbar pull-right">
+               <span class="action-item">
+                   <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">Save Donor Set</a>
+               </span>
+               <span class="action-item">
+                   <span data-ng-show="calc===false">
+                      <i class="icon-download"></i><a href="" data-ng-click="calc=!calc">Download Donor Data</a>
+                   </span>
+                   <span data-ng-show="calc===true">
+                      <i class="icon-spin icon-spinner"></i><span>Calculating File Size</span>
+                   </span>
+               </span>
             </span>
-
-            <!--
-            <span class="pull-right" style="font-size: 1rem">
-                <button class="t_button" 
-                    data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">
-                    <i class="icon-floppy"></i> Save Donor Set
-                </button>
-                <dl-button></dl-button>
-            </span>
-            -->
         </h3>
 
 
