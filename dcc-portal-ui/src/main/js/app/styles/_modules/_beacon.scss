@@ -52,6 +52,9 @@ td{
   color: #2D832D;
   border: 3px solid #2D832D ;
 }
+.beacon-true-code{
+  border-bottom: 2px solid #2D832D;
+}
 
 .beacon-false-container{
    background: #FFC200;
@@ -59,6 +62,9 @@ td{
 .beacon-false-text{
   color: #FFC200;
   border: 3px solid #FFC200;
+}
+.beacon-false-code{
+  border-bottom: 2px solid #FFC200;
 }
 
 
@@ -68,6 +74,9 @@ td{
 .beacon-null-text{
   color: #D31313;
   border: 3px solid #D31313 ;
+}
+.beacon-null-code{
+  border-bottom: 2px solid #D31313;
 }
 
 /** end of different color options */
@@ -96,3 +105,5 @@ td{
 .beacon-alert{
   margin-bottom: 2rem;
 }
+
+
