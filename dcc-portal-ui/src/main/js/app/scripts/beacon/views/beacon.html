@@ -52,12 +52,12 @@
                 <td></td>
                 <td align="right" >
                     <button class="t_button beaconsubmit" data-ng-click="resetQuery();">Reset</button>&nbsp;
-                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
+                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();inProgress=true;" data-ng-disabled="hasInvalidParams">Search</button>
                 </td>
             </tr>
         </table>
         <span data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></span><br>
-        <div data-ng-if="result.exists">
+        <div class="beacon-result-section" data-ng-if="result.exists" data-ng-style="{'opacity':inProgress?'0.2':'1'}">
             <h3>Result</h3>
             <div>The result of your Beacon query was:</div>
             <br>
@@ -84,8 +84,8 @@
     <div>
         <h4>summary</h4>
         A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this allele?</span><br>The Beacon
-        is designed to accept a query and responds with <code>true</code> if it finds such an allele, <code>false</code> if its data doesn't match
-        the allele and <code>null</code> if nothing is found.<br>The ICGC Beacon searches for alleles observed in somatic mutations only.<br><br>
+        is designed to accept a query and responds with <code class="beacon-true-code">true</code> if it finds such an allele, <code class="beacon-false-code" >false</code> if its data doesn't match
+        the allele and <code code class="beacon-null-code">not found</code> (null) if nothing is found.<br>The ICGC Beacon searches for alleles observed in somatic mutations only.<br><br>
         <h4>parameters</h4>
         <table class="table table-bordered table-striped">
             </thread>
@@ -115,8 +115,8 @@
         <h4>Links</h4>
         For more information about each dataset, please visit our <a href="/projects">Cancer Projects page</a>.<br>
         Read the <a target="_blank" href="/docs/#!/beacon/query_get_0">ICGC API documentation</a> for programmatic access to this
-        Beacon.<br>Beacon is a project of the <a  target="_blank" href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>. You can read more about Beacons at <a  target="_blank" href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Project Site</a> and see the latest details on their <a target="_blank" href="https://github.com/ga4gh/beacon-team"><i class="icon-external-link"></i>github page</a>.<br><small></small>
+        Beacon.<br>Beacon is a project of the <a  target="_blank" href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>. You can read more about Beacons at <a  target="_blank" href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Beacon Project</a> and see the latest details on their <a target="_blank" href="https://github.com/ga4gh/beacon-team"><i class="icon-external-link"></i>GitHub page</a>.<br><small></small>
     </div>
     <br>
-    <div class="alert alert-warning beacon-alert">This Beacon is based off of the v0.2 Specification which is still in progress and is subject to change without notice.</div>
+    <div class="alert alert-warning beacon-alert">This Beacon is based off of the v0.2 Specification which is still in progress and is subject to change without notice. Contact <a href="mailto:theglobalalliance@genomicsandhealth.org">theglobalalliance@genomicsandhealth.org</a> for information.</div>
 </section>
