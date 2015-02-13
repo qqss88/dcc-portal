@@ -47,11 +47,11 @@ var DATASET_ALL = 'All Projects';
 
   var module = angular.module('icgc.beacon.controllers', []);
 
-  module.controller('BeaconCtrl', function ($scope, LocationService, $location, Page, Restangular) {
+  module.controller('BeaconCtrl', function ($scope, LocationService, $location,$timeout, Page, Restangular) {
     Page.setTitle('Beacon');
     Page.setPage('beacon');
 
-    $scope.hasInvalidParams = true;
+    $scope.hasInvalidParams = false;
     $scope.errorMessage = '';
     $scope.result = {
       exists:false,
@@ -71,9 +71,12 @@ var DATASET_ALL = 'All Projects';
 
     var loadParameters = function(){
       var loadedProject = LocationService.getParam('proj');
-      $scope.projects.forEach(function (p) {
+      $scope.projects.every(function (p) {
         if(p.id === loadedProject){
           $scope.params.project = p;
+          return false;
+        }else{
+          return true;
         }
       });
 
@@ -86,7 +89,7 @@ var DATASET_ALL = 'All Projects';
       }
       $scope.params.allele = LocationService.getParam('ale')?
         LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
-
+      $scope.result.exists = LocationService.getParam('result') === 'true'?true:false;
       $scope.checkParams();
     };
 
@@ -99,8 +102,6 @@ var DATASET_ALL = 'All Projects';
       },{'Accept':'application/json'});
 
     $scope.checkParams = function(){
-      //Save state of things
-      saveParameters();
 
       $scope.hasInvalidParams = true;
       //reset error messages
@@ -110,21 +111,14 @@ var DATASET_ALL = 'All Projects';
       if($scope.params.position && ($scope.params.position > lengths[$scope.params.chr])){
         $scope.errorMessage = 'Position must be less than Chromosome '+
           $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
-        return;
-      }
-
-      // check that the reference is GRCh37 (all we support)
-      if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
+      }else if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
         $scope.errorMessage = 'Currently only GRCh37 is supported';
-        return;
+      }else if(($scope.params.reference && $scope.params.position && $scope.params.allele)){
+        $scope.hasInvalidParams = false;
       }
 
-      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
-        return;
-      }
-
-      //made it to the end, no errors found
-      $scope.hasInvalidParams = false;
+      //Save state of things
+      saveParameters();
     };
 
     $scope.submitQuery = function() {
@@ -137,35 +131,37 @@ var DATASET_ALL = 'All Projects';
         'dataset':$scope.params.project.id === DATASET_ALL ? '':$scope.params.project.id
       },{'Accept':'application/json'});
 
-      promise.then(function(data){
-        $scope.result.exists = true;
-        $scope.result.value = data.response.exists;
-        var url = data.getRequestedUrl();
+      $timeout(function() {
+        promise.then(function(data){
+          $scope.result.exists = true;
+          $scope.result.value = data.response.exists;
+          var url = data.getRequestedUrl();
 
-        if(url.indexOf(location.protocol) !== 0){
-          $scope.requestedUrl = location.protocol + '//' + location.host +
-            url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
-        }else{
-          $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
-        }
-        $scope.inProgress = false;
-        saveParameters();
-      });
+          if(url.indexOf(location.protocol) !== 0){
+            $scope.requestedUrl = location.protocol + '//' + location.host +
+              url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+          }else{
+            $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+          }
+          $scope.inProgress = false;
+          saveParameters();
+        });
+      }, 100);
 
     };
 
     $scope.exampleQuery =  function(type){
       if(type === 'true'){
-        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T'});
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T',result:'true'});
       }else if(type === 'false'){
-        $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C'});
+        $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C',result:'true'});
       }else{
-        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G'});
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G',result:'true'});
       }
       $scope.inProgress =true;
-      loadParameters();
       $scope.hasInvalidParams = false;
       $scope.errorMessage = '';
+      loadParameters();
       $scope.submitQuery();
     };
 
@@ -195,10 +191,8 @@ var DATASET_ALL = 'All Projects';
       };
 
       loadParameters();
-      if(LocationService.getParam('result') === 'true' && !$scope.hasInvalidParams){
+      if($scope.result.exists && !$scope.hasInvalidParams){
         $scope.submitQuery();
-      }else{
-        $scope.checkParams();
       }
     });
   });
