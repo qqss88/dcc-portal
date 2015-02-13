@@ -2,7 +2,7 @@
     <i class="t_badge t_badge_icon t_badge__search"><i class="icon-fire"></i></i>ICGC GA4GH Beacon
 </h1>
 <section class="beaconquery">
-    <div class="narrow">
+    <div class="narrow" >
         <h3>Query</h3>
         <br>
         <div>Enter your search criteria below and then click 'Search' to see the result.</div>
@@ -12,7 +12,7 @@
                     <span>Dataset</span>
                 </td>
                 <td>
-                    <select data-ng-model="params.project" data-ng-options="project.id for project in projects" data-ng-change="checkParams();"></select>
+                    <select class="beacon-form-control" data-ng-model="params.project" data-ng-options="project.id for project in projects" data-ng-change="checkParams();"></select>
                 </td>
             </tr>
             <tr>
@@ -20,7 +20,7 @@
                   <span>Chromosome ID *</span>
                 </td>
                 <td>
-                    <select data-ng-model="params.chr"
+                    <select class="beacon-form-control" data-ng-model="params.chr"
                             data-ng-options="item for item in chromosomes" data-ng-change="checkParams();"></select>
                 </td>
             </tr>
@@ -52,13 +52,13 @@
                 <td></td>
                 <td align="right" >
                     <button class="t_button beaconsubmit" data-ng-click="resetQuery();">Reset</button>&nbsp;
-                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();inProgress=true;" data-ng-disabled="hasInvalidParams">Search</button>
+                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
                 </td>
             </tr>
         </table>
         <span data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></span><br>
       <div data-ng-if="result.exists">
-        <div class="beacon-result-section" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?'#f2f2f2':'white'}">
+        <div class="beacon-result-section" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?result.fadeColor:'white'}">
             <h3>Result</h3>
             <div>The result of your Beacon query was:</div>
             <br>

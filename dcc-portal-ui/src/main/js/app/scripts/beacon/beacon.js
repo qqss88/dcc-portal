@@ -122,6 +122,7 @@ var DATASET_ALL = 'All Projects';
     };
 
     $scope.submitQuery = function() {
+      $scope.inProgress=true;
       var promise = Restangular.one('beacon', 'query')
       .get({
         'chromosome' : $scope.params.chr,
@@ -131,32 +132,43 @@ var DATASET_ALL = 'All Projects';
         'dataset':$scope.params.project.id === DATASET_ALL ? '':$scope.params.project.id
       },{'Accept':'application/json'});
 
-      $timeout(function() {
-        promise.then(function(data){
-          $scope.result.exists = true;
-          $scope.result.value = data.response.exists;
-          var url = data.getRequestedUrl();
 
-          if(url.indexOf(location.protocol) !== 0){
-            $scope.requestedUrl = location.protocol + '//' + location.host +
-              url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
-          }else{
-            $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
-          }
+      promise.then(function(data){
+        $scope.result.exists = true;
+        $scope.result.value = data.response.exists;
+        if($scope.result.value === 'true'){
+          $scope.result.fadeColor = '#EFFFEF';
+        }else if($scope.result.value === 'false'){
+          $scope.result.fadeColor = '#FFF3F3';
+        }else{
+          $scope.result.fadeColor = '#EFEFEF';
+        }
+        var url = data.getRequestedUrl();
+
+        if(url.indexOf(location.protocol) !== 0){
+          $scope.requestedUrl = location.protocol + '//' + location.host +
+            url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }else{
+          $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }
+        $timeout(function() {
           $scope.inProgress = false;
-          saveParameters();
-        });
-      }, 100);
+        }, 50);
+        saveParameters();
+      });
 
     };
 
     $scope.exampleQuery =  function(type){
       if(type === 'true'){
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T',result:'true'});
+        $scope.result.fadeColor = '#EFFFEF';
       }else if(type === 'false'){
         $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C',result:'true'});
+        $scope.result.fadeColor = '#FFF3F3';
       }else{
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G',result:'true'});
+        $scope.result.fadeColor = '#EFEFEF';
       }
       $scope.inProgress =true;
       $scope.hasInvalidParams = false;
@@ -193,6 +205,8 @@ var DATASET_ALL = 'All Projects';
       loadParameters();
       if($scope.result.exists && !$scope.hasInvalidParams){
         $scope.submitQuery();
+      }else{
+        $scope.result.exists = false;
       }
     });
   });
