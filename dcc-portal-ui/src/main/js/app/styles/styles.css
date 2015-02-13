@@ -3404,34 +3404,35 @@ div.stacked.tooltip {
   fill: #111;
 }
 
-/* line 1, _modules/_beacon.scss */
+/** MAIN RESULT COLOR VARIABLES */
+/* line 6, _modules/_beacon.scss */
 td {
   padding: 6px;
 }
 
-/* line 5, _modules/_beacon.scss */
+/* line 10, _modules/_beacon.scss */
 .beaconquery {
   padding-top: 0;
   padding-bottom: 0;
 }
 
-/* line 10, _modules/_beacon.scss */
+/* line 15, _modules/_beacon.scss */
 .beaconquestion {
   font-style: italic;
 }
 
-/* line 14, _modules/_beacon.scss */
+/* line 19, _modules/_beacon.scss */
 .beacon-notes {
   margin-left: 5%;
 }
 
-/* line 18, _modules/_beacon.scss */
+/* line 23, _modules/_beacon.scss */
 .beacon-icon {
   font-size: xx-large;
   color: white;
 }
 
-/* line 23, _modules/_beacon.scss */
+/* line 28, _modules/_beacon.scss */
 .beacon-icon-container {
   float: left;
   width: 30%;
@@ -3442,7 +3443,7 @@ td {
   text-align: center;
 }
 
-/* line 33, _modules/_beacon.scss */
+/* line 38, _modules/_beacon.scss */
 .beacon-icon-text {
   font-size: x-large;
   padding-top: 1.7rem;
@@ -3458,63 +3459,63 @@ td {
 }
 
 /** Different colors for each response */
-/* line 48, _modules/_beacon.scss */
+/* line 53, _modules/_beacon.scss */
 .beacon-true-container {
-  background: #2D832D;
+  background: #2d832d;
 }
 
-/* line 51, _modules/_beacon.scss */
+/* line 56, _modules/_beacon.scss */
 .beacon-true-text {
-  color: #2D832D;
+  color: #2d832d;
   border: 3px solid #2d832d;
 }
 
-/* line 55, _modules/_beacon.scss */
+/* line 60, _modules/_beacon.scss */
 .beacon-true-code {
-  border-bottom: 2px solid #2D832D;
+  border-bottom: 2px solid #2d832d;
 }
 
-/* line 59, _modules/_beacon.scss */
+/* line 64, _modules/_beacon.scss */
 .beacon-false-container {
-  background: #FFC200;
+  background: #ffc200;
 }
 
-/* line 62, _modules/_beacon.scss */
+/* line 67, _modules/_beacon.scss */
 .beacon-false-text {
-  color: #FFC200;
-  border: 3px solid #FFC200;
-}
-
-/* line 66, _modules/_beacon.scss */
-.beacon-false-code {
-  border-bottom: 2px solid #FFC200;
+  color: #ffc200;
+  border: 3px solid #ffc200;
 }
 
 /* line 71, _modules/_beacon.scss */
-.beacon-null-container {
-  background: #D31313;
+.beacon-false-code {
+  border-bottom: 2px solid #ffc200;
 }
 
-/* line 74, _modules/_beacon.scss */
+/* line 76, _modules/_beacon.scss */
+.beacon-null-container {
+  background: #d31313;
+}
+
+/* line 79, _modules/_beacon.scss */
 .beacon-null-text {
-  color: #D31313;
+  color: #d31313;
   border: 3px solid #d31313;
 }
 
-/* line 78, _modules/_beacon.scss */
+/* line 83, _modules/_beacon.scss */
 .beacon-null-code {
-  border-bottom: 2px solid #D31313;
+  border-bottom: 2px solid #d31313;
 }
 
 /** end of different color options */
-/* line 84, _modules/_beacon.scss */
+/* line 89, _modules/_beacon.scss */
 .beacon-result {
   padding-right: 8rem;
   width: 100%;
   height: 80px;
 }
 
-/* line 90, _modules/_beacon.scss */
+/* line 95, _modules/_beacon.scss */
 .beacon-api-link {
   padding-top: 0;
   margin-bottom: 2px;
@@ -3524,7 +3525,7 @@ td {
   width: 90%;
 }
 
-/* line 98, _modules/_beacon.scss */
+/* line 103, _modules/_beacon.scss */
 .beacon-api-link:focus {
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
@@ -3532,27 +3533,63 @@ td {
   border: 1px solid #e3e3e3;
 }
 
-/* line 105, _modules/_beacon.scss */
+/* line 110, _modules/_beacon.scss */
 .beacon-alert {
   margin-bottom: 2rem;
 }
 
-/* line 109, _modules/_beacon.scss */
-.bs-callout {
+/** Result callouts */
+/* line 116, _modules/_beacon.scss */
+.beacon-callout-container {
+  height: auto;
+  overflow: hidden;
+}
+
+/* line 121, _modules/_beacon.scss */
+.beacon-callout {
   padding: 15px;
   border: 1px solid #eee;
   border-left-width: 5px;
   border-radius: 3px;
+  float: left;
+  width: 30%;
+  height: 100%;
+  margin-right: 2.5%;
 }
 
-/* line 116, _modules/_beacon.scss */
-.bs-callout-default {
-  border-left-color: #2D832D;
+/* line 132, _modules/_beacon.scss */
+.beacon-callout-true {
+  border-left-color: #2d832d;
 }
 
-/* line 119, _modules/_beacon.scss */
-.bs-callout-default h4 {
-  color: #2D832D;
+/* line 135, _modules/_beacon.scss */
+.beacon-callout-true h4 {
+  color: #2d832d;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+/* line 141, _modules/_beacon.scss */
+.beacon-callout-false {
+  border-left-color: #ffc200;
+}
+
+/* line 144, _modules/_beacon.scss */
+.beacon-callout-false h4 {
+  color: #ffc200;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+}
+
+/* line 150, _modules/_beacon.scss */
+.beacon-callout-null {
+  border-left-color: #d31313;
+}
+
+/* line 153, _modules/_beacon.scss */
+.beacon-callout-null h4 {
+  color: #d31313;
+  font-weight: bold;
   margin-bottom: 0.4rem;
 }
 

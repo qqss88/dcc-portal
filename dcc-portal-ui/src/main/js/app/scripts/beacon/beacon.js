@@ -47,7 +47,7 @@ var DATASET_ALL = 'All Projects';
 
   var module = angular.module('icgc.beacon.controllers', []);
 
-  module.controller('BeaconCtrl', function ($scope, LocationService, Page, Restangular) {
+  module.controller('BeaconCtrl', function ($scope, LocationService, $location, Page, Restangular) {
     Page.setTitle('Beacon');
     Page.setPage('beacon');
 
@@ -150,6 +150,18 @@ var DATASET_ALL = 'All Projects';
         saveParameters();
       });
 
+    };
+
+    $scope.exampleQuery =  function(type){
+      if(type === 'true'){
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T'});
+      }else if(type === 'false'){
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'A'});
+      }else{
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'C'});
+      }
+      loadParameters();
+      $scope.submitQuery();
     };
 
     $scope.resetQuery = function() {

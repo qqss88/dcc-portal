@@ -1,3 +1,8 @@
+/** MAIN RESULT COLOR VARIABLES */
+$true-color:#2D832D;
+$false-color:#FFC200;
+$null-color:#D31313;
+
 td{
    padding:6px;
 }
@@ -46,37 +51,37 @@ td{
 
 /** Different colors for each response */
 .beacon-true-container{
-   background: #2D832D;
+   background: $true-color;
 }
 .beacon-true-text{
-  color: #2D832D;
-  border: 3px solid #2D832D ;
+  color: $true-color;
+  border: 3px solid $true-color;
 }
 .beacon-true-code{
-  border-bottom: 2px solid #2D832D;
+  border-bottom: 2px solid $true-color;
 }
 
 .beacon-false-container{
-   background: #FFC200;
+   background: $false-color;
 }
 .beacon-false-text{
-  color: #FFC200;
-  border: 3px solid #FFC200;
+  color: $false-color;
+  border: 3px solid $false-color;
 }
 .beacon-false-code{
-  border-bottom: 2px solid #FFC200;
+  border-bottom: 2px solid $false-color;
 }
 
 
 .beacon-null-container{
-   background: #D31313;
+   background: $null-color;
 }
 .beacon-null-text{
-  color: #D31313;
-  border: 3px solid #D31313 ;
+  color: $null-color;
+  border: 3px solid $null-color;
 }
 .beacon-null-code{
-  border-bottom: 2px solid #D31313;
+  border-bottom: 2px solid $null-color;
 }
 
 /** end of different color options */
@@ -106,17 +111,47 @@ td{
   margin-bottom: 2rem;
 }
 
-.bs-callout {
+/** Result callouts */
+
+.beacon-callout-container{
+  height:auto;
+  overflow: hidden;
+}
+
+.beacon-callout {
     padding: 15px;
     border: 1px solid #eee;
     border-left-width: 5px;
     border-radius: 3px;
+    float: left;
+    width:30%;
+    height:100%;
+    margin-right: 2.5%;
 }
 
-.bs-callout-default {
-    border-left-color: #2D832D;
+.beacon-callout-true {
+    border-left-color: $true-color;
 }
-.bs-callout-default h4 {
-    color: #2D832D;
+.beacon-callout-true h4 {
+    color: $true-color;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+}
+
+.beacon-callout-false {
+    border-left-color: $false-color;
+}
+.beacon-callout-false h4 {
+    color: $false-color;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+}
+
+.beacon-callout-null {
+    border-left-color:$null-color;
+}
+.beacon-callout-null h4 {
+    color: $null-color;
+    font-weight: bold;
     margin-bottom: 0.4rem;
 }

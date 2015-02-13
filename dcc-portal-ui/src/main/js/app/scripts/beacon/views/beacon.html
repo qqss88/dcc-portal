@@ -85,10 +85,22 @@
         <h4>summary</h4>
         A Beacon is a simple service that answers the question: <span class="beaconquestion">Have you observed this mutated allele?</span><br>The Beacon is designed to accept a query and responds with one of the three results decsribed below. The ICGC Beacon searches for alleles observed in somatic mutations only.<br><br>
         <h4>Results</h4>
-        <div class="bs-callout bs-callout-default">
-          <h4>true</h4>
-          Returned when a matching mutation is found at the queried location.<br>
-          For an example, try this <a ng-click=""><i class="icon-search"></i>query</a>.
+        <div class="beacon-callout-container">
+          <div class="beacon-callout beacon-callout-true">
+            <h4>true</h4>
+            Returned when a matching mutation is found at the queried location.<br><br>
+            For an example, try this <a ng-click="exampleQuery('true');" href=""><i class="icon-search"></i>query</a>.
+          </div>
+          <div class="beacon-callout beacon-callout-false">
+            <h4>false</h4>
+            Returned when a mutation is found at that position but does not match the allele.<br><br>
+            For an example, try this <a ng-click="exampleQuery('false');" href=""><i class="icon-search"></i>query</a>.
+          </div>
+          <div class="beacon-callout beacon-callout-null">
+            <h4>Not found</h4>
+            Returned when no mutation is found at the queried position.<br><br><br>
+            For an example, try this <a ng-click="exampleQuery('null');" href=""><i class="icon-search"></i>query</a>.
+          </div>
         </div>
         <br>
         <h4>Links</h4>
@@ -97,5 +109,5 @@
         Beacon.<br>Beacon is a project of the <a  target="_blank" href="http://genomicsandhealth.org/"><i class="icon-external-link"></i>Global Alliance for Genomics &amp; Health</a>. You can read more about Beacons at <a  target="_blank" href="http://ga4gh.org/#/beacon"><i class="icon-external-link"></i>GA4GH's Beacon Project</a> and see the latest details on their <a target="_blank" href="https://github.com/ga4gh/beacon-team"><i class="icon-external-link"></i>GitHub page</a>.<br><small></small>
     </div>
     <br>
-    <div class="alert alert-warning beacon-alert">This Beacon is based off of the v0.2 Specification which is still in progress and is subject to change without notice. Contact <a href="mailto:theglobalalliance@genomicsandhealth.org">theglobalalliance@genomicsandhealth.org</a> for information.</div></div>
+    <div class="alert alert-warning beacon-alert">This Beacon is based off of the v0.2 Specification which is still in progress and is subject to change without notice. Please contact <a href="mailto:theglobalalliance@genomicsandhealth.org">theglobalalliance@genomicsandhealth.org</a> for information.</div></div>
 </section>
