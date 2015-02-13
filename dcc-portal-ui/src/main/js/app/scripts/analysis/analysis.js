@@ -112,6 +112,9 @@
 
     $scope.update = function() {
 
+      $scope.enrichmentSet = null;
+      $scope.setop = null;
+
       // Check if delete button should be enabled
       $scope.canBeDeleted = _.filter($scope.selectedSets, function(set) {
         if (set.readonly && set.readonly === true) {
@@ -125,8 +128,12 @@
       var selected = $scope.selectedSets, uniqued = [];
       uniqued = _.uniq(_.pluck(selected, 'type'));
 
-      $scope.enrichmentSet = null;
-      $scope.setop = null;
+
+      // If there are unfinished, do not proceed
+      if (_.some(selected, function(s) { return s.state != 'FINISHED'; })) {
+        return;
+      }
+
 
       // Enrichment analysis takes only ONE gene set
       if (selected.length === 1 && uniqued[0] === 'gene') {
@@ -337,10 +344,8 @@
   var module = angular.module('icgc.analysis.services', ['restangular']);
 
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
-
     var ANALYSIS_ENTITY = 'analysis';
     var analysisList = [];
-
 
     this.getAnalysis = function(id, type) {
       return RestangularNoCache.one('analysis/' + type , id).get();
@@ -373,7 +378,10 @@
       if (type === 'enrichment') {
         payload.universe = analysis.params.universe;
         payload.maxGeneCount = analysis.params.maxGeneCount;
+      } else {
+        payload.dataType = analysis.type.toLowerCase();
       }
+
       analysisList.unshift( payload );
       localStorageService.set(ANALYSIS_ENTITY, analysisList);
     };
