@@ -223,7 +223,7 @@
         } else if (data.state === 'FINISHED') {
           $scope.analysisResult = data;
         }
-      }, function(error) {
+      }, function() {
         $scope.error = true;
       });
     }
@@ -251,7 +251,7 @@
         }
         wait(id, type);
 
-      }, function(error) {
+      }, function() {
         $scope.error = true;
       });
     }
@@ -339,7 +339,6 @@
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
 
     var ANALYSIS_ENTITY = 'analysis';
-    var _this = this;
     var analysisList = [];
 
 
