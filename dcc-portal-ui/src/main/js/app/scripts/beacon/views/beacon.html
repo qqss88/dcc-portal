@@ -1,7 +1,7 @@
 <h1>
     <i class="t_badge t_badge_icon t_badge__search"><i class="icon-fire"></i></i>ICGC GA4GH Beacon
 </h1>
-<section class="beaconquery">
+<section class="beaconquery" >
     <div class="narrow" >
         <h3>Query</h3>
         <br>
@@ -29,7 +29,7 @@
                   <span><abbr data-tooltip="1-based start position in chromosome">Position</abbr> *</span>
                 </td>
                 <td>
-                    <input placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position" data-ng-change="checkParams();">
+                    <input data-ng-class="{'invalid': invalidParams.isPosition}" placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position" data-ng-change="checkParams();"><i data-tooltip="Must be less than Chromosome {{params.chr}}'s length: {{lengths[params.chr]}}" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isPosition"></i>
                 </td>
             </tr>
             <tr>
@@ -37,42 +37,41 @@
                   <span><abbr data-tooltip="Genome ID: Currently only GRCh37">Reference</abbr> *</span>
                 </td>
                 <td>
-                    <input type="text" placeholder="eg. GRCh37" data-ng-model="params.reference" data-ng-change="checkParams();">
+                    <input data-ng-class="{'invalid': invalidParams.isReference}" type="text" placeholder="eg. GRCh37" data-ng-model="params.reference" data-ng-change="checkParams();"><i data-tooltip="Currently only GRCh37" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isReference"></i>
                 </td>
             </tr>
             <tr>
                 <td align="right">
-                  <span><abbr data-tooltip="[ACTG]+">Allele(s)</abbr> *</span>
+                  <span><abbr data-tooltip="One or more of: A, C, T, G">Allele(s)</abbr> *</span>
                 </td>
                 <td>
-                    <input allele-validator placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele" data-ng-change="checkParams();">
+                    <input data-ng-class="{'invalid': invalidParams.isAllele}" allele-validator placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele" data-ng-change="checkParams();"><i data-tooltip="Must be of the form [ACTG]+" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isAllele"></i>
                 </td>
             </tr>
             <tr>
                 <td></td>
                 <td align="right" >
                     <button class="t_button beaconsubmit" data-ng-click="resetQuery();">Reset</button>&nbsp;
-                    <button class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
+                    <button data-ng-style="{'margin-right':(invalidParams.isPosition||invalidParams.isReference||invalidParams.isAllele)?'1.4em':'0'}" class="t_button beaconsubmit" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
                 </td>
             </tr>
         </table>
-        <span data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></span><br>
       <div data-ng-if="result.exists">
-        <div class="beacon-result-section" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?result.fadeColor:'white'}">
+        <div class="beacon-result-section" >
             <h3>Result</h3>
             <div>The result of your Beacon query was:</div>
             <br>
             <div class="beacon-result" data-ng-if="result.value == 'true'">
                 <div class="beacon-icon-container beacon-true-container"><i class="icon-ok beacon-icon"></i></div>
-                <div class="beacon-icon-text beacon-true-text">TRUE</div>
+                <div class="beacon-icon-text beacon-true-text" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?'#DBF3DB':'white'}">TRUE</div>
             </div>
             <div class="beacon-result" data-ng-if="result.value == 'false'">
                 <div class="beacon-icon-container beacon-false-container"><i class="icon-cancel beacon-icon"></i></div>
-                <div class="beacon-icon-text beacon-false-text">FALSE</div>
+                <div class="beacon-icon-text beacon-false-text" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?'#EEB2B2':'white'}">FALSE</div>
             </div>
             <div class="beacon-result" data-ng-if="result.value == 'null'">
                 <div class="beacon-icon-container beacon-null-container"><i class="icon-help beacon-icon"></i></div>
-                <div class="beacon-icon-text beacon-null-text">NULL</div>
+                <div class="beacon-icon-text beacon-null-text" data-ng-style="{'transition':inProgress?'':'background-color 1.5s ease-out','background-color':inProgress?'#EDEDED':'white'}">NULL</div>
             </div>
             <br>
             <input onClick="this.select();" class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>

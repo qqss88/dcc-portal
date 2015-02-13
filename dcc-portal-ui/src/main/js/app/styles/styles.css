@@ -3593,11 +3593,15 @@ td {
   margin-bottom: 0.4rem;
 }
 
+/* line 159, _modules/_beacon.scss */
+.invalid-icon {
+  color: #e37559;
+}
+
 /** SELECT FORM CONTROL FROM BOOTSTRAP 3.2 */
-/* line 161, _modules/_beacon.scss */
+/* line 165, _modules/_beacon.scss */
 .beacon-form-control {
   display: block;
-  width: 100%;
   height: 34px;
   font-size: 14px;
   line-height: 1.42857143;
@@ -3614,7 +3618,7 @@ td {
   padding: 6px 12px;
 }
 
-/* line 180, _modules/_beacon.scss */
+/* line 183, _modules/_beacon.scss */
 .beacon-form-control:focus {
   outline: 0;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
@@ -3622,20 +3626,20 @@ td {
   border-color: #66afe9;
 }
 
-/* line 187, _modules/_beacon.scss */
+/* line 190, _modules/_beacon.scss */
 .beacon-form-control::-moz-placeholder {
   color: #777;
   opacity: 1;
 }
 
-/* line 192, _modules/_beacon.scss */
+/* line 195, _modules/_beacon.scss */
 .beacon-form-control[disabled], .beacon-form-control[readonly], fieldset[disabled] .beacon-form-control {
   cursor: not-allowed;
   background-color: #eee;
   opacity: 1;
 }
 
-/* line 198, _modules/_beacon.scss */
+/* line 201, _modules/_beacon.scss */
 .beacon-form-control:-ms-input-placeholder, .beacon-form-control::-webkit-input-placeholder {
   color: #777;
 }
