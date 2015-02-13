@@ -165,7 +165,7 @@
             <td>
                 <a data-ng-if="ProjectCtrl.project.sgvTestedDonorCount > 0"
                    data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]},\"availableDataTypes\":{\"is\":[\"sgv\"]}}}"})'>
-                    {{ProjectCtrl.project.sgvTestedDonorCount | number}}
+                    {{ProjectCtrl.project.sgvTestedDonorCount | number}} donors
                 </a>
                 <span data-ng-if="ProjectCtrl.project.sgvTestedDonorCount === 0">--</span>
             </td>

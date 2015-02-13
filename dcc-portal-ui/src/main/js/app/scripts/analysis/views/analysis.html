@@ -13,7 +13,6 @@
                 <span>
                     <button class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0"
                         data-tooltip="Delete All Analyses">
-
                         <i class="icon-trash"></i>
                     </button>
                 </span>
@@ -22,8 +21,7 @@
                 <li class="t_suggest_flyout__hits__hit"
                     data-ng-click="getAnalysis()"
                     data-ng-class="{selected: !analysisId}">
-                    <span style="font-size:1.2rem"><i class="icon-beaker"></i> Saved Sets</span>
-                    <i class="icon-caret-right" data-ng-if="!analysisId"></i><br>
+                    <span style="font-size:1.2rem"><i class="icon-beaker"></i> Saved Sets</span><br>
                     <small>&nbsp;</small>
                 </li>
                 <li class="t_suggest_flyout__hits__hit"
@@ -31,10 +29,17 @@
                     data-ng-repeat="item in analysisList"
                     data-ng-class="{selected: item.id == analysisId}">
                     <span>
-                        <span>{{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}</span>
-                        <i class="icon-caret-right" data-ng-if="item.id === analysisId"></i><br>
-                        <small>{{item.timestamp | date:"yyyy-MM-dd hh:mm:ss a"}}</small>
-                        <!--<small>&nbsp;</small>-->
+                        <div style="padding-right:0.25rem">
+                            <span>
+                                {{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}
+                                <small class="pull-right" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                                   {{item.timestamp | date:"yyyy-MM-dd"}}
+                                </small>
+                            </span>
+                        </div>
+                        <small data-ng-if="item.type === 'enrichment'" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                            {{item.universe | define}} - {{item.maxGeneCount | number}} {{item.maxGeneCount !== 1? "genes": "gene" }}
+                        </small>
                         <span data-ng-mouseenter="hover=true"
                               data-ng-mouseleave="hover=false"
                               data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
@@ -75,7 +80,8 @@
 
 
             <span class="alert-error" data-ng-if="syncError">
-                <i class="icon-attention"></i>Synchronization has timed out or has failed. Please refresh this page to try again, or delete the sets that are in bad states.
+                <i class="icon-attention"></i>
+                Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
             </span>
 
 
@@ -164,8 +170,8 @@
         </div>
         <div class="clearfix"></div>
 
-        <div data-ng-if="error">
-            <span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. <br>It may no longer be valid with respect to current portal data.</span>
+        <div data-ng-if="error" class="alert-error">
+            <i class="icon-attention"></i><span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. It may no longer be valid with respect to current portal data.</span>
         </div>
     </div>
 </article>
