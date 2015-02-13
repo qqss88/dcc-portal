@@ -35,8 +35,8 @@ import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
 import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
 import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
@@ -91,13 +91,13 @@ public class PortalConfig {
   private EntityListService entityListService;
 
   @Bean
-  public DynamicDownloader dynamicDownloader() {
+  public DownloaderClient dynamicDownloader() {
     val download = properties.getDownload();
     if (!download.isEnabled()) {
       return null;
     }
 
-    return new DynamicDownloader(
+    return new DownloaderClient(
         download.getUri() + download.getDynamicRootPath(),
         download.getQuorum(),
         download.getOozieUrl(),
