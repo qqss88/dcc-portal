@@ -156,11 +156,14 @@ td{
     margin-bottom: 0.4rem;
 }
 
+.invalid-icon{
+  color:#e37559;
+}
+
 /** SELECT FORM CONTROL FROM BOOTSTRAP 3.2 */
 
 .beacon-form-control {
   display:block;
-  width:100%;
   height:34px;
   font-size:14px;
   line-height:1.42857143;

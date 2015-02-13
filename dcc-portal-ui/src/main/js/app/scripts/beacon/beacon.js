@@ -59,6 +59,12 @@ var DATASET_ALL = 'All Projects';
     };
     $scope.chromosomes = Object.keys(lengths);
     $scope.inProgress = false;
+    $scope.lengths = lengths;
+    $scope.invalidParams = {
+      isPositon:false,
+      isAllele:false,
+      isReference:false
+    };
 
     var saveParameters = function(){
       LocationService.setParam('proj',$scope.params.project.id);
@@ -103,18 +109,25 @@ var DATASET_ALL = 'All Projects';
 
     $scope.checkParams = function(){
 
-      $scope.hasInvalidParams = true;
-      //reset error messages
+      $scope.hasInvalidParams = false;
+      $scope.invalidParams = {
+        isPositon:false,
+        isAllele:false,
+        isReference:false
+      };
       $scope.errorMessage = '';
 
       // check that the position is less than length of chromosome
       if($scope.params.position && ($scope.params.position > lengths[$scope.params.chr])){
-        $scope.errorMessage = 'Position must be less than Chromosome '+
-          $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
-      }else if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
-        $scope.errorMessage = 'Currently only GRCh37 is supported';
-      }else if(($scope.params.reference && $scope.params.position && $scope.params.allele)){
-        $scope.hasInvalidParams = false;
+        $scope.invalidParams.isPosition = true;
+        $scope.hasInvalidParams = true;
+      }
+      if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
+        $scope.invalidParams.isReference = true;
+        $scope.hasInvalidParams = true;
+      }
+      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
+        $scope.hasInvalidParams = true;
       }
 
       //Save state of things
@@ -136,13 +149,6 @@ var DATASET_ALL = 'All Projects';
       promise.then(function(data){
         $scope.result.exists = true;
         $scope.result.value = data.response.exists;
-        if($scope.result.value === 'true'){
-          $scope.result.fadeColor = '#EFFFEF';
-        }else if($scope.result.value === 'false'){
-          $scope.result.fadeColor = '#FFF3F3';
-        }else{
-          $scope.result.fadeColor = '#EFEFEF';
-        }
         var url = data.getRequestedUrl();
 
         if(url.indexOf(location.protocol) !== 0){
@@ -162,13 +168,10 @@ var DATASET_ALL = 'All Projects';
     $scope.exampleQuery =  function(type){
       if(type === 'true'){
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T',result:'true'});
-        $scope.result.fadeColor = '#EFFFEF';
       }else if(type === 'false'){
         $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C',result:'true'});
-        $scope.result.fadeColor = '#FFF3F3';
       }else{
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G',result:'true'});
-        $scope.result.fadeColor = '#EFEFEF';
       }
       $scope.inProgress =true;
       $scope.hasInvalidParams = false;
@@ -184,6 +187,11 @@ var DATASET_ALL = 'All Projects';
         reference:'GRCh37',
       };
       $scope.hasInvalidParams = true;
+      $scope.invalidParams = {
+        isPositon:false,
+        isAllele:false,
+        isReference:false
+      };
       $scope.errorMessage = '';
       $scope.result = {
         exists:false,
