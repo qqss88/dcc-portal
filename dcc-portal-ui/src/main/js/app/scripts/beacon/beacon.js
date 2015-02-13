@@ -66,7 +66,7 @@ var DATASET_ALL = 'All Projects';
       LocationService.setParam('pos',$scope.params.position);
       LocationService.setParam('ref',$scope.params.reference);
       LocationService.setParam('ale',$scope.params.allele);
-      LocationService.setParam('result',$scope.result.exists?'true':'false');
+      LocationService.setParam('result',($scope.result.exists && !$scope.hasInvalidParams)?'true':'false');
     };
 
     var loadParameters = function(){
@@ -86,6 +86,8 @@ var DATASET_ALL = 'All Projects';
       }
       $scope.params.allele = LocationService.getParam('ale')?
         LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
+
+      $scope.checkParams();
     };
 
     var projectsPromise = Restangular.one('projects')
@@ -156,11 +158,14 @@ var DATASET_ALL = 'All Projects';
       if(type === 'true'){
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T'});
       }else if(type === 'false'){
-        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'A'});
+        $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C'});
       }else{
-        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'C'});
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G'});
       }
+      $scope.inProgress =true;
       loadParameters();
+      $scope.hasInvalidParams = false;
+      $scope.errorMessage = '';
       $scope.submitQuery();
     };
 
@@ -190,7 +195,7 @@ var DATASET_ALL = 'All Projects';
       };
 
       loadParameters();
-      if(LocationService.getParam('result') === 'true'){
+      if(LocationService.getParam('result') === 'true' && !$scope.hasInvalidParams){
         $scope.submitQuery();
       }else{
         $scope.checkParams();

@@ -3477,34 +3477,34 @@ td {
 
 /* line 64, _modules/_beacon.scss */
 .beacon-false-container {
-  background: #ffc200;
+  background: #d31313;
 }
 
 /* line 67, _modules/_beacon.scss */
 .beacon-false-text {
-  color: #ffc200;
-  border: 3px solid #ffc200;
-}
-
-/* line 71, _modules/_beacon.scss */
-.beacon-false-code {
-  border-bottom: 2px solid #ffc200;
-}
-
-/* line 76, _modules/_beacon.scss */
-.beacon-null-container {
-  background: #d31313;
-}
-
-/* line 79, _modules/_beacon.scss */
-.beacon-null-text {
   color: #d31313;
   border: 3px solid #d31313;
 }
 
+/* line 71, _modules/_beacon.scss */
+.beacon-false-code {
+  border-bottom: 2px solid #d31313;
+}
+
+/* line 76, _modules/_beacon.scss */
+.beacon-null-container {
+  background: #444444;
+}
+
+/* line 79, _modules/_beacon.scss */
+.beacon-null-text {
+  color: #444444;
+  border: 3px solid #444444;
+}
+
 /* line 83, _modules/_beacon.scss */
 .beacon-null-code {
-  border-bottom: 2px solid #d31313;
+  border-bottom: 2px solid #444444;
 }
 
 /** end of different color options */
@@ -3571,24 +3571,24 @@ td {
 
 /* line 141, _modules/_beacon.scss */
 .beacon-callout-false {
-  border-left-color: #ffc200;
+  border-left-color: #d31313;
 }
 
 /* line 144, _modules/_beacon.scss */
 .beacon-callout-false h4 {
-  color: #ffc200;
+  color: #d31313;
   font-weight: bold;
   margin-bottom: 0.4rem;
 }
 
 /* line 150, _modules/_beacon.scss */
 .beacon-callout-null {
-  border-left-color: #d31313;
+  border-left-color: #444444;
 }
 
 /* line 153, _modules/_beacon.scss */
 .beacon-callout-null h4 {
-  color: #d31313;
+  color: #444444;
   font-weight: bold;
   margin-bottom: 0.4rem;
 }

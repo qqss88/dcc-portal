@@ -57,7 +57,7 @@
             </tr>
         </table>
         <span data-ng-if="!hasInvaidParams"><small style="color:red">{{errorMessage}}</small></span><br>
-        <div class="beacon-result-section" data-ng-if="result.exists" data-ng-style="{'opacity':inProgress?'0.2':'1'}">
+        <div class="beacon-result-section" data-ng-if="result.exists" data-ng-style="{'transition':inProgress?'':'background 1.5s ease-out','background-color':inProgress?'#f2f2f2':'white'}">
             <h3>Result</h3>
             <div>The result of your Beacon query was:</div>
             <br>
@@ -70,8 +70,8 @@
                 <div class="beacon-icon-text beacon-false-text">FALSE</div>
             </div>
             <div class="beacon-result" data-ng-if="result.value == 'null'">
-                <div class="beacon-icon-container beacon-null-container"><i class="icon-cancel beacon-icon"></i></div>
-                <div class="beacon-icon-text beacon-null-text">NOT FOUND</div>
+                <div class="beacon-icon-container beacon-null-container"><i class="icon-help beacon-icon"></i></div>
+                <div class="beacon-icon-text beacon-null-text">NULL</div>
             </div>
             <br>
             <input onClick="this.select();" class="well beacon-api-link" readonly="readonly" data-ng-model="requestedUrl" data-ng-if="requestedUrl"><a href="{{requestedUrl}}"  target="_blank" <i class="icon-external-link"></i></a>
@@ -97,7 +97,7 @@
             For an example, try this <a ng-click="exampleQuery('false');" href=""><i class="icon-search"></i>query</a>.
           </div>
           <div class="beacon-callout beacon-callout-null">
-            <h4>Not found</h4>
+            <h4>Null</h4>
             Returned when no mutation is found at the queried position.<br><br><br>
             For an example, try this <a ng-click="exampleQuery('null');" href=""><i class="icon-search"></i>query</a>.
           </div>
