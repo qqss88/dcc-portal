@@ -18,7 +18,7 @@ package org.icgc.dcc.portal.health;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.data.downloader.DynamicDownloader;
+import org.icgc.dcc.downloader.client.DownloaderClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,10 +36,10 @@ public final class DownloaderHealthCheck extends HealthCheck {
   /**
    * Dependencies
    */
-  private final DynamicDownloader downloader;
+  private final DownloaderClient downloader;
 
   @Autowired
-  public DownloaderHealthCheck(DynamicDownloader downloader) {
+  public DownloaderHealthCheck(DownloaderClient downloader) {
     super(CHECK_NAME);
     this.downloader = downloader;
   }

@@ -44,7 +44,8 @@
       paddingBottom: 10,
       paddingLeft: 10,
       paddingRight: 10,
-      outlineColour: '#555',
+      outlineColour: '#999',
+      outlineWidth: 1.5,
       hoverColour: '#e9931c',
       urlPath: '',
       mapFunc: function(data) {
@@ -112,10 +113,10 @@
     this.colours = ['rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'];
     this.colours = ['rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,69,148)'];
 
-    this.colours = ['rgb(230, 230, 230)'];
+    this.colours = ['rgb(242,242,242)'];
     this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
-    this.getColourBySetIds = function(ids) {
-      return this.colours[Math.ceil(this.ramp(this.getValueBySetIds(ids)))];
+    this.getColourBySetIds = function() {
+      return this.colours[0];
     };
 
     this.svg = undefined;
@@ -155,14 +156,14 @@
       .append('svg:circle')
       .attr('cx', cx - radius * factor)
       .attr('cy', cy)
-      .attr('r', radius+3);
+      .attr('r', radius+ config.outlineWidth);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out-set2')
       .append('svg:circle')
       .attr('cx', cx + radius * factor)
       .attr('cy', cy)
-      .attr('r', radius+3);
+      .attr('r', radius+ config.outlineWidth);
 
 
     // 1 intersection
@@ -183,8 +184,8 @@
       .attr('class', 'inner')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
     svg.append('svg:rect')
       .datum({selected:false, data:[uniqueIds[1]]})
@@ -192,8 +193,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle2-set2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
 
@@ -213,8 +214,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle2-set2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
 
@@ -298,21 +299,21 @@
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 300/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 300/180) * radius * factor)
-      .attr('r', radius+3);
+      .attr('r', radius+ config.outlineWidth);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle2_out')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 60/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 60/180) * radius * factor)
-      .attr('r', radius+3);
+      .attr('r', radius+ config.outlineWidth);
 
     defs.append('svg:clipPath')
       .attr('id', 'circle3_out')
       .append('svg:circle')
       .attr('cx', cx + Math.sin(Math.PI * 180/180) * radius * factor)
       .attr('cy', cy - Math.cos(Math.PI * 180/180) * radius * factor)
-      .attr('r', radius+3);
+      .attr('r', radius+ config.outlineWidth);
 
 
     // 1 intersection
@@ -338,8 +339,8 @@
       .attr('class', 'inner')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
     svg.append('svg:rect')
       .datum({selected:false, data:[uniqueIds[1]]})
@@ -347,8 +348,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
     svg.append('svg:rect')
       .datum({selected:false, data:[uniqueIds[2]]})
@@ -356,8 +357,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle3)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
     // 2 intersections
@@ -376,8 +377,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle2)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
     svg.append('svg:g')
@@ -395,8 +396,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle3)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
     svg.append('svg:g')
@@ -414,8 +415,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
 
@@ -439,8 +440,8 @@
       .attr('clip-path', 'url(' + config.urlPath + '#circle1)')
       .attr('width', config.chartWidth)
       .attr('height', config.chartHeight)
-      .style('fill', function(d) {
-        return _this.getColourBySetIds(d.data);
+      .style('fill', function() {
+        return _this.getColourBySetIds();
       });
 
     // Label - name
@@ -566,7 +567,7 @@
       })
       .on('mouseout', function(d) {
         if (d.selected === false) {
-          d3.select(this).style('fill', _this.getColourBySetIds(d.data));
+          d3.select(this).style('fill', _this.getColourBySetIds());
         }
         config.mouseoutFunc(d);
       })
@@ -605,7 +606,7 @@
       .attr('width', 15)
       .attr('height', 15)
       .style('stroke', '#FFFFFF')
-      .style('fill', function(d) {
+      .style('fill', function() {
         return d;
       });
       */
@@ -647,7 +648,7 @@
         if (bool === true) {
           return config.hoverColour;
         } else {
-          return _this.getColourBySetIds(d.data);
+          return _this.getColourBySetIds();
         }
       });
   };

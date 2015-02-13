@@ -40,6 +40,7 @@ import org.icgc.dcc.portal.service.BeaconService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Doubles;
 import com.wordnik.swagger.annotations.Api;
@@ -107,7 +108,8 @@ public class BeaconResource extends BaseResource {
       dataset = ANY_DATASET;
     }
 
-    return beaconService.query(chromosome.trim(), tryParse(position.trim()), reference.trim(), allele.trim(),
+    return beaconService.query(chromosome.trim(), Objects.firstNonNull(tryParse(position.trim()), 1), reference.trim(),
+        allele.trim(),
         dataset.trim());
   }
 
