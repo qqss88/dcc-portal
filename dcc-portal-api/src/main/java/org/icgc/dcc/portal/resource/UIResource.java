@@ -80,7 +80,7 @@ public class UIResource {
    * FIXME: Checkout elasticsearch aggregation framework when we have it to see if it can alleviate the amount of
    * requests, which is based on # of genes passed in.
    */
-  @Path("/geneProjectDonorCounts/{geneIds}")
+  @Path("/gene-project-donor-counts/{geneIds}")
   @GET
   public Map<String, TermFacet> countProjectDonor(
       @ApiParam(value = "Gene ID. Multiple IDs can be entered as ENSG00000155657,ENSG00000141510", required = true) @PathParam("geneIds") IdsParam geneIds,

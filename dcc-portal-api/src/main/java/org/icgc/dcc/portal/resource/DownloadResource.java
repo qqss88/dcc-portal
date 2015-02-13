@@ -87,6 +87,7 @@ import org.icgc.dcc.downloader.core.FileInfo;
 import org.icgc.dcc.downloader.core.SelectionEntry;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
@@ -459,7 +460,7 @@ public class DownloadResource {
   }
 
   @ApiOperation("Get the job info based on IDs")
-  @Path("/JobInfo")
+  @Path("{downloadIds}/info")
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
@@ -468,11 +469,12 @@ public class DownloadResource {
       @Auth(required = false) User user,
 
       // TODO: after merge with shane's branch, use pathparam to handle this
-      @ApiParam(value = "id", required = false) @QueryParam("downloadId") @DefaultValue("") FieldsParam downloadIds
+      @ApiParam(value = "id", required = false) @PathParam("downloadIds") @DefaultValue("") IdsParam downloadIds
 
       ) throws IOException {
     try {
-      if (downloadIds.get() != null || downloadIds.get().length != 0) {
+
+      if (downloadIds.get() != null || downloadIds.get().size() != 0) {
         Map<String, Map<String, String>> jobInfoMap = downloader.getJobInfo(ImmutableSet.copyOf(downloadIds.get()));
         ImmutableMap.Builder<String, Object> reportMapBuilder = ImmutableMap.builder();
         boolean isControlled = containsControlledData(jobInfoMap);

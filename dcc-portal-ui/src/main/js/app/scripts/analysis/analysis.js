@@ -31,6 +31,9 @@
           return $stateParams.id;
         }],
         analysisType: ['$stateParams', function($stateParams) {
+          if ($stateParams.type === 'set') {
+            return 'union';
+          }
           return $stateParams.type;
         }]
       }
@@ -92,7 +95,7 @@
         if (!data.id) {
           console.log('cannot create set operation');
         }
-        $location.path('analysis/union/' + data.id);
+        $location.path('analysis/set/' + data.id);
       });
     };
 
@@ -150,20 +153,17 @@
 
 
       if (toRemove.length > 0) {
+
+        _.remove($scope.selectedSets, function(set) {
+          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
+        });
+
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         $scope.update();
       }
     };
 
-    $scope.removeList = function(id) {
-      SetService.remove(id);
-      $scope.entityLists = SetService.getAll();
-      $scope.updateAvailableAnalysis();
-    };
-
-
     var analysisPromise;
-
 
     // TODO: Move this out
     var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
@@ -257,10 +257,16 @@
     }
 
     $scope.getAnalysis = function(id, type) {
+      var routeType = type;
       $timeout.cancel(analysisPromise);
+
+      if (type === 'union') {
+        routeType = 'set';
+      }
+
       if (id) {
         $scope.analysisId = id;
-        $location.path('analysis/' + type + '/' + id);
+        $location.path('analysis/' + routeType + '/' + id);
       } else {
         $scope.analysisId = null;
         $location.path('analysis');

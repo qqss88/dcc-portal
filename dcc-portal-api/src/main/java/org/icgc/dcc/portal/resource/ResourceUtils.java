@@ -103,6 +103,7 @@ public class ResourceUtils {
 
   static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity List Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
+  static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();

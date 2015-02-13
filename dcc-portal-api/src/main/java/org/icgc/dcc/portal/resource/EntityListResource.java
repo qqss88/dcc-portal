@@ -21,11 +21,11 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_VALUE;
+import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -60,10 +60,11 @@ import org.icgc.dcc.portal.service.EntityListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
 /**
- * TODO
+ * DropWizard end-points that provide various functionalities for entity sets.
  */
 
 @Slf4j
@@ -73,22 +74,18 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class EntityListResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";
-  private static final String EXPORT_FILE_EXTENSION = ".csv";
+  private static final String EXPORT_FILE_EXTENSION = ".tsv";
 
   @NonNull
   private final EntityListService service;
 
-  private List<EntityList> getEntityListsByIds(final Set<UUID> ids) {
-
+  private List<EntityList> getEntityListsByIds(@NonNull final Set<UUID> ids) {
     val result = new ArrayList<EntityList>(ids.size());
     for (val id : ids) {
-
-      // should implement @BindIn to allow the IN clause instead of doing a loop here
+      // Should implement @BindIn in the EntityListRepository to allow the IN clause instead of doing a loop here.
       val list = service.getEntityList(id);
       if (null != list) {
-
         result.add(list);
-
       }
     }
     return result;
@@ -97,20 +94,20 @@ public class EntityListResource {
   @GET
   @Path("/sets/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Retrieves a list of entity sets by their IDs.", response = EntityList.class, responseContainer = "List")
   public List<EntityList> getEntityLists(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UuidListParam entityListIds
       ) {
-
-    Set<UUID> listIds;
+    Set<UUID> listIds = null;
     try {
       listIds = entityListIds.get();
 
     } catch (Exception e) {
-
-      log.info("Unable to parse the incoming UUID list from the request: {}", entityListIds, e.getMessage());
-      throw new BadRequestException("Unable to parse the entityListIds parameter.");
+      log.error("Exception occurred while parsing the UUID list from web request: '{}'", entityListIds);
+      log.error("The exception while parsing the UUID list is: ", e);
+      throw new BadRequestException("Unable to parse the entitySetId parameter.");
     }
-    log.info("Received a getEntityLists request for these lists: '{}'", listIds);
+    log.debug("Received a getEntityLists request for these lists: '{}'", listIds);
 
     return getEntityListsByIds(listIds);
   }
@@ -118,29 +115,27 @@ public class EntityListResource {
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Retrieves an entity set by its ID.", response = EntityList.class)
   public EntityList getEntityList(
-      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
-
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
+      ) {
     val result = getEntityListsByIds(Sets.newHashSet(entityListId));
     if (result.isEmpty()) {
-
       log.error("Error: getEntityListsByIds returns empty. The entityListId '{}' is most likely invalid.", entityListId);
-      throw new BadRequestException("Not found: " + entityListId); // TODO: better message
-      // return null; // this return 204 - perhaps it's more appropriate?
-    }
-    else {
+      throw new BadRequestException("Not found: " + entityListId);
+    } else {
       return result.get(0);
     }
   }
 
   @POST
-  // this hits the root path
+  // this hits the root path of /v1/entityset
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntityList.class)
   public Response createList(
       @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntityListDefinition listDefinition
       ) {
-
     val newList = service.createEntityList(listDefinition);
 
     return newListResponse(newList);
@@ -150,10 +145,10 @@ public class EntityListResource {
   @Path("/union")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Creates an entity set by combining two or more existing sets.", response = EntityList.class)
   public Response deriveList(
       @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntityListDefinition listDefinition
       ) {
-
     val newList = service.deriveEntityList(listDefinition);
 
     return newListResponse(newList);
@@ -171,10 +166,11 @@ public class EntityListResource {
 
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}/export")
-  @Produces(APPLICATION_OCTET_STREAM)
+  @Produces(TEXT_TSV)
+  @ApiOperation(value = "Exports the data of a set as a download in TSV (tab-delimited) format.", response = EntityList.class)
   public Response exportListItems(
-      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId) {
-
+      @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
+      ) {
     val list = getEntityList(entityListId);
 
     if (EntityList.State.FINISHED != list.getState()) {

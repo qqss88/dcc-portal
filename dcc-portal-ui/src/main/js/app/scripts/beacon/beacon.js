@@ -40,15 +40,58 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
                '13': 115169878, '14': 107349540, '15': 102531392, '16': 90354753,
                '17': 81195210, '18': 78077248, '19': 59128983, '20': 63025520,
                '21': 48129895, '22': 51304566, 'X': 155270560, 'Y': 59373566, 'MT': 16569};
+var DATASET_ALL = 'All Projects';
 
 (function() {
   'use strict';
 
   var module = angular.module('icgc.beacon.controllers', []);
 
-  module.controller('BeaconCtrl', function ($scope, Page, Restangular) {
+  module.controller('BeaconCtrl', function ($scope, LocationService, $location,$timeout, Page, Restangular) {
     Page.setTitle('Beacon');
     Page.setPage('beacon');
+
+    $scope.hasInvalidParams = false;
+    $scope.errorMessage = '';
+    $scope.result = {
+      exists:false,
+      value:''
+    };
+    $scope.chromosomes = Object.keys(lengths);
+    $scope.inProgress = false;
+
+    var saveParameters = function(){
+      LocationService.setParam('proj',$scope.params.project.id);
+      LocationService.setParam('chr',$scope.params.chr);
+      LocationService.setParam('pos',$scope.params.position);
+      LocationService.setParam('ref',$scope.params.reference);
+      LocationService.setParam('ale',$scope.params.allele);
+      LocationService.setParam('result',($scope.result.exists && !$scope.hasInvalidParams)?'true':'false');
+    };
+
+    var loadParameters = function(){
+      var loadedProject = LocationService.getParam('proj');
+      $scope.projects.every(function (p) {
+        if(p.id === loadedProject){
+          $scope.params.project = p;
+          return false;
+        }else{
+          return true;
+        }
+      });
+
+      $scope.params.chr = $scope.chromosomes.indexOf(LocationService.getParam('chr'))>-1?
+        LocationService.getParam('chr'):'1';
+      $scope.params.position = LocationService.getParam('pos')?
+        LocationService.getParam('pos').replace( /[^0-9]+/g, '').replace(/^0+/,''):'';
+      if(LocationService.getParam('ref')){
+        $scope.params.reference = LocationService.getParam('ref');
+      }
+      $scope.params.allele = LocationService.getParam('ale')?
+        LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
+      $scope.result.exists = LocationService.getParam('result') === 'true'?true:false;
+      $scope.checkParams();
+    };
 
     var projectsPromise = Restangular.one('projects')
       .get({
@@ -58,68 +101,80 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
         'size' : 100
       },{'Accept':'application/json'});
 
-    projectsPromise.then(function(data){
-      $scope.projects = data.hits;
-      $scope.projects.unshift({id:'-- ALL DATASETS'});
-      $scope.params = {
-        project:$scope.projects[0],
-        chr:'1',
-        reference:'GRCh37',
-      };
-    });
-
-    $scope.hasInvalidParams = true;
-    $scope.errorMessage = '';
-    $scope.result = {
-      exists:false,
-      value:''
-    };
-    $scope.chromosomes = Object.keys(lengths);
-
     $scope.checkParams = function(){
+
       $scope.hasInvalidParams = true;
       //reset error messages
       $scope.errorMessage = '';
 
-      //first if anything required is empty or missing, stop checking
-      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
-        $scope.hasInvalidParams = true;
-        return;
-      }
-
       // check that the position is less than length of chromosome
-      if($scope.params.position > lengths[$scope.params.chr]){
+      if($scope.params.position && ($scope.params.position > lengths[$scope.params.chr])){
         $scope.errorMessage = 'Position must be less than Chromosome '+
           $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
-        return;
-      }
-
-      // check that the reference is GRCh37 (all we support)
-      if($scope.params.reference !== 'GRCh37'){
+      }else if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
         $scope.errorMessage = 'Currently only GRCh37 is supported';
-        return;
+      }else if(($scope.params.reference && $scope.params.position && $scope.params.allele)){
+        $scope.hasInvalidParams = false;
       }
 
-      //made it to the end, no errors found
-      $scope.hasInvalidParams = false;
+      //Save state of things
+      saveParameters();
     };
 
     $scope.submitQuery = function() {
+      $scope.inProgress=true;
       var promise = Restangular.one('beacon', 'query')
       .get({
         'chromosome' : $scope.params.chr,
         'reference':$scope.params.reference,
         'position':$scope.params.position,
         'allele':$scope.params.allele ? $scope.params.allele : '',
-        'dataset':$scope.params.project.id === 'ALL' ? '':$scope.params.project.id
+        'dataset':$scope.params.project.id === DATASET_ALL ? '':$scope.params.project.id
       },{'Accept':'application/json'});
+
 
       promise.then(function(data){
         $scope.result.exists = true;
         $scope.result.value = data.response.exists;
+        if($scope.result.value === 'true'){
+          $scope.result.fadeColor = '#EFFFEF';
+        }else if($scope.result.value === 'false'){
+          $scope.result.fadeColor = '#FFF3F3';
+        }else{
+          $scope.result.fadeColor = '#EFEFEF';
+        }
         var url = data.getRequestedUrl();
-        $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+
+        if(url.indexOf(location.protocol) !== 0){
+          $scope.requestedUrl = location.protocol + '//' + location.host +
+            url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }else{
+          $scope.requestedUrl = url.substring(0,url.indexOf('?'))+'/query'+url.substring(url.indexOf('?'));
+        }
+        $timeout(function() {
+          $scope.inProgress = false;
+        }, 50);
+        saveParameters();
       });
+
+    };
+
+    $scope.exampleQuery =  function(type){
+      if(type === 'true'){
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T',result:'true'});
+        $scope.result.fadeColor = '#EFFFEF';
+      }else if(type === 'false'){
+        $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C',result:'true'});
+        $scope.result.fadeColor = '#FFF3F3';
+      }else{
+        $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G',result:'true'});
+        $scope.result.fadeColor = '#EFEFEF';
+      }
+      $scope.inProgress =true;
+      $scope.hasInvalidParams = false;
+      $scope.errorMessage = '';
+      loadParameters();
+      $scope.submitQuery();
     };
 
     $scope.resetQuery = function() {
@@ -135,7 +190,25 @@ var lengths = {'1': 249250621, '2': 243199373, '3': 198022430, '4': 191154276,
         value:''
       };
       $scope.requestedUrl = null;
+      saveParameters();
     };
+
+    projectsPromise.then(function(data){
+      $scope.projects = data.hits;
+      $scope.projects.unshift({id:DATASET_ALL});
+      $scope.params = {
+        project:$scope.projects[0],
+        chr:'1',
+        reference:'GRCh37',
+      };
+
+      loadParameters();
+      if($scope.result.exists && !$scope.hasInvalidParams){
+        $scope.submitQuery();
+      }else{
+        $scope.result.exists = false;
+      }
+    });
   });
 
   module.directive('positionValidator', function() {

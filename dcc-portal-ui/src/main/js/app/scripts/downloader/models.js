@@ -42,13 +42,9 @@ angular.module('app.downloader.model').factory('Downloader', function ($http, Re
 
     getJobMetaData: function (ids) {
       if (angular.isArray(ids)) {
-        return RestangularNoCache.one('download/JobInfo').get({
-          downloadId: ids.join(',')
-        });
+        return RestangularNoCache.one('download', ids.join(',')).one('info').get({});
       }
-      return RestangularNoCache.one('download/JobInfo').get({
-        downloadId: ids
-      });
+      return RestangularNoCache.one('download', ids).one('info').get({});
     },
 
     getJobStatus: function (ids) {
