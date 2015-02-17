@@ -235,6 +235,7 @@
       });
     }
 
+
     function init() {
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
@@ -251,11 +252,14 @@
           return;
         }
 
-        // Kick off polling if not finished
         if (data.state === 'FINISHED') {
-          $scope.analysisResult = data;
+          $timeout(function() {
+            $scope.analysisResult = data;
+          }, 150);
           return;
         }
+
+        // Kick off polling if not finished
         wait(id, type);
 
       }, function() {
@@ -322,16 +326,6 @@
     init();
     synchronizeSets(10);
 
-    // Perform sanity checks
-    /*
-    SetService.getMetaData(_.pluck($scope.entityLists, 'id')).then(function(results) {
-      if (results.length !== $scope.entityLists.length) {
-        $scope.syncError = true;
-        return;
-      }
-      synchronizeSets(10);
-    });
-    */
   });
 
 })();
