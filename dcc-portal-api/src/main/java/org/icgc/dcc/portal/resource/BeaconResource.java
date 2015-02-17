@@ -108,7 +108,8 @@ public class BeaconResource extends BaseResource {
       dataset = ANY_DATASET;
     }
 
-    return beaconService.query(chromosome.trim(), Objects.firstNonNull(tryParse(position.trim()), 1), reference.trim(),
+    return beaconService.query(chromosome.toUpperCase().trim(), Objects.firstNonNull(tryParse(position.trim()), 1),
+        reference.trim(),
         allele.trim(),
         dataset.trim());
   }
@@ -143,7 +144,7 @@ public class BeaconResource extends BaseResource {
     position = position.trim();
     val pos = tryParse(position);
     if (pos == null) return false;
-    return pos >= 0 && CHROMOSOME_LENGTHS.get(chromosome) >= pos;
+    return pos >= 0 && CHROMOSOME_LENGTHS.get(chromosome.toUpperCase().trim()) >= pos;
   }
 
 }
