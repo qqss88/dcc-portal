@@ -152,7 +152,12 @@ angular.module('app.ui.tooltipControl', [])
             }
           });
 
-          var position = calculatePlacement(params.placement, params.element);
+          var position = params.position;
+
+          if(!position){
+            position = calculatePlacement(params.placement, params.element);
+          }
+   //       console.log(position);
           element.css('top', position.top);
           element.css('left', position.left);
         });

@@ -48,7 +48,7 @@
 		
 		// create a div to function as the tooltip
 		var div = d3.select(element).append('div')
-		    .attr('class', 'stacked tooltip')
+		    .attr('class', 'tooltip-inner')
 		    .style('opacity', 0);
 		
 	  //for each gene, create an array of donors and get the total affected donors count
@@ -139,17 +139,14 @@
         .attr('y', function(d) { return y(d.y1); })
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
         .on('mouseover', function(d) {
-              div.transition()
-                  .duration(20)
-                  .style('opacity', 0.95);
-              div.html('<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected')
-                  .style('left', (d3.event.layerX + 5) + 'px')
-                  .style('top', (d3.event.layerY - 40) + 'px');
+              var point = d3.mouse(this); //use x = point[0] and y = point[1]
+              var x = d3.event.pageX;
+              var y = d3.event.pageY;
+   //           config.tooltipShowFunc(this,d,point[0],point[1]);
+              config.tooltipShowFunc(this,d,x,y);
             })
         .on('mouseout', function() {
-              div.transition()
-                  .duration(20)
-                  .style('opacity', 0);
+              config.tooltipHideFunc();
             })
         .on('click',function(d){   //link to the gene page on mouse click
               config.onClick(d.geneLink);

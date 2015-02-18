@@ -2758,6 +2758,7 @@ aside .t_tabs__tab {
   font-size: .9rem;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
   opacity: 0;
+  pointer-events: none;
   line-height: 1.6rem;
 }
 /* line 33, _modules/_tooltip.scss */
@@ -2794,7 +2795,7 @@ aside .t_tabs__tab {
   color: white;
   text-align: left;
   text-decoration: none;
-  background-color: #333333;
+  background-color: pink;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   -ms-border-radius: 0.5rem;
@@ -3384,21 +3385,6 @@ g.marker rect.selected {
 /* line 72, _modules/_vis.scss */
 .stacked.x.axis path {
   display: none;
-}
-
-/* line 76, _modules/_vis.scss */
-div.stacked.tooltip {
-  position: absolute;
-  text-align: left;
-  padding: 4px;
-  font: 12px sans-serif;
-  background: white;
-  border: 0px;
-  border-radius: 5px;
-  pointer-events: none;
-  -moz-box-shadow: 1px 1px 2px #999;
-  -webkit-box-shadow: 1px 1px 2px #999;
-  box-shadow: 1px 1px 2px #999;
 }
 
 /* line 90, _modules/_vis.scss */

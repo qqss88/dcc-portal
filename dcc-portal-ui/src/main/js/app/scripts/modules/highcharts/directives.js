@@ -149,7 +149,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
           enabled: true,
           formatter: function () {
             var name = this.point.term ? $filter('trans')(this.point.name, true) : 'No Data';
-            return '<div class="t_hc_tooltip">' +
+            return '<div class="tooltip-inner" style="opacity:0.9">' +
                    '<strong>' + name + '</strong><br/>' +
                    Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
                    '</div>';
@@ -266,8 +266,8 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           backgroundColor: 'none',
           shadow: false,
           formatter: function () {
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + $filter('define')(this.point.name) + '</strong><br/>' +
+            return '<div class="tooltip-inner" style="opacity:0.9;width:100%;overflow:visible">' +
+                   '<strong>' + $filter('define')(this.point.name) + '</strong><br>' +
                    Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
                    '</div>';
           }
@@ -403,7 +403,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
               num = this.y;
             }
 
-            return '<div class="t_hc_tooltip">' +
+            return '<div class="tooltip-inner" style="opacity:0.9">' +
                    '<strong>' + this.x + '</strong><br/>' +
                    num + ' ' + $attrs.ylabel +
                    '</div>';
@@ -572,7 +572,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
 //          formatter: function () {
 //            var donors = this.y;
 //
-//            return '<div class="t_hc_tooltip">' +
+//            return '<div class="tooltip-inner" style="opacity:0.9">' +
 //                   '<strong>' + this.series.name + '</strong><br/>' +
 //                   donors + ' ' + ' donors affected' +
 //                   '</div>';

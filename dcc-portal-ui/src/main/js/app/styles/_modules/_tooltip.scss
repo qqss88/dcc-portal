@@ -27,7 +27,7 @@
   visibility: visible;
   font-size: .9rem;
   @include opacity(0);
-
+  pointer-events: none;
   line-height: 1.6rem;
 
   &.in {
@@ -60,8 +60,8 @@
   color: $white;
   text-align: left;
   text-decoration: none;
-  //background-color: $blue;
-  background-color: $greyDarker;
+  background-color: pink;
+  //background-color: $greyDarker;
   @include border-radius(.5rem);
   border-color:j#FF9999;
 }
