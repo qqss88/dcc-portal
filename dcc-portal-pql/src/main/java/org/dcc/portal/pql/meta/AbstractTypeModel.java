@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.visitor.CreateAliasVisitor;
-import org.dcc.portal.pql.meta.visitor.CreateFullNameVisitor;
+import org.dcc.portal.pql.meta.visitor.CreateFullyQualifiedNameVisitor;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -53,7 +53,7 @@ public abstract class AbstractTypeModel {
 
   private static Map<String, FieldModel> initFieldsByFullPath(List<? extends FieldModel> fields) {
     val result = Maps.<String, FieldModel> newHashMap();
-    val visitor = new CreateFullNameVisitor();
+    val visitor = new CreateFullyQualifiedNameVisitor();
     for (val field : fields) {
       result.putAll(field.accept(visitor));
     }

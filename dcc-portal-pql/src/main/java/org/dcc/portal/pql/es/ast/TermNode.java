@@ -31,6 +31,7 @@ public class TermNode extends ExpressionNode {
 
   @NonNull
   TerminalNode nameNode;
+
   @NonNull
   TerminalNode valueNode;
 

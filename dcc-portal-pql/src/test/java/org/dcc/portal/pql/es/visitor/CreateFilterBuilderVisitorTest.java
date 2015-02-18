@@ -31,6 +31,7 @@ import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
@@ -50,9 +51,11 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   public void setUp() {
     es.execute(createIndexMappings(MUTATION_CENTRIC).withData(bulkFile(getClass())));
     visitor = new CreateFilterBuilderVisitor(es.client(), new MutationCentricTypeModel());
+
     queryContext = new QueryContext();
     queryContext.setType(MUTATION_CENTRIC);
     queryContext.setIndex(INDEX_NAME);
+
     listener = new PqlParseListener(queryContext);
     esAstTransformator = new EsAstTransformator();
   }
@@ -60,14 +63,13 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   @Test
   public void sortTest() {
     val result = executeQuery("select(start),sort(-start)");
-    assertThat(result.getHits().getAt(0).getSortValues()[0]).isEqualTo(61020906L);
-
+    assertThat(getFirstSearchResult(result).getSortValues()[0]).isEqualTo(61020906L);
   }
 
   @Test
   public void selectTest() {
     val result = executeQuery("select(chromosome)");
-    val hit = result.getHits().getAt(0);
+    val hit = getFirstSearchResult(result);
     assertThat(hit.fields().size()).isEqualTo(1);
     assertThat(hit.field("chromosome").getValue()).isEqualTo("1");
   }
@@ -108,14 +110,14 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   public void eqTest() {
     val result = executeQuery("eq(id, 'MU2')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
+    assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void eqTest_nested() {
     val result = executeQuery("eq(functionalImpactNested, 'Low')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU1");
+    assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU1");
   }
 
   @Test
@@ -195,14 +197,14 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     val result =
         executeQuery("and(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')))");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
+    assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void andTest_rootLevel() {
     val result = executeQuery("eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
+    assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
 
   @Test
@@ -325,6 +327,10 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   private static TermsFacet getFacet(SearchResponse response) {
     return response.getFacets().facet(TermsFacet.class, "verificationStatusNested");
+  }
+
+  private static SearchHit getFirstSearchResult(SearchResponse response) {
+    return response.getHits().getAt(0);
   }
 
 }

@@ -6,122 +6,128 @@
 grammar Pql;
 
 statement
-	: (filter | function) (COMMA (filter | function))*
-	| count (COMMA filter)*
-	| (filter | function) (COMMA (filter | function))* COMMA order
-	| (filter | function) (COMMA (filter | function))* COMMA range
-	| (filter | function) (COMMA (filter | function))* COMMA order COMMA range
-	;
+  : (filter | function) (COMMA (filter | function))*
+  | count (COMMA filter)*
+  | (filter | function) (COMMA (filter | function))* COMMA order
+  | (filter | function) (COMMA (filter | function))* COMMA range
+  | (filter | function) (COMMA (filter | function))* COMMA order COMMA range
+  ;
 	
 count
-	: 'count' OPAR CPAR
-	;
+  : 'count' OPAR CPAR
+  ;
 
 function
-	: 'select' OPAR ID (COMMA ID)* CPAR			# select
-	| 'facets' OPAR ID (COMMA ID)* CPAR			# facets
-	;
+  : 'select' OPAR ID (COMMA ID)* CPAR       # select
+  | 'facets' OPAR ID (COMMA ID)* CPAR       # facets
+  ;
 
 filter
-	: 'nested' OPAR ID (COMMA filter)+ CPAR		# nested
-	| eq										# equal
-    | ne										# notEqual
-    | gt										# greaterThan
-    | ge										# greaterEqual
-    | lt										# lessThan
-    | le										# lessEqual
-    | in										# inArray
-    | OPAR filter CPAR							# group
-    | 'and' OPAR filter (COMMA filter)+ CPAR	# and
-    | filter '&' filter							# and
-    | 'or' OPAR filter (COMMA filter)+ CPAR		# or
-    | filter '|' filter							# or
-    ;
+  : 'nested' OPAR ID (COMMA filter)+ CPAR   # nested
+  | eq                                      # equal
+  | ne                                      # notEqual
+  | gt                                      # greaterThan
+  | ge                                      # greaterEqual
+  | lt                                      # lessThan
+  | le                                      # lessEqual
+  | in                                      # inArray
+  | OPAR filter CPAR                        # group
+  | 'and' OPAR filter (COMMA filter)+ CPAR  # and
+  | filter '&' filter                       # and
+  | 'or' OPAR filter (COMMA filter)+ CPAR   # or
+  | filter '|' filter                       # or
+  ;
 
 eq
-    : 'eq' OPAR ID COMMA value CPAR
-    | ID '=' value
-    ;
+  : 'eq' OPAR ID COMMA value CPAR
+  | ID '=' value
+  ;
+
 ne
-    : 'ne' OPAR ID COMMA value CPAR
-    | ID '!=' value
-    ;
+  : 'ne' OPAR ID COMMA value CPAR
+  | ID '!=' value
+  ;
+
 gt
-    : 'gt' OPAR ID COMMA value CPAR
-    | ID '=gt=' value
-    ;
+  : 'gt' OPAR ID COMMA value CPAR
+  | ID '=gt=' value
+  ;
+
 ge
-    : 'ge' OPAR ID COMMA value CPAR
-    | ID '=ge=' value
-    ;
+  : 'ge' OPAR ID COMMA value CPAR
+  | ID '=ge=' value
+  ;
+
 lt
-    : 'lt' OPAR ID COMMA value CPAR
-    | ID '=lt=' value
-    ;
+  : 'lt' OPAR ID COMMA value CPAR
+  | ID '=lt=' value
+  ;
+
 le
-    : 'le' OPAR ID COMMA value CPAR
-    | ID '=le=' value
-    ;
+  : 'le' OPAR ID COMMA value CPAR
+  | ID '=le=' value
+  ;
+
 in
-    : 'in' OPAR ID COMMA value (COMMA value)+ CPAR
-    | ID '=' value (COMMA value)+
-    ;
+  : 'in' OPAR ID COMMA value (COMMA value)+ CPAR
+  | ID '=' value (COMMA value)+
+  ;
 
 order
-    : 'sort' OPAR (SIGN)? ID (COMMA (SIGN)? ID)* CPAR
-    ;
+  : 'sort' OPAR (SIGN)? ID (COMMA (SIGN)? ID)* CPAR
+  ;
 
 range
-    : 'limit' OPAR INT CPAR
-    | 'limit' OPAR INT COMMA INT CPAR
-    ;
+  : 'limit' OPAR INT CPAR
+  | 'limit' OPAR INT COMMA INT CPAR
+  ;
 
  
 value
-    : STRING
-    | FLOAT
-    | INT
-    ;
+  : STRING
+  | FLOAT
+  | INT
+  ;
  
 /*------------------------------------------------------------------------------
  * LEXER RULES
  *----------------------------------------------------------------------------*/
 
 COMMA
-    : ','
-    ;
+  : ','
+  ;
 
 OPAR 
-    : '(' 
-    ;
+  : '(' 
+  ;
 
 CPAR
-    : ')' 
-    ;
+  : ')' 
+  ;
 
 ID
-	: [a-zA-Z_] [a-zA-Z_0-9\.]*
-	;
+  : [a-zA-Z_] [a-zA-Z_0-9\.]*
+  ;
 
 SIGN
-    : '-'
-    | '+'
-    ;
+  : '-'
+  | '+'
+  ;
 
 STRING
-    : '"' ('*'|'%')? (~[*%"\r\n])* ('*'|'%')? '"'
-    | '\'' ('*'|'%')? (~[*%'\r\n])* ('*'|'%')? '\''
-    ;
+  : '"' ('*'|'%')? (~[*%"\r\n])* ('*'|'%')? '"'
+  | '\'' ('*'|'%')? (~[*%'\r\n])* ('*'|'%')? '\''
+  ;
 
 FLOAT
-    : (SIGN)? INT '.' [0-9]* 
-    | (SIGN)? '.' [0-9]+
-    ;
+  : (SIGN)? INT '.' [0-9]* 
+  | (SIGN)? '.' [0-9]+
+  ;
     
 INT
-    : (SIGN)? [0-9]+
-    ;
+  : (SIGN)? [0-9]+
+  ;
 
 WS
-    : [ \t\r\n]+ -> skip
-    ;
+  : [ \t\r\n]+ -> skip
+  ;

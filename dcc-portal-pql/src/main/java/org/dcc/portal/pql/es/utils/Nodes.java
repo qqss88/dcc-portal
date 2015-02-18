@@ -50,7 +50,7 @@ public class Nodes {
    * Get an {@link Optional} of type {@code childType}. Ensures that the {@code parent} has only a single child of that
    * type if any.
    */
-  public static <T extends ExpressionNode> Optional<T> getChildOptional(@NonNull ExpressionNode parent,
+  public static <T extends ExpressionNode> Optional<T> getOptionalChild(@NonNull ExpressionNode parent,
       @NonNull Class<T> childType) {
 
     val childrenList = filterChildren(parent, childType);

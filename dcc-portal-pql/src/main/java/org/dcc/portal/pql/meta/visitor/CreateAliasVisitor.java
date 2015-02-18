@@ -39,7 +39,7 @@ import org.dcc.portal.pql.meta.field.StringFieldModel;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Creates UiAlias -> FullName mapping.
+ * Creates Alias -> FullyQualifiedName mapping.
  */
 public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
 
@@ -51,7 +51,7 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
 
     val result = new ImmutableMap.Builder<String, String>();
     result.putAll(getAlias(field));
-    result.putAll(prefix(field.getName(), field.getElement().accept(this)));
+    result.putAll(prefixFieldName(field.getName(), field.getElement().accept(this)));
 
     return result.build();
   }
@@ -75,20 +75,7 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   public Map<String, String> visitObjectField(ObjectFieldModel field) {
     val result = new ImmutableMap.Builder<String, String>();
     for (val child : field.getFields()) {
-      result.putAll(prefix(field.getName(), child.accept(this)));
-    }
-
-    return result.build();
-  }
-
-  private static Map<String, String> prefix(String name, Map<String, String> map) {
-    val result = new ImmutableMap.Builder<String, String>();
-    for (val entry : map.entrySet()) {
-      if (name.equals(NO_NAME)) {
-        result.put(entry.getKey(), entry.getValue());
-      } else {
-        result.put(entry.getKey(), name + FIELD_SEPARATOR + entry.getValue());
-      }
+      result.putAll(prefixFieldName(field.getName(), child.accept(this)));
     }
 
     return result.build();
@@ -100,8 +87,21 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   }
 
   private static Map<String, String> getAlias(FieldModel field) {
-    return field.getUiAlias().equals(EMPTY_UI_ALIAS) ?
-        Collections.<String, String> emptyMap() : singletonMap(field.getUiAlias(), field.getName());
+    return field.getAlias().equals(EMPTY_UI_ALIAS) ?
+        Collections.<String, String> emptyMap() : singletonMap(field.getAlias(), field.getName());
+  }
+
+  private static Map<String, String> prefixFieldName(String name, Map<String, String> fieldNameByAliasMap) {
+    val result = new ImmutableMap.Builder<String, String>();
+    for (val entry : fieldNameByAliasMap.entrySet()) {
+      if (name.equals(NO_NAME)) {
+        result.put(entry.getKey(), entry.getValue());
+      } else {
+        result.put(entry.getKey(), name + FIELD_SEPARATOR + entry.getValue());
+      }
+    }
+
+    return result.build();
   }
 
 }

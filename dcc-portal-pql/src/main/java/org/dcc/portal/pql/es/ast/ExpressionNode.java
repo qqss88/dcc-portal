@@ -24,19 +24,27 @@ import java.util.Collection;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.visitor.Visitors;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-@EqualsAndHashCode(exclude = { "parent" })
+@Getter
+@EqualsAndHashCode(exclude = { "parent", "nodeName" })
 public abstract class ExpressionNode {
 
+  @Setter
   protected ExpressionNode parent;
   protected List<ExpressionNode> children;
+
+  @Getter(lazy = true)
+  private final String nodeName = getClass().getSimpleName();
 
   public ExpressionNode(ExpressionNode... children) {
     this.children = Lists.newArrayList(children);
@@ -49,14 +57,6 @@ public abstract class ExpressionNode {
     }
   }
 
-  public ExpressionNode getParent() {
-    return parent;
-  }
-
-  public void setParent(@NonNull ExpressionNode parent) {
-    this.parent = parent;
-  }
-
   public abstract <T> T accept(NodeVisitor<T> visitor);
 
   public int childrenCount() {
@@ -67,10 +67,6 @@ public abstract class ExpressionNode {
     val childrenList = Lists.newArrayList(children);
     this.children.addAll(childrenList);
     assignParent(childrenList, this);
-  }
-
-  public List<ExpressionNode> getChildren() {
-    return children;
   }
 
   public ExpressionNode getChild(int index) {
@@ -97,18 +93,7 @@ public abstract class ExpressionNode {
 
   @Override
   public String toString() {
-    val builder = new StringBuilder();
-    builder.append(this.getClass().getSimpleName() + " ( ");
-
-    for (int i = 0; i < children.size(); i++) {
-      builder.append(children.get(i).toString());
-      if (i < children.size() - 1) {
-        builder.append(", ");
-      }
-    }
-    builder.append(")");
-
-    return builder.toString();
+    return accept(Visitors.createToStringVisitor());
   }
 
   public boolean hasNestedParent() {

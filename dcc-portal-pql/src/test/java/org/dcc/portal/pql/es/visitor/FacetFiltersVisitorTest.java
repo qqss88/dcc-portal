@@ -104,7 +104,7 @@ public class FacetFiltersVisitorTest {
     assertThat(andNodeResult.childrenCount()).isEqualTo(1);
 
     val rangeNode = (RangeNode) andNodeResult.getFirstChild();
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(60);
   }
@@ -120,7 +120,7 @@ public class FacetFiltersVisitorTest {
     assertThat(orNodeResult.childrenCount()).isEqualTo(1);
 
     val rangeNode = (RangeNode) orNodeResult.getFirstChild();
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(60);
   }

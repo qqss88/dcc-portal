@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -29,21 +28,16 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 public class RangeNode extends ExpressionNode {
 
   @NonNull
-  String name;
+  String fieldName;
 
   public RangeNode(@NonNull String name, ExpressionNode... children) {
     super(children);
-    this.name = name;
+    this.fieldName = name;
   }
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitRange(this);
-  }
-
-  @Override
-  public String toString() {
-    return format("[%s] %s", name, super.toString());
   }
 
 }

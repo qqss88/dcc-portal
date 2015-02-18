@@ -36,7 +36,7 @@ import org.dcc.portal.pql.meta.field.StringFieldModel;
 
 import com.google.common.collect.ImmutableMap;
 
-public class CreateFullNameVisitor implements FieldVisitor<Map<String, FieldModel>> {
+public class CreateFullyQualifiedNameVisitor implements FieldVisitor<Map<String, FieldModel>> {
 
   @Override
   public Map<String, FieldModel> visitArrayField(ArrayFieldModel field) {
@@ -70,8 +70,8 @@ public class CreateFullNameVisitor implements FieldVisitor<Map<String, FieldMode
   public Map<String, FieldModel> visitObjectField(ObjectFieldModel field) {
     val result = new ImmutableMap.Builder<String, FieldModel>();
     result.put(field.getName(), field);
-    for (val child : field.getFields()) {
 
+    for (val child : field.getFields()) {
       result.putAll(prefix(field.getName(), child.accept(this)));
     }
 

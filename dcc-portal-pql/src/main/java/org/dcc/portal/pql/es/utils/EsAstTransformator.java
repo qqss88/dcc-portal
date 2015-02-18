@@ -25,7 +25,7 @@ import org.dcc.portal.pql.es.visitor.FacetsResolverVisitor;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 /**
- * Performs series of transformations to optimize the AST
+ * Performs series of transformations to resolve different processing rules and to optimize the AST
  */
 @Slf4j
 public class EsAstTransformator {

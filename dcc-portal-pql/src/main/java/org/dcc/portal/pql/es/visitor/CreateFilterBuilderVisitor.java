@@ -180,16 +180,16 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
       } else if (child instanceof FacetsNode) {
         addFacets(child, result);
       } else if (child instanceof FieldsNode) {
-        val castedChild = (FieldsNode) child;
-        String[] children = castedChild.getFields().toArray(new String[castedChild.getFields().size()]);
+        val fieldsNode = (FieldsNode) child;
+        String[] children = fieldsNode.getFields().toArray(new String[fieldsNode.getFields().size()]);
         result.addFields(children);
       } else if (child instanceof LimitNode) {
-        val castedChild = (LimitNode) child;
-        result.setFrom(castedChild.getFrom());
-        result.setSize(castedChild.getSize());
+        val limitNode = (LimitNode) child;
+        result.setFrom(limitNode.getFrom());
+        result.setSize(limitNode.getSize());
       } else if (child instanceof SortNode) {
-        val castedChild = (SortNode) child;
-        for (val entry : castedChild.getFields().entrySet()) {
+        val sortNode = (SortNode) child;
+        for (val entry : sortNode.getFields().entrySet()) {
           result.addSort(entry.getKey(), SortOrder.valueOf(entry.getValue().toString()));
         }
       }
@@ -210,12 +210,12 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   public FilterBuilder visitRange(@NonNull RangeNode node) {
     checkState(node.childrenCount() > 0, "RangeNode has no children");
 
-    stack.push(rangeFilter(node.getName()));
+    stack.push(rangeFilter(node.getFieldName()));
     for (val child : node.getChildren()) {
       child.accept(this);
     }
 
-    return createNestedFilter(node, node.getName(), stack.pop());
+    return createNestedFilter(node, node.getFieldName(), stack.pop());
   }
 
   @Override
@@ -297,7 +297,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     log.debug("Adding facets for FacetsNode: {}", facetsNode);
     for (val child : facetsNode.getChildren()) {
       val facetBuilder = child.accept(FACET_BUILDER_VISITOR);
-      val facetFilterNode = Nodes.getChildOptional(child, FilterNode.class);
+      val facetFilterNode = Nodes.getOptionalChild(child, FilterNode.class);
 
       if (facetFilterNode.isPresent()) {
         log.debug("Adding facet filter: {}", facetFilterNode.get());

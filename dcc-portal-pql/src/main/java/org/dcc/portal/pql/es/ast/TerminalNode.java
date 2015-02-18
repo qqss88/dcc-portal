@@ -35,7 +35,6 @@ public class TerminalNode extends ExpressionNode {
   Object value;
 
   public TerminalNode(@NonNull Object payload) {
-    super(new ExpressionNode[] {});
     this.value = payload;
   }
 

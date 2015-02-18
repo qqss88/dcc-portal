@@ -67,7 +67,7 @@ public class PqlParseListenerTest {
     // gt(ageAtDiagnosis, 10)
     val gtRangeNode = (RangeNode) orNode.getFirstChild();
     assertThat(gtRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(gtRangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(gtRangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getFirstChild();
     assertThat(gtRangeNode1Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode1Child.getValue()).isEqualTo(10);
@@ -75,7 +75,7 @@ public class PqlParseListenerTest {
     // ge(ageAtEnrollment, 20)
     val geRangeNode = (RangeNode) orNode.getChild(1);
     assertThat(geRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(geRangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(geRangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getFirstChild();
     assertThat(gtRangeNode2Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode2Child.getValue()).isEqualTo(20.2);
@@ -98,7 +98,7 @@ public class PqlParseListenerTest {
     // lt(ageAtLastFollowup, 30)
     val ltRangeNode = (RangeNode) andNode.getFirstChild();
     assertThat(ltRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(ltRangeNode.getName()).isEqualTo("donor_age_at_last_followup");
+    assertThat(ltRangeNode.getFieldName()).isEqualTo("donor_age_at_last_followup");
     val ltRangeNodeChild = (LessThanNode) ltRangeNode.getFirstChild();
     assertThat(ltRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(ltRangeNodeChild.getValue()).isEqualTo(30);
@@ -106,7 +106,7 @@ public class PqlParseListenerTest {
     // le(intervalOfLastFollowup, 40)
     val leRangeNode = (RangeNode) andNode.getChild(1);
     assertThat(leRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(leRangeNode.getName()).isEqualTo("donor_interval_of_last_followup");
+    assertThat(leRangeNode.getFieldName()).isEqualTo("donor_interval_of_last_followup");
     val leRangeNodeChild = (LessEqualNode) leRangeNode.getFirstChild();
     assertThat(leRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(leRangeNodeChild.getValue()).isEqualTo(40);

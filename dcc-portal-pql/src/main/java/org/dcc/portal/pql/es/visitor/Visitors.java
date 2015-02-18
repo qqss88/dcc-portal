@@ -15,31 +15,39 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.meta.field;
+package org.dcc.portal.pql.es.visitor;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-import org.dcc.portal.pql.meta.visitor.FieldVisitor;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.elasticsearch.client.Client;
 
-@Data
-@AllArgsConstructor
-public abstract class FieldModel {
+@NoArgsConstructor(access = PRIVATE)
+public class Visitors {
 
-  String name;
-  String alias;
-  FieldType type;
-  boolean nested;
+  private static final NodeVisitor<String> TO_STRING_VISITOR = new ToStringVisitor();
 
-  public static enum FieldType {
-    LONG,
-    DOUBLE,
-    STRING,
-    ARRAY,
-    BOOLEAN,
-    OBJECT
+  // FIXME: implement
+
+  public static void createFacetBuilderVisitor() {
   }
 
-  public abstract <T> T accept(FieldVisitor<T> visitor);
+  public static CreateFilterBuilderVisitor createFilterBuilderVisitor(Client client, AbstractTypeModel typeModel) {
+    return new CreateFilterBuilderVisitor(client, typeModel);
+  }
+
+  public static void createEmptyNodesCleanerVisitor() {
+  }
+
+  public static void createFacetFiltersVisitor() {
+  }
+
+  public static void createFacetsResolverVisitor() {
+  }
+
+  public static NodeVisitor<String> createToStringVisitor() {
+    return TO_STRING_VISITOR;
+  }
 
 }

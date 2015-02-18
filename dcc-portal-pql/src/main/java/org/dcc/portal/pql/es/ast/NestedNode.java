@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -45,10 +44,5 @@ public class NestedNode extends ExpressionNode {
   public boolean hasNestedParent() {
     return true;
   };
-
-  @Override
-  public String toString() {
-    return format("[%s]", path) + super.toString();
-  }
 
 }

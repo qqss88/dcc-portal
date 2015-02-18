@@ -19,7 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static org.dcc.portal.pql.es.utils.Nodes.getChildOptional;
+import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -87,7 +87,7 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
   public ExpressionNode visitTermsFacet(TermsFacetNode node) {
     log.debug("Visiting TermsFacetNode. {}", node);
     val rootNode = node.getParent().getParent();
-    val filtersNodeOpt = getChildOptional(rootNode, FilterNode.class);
+    val filtersNodeOpt = getOptionalChild(rootNode, FilterNode.class);
     if (filtersNodeOpt.isPresent()) {
 
       // The FilterNode must be added to the TermsFacetNode before FilterNode processing. During the FilterNode
@@ -105,11 +105,11 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   private Optional<FacetsNode> getFacetsNodeOptional(ExpressionNode rootNode) {
-    return getChildOptional(rootNode, FacetsNode.class);
+    return getOptionalChild(rootNode, FacetsNode.class);
   }
 
   private boolean hasFacets(ExpressionNode rootNode) {
-    return getChildOptional(rootNode, FacetsNode.class).isPresent() ? true : false;
+    return getOptionalChild(rootNode, FacetsNode.class).isPresent() ? true : false;
   }
 
   private static void moveFiltersToQuery(ExpressionNode rootNode, ExpressionNode filters) {
@@ -129,7 +129,7 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   private static Optional<FilterNode> getFilterNodeOptional(ExpressionNode rootNode) {
-    return getChildOptional(rootNode, FilterNode.class);
+    return getOptionalChild(rootNode, FilterNode.class);
   }
 
 }

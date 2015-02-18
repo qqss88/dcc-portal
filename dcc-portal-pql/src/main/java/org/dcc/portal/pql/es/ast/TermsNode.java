@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -34,11 +33,6 @@ public class TermsNode extends ExpressionNode {
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitTerms(this);
-  }
-
-  @Override
-  public String toString() {
-    return format("[%s] %s", field, super.toString());
   }
 
 }

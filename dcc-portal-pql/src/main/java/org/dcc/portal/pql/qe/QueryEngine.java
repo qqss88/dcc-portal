@@ -40,17 +40,23 @@ public class QueryEngine {
 
   public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
     context.setIndex(index);
+
+    ExpressionNode esAst = resolveEsAst(query, context);
+    esAst = esAstTransformator.process(esAst, context.getType());
+
+    // FIXME: Check if following can be put into the esAstTransformator
+    val esVisitor = new CreateFilterBuilderVisitor(client, context.getTypeModel());
+
+    return esVisitor.visit(esAst, context);
+  }
+
+  private static ExpressionNode resolveEsAst(String query, QueryContext context) {
     val parser = ParseTrees.getParser(query);
     val pqlListener = new PqlParseListener(context);
     parser.addParseListener(pqlListener);
     parser.statement();
 
-    ExpressionNode esAst = pqlListener.getEsAst();
-    esAst = esAstTransformator.process(esAst, context.getType());
-    // FIXME: cache
-    val esVisitor = new CreateFilterBuilderVisitor(client, context.getTypeModel());
-
-    return esVisitor.visit(esAst, context);
+    return pqlListener.getEsAst();
   }
 
 }

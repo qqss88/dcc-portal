@@ -111,7 +111,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitRange(RangeNode node) {
-    return new RangeNode(node.getName(), visitChildren(node));
+    return new RangeNode(node.getFieldName(), visitChildren(node));
   }
 
   @Override
@@ -166,7 +166,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitTermsFacet(TermsFacetNode node) {
-    val result = new TermsFacetNode(node.getName(), node.getField());
+    val result = new TermsFacetNode(node.getFacetName(), node.getField(), node.isGlobal());
     result.addChildren(visitChildren(node));
 
     return result;

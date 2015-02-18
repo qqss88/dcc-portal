@@ -32,8 +32,8 @@ public class LessEqualNode extends ExpressionNode {
   Object value;
 
   public LessEqualNode(@NonNull ExpressionNode node) {
-    val castedNode = (TerminalNode) node;
-    this.value = castedNode.getValue();
+    val terminalNode = (TerminalNode) node;
+    this.value = terminalNode.getValue();
     addChildren(node);
   }
 

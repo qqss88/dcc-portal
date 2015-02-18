@@ -32,8 +32,8 @@ public class GreaterThanNode extends ExpressionNode {
   Object value;
 
   public GreaterThanNode(@NonNull ExpressionNode node) {
-    val castedNode = (TerminalNode) node;
-    this.value = castedNode.getValue();
+    val terminalNode = (TerminalNode) node;
+    this.value = terminalNode.getValue();
     addChildren(node);
   }
 

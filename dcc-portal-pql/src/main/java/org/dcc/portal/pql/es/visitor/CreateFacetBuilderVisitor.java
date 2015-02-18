@@ -29,7 +29,7 @@ public class CreateFacetBuilderVisitor extends NodeVisitor<FacetBuilder> {
 
   @Override
   public FacetBuilder visitTermsFacet(TermsFacetNode node) {
-    val result = termsFacet(node.getName())
+    val result = termsFacet(node.getFacetName())
         .field(node.getField())
         .size(DEFAULT_FACETS_SIZE);
 

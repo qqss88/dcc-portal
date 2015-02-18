@@ -75,14 +75,14 @@ public class PqlParseTreeVisitorTest {
     // gt(ageAtDiagnosis, 10)
     RangeNode rangeNode = (RangeNode) orNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
     rangeNode = (RangeNode) orNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
 
@@ -113,14 +113,14 @@ public class PqlParseTreeVisitorTest {
     // gt(ageAtDiagnosis, 10)
     RangeNode rangeNode = (RangeNode) andNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
     rangeNode = (RangeNode) andNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
   }
@@ -176,14 +176,14 @@ public class PqlParseTreeVisitorTest {
     // gt(ageAtDiagnosis, 10)
     RangeNode rangeNode = (RangeNode) andNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
     rangeNode = (RangeNode) andNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
 
@@ -214,14 +214,14 @@ public class PqlParseTreeVisitorTest {
     // gt(ageAtDiagnosis, 10)
     RangeNode rangeNode = (RangeNode) orNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
     rangeNode = (RangeNode) orNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
   }
@@ -261,7 +261,7 @@ public class PqlParseTreeVisitorTest {
     val rangeNode = (RangeNode) VISITOR.visitGreaterEqual(geContext);
 
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
 
     val geNode = (GreaterEqualNode) rangeNode.getFirstChild();
     assertThat(geNode.getChildren().size()).isEqualTo(1);
@@ -280,7 +280,7 @@ public class PqlParseTreeVisitorTest {
     val gtContext = (GreaterThanContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitGreaterThan(gtContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
 
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getChildren().size()).isEqualTo(1);
@@ -298,7 +298,7 @@ public class PqlParseTreeVisitorTest {
     val leContext = (LessEqualContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitLessEqual(leContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
 
     val leNode = (LessEqualNode) rangeNode.getFirstChild();
     assertThat(leNode.getChildren().size()).isEqualTo(1);
@@ -314,7 +314,7 @@ public class PqlParseTreeVisitorTest {
     val ltContext = (LessThanContext) parseTree.getChild(0);
     val rangeNode = (RangeNode) VISITOR.visitLessThan(ltContext);
     assertThat(rangeNode.getChildren().size()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
 
     val toNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(toNode.getChildren().size()).isEqualTo(1);
@@ -383,7 +383,7 @@ public class PqlParseTreeVisitorTest {
 
     val rangeNode = (RangeNode) mustNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_enrollment");
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(50000);
   }

@@ -19,7 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
-import static org.dcc.portal.pql.es.utils.Nodes.getChildOptional;
+import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +85,7 @@ public class FacetsResolverVisitorTest {
     log.debug("QueryNode: {}", queryNode);
     assertThat(queryNode.getFirstChild()).isEqualTo(filterNode);
     assertThat(queryNode.childrenCount()).isEqualTo(1);
-    assertThat(getChildOptional(result, FilterNode.class).isPresent()).isFalse();
+    assertThat(getOptionalChild(result, FilterNode.class).isPresent()).isFalse();
   }
 
   /**
@@ -94,7 +94,7 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitTermsFacet_match() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male'), eq(ageAtDiagnosis, 60)");
-    val facetsNodeOpt = getChildOptional(originalRoot, FacetsNode.class);
+    val facetsNodeOpt = getOptionalChild(originalRoot, FacetsNode.class);
     assertThat(facetsNodeOpt.isPresent()).isTrue();
 
     val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getFirstChild());
@@ -115,7 +115,7 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitTermsFacet_noMatch() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
-    val facetsNodeOpt = getChildOptional(originalRoot, FacetsNode.class);
+    val facetsNodeOpt = getOptionalChild(originalRoot, FacetsNode.class);
     assertThat(facetsNodeOpt.isPresent()).isTrue();
 
     val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getFirstChild());

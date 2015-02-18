@@ -86,7 +86,7 @@ public class FacetFiltersVisitor extends NodeVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitRange(RangeNode node) {
-    return node.getName().equals(facetField) ? REMOVE_CHILD : node;
+    return node.getFieldName().equals(facetField) ? REMOVE_CHILD : node;
   }
 
   @Override
