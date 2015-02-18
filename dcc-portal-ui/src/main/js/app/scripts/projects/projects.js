@@ -193,7 +193,7 @@
     refresh();
   });
 
-  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API) {
+  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API, ExternalLinks) {
     var _ctrl = this;
     Page.setTitle(project.id);
     Page.setPage('entity');
@@ -201,6 +201,7 @@
     _ctrl.hasExp = !_.isEmpty(project.experimentalAnalysisPerformedSampleCounts);
 
     _ctrl.project = project;
+    _ctrl.ExternalLinks = ExternalLinks;
 
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {

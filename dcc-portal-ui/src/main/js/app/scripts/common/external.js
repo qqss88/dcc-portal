@@ -55,7 +55,7 @@
 
     // Gene related links
     this.geneHGNC = function(hgncId) {
-      return 'http://www.genenames.org/data/hgnc_data.php?hgnc_id=' + hgnc_id;
+      return 'http://www.genenames.org/data/hgnc_data.php?hgnc_id=' + hgncId;
     };
     this.geneEnsembl = function(geneId) {
       return 'http://feb2014.archive.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g=' + geneId;
@@ -90,7 +90,12 @@
     this.projectGEO = function() {
       return 'http://www.ncbi.nlm.nih.gov/geo/';
     };
-
+    this.projectEGA = function() {
+      return 'https://www.ebi.ac.uk/ega/';
+    };
+    this.projectCGHub = function(diseasesCode) {
+      return 'https://browser.cghub.ucsc.edu/search/?disease_abbr=' + diseasesCode;
+    };
 
 
   });
