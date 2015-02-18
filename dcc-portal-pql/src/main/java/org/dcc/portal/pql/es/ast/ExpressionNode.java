@@ -18,7 +18,7 @@
 package org.dcc.portal.pql.es.ast;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.List;
@@ -91,24 +91,24 @@ public abstract class ExpressionNode {
 
   public void removeChild(int index) {
     checkArgument(index >= 0 && index < childrenCount(),
-        _("Index %d does is out of children bounds. Children cound: %d", index, childrenCount()));
+        format("Index %d is out of children bounds. Children count: %d", index, childrenCount()));
     children.remove(index);
   }
 
   @Override
   public String toString() {
-    val buffer = new StringBuffer();
-    buffer.append(this.getClass().getSimpleName() + " ( ");
+    val builder = new StringBuilder();
+    builder.append(this.getClass().getSimpleName() + " ( ");
 
     for (int i = 0; i < children.size(); i++) {
-      buffer.append(children.get(i).toString());
+      builder.append(children.get(i).toString());
       if (i < children.size() - 1) {
-        buffer.append(", ");
+        builder.append(", ");
       }
     }
-    buffer.append(")");
+    builder.append(")");
 
-    return buffer.toString();
+    return builder.toString();
   }
 
   public boolean hasNestedParent() {

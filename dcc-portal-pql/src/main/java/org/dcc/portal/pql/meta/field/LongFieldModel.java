@@ -20,6 +20,7 @@ package org.dcc.portal.pql.meta.field;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
+import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
@@ -41,12 +42,16 @@ public class LongFieldModel extends FieldModel {
     super(name, uiAlias, LONG, nested);
   }
 
-  public static LongFieldModel long_(String name) {
+  public static LongFieldModel long_(@NonNull String name) {
     return new LongFieldModel(name);
   }
 
+  public static LongFieldModel long_(@NonNull String name, @NonNull String alias) {
+    return new LongFieldModel(name, alias);
+  }
+
   @Override
-  public <T> T accept(FieldVisitor<T> visitor) {
+  public <T> T accept(@NonNull FieldVisitor<T> visitor) {
     return visitor.visitLongField(this);
   }
 

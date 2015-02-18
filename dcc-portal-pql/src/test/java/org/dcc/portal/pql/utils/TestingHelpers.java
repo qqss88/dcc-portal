@@ -29,6 +29,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
@@ -51,7 +52,14 @@ public class TestingHelpers {
   }
 
   public static ExpressionNode createEsAst(@NonNull String query) {
-    return createEsAst(query, new PqlParseListener(new QueryContext()));
+    return createEsAst(query, new PqlParseListener(initQueryContext()));
+  }
+
+  public static QueryContext initQueryContext() {
+    val result = new QueryContext();
+    result.setType(Type.DONOR_CENTRIC);
+
+    return result;
   }
 
 }

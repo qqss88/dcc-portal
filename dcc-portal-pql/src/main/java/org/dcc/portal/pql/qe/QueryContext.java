@@ -17,9 +17,12 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import lombok.Data;
 
 import org.dcc.portal.pql.es.model.RequestType;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @Data
@@ -28,5 +31,11 @@ public class QueryContext {
   private String index;
   private Type type;
   private RequestType requestType;
+
+  public AbstractTypeModel getTypeModel() {
+    checkNotNull(type);
+
+    return IndexModel.getTypeModel(type);
+  }
 
 }

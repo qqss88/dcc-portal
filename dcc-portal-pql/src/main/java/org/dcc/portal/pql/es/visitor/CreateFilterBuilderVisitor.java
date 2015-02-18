@@ -62,7 +62,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
@@ -70,10 +70,12 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.google.common.collect.Lists;
 
+// TODO: create static factory construction methods that return cached visitor for each type model.
 @Slf4j
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
@@ -83,9 +85,8 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   @NonNull
   private final Client client;
   @NonNull
-  private final IndexModel indexModel;
+  private final AbstractTypeModel typeModel;
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
-  private QueryContext queryContext;
 
   @Override
   public FilterBuilder visitBool(@NonNull BoolNode node) {
@@ -124,13 +125,14 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
    * {@link NestedNode} parent.
    */
   private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter) {
-    if (indexModel.isNested(field, queryContext.getType())) {
+    if (typeModel.isNested(field)) {
       if (!node.hasNestedParent()) {
-        val nestedPath = indexModel.getNestedPath(field, queryContext.getType());
+        val nestedPath = typeModel.getNestedPath(field);
         log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'",
             node, nestedPath);
+        val nestedFilter = nestedFilter(nestedPath, sourceFilter);
 
-        return nestedFilter(nestedPath, sourceFilter);
+        return nestedFilter;
       }
     }
 
@@ -155,7 +157,6 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   }
 
   public SearchRequestBuilder visit(@NonNull ExpressionNode node, @NonNull QueryContext queryContext) {
-    this.queryContext = queryContext;
     SearchRequestBuilder result = client
         .prepareSearch(queryContext.getIndex())
         .setTypes(queryContext.getType().getId());
@@ -193,7 +194,6 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
         }
       }
     }
-    this.queryContext = null;
 
     return result;
   }
@@ -293,30 +293,31 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     return nestedFilter(node.getPath(), node.getFirstChild().accept(this));
   }
 
-  @Override
-  public FilterBuilder visitFacets(FacetsNode node) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public FilterBuilder visitTermsFacet(TermsFacetNode node) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   private void addFacets(ExpressionNode facetsNode, SearchRequestBuilder result) {
     log.debug("Adding facets for FacetsNode: {}", facetsNode);
     for (val child : facetsNode.getChildren()) {
       val facetBuilder = child.accept(FACET_BUILDER_VISITOR);
       val facetFilterNode = Nodes.getChildOptional(child, FilterNode.class);
+
       if (facetFilterNode.isPresent()) {
         log.debug("Adding facet filter: {}", facetFilterNode.get());
         val facetFilter = facetFilterNode.get().accept(this);
         facetBuilder.facetFilter(facetFilter);
       }
 
+      resolveNestedField(child, facetBuilder);
       result.addFacet(facetBuilder);
+    }
+  }
+
+  /**
+   * If the facet is requested for a nested field add the {@code matchAll} {@code nested} ES query to the facet.
+   */
+  private void resolveNestedField(ExpressionNode facetNode, FacetBuilder facetBuilder) {
+    val termsFacetNode = (TermsFacetNode) facetNode;
+    if (typeModel.isNested(termsFacetNode.getField())) {
+      log.debug("Field {} is a nested one. Adding nested query to the facet.", termsFacetNode.getField());
+      facetBuilder.nested(typeModel.getNestedPath(termsFacetNode.getField()));
     }
   }
 

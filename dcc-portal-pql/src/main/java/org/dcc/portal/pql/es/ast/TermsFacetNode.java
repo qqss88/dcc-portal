@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -32,17 +32,19 @@ public class TermsFacetNode extends ExpressionNode {
   private static final String GLOBAL = "global";
   private static final String NON_GLOBAL = "non-global";
 
-  @NonNull
+  private final String name;
   private final String field;
   private boolean global;
 
-  public TermsFacetNode(@NonNull String field) {
+  public TermsFacetNode(@NonNull String name, @NonNull String field) {
+    this.name = name;
     this.field = field;
     this.global = false;
   }
 
-  public TermsFacetNode(@NonNull String field, boolean global, ExpressionNode... children) {
+  public TermsFacetNode(@NonNull String name, @NonNull String field, boolean global, ExpressionNode... children) {
     super(children);
+    this.name = name;
     this.field = field;
     this.global = global;
   }
@@ -52,7 +54,7 @@ public class TermsFacetNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitTermsFacet(this);
   }
 
@@ -60,7 +62,7 @@ public class TermsFacetNode extends ExpressionNode {
   public String toString() {
     val scope = global ? GLOBAL : NON_GLOBAL;
 
-    return _("[%s Scope: %s]", field, scope) + super.toString();
+    return format("[%s Scope: %s %s]", field, scope, super.toString());
   }
 
 }

@@ -17,16 +17,18 @@
  */
 package org.dcc.portal.pql.meta;
 
+import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.visitor.CreateAliasVisitor;
 import org.dcc.portal.pql.meta.visitor.CreateFullNameVisitor;
@@ -69,6 +71,11 @@ public abstract class AbstractTypeModel {
     return result.build();
   }
 
+  /**
+   * Checks if {@code field} is nested field.
+   * 
+   * @param field - fully qualified name. Not field alias.
+   */
   public final boolean isNested(String field) {
     val fullName = getFullName(field);
     val tokens = split(fullName);
@@ -108,6 +115,7 @@ public abstract class AbstractTypeModel {
     throw new IllegalArgumentException("Can't get nested path for a non-nested field");
   }
 
+  @Deprecated
   public final String getFullName(String path) {
     val uiAlias = fieldsByAlias.get(path);
 
@@ -115,17 +123,30 @@ public abstract class AbstractTypeModel {
 
   }
 
+  /**
+   * Returns fully qualified name of the field that has {@code alias} defined.
+   * @throws NoSuchElementException if there is a field with such an alias.
+   */
+  public final String getField(@NonNull String field) {
+    val alias = fieldsByAlias.get(field);
+    if (alias == null) {
+      throw new SemanticException("Field %s is not defined in the type model", field);
+    }
+
+    return alias;
+  }
+
   @Override
   public String toString() {
-    val buffer = new StringBuffer();
+    val builder = new StringBuilder();
     val newLine = System.getProperty("line.separator");
     for (val entity : fieldsByFullPath.entrySet()) {
       val value = entity.getValue();
-      buffer.append(_("Path: %s, Type: %s, Nested: %s", entity.getKey(), value.getType(), value.isNested()));
-      buffer.append(newLine);
+      builder.append(format("Path: %s, Type: %s, Nested: %s", entity.getKey(), value.getType(), value.isNested()));
+      builder.append(newLine);
     }
 
-    return buffer.toString();
+    return builder.toString();
   }
 
 }

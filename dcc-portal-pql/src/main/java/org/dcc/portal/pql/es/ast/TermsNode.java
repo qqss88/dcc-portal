@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -38,7 +38,7 @@ public class TermsNode extends ExpressionNode {
 
   @Override
   public String toString() {
-    return _("[%s]", field) + super.toString();
+    return format("[%s] %s", field, super.toString());
   }
 
 }

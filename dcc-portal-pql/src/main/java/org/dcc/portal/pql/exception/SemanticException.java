@@ -15,21 +15,18 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.exception;
 
+import static java.lang.String.format;
 import lombok.NonNull;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+/**
+ * This type of exception is thrown when the query is valid, but has invalid field names etc.
+ */
+public class SemanticException extends RuntimeException {
 
-public class FacetsNode extends ExpressionNode {
-
-  public FacetsNode(ExpressionNode... children) {
-    super(children);
-  }
-
-  @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitFacets(this);
+  public SemanticException(@NonNull String message, Object... args) {
+    super(format(message, args));
   }
 
 }

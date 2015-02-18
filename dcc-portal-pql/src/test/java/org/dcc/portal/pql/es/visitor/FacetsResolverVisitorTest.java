@@ -70,7 +70,7 @@ public class FacetsResolverVisitorTest {
    */
   @Test
   public void visitRoot_moveFilters() {
-    val originalRoot = (RootNode) createEsAst("facets(gender), eq(age, 60)");
+    val originalRoot = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
     val filterNode = cloneNode(originalRoot.getFirstChild());
     val result = resolver.visitRoot(originalRoot);
 
@@ -92,8 +92,8 @@ public class FacetsResolverVisitorTest {
    * Facets field matches filter. Filter should be copied to facet filter without the matched part.
    */
   @Test
-  public void visitTermsFacet_Match() {
-    val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male'), eq(age, 60)");
+  public void visitTermsFacet_match() {
+    val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male'), eq(ageAtDiagnosis, 60)");
     val facetsNodeOpt = getChildOptional(originalRoot, FacetsNode.class);
     assertThat(facetsNodeOpt.isPresent()).isTrue();
 
@@ -105,7 +105,28 @@ public class FacetsResolverVisitorTest {
     val mustNode = filterNode.getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(1);
     val termNode = (TermNode) mustNode.getFirstChild();
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("age");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
+  }
+
+  /**
+   * Facets field does not match filter. TermsFacetNode should not contain filters
+   */
+  @Test
+  public void visitTermsFacet_noMatch() {
+    val originalRoot = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
+    val facetsNodeOpt = getChildOptional(originalRoot, FacetsNode.class);
+    assertThat(facetsNodeOpt.isPresent()).isTrue();
+
+    val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getFirstChild());
+    assertThat(termsFacet.childrenCount()).isEqualTo(1);
+    val filterNode = (FilterNode) termsFacet.getFirstChild();
+
+    // FilterNode - BoolNode - MustNode
+    val mustNode = filterNode.getFirstChild().getFirstChild();
+    assertThat(mustNode.childrenCount()).isEqualTo(1);
+    val termNode = (TermNode) mustNode.getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
   }
 
@@ -129,7 +150,7 @@ public class FacetsResolverVisitorTest {
 
   @Test
   public void globalUnsetTest() {
-    val root = (RootNode) createEsAst("facets(gender), eq(age, 60)");
+    val root = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
     val result = resolver.visitRoot(root);
 
     // root - facets - TermsFacet

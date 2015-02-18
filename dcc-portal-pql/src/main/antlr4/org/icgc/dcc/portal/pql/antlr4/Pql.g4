@@ -1,3 +1,8 @@
+// Copyright 2014(c) The Ontario Institute for Cancer Research. All rights reserved.
+//
+// Description:
+//  Grammar definition for Portal Query Language.
+
 grammar Pql;
 
 statement
@@ -82,9 +87,17 @@ value
  * LEXER RULES
  *----------------------------------------------------------------------------*/
 
-COMMA: ',' ;
-OPAR : '(' ;
-CPAR : ')' ;
+COMMA
+    : ','
+    ;
+
+OPAR 
+    : '(' 
+    ;
+
+CPAR
+    : ')' 
+    ;
 
 ID
 	: [a-zA-Z_] [a-zA-Z_0-9\.]*

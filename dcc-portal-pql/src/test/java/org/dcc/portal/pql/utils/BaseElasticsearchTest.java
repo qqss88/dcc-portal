@@ -133,7 +133,7 @@ public class BaseElasticsearchTest {
   }
 
   protected static BulkJSONProvider bulkFile(Class<?> testClass) {
-    return new BulkJSONProvider(new File(FIXTURES_DIR, testClass.getSimpleName() + ".json"));
+    return new BulkJSONProvider(new File(FIXTURES_DIR, testClass.getSimpleName() + ".txt"));
   }
 
   protected static ObjectNode filters(String jsonish) {

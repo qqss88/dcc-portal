@@ -18,8 +18,8 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.Nodes.getChildOptional;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -125,7 +125,7 @@ public class FacetsResolverVisitor extends NodeVisitor<ExpressionNode> {
       }
     }
 
-    throw new IllegalStateException(_("Could not find FilterNode in RootNode: %s", rootNode));
+    throw new IllegalStateException(format("Could not find FilterNode in RootNode: %s", rootNode));
   }
 
   private static Optional<FilterNode> getFilterNodeOptional(ExpressionNode rootNode) {

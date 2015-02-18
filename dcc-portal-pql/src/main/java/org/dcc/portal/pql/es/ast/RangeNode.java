@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -43,7 +43,7 @@ public class RangeNode extends ExpressionNode {
 
   @Override
   public String toString() {
-    return _("[%s]", name) + super.toString();
+    return format("[%s] %s", name, super.toString());
   }
 
 }

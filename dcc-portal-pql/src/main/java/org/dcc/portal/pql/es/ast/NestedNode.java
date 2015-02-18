@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
@@ -37,7 +37,7 @@ public class NestedNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitNested(this);
   }
 
@@ -48,7 +48,7 @@ public class NestedNode extends ExpressionNode {
 
   @Override
   public String toString() {
-    return _("[%s]", path) + super.toString();
+    return format("[%s]", path) + super.toString();
   }
 
 }

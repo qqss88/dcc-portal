@@ -34,7 +34,7 @@ public class TerminalNode extends ExpressionNode {
   @NonNull
   Object value;
 
-  public TerminalNode(Object payload) {
+  public TerminalNode(@NonNull Object payload) {
     super(new ExpressionNode[] {});
     this.value = payload;
   }
@@ -45,7 +45,7 @@ public class TerminalNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitTerminal(this);
   }
 

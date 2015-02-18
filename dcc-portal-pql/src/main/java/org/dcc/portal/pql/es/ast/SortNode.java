@@ -35,7 +35,7 @@ public class SortNode extends ExpressionNode {
   Map<String, Order> fields = Maps.newHashMap();
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitSort(this);
   }
 

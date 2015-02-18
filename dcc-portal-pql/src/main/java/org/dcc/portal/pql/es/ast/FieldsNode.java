@@ -44,7 +44,7 @@ public class FieldsNode extends ExpressionNode {
   }
 
   @Override
-  public void addChildren(ExpressionNode... children) {
+  public void addChildren(@NonNull ExpressionNode... children) {
     super.addChildren(children);
     for (val child : children) {
       val value = ((TerminalNode) child).getValue().toString();

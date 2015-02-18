@@ -18,7 +18,7 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
+import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +26,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
@@ -48,28 +48,28 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   @Before
   public void setUp() {
-    es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new CreateFilterBuilderVisitor(es.client(), new IndexModel());
+    es.execute(createIndexMappings(MUTATION_CENTRIC).withData(bulkFile(getClass())));
+    visitor = new CreateFilterBuilderVisitor(es.client(), new MutationCentricTypeModel());
     queryContext = new QueryContext();
-    queryContext.setType(DONOR_CENTRIC);
+    queryContext.setType(MUTATION_CENTRIC);
     queryContext.setIndex(INDEX_NAME);
-    listener = new PqlParseListener(new QueryContext());
+    listener = new PqlParseListener(queryContext);
     esAstTransformator = new EsAstTransformator();
   }
 
   @Test
   public void sortTest() {
-    val result = executeQuery("select(donor_age_at_enrollment),sort(-donor_age_at_enrollment)");
-    assertThat(result.getHits().getAt(0).getSortValues()[0]).isEqualTo(173L);
+    val result = executeQuery("select(start),sort(-start)");
+    assertThat(result.getHits().getAt(0).getSortValues()[0]).isEqualTo(61020906L);
 
   }
 
   @Test
   public void selectTest() {
-    val result = executeQuery("select(donor_age_at_enrollment)");
+    val result = executeQuery("select(chromosome)");
     val hit = result.getHits().getAt(0);
     assertThat(hit.fields().size()).isEqualTo(1);
-    assertThat(hit.field("donor_age_at_enrollment").getValue()).isEqualTo(77);
+    assertThat(hit.field("chromosome").getValue()).isEqualTo("1");
   }
 
   @Test
@@ -78,222 +78,221 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     queryContext.setRequestType(RequestType.COUNT);
     val request = visitor.visit(esAst, queryContext);
     val result = request.execute().actionGet();
-    assertTotalHitsCount(result, 9);
+    assertTotalHitsCount(result, 3);
   }
 
   @Test
   public void countTest_withFilter() {
-    val esAst = createTree("count(), gt(donor_age_at_enrollment, 100)");
+    val esAst = createTree("count(), gt(start, 60000000)");
     queryContext.setRequestType(RequestType.COUNT);
     val request = visitor.visit(esAst, queryContext);
     val result = request.execute().actionGet();
-    assertTotalHitsCount(result, 4);
+    assertTotalHitsCount(result, 1);
   }
 
   @Test
   public void inTest() {
-    val result = executeQuery("in(_donor_id, 'DO1', 'DO2')");
+    val result = executeQuery("in(chromosome, '1', '2')");
     assertTotalHitsCount(result, 2);
-    containsOnlyIds(result, "DO1", "DO2");
+    containsOnlyIds(result, "MU1", "MU2");
   }
 
   @Test
   public void inTest_nested() {
-    val result = executeQuery("in(gene.ssm._mutation_id, 'MU7', 'MU27')");
+    val result = executeQuery("in(sequencingStrategyNested, 'WGA', 'WGD')");
     assertTotalHitsCount(result, 2);
-    containsOnlyIds(result, "DO5", "DO8");
+    containsOnlyIds(result, "MU1", "MU2");
   }
 
   @Test
   public void eqTest() {
-    val result = executeQuery("eq(_donor_id, 'DO1')");
+    val result = executeQuery("eq(id, 'MU2')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO1");
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void eqTest_nested() {
-    val result = executeQuery("eq(gene.ssm.observation._sample_id, 'SA35')");
+    val result = executeQuery("eq(functionalImpactNested, 'Low')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO7");
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU1");
   }
 
   @Test
   public void neTest() {
-    val result = executeQuery("ne(_donor_id, 'DO1')");
-    assertTotalHitsCount(result, 8);
+    val result = executeQuery("ne(id, 'MU1')");
+    assertTotalHitsCount(result, 2);
     for (val hit : result.getHits()) {
-      assertThat(hit.getId()).isNotEqualTo("DO1");
+      assertThat(hit.getId()).isNotEqualTo("MU1");
     }
   }
 
   @Test
   public void neTest_nested() {
-    val result = executeQuery("ne(gene._summary._ssm_count, 1)");
-    assertTotalHitsCount(result, 3);
-    containsOnlyIds(result, "DO3", "DO6", "DO7");
+    val result = executeQuery("ne(functionalImpactNested, 'Low')");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU2", "MU3");
   }
 
   @Test
   public void gtTest() {
-    val result = executeQuery("gt(_donor_id, 'DO5')");
-    assertTotalHitsCount(result, 4);
-    containsOnlyIds(result, "DO6", "DO7", "DO8", "DO9");
+    val result = executeQuery("gt(testedDonorCount, 200)");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU3");
   }
 
   @Test
   public void gtTest_nested() {
-    val result = executeQuery("gt(gene.ssm.chromosome_start, 238855352)");
+    val result = executeQuery("gt(transcriptId, 'T2')");
     assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO5");
+    containsOnlyIds(result, "MU3");
   }
 
   @Test
   public void geTest() {
-    val result = executeQuery("ge(gene.ssm.observation.quality_score, 49)");
-    assertTotalHitsCount(result, 3);
-    containsOnlyIds(result, "DO2", "DO3", "DO9");
+    val result = executeQuery("ge(testedDonorCount, 200)");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU2", "MU3");
   }
 
   @Test
   public void geTest_nested() {
-    val result = executeQuery("ge(gene.ssm.chromosome_start, 238855352)");
+    val result = executeQuery("ge(transcriptId, 'T2')");
     assertTotalHitsCount(result, 2);
-    containsOnlyIds(result, "DO5", "DO7");
+    containsOnlyIds(result, "MU2", "MU3");
   }
 
   @Test
   public void leTest() {
-    val result = executeQuery("le(_donor_id, 'DO5')");
-    assertTotalHitsCount(result, 5);
-    containsOnlyIds(result, "DO1", "DO2", "DO3", "DO4", "DO5");
+    val result = executeQuery("le(id, 'MU2')");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU1", "MU2");
   }
 
   @Test
   public void leTest_nested() {
-    val result = executeQuery("le(gene.ssm.chromosome_start, 1672334)");
+    val result = executeQuery("le(transcriptId, 'T2')");
     assertTotalHitsCount(result, 2);
-    containsOnlyIds(result, "DO2", "DO9");
+    containsOnlyIds(result, "MU1", "MU2");
   }
 
   @Test
   public void ltTest() {
-    val result = executeQuery("lt(_donor_id, 'DO5')");
-    assertTotalHitsCount(result, 4);
-    containsOnlyIds(result, "DO1", "DO2", "DO3", "DO4");
+    val result = executeQuery("lt(id, 'MU2')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU1");
   }
 
   @Test
   public void ltTest_nested() {
-    val result = executeQuery("lt(gene.ssm.chromosome_start, 1672334)");
+    val result = executeQuery("lt(transcriptId, 'T2')");
     assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO9");
+    containsOnlyIds(result, "MU1");
   }
 
   @Test
   public void andTest() {
     val result =
-        executeQuery("and(ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)))");
+        executeQuery("and(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')))");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO9");
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void andTest_rootLevel() {
-    val result = executeQuery("ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)");
+    val result = executeQuery("eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')");
     assertTotalHitsCount(result, 1);
-    assertThat(result.getHits().getAt(0).getId()).isEqualTo("DO9");
+    assertThat(result.getHits().getAt(0).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void orTest() {
     val result =
-        executeQuery("or(ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 49)))");
-    assertTotalHitsCount(result, 6);
-    containsOnlyIds(result, "DO2", "DO3", "DO4", "DO5", "DO8", "DO9");
+        executeQuery("or(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGA')))");
+    assertTotalHitsCount(result, 3);
+    containsOnlyIds(result, "MU1", "MU2", "MU3");
   }
 
   @Test
   public void nestedTest() {
-    val result = executeQuery("nested(gene.ssm.observation, " +
-        "ge(gene.ssm.observation.quality_score, 49), ge(gene.ssm.observation.probability, 27))");
+    val result = executeQuery("nested(ssm_occurrence.observation, " +
+        "eq(verificationStatusNested, 'tested'), lt(sequencingStrategyNested, 'WGE'))");
     assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO2");
+    containsOnlyIds(result, "MU2");
   }
 
   @Test
   public void facetsTest_noFilters() {
-    val result = executeQuery("facets(donor_sex)");
-    assertTotalHitsCount(result, 9);
+    val result = executeQuery("facets(verificationStatusNested)");
+    assertTotalHitsCount(result, 3);
 
     val facet = getFacet(result);
-    assertThat(facet.getMissingCount()).isEqualTo(1);
+    assertThat(facet.getMissingCount()).isEqualTo(0);
     assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(8);
+    assertThat(facet.getTotalCount()).isEqualTo(6);
 
     for (val entry : facet.getEntries()) {
-      if (entry.getTerm().toString().equals("male")) {
-        assertThat(entry.getCount()).isEqualTo(5);
+      if (entry.getTerm().toString().equals("tested")) {
+        assertThat(entry.getCount()).isEqualTo(2);
       } else {
-        assertThat(entry.getCount()).isEqualTo(3);
+        assertThat(entry.getCount()).isEqualTo(4);
       }
     }
   }
 
   @Test
   public void facetsTest_noMatchFilter() {
-    val result = executeQuery("facets(donor_sex), eq(project._project_id, 'PACA-AU')");
-    assertTotalHitsCount(result, 3);
-    containsOnlyIds(result, "DO1", "DO4", "DO5");
+    val result = executeQuery("facets(verificationStatus), in(transcriptId, 'T1', 'T2')");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU1", "MU2");
 
-    val facet = getFacet(result);
+    val facet = result.getFacets().facet(TermsFacet.class, "verificationStatus");
     assertThat(facet.getMissingCount()).isEqualTo(0);
     assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(3);
+    assertThat(facet.getTotalCount()).isEqualTo(2);
 
     assertThat(facet.getEntries()).hasSize(1);
-    assertThat(facet.getEntries().get(0).getCount()).isEqualTo(3);
+    assertThat(facet.getEntries().get(0).getCount()).isEqualTo(2);
   }
 
   @Test
   public void facetsTest_matchFilter() {
-    val result = executeQuery("facets(donor_sex), eq(donor_sex, 'female')");
-    assertTotalHitsCount(result, 3);
-    containsOnlyIds(result, "DO6", "DO7", "DO9");
+    val result = executeQuery("facets(verificationStatusNested), eq(verificationStatusNested, 'tested')");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU2", "MU3");
 
     val facet = getFacet(result);
-    assertThat(facet.getMissingCount()).isEqualTo(1);
+    assertThat(facet.getMissingCount()).isEqualTo(0);
     assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(8);
+    assertThat(facet.getTotalCount()).isEqualTo(6);
 
     for (val entry : facet.getEntries()) {
-      if (entry.getTerm().toString().equals("male")) {
-        assertThat(entry.getCount()).isEqualTo(5);
+      if (entry.getTerm().toString().equals("tested")) {
+        assertThat(entry.getCount()).isEqualTo(2);
       } else {
-        assertThat(entry.getCount()).isEqualTo(3);
+        assertThat(entry.getCount()).isEqualTo(4);
       }
     }
   }
 
   @Test
-  public void facetsTest_µmultiFilters() {
-    val result = executeQuery("facets(donor_sex), eq(donor_sex, 'female'), eq(project._project_id, 'PACA-AU')");
+  public void facetsTest_multiFilters() {
+    val result =
+        executeQuery("facets(verificationStatus), eq(verificationStatus, 'tested'), in(transcriptId, 'T1', 'T2')");
     assertTotalHitsCount(result, 0);
 
-    val facet = getFacet(result);
+    val facet = result.getFacets().facet(TermsFacet.class, "verificationStatus");
     assertThat(facet.getMissingCount()).isEqualTo(0);
     assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(3);
+    assertThat(facet.getTotalCount()).isEqualTo(2);
 
     assertThat(facet.getEntries()).hasSize(1);
-    val maleFacet = facet.getEntries().get(0);
-    assertThat(maleFacet.getTerm().toString()).isEqualTo("male");
-    assertThat(maleFacet.getCount()).isEqualTo(3);
+    assertThat(facet.getEntries().get(0).getCount()).isEqualTo(2);
   }
 
   private SearchResponse executeQuery(String query) {
     ExpressionNode esAst = createTree(query);
-    esAst = esAstTransformator.process(esAst, Type.DONOR_CENTRIC);
+    esAst = esAstTransformator.process(esAst, Type.MUTATION_CENTRIC);
     log.debug("ES AST: {}", esAst);
     val request = visitor.visit(esAst, queryContext);
     log.debug("Request - {}", request);
@@ -325,7 +324,7 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   }
 
   private static TermsFacet getFacet(SearchResponse response) {
-    return response.getFacets().facet(TermsFacet.class, "donor_sex");
+    return response.getFacets().facet(TermsFacet.class, "verificationStatusNested");
   }
 
 }

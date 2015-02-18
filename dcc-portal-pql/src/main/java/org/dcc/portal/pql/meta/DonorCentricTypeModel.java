@@ -44,23 +44,24 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
 
   private static List<FieldModel> initFields() {
     val fields = new ImmutableList.Builder<FieldModel>();
-    fields.add(string("_donor_id"));
+    fields.add(string("_donor_id", "id"));
     fields.add(string("_project_id"));
     fields.add(initSummary());
-    fields.add(long_("donor_age_at_diagnosis"));
-    fields.add(long_("donor_age_at_enrollment"));
-    fields.add(long_("donor_age_at_last_followup"));
-    fields.add(string("donor_diagnosis_icd10"));
-    fields.add(string("donor_id"));
-    fields.add(long_("donor_interval_of_last_followup"));
-    fields.add(long_("donor_relapse_interval"));
-    fields.add(string("donor_relapse_type"));
-    fields.add(string("donor_sex"));
-    fields.add(long_("donor_survival_time"));
-    fields.add(string("donor_tumour_stage_at_diagnosis"));
-    fields.add(string("donor_tumour_stage_at_diagnosis_supplemental"));
-    fields.add(string("donor_tumour_staging_system_at_diagnosis"));
-    fields.add(string("donor_vital_status"));
+    fields.add(string("disease_status_last_followup", "diseaseStatusLastFollowup"));
+    fields.add(long_("donor_age_at_diagnosis", "ageAtDiagnosis"));
+    fields.add(long_("donor_age_at_enrollment", "ageAtEnrollment"));
+    fields.add(long_("donor_age_at_last_followup", "ageAtLastFollowup"));
+    fields.add(string("donor_diagnosis_icd10", "diagnosisIcd10"));
+    fields.add(string("donor_id", "submittedDonorId"));
+    fields.add(long_("donor_interval_of_last_followup", "intervalOfLastFollowup"));
+    fields.add(long_("donor_relapse_interval", "relapseInterval"));
+    fields.add(string("donor_relapse_type", "relapseType"));
+    fields.add(string("donor_sex", "gender"));
+    fields.add(long_("donor_survival_time", "survivalTime"));
+    fields.add(string("donor_tumour_stage_at_diagnosis", "tumourStageAtDiagnosis"));
+    fields.add(string("donor_tumour_stage_at_diagnosis_supplemental", "tumourStageAtDiagnosisSupplemental"));
+    fields.add(string("donor_tumour_staging_system_at_diagnosis", "tumourStagingSystemAtDiagnosis"));
+    fields.add(string("donor_vital_status", "vitalStatus"));
     fields.add(initGene());
     fields.add(initProject());
 
@@ -70,23 +71,23 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
   private static ObjectFieldModel initSummary() {
     return object("_summary",
         long_("_affected_gene_count"),
-        string("_age_at_diagnosis_group"),
-        arrayOfStrings("_available_data_type"),
+        string("_age_at_diagnosis_group", "ageAtDiagnosisGroup"),
+        arrayOfStrings("_available_data_type", "availableDataTypes"),
         bool("_cngv_exists"),
-        bool("_cnsm_exists"),
-        bool("_exp_array_exists"),
-        bool("_exp_seq_exists"),
-        bool("_jcn_exists"),
-        bool("_meth_array_exists"),
-        bool("_meth_seq_exists"),
-        bool("_mirna_seq_exists"),
-        bool("_pexp_exists"),
-        bool("_sgv_exists"),
-        bool("_ssm_count"),
+        bool("_cnsm_exists", "cnsmExists"),
+        bool("_exp_array_exists", "expArrayExists"),
+        bool("_exp_seq_exists", "expSeqExists"),
+        bool("_jcn_exists", "jcnExists"),
+        bool("_meth_array_exists", "methArrayExists"),
+        bool("_meth_seq_exists", "methSeqExists"),
+        bool("_mirna_seq_exists", "mirnaSeqExists"),
+        bool("_pexp_exists", "pexpExists"),
+        bool("_sgv_exists", "sgvExists"),
+        bool("_ssm_count", "ssmCount"),
         bool("_stgv_exists"),
-        bool("_stsm_exists"),
-        arrayOfStrings("_studies"),
-        arrayOfStrings("experimental_analysis_performed"),
+        bool("_stsm_exists", "stsmExists"),
+        arrayOfStrings("_studies", "studies"),
+        arrayOfStrings("experimental_analysis_performed", "analysisTypes"),
         initExperimentalAnalysisPerformedSampleCount(),
         arrayOfStrings("repository"));
   }
@@ -164,9 +165,9 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
 
   private static ObjectFieldModel initProject() {
     return object("project",
-        string("_project_id"),
-        string("primary_site"),
-        string("project_name"));
+        string("_project_id", "projectId"),
+        string("primary_site", "primarySite"),
+        string("project_name", "projectName"));
   }
 
 }

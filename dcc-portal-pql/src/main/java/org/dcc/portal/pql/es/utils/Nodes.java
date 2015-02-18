@@ -20,8 +20,8 @@ package org.dcc.portal.pql.es.utils;
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.collect.Iterables.filter;
+import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ public class Nodes {
     if (childrenList.isEmpty()) {
       return absent();
     } else if (childrenList.size() > 1) {
-      throw new IllegalStateException(_("RootNode contains more that one child of type %s. %s", childType, parent));
+      throw new IllegalStateException(format("RootNode contains more that one child of type %s. %s", childType, parent));
     }
 
     return fromNullable(childrenList.get(0));

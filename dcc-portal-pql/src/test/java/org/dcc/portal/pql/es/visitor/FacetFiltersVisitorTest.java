@@ -38,7 +38,7 @@ import org.junit.Test;
 public class FacetFiltersVisitorTest {
 
   private static final ExpressionNode REMOVE_CHILD = null;
-  private static final String FACET_FIELD = "gender";
+  private static final String FACET_FIELD = "donor_sex";
   FacetFiltersVisitor visitor;
 
   @Before
@@ -48,7 +48,7 @@ public class FacetFiltersVisitorTest {
 
   @Test
   public void visitTerm_noMatch() {
-    val original = (TermNode) getMustNode("eq(age, 60)").getFirstChild();
+    val original = (TermNode) getMustNode("eq(ageAtDiagnosis, 60)").getFirstChild();
     val clone = cloneNode(original);
     val result = visitor.visitTerm(original);
     assertThat(result).isEqualTo(clone);
@@ -63,7 +63,7 @@ public class FacetFiltersVisitorTest {
 
   @Test
   public void visitRange_noMatch() {
-    val original = (RangeNode) getMustNode("gt(age, 60)").getFirstChild();
+    val original = (RangeNode) getMustNode("gt(ageAtDiagnosis, 60)").getFirstChild();
     val clone = cloneNode(original);
     val result = visitor.visitRange(original);
     assertThat(result).isEqualTo(clone);
@@ -78,7 +78,7 @@ public class FacetFiltersVisitorTest {
 
   @Test
   public void visitTerms_noMatch() {
-    val original = (TermsNode) getMustNode("in(age, 60, 70)").getFirstChild();
+    val original = (TermsNode) getMustNode("in(ageAtDiagnosis, 60, 70)").getFirstChild();
     val clone = cloneNode(original);
     val result = visitor.visitTerms(original);
     assertThat(result).isEqualTo(clone);
@@ -93,7 +93,7 @@ public class FacetFiltersVisitorTest {
 
   @Test
   public void visitAnd_match() {
-    val andNode = (AndNode) getMustNode("or(and(gt(age, 60), eq(gender, 70)), eq(a, 1))")
+    val andNode = (AndNode) getMustNode("or(and(gt(ageAtDiagnosis, 60), eq(gender, 70)), eq(ageAtEnrollment, 1))")
         .getFirstChild() // OrNode
         .getFirstChild();
     val andNodeClone = cloneNode(andNode);
@@ -104,14 +104,14 @@ public class FacetFiltersVisitorTest {
     assertThat(andNodeResult.childrenCount()).isEqualTo(1);
 
     val rangeNode = (RangeNode) andNodeResult.getFirstChild();
-    assertThat(rangeNode.getName()).isEqualTo("age");
+    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(60);
   }
 
   @Test
   public void visitOr_match() {
-    val orNode = (OrNode) getMustNode("or(gt(age, 60), eq(gender, 70))").getFirstChild();
+    val orNode = (OrNode) getMustNode("or(gt(ageAtDiagnosis, 60), eq(gender, 70))").getFirstChild();
     val orNodeClone = cloneNode(orNode);
     val orNodeResult = visitor.visitOr(orNode);
 
@@ -120,7 +120,7 @@ public class FacetFiltersVisitorTest {
     assertThat(orNodeResult.childrenCount()).isEqualTo(1);
 
     val rangeNode = (RangeNode) orNodeResult.getFirstChild();
-    assertThat(rangeNode.getName()).isEqualTo("age");
+    assertThat(rangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(60);
   }
@@ -133,7 +133,7 @@ public class FacetFiltersVisitorTest {
     val mustNode = Nodes.cloneNode(filterNode.getFirstChild().getFirstChild());
 
     // Must be wrapped in FacetsNode. This is what the FacetsResolveFivitor does
-    val facetsNode = new FacetsNode(new TermsFacetNode("gender"));
+    val facetsNode = new FacetsNode(new TermsFacetNode("gender", "donor_sex"));
     facetsNode.getFirstChild().addChildren(mustNode);
 
     return mustNode;

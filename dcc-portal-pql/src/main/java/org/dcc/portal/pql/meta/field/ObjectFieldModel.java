@@ -26,6 +26,7 @@ import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
@@ -54,21 +55,35 @@ public class ObjectFieldModel extends FieldModel {
     this.fields = fields;
   }
 
-  public static <T extends FieldModel> ObjectFieldModel object(String name, T... fields) {
+  public static <T extends FieldModel> ObjectFieldModel object(@NonNull String name, @NonNull T... fields) {
     val fieldsList = new ImmutableList.Builder<T>();
     fieldsList.add(fields);
 
     return new ObjectFieldModel(name, fieldsList.build());
   }
 
-  public static <T extends FieldModel> ObjectFieldModel object(T... fields) {
+  public static <T extends FieldModel> ObjectFieldModel object(@NonNull String name, @NonNull String alias,
+      @NonNull T... fields) {
+    val fieldsList = new ImmutableList.Builder<T>();
+    fieldsList.add(fields);
+
+    return new ObjectFieldModel(name, alias, fieldsList.build());
+  }
+
+  public static <T extends FieldModel> ObjectFieldModel object(@NonNull String name, @NonNull String alias) {
+    val fieldsList = new ImmutableList.Builder<T>();
+
+    return new ObjectFieldModel(name, alias, fieldsList.build());
+  }
+
+  public static <T extends FieldModel> ObjectFieldModel object(@NonNull T... fields) {
     val fieldsList = new ImmutableList.Builder<T>();
     fieldsList.add(fields);
 
     return new ObjectFieldModel(NO_NAME, fieldsList.build());
   }
 
-  public static <T extends FieldModel> ObjectFieldModel nestedObject(T... fields) {
+  public static <T extends FieldModel> ObjectFieldModel nestedObject(@NonNull T... fields) {
     val fieldsList = new ImmutableList.Builder<T>();
     for (val field : fields) {
       field.setNested(NESTED);
@@ -79,7 +94,7 @@ public class ObjectFieldModel extends FieldModel {
   }
 
   @Override
-  public <T> T accept(FieldVisitor<T> visitor) {
+  public <T> T accept(@NonNull FieldVisitor<T> visitor) {
     return visitor.visitObjectField(this);
   }
 

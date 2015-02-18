@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.ast;
 
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -35,7 +36,7 @@ public class LimitNode extends ExpressionNode {
   int size;
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitLimit(this);
   }
 

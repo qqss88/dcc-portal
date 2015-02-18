@@ -20,6 +20,7 @@ package org.dcc.portal.pql.meta.field;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.BOOLEAN;
+import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
@@ -29,24 +30,28 @@ public class BooleanFieldModel extends FieldModel {
     this(name, EMPTY_UI_ALIAS);
   }
 
-  private BooleanFieldModel(String name, String uiAlias) {
-    this(name, uiAlias, NOT_NESTED);
+  private BooleanFieldModel(String name, String alias) {
+    this(name, alias, NOT_NESTED);
   }
 
   private BooleanFieldModel(String name, boolean nested) {
     this(name, EMPTY_UI_ALIAS, nested);
   }
 
-  private BooleanFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, BOOLEAN, nested);
+  private BooleanFieldModel(String name, String alias, boolean nested) {
+    super(name, alias, BOOLEAN, nested);
   }
 
-  public static BooleanFieldModel bool(String name) {
+  public static BooleanFieldModel bool(@NonNull String name) {
     return new BooleanFieldModel(name);
   }
 
+  public static BooleanFieldModel bool(@NonNull String name, @NonNull String alias) {
+    return new BooleanFieldModel(name, alias);
+  }
+
   @Override
-  public <T> T accept(FieldVisitor<T> visitor) {
+  public <T> T accept(@NonNull FieldVisitor<T> visitor) {
     return visitor.visitBooleanField(this);
   }
 

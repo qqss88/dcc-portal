@@ -17,8 +17,8 @@
  */
 package org.dcc.portal.pql.es.model;
 
+import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -39,7 +39,7 @@ public enum Order implements Identifiable {
       }
     }
 
-    throw new IllegalArgumentException(_("No sign '%s' found", sign));
+    throw new IllegalArgumentException(format("No sign '%s' found", sign));
   }
 
   @Override

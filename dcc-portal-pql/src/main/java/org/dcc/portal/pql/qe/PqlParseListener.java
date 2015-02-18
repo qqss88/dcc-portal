@@ -27,8 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.FilterNode;
+import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.model.RequestType;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
@@ -42,15 +42,19 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 @EqualsAndHashCode(callSuper = false)
 public class PqlParseListener extends PqlBaseListener {
 
-  private static final PqlParseTreeVisitor PQL_VISITOR = new PqlParseTreeVisitor();
-
   ExpressionNode esAst = new RootNode();
-  @NonNull
   QueryContext queryContext;
+  PqlParseTreeVisitor pqlVisitor;
+
+  public PqlParseListener(@NonNull QueryContext queryContext) {
+    this.queryContext = queryContext;
+    this.pqlVisitor = new PqlParseTreeVisitor(queryContext.getTypeModel());
+  }
 
   @Override
   public void exitStatement(@NonNull StatementContext context) {
     log.debug("Starting to process query - {}", context.toStringTree());
+    // FIXME: Remove and define query type by CountNode
     if (context.count() != null) {
       log.debug("Processing count() type query");
       queryContext.setRequestType(RequestType.COUNT);
@@ -76,20 +80,20 @@ public class PqlParseListener extends PqlBaseListener {
     // process limit
     val rangeContext = context.range();
     if (rangeContext != null) {
-      esAst.addChildren(rangeContext.accept(PQL_VISITOR));
+      esAst.addChildren(rangeContext.accept(pqlVisitor));
     }
 
     // process sort
     val sortContext = context.order();
     if (sortContext != null) {
-      esAst.addChildren(sortContext.accept(PQL_VISITOR));
+      esAst.addChildren(sortContext.accept(pqlVisitor));
     }
 
   }
 
-  private static void processFunctions(Collection<FunctionContext> functions, ExpressionNode rootNode) {
+  private void processFunctions(Collection<FunctionContext> functions, ExpressionNode rootNode) {
     for (val child : functions) {
-      rootNode.addChildren(child.accept(PQL_VISITOR));
+      rootNode.addChildren(child.accept(pqlVisitor));
     }
   }
 
@@ -98,13 +102,13 @@ public class PqlParseListener extends PqlBaseListener {
    * @param filterNodes - {@link FilterContext} nodes that represent a filter expression
    * @param boolNode - parent for all the nodes to be processed
    */
-  private static BoolNode processFilters(Collection<FilterContext> filterNodes) {
+  private BoolNode processFilters(Collection<FilterContext> filterNodes) {
     val boolNode = new BoolNode();
     val mustNode = new MustBoolNode();
     boolNode.addChildren(mustNode);
 
     for (val filter : filterNodes) {
-      val expressionNode = filter.accept(PQL_VISITOR);
+      val expressionNode = filter.accept(pqlVisitor);
       log.debug("Filter {} generated {}", filter.toStringTree(), expressionNode);
       mustNode.addChildren(expressionNode);
     }

@@ -25,7 +25,6 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.es.visitor.CreateFilterBuilderVisitor;
-import org.dcc.portal.pql.meta.IndexModel;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
@@ -49,7 +48,7 @@ public class QueryEngine {
     ExpressionNode esAst = pqlListener.getEsAst();
     esAst = esAstTransformator.process(esAst, context.getType());
     // FIXME: cache
-    val esVisitor = new CreateFilterBuilderVisitor(client, new IndexModel());
+    val esVisitor = new CreateFilterBuilderVisitor(client, context.getTypeModel());
 
     return esVisitor.visit(esAst, context);
   }

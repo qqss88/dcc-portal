@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.qe;
 
 import static com.google.common.base.Preconditions.checkState;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
@@ -68,10 +70,14 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
 
 @Slf4j
+@AllArgsConstructor
 public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   private static final String SINGLE_QUOTE = "'";
   private static final String DOUBLE_QUOTE = "\"";
+
+  @NonNull
+  private final AbstractTypeModel typeModel;
 
   @Override
   public ExpressionNode visitOr(@NonNull OrContext context) {
@@ -102,7 +108,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitEq(@NonNull EqContext context) {
-    val nameNode = new TerminalNode(context.ID().getText());
+    val nameNode = createNameNode(context.ID().getText());
     val valueNode = (TerminalNode) context.value().accept(this);
     val termNode = new TermNode(nameNode, valueNode);
     log.debug("TermNode: {}", termNode);
@@ -140,7 +146,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitNe(@NonNull NeContext context) {
-    val nameNode = new TerminalNode(context.ID().getText());
+    val nameNode = createNameNode(context.ID().getText());
     val valueNode = (TerminalNode) context.value().accept(this);
     val notNode = new NotNode(new TermNode(nameNode, valueNode));
     log.debug("NotNode: {}", notNode);
@@ -155,9 +161,9 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitGe(@NonNull GeContext context) {
-    val id = context.ID().getText();
     val value = context.value().accept(this);
-    val rangeNode = new RangeNode(id, new GreaterEqualNode(value));
+    val field = getField(context.ID().getText());
+    val rangeNode = new RangeNode(field, new GreaterEqualNode(value));
     log.debug("RangeNode: {}", rangeNode);
 
     return rangeNode;
@@ -170,9 +176,9 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitGt(@NonNull GtContext context) {
-    val id = context.ID().getText();
     val value = context.value().accept(this);
-    val rangeNode = new RangeNode(id, new GreaterThanNode(value));
+    val field = getField(context.ID().getText());
+    val rangeNode = new RangeNode(field, new GreaterThanNode(value));
     log.debug("RangeNode: {}", rangeNode);
 
     return rangeNode;
@@ -185,9 +191,9 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitLe(@NonNull LeContext context) {
-    val id = context.ID().getText();
     val value = context.value().accept(this);
-    val rangeNode = new RangeNode(id, new LessEqualNode(value));
+    val field = getField(context.ID().getText());
+    val rangeNode = new RangeNode(field, new LessEqualNode(value));
     log.debug("RangeNode: {}", rangeNode);
 
     return rangeNode;
@@ -200,9 +206,9 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitLt(@NonNull LtContext context) {
-    val id = context.ID().getText();
     val value = context.value().accept(this);
-    val rangeNode = new RangeNode(id, new LessThanNode(value));
+    val field = getField(context.ID().getText());
+    val rangeNode = new RangeNode(field, new LessThanNode(value));
     log.debug("RangeNode: {}", rangeNode);
 
     return rangeNode;
@@ -212,7 +218,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   public ExpressionNode visitSelect(@NonNull SelectContext nodeContext) {
     val fieldsNode = new FieldsNode();
     for (val field : nodeContext.ID()) {
-      fieldsNode.addChildren(new TerminalNode(field));
+      fieldsNode.addChildren(new TerminalNode(getField(field.getText())));
     }
     log.debug("FieldsNode: {}", fieldsNode);
 
@@ -239,9 +245,9 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     for (val id : nodeContext.ID()) {
       val order = getOrderAt(nodeContext, id.getSymbol().getCharPositionInLine() - 1);
       if (order != null) {
-        sortNode.addField(id.getText(), order);
+        sortNode.addField(getField(id.getText()), order);
       } else {
-        sortNode.addField(id.getText(), Order.ASC);
+        sortNode.addField(getField(id.getText()), Order.ASC);
       }
     }
     log.debug("{}", sortNode);
@@ -266,7 +272,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitIn(@NonNull InContext nodeContext) {
-    val termsNode = new TermsNode(nodeContext.ID().getText());
+    val termsNode = new TermsNode(getField(nodeContext.ID().getText()));
     for (val child : nodeContext.value()) {
       termsNode.addChildren(child.accept(this));
     }
@@ -291,11 +297,19 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   public ExpressionNode visitFacets(@NonNull FacetsContext nodeContext) {
     val facetsNode = new FacetsNode();
     for (val child : nodeContext.ID()) {
-      facetsNode.addChildren(new TermsFacetNode(child.getText()));
+      facetsNode.addChildren(new TermsFacetNode(child.getText(), getField(child.getText())));
     }
     log.debug("{}", facetsNode);
 
     return facetsNode;
+  }
+
+  private TerminalNode createNameNode(@NonNull String field) {
+    return new TerminalNode(getField(field));
+  }
+
+  private String getField(String alias) {
+    return typeModel.getField(alias);
   }
 
 }

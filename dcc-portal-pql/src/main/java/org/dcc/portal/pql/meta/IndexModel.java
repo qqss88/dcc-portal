@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static java.lang.String.format;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -26,7 +26,9 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 @Value
 public class IndexModel {
 
-  DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
+  private static final DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
+  private static final GeneCentricTypeModel geneCentric = new GeneCentricTypeModel();
+  private static final MutationCentricTypeModel mutationCentric = new MutationCentricTypeModel();
 
   public boolean isNested(@NonNull String field, Type type) {
     return getTypeModel(type).isNested(field);
@@ -36,13 +38,17 @@ public class IndexModel {
     return getTypeModel(type).getNestedPath(field);
   }
 
-  private AbstractTypeModel getTypeModel(Type type) {
+  public static AbstractTypeModel getTypeModel(Type type) {
     switch (type) {
     case DONOR_CENTRIC:
       return donorCentric;
+    case GENE_CENTRIC:
+      return geneCentric;
+    case MUTATION_CENTRIC:
+      return mutationCentric;
     }
 
-    throw new IllegalArgumentException(_("Type %s was not found", type.getId()));
+    throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
   }
 
 }

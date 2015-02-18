@@ -17,10 +17,11 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static org.dcc.portal.pql.utils.TestingHelpers.initQueryContext;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,12 +48,13 @@ import org.junit.Test;
 @Slf4j
 public class PqlParseListenerTest {
 
-  PqlParseListener listener = new PqlParseListener(new QueryContext());
+  PqlParseListener listener = new PqlParseListener(initQueryContext());
 
   @Test
   public void filtersTest() {
-    val query =
-        "or(gt(a, 10), ge(b, 20.2)), eq(c, 100), ne(d, 200), and(lt(e, 30), le(f, 40)), in(sex, 'male', 'female')";
+    val query = "or(gt(ageAtDiagnosis, 10), ge(ageAtEnrollment, 20.2)), "
+        + "eq(diseaseStatusLastFollowup, 100), ne(relapseInterval, 200), "
+        + "and(lt(ageAtLastFollowup, 30), le(intervalOfLastFollowup, 40)), in(gender, 'male', 'female')";
     val esAst = createEsAst(query);
     log.info("{}", esAst);
     assertFilterStructure(esAst);
@@ -62,57 +64,57 @@ public class PqlParseListenerTest {
     val orNode = mustNode.getFirstChild();
     assertThat(orNode.childrenCount()).isEqualTo(2);
 
-    // gt(age, 10)
+    // gt(ageAtDiagnosis, 10)
     val gtRangeNode = (RangeNode) orNode.getFirstChild();
     assertThat(gtRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(gtRangeNode.getName()).isEqualTo("a");
+    assertThat(gtRangeNode.getName()).isEqualTo("donor_age_at_diagnosis");
     val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getFirstChild();
     assertThat(gtRangeNode1Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode1Child.getValue()).isEqualTo(10);
 
-    // ge(age, 20)
+    // ge(ageAtEnrollment, 20)
     val geRangeNode = (RangeNode) orNode.getChild(1);
     assertThat(geRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(geRangeNode.getName()).isEqualTo("b");
+    assertThat(geRangeNode.getName()).isEqualTo("donor_age_at_enrollment");
     val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getFirstChild();
     assertThat(gtRangeNode2Child.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode2Child.getValue()).isEqualTo(20.2);
 
-    // eq(c, 100)
+    // eq(diseaseStatusLastFollowup, 100)
     val eqNode = (TermNode) mustNode.getChild(1);
     assertThat(eqNode.childrenCount()).isEqualTo(2);
-    assertThat(eqNode.getNameNode().getValue()).isEqualTo("c");
+    assertThat(eqNode.getNameNode().getValue()).isEqualTo("disease_status_last_followup");
     assertThat(eqNode.getValueNode().getValue()).isEqualTo(100);
 
-    // ne(d, 200)
+    // ne(relapseInterval, 200)
     val notNode = (NotNode) mustNode.getChild(2);
     assertThat(notNode.childrenCount()).isEqualTo(1);
-    childrenContainValue(notNode, "d");
+    childrenContainValue(notNode, "donor_relapse_interval");
     childrenContainValue(notNode, 200);
 
     val andNode = (AndNode) mustNode.getChild(3);
     assertThat(andNode.childrenCount()).isEqualTo(2);
 
-    // lt(e, 30)
+    // lt(ageAtLastFollowup, 30)
     val ltRangeNode = (RangeNode) andNode.getFirstChild();
     assertThat(ltRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(ltRangeNode.getName()).isEqualTo("e");
+    assertThat(ltRangeNode.getName()).isEqualTo("donor_age_at_last_followup");
     val ltRangeNodeChild = (LessThanNode) ltRangeNode.getFirstChild();
     assertThat(ltRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(ltRangeNodeChild.getValue()).isEqualTo(30);
 
-    // le(f, 40)
+    // le(intervalOfLastFollowup, 40)
     val leRangeNode = (RangeNode) andNode.getChild(1);
     assertThat(leRangeNode.childrenCount()).isEqualTo(1);
-    assertThat(leRangeNode.getName()).isEqualTo("f");
+    assertThat(leRangeNode.getName()).isEqualTo("donor_interval_of_last_followup");
     val leRangeNodeChild = (LessEqualNode) leRangeNode.getFirstChild();
     assertThat(leRangeNodeChild.childrenCount()).isEqualTo(1);
     assertThat(leRangeNodeChild.getValue()).isEqualTo(40);
 
-    // in(sex, 'male', 'female')
+    // in(gender, 'male', 'female')
     val termsNode = (TermsNode) mustNode.getChild(4);
     assertThat(termsNode.childrenCount()).isEqualTo(2);
-    assertThat(termsNode.getField()).isEqualTo("sex");
+    assertThat(termsNode.getField()).isEqualTo("donor_sex");
     val maleNode = (TerminalNode) termsNode.getFirstChild();
     assertThat(maleNode.getValue()).isEqualTo("male");
     val femaleNode = (TerminalNode) termsNode.getChild(1);
@@ -121,11 +123,11 @@ public class PqlParseListenerTest {
 
   @Test
   public void selectTest() {
-    val esAst = createEsAst("select(age, gender)", listener);
+    val esAst = createEsAst("select(id, gender)", listener);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     val fieldsNode = (FieldsNode) esAst.getFirstChild();
     assertThat(fieldsNode.childrenCount()).isEqualTo(2);
-    assertThat(fieldsNode.getFields()).containsOnly("age", "gender");
+    assertThat(fieldsNode.getFields()).containsOnly("_donor_id", "donor_sex");
   }
 
   @Test
@@ -138,20 +140,20 @@ public class PqlParseListenerTest {
 
   @Test
   public void countTest_withFilters() {
-    val esAst = createEsAst("count(),eq(age, 10)", listener);
+    val esAst = createEsAst("count(),eq(id, 10)", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
     assertThat(esAst.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
     assertThat(esAst.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
     val mustNode = esAst.getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.getFirstChild().childrenCount()).isEqualTo(2);
-    childrenContainValue(mustNode, "age");
+    childrenContainValue(mustNode, "_donor_id");
     childrenContainValue(mustNode, 10);
   }
 
   @Test
   public void nestedTest() {
-    val esAst = createEsAst("nested(gene, eq(gene._donor_id, 'D01'))", listener);
+    val esAst = createEsAst("nested(gene, eq(projectId, 'D01'))", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
     assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
@@ -195,7 +197,7 @@ public class PqlParseListenerTest {
     }
 
     if (!found) {
-      fail(_("Value %s was not found in %s", value, parent));
+      fail(format("Value %s was not found in %s", value, parent));
     }
 
   }
@@ -205,7 +207,7 @@ public class PqlParseListenerTest {
     val nodeValue = node.getValueNode().getValue();
     if (nodeName.equals(value) || nodeValue.equals(value)) {
       if (foundBefore) {
-        fail(_("Parent contains more than one value of %s", value.toString()));
+        fail(format("Parent contains more than one value of %s", value.toString()));
       } else {
         return true;
       }

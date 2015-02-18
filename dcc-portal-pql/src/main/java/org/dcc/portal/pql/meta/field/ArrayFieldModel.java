@@ -23,6 +23,7 @@ import static org.dcc.portal.pql.meta.Constants.NESTED;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
 import lombok.Getter;
+import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
@@ -48,24 +49,28 @@ public class ArrayFieldModel extends FieldModel {
     this.element = element;
   }
 
-  public static ArrayFieldModel arrayOfStrings(String name) {
+  public static ArrayFieldModel arrayOfStrings(@NonNull String name) {
     return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
   }
 
-  public static ArrayFieldModel nestedArrayOfStrings(String name) {
+  public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull String alias) {
+    return new ArrayFieldModel(name, alias, EMPTY_STRING_FIELD);
+  }
+
+  public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name) {
     return new ArrayFieldModel(name, NESTED, EMPTY_STRING_FIELD);
   }
 
-  public static ArrayFieldModel arrayOfObjects(String name, ObjectFieldModel element) {
+  public static ArrayFieldModel arrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
     return new ArrayFieldModel(name, element);
   }
 
-  public static ArrayFieldModel nestedArrayOfObjects(String name, ObjectFieldModel element) {
+  public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
     return new ArrayFieldModel(name, NESTED, element);
   }
 
   @Override
-  public <T> T accept(FieldVisitor<T> visitor) {
+  public <T> T accept(@NonNull FieldVisitor<T> visitor) {
     return visitor.visitArrayField(this);
   }
 

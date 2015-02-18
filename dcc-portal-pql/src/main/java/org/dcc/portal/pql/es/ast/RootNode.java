@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import lombok.NonNull;
+
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 public class RootNode extends ExpressionNode {
@@ -26,7 +28,7 @@ public class RootNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(NodeVisitor<T> visitor) {
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
     return visitor.visitRoot(this);
   }
 

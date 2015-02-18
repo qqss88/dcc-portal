@@ -15,21 +15,52 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.meta;
 
-import lombok.NonNull;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
+import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
+import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
+import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import java.util.List;
 
-public class FacetsNode extends ExpressionNode {
+import org.dcc.portal.pql.meta.field.FieldModel;
+import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
-  public FacetsNode(ExpressionNode... children) {
-    super(children);
+import com.google.common.collect.ImmutableList;
+
+public class GeneCentricTypeModel extends AbstractTypeModel {
+
+  public GeneCentricTypeModel() {
+    super(defineFields());
   }
 
-  @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitFacets(this);
+  private static List<FieldModel> defineFields() {
+    return new ImmutableList.Builder<FieldModel>()
+        .add(string("_gene_id", "id"))
+        .add(string("symbol", "symbol"))
+        .add(string("name", "name"))
+        .add(string("biotype", "type"))
+        .add(string("chromosome", "chromosome"))
+        .add(long_("start", "start"))
+        .add(long_("strand", "strand"))
+        .add(string("description", "description"))
+        .add(arrayOfStrings("synonyms", "synonyms"))
+        .add(defineExternalDbIds())
+        .add(defineSummary())
+        .add(arrayOfStrings("pathways", "pathways"))
+        .build();
+  }
+
+  private static ObjectFieldModel defineExternalDbIds() {
+    return object("external_db_ids", "externalDbIds",
+        arrayOfStrings("entrez_gene"));
+  }
+
+  private static ObjectFieldModel defineSummary() {
+    return object("_summary",
+        long_("_affected_donor_count", "affectedDonorCountTotal"),
+        string("_affected_transcript_id", "affectedTranscriptIds"));
   }
 
 }
