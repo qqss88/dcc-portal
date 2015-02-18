@@ -203,6 +203,7 @@ var DATASET_ALL = 'All Projects';
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
+      $scope.projects.unshift({id:'——————'});
       $scope.projects.unshift({id:DATASET_ALL});
       $scope.params = {
         project:$scope.projects[0],
@@ -239,12 +240,6 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
-
-        element.bind('keypress', function(event) {
-          if(event.keyCode === 32) {
-            event.preventDefault();
-          }
-        });
       }
     };
   });
@@ -269,14 +264,55 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
+      }
+    };
+  });
 
+  module.directive('searchOnEnter', function() {
+    return {
+      require: '?ngModel',
+      link: function(scope, element) {
         element.bind('keypress', function(event) {
           if(event.keyCode === 32) {
             event.preventDefault();
+          }else if(event.keyCode === 13) {
+            scope.checkParams();
+            if(!scope.hasInvalidParams){
+              scope.submitQuery();
+            }
           }
         });
       }
     };
   });
 
+  /** From github issue 638 on angularjs page **/
+  module.directive('optionsDisabled', function($parse) {
+    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
+      // refresh the disabled options in the select element.
+      angular.forEach(element.find('option'), function(value, index){
+        var elem = angular.element(value);
+        if(elem.val()!==''){
+          var locals = {};
+          locals[attr] = data[index];
+          elem.attr('disabled', fnDisableIfTrue(scope, locals));
+        }
+      });
+    };
+    return {
+      priority: 0,
+      require: 'ngModel',
+      link: function(scope, iElement, iAttrs) {
+        // parse expression and build array of disabled options
+        var expElements = iAttrs.optionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
+        var attrToWatch = expElements[3];
+        var fnDisableIfTrue = $parse(expElements[1]);
+        scope.$watch(attrToWatch, function(newValue) {
+          if(newValue){
+            disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
+          }
+        }, true);
+      }
+    };
+  });
 })();
