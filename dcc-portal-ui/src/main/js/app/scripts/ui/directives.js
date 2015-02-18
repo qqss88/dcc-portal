@@ -99,14 +99,23 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target) {
-          var position = $position.offset(target);
-          var result = {};
+        function calculatePlacement(placement, target, pos) {
+          if(!pos){
+            var position = $position.offset(target);
+            var result = {};
 
-
-          var ttWidth = element.prop('offsetWidth');
-          var ttHeight = element.prop('offsetHeight');
-
+            var ttWidth = element.prop('offsetWidth');
+            var ttHeight = element.prop('offsetHeight');
+          }else{
+            var position = {
+              top:pos.top,
+              left:pos.left,
+              width:0,
+              height:0
+            };
+            var ttWidth = element.prop('offsetWidth');
+            var ttHeight = element.prop('offsetHeight');
+          }
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
           // This is to avoid NaN
@@ -151,13 +160,8 @@ angular.module('app.ui.tooltipControl', [])
               scope.placement = params.placement;
             }
           });
-
-          var position = params.position;
-
-          if(!position){
-            position = calculatePlacement(params.placement, params.element);
-          }
-   //       console.log(position);
+          console.log("calculating placement...");
+          var position = calculatePlacement(params.placement, params.element, params.position);
           element.css('top', position.top);
           element.css('left', position.left);
         });

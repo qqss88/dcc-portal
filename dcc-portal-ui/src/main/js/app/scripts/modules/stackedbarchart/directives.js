@@ -50,24 +50,19 @@
                           function getLabel() {
                             return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
                           }
-                          console.log(elem);
-                          console.log(elem.getBoundingClientRect()); // a piece of the column
+
                           var e = window.event;
-                          console.log('Page:          '+event.pageX+', '+event.pageY);
-                          console.log('d3mouse:       '+x+', '+y);
-                          console.log('Client:        '+event.clientX+', '+event.clientY);
-                          console.log('Element:       '+elem.x+', '+elem.y);
 
                           var position = {
-                            left:x,
-                            top:y
+                            left:elem.getBoundingClientRect().left + elem.getBoundingClientRect().width + 1,
+                            top:elem.getBoundingClientRect().top + window.pageYOffset + elem.getBoundingClientRect().height/2
                           }
 
                           $scope.$emit('tooltip::show', {
                             element: angular.element(elem),
                             text: getLabel(),
                             placement: 'right',
-                            position:position
+                            position: position
                           });
                         },
                         tooltipHideFunc: function() {

@@ -253,13 +253,26 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
                   });
                 }
                 $scope.$apply();
+              },
+              mouseOver: function () {
+                var e = window.event;
+                console.log(this);
+                $scope.$emit('tooltip::show', {
+                  element: angular.element(this),
+                  text: 'tooooooltipppppppp',
+                  placement: 'right',
+                  position: {left:e.pageX,top:e.pageY}
+                });
+              },
+              mouseOut: function () {
+                $scope.$emit('tooltip::hide');
               }
             }
           }
         },
         tooltip: {
           shared: true,
-          enabled: true,
+          enabled: false,
           useHTML: true,
           borderWidth: 0,
           borderRadius: 0,
