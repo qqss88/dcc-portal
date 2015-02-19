@@ -29,7 +29,7 @@
   angular.module('icgc.genelist.controllers', []);
 
   angular.module('icgc.genelist.controllers').controller('genelistController',
-    function($scope, $timeout, $http, $location, Restangular, LocationService, FiltersUtil) {
+    function($scope, $timeout, $http, $location, Restangular, LocationService, FiltersUtil, Extensions) {
 
     var verifyPromise = null;
     var delay = 1000;
@@ -133,12 +133,12 @@
           if (! filters.hasOwnProperty('gene')) {
             filters.gene = {};
           }
-          if (! filters.gene.hasOwnProperty('uploadGeneListId')) {
-            filters.gene.uploadGeneListId = {};
+          if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
+            filters.gene[Extensions.ENTITY] = {};
           }
 
           $scope.genelistModal = false;
-          filters.gene.uploadGeneListId.is = [result.geneListId];
+          filters.gene[Extensions.ENTITY].is = [result.geneListId];
 
           // Upload gene list redirects to gene tab, regardless of where we came from
           search.filters = angular.toJson(filters);
@@ -167,14 +167,6 @@
       $scope.hasGeneList = false;
       if (FiltersUtil.hasGeneListExtension(filters)) {
         $scope.hasGeneList = true;
-
-
-        if (filters.gene.inputGeneListId) {
-          $scope.geneListType = 'inputGeneListId';
-        } else {
-          $scope.geneListType = 'uploadGeneListId';
-        }
-
       }
     }, true);
 

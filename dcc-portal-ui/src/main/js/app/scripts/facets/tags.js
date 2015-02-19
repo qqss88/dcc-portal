@@ -22,10 +22,11 @@
 
   module.controller('tagsFacetCtrl',
     function ($scope, Facets, LocationService, HighchartsService, FiltersUtil,
-      Extensions, GeneSets, Genes, GeneSetNameLookupService ) {
+      Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
     $scope.projects = HighchartsService.projectColours;
 
+    $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {
 
@@ -52,6 +53,20 @@
         type: type,
         facet: $scope.facetName
       });
+
+      // There are only 'active' entity ids
+      $scope.activeEntityIds = Facets.getActiveTags({
+        type: type,
+        facet: Extensions.ENTITY
+      });
+
+      // Fetch display names for entity lists
+      $scope.entityIdMap = {};
+      if ($scope.activeEntityIds.length > 0) {
+        SetService.getMetaData($scope.activeEntityIds).then(function(results) {
+          $scope.entityIdMap = SetService.lookupTable(results);
+        });
+      }
 
 
       // Grab predefined geneset fields: each gene set type require specialized logic
@@ -181,8 +196,20 @@
       });
     };
 
+
+    /* Used for special cases where the relation is one-to-many instead of one-to-one */
+    $scope.removeSpecificTerm = function(type, facet, term) {
+      console.log('specific term removal', term, type, facet);
+      Facets.removeTerm({
+        type: type,
+        facet: facet,
+        term: term
+      });
+    };
+
+
     $scope.removeFacet = function () {
-      var type = $scope.type, filters = LocationService.filters();
+      var type = $scope.type;
       if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
         type = 'gene';
       }
@@ -192,10 +219,11 @@
         facet: $scope.facetName
       });
 
-      if ($scope.type === 'gene' && FiltersUtil.hasGeneListExtension(filters) === true) {
+      // Remove secondary facet - entity
+      if (_.contains(['gene', 'donor', 'mutation'], type) === true && $scope.facetName === 'id') {
         Facets.removeFacet({
           type: type,
-          facet: 'inputGeneListId'
+          facet: Extensions.ENTITY
         });
       }
 

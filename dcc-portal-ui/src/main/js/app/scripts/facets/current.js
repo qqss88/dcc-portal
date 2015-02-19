@@ -22,12 +22,23 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil) {
+  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService) {
     $scope.Facets = Facets;
+    $scope.Extensions = Extensions;
 
     function refresh() {
-      $scope.filters = FiltersUtil.buildUIFilters(LocationService.filters());
-      $scope.isActive = _.keys($scope.filters).length;
+      var currentFilters = LocationService.filters();
+      var ids = LocationService.extractSetIds(currentFilters);
+
+      if (ids.length > 0) {
+        SetService.getMetaData(ids).then(function(results) {
+          $scope.filters = FiltersUtil.buildUIFilters(currentFilters, SetService.lookupTable(results));
+        });
+      } else {
+        $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
+      }
+      //$scope.isActive = _.keys($scope.filters).length;
+      $scope.isActive = _.keys(currentFilters).length;
     }
 
 
@@ -36,24 +47,23 @@
      * like facets but are structured in different ways
      */
     $scope.removeFacet = function(type, facet) {
+
+      // Remove primary facet
       Facets.removeFacet({
         type: type,
         facet: facet
       });
 
-      if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
 
-        // FIXME: Grab facet keys from Extensions
+      // Remove secondary facet - entity
+      if (_.contains(['gene', 'donor', 'mutation'], type) === true && facet === 'id') {
         Facets.removeFacet({
           type: type,
-          facet: 'inputGeneListId'
-        });
-
-        Facets.removeFacet({
-          type: type,
-          facet: 'uploadGeneListId'
+          facet: Extensions.ENTITY
         });
       }
+
+      // Remove secondary facet - existing conditions
       if (type === 'gene' && facet === 'pathwayId') {
         Facets.removeFacet({
           type: type,

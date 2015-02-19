@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.util;
 import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.IndexModel.ALL;
-import static org.icgc.dcc.portal.model.IndexModel.API_INPUT_GENE_LIST_ID_FIELD_NAME;
+import static org.icgc.dcc.portal.model.IndexModel.API_ENTITY_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
@@ -31,8 +31,6 @@ import java.util.UUID;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
-
-import org.icgc.dcc.portal.model.Universe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -107,14 +105,14 @@ public final class Filters {
 
   public static ObjectNode inputGeneListIdFilter(@NonNull String inputGeneListId) {
     val geneFilter = geneFilter();
-    geneFilter.with("gene").put(API_INPUT_GENE_LIST_ID_FIELD_NAME, is(inputGeneListId));
+    geneFilter.with("gene").put(API_ENTITY_LIST_ID_FIELD_NAME, is(inputGeneListId));
 
     return geneFilter;
   }
 
   public static ObjectNode inputGeneListFilter(@NonNull UUID inputGeneListId) {
     val inputGeneListFilter = geneFilter();
-    inputGeneListFilter.with(GENE.getId()).put(API_INPUT_GENE_LIST_ID_FIELD_NAME, is(inputGeneListId.toString()));
+    inputGeneListFilter.with(GENE.getId()).put(API_ENTITY_LIST_ID_FIELD_NAME, is(inputGeneListId.toString()));
 
     return inputGeneListFilter;
   }
@@ -131,17 +129,21 @@ public final class Filters {
     if (universe.path("gene").path("goTermId").isMissingNode() == false) {
       val universeId = universe.get("gene").get("goTermId").withArray("is").get(0).asText();
       result.with("gene").with("goTermId").withArray(ALL).add(universeId);
-    } else if (universe.path("gene").path(Universe.REACTOME_PATHWAYS.getGeneSetFacetName()).isMissingNode() == false) {
-      result.with("gene").put(Universe.REACTOME_PATHWAYS.getGeneSetFacetName(), true);
+    } else if (universe.path("gene").path("hasPathway").isMissingNode() == false) {
+      result.with("gene").put("hasPathway", "true");
     }
+    // } else if (universe.path("gene").path(Universe.REACTOME_PATHWAYS.getGeneSetFacetName()).isMissingNode() == false)
+    // {
+    // result.with("gene").put(Universe.REACTOME_PATHWAYS.getGeneSetFacetName(), true);
+    // }
     return result;
   }
 
   public static ObjectNode mergeAnalysisInputGeneList(@NonNull ObjectNode current, @NonNull ObjectNode genelist) {
     val result = current.deepCopy();
-    if (genelist.path("gene").path(API_INPUT_GENE_LIST_ID_FIELD_NAME).isMissingNode() == false) {
-      val geneListId = genelist.path("gene").path(API_INPUT_GENE_LIST_ID_FIELD_NAME).withArray(IS).get(0).asText();
-      result.with("gene").put(API_INPUT_GENE_LIST_ID_FIELD_NAME, is(geneListId));
+    if (genelist.path("gene").path(API_ENTITY_LIST_ID_FIELD_NAME).isMissingNode() == false) {
+      val geneListId = genelist.path("gene").path(API_ENTITY_LIST_ID_FIELD_NAME).withArray(IS).get(0).asText();
+      result.with("gene").put(API_ENTITY_LIST_ID_FIELD_NAME, is(geneListId));
     }
     return result;
   }

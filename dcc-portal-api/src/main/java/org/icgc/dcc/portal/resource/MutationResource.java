@@ -76,6 +76,7 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Genes;
 import org.icgc.dcc.portal.model.IdsParam;
+import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.service.DonorService;
@@ -110,6 +111,13 @@ public class MutationResource {
   private final MutationService mutationService;
   private final GeneService geneService;
   private final DonorService donorService;
+
+  // When the query is keyed by gene id, it makes little sense to use entity set.
+  private void removeMutationEntitySet(ObjectNode filters) {
+    if (filters.path("mutation").path(IndexModel.API_ENTITY_LIST_ID_FIELD_NAME).isMissingNode() == false) {
+      ((ObjectNode) filters.get("mutation")).remove(IndexModel.API_ENTITY_LIST_ID_FIELD_NAME);
+    }
+  }
 
   @GET
   @Timed
@@ -179,6 +187,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_FIND_TEMPLATE, DONOR, mutationIds.get());
 
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, JsonUtils.join(mutationIds.get()));
@@ -197,6 +207,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_COUNT_TEMPLATE, DONOR, mutationId);
 
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, mutationId);
@@ -214,6 +226,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
     List<String> mutations = mutationIds.get();
+
+    removeMutationEntitySet(filters);
 
     log.info(NESTED_COUNT_TEMPLATE, DONOR, mutations);
 
@@ -246,6 +260,8 @@ public class MutationResource {
     ObjectNode filters = filtersParam.get();
     List<String> mutations = mutationIds.get();
 
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_FIND_TEMPLATE, GENE, mutations);
 
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, JsonUtils.join(mutations));
@@ -264,6 +280,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_COUNT_TEMPLATE, GENE, mutationId);
 
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, mutationId);
@@ -281,6 +299,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
     List<String> mutations = mutationIds.get();
+
+    removeMutationEntitySet(filters);
 
     log.info(NESTED_COUNT_TEMPLATE, GENE, mutations);
 
@@ -306,6 +326,8 @@ public class MutationResource {
       ) {
     ObjectNode filters = filtersParam.get();
 
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, mutationId, geneId });
 
     filters = mergeFilters(filters, GENE_MUTATION_FILTER_TEMPLATE, geneId, mutationId);
@@ -325,6 +347,8 @@ public class MutationResource {
     ObjectNode filters = filtersParam.get();
     List<String> mutations = mutationIds.get();
     List<String> genes = geneIds.get();
+
+    removeMutationEntitySet(filters);
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, mutations, genes });
 
@@ -348,14 +372,18 @@ public class MutationResource {
   public Long countProjectDonors(
       @ApiParam(value = API_MUTATION_VALUE, required = true) @PathParam(API_MUTATION_PARAM) String mutationId,
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
       ) {
+    ObjectNode filters = filtersParam.get();
+
+    removeMutationEntitySet(filters);
+
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, mutationId, projectId });
 
     val donors = new FiltersParam(String.format(PROJECT_MUTATION_FILTER_TEMPLATE, projectId, mutationId));
-    JsonUtils.merge(filters.get(), donors.get());
+    JsonUtils.merge(filters, donors.get());
 
-    return donorService.count(query().filters(filters.get()).build());
+    return donorService.count(query().filters(filters).build());
   }
 
   @Path("/{" + API_MUTATION_PARAM + "}/projects/{" + API_PROJECT_PARAM + "}/donors/counts")
@@ -370,6 +398,8 @@ public class MutationResource {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
     List<String> mutations = mutationIds.get();
+
+    removeMutationEntitySet(filters);
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, mutations, projects });
 

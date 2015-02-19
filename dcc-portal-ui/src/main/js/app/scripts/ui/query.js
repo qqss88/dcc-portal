@@ -21,7 +21,9 @@
   /**
    * Display the JSON filter in more user friendly format
    */
-  angular.module('icgc.ui.query', []).directive('queryDisplay', function(FiltersUtil) {
+  angular.module('icgc.ui.query', []).directive('queryDisplay',
+    function(FiltersUtil, LocationService, SetService, Extensions) {
+
     return {
       restrict: 'E',
       replace: true,
@@ -43,7 +45,15 @@
           if (_.isEmpty(uiFilters)) {
             scope.uiFilters = null;
           } else {
-            scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters);
+            var ids = LocationService.extractSetIds(uiFilters);
+
+            if (ids.length > 0) {
+              SetService.getMetaData(ids).then(function(results) {
+                scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, SetService.lookupTable(results));
+              });
+            } else {
+              scope.uiFilters = FiltersUtil.buildUIFilters(uiFilters, {});
+            }
           }
         }
 
@@ -52,6 +62,8 @@
             refresh();
           }
         });
+
+        scope.Extensions = Extensions;
 
       }
     };

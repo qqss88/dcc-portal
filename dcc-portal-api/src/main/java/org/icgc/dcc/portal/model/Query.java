@@ -42,7 +42,7 @@ public class Query {
   /**
    * Id is always returned, so this is a good way to emulate no fields semantics and not break anything
    */
-  private static final List<String> NO_FIELDS = ImmutableList.of("_id");
+  public static final List<String> NO_FIELDS = ImmutableList.of("_id");
 
   private static final List<String> INCLUDE_FACETS = ImmutableList.of("facets");
 

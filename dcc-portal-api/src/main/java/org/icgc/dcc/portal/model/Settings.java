@@ -27,6 +27,10 @@ public class Settings {
   String ssoUrl;
   String releaseDate;
 
+  String demoListUuid;
+  int maxNumberOfHits;
+  int maxMultiplier;
+
   public static SettingsBuilder builder() {
     return new SettingsBuilder();
   }

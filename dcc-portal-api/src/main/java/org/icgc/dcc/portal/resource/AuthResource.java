@@ -69,24 +69,41 @@ public class AuthResource extends BaseResource {
   public Response verify(
       @CookieParam(value = CrowdProperties.SESSION_TOKEN_NAME) String sessionToken,
       @CookieParam(value = CrowdProperties.CUD_TOKEN_NAME) String cudToken) {
+    log.info("Received an authorization request. Session token: '{}'. CUD token: '{}'", sessionToken, cudToken);
 
     // Already logged in and knows credentials
     if (sessionToken != null) {
-      return verifiedResponse(getAuthenticatedUser(sessionToken));
+      log.info("[{}] Looking for already authenticated user in the cache", sessionToken);
+      val user = getAuthenticatedUser(sessionToken);
+      val verifiedResponse = verifiedResponse(user);
+      log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
+          new Object[] { sessionToken, user.getOpenIDIdentifier(), user.getDaco() });
+
+      return verifiedResponse;
     }
 
-    // Authenticated by the ICGC SSO authenticator
     if (!isNullOrEmpty(cudToken)) {
+      log.info("[{}] The user has been authenticated by the ICGC authenticator.", cudToken);
       try {
+        log.debug("[{}] Looking for user info in the CUD", cudToken);
         val cudUser = authService.getCudUserInfo(cudToken);
+        log.debug("[{}] Retrieved user information: {}", cudToken, cudUser);
+        val user = createUser(cudUser.getUserName(), cudToken);
+        val verifiedResponse = verifiedResponse(user);
+        log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
+            new Object[] { cudToken, cudUser.getUserName(), user.getDaco() });
 
-        return verifiedResponse(createUser(cudUser.getUserName()));
+        return verifiedResponse;
       } catch (ICGCAccessException e) {
-        throwAuthenticationException("Authentication failed due to expired token", true);
+        log.warn("[{}] Failed to authorize CUD user. Exception: {}", cudToken, e.getMessage());
+        throwAuthenticationException("Authorization failed due to expired token", true);
       }
     }
 
-    throwAuthenticationException("Authentication failed due to missing token", true);
+    val userMessage = "Authorization failed due to missing token";
+    val logMessage = "Couldn't authorize the user. No session token found.";
+    val invalidateCookie = true;
+    throwAuthenticationException(userMessage, logMessage, invalidateCookie);
 
     // Will not come to this point because of throwAuthenticationException()
     return null;
@@ -99,17 +116,15 @@ public class AuthResource extends BaseResource {
    */
   private User getAuthenticatedUser(String sessionToken) {
     val token = stringToUuid(sessionToken);
-    log.info("Verifying if user with session token '{}' already logged in.", sessionToken);
     val tempUserOptional = sessionService.getUserBySessionToken(token);
 
     if (!tempUserOptional.isPresent()) {
       throwAuthenticationException(
           "Authentication failed due to no User matching session token: " + sessionToken,
-          _("Session token '%s' has expired.", sessionToken),
+          _("[%s] Could not find any user in the cache. The session must have expired.", sessionToken),
           true);
     }
-
-    log.info("Found active user by session token '{}'", sessionToken);
+    log.info("[{}] Found user in the cache: {}", sessionToken, tempUserOptional.get());
 
     return tempUserOptional.get();
   }
@@ -119,21 +134,28 @@ public class AuthResource extends BaseResource {
    * 
    * @throws AuthenticationException
    */
-  private User createUser(String userName) {
+  private User createUser(String userName, String cudToken) {
     val sessionToken = randomUUID();
+    val sessionTokenString = cudToken == null ? sessionToken.toString() : cudToken;
+    log.info("[{}] Creating and persisting user '{}' in the cache.", sessionTokenString, userName);
     val user = new User(null, sessionToken);
     user.setEmailAddress(userName);
+    log.debug("[{}] Created user: {}", sessionTokenString, user);
 
     try {
+      log.debug("[{}] Checking if the user has the DACO access", sessionTokenString);
       if (authService.hasDacoAccess(userName, UserType.CUD)) {
-        log.debug("Granted DACO access to user '{}'", userName);
+        log.info("[{}] Granted DACO access to the user", sessionTokenString);
         user.setDaco(true);
       }
-    } catch (ICGCException e) {
-      throwAuthenticationException("Failed to grant DACO access", e.getMessage());
+    } catch (Exception e) {
+      throwAuthenticationException("Failed to grant DACO access to the user",
+          _("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
     }
 
+    log.debug("[{}] Saving the user in the cache", sessionTokenString);
     sessionService.putUser(sessionToken, user);
+    log.debug("[{}] Saved the user in the cache", sessionTokenString);
 
     return user;
   }
@@ -148,28 +170,31 @@ public class AuthResource extends BaseResource {
     val username = creds.get(USERNAME_KEY);
     log.info("Logging into CUD as {}", username);
 
-    log.info("Checking if user '{}' has already authenticated.", username);
+    log.info("[{}] Checking if the user has been already authenticated.", username);
     val userOptional = sessionService.getUserByEmail(username);
     if (userOptional.isPresent()) {
-      log.info("User '{}' is already authenticated.", username);
+      log.info("[{}] The user is already authenticated.", username);
 
       return verifiedResponse(userOptional.get());
     }
 
     // Login user.
     try {
+      log.info("[{}] The user is not authenticated yet. Authenticating...", username);
       authService.loginUser(username, creds.get(PASSWORD_KEY));
     } catch (ICGCException e) {
-      throwAuthenticationException("Username and password are incorrect");
+      throwAuthenticationException("Username and password are incorrect",
+          _("[%s] Failed to login the user. Exception %s", username, e.getMessage()));
     }
 
-    return verifiedResponse(createUser(username));
+    return verifiedResponse(createUser(username, null));
   }
 
   @POST
   @Path("/logout")
   public Response logout(@Context HttpServletRequest request) {
     val sessionToken = getSessionToken(request);
+    log.info("[{}] Terminating session", sessionToken);
 
     if (sessionToken != null) {
       val userOptional = sessionService.getUserBySessionToken(sessionToken);
@@ -177,8 +202,7 @@ public class AuthResource extends BaseResource {
       if (userOptional.isPresent()) {
         sessionService.removeUser(userOptional.get());
       }
-
-      log.info("Successfully terminated session {}", sessionToken);
+      log.info("[{}] Successfully terminated session", sessionToken);
 
       return createLogoutResponse(OK, "");
     }
@@ -212,11 +236,13 @@ public class AuthResource extends BaseResource {
   }
 
   private static Response verifiedResponse(User user) {
+    log.debug("Creating successful verified response for user: {}", user);
     val cookie = createSessionCookie(CrowdProperties.SESSION_TOKEN_NAME, user.getSessionToken().toString());
 
     return Response.ok(ImmutableMap.of(TOKEN_KEY, user.getSessionToken(), USERNAME_KEY, user.getEmailAddress(),
         DACO_ACCESS_KEY, user.getDaco()))
-        .header(SET_COOKIE, cookie.toString()).build();
+        .header(SET_COOKIE, cookie.toString())
+        .build();
   }
 
   private static Response createLogoutResponse(Status status, String message) {

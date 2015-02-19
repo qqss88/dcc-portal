@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anySetOf;
@@ -37,12 +38,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.oozie.client.WorkflowJob.Status;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobProgress;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobStatus;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
-import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
+import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
@@ -77,7 +78,7 @@ public class DownloadResourceTest extends ResourceTest {
   @Mock
   private DonorService donorService;
   @Mock
-  private DynamicDownloader downloader;
+  private DownloaderClient downloader;
 
   @Mock
   private ExportedDataFileSystem fs;
@@ -185,6 +186,23 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
   }
 
+  @Test
+  public void testNoArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
+  @Test
+  public void testEmptyArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .queryParam("fn", "")
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
   @Test(expected = NotFoundException.class)
   public void testDeniedControlledDataAccessStream() throws IOException {
     when(
@@ -195,8 +213,7 @@ public class DownloadResourceTest extends ResourceTest {
     // // try to access control data without proper authentication
     client()
         .resource(RESOURCE)
-        .queryParam("filters", "")
-        .queryParam("info", "[{\"key\":\"SGV\",\"value\":\"TSV\"}]")
+        .queryParam("fn", "somefiles")
         .get(ClientResponse.class);
   }
 
@@ -289,7 +306,7 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.get("serviceStatus")).isEqualTo(false);
   }
 
-  private final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
+  private static final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
 
     List<DataType> selection;
 

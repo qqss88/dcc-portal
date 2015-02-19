@@ -14,15 +14,12 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+(function () {
+  'use strict';
 
-package org.icgc.dcc.portal;
-
-public class DataPortalService {
-
-  // TODO: Change pom.xml and wrapper.conf to point to PortalMain and remove this class. This is for consistency with
-  // other systems / modules.
-  public static void main(String... args) throws Exception {
-    PortalMain.main(args);
-  }
-
-}
+  angular.module('icgc.visualization', [
+    'icgc.visualization.projectmutationviewer',
+    'icgc.visualization.stackedbar'
+  ]);
+  
+})();

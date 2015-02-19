@@ -17,9 +17,15 @@
 
 package org.icgc.dcc.portal.config;
 
+import lombok.val;
+
 import org.skife.jdbi.v2.DBI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+
+import com.yammer.dropwizard.config.Environment;
+import com.yammer.dropwizard.jdbi.DBIFactory;
 
 /**
  * Configuration relating to data access.
@@ -27,9 +33,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DataSourceConfig {
 
+  @Lazy
   @Bean
-  public DBI dbi(PortalProperties properties) {
-    return new DBI(properties.getDatabase().getUrl());
-  }
+  public DBI dbi(PortalProperties properties, Environment environment) throws Exception {
+    val name = "postgresql";
+    val factory = new DBIFactory();
 
+    return factory.build(environment, properties.getDatabase(), name);
+  }
 }

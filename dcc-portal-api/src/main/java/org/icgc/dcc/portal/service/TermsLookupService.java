@@ -23,6 +23,8 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -50,8 +52,8 @@ public class TermsLookupService {
   /**
    * Constants.
    */
-  private static final String TERMS_LOOKUP_PATH = "values";
-  private static final String TERMS_LOOKUP_INDEX_NAME = "terms-lookup";
+  public static final String TERMS_LOOKUP_PATH = "values";
+  public static final String TERMS_LOOKUP_INDEX_NAME = "terms-lookup";
 
   /**
    * Dependencies.
@@ -91,11 +93,22 @@ public class TermsLookupService {
   }
 
   @SneakyThrows
-  public void createTermsLookup(@NonNull TermLookupType type, @NonNull UUID id, @NonNull Iterable<String> values) {
+  private void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Map<String, Object> keyValuePairs) {
     client.prepareIndex(TERMS_LOOKUP_INDEX_NAME, type.getName())
         .setId(id.toString())
-        .setSource(TERMS_LOOKUP_PATH, values).execute()
-        .get();
+        .setSource(keyValuePairs).execute().get();
+  }
+
+  public void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Iterable<String> values) {
+    createTermsLookup(type, id, Collections.singletonMap(TERMS_LOOKUP_PATH, (Object) values));
+  }
+
+  public void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Iterable<String> values, @NonNull final Map<String, Object> additionalAttributes) {
+    additionalAttributes.put(TERMS_LOOKUP_PATH, values);
+    createTermsLookup(type, id, additionalAttributes);
   }
 
   public static TermsLookupFilterBuilder createTermsLookupFilter(@NonNull String fieldName,
@@ -125,7 +138,9 @@ public class TermsLookupService {
   @RequiredArgsConstructor(access = PRIVATE)
   public enum TermLookupType {
 
-    GENE_IDS("gene-ids");
+    GENE_IDS("gene-ids"),
+    MUTATION_IDS("mutation-ids"),
+    DONOR_IDS("donor-ids");
 
     @NonNull
     private final String name;

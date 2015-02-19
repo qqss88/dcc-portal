@@ -76,8 +76,6 @@ public class PortalMain extends SpringService<PortalProperties> {
 
   @Override
   public void run(PortalProperties config, Environment environment) throws Exception {
-    super.run(config, environment);
-
     environment.setBaseResource(getBaseResource());
 
     environment.addFilter(UrlRewriteFilter.class, "/*")

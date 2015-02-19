@@ -22,12 +22,13 @@ angular.module('app.download.controllers', ['app.download.services']);
 // Note download may result in unwarranted warnings, see:
 // http://stackoverflow.com/questions/15393210/chrome-showing-canceled-on-successful-file-download-200-status
 angular.module('app.download.controllers').controller('DownloadController',
-  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular, ProjectCache) {
+  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular, ProjectCache, API) {
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
     $scope.path = $stateParams.path;
     $scope.slugs = [];
+    $scope.API = API;
 
     $scope.deprecatedReleases = ['release_15'];
 

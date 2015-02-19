@@ -1,0 +1,89 @@
+<div data-ng-if="!item || item.state === 'IN_PROGRESS'">
+    <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
+</div>
+<div data-ng-if="item && item.state === 'FINISHED'">
+
+
+    <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
+
+    <div class="canvas half"></div>
+    <div class="half omega">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Alias</th>
+                    <th>Set name</th>
+                    <th class="text-right"># of items</th>
+                    <th>Item type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="item in setList">
+                    <td>{{getSetShortHand(item, setList)}}</td>
+                    <td>{{setMap[item].name}}</td>
+                    <td class="text-right">
+                        <a href="{{setMap[item].advLink}}">{{setMap[item].count | number}}</a>
+                    </td>
+                    <td>{{setMap[item].type.toLowerCase() | trans:true}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+
+        <table class="table table-selectable">
+            <thead>
+                <tr>
+                    <th data-ng-click="checked=!checked; checked? selectAll() : selectNone()" class="text-center">
+                        <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i>
+                    </th>
+                    <th>Set operations</th>
+                    <th class="text-right"># of items</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="item in data"
+                    data-ng-mouseenter="tableMouseEnter(item.intersection)"
+                    data-ng-mouseleave="tableMouseOut(item.intersection)">
+
+                    <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
+                        <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
+                    </td>
+                    <td>
+                        <set-notation data-item="item" data-set-list="setList"></set-notation>
+                    </td>
+                    <td class="text-right">
+                        <a data-ng-if="item.count > 0" data-ng-click="redirect(item)" href="">{{item.count | number}}</a>
+                        <span data-ng-if="item.count === 0">{{item.count | number}}</span>
+                    </td>
+                    <td>
+                        <span class="t_tools" style="float:left"> 
+                            <span class="t_tools__tool" data-ng-if="item.count > 0">
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
+                                <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">Union of selected sets</td>
+                    <td class="text-right">
+                        <a data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit" data-ng-click="redirect()" href="">{{selectedTotalCount | number}}</a>
+                        <span data-ng-if="selectedTotalCount===0">0</span>
+                        <span data-ng-if="selectedTotalCount > unionMaxLimit">{{selectedTotalCount}}</span>
+                    </td>
+                    <td>
+                        <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
+                            <span class="t_tools__tool">
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
+                                <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <small>Set Operations has an upper limit of managing {{unionMaxLimit | number }} items.</small>
+    </div>
+</div>

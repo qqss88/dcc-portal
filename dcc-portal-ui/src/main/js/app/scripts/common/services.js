@@ -163,6 +163,28 @@
     this.getData = getData;
   });
 
+
+  /**
+  * Centralized location for tooltip text
+  */
+  module.service('TooltipText', function() {
+    this.ENRICHMENT = {
+      OVERVIEW_GENES_OVERLAP: 'Intersection between genes involved in Universe and input genes.',
+      INPUT_GENES: 'Number of genes resulting from original query with upper limit. <br>' +
+        'Input genes for this enrichment analysis result.',
+      FDR: 'False Discovery Rate',
+      GENESET_GENES: 'Number of genes involved in this gene set.',
+      GENESET_GENES_OVERLAP: 'Intersection between genes involved in this gene set and input genes.',
+      GENESET_DONORS: 'Number of donors filtered by genes in overlap',
+      GENESET_MUTATIONS: 'Number of simple somatic mutations filtered by genes in overlap.',
+      // GENESET_EXPECTED: 'Number of genes expected by chance',
+      GENESET_EXPECTED: 'Number of genes in overlap expected by chance',
+      GENESET_PVALUE: 'P-Value using hypergeometric test',
+      GENESET_ADJUSTED_PVALUE: 'Adjusted P-Value using the Benjamini-Hochberg procedure'
+    };
+  });
+
+
   module.service('DefinitionService', function(Extensions) {
     var definitions = {
 
@@ -464,159 +486,6 @@
   module.service ( 'GeneSetNameLookupService', new KeyValueLookupServiceFactory (_fetchGeneSetNameById) );
 
 
-  module.service('FiltersUtil', function(Extensions) {
-
-    // Gene id extensions
-    var geneListKeys = _.pluck(Extensions.GENE_LISTS, 'id');
-
-    this.removeExtensions = function(filters) {
-      if (filters.hasOwnProperty('gene')) {
-
-        geneListKeys.forEach(function(key) {
-          if (filters.gene.hasOwnProperty(key)) {
-            delete filters.gene[key];
-          }
-        });
-
-        // delete filters.gene.inputGeneListId;
-        if (_.isEmpty(filters.gene)) {
-          delete filters.gene;
-        }
-      }
-      return filters;
-    };
-
-    this.hasGeneListExtension = function(filters) {
-      var hasGeneListExtension = false;
-      if (filters.hasOwnProperty('gene')) {
-        geneListKeys.forEach(function(key) {
-          if (filters.gene.hasOwnProperty(key)) {
-            hasGeneListExtension = true;
-          }
-        });
-      }
-      return hasGeneListExtension;
-    };
-
-
-    this.getGeneSetQueryType = function(type) {
-      if (type === 'go_term') {
-        return 'goTermId';
-      } else if (type === 'curated_set') {
-        return 'curatedSetId';
-      } else if (type === 'pathway') {
-        return 'pathwayId';
-      }
-      return 'geneSetId';
-    };
-
-
-    this.buildGeneSetFilterByType = function(type, geneSetIds) {
-      var filter = {gene:{}};
-      filter.gene[type] = {is: geneSetIds};
-      console.log('building', JSON.stringify(filter));
-      return filter;
-    };
-
-
-    this.buildUIFilters = function(filters) {
-      var display = {};
-
-      angular.forEach(filters, function(typeFilters, typeKey) {
-        display[typeKey] = {};
-        angular.forEach(typeFilters, function(facetFilters, facetKey) {
-          var uiFacetKey = facetKey;
-
-          // FIXME: no logic to handle "all" clause
-          if (facetFilters.all) {
-            return;
-          }
-
-          // Genelist expansion maps to gene id
-          if (typeKey === 'gene' && (facetKey === Extensions.GENE_ID || _.contains(geneListKeys, facetKey))) {
-            uiFacetKey = 'id';
-          }
-
-          // Remap gene ontologies
-          if (uiFacetKey === 'hasPathway') {
-            var uiTerm = 'Reactome Pathways';
-            uiFacetKey = 'pathwayId';
-
-            if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
-              display[typeKey][uiFacetKey] = {};
-              display[typeKey][uiFacetKey].is = [];
-            }
-            display[typeKey][uiFacetKey].is.unshift({
-              term: uiTerm,
-              controlTerm: undefined,
-              controlFacet: facetKey,
-              controlType: typeKey
-            });
-            return;
-          }
-
-          // Allocate terms
-          if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
-            display[typeKey][uiFacetKey] = {};
-            display[typeKey][uiFacetKey].is = [];
-          }
-
-
-          facetFilters.is.forEach(function(term) {
-            var uiTerm = term, isPredefined = false;
-            if (typeKey === 'gene' && _.contains(geneListKeys, facetKey)) {
-
-              uiTerm = _.find(Extensions.GENE_LISTS, function(gl) {
-                return gl.id === facetKey;
-              }).label;
-
-              // 'Uploaded Gene List';
-              isPredefined = true;
-            } else if (typeKey === 'gene' && facetKey === 'goTermId') {
-              var predefinedGO = _.find(Extensions.GENE_SET_ROOTS, function(set) {
-                return set.id === term && set.type === 'go_term';
-              });
-
-              if (predefinedGO) {
-                uiTerm = predefinedGO.name;
-                isPredefined = true;
-              }
-            } else if (typeKey === 'gene' && facetKey === 'curatedSetId') {
-              var predefinedCurated = _.find(Extensions.GENE_SET_ROOTS, function(set) {
-                return set.id === term && set.type === 'curated_set';
-              });
-              if (predefinedCurated) {
-                uiTerm = predefinedCurated.name;
-                isPredefined = true;
-              }
-            }
-
-            // Extension terms goes first
-            if (isPredefined) {
-              display[typeKey][uiFacetKey].is.unshift({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
-            } else {
-              display[typeKey][uiFacetKey].is.push({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
-            }
-
-          });
-        });
-      });
-      return display;
-    };
-
-  });
-
-
 
   /**
    * Client side export of content using Blob and File, with fall back to server-side content echoing
@@ -639,25 +508,5 @@
 
     };
   });
-
-
-  /*
-  module.service('GeneSetService', function() {
-
-    this.getGeneOntologies = function() {
-    };
-
-    this.getCuratedSets = function() {
-    };
-
-    this.getPathways = function() {
-    };
-
-    this.getAll = function() {
-    };
-
-    this.is
-  });
-  */
 
 })();

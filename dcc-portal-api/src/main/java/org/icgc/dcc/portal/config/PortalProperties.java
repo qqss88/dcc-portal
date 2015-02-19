@@ -17,16 +17,19 @@
 
 package org.icgc.dcc.portal.config;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.inject.Stage.DEVELOPMENT;
-import static org.icgc.dcc.data.archive.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
+import static org.icgc.dcc.downloader.core.ArchiverConstant.ARCHIVE_CURRENT_RELEASE;
 
 import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -38,9 +41,10 @@ import org.icgc.dcc.portal.browser.model.DataSource;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
+import com.yammer.dropwizard.db.DatabaseConfiguration;
 
-@Getter
-@ToString
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class PortalProperties extends Configuration {
 
   @Valid
@@ -85,10 +89,14 @@ public class PortalProperties extends Configuration {
 
   @Valid
   @JsonProperty
-  DatabaseProperties database = new DatabaseProperties();
+  SetOperationProperties setOperation = new SetOperationProperties();
 
-  @Getter
-  @ToString
+  @Valid
+  @NotNull
+  @JsonProperty
+  DatabaseConfiguration database = new DatabaseConfiguration();
+
+  @Data
   public static class BrowserProperties {
 
     @JsonProperty
@@ -103,18 +111,17 @@ public class PortalProperties extends Configuration {
     boolean enableLastModified;
 
     @JsonProperty
-    List<String> excludeLastModified;
+    List<String> excludeLastModified = newArrayList();
 
     @JsonProperty
     boolean enableETag;
 
     @JsonProperty
-    List<String> excludeETag;
+    List<String> excludeETag = newArrayList();
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class CrowdProperties {
 
     /**
@@ -132,8 +139,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class DownloadProperties {
 
     @JsonProperty
@@ -180,15 +186,14 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class ElasticSearchProperties {
 
     @JsonProperty
     String indexName = "dcc-release-release5";
 
     @JsonProperty
-    List<ElasticSearchNodeAddress> nodeAddresses;
+    List<ElasticSearchNodeAddress> nodeAddresses = newArrayList();
 
     @Getter
     @ToString
@@ -267,8 +272,7 @@ public class PortalProperties extends Configuration {
 
   }
 
-  @Getter
-  @ToString
+  @Data
   public static class MailProperties {
 
     boolean enabled = false;
@@ -295,20 +299,31 @@ public class PortalProperties extends Configuration {
   }
 
   @Data
+  public static class SetOperationProperties {
+
+    @JsonProperty
+    @NotEmpty
+    String demoListUuid;
+
+    @JsonProperty
+    @NotEmpty
+    String demoListFilterParam;
+
+    @JsonProperty
+    int maxPreviewNumberOfHits;
+    @JsonProperty
+    int maxNumberOfHits;
+    @JsonProperty
+    int maxMultiplier;
+  }
+
+  @Data
   public static class WebProperties {
 
     @JsonProperty
     @NotEmpty
     @URL
     String baseUrl;
-
-  }
-
-  @Data
-  public static class DatabaseProperties {
-
-    @JsonProperty
-    String url;
 
   }
 

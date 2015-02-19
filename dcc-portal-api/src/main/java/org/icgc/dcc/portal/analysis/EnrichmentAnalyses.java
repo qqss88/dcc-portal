@@ -31,7 +31,7 @@ import lombok.val;
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Result;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Doubles;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -43,7 +43,7 @@ public final class EnrichmentAnalyses {
 
   public static double calculateGeneCountPValue(int q, int k, int m, int n) {
     val distribution = new HypergeometricDistribution(n, m, k);
-    val pValue = 1.0 - min(distribution.cumulativeProbability(q), 1.0);
+    val pValue = 1.0 - min(1.0, distribution.cumulativeProbability(q - 1)); // min is needed to prevent negatives
 
     return pValue;
   }

@@ -32,7 +32,7 @@ public class ResourceUtils {
   static final String DEFAULT_ORDER = "desc";
   static final String DEFAULT_PROJECT_SORT = "totalDonorCount";
   static final String DEFAULT_DONOR_SORT = "ssmAffectedGenes";
-  static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
+  public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
 
   static final String COUNT_TEMPLATE = "Request for a count of {} with filters '{}";
@@ -97,6 +97,13 @@ public class ResourceUtils {
   static final String API_ANALYSIS_ID_PARAM = "analysisId";
   static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
+
+  static final String API_ENTITY_LIST_ID_VALUE = "Entity List ID";
+  static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
+
+  static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity List Definition";
+  static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
+  static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();

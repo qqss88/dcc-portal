@@ -27,20 +27,20 @@ import static java.lang.System.currentTimeMillis;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CLINICAL;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CLINICALSAMPLE;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.CNSM;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.EXP_ARRAY;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.EXP_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.JCN;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.METH_ARRAY;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.METH_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.MIRNA_SEQ;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.PEXP;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SGV_CONTROLLED;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SSM_CONTROLLED;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.SSM_OPEN;
-import static org.icgc.dcc.data.downloader.DynamicDownloader.DataType.STSM;
+import static org.icgc.dcc.downloader.core.DataType.CLINICAL;
+import static org.icgc.dcc.downloader.core.DataType.CLINICALSAMPLE;
+import static org.icgc.dcc.downloader.core.DataType.CNSM;
+import static org.icgc.dcc.downloader.core.DataType.EXP_ARRAY;
+import static org.icgc.dcc.downloader.core.DataType.EXP_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.JCN;
+import static org.icgc.dcc.downloader.core.DataType.METH_ARRAY;
+import static org.icgc.dcc.downloader.core.DataType.METH_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.MIRNA_SEQ;
+import static org.icgc.dcc.downloader.core.DataType.PEXP;
+import static org.icgc.dcc.downloader.core.DataType.SGV_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SSM_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SSM_OPEN;
+import static org.icgc.dcc.downloader.core.DataType.STSM;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -77,16 +77,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
-import org.icgc.dcc.data.common.FileInfo;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobProgress;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobStatus;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
-import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
-import org.icgc.dcc.data.downloader.SelectionEntry;
-import org.icgc.dcc.portal.model.FieldsParam;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
+import org.icgc.dcc.downloader.core.DataType;
+import org.icgc.dcc.downloader.core.FileInfo;
+import org.icgc.dcc.downloader.core.SelectionEntry;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.BadRequestException;
@@ -120,14 +120,14 @@ import com.yammer.metrics.annotation.Timed;
 public class DownloadResource {
 
   /**
-   *
+   * Constants.
    */
   private static final String IS_CONTROLLED = "isControlled";
   private static final String APPLICATION_GZIP = "application/x-gzip";
   private static final String APPLICATION_TAR = "application/x-tar";
 
   @Data
-  public class ServiceStatus {
+  public static class ServiceStatus {
 
     private final boolean serviceStatus;
   }
@@ -141,7 +141,7 @@ public class DownloadResource {
   private static final String FULL_ARCHIVE_EXTENSION = ".tar";
 
   private final DonorService donorService;
-  private final DynamicDownloader downloader;
+  private final DownloaderClient downloader;
   private final ExportedDataFileSystem fs;
   private Stage env;
 
@@ -220,7 +220,7 @@ public class DownloadResource {
   }
 
   @Autowired
-  public DownloadResource(DonorService donorService, DynamicDownloader downloader, ExportedDataFileSystem fs, Stage env) {
+  public DownloadResource(DonorService donorService, DownloaderClient downloader, ExportedDataFileSystem fs, Stage env) {
     this.donorService = donorService;
     this.downloader = downloader;
     this.fs = fs;
@@ -459,7 +459,7 @@ public class DownloadResource {
   }
 
   @ApiOperation("Get the job info based on IDs")
-  @Path("/JobInfo")
+  @Path("{downloadIds}/info")
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
@@ -468,11 +468,12 @@ public class DownloadResource {
       @Auth(required = false) User user,
 
       // TODO: after merge with shane's branch, use pathparam to handle this
-      @ApiParam(value = "id", required = false) @QueryParam("downloadId") @DefaultValue("") FieldsParam downloadIds
+      @ApiParam(value = "id", required = false) @PathParam("downloadIds") @DefaultValue("") IdsParam downloadIds
 
       ) throws IOException {
     try {
-      if (downloadIds.get() != null || downloadIds.get().length != 0) {
+
+      if (downloadIds.get() != null || downloadIds.get().size() != 0) {
         Map<String, Map<String, String>> jobInfoMap = downloader.getJobInfo(ImmutableSet.copyOf(downloadIds.get()));
         ImmutableMap.Builder<String, Object> reportMapBuilder = ImmutableMap.builder();
         boolean isControlled = containsControlledData(jobInfoMap);
@@ -520,7 +521,7 @@ public class DownloadResource {
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public List<FileInfo> ListDirectory(
+  public List<FileInfo> listDirectory(
 
       @Auth(required = false) User user,
 
@@ -570,6 +571,8 @@ public class DownloadResource {
       @DefaultValue("") String filePath
 
       ) throws IOException {
+
+    if (filePath.trim().equals("")) throw new BadRequestException("Missing argument fn");
 
     boolean isLogin = isLogin(user);
     ResponseBuilder rb = ok();
@@ -688,9 +691,10 @@ public class DownloadResource {
     Set<DataType> selectedType = Sets.filter(downloadableTypes, new Predicate<DataType>() {
 
       @Override
-      public boolean apply(@Nullable DataType input) {
+      public boolean apply(DataType input) {
         return input.name.equals(dataType);
       }
+
     });
     if (selectedType.isEmpty()) {
       log.error("permission denied for download type that needs access control: " + dataType

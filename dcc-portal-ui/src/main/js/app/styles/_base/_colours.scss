@@ -35,10 +35,20 @@ $white: hsl(0, 0%, 100%);
 
 $yellow: hsl(35, 82%, 51%);
 $orange: hsl(29, 97%, 41%);
-$red: #dc322f;
+
+/*$mauve: hsl(300, 46%, 83%);*/
+$mauve: hsl(336, 52%, 40%);
+
+/* $red: #dc322f; */
+/* $redDarker: #BB3200; */
+
+/* $red: hsl(1, 71%, 52%); */
+$red: hsl(12, 71%, 52%);
+$redDarker: hsl(16, 100%, 37%);
+
 $magenta: hsl(331, 64%, 52%);
 $violet: hsl(237, 43%, 60%);
-;
+
 $blue: hsl(204, 76%, 36%);
 $cyan: hsl(196, 79%, 42%);
 $green: hsl(110, 100%, 30%);
@@ -48,6 +58,8 @@ $gene: $magenta;
 $mutation: $cyan;
 $project: $yellow;
 $pathway: $green;
+$charts: $violet;
+$table: $magenta;
 
 // ---------------------------------------------------------------------------
 // Color System

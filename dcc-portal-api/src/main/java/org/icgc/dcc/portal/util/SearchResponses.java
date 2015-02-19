@@ -44,4 +44,12 @@ public final class SearchResponses {
     return ids;
   }
 
+  public static long getTotalHitCount(@NonNull SearchResponse response) {
+    return response.getHits().totalHits();
+  }
+
+  public static boolean hasHits(@NonNull SearchResponse response) {
+    return response.getHits().hits().length > 0;
+  }
+
 }

@@ -105,7 +105,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
         plotOptions: {
           pie: {
             borderWidth: 1,
-            animation: true,
+            animation: false,
             cursor: 'pointer',
             showInLegend: false,
             events: {
@@ -205,8 +205,9 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
         chart: {
           renderTo: $element[0],
           type: 'pie',
-          height: $attrs.height || null,
-          width: $attrs.width || null
+          height: $attrs.height|| null,
+          width: $attrs.width || null,
+          marginBottom: 60
         },
         title: {
           text: $attrs.heading,
@@ -218,14 +219,15 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
         subtitle: {
           text: '',
           style: {
-            color: 'hsl(0, 0%, 60%)'
+            color: 'hsl(0, 0%, 60%)',
+            paddingBottom: '25px'
           }
         },
         plotOptions: {
           pie: {
             allowPointSelect: false,
             borderWidth: 1,
-            animation: true,
+            animation: false,
             cursor: 'pointer',
             showInLegend: false,
             events: {
@@ -319,7 +321,6 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
         newSettings.series[1].data = newValue.outer;
 
         newSettings.subtitle.text = $scope.subTitle;
-
         renderChart(newSettings);
       });
 
@@ -420,7 +421,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
               fontSize: '0.75rem',
               fontWeight: '300'
             },
-            margin: 25
+            margin: 15
           },
           labels: {
             enabled: true,
@@ -486,146 +487,146 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
   };
 });
 
-angular.module('highcharts.directives').directive('stacked', function ($location) {
-  return {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      items: '=',
-      subTitle: '@'
-    },
-    template: '<div id="container" style="margin: 0 auto">not working</div>',
-    link: function ($scope, $element, $attrs) {
-      var c, chartsDefaults;
-
-      function renderChart(settings) {
-        if (c) {
-          c.destroy();
-        }
-        c = new Highcharts.Chart(settings);
-        if (!settings.xAxis.categories) {
-          c.showLoading('<i class="icon-spinner icon-spin"></i> Loading...');
-        }
-        if (settings.xAxis.categories && settings.xAxis.categories.length === 0) {
-          c.showLoading('No Data');
-        }
-      }
-
-      chartsDefaults = {
-        credits: {enabled: false},
-        loading: {
-          style: {
-            backgroundColor: null
-          },
-          labelStyle: {
-            fontSize: '1.25rem'
-          }
-        },
-        chart: {
-          zoomType: 'x',
-          renderTo: $element[0],
-          type: 'column',
-          height: $attrs.height || null,
-          width: $attrs.width || null
-        },
-        subtitle: {
-          text: '',
-          style: {
-            color: 'hsl(0, 0%, 60%)'
-          }
-        },
-        title: {
-          text: 'Top 20 Mutated Genes with High Functional Impact SSMs',
-          style: {
-            fontSize: '1.25rem'
-          }
-        },
-        xAxis: {
-          labels: {
-            rotation: -45,
-            align: 'right',
-            x: 5
-          },
-          categories: []
-        },
-        yAxis: {
-          allowDecimals: false,
-          min: 0,
-          title: {
-            text: 'Donors Affected',
-            margin: 30,
-            style: {
-              color: 'hsl(0, 0%, 60%)',
-              fontSize: '0.75rem',
-              fontWeight: '300'
-            }
-          },
-          labels: {
-            enabled: true,
-            formatter: function () {
-              return this.value;
-            }
-          }
-        },
-        tooltip: {
-          formatter: function () {
-            var donors = this.y;
-
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + this.series.name + '</strong><br/>' +
-                   donors + ' ' + ' donors affected' +
-                   '</div>';
-          }
-        },
-        plotOptions: {
-          column: {
-            cursor: 'pointer',
-            stacking: 'normal',
-            borderWidth: 0,
-            dataLabels: {
-              enabled: false
-            },
-            events: {
-              click: function (e) {
-                $location.path('/genes/' + e.point.gene_id).search({});
-                $scope.$apply();
-              }
-            }
-          }
-        }
-      };
-
-      $scope.$watch('items', function (newValue) {
-        var deepCopy, newSettings, dataCopy;
-        if (!newValue) {
-          return;
-        }
-
-        // We need deep copy in order to NOT override original chart object.
-        // This allows us to override chart data member and still the keep
-        // our original renderTo will be the same
-        deepCopy = true;
-        newSettings = {};
-        dataCopy = {};
-
-        jQuery.extend(deepCopy, newSettings, chartsDefaults);
-
-        // Highcharts seem to change the internals, so we want to make
-        // a deep copy to prevent angular watchers from firing over and over
-        jQuery.extend(true, dataCopy, newValue);
-
-        newSettings.xAxis.categories = dataCopy.x;
-        newSettings.series = dataCopy.s;
-        newSettings.subtitle.text = $scope.subTitle;
-
-        renderChart(newSettings);
-      }, true);
-
-      renderChart(chartsDefaults);
-
-      $scope.$on('$destroy', function () {
-        c.destroy();
-      });
-    }
-  };
-});
+//angular.module('highcharts.directives').directive('stacked', function ($location) {
+//  return {
+//    restrict: 'E',
+//    replace: true,
+//    scope: {
+//      items: '=',
+//      subTitle: '@'
+//    },
+//    template: '<div id="container" style="margin: 0 auto">not working</div>',
+//    link: function ($scope, $element, $attrs) {
+//      var c, chartsDefaults;
+//
+//      function renderChart(settings) {
+//        if (c) {
+//          c.destroy();
+//        }
+//        c = new Highcharts.Chart(settings);
+//        if (!settings.xAxis.categories) {
+//          c.showLoading('<i class="icon-spinner icon-spin"></i> Loading...');
+//        }
+//        if (settings.xAxis.categories && settings.xAxis.categories.length === 0) {
+//          c.showLoading('No Data');
+//        }
+//      }
+//
+//      chartsDefaults = {
+//        credits: {enabled: false},
+//        loading: {
+//          style: {
+//            backgroundColor: null
+//          },
+//          labelStyle: {
+//            fontSize: '1.25rem'
+//          }
+//        },
+//        chart: {
+//          zoomType: 'x',
+//          renderTo: $element[0],
+//          type: 'column',
+//          height: $attrs.height || null,
+//          width: $attrs.width || null
+//        },
+//        subtitle: {
+//          text: '',
+//          style: {
+//            color: 'hsl(0, 0%, 60%)'
+//          }
+//        },
+//        title: {
+//          text: 'Top 20 Mutated Genes with High Functional Impact SSMs',
+//          style: {
+//            fontSize: '1.25rem'
+//          }
+//        },
+//        xAxis: {
+//          labels: {
+//            rotation: -45,
+//            align: 'right',
+//            x: 5
+//          },
+//          categories: []
+//        },
+//        yAxis: {
+//          allowDecimals: false,
+//          min: 0,
+//          title: {
+//            text: 'Donors Affected',
+//            margin: 15,
+//            style: {
+//              color: 'hsl(0, 0%, 60%)',
+//              fontSize: '0.75rem',
+//              fontWeight: '300'
+//            }
+//          },
+//          labels: {
+//            enabled: true,
+//            formatter: function () {
+//              return this.value;
+//            }
+//          }
+//        },
+//        tooltip: {
+//          formatter: function () {
+//            var donors = this.y;
+//
+//            return '<div class="t_hc_tooltip">' +
+//                   '<strong>' + this.series.name + '</strong><br/>' +
+//                   donors + ' ' + ' donors affected' +
+//                   '</div>';
+//          }
+//        },
+//        plotOptions: {
+//          column: {
+//            cursor: 'pointer',
+//            stacking: 'normal',
+//            borderWidth: 0,
+//            dataLabels: {
+//              enabled: false
+//            },
+//            events: {
+//              click: function (e) {
+//                $location.path('/genes/' + e.point.gene_id).search({});
+//                $scope.$apply();
+//              }
+//            }
+//          }
+//        }
+//      };
+//
+//      $scope.$watch('items', function (newValue) {
+//        var deepCopy, newSettings, dataCopy;
+//        if (!newValue) {
+//          return;
+//        }
+//
+//        // We need deep copy in order to NOT override original chart object.
+//        // This allows us to override chart data member and still the keep
+//        // our original renderTo will be the same
+//        deepCopy = true;
+//        newSettings = {};
+//        dataCopy = {};
+//
+//        jQuery.extend(deepCopy, newSettings, chartsDefaults);
+//
+//        // Highcharts seem to change the internals, so we want to make
+//        // a deep copy to prevent angular watchers from firing over and over
+//        jQuery.extend(true, dataCopy, newValue);
+//
+//        newSettings.xAxis.categories = dataCopy.x;
+//        newSettings.series = dataCopy.s;
+//        newSettings.subtitle.text = $scope.subTitle;
+//
+//        renderChart(newSettings);
+//      }, true);
+//
+//      renderChart(chartsDefaults);
+//
+//      $scope.$on('$destroy', function () {
+//        c.destroy();
+//      });
+//    }
+//  };
+//});
