@@ -64,7 +64,7 @@ textarea {
 
 .markdown_container td,
 .markdown_container th {
-   border: 1px solid rgb(230, 230, 230); 
+   border: 1px solid rgb(230, 230, 230);
    text-align: left;
    padding: .2rem .4rem;
    line-height: 1rem;
@@ -119,4 +119,18 @@ textarea {
     font-weight: bold;
 }
 
+/** Genome maps tooltips */
+.qtip-default, .qtip-light{
+  background-color: rgba(255,255,255,0.9);
+  border-radius: 5px;
+  border-color: hsl(0, 0%, 20%);
+}
 
+.qtip-tip{
+  background-color: hsl(0, 0%, 20%) !important;
+  border-color: hsl(0, 0%, 20%);
+}
+
+.qtip-default .qtip-titlebar{
+  background-color: rgba(0,0,0,0);
+}

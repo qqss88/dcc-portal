@@ -2792,16 +2792,16 @@ aside .t_tabs__tab {
   max-width: 30rem;
   white-space: normal;
   padding: .6rem;
-  color: white;
+  color: #333333;
   text-align: left;
   text-decoration: none;
-  background-color: pink;
+  background-color: white;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   -ms-border-radius: 0.5rem;
   -o-border-radius: 0.5rem;
   border-radius: 0.5rem;
-  border-color: j #ff9999;
+  border: solid 1px #333333;
 }
 
 /* line 70, _modules/_tooltip.scss */
@@ -2829,32 +2829,32 @@ aside .t_tabs__tab {
 .tooltip.top .tooltip-arrow {
   bottom: 0;
   left: 50%;
-  margin-left: -0.5rem;
-  border-width: 0.5rem 0.5rem 0;
+  margin-left: -0.4rem;
+  border-width: 0.4rem 0.4rem 0;
   border-top-color: #333333;
 }
 /* line 105, _modules/_tooltip.scss */
 .tooltip.right .tooltip-arrow {
   top: 50%;
   left: 0;
-  margin-top: -0.5rem;
-  border-width: 0.5rem 0.5rem 0.5rem 0;
+  margin-top: -0.4rem;
+  border-width: 0.4rem 0.4rem 0.4rem 0;
   border-right-color: #333333;
 }
 /* line 112, _modules/_tooltip.scss */
 .tooltip.left .tooltip-arrow {
   top: 50%;
   right: 0;
-  margin-top: -0.5rem;
-  border-width: 0.5rem 0 0.5rem 0.5rem;
+  margin-top: -0.4rem;
+  border-width: 0.4rem 0 0.4rem 0.4rem;
   border-left-color: #333333;
 }
 /* line 119, _modules/_tooltip.scss */
 .tooltip.bottom .tooltip-arrow {
   top: 0;
   left: 50%;
-  margin-left: -0.5rem;
-  border-width: 0 0.5rem 0.5rem;
+  margin-left: -0.4rem;
+  border-width: 0 0.4rem 0.4rem;
   border-bottom-color: #333333;
 }
 

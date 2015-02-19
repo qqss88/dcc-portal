@@ -57,13 +57,13 @@
   max-width: 30rem;
   white-space: normal;
   padding: .6rem;
-  color: $white;
+  color: $greyDarker;
   text-align: left;
   text-decoration: none;
-  background-color: pink;
+  background-color: $white;
   //background-color: $greyDarker;
   @include border-radius(.5rem);
-  border-color:j#FF9999;
+  border: solid 1px $greyDarker;
 }
 
 .tooltip.replace .tooltip-inner,
@@ -83,7 +83,7 @@
 }
 
 // Arrows
-$tooltipArrowWidth: .5rem;
+$tooltipArrowWidth: .4rem;
 // $tooltipArrowColor: $blue;
 $tooltipArrowColor: $greyDarker;
 .tooltip-arrow {
