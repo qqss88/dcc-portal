@@ -1,8 +1,10 @@
 <div data-ng-if="!item || item.state === 'IN_PROGRESS'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
-<div data-ng-if="item && item.state === 'FINISHED'">
-
+<div data-ng-if="isDeprecated" class="alert-error">
+    <i class="icon-attention"></i>This analysis is deprecated. This analysis was created against an old version of the data and may no longer be valid. Please remove or recreate it again.
+</div>
+<div data-ng-if="item && item.state === 'FINISHED'" data-disable-events="isDeprecated">
 
     <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
 

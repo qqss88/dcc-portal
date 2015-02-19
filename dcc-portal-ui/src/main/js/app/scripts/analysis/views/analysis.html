@@ -69,8 +69,6 @@
             <small>Note: Enrichment Analysis has an upper limit of 10,000 genes, Set Operations supports up to 3 sets of the same type.</small>
             <br>
 
-            <!--<small>For more information on the Bench, please refer to <a href="">documentation</a>. </small>-->
-            <!--<small>Documentation is available on this link: <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis Documentation</a></small>-->
             <small>Please see the <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis</a> documentation resource for a general overview of this feature.</small>
 
             </span>
@@ -83,10 +81,10 @@
             </enrichment-upload>
 
 
-            <span class="alert-error" data-ng-if="syncError">
+            <div class="alert-error" data-ng-if="syncError">
                 <i class="icon-attention"></i>
                 Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
-            </span>
+            </div>
 
 
             <div style="padding:.5rem 0">

@@ -143,7 +143,7 @@
 
 
   angular.module('icgc.enrichment.directives').directive('enrichmentResult',
-    function (Extensions, Restangular, EnrichmentService, ExportService, TooltipText) {
+    function (Extensions, Restangular, EnrichmentService, ExportService, TooltipText, Settings) {
 
     return {
       restrict: 'E',
@@ -181,6 +181,16 @@
             row.geneSetFilters = EnrichmentService.geneSetFilters(enrichment, row);
             row.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(enrichment, row);
           });
+
+          // Check if the analysis is still valid with respect to current data
+          Settings.get().then(function(settings) {
+            if (! enrichment.dataVersion || settings.dataVersion !== enrichment.dataVersion) {
+              $scope.isDeprecated = true;
+            } else {
+              $scope.isDeprecated = false;
+            }
+          });
+
         }
 
         $scope.exportEnrichment = function(id) {
