@@ -58,7 +58,7 @@
                         <span data-ng-if="item.count === 0">{{item.count | number}}</span>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left"> 
+                        <span style="float:left; font-size:1.25rem"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
                                 <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
@@ -74,12 +74,13 @@
                         <span data-ng-if="selectedTotalCount > unionMaxLimit">{{selectedTotalCount}}</span>
                     </td>
                     <td>
-                        <span class="t_tools" style="float:left" data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
+                        <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
                                 <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
                         </span>
+                        <br>
                     </td>
                 </tr>
             </tbody>

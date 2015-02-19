@@ -224,6 +224,11 @@
       }
     };
 
+    // Close self if there is a location change
+    $scope.$on('$locationChangeSuccess', function() {
+      $scope.genelistModal = false;
+    });
+
     $scope.$on('$destroy', function() {
       if (verifyPromise) {
         $timeout.cancel(verifyPromise);

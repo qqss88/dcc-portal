@@ -50,12 +50,16 @@
   var module = angular.module('icgc.genes.controllers', ['icgc.genes.models']);
 
   module.controller('GeneCtrl', function ($scope, HighchartsService, Page, Projects, Mutations,
-    LocationService, Donors, Genes, GMService, Restangular, gene) {
+    LocationService, Donors, Genes, GMService, Restangular, ExternalLinks, gene) {
+
     var _ctrl = this;
     Page.setTitle(gene.id);
     Page.setPage('entity');
 
+    _ctrl.ExternalLinks = ExternalLinks;
+
     _ctrl.gvOptions = {location: false, panels: false, zoom: 50};
+
 
     _ctrl.gene = gene;
     _ctrl.gene.uiProteinTranscript = [];
