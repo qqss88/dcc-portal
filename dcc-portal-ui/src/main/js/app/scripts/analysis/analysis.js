@@ -171,7 +171,7 @@
     };
 
     var analysisPromise;
-    var pollTimeout;
+    var pollTimeout, syncSetTimeout;
 
 
     $scope.analysisId = analysisId;
@@ -199,7 +199,7 @@
       promise = SetService.getMetaData(pendingListsIDs);
       promise.then(function(results) {
         SetService.updateSets(results);
-        $timeout(function() {
+        syncSetTimeout = $timeout(function() {
           synchronizeSets(--numTries);
         }, 3000);
       });
@@ -264,6 +264,9 @@
     }
 
     $scope.$on('$locationChangeStart', function() {
+      // Cancel any remaining polling requests
+      $timeout.cancel(pollTimeout);
+      $timeout.cancel(syncSetTimeout);
     });
 
     // Clea up
@@ -271,9 +274,14 @@
       $timeout.cancel(analysisPromise);
     });
 
+
     // Start
     init();
-    synchronizeSets(10);
+
+    // Only do synchronization on analysis home tab
+    if (! $scope.analysisId || ! $scope.analysisType) {
+      synchronizeSets(10);
+    }
 
   });
 
