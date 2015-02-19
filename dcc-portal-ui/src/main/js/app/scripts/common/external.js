@@ -21,13 +21,15 @@
 
   var module = angular.module('icgc.common.external', []);
 
-  /** 
+  /**
    * Provides links to external websites for
    * - Genes
    * - Gene Sets
    * - Gene Transcripts
    * - Project experimental type
    *
+   * This is largely for URLs that needs to be dynamically constructed, tend to change over time,
+   * or used in multiple places.
    * No sanity checks are performed on the IDs, we assume that they are valid
    */
   module.service('ExternalLinks', function () {
@@ -49,7 +51,7 @@
       return 'http://cancer.sanger.ac.uk/cancergenome/projects/census/';
     };
     this.geneSetGeneOntology = function() {
-      return 'http://geneontology.org/'; 
+      return 'http://geneontology.org/';
     };
 
 
@@ -64,7 +66,7 @@
       return 'http://cancer.sanger.ac.uk/cosmic/gene/analysis?ln=' + geneSymbol;
     };
     this.geneEntrez = function(entrezId) {
-      return 'http://www.ncbi.nlm.nih.gov/gene/' + entrezId; 
+      return 'http://www.ncbi.nlm.nih.gov/gene/' + entrezId;
     };
     this.geneOMIM = function(omimId) {
       return 'http://omim.org/entry/' + omimId;

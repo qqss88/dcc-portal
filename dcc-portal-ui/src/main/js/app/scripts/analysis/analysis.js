@@ -4,7 +4,8 @@
   var module = angular.module('icgc.analysis', [
     'icgc.analysis.controllers',
     'icgc.bench.controllers',
-    'ui.router']);
+    'ui.router'
+  ]);
 
   module.config(function ($stateProvider) {
     $stateProvider.state('analyses', {
@@ -130,7 +131,7 @@
 
 
       // If there are unfinished, do not proceed
-      if (_.some(selected, function(s) { return s.state != 'FINISHED'; })) {
+      if (_.some(selected, function(s) { return s.state !== 'FINISHED'; })) {
         return;
       }
 
