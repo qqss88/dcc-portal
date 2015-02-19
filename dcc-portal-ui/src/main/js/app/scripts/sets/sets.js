@@ -121,6 +121,13 @@
             });
           }
         });
+
+        // Remove self if location change detected
+        $scope.$on('$locationChangeStart', function() {
+          if ($scope.setModal === true) {
+            $scope.setModal = false;
+          }
+        });
       }
     };
   });

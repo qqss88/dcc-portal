@@ -43,7 +43,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page,
-      Genes, Projects, Mutations, Donors, FiltersUtil, geneSet) {
+      Genes, Projects, Mutations, Donors, FiltersUtil, ExternalLinks, geneSet) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -51,6 +51,8 @@
 
       _ctrl.geneSet = geneSet;
       _ctrl.geneSet.queryType = FiltersUtil.getGeneSetQueryType(_ctrl.geneSet.type);
+
+      _ctrl.ExternalLinks = ExternalLinks;
 
       // Build adv query based on type
       geneSetFilter = {};
