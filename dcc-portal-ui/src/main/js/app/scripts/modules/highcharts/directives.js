@@ -253,19 +253,27 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
                   });
                 }
                 $scope.$apply();
-              },
-              mouseOver: function () {
-                var e = window.event;
-                console.log(this);
-                $scope.$emit('tooltip::show', {
-                  element: angular.element(this),
-                  text: 'tooooooltipppppppp',
-                  placement: 'right',
-                  position: {left:e.pageX,top:e.pageY}
-                });
-              },
-              mouseOut: function () {
-                $scope.$emit('tooltip::hide');
+              }
+            }
+          },
+          series: {
+            point: {
+              events: {
+                mouseOver: function (event) {
+                  var e = window.event;
+                  $scope.$emit('tooltip::show', {
+                    element: angular.element(this),
+                    text: '<div class="tooltip-inner" style="opacity:0.9;width:100%;overflow:visible">' +
+                   '<strong>' + $filter('define')(event.target.name) + '</strong><br>' +
+                   Highcharts.numberFormat(event.target.y, 0) + ' ' + event.target.series.name +
+                   '</div>',
+                    placement: 'right',
+                    position: {left:e.pageX,top:e.pageY}
+                  });
+                },
+                mouseOut: function () {
+                  $scope.$emit('tooltip::hide');
+                }
               }
             }
           }
