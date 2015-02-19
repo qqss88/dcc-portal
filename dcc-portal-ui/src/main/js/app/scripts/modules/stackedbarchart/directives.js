@@ -19,7 +19,7 @@
 
 	var module = angular.module('icgc.visualization.stackedbar', []);
 	
-	module.directive('stacked', function ($location, HighchartsService) {
+	module.directive('stacked', function ($location, HighchartsService, $window) {
 	    return {
 		    restrict: 'E',
 		    replace: true,
@@ -43,22 +43,21 @@
                         colours: HighchartsService.projectColours,
                         yaxis:{label:'Donors Affected',ticks:4},
                         onClick: function(geneid){
+                          $scope.$emit('tooltip::hide');
                           $location.path('/genes/' + geneid).search({});
                           $scope.$apply();
                         },
-                        tooltipShowFunc: function(elem, d,x,y) {
+                        tooltipShowFunc: function(elem, d) {
                           function getLabel() {
                             return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
                           }
 
-                          var e = window.event;
-
                           var position = {
                             left:elem.getBoundingClientRect().left,
-                            top:elem.getBoundingClientRect().top + window.pageYOffset,
+                            top:elem.getBoundingClientRect().top + $window.pageYOffset,
                             width: elem.getBoundingClientRect().width,
                             height: elem.getBoundingClientRect().height
-                          }
+                          };
 
                           $scope.$emit('tooltip::show', {
                             element: angular.element(elem),

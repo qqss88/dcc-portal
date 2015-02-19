@@ -44,12 +44,6 @@
 		    .attr('preserveAspectRatio','xMidYMid')
 		    .append('g')
 		    .attr('transform', 'translate(' + config.margin.left + ',' + config.margin.top + ')');
-
-		
-		// create a div to function as the tooltip
-		var div = d3.select(element).append('div')
-		    .attr('class', 'tooltip-inner')
-		    .style('opacity', 0);
 		
 	  //for each gene, create an array of donors and get the total affected donors count
 	  this.data.forEach(function(d) {
@@ -139,11 +133,7 @@
         .attr('y', function(d) { return y(d.y1); })
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
         .on('mouseover', function(d) {
-              var point = d3.mouse(this); //use x = point[0] and y = point[1]
-              var x = d3.event.pageX;
-              var y = d3.event.pageY;
-   //           config.tooltipShowFunc(this,d,point[0],point[1]);
-              config.tooltipShowFunc(this,d,x,y);
+              config.tooltipShowFunc(this,d);
             })
         .on('mouseout', function() {
               config.tooltipHideFunc();

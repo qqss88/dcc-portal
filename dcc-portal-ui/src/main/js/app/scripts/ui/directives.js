@@ -88,7 +88,7 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
 
 // Centralized tooltip directive. There should be only one per application
 angular.module('app.ui.tooltipControl', [])
-  .directive('tooltipControl', function ($position, $rootScope, $sce) {
+  .directive('tooltipControl', function ($position, $rootScope, $sce, $window) {
     return {
       restrict: 'E',
       replace: true,
@@ -113,7 +113,7 @@ angular.module('app.ui.tooltipControl', [])
           var tooltip = {
             width: element.prop('offsetWidth'),
             height: element.prop('offsetHeight')
-          }
+          };
 
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
@@ -159,14 +159,32 @@ angular.module('app.ui.tooltipControl', [])
               scope.placement = params.placement;
             }
           });
-          var position = calculatePlacement(params.placement, params.element, params.elementPosition);
-          element.css('top', position.top);
-          element.css('left', position.left);
+
+          if(params.sticky){
+            $window.onmousemove = function(e){
+              //TODO: extract offset as a parameter
+              var position = calculatePlacement(params.placement, params.element,
+                                                {left:e.pageX,
+                                                 top:e.pageY,
+                                                 width:10,
+                                                 height:-6
+                                                });
+              element.css('top', position.top);
+              element.css('left', position.left);
+            };
+          }else{
+            var position = calculatePlacement(params.placement, params.element, params.elementPosition);
+            element.css('top', position.top);
+            element.css('left', position.left);
+          }
+
         });
         $rootScope.$on('tooltip::hide', function() {
+          $window.onmousemove = {};
           element.css('top', -999);
           element.css('left', -999);
         });
+
       }
     };
   });

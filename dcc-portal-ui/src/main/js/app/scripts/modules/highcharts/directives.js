@@ -142,28 +142,49 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
                 }
               }
             }
-          }
-        },
-        tooltip: {
-          shared: true,
-          enabled: true,
-          formatter: function () {
-            var name = this.point.term ? $filter('trans')(this.point.name, true) : 'No Data';
-            return '<div class="tooltip-inner" style="opacity:0.9">' +
+          },
+          series: {
+              point: {
+                events: {
+                  mouseOver: function (event) {
+                    var name = event.target.term ? $filter('trans')(event.target.name, true) : 'No Data';
+                    $scope.$emit('tooltip::show', {
+                      element: angular.element(this),
+                      text: '<div>' +
+                     '<strong>' + name + '</strong><br/>' +
+                     Highcharts.numberFormat(event.target.y, 0) + ' ' + event.target.series.name +
+                     '</div>',
+                      placement: 'top',
+                      sticky: true
+                    });
+                  },
+                  mouseOut: function () {
+                    $scope.$emit('tooltip::hide');
+                  }
+                }
+              }
+            }
+          },
+          tooltip: {
+            shared: true,
+            enabled: false,
+            formatter: function () {
+              var name = this.point.term ? $filter('trans')(this.point.name, true) : 'No Data';
+              return '<div class="t_hc_tooltip">' +
                    '<strong>' + name + '</strong><br/>' +
                    Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
                    '</div>';
-          }
-        },
-        series: [
-          {
-            type: 'pie',
-            size: '90%',
-            name: $attrs.label,
-            data: formatSeriesData($scope.items)
-          }
-        ]
-      };
+            }
+          },
+          series: [
+            {
+              type: 'pie',
+              size: '90%',
+              name: $attrs.label,
+              data: formatSeriesData($scope.items)
+            }
+          ]
+        };
 
       $scope.$watch('items', function (newValue, oldValue) {
         if (!newValue || angular.equals(newValue, oldValue)) {
@@ -260,15 +281,14 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
             point: {
               events: {
                 mouseOver: function (event) {
-                  var e = window.event;
                   $scope.$emit('tooltip::show', {
                     element: angular.element(this),
-                    text: '<div class="tooltip-inner" style="opacity:0.9;width:100%;overflow:visible">' +
+                    text: '<div>' +
                    '<strong>' + $filter('define')(event.target.name) + '</strong><br>' +
                    Highcharts.numberFormat(event.target.y, 0) + ' ' + event.target.series.name +
                    '</div>',
-                    placement: 'top',
-                    elementPosition: {left:e.pageX,top:e.pageY}
+                    placement: 'right',
+                    sticky: true
                   });
                 },
                 mouseOut: function () {
@@ -287,7 +307,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           backgroundColor: 'none',
           shadow: false,
           formatter: function () {
-            return '<div class="tooltip-inner" style="opacity:0.9;width:100%;overflow:visible">' +
+            return '<div class="t_hc_tooltip">' +
                    '<strong>' + $filter('define')(this.point.name) + '</strong><br>' +
                    Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
                    '</div>';
@@ -410,7 +430,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
         },
         tooltip: {
           shared: true,
-          enabled: true,
+          enabled: false,
           useHTML: true,
           borderWidth: 0,
           borderRadius: 0,
@@ -424,7 +444,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
               num = this.y;
             }
 
-            return '<div class="tooltip-inner" style="opacity:0.9">' +
+            return '<div class="t_hc_tooltip">' +
                    '<strong>' + this.x + '</strong><br/>' +
                    num + ' ' + $attrs.ylabel +
                    '</div>';
@@ -466,6 +486,37 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
                 if (e.point.link) {
                   $location.path(e.point.link);
                   $scope.$apply();
+                }
+              }
+            }
+          },
+          series: {
+            stickyTracking : true,
+            point: {
+              events: {
+                mouseOver: function (event) {
+                  var getLabel = function () {
+                    var num;
+                    if ($attrs.format && $attrs.format === 'percentage') {
+                      num = Number(event.target.y * 100).toFixed(2);
+                    } else {
+                      num = event.target.y;
+                    }
+
+                    return '<div>' +
+                           '<strong>' + event.target.category + '</strong><br/>' +
+                           num + ' ' + $attrs.ylabel +
+                           '</div>';
+                  };
+                  $scope.$emit('tooltip::show', {
+                    element: angular.element(this),
+                    placement:'right',
+                    text: getLabel(),
+                    sticky:true
+                  });
+                },
+                mouseOut: function () {
+                  $scope.$emit('tooltip::hide');
                 }
               }
             }
