@@ -99,23 +99,22 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target, pos) {
-          if(!pos){
-            var position = $position.offset(target);
-            var result = {};
+        function calculatePlacement(placement, target, targetPosition) {
 
-            var ttWidth = element.prop('offsetWidth');
-            var ttHeight = element.prop('offsetHeight');
+          var position;
+          var result = {};
+
+          if(!targetPosition){
+            position = $position.offset(target);
           }else{
-            var position = {
-              top:pos.top,
-              left:pos.left,
-              width:0,
-              height:0
-            };
-            var ttWidth = element.prop('offsetWidth');
-            var ttHeight = element.prop('offsetHeight');
+            position = targetPosition;
           }
+
+          var tooltip = {
+            width: element.prop('offsetWidth'),
+            height: element.prop('offsetHeight')
+          }
+
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
           // This is to avoid NaN
@@ -125,20 +124,20 @@ angular.module('app.ui.tooltipControl', [])
           switch(placement) {
           case 'right':
             result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
+              top: position.top + position.height / 2 - tooltip.height / 2,
               left: position.left + position.width
             };
             break;
           case 'left':
             result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left - ttWidth
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left - tooltip.width
             };
             break;
           case 'top':
             result = {
-              top: position.top - ttHeight,
-              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+              top: position.top - tooltip.height,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
             break;
           default:
@@ -160,8 +159,7 @@ angular.module('app.ui.tooltipControl', [])
               scope.placement = params.placement;
             }
           });
-          console.log("calculating placement...");
-          var position = calculatePlacement(params.placement, params.element, params.position);
+          var position = calculatePlacement(params.placement, params.element, params.elementPosition);
           element.css('top', position.top);
           element.css('left', position.left);
         });

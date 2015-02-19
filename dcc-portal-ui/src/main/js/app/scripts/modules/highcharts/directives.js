@@ -267,8 +267,8 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
                    '<strong>' + $filter('define')(event.target.name) + '</strong><br>' +
                    Highcharts.numberFormat(event.target.y, 0) + ' ' + event.target.series.name +
                    '</div>',
-                    placement: 'right',
-                    position: {left:e.pageX,top:e.pageY}
+                    placement: 'top',
+                    elementPosition: {left:e.pageX,top:e.pageY}
                   });
                 },
                 mouseOut: function () {

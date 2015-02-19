@@ -54,15 +54,17 @@
                           var e = window.event;
 
                           var position = {
-                            left:elem.getBoundingClientRect().left + elem.getBoundingClientRect().width + 1,
-                            top:elem.getBoundingClientRect().top + window.pageYOffset + elem.getBoundingClientRect().height/2
+                            left:elem.getBoundingClientRect().left,
+                            top:elem.getBoundingClientRect().top + window.pageYOffset,
+                            width: elem.getBoundingClientRect().width,
+                            height: elem.getBoundingClientRect().height
                           }
 
                           $scope.$emit('tooltip::show', {
                             element: angular.element(elem),
                             text: getLabel(),
                             placement: 'right',
-                            position: position
+                            elementPosition: position
                           });
                         },
                         tooltipHideFunc: function() {
