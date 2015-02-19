@@ -98,10 +98,10 @@ public class ResourceUtils {
   static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
 
-  static final String API_ENTITY_LIST_ID_VALUE = "Entity List ID";
+  static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
 
-  static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity List Definition";
+  static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity Set Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
   static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
 

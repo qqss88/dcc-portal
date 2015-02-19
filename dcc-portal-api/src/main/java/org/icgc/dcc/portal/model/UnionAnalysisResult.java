@@ -28,13 +28,15 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import org.elasticsearch.common.Preconditions;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
- * TODO
+ * Represents the result from a set analysis.
  */
 @Data
 @ApiModel(value = "UnionAnalysisResult")
@@ -46,7 +48,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   @NonNull
   private State state;
   @NonNull
-  private final BaseEntityList.Type type;
+  private final BaseEntitySet.Type type;
 
   private final long timestamp = new Date().getTime();
 
@@ -68,7 +70,6 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
     return this;
   }
 
-  // had to use this approach because of using 'final' for the instance vars
   private final static class JsonPropertyName {
 
     final static String id = "id";
@@ -81,9 +82,8 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   public UnionAnalysisResult(
       @JsonProperty(JsonPropertyName.id) final UUID id,
       @JsonProperty(JsonPropertyName.state) final State state,
-      @JsonProperty(JsonPropertyName.type) final BaseEntityList.Type type,
+      @JsonProperty(JsonPropertyName.type) final BaseEntitySet.Type type,
       @JsonProperty(JsonPropertyName.result) final List<UnionUnitWithCount> result) {
-
     this.id = id;
     this.state = state;
     this.type = type;
@@ -91,7 +91,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   }
 
   // static constructors
-  public static UnionAnalysisResult createForNewlyCreated(final BaseEntityList.Type entityType) {
+  public static UnionAnalysisResult createForNewlyCreated(final BaseEntitySet.Type entityType) {
     return new UnionAnalysisResult(
         UUID.randomUUID(),
         State.PENDING,
@@ -99,10 +99,7 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
         null);
   }
 
-  public static UnionAnalysisResult createForInProgress(
-      final UUID id,
-      final BaseEntityList.Type entityType) {
-
+  public static UnionAnalysisResult createForInProgress(final UUID id, final BaseEntitySet.Type entityType) {
     return new UnionAnalysisResult(
         id,
         State.IN_PROGRESS,
@@ -110,14 +107,10 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
         null);
   }
 
-  public static UnionAnalysisResult createWithResult(
-      final UUID id,
-      final BaseEntityList.Type entityType,
+  public static UnionAnalysisResult createWithResult(final UUID id, final BaseEntitySet.Type entityType,
       @NonNull List<UnionUnitWithCount> result) {
+    Preconditions.checkArgument(!result.isEmpty(), "The 'result' argument must not be empty.");
 
-    if (result.isEmpty()) {
-      throw new IllegalArgumentException("The result argument must not be empty.");
-    }
     return new UnionAnalysisResult(
         id,
         State.FINISHED,

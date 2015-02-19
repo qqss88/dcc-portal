@@ -17,10 +17,11 @@
 
 package org.icgc.dcc.portal.service;
 
-import static org.elasticsearch.common.base.Throwables.propagate;
+import static com.google.common.base.Throwables.propagate;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +48,8 @@ public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
 
-  private final Map<String, Map<String, Integer>> projectMutationCache =
-      new ConcurrentHashMap<String, Map<String, Integer>>();
+  private final AtomicReference<Map<String, Map<String, Integer>>> projectMutationCache =
+      new AtomicReference<Map<String, Map<String, Integer>>>();
 
   @Autowired
   public OccurrenceService(OccurrenceRepository occurrenceRepository) {
@@ -58,10 +59,15 @@ public class OccurrenceService {
   @Async
   public void init() {
     try {
-      log.info("Caching...");
-      projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+      log.info("Retrieving donor mutations for caching...");
+
+      val donorMutationDistribution = occurrenceRepository.getProjectDonorMutationDistribution();
+      val immutableCopy = Collections.unmodifiableMap(donorMutationDistribution);
+      projectMutationCache.set(immutableCopy);
+
+      log.info("Finished adding donor mutations to cache in app.");
     } catch (Exception e) {
-      log.error("Error caching: ", e);
+      log.error("Error caching donor mutations: ", e);
 
       propagate(e);
     }
@@ -96,9 +102,10 @@ public class OccurrenceService {
   }
 
   public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
-    if (projectMutationCache != null) {
-      return projectMutationCache;
+    val result = projectMutationCache.get();
+    if (null == result) {
+      throw new HttpConflictException("The donor mutation cache is currently not available. Please retry later.");
     }
-    return occurrenceRepository.getProjectDonorMutationDistribution();
+    return result;
   }
 }

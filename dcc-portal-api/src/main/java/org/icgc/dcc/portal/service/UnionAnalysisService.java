@@ -28,7 +28,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
-import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
+import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
@@ -49,9 +49,7 @@ public class UnionAnalysisService {
   @NonNull
   private final UnionAnalyzer analyzer;
 
-  public UnionAnalysisResult getAnalysis(
-      @NonNull final UUID analysisId) {
-
+  public UnionAnalysisResult getAnalysis(@NonNull final UUID analysisId) {
     val result = repository.find(analysisId);
 
     if (null == result) {
@@ -62,9 +60,7 @@ public class UnionAnalysisService {
     return result;
   }
 
-  public UnionAnalysisResult submitAnalysis(
-      @NonNull final UnionAnalysisRequest request) {
-
+  public UnionAnalysisResult submitAnalysis(@NonNull final UnionAnalysisRequest request) {
     val entityType = request.getType();
 
     val newAnalysis = UnionAnalysisResult.createForNewlyCreated(entityType);
@@ -77,7 +73,7 @@ public class UnionAnalysisService {
     return newAnalysis;
   }
 
-  public List<String> previewSetUnion(@NonNull final DerivedEntityListDefinition listDefinition) {
+  public List<String> previewSetUnion(@NonNull final DerivedEntitySetDefinition listDefinition) {
     return analyzer.previewSetUnion(listDefinition);
   }
 }

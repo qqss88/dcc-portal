@@ -32,7 +32,8 @@ import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- *
+ * Represents a unit of a set union comprised of a list of sets that form the intersection and a list of sets that need
+ * to be excluded.
  */
 @Data
 @ApiModel(value = "UnionUnit")
@@ -54,21 +55,22 @@ public class UnionUnit {
   public UnionUnit(
       @NonNull @JsonProperty(JsonPropertyName.intersection) final Set<UUID> intersection,
       @NonNull @JsonProperty(JsonPropertyName.exclusions) final Set<UUID> exclusions) {
-
     if (intersection.isEmpty()) {
-      // the intersection collection must NOT be empty - it wouldn't make
-      // sense to have an empty intersection to represent an union, especially when this data structure
-      // is meant to be immutable.
+      /*
+       * the intersection collection must NOT be empty - it wouldn't make sense to have an empty intersection to
+       * represent an union, especially when this data structure is meant to be immutable.
+       */
       throw new IllegalArgumentException("The intersection argument must not be empty.");
     }
-    this.intersection = intersection;// ImmutableSet.copyOf(intersection);
-    this.exclusions = exclusions;// ImmutableSet.copyOf(exclusions);
+    this.intersection = intersection;
+    this.exclusions = exclusions;
   }
 
   @JsonIgnore
   public boolean isValid() {
-
-    // simple sanity check - the intersection should NOT have any element in the exclusion set.
+    /*
+     * simple sanity check - the intersection should NOT have any element in the exclusion set.
+     */
     return (exclusions.isEmpty()) ? true : Sets.intersection(intersection, exclusions).isEmpty();
   }
 

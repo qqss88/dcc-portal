@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import java.util.UUID;
 
-import org.icgc.dcc.portal.model.EntityList;
+import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.repository.JsonRepository.JsonMapperFactory;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -35,11 +35,11 @@ public interface EntityListRepository extends JsonRepository {
   public final static String TABLE_NAME = "entity_set";
 
   @SqlQuery("SELECT " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
-  EntityList find(@Bind(ID_FIELD_NAME) UUID id);
+  EntitySet find(@Bind(ID_FIELD_NAME) UUID id);
 
   @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + ", " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
-  int save(@BindValue EntityList list);
+  int save(@BindValue EntitySet list);
 
   @SqlUpdate("UPDATE " + TABLE_NAME + " SET " + DATA_FIELD_NAME + " = :data WHERE " + ID_FIELD_NAME + " = :id")
-  int update(@BindValue EntityList list);
+  int update(@BindValue EntitySet list);
 }

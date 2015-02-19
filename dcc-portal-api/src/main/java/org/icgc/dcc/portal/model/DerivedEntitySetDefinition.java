@@ -17,82 +17,70 @@
  */
 package org.icgc.dcc.portal.model;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import java.util.List;
+
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.Value;
+import lombok.val;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Represents the definition of a derived set.
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "EntityListDefinition")
-public class EntityListDefinition extends BaseEntityList {
-
-  private final static int MIN_SIZE = 1;
-  private final static int MAX_SIZE = Integer.MAX_VALUE;
+@ApiModel(value = "DerivedEntitySetDefinition")
+public class DerivedEntitySetDefinition extends BaseEntitySet {
 
   @NonNull
-  private final ObjectNode filters;
-  @NonNull
-  private final String sortBy;
-  @NonNull
-  private final SortOrder sortOrder;
-  private final int size;
+  @ApiModelProperty(value = "A list of UnionUnits that will form the union of the resulting set.", required = true)
+  private final List<UnionUnit> union;
+
+  /*
+   * This flag indicates whether the resulting set is meant to be temporary.
+   */
+  @ApiModelProperty(value = "This flag indicates whether the resulting set should be temporary.")
+  private boolean isTransient;
 
   private final static class JsonPropertyName {
 
-    final static String filters = "filters";
-    final static String sortBy = "sortBy";
-    final static String sortOrder = "sortOrder";
+    final static String union = "union";
     final static String name = "name";
     final static String description = "description";
     final static String type = "type";
-    final static String size = "size";
+    final static String isTemp = "isTemp";
   }
 
   @JsonCreator
-  @SneakyThrows
-  public EntityListDefinition(
-      @JsonProperty(JsonPropertyName.filters) final String filters,
-      @JsonProperty(JsonPropertyName.sortBy) final String sortBy,
-      @JsonProperty(JsonPropertyName.sortOrder) final SortOrder sortOrder,
+  public DerivedEntitySetDefinition(
+      @NonNull @JsonProperty(JsonPropertyName.union) final List<UnionUnit> union,
       @NonNull @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
       @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
-      @JsonProperty(JsonPropertyName.size) final int limit) {
-
+      @JsonProperty(JsonPropertyName.isTemp) final boolean isTransient) {
     super(name, description, type);
 
-    if (isNullOrEmpty(sortBy)) {
-      throw new IllegalArgumentException("The sortBy argument must contain a valid expression.");
+    validateUnion(union);
+    this.union = union;
+    this.isTransient = isTransient;
+  }
+
+  /**
+   * @param union
+   */
+  private void validateUnion(final List<UnionUnit> union) {
+    Preconditions.checkArgument(!union.isEmpty(), "The union argument must not be empty.");
+
+    for (val unionUnit : union) {
+      if (!unionUnit.isValid()) {
+        throw new IllegalArgumentException("Not all union units in the union argument are valid.");
+      }
     }
-    this.sortBy = sortBy;
-    this.filters = FiltersParam.parseFilters(filters);
-    this.sortOrder = sortOrder;
-    this.size = (limit < MIN_SIZE) ? MAX_SIZE : limit;
-  }
-
-  public int getLimit(final int cap) {
-    return (this.size > cap) ? cap : this.size;
-  }
-
-  @RequiredArgsConstructor
-  @Getter
-  public enum SortOrder {
-
-    ASCENDING("asc"),
-    DESCENDING("desc");
-
-    private final String name;
   }
 }
