@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.Data;
@@ -28,12 +29,12 @@ import lombok.val;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Represents a request for set union analysis.
  */
 @Data
 public class UnionAnalysisRequest {
@@ -41,10 +42,11 @@ public class UnionAnalysisRequest {
   private static final int REQUIRED_ELEMENT_COUNT = 2;
 
   @NonNull
+  @ApiModelProperty(value = "A list of set IDs (UUID) involved in this analysis.", required = true)
   private final ImmutableSet<UUID> lists;
-
   @NonNull
-  private final BaseEntityList.Type type;
+  @ApiModelProperty(value = "The type of set analysis.", required = true)
+  private final BaseEntitySet.Type type;
 
   private final static class JsonPropertyName {
 
@@ -54,13 +56,11 @@ public class UnionAnalysisRequest {
 
   @JsonCreator
   public UnionAnalysisRequest(
-      @NonNull @JsonProperty(JsonPropertyName.lists) final Collection<UUID> lists,
-      @NonNull @JsonProperty(JsonPropertyName.type) final BaseEntityList.Type type) {
-
+      @NonNull @JsonProperty(JsonPropertyName.lists) final Iterable<UUID> lists,
+      @NonNull @JsonProperty(JsonPropertyName.type) final BaseEntitySet.Type type) {
     val uniqueItems = ImmutableSet.copyOf(lists);
 
     if (uniqueItems.size() < REQUIRED_ELEMENT_COUNT) {
-
       throw new IllegalArgumentException(
           "The entityLists argument must contain at least " +
               REQUIRED_ELEMENT_COUNT +
@@ -73,16 +73,18 @@ public class UnionAnalysisRequest {
   /*
    * Build a data structure to represent all the possible "smallest" combinations from a set.
    */
-  public ImmutableList<UnionUnit> toUnionSets() {
+  public List<UnionUnit> toUnionSets() {
 
     val setSize = lists.size();
     val subsets = Sets.powerSet(this.lists);
 
+    /*
+     * Used to remove the empty set and itself from the subsets.
+     */
     val predicate = new Predicate<Collection<?>>() {
 
       @Override
       public boolean apply(Collection<?> s) {
-
         val size = s.size();
         return (size > 0) && (size < setSize);
       }
@@ -93,12 +95,11 @@ public class UnionAnalysisRequest {
     val result = new ArrayList<UnionUnit>(resultSize + 1);
 
     for (val subset : filteredSubsets) {
-
       val unionUnit = new UnionUnit(Sets.difference(this.lists, subset), subset);
       result.add(unionUnit);
     }
     result.add(UnionUnit.noExclusionInstance(this.lists));
 
-    return ImmutableList.copyOf(result);
+    return result;
   }
 }

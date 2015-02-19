@@ -30,40 +30,46 @@ import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Represents an entity set.
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "EntityList")
+@ApiModel(value = "EntitySet")
 @JsonInclude(NON_NULL)
-public class EntityList extends BaseEntityList implements Identifiable<UUID> {
+public class EntitySet extends BaseEntitySet implements Identifiable<UUID> {
 
   @NonNull
+  @ApiModelProperty(value = "ID of this entity set.", required = true)
   private final UUID id;
 
   @NonNull
+  @ApiModelProperty(value = "The processing state for this entity set.", required = true)
   private State state;
 
+  @ApiModelProperty(value = "Number of elements in this entity set.")
   private Long count;
 
   @NonNull
+  @ApiModelProperty(value = "Sub-type for this entity set.", required = true)
   private SubType subtype = SubType.NORMAL;
 
-  public EntityList updateStateToInProgress() {
+  public EntitySet updateStateToInProgress() {
     this.state = State.IN_PROGRESS;
     return this;
   }
 
-  public EntityList updateStateToFinished(final long count) {
+  public EntitySet updateStateToFinished(final long count) {
     this.state = State.FINISHED;
     this.count = count;
     return this;
   }
 
-  public EntityList updateStateToError() {
+  public EntitySet updateStateToError() {
     this.state = State.ERROR;
     return this;
   }
@@ -79,14 +85,13 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   }
 
   @JsonCreator
-  public EntityList(
+  public EntitySet(
       @JsonProperty(JsonPropertyName.id) final UUID id,
       @JsonProperty(JsonPropertyName.state) final State state,
       @JsonProperty(JsonPropertyName.count) final Long count,
       @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
       @JsonProperty(JsonPropertyName.type) final Type type) {
-
     super(name, description, type);
 
     this.id = id;
@@ -94,10 +99,8 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
     this.count = count;
   }
 
-  // static constructors
-  private EntityList(final UUID id, @NonNull final String name, final String description,
+  private EntitySet(final UUID id, @NonNull final String name, final String description,
       @NonNull final Type type, final State status, final Long count) {
-
     super(name, description, type);
 
     this.id = id;
@@ -106,10 +109,8 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
   }
 
   // static constructors
-  public static EntityList createFromDefinition(
-      @NonNull final BaseEntityList definition) {
-
-    return new EntityList(
+  public static EntitySet createFromDefinition(@NonNull final BaseEntitySet definition) {
+    return new EntitySet(
         UUID.randomUUID(),
         definition.getName(),
         definition.getDescription(),
@@ -118,13 +119,8 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  // Each enum value should have its own class constructor.
-  public static EntityList forNewlyCreated(
-      @NonNull final String name,
-      final String description,
-      @NonNull final Type type) {
-
-    return new EntityList(
+  public static EntitySet forNewlyCreated(@NonNull final String name, final String description, @NonNull final Type type) {
+    return new EntitySet(
         UUID.randomUUID(),
         name,
         description,
@@ -133,13 +129,9 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  public static EntityList createForStatusInProgress(
-      final UUID id,
-      @NonNull final String name,
-      final String description,
-      @NonNull final Type type) {
-
-    return new EntityList(
+  public static EntitySet createForStatusInProgress(final UUID id, @NonNull final String name,
+      final String description, @NonNull final Type type) {
+    return new EntitySet(
         id,
         name,
         description,
@@ -148,35 +140,36 @@ public class EntityList extends BaseEntityList implements Identifiable<UUID> {
         null);
   }
 
-  public static EntityList createForStatusFinished(final UUID id, final String name, final String description,
+  public static EntitySet createForStatusFinished(final UUID id, final String name, final String description,
       final Type type, final long count) {
+    Preconditions.checkArgument(count >= 0, "The 'count' argument must be a positive number.");
 
-    if (count < 0) {
-      throw new IllegalArgumentException("The count argument must be a positive number.");
-    }
-    return new EntityList(id, name, description, type, State.FINISHED, count);
+    return new EntitySet(id, name, description, type, State.FINISHED, count);
   }
 
   @RequiredArgsConstructor
   @Getter
+  @ApiModel(value = "State")
   public enum State {
-
     PENDING("pending"),
     IN_PROGRESS("in progess"),
     FINISHED("finished"),
     ERROR("error");
 
+    @NonNull
     private final String name;
   }
 
   @RequiredArgsConstructor
   @Getter
+  @ApiModel(value = "Subtype")
   public enum SubType {
     NORMAL("normal"),
     UPLOAD("upload"),
     ENRICHMENT("enrichment"),
     TRANSIENT("transient");
 
+    @NonNull
     private final String name;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,53 +17,23 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
-
-import java.util.Set;
-import java.util.UUID;
-
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
-import org.icgc.dcc.portal.model.BaseEntitySet.Type;
-import org.icgc.dcc.portal.model.EntitySet;
-import org.icgc.dcc.portal.model.EntitySet.SubType;
-import org.icgc.dcc.portal.repository.EntityListRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import lombok.experimental.Accessors;
 
 /**
- * User "gene set" related operations.
+ * A custom exception class to represent the HTTP 409 status code. Generally, this exception is meant to be used in the
+ * event that a resource is not yet available at this time and the HTTP client should retry the resource at a later
+ * time. It's recommended that a descriptive message (in this exception) be provided and passed back to the HTTP client.
+ * Read more about status 409 here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.10
  */
-@Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class UserGeneSetService {
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors
+public class HttpConflictException extends RuntimeException {
 
-  /**
-   * Dependencies.
-   */
   @NonNull
-  private final EntityListRepository repository;
-  @NonNull
-  private final TermsLookupService termsLookupService;
-
-  /*
-   * This was not used in anywhere at all. To be removed.
-   * 
-   * public String get(@NonNull UUID id) { return repository.find(id); }
-   */
-
-  public UUID save(@NonNull Set<String> geneIds) {
-    val id = UUID.randomUUID();
-    val newList = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
-    newList.setSubtype(SubType.UPLOAD);
-
-    termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
-
-    repository.save(newList);
-
-    return id;
-  }
+  private final String message;
 
 }
