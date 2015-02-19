@@ -1,7 +1,10 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.analysis', ['icgc.analysis.controllers', 'ui.router']);
+  var module = angular.module('icgc.analysis', [
+    'icgc.analysis.controllers',
+    'icgc.bench.controllers',
+    'ui.router']);
 
   module.config(function ($stateProvider) {
     $stateProvider.state('analyses', {
@@ -43,7 +46,6 @@
 })();
 
 
-
 (function () {
   'use strict';
 
@@ -63,12 +65,10 @@
     // Selected sets
     $scope.selectedSets = [];
     $scope.addSelection = function(set) {
-      // console.log('adding set', set);
       $scope.selectedSets.push(set);
     };
 
     $scope.removeSelection = function(set) {
-      // console.log('removeng set', set);
       _.remove($scope.selectedSets, function(s) {
         return s.id === set.id;
       });
@@ -171,20 +171,14 @@
     };
 
     var analysisPromise;
-
     var pollTimeout;
 
-    // TODO: Move this out
-    var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
-    var REMOVE_ALL = 'Are you sure you want to remove all analyses?';
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
-    $scope.analysisList = AnalysisService.getAll();
 
 
     function synchronizeSets(numTries) {
-      // console.log('synchronizing', numTries + ' tries remaining...');
 
       var pendingLists, pendingListsIDs, promise;
       pendingLists = _.filter($scope.entityLists, function(d) {
@@ -237,6 +231,8 @@
 
 
     function init() {
+      $timeout.cancel(pollTimeout);
+
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
       }
@@ -267,62 +263,15 @@
       });
     }
 
-
-    $scope.getAnalysis = function(id, type) {
-      var routeType = type;
-      $timeout.cancel(pollTimeout);
-
-      if (type === 'union') {
-        routeType = 'set';
-      }
-
-      if (id) {
-        $scope.analysisId = id;
-        $location.path('analysis/' + routeType + '/' + id);
-      } else {
-        $scope.analysisId = null;
-        $location.path('analysis');
-      }
-    };
-
-
-    /**
-     * Remove all analyses, this includes both enrichment and set ops
-     */
-    $scope.removeAllAnalyses = function() {
-      var confirmRemove;
-      confirmRemove  = window.confirm(REMOVE_ALL);
-      if (confirmRemove) {
-        AnalysisService.removeAll();
-        $location.path('analysis');
-      }
-    };
-
-
-    /**
-     * Remove a single analysis by UUID
-     */
-    $scope.remove = function(id) {
-      var confirmRemove = window.confirm(REMOVE_ONE);
-      if (! confirmRemove) {
-        return;
-      }
-
-      if (AnalysisService.remove(id) === true) {
-        $scope.analysis = null;
-        $location.path('analysis');
-      }
-    };
+    $scope.$on('$locationChangeStart', function() {
+    });
 
     // Clea up
     $scope.$on('destroy', function() {
       $timeout.cancel(analysisPromise);
     });
 
-
-
     // Start
-    $scope.analysisList = AnalysisService.getAll();
     init();
     synchronizeSets(10);
 
@@ -391,7 +340,6 @@
       }
       return false;
     };
-
 
     // Init service
     analysisList = localStorageService.get(ANALYSIS_ENTITY) || [];
