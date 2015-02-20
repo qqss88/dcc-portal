@@ -64,6 +64,11 @@
       _ctrl.Page = Page;
       _ctrl.state = State;
 
+      _ctrl.observationDialog = {
+        modal: false,
+        observation: null
+      };
+
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
       _ctrl.Mutation = AdvancedMutationService;
@@ -106,10 +111,12 @@
       // Data is cached so refreshing on tab switch
       // should be free
       $scope.$on('$locationChangeSuccess', function (event, next) {
+        _ctrl.observationDialog.modal = false;
         if (next.indexOf('search') !== -1) {
           refresh();
         }
       });
+
 
       // Tabs need to update when using browser buttons
       // Shouldn't have to worry about refreshing data here

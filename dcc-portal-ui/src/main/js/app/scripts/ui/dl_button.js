@@ -188,6 +188,11 @@ angular.module('app.ui.dl', []).directive('dlButton',
             scope.calculateSize();
           }
         });
+
+        // Close self if location change detected
+        scope.$on('$locationChangeStart', function() {
+          scope.modal = false;
+        });
       }
     };
   });
