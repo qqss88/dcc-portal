@@ -55,9 +55,31 @@ public class TestingHelpers {
     return createEsAst(query, new PqlParseListener(initQueryContext()));
   }
 
+  public static ExpressionNode createEsAst(@NonNull String query, @NonNull Type type) {
+    return createEsAst(query, new PqlParseListener(initQueryContext(type)));
+  }
+
   public static QueryContext initQueryContext() {
     val result = new QueryContext();
     result.setType(Type.DONOR_CENTRIC);
+
+    return result;
+  }
+
+  public static QueryContext initQueryContext(Type type) {
+    val result = new QueryContext();
+
+    switch (type) {
+    case DONOR_CENTRIC:
+      result.setType(Type.DONOR_CENTRIC);
+      break;
+    case GENE_CENTRIC:
+      result.setType(Type.GENE_CENTRIC);
+      break;
+    case MUTATION_CENTRIC:
+      result.setType(Type.MUTATION_CENTRIC);
+      break;
+    }
 
     return result;
   }

@@ -33,6 +33,7 @@ import lombok.val;
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
 
@@ -40,6 +41,11 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
 
   public DonorCentricTypeModel() {
     super(initFields());
+  }
+
+  @Override
+  public String getType() {
+    return Type.DONOR.getId();
   }
 
   private static List<FieldModel> initFields() {
@@ -106,14 +112,14 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
 
   private static ArrayFieldModel initGene() {
     val element = object(
-        string("_gene_id"),
+        string("_gene_id", "gene.id"),
         object("_summary", long_("_ssm_count")),
-        string("biotype"),
-        string("chromosome"),
-        long_("end"),
-        long_("start"),
-        string("symbol"),
-        nestedArrayOfStrings("pathways"),
+        string("biotype", "gene.type"),
+        string("chromosome", "gene.chromosome"),
+        long_("end", "gene.end"),
+        long_("start", "gene.start"),
+        string("symbol", "gene.symbol"),
+        nestedArrayOfStrings("pathways", "gene.pathways"),
         object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component")),
         nestedArrayOfObjects("ssm", initSmm()));
 
@@ -122,14 +128,17 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
 
   private static ObjectFieldModel initSmm() {
     return object(
-        string("_mutation_id"),
+        string("_mutation_id", "mutation.id"),
         string("_type"),
-        string("chromosome"),
-        long_("chromosome_end"),
-        long_("chromosome_start"),
-        nestedArrayOfObjects("consequence",
-            object(string("consequence_type"), string("functional_impact_prediction_summary"))),
-        string("mutation_type"),
+        string("chromosome", "mutation.chromosome"),
+        long_("chromosome_end", "mutation.end"),
+        long_("chromosome_start", "mutation.start"),
+        nestedArrayOfObjects(
+            "consequence",
+            object(
+                string("consequence_type", "mutation.consequenceType"),
+                string("functional_impact_prediction_summary", "mutation.functionalImpact"))),
+        string("mutation_type", "mutation.type"),
         nestedArrayOfObjects("observation", initObservation()));
   }
 
@@ -150,17 +159,17 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         long_("mutant_allele_read_count"),
         string("observation_id"),
         string("other_analysis_algorithm"),
-        string("platform"),
+        string("platform", "mutation.platform"),
         double_("probability"),
         double_("quality_score"),
         string("raw_data_accession"),
         string("raw_data_repository"),
         double_("seq_coverage"),
-        string("sequencing_strategy"),
+        string("sequencing_strategy", "mutation.sequencingStrategy"),
         long_("total_read_count"),
         string("variation_calling_algorithm"),
         string("verification_platform"),
-        string("verification_status"));
+        string("verification_status", "mutation.verificationStatus"));
   }
 
   private static ObjectFieldModel initProject() {

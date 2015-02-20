@@ -86,9 +86,14 @@ public abstract class ExpressionNode {
   }
 
   public void removeChild(int index) {
-    checkArgument(index >= 0 && index < childrenCount(),
-        format("Index %d is out of children bounds. Children count: %d", index, childrenCount()));
+    checkChildrenBoundaries(index);
     children.remove(index);
+  }
+
+  public void setChild(int index, @NonNull ExpressionNode newChild) {
+    checkChildrenBoundaries(index);
+    children.set(index, newChild);
+    newChild.setParent(this);
   }
 
   @Override
@@ -98,6 +103,11 @@ public abstract class ExpressionNode {
 
   public boolean hasNestedParent() {
     return parent.hasNestedParent();
+  }
+
+  private void checkChildrenBoundaries(int index) {
+    checkArgument(index >= 0 && index < childrenCount(),
+        format("Index %d is out of children bounds. Children count: %d", index, childrenCount()));
   }
 
 }

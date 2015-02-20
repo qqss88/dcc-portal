@@ -28,6 +28,7 @@ import java.util.List;
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
 
@@ -35,6 +36,11 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
 
   public MutationCentricTypeModel() {
     super(defineFields());
+  }
+
+  @Override
+  public String getType() {
+    return Type.MUTATION.getId();
   }
 
   private static List<FieldModel> defineFields() {
@@ -71,17 +77,43 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         object(
             string("id", "transcriptId"),
             string("functional_impact_prediction_summary", "functionalImpactNested"),
-            object("consequence", string("consequence_type", "consequenceTypeNested"))));
+            object("consequence", string("consequence_type", "consequenceTypeNested")),
+            object("gene",
+                string("_gene_id", "gene.id"),
+                string("biotype", "gene.type")
+            )));
   }
 
   private static ArrayFieldModel defineSsmOccurrence() {
     return nestedArrayOfObjects("ssm_occurrence",
         object(
-        nestedArrayOfObjects("observation", object(
-            string("platform", "platformNested"),
-            string("verification_status", "verificationStatusNested"),
-            string("sequencing_strategy", "sequencingStrategyNested")))
+            defineDonor(),
+            defineProject(),
+            nestedArrayOfObjects("observation", object(
+                string("platform", "platformNested"),
+                string("verification_status", "verificationStatusNested"),
+                string("sequencing_strategy", "sequencingStrategyNested")))
         ));
+  }
+
+  private static ObjectFieldModel defineProject() {
+    return object("project",
+        string("_project_id", "donor.projectId"),
+        string("primary_site", "donor.primarySite"),
+        string("project_name", "donor.projectName"));
+  }
+
+  private static ObjectFieldModel defineDonor() {
+    return object("donor",
+        string("donor_sex", "donor.gender"),
+        string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
+        string("donor_vital_status", "donor.vitalStatus"),
+        string("disease_status_last_followup", "donor.diseaseStatusLastFollowup"),
+        string("donor_relapse_type", "donor.relapseType"),
+        object("_summary",
+            string("_age_at_diagnosis_group", "donor.ageAtDiagnosisGroup"),
+            arrayOfStrings("_available_data_type", "donor.availableDataTypes"),
+            arrayOfStrings("experimental_analysis_performed", "donor.analysisTypes")));
   }
 
 }

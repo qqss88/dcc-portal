@@ -18,6 +18,10 @@
 package org.dcc.portal.pql.qe;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
@@ -69,12 +73,15 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
 
+import com.google.common.base.Splitter;
+
 @Slf4j
 @AllArgsConstructor
 public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   private static final String SINGLE_QUOTE = "'";
   private static final String DOUBLE_QUOTE = "\"";
+  private static final Splitter FIELD_SPLITTER = Splitter.on(".");
 
   @NonNull
   private final AbstractTypeModel typeModel;
@@ -310,6 +317,15 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   private String getField(String alias) {
     return typeModel.getField(alias);
+  }
+
+  // TODO: Force prefixes
+  @SuppressWarnings("unused")
+  private static List<String> splitFields(String fullyQualifiedFieldName) {
+    val fields = FIELD_SPLITTER.splitToList(fullyQualifiedFieldName);
+    checkState(fields.size() == 2, format("Can't determine TypeIndex for field %s ", fullyQualifiedFieldName));
+
+    return fields;
   }
 
 }

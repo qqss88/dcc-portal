@@ -51,6 +51,8 @@ public abstract class AbstractTypeModel {
     log.debug("FieldsByAlias Map: {}", fieldsByAlias);
   }
 
+  public abstract String getType();
+
   private static Map<String, FieldModel> initFieldsByFullPath(List<? extends FieldModel> fields) {
     val result = Maps.<String, FieldModel> newHashMap();
     val visitor = new CreateFullyQualifiedNameVisitor();

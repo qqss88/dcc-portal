@@ -18,14 +18,19 @@
 package org.dcc.portal.pql.meta;
 
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
 
+import lombok.val;
+
+import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
 
@@ -33,6 +38,11 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
 
   public GeneCentricTypeModel() {
     super(defineFields());
+  }
+
+  @Override
+  public String getType() {
+    return Type.GENE.getId();
   }
 
   private static List<FieldModel> defineFields() {
@@ -44,6 +54,7 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(string("chromosome", "chromosome"))
         .add(long_("start", "start"))
         .add(long_("strand", "strand"))
+        .add(defineDonor())
         .add(string("description", "description"))
         .add(arrayOfStrings("synonyms", "synonyms"))
         .add(defineExternalDbIds())
@@ -60,7 +71,58 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
   private static ObjectFieldModel defineSummary() {
     return object("_summary",
         long_("_affected_donor_count", "affectedDonorCountTotal"),
-        string("_affected_transcript_id", "affectedTranscriptIds"));
+        long_("_affected_project_count"),
+        arrayOfStrings("_affected_transcript_id", "affectedTranscriptIds"),
+        long_("_total_mutation_count"),
+        long_("_unique_mutation_count"));
+  }
+
+  private static ArrayFieldModel defineDonor() {
+    val element = object(
+        string("_donor_id", "donor.id"),
+        defineDonorSummary(),
+        string("disease_status_last_followup", "donor.diseaseStatusLastFollowup"),
+        string("donor_relapse_type", "donor.relapseType"),
+        string("donor_sex", "donor.gender"),
+        string("donor_tumour_stage_at_diagnosis", "donor.tumorStageAtDiagnosis"),
+        string("donor_vital_status", "donor.vitalStatus"),
+        defineSsm());
+
+    return nestedArrayOfObjects("donor", element);
+  }
+
+  private static ObjectFieldModel defineDonorSummary() {
+    return object("_summary",
+        string("_age_at_diagnosis_group", "donor.ageAtDiagnosisGroup"),
+        string("_available_data_type", "donor.availableDataTypes"),
+        string("experimental_analysis_performed", "donor.analysisTypes"));
+  }
+
+  private static ArrayFieldModel defineSsm() {
+    val element = object(
+        string("_mutation_id", "mutation.id"),
+        string("mutation_type", "mutation.type"),
+        defineConsequence(),
+        defineObservation());
+
+    return nestedArrayOfObjects("ssm", element);
+  }
+
+  private static ArrayFieldModel defineConsequence() {
+    val element = object(
+        string("consequence_type", "mutation.consequenceType"),
+        string("functional_impact_prediction_summary", "mutation.functionalImpact"));
+
+    return nestedArrayOfObjects("consequence", element);
+  }
+
+  private static ArrayFieldModel defineObservation() {
+    val element = object(
+        string("platform", "mutation.platform"),
+        string("sequencing_strategy", "mutation.sequencingStrategy"),
+        string("verification_status", "verificationStatus"));
+
+    return nestedArrayOfObjects("observation", element);
   }
 
 }
