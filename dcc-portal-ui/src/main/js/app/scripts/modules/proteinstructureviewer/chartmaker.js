@@ -59,14 +59,10 @@ var ProteinStructureChart = function (options, data) {
     rightMargin: 20,
     bottomMargin: 10,
     markerRadius: 4,
-    domainTooltipHtmlFn: function (d) {
-      return "<a href='#'>" + d.id + '</a><br>' + d.id;
-    },
     domainTooltipOptions: {container: 'body', placement: 'bottom', html: true},
-    markerTooltipHtmlFn: function (d) {
-      return 'Mutation: ' + d.id;
-    },
     markerTooltipOptions: {container: 'body', placement: 'right', html: true},
+    tooltipShowFunc: {},
+    tooltipHideFunc: {},
     markerClassFn: function (d) {
       return undefined;
     },
@@ -202,14 +198,18 @@ ProteinStructureChart.prototype.addValues = function () {
 
   values.append('path')
     .attr('d', valuePathFn);
-
+  var config = this.config;
   values.append('circle')
     .attr('class', this.config.markerClassFn)
     .attr('cx', markerCxFn)
     .attr('cy', markerCyFn)
     .attr('r', markerRadius)
-    .attr('rel', 'tooltip')
-    .attr('title', this.config.markerTooltipHtmlFn)
+    .on('mouseover',function(d){
+        config.tooltipShowFunc(this, d, config.markerTooltipOptions);
+      })
+    .on('mouseout',function(){
+        config.tooltipHideFunc();
+      })
     .on('click', this.config.markerUrlFn);
 
   values.append('rect')
@@ -328,9 +328,13 @@ ProteinStructureChart.prototype.addDomains = function () {
       .duration(250)
       .style('opacity', 1.0);
   }
-
-  domainGroups.attr('rel', 'tooltip')
-    .attr('title', this.config.domainTooltipHtmlFn);
+  var config = this.config;
+  domainGroups.on('mouseover',function(d){
+        config.tooltipShowFunc(this, d, config.domainTooltipOptions, true);
+      })
+    .on('mouseout',function(){
+        config.tooltipHideFunc();
+      });
 
   // Add the domain rectables
   domainGroups.append('rect')
@@ -356,20 +360,6 @@ ProteinStructureChart.prototype.addDomains = function () {
     .attr('fill', 'black')
     .on('mouseover', highlightDomainFn)
     .on('mouseout', unhighlightDomainFn);
-};
-
-/**
- * Sets up the tooltips needed for the chart constituent elements. This is a Bootstrap/
- * jQuery level.
- */
-ProteinStructureChart.prototype.addTooltips = function () {
-  var element = this.element;
-  jQuery(element).find('g.marker circle').tooltip(this.config.markerTooltipOptions);
-  jQuery(element).find('g.marker circle').on('click', function () {
-    jQuery(this).tooltip('destroy');
-  });
-
-  jQuery(element).find('g.domain').tooltip(this.config.domainTooltipOptions);
 };
 
 ProteinStructureChart.prototype.addChart = function () {
@@ -467,7 +457,6 @@ ProteinStructureChart.prototype.display = function (element) {
   this.addChart();
   this.addDomains();
   this.addValues();
-  this.addTooltips();
 };
 
 

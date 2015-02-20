@@ -178,17 +178,37 @@
               // will do for now.
               chartData.mutations = transformMutations(mutations, transcript.id);
 
-              options.domainTooltipHtmlFn = function (d) {
-                return d.id + ': ' + d.description;
-              };
+              options.tooltipShowFunc = function(elem, d, options, isDomain) {
+                var getLabel = function(){
+                  if(isDomain) return d.id + ': ' + d.description;
 
-              options.markerTooltipHtmlFn = function (d) {
-                var FI = getOverallFunctionalImpact(d);
-                return 'Mutation ID: ' + d.ref + '<br>' +
-                       'Number of donors: ' + d.value + '<br>' +
-                       'Amino acid change: ' + d.id + '<br>' +
-                       'Functional Impact: ' + FI;
-              };
+                  var FI = getOverallFunctionalImpact(d);
+                  return 'Mutation ID: ' + d.ref + '<br>' +
+                         'Number of donors: ' + d.value + '<br>' +
+                         'Amino acid change: ' + d.id + '<br>' +
+                         'Functional Impact: ' + FI;
+                };
+
+                if(isDomain){
+                  var actualElement = angular.element(angular.element(elem).context.firstChild);
+                  var position = {
+                    width: actualElement.prop('width').baseVal.value,
+                    height: actualElement.prop('height').baseVal.value,
+                    left: angular.element(elem).parent().prop('offsetLeft') + actualElement.prop('x').baseVal.value,
+                    top: angular.element(elem).parent().prop('offsetTop') + actualElement.prop('y').baseVal.value
+                  }
+                }
+                scope.$emit('tooltip::show', {
+                  element: angular.element(elem),
+                  text: getLabel(),
+                  placement: options.placement,
+                  elementPosition: isDomain?position:null
+                });
+              }
+
+              options.tooltipHideFunc = function() {
+                scope.$emit('tooltip::hide');
+              }
 
               options.markerClassFn = function(d) {
                 var style;
