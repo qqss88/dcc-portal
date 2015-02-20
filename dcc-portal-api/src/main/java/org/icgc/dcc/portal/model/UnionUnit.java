@@ -27,6 +27,7 @@ import lombok.NonNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
@@ -55,13 +56,12 @@ public class UnionUnit {
   public UnionUnit(
       @NonNull @JsonProperty(JsonPropertyName.intersection) final Set<UUID> intersection,
       @NonNull @JsonProperty(JsonPropertyName.exclusions) final Set<UUID> exclusions) {
-    if (intersection.isEmpty()) {
-      /*
-       * the intersection collection must NOT be empty - it wouldn't make sense to have an empty intersection to
-       * represent an union, especially when this data structure is meant to be immutable.
-       */
-      throw new IllegalArgumentException("The intersection argument must not be empty.");
-    }
+    /*
+     * the intersection collection must NOT be empty - it wouldn't make sense to have an empty intersection to represent
+     * an union, especially when this data structure is meant to be immutable - no setter.
+     */
+    Preconditions.checkArgument(!intersection.isEmpty(), "The 'intersection' argument must not be empty.");
+
     this.intersection = intersection;
     this.exclusions = exclusions;
   }
