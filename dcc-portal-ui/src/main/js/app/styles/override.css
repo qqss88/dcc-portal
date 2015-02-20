@@ -121,13 +121,16 @@ textarea {
 
 /** Genome maps tooltips */
 .qtip-default, .qtip-light{
-  background-color: rgba(255,255,255,0.95);
+  background-color: rgba(255,255,255,1);
   border-radius: 5px;
   border-color: hsl(0, 0%, 20%);
+  -webkit-filter: drop-shadow(0 1px 5px rgba(88,88,88,0.5));
+  -moz-box-shadow: 0 1px 5px rgba(88,88,88,0.5);
+  filter: drop-shadow(0 1px 5px rgba(88,88,88,0.5));
 }
 
 .qtip-tip{
-  background-color: hsl(0, 0%, 20%) !important;
+  background-color: white !important;
   border-color: hsl(0, 0%, 20%);
 }
 
