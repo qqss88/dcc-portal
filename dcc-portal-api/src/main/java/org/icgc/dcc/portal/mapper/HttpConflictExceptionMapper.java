@@ -27,7 +27,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.icgc.dcc.portal.model.Error;
-import org.icgc.dcc.portal.service.HttpConflictException;
+import org.icgc.dcc.portal.service.DataNotAvailableException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Provider
-public class HttpConflictExceptionMapper implements ExceptionMapper<HttpConflictException> {
+public class HttpConflictExceptionMapper implements ExceptionMapper<DataNotAvailableException> {
 
   /*
    * HTTP 409
@@ -43,14 +43,14 @@ public class HttpConflictExceptionMapper implements ExceptionMapper<HttpConflict
   private final static Status STATUS = CONFLICT;
 
   @Override
-  public Response toResponse(HttpConflictException e) {
+  public Response toResponse(DataNotAvailableException e) {
     return status(STATUS)
         .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(e))
         .build();
   }
 
-  private static Error errorResponse(HttpConflictException e) {
+  private static Error errorResponse(DataNotAvailableException e) {
     return new Error(STATUS, e.getMessage());
   }
 }

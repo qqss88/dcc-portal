@@ -23,15 +23,15 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 /**
- * A custom exception class to represent the HTTP 409 status code. Generally, this exception is meant to be used in the
- * event that a resource is not yet available at this time and the HTTP client should retry the resource at a later
- * time. It's recommended that a descriptive message (in this exception) be provided and passed back to the HTTP client.
- * Read more about status 409 here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.10
+ * A custom exception class to represent the scenario where data is temporarily not available and the caller should
+ * retry at a later time. It's recommended that a descriptive message for the exception be provided and passed back to
+ * the caller. Currently this exception is mapped to HTTP 409 status in REST endpoints. Read more about status 409 here:
+ * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.10
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors
-public class HttpConflictException extends RuntimeException {
+public class DataNotAvailableException extends RuntimeException {
 
   @NonNull
   private final String message;
