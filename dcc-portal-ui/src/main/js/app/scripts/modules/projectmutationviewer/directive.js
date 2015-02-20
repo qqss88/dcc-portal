@@ -50,11 +50,11 @@
             }
 
             var position = {
-                            left:elem.getBoundingClientRect().left,
-                            top:elem.getBoundingClientRect().top + $window.pageYOffset,
-                            width: elem.getBoundingClientRect().width,
-                            height: elem.getBoundingClientRect().height
-                          };
+              left:elem.getBoundingClientRect().left,
+              top:elem.getBoundingClientRect().top + $window.pageYOffset,
+              width: elem.getBoundingClientRect().width,
+              height: elem.getBoundingClientRect().height
+            };
             $scope.$emit('tooltip::show', {
               element: angular.element(elem),
               text: getLabel(),

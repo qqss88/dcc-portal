@@ -103,6 +103,7 @@ angular.module('app.ui.tooltipControl', [])
 
           var position;
           var result = {};
+          var arrowOffset = 10;
 
           if(targetPosition){
             position = targetPosition;
@@ -125,24 +126,24 @@ angular.module('app.ui.tooltipControl', [])
           case 'right':
             result = {
               top: position.top + position.height / 2 - tooltip.height / 2,
-              left: position.left + position.width
+              left: position.left + position.width + arrowOffset
             };
             break;
           case 'left':
             result = {
               top: position.top + position.height / 2 - tooltip.height / 2,
-              left: position.left - tooltip.width
+              left: position.left - tooltip.width - arrowOffset
             };
             break;
           case 'top':
             result = {
-              top: position.top - tooltip.height,
+              top: position.top - tooltip.height - arrowOffset,
               left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
             break;
           default:
             result = {
-              top: position.top,
+              top: position.top + arrowOffset,
               left: position.left + position.width / 2
             };
           }
@@ -161,8 +162,8 @@ angular.module('app.ui.tooltipControl', [])
           });
 
           if(params.sticky){
+            element.css('visibility', 'visible');
             $window.onmousemove = function(e){
-              //TODO: extract offset as a parameter
               var position = calculatePlacement(params.placement, params.element,
                                                 {left:e.pageX,
                                                  top:e.pageY,
@@ -176,10 +177,12 @@ angular.module('app.ui.tooltipControl', [])
             var position = calculatePlacement(params.placement, params.element, params.elementPosition);
             element.css('top', position.top);
             element.css('left', position.left);
+            element.css('visibility', 'visible');
           }
 
         });
         $rootScope.$on('tooltip::hide', function() {
+          element.css('visibility', 'hidden');
           $window.onmousemove = {};
           element.css('top', -999);
           element.css('left', -999);
