@@ -4,7 +4,7 @@
 
   var module = angular.module('icgc.visualization.projectmutationviewer', []);
 
-  module.directive('projectMutationDistribution', function ($location, $filter) {
+  module.directive('projectMutationDistribution', function ($location, $filter, $window) {
     return {
       restrict: 'E',
       replace: 'true',
@@ -48,10 +48,18 @@
                 'Median: ' + $filter('number')(data.medium) + '<br>' +
                 '# Donors: ' + data.donorCount;
             }
+
+            var position = {
+                            left:elem.getBoundingClientRect().left,
+                            top:elem.getBoundingClientRect().top + $window.pageYOffset,
+                            width: elem.getBoundingClientRect().width,
+                            height: elem.getBoundingClientRect().height
+                          };
             $scope.$emit('tooltip::show', {
               element: angular.element(elem),
               text: getLabel(),
-              placement: 'top'
+              placement: 'top',
+              elementPosition: position
             });
           },
           tooltipHideFunc: function() {

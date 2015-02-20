@@ -2763,8 +2763,8 @@ aside .t_tabs__tab {
 }
 /* line 33, _modules/_tooltip.scss */
 .tooltip.in {
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
-  opacity: 0.9;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=95);
+  opacity: 0.95;
 }
 /* line 37, _modules/_tooltip.scss */
 .tooltip.top {

@@ -104,10 +104,10 @@ angular.module('app.ui.tooltipControl', [])
           var position;
           var result = {};
 
-          if(!targetPosition){
-            position = $position.offset(target);
-          }else{
+          if(targetPosition){
             position = targetPosition;
+          }else{
+            position = $position.offset(target);
           }
 
           var tooltip = {
