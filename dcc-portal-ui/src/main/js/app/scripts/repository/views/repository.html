@@ -9,7 +9,12 @@
        <div btf-markdown="file.textContent" class="release_notice"></div>
     </div>
 
-    <div class="wide">
+    <section class="alert alert-warning" data-ng-if="downloadEnabled === false">
+    Data Repository is currently disabled due to maintenance.<br>
+    Please contact <a href="mailto:dcc-support@icgc.org">support</a> if you require assistance.
+    </section>
+
+    <div class="wide" data-ng-if="downloadEnabled === true">
         <span data-ng-init="predicate='name'"></span>
         <span data-ng-init="reverse=false"></span>
 
