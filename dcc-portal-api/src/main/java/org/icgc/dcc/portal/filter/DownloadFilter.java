@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.icgc.dcc.portal.resource.DownloadResource;
-import org.icgc.dcc.portal.service.HttpConflictException;
+import org.icgc.dcc.portal.service.NotAvailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +43,7 @@ public class DownloadFilter implements ContainerRequestFilter {
   @Override
   public ContainerRequest filter(ContainerRequest request) {
     if (isDownloadDisabled() && isDownloadURL(request)) {
-      throw new HttpConflictException("Download service unavailable. Please try again later");
+      throw new NotAvailableException("Download service unavailable. Please try again later");
     }
 
     return request;
