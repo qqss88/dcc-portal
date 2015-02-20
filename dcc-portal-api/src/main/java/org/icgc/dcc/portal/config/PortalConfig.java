@@ -173,14 +173,18 @@ public class PortalConfig {
 
   @Bean
   public Settings settings() {
-    val setOperationConfig = properties.getSetOperation();
+    val crowd = properties.getCrowd();
+    val release = properties.getRelease();
+    val download = properties.getDownload();
+    val setAnalysis = properties.getSetOperation();
 
     return Settings.builder()
-        .ssoUrl(properties.getCrowd().getSsoUrl())
-        .releaseDate(properties.getRelease().getReleaseDate())
-        .demoListUuid(setOperationConfig.demoListUuid)
-        .maxNumberOfHits(setOperationConfig.maxNumberOfHits)
-        .maxMultiplier(setOperationConfig.maxMultiplier)
+        .ssoUrl(crowd.getSsoUrl())
+        .releaseDate(release.getReleaseDate())
+        .downloadEnabled(download.isEnabled())
+        .demoListUuid(setAnalysis.demoListUuid)
+        .maxNumberOfHits(setAnalysis.maxNumberOfHits)
+        .maxMultiplier(setAnalysis.maxMultiplier)
         .build();
   }
 
