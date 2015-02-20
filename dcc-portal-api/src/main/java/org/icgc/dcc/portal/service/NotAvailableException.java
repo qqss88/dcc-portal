@@ -15,42 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.service;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
-import org.icgc.dcc.portal.model.Error;
-import org.icgc.dcc.portal.service.DataNotAvailableException;
-import org.springframework.stereotype.Component;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.experimental.Accessors;
 
 /**
- * A exception mapper for HttpConflictException to handle HTTP status 409.
+ * A custom exception class to represent the scenario where data is temporarily not available and the caller should
+ * retry at a later time. It's recommended that a descriptive message for the exception be provided and passed back to
+ * the caller. Currently this exception is mapped to HTTP 409 status in REST endpoints. Read more about status 409 here:
+ * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.10
  */
-@Component
-@Provider
-public class HttpConflictExceptionMapper implements ExceptionMapper<DataNotAvailableException> {
+@Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors
+public class NotAvailableException extends RuntimeException {
 
-  /*
-   * HTTP 409
-   */
-  private final static Status STATUS = CONFLICT;
+  @NonNull
+  private final String message;
 
-  @Override
-  public Response toResponse(DataNotAvailableException e) {
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e))
-        .build();
-  }
-
-  private static Error errorResponse(DataNotAvailableException e) {
-    return new Error(STATUS, e.getMessage());
-  }
 }

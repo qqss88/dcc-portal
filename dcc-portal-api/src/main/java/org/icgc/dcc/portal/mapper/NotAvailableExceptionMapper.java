@@ -15,25 +15,42 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.mapper;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.experimental.Accessors;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.status;
+import static javax.ws.rs.core.Response.Status.CONFLICT;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
+import org.icgc.dcc.portal.model.Error;
+import org.icgc.dcc.portal.service.NotAvailableException;
+import org.springframework.stereotype.Component;
 
 /**
- * A custom exception class to represent the scenario where data is temporarily not available and the caller should
- * retry at a later time. It's recommended that a descriptive message for the exception be provided and passed back to
- * the caller. Currently this exception is mapped to HTTP 409 status in REST endpoints. Read more about status 409 here:
- * http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.10
+ * A exception mapper for HttpConflictException to handle HTTP status 409.
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors
-public class DataNotAvailableException extends RuntimeException {
+@Component
+@Provider
+public class NotAvailableExceptionMapper implements ExceptionMapper<NotAvailableException> {
 
-  @NonNull
-  private final String message;
+  /*
+   * HTTP 409
+   */
+  private final static Status STATUS = CONFLICT;
 
+  @Override
+  public Response toResponse(NotAvailableException e) {
+    return status(STATUS)
+        .type(APPLICATION_JSON_TYPE)
+        .entity(errorResponse(e))
+        .build();
+  }
+
+  private static Error errorResponse(NotAvailableException e) {
+    return new Error(STATUS, e.getMessage());
+  }
 }

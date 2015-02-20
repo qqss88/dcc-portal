@@ -104,7 +104,7 @@ public class OccurrenceService {
   public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
     val result = projectMutationCache.get();
     if (null == result) {
-      throw new DataNotAvailableException("The donor mutation cache is currently not available. Please retry later.");
+      throw new NotAvailableException("The donor mutation cache is currently not available. Please retry later.");
     }
     return result;
   }
