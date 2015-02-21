@@ -101,15 +101,9 @@ angular.module('app.ui.tooltipControl', [])
 
         function calculatePlacement(placement, target, targetPosition) {
 
-          var position;
+          var position = targetPosition || $position.offset(target);
           var result = {};
           var arrowOffset = 10;
-
-          if(targetPosition){
-            position = targetPosition;
-          }else{
-            position = $position.offset(target);
-          }
 
           var tooltip = {
             width: element.prop('offsetWidth'),
@@ -175,12 +169,12 @@ angular.module('app.ui.tooltipControl', [])
             if(!$window.onmousemove){
               $window.onmousemove = function(e){
                 if(element.hasClass('sticky')){
-                  var position = calculatePlacement(scope.placement, params.element,
-                                  {left:e.pageX,
-                                   top:e.pageY,
-                                   width:10,
-                                   height:-6
-                                  });
+                  var position = calculatePlacement(scope.placement, params.element,{
+                    left:e.pageX,
+                    top:e.pageY,
+                    width:10,
+                    height:-6
+                  });
                   element.css('top', position.top);
                   element.css('left', position.left);
                 }
@@ -192,14 +186,12 @@ angular.module('app.ui.tooltipControl', [])
             element.css('left', position.left);
             element.removeClass('sticky');
           }
-
         });
         $rootScope.$on('tooltip::hide', function() {
           element.css('visibility', 'hidden');
           element.css('top', -999);
           element.css('left', -999);
         });
-
       }
     };
   });

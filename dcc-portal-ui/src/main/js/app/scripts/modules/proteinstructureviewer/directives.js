@@ -198,6 +198,10 @@
                     top: angular.element(elem).parent().prop('offsetTop') + actualElement.prop('y').baseVal.value
                   }
                 }
+                console.log(angular.element(elem).parent().getCTM());
+                console.log(angular.element(elem).context.firstChild.getCTM());
+                console.log(elem.getCTM());
+
                 scope.$emit('tooltip::show', {
                   element: angular.element(elem),
                   text: getLabel(),

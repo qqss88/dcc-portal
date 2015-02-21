@@ -287,9 +287,8 @@ var DATASET_ALL = 'All Projects';
   });
 
   /** From github issue 638 (https://github.com/angular/angular.js/issues/638)
-      on angularjs page.
-      In short, it allows for certain options in ng-options to be disabled if they are
-      true for a certain condition. See "options-disabled" in beacon.html for use.**/
+      on angularjs page. In short, it allows for certain options in ng-options to be disabled
+      if they are true for a certain condition. See "options-disabled" in beacon.html for use.**/
 
   module.directive('optionsDisabled', function($parse) {
     var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {

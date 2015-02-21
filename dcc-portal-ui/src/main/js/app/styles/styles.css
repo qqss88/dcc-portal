@@ -3390,7 +3390,7 @@ g.marker rect.selected {
   display: none;
 }
 
-/* line 90, _modules/_vis.scss */
+/* line 76, _modules/_vis.scss */
 .stackedsubtitle {
   font-weight: normal;
   color: #999999;
@@ -3398,19 +3398,19 @@ g.marker rect.selected {
 }
 
 /* modify the container of the stacked bar chart */
-/* line 97, _modules/_vis.scss */
+/* line 83, _modules/_vis.scss */
 .wide.omega {
   text-align: right;
   margin-right: 30px;
   min-width: 500px;
 }
 
-/* line 103, _modules/_vis.scss */
+/* line 89, _modules/_vis.scss */
 #svgcontainer {
   min-width: 500px;
 }
 
-/* line 107, _modules/_vis.scss */
+/* line 93, _modules/_vis.scss */
 .venn-count {
   fill: #111;
 }
