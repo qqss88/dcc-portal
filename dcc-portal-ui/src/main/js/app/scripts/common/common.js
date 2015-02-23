@@ -23,7 +23,8 @@
     'icgc.common.version',
     'icgc.common.notify',
     'icgc.common.location',
-    'icgc.common.display'
+    'icgc.common.display',
+    'icgc.common.external'
   ]);
 
 

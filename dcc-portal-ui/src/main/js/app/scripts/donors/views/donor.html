@@ -125,12 +125,16 @@
             </tr>
         </table>
 
-        <span data-ng-init="calc=false"></span>
-        <button class="t_button" type="button" data-ng-click="calc=!calc">
-            <i data-ng-class="{'icon-download':!calc, 'icon-spin icon-spinner':calc}"></i>
-            <span data-ng-show="!calc"> Download Donor Data</span>
-            <span data-ng-show="calc"> Calculating file sizes...</span>
-        </button>
+        <div>
+            <span data-ng-init="calc=false"></span>
+            <button class="t_button" type="button" data-ng-click="calc=!calc" data-ng-disabled="!DonorCtrl.downloadEnabled">
+                <i data-ng-class="{'icon-download':!calc, 'icon-spin icon-spinner':calc}"></i>
+                <span data-ng-show="!calc"> Download Donor Data</span>
+                <span data-ng-show="calc"> Calculating file sizes...</span>
+            </button>
+            <br>
+            <span data-ng-if="!DonorCtrl.downloadEnabled" class="alert-warning">Data download is currently unavailable.</span>
+        </div>
 
         <dl-button dl-filter='{"donor":{"id":{"is":["{{DonorCtrl.donor.id}}"]}}}' data-calc="calc"></dl-button>
     </div>

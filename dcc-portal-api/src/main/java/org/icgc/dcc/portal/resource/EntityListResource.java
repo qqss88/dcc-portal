@@ -51,12 +51,13 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.common.collect.Sets;
-import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
-import org.icgc.dcc.portal.model.EntityList;
-import org.icgc.dcc.portal.model.EntityListDefinition;
+import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySetDefinition;
 import org.icgc.dcc.portal.model.UuidListParam;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.EntityListService;
+import org.icgc.dcc.portal.service.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,8 +80,8 @@ public class EntityListResource {
   @NonNull
   private final EntityListService service;
 
-  private List<EntityList> getEntityListsByIds(@NonNull final Set<UUID> ids) {
-    val result = new ArrayList<EntityList>(ids.size());
+  private List<EntitySet> getEntityListsByIds(@NonNull final Set<UUID> ids) {
+    val result = new ArrayList<EntitySet>(ids.size());
     for (val id : ids) {
       // Should implement @BindIn in the EntityListRepository to allow the IN clause instead of doing a loop here.
       val list = service.getEntityList(id);
@@ -94,8 +95,8 @@ public class EntityListResource {
   @GET
   @Path("/sets/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Retrieves a list of entity sets by their IDs.", response = EntityList.class, responseContainer = "List")
-  public List<EntityList> getEntityLists(
+  @ApiOperation(value = "Retrieves a list of entity sets by their IDs.", response = EntitySet.class, responseContainer = "List")
+  public List<EntitySet> getEntityLists(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UuidListParam entityListIds
       ) {
     Set<UUID> listIds = null;
@@ -115,14 +116,14 @@ public class EntityListResource {
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Retrieves an entity set by its ID.", response = EntityList.class)
-  public EntityList getEntityList(
+  @ApiOperation(value = "Retrieves an entity set by its ID.", response = EntitySet.class)
+  public EntitySet getEntityList(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
       ) {
     val result = getEntityListsByIds(Sets.newHashSet(entityListId));
     if (result.isEmpty()) {
       log.error("Error: getEntityListsByIds returns empty. The entityListId '{}' is most likely invalid.", entityListId);
-      throw new BadRequestException("Not found: " + entityListId);
+      throw new NotFoundException(entityListId.toString(), API_ENTITY_LIST_ID_VALUE);
     } else {
       return result.get(0);
     }
@@ -132,9 +133,9 @@ public class EntityListResource {
   // this hits the root path of /v1/entityset
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntityList.class)
+  @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
   public Response createList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntityListDefinition listDefinition
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition
       ) {
     val newList = service.createEntityList(listDefinition);
 
@@ -145,35 +146,35 @@ public class EntityListResource {
   @Path("/union")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Creates an entity set by combining two or more existing sets.", response = EntityList.class)
+  @ApiOperation(value = "Creates an entity set by combining two or more existing sets.", response = EntitySet.class)
   public Response deriveList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntityListDefinition listDefinition
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition
       ) {
     val newList = service.deriveEntityList(listDefinition);
 
     return newListResponse(newList);
   }
 
-  private static Response newListResponse(final EntityList newList) {
+  private static Response newListResponse(final EntitySet newList) {
     return Response.status(CREATED)
         .entity(newList)
         .build();
   }
 
-  private static String getFileName(final EntityList list) {
+  private static String getFileName(final EntitySet list) {
     return list.getType().getName() + "-ids-for-set-" + list.getName() + EXPORT_FILE_EXTENSION;
   }
 
   @GET
   @Path("/{" + API_ENTITY_LIST_ID_PARAM + "}/export")
   @Produces(TEXT_TSV)
-  @ApiOperation(value = "Exports the data of a set as a download in TSV (tab-delimited) format.", response = EntityList.class)
+  @ApiOperation(value = "Exports the data of a set as a download in TSV (tab-delimited) format.", response = EntitySet.class)
   public Response exportListItems(
       @ApiParam(value = API_ENTITY_LIST_ID_VALUE, required = true) @PathParam(API_ENTITY_LIST_ID_PARAM) final UUID entityListId
       ) {
     val list = getEntityList(entityListId);
 
-    if (EntityList.State.FINISHED != list.getState()) {
+    if (EntitySet.State.FINISHED != list.getState()) {
       // We return a 204 if the list is not ready.
       return null;
     }

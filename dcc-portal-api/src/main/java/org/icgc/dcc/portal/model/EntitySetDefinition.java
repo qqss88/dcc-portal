@@ -22,31 +22,36 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.Value;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Represents the definition of a set originated from Advanced Search
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "EntityListDefinition")
-public class EntityListDefinition extends BaseEntityList {
+@ApiModel(value = "EntitySetDefinition")
+public class EntitySetDefinition extends BaseEntitySet {
 
   private final static int MIN_SIZE = 1;
   private final static int MAX_SIZE = Integer.MAX_VALUE;
 
   @NonNull
+  @ApiModelProperty(value = "The filter used for the query; must be URL-encoded.", required = true)
   private final ObjectNode filters;
   @NonNull
+  @ApiModelProperty(value = "The field used to sort the query result.", required = true)
   private final String sortBy;
   @NonNull
+  @ApiModelProperty(value = "The sort order of query result.", required = true)
   private final SortOrder sortOrder;
+  @ApiModelProperty(value = "A user-defined limit for the number of entities to return from query.")
   private final int size;
 
   private final static class JsonPropertyName {
@@ -61,8 +66,7 @@ public class EntityListDefinition extends BaseEntityList {
   }
 
   @JsonCreator
-  @SneakyThrows
-  public EntityListDefinition(
+  public EntitySetDefinition(
       @JsonProperty(JsonPropertyName.filters) final String filters,
       @JsonProperty(JsonPropertyName.sortBy) final String sortBy,
       @JsonProperty(JsonPropertyName.sortOrder) final SortOrder sortOrder,
@@ -70,12 +74,10 @@ public class EntityListDefinition extends BaseEntityList {
       @JsonProperty(JsonPropertyName.description) final String description,
       @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
       @JsonProperty(JsonPropertyName.size) final int limit) {
-
     super(name, description, type);
 
-    if (isNullOrEmpty(sortBy)) {
-      throw new IllegalArgumentException("The sortBy argument must contain a valid expression.");
-    }
+    Preconditions.checkArgument(!isNullOrEmpty(sortBy), "The 'sortBy' argument must contain a valid expression.");
+
     this.sortBy = sortBy;
     this.filters = FiltersParam.parseFilters(filters);
     this.sortOrder = sortOrder;
@@ -83,7 +85,7 @@ public class EntityListDefinition extends BaseEntityList {
   }
 
   public int getLimit(final int cap) {
-    return (this.size > cap) ? cap : this.size;
+    return Math.min(cap, size);
   }
 
   @RequiredArgsConstructor

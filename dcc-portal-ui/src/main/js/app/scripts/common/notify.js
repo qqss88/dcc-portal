@@ -111,6 +111,11 @@
 
   module.controller('NotifyCtrl', function ($scope, Notify) {
     $scope.notify = Notify;
+    $scope.$on('$locationChangeSuccess', function() {
+      if (Notify.isVisible()) {
+        Notify.hide();
+      }
+    });
   });
 
   module.directive('notify', function () {

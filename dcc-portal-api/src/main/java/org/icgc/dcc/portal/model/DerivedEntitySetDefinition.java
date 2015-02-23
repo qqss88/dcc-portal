@@ -26,20 +26,26 @@ import lombok.val;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Represents the definition of a derived set.
  */
 @Value
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "DerivedEntityListDefinition")
-public class DerivedEntityListDefinition extends BaseEntityList {
+@ApiModel(value = "DerivedEntitySetDefinition")
+public class DerivedEntitySetDefinition extends BaseEntitySet {
 
   @NonNull
+  @ApiModelProperty(value = "A list of UnionUnits that will form the union of the resulting set.", required = true)
   private final List<UnionUnit> union;
 
-  // This flag indicates whether the resulting list is meant to be temporary.
+  /*
+   * This flag indicates whether the resulting set is meant to be temporary.
+   */
+  @ApiModelProperty(value = "This flag indicates whether the resulting set should be temporary.")
   private boolean isTransient;
 
   private final static class JsonPropertyName {
@@ -52,13 +58,12 @@ public class DerivedEntityListDefinition extends BaseEntityList {
   }
 
   @JsonCreator
-  public DerivedEntityListDefinition(
-      @JsonProperty(JsonPropertyName.union) final List<UnionUnit> union,
+  public DerivedEntitySetDefinition(
+      @NonNull @JsonProperty(JsonPropertyName.union) final List<UnionUnit> union,
       @NonNull @JsonProperty(JsonPropertyName.name) final String name,
       @JsonProperty(JsonPropertyName.description) final String description,
       @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
       @JsonProperty(JsonPropertyName.isTemp) final boolean isTransient) {
-
     super(name, description, type);
 
     validateUnion(union);
@@ -70,13 +75,11 @@ public class DerivedEntityListDefinition extends BaseEntityList {
    * @param union
    */
   private void validateUnion(final List<UnionUnit> union) {
-    if (union.isEmpty()) {
-      throw new IllegalArgumentException("The union argument must not be empty.");
-    } else {
-      for (val unionUnit : union) {
-        if (!unionUnit.isValid()) {
-          throw new IllegalArgumentException("Not all union units in the union argument are valid.");
-        }
+    Preconditions.checkArgument(!union.isEmpty(), "The union argument must not be empty.");
+
+    for (val unionUnit : union) {
+      if (!unionUnit.isValid()) {
+        throw new IllegalArgumentException("Not all union units in the union argument are valid.");
       }
     }
   }
