@@ -45,15 +45,13 @@
                         <small data-ng-if="item.type === 'union'" class="t_suggest_detail">
                             {{item.dataType | trans:true}}
                         </small>
-                        <span data-ng-mouseenter="hover=true"
-                              data-ng-mouseleave="hover=false"
-                              data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
-                            <i class="icon-cancel pull-right"
-                               style="background: {{hover===true? '#dc502e' : ''}}"
+                        <span class="" data-ng-click="$event.stopPropagation(); remove(item.id);">
+                            <i class="icon-cancel pull-right t_suggest_cancel"
                                data-tooltip="Delete Analysis"
                                data-tooltip-placement="right">
                             </i>
                         </span>
+
                     </span>
                 </li>
             </ul>

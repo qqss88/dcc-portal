@@ -2096,29 +2096,38 @@ input.valid:focus {
   color: #bbbbbb;
 }
 /* line 112, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit .t_suggest_cancel {
+  background: none;
+  border-radius: 0.25rem;
+}
+/* line 115, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit .t_suggest_cancel:hover {
+  background: #dc502e;
+}
+/* line 120, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.selected {
   background: #166aa2;
   color: white;
   cursor: default;
 }
-/* line 117, _modules/_suggest.scss */
+/* line 125, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.selected .t_suggest_detail {
   color: white;
 }
 
-/* line 123, _modules/_suggest.scss */
+/* line 131, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__type {
   vertical-align: middle;
   text-align: center;
   width: 4rem;
 }
 
-/* line 129, _modules/_suggest.scss */
+/* line 137, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text {
   padding: .7rem 1rem;
 }
 
-/* line 133, _modules/_suggest.scss */
+/* line 141, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text__details {
   font-style: italic;
   font-weight: 300;
@@ -2129,12 +2138,12 @@ input.valid:focus {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 145, _modules/_suggest.scss */
+  /* line 153, _modules/_suggest.scss */
   .t_suggest__embedded__left {
     top: 2.4rem;
   }
 
-  /* line 149, _modules/_suggest.scss */
+  /* line 157, _modules/_suggest.scss */
   .t_suggest__embedded__right {
     top: 2.4rem;
   }
