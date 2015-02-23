@@ -109,7 +109,9 @@ public enum Chromosome {
    * appear redundant to the built-in valueOf(); however, this supports literals in lowercase too.
    */
   public static Chromosome ofLiteral(final String literal) {
-    checkArgument(!isNullOrEmpty(literal), "The name of a chromosome must not empty or null.");
+    if (isNullOrEmpty(literal)) {
+      throw new BadRequestException("The name of a chromosome must not empty or null.");
+    }
 
     // Try the fast way first.
     try {
