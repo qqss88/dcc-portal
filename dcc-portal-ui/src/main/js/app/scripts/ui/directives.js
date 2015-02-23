@@ -99,10 +99,8 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target, targetPosition) {
-
+        function calculateAbsoluteCoordinates(placement, target, targetPosition) {
           var position = targetPosition || $position.offset(target);
-          var result = {};
           var arrowOffset = 10;
 
           var tooltip = {
@@ -118,37 +116,35 @@ angular.module('app.ui.tooltipControl', [])
 
           switch(placement) {
           case 'right':
-            result = {
+            return {
               top: position.top + position.height / 2 - tooltip.height / 2,
               left: position.left + position.width + arrowOffset
             };
             break;
           case 'left':
-            result = {
+            return {
               top: position.top + position.height / 2 - tooltip.height / 2,
               left: position.left - tooltip.width - arrowOffset
             };
             break;
           case 'top':
-            result = {
+            return {
               top: position.top - tooltip.height - arrowOffset,
               left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
             break;
           case 'bottom':
-            result = {
+            return {
               top: position.top + tooltip.height - arrowOffset,
               left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
             break;
           default:
-            result = {
+            return {
               top: position.top + arrowOffset,
               left: position.left + position.width / 2
             };
           }
-
-          return result;
         }
 
         $rootScope.$on('tooltip::show', function(evt, params) {
@@ -169,11 +165,11 @@ angular.module('app.ui.tooltipControl', [])
             if(!$window.onmousemove){
               $window.onmousemove = function(e){
                 if(element.hasClass('sticky')){
-                  var position = calculatePlacement(scope.placement, params.element,{
-                    left:e.pageX,
-                    top:e.pageY,
-                    width:10,
-                    height:-6
+                  var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
+                    left: e.pageX,
+                    top: e.pageY,
+                    width: 10,
+                    height: -6
                   });
                   element.css('top', position.top);
                   element.css('left', position.left);
@@ -181,7 +177,7 @@ angular.module('app.ui.tooltipControl', [])
               };
             }
           }else{
-            var position = calculatePlacement(params.placement, params.element, params.elementPosition);
+            var position = calculateAbsoluteCoordinates(params.placement, params.element, params.elementPosition);
             element.css('top', position.top);
             element.css('left', position.left);
             element.removeClass('sticky');
