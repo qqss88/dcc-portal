@@ -35,9 +35,9 @@ $shadowColor: $tooltipShadowColor;
   border: 1px solid $border;
   background-color: $fill;
   border-radius: 3px;
-  -webkit-filter: drop-shadow(0 1px 5px $shadowColor);
-  -moz-box-shadow: 0 1px 5px $shadowColor;
-  filter: drop-shadow(0 1px 5px $shadowColor);
+  -webkit-filter: drop-shadow(0 1px 3px $shadowColor);
+  -moz-box-shadow: 0 1px 3px $shadowColor;
+  filter: drop-shadow(0 1px 3px $shadowColor);
   padding: 5px;
 }
 

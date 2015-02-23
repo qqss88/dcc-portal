@@ -589,45 +589,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 86, _base/_colours.scss */
+/* line 87, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 74, _base/_colours.scss */
+/* line 75, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 77, _base/_colours.scss */
+/* line 78, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 81, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 90, _base/_colours.scss */
+/* line 91, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 74, _base/_colours.scss */
+/* line 75, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 77, _base/_colours.scss */
+/* line 78, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 81, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 94, _base/_colours.scss */
+/* line 95, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -2707,12 +2707,12 @@ aside .t_tabs__tab {
   font-size: .9rem;
   pointer-events: none;
   line-height: 1.6rem;
-  border: 1px solid #cccccc;
+  border: 1px solid #b3b3b3;
   background-color: white;
   border-radius: 3px;
-  -webkit-filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
-  -moz-box-shadow: 0 1px 5px rgba(88, 88, 88, 0.5);
-  filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
   padding: 5px;
 }
 
@@ -2751,7 +2751,7 @@ aside .t_tabs__tab {
 /* line 71, _modules/_tooltip.scss */
 .top.tooltip:before {
   border-color: transparent;
-  border-top-color: #cccccc;
+  border-top-color: #b3b3b3;
   margin-left: -7px;
 }
 
@@ -2769,7 +2769,7 @@ aside .t_tabs__tab {
 /* line 88, _modules/_tooltip.scss */
 .right.tooltip:before {
   border-color: transparent;
-  border-right-color: #cccccc;
+  border-right-color: #b3b3b3;
   margin-top: -7px;
 }
 
@@ -2788,7 +2788,7 @@ aside .t_tabs__tab {
 /* line 106, _modules/_tooltip.scss */
 .left.tooltip:before {
   border-color: transparent;
-  border-left-color: #cccccc;
+  border-left-color: #b3b3b3;
   margin-top: -7px;
 }
 
@@ -2806,7 +2806,7 @@ aside .t_tabs__tab {
 /* line 123, _modules/_tooltip.scss */
 .bottom.tooltip:before {
   border-color: transparent;
-  border-bottom-color: #cccccc;
+  border-bottom-color: #b3b3b3;
   margin-left: -7px;
 }
 
@@ -3616,21 +3616,33 @@ td {
 .qtip-default, .qtip-light {
   background-color: white;
   border-radius: 5px;
-  border-color: #cccccc;
-  -webkit-filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
-  -moz-box-shadow: 0 1px 5px rgba(88, 88, 88, 0.5);
-  filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
+  border-color: #b3b3b3;
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: black;
 }
 
-/* line 10, _modules/_genomemaps.scss */
+/* line 12, _modules/_genomemaps.scss */
 .qtip-tip {
   background-color: white !important;
-  border-color: #cccccc;
+  border-color: #b3b3b3;
 }
 
-/* line 15, _modules/_genomemaps.scss */
+/* line 17, _modules/_genomemaps.scss */
 .qtip-default .qtip-titlebar {
   background-color: transparent;
+}
+
+/* line 22, _modules/_genomemaps.scss */
+.gmkeys {
+  font-weight: bold;
+}
+
+/* line 26, _modules/_genomemaps.scss */
+.gmtitle {
+  font-size: .9rem;
 }
 
 /* line 24, styles.scss */

@@ -2,9 +2,11 @@
   background-color: $tooltipFill;
   border-radius: 5px;
   border-color: $tooltipBorder;
-  -webkit-filter: drop-shadow(0 1px 5px $tooltipShadowColor);
-  -moz-box-shadow: 0 1px 5px $tooltipShadowColor;
-  filter: drop-shadow(0 1px 5px $tooltipShadowColor);
+  -webkit-filter: drop-shadow(0 1px 3px $tooltipShadowColor);
+  -moz-box-shadow: 0 1px 3px $tooltipShadowColor;
+  filter: drop-shadow(0 1px 3px $tooltipShadowColor);
+  font-family: $sans-stack;
+  color: black;
 }
 
 .qtip-tip{
@@ -14,4 +16,13 @@
 
 .qtip-default .qtip-titlebar{
   background-color: transparent;
+}
+
+// Formats the text in the tooltip
+.gmkeys{
+  font-weight: bold;
+}
+
+.gmtitle{
+  font-size: .9rem;
 }
