@@ -23,7 +23,7 @@ angular.module('app.downloader.controllers', ['app.downloader.services']);
 // Note: We try to preemptitively determine status as a way improve UX and reduce polls
 angular.module('app.downloader.controllers').controller('DownloaderController',
   function ($window, $filter, $timeout, $scope, Page, DownloaderService,
-    DataTypes, API, Restangular, RestangularNoCache, ids) {
+    DataTypes, API, Restangular, RestangularNoCache, Settings, ids) {
 
     var cancelTimeout;
     var dataTypeOrder = DataTypes.order;
@@ -301,7 +301,12 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
 
     // Start
-    init();
+    Settings.get().then(function(settings) {
+      $scope.downloadEnabled = settings.downloadEnabled || false;
+      if ($scope.downloadEnabled === true) {
+        init();
+      }
+    });
 
     // Clean up events
     $scope.$on('$destroy', function() {

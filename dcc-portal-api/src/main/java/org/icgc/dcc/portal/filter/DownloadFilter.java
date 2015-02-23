@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,55 +15,46 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
-
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
-
-import java.util.Set;
-import java.util.UUID;
+package org.icgc.dcc.portal.filter;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 
-import org.icgc.dcc.portal.model.BaseEntitySet.Type;
-import org.icgc.dcc.portal.model.EntitySet;
-import org.icgc.dcc.portal.model.EntitySet.SubType;
-import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
+import org.icgc.dcc.portal.resource.DownloadResource;
+import org.icgc.dcc.portal.service.NotAvailableException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+
+import com.sun.jersey.spi.container.ContainerRequest;
+import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 /**
- * User "gene set" related operations.
+ * Filter for globally disabling access to {@link DownloadResource} resources if {@link DownloadProperties#isEnabled()}
+ * is {@code false}.
  */
-@Service
+@Component
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
-public class UserGeneSetService {
+public class DownloadFilter implements ContainerRequestFilter {
 
-  /**
-   * Dependencies.
-   */
   @NonNull
-  private final EntityListRepository repository;
-  @NonNull
-  private final TermsLookupService termsLookupService;
+  private final DownloadProperties download;
 
-  /*
-   * This was not used in anywhere at all. To be removed.
-   * 
-   * public String get(@NonNull UUID id) { return repository.find(id); }
-   */
+  @Override
+  public ContainerRequest filter(ContainerRequest request) {
+    if (isDownloadDisabled() && isDownloadURL(request)) {
+      throw new NotAvailableException("Download service unavailable. Please try again later");
+    }
 
-  public UUID save(@NonNull Set<String> geneIds) {
-    val id = UUID.randomUUID();
-    val newList = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
-    newList.setSubtype(SubType.UPLOAD);
+    return request;
+  }
 
-    termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
+  private boolean isDownloadDisabled() {
+    return !download.isEnabled();
+  }
 
-    repository.save(newList);
-
-    return id;
+  private boolean isDownloadURL(ContainerRequest request) {
+    return request.getPath().contains("/v1/download");
   }
 
 }

@@ -62,7 +62,7 @@
     // TODO: Should double check this and make it automatically itself out based on input
     this.yScale = d3.scale.log().base(10).domain([Math.pow(10, -2), Math.pow(10, 5)]).range([config.chartHeight, 0]);
     this.yAxis = d3.svg.axis().scale(this.yScale).orient('left').tickValues(this.tickValues).tickFormat(function(d) {
-      return d3.format('s')(d); // SI format
+      return d > 1.0 ? d3.format('s')(d) : d; // SI format
     }).tickSize(4);
 
     this.config = config;
