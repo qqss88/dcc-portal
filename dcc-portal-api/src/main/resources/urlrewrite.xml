@@ -36,8 +36,8 @@
   <!-- Alias -->
   <rule>
     <condition type="method">GET</condition>
-    <from>^/docs/$</from>
-    <to last="true">/docs</to>
+    <from>^/docs$</from>
+    <to last="true" type="redirect">/docs/</to>
   </rule>
   <rule>
     <condition type="method">GET</condition>

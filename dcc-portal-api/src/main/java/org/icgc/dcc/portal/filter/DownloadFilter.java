@@ -39,8 +39,15 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
 @Component
 public class DownloadFilter implements ContainerRequestFilter {
 
+  /**
+   * Configuration.
+   */
   @Autowired
   private DownloadProperties download;
+
+  /**
+   * State.
+   */
   @Context
   private UriInfo uriInfo;
 
