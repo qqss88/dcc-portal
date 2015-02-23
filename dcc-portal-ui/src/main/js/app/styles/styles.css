@@ -2924,139 +2924,6 @@ aside .t_tabs__tab {
   opacity: .95;
 }
 
-/* line 1, _modules/_gv.scss */
-.t_gv__navbar {
-  padding-bottom: 1rem;
-}
-/* line 4, _modules/_gv.scss */
-.t_gv__navbar button {
-  line-height: 2rem;
-}
-/* line 7, _modules/_gv.scss */
-.t_gv__navbar input {
-  margin-top: -.1rem;
-}
-
-/* line 12, _modules/_gv.scss */
-.gv-panel-title, .gv-status-bar {
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 300;
-  color: black;
-  padding: .5rem;
-  background: #f2f2f2;
-  border: none;
-  margin-bottom: .25rem;
-}
-
-/* line 25, _modules/_gv.scss */
-.ocb-font-size-14 {
-  font-size: 1rem;
-}
-
-/* line 29, _modules/_gv.scss */
-.ocb-track-title-font-size {
-  font-size: 1rem;
-  line-height: 2rem;
-}
-
-/* line 34, _modules/_gv.scss */
-.ocb-track-feature-font-size, .ocb-font-size-12 {
-  font-size: .8rem;
-  line-height: 1rem;
-}
-
-/* line 39, _modules/_gv.scss */
-.ocb-font-sourcesanspro {
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-/* line 43, _modules/_gv.scss */
-.gv_pos_num {
-  font-size: .9rem;
-  fill: #1a9900;
-}
-
-/* line 48, _modules/_gv.scss */
-.gv_nts_line {
-  fill: #666666;
-}
-
-/* line 52, _modules/_gv.scss */
-.gv_centerline {
-  opacity: 0.5;
-  border: 1px solid #ce6503;
-  background: #e9931c;
-}
-
-/* line 58, _modules/_gv.scss */
-.gv_mouseline {
-  border: 1px solid black;
-  opacity: 0.2;
-  background: #666666;
-}
-
-/* line 64, _modules/_gv.scss */
-.gv_selectbox {
-  fill: #166aa2;
-  opacity: 0.4;
-}
-
-/* line 71, _modules/_gv.scss */
-.gv_selectbox_active {
-  fill: #ce6503;
-  opacity: .3;
-}
-
-/* line 78, _modules/_gv.scss */
-.gv_faded_region, .gv_active_region {
-  z-index: 0;
-  position: absolute;
-  height: 100%;
-}
-
-/* line 89, _modules/_gv.scss */
-.gv_active_region {
-  background-color: #ce6503;
-  opacity: .3;
-}
-
-/* line 94, _modules/_gv.scss */
-.ocb-track-resize {
-  opacity: 1;
-  background-color: #f2f2f2;
-  background-repeat: no-repeat;
-  background-position: 49%;
-  height: .75rem;
-  border-top: 1px solid #e6e6e6;
-  border-bottom: 1px solid #e6e6e6;
-}
-/* line 103, _modules/_gv.scss */
-.ocb-track-resize:hover {
-  background-repeat: no-repeat;
-  background-color: #e6e6e6;
-  cursor: ns-resize;
-}
-
-/* line 110, _modules/_gv.scss */
-.gv_track_title {
-  padding: .2rem;
-  font-size: 1rem;
-  background: none;
-  border-bottom: 1px dashed #cccccc;
-}
-
-/* line 117, _modules/_gv.scss */
-.gv_track {
-  fill: transparent;
-}
-
-/* line 121, _modules/_gv.scss */
-.gv_track_hover {
-  opacity: 0.1;
-  fill: #1693c0;
-}
-
 /*** Protein Viewer ***/
 /* line 2, _modules/_protein.scss */
 .axis-label {
@@ -3643,6 +3510,139 @@ td {
 /* line 26, _modules/_genomemaps.scss */
 .gmtitle {
   font-size: .9rem;
+}
+
+/* line 30, _modules/_genomemaps.scss */
+.t_gv__navbar {
+  padding-bottom: 1rem;
+}
+/* line 33, _modules/_genomemaps.scss */
+.t_gv__navbar button {
+  line-height: 2rem;
+}
+/* line 36, _modules/_genomemaps.scss */
+.t_gv__navbar input {
+  margin-top: -.1rem;
+}
+
+/* line 41, _modules/_genomemaps.scss */
+.gv-panel-title, .gv-status-bar {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: black;
+  padding: .5rem;
+  background: #f2f2f2;
+  border: none;
+  margin-bottom: .25rem;
+}
+
+/* line 54, _modules/_genomemaps.scss */
+.ocb-font-size-14 {
+  font-size: 1rem;
+}
+
+/* line 58, _modules/_genomemaps.scss */
+.ocb-track-title-font-size {
+  font-size: 1rem;
+  line-height: 2rem;
+}
+
+/* line 63, _modules/_genomemaps.scss */
+.ocb-track-feature-font-size, .ocb-font-size-12 {
+  font-size: .8rem;
+  line-height: 1rem;
+}
+
+/* line 68, _modules/_genomemaps.scss */
+.ocb-font-sourcesanspro {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* line 72, _modules/_genomemaps.scss */
+.gv_pos_num {
+  font-size: .9rem;
+  fill: #1a9900;
+}
+
+/* line 77, _modules/_genomemaps.scss */
+.gv_nts_line {
+  fill: #666666;
+}
+
+/* line 81, _modules/_genomemaps.scss */
+.gv_centerline {
+  opacity: 0.5;
+  border: 1px solid #ce6503;
+  background: #e9931c;
+}
+
+/* line 87, _modules/_genomemaps.scss */
+.gv_mouseline {
+  border: 1px solid black;
+  opacity: 0.2;
+  background: #666666;
+}
+
+/* line 93, _modules/_genomemaps.scss */
+.gv_selectbox {
+  fill: #166aa2;
+  opacity: 0.4;
+}
+
+/* line 100, _modules/_genomemaps.scss */
+.gv_selectbox_active {
+  fill: #ce6503;
+  opacity: .3;
+}
+
+/* line 107, _modules/_genomemaps.scss */
+.gv_faded_region, .gv_active_region {
+  z-index: 0;
+  position: absolute;
+  height: 100%;
+}
+
+/* line 118, _modules/_genomemaps.scss */
+.gv_active_region {
+  background-color: #ce6503;
+  opacity: .3;
+}
+
+/* line 123, _modules/_genomemaps.scss */
+.ocb-track-resize {
+  opacity: 1;
+  background-color: #f2f2f2;
+  background-repeat: no-repeat;
+  background-position: 49%;
+  height: .75rem;
+  border-top: 1px solid #e6e6e6;
+  border-bottom: 1px solid #e6e6e6;
+}
+/* line 132, _modules/_genomemaps.scss */
+.ocb-track-resize:hover {
+  background-repeat: no-repeat;
+  background-color: #e6e6e6;
+  cursor: ns-resize;
+}
+
+/* line 139, _modules/_genomemaps.scss */
+.gv_track_title {
+  padding: .2rem;
+  font-size: 1rem;
+  background: none;
+  border-bottom: 1px dashed #cccccc;
+}
+
+/* line 146, _modules/_genomemaps.scss */
+.gv_track {
+  fill: transparent;
+}
+
+/* line 150, _modules/_genomemaps.scss */
+.gv_track_hover {
+  opacity: 0.1;
+  fill: #1693c0;
 }
 
 /* line 24, styles.scss */
