@@ -46,7 +46,10 @@
       paddingRight: 10,
       outlineColour: '#999',
       outlineWidth: 1.5,
-      hoverColour: '#e9931c',
+
+      selectColour: '#A4DEF4',
+      hoverColour: '#daf2fb',
+
       urlPath: '',
       mapFunc: function(data) {
         return data;
@@ -566,9 +569,9 @@
         config.mouseoverFunc(d);
       })
       .on('mouseout', function(d) {
-        if (d.selected === false) {
-          d3.select(this).style('fill', _this.getColourBySetIds());
-        }
+        //if (d.selected === false) {
+        d3.select(this).style('fill', d.selected? config.selectColour : _this.getColourBySetIds());
+        //}
         config.mouseoutFunc(d);
       })
       .on('click', function(d) {
@@ -627,12 +630,12 @@
         } else {
           d.selected = forcedState;
         }
-        _this.toggleHighlight(d.data, d.selected);
+        _this.toggleHighlight(d.data);
       });
   };
 
 
-  Venn23.prototype.toggleHighlight = function(ids, bool) {
+  Venn23.prototype.toggleHighlight = function(ids, hovering) {
     var _this = this;
     var config = _this.config;
 
@@ -641,15 +644,20 @@
         return _.difference(d.data, ids).length === 0 && _.difference(ids, d.data).length === 0;
       })
       .style('fill', function(d) {
-        if (d.selected === true) {
-          return config.hoverColour;
+        if (typeof hovering === 'undefined') {
+          if (d.selected === true) {
+            return config.selectColour;
+          } else {
+            return _this.getColourBySetIds();
+          }
+        } else {
+          if (hovering === true) {
+            return config.hoverColour;
+          } else {
+            return d.selected? config.selectColour : _this.getColourBySetIds();
+          }
         }
 
-        if (bool === true) {
-          return config.hoverColour;
-        } else {
-          return _this.getColourBySetIds();
-        }
       });
   };
 
