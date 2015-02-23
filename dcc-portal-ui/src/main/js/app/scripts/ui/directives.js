@@ -120,25 +120,21 @@ angular.module('app.ui.tooltipControl', [])
               top: position.top + position.height / 2 - tooltip.height / 2,
               left: position.left + position.width + arrowOffset
             };
-            break;
           case 'left':
             return {
               top: position.top + position.height / 2 - tooltip.height / 2,
               left: position.left - tooltip.width - arrowOffset
             };
-            break;
           case 'top':
             return {
               top: position.top - tooltip.height - arrowOffset,
               left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
-            break;
           case 'bottom':
             return {
               top: position.top + tooltip.height - arrowOffset,
               left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
-            break;
           default:
             return {
               top: position.top + arrowOffset,
