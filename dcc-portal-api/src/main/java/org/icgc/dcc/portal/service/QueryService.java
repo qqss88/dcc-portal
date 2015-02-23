@@ -24,6 +24,7 @@ import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.icgc.dcc.common.core.util.FormatUtils._;
+import static org.icgc.dcc.portal.model.Chromosome.toChromosomeLocation;
 import static org.icgc.dcc.portal.model.IndexModel.API_ENTITY_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -35,7 +36,6 @@ import static org.icgc.dcc.portal.model.IndexModel.NOT;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.MUTATION_IDS;
-import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.util.List;
 import java.util.UUID;
@@ -436,7 +436,7 @@ public class QueryService {
       ImmutableMap<Kind, String> prefixMapping) {
     val locationFilter = FilterBuilders.boolFilter();
 
-    val location = parseLocation(value);
+    val location = toChromosomeLocation(value);
 
     // Nested fields
     String prefix = "";

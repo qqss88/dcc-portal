@@ -16,16 +16,14 @@
  */
 package org.icgc.dcc.portal.model;
 
-
-
 import java.io.Serializable;
 
 import lombok.Value;
 
 @Value
-public class Location implements Serializable {
+public class ChromosomeLocation implements Serializable {
 
-  final String chromosome;
+  final Chromosome chromosome;
   final Integer start;
   final Integer end;
 
