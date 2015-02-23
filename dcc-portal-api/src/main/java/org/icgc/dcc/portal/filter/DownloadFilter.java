@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,35 +15,46 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.model;
+package org.icgc.dcc.portal.filter;
 
-import lombok.Value;
-import lombok.experimental.Builder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-@Value
-@Builder
-public class Settings {
+import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
+import org.icgc.dcc.portal.resource.DownloadResource;
+import org.icgc.dcc.portal.service.NotAvailableException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-  /**
-   * Release settings.
-   */
-  String releaseDate;
+import com.sun.jersey.spi.container.ContainerRequest;
+import com.sun.jersey.spi.container.ContainerRequestFilter;
 
-  /**
-   * Download settings.
-   */
-  boolean downloadEnabled;
+/**
+ * Filter for globally disabling access to {@link DownloadResource} resources if {@link DownloadProperties#isEnabled()}
+ * is {@code false}.
+ */
+@Component
+@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+public class DownloadFilter implements ContainerRequestFilter {
 
-  /**
-   * Crowd settings.
-   */
-  String ssoUrl;
+  @NonNull
+  private final DownloadProperties download;
 
-  /**
-   * Set analysis settings.
-   */
-  String demoListUuid;
-  int maxNumberOfHits;
-  int maxMultiplier;
+  @Override
+  public ContainerRequest filter(ContainerRequest request) {
+    if (isDownloadDisabled() && isDownloadURL(request)) {
+      throw new NotAvailableException("Download service unavailable. Please try again later");
+    }
+
+    return request;
+  }
+
+  private boolean isDownloadDisabled() {
+    return !download.isEnabled();
+  }
+
+  private boolean isDownloadURL(ContainerRequest request) {
+    return request.getPath().contains("/v1/download");
+  }
 
 }
