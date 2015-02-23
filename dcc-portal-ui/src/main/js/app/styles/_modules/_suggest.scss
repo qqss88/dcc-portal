@@ -104,10 +104,19 @@
     color: $white;
   }
 
+  // Detail line item
+  .t_suggest_detail {
+    color: #BBB
+  }
+
   &.selected {
     background: $blue;
     color: $white;
     cursor: default;
+
+    .t_suggest_detail {
+      color: $white
+    }
   }
 }
 
