@@ -17,8 +17,10 @@
  */
 package org.icgc.dcc.portal.filter;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
+
+import lombok.Setter;
 
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.icgc.dcc.portal.resource.DownloadResource;
@@ -33,28 +35,38 @@ import com.sun.jersey.spi.container.ContainerRequestFilter;
  * Filter for globally disabling access to {@link DownloadResource} resources if {@link DownloadProperties#isEnabled()}
  * is {@code false}.
  */
+@Setter
 @Component
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class DownloadFilter implements ContainerRequestFilter {
 
-  @NonNull
-  private final DownloadProperties download;
+  @Autowired
+  private DownloadProperties download;
+  @Context
+  private UriInfo uriInfo;
 
   @Override
   public ContainerRequest filter(ContainerRequest request) {
-    if (isDownloadDisabled() && isDownloadURL(request)) {
+    if (isDownloadDisabled() && isDownloadURL()) {
       throw new NotAvailableException("Download service unavailable. Please try again later");
     }
 
     return request;
   }
 
+  private String getRequestPath() {
+    return uriInfo.getAbsolutePath().getPath();
+  }
+
+  private String getDownloadPath() {
+    return uriInfo.getBaseUriBuilder().path(DownloadResource.class).build().getPath();
+  }
+
   private boolean isDownloadDisabled() {
     return !download.isEnabled();
   }
 
-  private boolean isDownloadURL(ContainerRequest request) {
-    return request.getPath().contains("/v1/download");
+  private boolean isDownloadURL() {
+    return getRequestPath().contains(getDownloadPath());
   }
 
 }
