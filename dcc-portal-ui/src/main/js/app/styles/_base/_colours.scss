@@ -61,6 +61,10 @@ $pathway: $green;
 $charts: $violet;
 $table: $magenta;
 
+$tooltipBorder: $greyLight;
+$tooltipFill: white;
+$tooltipShadowColor: rgba(88,88,88,0.5);
+
 // ---------------------------------------------------------------------------
 // Color System
 @mixin theme($background, $text, $headers, $links, $hover) {

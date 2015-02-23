@@ -589,45 +589,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 82, _base/_colours.scss */
+/* line 86, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 70, _base/_colours.scss */
+/* line 74, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 73, _base/_colours.scss */
+/* line 77, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 77, _base/_colours.scss */
+/* line 81, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 86, _base/_colours.scss */
+/* line 90, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 70, _base/_colours.scss */
+/* line 74, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 73, _base/_colours.scss */
+/* line 77, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 77, _base/_colours.scss */
+/* line 81, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 90, _base/_colours.scss */
+/* line 94, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -3661,6 +3661,27 @@ td {
 /* line 208, _modules/_beacon.scss */
 .beacon-form-control:-ms-input-placeholder, .beacon-form-control::-webkit-input-placeholder {
   color: #777;
+}
+
+/* line 1, _modules/_genomemaps.scss */
+.qtip-default, .qtip-light {
+  background-color: white;
+  border-radius: 5px;
+  border-color: #cccccc;
+  -webkit-filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
+  -moz-box-shadow: 0 1px 5px rgba(88, 88, 88, 0.5);
+  filter: drop-shadow(0 1px 5px rgba(88, 88, 88, 0.5));
+}
+
+/* line 10, _modules/_genomemaps.scss */
+.qtip-tip {
+  background-color: white !important;
+  border-color: #cccccc;
+}
+
+/* line 15, _modules/_genomemaps.scss */
+.qtip-default .qtip-titlebar {
+  background-color: transparent;
 }
 
 /* line 24, styles.scss */
