@@ -17,11 +17,13 @@
  */
 package org.icgc.dcc.portal.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @Data
+@AllArgsConstructor
 public class AlleleMutation {
 
   @ApiModelProperty(value = "Reference allele(s)", required = true)
@@ -32,11 +34,4 @@ public class AlleleMutation {
 
   @ApiModelProperty(value = "The complete mutation of the allele(s)", required = true)
   String mutation;
-
-  public AlleleMutation(String from, String to, String mutation) {
-    this.fromAllele = from;
-    this.toAllele = to;
-    this.mutation = mutation;
-  }
-
 }
