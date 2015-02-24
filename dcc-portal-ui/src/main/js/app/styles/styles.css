@@ -589,45 +589,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 82, _base/_colours.scss */
+/* line 87, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 70, _base/_colours.scss */
+/* line 75, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 73, _base/_colours.scss */
+/* line 78, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 77, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 86, _base/_colours.scss */
+/* line 91, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 70, _base/_colours.scss */
+/* line 75, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 73, _base/_colours.scss */
+/* line 78, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 77, _base/_colours.scss */
+/* line 82, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 90, _base/_colours.scss */
+/* line 95, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -1645,57 +1645,6 @@ footer .dcc-col {
 /* line 1, _sections/_download.scss */
 .t_download__disabled {
   color: #999999;
-}
-
-/* line 1, _modules/_tt.scss */
-.tt-wrapper {
-  position: relative;
-}
-
-/* line 5, _modules/_tt.scss */
-.tt-wrapper ul {
-  width: 150px;
-  height: auto;
-  padding: 10px;
-  left: 0;
-  border: 4px solid white;
-  background: #f2f2f2;
-  text-indent: 0px;
-  border-radius: 5px;
-  position: absolute;
-  pointer-events: none;
-  bottom: 100px;
-  opacity: 0;
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease-in-out;
-}
-
-/* line 24, _modules/_tt.scss */
-.tt-wrapper ul:before,
-.tt-wrapper ul:after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 50%;
-  margin-left: -49px;
-  width: 0;
-  height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-top: 10px solid rgba(0, 0, 0, 0.1);
-}
-
-/* line 37, _modules/_tt.scss */
-.tt-wrapper ul:after {
-  bottom: -14px;
-  margin-left: -50px;
-  border-top: 10px solid white;
-}
-
-/* line 43, _modules/_tt.scss */
-.tt-wrapper:hover ul {
-  opacity: 1;
-  bottom: 25px;
 }
 
 /* line 1, _modules/_button.scss */
@@ -2765,7 +2714,7 @@ aside .t_tabs__tab {
 .fade {
   display: none;
 }*/
-/* line 22, _modules/_tooltip.scss */
+/* line 26, _modules/_tooltip.scss */
 .tooltip {
   font-weight: 300;
   position: absolute;
@@ -2773,110 +2722,114 @@ aside .t_tabs__tab {
   display: block;
   visibility: visible;
   font-size: .9rem;
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-  opacity: 0;
+  pointer-events: none;
   line-height: 1.6rem;
-}
-/* line 33, _modules/_tooltip.scss */
-.tooltip.in {
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
-  opacity: 0.9;
-}
-/* line 37, _modules/_tooltip.scss */
-.tooltip.top {
-  margin-top: -3px;
-  padding: 5px 0;
-}
-/* line 41, _modules/_tooltip.scss */
-.tooltip.right {
-  margin-left: 3px;
-  padding: 0 5px;
-}
-/* line 45, _modules/_tooltip.scss */
-.tooltip.bottom {
-  margin-top: 3px;
-  padding: 5px 0;
-}
-/* line 49, _modules/_tooltip.scss */
-.tooltip.left {
-  margin-left: -3px;
-  padding: 0 5px;
-}
-
-/* line 56, _modules/_tooltip.scss */
-.tooltip-inner {
-  max-width: 30rem;
-  white-space: normal;
-  padding: .6rem;
-  color: white;
-  text-align: left;
-  text-decoration: none;
-  background-color: #333333;
-  -webkit-border-radius: 0.5rem;
-  -moz-border-radius: 0.5rem;
-  -ms-border-radius: 0.5rem;
-  -o-border-radius: 0.5rem;
-  border-radius: 0.5rem;
-  border-color: j #ff9999;
-}
-
-/* line 70, _modules/_tooltip.scss */
-.tooltip.replace .tooltip-inner,
-.tooltip.parent .tooltip-inner {
-  font-size: .9rem;
-  font-weight: 400;
-  max-width: none;
+  border: 1px solid #b3b3b3;
   background-color: white;
-  color: #333333;
-  box-shadow: 0px 1px 2px #aaa;
-  border-collapse: separate;
+  border-radius: 3px;
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  padding: 5px;
 }
 
-/* line 89, _modules/_tooltip.scss */
-.tooltip-arrow {
-  position: absolute;
-  width: 0;
+/* line 45, _modules/_tooltip.scss */
+.tooltip:after,
+.tooltip:before {
+  border: solid transparent;
+  content: " ";
   height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* line 54, _modules/_tooltip.scss */
+.tooltip:after {
+  border-width: 6px;
+}
+
+/* line 57, _modules/_tooltip.scss */
+.tooltip:before {
+  border-width: 7px;
+}
+
+/* line 62, _modules/_tooltip.scss */
+.top.tooltip:after, .top.tooltip:before {
+  top: 100%;
+  left: 50%;
+}
+/* line 66, _modules/_tooltip.scss */
+.top.tooltip:after {
   border-color: transparent;
-  border-style: solid;
+  border-top-color: white;
+  margin-left: -6px;
+}
+/* line 71, _modules/_tooltip.scss */
+.top.tooltip:before {
+  border-color: transparent;
+  border-top-color: #b3b3b3;
+  margin-left: -7px;
 }
 
-/* line 98, _modules/_tooltip.scss */
-.tooltip.top .tooltip-arrow {
-  bottom: 0;
-  left: 50%;
-  margin-left: -0.5rem;
-  border-width: 0.5rem 0.5rem 0;
-  border-top-color: #333333;
-}
-/* line 105, _modules/_tooltip.scss */
-.tooltip.right .tooltip-arrow {
+/* line 79, _modules/_tooltip.scss */
+.right.tooltip:after, .right.tooltip:before {
   top: 50%;
-  left: 0;
-  margin-top: -0.5rem;
-  border-width: 0.5rem 0.5rem 0.5rem 0;
-  border-right-color: #333333;
+  right: 100%;
 }
-/* line 112, _modules/_tooltip.scss */
-.tooltip.left .tooltip-arrow {
+/* line 83, _modules/_tooltip.scss */
+.right.tooltip:after {
+  border-color: transparent;
+  border-right-color: white;
+  margin-top: -6px;
+}
+/* line 88, _modules/_tooltip.scss */
+.right.tooltip:before {
+  border-color: transparent;
+  border-right-color: #b3b3b3;
+  margin-top: -7px;
+}
+
+/* line 96, _modules/_tooltip.scss */
+.left.tooltip:after, .left.tooltip:before {
   top: 50%;
+  left: 100%;
   right: 0;
-  margin-top: -0.5rem;
-  border-width: 0.5rem 0 0.5rem 0.5rem;
-  border-left-color: #333333;
 }
-/* line 119, _modules/_tooltip.scss */
-.tooltip.bottom .tooltip-arrow {
-  top: 0;
-  left: 50%;
-  margin-left: -0.5rem;
-  border-width: 0 0.5rem 0.5rem;
-  border-bottom-color: #333333;
+/* line 101, _modules/_tooltip.scss */
+.left.tooltip:after {
+  border-color: transparent;
+  border-left-color: white;
+  margin-top: -6px;
+}
+/* line 106, _modules/_tooltip.scss */
+.left.tooltip:before {
+  border-color: transparent;
+  border-left-color: #b3b3b3;
+  margin-top: -7px;
 }
 
-/* line 128, _modules/_tooltip.scss */
+/* line 114, _modules/_tooltip.scss */
+.bottom.tooltip:after, .bottom.tooltip:before {
+  left: 50%;
+  bottom: 100%;
+}
+/* line 118, _modules/_tooltip.scss */
+.bottom.tooltip:after {
+  border-color: transparent;
+  border-bottom-color: white;
+  margin-left: -6px;
+}
+/* line 123, _modules/_tooltip.scss */
+.bottom.tooltip:before {
+  border-color: transparent;
+  border-bottom-color: #b3b3b3;
+  margin-left: -7px;
+}
+
+/* line 130, _modules/_tooltip.scss */
 .tooltip.hide {
-  display: none;
+  visibility: hidden;
 }
 
 /* line 3, _modules/_sidenav.scss */
@@ -2986,139 +2939,6 @@ aside .t_tabs__tab {
   background: white;
   border-radius: 3px;
   opacity: .95;
-}
-
-/* line 1, _modules/_gv.scss */
-.t_gv__navbar {
-  padding-bottom: 1rem;
-}
-/* line 4, _modules/_gv.scss */
-.t_gv__navbar button {
-  line-height: 2rem;
-}
-/* line 7, _modules/_gv.scss */
-.t_gv__navbar input {
-  margin-top: -.1rem;
-}
-
-/* line 12, _modules/_gv.scss */
-.gv-panel-title, .gv-status-bar {
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 300;
-  color: black;
-  padding: .5rem;
-  background: #f2f2f2;
-  border: none;
-  margin-bottom: .25rem;
-}
-
-/* line 25, _modules/_gv.scss */
-.ocb-font-size-14 {
-  font-size: 1rem;
-}
-
-/* line 29, _modules/_gv.scss */
-.ocb-track-title-font-size {
-  font-size: 1rem;
-  line-height: 2rem;
-}
-
-/* line 34, _modules/_gv.scss */
-.ocb-track-feature-font-size, .ocb-font-size-12 {
-  font-size: .8rem;
-  line-height: 1rem;
-}
-
-/* line 39, _modules/_gv.scss */
-.ocb-font-sourcesanspro {
-  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-/* line 43, _modules/_gv.scss */
-.gv_pos_num {
-  font-size: .9rem;
-  fill: #1a9900;
-}
-
-/* line 48, _modules/_gv.scss */
-.gv_nts_line {
-  fill: #666666;
-}
-
-/* line 52, _modules/_gv.scss */
-.gv_centerline {
-  opacity: 0.5;
-  border: 1px solid #ce6503;
-  background: #e9931c;
-}
-
-/* line 58, _modules/_gv.scss */
-.gv_mouseline {
-  border: 1px solid black;
-  opacity: 0.2;
-  background: #666666;
-}
-
-/* line 64, _modules/_gv.scss */
-.gv_selectbox {
-  fill: #166aa2;
-  opacity: 0.4;
-}
-
-/* line 71, _modules/_gv.scss */
-.gv_selectbox_active {
-  fill: #ce6503;
-  opacity: .3;
-}
-
-/* line 78, _modules/_gv.scss */
-.gv_faded_region, .gv_active_region {
-  z-index: 0;
-  position: absolute;
-  height: 100%;
-}
-
-/* line 89, _modules/_gv.scss */
-.gv_active_region {
-  background-color: #ce6503;
-  opacity: .3;
-}
-
-/* line 94, _modules/_gv.scss */
-.ocb-track-resize {
-  opacity: 1;
-  background-color: #f2f2f2;
-  background-repeat: no-repeat;
-  background-position: 49%;
-  height: .75rem;
-  border-top: 1px solid #e6e6e6;
-  border-bottom: 1px solid #e6e6e6;
-}
-/* line 103, _modules/_gv.scss */
-.ocb-track-resize:hover {
-  background-repeat: no-repeat;
-  background-color: #e6e6e6;
-  cursor: ns-resize;
-}
-
-/* line 110, _modules/_gv.scss */
-.gv_track_title {
-  padding: .2rem;
-  font-size: 1rem;
-  background: none;
-  border-bottom: 1px dashed #cccccc;
-}
-
-/* line 117, _modules/_gv.scss */
-.gv_track {
-  fill: transparent;
-}
-
-/* line 121, _modules/_gv.scss */
-.gv_track_hover {
-  opacity: 0.1;
-  fill: #1693c0;
 }
 
 /*** Protein Viewer ***/
@@ -3404,21 +3224,6 @@ g.marker rect.selected {
 }
 
 /* line 76, _modules/_vis.scss */
-div.stacked.tooltip {
-  position: absolute;
-  text-align: left;
-  padding: 4px;
-  font: 12px sans-serif;
-  background: white;
-  border: 0px;
-  border-radius: 5px;
-  pointer-events: none;
-  -moz-box-shadow: 1px 1px 2px #999;
-  -webkit-box-shadow: 1px 1px 2px #999;
-  box-shadow: 1px 1px 2px #999;
-}
-
-/* line 90, _modules/_vis.scss */
 .stackedsubtitle {
   font-weight: normal;
   color: #999999;
@@ -3426,19 +3231,19 @@ div.stacked.tooltip {
 }
 
 /* modify the container of the stacked bar chart */
-/* line 97, _modules/_vis.scss */
+/* line 83, _modules/_vis.scss */
 .wide.omega {
   text-align: right;
   margin-right: 30px;
   min-width: 500px;
 }
 
-/* line 103, _modules/_vis.scss */
+/* line 89, _modules/_vis.scss */
 #svgcontainer {
   min-width: 500px;
 }
 
-/* line 107, _modules/_vis.scss */
+/* line 93, _modules/_vis.scss */
 .venn-count {
   fill: #111;
 }
@@ -3689,6 +3494,172 @@ td {
 /* line 208, _modules/_beacon.scss */
 .beacon-form-control:-ms-input-placeholder, .beacon-form-control::-webkit-input-placeholder {
   color: #777;
+}
+
+/* line 1, _modules/_genomemaps.scss */
+.qtip-default, .qtip-light {
+  background-color: white;
+  border-radius: 5px;
+  border-color: #b3b3b3;
+  -webkit-filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  -moz-box-shadow: 0 1px 3px rgba(180, 180, 180, 0.43);
+  filter: drop-shadow(0 1px 3px rgba(180, 180, 180, 0.43));
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: black;
+}
+
+/* line 12, _modules/_genomemaps.scss */
+.qtip-tip {
+  background-color: white !important;
+  border-color: #b3b3b3;
+}
+
+/* line 17, _modules/_genomemaps.scss */
+.qtip-default .qtip-titlebar {
+  background-color: transparent;
+}
+
+/* line 22, _modules/_genomemaps.scss */
+.gmkeys {
+  font-weight: bold;
+}
+
+/* line 26, _modules/_genomemaps.scss */
+.gmtitle {
+  font-size: .9rem;
+}
+
+/* line 30, _modules/_genomemaps.scss */
+.t_gv__navbar {
+  padding-bottom: 1rem;
+}
+/* line 33, _modules/_genomemaps.scss */
+.t_gv__navbar button {
+  line-height: 2rem;
+}
+/* line 36, _modules/_genomemaps.scss */
+.t_gv__navbar input {
+  margin-top: -.1rem;
+}
+
+/* line 41, _modules/_genomemaps.scss */
+.gv-panel-title, .gv-status-bar {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: black;
+  padding: .5rem;
+  background: #f2f2f2;
+  border: none;
+  margin-bottom: .25rem;
+}
+
+/* line 54, _modules/_genomemaps.scss */
+.ocb-font-size-14 {
+  font-size: 1rem;
+}
+
+/* line 58, _modules/_genomemaps.scss */
+.ocb-track-title-font-size {
+  font-size: 1rem;
+  line-height: 2rem;
+}
+
+/* line 63, _modules/_genomemaps.scss */
+.ocb-track-feature-font-size, .ocb-font-size-12 {
+  font-size: .8rem;
+  line-height: 1rem;
+}
+
+/* line 68, _modules/_genomemaps.scss */
+.ocb-font-sourcesanspro {
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* line 72, _modules/_genomemaps.scss */
+.gv_pos_num {
+  font-size: .9rem;
+  fill: #1a9900;
+}
+
+/* line 77, _modules/_genomemaps.scss */
+.gv_nts_line {
+  fill: #666666;
+}
+
+/* line 81, _modules/_genomemaps.scss */
+.gv_centerline {
+  opacity: 0.5;
+  border: 1px solid #ce6503;
+  background: #e9931c;
+}
+
+/* line 87, _modules/_genomemaps.scss */
+.gv_mouseline {
+  border: 1px solid black;
+  opacity: 0.2;
+  background: #666666;
+}
+
+/* line 93, _modules/_genomemaps.scss */
+.gv_selectbox {
+  fill: #166aa2;
+  opacity: 0.4;
+}
+
+/* line 100, _modules/_genomemaps.scss */
+.gv_selectbox_active {
+  fill: #ce6503;
+  opacity: .3;
+}
+
+/* line 107, _modules/_genomemaps.scss */
+.gv_faded_region, .gv_active_region {
+  z-index: 0;
+  position: absolute;
+  height: 100%;
+}
+
+/* line 118, _modules/_genomemaps.scss */
+.gv_active_region {
+  background-color: #ce6503;
+  opacity: .3;
+}
+
+/* line 123, _modules/_genomemaps.scss */
+.ocb-track-resize {
+  opacity: 1;
+  background-color: #f2f2f2;
+  background-repeat: no-repeat;
+  background-position: 49%;
+  height: .75rem;
+  border-top: 1px solid #e6e6e6;
+  border-bottom: 1px solid #e6e6e6;
+}
+/* line 132, _modules/_genomemaps.scss */
+.ocb-track-resize:hover {
+  background-repeat: no-repeat;
+  background-color: #e6e6e6;
+  cursor: ns-resize;
+}
+
+/* line 139, _modules/_genomemaps.scss */
+.gv_track_title {
+  padding: .2rem;
+  font-size: 1rem;
+  background: none;
+  border-bottom: 1px dashed #cccccc;
+}
+
+/* line 146, _modules/_genomemaps.scss */
+.gv_track {
+  fill: transparent;
+}
+
+/* line 150, _modules/_genomemaps.scss */
+.gv_track_hover {
+  opacity: 0.1;
+  fill: #1693c0;
 }
 
 /* line 24, styles.scss */

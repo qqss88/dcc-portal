@@ -64,7 +64,7 @@ textarea {
 
 .markdown_container td,
 .markdown_container th {
-   border: 1px solid rgb(230, 230, 230); 
+   border: 1px solid rgb(230, 230, 230);
    text-align: left;
    padding: .2rem .4rem;
    line-height: 1rem;
@@ -118,5 +118,3 @@ textarea {
 .match {
     font-weight: bold;
 }
-
-

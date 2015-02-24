@@ -127,7 +127,7 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
  * This act as the tooltip "server" that waits for tooltip events
  */
 angular.module('app.ui.tooltipControl', [])
-  .directive('tooltipControl', function ($position, $rootScope, $sce) {
+  .directive('tooltipControl', function ($position, $rootScope, $sce, $window) {
     return {
       restrict: 'E',
       replace: true,
@@ -138,13 +138,14 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target) {
-          var position = $position.offset(target);
-          var result = {};
+        function calculateAbsoluteCoordinates(placement, target, targetPosition) {
+          var position = targetPosition || $position.offset(target);
+          var arrowOffset = 10;
 
-
-          var ttWidth = element.prop('offsetWidth');
-          var ttHeight = element.prop('offsetHeight');
+          var tooltip = {
+            width: element.prop('offsetWidth'),
+            height: element.prop('offsetHeight')
+          };
 
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
@@ -154,31 +155,31 @@ angular.module('app.ui.tooltipControl', [])
 
           switch(placement) {
           case 'right':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left + position.width
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left + position.width + arrowOffset
             };
-            break;
           case 'left':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left - ttWidth
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left - tooltip.width - arrowOffset
             };
-            break;
           case 'top':
-            result = {
-              top: position.top - ttHeight,
-              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+            return {
+              top: position.top - tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
-            break;
+          case 'bottom':
+            return {
+              top: position.top + tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
+            };
           default:
-            result = {
-              top: position.top,
+            return {
+              top: position.top + arrowOffset,
               left: position.left + position.width / 2
             };
           }
-
-          return result;
         }
 
         $rootScope.$on('tooltip::show', function(evt, params) {
@@ -191,11 +192,34 @@ angular.module('app.ui.tooltipControl', [])
             }
           });
 
-          var position = calculatePlacement(params.placement, params.element);
-          element.css('top', position.top);
-          element.css('left', position.left);
+          element.css('visibility', 'visible');
+
+          if(params.sticky){
+            element.addClass('sticky');
+
+            if(!$window.onmousemove){
+              $window.onmousemove = function(e){
+                if(element.hasClass('sticky')){
+                  var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
+                    left: e.pageX,
+                    top: e.pageY,
+                    width: 10,
+                    height: -6
+                  });
+                  element.css('top', position.top);
+                  element.css('left', position.left);
+                }
+              };
+            }
+          }else{
+            var position = calculateAbsoluteCoordinates(params.placement, params.element, params.elementPosition);
+            element.css('top', position.top);
+            element.css('left', position.left);
+            element.removeClass('sticky');
+          }
         });
         $rootScope.$on('tooltip::hide', function() {
+          element.css('visibility', 'hidden');
           element.css('top', -999);
           element.css('left', -999);
         });
