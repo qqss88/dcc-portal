@@ -19,10 +19,10 @@ package org.icgc.dcc.portal.model;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.Builder;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.util.JsonUtils;
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 
-@Builder(chain = true, fluent = true)
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
