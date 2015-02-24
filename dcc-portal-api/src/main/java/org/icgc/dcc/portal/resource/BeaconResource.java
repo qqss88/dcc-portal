@@ -19,13 +19,11 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Ints.tryParse;
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -35,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.Beacon;
+import org.icgc.dcc.portal.model.BeaconInfo;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.BeaconService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,9 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
-@Api(value = "/beacon", description = "Answers the question: \"Have you observed this genotype?\"")
-@Path("/v1/beacon/query")
+@Api(value = "/beacon", description = "Resources relating to GA4GH Beacon")
+@Path("/v1/beacon")
+@Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class BeaconResource extends BaseResource {
 
@@ -73,12 +73,12 @@ public class BeaconResource extends BaseResource {
   private static final String ANY_DATASET = " ";
 
   @GET
-  @ApiOperation(value = "Beacon", nickname = "Beacon", response = Beacon.class,
-      notes = "A GA4GH Beacon based off of the v0.2 specification. Given a position in a chromosome and an alllele,"
+  @ApiOperation(value = "Query the Beacon", nickname = "query", response = Beacon.class,
+      notes = "<strong>Answers the question: \"Have you observed this genotype?\"</strong>"
+          + "<br>A GA4GH Beacon based off of the v0.2 specification. Given a position in a chromosome and an alllele,"
           + " the beacon looks for matching mutations at that location and returns a response accordingly.<br/><br/> Read "
           + "more about beacons and see other beacons at <a href=http://ga4gh.org/#/beacon>GAG4GH's Beacon Project Site</a>.")
-  @Consumes(APPLICATION_FORM_URLENCODED)
-  @Produces(APPLICATION_JSON)
+  @Path("/query")
   @Timed
   public Beacon query(
 
@@ -112,6 +112,15 @@ public class BeaconResource extends BaseResource {
         reference.trim(),
         allele.trim(),
         dataset.trim());
+  }
+
+  @GET
+  @ApiOperation(value = "Get information about the Beacon", nickname = "info", response = BeaconInfo.class,
+      notes = "Provides information about the Beacon")
+  @Path("/info")
+  @Timed
+  public BeaconInfo info() {
+    return new BeaconInfo();
   }
 
   private Boolean isValidChromosome(String chromosome) {
