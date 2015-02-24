@@ -22,7 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.util.JsonUtils;

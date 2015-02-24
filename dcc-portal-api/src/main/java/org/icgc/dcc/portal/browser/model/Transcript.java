@@ -4,7 +4,7 @@ import java.util.List;
 
 import lombok.Value;
 import lombok.val;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
