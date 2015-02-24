@@ -180,20 +180,20 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               return f.id;
             },
             tooltipTitle: function (f) {
-              return 'ICGC mutation' + ' - <span class="ok">' + f.id + '</span>';
+              return '<span class="gmtitle">ICGC mutation' + ' - ' + f.id + '</span>';
             },
             tooltipText: function (f) {
               var consequences = GMService.tooltipConsequences(f.consequences), fi;
               fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High'))? 'High' : 'Low';
 
-              return 'mutation:&nbsp;<span class="ssel">' + f.mutation + '</span><br>' +
-                     'reference allele:&nbsp;<span class="ssel">' + f.refGenAllele + '</span><br>' +
-                     'mutation type:&nbsp;<span class="ssel">' + f.mutationType + '</span><br>' +
-                     'project info:<span class="ssel"><br>' + f.projectInfo.join('<br>') + '</span><br>' +
-                     'consequences:<br><span class="ssel">' + consequences + '</span><br>' +
-                     'source:&nbsp;<span class="ssel">ICGC</span><br>' +
-                     'start-end:&nbsp;<span class="emph">' + f.start + '-' + f.end + '</span><br>' +
-                     'functional impact:&nbsp;<span class="emph">' + fi + '</span>';
+              return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
+                     '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
+                     '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
+                     '<span class="gmkeys">project info:</span><br>' + f.projectInfo.join('<br>') + '<br>' +
+                     '<span class="gmkeys">consequences:<br></span>' + consequences + '<br>' +
+                     '<span class="gmkeys">source:&nbsp;</span>ICGC<br>' +
+                     '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
+                     '<span class="gmkeys">functional impact:&nbsp;</span>' + fi;
             },
             color: function (feat) {
               switch (feat.mutationType) {
@@ -456,20 +456,20 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
               return f.id;
             },
             tooltipTitle: function (f) {
-              return 'ICGC mutation' + ' - <span class="ok">' + f.id + '</span>';
+              return '<span class="gmtitle">ICGC mutation' + ' - ' + f.id + '</span>';
             },
             tooltipText: function (f) {
               var consequences = GMService.tooltipConsequences(f.consequences), fi;
               fi = (f.functionalImpact && _.contains(f.functionalImpact, 'High'))? 'High' : 'Low';
 
-              return 'mutation:&nbsp;<span class="ssel">' + f.mutation + '</span><br>' +
-                     'reference allele:&nbsp;<span class="ssel">' + f.refGenAllele + '</span><br>' +
-                     'mutation type:&nbsp;<span class="ssel">' + f.mutationType + '</span><br>' +
-                     'project info:<span class="ssel"><br>' + f.projectInfo.join('<br>') + '</span><br>' +
-                     'consequences:<br><span class="ssel">' + consequences + '</span><br>' +
-                     'source:&nbsp;<span class="ssel">ICGC</span><br>' +
-                     'start-end:&nbsp;<span class="emph">' + f.start + '-' + f.end + '</span><br>' +
-                     'functional impact:&nbsp;<span class="emph">' + fi + '</span>';
+              return '<span class="gmkeys">mutation:&nbsp;</span>' + f.mutation + '<br>' +
+                     '<span class="gmkeys">reference allele:&nbsp;</span>' + f.refGenAllele + '<br>' +
+                     '<span class="gmkeys">mutation type:&nbsp;</span>' + f.mutationType + '<br>' +
+                     '<span class="gmkeys">project info:</span><br>' + f.projectInfo.join('<br>') + '<br>' +
+                     '<span class="gmkeys">consequences:<br></span>' + consequences + '<br>' +
+                     '<span class="gmkeys">source:&nbsp;</span>ICGC<br>' +
+                     '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
+                     '<span class="gmkeys">functional impact:&nbsp;</span>' + fi;
             },
             color: function (feat) {
               switch (feat.mutationType) {
