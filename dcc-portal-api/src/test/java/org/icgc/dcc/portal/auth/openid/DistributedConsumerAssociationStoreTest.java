@@ -17,11 +17,8 @@
  */
 package org.icgc.dcc.portal.auth.openid;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore.ASSOCIATIONS_CACHE_NAME;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

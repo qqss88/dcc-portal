@@ -85,7 +85,6 @@ import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
 import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.downloader.core.FileInfo;
 import org.icgc.dcc.downloader.core.SelectionEntry;
-import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
@@ -662,14 +661,14 @@ public class DownloadResource {
 
   @Data
   public static class ServiceStatus {
-  
+
     private final boolean serviceStatus;
-  
+
   }
 
   @Data
   public static class JobInfo {
-  
+
     private final String downloadId;
   }
 
