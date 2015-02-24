@@ -43,12 +43,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
 import org.icgc.dcc.portal.config.PortalProperties;
-import org.icgc.dcc.portal.model.BaseEntityList;
-import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
-import org.icgc.dcc.portal.model.EntityList;
-import org.icgc.dcc.portal.model.EntityList.State;
-import org.icgc.dcc.portal.model.EntityList.SubType;
-import org.icgc.dcc.portal.model.EntityListDefinition;
+import org.icgc.dcc.portal.model.BaseEntitySet;
+import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySet.State;
+import org.icgc.dcc.portal.model.EntitySet.SubType;
+import org.icgc.dcc.portal.model.EntitySetDefinition;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -112,21 +112,21 @@ public class EntityListService {
     private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";
     private static final String SORT_BY = DEFAULT_GENE_MUTATION_SORT;
 
-    private final EntityListDefinition.SortOrder SORT_ORDER = EntityListDefinition.SortOrder.ASCENDING;
-    private final BaseEntityList.Type TYPE = BaseEntityList.Type.GENE;
+    private final EntitySetDefinition.SortOrder SORT_ORDER = EntitySetDefinition.SortOrder.ASCENDING;
+    private final BaseEntitySet.Type TYPE = BaseEntitySet.Type.GENE;
 
-    private final EntityListDefinition definition;
-    private final EntityList demoList;
+    private final EntitySetDefinition definition;
+    private final EntitySet demoList;
 
     private DemoEntityList(@NonNull final String uuid, @NonNull final String geneSymbols) {
-      this.demoList = new EntityList(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE);
+      this.demoList = new EntitySet(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE);
       this.definition =
-          new EntityListDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
+          new EntitySetDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
               TYPE, 0);
     }
   }
 
-  public EntityList getEntityList(@NonNull final UUID listId) {
+  public EntitySet getEntityList(@NonNull final UUID listId) {
     val list = repository.find(listId);
 
     if (null == list) {
@@ -137,8 +137,8 @@ public class EntityListService {
     return list;
   }
 
-  public EntityList createEntityList(
-      @NonNull final EntityListDefinition listDefinition) {
+  public EntitySet createEntityList(
+      @NonNull final EntitySetDefinition listDefinition) {
 
     val newList = createAndSaveNewListFrom(listDefinition);
 
@@ -166,8 +166,8 @@ public class EntityListService {
     analyzer.materializeList(listId, demoEntityList.definition);
   }
 
-  public EntityList deriveEntityList(
-      @NonNull final DerivedEntityListDefinition listDefinition) {
+  public EntitySet deriveEntityList(
+      @NonNull final DerivedEntitySetDefinition listDefinition) {
 
     val newList =
         (listDefinition.isTransient()) ? createAndSaveNewListFrom(listDefinition, SubType.TRANSIENT) : createAndSaveNewListFrom(listDefinition);
@@ -177,8 +177,8 @@ public class EntityListService {
     return newList;
   }
 
-  private EntityList createAndSaveNewListFrom(final BaseEntityList listDefinition, final SubType subtype) {
-    val newList = EntityList.createFromDefinition(listDefinition);
+  private EntitySet createAndSaveNewListFrom(final BaseEntitySet listDefinition, final SubType subtype) {
+    val newList = EntitySet.createFromDefinition(listDefinition);
     if (null != subtype) {
       newList.setSubtype(subtype);
     }
@@ -189,7 +189,7 @@ public class EntityListService {
     return newList;
   }
 
-  private EntityList createAndSaveNewListFrom(final BaseEntityList listDefinition) {
+  private EntitySet createAndSaveNewListFrom(final BaseEntitySet listDefinition) {
     return createAndSaveNewListFrom(listDefinition, null);
   }
 
@@ -211,11 +211,11 @@ public class EntityListService {
     return result;
   }
 
-  public void exportListItems(@NonNull EntityList entityList, @NonNull OutputStream outputStream) throws IOException {
+  public void exportListItems(@NonNull EntitySet entityList, @NonNull OutputStream outputStream) throws IOException {
     val content =
         // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
         // overload.
-        (BaseEntityList.Type.GENE == entityList.getType()) ? convertToListOfListForGene(analyzer
+        (BaseEntitySet.Type.GENE == entityList.getType()) ? convertToListOfListForGene(analyzer
             .retrieveGeneIdsAndSymbolsByListId(entityList.getId())) : convertToListOfList(analyzer
             .retriveListItems(entityList));
 

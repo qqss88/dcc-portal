@@ -59,6 +59,12 @@ var DATASET_ALL = 'All Projects';
     };
     $scope.chromosomes = Object.keys(lengths);
     $scope.inProgress = false;
+    $scope.lengths = lengths;
+    $scope.invalidParams = {
+      isPositon:false,
+      isAllele:false,
+      isReference:false
+    };
 
     var saveParameters = function(){
       LocationService.setParam('proj',$scope.params.project.id);
@@ -103,18 +109,25 @@ var DATASET_ALL = 'All Projects';
 
     $scope.checkParams = function(){
 
-      $scope.hasInvalidParams = true;
-      //reset error messages
+      $scope.hasInvalidParams = false;
+      $scope.invalidParams = {
+        isPositon:false,
+        isAllele:false,
+        isReference:false
+      };
       $scope.errorMessage = '';
 
       // check that the position is less than length of chromosome
       if($scope.params.position && ($scope.params.position > lengths[$scope.params.chr])){
-        $scope.errorMessage = 'Position must be less than Chromosome '+
-          $scope.params.chr+'\'s length: '+lengths[$scope.params.chr];
-      }else if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
-        $scope.errorMessage = 'Currently only GRCh37 is supported';
-      }else if(($scope.params.reference && $scope.params.position && $scope.params.allele)){
-        $scope.hasInvalidParams = false;
+        $scope.invalidParams.isPosition = true;
+        $scope.hasInvalidParams = true;
+      }
+      if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
+        $scope.invalidParams.isReference = true;
+        $scope.hasInvalidParams = true;
+      }
+      if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
+        $scope.hasInvalidParams = true;
       }
 
       //Save state of things
@@ -136,13 +149,6 @@ var DATASET_ALL = 'All Projects';
       promise.then(function(data){
         $scope.result.exists = true;
         $scope.result.value = data.response.exists;
-        if($scope.result.value === 'true'){
-          $scope.result.fadeColor = '#EFFFEF';
-        }else if($scope.result.value === 'false'){
-          $scope.result.fadeColor = '#FFF3F3';
-        }else{
-          $scope.result.fadeColor = '#EFEFEF';
-        }
         var url = data.getRequestedUrl();
 
         if(url.indexOf(location.protocol) !== 0){
@@ -162,13 +168,10 @@ var DATASET_ALL = 'All Projects';
     $scope.exampleQuery =  function(type){
       if(type === 'true'){
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'16918653','ale':'T',result:'true'});
-        $scope.result.fadeColor = '#EFFFEF';
       }else if(type === 'false'){
         $location.search({'proj':'PACA-CA', 'chr':'12','ref':'GRCh37', 'pos':'25398285','ale':'C',result:'true'});
-        $scope.result.fadeColor = '#FFF3F3';
       }else{
         $location.search({'proj':'All Projects', 'chr':'1','ref':'GRCh37', 'pos':'10000','ale':'G',result:'true'});
-        $scope.result.fadeColor = '#EFEFEF';
       }
       $scope.inProgress =true;
       $scope.hasInvalidParams = false;
@@ -184,6 +187,11 @@ var DATASET_ALL = 'All Projects';
         reference:'GRCh37',
       };
       $scope.hasInvalidParams = true;
+      $scope.invalidParams = {
+        isPositon:false,
+        isAllele:false,
+        isReference:false
+      };
       $scope.errorMessage = '';
       $scope.result = {
         exists:false,
@@ -195,6 +203,7 @@ var DATASET_ALL = 'All Projects';
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
+      $scope.projects.unshift({id:'——————'});
       $scope.projects.unshift({id:DATASET_ALL});
       $scope.params = {
         project:$scope.projects[0],
@@ -231,12 +240,6 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
-
-        element.bind('keypress', function(event) {
-          if(event.keyCode === 32) {
-            event.preventDefault();
-          }
-        });
       }
     };
   });
@@ -261,14 +264,58 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
+      }
+    };
+  });
 
+  module.directive('searchOnEnter', function() {
+    return {
+      require: '?ngModel',
+      link: function(scope, element) {
         element.bind('keypress', function(event) {
           if(event.keyCode === 32) {
             event.preventDefault();
+          }else if(event.keyCode === 13) {
+            scope.checkParams();
+            if(!scope.hasInvalidParams){
+              scope.submitQuery();
+            }
           }
         });
       }
     };
   });
 
+  /** From github issue 638 (https://github.com/angular/angular.js/issues/638)
+      on angularjs page. In short, it allows for certain options in ng-options to be disabled
+      if they are true for a certain condition. See "options-disabled" in beacon.html for use.**/
+
+  module.directive('optionsDisabled', function($parse) {
+    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
+      // refresh the disabled options in the select element.
+      angular.forEach(element.find('option'), function(value, index){
+        var elem = angular.element(value);
+        if(elem.val()!==''){
+          var locals = {};
+          locals[attr] = data[index];
+          elem.attr('disabled', fnDisableIfTrue(scope, locals));
+        }
+      });
+    };
+    return {
+      priority: 0,
+      require: 'ngModel',
+      link: function(scope, iElement, iAttrs) {
+        // parse expression and build array of disabled options
+        var expElements = iAttrs.optionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
+        var attrToWatch = expElements[3];
+        var fnDisableIfTrue = $parse(expElements[1]);
+        scope.$watch(attrToWatch, function(newValue) {
+          if(newValue){
+            disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
+          }
+        }, true);
+      }
+    };
+  });
 })();

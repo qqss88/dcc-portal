@@ -21,25 +21,30 @@ import java.util.Date;
 
 import lombok.Data;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * TODO
+ * Base class representing an entity set.
  */
+@Slf4j
 @Data
-@ApiModel(value = "BaseEntityList")
-public abstract class BaseEntityList {
+@ApiModel(value = "BaseEntitySet")
+public abstract class BaseEntitySet {
 
-  @ApiModelProperty(value = "TODO")
+  @ApiModelProperty(value = "Name of Entity Set", required = true)
   private final String name;
 
-  @ApiModelProperty(value = "TODO")
+  @ApiModelProperty(value = "Description of Entity Set")
   private final String description;
 
-  @ApiModelProperty(value = "TODO")
+  @ApiModelProperty(value = "Type of Entity Set", required = true)
   private final Type type;
 
   private final long timestamp = new Date().getTime();
@@ -52,6 +57,27 @@ public abstract class BaseEntityList {
     GENE("gene"),
     MUTATION("mutation");
 
+    @NonNull
     private final String name;
+
+    public TermLookupType toLookupTypeFrom() {
+      if (this == DONOR) {
+        return TermLookupType.DONOR_IDS;
+      } else if (this == GENE) {
+        return TermLookupType.GENE_IDS;
+      } else if (this == MUTATION) {
+        return TermLookupType.MUTATION_IDS;
+      }
+
+      log.error("No mapping for enum value '{}' of BaseEntityList.Type.", this);
+      throw new IllegalStateException("No mapping for enum value: " + this);
+    }
+
+    // This should probably be declared elsewhere.
+    private final static String INDEX_TYPE_NAME_SUFFIX = "-centric";
+
+    public String getIndexTypeName() {
+      return this.getName() + INDEX_TYPE_NAME_SUFFIX;
+    }
   }
 }

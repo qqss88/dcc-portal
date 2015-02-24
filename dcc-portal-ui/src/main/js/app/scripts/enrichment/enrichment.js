@@ -130,6 +130,13 @@
           }
         });
 
+        // Close self if location change detected
+        $scope.$on('$locationChangeStart', function() {
+          if ($scope.enrichmentModal === true) {
+            $scope.enrichmentModal = false;
+          }
+        });
+
       }
     };
   });

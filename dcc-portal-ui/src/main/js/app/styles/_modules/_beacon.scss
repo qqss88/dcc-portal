@@ -7,6 +7,13 @@ td{
    padding:6px;
 }
 
+.beacon-button:focus{
+  outline: 0;
+  border-color:#66afe9;
+  -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+}
+
 .beaconquery{
  padding-top: 0;
   padding-bottom: 0;
@@ -39,7 +46,7 @@ td{
   font-size: x-large;
   padding-top: 1.7rem;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-weight: 550;
+  font-weight: 600;
   text-align: center;
   float:left;
   width:70%;
@@ -156,11 +163,14 @@ td{
     margin-bottom: 0.4rem;
 }
 
+.invalid-icon{
+  color:#e37559;
+}
+
 /** SELECT FORM CONTROL FROM BOOTSTRAP 3.2 */
 
 .beacon-form-control {
   display:block;
-  width:100%;
   height:34px;
   font-size:14px;
   line-height:1.42857143;

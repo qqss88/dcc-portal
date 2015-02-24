@@ -1,7 +1,11 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.analysis', ['icgc.analysis.controllers', 'ui.router']);
+  var module = angular.module('icgc.analysis', [
+    'icgc.analysis.controllers',
+    'icgc.bench.controllers',
+    'ui.router'
+  ]);
 
   module.config(function ($stateProvider) {
     $stateProvider.state('analyses', {
@@ -62,12 +66,10 @@
     // Selected sets
     $scope.selectedSets = [];
     $scope.addSelection = function(set) {
-      // console.log('adding set', set);
       $scope.selectedSets.push(set);
     };
 
     $scope.removeSelection = function(set) {
-      // console.log('removeng set', set);
       _.remove($scope.selectedSets, function(s) {
         return s.id === set.id;
       });
@@ -81,7 +83,6 @@
     $scope.launchSetAnalysis = function() {
       var selected = $scope.selectedSets;
 
-      // FIXME: sync with terry
       var type = selected[0].type.toUpperCase();
       var ids  = _.pluck(selected, 'id');
 
@@ -112,6 +113,9 @@
 
     $scope.update = function() {
 
+      $scope.enrichmentSet = null;
+      $scope.setop = null;
+
       // Check if delete button should be enabled
       $scope.canBeDeleted = _.filter($scope.selectedSets, function(set) {
         if (set.readonly && set.readonly === true) {
@@ -125,8 +129,12 @@
       var selected = $scope.selectedSets, uniqued = [];
       uniqued = _.uniq(_.pluck(selected, 'type'));
 
-      $scope.enrichmentSet = null;
-      $scope.setop = null;
+
+      // If there are unfinished, do not proceed
+      if (_.some(selected, function(s) { return s.state !== 'FINISHED'; })) {
+        return;
+      }
+
 
       // Enrichment analysis takes only ONE gene set
       if (selected.length === 1 && uniqued[0] === 'gene') {
@@ -164,18 +172,14 @@
     };
 
     var analysisPromise;
+    var pollTimeout, syncSetTimeout;
 
-    // TODO: Move this out
-    var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
-    var REMOVE_ALL = 'Are you sure you want to remove all analyses?';
 
     $scope.analysisId = analysisId;
     $scope.analysisType = analysisType;
-    $scope.analysisList = AnalysisService.getAll();
 
 
     function synchronizeSets(numTries) {
-      console.log('synchronizing', numTries + ' tries remaining...');
 
       var pendingLists, pendingListsIDs, promise;
       pendingLists = _.filter($scope.entityLists, function(d) {
@@ -196,124 +200,90 @@
       promise = SetService.getMetaData(pendingListsIDs);
       promise.then(function(results) {
         SetService.updateSets(results);
-        $timeout(function() {
+        syncSetTimeout = $timeout(function() {
           synchronizeSets(--numTries);
         }, 3000);
       });
     }
 
-
-    function getAnalysis() {
+    function wait(id, type) {
       $scope.error = null;
-      // 1) Check if analysis exist in the backend
-      // 2) If analysis cannot be found, delete from local-list and display error
-      if (! $scope.analysisId) {
+
+      var promise = AnalysisService.getAnalysis(id, type);
+      promise.then(function(data) {
+        var rate = 1000;
+
+        if (data.state !== 'FINISHED') {
+          $scope.analysisResult = data;
+
+          if (data.state === 'POST_PROCESSING') {
+            rate = 4000;
+          }
+          pollTimeout = $timeout(function() {
+            wait(id, type);
+          }, rate);
+        } else if (data.state === 'FINISHED') {
+          $scope.analysisResult = data;
+        }
+      }, function() {
+        $scope.error = true;
+      });
+    }
+
+
+    function init() {
+      $timeout.cancel(pollTimeout);
+
+      if (! $scope.analysisId || ! $scope.analysisType) {
         return;
       }
-      var resultPromise = AnalysisService.getAnalysis($scope.analysisId, $scope.analysisType);
-      var sync = false;
 
-      resultPromise.then(function(data) {
-        // data = Restangular.stripRestangular(data);
+      var id = $scope.analysisId, type = $scope.analysisType;
+      var promise = AnalysisService.getAnalysis(id, type);
+
+      promise.then(function(data) {
         if (! _.isEmpty(data)) {
-          $scope.analysisResult = data;
-          if (sync === false) {
-            AnalysisService.update(data);
-            $scope.analysisList = AnalysisService.getAll();
-            sync = true;
-          }
+          AnalysisService.addAnalysis(data, type);
         } else {
           $scope.error = true;
           return;
         }
 
-        // FIXME: sync with bob and terry
-        var currentState = data.state;
-        data.state = currentState;
-
-
-        // Check if we need to poll
-        if (currentState !== 'FINISHED') {
-          var pollRate = 1000;
-          if (currentState === 'POST_PROCESSING') {
-            pollRate = 4000;
-          }
-          analysisPromise = $timeout(getAnalysis, pollRate);
+        if (data.state === 'FINISHED') {
+          $timeout(function() {
+            $scope.analysisResult = data;
+          }, 150);
+          return;
         }
 
-      }, function(error) {
-        $scope.error = error.status;
+        // Kick off polling if not finished
+        wait(id, type);
+
+      }, function() {
+        $scope.error = true;
       });
     }
 
-    function init() {
-      // 1) If not already exist in local-list, prepend it to local-list
-      // 2) Display list, ordered by something...
-      // 3) Render analysis result in content panel
-      if ($scope.analysisId && $scope.analysisType) {
-        AnalysisService.add( $scope.analysisId, $scope.analysisType);
-        $scope.analysisList = AnalysisService.getAll();
-      }
-    }
-
-    $scope.getAnalysis = function(id, type) {
-      var routeType = type;
-      $timeout.cancel(analysisPromise);
-
-      if (type === 'union') {
-        routeType = 'set';
-      }
-
-      if (id) {
-        $scope.analysisId = id;
-        $location.path('analysis/' + routeType + '/' + id);
-      } else {
-        $scope.analysisId = null;
-        $location.path('analysis');
-      }
-    };
-
-
-    /**
-     * Remove all analyses, this includes both enrichment and set ops
-     */
-    $scope.removeAllAnalyses = function() {
-      var confirmRemove;
-      confirmRemove  = window.confirm(REMOVE_ALL);
-      if (confirmRemove) {
-        AnalysisService.removeAll();
-        $scope.analysisList = AnalysisService.getAll();
-        $location.path('analysis');
-      }
-    };
-
-
-    /**
-     * Remove a single analysis by UUID
-     */
-    $scope.remove = function(id) {
-      var confirmRemove = window.confirm(REMOVE_ONE);
-      if (! confirmRemove) {
-        return;
-      }
-
-      if (AnalysisService.remove(id) === true) {
-        $scope.analysis = null;
-        $scope.analysisList = AnalysisService.getAll();
-        $location.path('analysis');
-      }
-    };
+    $scope.$on('$locationChangeStart', function() {
+      // Cancel any remaining polling requests
+      $timeout.cancel(pollTimeout);
+      $timeout.cancel(syncSetTimeout);
+    });
 
     // Clea up
     $scope.$on('destroy', function() {
       $timeout.cancel(analysisPromise);
     });
 
-    init();
-    getAnalysis();
 
-    // Sync any unfinished sets that are still in the process of materialization
-    synchronizeSets(5);
+    // Start
+    init();
+
+    // Only do synchronization on analysis home tab
+    if (! $scope.analysisId || ! $scope.analysisType) {
+      synchronizeSets(10);
+    }
+
   });
 
 })();
@@ -326,53 +296,49 @@
   var module = angular.module('icgc.analysis.services', ['restangular']);
 
   module.service('AnalysisService', function(RestangularNoCache, localStorageService) {
-
     var ANALYSIS_ENTITY = 'analysis';
-    var _this = this;
+    var analysisList = [];
 
     this.getAnalysis = function(id, type) {
       return RestangularNoCache.one('analysis/' + type , id).get();
     };
 
     this.getAll = function() {
-      return localStorageService.get(ANALYSIS_ENTITY) || [];
+      return analysisList;
     };
 
     this.removeAll = function() {
-      localStorageService.set(ANALYSIS_ENTITY, []);
+      analysisList = [];
+      localStorageService.set(ANALYSIS_ENTITY, analysisList);
     };
 
-    this.add = function(id, type) {
-      var analysisList = this.getAll();
+    /**
+     * Add analysis to local storage 
+     */
+    this.addAnalysis = function(analysis, type) {
       var ids = _.pluck(analysisList, 'id');
-      if (_.contains(ids, id) === false) {
-        var newAnalysis = {
-          id: id,
-          timestamp: '--',
-          type: type
-        };
-        analysisList.unshift(newAnalysis);
-        localStorageService.set(ANALYSIS_ENTITY, analysisList);
-        return true;
+      if (_.contains(ids, analysis.id) === true) {
+        return;
       }
-      return false;
-    };
 
-    this.update = function(analysis) {
-      var analysisList = _this.getAll();
-      var cachedAnalysis = _.find(analysisList, function(d) {
-        return d.id === analysis.id;
-      });
-      if (cachedAnalysis) {
-        cachedAnalysis.timestamp = analysis.timestamp;
-        localStorageService.set(ANALYSIS_ENTITY, analysisList);
-        return true;
+      var payload = {
+        id: analysis.id,
+        timestamp: analysis.timestamp || '--',
+        type: type
+      };
+
+      if (type === 'enrichment') {
+        payload.universe = analysis.params.universe;
+        payload.maxGeneCount = analysis.params.maxGeneCount;
+      } else {
+        payload.dataType = analysis.type.toLowerCase();
       }
-      return false;
+
+      analysisList.unshift( payload );
+      localStorageService.set(ANALYSIS_ENTITY, analysisList);
     };
 
     this.remove = function(id) {
-      var analysisList = this.getAll();
       var ids = _.pluck(analysisList, 'id');
 
       if (_.contains(ids, id)) {
@@ -383,6 +349,9 @@
       }
       return false;
     };
+
+    // Init service
+    analysisList = localStorageService.get(ANALYSIS_ENTITY) || [];
   });
 
 })();

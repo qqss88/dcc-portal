@@ -300,7 +300,17 @@
 
     /****** Local storage related API ******/
     this.getAll = function() {
+      return setList;
+    };
+
+    this.initService = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
+
+      // Reset everything to PENDNG
+      setList.forEach(function(set) {
+        set.state = 'PENDING';
+      });
+
       _this.refreshList();
 
       return setList;
@@ -385,7 +395,7 @@
 
 
     // Initialize
-    var setList = _this.getAll();
+    var setList = _this.initService();
     _this.initDemo();
   });
 

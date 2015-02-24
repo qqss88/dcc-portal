@@ -14,7 +14,6 @@
   ~ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
   ~ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge__geneset"></span>
         {{ GeneSetCtrl.geneSet.id }}</h1>
@@ -65,7 +64,7 @@
                 <td>{{ GeneSetCtrl.geneSet.type }}</td>
             </tr>
             <tr>
-                <th>Genes</th>
+                <th>Human Genes</th>
                 <td>
                     <a href='/search/g?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]}}}'>{{GeneSetCtrl.geneSet.geneCount}}</a>
                 </td>
@@ -97,8 +96,6 @@
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.type==='go_term'">
                 <th>Inferred Tree</th>
-                <!--<td>{{GeneSetCtrl.geneSet.inferredTree}}</td>-->
-                <!--<td>{{GeneSetCtrl.uiInferredTree}}</td>-->
                 <td>
                     <inferred-tree tree="GeneSetCtrl.uiInferredTree"></inferred-tree>
                 </td>
@@ -122,39 +119,38 @@
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'">
                 <td>Reactome Pathway</td>
                 <td>
-                    <a href="http://www.reactome.org/content/detail/{{GeneSetCtrl.geneSet.id}}"
-                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}</a>
+                    <a href="{{GeneSetCtrl.ExternalLinks.geneSetReactome(GeneSetCtrl.geneSet.id)}}" target="_blank">
+                       <i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}</a>
                 </td>
             </tr>
-
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'COSMIC - Sanger'">
                 <td>COSMIC</td>
                 <td>
-                    <a href="http://cancer.sanger.ac.uk/cancergenome/projects/census/"
-                       target="_blank"><i class="icon-external-link"></i>Cancer Gene Census</a>
+                    <a href="{{GeneSetCtrl.ExternalLinks.geneSetSanger()}}" target="_blank">
+                       <i class="icon-external-link"></i>Cancer Gene Census</a>
                 </td>
             </tr>
-
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
                 <td>Amigo2</td>
                 <td>
-                    <a href="http://amigo.geneontology.org/amigo/term/{{GeneSetCtrl.geneSet.id}}"
-                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
+                    <a href="{{GeneSetCtrl.ExternalLinks.geneSetAmigo(GeneSetCtrl.geneSet.id)}}" target="_blank">
+                        <i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
                     </a>
                 </td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
                 <td>EBI QuickGO</td>
                 <td>
-                    <a href="http://www.ebi.ac.uk/QuickGO/GTerm?id={{GeneSetCtrl.geneSet.id}}"
-                       target="_blank"><i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
+                    <a href="{{GeneSetCtrl.ExternalLinks.geneSetEBI(GeneSetCtrl.geneSet.id)}}" target="_blank">
+                        <i class="icon-external-link"></i> {{ GeneSetCtrl.geneSet.id }}
                    </a>
                 </td>
             </tr>
             <tr data-ng-if="GeneSetCtrl.geneSet.source === 'Gene Ontology'">
                 <td>Gene Ontology</td>
                 <td>
-                    <a href="http://geneontology.org/" target="_blank">GO Website</a>
+                    <a href="{{GeneSetCtrl.ExternalLinks.geneSetGeneOntology()}}" target="_blank">
+                        <i class="icon-external-link"></i>GO Website</a>
                 </td>
             </tr>
 
@@ -363,7 +359,6 @@
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
                         /
-                        <!--<a data-ng-href='/search?filters={"gene":{"{{GeneSetCtrl.geneSet.queryType}}":{"is":["{{GeneSetCtrl.geneSet.id}}"]},"id":{"is":["{{gene.id}}"]} }}'>-->
                         <a data-ng-href='/search?filters={{GeneSetCtrl.baseAdvQuery}}'>
                             {{GeneSetCtrl.totalDonors | number}}</a>
                         <em>({{gene.affectedDonorCountFiltered/GeneSetCtrl.totalDonors * 100 | number:2}}%)</em>

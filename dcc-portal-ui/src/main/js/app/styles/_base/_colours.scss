@@ -27,6 +27,7 @@ $black: hsl(0, 0%, 0%);
 $greyDarker: hsl(0, 0%, 20%);
 $greyDark: hsl(0, 0%, 40%);
 $grey: hsl(0, 0%, 60%);
+$greySlightlyLighter: hsl(0, 0%, 70%);
 $greyLight: hsl(0, 0%, 80%);
 $greyLighter: hsl(0, 0%, 90%);
 $greyLightest: hsl(0, 0%, 95%);
@@ -60,6 +61,10 @@ $project: $yellow;
 $pathway: $green;
 $charts: $violet;
 $table: $magenta;
+
+$tooltipBorder: $greySlightlyLighter;
+$tooltipFill: white;
+$tooltipShadowColor: rgba(180,180,180,0.43);
 
 // ---------------------------------------------------------------------------
 // Color System
