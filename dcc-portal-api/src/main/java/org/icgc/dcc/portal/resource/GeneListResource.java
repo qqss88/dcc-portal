@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -132,7 +132,7 @@ public class GeneListResource {
     if (originalIds.size() > MAX_GENE_LIST_SIZE) {
       log.info("Exceeds maximum size {}", MAX_GENE_LIST_SIZE);
       geneList.getWarnings().add(
-          _("Input data exceeds maximum threshold of %s gene identifiers.", MAX_GENE_LIST_SIZE));
+          String.format("Input data exceeds maximum threshold of %s gene identifiers.", MAX_GENE_LIST_SIZE));
       return geneList;
     }
 
