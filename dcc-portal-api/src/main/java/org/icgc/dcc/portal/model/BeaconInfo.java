@@ -44,7 +44,7 @@ public class BeaconInfo {
     this.name = "Beacon";
     this.organization = "ICGC";
     // Recommended format is [organization]+[beacon]
-    this.id = this.organization + "-" + this.name;
+    this.id = this.organization + " - " + this.name;
     this.api = "0.2";
   }
 

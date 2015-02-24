@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.icgc.dcc.portal.model.AlleleMutation;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.repository.BaseRepositoryTest;
@@ -39,28 +40,28 @@ public class BeaconServiceTest extends BaseRepositoryTest {
 
   @Test
   public void testSuccesfullyFound() {
-    Beacon result = service.query("19", 1207014, "GRCh37", "T", "");
+    Beacon result = service.query("19", 1207014, "GRCh37", new AlleleMutation("-", "T", "T"), "");
     assertThat(result.getResponse().exists).isEqualTo("true");
   }
 
   @Test
   public void testWrongAlleleFound() {
-    Beacon result = service.query("19", 1207014, "GRCh37", "C", "");
+    Beacon result = service.query("19", 1207014, "GRCh37", new AlleleMutation("-", "C", "C"), "");
     assertThat(result.getResponse().exists).isEqualTo("false");
   }
 
   @Test
   public void testNothingFound() {
-    Beacon result = service.query("11", 11111, "GRCh37", "T", "");
+    Beacon result = service.query("11", 11111, "GRCh37", new AlleleMutation("-", "T", "T"), "");
     assertThat(result.getResponse().exists).isEqualTo("null");
   }
 
   @Test
   public void testSpecificDataset() {
-    Beacon result = service.query("11", 11111, "GRCh37", "T", "53049.0");
+    Beacon result = service.query("11", 11111, "GRCh37", new AlleleMutation("-", "T", "T"), "53049.0");
     assertThat(result.getResponse().exists).isEqualTo("null");
 
-    result = service.query("11", 1207014, "GRCh37", "T", "MADE-UP");
+    result = service.query("11", 1207014, "GRCh37", new AlleleMutation("-", "T", "T"), "MADE-UP");
     assertThat(result.getResponse().exists).isEqualTo("null");
   }
 

@@ -22,7 +22,6 @@ import static com.google.common.primitives.Ints.tryParse;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,6 +31,7 @@ import javax.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import org.icgc.dcc.portal.model.AlleleParam;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.BeaconInfo;
 import org.icgc.dcc.portal.service.BadRequestException;
@@ -63,10 +63,6 @@ public class BeaconResource extends BaseResource {
           .put("16", 90354753).put("17", 81195210).put("18", 78077248).put("19", 59128983).put("20", 63025520)
           .put("21", 48129895).put("22", 51304566).put("X", 155270560).put("Y", 59373566).put("MT", 16569).build();
 
-  private static final Pattern ALLELE_REGEX = Pattern.compile("^[ACTG]+");
-  private static final String WILDCARD_ANY = "ANY";
-  private static final String WILDCARD_DEL = "D";
-  private static final String WILDCARD_INS = "I";
   private static final String CHROMOSOME_X = "X";
   private static final String CHROMOSOME_Y = "Y";
   private static final String CHROMOSOME_MT = "MT";
@@ -88,7 +84,7 @@ public class BeaconResource extends BaseResource {
 
       @ApiParam(value = "Genome ID: GRCh\\d+", required = true) @QueryParam("reference") String reference,
 
-      @ApiParam(value = "Alleles: [ACTG]+", required = true) @QueryParam("allele") String allele,
+      @ApiParam(value = "Alleles: [ACTG]+", required = true) @QueryParam("allele") AlleleParam allele,
 
       @ApiParam(value = "Dataset to be queried (Project ID)") @QueryParam("dataset") String dataset
 
@@ -100,17 +96,13 @@ public class BeaconResource extends BaseResource {
       throw new BadRequestException("'position' is empty, invalid or exceeds chromosome size");
     } else if (!isValidReference(reference)) {
       throw new BadRequestException("'reference' is empty or invalid (must be GRCh\\d+)");
-    } else if (isNullOrEmpty(allele)) {
-      allele = WILDCARD_ANY;
-    } else if (!isValidAllele(allele)) {
-      throw new BadRequestException("'allele' is invalid (must be [ACTG]+)");
     } else if (isNullOrEmpty(dataset)) {
       dataset = ANY_DATASET;
     }
 
     return beaconService.query(chromosome.toUpperCase().trim(), Objects.firstNonNull(tryParse(position.trim()), 1),
         reference.trim(),
-        allele.trim(),
+        allele.get(),
         dataset.trim());
   }
 
@@ -142,11 +134,6 @@ public class BeaconResource extends BaseResource {
     }
     ref = ref.trim();
     return ref.startsWith("GRCh") && Doubles.tryParse(ref.substring(4)) != null;
-  }
-
-  private Boolean isValidAllele(String allele) {
-    allele = allele.trim();
-    return ALLELE_REGEX.matcher(allele).matches() || allele.equals(WILDCARD_DEL) || allele.equals(WILDCARD_INS);
   }
 
   private Boolean isValidPosition(String position, String chromosome) {
