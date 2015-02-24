@@ -51,7 +51,7 @@ import com.yammer.metrics.annotation.Timed;
 @Component
 @Api(value = "/beacon", description = "Answers the question: \"Have you observed this genotype?\"")
 @Path("/v1/beacon/query")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class BeaconResource extends BaseResource {
 
   private final BeaconService beaconService;

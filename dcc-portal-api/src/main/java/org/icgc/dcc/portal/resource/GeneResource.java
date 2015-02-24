@@ -103,7 +103,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/genes")
 @Produces(APPLICATION_JSON)
 @Api(value = "/genes", description = "Operations about " + GENE)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneResource {
 
   private static final String GENE_FILTER_TEMPLATE = "{gene:{id:{is:['%s']}}}";

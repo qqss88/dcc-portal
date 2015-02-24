@@ -55,7 +55,7 @@ import com.yammer.metrics.annotation.Timed;
 @Component
 @Path("/v1/genelists")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneListResource {
 
   @NonNull

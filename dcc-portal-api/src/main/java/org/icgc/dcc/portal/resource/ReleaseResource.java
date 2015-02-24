@@ -49,7 +49,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/releases")
 @Produces(APPLICATION_JSON)
 @Api(value = "/releases", description = "Operations about releases")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ReleaseResource {
 
   private static final String DEFAULT_FILTERS = "{}";

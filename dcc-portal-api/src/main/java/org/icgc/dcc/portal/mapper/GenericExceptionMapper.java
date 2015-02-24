@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Provider
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   private static final Random RANDOM = new Random();

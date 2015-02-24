@@ -54,7 +54,7 @@ import org.springframework.stereotype.Component;
 @Path("/v1/auth/openid")
 @Produces(TEXT_PLAIN)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OpenIDResource extends BaseResource {
 
   /**

@@ -65,7 +65,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/genesets")
 @Produces(APPLICATION_JSON)
 @Api(value = "/genesets", description = "Operations about gene sets")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneSetResource {
 
   private final GeneSetService geneSetService;

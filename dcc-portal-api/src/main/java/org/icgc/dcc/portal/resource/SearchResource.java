@@ -48,7 +48,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/keywords")
 @Produces(APPLICATION_JSON)
 @Api(value = "/keyword", description = "Operations about keyword search")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class SearchResource {
 
   private static final String DEFAULT_FILTERS = "{}";

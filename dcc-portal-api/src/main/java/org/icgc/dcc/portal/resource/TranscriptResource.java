@@ -44,7 +44,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/transcripts")
 @Produces(APPLICATION_JSON)
 @Api(value = "/transcripts", description = "Operations about transcripts")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class TranscriptResource {
 
   private static final String DEFAULT_FILTERS = "{}";

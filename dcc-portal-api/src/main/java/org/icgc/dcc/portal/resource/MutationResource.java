@@ -100,7 +100,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/mutations")
 @Produces(APPLICATION_JSON)
 @Api(value = "/mutations", description = "Operations about " + MUTATION)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class MutationResource {
 
   private static final String MUTATION_FILTER_TEMPLATE = "{mutation:{id:{is:['%s']}}}";

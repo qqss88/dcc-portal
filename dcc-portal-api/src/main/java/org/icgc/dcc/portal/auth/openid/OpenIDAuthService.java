@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OpenIDAuthService {
 
   public static final String OPENID_EMAIL = "http://schema.openid.net/contact/email";

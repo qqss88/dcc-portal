@@ -48,7 +48,7 @@ import com.google.common.collect.ImmutableMap;
 @Path("/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";

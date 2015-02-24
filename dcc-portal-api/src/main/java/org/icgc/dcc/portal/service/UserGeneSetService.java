@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
  * User "gene set" related operations.
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserGeneSetService {
 
   /**
