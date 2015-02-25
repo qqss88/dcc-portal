@@ -77,7 +77,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
       val responseBuilder = Response.fromResponse(response);
       val statusCode = response.getStatus();
 
-      val ok = statusCode >= 200 && statusCode < 400;
+      val ok = statusCode < 400;
       if (ok) {
         return responseBuilder.build();
       } else {
