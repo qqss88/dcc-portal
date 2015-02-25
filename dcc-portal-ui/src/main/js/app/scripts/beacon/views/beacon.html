@@ -54,7 +54,7 @@
             </tr>
             <tr>
                 <td align="right">
-                  <span><abbr data-tooltip="One or more of: A, C, T, G alone or an indel">Mutated Allele(s)</abbr> *</span>
+                  <span><abbr data-tooltip="One or more of: A, C, T, G or an indel">Mutated Allele(s)</abbr> *</span>
                 </td>
                 <td>
                     <input search-on-enter tabindex="5" data-ng-class="{'invalid': invalidParams.isAllele}" allele-validator
@@ -107,17 +107,17 @@
         <div class="beacon-callout-container">
           <div class="beacon-callout beacon-callout-true">
             <h4>true</h4>
-            Returned when a matching mutation is found at the queried location.<br><br><br>
+            Returned when a matching mutation is found at the queried position.<br><br><br>
             For an example, try this <a ng-click="exampleQuery('true');" href=""><i class="icon-search"></i>query</a>.
           </div>
           <div class="beacon-callout beacon-callout-false">
             <h4>false</h4>
-            Returned when a mutation is found at that position but does not match the mutated allele.<br><br>
+            Returned when a mutation is found at that position but does not match the mutated allele(s).<br><br>
             For an example, try this <a ng-click="exampleQuery('false');" href=""><i class="icon-search"></i>query</a>.
           </div>
           <div class="beacon-callout beacon-callout-null">
             <h4>Null</h4>
-            Returned when no mutation is found at the queried position.<br><br><br><br>
+            Returned when no mutation is found at the queried position in the selected dataset(s).<br><br>
             For an example, try this <a ng-click="exampleQuery('null');" href=""><i class="icon-search"></i>query</a>.
           </div>
         </div>

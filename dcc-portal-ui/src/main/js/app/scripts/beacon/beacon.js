@@ -130,7 +130,7 @@ var DATASET_ALL = 'All Projects';
       if($scope.params.allele && !(
          /^[ACTG]+$/.test($scope.params.allele) ||
          /^([ACTG])>\1[ACTG]+$/.test($scope.params.allele) ||
-         /^->[ACTG]$/.test($scope.params.allele) ||
+         /^->[ACTG]+$/.test($scope.params.allele) ||
          /^([ACTG])[ACTG]+>\\1$/.test($scope.params.allele) ||
          /^[ACTG]+>-$/.test($scope.params.allele))){
         $scope.invalidParams.isAllele = true;
