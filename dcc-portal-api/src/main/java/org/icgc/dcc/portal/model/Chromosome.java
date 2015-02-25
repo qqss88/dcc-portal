@@ -22,21 +22,19 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Ints.tryParse;
 
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-
-import org.icgc.dcc.portal.service.BadRequestException;
 
 /**
  * Represents a Chromosome, with a name and the allowed max position.
  */
-@RequiredArgsConstructor
 @Getter
+@RequiredArgsConstructor
 public enum Chromosome {
 
   CHR1("1", 249250621),
@@ -65,8 +63,9 @@ public enum Chromosome {
   Y("Y", 59373566),
   MT("MT", 16569);
 
+  @NonNull
   private final String name;
-  /*
+  /**
    * Max position for a chromosome
    */
   private final int length;
@@ -74,136 +73,98 @@ public enum Chromosome {
   /*
    * Constants
    */
-  private static final String PREFIX = "chr".toUpperCase();
+  private static final String PREFIX = enforcesUppercase("chr");
   private static final int PREFIX_LENGTH = PREFIX.length();
-
-  private static final String CHROMOSOME_SEPARATOR = ":";
-  private static final String RANGE_SEPARATOR = "-";
 
   private static final Map<String, Chromosome> LOOKUP_TABLE_BY_NAME;
 
   static {
-    val values = EnumSet.allOf(Chromosome.class);
-    val lookup = new HashMap<String, Chromosome>(values.size());
-    for (val c : values) {
-      lookup.put(c.getName().toUpperCase(), c);
+    Chromosome[] values = Chromosome.values();
+    val lookup = new HashMap<String, Chromosome>(values.length);
+
+    for (val value : values) {
+      lookup.put(enforcesUppercase(value.name), value);
     }
+
     LOOKUP_TABLE_BY_NAME = Collections.unmodifiableMap(lookup);
   }
 
-  /*
+  private static String enforcesUppercase(final String input) {
+    return input.toUpperCase();
+  }
+
+  /**
    * Gets a Chromosome instance by its name (1-22, X, Y or MT).
    */
-  public static Chromosome ofName(final String name) {
+  public static Chromosome byName(final String name) {
     checkArgument(!isNullOrEmpty(name), "The name of a chromosome must not empty or null.");
 
     val result = LOOKUP_TABLE_BY_NAME.get(name);
+
     if (null == result) {
-      throw new BadRequestException("Invalid chromosome name (must be 1-22, X, Y or MT): " + name);
+      throw new IllegalArgumentException("Invalid chromosome name (must be 1-22, X, Y or MT): " + name);
     }
+
     return result;
   }
 
-  /*
+  /**
    * Gets a Chromosome instance by its literal name in the format of 'chr' plus 1-22 or 'x', 'y', 'mt'. This might
    * appear redundant to the built-in valueOf(); however, this supports literals in lowercase too.
    */
-  public static Chromosome ofLiteral(final String literal) {
-    if (isNullOrEmpty(literal)) {
-      throw new BadRequestException("The name of a chromosome must not empty or null.");
-    }
+  public static Chromosome byExpression(final String expression) {
+    checkArgument(!isNullOrEmpty(expression), "The name of a chromosome must not empty or null.");
+
+    val input = enforcesUppercase(expression.trim());
 
     // Try the fast way first.
     try {
-      return Chromosome.valueOf(literal);
+      return Chromosome.valueOf(input);
     } catch (Exception e) {
       /*
        * This empty catch is intentional so that the function can continue on.
        */
     }
 
-    val input = literal.trim().toUpperCase();
     val name =
         (input.startsWith(PREFIX) && input.length() > PREFIX_LENGTH) ? input.substring(PREFIX_LENGTH) : input;
-    return ofName(name);
+    return byName(name);
   }
 
   @Override
   public String toString() {
-    return this.getName();
+    return this.name;
   }
 
-  /*
+  /**
    * Checks if the position falls within the range of 0 to the max length associated with a particular chromosome. If it
-   * does not, a BadRequestException will be thrown.
+   * does not, an exception will be thrown.
    * 
-   * @param positionToCheck
+   * @param position
    * 
-   * @throws BadRequestException if positionToCheck exceeds the max associated with the chromosome.
+   * @throws IllegalArgumentException if position exceeds the max associated with the chromosome.
    */
-  public void checkPosition(final int positionToCheck) {
-    if (positionToCheck < 0) {
-      throw new BadRequestException("The 'position' argument must not be negative.");
-    }
-    if (positionToCheck > this.length) {
-      throw new BadRequestException("The requested position (" + positionToCheck + ") exceeds the max limit ("
-          + this.length + ") for Chromosome " + this.getName());
-    }
+  public void checkPosition(final int position) {
+    checkArgument(position >= 0, "The 'position' argument must not be negative.");
+
+    checkArgument(position <= this.length, "The requested position (" + position + ") exceeds the max limit ("
+        + this.length + ") for Chromosome " + this.name);
   }
 
-  /*
-   * Parses a string to a valid length for a chromosome. It will throw a BadRequestException when an error occurs.
+  /**
+   * Parses a string to a valid length for a chromosome. It will throw an exception when an error occurs.
    */
-  public Integer parsePosition(final String requestedPosition) {
-    checkArgument(!isNullOrEmpty(requestedPosition), "The 'position' argument must not empty or null.");
+  public Integer parsePosition(final String position) {
+    checkArgument(!isNullOrEmpty(position), "The 'position' argument must not empty or null.");
 
-    val wantedPosition = tryParse(requestedPosition.trim().replaceAll(",", ""));
-    if (null == wantedPosition) {
-      throw new BadRequestException("Error parsing '" + requestedPosition + "' to an integer.");
+    val cleaned = position.trim().replaceAll(",", "");
+    val parsedPosition = tryParse(cleaned);
+
+    if (null == parsedPosition) {
+      throw new IllegalArgumentException("Error parsing '" + position + "' to an integer.");
     }
-    checkPosition(wantedPosition);
-    return wantedPosition;
-  }
 
-  /*
-   * Offers a safe (exception-free) way to parse a string to a valid position for a particular chromosome, backed by a
-   * default value.
-   * 
-   * Warning: the defaultValue is NOT validated. It is assumed valid.
-   */
-  public Integer safeParsePositionElseDefault(final String positionInString, final int defaultValue) {
-    Integer result = null;
-    try {
-      result = parsePositionElseDefault(positionInString, defaultValue);
-    } catch (Exception e) {
-      result = defaultValue;
-    }
-    return result;
-  }
-
-  private Integer parsePositionElseDefault(final String requestedPosition, final int defaultValue) {
-    return (isNullOrEmpty(requestedPosition)) ? defaultValue : parsePosition(requestedPosition);
-  }
-
-  /*
-   * Parses a string to a ChromosomeLocation instance, validating the chromosome and its lower and upper bounds along
-   * the way. An example of a valid string is: chr1:20-100
-   */
-  public static ChromosomeLocation toChromosomeLocation(final String chromosomeWithRange) {
-    checkArgument(!isNullOrEmpty(chromosomeWithRange), "The 'chromosomeWithRange' argument must not empty or null.");
-
-    String[] parts = chromosomeWithRange.split(CHROMOSOME_SEPARATOR);
-    val chromosome = ofLiteral(parts[0]);
-    Integer start = null;
-    Integer end = null;
-    if (parts.length > 1 && !isNullOrEmpty(parts[1])) {
-      String[] range = parts[1].split(RANGE_SEPARATOR);
-
-      start = chromosome.parsePositionElseDefault(range[0], 0);
-      if (range.length > 1) {
-        end = chromosome.parsePositionElseDefault(range[1], chromosome.getLength());
-      }
-    }
-    return new ChromosomeLocation(chromosome, start, end);
+    checkPosition(parsedPosition);
+    return parsedPosition;
   }
 }

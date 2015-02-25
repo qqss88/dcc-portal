@@ -80,7 +80,7 @@ public class BeaconResource extends BaseResource {
 
       ) {
     // Validate
-    val parsedChromosome = Chromosome.ofLiteral(chromosome);
+    val parsedChromosome = Chromosome.byExpression(chromosome);
     val parsedPosition = parsedChromosome.parsePosition(position);
 
     if (!isValidReference(reference)) {

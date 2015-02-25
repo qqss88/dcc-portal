@@ -16,16 +16,20 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.io.Serializable;
 
 import lombok.Value;
+import lombok.val;
 
 @Value
 public class ChromosomeLocation implements Serializable {
 
-  final Chromosome chromosome;
-  final Integer start;
-  final Integer end;
+  Chromosome chromosome;
+  Integer start;
+  Integer end;
 
   public boolean hasStart() {
     return start != null;
@@ -35,4 +39,37 @@ public class ChromosomeLocation implements Serializable {
     return end != null;
   }
 
+  private static final String CHROMOSOME_SEPARATOR = ":";
+  private static final String RANGE_SEPARATOR = "-";
+
+  private static Integer parsePosition(final String position, final Chromosome chromosome, final int defaultValue) {
+    return isNullOrEmpty(position) ? defaultValue : chromosome.parsePosition(position);
+  }
+
+  /**
+   * Parses a string to a ChromosomeLocation instance, validating the chromosome and its lower and upper bounds along
+   * the way. An example of a valid string is: chr1:20-100
+   */
+  public static ChromosomeLocation parse(final String chromosomeWithRange) {
+    checkArgument(!isNullOrEmpty(chromosomeWithRange), "The 'chromosomeWithRange' argument must not empty or null.");
+
+    final String[] parts = chromosomeWithRange.split(CHROMOSOME_SEPARATOR);
+    val chromosome = Chromosome.byExpression(parts[0]);
+    Integer start = null;
+    Integer end = null;
+
+    if (parts.length > 1 && !isNullOrEmpty(parts[1])) {
+      final String[] range = parts[1].split(RANGE_SEPARATOR);
+
+      val defaultLowerbound = 0;
+      start = parsePosition(range[0], chromosome, defaultLowerbound);
+
+      if (range.length > 1) {
+        val defaultUpperbound = chromosome.getLength();
+        end = parsePosition(range[1], chromosome, defaultUpperbound);
+      }
+    }
+
+    return new ChromosomeLocation(chromosome, start, end);
+  }
 }

@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
+import org.icgc.dcc.portal.mapper.IllegalArgumentExceptionMapper;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.BeaconQuery;
 import org.icgc.dcc.portal.model.BeaconResponse;
@@ -66,6 +67,7 @@ public class BeaconResourceTest extends ResourceTest {
   protected final void setUpResources() {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
+    addProvider(IllegalArgumentExceptionMapper.class);
   }
 
   @Test
@@ -83,6 +85,10 @@ public class BeaconResourceTest extends ResourceTest {
     when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("39", "1111", "GRCh37", "A");
+    assertEqualToBadRequest(response);
+  }
+
+  private static void assertEqualToBadRequest(final ClientResponse response) {
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
@@ -107,7 +113,7 @@ public class BeaconResourceTest extends ResourceTest {
     when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("", "1111", "GRCh37", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
@@ -115,7 +121,7 @@ public class BeaconResourceTest extends ResourceTest {
     when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("MT", "1111111111", "GRCh37", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   private ClientResponse generateResponse(String chromosome, String position, String reference, String allele) {
