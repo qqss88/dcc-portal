@@ -32,9 +32,18 @@ public class AlleleParamTest {
   @Parameters
   public static Iterable<Object[]> data() {
     return Arrays.asList(new Object[][] {
-        { "AAA", true }, { "T>TGGG", true }, { "CCA>C", true }, { "->ATT", true }, { "  GG>-", true },
-        { "acccc", false }, { "A>aaA", false }, { "AA>AGGG", false }, { "GAGC>GC", false }, { "- >AGGG", false },
-        { "A<AAA", false }, { "A>C>T", false }
+        { "AAA", true },
+        { "T>TGGG", true },
+        { "CCA>C", true },
+        { "->ATT", true },
+        { "  GG>-", true },
+        { "acccc", false },
+        { "A>aaA", false },
+        { "AA>AGGG", false },
+        { "GAGC>GC", false },
+        { "- >AGGG", false },
+        { "A<AAA", false },
+        { "A>C>T", false }
     });
   }
 
@@ -50,16 +59,13 @@ public class AlleleParamTest {
   public void testAlleleParam() {
     Boolean exception = false;
 
-    if (valid) {
+    try {
       new AlleleParam(input).get();
-    } else {
-      try {
-        new AlleleParam(input).get();
-      } catch (Exception e) {
-        exception = true;
-      }
-
-      assertThat(exception).isTrue();
+    } catch (Exception e) {
+      exception = true;
     }
+
+    assertThat(exception).isEqualTo(!valid);
+
   }
 }

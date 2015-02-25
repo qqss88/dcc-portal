@@ -16,6 +16,8 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.regex.Pattern;
 
 import org.icgc.dcc.portal.util.AlleleParser;
@@ -38,7 +40,7 @@ public class AlleleParam extends AbstractParam<AlleleMutation> {
   protected AlleleMutation parse(String input) throws Exception {
     String allele = input.trim();
 
-    if (!isValidAllele(allele)) throw new Exception();
+    checkArgument(isValidAllele(allele), "'allele' parameter is not valid: Must be [ACTG]+ or an indel");
 
     return AlleleParser.parseAllele(allele);
   }

@@ -17,24 +17,33 @@
  */
 package org.icgc.dcc.portal.util;
 
+import lombok.NonNull;
+
 import org.icgc.dcc.portal.model.AlleleMutation;
 
 public class AlleleParser {
 
+  private static final String INDEL_SYMBOL = ">";
+  private static final String NO_ALLELE_SYMBOL = "-";
+
+  @NonNull
   public static AlleleMutation parseAllele(String input) {
     String allele = input.trim();
 
-    if (!allele.contains(">")) return new AlleleMutation("-", allele, allele);
+    if (!allele.contains(INDEL_SYMBOL)) {
+      return new AlleleMutation(NO_ALLELE_SYMBOL, allele, allele);
+    }
 
-    if (allele.substring(0, allele.indexOf(">")).length() == 1) {
-      return allele.contains("-") ?
-          new AlleleMutation("-", allele.substring(2), allele)
-          : new AlleleMutation("-", allele.substring(3), "->" + allele.substring(3));
+    if (allele.substring(0, allele.indexOf(INDEL_SYMBOL)).length() == 1) {
+      return allele.contains(NO_ALLELE_SYMBOL) ?
+          new AlleleMutation(NO_ALLELE_SYMBOL, allele.substring(2), allele)
+          : new AlleleMutation(NO_ALLELE_SYMBOL, allele.substring(3), NO_ALLELE_SYMBOL + INDEL_SYMBOL
+              + allele.substring(3));
     } else {
-      return allele.contains("-") ?
-          new AlleleMutation(allele.substring(0, allele.indexOf(">")), "-", allele)
-          : new AlleleMutation(allele.substring(1, allele.indexOf(">")), "-",
-              allele.substring(1, allele.indexOf(">")) + ">-");
+      return allele.contains(NO_ALLELE_SYMBOL) ?
+          new AlleleMutation(allele.substring(0, allele.indexOf(INDEL_SYMBOL)), NO_ALLELE_SYMBOL, allele)
+          : new AlleleMutation(allele.substring(1, allele.indexOf(INDEL_SYMBOL)), NO_ALLELE_SYMBOL,
+              allele.substring(1, allele.indexOf(INDEL_SYMBOL)) + INDEL_SYMBOL + NO_ALLELE_SYMBOL);
     }
   }
 

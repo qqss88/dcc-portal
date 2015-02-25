@@ -34,4 +34,5 @@ public class AlleleMutation {
 
   @ApiModelProperty(value = "The complete mutation of the allele(s)", required = true)
   String mutation;
+
 }

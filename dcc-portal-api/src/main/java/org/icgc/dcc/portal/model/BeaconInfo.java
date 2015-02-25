@@ -17,33 +17,27 @@
  */
 package org.icgc.dcc.portal.model;
 
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 @Value
+@NoArgsConstructor
 public class BeaconInfo {
 
   @JsonProperty
+  @ApiModelProperty(value = "Owning organization", required = true)
+  String organization = "ICGC";
+  @JsonProperty
   @ApiModelProperty(value = "Unique Beacon ID", required = true)
-  String id;
+  String id = this.organization + " - Beacon";
   @JsonProperty
   @ApiModelProperty(value = "Beacon name", required = true)
-  String name;
-  @JsonProperty
-  @ApiModelProperty(value = "Owning organization", required = true)
-  String organization;
+  String name = "Beacon";
   @JsonProperty
   @ApiModelProperty(value = "Beacon API version supported", required = true)
-  String api;
-
-  public BeaconInfo() {
-    this.name = "Beacon";
-    this.organization = "ICGC";
-    // Recommended format is [organization]-[beacon]
-    this.id = this.organization + " - Beacon";
-    this.api = "0.2";
-  }
+  String api = "0.2";
 
 }
