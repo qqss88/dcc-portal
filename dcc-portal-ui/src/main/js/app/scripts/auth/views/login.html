@@ -11,6 +11,6 @@
         <i data-ng-show="user.daco" style="cursor: pointer" class="icon-cog"
            data-ng-click="authModal=true"></i>
         (<a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
-    <a data-ng-hide="user.token || user.verifying" data-ng-click="loginModal=true" href="">
+    <a data-ng-hide="user.token || user.verifying" data-ng-click="openLogin()" href="">
         <i class="icon-login"></i>Login</a>
 </div>

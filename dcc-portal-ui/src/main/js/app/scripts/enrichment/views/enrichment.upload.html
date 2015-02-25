@@ -1,10 +1,10 @@
-<div data-modal=enrichmentModal>
+<div> 
     <div class="modal-dialog light">
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
                 <h3 class="pull-left">Perform Enrichment Analysis</h3>
-                <button class="pull-right t_button" data-ng-click="enrichmentModal=false"><i class="icon-cancel"></i>
+                <button class="pull-right t_button" data-ng-click="cancel()"><i class="icon-cancel"></i>
                 </button>
             </div>
 
@@ -15,7 +15,7 @@
                        <div>
                            <div>Select number of genes to be analyzed: ({{geneLimit}} maximum) </div>
                            <input type="text" size="6" 
-                               data-ng-model="analysisParams.maxGeneCount"
+                               data-ng-model="params.maxGeneCount"
                                data-ng-change="checkInput()">
                            <br>
                            <br>
@@ -27,7 +27,7 @@
                            <div data-ng-repeat="item in Extensions.GENE_SET_ROOTS"
                                 data-ng-if="['go_term', 'pathway'].indexOf(item.type) >= 0">
                                <input type="radio"
-                                   data-ng-model="analysisParams.universe"
+                                   data-ng-model="params.universe"
                                    data-ng-change="checkInput()"
                                    value="{{item.universe}}"><span> {{item.name}}</span>
                            </div>
@@ -38,7 +38,7 @@
                        <div>
                            <div>Select <abbr data-tooltip="False Discovery Rate">FDR</abbr> q-value threshold: (0.005 to 0.5 inclusive)</div>
                            <input type="text" size="5" 
-                               data-ng-model="analysisParams.fdr"
+                               data-ng-model="params.fdr"
                                data-ng-change="checkInput()">
                        </div>
                    </li>
@@ -46,7 +46,7 @@
                <div>
                    <span>Show top: </span>
                    <span>
-                       <select data-ng-model="analysisParams.maxGeneSetCount" 
+                       <select data-ng-model="params.maxGeneSetCount" 
                            data-ng-change="checkInput()"
                            data-ng-options="item for item in [10, 20, 50, 100]"></select>
                    </span>
@@ -56,7 +56,7 @@
 
             <!-- footer -->
             <div class="modal-footer">
-                <button class="t_button" data-ng-click="enrichmentModal=false; reset();">Cancel</button>
+                <button class="t_button" data-ng-click="cancel(); reset();">Cancel</button>
                 <button class="t_button" data-ng-click="newGeneSetEnrichment()"
                     data-ng-disabled="! hasValidParams">Submit</button> 
             </div>

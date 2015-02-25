@@ -1,11 +1,11 @@
-<div data-modal=setModal>
+<div>
     <div class="modal-dialog light">
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 class="pull-left">Save {{setType}} set</h3>
+                <h3 class="pull-left">Save {{params.setType}} set</h3>
 
-                <button class="pull-right t_button" data-ng-click="setModal=false"><i class="icon-cancel"></i>
+                <button class="pull-right t_button" data-ng-click="cancel()"><i class="icon-cancel"></i>
                 </button>
             </div>
 
@@ -19,20 +19,20 @@
                     <query-display data-filters="uiFilters"><query-display>
                 </div>
                 -->
-                <div data-ng-if="setLimit">
+                <div data-ng-if="params.setLimit">
                     <br>
                     <div>Save top: </div>
                     <input type="text" maxlength="9" size="9"
                         data-select-on-click
-                        data-ng-model="$parent.setSize" data-ng-change="validateInput()">
+                        data-ng-model="params.setSize" data-ng-change="validateInput()">
                     <br>
-                    <small>You can save up to the top {{setSizeLimit | number}} {{setType}}s</small>
+                    <small>You can save up to the top {{params.setSizeLimit | number}} {{params.setType}}s</small>
                 </div>
 
 
                 <div>
                     <div>Name:</div>
-                    <input type="text" data-ng-model="setName" maxlength="32" data-select-on-click data-ng-change="validateInput()"></input>
+                    <input type="text" data-ng-model="params.setName" maxlength="32" data-select-on-click data-ng-change="validateInput()"></input>
                 </div>
 
                 <div>

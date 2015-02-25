@@ -1,5 +1,5 @@
 /*
- * Copyright 2014(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -18,7 +18,9 @@
 
 (function () {
   'use strict';
-  angular.module('icgc.genelist', ['icgc.genelist.controllers', 'icgc.genelist.directives']);
+  angular.module('icgc.genelist', [
+    'icgc.genelist.controllers'
+  ]);
 })();
 
 
@@ -28,32 +30,53 @@
 
   angular.module('icgc.genelist.controllers', []);
 
-  angular.module('icgc.genelist.controllers').controller('genelistController',
-    function($scope, $timeout, $http, $location, Restangular, LocationService, FiltersUtil, Extensions) {
+  angular.module('icgc.genelist.controllers').controller('GeneListController',
+    function($scope, $timeout, $location, $modalInstance, Restangular, LocationService, FiltersUtil, Extensions) {
 
     var verifyPromise = null;
     var delay = 1000;
 
-    function verify() {
-      $scope.state = 'verifying';
+    // Input params
+    $scope.params = {};
+    $scope.params.rawText = '';
+    $scope.params.state = '';
+    $scope.params.myFile = null;
+    $scope.params.fileName = '';
 
-      var data = 'geneIds=' + encodeURI($scope.rawText);
+    // Output
+    $scope.out = {};
+    $scope.out.validIds = [];
+    $scope.out.invalidIds = [];
+    $scope.out.warnings = [];
+    $scope.out.hasType = {};
+    $scope.out.uiResult = {};
+    $scope.out.totalInput = 0;
+    $scope.out.totalMatch = 0;
+    $scope.out.totalColumns = 0;
+
+
+    function verify() {
+      $scope.params.state = 'verifying';
+
+      var data = 'geneIds=' + encodeURI($scope.params.rawText);
+
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, undefined, {'validationOnly':true}).then(function(result) {
 
           var verifyResult = Restangular.stripRestangular(result);
-          $scope.state = 'verified';
-          $scope.validIds = [];
-          $scope.invalidIds = [];
-          $scope.warnings = [];
+          $scope.params.state = 'verified';
+          $scope.out.validIds = [];
+          $scope.out.invalidIds = [];
+          $scope.out.warnings = [];
+
 
           if (verifyResult.warnings) {
             verifyResult.warnings.forEach(function(msg) {
-              $scope.warnings.push(msg);
+              $scope.out.warnings.push(msg);
             });
           }
-          $scope.invalidIds = verifyResult.invalidGenes;
-          $scope.hasType = {};
+          $scope.out.invalidIds = verifyResult.invalidGenes;
+          $scope.out.hasType = {};
 
 
           var uiResult = {}, uniqueEnsembl = {}, totalInput = 0;
@@ -79,7 +102,7 @@
                     row[typeName].push(inputToken);
 
                     // Mark it for visibility test on the view
-                    $scope.hasType[typeName] = 1;
+                    $scope.out.hasType[typeName] = 1;
                   }
 
                   // Aggregate matched ensembl ids that match to the same symbol
@@ -88,7 +111,7 @@
                   }
                   if (row.matchedId.indexOf(gene.id) === -1) {
                     row.matchedId.push(gene.id);
-                    $scope.validIds.push(gene.id);
+                    $scope.out.validIds.push(gene.id);
                   }
 
                   // Total counts
@@ -98,25 +121,25 @@
               }
             });
           });
-          $scope.uiResult = uiResult;
-          $scope.totalInput = totalInput;
-          $scope.totalMatch = Object.keys(uniqueEnsembl).length;
-          $scope.totalColumns = Object.keys($scope.hasType).length;
+          $scope.out.uiResult = uiResult;
+          $scope.out.totalInput = totalInput;
+          $scope.out.totalMatch = Object.keys(uniqueEnsembl).length;
+          $scope.out.totalColumns = Object.keys($scope.out.hasType).length;
         });
     }
 
     function verifyFile() {
       // Update UI
-      $scope.state = 'uploading';
-      $scope.fileName = $scope.myFile.name;
+      $scope.params.state = 'uploading';
+      $scope.params.fileName = $scope.params.myFile.name;
 
       // The $timeout is just to give sufficent time in order to convey system state
       $timeout(function() {
         var data = new FormData();
-        data.append('filepath', $scope.myFile);
+        data.append('filepath', $scope.params.myFile);
         Restangular.one('ui').withHttpConfig({transformRequest: angular.identity})
           .customPOST(data, 'file', {}, {'Content-Type': undefined}).then(function(result) {
-            $scope.rawText = result.data;
+            $scope.params.rawText = result.data;
             verify();
           });
       }, 1000);
@@ -124,7 +147,7 @@
 
     function createNewGeneList() {
       var data;
-      data = 'geneIds=' + encodeURI($scope.rawText);
+      data = 'geneIds=' + encodeURI($scope.params.rawText);
 
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data).then(function(result) {
@@ -146,55 +169,15 @@
         });
     }
 
-    function remove() {
-      var filters = FiltersUtil.removeExtensions(LocationService.filters());
-      LocationService.setFilters(filters);
-    }
-
-    // Initialize
-    $scope.rawText = '';
-    $scope.state = '';
-    $scope.hasGeneList = false;
-    $scope.typeNameMap = {
-      'symbol': 'Gene Symbol',
-      '_gene_id': 'Ensembl ID',
-      'external_db_ids.uniprotkb_swissprot': 'UniProtKB/Swiss-Prot ID'
-    };
-
-
-    $scope.$watch(function () { return LocationService.search(); }, function() {
-      var filters = LocationService.filters();
-      $scope.hasGeneList = false;
-      if (FiltersUtil.hasGeneListExtension(filters)) {
-        $scope.hasGeneList = true;
-      }
-    }, true);
-
-    $scope.remove = function() {
-      remove();
-    };
-
     $scope.newGeneList = function() {
       createNewGeneList();
+      $modalInstance.dismiss('cancel');
     };
 
-    $scope.toggleGeneType = function(type) {
-      if ($scope.validIds.length > 1) {
-        type.selected = !type.selected;
-      }
-    };
-
-    $scope.hasGeneTypeSelected = function() {
-      var selected = _.filter($scope.validIds, function(type) {
-        return type.selected === true;
-      });
-      return selected.length > 0;
-    };
-
-    // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean 
-    // way of modeling [input type=file]. So to get file information, it is proxied through a 
+    // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean
+    // way of modeling [input type=file]. So to get file information, it is proxied through a
     // directive that gets the file value (myFile) from input $element
-    $scope.$watch('myFile', function(newValue) {
+    $scope.$watch('params.myFile', function(newValue) {
       if (! newValue) {
         return;
       }
@@ -204,23 +187,27 @@
 
     $scope.updateGenelist = function() {
       // If content was from file, clear out the filename
-      $scope.fileName = null;
-      if ($scope.myFile) {
-        $scope.myFile = null;
+      $scope.params.fileName = null;
+      if ($scope.params.myFile) {
+        $scope.params.myFile = null;
       }
 
       $timeout.cancel(verifyPromise);
       verifyPromise = $timeout(verify, delay, true);
     };
 
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
     $scope.reset = function() {
-      $scope.state = '';
-      $scope.fileName = null;
-      $scope.rawText = '';
-      $scope.validIds = [];
-      $scope.invalidIds = [];
-      if ($scope.myFile) {
-        $scope.myFile = null;
+      $scope.params.state = '';
+      $scope.params.fileName = null;
+      $scope.params.rawText = '';
+      $scope.out.validIds = [];
+      $scope.out.invalidIds = [];
+      if ($scope.params.myFile) {
+        $scope.params.myFile = null;
       }
     };
 
@@ -237,29 +224,11 @@
         $scope.myFile = null;
       }
 
-      $scope.rawText = null;
+      $scope.params.rawText = null;
       $scope.invalidIds = null;
       $scope.validIds = null;
     });
 
-  });
-})();
-
-
-(function () {
-  'use strict';
-
-  angular.module('icgc.genelist.directives', ['icgc.genelist.controllers']);
-
-  angular.module('icgc.genelist.directives').directive('uploadGenelist', function () {
-    return {
-      restrict: 'E',
-      scope: {
-        collapsed: '='
-      },
-      templateUrl: '/scripts/genelist/views/upload.html',
-      controller: 'genelistController'
-    };
   });
 })();
 

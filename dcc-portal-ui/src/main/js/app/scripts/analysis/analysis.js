@@ -52,7 +52,7 @@
 
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
-  module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
+  module.controller('AnalysisController', function ($scope, $location, $timeout, $modal, analysisId, analysisType,
     Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
 
     Page.setPage('analysis');
@@ -106,8 +106,19 @@
       };
       filters.gene[Extensions.ENTITY] = { is: [$scope.enrichmentSet] };
 
-      $scope.enrichment.filters = filters;
-      $scope.enrichment.modal = true;
+
+      $modal.open({
+        templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
+        controller: 'EnrichmentUploadController',
+        resolve: {
+          geneLimit: function() {
+            return undefined;
+          },
+          filters: function() {
+            return filters;
+          }
+        }
+      });
     };
 
 

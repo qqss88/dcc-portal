@@ -21,7 +21,7 @@
   var module = angular.module('icgc.facets.tags', ['icgc.ui.suggest']);
 
   module.controller('tagsFacetCtrl',
-    function ($scope, Facets, LocationService, HighchartsService, FiltersUtil,
+    function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
     $scope.projects = HighchartsService.projectColours;
@@ -233,6 +233,15 @@
           facet: 'hasPathway'
         });
       }
+    };
+
+
+    /* Add a gene set term to the search filters */
+    $scope.addGeneSet = function() {
+      $modal.open({
+        templateUrl: '/scripts/genelist/views/upload.html',
+        controller: 'GeneListController'
+      });
     };
 
 

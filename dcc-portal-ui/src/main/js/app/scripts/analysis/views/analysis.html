@@ -76,13 +76,6 @@
             </span>
             <br><br>
 
-            <enrichment-upload
-                data-gene-limit="{{totalCount}}"
-                data-filters="enrichment.filters"
-                data-enrichment-modal="enrichment.modal">
-            </enrichment-upload>
-
-
             <span class="alert-error" data-ng-if="syncError">
                 <i class="icon-attention"></i>
                 Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.

@@ -1,7 +1,11 @@
 (function () {
   'use strict';
 
-  angular.module('icgc.enrichment', ['icgc.enrichment.directives', 'icgc.enrichment.services']);
+  angular.module('icgc.enrichment', [
+    'icgc.enrichment.controllers',
+    'icgc.enrichment.directives',
+    'icgc.enrichment.services'
+  ]);
 })();
 
 
@@ -9,138 +13,122 @@
 (function () {
   'use strict';
 
-  angular.module('icgc.enrichment.directives', []);
+  var module = angular.module('icgc.enrichment.controllers', []);
+  module.controller('EnrichmentUploadController',
+    function($scope, $modalInstance, $location, Restangular, LocationService, Extensions, geneLimit, filters) {
 
-  angular.module('icgc.enrichment.directives').directive('enrichmentUpload',
-    function (Extensions, Restangular, LocationService, $location) {
+    $scope.params = {};
+    $scope.Extensions = Extensions;
+    $scope.filters = filters;
+    $scope.hasValidParams = true;
 
-    return {
-      restrict: 'E',
-      scope: {
-        enrichmentModal: '=',
-        filters: '=',
-        geneLimit: '@'
-      },
-      templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
-      link: function($scope) {
+    // Params and their default values
+    $scope.params.maxGeneSetCount = 50;
+    $scope.params.fdr = 0.05;
+    $scope.params.universe = 'REACTOME_PATHWAYS';
+    $scope.params.maxGeneCount = geneLimit || 10000;
 
 
+    function hasValidFDR(val) {
+      var v = parseFloat(val);
+
+      if (isNaN(val) === true) {
+        return false;
+      }
+      if (angular.isNumber(v) === false) {
+        return false;
+      }
+      if (v >= 0.005 && v <= 0.5) {
+        return true;
+      }
+      return false;
+    }
+
+
+    function hasValidGeneCount(val) {
+      var v = parseInt(val, 10);
+      if (isNaN(val) === true) {
+        return false;
+      }
+      if (angular.isNumber(v) === false || v > $scope.geneLimit || v <= 0) {
+        return false;
+      }
+      return true;
+    }
+
+
+    function buildEnrichmentRequest() {
+      var data, geneSortParam;
+
+      // Check if we should use a provided filter or the default (LocationService)
+      if (angular.isDefined(filters)) {
+        data = 'params=' + JSON.stringify($scope.params) + '&' +
+          'filters=' + JSON.stringify($scope.filters) + '&' ;
+      } else {
+        data = 'params=' + JSON.stringify($scope.params) + '&' +
+          'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
+      }
+
+      geneSortParam = LocationService.getJsonParam('genes');
+
+      if (!_.isEmpty(geneSortParam)) {
+        var sort, order;
+        sort = geneSortParam.sort;
+        order = geneSortParam.order === 'asc'? 'ASC' : 'DESC';
+        data += 'sort=' + sort + '&order=' + order;
+      } else {
+        data += 'sort=affectedDonorCountFiltered&order=DESC';
+      }
+
+      console.log('data', data);
+      return data;
+    }
+
+
+    $scope.newGeneSetEnrichment = function() {
+      var promise, data;
+      data = buildEnrichmentRequest();
+      promise = Restangular.one('analysis')
+        .withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'enrichment');
+
+      // Send and forget, we really just need to get the analysis id
+      // to start the redirection
+      promise.then(function(result) {
+        var id = result.id;
+        $modalInstance.dismiss('cancel');
+        $location.path('/analysis/enrichment/' + id).search({});
+      });
+    };
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
+
+    $scope.checkInput = function() {
+      var params = $scope.params;
+      if (hasValidGeneCount(params.maxGeneCount) === false ||
+        hasValidFDR(params.fdr) === false ||
+        angular.isDefined(params.universe) === false) {
         $scope.hasValidParams = false;
-        $scope.Extensions = Extensions;
-
-        // Default values
-        $scope.analysisParams = {
-          maxGeneSetCount: 50,
-          fdr: 0.05,
-          maxGeneCount: $scope.geneLimit || 10000,
-          universe: 'REACTOME_PATHWAYS'
-        };
-
-
-        function buildEnrichmentRequest() {
-          var data, geneSortParam;
-
-          // Check if we should use a provided filter or the default (LocationService)
-          if (angular.isDefined($scope.filters)) {
-            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
-              'filters=' + JSON.stringify($scope.filters) + '&' ;
-          } else {
-            data = 'params=' + JSON.stringify($scope.analysisParams) + '&' +
-              'filters=' + JSON.stringify(LocationService.filters()) + '&' ;
-          }
-
-          geneSortParam = LocationService.getJsonParam('genes');
-
-          if (!_.isEmpty(geneSortParam)) {
-            var sort, order;
-            sort = geneSortParam.sort;
-            order = geneSortParam.order === 'asc'? 'ASC' : 'DESC';
-            data += 'sort=' + sort + '&order=' + order;
-          } else {
-            data += 'sort=affectedDonorCountFiltered&order=DESC';
-          }
-          return data;
-        }
-
-
-        $scope.newGeneSetEnrichment = function() {
-          var promise, data;
-          data = buildEnrichmentRequest();
-          promise = Restangular.one('analysis')
-            .withHttpConfig({transformRequest: angular.identity})
-            .customPOST(data, 'enrichment');
-
-          // Send and forget, we really just need to get the analysis id
-          // to start the redirection
-          promise.then(function(result) {
-            var id = result.id;
-            $scope.enrichmentModal = false;
-            $location.path('/analysis/enrichment/' + id).search({});
-          });
-        };
-
-        $scope.checkInput = function() {
-          var params = $scope.analysisParams;
-          if ($scope.hasValidGeneCount(params.maxGeneCount) === false ||
-            $scope.hasValidFDR(params.fdr) === false ||
-            angular.isDefined(params.universe) === false) {
-            $scope.hasValidParams = false;
-          } else {
-            $scope.hasValidParams = true;
-          }
-        };
-
-        $scope.hasValidFDR = function(val) {
-          var v = parseFloat(val);
-
-          if (isNaN(val) === true) {
-            return false;
-          }
-          if (angular.isNumber(v) === false) {
-            return false;
-          }
-          if (v >= 0.005 && v <= 0.5) {
-            return true;
-          }
-          return false;
-        };
-
-        $scope.hasValidGeneCount = function(val) {
-          var v = parseInt(val, 10);
-          if (isNaN(val) === true) {
-            return false;
-          }
-          if (angular.isNumber(v) === false || v > $scope.geneLimit || v <= 0) {
-            return false;
-          }
-          return true;
-        };
-
-        $scope.$watch('geneLimit', function(n) {
-          if (n) {
-            $scope.geneLimit = Math.min(n, 10000);
-            $scope.analysisParams.maxGeneCount = n;
-            $scope.checkInput();
-          }
-        });
-
-        $scope.$watch('filters', function(n) {
-          if (n) {
-            $scope.filters = n;
-          }
-        });
-
-        // Close self if location change detected
-        $scope.$on('$locationChangeStart', function() {
-          if ($scope.enrichmentModal === true) {
-            $scope.enrichmentModal = false;
-          }
-        });
-
+      } else {
+        $scope.hasValidParams = true;
       }
     };
+
+
   });
 
+})();
+
+
+
+
+(function () {
+  'use strict';
+
+  angular.module('icgc.enrichment.directives', []);
 
   angular.module('icgc.enrichment.directives').directive('enrichmentResult',
     function (Extensions, Restangular, EnrichmentService, ExportService, TooltipText) {

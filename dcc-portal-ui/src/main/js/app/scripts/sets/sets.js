@@ -21,8 +21,111 @@
 
   angular.module('icgc.sets', [
     'icgc.sets.directives',
+    'icgc.sets.controllers',
     'icgc.sets.services'
   ]);
+})();
+
+
+(function() {
+  'use strict';
+
+  var module = angular.module('icgc.sets.controllers', []);
+
+  module.controller('SetUploadController',
+    function($scope, $modalInstance, LocationService, SetService, Settings, setType, setLimit, setUnion) {
+
+    $scope.setLimit = setLimit;
+    $scope.isValid = true;
+
+
+    // Input data parameters
+    $scope.params = {};
+    $scope.params.setName = '';
+    $scope.params.setDescription = '';
+    $scope.params.setType = setType;
+    $scope.params.setLimit  = setLimit;
+    $scope.params.setSize = 0;
+    $scope.params.setUnion = setUnion;
+
+
+    /**
+     * Save either a new set from search filters, or a derived set from existing sets
+     */
+    $scope.submitNewSet = function() {
+      var params = {}, sortParam;
+
+      params.type = $scope.params.setType;
+      params.name = $scope.params.setName;
+      params.description = $scope.params.setDescription;
+      params.size = $scope.params.setSize;
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        params.filters = LocationService.filters();
+        sortParam = LocationService.getJsonParam($scope.setType + 's');
+
+        if (angular.isDefined(sortParam)) {
+          params.sortBy = sortParam.sort;
+          if (sortParam.order === 'asc') {
+            params.sortOrder = 'ASCENDING';
+          } else {
+            params.sortOrder = 'DESCENDING';
+          }
+        }
+      }
+      if (angular.isDefined($scope.params.setUnion)) {
+        params.union = $scope.params.setUnion;
+      }
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        SetService.addSet(setType, params);
+      } else {
+        SetService.addDerivedSet(setType, params);
+      }
+
+      // Reset
+      $modalInstance.dismiss('cancel');
+    };
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
+
+    /**
+     * Validate size, name
+     */
+    $scope.validateInput = function() {
+      if (_.isEmpty($scope.params.setName) === true) {
+        $scope.isValid = false;
+        return;
+      }
+
+      if ($scope.params.setLimit) {
+        if (isNaN($scope.params.setSize) === true) {
+          $scope.isValid = false;
+          return;
+        }
+
+        if ($scope.params.setSize <= 0 || $scope.params.setSize > $scope.params.setSizeLimit) {
+          $scope.isValid = false;
+          return;
+        }
+      }
+      $scope.isValid = true;
+    };
+
+
+    // Start. Get limit restrictions from the server side
+    Settings.get().then(function(settings) {
+      $scope.params.setSize = Math.min($scope.setLimit || 0, settings.maxNumberOfHits);
+      $scope.params.setSizeLimit = $scope.params.setSize;
+      $scope.params.setName = 'My ' + setType + ' set';
+      $scope.uiFilters = LocationService.filters();
+    });
+
+  });
+
 })();
 
 

@@ -20,6 +20,7 @@
 
   var module = angular.module('icgc.share', []);
 
+  /*
   module.directive('selectOnClick', function () {
     return {
       restrict: 'A',
@@ -30,6 +31,7 @@
       }
     };
   });
+  */
 
   module.directive('shareButton', function ($compile) {
     return {

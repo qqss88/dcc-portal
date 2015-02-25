@@ -26,7 +26,7 @@
 
   angular.module('icgc.auth.models', []);
 
-  angular.module('icgc.auth.models').factory('Auth', function ($window, $cookies, Restangular) {
+  angular.module('icgc.auth.models').factory('Auth', function ($window, $cookies, $modal, Restangular) {
     var user = {}, handler = Restangular.one('auth').withHttpConfig({cache: false});
 
     function hasSession() {
@@ -130,7 +130,7 @@
   angular.module('icgc.auth.controllers', ['icgc.auth.models']);
 
   angular.module('icgc.auth.controllers').controller('authController',
-    function ($window, $scope, Auth, CUD, OpenID, $state, $stateParams) {
+    function ($window, $scope, $modal, Auth, CUD, OpenID, $state, $stateParams) {
 
       function setup() {
         $scope.user = Auth.getUser();
@@ -174,6 +174,24 @@
         }
       }
 
+      $scope.openLoginPopup = function() {
+        $modal.open({
+          templateUrl: '/scripts/auth/views/login.popup.html',
+        });
+      };
+
+      $scope.openLogoutPopup = function() {
+        $modal.open({
+          templateUrl: '/scripts/auth/views/logout.popup.html',
+        });
+      };
+
+      $scope.openAuthPopup = function() {
+        $modal.open({
+          templateUrl: '/scripts/auth/views/auth.popup.html',
+        });
+      };
+
       $scope.tryLogin = function () {
         $scope.connecting = true;
         if ($scope.provider === 'icgc') {
@@ -204,6 +222,7 @@
 
   angular.module('icgc.auth.directives', ['icgc.auth.controllers']);
 
+  /*
   angular.module('icgc.auth.directives').directive('login', function ($compile) {
     return {
       restrict: 'E',
@@ -218,6 +237,7 @@
       }
     };
   });
+  */
 
   angular.module('icgc.auth.directives').directive('loginPopup', function () {
     return {

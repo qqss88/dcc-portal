@@ -1,33 +1,24 @@
+<!--
 <ul class="t_facets__facet">
     <li class="t_facets__facet__terms">
         <ul class="t_facets__facet__terms__active">
-            <!--
-            <li class="t_facets__facet__terms__active__term__label"
-                data-ng-if="hasGeneList"
-                data-ng-click="remove()"
-                data-ng-mouseover="toggleRemove=true"
-                data-ng-mouseleave="toggleRemove=false">
-                <i class="{{ toggleRemove === true? 'icon-cancel':'icon-ok'}}"></i>
-                Gene List
-                {{geneListType === "uploadGeneListId"? "Uploaded Gene List" : "Input Gene List"}}
-            </li>
-            -->
             <li class="text-right" data-ng-hide="collapsed">
                 <button type="button" class="t_button" data-ng-click="genelistModal=!genelistModal; reset();">
-                    <i class="icon-upload"></i> Upload Gene Set
+                    <i class="icon-search"></i> Search by Gene Set
                 </button>
                 <br><br>
             </li>
         </ul>
     </li>
 </ul>
-<div data-modal=genelistModal>
+-->
+<div> 
     <div class="modal-dialog light">
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
                 <h3 class="pull-left">Upload Gene Set</h3>
-                <button class="pull-right t_button" data-ng-click="genelistModal=false"><i
+                <button class="pull-right t_button" data-ng-click="cancel()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
@@ -38,9 +29,6 @@
                    <span>Type or copy-and-paste a list of genes</span>
                    <span class="pull-right"
                       data-tooltip=" - Gene identifier: Symbol or Ensembl ID or UniProtKB-SwissProt ID <br> - Delimiters between gene identifiers: comma, space or one gene per line <br> - If you upload a file, format file is text file (.txt, .csv, .tsv)"
-
-
-
                       data-tooltip-placement="left">
                       <a href=""><i class="icon-help"></i></a>
                    </span>
@@ -50,7 +38,7 @@
                        rows="5"
                        placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
                        data-autofocus
-                       data-ng-model="rawText"
+                       data-ng-model="params.rawText"
                        data-ng-change="updateGenelist()">
                    </textarea>
                </div>
@@ -61,25 +49,25 @@
                <div>
                    <div>Or choose a file to upload</div>
                    <span class="t_button btn btn-file">
-                       Browse <input type="file" accept=".tsv,.csv,text/*" data-file-upload="myFile">
+                       Browse <input type="file" accept=".tsv,.csv,text/*" data-file-upload="params.myFile">
                    </span>
-                   {{fileName}}
+                   {{params.fileName}}
                </div>
 
 
-               <span data-ng-if="state==='verifying'"><i class="icon-spin icon-spinner"></i> Verifying Gene Set... </span>
-               <span data-ng-if="state==='uploading'"><i class="icon-spin icon-spinner"></i> Loading Gene Set file ... </span>
-               <div data-ng-if="state==='verified'">
-                   <div data-ng-if="warnings.length > 0">
-                      <span class="alert-error" data-ng-repeat="warning in warnings">
+               <span data-ng-if="params.state==='verifying'"><i class="icon-spin icon-spinner"></i> Verifying Gene Set... </span>
+               <span data-ng-if="params.state==='uploading'"><i class="icon-spin icon-spinner"></i> Loading Gene Set file ... </span>
+               <div data-ng-if="params.state==='verified'">
+                   <div data-ng-if="out.warnings.length > 0">
+                      <span class="alert-error" data-ng-repeat="warning in out.warnings">
                           <i class="icon-attention-1"></i> {{ warning }}
                       </span>
                    </div>
 
-                   <div data-ng-if="validIds.length > 0 && warnings.length === 0">
+                   <div data-ng-if="out.validIds.length > 0 && out.warnings.length === 0">
                       <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
                           <a href="">
-                               {{totalInput}} submitted gene identifier(s) mapped to {{totalMatch}} Ensembl ID
+                               {{out.totalInput}} submitted gene identifier(s) mapped to {{out.totalMatch}} Ensembl ID
                               <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                           </a>
                       </span>
@@ -88,22 +76,22 @@
                           <table class="table table-info" id="genelist">
                               <thead>
                                   <tr>
-                                      <th colspan="{{totalColumns}}" class="text-center">Submitted</th>
+                                      <th colspan="{{out.totalColumns}}" class="text-center">Submitted</th>
                                       <th colspan="2" class="text-center" style="border-left:1px solid">Mapped</th>
                                   </tr>
                                   <tr>
-                                      <td class="text-center" data-ng-if="hasType['symbol']">Symbol</td>
-                                      <td class="text-center" data-ng-if="hasType['external_db_ids.uniprotkb_swissprot']">UniProt ID</td>
-                                      <td class="text-center" data-ng-if="hasType['_gene_id']">Ensembl ID</td>
+                                      <td class="text-center" data-ng-if="out.hasType['symbol']">Symbol</td>
+                                      <td class="text-center" data-ng-if="out.hasType['external_db_ids.uniprotkb_swissprot']">UniProt ID</td>
+                                      <td class="text-center" data-ng-if="out.hasType['_gene_id']">Ensembl ID</td>
                                       <td style="border-left:1px solid">Ensembl ID</td>
                                       <td>Symbol</td>
                                   </tr>
                               </thead>
                               <tbody>
-                                  <tr data-ng-repeat="(symbol, row) in uiResult">
-                                      <td data-ng-if="hasType['symbol']">{{row['symbol'].join(', ')}}</td>
-                                      <td data-ng-if="hasType['external_db_ids.uniprotkb_swissprot']">{{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}</td>
-                                      <td data-ng-if="hasType['_gene_id']">{{row['_gene_id'].join(', ')}}</td>
+                                  <tr data-ng-repeat="(symbol, row) in out.uiResult">
+                                      <td data-ng-if="out.hasType['symbol']">{{row['symbol'].join(', ')}}</td>
+                                      <td data-ng-if="out.hasType['external_db_ids.uniprotkb_swissprot']">{{row['external_db_ids.uniprotkb_swissprot'].join(', ') }}</td>
+                                      <td data-ng-if="out.hasType['_gene_id']">{{row['_gene_id'].join(', ')}}</td>
                                       <td style="border-left:1px solid">{{row['matchedId'].join(', ')}}</td>
                                       <td>{{symbol}}</td>
                                   </tr>
@@ -112,22 +100,22 @@
                       </div>
                    </div>
 
-                   <div data-ng-if="validIds.length === 0 && warnings.length === 0">
+                   <div data-ng-if="out.validIds.length === 0 && out.warnings.length === 0">
                       <span class="alert-error">
                          <i class="icon-attention-1"></i> No submitted gene recognized in the system
                       </span>
                    </div>
 
 
-                   <div data-ng-show="validIds.length > 0 && invalidIds.length > 0 && warnings.length === 0" data-ng-init="expanded=false">
+                   <div data-ng-show="out.validIds.length > 0 && out.invalidIds.length > 0 && out.warnings.length === 0" data-ng-init="expanded=false">
                        <a href="" data-ng-click="expanded=!expanded">
                            <span class="alert-warning">
-                               <i class="icon-attention-1"></i>{{invalidIds.length}} submitted gene(s) not recognized in the system
+                               <i class="icon-attention-1"></i>{{out.invalidIds.length}} submitted gene(s) not recognized in the system
                                <i class="{{expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                            </span>
                        </a>
                        <div class="gene-list-ids" data-ng-hide="!expanded">
-                           <em>{{ invalidIds.join(', ') }}</em>
+                           <em>{{ out.invalidIds.join(', ') }}</em>
                        </div>
                    </div>
 
@@ -137,9 +125,9 @@
 
             <!-- footer -->
             <div class="modal-footer">
-                <button class="t_button" data-ng-click="genelistModal=false; reset();">Cancel</button>
+                <button class="t_button" data-ng-click="cancel();">Cancel</button>
                 <button class="t_button" data-ng-click="newGeneList()"
-                    data-ng-disabled="state !== 'verified' || validIds.length === 0">Submit</button>
+                    data-ng-disabled="params.state !== 'verified' || out.validIds.length === 0">Submit</button>
             </div>
         </div>
     </div>
