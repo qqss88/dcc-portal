@@ -63,6 +63,13 @@ public class BeaconResourceTest extends ResourceTest {
   @InjectMocks
   private BeaconResource resource;
 
+  /*
+   * Helpers
+   */
+  private static void assertEqualToBadRequest(final ClientResponse response) {
+    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+  }
+
   @Override
   protected final void setUpResources() {
     addResource(resource);
@@ -88,16 +95,12 @@ public class BeaconResourceTest extends ResourceTest {
     assertEqualToBadRequest(response);
   }
 
-  private static void assertEqualToBadRequest(final ClientResponse response) {
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
-  }
-
   @Test
   public void testInvalidAlleleArgs() {
     when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("1", "1111", "GRCh37", "WTWT");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
@@ -105,7 +108,7 @@ public class BeaconResourceTest extends ResourceTest {
     when(service.query(any(String.class), anyInt(), any(String.class), any(String.class), any(String.class)))
         .thenReturn(generateDummyBeaconResponse());
     val response = generateResponse("1", "1111", "OMG", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
@@ -140,5 +143,4 @@ public class BeaconResourceTest extends ResourceTest {
     val respResp = new BeaconResponse("true");
     return new Beacon("whats the id", queryResp, respResp);
   }
-
 }
