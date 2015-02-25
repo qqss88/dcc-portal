@@ -111,7 +111,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   protected String formatResponseEntity(long id, Throwable t) {
     val message =
-        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).%n";
+        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).\n";
     return String.format(message, t.getMessage(), id);
   }
 

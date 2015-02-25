@@ -34,7 +34,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
  * TODO
  */
 @Value
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @ApiModel(value = "UnionUnitWithCount")
 public class UnionUnitWithCount extends UnionUnit {
 
