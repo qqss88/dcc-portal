@@ -20,9 +20,9 @@
 angular.module('app.downloader', ['app.downloader.services', 'app.downloader.controllers']);
 
 angular.module('app.downloader').config(function($stateProvider) {
-  $stateProvider.state('downloader', {
-    url: '/downloader/:id',
-    templateUrl: '/views/downloader.html',
+  $stateProvider.state('download', {
+    url: '/download/:id',
+    templateUrl: '/scripts/downloader/views/downloader.html',
     controller: 'DownloaderController',
     resolve: {
       ids: ['$stateParams', function ($stateParams) {

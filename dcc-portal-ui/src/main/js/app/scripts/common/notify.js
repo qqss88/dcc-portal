@@ -48,6 +48,15 @@
         error = false;
         Page.setError(false);
         Page.stopAllWork();
+      }
+    }
+
+    function redirectHome() {
+      visible = false;
+      if (error === true) {
+        error = false;
+        Page.setError(false);
+        Page.stopAllWork();
         $location.path('/').search({});
       }
     }
@@ -90,6 +99,7 @@
       show: show,
       showErrors: showErrors,
       hide: hide,
+      redirectHome: redirectHome,
       setMessage: setMessage,
       getMessage: getMessage,
       setRemovable: setRemovable,
@@ -99,8 +109,13 @@
     };
   });
 
-  module.controller('NotifyCtrl', function ($scope, Notify) {
+  module.controller('NotifyCtrl', function ($scope, Page, Notify) {
     $scope.notify = Notify;
+    $scope.$on('$locationChangeSuccess', function() {
+      if (Notify.isVisible() && Page.page() !== 'error') {
+        Notify.hide();
+      }
+    });
   });
 
   module.directive('notify', function () {
@@ -111,8 +126,15 @@
       scope: true,
       template: '<div><div data-ng-if="notify.isVisible()" class="t_notify_popup {{notify.getTheme()}}">' +
                 '<div class="t_notify_body pull-left" data-ng-bind-html="notify.getMessage()"></div>' +
-                '<a style="color: #fff;cursor:pointer" data-ng-href=""><i data-ng-if="notify.isRemovable()" ' +
-                'data-ng-click="notify.hide()" class="pull-right icon-cancel"></i></a></div></div>'
+                '<div class="pull-right">' +
+                '<a class="t_notify_link" data-ng-href="" data-ng-click="notify.redirectHome()">'+
+                '<i data-ng-if="notify.isRemovable()" class="icon-home"></i>Home</a>' +
+                '<span>&nbsp;&nbsp;</span>' +
+                '<a class="t_notify_link" data-ng-href="" data-ng-click="notify.hide()">' +
+                '<i data-ng-if="notify.isRemovable()" class="icon-cancel"></i>Close</a>' +
+                '</div>' +
+                '</div>' +
+                '</div>'
     };
   });
 })();

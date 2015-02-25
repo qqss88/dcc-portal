@@ -24,10 +24,26 @@ import lombok.experimental.Builder;
 @Builder
 public class Settings {
 
-  String ssoUrl;
+  /**
+   * Release settings.
+   */
   String releaseDate;
 
-  public static SettingsBuilder builder() {
-    return new SettingsBuilder();
-  }
+  /**
+   * Download settings.
+   */
+  boolean downloadEnabled;
+
+  /**
+   * Crowd settings.
+   */
+  String ssoUrl;
+
+  /**
+   * Set analysis settings.
+   */
+  String demoListUuid;
+  int maxNumberOfHits;
+  int maxMultiplier;
+
 }

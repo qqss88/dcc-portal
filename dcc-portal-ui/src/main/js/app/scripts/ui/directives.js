@@ -17,20 +17,47 @@
 
 'use strict';
 
-angular.module('icgc.ui', ['icgc.ui.suggest', 'icgc.ui.table', 'icgc.ui.toolbar', 'icgc.ui.openin']);
+angular.module('icgc.ui', [
+  'icgc.ui.suggest',
+  'icgc.ui.table',
+  'icgc.ui.toolbar',
+  'icgc.ui.openin',
+  'icgc.ui.trees',
+  'icgc.ui.lists',
+  'icgc.ui.query',
+  'icgc.ui.events'
+]);
+
 
 angular.module('app.ui', [
   'app.ui.sortable',
   'app.ui.scrollto',
+  'app.ui.scrollSpy',
   'app.ui.pagination',
   'app.ui.tpls',
-  'app.ui.synonyms',
   'app.ui.dl',
-  'app.ui.scrolled', 'app.ui.focus', 'app.ui.blur', 'app.ui.autofocus',
-  'app.ui.param', 'app.ui.nested', 'app.ui.mutation', 'app.ui.hidetext', 'app.ui.lists',
-  'app.ui.es', 'app.ui.exists', 'app.ui.scrollSpy', 'app.ui.tooltip', 'app.ui.tooltipControl', 'app.ui.exists2',
+  'app.ui.autofocus',
+  'app.ui.param', 'app.ui.nested', 'app.ui.mutation',
+  'app.ui.hidetext', 'app.ui.exists',
+  'app.ui.tooltip', 'app.ui.tooltipControl',
   'app.ui.fileUpload'
+  // 'app.ui.exists2',
+  // 'app.ui.scrolled',
 ]);
+
+
+
+// Select content on click
+angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, element) {
+      element.on('click', function() {
+        this.select();
+      });
+    }
+  };
+});
 
 
 // See: https://github.com/angular/angular.js/issues/1375
@@ -61,7 +88,7 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
 
 // Centralized tooltip directive. There should be only one per application
 angular.module('app.ui.tooltipControl', [])
-  .directive('tooltipControl', function ($position, $rootScope, $sce) {
+  .directive('tooltipControl', function ($position, $rootScope, $sce, $window) {
     return {
       restrict: 'E',
       replace: true,
@@ -72,13 +99,14 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target) {
-          var position = $position.offset(target);
-          var result = {};
+        function calculateAbsoluteCoordinates(placement, target, targetPosition) {
+          var position = targetPosition || $position.offset(target);
+          var arrowOffset = 10;
 
-
-          var ttWidth = element.prop('offsetWidth');
-          var ttHeight = element.prop('offsetHeight');
+          var tooltip = {
+            width: element.prop('offsetWidth'),
+            height: element.prop('offsetHeight')
+          };
 
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
@@ -88,31 +116,31 @@ angular.module('app.ui.tooltipControl', [])
 
           switch(placement) {
           case 'right':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left + position.width
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left + position.width + arrowOffset
             };
-            break;
           case 'left':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left - ttWidth
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left - tooltip.width - arrowOffset
             };
-            break;
           case 'top':
-            result = {
-              top: position.top - ttHeight,
-              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+            return {
+              top: position.top - tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
-            break;
+          case 'bottom':
+            return {
+              top: position.top + tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
+            };
           default:
-            result = {
-              top: position.top,
+            return {
+              top: position.top + arrowOffset,
               left: position.left + position.width / 2
             };
           }
-
-          return result;
         }
 
         $rootScope.$on('tooltip::show', function(evt, params) {
@@ -125,11 +153,34 @@ angular.module('app.ui.tooltipControl', [])
             }
           });
 
-          var position = calculatePlacement(params.placement, params.element);
-          element.css('top', position.top);
-          element.css('left', position.left);
+          element.css('visibility', 'visible');
+
+          if(params.sticky){
+            element.addClass('sticky');
+
+            if(!$window.onmousemove){
+              $window.onmousemove = function(e){
+                if(element.hasClass('sticky')){
+                  var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
+                    left: e.pageX,
+                    top: e.pageY,
+                    width: 10,
+                    height: -6
+                  });
+                  element.css('top', position.top);
+                  element.css('left', position.left);
+                }
+              };
+            }
+          }else{
+            var position = calculateAbsoluteCoordinates(params.placement, params.element, params.elementPosition);
+            element.css('top', position.top);
+            element.css('left', position.left);
+            element.removeClass('sticky');
+          }
         });
         $rootScope.$on('tooltip::hide', function() {
+          element.css('visibility', 'hidden');
           element.css('top', -999);
           element.css('left', -999);
         });
@@ -194,18 +245,6 @@ angular.module('app.ui.tooltip', [])
 
 
 
-angular.module('app.ui.exists2', []).directive('exists2', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    scope: {
-      exists2: '='
-    },
-    template: '<span><i data-ng-if="exists2" class="icon-ok"></i><span data-ng-if="!exists2">--</span></span>'
-  };
-});
-
-
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
     restrict: 'A',
@@ -237,238 +276,6 @@ angular.module('app.ui.exists', []).directive('exists', function () {
       scope.$on('$destroy', function() {
         iconOK.remove();
         iconOK = null;
-      });
-    }
-  };
-});
-
-
-angular.module('app.ui.es', []).directive('expandSearch', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    transclude: true,
-    template: '<a ng-class="{\'open\':o.open==true}" ng-transclude=""></a>',
-    link: function (scope, elem) {
-      scope.o = {};
-      scope.expand = function () {
-        scope.o.open = true;
-        jQuery(elem).find('input').focus();
-      };
-    }
-  };
-});
-
-angular.module('app.ui.lists', []).directive('hideSumList', function (Projects) {
-  return {
-    restrict: 'A',
-    //replace: true,
-    transclude: true,
-    template: '<div class="t_sh">' +
-              '<span data-ng-if="!hasItems"><i class="icon-spin icon-spinner"></i></span>' +
-              '<span data-ng-if="!show&&list.length === 0">--</span>' +
-              '<div data-ng-if="show" class="text-right">' +
-              '<a href="{{ link }}">{{sum | number}}</a>' +
-              ' / ' +
-              '<a href=\'/search?filters={"donor":{"availableDataTypes":{"is":["ssm"]}}}\'>{{sumTotal | number}}</a>' +
-              ' <em>({{sum/sumTotal*100|number:2}}%)</em>' +
-              '<span data-ng-click="toggle()" class="t_tools__tool">' +
-              '<i data-ng-class="expanded ? \'icon-caret-down\' : \'icon-caret-left\'"></i>' +
-              '</span>' +
-              '</div>' +
-              '<div data-ng-transclude></div>' +
-              '</div>',
-    link: function (scope, elem, attrs) {
-      var previous, next, limit;
-
-      scope.hasItems = false;
-      // How many items to show in collapsed list
-      limit = attrs.limit ? parseInt(attrs.limit, 10) : 0;
-
-      function swap() {
-        previous = [next, next = previous][0];
-      }
-
-      function list(value) {
-        scope.hasItems = true;
-        scope.list = value;
-        // How many items are hidden
-        scope.more = scope.list.length - limit;
-        // If there is more than 1 item in the collapsed list show toggle
-        scope.show = scope.more > 0;
-
-        previous = scope.list;
-        next = scope.show ? scope.list.slice(0, limit) : scope.list;
-
-        // If list updates while expanded
-        if (scope.expanded) {
-          swap();
-        }
-
-        scope.list = next;
-
-        scope.sum = _.reduce(_.pluck(value, 'count'), function (s, n) {
-          return s + n;
-        });
-
-        scope.sumTotal = Projects.totalSsmTestedDonorCount;
-      }
-
-      scope.toggle = function () {
-        scope.expanded = !scope.expanded;
-        swap();
-        scope.list = next;
-      };
-
-      // Need to use observe instead of scope so list still
-      // has access to parent scope events
-      attrs.$observe('hideSumList', function (value) {
-        if (value) {
-          list(angular.fromJson(value));
-        }
-      });
-
-      attrs.$observe('sum', function (value) {
-        if (value) {
-          scope.sum = angular.fromJson(value);
-        }
-      });
-
-      attrs.$observe('link', function (value) {
-        if (value) {
-          scope.link = value;
-        }
-      });
-    }
-  };
-});
-
-
-angular.module('app.ui.lists').directive('hideLinkList', function () {
-  return {
-    restrict: 'A',
-    //replace: true,
-    transclude: true,
-    template: '<div class="t_sh">' +
-              '<span data-ng-if="!hasItems"><i class="icon-spin"></i></span>' +
-              '<span data-ng-if="!show&&hasItems">--</span>' +
-              '<div data-ng-if="show" class="text-right">' +
-              '<a data-ng-href="{{ link }}">{{ more }}</a> ' +
-              '<span data-ng-if="!expanded">' +
-              '<span data-ng-click="toggle()" class="t_tools__tool"><i class="icon-caret-left"></i></span>' +
-              '</span>' +
-              '<span data-ng-if="expanded" data-ng-click="toggle()" class="t_tools__tool">' +
-              '<i class="icon-caret-down"></i></span>' +
-              '</div>' +
-              '<div data-ng-transclude></div>' +
-              '</div>',
-    link: function (scope, elem, attrs) {
-      var previous, next, limit;
-
-      scope.hasItems = false;
-      // How many items to show in collapsed list
-      limit = attrs.limit ? parseInt(attrs.limit, 10) : 0;
-
-      function swap() {
-        previous = [next, next = previous][0];
-      }
-
-      function list(value) {
-        scope.hasItems = true;
-        scope.list = value;
-        // How many items are hidden
-        scope.more = scope.list.length - limit;
-        // If there is more than 1 item in the collapsed list show toggle
-        scope.show = scope.more > 0;
-
-        previous = scope.list;
-        next = scope.show ? scope.list.slice(0, limit) : scope.list;
-
-        // If list updates while expanded
-        if (scope.expanded) {
-          swap();
-        }
-
-        scope.list = next;
-      }
-
-      scope.toggle = function () {
-        scope.expanded = !scope.expanded;
-        swap();
-        scope.list = next;
-      };
-
-      // Need to use observe instead of scope so list still
-      // has access to parent scope events
-      attrs.$observe('hideLinkList', function (value) {
-        if (value) {
-          list(JSON.parse(value));
-        }
-      });
-
-      attrs.$observe('link', function (value) {
-        if (value) {
-          scope.link = value;
-        }
-      });
-    }
-  };
-});
-
-angular.module('app.ui.lists').directive('hideList', function () {
-  return {
-    restrict: 'A',
-    replace: true,
-    transclude: true,
-    template: '<ul class="t_sh">' +
-              '<li data-ng-if="list.length == 0">--</li>' +
-              '<li><ul ng-transclude></ul></li>' +
-              '<li ng-if="show" class="t_sh__toggle">' +
-              '<a ng-click="toggle()" href="" class="t_tools__tool">' +
-              '<span ng-if="!expanded"><i class="icon-caret-down"></i> {{ more }} more</span>' +
-              '<span ng-if="expanded"><i class="icon-caret-up"></i> less</span>' +
-              '</a>' +
-              '</li></ul>',
-    link: function (scope, elem, attrs) {
-      var previous, next, limit;
-
-      // How many items to show in collapsed list
-      limit = attrs.limit ? parseInt(attrs.limit, 10) : 1;
-
-      function swap() {
-        previous = [next, next = previous][0];
-      }
-
-      function list(value) {
-        scope.list = value;
-        // How many items are hidden
-        scope.more = scope.list.length - limit;
-        // If there is more than 1 item in the collapsed list show toggle
-        scope.show = scope.more > 1;
-
-        previous = scope.list;
-        next = scope.show ? scope.list.slice(0, limit) : scope.list;
-
-        // If list updates while expanded
-        if (scope.expanded) {
-          swap();
-        }
-
-        scope.list = next;
-      }
-
-      scope.toggle = function () {
-        scope.expanded = !scope.expanded;
-        swap();
-        scope.list = next;
-      };
-
-      // Need to use observe instead of scope so list still
-      // has access to parent scope events
-      attrs.$observe('hideList', function (value) {
-        if (value) {
-          list(JSON.parse(value));
-        }
       });
     }
   };
@@ -507,6 +314,7 @@ angular.module('app.ui.hidetext', []).directive('hideText', function () {
   };
 });
 
+// This might be more confusing than helpful - DC
 angular.module('app.ui.nested', []).directive('nested', function ($location) {
   return function (scope, element, attrs) {
     element.bind('click', function (e) {
@@ -527,7 +335,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-                '<abbr data-tooltip="{{ c.consequence | trans | define }}">{{c.consequence | trans}}</abbr>' +
+                '<abbr data-tooltip="SO term: {{ c.consequence }}">{{c.consequence | trans}}</abbr>' +
                 '<span data-ng-repeat="(gk, gv) in c.data">' +
                   '<span>{{ $first==true? ": " : ""}}</span>' +
                   '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
@@ -595,6 +403,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
   };
 });
 
+// Used in keyword search, rename - DC
 angular.module('app.ui.param', []).directive('param', function (LocationService) {
   return {
     restrict: 'A',
@@ -633,34 +442,6 @@ angular.module('app.ui.param', []).directive('param', function (LocationService)
   };
 });
 
-angular.module('app.ui.focus', []).directive('focus', function ($parse) {
-  return function (scope, element, attr) {
-    var fn = $parse(attr.focus);
-
-    function callback(event) {
-      scope.$apply(function () {
-        fn(scope, {$event: event});
-      });
-    }
-
-    element.on('focus', callback);
-  };
-});
-
-angular.module('app.ui.blur', []).directive('blur', function ($parse) {
-  return function (scope, element, attr) {
-    var fn = $parse(attr.blur);
-
-    function callback(event) {
-      scope.$apply(function () {
-        fn(scope, {$event: event});
-      });
-    }
-
-    element.on('blur', callback);
-  };
-});
-
 angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout) {
   return {
     restrict: 'A',
@@ -668,53 +449,6 @@ angular.module('app.ui.autofocus', []).directive('autofocus', function ($timeout
       $timeout(function() {
         $element[0].focus();
       });
-    }
-  };
-});
-
-angular.module('app.ui.scrolled', []).directive('scrolled', function ($window) {
-  return function (scope, elem) {
-    var w, oy;
-
-    w = angular.element($window);
-    oy = w.scrollTop();
-
-    function checkDelta() {
-      var top = w.scrollTop();
-
-      // only scroll down after top 100px
-      // only scroll if d > 50px
-      if (top > 150 && top > oy + 50) {
-        //scroll down
-        elem.stop(true, true).animate({
-          top: '-51'
-        }, 100);
-        oy = top;
-      } else if (top < oy - 50) {
-        //scroll up
-        elem.stop(true, true).animate({
-          top: '0'
-        }, 100);
-        oy = top;
-      }
-    }
-
-    w.on('scroll', checkDelta);
-    scope.$on('$destroy', function () {
-      w.off('scroll', checkDelta);
-    });
-  };
-});
-
-angular.module('app.ui.synonyms', []).directive('synonyms', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      item: '='
-    },
-    template: '<span>{{syn}}</span>',
-    link: function (scope) {
-      scope.syn = angular.isArray(scope.item) ? scope.item.join(', ') : scope.item;
     }
   };
 });

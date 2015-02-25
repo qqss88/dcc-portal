@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
 
@@ -79,19 +78,19 @@ public class BrowserResource {
   @ApiOperation(value = "Retrieves a list of genes")
   public String getGene(
 
-      @QueryParam("segment") Optional<String> segment,
+      @QueryParam("segment") String segment,
 
-      @QueryParam("histogram") Optional<String> histogram,
+      @QueryParam("histogram") String histogram,
 
-      @QueryParam("dataType") Optional<String> dataType,
+      @QueryParam("dataType") String dataType,
 
-      @QueryParam("interval") Optional<String> interval,
+      @QueryParam("interval") String interval,
 
-      @QueryParam("resource") Optional<String> resource,
+      @QueryParam("resource") String resource,
 
-      @QueryParam("biotype") Optional<String> bioType,
+      @QueryParam("biotype") String bioType,
 
-      @QueryParam("consequence_type") Optional<String> consequenceType) {
+      @QueryParam("consequence_type") String consequenceType) {
     return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType);
   }
 
@@ -104,19 +103,19 @@ public class BrowserResource {
   @ApiOperation(value = "Retrieves a list of mutations")
   public String getMutation(
 
-      @QueryParam("segment") Optional<String> segment,
+      @QueryParam("segment") String segment,
 
-      @QueryParam("histogram") Optional<String> histogram,
+      @QueryParam("histogram") String histogram,
 
-      @QueryParam("dataType") Optional<String> dataType,
+      @QueryParam("dataType") String dataType,
 
-      @QueryParam("interval") Optional<String> interval,
+      @QueryParam("interval") String interval,
 
-      @QueryParam("resource") Optional<String> resource,
+      @QueryParam("resource") String resource,
 
-      @QueryParam("biotype") Optional<String> bioType,
+      @QueryParam("biotype") String bioType,
 
-      @QueryParam("consequence_type") Optional<String> consequenceType) {
+      @QueryParam("consequence_type") String consequenceType) {
     return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType);
   }
 
@@ -124,19 +123,19 @@ public class BrowserResource {
    * Common method used to retrieve data of all types.
    */
   @SneakyThrows
-  String getData(Optional<String> segment, Optional<String> histogram, Optional<String> dataType,
-      Optional<String> interval, Optional<String> resource, Optional<String> bioType, Optional<String> consequenceType) {
-    queryMap.put("segment", segment.orNull());
-    queryMap.put("histogram", histogram.orNull());
-    queryMap.put("dataType", dataType.orNull());
-    queryMap.put("interval", interval.orNull());
-    queryMap.put("resource", resource.orNull());
-    queryMap.put("biotype", bioType.orNull());
-    queryMap.put("consequence_type", consequenceType.orNull());
+  String getData(String segment, String histogram, String dataType,
+      String interval, String resource, String bioType, String consequenceType) {
+    queryMap.put("segment", segment);
+    queryMap.put("histogram", histogram);
+    queryMap.put("dataType", dataType);
+    queryMap.put("interval", interval);
+    queryMap.put("resource", resource);
+    queryMap.put("biotype", bioType);
+    queryMap.put("consequence_type", consequenceType);
 
     AnnotationDataSource dataSource = newInstance(queryMap.get("resource"));
 
-    boolean hist = histogram.isPresent() && "true".equals(histogram.get());
+    boolean hist = histogram != null && "true".equals(histogram);
     if (hist) {
       List<Object> result = getHistogram(dataSource);
       return MAPPER.writeValueAsString(result);

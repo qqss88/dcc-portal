@@ -141,7 +141,7 @@ public class BaseRepositoryTest {
   }
 
   @SneakyThrows
-  private static String settingsSource() {
+  protected static String settingsSource() {
     return settingsSource(SETTINGS_FILE);
   }
 

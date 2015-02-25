@@ -125,7 +125,7 @@ public class MutationParser {
   }
 
   /**
-   * Queries elasticsearch for appropriate data.
+   * EnrichmentQueries elasticsearch for appropriate data.
    */
   private SearchResponse getResponse(String segmentId, Long start, Long stop, List<String> consequenceTypes,
       List<String> projectFilters, Integer size) {
@@ -163,7 +163,7 @@ public class MutationParser {
   }
 
   /**
-   * Queries elasticsearch with a histogram facet.
+   * EnrichmentQueries elasticsearch with a histogram facet.
    */
   private SearchResponse getHistogramResponse(Long interval, String segmentId, Long start, Long stop,
       List<String> consequenceTypes, List<String> projectFilters) {

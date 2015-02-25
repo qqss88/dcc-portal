@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anySetOf;
@@ -37,22 +38,20 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.oozie.client.WorkflowJob.Status;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.common.ExportedDataFileSystem.AccessPermission;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobProgress;
-import org.icgc.dcc.data.downloader.ArchiveJobManager.JobStatus;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
-import org.icgc.dcc.data.downloader.DynamicDownloader.DataType;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
+import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
+import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.User;
-import org.icgc.dcc.portal.service.DistributedCacheService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.NotFoundException;
 import org.icgc.dcc.portal.service.ServiceUnavailableException;
-import org.icgc.dcc.portal.utils.HazelcastFactory;
-import org.junit.After;
+import org.icgc.dcc.portal.service.SessionService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -65,7 +64,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Stage;
-import com.hazelcast.core.HazelcastInstance;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.yammer.dropwizard.testing.ResourceTest;
@@ -75,13 +73,12 @@ public class DownloadResourceTest extends ResourceTest {
 
   private final static String RESOURCE = "/v1/download";
 
-  private final HazelcastInstance hazelcast = HazelcastFactory.createLocalHazelcastInstance();
-  private final DistributedCacheService cacheService = new DistributedCacheService(hazelcast);
+  private final SessionService sessionService = new SessionService();
 
   @Mock
   private DonorService donorService;
   @Mock
-  private DynamicDownloader downloader;
+  private DownloaderClient downloader;
 
   @Mock
   private ExportedDataFileSystem fs;
@@ -92,24 +89,20 @@ public class DownloadResourceTest extends ResourceTest {
   @Before
   public void setUp() throws Exception {
     user.setDaco(true);
-    cacheService.putUser(sessionToken, user);
-  }
-
-  @After
-  public void tearDown() {
-    hazelcast.shutdown();
+    sessionService.putUser(sessionToken, user);
   }
 
   @Override
   protected final void setUpResources() {
     addResource(new DownloadResource(donorService, downloader, fs, Stage.PRODUCTION));
     addProvider(BadRequestExceptionMapper.class);
-    addProvider(new OpenIDAuthProvider(new OpenIDAuthenticator(cacheService), "openid"));
+    addProvider(new OpenIDAuthProvider(new OpenIDAuthenticator(sessionService), "openid"));
   }
 
   @Test
   public void testPublicDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.UNCHECKED);
+    when(fs.isFile(any(File.class))).thenReturn(true);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
 
     ClientResponse response = client()
@@ -126,6 +119,7 @@ public class DownloadResourceTest extends ResourceTest {
   public void testOpenDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.OPEN);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
+    when(fs.isFile(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -141,6 +135,7 @@ public class DownloadResourceTest extends ResourceTest {
   public void testControlledDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.CONTROLLED);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
+    when(fs.isFile(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -191,6 +186,23 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.getStatus()).isEqualTo(OK.getStatusCode());
   }
 
+  @Test
+  public void testNoArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
+  @Test
+  public void testEmptyArgument() throws IOException {
+    ClientResponse response = client()
+        .resource(RESOURCE)
+        .queryParam("fn", "")
+        .get(ClientResponse.class);
+    assertEquals(400, response.getStatus());
+  }
+
   @Test(expected = NotFoundException.class)
   public void testDeniedControlledDataAccessStream() throws IOException {
     when(
@@ -201,8 +213,7 @@ public class DownloadResourceTest extends ResourceTest {
     // // try to access control data without proper authentication
     client()
         .resource(RESOURCE)
-        .queryParam("filters", "")
-        .queryParam("info", "[{\"key\":\"SGV\",\"value\":\"TSV\"}]")
+        .queryParam("fn", "somefiles")
         .get(ClientResponse.class);
   }
 
@@ -295,7 +306,7 @@ public class DownloadResourceTest extends ResourceTest {
     assertThat(response.get("serviceStatus")).isEqualTo(false);
   }
 
-  private final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
+  private static final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
 
     List<DataType> selection;
 

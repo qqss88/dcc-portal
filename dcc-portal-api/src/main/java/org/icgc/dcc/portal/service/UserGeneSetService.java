@@ -17,13 +17,19 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
+
+import java.util.Set;
 import java.util.UUID;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.icgc.dcc.portal.repository.UserGeneSetRepository;
+import org.icgc.dcc.portal.model.BaseEntitySet.Type;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySet.SubType;
+import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,16 +40,28 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor(onConstructor = @_(@Autowired))
 public class UserGeneSetService {
 
+  /**
+   * Dependencies.
+   */
   @NonNull
-  private final UserGeneSetRepository repository;
+  private final EntityListRepository repository;
+  @NonNull
+  private final TermsLookupService termsLookupService;
 
-  public String get(@NonNull UUID id) {
-    return repository.find(id);
-  }
+  /*
+   * This was not used in anywhere at all. To be removed.
+   * 
+   * public String get(@NonNull UUID id) { return repository.find(id); }
+   */
 
-  public UUID save(@NonNull String data) {
+  public UUID save(@NonNull Set<String> geneIds) {
     val id = UUID.randomUUID();
-    repository.save(id, data);
+    val newList = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
+    newList.setSubtype(SubType.UPLOAD);
+
+    termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
+
+    repository.save(newList);
 
     return id;
   }

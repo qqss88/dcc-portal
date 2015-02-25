@@ -20,39 +20,38 @@
 
 angular.module('app.downloader.model', []);
 
-angular.module('app.downloader.model').factory('Downloader', function ($http) {
+angular.module('app.downloader.model').factory('Downloader', function ($http, RestangularNoCache) {
   return {
 
     requestDownloadJob: function (filters, info, email, downloadUrl, uiQueryStr) {
-      var url;
       filters = JSON.stringify(filters);
       info = JSON.stringify(info);
-      url = '/api/v1/download/submit?' +
-            'filters=' + filters +
-            '&info=' + info +
-            '&email=' + email +
-            '&downloadUrl=' + downloadUrl +
-            '&uiQueryStr=' + encodeURIComponent(uiQueryStr);
 
-      return $http.get(url);
+      return RestangularNoCache.one('download/submit').get({
+        filters: filters,
+        info: info,
+        email: email,
+        downloadUrl: downloadUrl,
+        uiQueryStr: encodeURIComponent(uiQueryStr)
+      });
     },
 
     cancelJob: function (ids) {
-      return $http.get('/api/v1/download/' + ids + '/cancel');
+      return RestangularNoCache.one('download', ids).one('cancel').get({});
     },
 
     getJobMetaData: function (ids) {
       if (angular.isArray(ids)) {
-        return $http.get('/api/v1/download/JobInfo?downloadId=' + ids.join(','));
+        return RestangularNoCache.one('download', ids.join(',')).one('info').get({});
       }
-      return $http.get('/api/v1/download/JobInfo?downloadId=' + ids);
+      return RestangularNoCache.one('download', ids).one('info').get({});
     },
 
     getJobStatus: function (ids) {
       if (angular.isArray(ids)) {
-        return $http.get('/api/v1/download/' + ids.join(',') + '/status');
+        return RestangularNoCache.one('download', ids.join(',')).one('status').get({});
       }
-      return $http.get('/api/v1/download/' + ids + '/status');
+      return RestangularNoCache.one('download', ids).one('status').get({});
     }
   };
 });

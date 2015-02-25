@@ -41,6 +41,7 @@ import org.icgc.dcc.portal.bundle.SwaggerBundle;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.filter.CachingFilter;
 import org.icgc.dcc.portal.filter.CrossOriginFilter;
+import org.icgc.dcc.portal.filter.DownloadFilter;
 import org.icgc.dcc.portal.filter.VersionFilter;
 import org.icgc.dcc.portal.spring.SpringService;
 import org.icgc.dcc.portal.util.VersionUtils;
@@ -76,8 +77,6 @@ public class PortalMain extends SpringService<PortalProperties> {
 
   @Override
   public void run(PortalProperties config, Environment environment) throws Exception {
-    super.run(config, environment);
-
     environment.setBaseResource(getBaseResource());
 
     environment.addFilter(UrlRewriteFilter.class, "/*")
@@ -90,6 +89,7 @@ public class PortalMain extends SpringService<PortalProperties> {
 
     environment.setJerseyProperty(PROPERTY_CONTAINER_REQUEST_FILTERS,
         list(LoggingFilter.class.getName(),
+            DownloadFilter.class.getName(),
             CachingFilter.class.getName()));
     environment.setJerseyProperty(PROPERTY_CONTAINER_RESPONSE_FILTERS,
         list(LoggingFilter.class.getName(),

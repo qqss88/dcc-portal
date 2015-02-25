@@ -17,10 +17,13 @@
 
 package org.icgc.dcc.portal.config;
 
+import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.icgc.dcc.portal.service.SessionService.DISCOVERY_INFO_CACHE_NAME;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
@@ -32,8 +35,8 @@ import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
-import org.icgc.dcc.data.common.ExportedDataFileSystem;
-import org.icgc.dcc.data.downloader.DynamicDownloader;
+import org.icgc.dcc.downloader.client.DownloaderClient;
+import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
 import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
 import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
@@ -41,15 +44,24 @@ import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
+import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
+import org.icgc.dcc.portal.model.User;
+import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
+import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
-import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.EntityListService;
 import org.icgc.dcc.portal.service.OccurrenceService;
+import org.icgc.dcc.portal.service.SessionService;
 import org.openid4java.consumer.ConsumerManager;
+import org.openid4java.consumer.InMemoryConsumerAssociationStore;
+import org.openid4java.consumer.InMemoryNonceVerifier;
+import org.openid4java.discovery.DiscoveryInformation;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -76,14 +88,17 @@ public class PortalConfig {
   @Autowired
   private OccurrenceService service;
 
+  @Autowired
+  private EntityListService entityListService;
+
   @Bean
-  public DynamicDownloader dynamicDownloader() {
+  public DownloaderClient dynamicDownloader() {
     val download = properties.getDownload();
     if (!download.isEnabled()) {
       return null;
     }
 
-    return new DynamicDownloader(
+    return new DownloaderClient(
         download.getUri() + download.getDynamicRootPath(),
         download.getQuorum(),
         download.getOozieUrl(),
@@ -96,6 +111,12 @@ public class PortalConfig {
   @PostConstruct
   public void initCache() {
     service.init();
+
+  }
+
+  @PostConstruct
+  public void createDemoEntityList() {
+    entityListService.createDemoEntityList();
   }
 
   @Bean
@@ -122,11 +143,6 @@ public class PortalConfig {
   }
 
   @Bean
-  public MailProperties mailConfig() {
-    return properties.getMail();
-  }
-
-  @Bean
   public OpenIDAuthProvider openIdProvider(OpenIDAuthenticator authenticator) {
     return new OpenIDAuthProvider(authenticator, "OpenID");
   }
@@ -137,10 +153,34 @@ public class PortalConfig {
   }
 
   @Bean
+  public EnrichmentAnalysisRepository enrichmentAnalysisRepository(DBI dbi) {
+    return dbi.open(EnrichmentAnalysisRepository.class);
+  }
+
+  @Bean
+  public EntityListRepository entityListRepository(final DBI dbi) {
+    return dbi.open(EntityListRepository.class);
+  }
+
+  @Bean
+  public UnionAnalysisRepository unionAnalysisRepository(final DBI dbi) {
+    return dbi.open(UnionAnalysisRepository.class);
+  }
+
+  @Bean
   public Settings settings() {
+    val crowd = properties.getCrowd();
+    val release = properties.getRelease();
+    val download = properties.getDownload();
+    val setAnalysis = properties.getSetOperation();
+
     return Settings.builder()
-        .ssoUrl(properties.getCrowd().getSsoUrl())
-        .releaseDate(properties.getRelease().getReleaseDate())
+        .ssoUrl(crowd.getSsoUrl())
+        .releaseDate(release.getReleaseDate())
+        .downloadEnabled(download.isEnabled())
+        .demoListUuid(setAnalysis.demoListUuid)
+        .maxNumberOfHits(setAnalysis.maxNumberOfHits)
+        .maxMultiplier(setAnalysis.maxMultiplier)
         .build();
   }
 
@@ -158,11 +198,6 @@ public class PortalConfig {
         .build();
 
     return ICGCClient.create(icgcConfig).shortUrl();
-  }
-
-  @Bean
-  public ICGCProperties icgcConfiguration() {
-    return properties.getIcgc();
   }
 
   @Bean
@@ -194,40 +229,80 @@ public class PortalConfig {
 
   @Bean
   public HazelcastInstance hazelcastInstance() {
-    return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
+    if (isDistributed()) {
+      return Hazelcast.newHazelcastInstance(getHazelcastConfig(properties.getHazelcast()));
+    } else {
+      return null;
+    }
   }
 
   @Bean
-  public ConsumerManager consumerManager(HazelcastInstance hazelcast) {
+  public ConsumerManager consumerManager() {
     val consumerManager = new ConsumerManager();
-    consumerManager.setAssociations(new DistributedConsumerAssociationStore(hazelcast));
-    consumerManager.setNonceVerifier(new DistributedNonceVerifier(hazelcast));
+
+    if (isDistributed()) {
+      consumerManager.setAssociations(new DistributedConsumerAssociationStore(hazelcastInstance()));
+      consumerManager.setNonceVerifier(new DistributedNonceVerifier(hazelcastInstance()));
+    } else {
+      consumerManager.setAssociations(new InMemoryConsumerAssociationStore());
+      consumerManager.setNonceVerifier(new InMemoryNonceVerifier());
+    }
 
     return consumerManager;
   }
 
   @Bean
-  public DistributedCacheService distributedCacheService(HazelcastInstance hazelcast) {
-    return new DistributedCacheService(hazelcast);
+  public SessionService sessionService() {
+    if (isDistributed()) {
+      Map<UUID, User> usersCache = hazelcastInstance().getMap(SessionService.USERS_CACHE_NAME);
+      Map<UUID, DiscoveryInformation> discoveryInfoCache = hazelcastInstance().getMap(DISCOVERY_INFO_CACHE_NAME);
+
+      return new SessionService(usersCache, discoveryInfoCache);
+    } else {
+      Map<UUID, User> usersCache = newHashMap();
+      Map<UUID, DiscoveryInformation> discoveryInfoCache = newHashMap();
+
+      return new SessionService(usersCache, discoveryInfoCache);
+    }
   }
 
   @Bean
-  public CrowdProperties crowdConfig() {
+  public MailProperties mailProperties() {
+    return properties.getMail();
+  }
+
+  @Bean
+  public ICGCProperties icgcProperties() {
+    return properties.getIcgc();
+  }
+
+  @Bean
+  public DownloadProperties downloadProperties() {
+    return properties.getDownload();
+  }
+
+  @Bean
+  public CrowdProperties crowdProperties() {
     return properties.getCrowd();
   }
 
   @Bean
-  public CacheProperties cacheConfiguration() {
+  public CacheProperties cacheProperties() {
     return properties.getCache();
   }
 
   @Bean
-  public WebProperties webConfiguration() {
+  public WebProperties webProperties() {
     return properties.getWeb();
+  }
+
+  private boolean isDistributed() {
+    return properties.getHazelcast().isEnabled();
   }
 
   private static Config getHazelcastConfig(HazelcastProperties hazelcastConfig) {
     val config = new Config();
+    config.setProperty("hazelcast.logging.type", "slf4j");
     config.setGroupConfig(new GroupConfig(hazelcastConfig.getGroupName(), hazelcastConfig.getGroupPassword()));
     configureMapConfigs(hazelcastConfig, config.getMapConfigs());
 
@@ -236,14 +311,14 @@ public class PortalConfig {
 
   private static void configureMapConfigs(HazelcastProperties hazelcastConfig, Map<String, MapConfig> mapConfigs) {
     val usersMapConfig = new MapConfig();
-    usersMapConfig.setName(DistributedCacheService.USERS_CACHE_NAME);
+    usersMapConfig.setName(SessionService.USERS_CACHE_NAME);
     usersMapConfig.setTimeToLiveSeconds(hazelcastConfig.getUsersCacheTTL());
-    mapConfigs.put(DistributedCacheService.USERS_CACHE_NAME, usersMapConfig);
+    mapConfigs.put(SessionService.USERS_CACHE_NAME, usersMapConfig);
 
     val openidAuthMapConfig = new MapConfig();
-    openidAuthMapConfig.setName(DistributedCacheService.DISCOVERY_INFO_CACHE_NAME);
+    openidAuthMapConfig.setName(SessionService.DISCOVERY_INFO_CACHE_NAME);
     openidAuthMapConfig.setTimeToLiveSeconds(hazelcastConfig.getOpenidAuthTTL());
-    mapConfigs.put(DistributedCacheService.DISCOVERY_INFO_CACHE_NAME, openidAuthMapConfig);
+    mapConfigs.put(SessionService.DISCOVERY_INFO_CACHE_NAME, openidAuthMapConfig);
   }
 
 }

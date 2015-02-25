@@ -27,17 +27,17 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
+import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildPathwayFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildProjectFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
 import static org.icgc.dcc.portal.service.QueryService.hasDonor;
 import static org.icgc.dcc.portal.service.QueryService.hasGene;
+import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
 import static org.icgc.dcc.portal.service.QueryService.hasMutation;
 import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.hasPathway;
 import static org.icgc.dcc.portal.service.QueryService.hasProject;
 import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
@@ -45,6 +45,7 @@ import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.Map;
 
@@ -89,7 +90,6 @@ public class OccurrenceRepository {
       .put(Kind.MUTATION, "ssm")
       .put(Kind.CONSEQUENCE, "ssm.consequence")
       .put(Kind.GENE, "ssm.consequence")
-      .put(Kind.PATHWAY, "ssm.consequence.gene.pathways")
       .put(Kind.OBSERVATION, "ssm.observation")
       .build());
 
@@ -100,7 +100,7 @@ public class OccurrenceRepository {
       .put(Kind.MUTATION, "ssm")
       .put(Kind.CONSEQUENCE, "ssm.consequence")
       .put(Kind.GENE, "ssm.consequence.gene")
-      .put(Kind.PATHWAY, "ssm.consequence.gene.pathways")
+      .put(Kind.GENE_SET, "ssm.consequence.gene")
       .put(Kind.OBSERVATION, "ssm.observation")
       .build());
 
@@ -108,7 +108,7 @@ public class OccurrenceRepository {
   private final String index;
 
   @Autowired
-  OccurrenceRepository(Client client, IndexModel indexModel) {
+  public OccurrenceRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
   }
@@ -126,12 +126,12 @@ public class OccurrenceRepository {
     boolean hasDonor = hasDonor(filters);
     boolean hasProject = hasProject(filters);
     boolean hasGene = hasGene(filters);
-    boolean hasPathway = hasPathway(filters);
+    boolean hasGeneSet = hasGeneSet(filters);
     boolean hasMutation = hasMutation(filters);
     boolean hasConsequence = hasConsequence(filters);
     boolean hasObservation = hasObservation(filters);
 
-    if (hasProject || hasPathway || hasDonor || hasGene || hasMutation || hasConsequence || hasObservation) {
+    if (hasProject || hasGeneSet || hasDonor || hasGene || hasMutation || hasConsequence || hasObservation) {
       matchAll = false;
       if (hasDonor) {
         musts.add(nestedFilter(NESTED_MAPPING.get(Kind.DONOR), buildDonorFilters(filters, PREFIX_MAPPING)));
@@ -140,7 +140,7 @@ public class OccurrenceRepository {
         musts.add(nestedFilter(NESTED_MAPPING.get(Kind.PROJECT), buildProjectFilters(filters, PREFIX_MAPPING)));
       }
 
-      if (hasGene || hasPathway || hasMutation || hasConsequence || hasObservation) {
+      if (hasGene || hasGeneSet || hasMutation || hasConsequence || hasObservation) {
         val mb = FilterBuilders.boolFilter();
         val mMusts = Lists.<FilterBuilder> newArrayList();
         if (hasMutation) mMusts.add(buildMutationFilters(filters, PREFIX_MAPPING));
@@ -150,13 +150,16 @@ public class OccurrenceRepository {
               buildObservationFilters(filters, PREFIX_MAPPING)));
         }
 
-        if (hasGene || hasPathway || hasConsequence) {
+        if (hasGene || hasGeneSet || hasConsequence) {
           val nb = FilterBuilders.boolFilter();
           val nMusts = Lists.<FilterBuilder> newArrayList();
           if (hasConsequence) nMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
           if (hasGene) nMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-          if (hasPathway) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.PATHWAY),
-              buildPathwayFilters(filters, PREFIX_MAPPING)));
+
+          if (hasGeneSet) nMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
+          // if (hasGeneSet) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
+          // buildGeneSetFilters(filters, PREFIX_MAPPING)));
+
           nb.must(nMusts.toArray(new FilterBuilder[nMusts.size()]));
           mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.CONSEQUENCE), nb));
         }
@@ -285,10 +288,8 @@ public class OccurrenceRepository {
         result.get(projectId).put(donorId, result.get(projectId).get(donorId) + 1);
       }
 
-      // Break condition: No hits are returned
-      if (response.getHits().hits().length == 0) {
-        response = client.prepareSearchScroll(response.getScrollId())
-            .setScroll(new TimeValue(0)).execute().actionGet();
+      val finished = !hasHits(response);
+      if (finished) {
         break;
       }
     }

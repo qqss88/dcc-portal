@@ -87,7 +87,7 @@
                 <td>
                     <span class="t_impact_{{consequence.functionalImpact | lowercase }}">{{consequence.aaMutation}}</span>
                 </td>
-                <td><abbr data-tooltip="{{ consequence.type | trans | define }}">{{consequence.type | trans}}</abbr>
+                <td><abbr data-tooltip="SO term: {{consequence.type}}">{{consequence.type | trans}}</abbr>
                 </td>
                 <td>{{consequence.cdsMutation}}</td>
                 <td>
@@ -95,15 +95,9 @@
                     <span data-ng-if="!consequence.geneStrand">N/A</span>
                 </td>
                 <td>
-                    <ul data-hide-list="{{ consequence.transcriptsAffected }}">
-                        <li data-ng-repeat="transcript in list">
-                            <a data-ng-if="transcript.name" target="_blank"
-                               data-ng-href="http://oct2012.archive.ensembl.org/Homo_sapiens/Transcript/Summary?db=core;t={{transcript.id}}">
-                                <i class="icon-external-link"></i>
-                                {{transcript.name}}
-                            </a>
-                        </li>
-                    </ul>
+                    <hide-list data-items="consequence.transcriptsAffected" data-limit="1" 
+                        data-template-name="template/mutationTranscriptList.html">
+                    </hide-list>
                 </td>
             </tr>
             </tbody>

@@ -55,7 +55,7 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
-              AdvancedMutationService) {
+              AdvancedMutationService, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -63,6 +63,11 @@
 
       _ctrl.Page = Page;
       _ctrl.state = State;
+
+      _ctrl.observationDialog = {
+        modal: false,
+        observation: null
+      };
 
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
@@ -82,6 +87,12 @@
         _ctrl.Mutation.ajax();
       }
 
+      _ctrl.saveSet = function(type, limit) {
+        _ctrl.setLimit = limit;
+        _ctrl.setType = type;
+        _ctrl.setModal = true;
+      };
+
       _ctrl.setTab = function (tab) {
         _ctrl.state.setTab(tab);
         ajax();
@@ -94,16 +105,22 @@
       // Setup
       _ctrl.setTab($state.current.data.tab);
       _ctrl.setSubTab($state.current.data.subTab);
+
+      Settings.get().then(function(settings) {
+        _ctrl.downloadEnabled = settings.downloadEnabled || false;
+      });
       refresh();
 
       // Refresh when filters change
       // Data is cached so refreshing on tab switch
       // should be free
       $scope.$on('$locationChangeSuccess', function (event, next) {
+        _ctrl.observationDialog.modal = false;
         if (next.indexOf('search') !== -1) {
           refresh();
         }
       });
+
 
       // Tabs need to update when using browser buttons
       // Shouldn't have to worry about refreshing data here
@@ -122,7 +139,9 @@
       });
     });
 
-  module.service('AdvancedDonorService', function (Page, LocationService, HighchartsService, Donors, State) {
+  module.service('AdvancedDonorService',
+    function(Page, LocationService, HighchartsService, Donors, State, Extensions) {
+
     var _this = this;
 
     _this.ajax = function () {
@@ -196,6 +215,13 @@
 
       donors.hits.forEach(function (donor) {
         donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
+
+        // Remove gene entity set because gene id is the key
+        if (donor.embedQuery.hasOwnProperty('donor')) {
+          var donorFilters = donor.embedQuery.donor;
+          delete donorFilters[Extensions.ENTITY];
+        }
+
       });
       _this.donors = donors;
       _this.ajax();
@@ -210,7 +236,9 @@
     };
   });
 
-  module.service('AdvancedGeneService', function (Page, LocationService, Genes, Projects, Donors, State, FiltersUtil) {
+  module.service('AdvancedGeneService',
+    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions) {
+
     var _this = this;
 
     _this.ajax = function () {
@@ -273,6 +301,13 @@
       genes.hits.forEach(function (gene) {
         var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
         gene.embedQuery = LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet');
+
+        // Remove gene entity set because gene id is the key
+        if (gene.embedQuery.hasOwnProperty('gene')) {
+          var geneFilters = gene.embedQuery.gene;
+          delete geneFilters[Extensions.ENTITY];
+        }
+
       });
       _this.genes = genes;
       _this.ajax();
@@ -288,7 +323,7 @@
   });
 
   module.service('AdvancedMutationService',
-    function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State) {
+    function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State, Extensions) {
       var _this = this;
 
       _this.ajax = function () {
@@ -361,6 +396,13 @@
         mutations.hits.forEach(function (mutation) {
           var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
+
+          // Remove gene entity set because gene id is the key
+          if (mutation.embedQuery.hasOwnProperty('mutation')) {
+            var mutationFilters = mutation.embedQuery.mutation;
+            delete mutationFilters[Extensions.ENTITY];
+          }
+
         });
         _this.mutations = mutations;
         _this.ajax();

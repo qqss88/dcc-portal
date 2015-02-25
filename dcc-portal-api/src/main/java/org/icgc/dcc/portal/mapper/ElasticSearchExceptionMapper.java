@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.mapper;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
@@ -49,6 +50,7 @@ public class ElasticSearchExceptionMapper implements ExceptionMapper<Elasticsear
     log.error(formatLogMessage(id), e);
 
     return status(STATUS)
+        .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(e, id))
         .build();
   }

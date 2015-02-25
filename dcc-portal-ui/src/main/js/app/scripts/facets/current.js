@@ -22,33 +22,87 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil) {
+  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService) {
     $scope.Facets = Facets;
+    $scope.Extensions = Extensions;
 
     function refresh() {
-      $scope.filters = FiltersUtil.buildUIFilters(LocationService.filters());
-      $scope.isActive = _.keys($scope.filters).length;
+      var currentFilters = LocationService.filters();
+      var ids = LocationService.extractSetIds(currentFilters);
+
+      if (ids.length > 0) {
+        SetService.getMetaData(ids).then(function(results) {
+          $scope.filters = FiltersUtil.buildUIFilters(currentFilters, SetService.lookupTable(results));
+        });
+      } else {
+        $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
+      }
+      //$scope.isActive = _.keys($scope.filters).length;
+      $scope.isActive = _.keys(currentFilters).length;
     }
 
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
     $scope.removeFacet = function(type, facet) {
+
+      // Remove primary facet
       Facets.removeFacet({
         type: type,
         facet: facet
       });
 
-      if (type === 'gene' && facet === 'id' && FiltersUtil.hasGeneListExtension(LocationService.filters())) {
+
+      // Remove secondary facet - entity
+      if (_.contains(['gene', 'donor', 'mutation'], type) === true && facet === 'id') {
         Facets.removeFacet({
           type: type,
-          facet: 'uploadedGeneList'
+          facet: Extensions.ENTITY
         });
       }
+
+      // Remove secondary facet - existing conditions
+      if (type === 'gene' && facet === 'pathwayId') {
+        Facets.removeFacet({
+          type: type,
+          facet: 'hasPathway'
+        });
+      }
+
+    };
+
+    /**
+     * Proxy to Facets service, it does addtional handling of fields that behaves like
+     * like facets but are structured in different ways
+     */
+    $scope.removeTerm = function(type, facet, term) {
+      console.log('current remove term', type, facet, term);
+
+      if (type === 'gene' && facet === 'hasPathway') {
+        Facets.removeFacet({
+          type: type,
+          facet: facet
+        });
+      } else {
+        Facets.removeTerm({
+          type: type,
+          facet: facet,
+          term: term
+        });
+      }
+
     };
 
     refresh();
-    $scope.$on('$locationChangeSuccess', function () {
-      refresh();
-
+    $scope.$on('$locationChangeSuccess', function (evt, next) {
+      // FIXME: Only applicable on search page. Should have a cleaner solution
+      if (next.indexOf('search') !== -1) {
+        refresh();
+      }
     });
+
   });
 
   module.directive('current', function () {

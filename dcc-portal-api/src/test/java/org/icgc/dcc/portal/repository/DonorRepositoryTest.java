@@ -169,41 +169,41 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void testCount() throws Exception {
-    Query query = Query.builder().build();
-    long response = donorRepository.count(query);
-    assertThat(response).isEqualTo(9);
-  }
+    public void testCountIntersection() throws Exception {
+      Query query = Query.builder().build();
+      long response = donorRepository.count(query);
+      assertThat(response).isEqualTo(9);
+    }
 
   @Test
-  public void testCountWithNestedGeneFilters() throws Exception {
-    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
-    Query query =
-        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-    long response = donorRepository.count(query);
-
-    assertThat(response).isEqualTo(5);
-  }
-
-  @Test
-  public void testCountWithNestedMutationFilters() throws Exception {
-    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
-    Query query =
-        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-    long response = donorRepository.count(query);
-
-    assertThat(response).isEqualTo(1);
-  }
+    public void testCountIntersectionWithNestedGeneFilters() throws Exception {
+      FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
+      Query query =
+          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+      long response = donorRepository.count(query);
+  
+      assertThat(response).isEqualTo(5);
+    }
 
   @Test
-  public void testCountWithNestedGeneMutationFilters() throws Exception {
-    FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
-    Query query =
-        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-    long response = donorRepository.count(query);
+    public void testCountIntersectionWithNestedMutationFilters() throws Exception {
+      FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
+      Query query =
+          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+      long response = donorRepository.count(query);
+  
+      assertThat(response).isEqualTo(1);
+    }
 
-    assertThat(response).isEqualTo(1);
-  }
+  @Test
+    public void testCountIntersectionWithNestedGeneMutationFilters() throws Exception {
+      FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
+      Query query =
+          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+      long response = donorRepository.count(query);
+  
+      assertThat(response).isEqualTo(1);
+    }
 
   @Test
   public void testFind() throws Exception {

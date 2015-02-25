@@ -14,7 +14,9 @@
             </li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li><br></li>
-            <li class="t_subnav__items__item"><span>Page Filters</span></li>
+            <li class="t_subnav__items__item" data-ng-if="GeneCtrl.mutationFacets.functionalImpact.total > 0">
+                <span>Page Filters</span>
+            </li>
             <li class="t_subnav__items__box">
                 <ul class="t_facets">
                     <terms data-type="mutation"
@@ -71,30 +73,34 @@
 
         <h3>Annotation</h3>
         <table class="table table-info">
-            <tr>
-                <th>Reactome pathways</th>
+            <tr> 
+                <th>Reactome Pathways</th>
                 <td>
-                    <ul data-hide-list="{{GeneCtrl.gene.pathways | orderBy:'name'}}" data-limit="10">
-                        <li data-ng-repeat="pathway in list">
-                            <a href="pathways/{{pathway.id}}"><span> {{pathway.name}}</span>
-                            </a>
-                        </li>
-                    </ul>
-                    <span data-ng-if="! GeneCtrl.gene.pathways">None</span>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.pathwayList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
                 </td>
             </tr>
-            <tr data-ng-if="GeneCtrl.gene.list">
-                <th>Gene Sets</th>
+            <tr>
+                <th>GO Terms</th>
                 <td>
-                   <span>
-                       <a href="http://cancer.sanger.ac.uk/cosmic/census" target="_blank">
-                       <i class="icon-external-link"></i> Cancer Gene Census
-                       </a>
-                   </span>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.goList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
+                </td>
+            </tr>
+            <tr>
+                <th>Curated Gene Set</th>
+                <td>
+                    <hide-list data-items="GeneCtrl.uiGeneSets.curatedList" 
+                        data-display-limit="5"
+                        data-template-name="template/geneGeneSetList.html">
+                    </hide-list>
                 </td>
             </tr>
         </table>
-
 
     </div>
     <div class="narrow omega">
@@ -105,8 +111,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['hgnc']">
-                            <a data-ng-href="http://www.genenames.org/data/hgnc_data.php?hgnc_id={{ id }}"
-                               target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneHGNC(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -116,16 +121,14 @@
             <tr>
                 <th>Ensembl (release 75)</th>
                 <td>
-                    <a data-ng-href="http://feb2014.archive.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={{GeneCtrl.gene.id}}"
-                       target="_blank">
+                    <a data-ng-href="{{GeneCtrl.ExternalLinks.geneEnsembl(GeneCtrl.gene.id)}}" target="_blank">
                         <i class="icon-external-link"></i> {{ GeneCtrl.gene.id }}</a>
                 </td>
             </tr>
             <tr>
                 <th>COSMIC</th>
                 <td>
-                    <a data-ng-href="http://cancer.sanger.ac.uk/cosmic/gene/analysis?ln={{ GeneCtrl.gene.symbol }}"
-                       target="_blank">
+                    <a data-ng-href="{{GeneCtrl.ExternalLinks.geneCOSMIC(GeneCtrl.gene.symbol)}}" target="_blank">
                         <i class="icon-external-link"></i> {{ GeneCtrl.gene.symbol }}</a>
                 </td>
             </tr>
@@ -134,7 +137,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['entrez_gene']">
-                            <a data-ng-href="http://www.ncbi.nlm.nih.gov/gene/{{ id }}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneEntrez(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -146,7 +149,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['omim_gene']">
-                            <a data-ng-href="http://omim.org/entry/{{id}}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneOMIM(id)}}" target="_blankc">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -158,7 +161,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['uniprotkb_swissprot']">
-                            <a data-ng-href="http://www.uniprot.org/uniprot/{{ id }}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneUniProt(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -169,12 +172,12 @@
     </div>
 </section>
 <section id="projects"
-         data-ng-class="{'loading': !GeneCtrl.gene.fprojects, 'empty': GeneCtrl.gene.fprojects.length == 0}">
-    <h3 data-ng-if="!GeneCtrl.gene.fprojects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
+         data-ng-class="{'loading': !GeneCtrl.gene.projects, 'empty': GeneCtrl.gene.fprojects.length == 0}">
+    <h3 data-ng-if="!GeneCtrl.gene.projects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
 
-    <h3 data-ng-if="GeneCtrl.gene.fprojects.length == 0">No Donors Affected.</h3>
+    <h3 data-ng-if="GeneCtrl.gene.projects.length == 0">No Donors Affected.</h3>
 
-    <div data-ng-if="GeneCtrl.gene.fprojects.length > 0">
+    <div data-ng-if="GeneCtrl.gene.projects.length > 0">
         <h3>Cancer Distribution
             <span data-open-in-list='?filters={{GeneCtrl.gene.advQuery}}' data-type="donor"></span>
         </h3>
@@ -186,8 +189,8 @@
             <a data-ng-href='/search/m?filters={{GeneCtrl.gene.advQuery}}'>
                 <strong>{{GeneCtrl.totalMutations | number}}</strong></a>
             mutations across
-            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneCtrl.gene.fprojects|pluck:"id").join("\",\"")}}"]}}}'>
-            <strong>{{GeneCtrl.gene.fprojects.length | number}}</strong></a>
+            <a data-ng-href='/projects?filters={"project":{"id":{"is":["{{(GeneCtrl.gene.projects|pluck:"id").join("\",\"")}}"]}}}'>
+            <strong>{{GeneCtrl.gene.projects.length | number}}</strong></a>
             projects
         </h4>
 
@@ -197,7 +200,7 @@
                  format="percentage"></bar>
         </div>
         <span class="t_table_top">
-            Showing <strong>{{GeneCtrl.gene.fprojects.length | number}}</strong> projects
+            Showing <strong>{{GeneCtrl.gene.projects.length | number}}</strong> projects
             <span data-toolbar data-dl="{{GeneCtrl.gene.id}}_distribution"></span>
         </span>
         <table class="table table-bordered table-striped table-condensed">
@@ -214,7 +217,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat="project in GeneCtrl.gene.fprojects | orderBy:'uiAffectedDonorPercentage':true">
+            <tr data-ng-repeat="project in GeneCtrl.gene.projects | orderBy:'uiAffectedDonorPercentage':true">
                 <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
                     {{ project.id }}
                 </a></td>
@@ -264,7 +267,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat="project in GeneCtrl.gene.fprojects | orderBy:'summary.uiAffectedDonorPercentage':true">
+            <tr data-ng-repeat="project in GeneCtrl.gene.projects | orderBy:'summary.uiAffectedDonorPercentage':true">
                 <td>{{project.name}}</td>
                 <td>{{project.primarySite}}</td>
                 <td>{{project.tumourType}}</td>

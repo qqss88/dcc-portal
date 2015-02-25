@@ -17,6 +17,7 @@
 package org.icgc.dcc.portal.mapper;
 
 import static com.google.common.base.Throwables.getStackTraceAsString;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
@@ -33,6 +34,7 @@ import javax.ws.rs.ext.Provider;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,19 +60,36 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   private HttpServletRequest request;
 
   @Override
+  @SneakyThrows
   public Response toResponse(Throwable t) {
+    val id = randomId();
     if (t instanceof WebApplicationException) {
-      return ((WebApplicationException) t).getResponse();
+      val response = ((WebApplicationException) t).getResponse();
+
+      val ok = response.getStatus() >= 200 && response.getStatus() < 400;
+      if (ok) {
+        return Response.fromResponse(response).build();
+      } else {
+        // Add an error response payload
+        log.error(t.getMessage());
+        return Response.fromResponse(response)
+            .type(APPLICATION_JSON_TYPE)
+            .entity(webErrorResponse(t, id, response.getStatus()))
+            .build();
+      }
     }
 
-    val id = randomId();
     logException(id, t);
     sendEmail(id, t);
 
     return serverError()
-        .type(headers.getMediaType())
+        .type(APPLICATION_JSON_TYPE)
         .entity(errorResponse(t, id))
         .build();
+  }
+
+  private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
+    return new Error(statusCode, t.getMessage());
   }
 
   private Error errorResponse(Throwable t, final long id) {
@@ -82,7 +101,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   }
 
   protected String formatResponseEntity(long id, Throwable exception) {
-    return String.format("There was an error processing your request. It has been logged (ID %016x).\n", id);
+    return String.format("There was an error processing your request. It has been logged (ID %016x).%n", id);
   }
 
   protected String formatLogMessage(long id, Throwable exception) {

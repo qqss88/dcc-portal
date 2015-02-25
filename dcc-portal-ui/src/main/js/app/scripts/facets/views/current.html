@@ -12,36 +12,38 @@
 
                     <span class="t_facets__facet__label"
                           data-ng-mouseenter="hoverStyle={'text-decoration':'line-through'}; $event.stopPropagation();"
-                          data-ng-mouseleave="hoverStyle={}; $event.stopPropagation()" 
-                          data-ng-click="removeFacet(typeName, facet)" 
+                          data-ng-mouseleave="hoverStyle={}; $event.stopPropagation()"
+                          data-ng-click="removeFacet(typeName, facet)"
                           data-ng-switch="facet">
                         <span data-ng-switch-when="id">{{typeName | trans:true}}</span>
                         <span data-ng-switch-when="pathwayId">Pathway</span>
-                        <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
+                        <span data-ng-switch-when="goTermId">GO</span>
+                        <span data-ng-switch-when="curatedSetId">Curated Gene Set</span>
+                        <span data-ng-switch-when="location">{{typeName | trans:true}} Location</span>
                         <span data-ng-switch-default="">{{facet | trans:true}}</span>
                     </span>
 
                     <span class="t_current__or">
-                        {{ terms.is.length !== 1? "IN (" : terms.is[0].controlFacet === 'uploadedGeneList'? "IN (" : "IS" }} 
+                        {{ terms.is.length !== 1? "IN (" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }}
                     </span>
 
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
-                        <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? terms.is.length : limit) track by termObj.term" 
+                        <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? terms.is.length : limit) track by termObj.term"
                             class="t_facets__facet__terms__term">
                             <span class="t_facets__facet__terms__active__term__label"
                                   data-ng-style="hoverStyle"
-                                  data-ng-click="Facets.removeTerm({type: termObj.controlType, facet: termObj.controlFacet, term: termObj.controlTerm})"
-                                  data-tooltip="{{ termObj.term | trans | define:true }}">{{termObj.term | trans:true}}</span>
-                            <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>  
+                                  data-ng-click="removeTerm(termObj.controlType, termObj.controlFacet, termObj.controlTerm)"
+                                  data-tooltip="{{ termObj.term | geneSetNameLookup | trans:true | define}}">{{termObj.term | trans:true}}</span>
+                            <span data-ng-if="!$last" class="t_current__or">,&nbsp;</span>
                         </li>
                         <li data-ng-show="terms.is.length > limit">
                             <a href=""><span data-ng-click="expandTerms=!expandTerms" class="t_current__or">
                                 <i class="{{expandTerms?'icon-caret-left':''}}"></i> {{ expandTerms? 'less':'...'}}
-                            </span></a> 
+                            </span></a>
                         </li>
-                    </ul> 
-                    <span class="t_current__or"> 
-                        {{ terms.is.length !== 1? ")" : terms.is[0].controlFacet === 'uploadedGeneList'?  ")" : ""}}
+                    </ul>
+                    <span class="t_current__or">
+                        {{ terms.is.length !== 1? ")" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
                     </span>
 
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>

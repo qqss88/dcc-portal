@@ -23,9 +23,10 @@ angular.module('app.ui.dl', []).directive('dlButton',
     return {
       restrict: 'E',
       scope: {
-        dlFilter: '@'
+        dlFilter: '@',
+        calc: '='
       },
-      templateUrl: 'views/common/dl.html',
+      templateUrl: '/scripts/ui/views/download.request.html',
       link: function (scope) {
 
         var emailRegex = /.+@.+\..+/i;
@@ -37,8 +38,6 @@ angular.module('app.ui.dl', []).directive('dlButton',
           dialogFade: true
         };
 
-
-        scope.show = true;
 
         scope.overallSize = 0;
         scope.dlTotal = 0;
@@ -95,7 +94,7 @@ angular.module('app.ui.dl', []).directive('dlButton',
 
           scope.dlFile = 0;
           scope.dlTotal = 0;
-          scope.calc = true;
+          // scope.calc = true;
 
           if (scope.dlFilter) {
             filters = JSON.parse(scope.dlFilter);
@@ -168,35 +167,32 @@ angular.module('app.ui.dl', []).directive('dlButton',
                 filters = LocationService.filters();
               }
 
-              linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/downloader';
+              linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/download';
 
               DownloaderService
                 .requestDownloadJob(filters, actives, scope.emailAddress,
                   linkURL, JSON.stringify(filters)).then(function (job) {
 
-                  // Update cache
-                  /* Remove local history for now until better user management is in place
-                   var current;
-                   current = DownloaderService.getCurrentJobIds();
-                   if (current.indexOf(job.downloadId) === -1) {
-                   current.push(job.downloadId);
-                   DownloaderService.setCurrentJobIds(current);
-                   }
-                   */
-
                   scope.modal = false;
                   scope.reset();
 
-                  $location.path('/downloader/' + job.data.downloadId).search('');
+                  $location.path('/download/' + job.downloadId).search('');
                 });
-
-
-              /*
-               $location.path('/downloader');
-               */
             }
           });
         };
+
+        scope.$watch('calc', function(n) {
+          if (n === true) {
+            console.log('>>>', n);
+            scope.calculateSize();
+          }
+        });
+
+        // Close self if location change detected
+        scope.$on('$locationChangeStart', function() {
+          scope.modal = false;
+        });
       }
     };
   });

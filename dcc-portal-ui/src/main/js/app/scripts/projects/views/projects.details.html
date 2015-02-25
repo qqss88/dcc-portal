@@ -1,0 +1,295 @@
+
+<section>
+<span data-ng-init="predicate='totalDonorCount'"></span>
+<span data-ng-init="reverse=true"></span>
+
+<div class="t_table_top" style="padding:0;margin: 0">
+    Showing <strong>{{ ProjectsCtrl.projects.hits.length }}</strong> projects
+    <span data-toolbar data-dl="projects"></span>
+</div>
+<table class="table table-bordered table-striped">
+<thead>
+<tr>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='id'; reverse=!reverse">
+        Code
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='id'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='id'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='name'; reverse=!reverse">
+        Name
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='name'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='name'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='primarySite'; reverse=!reverse">
+        Site
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primarySite'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='primarySite'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='primaryCountries'; reverse=!reverse">
+        <abbr data-tooltip="Lead country of the cancer project">Country</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primaryCountries'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='primaryCountries'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Total number of donors">Donors</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalDonorCount'"
+           class="icon-sort"></i>
+        <i data-ng-if="predicate==='totalDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th colspan="11" class="text-center">Available Data Types</th>
+</tr>
+<tr>
+    <th style="cursor: pointer" data-ng-click="predicate='ssmTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'SSM' | define }}"
+              class="tiny-header">SSM</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='ssmTestedDonorCount'"
+           class="icon-sort"></i>
+
+        <i data-ng-if="predicate==='ssmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='cnsmTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'CNSM' | define }}"
+              class="tiny-header">CNSM</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='cnsmTestedDonorCount'"
+           class="icon-sort"></i>
+        <i data-ng-if="predicate==='cnsmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='stsmTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'StSM' | define }}"
+              class="tiny-header">StSM</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='stsmTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='stsmTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='sgvTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'SGV' | define }}"
+              class="tiny-header">SGV</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='sgvTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='sgvTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='methArrayTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'METH-A' | define }}"
+              class="tiny-header">METH-A</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methArrayTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='methArrayTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='methSeqTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'METH-S' | define }}"
+              class="tiny-header">METH-S</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='methSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='methSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='expArrayTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'EXP-A' | define }}"
+              class="tiny-header">EXP-A</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expArrayTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='expArrayTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='expSeqTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'EXP-S' | define }}"
+              class="tiny-header">EXP-S</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='expSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='expSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='pexpTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'PEXP' | define }}"
+              class="tiny-header">PEXP</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='pexpTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='pexpTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='mirnaSeqTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'miRNA-S' | define }}"
+              class="tiny-header">miRNA-S</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='mirnaSeqTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='mirnaSeqTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+    <th style="cursor: pointer" data-ng-click="predicate='jcnTestedDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Number of donors with {{ 'JCN' | define }}"
+              class="tiny-header">JCN</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='jcnTestedDonorCount'" class="icon-sort"></i>
+        <i data-ng-if="predicate==='jcnTestedDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
+</tr>
+</thead>
+<tbody>
+<tr class="transition-fade"
+    data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
+    <td style="white-space: nowrap"><a data-ui-sref="project({id:project.id})">{{project.id}}</a></td>
+    <td>{{project.name}}</td>
+    <td>{{project.primarySite}}</td>
+    <td>{{project.primaryCountries.join(', ')}}</td>
+    <td class="text-right">
+            <span data-ng-if="project.totalDonorCount > 0">
+                <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]}}}"})'>
+                    {{project.totalDonorCount | number}}</a>
+            </span>
+        <span data-ng-if="project.totalDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.ssmTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"ssm\"]}}}"})'>
+            {{project.ssmTestedDonorCount | number}}</a>
+        <span data-ng-if="project.ssmTestedDonorCount== 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.cnsmTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"cnsm\"]}}}"})'>
+            {{project.cnsmTestedDonorCount | number}}</a>
+        <span data-ng-if="project.cnsmTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.stsmTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"stsm\"]}}}"})'>
+            {{project.stsmTestedDonorCount | number}}</a>
+        <span data-ng-if="project.stsmTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.sgvTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"sgv\"]}}}"})'>
+            {{project.sgvTestedDonorCount | number}}</a>
+        <span data-ng-if="project.sgvTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.methArrayTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_array\"]}}}"})'>
+            {{project.methArrayTestedDonorCount | number}}
+        </a>
+        <span data-ng-if="project.methArrayTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.methSeqTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_seq\"]}}}"})'>
+            {{project.methSeqTestedDonorCount | number}}
+        </a>
+        <span data-ng-if="project.methSeqTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.expArrayTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_array\"]}}}"})'>
+            {{project.expArrayTestedDonorCount | number}}
+        </a>
+        <span data-ng-if="project.expArrayTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.expSeqTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_seq\"]}}}"})'>
+            {{project.expSeqTestedDonorCount | number}}
+        </a>
+        <span data-ng-if="project.expSeqTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.pexpTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"pexp\"]}}}"})'>
+            {{project.pexpTestedDonorCount | number}}
+        </a>
+        <span data-ng-if="project.pexpTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.mirnaSeqTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"mirna_seq\"]}}}"})'>
+            {{project.mirnaSeqTestedDonorCount | number}}</a>
+        <span data-ng-if="project.mirnaSeqTestedDonorCount === 0">--</span>
+    </td>
+    <td class="text-right">
+        <a data-ng-if="project.jcnTestedDonorCount > 0"
+           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"jcn\"]}}}"})'>
+            {{project.jcnTestedDonorCount | number}}</a>
+        <span data-ng-if="project.jcnTestedDonorCount === 0">--</span>
+    </td>
+</tr>
+<tr>
+    <td colspan="4"><strong>Total</strong></td>
+    <td class="text-right">
+        <a href="/search?filters={{createAdvanceFilters()}}">
+            {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("ssm")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("cnsm")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("stsm")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("sgv")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("meth_array")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("meth_seq")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("exp_array")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("exp_seq")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("pexp")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("mirna_seq")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number}}</a>
+    </td>
+    <td class="text-right">
+        <a href='/search?filters={{createAdvanceFilters("jcn")}}'>
+            {{ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number}}</a>
+    </td>
+</tr>
+</tbody>
+</table>
+
+<table id="projects" class="hidden" data-ng-if="ProjectsCtrl.Page.isExporting()">
+    <thead>
+    <tr>
+        <th>Project Code</th>
+        <th>Project Name</th>
+        <th>Primary Site</th>
+        <th>Country</th>
+        <th>Donors</th>
+        <th>SSM</th>
+        <th>CNSM</th>
+        <th>STSM</th>
+        <th>SGV</th>
+        <th>METH-A</th>
+        <th>METH-S</th>
+        <th>EXP-A</th>
+        <th>EXP-S</th>
+        <th>PEXP</th>
+        <th>miRNA-S</th>
+        <th>JCN</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr data-ng-repeat="project in ProjectsCtrl.projects.hits track by project.id">
+        <td>{{project.id}}</td>
+        <td>{{project.name}}</td>
+        <td>{{project.primarySite}}</td>
+        <td>{{project.primaryCountries.join(', ')}}</td>
+        <td>{{project.totalDonorCount}}</td>
+        <td>{{project.ssmTestedDonorCount}}</td>
+        <td>{{project.cnsmTestedDonorCount}}</td>
+        <td>{{project.stsmTestedDonorCount}}</td>
+        <td>{{project.sgvTestedDonorCount}}</td>
+        <td>{{project.methArrayTestedDonorCount}}</td>
+        <td>{{project.methSeqTestedDonorCount}}</td>
+        <td>{{project.expArrayTestedDonorCount}}</td>
+        <td>{{project.expSeqTestedDonorCount}}</td>
+        <td>{{project.pexpTestedDonorCount}}</td>
+        <td>{{project.mirnaSeqTestedDonorCount}}</td>
+        <td>{{project.jcnTestedDonorCount}}</td>
+    </tr>
+    </tbody>
+</table>
+</section>

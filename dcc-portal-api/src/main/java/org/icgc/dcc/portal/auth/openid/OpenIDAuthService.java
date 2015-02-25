@@ -1,12 +1,12 @@
 package org.icgc.dcc.portal.auth.openid;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwRedirectException;
 
 import java.net.URI;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import javax.ws.rs.core.UriBuilder;
@@ -22,7 +22,7 @@ import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthService;
 import org.icgc.dcc.portal.service.AuthenticationException;
-import org.icgc.dcc.portal.service.DistributedCacheService;
+import org.icgc.dcc.portal.service.SessionService;
 import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.VerificationResult;
@@ -55,7 +55,7 @@ public class OpenIDAuthService {
   private static final String DEFAULT_USER_MESSAGE = "An error occurred while trying to log in.";
 
   @NonNull
-  private final DistributedCacheService cacheService;
+  private final SessionService sessionService;
   @NonNull
   private final ConsumerManager consumerManager;
   @NonNull
@@ -74,19 +74,23 @@ public class OpenIDAuthService {
 
     // This token will tag along to the response from the provider and allows us to link the response to a user
     val sessionToken = UUID.randomUUID();
+    log.info("[{}] Received an OpenID authentication request", sessionToken);
 
     // The OpenID provider will use this endpoint to provide authentication
     val returnToUrl = formatReturnToUrl(serverName, serverPort, sessionToken, currentUrl);
-    log.info("Return to URL '{}'", returnToUrl);
+    log.info("[{}] Generated return_to URL '{}'", sessionToken, returnToUrl);
 
-    // Perform discovery on the user-supplied identifier
+    log.debug("[{}] Performing discoveries on the user identifier '{}'", sessionToken, identifier);
     List<?> discoveries = consumerManager.discover(identifier);
+    log.debug("[{}] Discoveries: {}", sessionToken, discoveries);
 
-    // Attempt to associate with the OpenID provider and retrieve one service endpoint for authentication
+    log.debug("[{}] Attempting to associate with the OpenID provider", sessionToken);
     val discoveryInfo = consumerManager.associate(discoveries);
+    log.debug("[{}] Associated. Discovery info: {}", sessionToken, discoveryInfo);
 
     // Persist the discovery info in the cache for further verification
-    cacheService.putDiscoveryInfo(sessionToken, discoveryInfo);
+    sessionService.putDiscoveryInfo(sessionToken, discoveryInfo);
+    log.debug("[{}] Persisted the discovery info into the cache.", sessionToken);
 
     // Build the AuthRequest message to be sent to the OpenID provider
     val authRequest = consumerManager.authenticate(discoveryInfo, returnToUrl);
@@ -99,6 +103,7 @@ public class OpenIDAuthService {
 
     // Attach the extension to the authentication request
     authRequest.addExtension(fetch);
+    log.info("[{}] Successfully created an OpenID authentication request", sessionToken);
 
     return authRequest;
   }
@@ -110,9 +115,15 @@ public class OpenIDAuthService {
    * @return an authenticated User
    */
   public User verify(String sessionToken, String receivingUrl, ParameterList parameterList, URI redirect) {
+    log.info("[{}] Received an OpenID verification request", sessionToken);
     val verification = verifyProviderResponse(sessionToken, receivingUrl, parameterList, redirect);
+    log.info("[{}] Successfuly verified the OpenID verification request", sessionToken);
+    log.info("[{}] Creating and persisting session user", sessionToken);
+    val user = createUser(sessionToken, verification, redirect);
+    log.info("[{}] Created user '{}'. DACO access: {}",
+        new Object[] { sessionToken, user.getOpenIDIdentifier(), user.getDaco() });
 
-    return createUser(sessionToken, verification, redirect);
+    return user;
   }
 
   /**
@@ -123,20 +134,22 @@ public class OpenIDAuthService {
   private VerificationResult verifyProviderResponse(String sessionToken, String receivingUrl,
       ParameterList parameterList, URI redirect) {
 
-    checkState(!isNullOrEmpty(sessionToken), "Null or empty token", redirect);
+    checkState(!isNullOrEmpty(sessionToken), "Failed to verify provider response. Null or empty token", redirect);
     val sessionTokenUuid = stringToUuid(sessionToken, redirect);
 
-    val discoveryInfoOptional = cacheService.getDiscoveryInfo(sessionTokenUuid);
-    cacheService.removeDiscoveryInfo(sessionTokenUuid);
+    log.debug("[{}] Looking for discovery info in the cache", sessionToken);
+    val discoveryInfoOptional = sessionService.getDiscoveryInfo(sessionTokenUuid);
+    sessionService.removeDiscoveryInfo(sessionTokenUuid);
 
-    checkState(discoveryInfoOptional.isPresent(), "Authentication failed due to no discovery information matching "
-        + "session token " + sessionToken, redirect);
+    checkState(discoveryInfoOptional.isPresent(), _("[%s] Authentication failed because of missing discovery "
+        + "information for session", sessionToken), redirect);
     val discoveryInfo = discoveryInfoOptional.get();
+    log.debug("[{}] Found discovery info in the cache. {}", sessionToken, discoveryInfo);
 
     try {
       return consumerManager.verify(receivingUrl, parameterList, discoveryInfo);
     } catch (Exception e) {
-      log.info(e.getMessage());
+      log.info("[{}] Failed to verify OpenID provider response. {}", sessionToken, e.getMessage());
       throw new AuthenticationException(DEFAULT_USER_MESSAGE, false, redirect);
     }
   }
@@ -151,19 +164,20 @@ public class OpenIDAuthService {
   private User createUser(String sessionToken, VerificationResult verification, URI redirect) {
     // AKA OpenID URL or XRI
     val userIdentifier = verification.getVerifiedId();
-    checkState(userIdentifier != null, "Received null user identifier", redirect);
+    log.debug("[{}] User identifier: {}", sessionToken, userIdentifier);
+    checkState(userIdentifier != null, _("[%s] Received null user identifier", sessionToken), redirect);
 
     // sessionToken is not generated as it's set couple steps later
     User user = new User();
     user.setOpenIDIdentifier(userIdentifier.getIdentifier());
-    checkState(setUserEmail(verification, user), "Failed to set user's email", redirect);
+    checkState(setUserEmail(verification, user), _("[%s] Failed to set user's email", sessionToken), redirect);
 
     val sessionTokenUuid = stringToUuid(sessionToken, redirect);
-    user = configureDacoAccess(sessionTokenUuid, checkOtherSessions(user, redirect), redirect);
+    user = configureDacoAccess(sessionTokenUuid, checkOtherSessions(user, redirect, sessionToken), redirect);
     user.setSessionToken(sessionTokenUuid);
 
     // Persist the user in the cache with the authentication token
-    cacheService.putUser(sessionTokenUuid, user);
+    sessionService.putUser(sessionTokenUuid, user);
 
     return user;
   }
@@ -200,8 +214,9 @@ public class OpenIDAuthService {
         user.setDaco(true);
       }
 
-    } catch (NoSuchElementException e) {
-      throwRedirectException(DEFAULT_USER_MESSAGE, "Failed to check DACO access settings for the user", redirect);
+    } catch (Exception e) {
+      throwRedirectException(DEFAULT_USER_MESSAGE,
+          _("Failed to check DACO access settings for the user. %s", e.getMessage()), redirect);
     }
 
     return user;
@@ -214,25 +229,27 @@ public class OpenIDAuthService {
    * @param lookupUser used to search for already logged in users
    * @throws AuthenticationException if no user found
    */
-  private User checkOtherSessions(User lookupUser, URI redirect) {
+  private User checkOtherSessions(User lookupUser, URI redirect, String sessionToken) {
     // Search for already logged-in user (another browser?)
-    val userByIdentifierOptional = cacheService.getUserByOpenidIdentifier(lookupUser.getOpenIDIdentifier());
+    log.debug("[{}] Looking for users by OpenID: '{}'", sessionToken, lookupUser.getOpenIDIdentifier());
+    val userByIdentifierOptional = sessionService.getUserByOpenidIdentifier(lookupUser.getOpenIDIdentifier());
     if (userByIdentifierOptional.isPresent()) {
-      log.info("Found an existing User using OpenID identifier {}", lookupUser);
+      log.debug("[{}] Found an existing User using OpenID identifier {}", sessionToken, lookupUser);
 
       return userByIdentifierOptional.get();
     }
 
     // This is either a new registration or the user's OpenID URL(XRI) has changed
     if (lookupUser.getEmailAddress() != null) {
-      val userOptional = cacheService.getUserByEmail(lookupUser.getEmailAddress());
+      log.debug("[{}] Looking for users by email: '{}'", sessionToken, lookupUser.getEmailAddress());
+      val userOptional = sessionService.getUserByEmail(lookupUser.getEmailAddress());
       if (!userOptional.isPresent()) {
-        log.info("No authenticated users found. Registering a new {}", lookupUser);
+        log.debug("[{}] No authenticated users found. Registering a new one - {}", sessionToken, lookupUser);
 
         return lookupUser;
       } else {
         // The user's OpenID URL(XRI) has changed so update it
-        log.info("Updating user's OpenID URL(XRI) for {}", lookupUser);
+        log.debug("[{}] Updating user's OpenID URL(XRI) for {}", sessionToken, lookupUser);
         val newUser = userOptional.get();
         newUser.setOpenIDIdentifier(lookupUser.getOpenIDIdentifier());
 
@@ -277,16 +294,17 @@ public class OpenIDAuthService {
   }
 
   private static String formatReturnToUrl(String hostname, int port, UUID sessionToken, String returnTo) {
+    val redirectBuilder = UriBuilder.fromPath("/");
+    val returnBuilder = UriBuilder.fromPath("api");
 
-    UriBuilder redirectBuilder = UriBuilder.fromPath("/");
-    UriBuilder returnBuilder = UriBuilder.fromPath("api");
+    // The end-user and an HTTPS termination point(portal or load balancer) always communicate over HTTPS in OpenID
+    // authentication scenario, that's why scheme in a return_to URL always must be set to HTTPS
+    redirectBuilder.scheme(Scheme.HTTPS.getId());
+    returnBuilder.scheme(Scheme.HTTPS.getId());
 
-    if (port == DEFAULT_HTTP_PORT) {
-      redirectBuilder.scheme(Scheme.HTTP.getId());
-      returnBuilder.scheme(Scheme.HTTP.getId());
-    } else {
-      redirectBuilder.scheme(Scheme.HTTPS.getId()).port(port);
-      returnBuilder.scheme(Scheme.HTTPS.getId()).port(port);
+    if (port != DEFAULT_HTTP_PORT) {
+      redirectBuilder.port(port);
+      returnBuilder.port(port);
     }
 
     redirectBuilder.host(hostname)
@@ -299,7 +317,6 @@ public class OpenIDAuthService {
         .queryParam("redirect", redirectBuilder.build().toString());
 
     val returnToURLStr = returnBuilder.build().toString();
-    log.info("Return to URL: {}", returnToURLStr);
 
     return returnToURLStr;
   }

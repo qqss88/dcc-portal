@@ -6,7 +6,7 @@
 #   VCL and backend-definitions.
 #
 # Notes:
-#   You can change the file name by editing /etc/default/varnish.
+#   It should be included in the main.vcl configuration file.
 #
 #   After changing this file, you can run either service varnish reload, which will not restart Varnish, 
 #   or you can run service varnish restart, which empties the cache.
@@ -22,7 +22,7 @@
 #   /etc/varnish/portal.vcl
 #
 # SCM:
-#  https://github.com/icgc-dcc/dcc/blob/develop/dcc-portal/dcc-portal-api/src/main/varnish/portal.vcl
+#  git@hproxy-dcc.res.oicr.on.ca:/srv/git/dcc-cache.git/identifier.vcl
 #
 
 # Backend 1
@@ -30,11 +30,11 @@ backend www1 {
 	.host = "hportal1-dcc.oicr.on.ca";
 	.port = "5381";
 	.probe = {
-                .url = "/";
-                .interval = 5s;
-                .timeout = 1 s;
-                .window = 5;
-                .threshold = 3;
+    	.url = "/";
+		.interval = 5s;
+		.timeout = 1s;
+		.window = 5;
+		.threshold = 3;
 	}
 }
 
@@ -43,11 +43,11 @@ backend www2 {
 	.host = "hportal2-dcc.oicr.on.ca";
 	.port = "5381";
 	.probe = {
-                .url = "/";
-                .interval = 5s;
-                .timeout = 1 s;
-                .window = 5;
-                .threshold = 3;
+		.url = "/";
+		.interval = 5s;
+		.timeout = 1s;
+		.window = 5;
+		.threshold = 3;
 	}
 }
 
@@ -71,9 +71,9 @@ director member client {
 */
 
 acl banners {
-        "localhost";
-        "hportal1-dcc.oicr.on.ca";
-        "hportal2-dcc.oicr.on.ca";
+	"localhost";
+	"hportal1-dcc.oicr.on.ca";
+	"hportal2-dcc.oicr.on.ca";
 }
 
 # The first VCL function executed, right after Varnish has decoded the request into its basic data structure. 
@@ -84,12 +84,13 @@ acl banners {
 # - Executing re-write rules needed for specific web applications.
 # - Deciding which Web server to use.
 sub vcl_recv {
+	if (server.port == 5381) {
         set req.backend = www;
 
-	/*
+		/*
         set req.backend = member;
         set client.identity = client.ip;
-	*/
+		*/
 
         /* Force banning for remote application cache coherence */
         if (req.request == "BAN") {
@@ -119,30 +120,38 @@ sub vcl_recv {
                 return(pipe);
         }
 
-	if (req.request == "GET" && req.url ~ "^/api/.*/short\?.*$") {
-		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
-		set req.http.Connection = "close";
+		if (req.request == "GET" && req.url ~ "^/api/.*/short\?.*$") {
+			/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
+			set req.http.Connection = "close";
 
-		/* Never cache short URL API */
-		return(pipe);
-	}
+			/* Never cache short URL API */
+			return(pipe);
+		}
 
-	if (req.url ~ "^/api/.*/analysis.*$") {
-		/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
-		set req.http.Connection = "close";
+		if (req.url ~ "^/api/.*/analysis.*$") {
+			/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
+			set req.http.Connection = "close";
 
-		/* Never cache analysis path */
-		return(pipe);
-	}
+			/* Never cache analysis path */
+			return(pipe);
+		}
+	
+		if (req.url ~ "^/api/.*/entityset.*$") {
+			/* Don't reuse connection. See https://www.varnish-cache.org/docs/3.0/tutorial/vcl.html#actions pipe paragraph */
+			set req.http.Connection = "close";
 
+			/* Never cache analysis path */
+			return(pipe);
+		}
+	
         if (req.http.X-Bypass) {
-                /* Never cache bypass requests for load testing */
-                return(pipe);
+        	/* Never cache bypass requests for load testing */
+            return(pipe);
         }
 
         /* Remove cache busting cookies */
-
         remove req.http.Cookie;
+    }
 }
 
 
@@ -150,29 +159,31 @@ sub vcl_recv {
 # provided by the client to decide on caching policy, while you use information provided by the server 
 # to further decide on a caching policy in vcl_fetch.
 sub vcl_fetch {
-	if (beresp.status == 200 && req.request == "GET" && req.url ~ "^/(index\.html)?$") {
-		/* Short duration for the index page */
-		set beresp.ttl = 1m;
-		set beresp.http.cache-control = "max-age=0";
-	} else if (beresp.status == 200 && req.request == "GET" && req.url ~ "^/(vendor|styles|scripts|views)/.*$") {
-		/* Static resources */
-		set beresp.ttl = 1h;
-		set beresp.http.cache-control = "max-age=3600";
-	} else if (beresp.status == 200 && req.request == "GET") {
-		/* Long duration for everything else that was successful */
-		set beresp.ttl = 30d;
-		set beresp.http.cache-control = "max-age=3600";
-	} else {
-		/* No TTL on everything else */
-		set beresp.ttl = 0s;
-	}
+	if (server.port == 5381) {
+		if (beresp.status == 200 && req.request == "GET" && req.url ~ "^/(index\.html)?$") {
+			/* Short duration for the index page */
+			set beresp.ttl = 1m;
+			set beresp.http.cache-control = "max-age=0";
+		} else if (beresp.status == 200 && req.request == "GET" && req.url ~ "^/(vendor|styles|scripts|views)/.*$") {
+			/* Static resources */
+			set beresp.ttl = 1h;
+			set beresp.http.cache-control = "max-age=3600";
+		} else if (beresp.status == 200 && req.request == "GET") {
+			/* Long duration for everything else that was successful */
+			set beresp.ttl = 30d;
+			set beresp.http.cache-control = "max-age=3600";
+		} else {
+			/* No TTL on everything else */
+			set beresp.ttl = 0s;
+		}
 
-	/* Prevent cookie cache-busting */
-	unset beresp.http.set-cookie;
+		/* Prevent cookie cache-busting */
+		unset beresp.http.set-cookie;
 
-	/* Rewrite Vary until dropwizard is upgraded. See https://github.com/dropwizard/dropwizard/issues/494 */
-	if (beresp.status == 200 && beresp.http.content-encoding ~ "^gzip$") {
-		set beresp.http.vary = "Accept-Encoding";
+		/* Rewrite Vary until dropwizard is upgraded. See https://github.com/dropwizard/dropwizard/issues/494 */
+		if (beresp.status == 200 && beresp.http.content-encoding ~ "^gzip$") {
+			set beresp.http.vary = "Accept-Encoding";
+		}
 	}
 }
 

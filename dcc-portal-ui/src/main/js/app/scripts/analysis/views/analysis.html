@@ -1,0 +1,181 @@
+<h1>
+    <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Set Analysis
+</h1>
+<aside class="t_sidebar" data-ng-controller="BenchController">
+    <div>
+        <div class="t_tabs" style="margin-right: -2rem">
+            <div class="t_tabs__tab t_tabs__tab__analysis active">
+                <span>Bench</span>
+            </div>
+        </div>
+        <div style="max-height: 60rem; overflow-y: scroll;padding-bottom: 1rem; margin-right:-2rem">
+            <section class="text-right">
+                <span>
+                    <button class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0"
+                        data-tooltip="Delete All Analyses">
+                        <i class="icon-trash"></i>
+                    </button>
+                </span>
+            </section>
+            <ul class="t_suggest_flyout__hits">
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-click="getAnalysis()"
+                    data-ng-class="{selected: !analysisId}">
+                    <span style="font-size:1.2rem"><i class="icon-beaker"></i> Saved Sets</span><br>
+                    <small>&nbsp;</small>
+                </li>
+                <li class="t_suggest_flyout__hits__hit"
+                    data-ng-click="getAnalysis(item.id, item.type)"
+                    data-ng-repeat="item in analysisList"
+                    data-ng-class="{selected: item.id == analysisId}">
+                    <span>
+                        <div style="padding-right:0.25rem">
+                            <span>
+                                {{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}
+                                <small class="pull-right" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                                   {{item.timestamp | date:"yyyy-MM-dd"}}
+                                </small>
+                            </span>
+                        </div>
+                        <small data-ng-if="item.type === 'enrichment'" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                            {{item.universe | define}} - {{item.maxGeneCount | number}} {{item.maxGeneCount !== 1? "genes": "gene" }}
+                        </small>
+                        <small data-ng-if="item.type === 'union'" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                            {{item.dataType | trans:true}}
+                        </small>
+                        <span data-ng-mouseenter="hover=true"
+                              data-ng-mouseleave="hover=false"
+                              data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
+                            <i class="icon-cancel pull-right"
+                               style="background: {{hover===true? '#dc502e' : ''}}"
+                               data-tooltip="Delete Analysis"
+                               data-tooltip-placement="right">
+                            </i>
+                        </span>
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</aside>
+
+<article>
+    <div style="margin: 1rem" data-ng-if="!analysisId">
+        <h3>Saved Sets</h3>
+        <div>
+            <span>
+            Create <strong>donor</strong>, <strong>gene</strong> or <strong>mutation</strong> sets of your interest in the <a href="/search">Advanced Search</a>, then select set(s) below to launch analysis.
+            <br>
+            <small>Note: Enrichment Analysis has an upper limit of 10,000 genes, Set Operations supports up to 3 sets of the same type.</small>
+            <br>
+
+            <!--<small>For more information on the Bench, please refer to <a href="">documentation</a>. </small>-->
+            <!--<small>Documentation is available on this link: <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis Documentation</a></small>-->
+            <small>Please see the <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis</a> documentation resource for a general overview of this feature.</small>
+
+            </span>
+            <br><br>
+
+            <enrichment-upload
+                data-gene-limit="{{totalCount}}"
+                data-filters="enrichment.filters"
+                data-enrichment-modal="enrichment.modal">
+            </enrichment-upload>
+
+
+            <span class="alert-error" data-ng-if="syncError">
+                <i class="icon-attention"></i>
+                Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
+            </span>
+
+
+            <div style="padding:.5rem 0">
+                <div>
+                    <span>Available analyses: </span>
+                    <span>
+                        <button class="t_button" data-ng-disabled="!setop" data-ng-click="launchSetAnalysis()">
+                        <i class="icon-beaker"></i>
+                        Set Operations
+                        </button>
+                    </span>
+                    <span>
+                        <button class="t_button" data-ng-disabled="!enrichmentSet || totalCount > 10000" data-ng-click="launchEnrichmentAnalysis()">
+                        <i class="icon-beaker"></i>
+                        Enrichment Analysis 
+                        </button>
+                    </span>
+                    <span class="pull-right">
+                        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="canBeDeleted === 0"
+                            data-tooltip="Delete">
+                            <i class="icon-trash"></i>
+                        </button>   
+                    </span>
+                </div>
+            </div>
+            <table class="table">
+                <thead>
+                    <th></th>
+                    <th>Item type</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th class="text-right"># of items</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="item in entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
+                        <td class="text-center">
+                            <span data-ng-if="item.state === 'FINISHED' || syncError" style="cursor:pointer" 
+                                  data-ng-click="checked = !checked; checked === true? addSelection(item) : removeSelection(item); update();">
+                                <i class="{{checked === true? 'icon-check': 'icon-check-empty'}}"></i>
+                            </span>
+                        </td>
+                        <td>{{item.type | trans:true}}</td>
+                        <td>{{item.name}}</td>
+                        <td style="max-width: 30rem">{{item.description}}</td>
+                        <td class="text-right" data-ng-if="item.state === 'FINISHED'">
+                            <a href="{{item.advLink}}">{{item.count | number}}</a>
+                        </td>
+                        <td data-ng-if="item.state === 'FINISHED'">
+                            <span style="float:left; font-size:1.25rem">
+                                <span class="t_tools__tool" data-tooltip="Export as TSV">
+                                    <i class="icon-file" data-ng-click="exportSet(item.id)"></i>
+                                </span>
+                            </span>
+                        </td>
+                        <td colspan="2" data-ng-if="item.state !== 'FINISHED'">
+                            Processing ... <i class="icon-spinner icon-spin"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="margin: 1rem" data-ng-if="analysisId">
+
+        <div data-ng-if="analysisType === 'enrichment'" >
+            <h3>Enrichment Analysis
+                <span style="font-size:1rem" class="pull-right">
+                    <share-button></share-button>
+                </span>
+            </h3>
+            <div data-ng-if="!error">
+                <enrichment-result data-item="analysisResult"></enrichment-result>
+            </div>
+        </div>
+        <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
+            <h3>Set Operations
+                <span style="font-size:1rem" class="pull-right">
+                    <share-button></share-button>
+                </span>
+            </h3>
+            <div data-ng-if="!error">
+                <set-operation data-item="analysisResult"></set-operation>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+
+        <div data-ng-if="error" class="alert-error">
+            <i class="icon-attention"></i><span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. It may no longer be valid with respect to current portal data.</span>
+        </div>
+    </div>
+</article>

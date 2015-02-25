@@ -141,4 +141,8 @@ public class GeneService {
   public Gene findOne(String geneId, Query query) {
     return new Gene(geneRepository.findOne(geneId, query));
   }
+
+  public List<String> getAffectedTranscripts(String geneId) {
+    return geneRepository.getAffectedTranscripts(geneId);
+  }
 }

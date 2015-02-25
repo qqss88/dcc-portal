@@ -5,14 +5,24 @@
     <li data-tags-facet data-label="Gene" data-facet-name="id" data-placeholder="eg. KRAS, ENSG00000133703"
         data-type="gene">
     </li>
-    <li data-tags-facet data-label="Pathway"
-        data-facet-name="pathwayId"
-        data-placeholder="eg. REACT_75842, TNF signaling" data-type="pathway">
-    </li>
+
     <terms data-type="gene" data-facet-name="type" data-facet="AdvancedCtrl.Gene.genes.facets.type"
            data-capitalize="true"></terms>
-    <terms data-type="gene" data-facet-name="list" data-facet="AdvancedCtrl.Gene.genes.facets.list"
-           data-capitalize="true"></terms>
+
+    <li data-tags-facet data-label="Pathway"
+        data-facet-name="pathwayId"
+        data-placeholder="eg. REACT_75842, TNF Signaling" data-type="pathway">
+    </li>
+
+    <li data-tags-facet data-label="Gene Ontology (GO)"
+        data-facet-name="goTermId"
+        data-placeholder="eg. GO:0016049, cell growth" data-type="go_term">
+    </li>
+
+    <li data-tags-facet data-label="Curated Gene Set"
+        data-facet-name="curatedSetId" data-type="curated_set">
+    </li>
+
     <li data-location-facet data-type="gene" data-facet-name="location" data-label="Location"
         data-placeholder="Enter gene location" data-example="eg. chr12:43566-3457633"></li>
 </ul>

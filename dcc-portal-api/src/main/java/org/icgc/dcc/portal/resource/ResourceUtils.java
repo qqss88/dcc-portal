@@ -1,19 +1,30 @@
 package org.icgc.dcc.portal.resource;
 
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.Validation;
+
+import lombok.NonNull;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Query.QueryBuilder;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.util.JsonUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class ResourceUtils {
+
+  static final Set<String> ORDER_VALUES = ImmutableSet.of("asc", "desc");
 
   static final String DEFAULT_FILTERS = "{}";
   static final String DEFAULT_SIZE = "10";
@@ -21,7 +32,7 @@ public class ResourceUtils {
   static final String DEFAULT_ORDER = "desc";
   static final String DEFAULT_PROJECT_SORT = "totalDonorCount";
   static final String DEFAULT_DONOR_SORT = "ssmAffectedGenes";
-  static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
+  public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
 
   static final String COUNT_TEMPLATE = "Request for a count of {} with filters '{}";
@@ -45,8 +56,8 @@ public class ResourceUtils {
   static final String AFFECTED_BY_THE = " affected by the ";
   static final String FOR_THE = " for the ";
   static final String FIND_BY_ID_ERROR =
-      "If it does not exist with the specified Id an error will be returned";
-  static final String FIND_BY_ID = "Find by Id";
+      "If it does not exist with the specified Identifiable an error will be returned";
+  static final String FIND_BY_ID = "Find by Identifiable";
   static final String NOT_FOUND = " not found";
   static final String MULTIPLE_IDS = ". Multiple IDs can be separated by a comma";
 
@@ -56,6 +67,8 @@ public class ResourceUtils {
   static final String API_MUTATION_PARAM = "mutationId";
   static final String API_GENE_VALUE = "Gene ID";
   static final String API_GENE_PARAM = "geneId";
+  static final String API_GENE_SET_PARAM = "geneSetId";
+  static final String API_GENE_SET_VALUE = "Gene Set ID";
   static final String API_PROJECT_VALUE = "Project ID";
   static final String API_PROJECT_PARAM = "projectId";
   static final String API_OCCURRENCE_VALUE = "Occurrence ID";
@@ -78,6 +91,19 @@ public class ResourceUtils {
   static final String API_FILTER_VALUE = "Filter the search results";
   static final String API_SCORE_FILTERS_PARAM = "scoreFilters";
   static final String API_SCORE_FILTER_VALUE = "Used to filter scoring differently from results";
+  static final String API_ANALYSIS_VALUE = "Analysis";
+  static final String API_ANALYSIS_PARAM = "analysis";
+  static final String API_ANALYSIS_ID_VALUE = "Analysis ID";
+  static final String API_ANALYSIS_ID_PARAM = "analysisId";
+  static final String API_PARAMS_VALUE = "EnrichmentParams";
+  static final String API_PARAMS_PARAM = "params";
+
+  static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
+  static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
+
+  static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity Set Definition";
+  static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
+  static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();
@@ -118,4 +144,23 @@ public class ResourceUtils {
   static QueryBuilder query() {
     return Query.builder();
   }
+
+  /**
+   * @see http://stackoverflow.com/questions/23704616/how-to-validate-a-single-parameter-in-dropwizard
+   */
+  static void validate(@NonNull Object object) {
+    val errorMessages = new ArrayList<String>();
+    val validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    val violations = validator.validate(object);
+    if (!violations.isEmpty()) {
+      for (val violation : violations) {
+        errorMessages.add("'" + violation.getPropertyPath() + "' " + violation.getMessage());
+      }
+
+      throw new BadRequestException(COMMA.join(errorMessages));
+    }
+
+  }
+
 }

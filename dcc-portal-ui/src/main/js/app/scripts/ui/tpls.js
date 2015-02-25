@@ -17,8 +17,44 @@
 
 'use strict';
 
-angular.module('app.ui.tpls', ['template/tsize.html', 'template/sortable.html', 'template/pagination.html',
-  'template/dialog/message.html', 'template/tooltip.html']);
+angular.module('app.ui.tpls', [
+  'template/tsize.html',
+  'template/sortable.html',
+  'template/pagination.html',
+  'template/dialog/message.html',
+  'template/tooltip.html',
+  'template/lists'
+]);
+
+
+
+angular.module('template/lists', []).run(function ($templateCache) {
+
+  $templateCache.put('template/mutationTranscriptList.html',
+    '<a target="_blank" ' +
+    'data-ng-href="http://feb2014.archive.ensembl.org/Homo_sapiens/Transcript/Summary?db=core;t={{item.id}}">' +
+    '<i class="icon-external-link"></i>{{item.name}}</a>');
+
+
+  // Display a list of gene set annotations
+  // { name: xyz, id: xyz, qualifiers:[ xyz, xyz] }
+  $templateCache.put('template/geneGeneSetList.html',
+    '<ul data-ng-if="item.qualifiers">' +
+    '<li data-ng-repeat="qualifier in item.qualifiers">' +
+    '<span>{{qualifier | trans }} <a href="genesets/{{item.id}}"><span>{{item.name}}</span></a></span>' +
+    '</li>' +
+    '</ul>' +
+    '<span data-ng-if="!item.qualifiers">' +
+    '<a href="genesets/{{item.id}}"><span>{{item.name}}</span></a>' +
+    '</span>');
+
+  $templateCache.put ( 'template/reactomePathway.html',
+    '<span><a href="http://www.reactome.org/PathwayBrowser/#DIAGRAM={{item.diagramId}}&ID={{item.geneSetId}}"' +
+    ' target="_blank">' +
+    '<i class="icon-external-link"></i> View in Reactome Pathway Browser</a>' +
+    '</span><pathway-tree tree="[item.root]"></pathway-tree><br>'
+  );
+});
 
 
 angular.module('template/tooltip.html', []).run(function ($templateCache) {
@@ -29,6 +65,7 @@ angular.module('template/tooltip.html', []).run(function ($templateCache) {
     '</div>\n' +
     '');
 });
+
 
 angular.module('template/tsize.html', []).run(function ($templateCache) {
   $templateCache.put('template/tsize.html',

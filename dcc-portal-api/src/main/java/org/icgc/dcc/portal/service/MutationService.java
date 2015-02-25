@@ -117,9 +117,8 @@ public class MutationService {
         transcript.put("id", transcriptIds.get(i));
         transcript.put("functional_impact_prediction_summary", predictionSummary.get(i));
 
-        // FIXME: This part is weird, but works
         val consequence = Maps.<String, Object> newHashMap();
-        List<Object> f3 = hit.getFields().get("transcript.consequence.aa_mutation").getValues();
+        List<Object> f3 = hit.getFields().get("transcript.consequence.aa_mutation").getValue();
         consequence.put("aa_mutation", f3.get(i).toString());
         transcript.put("consequence", consequence);
 

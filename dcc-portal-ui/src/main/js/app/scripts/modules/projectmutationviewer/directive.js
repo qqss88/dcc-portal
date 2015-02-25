@@ -2,9 +2,9 @@
 (function() {
   'use strict';
 
-  var module = angular.module('icgc.visualization', []);
+  var module = angular.module('icgc.visualization.projectmutationviewer', []);
 
-  module.directive('projectMutationDistribution', function ($location, $filter) {
+  module.directive('projectMutationDistribution', function ($location, $filter, $window) {
     return {
       restrict: 'E',
       replace: 'true',
@@ -18,8 +18,8 @@
         '<div class="canvas"></div>' +
         '<div class="text-right">' +
         '<small>Design inspired from Nature: ' +
-        '<a href="http://www.nature.com/nature/journal/v500/n7463/full/nature12477.html" ' +
-        'target="_blank">doi:10.1038/nature12477</a></small>' +
+        '<a href="http://www.nature.com/nature/journal/v499/n7457/full/nature12213.html" ' +
+        'target="_blank">doi:10.1038/nature12213</a></small>' +
         '</div>' +
         '</div>',
       scope: {
@@ -48,10 +48,18 @@
                 'Median: ' + $filter('number')(data.medium) + '<br>' +
                 '# Donors: ' + data.donorCount;
             }
+
+            var position = {
+              left:elem.getBoundingClientRect().left,
+              top:elem.getBoundingClientRect().top + $window.pageYOffset,
+              width: elem.getBoundingClientRect().width,
+              height: elem.getBoundingClientRect().height
+            };
             $scope.$emit('tooltip::show', {
               element: angular.element(elem),
               text: getLabel(),
-              placement: 'top'
+              placement: 'top',
+              elementPosition: position
             });
           },
           tooltipHideFunc: function() {

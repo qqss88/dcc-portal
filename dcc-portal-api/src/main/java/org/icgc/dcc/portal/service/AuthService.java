@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
  * 
  * @see https://wiki.oicr.on.ca/display/icgcweb/CUD-LOGIN
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
 public class AuthService {
@@ -53,7 +55,11 @@ public class AuthService {
    * @throws ICGCException and its sub-classes
    */
   public boolean hasDacoAccess(String userId, UserType userType) {
-    return dacoClient.hasDacoAccess(userId, userType);
+    log.debug("Checking DACO access for user: '{}'. User type: {}", userId, userType);
+    val result = dacoClient.hasDacoAccess(userId, userType);
+    log.debug("Does {} have DACO access? - {}", userId, result);
+
+    return result;
   }
 
   /**
@@ -62,7 +68,11 @@ public class AuthService {
    * @throws ICGCException and its sub-classes
    */
   public String loginUser(String username, String password) {
-    return cudClient.login(username, password);
+    log.debug("Login user. Username: {}. Password: {}", username, password);
+    val result = cudClient.login(username, password);
+    log.debug("Logged in user '{}'. Login token '{}'", username, result);
+
+    return result;
   }
 
   /**
@@ -71,9 +81,12 @@ public class AuthService {
    * @throws ICGCException and its sub-classes
    */
   public User getCudUserInfo(@NonNull String userToken) {
+    log.debug("Getting CUD info for user token {}", userToken);
     val authToken = getAuthToken();
+    val result = cudClient.getUserInfo(authToken, userToken);
+    log.debug("User information: {}", result);
 
-    return cudClient.getUserInfo(authToken, userToken);
+    return result;
   }
 
   /**
@@ -82,7 +95,7 @@ public class AuthService {
    * @return session token
    * @throws ICGCException and its sub-classes
    */
-  private String getAuthToken() {
+  public String getAuthToken() {
     return loginUser(icgcConfig.getCudUser(), icgcConfig.getCudPassword());
   }
 

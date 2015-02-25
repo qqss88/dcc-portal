@@ -22,6 +22,17 @@
 
   &:focus {
   }
+
+
+  // For destructive actions
+  &.t_button__destructive {
+    background: $red;
+
+    &:hover {
+      background: $redDarker;
+    }
+  }
+
 }
 
 .t_button_large {

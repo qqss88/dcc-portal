@@ -23,7 +23,7 @@
 
 // The core proteinstructure directive -- this is used with a (possible) mutation to display
 // the structure. But the core value is the gene identifier.
-  module.directive('proteinstructure', function (chartmaker, $location, Protein, LocationService) {
+  module.directive('proteinstructure', function (chartmaker, $location, Protein, LocationService, $window) {
 
     // This might look n**2, but it's not supposed to be.
     function transformDomains(domains) {
@@ -178,17 +178,43 @@
               // will do for now.
               chartData.mutations = transformMutations(mutations, transcript.id);
 
-              options.domainTooltipHtmlFn = function (d) {
-                return d.id + ': ' + d.description;
-              };
+              options.tooltipShowFunc = function(elem, d, options, isDomain) {
+                var getLabel = function(){
+                  if(isDomain) return d.id + ': ' + d.description;
 
-              options.markerTooltipHtmlFn = function (d) {
-                var FI = getOverallFunctionalImpact(d);
-                return 'Mutation ID: ' + d.ref + '<br>' +
-                       'Number of donors: ' + d.value + '<br>' +
-                       'Amino acid change: ' + d.id + '<br>' +
-                       'Functional Impact: ' + FI;
-              };
+                  var FI = getOverallFunctionalImpact(d);
+                  return 'Mutation ID: ' + d.ref + '<br>' +
+                         'Number of donors: ' + d.value + '<br>' +
+                         'Amino acid change: ' + d.id + '<br>' +
+                         'Functional Impact: ' + FI;
+                };
+
+                if(isDomain){
+                  // The domain svg element consits of a group of text and rect. Since the text
+                  // can extend the rect which we care about it, get the first child (rect)
+                  var actualElement = angular.element(angular.element(elem).context.firstChild);
+
+                  // Use the width/height of the rect and the CTM of the svg container plus the
+                  // x and y position of the rect within the svg container to find the left/right values
+                  var position = {
+                    width: actualElement.prop('width').baseVal.value,
+                    height: actualElement.prop('height').baseVal.value,
+                    left: elem.getScreenCTM().e + actualElement.prop('x').baseVal.value,
+                    top: elem.getScreenCTM().f + $window.pageYOffset + actualElement.prop('y').baseVal.value
+                  }
+                }
+
+                scope.$emit('tooltip::show', {
+                  element: angular.element(elem),
+                  text: getLabel(),
+                  placement: options.placement,
+                  elementPosition: isDomain?position:null
+                });
+              }
+
+              options.tooltipHideFunc = function() {
+                scope.$emit('tooltip::hide');
+              }
 
               options.markerClassFn = function(d) {
                 var style;

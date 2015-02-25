@@ -17,9 +17,13 @@
 
 package org.icgc.dcc.portal.service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import static com.google.common.base.Throwables.propagate;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -44,8 +48,8 @@ public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
 
-  private final Map<String, Map<String, Integer>> projectMutationCache =
-      new ConcurrentHashMap<String, Map<String, Integer>>();
+  private final AtomicReference<Map<String, Map<String, Integer>>> projectMutationCache =
+      new AtomicReference<Map<String, Map<String, Integer>>>();
 
   @Autowired
   public OccurrenceService(OccurrenceRepository occurrenceRepository) {
@@ -54,15 +58,26 @@ public class OccurrenceService {
 
   @Async
   public void init() {
-    projectMutationCache.putAll(occurrenceRepository.getProjectDonorMutationDistribution());
+    try {
+      log.info("Retrieving donor mutations for caching...");
+
+      val donorMutationDistribution = occurrenceRepository.getProjectDonorMutationDistribution();
+      val immutableCopy = Collections.unmodifiableMap(donorMutationDistribution);
+      projectMutationCache.set(immutableCopy);
+
+      log.info("Finished adding donor mutations to cache in app.");
+    } catch (Exception e) {
+      log.error("Error caching donor mutations: ", e);
+
+      propagate(e);
+    }
   }
 
   public Occurrences findAll(Query query) {
-
     SearchResponse response = occurrenceRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
-    ImmutableList.Builder<Occurrence> list = ImmutableList.builder();
+    val list = ImmutableList.<Occurrence> builder();
 
     for (SearchHit hit : hits) {
       Map<String, Object> fieldMap = Maps.newHashMap();
@@ -72,7 +87,7 @@ public class OccurrenceService {
       list.add(new Occurrence(fieldMap));
     }
 
-    Occurrences occurrences = new Occurrences(list.build());
+    val occurrences = new Occurrences(list.build());
     occurrences.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return occurrences;
@@ -87,9 +102,10 @@ public class OccurrenceService {
   }
 
   public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
-    if (projectMutationCache != null) {
-      return projectMutationCache;
+    val result = projectMutationCache.get();
+    if (null == result) {
+      throw new NotAvailableException("The donor mutation cache is currently not available. Please retry later.");
     }
-    return occurrenceRepository.getProjectDonorMutationDistribution();
+    return result;
   }
 }

@@ -22,7 +22,9 @@ angular.module('app.downloader.controllers', ['app.downloader.services']);
 // Controls the download jobs for dynamic downloads
 // Note: We try to preemptitively determine status as a way improve UX and reduce polls
 angular.module('app.downloader.controllers').controller('DownloaderController',
-  function ($window, $filter, $timeout, $scope, Page, DownloaderService, DataTypes, FiltersUtil, ids) {
+  function ($window, $filter, $timeout, $scope, Page, DownloaderService,
+    DataTypes, API, Restangular, RestangularNoCache, Settings, ids) {
+
     var cancelTimeout;
     var dataTypeOrder = DataTypes.order;
 
@@ -86,14 +88,15 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
       // Double check status before sending download request
       DownloaderService.getJobStatus(id).then(function(jobs) {
-        //current.status = jobs.data[0].status;
+        jobs = Restangular.stripRestangular(jobs);
 
         if (['SUCCEEDED', 'FINISHING'].indexOf(current.status) >= 0 &&
-          ['SUCCEEDED', 'RUNNING'].indexOf(jobs.data[0].status) >= 0) {
+          ['SUCCEEDED', 'RUNNING'].indexOf(jobs[0].status) >= 0) {
           console.log('Starting Download', id);
-          $window.location.assign('/api/v1/download/' + id);
+
+          $window.location.assign(API.BASE_URL + '/download/' + id);
         } else {
-          current.status = jobs.data[0].status;
+          current.status = jobs[0].status;
         }
       });
     };
@@ -105,10 +108,11 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
       // Double check status before sending download request
       DownloaderService.getJobStatus(id).then(function(jobs) {
-        current.status = jobs.data[0].status;
+        jobs = Restangular.stripRestangular(jobs);
+        current.status = jobs[0].status;
         if (['SUCCEEDED', 'RUNNING'].indexOf(current.status) >= 0) {
           console.log('Starting Download', id);
-          $window.location.assign('/api/v1/download/' + id + '/' + fileType);
+          $window.location.assign(API.BASE_URL + '/download/' + id + '/' + fileType);
         }
       });
 
@@ -118,8 +122,9 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
     $scope.cancelDownload = function(id) {
       console.log('Cancelling Download', id);
       DownloaderService.cancelJob(id).then(function(job) {
+        job = Restangular.stripRestangular(job);
         var current = _.findWhere($scope.jobs, {'downloadId':id});
-        current.status = job.data.status;
+        current.status = job.status;
       });
     };
 
@@ -132,14 +137,17 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
       }
 
       DownloaderService.getJobStatus($scope.ids).then(function(jobs) {
-        $scope.jobs = jobs.data;
+        jobs = Restangular.stripRestangular(jobs);
+        $scope.jobs = jobs;
         $scope.showInfo = false;
         $scope.hasEmail = false;
 
         DownloaderService.getJobMetaData($scope.ids).then(function(metas) {
+          metas = Restangular.stripRestangular(metas);
+
           // Init static things
           $scope.jobs.forEach(function(job) {
-            var jobInfo = metas.data[job.downloadId];
+            var jobInfo = metas[job.downloadId];
 
             job.overallProgress = 0;
 
@@ -155,13 +163,13 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
               // Filter is the expanded query, uiFilter is what user sees
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
-              job.uiQueryFilter = FiltersUtil.buildUIFilters(cleanFilter(JSON.parse(jobInfo.uiQueryStr)));
+              job.uiQueryFilter = cleanFilter(JSON.parse(decodeURIComponent(jobInfo.uiQueryStr)));
 
               if (_.isEmpty(job.filter)) {
                 delete job.filter;
                 delete job.uiQueryFilter;
               } else {
-                job.filterStr = encodeURIComponent(jobInfo.uiQueryStr);
+                job.filterStr = JSON.stringify(job.uiQueryFilter);
               }
               job.isExpanded = true;
               job.hasEmail = jobInfo.hasEmail === 'true';
@@ -229,9 +237,10 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
       $scope.currentTime = (new Date()).getTime();
 
       DownloaderService.getJobStatus(_.pluck(activeJobs, 'downloadId')).then(function(updates) {
-        $scope.jobs.forEach(function(job) {
+        updates = Restangular.stripRestangular(updates);
 
-          var update = _.findWhere(updates.data, {'downloadId': job.downloadId});
+        $scope.jobs.forEach(function(job) {
+          var update = _.findWhere(updates, {'downloadId': job.downloadId});
           if (! update) {
             return;
           }
@@ -260,11 +269,12 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
             // if status is success, fetch the end run meta data
             if (job.status === 'SUCCEEDED') {
               DownloaderService.getJobMetaData(job.downloadId).then(function(infos) {
+                infos = Restangular.stripRestangular(infos);
                 var info;
                 if (!infos) {
                   return;
                 }
-                info = infos.data[job.downloadId];
+                info = infos[job.downloadId];
                 job.ttl = parseInt(info.ttl, 10); // Time to live
                 job.et  = parseInt(info.et, 10);  // end time
                 job.archiveSize = info.fileSize;  // Total archive size
@@ -291,7 +301,12 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
 
     // Start
-    init();
+    Settings.get().then(function(settings) {
+      $scope.downloadEnabled = settings.downloadEnabled || false;
+      if ($scope.downloadEnabled === true) {
+        init();
+      }
+    });
 
     // Clean up events
     $scope.$on('$destroy', function() {

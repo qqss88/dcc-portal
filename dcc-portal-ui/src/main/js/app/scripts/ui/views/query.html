@@ -1,0 +1,31 @@
+<span>
+    <span data-ng-if="!uiFilters">All</span>
+    <span data-ng-repeat="(typeName, type) in uiFilters">
+        <span data-ng-repeat="(facet, terms) in type track by facet"> 
+
+            <span data-ng-switch="facet">
+                <span data-ng-switch-when="id">{{typeName | trans:true}}</span>
+                <span data-ng-switch-when="pathwayId">Pathway</span>
+                <span data-ng-switch-when="goTermId">GO</span>
+                <span data-ng-switch-when="curatedSetId">Curated Gene Set</span>
+                <span data-ng-switch-when="location">{{typeName | trans:true}} location</span>
+                <span data-ng-switch-default="">{{facet | trans:true}}</span>
+            </span>
+
+            <span> 
+                {{ terms.is.length !== 1? "IN (" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }} 
+            </span>
+
+            <span data-ng-repeat="termObj in terms.is track by termObj.term">
+                <span data-ng-style="hoverStyle">{{termObj.term | trans:true}}</span>
+                <span data-ng-if="!$last">,&nbsp;</span>  
+            </span>
+            <span> 
+                {{ terms.is.length !== 1? ")" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
+            </span>
+
+            <span data-ng-if="!$last"> AND </span>
+        </span>
+        <span data-ng-if="!$last"> AND </span>
+    </span>
+</span>

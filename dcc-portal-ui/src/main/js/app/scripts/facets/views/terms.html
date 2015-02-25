@@ -19,16 +19,16 @@
                 <span data-ng-hide="hideCount" data-ng-style="bar(item.count)"
                       class="t_facets__facet__terms__active__term__bar"></span>
                 <span class="t_facets__facet__terms__active__term__label__text">
-                    <span ng-if="!defined">
-                    <i style='color:{{sites[item.term]}}' class="icon-ok t_impact_{{ item.term | lowercase }}"></i>
+                    <span data-ng-if="!defined">
+                        <i style='color:{{sites[item.term]}}' class="icon-ok t_impact_{{ item.term | lowercase }}"></i>
                         <span data-tooltip={{item.term}} data-tooltip-placement="overflow">
-                        {{item.term | trans: capitalize }}
+                        {{ item.label }}
                         </span>
                     </span>
-                    <span ng-if="defined">
+                    <span data-ng-if="defined">
                         <i style='color:{{projects[item.term]}}' class="icon-ok"></i>
-                        <span data-tooltip="{{ item.term | trans:capitalize | define }}">
-                        {{ item.term | trans: capitalize }}
+                        <span data-tooltip="{{ item.tooltip }}">
+                        {{ item.label }}
                         </span>
                     </span>
                 </span>
@@ -44,11 +44,11 @@
 
                 <span data-ng-hide="hideCount" data-ng-style="bar(item.count)" class="t_facets__facet__terms__inactive__term__bar"></span>
                 <span class="t_facets__facet__terms__inactive__term__label"
-                      data-tooltip="{{ defined? (item.term | trans:capitalize | define) : (item.term | trans:capitalize) }}"
+                      data-tooltip="{{ item.tooltip }}"
                       data-tooltip-placement="{{ defined? 'right':'overflow'}}"
                       data-ng-click="addTerm(item.term)">
                     <i style='color:{{ defined? projects[item.term] : sites[item.term] }}' class="icon-check-empty t_impact_{{item.term | lowercase}}"></i>
-                    {{item.term | trans:capitalize}} 
+                    {{item.label}}
                 </span>
 
                 <span data-ng-hide="hideCount" class="t_facets__facet__terms__inactive__term__count">{{item.count | number}}</span>
