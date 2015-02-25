@@ -51,4 +51,12 @@ public class IndexModel {
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
   }
 
+  public static AbstractTypeModel getDonorCentricTypeModel() {
+    return donorCentric;
+  }
+
+  public static AbstractTypeModel getMutationCentricTypeModel() {
+    return mutationCentric;
+  }
+
 }

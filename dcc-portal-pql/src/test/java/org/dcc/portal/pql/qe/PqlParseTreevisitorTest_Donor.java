@@ -21,9 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.junit.Test;
 
 public class PqlParseTreevisitorTest_Donor {
@@ -64,6 +66,16 @@ public class PqlParseTreevisitorTest_Donor {
     assertThat(termNode.getChildren().size()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("gene.ssm.consequence.consequence_type");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
+  }
+
+  @Test
+  public void visitGreaterEqualTest_mutation() {
+    val query = "ge(mutation.consequenceType, 'T1')";
+    val parseTree = createParseTree(query);
+    val eqContext = (GreaterEqualContext) parseTree.getChild(0);
+    val termNode = (RangeNode) VISITOR.visitGreaterEqual(eqContext);
+
+    assertThat(termNode.getFieldName()).isEqualTo("gene.ssm.consequence.consequence_type");
   }
 
 }

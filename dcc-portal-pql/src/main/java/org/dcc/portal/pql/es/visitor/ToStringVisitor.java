@@ -200,7 +200,8 @@ public class ToStringVisitor extends NodeVisitor<String> {
   @Override
   public String visitTermsFacet(TermsFacetNode node) {
     val scope = node.isGlobal() ? GLOBAL : NON_GLOBAL;
-    val header = format("%s%s [%s, %s] (", calcIndent(node), node.getNodeName(), node.getFacetName(), scope);
+    val header = format("%s%s [%s(%s), %s] (",
+        calcIndent(node), node.getNodeName(), node.getFacetName(), node.getField(), scope);
 
     return buildToString(node, Optional.of(header));
   }
