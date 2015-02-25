@@ -48,7 +48,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
-@Api(value = "/beacon", description = "Resources relating to GA4GH Beacon")
+@Api(value = "/beacon", description = "Resources relating to the ICGC GA4GH Beacon")
 @Path("/v1/beacon")
 @Produces(APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @_({ @Autowired }))

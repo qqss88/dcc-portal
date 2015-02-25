@@ -17,48 +17,49 @@
  */
 package org.icgc.dcc.portal.model;
 
-import javax.ws.rs.WebApplicationException;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+@RunWith(Parameterized.class)
 public class AlleleParamTest {
 
-  @SuppressWarnings("unused")
-  public void testValidAllele() {
-    AlleleMutation mutation = new AlleleParam("AAA").get();
-    mutation = new AlleleParam("T>TGGG").get();
-    mutation = new AlleleParam("CCA>C").get();
-    mutation = new AlleleParam("->ATT").get();
-    mutation = new AlleleParam("  GG>-").get();
+  @Parameters
+  public static Iterable<Object[]> data() {
+    return Arrays.asList(new Object[][] {
+        { "AAA", true }, { "T>TGGG", true }, { "CCA>C", true }, { "->ATT", true }, { "  GG>-", true },
+        { "acccc", false }, { "A>aaA", false }, { "AA>AGGG", false }, { "GAGC>GC", false }, { "- >AGGG", false },
+        { "A<AAA", false }, { "A>C>T", false }
+    });
   }
 
-  @SuppressWarnings("unused")
-  @Test(expected = WebApplicationException.class)
-  public void testInvalidLowercase() {
-    AlleleMutation mutation = new AlleleParam("acccc").get();
-    mutation = new AlleleParam("A>aaA").get();
+  private String input;
+  private Boolean valid;
+
+  public AlleleParamTest(String input, Boolean valid) {
+    this.input = input;
+    this.valid = valid;
   }
 
-  @SuppressWarnings("unused")
-  @Test(expected = WebApplicationException.class)
-  public void testInvalidReferenceInIndels() {
-    // Must be one reference for insertion
-    AlleleMutation mutation = new AlleleParam("AA>AGGG").get();
+  @Test
+  public void testAlleleParam() {
+    Boolean exception = false;
 
-    // Must be one "left" for deletion
-    mutation = new AlleleParam("GAGC>GC").get();
-  }
+    if (valid) {
+      new AlleleParam(input).get();
+    } else {
+      try {
+        new AlleleParam(input).get();
+      } catch (Exception e) {
+        exception = true;
+      }
 
-  @SuppressWarnings("unused")
-  @Test(expected = WebApplicationException.class)
-  public void testInvalidNoRerfernceFormat() {
-    // no spaces inside
-    AlleleMutation mutation = new AlleleParam("- >AGGG").get();
-
-    // no random other character to indicate mutation
-    mutation = new AlleleParam("A<AAA").get();
-
-    // only one mutation
-    mutation = new AlleleParam("A>C>T").get();
+      assertThat(exception).isTrue();
+    }
   }
 }

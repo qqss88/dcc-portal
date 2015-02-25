@@ -17,13 +17,12 @@
  */
 package org.icgc.dcc.portal.model;
 
-import lombok.Data;
+import lombok.Value;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
-@Data
+@Value
 public class BeaconInfo {
 
   @JsonProperty
@@ -39,12 +38,11 @@ public class BeaconInfo {
   @ApiModelProperty(value = "Beacon API version supported", required = true)
   String api;
 
-  @JsonCreator
   public BeaconInfo() {
     this.name = "Beacon";
     this.organization = "ICGC";
-    // Recommended format is [organization]+[beacon]
-    this.id = this.organization + " - " + this.name;
+    // Recommended format is [organization]-[beacon]
+    this.id = this.organization + " - Beacon";
     this.api = "0.2";
   }
 
