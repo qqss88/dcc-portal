@@ -1,16 +1,16 @@
 <div style="background: #eaeaea;color:#333;text-align: right; padding: .2rem 1rem">
-    <span data-ng-show="user.verifying"><i class="icon-spinner icon-spin"></i> Verifying...</span>
-    <span data-ng-show="user.token && !user.verifying">
-        <i data-ng-show="user.daco" class="icon-shield data-available"
+    <span data-ng-show="params.user.verifying"><i class="icon-spinner icon-spin"></i> Verifying...</span>
+    <span data-ng-show="params.user.token && !params.user.verifying">
+        <i data-ng-show="params.user.daco" class="icon-shield data-available"
            data-tooltip-placement="bottom"
            data-tooltip-html-unsafe="Authorized"></i>
-        <i data-ng-hide="user.daco" class="icon-shield data-missing"
+        <i data-ng-hide="params.user.daco" class="icon-shield data-missing"
            data-tooltip-placement="bottom"
            data-tooltip-html-unsafe="Unauthorized"></i>
-        {{user.email}}
-        <i data-ng-show="user.daco" style="cursor: pointer" class="icon-cog"
-           data-ng-click="authModal=true"></i>
+        {{params.user.email}}
+        <i data-ng-show="params.user.daco" style="cursor: pointer" class="icon-cog"
+           data-ng-click="openAuthPopup()"></i>
         (<a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
-    <a data-ng-hide="user.token || user.verifying" data-ng-click="openLogin()" href="">
+    <a data-ng-hide="params.user.token || params.user.verifying" data-ng-click="openLoginPopup()" href="">
         <i class="icon-login"></i>Login</a>
 </div>

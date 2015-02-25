@@ -132,17 +132,27 @@
   angular.module('icgc.auth.controllers').controller('authController',
     function ($window, $scope, $modal, Auth, CUD, OpenID, $state, $stateParams) {
 
+      $scope.params = {};
+      $scope.params.provider = 'icgc';
+      $scope.params.error = null;
+      $scope.params.user = null;
+      $scope.params.openIDUrl = null;
+      $scope.params.cudUsername = null;
+      $scope.params.cudPassword = null;
+
+
+
       function setup() {
         $scope.user = Auth.getUser();
         // Check for errors
         if (OpenID.hasErrors()) {
-          $scope.error = OpenID.getErrors();
+          $scope.params.error = OpenID.getErrors();
           $scope.loginModal = true;
         } else {
           Auth.checkSession(
             function (data) {
               Auth.login(data);
-              $scope.user = Auth.getUser();
+              $scope.params.user = Auth.getUser();
               $state.transitionTo($state.current, $stateParams,
                 { reload: true, inherit: false, notify: true });
               console.log('logged in as: ', $scope.user);
@@ -153,9 +163,9 @@
       function errorMap(e) {
         switch (e.code) {
         case '1796':
-          return  $scope.openIDUrl + ' is not a known provider';
+          return  $scope.params.openIDUrl + ' is not a known provider';
         case '1798':
-          return 'Could not connect to ' + $scope.openIDUrl;
+          return 'Could not connect to ' + $scope.params.openIDUrl;
         default:
           return e.message;
         }
@@ -170,41 +180,44 @@
         case 'verisign':
           return 'https://' + $scope.verisignUsername + '.pip.verisignlabs.com/';
         default:
-          return $scope.openIDUrl;
+          return $scope.params.openIDUrl;
         }
       }
 
       $scope.openLoginPopup = function() {
         $modal.open({
           templateUrl: '/scripts/auth/views/login.popup.html',
+          scope: $scope
         });
       };
 
       $scope.openLogoutPopup = function() {
         $modal.open({
           templateUrl: '/scripts/auth/views/logout.popup.html',
+          scope: $scope
         });
       };
 
       $scope.openAuthPopup = function() {
         $modal.open({
           templateUrl: '/scripts/auth/views/auth.popup.html',
+          scope: $scope
         });
       };
 
       $scope.tryLogin = function () {
         $scope.connecting = true;
-        if ($scope.provider === 'icgc') {
+        if ($scope.params.provider === 'icgc') {
           CUD.login({
-            username: $scope.cudUsername,
-            password: $scope.cudPassword
+            username: $scope.params.cudUsername,
+            password: $scope.params.cudPassword
           });
         } else {
-          OpenID.provider(providerMap($scope.provider)).then(
+          OpenID.provider(providerMap($scope.params.provider)).then(
             function () {},
             function (response) {
               $scope.connecting = false;
-              $scope.error = errorMap(response.data);
+              $scope.params.error = errorMap(response.data);
             });
         }
       };
@@ -222,22 +235,23 @@
 
   angular.module('icgc.auth.directives', ['icgc.auth.controllers']);
 
-  /*
-  angular.module('icgc.auth.directives').directive('login', function ($compile) {
+
+  // angular.module('icgc.auth.directives').directive('login', function ($compile) {
+  angular.module('icgc.auth.directives').directive('login', function () {
     return {
       restrict: 'E',
       replace: true,
       transclude: true,
       templateUrl: '/scripts/auth/views/login.html',
       controller: 'authController',
-      link: function (scope, element) {
-        element.after($compile('<login-popup></login-popup>')(scope));
-        element.after($compile('<logout-popup></logout-popup>')(scope));
-        element.after($compile('<auth-popup></auth-popup>')(scope));
+      link: function () {
+        // element.after($compile('<login-popup></login-popup>')(scope));
+        // element.after($compile('<logout-popup></logout-popup>')(scope));
+        // element.after($compile('<auth-popup></auth-popup>')(scope));
       }
     };
   });
-  */
+
 
   angular.module('icgc.auth.directives').directive('loginPopup', function () {
     return {

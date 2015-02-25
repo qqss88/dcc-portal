@@ -28,6 +28,8 @@
     'ui.scrollfix',
     'ui.bootstrap.modal',
     'ui.bootstrap.position',
+    'template/modal/backdrop.html',
+    'template/modal/window.html',
     'ui.router',
     'infinite-scroll',
     'angular-lodash',
