@@ -12,7 +12,9 @@
                     <span>Dataset</span>
                 </td>
                 <td>
-                    <select tabindex="1" class="beacon-form-control" data-ng-model="params.project" data-ng-options="project.id for project in projects" data-ng-change="checkParams();" options-disabled="project.id=='——————' for project in projects"></select>
+                    <select tabindex="1" class="beacon-form-control" data-ng-model="params.project"
+                            data-ng-options="project.id for project in projects" data-ng-change="checkParams();"
+                            options-disabled="project.id=='——————' for project in projects"></select>
                     </select>
                 </td>
             </tr>
@@ -30,7 +32,12 @@
                   <span><abbr data-tooltip="1-based start position in chromosome">Position</abbr> *</span>
                 </td>
                 <td>
-                    <input search-on-enter tabindex="3" data-ng-class="{'invalid': invalidParams.isPosition}" placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position" data-ng-change="checkParams();"><i data-tooltip="Must be less than Chromosome {{params.chr}}'s length: {{lengths[params.chr]}}" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isPosition"></i>
+                    <input search-on-enter tabindex="3" data-ng-class="{'invalid': invalidParams.isPosition}"
+                           placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position"
+                           data-ng-change="checkParams();">
+                           <i data-tooltip="Must be less than Chromosome {{params.chr}}'s length: {{lengths[params.chr]}}"
+                              data-tooltip-placement="right" class="invalid-icon icon-attention"
+                              data-ng-if="invalidParams.isPosition"></i>
                 </td>
             </tr>
             <tr>
@@ -38,22 +45,32 @@
                   <span><abbr data-tooltip="Genome ID: Currently only GRCh37">Reference</abbr> *</span>
                 </td>
                 <td>
-                    <input search-on-enter tabindex="4" data-ng-class="{'invalid': invalidParams.isReference}" type="text" placeholder="eg. GRCh37" data-ng-model="params.reference" data-ng-change="checkParams();"><i data-tooltip="Currently only GRCh37" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isReference"></i>
+                    <input search-on-enter tabindex="4" data-ng-class="{'invalid': invalidParams.isReference}"
+                           type="text" placeholder="eg. GRCh37" data-ng-model="params.reference"
+                           data-ng-change="checkParams();">
+                           <i data-tooltip="Currently only GRCh37" data-tooltip-placement="right"
+                              class="invalid-icon icon-attention" data-ng-if="invalidParams.isReference"></i>
                 </td>
             </tr>
             <tr>
                 <td align="right">
-                  <span><abbr data-tooltip="One or more of: A, C, T, G">Allele(s)</abbr> *</span>
+                  <span><abbr data-tooltip="One or more of: A, C, T, G or an indel">Mutated Allele(s)</abbr> *</span>
                 </td>
                 <td>
-                    <input search-on-enter tabindex="5" data-ng-class="{'invalid': invalidParams.isAllele}" allele-validator placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele" data-ng-change="checkParams();"><i data-tooltip="Must be of the form [ACTG]+" data-tooltip-placement="right" class="invalid-icon icon-attention" data-ng-if="invalidParams.isAllele"></i>
+                    <input search-on-enter tabindex="5" data-ng-class="{'invalid': invalidParams.isAllele}" allele-validator
+                           placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele"
+                           data-ng-change="checkParams();">
+                           <i data-tooltip="Must be of form [ACTG]+ or an indel" data-tooltip-placement="right"
+                              class="invalid-icon icon-attention" data-ng-if="invalidParams.isAllele"></i>
                 </td>
             </tr>
             <tr>
                 <td></td>
                 <td align="right" >
                     <button tabindex="7" class="t_button beacon-button" data-ng-click="resetQuery();">Reset</button>&nbsp;
-                    <button tabindex="6" data-ng-style="{'margin-right':(invalidParams.isPosition||invalidParams.isReference||invalidParams.isAllele)?'1.4em':'0'}" class="t_button beacon-button" data-ng-click="submitQuery();" data-ng-disabled="hasInvalidParams">Search</button>
+                    <button tabindex="6" data-ng-style="{'margin-right':(invalidParams.isPosition||invalidParams.isReference||invalidParams.isAllele)?'1.7em':'0'}"
+                            class="t_button beacon-button" data-ng-click="submitQuery();"
+                            data-ng-disabled="hasInvalidParams">Search</button>
                 </td>
             </tr>
         </table>
@@ -85,22 +102,22 @@
     <h3>Information</h3>
     <br>
     <div>
-        A <a href="http://ga4gh.org/#/beacon" target="_blank">Beacon</a> is a simple service that answers the question: <span class="beaconquestion">Have you observed this mutated allele?</span><br>The ICGC Beacon searches for alleles observed in somatic mutations only. The Beacon is designed to accept a query and responds with one of the three results described below. <br><br>
+        A <a href="http://ga4gh.org/#/beacon" target="_blank">Beacon</a> is a simple service that answers the question: <span class="beaconquestion">Have you observed this mutated allele?</span><br>The ICGC Beacon searches for mutated alleles observed in somatic mutations only. The Beacon is designed to accept a query and responds with one of the three results described below. <br><br>
         <h4>Results</h4>
         <div class="beacon-callout-container">
           <div class="beacon-callout beacon-callout-true">
             <h4>true</h4>
-            Returned when a matching mutation is found at the queried location.<br><br>
+            Returned when a matching mutation is found at the queried position.<br><br><br>
             For an example, try this <a ng-click="exampleQuery('true');" href=""><i class="icon-search"></i>query</a>.
           </div>
           <div class="beacon-callout beacon-callout-false">
             <h4>false</h4>
-            Returned when a mutation is found at that position but does not match the allele.<br><br>
+            Returned when a mutation is found at that position but does not match the mutated allele(s).<br><br>
             For an example, try this <a ng-click="exampleQuery('false');" href=""><i class="icon-search"></i>query</a>.
           </div>
           <div class="beacon-callout beacon-callout-null">
             <h4>Null</h4>
-            Returned when no mutation is found at the queried position.<br><br><br>
+            Returned when no mutation is found at the queried position in the selected dataset(s).<br><br>
             For an example, try this <a ng-click="exampleQuery('null');" href=""><i class="icon-search"></i>query</a>.
           </div>
         </div>

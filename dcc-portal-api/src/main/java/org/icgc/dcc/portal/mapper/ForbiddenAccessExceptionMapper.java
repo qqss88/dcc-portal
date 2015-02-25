@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Provider
-public class ForbiddendAccessExceptionMapper implements ExceptionMapper<ForbiddenAccessException> {
+public class ForbiddenAccessExceptionMapper implements ExceptionMapper<ForbiddenAccessException> {
 
   private final static Status STATUS = FORBIDDEN;
 

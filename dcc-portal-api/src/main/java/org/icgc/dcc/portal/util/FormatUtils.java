@@ -30,7 +30,7 @@ public final class FormatUtils {
    * Formats a object's string representation with leading {@code 'es'} prefix for easy console grepping. This is to
    * complement the same style used in Jersey's {@code LoggingFilter}.
    */
-  public static String formatRequest(ActionRequestBuilder<?, ?, ?> builder) {
+  public static String formatRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
     String text =
         builder == null ? "null" : (builder instanceof GetRequestBuilder ? builder.request().toString() : builder
             .toString());

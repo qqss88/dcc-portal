@@ -167,7 +167,7 @@ angular.module('app.ui.dl', []).directive('dlButton',
                 filters = LocationService.filters();
               }
 
-              linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/downloader';
+              linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/download';
 
               DownloaderService
                 .requestDownloadJob(filters, actives, scope.emailAddress,
@@ -176,7 +176,7 @@ angular.module('app.ui.dl', []).directive('dlButton',
                   scope.modal = false;
                   scope.reset();
 
-                  $location.path('/downloader/' + job.downloadId).search('');
+                  $location.path('/download/' + job.downloadId).search('');
                 });
             }
           });

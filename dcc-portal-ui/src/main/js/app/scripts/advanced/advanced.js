@@ -55,7 +55,7 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
-              AdvancedMutationService) {
+              AdvancedMutationService, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -105,6 +105,10 @@
       // Setup
       _ctrl.setTab($state.current.data.tab);
       _ctrl.setSubTab($state.current.data.subTab);
+
+      Settings.get().then(function(settings) {
+        _ctrl.downloadEnabled = settings.downloadEnabled || false;
+      });
       refresh();
 
       // Refresh when filters change

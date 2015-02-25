@@ -24,7 +24,6 @@ import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Sets;
@@ -58,7 +57,8 @@ public class SearchRepository {
   }
 
   public SearchResponse findAll(Query query, String type) {
-    SearchRequestBuilder search = client.prepareSearch(index)
+    val search = client
+        .prepareSearch(index)
         .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize());
@@ -110,11 +110,11 @@ public class SearchRepository {
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
 
     if (type.equals("pathway")) {
-      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "pathway")));
+      search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "pathway")));
     } else if (type.equals("curated_set")) {
-      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
+      search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
     } else if (type.equals("go_term")) {
-      search.setFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
+      search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
     }
 
     log.debug("{}", search);

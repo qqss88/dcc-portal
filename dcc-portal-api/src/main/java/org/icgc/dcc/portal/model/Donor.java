@@ -1,6 +1,9 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -103,51 +106,43 @@ public class Donor {
   @JsonCreator
   public Donor(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.DONOR);
-    id = (String) fieldMap.get(fields.get("id"));
-    submittedDonorId = (String) fieldMap.get(fields.get("submittedDonorId"));
-    projectId = (String) fieldMap.get(fields.get("projectId"));
-    projectName = (String) fieldMap.get(fields.get("projectName"));
-    primarySite = (String) fieldMap.get(fields.get("primarySite"));
-    tumourType = (String) fieldMap.get(fields.get("tumourType"));
-    tumourSubtype = (String) fieldMap.get(fields.get("tumourSubtype"));
+    id = getString(fieldMap.get(fields.get("id")));
+    submittedDonorId = getString(fieldMap.get(fields.get("submittedDonorId")));
+    projectId = getString(fieldMap.get(fields.get("projectId")));
+    projectName = getString(fieldMap.get(fields.get("projectName")));
+    primarySite = getString(fieldMap.get(fields.get("primarySite")));
+    tumourType = getString(fieldMap.get(fields.get("tumourType")));
+    tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
     ssmAffectedGenes = getLong(fieldMap.get(fields.get("ssmAffectedGenes")));
     ssmCount = getLong(fieldMap.get(fields.get("ssmCount")));
-    cnsmExists = (Boolean) fieldMap.get(fields.get("cnsmExists"));
-    stsmExists = (Boolean) fieldMap.get(fields.get("stsmExists"));
-    sgvExists = (Boolean) fieldMap.get(fields.get("sgvExists"));
-    methSeqExists = (Boolean) fieldMap.get(fields.get("methSeqExists"));
-    methArrayExists = (Boolean) fieldMap.get(fields.get("methArrayExists"));
-    expSeqExists = (Boolean) fieldMap.get(fields.get("expSeqExists"));
-    expArrayExists = (Boolean) fieldMap.get(fields.get("expArrayExists"));
-    pexpExists = (Boolean) fieldMap.get(fields.get("pexpExists"));
-    mirnaSeqExists = (Boolean) fieldMap.get(fields.get("mirnaSeqExists"));
-    jcnExists = (Boolean) fieldMap.get(fields.get("jcnExists"));
+    cnsmExists = getBoolean(fieldMap.get(fields.get("cnsmExists")));
+    stsmExists = getBoolean(fieldMap.get(fields.get("stsmExists")));
+    sgvExists = getBoolean(fieldMap.get(fields.get("sgvExists")));
+    methSeqExists = getBoolean(fieldMap.get(fields.get("methSeqExists")));
+    methArrayExists = getBoolean(fieldMap.get(fields.get("methArrayExists")));
+    expSeqExists = getBoolean(fieldMap.get(fields.get("expSeqExists")));
+    expArrayExists = getBoolean(fieldMap.get(fields.get("expArrayExists")));
+    pexpExists = getBoolean(fieldMap.get(fields.get("pexpExists")));
+    mirnaSeqExists = getBoolean(fieldMap.get(fields.get("mirnaSeqExists")));
+    jcnExists = getBoolean(fieldMap.get(fields.get("jcnExists")));
     ageAtDiagnosis = getLong(fieldMap.get(fields.get("ageAtDiagnosis")));
-    ageAtDiagnosisGroup = (String) fieldMap.get(fields.get("ageAtDiagnosisGroup"));
+    ageAtDiagnosisGroup = getString(fieldMap.get(fields.get("ageAtDiagnosisGroup")));
     ageAtEnrollment = getLong(fieldMap.get(fields.get("ageAtEnrollment")));
     ageAtLastFollowup = getLong(fieldMap.get(fields.get("ageAtLastFollowup")));
     intervalOfLastFollowup = getLong(fieldMap.get(fields.get("intervalOfLastFollowup")));
     relapseInterval = getLong(fieldMap.get(fields.get("relapseInterval")));
     survivalTime = getLong(fieldMap.get(fields.get("survivalTime")));
-    diagnosisIcd10 = (String) fieldMap.get(fields.get("diagnosisIcd10"));
-    diseaseStatusLastFollowup = (String) fieldMap.get(fields.get("diseaseStatusLastFollowup"));
-    gender = (String) fieldMap.get(fields.get("gender"));
-    vitalStatus = (String) fieldMap.get(fields.get("vitalStatus"));
-    tumourStageAtDiagnosis = (String) fieldMap.get(fields.get("tumourStageAtDiagnosis"));
-    tumourStagingSystemAtDiagnosis = (String) fieldMap.get(fields.get("tumourStagingSystemAtDiagnosis"));
-    tumourStageAtDiagnosisSupplemental = (String) fieldMap.get(fields.get("tumourStageAtDiagnosisSupplemental"));
-    relapseType = (String) fieldMap.get(fields.get("relapseType"));
+    diagnosisIcd10 = getString(fieldMap.get(fields.get("diagnosisIcd10")));
+    diseaseStatusLastFollowup = getString(fieldMap.get(fields.get("diseaseStatusLastFollowup")));
+    gender = getString(fieldMap.get(fields.get("gender")));
+    vitalStatus = getString(fieldMap.get(fields.get("vitalStatus")));
+    tumourStageAtDiagnosis = getString(fieldMap.get(fields.get("tumourStageAtDiagnosis")));
+    tumourStagingSystemAtDiagnosis = getString(fieldMap.get(fields.get("tumourStagingSystemAtDiagnosis")));
+    tumourStageAtDiagnosisSupplemental = getString(fieldMap.get(fields.get("tumourStageAtDiagnosisSupplemental")));
+    relapseType = getString(fieldMap.get(fields.get("relapseType")));
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
     analysisTypes = (List<String>) fieldMap.get(fields.get("analysisTypes"));
     specimen = buildSpecimen((List<Map<String, Object>>) fieldMap.get("specimen"));
-  }
-
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    else if (field instanceof Integer) return (long) (Integer) field;
-    else if (field instanceof Float) return ((Float) field).longValue();
-    else
-      return null;
   }
 
   private List<Specimen> buildSpecimen(List<Map<String, Object>> field) {

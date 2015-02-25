@@ -39,7 +39,7 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, Page, donor, Projects, Mutations) {
+  module.controller('DonorCtrl', function ($scope, Page, donor, Projects, Mutations, Settings) {
 
     var _ctrl = this;
 
@@ -67,6 +67,10 @@
       };
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
+      });
+
+      Settings.get().then(function(settings) {
+        _ctrl.downloadEnabled = settings.downloadEnabled || false;
       });
     }
 

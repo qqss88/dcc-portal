@@ -4,6 +4,7 @@ import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.processSource;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -104,10 +105,10 @@ public class GeneService {
     for (val hit : hits) {
       val fieldMap = Maps.<String, Object> newHashMap();
       for (val field : hit.getFields().entrySet()) {
-
-        fieldMap.put(field.getKey(), field.getValue().getValue());
-
+        fieldMap.put(field.getKey(), field.getValue().getValues());
       }
+      processSource(hit.getSource(), fieldMap);
+
       if (includeScore) fieldMap.put("_score", hit.getScore());
       fieldMap.put("projectIds", projectIds);
       list.add(new Gene(fieldMap));

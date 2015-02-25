@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.addResponseIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createMapFromSearchFields;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +35,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Slf4j
 @Service
@@ -53,34 +53,9 @@ public class SearchService {
     val list = ImmutableList.<Keyword> builder();
 
     for (val hit : hits) {
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        if (Lists.newArrayList(
-            // Gene
-            fields.get("synonyms"),
-            fields.get("uniprotkbSwissprot"),
-            fields.get("omimGene"),
-            fields.get("entrezGene"),
-            fields.get("hgnc"),
+      val fieldMap = createMapFromSearchFields(hit.getFields());
+      addResponseIncludes(query, hit, fieldMap);
 
-            // Donor
-            fields.get("specimenIds"),
-            fields.get("submittedSpecimenIds"),
-            fields.get("sampleIds"),
-            fields.get("submittedSampleIds"),
-
-            // Mutation
-            fields.get("geneMutations"),
-
-            // Gene Set
-            fields.get("altlds")
-
-            ).contains(field.getKey())) {
-          fieldMap.put(field.getKey(), field.getValue().getValues().get(0));
-        } else {
-          fieldMap.put(field.getKey(), field.getValue().getValue());
-        }
-      }
       list.add(new Keyword(fieldMap));
     }
 

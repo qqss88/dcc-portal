@@ -29,7 +29,9 @@ import lombok.val;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.icgc.dcc.portal.model.AlleleMutation;
 import org.icgc.dcc.portal.model.Beacon;
+import org.icgc.dcc.portal.model.BeaconInfo;
 import org.icgc.dcc.portal.model.BeaconQuery;
 import org.icgc.dcc.portal.model.BeaconResponse;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -59,7 +61,6 @@ import com.google.common.collect.ImmutableMap;
 public class BeaconService {
 
   private static final int POSITION_BUFFER = 1000; // Must be larger than any single mutation.
-  private static final String BEACON_ID = "ICGC";
 
   private final Client client;
   private final String index;
@@ -70,7 +71,9 @@ public class BeaconService {
     this.client = client;
   }
 
-  public Beacon query(String chromosome, int position, String reference, String allele, String dataset) {
+  public Beacon query(String chromosome, int position, String reference, AlleleMutation alleleMutation, String dataset) {
+    String allele = alleleMutation.getMutation();
+
     val search = client.prepareSearch(index)
         .setTypes(IndexModel.Type.MUTATION_CENTRIC.getId())
         .setSearchType(QUERY_THEN_FETCH);
@@ -89,14 +92,15 @@ public class BeaconService {
         .put("allele", allele)
         .put("position", position).build();
 
-    search.addScriptField("result", generateDefaultScriptField(), params);
+    search.addScriptField("result",
+        allele.contains(">") ? generateInsertionOrDeletionScriptField() : generateDefaultScriptField(), params);
 
     val filter = FilterBuilders.scriptFilter(
         "var m = doc['mutation'].value;"
             + "var length = m.substring(m.indexOf('>')+1,m.length()).length();"
             + "position <= doc['chromosome_start'].value+length"
         ).addParam("position", position);
-    search.setFilter(filter);
+    search.setPostFilter(filter);
 
     val hits = search.execute().actionGet().getHits();
     String finalResult = "null";
@@ -123,27 +127,15 @@ public class BeaconService {
         + "m==allele";
   }
 
+  private String generateInsertionOrDeletionScriptField() {
+    return "doc['mutation'].value == allele";
+  }
+
   private Beacon createBeaconResponse(String exists, String chromosome, int position, String reference, String allele,
       String dataset) {
     val queryResp = new BeaconQuery(allele, chromosome, position, reference, dataset);
     val respResp = new BeaconResponse(exists);
-    return new Beacon(BEACON_ID, queryResp, respResp);
-  }
-
-  /**
-   * Ignored until more detail is given about wildcard behaviour
-   */
-  @SuppressWarnings("unused")
-  private String generateInsertionScriptField() {
-    return "doc['mutation'].value.startsWith('.')";
-  }
-
-  /**
-   * Ignored until more detail is given about wildcard behaviour
-   */
-  @SuppressWarnings("unused")
-  private String generateDeletionScriptField() {
-    return "doc['mutation'].value.endsWith('.')";
+    return new Beacon((new BeaconInfo()).getId(), queryResp, respResp);
   }
 
 }

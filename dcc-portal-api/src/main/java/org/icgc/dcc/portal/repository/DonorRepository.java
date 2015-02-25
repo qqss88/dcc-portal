@@ -23,8 +23,8 @@ import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.customScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
+import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
@@ -46,6 +46,9 @@ import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.LinkedHashMap;
@@ -53,25 +56,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
@@ -214,10 +212,10 @@ public class DonorRepository implements Repository {
   @Override
   public SearchResponse findAllCentric(Query query) {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
-
     search.setQuery(buildQuery(query));
+
     log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
+    val response = search.execute().actionGet();
     log.debug("{}", response);
 
     return response;
@@ -228,7 +226,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, TYPE);
 
     log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
+    val response = search.execute().actionGet();
     log.debug("{}", response);
 
     return response;
@@ -236,16 +234,17 @@ public class DonorRepository implements Repository {
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
-            .setSize(query.getSize());
+    val search = client
+        .prepareSearch(index)
+        .setTypes(type.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize());
 
-    ObjectNode filters = remapFilters(query.getFilters());
-    search.setFilter(getFilters(filters));
-
+    val filters = remapFilters(query.getFilters());
+    search.setPostFilter(getFilters(filters));
     search.addFields(getFields(query, KIND));
-
-    if (query.hasInclude("specimen")) search.addFields("specimen");
+    addIncludes(search, query, KIND);
 
     val facets = getFacets(query, filters);
     for (val facet : facets) {
@@ -307,7 +306,7 @@ public class DonorRepository implements Repository {
         boolFilter.must(getFilters(remappedFilters));
       }
 
-      search.setFilter(boolFilter);
+      search.setPostFilter(boolFilter);
     }
 
     log.debug("{}", search);
@@ -349,7 +348,7 @@ public class DonorRepository implements Repository {
 
     if (query.hasFilters()) {
       ObjectNode filters = remapFilters(query.getFilters());
-      search.setFilter(getFilters(filters));
+      search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
     }
 
@@ -360,7 +359,9 @@ public class DonorRepository implements Repository {
   public NestedQueryBuilder buildQuery(Query query) {
     return nestedQuery(
         "gene",
-        customScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query))).script(SCORE)).scoreMode("total");
+        functionScoreQuery(
+            filteredQuery(matchAllQuery(), buildScoreFilters(query)),
+            ScoreFunctionBuilders.scriptFunction(SCORE))).scoreMode("total");
   }
 
   public ObjectNode remapFilters(ObjectNode filters) {
@@ -368,44 +369,14 @@ public class DonorRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val fieldMapping = FIELDS_MAPPING.get(KIND);
-    val fs = Lists.<String> newArrayList();
+    val search = client.prepareGet(index, TYPE.getId(), id);
+    search.setFields(getFields(query, KIND));
+    addIncludes(search, query, KIND);
 
-    GetRequestBuilder search = client.prepareGet(index, TYPE.getId(), id);
+    val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (query.hasFields()) {
-      for (String field : query.getFields()) {
-        if (fieldMapping.containsKey(field)) {
-          fs.add(fieldMapping.get(field));
-        }
-      }
-    } else
-      fs.addAll(fieldMapping.values().asList());
-
-    if (query.hasInclude("specimen")) fs.add("specimen");
-
-    search.setFields(fs.toArray(new String[fs.size()]));
-
-    GetResponse response = search.execute().actionGet();
-
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
-    }
-
-    val map = Maps.<String, Object> newHashMap();
-
-    for (GetField f : response.getFields().values()) {
-      if (Lists.newArrayList(fieldMapping.get("availableDataTypes"), fieldMapping.get("analysisTypes"), "specimen")
-          .contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
+    val map = createResponseMap(response, query);
     log.debug("{}", map);
 
     return map;
@@ -422,7 +393,7 @@ public class DonorRepository implements Repository {
         .setSearchType(SCAN)
         .setSize(SCAN_BATCH_SIZE)
         .setScroll(KEEP_ALIVE)
-        .setFilter(getFilters(filters))
+        .setPostFilter(getFilters(filters))
         .setQuery(matchAllQuery())
         .setNoFields();
 

@@ -213,7 +213,7 @@ public class GeneSetRepository {
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(size(ids))
-        .setFilter(filters)
+        .setPostFilter(filters)
         .addField(fieldName);
 
     return search.execute().actionGet();

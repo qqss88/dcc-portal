@@ -48,26 +48,22 @@ import static org.icgc.dcc.portal.service.QueryService.hasTranscript;
 import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -295,18 +291,17 @@ public class MutationRepository implements Repository {
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search =
-        client.prepareSearch(index).setTypes(type.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
-            .setSize(query.getSize());
+    val search = client
+        .prepareSearch(index)
+        .setTypes(type.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize());
 
-    ObjectNode filters = remapFilters(query.getFilters());
-    search.setFilter(getFilters(filters, ""));
-
+    val filters = remapFilters(query.getFilters());
+    search.setPostFilter(getFilters(filters, ""));
     search.addFields(getFields(query, KIND));
-
-    if (query.hasInclude("transcripts") || query.hasInclude("consequences")) search.addFields("transcript");
-
-    if (query.hasInclude("occurrences")) search.addFields("ssm_occurrence");
+    addIncludes(search, query, KIND);
 
     val facets = getFacets(query, filters);
     for (val facet : facets) {
@@ -377,7 +372,7 @@ public class MutationRepository implements Repository {
         boolFilter.must(getFilters(remappedFilters, ""));
       }
 
-      search.setFilter(boolFilter);
+      search.setPostFilter(boolFilter);
     }
 
     log.debug("{}", search);
@@ -416,7 +411,7 @@ public class MutationRepository implements Repository {
     if (query.hasFilters()) {
       ObjectNode filters = query.hasScoreFilters() ? query.getScoreFilters() : query.getFilters();
       filters = remapFilters(filters);
-      search.setFilter(buildFilters(filters, ""));
+      search.setPostFilter(buildFilters(filters, ""));
 
       search.setQuery(buildQuery(query));
     }
@@ -431,67 +426,14 @@ public class MutationRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val fs = Lists.<String> newArrayList();
-    ImmutableMap<String, String> fieldMapping = FIELDS_MAPPING.get(KIND);
+    val search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
+    search.setFields(getFields(query, KIND));
+    addIncludes(search, query, KIND);
 
-    GetRequestBuilder search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
+    val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (query.hasFields()) {
-
-      for (String field : query.getFields()) {
-        if (fieldMapping.containsKey(field)) {
-          fs.add(fieldMapping.get(field));
-        }
-      }
-    } else
-      fs.addAll(fieldMapping.values().asList());
-
-    if (query.hasInclude("transcripts") || query.hasInclude("consequences"))
-
-    fs.add("transcript");
-
-    if (query.hasInclude("occurrences"))
-
-    fs.add("ssm_occurrence");
-
-    search.setFields(fs.toArray(new String[fs.size()]));
-
-    GetResponse response = search.execute().actionGet();
-
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
-    }
-
-    Map<String, Object> map = new HashMap<String, Object>();
-    for (GetField f : response.getFields().values()) {
-      if (Lists.newArrayList(
-          fieldMapping.get("platform"),
-          fieldMapping.get("consequenceType"),
-          fieldMapping.get("verificationStatus"),
-          fieldMapping.get("sequencingStrategy"),
-          fieldMapping.get("affectedProjectIds"),
-          fieldMapping.get("functionalImpact"),
-          "transcript",
-          "ssm_occurrence").contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
-    if (query.hasInclude("consequences")) {
-      log.info("Copying transcripts to consequences...");
-      map.put("consequences", map.get("transcript"));
-      if (!query.hasInclude("transcripts")) {
-        log.info("Removing transcripts...");
-        map.remove("transcript");
-      }
-    }
-
+    val map = createResponseMap(response, query);
     log.debug("{}", map);
 
     return map;
@@ -500,11 +442,14 @@ public class MutationRepository implements Repository {
   public SearchResponse protein(Query query) {
     ImmutableMap<String, String> fields = FIELDS_MAPPING.get(KIND);
 
-    val search =
-        client.prepareSearch(index).setTypes(CENTRIC_TYPE.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(1)
-            .setSize(10000);
+    val search = client
+        .prepareSearch(index)
+        .setTypes(CENTRIC_TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(1)
+        .setSize(10000);
 
-    search.setFilter(getFilters(query.getFilters(), null));
+    search.setPostFilter(getFilters(query.getFilters(), null));
 
     search.addFields(new String[] {
         fields.get("id"),
