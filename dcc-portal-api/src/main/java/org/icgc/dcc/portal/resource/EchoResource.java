@@ -40,7 +40,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
-@Api(value = "/echo", description = "Operations about echoing data")
+@Api(value = "/echo", description = "Resources relating to echoing data")
 @Path("/echo")
 public class EchoResource extends BaseResource {
 
