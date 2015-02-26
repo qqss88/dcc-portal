@@ -67,6 +67,7 @@
     'icgc.sets',
     'icgc.analysis',
     'icgc.beacon',
+    'icgc.downloader',
 
     // old
     'app.ui',
@@ -127,6 +128,9 @@
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
+
+    // Openstack
+    // RestangularProvider.setBaseUrl('http://10.5.74.170:5381' + API.BASE_URL);
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 

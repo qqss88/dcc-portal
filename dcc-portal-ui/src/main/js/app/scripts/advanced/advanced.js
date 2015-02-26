@@ -87,6 +87,16 @@
         _ctrl.Mutation.ajax();
       }
 
+      _ctrl.downloadDonorData = function() {
+        $modal.open({
+          templateUrl: '/scripts/downloader/views/request.html',
+          controller: 'DownloadRequestController',
+          resolve: {
+            filters: function() { return undefined; }
+          }
+        });
+      };
+
       _ctrl.saveSet = function(type, limit) {
         _ctrl.setLimit = limit;
         _ctrl.setType = type;
