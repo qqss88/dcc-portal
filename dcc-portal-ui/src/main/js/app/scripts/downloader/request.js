@@ -51,6 +51,25 @@
     }
 
 
+    $scope.validateEmail = function () {
+      // No email provided
+      if ($scope.params.emailAddress === '') {
+        $scope.params.isValidEmail = true;
+        return;
+      }
+      $scope.params.isValidEmail = $scope.params.emailAddress.match(emailRegex);
+
+      /*
+      if (scope.emailAddress.match(emailRegex)) {
+        scope.isValidEmail = true;
+      } else {
+        scope.isValidEmail = false;
+      }
+      */
+    };
+
+
+
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
     };

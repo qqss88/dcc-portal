@@ -55,12 +55,12 @@
                    <div>
                       <input type="text" size="45" 
                           placeholder="Send email notifications"
-                          ng-model="emailAddress" 
-                          ng-change="validateEmail()"></input>
+                          data-ng-model="params.emailAddress" 
+                          data-ng-change="validateEmail()"></input>
 
                       <span data-ng-if="emailAddress.length > 0">
-                         <i style="font-size:2.0em" class="icon icon-ok" data-ng-show="isValidEmail"></i>
-                         <i style="font-size:2.0em" class="icon icon-cancel" data-ng-hide="isValidEmail"></i>
+                         <i style="font-size:2.0em" class="icon icon-ok" data-ng-show="params.isValidEmail"></i>
+                         <i style="font-size:2.0em" class="icon icon-cancel" data-ng-hide="params.isValidEmail"></i>
                       </span>
                    </div>
                </div>
