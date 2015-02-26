@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.regex.Pattern;
 
+import lombok.NonNull;
+
 import org.icgc.dcc.portal.util.AlleleParser;
 
 import com.yammer.dropwizard.jersey.params.AbstractParam;
@@ -37,6 +39,7 @@ public class AlleleParam extends AbstractParam<AlleleMutation> {
   }
 
   @Override
+  @NonNull
   protected AlleleMutation parse(String input) throws Exception {
     String allele = input.trim();
 

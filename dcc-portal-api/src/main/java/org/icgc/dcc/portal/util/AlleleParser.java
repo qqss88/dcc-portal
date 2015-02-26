@@ -30,21 +30,42 @@ public class AlleleParser {
   public static AlleleMutation parseAllele(String input) {
     String allele = input.trim();
 
-    if (!allele.contains(INDEL_SYMBOL)) {
+    if (!isIndel(allele)) {
       return new AlleleMutation(NO_ALLELE_SYMBOL, allele, allele);
     }
 
-    if (allele.substring(0, allele.indexOf(INDEL_SYMBOL)).length() == 1) {
-      return allele.contains(NO_ALLELE_SYMBOL) ?
-          new AlleleMutation(NO_ALLELE_SYMBOL, allele.substring(2), allele)
-          : new AlleleMutation(NO_ALLELE_SYMBOL, allele.substring(3), NO_ALLELE_SYMBOL + INDEL_SYMBOL
-              + allele.substring(3));
-    } else {
-      return allele.contains(NO_ALLELE_SYMBOL) ?
-          new AlleleMutation(allele.substring(0, allele.indexOf(INDEL_SYMBOL)), NO_ALLELE_SYMBOL, allele)
-          : new AlleleMutation(allele.substring(1, allele.indexOf(INDEL_SYMBOL)), NO_ALLELE_SYMBOL,
-              allele.substring(1, allele.indexOf(INDEL_SYMBOL)) + INDEL_SYMBOL + NO_ALLELE_SYMBOL);
+    return generateNormalMutation(allele);
+  }
+
+  private static AlleleMutation generateNormalMutation(String allele) {
+    String from = allele.substring(0, allele.indexOf(INDEL_SYMBOL));
+    String to = allele.substring(allele.indexOf(INDEL_SYMBOL) + 1);
+
+    if (isAlreadyNormal(from, to)) {
+      return new AlleleMutation(from, to, allele);
     }
+
+    if (isInsertion(allele)) {
+      from = NO_ALLELE_SYMBOL;
+      to = to.substring(1);
+    } else {
+      from = from.substring(1);
+      to = NO_ALLELE_SYMBOL;
+    }
+
+    return new AlleleMutation(from, to, from + INDEL_SYMBOL + to);
+  }
+
+  private static Boolean isIndel(String allele) {
+    return allele.contains(INDEL_SYMBOL);
+  }
+
+  private static Boolean isInsertion(String allele) {
+    return allele.substring(0, allele.indexOf(INDEL_SYMBOL)).length() == 1;
+  }
+
+  private static Boolean isAlreadyNormal(String from, String to) {
+    return from.equals(NO_ALLELE_SYMBOL) || to.equals(NO_ALLELE_SYMBOL);
   }
 
 }

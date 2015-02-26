@@ -21,12 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 
+import lombok.AllArgsConstructor;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
+@AllArgsConstructor
 public class AlleleParamTest {
 
   @Parameters
@@ -50,11 +53,6 @@ public class AlleleParamTest {
   private String input;
   private Boolean valid;
 
-  public AlleleParamTest(String input, Boolean valid) {
-    this.input = input;
-    this.valid = valid;
-  }
-
   @Test
   public void testAlleleParam() {
     Boolean exception = false;
@@ -66,6 +64,6 @@ public class AlleleParamTest {
     }
 
     assertThat(exception).isEqualTo(!valid);
-
   }
+
 }
