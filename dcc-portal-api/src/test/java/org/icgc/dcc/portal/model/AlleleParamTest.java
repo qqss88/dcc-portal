@@ -15,39 +15,55 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.model;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import java.util.Arrays;
 
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+import lombok.AllArgsConstructor;
 
-/**
- * An exception mapper for IllegalArgumentException
- */
-@Component
-@Provider
-public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalArgumentException> {
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-  private final static Status STATUS = BAD_REQUEST;
+@RunWith(Parameterized.class)
+@AllArgsConstructor
+public class AlleleParamTest {
 
-  @Override
-  public Response toResponse(IllegalArgumentException e) {
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e))
-        .build();
+  @Parameters
+  public static Iterable<Object[]> data() {
+    return Arrays.asList(new Object[][] {
+        { "AAA", true },
+        { "T>TGGG", true },
+        { "CCA>C", true },
+        { "->ATT", true },
+        { "  GG>-", true },
+        { "acccc", false },
+        { "A>aaA", false },
+        { "AA>AGGG", false },
+        { "GAGC>GC", false },
+        { "- >AGGG", false },
+        { "A<AAA", false },
+        { "A>C>T", false }
+    });
   }
 
-  private Error errorResponse(IllegalArgumentException e) {
-    return new Error(STATUS, e.getMessage());
+  private String input;
+  private Boolean valid;
+
+  @Test
+  public void testAlleleParam() {
+    Boolean exception = false;
+
+    try {
+      new AlleleParam(input).get();
+    } catch (Exception e) {
+      exception = true;
+    }
+
+    assertThat(exception).isEqualTo(!valid);
   }
 
 }

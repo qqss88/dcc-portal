@@ -15,39 +15,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.model;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import lombok.NoArgsConstructor;
+import lombok.Value;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+@Value
+@NoArgsConstructor
+public class BeaconInfo {
 
-/**
- * An exception mapper for IllegalArgumentException
- */
-@Component
-@Provider
-public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalArgumentException> {
-
-  private final static Status STATUS = BAD_REQUEST;
-
-  @Override
-  public Response toResponse(IllegalArgumentException e) {
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e))
-        .build();
-  }
-
-  private Error errorResponse(IllegalArgumentException e) {
-    return new Error(STATUS, e.getMessage());
-  }
+  @JsonProperty
+  @ApiModelProperty(value = "Owning organization", required = true)
+  String organization = "ICGC";
+  @JsonProperty
+  @ApiModelProperty(value = "Unique Beacon ID", required = true)
+  String id = this.organization + " - Beacon";
+  @JsonProperty
+  @ApiModelProperty(value = "Beacon name", required = true)
+  String name = "Beacon";
+  @JsonProperty
+  @ApiModelProperty(value = "Beacon API version supported", required = true)
+  String api = "0.2";
 
 }

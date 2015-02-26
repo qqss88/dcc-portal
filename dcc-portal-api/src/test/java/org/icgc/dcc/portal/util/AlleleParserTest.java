@@ -15,39 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.util;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc.dcc.portal.util.AlleleParser.parseAllele;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import org.junit.Test;
 
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+public class AlleleParserTest {
 
-/**
- * An exception mapper for IllegalArgumentException
- */
-@Component
-@Provider
-public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalArgumentException> {
-
-  private final static Status STATUS = BAD_REQUEST;
-
-  @Override
-  public Response toResponse(IllegalArgumentException e) {
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e))
-        .build();
+  @Test
+  public void testCorrectDeletion() {
+    assertThat(parseAllele("ACTCTG>A").getMutation()).isEqualTo("CTCTG>-");
   }
 
-  private Error errorResponse(IllegalArgumentException e) {
-    return new Error(STATUS, e.getMessage());
+  public void testCorrectInsertion() {
+    assertThat(parseAllele("G>GAGA").getMutation()).isEqualTo("->AGA");
   }
 
+  @Test
+  public void testCorrectReferencelessDeletion() {
+    assertThat(parseAllele("GGGG>-").getMutation()).isEqualTo("GGGG>-");
+  }
+
+  @Test
+  public void testCorrectreferncelessInsertion() {
+    assertThat(parseAllele("->AAGG").getMutation()).isEqualTo("->AAGG");
+  }
+
+  @Test
+  public void testCorrectSub() {
+    parseAllele("   ATAGA ");
+  }
 }

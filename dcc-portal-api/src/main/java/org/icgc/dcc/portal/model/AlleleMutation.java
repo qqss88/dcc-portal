@@ -15,39 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.mapper;
+package org.icgc.dcc.portal.model;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
-import org.icgc.dcc.portal.model.Error;
-import org.springframework.stereotype.Component;
+@Data
+@AllArgsConstructor
+public class AlleleMutation {
 
-/**
- * An exception mapper for IllegalArgumentException
- */
-@Component
-@Provider
-public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalArgumentException> {
+  @ApiModelProperty(value = "Reference allele(s)", required = true)
+  String fromAllele;
 
-  private final static Status STATUS = BAD_REQUEST;
+  @ApiModelProperty(value = "Mutated allele(s)", required = true)
+  String toAllele;
 
-  @Override
-  public Response toResponse(IllegalArgumentException e) {
-    return status(STATUS)
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(e))
-        .build();
-  }
-
-  private Error errorResponse(IllegalArgumentException e) {
-    return new Error(STATUS, e.getMessage());
-  }
+  @ApiModelProperty(value = "The complete mutation of the allele(s)", required = true)
+  String mutation;
 
 }
