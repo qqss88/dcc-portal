@@ -160,7 +160,6 @@
             filters.gene[Extensions.ENTITY] = {};
           }
 
-          $scope.genelistModal = false;
           filters.gene[Extensions.ENTITY].is = [result.geneListId];
 
           // Upload gene list redirects to gene tab, regardless of where we came from
@@ -210,11 +209,6 @@
         $scope.params.myFile = null;
       }
     };
-
-    // Close self if there is a location change
-    $scope.$on('$locationChangeSuccess', function() {
-      $scope.genelistModal = false;
-    });
 
     $scope.$on('$destroy', function() {
       if (verifyPromise) {

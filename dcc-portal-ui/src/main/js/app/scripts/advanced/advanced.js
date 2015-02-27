@@ -64,10 +64,6 @@
       _ctrl.Page = Page;
       _ctrl.state = State;
 
-      _ctrl.observationDialog = {
-        modal: false,
-        observation: null
-      };
 
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
@@ -100,7 +96,6 @@
       _ctrl.saveSet = function(type, limit) {
         _ctrl.setLimit = limit;
         _ctrl.setType = type;
-        _ctrl.setModal = true;
 
         $modal.open({
           templateUrl: '/scripts/sets/views/sets.upload.html',
@@ -177,7 +172,6 @@
       // Data is cached so refreshing on tab switch
       // should be free
       $scope.$on('$locationChangeSuccess', function (event, next) {
-        _ctrl.observationDialog.modal = false;
         if (next.indexOf('search') !== -1) {
           refresh();
         }

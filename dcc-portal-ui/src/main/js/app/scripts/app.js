@@ -128,7 +128,6 @@
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
-
     // Openstack
     // RestangularProvider.setBaseUrl('http://10.5.74.170:5381' + API.BASE_URL);
 
@@ -166,7 +165,8 @@
     localStorageServiceProvider.setPrefix('icgc');
   });
 
-  module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {
+  module.run(function ($http, $state, $timeout, $interval, $rootScope, $modalStack,
+    Restangular, Angularytics, Compatibility, Notify) {
 
     var ignoreNotFound = [
       '/analysis/',
@@ -210,6 +210,19 @@
     Angularytics.init();
     // Browser compatibility tests
     Compatibility.run();
+
+
+    // Close any modal dialogs on location chagne
+    $rootScope.$on('$locationChangeSuccess', function (newVal, oldVal) {
+      console.log('rootscope location change success', oldVal, newVal);
+      console.log('modal stack', $modalStack.getTop());
+      
+      if (oldVal !== newVal && $modalStack.getTop()) { 
+        $modalStack.dismiss($modalStack.getTop().key);
+      }
+      
+    });
+
   });
 
 

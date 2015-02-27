@@ -134,108 +134,6 @@
 
   var module = angular.module('icgc.sets.directives', []);
 
-  module.directive('setUpload', function(LocationService, SetService, Settings) {
-    return {
-      restruct: 'E',
-      scope: {
-        setModal: '=',
-        setType: '=',
-        setUnion: '=',
-        setLimit: '='
-      },
-      templateUrl: '/scripts/sets/views/sets.upload.html',
-      link: function($scope) {
-
-        $scope.setDescription = null;
-        $scope.setSize = 0;
-        $scope.isValid = true;
-
-        // Validate size, name
-        $scope.validateInput = function() {
-          if (_.isEmpty($scope.setName) === true) {
-            $scope.isValid = false;
-            return;
-          }
-
-          if ($scope.setLimit) {
-            if (isNaN($scope.setSize) === true) {
-              $scope.isValid = false;
-              return;
-            }
-
-            if ($scope.setSize <= 0 || $scope.setSize > $scope.setSizeLimit) {
-              $scope.isValid = false;
-              return;
-            }
-          }
-          $scope.isValid = true;
-        };
-
-        $scope.submitNewSet = function() {
-          var params = {}, sortParam;
-
-          params.type = $scope.setType;
-          params.name = $scope.setName;
-          params.description = $scope.setDescription;
-          params.size = $scope.setSize;
-
-          if (angular.isDefined($scope.setLimit)) {
-            params.filters = LocationService.filters();
-            sortParam = LocationService.getJsonParam($scope.setType + 's');
-
-            if (angular.isDefined(sortParam)) {
-              params.sortBy = sortParam.sort;
-              if (sortParam.order === 'asc') {
-                params.sortOrder = 'ASCENDING';
-              } else {
-                params.sortOrder = 'DESCENDING';
-              }
-            }
-          }
-
-          if (angular.isDefined($scope.setUnion)) {
-            params.union = $scope.setUnion;
-          }
-
-          if (angular.isDefined($scope.setLimit)) {
-            SetService.addSet($scope.setType, params);
-          } else {
-            SetService.addDerivedSet($scope.setType, params);
-          }
-
-          // Reset
-          $scope.setDescription = null;
-          $scope.setType = null;
-        };
-
-        $scope.cancel = function() {
-          $scope.setDescription = null;
-          $scope.setType = null;
-          $scope.setModal = false;
-        };
-
-        $scope.$watch('setModal', function(n) {
-          if (n) {
-            Settings.get().then(function(settings) {
-              $scope.setSize = Math.min($scope.setLimit || 0, settings.maxNumberOfHits);
-              $scope.setSizeLimit = $scope.setSize;
-              $scope.setName = 'My ' + $scope.setType + ' set';
-              $scope.uiFilters = LocationService.filters();
-            });
-          }
-        });
-
-        // Remove self if location change detected
-        $scope.$on('$locationChangeStart', function() {
-          if ($scope.setModal === true) {
-            $scope.setModal = false;
-          }
-        });
-      }
-    };
-  });
-
-
   /**
    * Display s subset from set operations using set notation
    */
@@ -285,7 +183,6 @@
         $scope.selected = [];
 
         $scope.dialog = {
-          setModal: false
         };
 
         function toggleSelection(intersection, count) {
