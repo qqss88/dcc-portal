@@ -268,7 +268,7 @@
     };
   });
 
-  module.directive('setOperation', function($location, $timeout, $filter, Page, LocationService,
+  module.directive('setOperation', function($location, $timeout, $filter, $modal, Page, LocationService,
     Settings, SetService, SetOperationService, Extensions) {
 
     return {
@@ -348,6 +348,25 @@
           }
           return union;
         }
+
+        $scope.saveDerivedSet = function() {
+
+          $modal.open({
+            templateUrl: '/scripts/sets/views/sets.upload.html',
+            controller: 'SetUploadController',
+            resolve: {
+              setType: function() {
+                return $scope.item.type.toLowerCase();
+              },
+              setLimit: function() {
+                return undefined;
+              },
+              setUnion: function() {
+                return $scope.dialog.setUnion;
+              }
+            }
+          });
+        };
 
 
         // Export the subset(s), materialize the set along the way

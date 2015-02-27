@@ -113,7 +113,7 @@
               return _ctrl.setLimit;
             },
             setUnion: function() {
-              return null;
+              return undefined;
             }
           }
         });

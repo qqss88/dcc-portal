@@ -3,9 +3,6 @@
 </div>
 <div data-ng-if="item && item.state === 'FINISHED'">
 
-
-    <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
-
     <div class="canvas half"></div>
     <div class="half omega">
 
@@ -60,7 +57,7 @@
                     <td>
                         <span style="float:left; font-size:1.25rem"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
-                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
                             </span>
                         </span>
@@ -76,7 +73,7 @@
                     <td>
                         <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
-                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
+                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
                         </span>

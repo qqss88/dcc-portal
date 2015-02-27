@@ -105,7 +105,7 @@
             linkURL, JSON.stringify(filters)).then(function (job) {
             $modalInstance.dismiss('cancel');
             $location.path('/download/' + job.downloadId).search('');
-        });
+          });
 
       });
     };

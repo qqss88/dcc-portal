@@ -143,7 +143,7 @@
 
 
       function setup() {
-        $scope.user = Auth.getUser();
+        $scope.params.user = Auth.getUser();
         // Check for errors
         if (OpenID.hasErrors()) {
           $scope.params.error = OpenID.getErrors();
@@ -155,7 +155,7 @@
               $scope.params.user = Auth.getUser();
               $state.transitionTo($state.current, $stateParams,
                 { reload: true, inherit: false, notify: true });
-              console.log('logged in as: ', $scope.user);
+              console.log('logged in as: ', $scope.params.user);
             });
         }
       }
