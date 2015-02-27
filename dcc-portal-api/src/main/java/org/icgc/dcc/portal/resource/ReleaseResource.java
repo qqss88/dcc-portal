@@ -48,7 +48,7 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/releases")
 @Produces(APPLICATION_JSON)
-@Api(value = "/releases", description = "Operations about releases")
+@Api(value = "/releases", description = "Resources relating to releases")
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ReleaseResource {
 

@@ -94,7 +94,7 @@ var DATASET_ALL = 'All Projects';
         $scope.params.reference = LocationService.getParam('ref');
       }
       $scope.params.allele = LocationService.getParam('ale')?
-        LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
+        LocationService.getParam('ale').replace( /[^ACTGactg>-]+/g, '').toUpperCase():'';
       $scope.result.exists = LocationService.getParam('result') === 'true'?true:false;
       $scope.checkParams();
     };
@@ -124,6 +124,16 @@ var DATASET_ALL = 'All Projects';
       }
       if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
         $scope.invalidParams.isReference = true;
+        $scope.hasInvalidParams = true;
+      }
+
+      if($scope.params.allele && !(
+         /^[ACTG]+$/.test($scope.params.allele) ||
+         /^([ACTG])>\1[ACTG]+$/.test($scope.params.allele) ||
+         /^->[ACTG]+$/.test($scope.params.allele) ||
+         /^([ACTG])[ACTG]+>\\1$/.test($scope.params.allele) ||
+         /^[ACTG]+>-$/.test($scope.params.allele))){
+        $scope.invalidParams.isAllele = true;
         $scope.hasInvalidParams = true;
       }
       if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
@@ -256,7 +266,7 @@ var DATASET_ALL = 'All Projects';
           if (angular.isUndefined(val)) {
             val = '';
           }
-          var clean = val.replace( /[^ACTGactg]+/g, '');
+          var clean = val.replace( /[^ACTGactg>-]+/g, '');
           clean = clean.toUpperCase();
           if (val !== clean) {
             ngModelCtrl.$setViewValue(clean);

@@ -99,7 +99,7 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/mutations")
 @Produces(APPLICATION_JSON)
-@Api(value = "/mutations", description = "Operations about " + MUTATION)
+@Api(value = "/mutations", description = "Resources relating to " + MUTATION)
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class MutationResource {
 

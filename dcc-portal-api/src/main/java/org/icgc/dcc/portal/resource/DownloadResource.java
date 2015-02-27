@@ -114,7 +114,7 @@ import com.yammer.metrics.annotation.Timed;
 
 @Component
 @Slf4j
-@Api(value = "/v1/download", description = "Operations about archive downloading")
+@Api(value = "/v1/download", description = "Resources relating to archive downloading")
 @Path("/v1/download")
 @Consumes(APPLICATION_JSON)
 public class DownloadResource {

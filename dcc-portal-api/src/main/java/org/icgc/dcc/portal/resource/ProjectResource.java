@@ -108,7 +108,7 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/projects")
 @Produces(APPLICATION_JSON)
-@Api(value = "/projects", description = "Operations about " + PROJECT)
+@Api(value = "/projects", description = "Resources relating to " + PROJECT)
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ProjectResource {
 
