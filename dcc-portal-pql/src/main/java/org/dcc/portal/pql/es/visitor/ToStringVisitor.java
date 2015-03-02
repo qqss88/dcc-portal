@@ -20,29 +20,32 @@ package org.dcc.portal.pql.es.visitor;
 import static java.lang.String.format;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.AndNode;
-import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
-import org.dcc.portal.pql.es.ast.GreaterEqualNode;
-import org.dcc.portal.pql.es.ast.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.LessEqualNode;
-import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
+import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 
 import com.google.common.base.Optional;
 
@@ -195,6 +198,29 @@ public class ToStringVisitor extends NodeVisitor<String> {
   @Override
   public String visitQuery(QueryNode node) {
     return buildToString(node);
+  }
+
+  @Override
+  public String visitAggregations(AggregationsNode node) {
+    return buildToString(node);
+  }
+
+  @Override
+  public String visitTermsAggregation(TermsAggregationNode node) {
+    val header =
+        format("%s%s [%s(%s)] (", calcIndent(node), node.getNodeName(), node.getAggregationName(), node.getFieldName());
+
+    return buildToString(node, Optional.of(header));
+  }
+
+  @Override
+  public String visitFilterAggregation(FilterAggregationNode node) {
+    val builder = new StringBuilder();
+    builder.append(format("%s%s [%s] (", calcIndent(node), node.getNodeName(), node.getAggregationName()));
+    builder.append(NEWLINE);
+    builder.append(node.getFilters().accept(this));
+
+    return buildToString(node, Optional.of(builder.toString()));
   }
 
   @Override

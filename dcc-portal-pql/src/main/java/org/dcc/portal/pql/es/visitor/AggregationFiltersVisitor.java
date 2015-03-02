@@ -17,39 +17,37 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
-import static com.google.common.base.Preconditions.checkState;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.AndNode;
-import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
-import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.OrNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 
 /**
- * Visits filter nodes. And removes those that match provided facet field.
+ * Visits filter nodes. And removes those that match provided aggregation field name.
  */
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
-public class FacetFiltersVisitor extends NodeVisitor<ExpressionNode> {
+public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode> {
 
   private static final ExpressionNode REMOVE_CHILD = null;
 
-  private String facetField;
+  private String termsFieldName;
 
-  public ExpressionNode visit(String facetField, FilterNode filterNode) {
-    log.debug("Visiting Facet Filters. TermsFacetField: '{}'. Filters: '{}'", facetField, filterNode);
-    this.facetField = facetField;
+  public ExpressionNode visit(String fieldName, FilterNode filterNode) {
+    log.debug("Visiting Aggregation Filters. Terms Aggregation Field: '{}'. Filters: '{}'", fieldName, filterNode);
+    this.termsFieldName = fieldName;
     val result = filterNode.accept(this);
 
     return result;
@@ -71,12 +69,12 @@ public class FacetFiltersVisitor extends NodeVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitMustBool(MustBoolNode node) {
-    return processCommon(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitTerm(TermNode node) {
-    return node.getNameNode().getValue().equals(facetField) ? REMOVE_CHILD : node;
+    return node.getNameNode().getValue().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
@@ -86,61 +84,39 @@ public class FacetFiltersVisitor extends NodeVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitRange(RangeNode node) {
-    return node.getFieldName().equals(facetField) ? REMOVE_CHILD : node;
+    return node.getFieldName().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
   public ExpressionNode visitTerms(TermsNode node) {
-    return node.getField().equals(facetField) ? REMOVE_CHILD : node;
+    return node.getField().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
   public ExpressionNode visitAnd(AndNode node) {
-    return processCommon(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitOr(OrNode node) {
-    return processCommon(node);
+    return processCommonCases(node);
   }
 
   private ExpressionNode visitChild(ExpressionNode parent) {
     return parent.getFirstChild().accept(this);
   }
 
-  // FIXME: give some more meaningful name
-  private ExpressionNode processCommon(ExpressionNode node) {
+  private ExpressionNode processCommonCases(ExpressionNode node) {
     for (int i = 0; i < node.childrenCount(); i++) {
       val child = node.getChild(i);
       log.debug("Visiting child: {}", child);
       if (child.accept(this) == REMOVE_CHILD) {
-        log.debug("Removing the child from the filters and setting scope of the facet to global.");
+        log.debug("Removing the child from the filters.");
         node.removeChild(i);
-        setGlobal(node);
       }
     }
 
     return node;
-  }
-
-  private void setGlobal(ExpressionNode node) {
-    getTermsFacetNode(node).setGlobal();
-  }
-
-  private TermsFacetNode getTermsFacetNode(ExpressionNode node) {
-    TermsFacetNode result = null;
-    ExpressionNode currentNode = node;
-    while (currentNode != null) {
-      if (currentNode instanceof TermsFacetNode) {
-        result = (TermsFacetNode) currentNode;
-        break;
-      }
-      currentNode = currentNode.getParent();
-    }
-
-    checkState(result != null, "Couldn't find TermsFacetNode parent in node %s", node);
-
-    return result;
   }
 
 }

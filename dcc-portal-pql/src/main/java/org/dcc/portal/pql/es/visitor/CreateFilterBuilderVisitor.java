@@ -39,29 +39,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.AndNode;
-import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
-import org.dcc.portal.pql.es.ast.GreaterEqualNode;
-import org.dcc.portal.pql.es.ast.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.LessEqualNode;
-import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
+import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -70,17 +68,15 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.RangeFilterBuilder;
-import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 import com.google.common.collect.Lists;
 
 // TODO: create static factory construction methods that return cached visitor for each type model.
+// FIXME: Remove code which is present in the FilterBuilderVisitor
 @Slf4j
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
-
-  private static final CreateFacetBuilderVisitor FACET_BUILDER_VISITOR = new CreateFacetBuilderVisitor();
 
   @NonNull
   private final Client client;
@@ -168,7 +164,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
 
     for (val child : node.getChildren()) {
       if (child instanceof FilterNode) {
-        result.setFilter(child.accept(this));
+        result.setPostFilter(child.accept(this));
       } else if (child instanceof QueryNode) {
         val filtersNode = child.getOptionalFirstChild();
         FilterBuilder queryFilters = null;
@@ -177,8 +173,8 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
         }
 
         result.setQuery(filteredQuery(matchAllQuery(), queryFilters));
-      } else if (child instanceof FacetsNode) {
-        addFacets(child, result);
+      } else if (child instanceof AggregationsNode) {
+        addAggregations(child, result);
       } else if (child instanceof FieldsNode) {
         val fieldsNode = (FieldsNode) child;
         String[] children = fieldsNode.getFields().toArray(new String[fieldsNode.getFields().size()]);
@@ -293,31 +289,11 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     return nestedFilter(node.getPath(), node.getFirstChild().accept(this));
   }
 
-  private void addFacets(ExpressionNode facetsNode, SearchRequestBuilder result) {
-    log.debug("Adding facets for FacetsNode: {}", facetsNode);
-    for (val child : facetsNode.getChildren()) {
-      val facetBuilder = child.accept(FACET_BUILDER_VISITOR);
-      val facetFilterNode = Nodes.getOptionalChild(child, FilterNode.class);
-
-      if (facetFilterNode.isPresent()) {
-        log.debug("Adding facet filter: {}", facetFilterNode.get());
-        val facetFilter = facetFilterNode.get().accept(this);
-        facetBuilder.facetFilter(facetFilter);
-      }
-
-      resolveNestedField(child, facetBuilder);
-      result.addFacet(facetBuilder);
-    }
-  }
-
-  /**
-   * If the facet is requested for a nested field add the {@code matchAll} {@code nested} ES query to the facet.
-   */
-  private void resolveNestedField(ExpressionNode facetNode, FacetBuilder facetBuilder) {
-    val termsFacetNode = (TermsFacetNode) facetNode;
-    if (typeModel.isNested(termsFacetNode.getField())) {
-      log.debug("Field {} is a nested one. Adding nested query to the facet.", termsFacetNode.getField());
-      facetBuilder.nested(typeModel.getNestedPath(termsFacetNode.getField()));
+  private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result) {
+    log.debug("Adding aggregations for AggregationsNode\n{}", aggregationsNode);
+    for (val child : aggregationsNode.getChildren()) {
+      val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(typeModel));
+      result.addAggregation(aggregationBuilder);
     }
   }
 

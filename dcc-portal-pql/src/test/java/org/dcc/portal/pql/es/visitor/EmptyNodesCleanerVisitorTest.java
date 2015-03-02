@@ -21,10 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor.REMOVE_NODE;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.BoolNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.junit.Before;
 import org.junit.Test;
 

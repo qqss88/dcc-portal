@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;

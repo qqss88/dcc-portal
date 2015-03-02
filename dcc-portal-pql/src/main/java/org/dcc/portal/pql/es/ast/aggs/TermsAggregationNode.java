@@ -15,21 +15,30 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.ast.aggs;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class MustBoolNode extends ExpressionNode {
+@Getter
+@EqualsAndHashCode(callSuper = true)
+public class TermsAggregationNode extends ExpressionNode {
 
-  public MustBoolNode(ExpressionNode... children) {
-    super(children);
+  private final String aggregationName;
+  private final String fieldName;
+
+  public TermsAggregationNode(@NonNull String aggregationName, @NonNull String fieldName) {
+    this.aggregationName = aggregationName;
+    this.fieldName = fieldName;
   }
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitMustBool(this);
+    return visitor.visitTermsAggregation(this);
   }
 
 }

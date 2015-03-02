@@ -24,12 +24,13 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.FacetsNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Rule;
@@ -37,20 +38,20 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 @Slf4j
-public class FacetsResolverVisitorTest {
+public class AggregationsResolverVisitorTest {
 
-  FacetsResolverVisitor resolver;
+  AggregationsResolverVisitor resolver;
 
   @Rule
   public ExpectedException exception = ExpectedException.none();
 
   @Before
   public void setUp() {
-    resolver = new FacetsResolverVisitor(Type.DONOR_CENTRIC);
+    resolver = new AggregationsResolverVisitor(Type.DONOR_CENTRIC);
   }
 
   @Test
-  public void visitRoot_noFacetsNode() {
+  public void visitRoot_noAggregationsNode() {
     val originalRoot = (RootNode) createEsAst("eq(gender, 'male')");
     val clone = cloneNode(originalRoot);
     val rootNode = resolver.visitRoot(originalRoot);
@@ -74,12 +75,16 @@ public class FacetsResolverVisitorTest {
     val filterNode = cloneNode(originalRoot.getFirstChild());
     val result = resolver.visitRoot(originalRoot);
 
-    // Children: Facets and Query
+    // Children: Aggregations and Query
     assertThat(result.childrenCount()).isEqualTo(2);
-    val facetsNode = (FacetsNode) result.getFirstChild();
-    log.debug("Facets Node: {}", facetsNode);
-    assertThat(facetsNode.childrenCount()).isEqualTo(1);
-    assertThat(facetsNode.getFirstChild().getFirstChild()).isEqualTo(filterNode);
+
+    val aggsNode = (AggregationsNode) result.getFirstChild();
+    log.debug("Aggregations Node: {}", aggsNode);
+    assertThat(aggsNode.childrenCount()).isEqualTo(1);
+    val filterAggsNode = (FilterAggregationNode) aggsNode.getFirstChild();
+    assertThat(filterAggsNode.childrenCount()).isEqualTo(1);
+    assertThat(filterAggsNode.getFirstChild()).isInstanceOf(TermsAggregationNode.class);
+    assertThat(filterAggsNode.getFilters()).isEqualTo(filterNode);
 
     val queryNode = (QueryNode) result.getChild(1);
     log.debug("QueryNode: {}", queryNode);
@@ -94,12 +99,14 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitTermsFacet_match() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(gender, 'male'), eq(ageAtDiagnosis, 60)");
-    val facetsNodeOpt = getOptionalChild(originalRoot, FacetsNode.class);
-    assertThat(facetsNodeOpt.isPresent()).isTrue();
+    val aggsNodeOpt = getOptionalChild(originalRoot, AggregationsNode.class);
+    assertThat(aggsNodeOpt.isPresent()).isTrue();
 
-    val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getFirstChild());
-    assertThat(termsFacet.childrenCount()).isEqualTo(1);
-    val filterNode = (FilterNode) termsFacet.getFirstChild();
+    val filterAgg = (FilterAggregationNode) resolver.visitTermsAggregation(
+        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild());
+    assertThat(filterAgg.childrenCount()).isEqualTo(1);
+    val filterNode = filterAgg.getFilters();
+    assertThat(filterNode.childrenCount()).isEqualTo(1);
 
     // FilterNode - BoolNode - MustNode
     val mustNode = filterNode.getFirstChild().getFirstChild();
@@ -115,12 +122,14 @@ public class FacetsResolverVisitorTest {
   @Test
   public void visitTermsFacet_noMatch() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
-    val facetsNodeOpt = getOptionalChild(originalRoot, FacetsNode.class);
-    assertThat(facetsNodeOpt.isPresent()).isTrue();
+    val aggsNodeOpt = getOptionalChild(originalRoot, AggregationsNode.class);
+    assertThat(aggsNodeOpt.isPresent()).isTrue();
 
-    val termsFacet = (TermsFacetNode) resolver.visitTermsFacet((TermsFacetNode) facetsNodeOpt.get().getFirstChild());
-    assertThat(termsFacet.childrenCount()).isEqualTo(1);
-    val filterNode = (FilterNode) termsFacet.getFirstChild();
+    val filterAgg = (FilterAggregationNode) resolver.visitTermsAggregation(
+        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild());
+    assertThat(filterAgg.childrenCount()).isEqualTo(1);
+    val filterNode = filterAgg.getFilters();
+    assertThat(filterNode.childrenCount()).isEqualTo(1);
 
     // FilterNode - BoolNode - MustNode
     val mustNode = filterNode.getFirstChild().getFirstChild();
@@ -135,27 +144,7 @@ public class FacetsResolverVisitorTest {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Source AST must be an instance of RootNode");
     val esAst = createEsAst("facets(gender)");
-    resolver.resolveFacets(esAst.getFirstChild(), Type.DONOR_CENTRIC);
-  }
-
-  @Test
-  public void globalSetTest() {
-    val root = (RootNode) createEsAst("facets(gender), eq(gender, 'male')");
-    val result = resolver.visitRoot(root);
-
-    // root - facets - TermsFacet
-    val termsFacetNode = (TermsFacetNode) result.getFirstChild().getFirstChild();
-    assertThat(termsFacetNode.isGlobal()).isTrue();
-  }
-
-  @Test
-  public void globalUnsetTest() {
-    val root = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
-    val result = resolver.visitRoot(root);
-
-    // root - facets - TermsFacet
-    val termsFacetNode = (TermsFacetNode) result.getFirstChild().getFirstChild();
-    assertThat(termsFacetNode.isGlobal()).isFalse();
+    resolver.resolveAggregations(esAst.getFirstChild(), Type.DONOR_CENTRIC);
   }
 
 }

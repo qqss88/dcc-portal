@@ -32,7 +32,10 @@ import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.facet.terms.TermsFacet;
+import org.elasticsearch.search.aggregations.bucket.filter.Filter;
+import org.elasticsearch.search.aggregations.bucket.global.Global;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
@@ -227,34 +230,37 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   public void facetsTest_noFilters() {
     val result = executeQuery("facets(verificationStatusNested)");
     assertTotalHitsCount(result, 3);
+    Global global = result.getAggregations().get("verificationStatusNested");
+    Nested nested = global.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
-    val facet = getFacet(result);
-    assertThat(facet.getMissingCount()).isEqualTo(0);
-    assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(6);
-
-    for (val entry : facet.getEntries()) {
-      if (entry.getTerm().toString().equals("tested")) {
-        assertThat(entry.getCount()).isEqualTo(2);
+    for (val bucket : terms.getBuckets()) {
+      if (bucket.getKey().equals("tested")) {
+        assertThat(bucket.getDocCount()).isEqualTo(2);
       } else {
-        assertThat(entry.getCount()).isEqualTo(4);
+        assertThat(bucket.getDocCount()).isEqualTo(4);
       }
     }
   }
 
   @Test
   public void facetsTest_noMatchFilter() {
-    val result = executeQuery("facets(verificationStatus), in(transcriptId, 'T1', 'T2')");
+    val result = executeQuery("facets(verificationStatusNested), in(transcriptId, 'T1', 'T2')");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU1", "MU2");
 
-    val facet = result.getFacets().facet(TermsFacet.class, "verificationStatus");
-    assertThat(facet.getMissingCount()).isEqualTo(0);
-    assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(2);
+    Global globalAgg = result.getAggregations().get("verificationStatusNested");
+    Filter filterAgg = globalAgg.getAggregations().get("verificationStatusNested");
+    Nested nested = filterAgg.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
-    assertThat(facet.getEntries()).hasSize(1);
-    assertThat(facet.getEntries().get(0).getCount()).isEqualTo(2);
+    for (val bucket : terms.getBuckets()) {
+      if (bucket.getKey().equals("tested")) {
+        assertThat(bucket.getDocCount()).isEqualTo(1);
+      } else {
+        assertThat(bucket.getDocCount()).isEqualTo(3);
+      }
+    }
   }
 
   @Test
@@ -263,33 +269,38 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU2", "MU3");
 
-    val facet = getFacet(result);
-    assertThat(facet.getMissingCount()).isEqualTo(0);
-    assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(6);
+    Global global = result.getAggregations().get("verificationStatusNested");
+    Nested nested = global.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
-    for (val entry : facet.getEntries()) {
-      if (entry.getTerm().toString().equals("tested")) {
-        assertThat(entry.getCount()).isEqualTo(2);
+    for (val bucket : terms.getBuckets()) {
+      if (bucket.getKey().equals("tested")) {
+        assertThat(bucket.getDocCount()).isEqualTo(2);
       } else {
-        assertThat(entry.getCount()).isEqualTo(4);
+        assertThat(bucket.getDocCount()).isEqualTo(4);
       }
     }
   }
 
   @Test
-  public void facetsTest_multiFilters() {
+  public void facetTest_multiFilters() {
     val result =
-        executeQuery("facets(verificationStatus), eq(verificationStatus, 'tested'), in(transcriptId, 'T1', 'T2')");
-    assertTotalHitsCount(result, 0);
+        executeQuery("facets(verificationStatusNested), eq(verificationStatusNested, 'tested'), in(transcriptId, 'T1', 'T2')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU2");
 
-    val facet = result.getFacets().facet(TermsFacet.class, "verificationStatus");
-    assertThat(facet.getMissingCount()).isEqualTo(0);
-    assertThat(facet.getOtherCount()).isEqualTo(0);
-    assertThat(facet.getTotalCount()).isEqualTo(2);
+    Global globalAgg = result.getAggregations().get("verificationStatusNested");
+    Filter filterAgg = globalAgg.getAggregations().get("verificationStatusNested");
+    Nested nested = filterAgg.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
-    assertThat(facet.getEntries()).hasSize(1);
-    assertThat(facet.getEntries().get(0).getCount()).isEqualTo(2);
+    for (val bucket : terms.getBuckets()) {
+      if (bucket.getKey().equals("tested")) {
+        assertThat(bucket.getDocCount()).isEqualTo(1);
+      } else {
+        assertThat(bucket.getDocCount()).isEqualTo(3);
+      }
+    }
   }
 
   private SearchResponse executeQuery(String query) {
@@ -323,10 +334,6 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   private static void assertTotalHitsCount(SearchResponse response, int expectedCount) {
     assertThat(response.getHits().getTotalHits()).isEqualTo(expectedCount);
-  }
-
-  private static TermsFacet getFacet(SearchResponse response) {
-    return response.getFacets().facet(TermsFacet.class, "verificationStatusNested");
   }
 
   private static SearchHit getFirstSearchResult(SearchResponse response) {

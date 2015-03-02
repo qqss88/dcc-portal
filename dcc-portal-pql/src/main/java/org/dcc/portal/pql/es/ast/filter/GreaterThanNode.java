@@ -15,21 +15,33 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.ast.filter;
 
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
+import lombok.Value;
+import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class OrNode extends ExpressionNode {
+@Value
+@EqualsAndHashCode(callSuper = true)
+public class GreaterThanNode extends ExpressionNode {
 
-  public OrNode(ExpressionNode... children) {
-    super(children);
+  @NonNull
+  Object value;
+
+  public GreaterThanNode(@NonNull ExpressionNode node) {
+    val terminalNode = (TerminalNode) node;
+    this.value = terminalNode.getValue();
+    addChildren(node);
   }
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitOr(this);
+    return visitor.visitGreaterThan(this);
   }
 
 }

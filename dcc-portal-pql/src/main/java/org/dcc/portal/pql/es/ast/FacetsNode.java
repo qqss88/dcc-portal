@@ -21,6 +21,7 @@ import lombok.NonNull;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+@Deprecated
 public class FacetsNode extends ExpressionNode {
 
   public FacetsNode(ExpressionNode... children) {

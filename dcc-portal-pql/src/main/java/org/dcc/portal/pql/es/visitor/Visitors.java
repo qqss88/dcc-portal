@@ -20,13 +20,25 @@ package org.dcc.portal.pql.es.visitor;
 import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.elasticsearch.client.Client;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Visitors {
 
   private static final NodeVisitor<String> TO_STRING_VISITOR = new ToStringVisitor();
+  private static final NodeVisitor<ExpressionNode> CLONE_VISITOR = new CloneNodeVisitor();
+
+  private static final CreateAggregationBuilderVisitor MUTATION_AGGREGATION_BUILDER_VISITOR =
+      new CreateAggregationBuilderVisitor(IndexModel.getMutationCentricTypeModel());
+
+  private static final FilterBuilderVisitor MUTATION_FILTER_VISITOR = new FilterBuilderVisitor(
+      IndexModel.getMutationCentricTypeModel());
+
+  private static final RemoveAggregationFilterVisitor REMOVE_AGGS_FILTER_VISITOR = new RemoveAggregationFilterVisitor();
 
   // FIXME: implement
 
@@ -48,6 +60,32 @@ public class Visitors {
 
   public static NodeVisitor<String> createToStringVisitor() {
     return TO_STRING_VISITOR;
+  }
+
+  public static NodeVisitor<ExpressionNode> createCloneNodeVisitor() {
+    return CLONE_VISITOR;
+  }
+
+  public static CreateAggregationBuilderVisitor createAggregationBuilderVisitor(AbstractTypeModel typeModel) {
+    if (typeModel instanceof MutationCentricTypeModel) {
+      return MUTATION_AGGREGATION_BUILDER_VISITOR;
+    }
+
+    // FIXME: Add the other typeModels
+
+    throw new IllegalArgumentException();
+  }
+
+  public static FilterBuilderVisitor filterBuilderVisitor(AbstractTypeModel typeModel) {
+    if (typeModel instanceof MutationCentricTypeModel) {
+      return MUTATION_FILTER_VISITOR;
+    }
+
+    throw new IllegalArgumentException();
+  }
+
+  public static RemoveAggregationFilterVisitor createRemoveAggregationFilterVisitor() {
+    return REMOVE_AGGS_FILTER_VISITOR;
   }
 
 }

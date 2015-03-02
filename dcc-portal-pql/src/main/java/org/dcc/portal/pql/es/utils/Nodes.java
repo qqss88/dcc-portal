@@ -30,7 +30,8 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.utils.CloneNodeVisitor;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.visitor.Visitors;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -38,7 +39,7 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class Nodes {
 
-  private static final CloneNodeVisitor CLONE_VISITOR = new CloneNodeVisitor();
+  private static final NodeVisitor<ExpressionNode> CLONE_VISITOR = Visitors.createCloneNodeVisitor();
 
   public static <T> List<T> filterChildren(@NonNull ExpressionNode node, @NonNull Class<T> childType) {
     val children = filter(node.getChildren(), childType);

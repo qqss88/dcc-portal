@@ -17,11 +17,15 @@
  */
 package org.dcc.portal.pql.es.utils;
 
+import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
-import org.dcc.portal.pql.es.visitor.FacetsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 /**
@@ -31,7 +35,8 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 public class EsAstTransformator {
 
   private final EmptyNodesCleanerVisitor emptyNodesCleaner = new EmptyNodesCleanerVisitor();
-  private final FacetsResolverVisitor facetsResolver = new FacetsResolverVisitor();
+  private final AggregationsResolverVisitor facetsResolver = new AggregationsResolverVisitor();
+  private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, Type type) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -43,11 +48,20 @@ public class EsAstTransformator {
   }
 
   public ExpressionNode optimize(ExpressionNode esAst) {
-    return esAst.accept(emptyNodesCleaner);
+    // Clean empty filter node
+    esAst = esAst.accept(emptyNodesCleaner);
+
+    // Remove FilterAggregationNodes without filters
+    val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
+    if (aggsNode.isPresent()) {
+      esAst = esAst.accept(removeAggsFilterVisitor);
+    }
+
+    return esAst;
   }
 
   public ExpressionNode resolveFacets(ExpressionNode esAst, Type type) {
-    return facetsResolver.resolveFacets(esAst, type);
+    return facetsResolver.resolveAggregations(esAst, type);
   }
 
 }

@@ -15,34 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.utils;
+package org.dcc.portal.pql.es.visitor;
 
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.AndNode;
-import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
-import org.dcc.portal.pql.es.ast.FilterNode;
-import org.dcc.portal.pql.es.ast.GreaterEqualNode;
-import org.dcc.portal.pql.es.ast.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.LessEqualNode;
-import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.OrNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
+import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 
 import com.google.common.collect.Lists;
 
@@ -155,6 +157,11 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
+  public ExpressionNode visitAggregations(AggregationsNode node) {
+    return new AggregationsNode(visitChildren(node));
+  }
+
+  @Override
   public ExpressionNode visitFields(FieldsNode node) {
     return new FieldsNode(visitChildren(node));
   }
@@ -167,6 +174,22 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   @Override
   public ExpressionNode visitTermsFacet(TermsFacetNode node) {
     val result = new TermsFacetNode(node.getFacetName(), node.getField(), node.isGlobal());
+    result.addChildren(visitChildren(node));
+
+    return result;
+  }
+
+  @Override
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node) {
+    val result = new TermsAggregationNode(node.getAggregationName(), node.getFieldName());
+    result.addChildren(visitChildren(node));
+
+    return result;
+  }
+
+  @Override
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node) {
+    val result = new FilterAggregationNode(node.getAggregationName(), node.getFilters());
     result.addChildren(visitChildren(node));
 
     return result;

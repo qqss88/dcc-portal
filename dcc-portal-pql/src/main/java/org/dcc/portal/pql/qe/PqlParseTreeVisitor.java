@@ -27,26 +27,26 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.AndNode;
-import org.dcc.portal.pql.es.ast.BoolNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
-import org.dcc.portal.pql.es.ast.GreaterEqualNode;
-import org.dcc.portal.pql.es.ast.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.LessEqualNode;
-import org.dcc.portal.pql.es.ast.LessThanNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
-import org.dcc.portal.pql.es.ast.MustBoolNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.NotNode;
-import org.dcc.portal.pql.es.ast.OrNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
+import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
@@ -300,15 +300,19 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     return nestedNode;
   }
 
+  /**
+   * Visiting facets but creating {@link AggregationsNode}.
+   */
   @Override
   public ExpressionNode visitFacets(@NonNull FacetsContext nodeContext) {
-    val facetsNode = new FacetsNode();
+    val aggsNode = new AggregationsNode();
     for (val child : nodeContext.ID()) {
-      facetsNode.addChildren(new TermsFacetNode(child.getText(), getField(child.getText())));
+      aggsNode.addChildren(new TermsAggregationNode(child.getText(), getField(child.getText())));
     }
-    log.debug("{}", facetsNode);
 
-    return facetsNode;
+    log.debug("{}", aggsNode);
+
+    return aggsNode;
   }
 
   private TerminalNode createNameNode(@NonNull String field) {

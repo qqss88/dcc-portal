@@ -15,43 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.ast.aggs;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NonNull;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-@Deprecated
-@Getter
-@EqualsAndHashCode(callSuper = true)
-public class TermsFacetNode extends ExpressionNode {
+/**
+ * A container for the other aggregations.
+ */
+public class AggregationsNode extends ExpressionNode {
 
-  private final String facetName;
-  private final String field;
-  private boolean global;
-
-  public TermsFacetNode(@NonNull String name, @NonNull String field) {
-    this.facetName = name;
-    this.field = field;
-    this.global = false;
-  }
-
-  public TermsFacetNode(@NonNull String name, @NonNull String field, boolean global, ExpressionNode... children) {
+  public AggregationsNode(ExpressionNode... children) {
     super(children);
-    this.facetName = name;
-    this.field = field;
-    this.global = global;
-  }
-
-  public void setGlobal() {
-    global = true;
   }
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitTermsFacet(this);
+    return visitor.visitAggregations(this);
   }
 
 }

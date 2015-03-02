@@ -15,31 +15,63 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.visitor;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class GreaterThanNode extends ExpressionNode {
+/**
+ * This visitor removes a {@link FilterAggregationNode} that has an empty filter and moves it's child (
+ * {@link TermsAggregationNode}) one level up.
+ */
+@Slf4j
+public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode> {
 
-  @NonNull
-  Object value;
+  private static final ExpressionNode SKIP_NODE = null;
 
-  public GreaterThanNode(@NonNull ExpressionNode node) {
-    val terminalNode = (TerminalNode) node;
-    this.value = terminalNode.getValue();
-    addChildren(node);
+  @Override
+  public ExpressionNode visitRoot(RootNode node) {
+    val aggsNode = Nodes.getOptionalChild(node, AggregationsNode.class);
+    if (aggsNode.isPresent()) {
+      aggsNode.get().accept(this);
+    }
+
+    return node;
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitGreaterThan(this);
+  public ExpressionNode visitAggregations(AggregationsNode node) {
+    for (int i = 0; i < node.childrenCount(); i++) {
+      val child = node.getChild(i);
+      val visitResult = child.accept(this);
+      if (visitResult != SKIP_NODE) {
+        node.setChild(i, visitResult);
+      }
+    }
+
+    return node;
+  }
+
+  @Override
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node) {
+    if (node.getFilters().childrenCount() == 0) {
+      log.debug("FilterAggregationNode has no filters. Requesting to remove.");
+      return node.getFirstChild();
+    }
+
+    return SKIP_NODE;
+  }
+
+  @Override
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node) {
+    return SKIP_NODE;
   }
 
 }

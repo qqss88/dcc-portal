@@ -15,29 +15,22 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.ast.filter;
 
-import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
-import lombok.val;
+import lombok.NonNull;
 
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
-import org.elasticsearch.search.facet.FacetBuilder;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class CreateFacetBuilderVisitor extends NodeVisitor<FacetBuilder> {
+public class BoolNode extends ExpressionNode {
 
-  private static int DEFAULT_FACETS_SIZE = 100;
+  public BoolNode(ExpressionNode... children) {
+    super(children);
+  }
 
   @Override
-  public FacetBuilder visitTermsFacet(TermsFacetNode node) {
-    val result = termsFacet(node.getFacetName())
-        .field(node.getField())
-        .size(DEFAULT_FACETS_SIZE);
-
-    if (node.isGlobal()) {
-      result.global(true);
-    }
-
-    return result;
+  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
+    return visitor.visitBool(this);
   }
 
 }

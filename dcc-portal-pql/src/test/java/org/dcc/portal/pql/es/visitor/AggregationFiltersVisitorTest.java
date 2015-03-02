@@ -22,28 +22,28 @@ import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.AndNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FacetsNode;
-import org.dcc.portal.pql.es.ast.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.OrNode;
-import org.dcc.portal.pql.es.ast.RangeNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.junit.Before;
 import org.junit.Test;
 
-public class FacetFiltersVisitorTest {
+public class AggregationFiltersVisitorTest {
 
   private static final ExpressionNode REMOVE_CHILD = null;
-  private static final String FACET_FIELD = "donor_sex";
-  FacetFiltersVisitor visitor;
+  private static final String AGGREGATION_FIELD = "donor_sex";
+  AggregationFiltersVisitor visitor;
 
   @Before
   public void setUp() {
-    visitor = new FacetFiltersVisitor(FACET_FIELD);
+    visitor = new AggregationFiltersVisitor(AGGREGATION_FIELD);
   }
 
   @Test

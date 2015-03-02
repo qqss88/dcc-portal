@@ -41,7 +41,7 @@ public class QueryEngine {
   public SearchRequestBuilder execute(@NonNull String query, @NonNull QueryContext context) {
     context.setIndex(index);
 
-    ExpressionNode esAst = resolveEsAst(query, context);
+    ExpressionNode esAst = resolvePql(query, context);
     esAst = esAstTransformator.process(esAst, context.getType());
 
     // FIXME: Check if following can be put into the esAstTransformator
@@ -50,7 +50,7 @@ public class QueryEngine {
     return esVisitor.visit(esAst, context);
   }
 
-  private static ExpressionNode resolveEsAst(String query, QueryContext context) {
+  private static ExpressionNode resolvePql(String query, QueryContext context) {
     val parser = ParseTrees.getParser(query);
     val pqlListener = new PqlParseListener(context);
     parser.addParseListener(pqlListener);
