@@ -134,9 +134,7 @@ angular.module('app.download.controllers').controller('DownloadController',
             f.textContent = data;
           });
         });
-
       });
-
     }
 
     // Check if download is disabled or not
@@ -144,10 +142,9 @@ angular.module('app.download.controllers').controller('DownloadController',
       if (settings.downloadEnabled && settings.downloadEnabled === true) {
         buildBreadcrumbs();
         getFiles();
-        console.log('blah 1');
+        $scope.downloadEnabled = true;
       } else {
         $scope.downloadEnabled = false;
-        console.log('blah 2');
       }
     });
 
