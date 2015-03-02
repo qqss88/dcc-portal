@@ -6,7 +6,7 @@ import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
@@ -48,7 +48,7 @@ import com.google.common.collect.ImmutableMap;
 @Path("/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";
@@ -121,7 +121,7 @@ public class AuthResource extends BaseResource {
     if (!tempUserOptional.isPresent()) {
       throwAuthenticationException(
           "Authentication failed due to no User matching session token: " + sessionToken,
-          _("[%s] Could not find any user in the cache. The session must have expired.", sessionToken),
+          String.format("[%s] Could not find any user in the cache. The session must have expired.", sessionToken),
           true);
     }
     log.info("[{}] Found user in the cache: {}", sessionToken, tempUserOptional.get());
@@ -150,7 +150,7 @@ public class AuthResource extends BaseResource {
       }
     } catch (Exception e) {
       throwAuthenticationException("Failed to grant DACO access to the user",
-          _("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
+          String.format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
     }
 
     log.debug("[{}] Saving the user in the cache", sessionTokenString);
@@ -184,7 +184,7 @@ public class AuthResource extends BaseResource {
       authService.loginUser(username, creds.get(PASSWORD_KEY));
     } catch (ICGCException e) {
       throwAuthenticationException("Username and password are incorrect",
-          _("[%s] Failed to login the user. Exception %s", username, e.getMessage()));
+          String.format("[%s] Failed to login the user. Exception %s", username, e.getMessage()));
     }
 
     return verifiedResponse(createUser(username, null));

@@ -227,7 +227,7 @@ public abstract class BaseRepositoryRequestTest {
    * @return the prettified JSON string
    */
   @SneakyThrows
-  static String _(Object object) {
+  static String convertToString(Object object) {
     return MAPPER.writeValueAsString(object);
   }
 
@@ -243,9 +243,9 @@ public abstract class BaseRepositoryRequestTest {
 
   static void log(ObjectNode filters, ObjectNode request) {
     log.info("Filters:");
-    log.info(_(filters));
+    log.info(convertToString(filters));
     log.info("Request:");
-    log.info(_(request));
+    log.info(convertToString(request));
   }
 
 }

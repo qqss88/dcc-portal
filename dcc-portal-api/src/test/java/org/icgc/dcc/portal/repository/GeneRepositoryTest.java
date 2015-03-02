@@ -97,7 +97,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(GENEID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(GENEID);
 
   }
 
@@ -125,7 +125,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
     // assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(GENEID);
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isIn(
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isIn(
         Lists.newArrayList("ENSG00000215529"));
 
     FiltersParam filterNot = new FiltersParam(joinFilters(DONOR_NOT_FILTER));
@@ -148,7 +148,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getTotalHits()).isEqualTo(1);
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(GENEID);
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(GENEID);
 
     FiltersParam filterNot = new FiltersParam(joinFilters(GENE_FILTER, MUTATION_NOT_FILTER));
     Query queryNot =
@@ -170,23 +170,23 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(GENEID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(GENEID);
   }
 
   @Test
-    public void testCountIntersection() throws Exception {
-      assertThat(geneRepository.count(Query.builder().build())).isEqualTo(4);
-    }
+  public void testCountIntersection() throws Exception {
+    assertThat(geneRepository.count(Query.builder().build())).isEqualTo(4);
+  }
 
   @Test
-    public void testCountIntersectionWithFilters() throws Exception {
-      assertThat(
-          geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_FILTER)).get()).build()))
-          .isEqualTo(1);
-      assertThat(
-          geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
-              .build())).isEqualTo(3);
-    }
+  public void testCountIntersectionWithFilters() throws Exception {
+    assertThat(
+        geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_FILTER)).get()).build()))
+        .isEqualTo(1);
+    assertThat(
+        geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
+            .build())).isEqualTo(3);
+  }
 
   @Test
   public void testFind() throws Exception {
@@ -226,5 +226,9 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
   public void testFind404() throws Exception {
     Query query = Query.builder().build();
     geneRepository.findOne(MISSING_ID, query);
+  }
+
+  protected Object cast(Object object) {
+    return object;
   }
 }

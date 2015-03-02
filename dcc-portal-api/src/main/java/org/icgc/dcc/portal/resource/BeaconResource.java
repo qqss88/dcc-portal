@@ -47,7 +47,7 @@ import com.yammer.metrics.annotation.Timed;
 @Api(value = "/beacon", description = "Resources relating to the ICGC GA4GH Beacon")
 @Path("/v1/beacon")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class BeaconResource extends BaseResource {
 
   private final BeaconService beaconService;

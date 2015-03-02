@@ -17,8 +17,6 @@
  */
 package org.icgc.dcc.portal.auth.openid;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier.NONCE_CACHE_NAME;
 import static org.mockito.Mockito.verify;
@@ -92,15 +90,6 @@ public class DistributedNonceVerifierTest {
     verify(map).get(VALID_KEY);
     assertThat(nonceVerifier.seen(URL, VALID_NONCE)).isEqualTo(SEEN);
     assertThat(nonceVerifier.seen(URL, INVALID_NONCE)).isEqualTo(INVALID_TIMESTAMP);
-  }
-
-  @Test
-  public void seenTest_arguments() {
-    catchException(nonceVerifier).seen("", "");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(nonceVerifier).seen(null, null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
   }
 
 }
