@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ProjectService {
 
   private final ProjectRepository projectRepository;

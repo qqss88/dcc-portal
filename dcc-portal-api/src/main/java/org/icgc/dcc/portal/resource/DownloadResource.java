@@ -223,7 +223,7 @@ public class DownloadResource {
     log.debug("Download Resource in {} mode", env);
   }
 
-  @ApiOperation("submit job to request archive generation")
+  @ApiOperation("Submit job to request archive generation")
   @Path("/submit")
   @Produces(APPLICATION_JSON)
   @GET
@@ -292,17 +292,16 @@ public class DownloadResource {
     }
   }
 
-  @ApiOperation("Get download service availability")
+  @ApiOperation("Cancel a download job associated with the supplied 'download id'")
   @Path("/{downloadId}/cancel")
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public Map<String, Object> cancel(
+  public Map<String, Object> cancelJob(
       @Auth(required = false) User user,
 
       @ApiParam(value = "download id") @PathParam("downloadId") String downloadId) throws BadRequestException {
     try {
-
       Map<String, Map<String, String>> jobInfoMap = downloader.getJobInfo(ImmutableSet.of(downloadId));
       boolean isControlled = containsControlledData(jobInfoMap);
       if (isPermissionDenied(user, isControlled)) {
@@ -310,12 +309,10 @@ public class DownloadResource {
       } else {
         return standardizeStatus(downloadId, downloader.cancelJob(downloadId));
       }
-
     } catch (IOException e) {
       log.error("fail to cancel the job with id: {}", downloadId, e);
       throw new BadRequestException("fail to cancel the job with id: " + downloadId);
     }
-
   }
 
   @ApiOperation("Get download service availability")
@@ -323,7 +320,7 @@ public class DownloadResource {
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public List<Map<String, Object>> getStatus(
+  public List<Map<String, Object>> getJobStatus(
 
       @Auth(required = false) User user,
 

@@ -29,6 +29,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -46,9 +47,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Provider
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
+  private static final boolean SEND_EMAIL_ASYNC = true;
   private static final Random RANDOM = new Random();
 
   @NonNull
@@ -59,33 +61,40 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   @Context
   private HttpServletRequest request;
 
+  private static Response buildErrorResponse(@NonNull final ResponseBuilder builder, @NonNull final Error error) {
+    return builder.type(APPLICATION_JSON_TYPE)
+        .entity(error)
+        .build();
+  }
+
   @Override
   @SneakyThrows
   public Response toResponse(Throwable t) {
     val id = randomId();
+
     if (t instanceof WebApplicationException) {
       val response = ((WebApplicationException) t).getResponse();
+      val responseBuilder = Response.fromResponse(response);
+      val statusCode = response.getStatus();
 
-      val ok = response.getStatus() >= 200 && response.getStatus() < 400;
+      val ok = statusCode < 400;
       if (ok) {
-        return Response.fromResponse(response).build();
+        return responseBuilder.build();
       } else {
-        // Add an error response payload
-        log.error(t.getMessage());
-        return Response.fromResponse(response)
-            .type(APPLICATION_JSON_TYPE)
-            .entity(webErrorResponse(t, id, response.getStatus()))
-            .build();
+        logException(id, t);
+
+        if (statusCode >= 500) {
+          sendEmail(id, t);
+        }
+
+        return buildErrorResponse(responseBuilder, webErrorResponse(t, id, statusCode));
       }
     }
 
     logException(id, t);
     sendEmail(id, t);
 
-    return serverError()
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(t, id))
-        .build();
+    return buildErrorResponse(serverError(), errorResponse(t, id));
   }
 
   private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
@@ -100,12 +109,15 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     log.error(formatLogMessage(id, t), t);
   }
 
-  protected String formatResponseEntity(long id, Throwable exception) {
-    return String.format("There was an error processing your request. It has been logged (ID %016x).%n", id);
+  protected String formatResponseEntity(long id, Throwable t) {
+    val message =
+        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).\n";
+    return String.format(message, t.getMessage(), id);
   }
 
-  protected String formatLogMessage(long id, Throwable exception) {
-    return String.format("Error handling a request: %016x", id);
+  protected String formatLogMessage(long id, Throwable t) {
+    val message = "Error handling a request: %016x, with the message of '%s'.";
+    return String.format(message, id, t.getMessage());
   }
 
   protected static long randomId() {
@@ -118,9 +130,8 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
       val message =
           request.getRemoteHost() + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
               + getStackTraceAsString(t);
-      val async = true;
 
-      mailService.sendEmail(subject, message, async);
+      mailService.sendEmail(subject, message, SEND_EMAIL_ASYNC);
     } catch (Exception e) {
       log.error("Exception mailing:", e);
     }

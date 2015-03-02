@@ -99,7 +99,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/donors")
 @Produces(APPLICATION_JSON)
 @Api(value = "/donors", description = "Resources relating to " + DONOR)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorResource {
 
   private static final String DONOR_FILTER_TEMPLATE = "{donor:{id:{is:['%s']}}}";

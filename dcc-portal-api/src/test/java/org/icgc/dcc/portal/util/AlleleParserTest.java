@@ -25,18 +25,21 @@ import org.junit.Test;
 public class AlleleParserTest {
 
   @Test
-  public void testCorrectIndels() {
-    // deletion
+  public void testCorrectDeletion() {
     assertThat(parseAllele("ACTCTG>A").getMutation()).isEqualTo("CTCTG>-");
-    // insertion
+  }
+
+  public void testCorrectInsertion() {
     assertThat(parseAllele("G>GAGA").getMutation()).isEqualTo("->AGA");
   }
 
   @Test
-  public void testCorrectReferencelessIndels() {
-    // deletion
+  public void testCorrectReferencelessDeletion() {
     assertThat(parseAllele("GGGG>-").getMutation()).isEqualTo("GGGG>-");
-    // insertion
+  }
+
+  @Test
+  public void testCorrectreferncelessInsertion() {
     assertThat(parseAllele("->AAGG").getMutation()).isEqualTo("->AAGG");
   }
 

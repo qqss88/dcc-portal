@@ -96,7 +96,7 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(2);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("OV-AU", "PACA-AU"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("OV-AU", "PACA-AU"));
     }
   }
 
@@ -112,7 +112,7 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(1);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isNotIn(Lists.newArrayList("OV-AU", "PACA-AU"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isNotIn(Lists.newArrayList("OV-AU", "PACA-AU"));
     }
   }
 
@@ -152,5 +152,9 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
   public void testFind404() throws Exception {
     Query query = Query.builder().build();
     projectRepository.findOne(MISSING_ID, query);
+  }
+
+  protected Object cast(Object object) {
+    return object;
   }
 }

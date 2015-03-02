@@ -18,7 +18,7 @@
 package org.icgc.dcc.portal.model;
 
 import lombok.Value;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 @Value
 @Builder

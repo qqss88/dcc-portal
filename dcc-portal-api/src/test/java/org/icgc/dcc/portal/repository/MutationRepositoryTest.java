@@ -176,17 +176,17 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
   }
 
   @Test
-    public void testCountIntersection() throws Exception {
-      assertThat(mutationRepository.count(Query.builder().build())).isEqualTo(1);
-    }
+  public void testCountIntersection() throws Exception {
+    assertThat(mutationRepository.count(Query.builder().build())).isEqualTo(1);
+  }
 
   @Test
-    public void testCountIntersectionWithFilters() throws Exception {
-      assertThat(mutationRepository.count(
-          Query.builder().filters(new FiltersParam(joinFilters(MUTATION_FILTER)).get()).build())).isEqualTo(1);
-      assertThat(mutationRepository.count(
-          Query.builder().filters(new FiltersParam(joinFilters(MUTATION_NOT_FILTER)).get()).build())).isEqualTo(0);
-    }
+  public void testCountIntersectionWithFilters() throws Exception {
+    assertThat(mutationRepository.count(
+        Query.builder().filters(new FiltersParam(joinFilters(MUTATION_FILTER)).get()).build())).isEqualTo(1);
+    assertThat(mutationRepository.count(
+        Query.builder().filters(new FiltersParam(joinFilters(MUTATION_NOT_FILTER)).get()).build())).isEqualTo(0);
+  }
 
   @Test
   public void testFind() throws Exception {

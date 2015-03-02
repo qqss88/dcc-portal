@@ -64,7 +64,7 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";

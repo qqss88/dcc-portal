@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneService {
 
   private final GeneRepository geneRepository;
