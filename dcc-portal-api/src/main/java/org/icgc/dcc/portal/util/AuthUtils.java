@@ -18,7 +18,7 @@
 package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 
 import java.net.URI;
 import java.util.UUID;
@@ -167,7 +167,7 @@ public final class AuthUtils {
       result = UUID.fromString(source);
     } catch (IllegalArgumentException e) {
       throwRedirectException(DEFAULT_USER_MESSAGE,
-          _("Failed to convert string '%s' to UUID. Exception: %s", source, e.getMessage()), redirect);
+          String.format("Failed to convert string '%s' to UUID. Exception: %s", source, e.getMessage()), redirect);
     }
 
     return result;

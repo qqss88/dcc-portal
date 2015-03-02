@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.validator.routines.UrlValidator.ALLOW_LOCAL_URLS;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -114,7 +113,7 @@ public class ShortUrlResource {
   }
 
   private static void checkState(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
-    if (!expression) throw new BadRequestException(_(errorMessageTemplate, errorMessageArgs));
+    if (!expression) throw new BadRequestException(String.format(errorMessageTemplate, errorMessageArgs));
   }
 
 }

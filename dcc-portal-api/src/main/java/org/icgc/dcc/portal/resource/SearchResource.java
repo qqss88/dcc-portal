@@ -47,8 +47,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/keywords")
 @Produces(APPLICATION_JSON)
-@Api(value = "/keyword", description = "Operations about keyword search")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/keyword", description = "Resources relating to keyword search")
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class SearchResource {
 
   private static final String DEFAULT_FILTERS = "{}";

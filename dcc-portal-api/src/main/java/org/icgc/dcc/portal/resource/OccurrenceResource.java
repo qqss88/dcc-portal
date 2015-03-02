@@ -69,7 +69,7 @@ import com.yammer.metrics.annotation.Timed;
 @Path("/v1/occurrences")
 @Produces(APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OccurrenceResource {
 
   private final OccurrenceService occurrenceService;

@@ -102,8 +102,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/genes")
 @Produces(APPLICATION_JSON)
-@Api(value = "/genes", description = "Operations about " + GENE)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/genes", description = "Resources relating to " + GENE)
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneResource {
 
   private static final String GENE_FILTER_TEMPLATE = "{gene:{id:{is:['%s']}}}";

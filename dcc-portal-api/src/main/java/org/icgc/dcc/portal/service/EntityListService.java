@@ -62,7 +62,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EntityListService {
 
   @NonNull

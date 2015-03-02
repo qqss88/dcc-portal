@@ -30,7 +30,7 @@ import com.google.common.collect.Sets;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class MutationService {
 
   private final MutationRepository mutationRepository;

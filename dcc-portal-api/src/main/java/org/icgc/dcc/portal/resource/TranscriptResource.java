@@ -43,8 +43,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/transcripts")
 @Produces(APPLICATION_JSON)
-@Api(value = "/transcripts", description = "Operations about transcripts")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/transcripts", description = "Resources relating to transcripts")
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class TranscriptResource {
 
   private static final String DEFAULT_FILTERS = "{}";

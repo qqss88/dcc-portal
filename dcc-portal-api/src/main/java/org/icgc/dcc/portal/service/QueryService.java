@@ -23,7 +23,7 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import static org.icgc.dcc.portal.model.IndexModel.API_ENTITY_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -35,7 +35,6 @@ import static org.icgc.dcc.portal.model.IndexModel.NOT;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.MUTATION_IDS;
-import static org.icgc.dcc.portal.util.LocationUtils.parseLocation;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +47,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
+import org.icgc.dcc.portal.model.ChromosomeLocation;
 import org.icgc.dcc.portal.model.IndexModel.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
@@ -176,7 +176,7 @@ public class QueryService {
 
     String prefix = "";
     if (prefixMapping.containsKey(Kind.GENE_SET)) {
-      prefix = _("%s.", prefixMapping.get(Kind.GENE_SET));
+      prefix = String.format("%s.", prefixMapping.get(Kind.GENE_SET));
     }
 
     for (val geneSetType : GeneSetType.values()) {
@@ -210,33 +210,33 @@ public class QueryService {
           // 2) Special cases pending on type
           if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_GO)) {
             if (bool.equals(IS)) {
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             } else {
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             }
           } else if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
             if (bool.equals(IS)) {
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + _("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
             } else {
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + _("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
             }
           } else {
             val idFilter = termsFilter(prefix + geneSetType.getType(), termList);
@@ -273,9 +273,9 @@ public class QueryService {
           val valueFilter = FilterBuilders.boolFilter();
           valueFilter.should(termFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), valueStr));
           valueFilter.should(termFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), valueStr));
-          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "cellular_component"), valueStr));
-          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "biological_process"), valueStr));
-          valueFilter.should(termFilter(prefix + _("%s.%s", "go_term", "molecular_function"), valueStr));
+          valueFilter.should(termFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), valueStr));
+          valueFilter.should(termFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), valueStr));
+          valueFilter.should(termFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), valueStr));
           allFilter.must(valueFilter);
         }
         resultFilter.must(allFilter);
@@ -436,7 +436,7 @@ public class QueryService {
       ImmutableMap<Kind, String> prefixMapping) {
     val locationFilter = FilterBuilders.boolFilter();
 
-    val location = parseLocation(value);
+    val location = ChromosomeLocation.parse(value);
 
     // Nested fields
     String prefix = "";

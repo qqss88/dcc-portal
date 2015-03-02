@@ -64,8 +64,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/genesets")
 @Produces(APPLICATION_JSON)
-@Api(value = "/genesets", description = "Operations about gene sets")
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/genesets", description = "Resources relating to gene sets")
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneSetResource {
 
   private final GeneSetService geneSetService;

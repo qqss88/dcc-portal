@@ -69,7 +69,7 @@ import com.google.common.collect.Lists;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EnrichmentAnalyzer {
 
   /**
