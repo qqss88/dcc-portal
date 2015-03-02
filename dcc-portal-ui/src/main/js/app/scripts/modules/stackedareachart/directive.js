@@ -17,9 +17,9 @@
 (function() {
   'use strict';
 
-	var module = angular.module('icgc.visualization.stackedbar', []);
-	
-	module.directive('stacked', function ($location, HighchartsService, $window) {
+	var module = angular.module('icgc.visualization.stackedarea', []);
+
+	module.directive('donorHistory', function ($location, HighchartsService, $window) {
 	    return {
 		    restrict: 'E',
 		    replace: true,
@@ -27,54 +27,45 @@
 		      items: '=',
           subtitle: '='
 		    },
-        template:'<div><div class="text-center graph_title">' +
-                    'Top 20 Mutated Genes with High Functional Impact SSMs' +
-                    '</div>'+
-                    '<div class="stackedsubtitle text-center">{{subtitle | number}} ' +
-                    'Unique SSM-Tested Donors</div></div>',
+        template:'<div class="text-center graph_title">' +
+                    'History of Life' +
+                    '</div>',
 		    link: function ($scope, $element) {
                 var chart;
                 $scope.$watch('items', function (newValue) {
                   if (newValue && !chart && typeof $scope.items[0] !== 'undefined') {
                     var config = {
-                        margin:{top: 5, right: 20, bottom: 50, left: 50},
-                        height: 250,
-                        width: 500,
+                        margin:{top: 40, right: 40, bottom: 40, left: 40},
+                        height: 600,
+                        width: 1000,
                         colours: HighchartsService.projectColours,
-                        yaxis:{label:'Donors Affected',ticks:4},
-                        onClick: function(geneid){
+                        yaxis:{label:'Donors',ticks:8},
+                        onClick: function(project){
                           $scope.$emit('tooltip::hide');
-                          $location.path('/genes/' + geneid).search({});
+                          $location.path('/projects/' + project).search({});
                           $scope.$apply();
                         },
-                        tooltipShowFunc: function(elem, d) {
+                        tooltipShowFunc: function(elem, project, currentDonors) {
                           function getLabel() {
-                            return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
+                            return '<strong>'+project+'</strong><br># of donors: '+currentDonors;
                           }
-
-                          var position = {
-                            left:elem.getBoundingClientRect().left,
-                            top:elem.getBoundingClientRect().top + $window.pageYOffset,
-                            width: elem.getBoundingClientRect().width,
-                            height: elem.getBoundingClientRect().height
-                          };
 
                           $scope.$emit('tooltip::show', {
                             element: angular.element(elem),
                             text: getLabel(),
                             placement: 'right',
-                            elementPosition: position
+                            sticky:true
                           });
                         },
                         tooltipHideFunc: function() {
                           $scope.$emit('tooltip::hide');
                         }
                       };
-                    chart = new dcc.StackedBarChart($scope.items,config);
+                    chart = new dcc.StackedAreaChart($scope.items,config);
                     chart.render($element[0]);
                   }
                 }, true);
-	
+
                 $scope.$on('$destroy', function () {
                   if (chart) {
                     chart.destroy();

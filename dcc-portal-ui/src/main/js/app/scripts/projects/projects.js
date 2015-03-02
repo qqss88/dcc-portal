@@ -38,6 +38,11 @@
       data: {tab:'summary'}
     });
 
+    $stateProvider.state('projects.history', {
+      url: '/history',
+      data: {tab:'history'}
+    });
+
     $stateProvider.state('project', {
       url: '/projects/:id',
       templateUrl: 'scripts/projects/views/project.html',
@@ -189,6 +194,8 @@
         refresh();
       }
     });
+
+    _ctrl.historicalData = [1,3,4,5];
 
     refresh();
   });

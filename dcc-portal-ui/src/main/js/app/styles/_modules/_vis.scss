@@ -57,12 +57,15 @@
    fill: #444444;
 }
 
+/* stacke area chart style */
+
+
 /* Stacked bar chart style */
 .stacked.y.axis path,
 .stacked.y.axis line {
   fill: none;
   stroke: gray;
-    sharp-rengering: crispEdges;
+  sharp-rengering: crispEdges;
 }
 
 .stacked.bar {
