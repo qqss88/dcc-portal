@@ -35,7 +35,7 @@ public class ResourceUtils {
   public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
 
-  static final String COUNT_TEMPLATE = "Request for a count of {} with filters '{}";
+  static final String COUNT_TEMPLATE = "Request for a count of {} with filters '{}'";
   static final String FIND_ALL_TEMPLATE =
       "Request for '{}' {} from index '{}', sorted by '{}' in '{}' order with filters '{}'";
   static final String FIND_ONE_TEMPLATE = "Request for '{}'";
