@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 
 import java.net.URI;
@@ -55,7 +54,7 @@ import org.springframework.stereotype.Component;
 @Path("/v1/auth/openid")
 @Produces(TEXT_PLAIN)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OpenIDResource extends BaseResource {
 
   /**
@@ -123,7 +122,7 @@ public class OpenIDResource extends BaseResource {
 
     return Response
         .seeOther(redirect)
-        .header(SET_COOKIE, _(RESPONSE_HEADER_VALUE_TEMPLATE, setSessionCookie(user).toString()))
+        .header(SET_COOKIE, String.format(RESPONSE_HEADER_VALUE_TEMPLATE, setSessionCookie(user).toString()))
         .build();
   }
 

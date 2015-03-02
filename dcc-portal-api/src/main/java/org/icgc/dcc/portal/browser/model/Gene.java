@@ -3,7 +3,7 @@ package org.icgc.dcc.portal.browser.model;
 import java.util.List;
 
 import lombok.Value;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 @Value
 @Builder

@@ -70,7 +70,7 @@ public class JsonNodes {
   }
 
   @SneakyThrows
-  public static String _(Object object) {
+  public static String convertToString(Object object) {
     return MAPPER.writeValueAsString(object);
   }
 

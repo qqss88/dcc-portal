@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal.browser.model;
 
 import lombok.Value;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 @Value
 @Builder
