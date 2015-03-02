@@ -77,7 +77,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Slf4j
 @Component
 @Path("/v1/analysis/enrichment")
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EnrichmentAnalysisResource {
 
   /**

@@ -71,7 +71,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Slf4j
 @Component
 @Path("/v1/entityset")
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EntityListResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";

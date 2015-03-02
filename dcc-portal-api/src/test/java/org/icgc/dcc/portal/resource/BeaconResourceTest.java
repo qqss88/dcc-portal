@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import lombok.val;
 
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
+import org.icgc.dcc.portal.mapper.IllegalArgumentExceptionMapper;
 import org.icgc.dcc.portal.model.AlleleMutation;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.BeaconQuery;
@@ -63,10 +64,18 @@ public class BeaconResourceTest extends ResourceTest {
   @InjectMocks
   private BeaconResource resource;
 
+  /*
+   * Helpers
+   */
+  private static void assertEqualToBadRequest(final ClientResponse response) {
+    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+  }
+
   @Override
   protected final void setUpResources() {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
+    addProvider(IllegalArgumentExceptionMapper.class);
   }
 
   @Test
@@ -81,35 +90,35 @@ public class BeaconResourceTest extends ResourceTest {
   public void testInvalidChromosomeArgs() {
     when(expectedQuery()).thenReturn(dummyBeaconResponse());
     val response = generateResponse("39", "1111", "GRCh37", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
   public void testInvalidAlleleArgs() {
     when(expectedQuery()).thenReturn(dummyBeaconResponse());
     val response = generateResponse("1", "1111", "GRCh37", "WTWT");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
   public void testInvalidReferenceArgs() {
     when(expectedQuery()).thenReturn(dummyBeaconResponse());
     val response = generateResponse("1", "1111", "OMG", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
   public void testEmptyArgs() {
     when(expectedQuery()).thenReturn(dummyBeaconResponse());
     val response = generateResponse("", "1111", "GRCh37", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   @Test
   public void testInvalidPositionArgs() {
     when(expectedQuery()).thenReturn(dummyBeaconResponse());
     val response = generateResponse("MT", "1111111111", "GRCh37", "A");
-    assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
+    assertEqualToBadRequest(response);
   }
 
   private ClientResponse generateResponse(String chromosome, String position, String reference, String allele) {
@@ -132,5 +141,4 @@ public class BeaconResourceTest extends ResourceTest {
   private Beacon expectedQuery() {
     return service.query(any(String.class), anyInt(), any(String.class), any(AlleleMutation.class), any(String.class));
   }
-
 }

@@ -35,7 +35,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Component
 @Path("/version")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class VersionResource {
 
   @NonNull

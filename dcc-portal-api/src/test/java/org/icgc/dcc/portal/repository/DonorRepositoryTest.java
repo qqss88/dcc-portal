@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -99,7 +98,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(3);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO2", "DO6", "DO7"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2", "DO6", "DO7"));
     }
   }
 
@@ -115,7 +114,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(6);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isNotIn(Lists.newArrayList("DO2", "DO6", "DO7"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isNotIn(Lists.newArrayList("DO2", "DO6", "DO7"));
     }
   }
 
@@ -131,7 +130,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(5);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(
           Lists.newArrayList("DO2", "DO2", "DO9", "DO1", "DO4", "DO8", "DO5"));
     }
   }
@@ -148,7 +147,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(1);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO9"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO9"));
     }
   }
 
@@ -164,53 +163,53 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(1);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO2"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2"));
     }
   }
 
   @Test
-    public void testCountIntersection() throws Exception {
-      Query query = Query.builder().build();
-      long response = donorRepository.count(query);
-      assertThat(response).isEqualTo(9);
-    }
+  public void testCountIntersection() throws Exception {
+    Query query = Query.builder().build();
+    long response = donorRepository.count(query);
+    assertThat(response).isEqualTo(9);
+  }
 
   @Test
-    public void testCountIntersectionWithNestedGeneFilters() throws Exception {
-      FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
-      Query query =
-          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-      long response = donorRepository.count(query);
-  
-      assertThat(response).isEqualTo(5);
-    }
+  public void testCountIntersectionWithNestedGeneFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, GENE_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    long response = donorRepository.count(query);
+
+    assertThat(response).isEqualTo(5);
+  }
 
   @Test
-    public void testCountIntersectionWithNestedMutationFilters() throws Exception {
-      FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
-      Query query =
-          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-      long response = donorRepository.count(query);
-  
-      assertThat(response).isEqualTo(1);
-    }
+  public void testCountIntersectionWithNestedMutationFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_NOT_FILTER, MUTATION_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    long response = donorRepository.count(query);
+
+    assertThat(response).isEqualTo(1);
+  }
 
   @Test
-    public void testCountIntersectionWithNestedGeneMutationFilters() throws Exception {
-      FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
-      Query query =
-          Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
-      long response = donorRepository.count(query);
-  
-      assertThat(response).isEqualTo(1);
-    }
+  public void testCountIntersectionWithNestedGeneMutationFilters() throws Exception {
+    FiltersParam filter = new FiltersParam(joinFilters(DONOR_FILTER, GENE_FILTER, MUTATION_FILTER));
+    Query query =
+        Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filter.get()).build();
+    long response = donorRepository.count(query);
+
+    assertThat(response).isEqualTo(1);
+  }
 
   @Test
   public void testFind() throws Exception {
     String id = "DO1";
     Query query = Query.builder().build();
     Map<String, Object> response = donorRepository.findOne(id, query);
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
   }
 
   @Test
@@ -218,7 +217,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     String id = "DO1";
     Query query = Query.builder().fields(Lists.newArrayList("id", "primarySite")).build();
     Map<String, Object> response = donorRepository.findOne(id, query);
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("primarySite")));
   }
 
@@ -229,7 +228,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> response = donorRepository.findOne(id, query);
 
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
     assertThat(response.containsKey("specimen")).isFalse();
 
     Query queryInclude =
@@ -237,7 +236,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = donorRepository.findOne(id, queryInclude);
 
-    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(id);
+    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(id);
     assertThat(responseInclude.containsKey("specimen")).isTrue();
   }
 
@@ -247,4 +246,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     donorRepository.findOne(MISSING_ID, query);
   }
 
+  protected Object cast(Object object) {
+    return object;
+  }
 }

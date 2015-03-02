@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -101,7 +100,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
   }
 
@@ -128,7 +127,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getTotalHits()).isEqualTo(1);
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
     FiltersParam filterNot = new FiltersParam(joinFilters(MUTATION_FILTER, DONOR_NOT_FILTER));
     Query queryNot = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterNot
@@ -150,7 +149,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getTotalHits()).isEqualTo(1);
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
     FiltersParam filterNot = new FiltersParam(joinFilters(MUTATION_FILTER, GENES_NOT_FILTER));
     Query queryNot = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterNot
@@ -172,28 +171,28 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
   }
 
   @Test
-    public void testCountIntersection() throws Exception {
-      assertThat(mutationRepository.count(Query.builder().build())).isEqualTo(1);
-    }
+  public void testCountIntersection() throws Exception {
+    assertThat(mutationRepository.count(Query.builder().build())).isEqualTo(1);
+  }
 
   @Test
-    public void testCountIntersectionWithFilters() throws Exception {
-      assertThat(mutationRepository.count(
-          Query.builder().filters(new FiltersParam(joinFilters(MUTATION_FILTER)).get()).build())).isEqualTo(1);
-      assertThat(mutationRepository.count(
-          Query.builder().filters(new FiltersParam(joinFilters(MUTATION_NOT_FILTER)).get()).build())).isEqualTo(0);
-    }
+  public void testCountIntersectionWithFilters() throws Exception {
+    assertThat(mutationRepository.count(
+        Query.builder().filters(new FiltersParam(joinFilters(MUTATION_FILTER)).get()).build())).isEqualTo(1);
+    assertThat(mutationRepository.count(
+        Query.builder().filters(new FiltersParam(joinFilters(MUTATION_NOT_FILTER)).get()).build())).isEqualTo(0);
+  }
 
   @Test
   public void testFind() throws Exception {
 
     Query query = Query.builder().build();
     Map<String, Object> response = mutationRepository.findOne(ID, query);
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
   }
 
   @Test
@@ -201,7 +200,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Query query = Query.builder().fields(Lists.newArrayList("id", "mutation")).build();
     Map<String, Object> response = mutationRepository.findOne(ID, query);
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("mutation")));
   }
 
@@ -212,7 +211,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> response = mutationRepository.findOne(ID, query);
 
-    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
     assertThat(response.containsKey("transcripts")).isFalse();
     assertThat(response.containsKey("consequence")).isFalse();
   }
@@ -225,7 +224,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isTrue();
     assertThat(responseInclude.containsKey("consequence")).isFalse();
   }
@@ -238,7 +237,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isFalse();
     assertThat(responseInclude.containsKey("consequences")).isTrue();
   }
@@ -251,7 +250,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
+    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isTrue();
     assertThat(responseInclude.containsKey("consequences")).isTrue();
   }
@@ -262,4 +261,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     mutationRepository.findOne(MISSING_ID, query);
   }
 
+  protected Object cast(Object object) {
+    return object;
+  }
 }

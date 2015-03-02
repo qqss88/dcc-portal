@@ -35,7 +35,7 @@ import com.yammer.dropwizard.auth.Authenticator;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OpenIDAuthenticator implements Authenticator<OpenIDCredentials, User> {
 
   @NonNull

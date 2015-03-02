@@ -42,7 +42,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
