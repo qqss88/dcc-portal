@@ -63,7 +63,7 @@
 
   module.controller('ProjectsCtrl',
     function ($q, $scope, $state, ProjectState, Page, Projects,
-               HighchartsService, Donors, Restangular, LocationService) {
+               HighchartsService, Donors, Restangular, LocationService, $http) {
 
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
@@ -181,6 +181,14 @@
               _ctrl.stacked = genes.hits;
             });
           });
+
+
+        if(!$scope.donorData){
+          $http.get('scripts/modules/stackedareachart/data.json').success(function(data) {
+            console.log("loaded data");
+              _ctrl.donorData = data;
+            });
+        }
       }
     }
 
@@ -194,8 +202,6 @@
         refresh();
       }
     });
-
-    _ctrl.historicalData = [1,3,4,5];
 
     refresh();
   });

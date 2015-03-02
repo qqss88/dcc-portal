@@ -1,7 +1,9 @@
 <section>
-<div class="wide omega">
-<donor-history height="300"
-         data-items="ProjectsCtrl.historicalData">
+<form>
+  <label><input class="stacked-area-input" type="radio" name="mode" value="area"> Area</label>
+  <label><input class="stacked-area-input" type="radio" name="mode" value="line" checked> Line</label>
+</form>
+<donor-history
+         data-selected="ProjectsCtrl.projectIds" data-items="ProjectsCtrl.donorData">
 </donor-history>
-  </div>
 </section>

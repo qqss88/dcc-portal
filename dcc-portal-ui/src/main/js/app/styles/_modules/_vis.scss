@@ -68,6 +68,12 @@
   sharp-rengering: crispEdges;
 }
 
+.stacked.y.axis.major line {
+  fill: none;
+  stroke: hotpink;
+  sharp-rengering: crispEdges;
+}
+
 .stacked.bar {
   fill: gray;
 }
