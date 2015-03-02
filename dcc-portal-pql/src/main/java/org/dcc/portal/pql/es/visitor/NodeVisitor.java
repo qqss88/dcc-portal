@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -26,7 +25,6 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
@@ -119,19 +117,11 @@ public abstract class NodeVisitor<T> {
     return defaultUnimplementedMethod();
   }
 
-  public T visitFacets(FacetsNode node) {
-    return defaultUnimplementedMethod();
-  }
-
   public T visitFields(FieldsNode node) {
     return defaultUnimplementedMethod();
   }
 
   public T visitQuery(QueryNode node) {
-    return defaultUnimplementedMethod();
-  }
-
-  public T visitTermsFacet(TermsFacetNode node) {
     return defaultUnimplementedMethod();
   }
 

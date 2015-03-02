@@ -21,7 +21,6 @@ import static java.lang.String.format;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -30,7 +29,6 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
@@ -178,11 +176,6 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitFacets(FacetsNode node) {
-    return buildToString(node);
-  }
-
-  @Override
   public String visitFields(FieldsNode node) {
     val builder = new StringBuilder();
     builder.append(getCommonHeader(node));
@@ -221,15 +214,6 @@ public class ToStringVisitor extends NodeVisitor<String> {
     builder.append(node.getFilters().accept(this));
 
     return buildToString(node, Optional.of(builder.toString()));
-  }
-
-  @Override
-  public String visitTermsFacet(TermsFacetNode node) {
-    val scope = node.isGlobal() ? GLOBAL : NON_GLOBAL;
-    val header = format("%s%s [%s(%s), %s] (",
-        calcIndent(node), node.getNodeName(), node.getFacetName(), node.getField(), scope);
-
-    return buildToString(node, Optional.of(header));
   }
 
   private String buildToString(ExpressionNode node) {

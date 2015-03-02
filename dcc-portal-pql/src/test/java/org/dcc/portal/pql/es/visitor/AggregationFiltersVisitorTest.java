@@ -23,9 +23,7 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.TermNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
@@ -131,10 +129,6 @@ public class AggregationFiltersVisitorTest {
     // FilterNode - BoolNode - MustBoolNode
     // Make a clean copy of the must node
     val mustNode = Nodes.cloneNode(filterNode.getFirstChild().getFirstChild());
-
-    // Must be wrapped in FacetsNode. This is what the FacetsResolveFivitor does
-    val facetsNode = new FacetsNode(new TermsFacetNode("gender", "donor_sex"));
-    facetsNode.getFirstChild().addChildren(mustNode);
 
     return mustNode;
   }

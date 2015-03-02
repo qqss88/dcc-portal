@@ -20,7 +20,6 @@ package org.dcc.portal.pql.es.visitor;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FacetsNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -29,7 +28,6 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.TermsFacetNode;
 import org.dcc.portal.pql.es.ast.TermsNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
@@ -152,11 +150,6 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitFacets(FacetsNode node) {
-    return new FacetsNode(visitChildren(node));
-  }
-
-  @Override
   public ExpressionNode visitAggregations(AggregationsNode node) {
     return new AggregationsNode(visitChildren(node));
   }
@@ -169,14 +162,6 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   @Override
   public ExpressionNode visitQuery(QueryNode node) {
     return new QueryNode(visitChildren(node));
-  }
-
-  @Override
-  public ExpressionNode visitTermsFacet(TermsFacetNode node) {
-    val result = new TermsFacetNode(node.getFacetName(), node.getField(), node.isGlobal());
-    result.addChildren(visitChildren(node));
-
-    return result;
   }
 
   @Override

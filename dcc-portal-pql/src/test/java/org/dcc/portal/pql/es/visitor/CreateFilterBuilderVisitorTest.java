@@ -74,7 +74,8 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     val result = executeQuery("select(chromosome)");
     val hit = getFirstSearchResult(result);
     assertThat(hit.fields().size()).isEqualTo(1);
-    assertThat(hit.field("chromosome").getValue()).isEqualTo("1");
+    val value = hit.field("chromosome").getValue();
+    assertThat(value).isEqualTo("1");
   }
 
   @Test
