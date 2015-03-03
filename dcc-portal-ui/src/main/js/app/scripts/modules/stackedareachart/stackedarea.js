@@ -93,6 +93,7 @@
         project.append("path")
             .attr("d", function(d) { return area(d.values); })
             .style("fill", function(d, i) {return color(d.key); })
+            .style('sharp-rengering','crispEdges')
             .on('mouseover', function(d) {
                   config.tooltipShowFunc(this,d.key,d.values[14].value);
                 })
@@ -147,23 +148,21 @@
         console.log('changinggg');
         if(view === 'line'){
           y.domain([0, d3.max(data, function(d) { return d.value; })]);
-          project.selectAll('path').transition().duration(1000)
+          project.selectAll('path').transition().duration(500)
             .attr("d", function(d){return line(d.values)})
-          .transition().duration(1000)
             .style("fill","none")
-            .attr("stroke","black")
+            .attr("stroke", function(d, i) {return color(d.key); })
             .attr("class","line")
-            .attr("stroke-width","1px")
-            ;
+            .attr("stroke-width","2px");
 
         }else{
           y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
-           project.selectAll('path').transition().duration(1000)
-           .style("fill", function(d, i) {return color(d.key); }).transition().duration(1000)
+           project.selectAll('path').transition().duration(500)
+            .attr("d", function(d) { return area(d.values); }).transition()
+            .style("fill", function(d, i) {return color(d.key); })
             .attr("stroke","none")
-           .attr("class","")
-            .attr("stroke-width","0px").transition().duration(1000)
-            .attr("d", function(d) { return area(d.values); });
+            .attr("class","")
+            .attr("stroke-width","0px");
         }
       }
 
