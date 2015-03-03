@@ -303,6 +303,12 @@
       return setList;
     };
 
+    this.getAllGeneSets = function() {
+      return _.filter(setList, function(s) {
+        return s.type === 'gene';
+      });
+    };
+
     this.initService = function() {
       setList = localStorageService.get(LIST_ENTITY) || [];
 

@@ -19,8 +19,82 @@
 (function () {
   'use strict';
   angular.module('icgc.genelist', [
-    'icgc.genelist.controllers'
+    'icgc.genelist.controllers',
+    'icgc.genelist.services'
   ]);
+})();
+
+
+(function() {
+  'use strict';
+
+  var module = angular.module('icgc.genelist.services', []);
+
+  module.service('GeneSetVerificationService', function() {
+
+    /**
+     * Generate ui display table for matched genes, and compute
+     * summary statistics
+     */
+    this.formatResult = function(verifyResult) {
+      var uiResult = {}, uniqueEnsemblMap = {}, totalInputCount = 0;
+      var validIds = [], hasType = {};
+
+      angular.forEach(verifyResult.validGenes, function(type, typeName) {
+        angular.forEach(type, function(geneList, inputToken) {
+
+          if (!geneList || geneList.length === 0) {
+            return;
+          }
+
+          geneList.forEach(function(gene) {
+            var symbol = gene.symbol, row;
+
+            // Initialize row structure
+            if (! uiResult.hasOwnProperty(symbol)) {
+              uiResult[symbol] = {};
+            }
+            row = uiResult[symbol];
+
+            // Aggregate input ids that match to the same symbol
+            if (! row.hasOwnProperty(typeName)) {
+              row[typeName] = [];
+            }
+            if (row[typeName].indexOf(inputToken) === -1) {
+              row[typeName].push(inputToken);
+
+              // Mark it for visibility test on the view
+              hasType[typeName] = 1;
+            }
+
+            // Aggregate matched ensembl ids that match to the same symbol
+            if (! row.hasOwnProperty('matchedId')) {
+              row.matchedId = [];
+            }
+            if (row.matchedId.indexOf(gene.id) === -1) {
+              row.matchedId.push(gene.id);
+              validIds.push(gene.id);
+            }
+            uniqueEnsemblMap[gene.id] = 1;
+
+          });
+          totalInputCount ++;
+        });
+      });
+
+      return {
+        uiResult: uiResult,
+        totalInput: totalInputCount,
+        totalMatch: Object.keys(uniqueEnsemblMap).length,
+        totalColumns: Object.keys(hasType).length,
+        hasType: hasType,
+        validIds: validIds,
+        invalidIds: verifyResult.invalidGenes,
+        warnings: verifyResult.warnings || []
+      };
+    };
+
+  });
 })();
 
 
@@ -31,7 +105,8 @@
   angular.module('icgc.genelist.controllers', []);
 
   angular.module('icgc.genelist.controllers').controller('GeneListController',
-    function($scope, $timeout, $location, $modalInstance, Restangular, LocationService, FiltersUtil, Extensions) {
+    function($scope, $timeout, $location, $modalInstance, Restangular, GeneSetVerificationService,
+    LocationService, FiltersUtil, Extensions, SetService) {
 
     var verifyPromise = null;
     var delay = 1000;
@@ -42,89 +117,25 @@
     $scope.params.state = '';
     $scope.params.myFile = null;
     $scope.params.fileName = '';
+    $scope.params.inputMethod = 'id';
+
+    $scope.params.savedSets = SetService.getAllGeneSets();
+    $scope.params.selectedSavedSet = -1;
+
 
     // Output
     $scope.out = {};
-    $scope.out.validIds = [];
-    $scope.out.invalidIds = [];
-    $scope.out.warnings = [];
-    $scope.out.hasType = {};
-    $scope.out.uiResult = {};
-    $scope.out.totalInput = 0;
-    $scope.out.totalMatch = 0;
-    $scope.out.totalColumns = 0;
 
 
     function verify() {
       $scope.params.state = 'verifying';
-
       var data = 'geneIds=' + encodeURI($scope.params.rawText);
 
       Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data, undefined, {'validationOnly':true}).then(function(result) {
-
           var verifyResult = Restangular.stripRestangular(result);
           $scope.params.state = 'verified';
-          $scope.out.validIds = [];
-          $scope.out.invalidIds = [];
-          $scope.out.warnings = [];
-
-
-          if (verifyResult.warnings) {
-            verifyResult.warnings.forEach(function(msg) {
-              $scope.out.warnings.push(msg);
-            });
-          }
-          $scope.out.invalidIds = verifyResult.invalidGenes;
-          $scope.out.hasType = {};
-
-
-          var uiResult = {}, uniqueEnsembl = {}, totalInput = 0;
-
-          angular.forEach(verifyResult.validGenes, function(type, typeName) {
-            angular.forEach(type, function(geneList, inputToken) {
-              if (geneList && geneList.length > 0) {
-
-                geneList.forEach(function(gene) {
-                  var symbol = gene.symbol, row;
-
-                  // Initialize row structure
-                  if (! uiResult.hasOwnProperty(symbol)) {
-                    uiResult[symbol] = {};
-                  }
-                  row = uiResult[symbol];
-
-                  // Aggregate input ids that match to the same symbol
-                  if (! row.hasOwnProperty(typeName)) {
-                    row[typeName] = [];
-                  }
-                  if (row[typeName].indexOf(inputToken) === -1) {
-                    row[typeName].push(inputToken);
-
-                    // Mark it for visibility test on the view
-                    $scope.out.hasType[typeName] = 1;
-                  }
-
-                  // Aggregate matched ensembl ids that match to the same symbol
-                  if (! row.hasOwnProperty('matchedId')) {
-                    row.matchedId = [];
-                  }
-                  if (row.matchedId.indexOf(gene.id) === -1) {
-                    row.matchedId.push(gene.id);
-                    $scope.out.validIds.push(gene.id);
-                  }
-
-                  // Total counts
-                  uniqueEnsembl[gene.id] = 1;
-                });
-                totalInput ++;
-              }
-            });
-          });
-          $scope.out.uiResult = uiResult;
-          $scope.out.totalInput = totalInput;
-          $scope.out.totalMatch = Object.keys(uniqueEnsembl).length;
-          $scope.out.totalColumns = Object.keys($scope.out.hasType).length;
+          $scope.out = GeneSetVerificationService.formatResult(verifyResult);
         });
     }
 
@@ -168,8 +179,21 @@
         });
     }
 
-    $scope.newGeneList = function() {
-      createNewGeneList();
+    $scope.submitList = function() {
+      if ($scope.params.selectedSavedSet >= 0) {
+        var id = $scope.params.savedSets[$scope.params.selectedSavedSet].id;
+        var filters = LocationService.filters();
+        if (! filters.hasOwnProperty('gene')) {
+          filters.gene = {};
+        }
+        if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
+          filters.gene[Extensions.ENTITY] = {};
+        }
+        filters.gene[Extensions.ENTITY].is = [id];
+        $location.path('/search/g').search( {filters: angular.toJson(filters)} );
+      } else {
+        createNewGeneList();
+      }
       $modalInstance.dismiss('cancel');
     };
 
@@ -199,12 +223,16 @@
       $modalInstance.dismiss('cancel');
     };
 
-    $scope.reset = function() {
+
+    $scope.resetListInput = function() {
+      $scope.params.selectedSavedSet = -1;
+    };
+
+    $scope.resetCustomInput = function() {
       $scope.params.state = '';
       $scope.params.fileName = null;
       $scope.params.rawText = '';
-      $scope.out.validIds = [];
-      $scope.out.invalidIds = [];
+      $scope.out = {};
       if ($scope.params.myFile) {
         $scope.params.myFile = null;
       }
