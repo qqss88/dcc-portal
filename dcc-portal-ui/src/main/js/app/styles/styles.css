@@ -3662,6 +3662,39 @@ td {
   fill: #1693c0;
 }
 
+/* line 1, _modules/_list.scss */
+.select-list {
+  width: 45rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #CCC;
+  overflow-y: scroll;
+}
+
+/* line 10, _modules/_list.scss */
+.select-list-item {
+  cursor: pointer;
+  padding: 0.50rem;
+}
+/* line 14, _modules/_list.scss */
+.select-list-item:nth-child(even) {
+  background: #f2f2f2;
+}
+/* line 18, _modules/_list.scss */
+.select-list-item:nth-child(odd) {
+  background: #fafafa;
+}
+/* line 22, _modules/_list.scss */
+.select-list-item:hover {
+  background: #1693c0;
+  color: white;
+}
+/* line 27, _modules/_list.scss */
+.select-list-item.active {
+  background: #166aa2;
+  color: white;
+}
+
 /* line 24, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

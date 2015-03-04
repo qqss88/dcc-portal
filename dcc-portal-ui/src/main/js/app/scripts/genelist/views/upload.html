@@ -138,10 +138,21 @@
 
                <!-- By Set -->
                <div data-ng-if="params.inputMethod === 'set'">
+                    
                    <div style="padding:0.5rem">
-                       <select size="6" style="width:35rem; padding:0.5rem; border-radius:0.5rem; border:1px solid #CCC" data-ng-focus="resetCustomInput()">
-                           <option data-ng-repeat="item in params.savedSets" data-ng-click="params.selectedSavedSet=$index">{{item.name}}</option>
-                       </select>
+                       <!--<div style="width:45rem; padding:0.5rem; border-radius:0.5rem; border:1px solid #CCC; overflow-y:scroll; max-height:5rem" data-ng-focus="resetCustomInput()">-->
+                       <div class="select-list" style="max-height:25rem" data-ng-focus="resetCustomInput()">
+                          <div data-ng-repeat="item in params.savedSets" class="select-list-item" 
+                             data-ng-class="{active: $index === params.selectedSavedSet}"
+                             data-ng-click="params.selectedSavedSet=$index">
+                             <span>
+                                 <span class="text-right">{{item.name}}</span>
+                                 <span class="pull-right">{{item.count | number}} genes</span>
+                                 <br>
+                                 <small>&nbsp;{{item.description}}</small>
+                             </span>
+                          </div>
+                       </div>
                    </div>
 
                    <div data-ng-if="params.selectedSavedSet >= 0">
