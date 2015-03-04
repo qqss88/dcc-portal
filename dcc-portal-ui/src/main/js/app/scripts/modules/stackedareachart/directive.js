@@ -18,23 +18,25 @@
   'use strict';
 
 	var module = angular.module('icgc.visualization.stackedarea', []);
-    var donorData = [];
 
-	module.directive('donorHistory', function ($location, HighchartsService, $window) {
+	module.directive('donorHistory', function ($location, HighchartsService) {
 	    return {
 		    restrict: 'E',
 		    replace: true,
 		    scope: {
 		      items: '=',
-              selected: '='
+          selected: '='
 		    },
-            template:'<div class="text-center graph_title">' +
-                    'History of Life' +
+        template:'<div class="text-center">' +
+                    '<div class="graph_title" style="margin-bottom:2.5rem;">'+
+                    'Cumulative Project Donor Count over Releases</div>' +
                     '</div>',
 		    link: function ($scope, $element) {
               var chart;
               var filterProjects = function(data, includedProjects){
-                if(!includedProjects) return data;
+                if(!includedProjects){
+                  return data;
+                }
 
                 var result = [];
                 data.forEach(function (elem) {
@@ -44,9 +46,9 @@
                 });
 
                 return result;
-              }
+              };
               var config = {
-                margin:{top: 40, right: 40, bottom: 40, left: 40},
+                margin:{top: 10, right: 40, bottom: 40, left: 40},
                 height: 600,
                 width: 1000,
                 colours: HighchartsService.projectColours,
@@ -74,12 +76,12 @@
               };
 
               $scope.$watch('selected', function (newValue){
-                 if(newValue && $scope.items){
-                   $scope.selected = newValue;
-                   chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
-                   chart.render($element[0]);
+                  if(newValue && $scope.items){
+                    $scope.selected = newValue;
+                    chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
+                    chart.render($element[0]);
                   }
-              },true);
+                },true);
 
               $scope.$watch('items', function (newValue) {
                 if(!chart && newValue){

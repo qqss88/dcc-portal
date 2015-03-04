@@ -3244,6 +3244,11 @@ g.marker rect.selected {
   fill: #111;
 }
 
+/* line 106, _modules/_vis.scss */
+.tick line {
+  opacity: 0.1;
+}
+
 /** MAIN RESULT COLOR VARIABLES */
 /* line 6, _modules/_beacon.scss */
 td {

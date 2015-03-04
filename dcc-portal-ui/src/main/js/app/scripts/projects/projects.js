@@ -185,9 +185,8 @@
 
         if(!$scope.donorData){
           $http.get('scripts/modules/stackedareachart/data.json').success(function(data) {
-            console.log("loaded data");
-              _ctrl.donorData = data;
-            });
+            _ctrl.donorData = data;
+          });
         }
       }
     }
