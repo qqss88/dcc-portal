@@ -24,9 +24,9 @@ import static org.icgc.dcc.portal.util.NetworkUtils.getHttpRequestCallerInfo;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.Builder;
 import lombok.Value;
 import lombok.val;
-import lombok.experimental.Builder;
 
 import org.icgc.dcc.portal.util.NetworkUtilsTest.MockHttpRequestValue.MockHttpRequestValueBuilder;
 import org.junit.Test;
