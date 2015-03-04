@@ -419,6 +419,14 @@
 
               // The maximum allowed items from union operation
               $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
+
+              // Check if the analysis is still valid with respect to current data
+              if (! n.dataVersion || settings.dataVersion !== n.dataVersion) {
+                $scope.isDeprecated = true;
+              } else {
+                $scope.isDeprecated = false;
+              }
+
               initVennDiagram();
             });
           }

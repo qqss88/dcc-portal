@@ -1,6 +1,8 @@
-<h1>
-    <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Set Analysis
-</h1>
+<div class="h1-wrap">
+   <h1 data-ui-scrollfix=79>
+       <i class="t_badge t_badge_icon t_badge__analysis"><i class="icon-beaker"></i></i>Set Analysis
+   </h1>
+</div>
 <aside class="t_sidebar" data-ng-controller="BenchController">
     <div>
         <div class="t_tabs" style="margin-right: -2rem">
@@ -32,26 +34,24 @@
                         <div style="padding-right:0.25rem">
                             <span>
                                 {{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}
-                                <small class="pull-right" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                                <small class="pull-right t_suggest_detail"> 
                                    {{item.timestamp | date:"yyyy-MM-dd"}}
                                 </small>
                             </span>
                         </div>
-                        <small data-ng-if="item.type === 'enrichment'" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                        <small data-ng-if="item.type === 'enrichment'" class="t_suggest_detail">
                             {{item.universe | define}} - {{item.maxGeneCount | number}} {{item.maxGeneCount !== 1? "genes": "gene" }}
                         </small>
-                        <small data-ng-if="item.type === 'union'" style="color:{{item.id == analysisId? '': '#BBB'}}">
+                        <small data-ng-if="item.type === 'union'" class="t_suggest_detail">
                             {{item.dataType | trans:true}}
                         </small>
-                        <span data-ng-mouseenter="hover=true"
-                              data-ng-mouseleave="hover=false"
-                              data-ng-click="$event.stopPropagation(); remove(item.id); hover=false">
-                            <i class="icon-cancel pull-right"
-                               style="background: {{hover===true? '#dc502e' : ''}}"
+                        <span class="" data-ng-click="$event.stopPropagation(); remove(item.id);">
+                            <i class="icon-cancel pull-right t_suggest_cancel"
                                data-tooltip="Delete Analysis"
                                data-tooltip-placement="right">
                             </i>
                         </span>
+
                     </span>
                 </li>
             </ul>
@@ -68,6 +68,7 @@
             <br>
             <small>Note: Enrichment Analysis has an upper limit of 10,000 genes, Set Operations supports up to 3 sets of the same type.</small>
             <br>
+
             <small>Please see the <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis</a> documentation resource for a general overview of this feature.</small>
             </span>
 
@@ -79,10 +80,10 @@
 
             <br>
 
-            <span class="alert-error" data-ng-if="syncError">
+            <div class="alert-error" data-ng-if="syncError">
                 <i class="icon-attention"></i>
                 Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
-            </span>
+            </div>
 
 
             <div style="padding:.5rem 0">
@@ -149,21 +150,11 @@
     <div style="margin: 1rem" data-ng-if="analysisId">
 
         <div data-ng-if="analysisType === 'enrichment'" >
-            <h3>Enrichment Analysis
-                <span style="font-size:1rem" class="pull-right">
-                    <share-button></share-button>
-                </span>
-            </h3>
             <div data-ng-if="!error">
                 <enrichment-result data-item="analysisResult"></enrichment-result>
             </div>
         </div>
         <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
-            <h3>Set Operations
-                <span style="font-size:1rem" class="pull-right">
-                    <share-button></share-button>
-                </span>
-            </h3>
             <div data-ng-if="!error">
                 <set-operation data-item="analysisResult"></set-operation>
             </div>
