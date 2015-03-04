@@ -12,8 +12,10 @@
                    data-facet="ProjectsCtrl.projects.facets.primarySite"></terms>
             <terms data-type="project" data-facet-name="primaryCountries"
                    data-facet="ProjectsCtrl.projects.facets.primaryCountries"></terms>
-            <terms data-type="project" data-facet-name="availableDataTypes" data-defined="true"
-                   data-facet="ProjectsCtrl.projects.facets.availableDataTypes"></terms>
+            <div data-disable-events="ProjectsCtrl.state.isTab('history')" >
+              <terms data-type="project" data-facet-name="availableDataTypes" data-defined="true"
+                     data-facet="ProjectsCtrl.projects.facets.availableDataTypes"></terms>
+            </div>
         </ul>
     </div>
 </aside>

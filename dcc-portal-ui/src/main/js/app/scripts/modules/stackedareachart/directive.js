@@ -58,9 +58,9 @@
                   $location.path('/projects/' + project).search({});
                   $scope.$apply();
                 },
-                tooltipShowFunc: function(elem, project, currentDonors) {
+                tooltipShowFunc: function(elem, project, currentDonors,release) {
                   function getLabel() {
-                    return '<strong>'+project+'</strong><br># of donors: '+currentDonors;
+                    return '<strong>'+project+'</strong><br>Release: '+release+'<br># of donors: '+currentDonors;
                   }
 
                   $scope.$emit('tooltip::show', {

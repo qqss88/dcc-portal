@@ -15,7 +15,7 @@
       var config = this.config;
 
       var margin = config.margin;
-      margin.left = margin.left +10;
+      margin.left = margin.left +20; // to account for padding of ticks
       var width = config.width - margin.left - margin.right,
           height = config.height - margin.top - margin.bottom;
 
@@ -33,11 +33,11 @@
 
       var xAxis = d3.svg.axis()
           .scale(x)
-          .orient('bottom').innerTickSize(-height).ticks(14);
+          .orient('bottom').innerTickSize(-height).ticks(14).tickPadding(10);
 
       var yAxis = d3.svg.axis()
           .scale(y)
-          .orient('left').innerTickSize(-width).ticks(config.yaxis.ticks).tickFormat(d3.format('.2s'));
+          .orient('left').innerTickSize(-width).ticks(config.yaxis.ticks).tickFormat(d3.format('.2s')).tickPadding(10);
 
       var stack = d3.layout.stack()
           .offset('zero')
@@ -77,22 +77,54 @@
             .enter().append('g')
             .attr('class', 'layer-project');
 
+      var hintLine = svg.selectAll('.stackedareahint')
+        .data([width*2]).enter()
+        .append('line')
+        .attr('class','stackedareahint')
+        .attr({
+          'class':'horizontalGrid',
+          'x1' : function(d){ return d;},
+          'x2' : function(d){ return d;},
+          'y1' : 0,
+          'y2' : height,
+          'fill' : 'none',
+          'shape-rendering' : 'crispEdges',
+          'stroke' : 'grey',
+          'stroke-width' : '1px'
+        });
+
+      var hintHighlighter = svg.selectAll('.stackedareahinthighlight')
+        .append('rect')
+        .style('opacity','0')
+        .attr('class','stackedareahinthighlight')
+        .attr({
+          'class':'horizontalGrid',
+          'y1' : 0,
+          'y2' : height,
+          'fill' : 'none',
+          'shape-rendering' : 'crispEdges',
+          'stroke' : 'grey',
+          'stroke-width' : '1px'
+        });
+
       project.append('path')
             .attr('d', function(d) { return area(d.values); })
             .style('fill', function(d) {return color(d.key); })
             .style('sharp-rengering','crispEdges')
             .on('mousemove', function(d) {
                   var coords = d3.mouse(this);
-                  config.tooltipShowFunc(this,d.key,d.values[Math.round(xReverser(coords[0]))-4].value);
+                  var release = Math.round(xReverser(coords[0]))-4;
+                  var actualRelease = Math.round(xReverser(coords[0]));
+                  config.tooltipShowFunc(this,d.key,d.values[release].value, actualRelease);
+                  hintLine.transition().duration(100).attr('x1',x(release + 4)).attr('x2',x(actualRelease));
                 })
             .on('mouseout', function() {
                   config.tooltipHideFunc();
+                  hintLine.transition().duration(500).attr('x1',width*2).attr('x2',width*2);
                   if(project.selectAll('path').style('fill') === 'none'){
-                    project.selectAll('path').style('opacity','1')
-                      .attr('stroke', function(d){return color(d.key);});
+                    project.selectAll('path').transition().duration(200).style('opacity','1');
                   }else{
                     project.selectAll('path')
-                      .style('fill', function(d){return color(d.key);})
                       .style('opacity','1')
                       .attr('stroke', 'none');
                   }
@@ -102,29 +134,27 @@
                 })
             .on('mouseover', function(data){
                 if(project.selectAll('path').style('fill') === 'none'){
-                  project.selectAll('path').style('opacity',function(d){return d.key === data.key?'1':'0.15';});
-//                    .attr('stroke', function(d){
-//                      return d.key == data.key?color(d.key):'lightgrey'});
+                  project.selectAll('path').transition().duration(200).style('opacity',function(d){return d.key === data.key?'1':'0.15';});
                 }else{
                   project.selectAll('path')
-                      .style('opacity',function(d){return d.key === data.key?'1':'0.25';})
-                 //     .style('fill', function(d){return d.key == data.key?color(d.key):'lightgrey'})
+                      .style('opacity',function(d){return d.key === data.key?'1':'0.15';})
                       .attr('stroke', 'white')
                       .attr('stroke-width','1px');
                 }
               });
 
       svg.append('g')
-          .attr('class', 'x axis')
+          .attr('class', 'stackedarea x axis')
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis);
 
       svg.append('g')
-          .attr('class', 'stacked y axis')
+          .attr('class', 'stackedarea y axis')
           .call(yAxis);
 
-      svg.select('.stacked.y.axis')
+      svg.select('.stackedarea.y.axis')
         .style('font-size','12')
+        .style('fill','grey')
         .append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', -margin.left)
@@ -133,8 +163,9 @@
         .style('text-anchor', 'middle')
         .text(config.yaxis.label);
 
-      svg.select('.x.axis')
+      svg.select('.stackedarea.x.axis')
         .style('font-size','12')
+        .style('fill','grey')
         .append('text')
         .attr('y',2*margin.bottom/3)
         .attr('x',width/2)
@@ -145,10 +176,10 @@
       var change = function changeView(view){
         if(view === 'Line'){
           y.domain([0, d3.max(data, function(d) { return d.value; })]);
-          svg.select('.stacked.y.axis').transition().duration(500)
+          svg.select('.stackedarea.y.axis').transition().duration(500)
             .call(yAxis);
           project.selectAll('path').transition().duration(500)
-            .attr('d', function(d){return line(d.values)};)
+            .attr('d', function(d){return line(d.values);})
             .style('fill','none')
             .attr('stroke', function(d) {return color(d.key); })
             .attr('class','line')
@@ -156,7 +187,7 @@
 
         }else if(view ==='Area'){
           y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
-          svg.select('.stacked.y.axis').transition().duration(500)
+          svg.select('.stackedarea.y.axis').transition().duration(500)
             .call(yAxis);
           project.selectAll('path').transition().duration(500)
             .attr('d', function(d) { return area(d.values); }).transition()
