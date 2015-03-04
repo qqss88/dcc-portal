@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
 
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dumbster.smtp.SimpleSmtpServer;
@@ -36,33 +39,42 @@ public class MailServiceTest {
   private final static String SUBJECT_HEADER = "Subject";
 
   private final static MailProperties mailConfig = new MailProperties();
-  private final static MailService mailService;
 
-  static {
+  private MailService mailService;
+  private SimpleSmtpServer emailMockServer;
+
+  @BeforeClass
+  public static void setUpOnce() {
     mailConfig.setEnabled(true);
     mailConfig.setSmtpServer(SMTP_HOST);
     mailConfig.setSmtpPort(SMTP_PORT);
+  }
 
+  @Before
+  public void setUp() {
     mailService = new MailService(mailConfig);
+    emailMockServer = SimpleSmtpServer.start(SMTP_PORT);
+  }
+
+  @After
+  public void tearDown() {
+    emailMockServer.stop();
   }
 
   @Test
   public void testSend() {
-    val emailServer = SimpleSmtpServer.start(SMTP_PORT);
-
     val emailSubject = "TEST - please ignore";
     val emailBody = "foo";
     val async = false;
 
     mailService.sendEmail(emailSubject, emailBody, async);
 
-    emailServer.stop();
+    assertThat(emailMockServer.getReceivedEmailSize()).isEqualTo(1);
 
-    assertThat(emailServer.getReceivedEmailSize()).isEqualTo(1);
-
-    val email = (SmtpMessage) emailServer.getReceivedEmail().next();
+    val email = (SmtpMessage) emailMockServer.getReceivedEmail().next();
 
     assertThat(email.getHeaderValue(SUBJECT_HEADER)).isEqualTo(emailSubject);
     assertThat(email.getBody()).isEqualTo(emailBody);
   }
+
 }

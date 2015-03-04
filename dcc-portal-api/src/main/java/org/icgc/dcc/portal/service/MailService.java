@@ -70,6 +70,31 @@ public class MailService {
   private final MailProperties config;
 
   /*
+   * Public methods
+   */
+  public void sendEmail(final String subject, final String message, final boolean async) {
+    if (dontSendEmail()) {
+      return;
+    }
+
+    final Runnable runnable = new Runnable() {
+
+      @Override
+      public void run() {
+        try {
+          val emailMessage = buildEmailMessage(subject, message);
+          send(emailMessage);
+        } catch (Exception e) {
+          log.error("An error occured while emailing: ", e);
+        }
+      }
+
+    };
+
+    sendNow(runnable, async);
+  }
+
+  /*
    * Static helpers
    */
   private static Collection<InternetAddress> tryParseInternetAddresses(Iterable<String> addresses) {
@@ -114,7 +139,6 @@ public class MailService {
     } else {
       runnable.run();
     }
-
   }
 
   /*
@@ -172,32 +196,6 @@ public class MailService {
 
   private boolean dontSendEmail() {
     return !config.isEnabled();
-  }
-
-  /*
-   * Public methods
-   */
-  public void sendEmail(final String subject, final String message, final boolean async) {
-    if (dontSendEmail()) {
-      return;
-    }
-
-    val runnable = new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          val message = buildEmailMessage(subject, message);
-
-          send(message);
-        } catch (Exception e) {
-          log.error("An error occured while emailing: ", e);
-        }
-      }
-
-    };
-
-    sendNow(runnable, async);
   }
 
 }

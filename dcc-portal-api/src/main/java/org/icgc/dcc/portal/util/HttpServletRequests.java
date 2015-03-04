@@ -21,27 +21,41 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 
 import java.net.InetAddress;
-import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.NonNull;
 import lombok.val;
+import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Joiner;
 
 /**
- * Network-related utility helpers
+ * HttpServletRequest-related helpers
  */
-public class NetworkUtils {
+@UtilityClass
+public class HttpServletRequests {
 
-  private static final String ZERO_NETWORK_IP_ADDRESS = "0.0.0.0";
-  private static final String UNKNOWN_HOST_NAME = "Unknown";
-  private static final char SPACE = ' ';
+  private final String RESERVED_IP_FOR_ZERO_NETWORK = "0.0.0.0";
+  private final String UNKNOWN_HOST_NAME = "Unknown";
+  private final char SPACE = ' ';
   private static final Joiner JOINER = Joiner.on(SPACE).skipNulls();
 
-  private static boolean areIPsMeaningful(final String... ipAddresses) {
+  /*
+   * A helper to return a string containing hostname and IP-related info for a web request. The format is "Web request
+   * received on x.x.x.x (web-server-hostname) from y.y.y.y via z.z.z.z (proxy-hostname)
+   */
+  @NonNull
+  public String getHttpRequestCallerInfo(final HttpServletRequest request) {
+    val intro = "Web request received";
+
+    return JOINER.join(intro, getLocalNetworkInfo(request), getRemoteUserNetworkInfo(request),
+        getProxyNetworkInfo(request));
+  }
+
+  private boolean isIpValid(final String... ipAddresses) {
     for (val ip : ipAddresses) {
-      if (isNullOrEmpty(ip) || ip.equals(ZERO_NETWORK_IP_ADDRESS)) {
+      if (isNullOrEmpty(ip) || ip.equals(RESERVED_IP_FOR_ZERO_NETWORK)) {
         return false;
       }
     }
@@ -49,17 +63,17 @@ public class NetworkUtils {
     return true;
   }
 
-  private static String formatNetworkInfo(final String hostName, final String ipAddress) {
+  private String formatNetworkInfo(final String hostName, final String ipAddress) {
     val info = isNullOrEmpty(hostName) ? UNKNOWN_HOST_NAME : hostName.trim();
 
     return isNullOrEmpty(ipAddress) ? info : info + " (" + ipAddress.trim() + ")";
   }
 
-  private static String getLocalNetworkInfo(final HttpServletRequest request) {
+  private String getLocalNetworkInfo(final HttpServletRequest request) {
     String localHostName = request.getLocalName();
     String localHostIp = request.getLocalAddr();
 
-    if (!areIPsMeaningful(localHostName, localHostIp)) {
+    if (!isIpValid(localHostName, localHostIp)) {
       try {
         val host = InetAddress.getLocalHost();
 
@@ -73,30 +87,18 @@ public class NetworkUtils {
     return "on " + formatNetworkInfo(localHostName, localHostIp);
   }
 
-  private static String getProxyNetworkInfo(final HttpServletRequest request) {
+  private String getProxyNetworkInfo(final HttpServletRequest request) {
     val proxyHostName = request.getRemoteHost();
     val proxyHostIp = request.getRemoteAddr();
 
     return "via " + formatNetworkInfo(proxyHostName, proxyHostIp);
   }
 
-  private static String getRemoteUserNetworkInfo(final HttpServletRequest request) {
+  private String getRemoteUserNetworkInfo(final HttpServletRequest request) {
     val userIp = request.getHeader(X_FORWARDED_FOR);
 
     val result = isNullOrEmpty(userIp) ? null : userIp.trim();
     return (null == result) ? null : "from " + result;
   }
 
-  /*
-   * A helper to return a string containing hostname and IP-related info for a web request. The format is "Web request
-   * received on x.x.x.x (web-server-hostname) from y.y.y.y via z.z.z.z (proxy-hostname)
-   */
-  public static String getHttpRequestCallerInfo(final HttpServletRequest request) {
-    val content = Arrays.asList("Web request received",
-        getLocalNetworkInfo(request),
-        getRemoteUserNetworkInfo(request),
-        getProxyNetworkInfo(request));
-
-    return JOINER.join(content);
-  }
 }

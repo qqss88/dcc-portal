@@ -20,7 +20,7 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static org.icgc.dcc.portal.util.NetworkUtils.getHttpRequestCallerInfo;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getHttpRequestCallerInfo;
 
 import java.util.Date;
 import java.util.Random;
@@ -82,7 +82,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
   protected static String formatResponseEntity(long id, Throwable t) {
     val message =
-        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).\n";
+        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).%n";
     return String.format(message, t.getMessage(), id);
   }
 
