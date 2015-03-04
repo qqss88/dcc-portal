@@ -19,26 +19,28 @@ package org.icgc.dcc.portal.util;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.net.InetAddress;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
-import lombok.experimental.UtilityClass;
 
 import com.google.common.base.Joiner;
 
 /**
  * HttpServletRequest-related helpers
  */
-@UtilityClass
-public class HttpServletRequests {
 
-  private final String RESERVED_IP_FOR_ZERO_NETWORK = "0.0.0.0";
-  private final String UNKNOWN_HOST_NAME = "Unknown";
-  private final char SPACE = ' ';
+@NoArgsConstructor(access = PRIVATE)
+public final class HttpServletRequests {
+
+  private static final String RESERVED_IP_FOR_ZERO_NETWORK = "0.0.0.0";
+  private static final String UNKNOWN_HOST_NAME = "Unknown";
+  private static final char SPACE = ' ';
   private static final Joiner JOINER = Joiner.on(SPACE).skipNulls();
 
   /*
@@ -46,14 +48,14 @@ public class HttpServletRequests {
    * received on x.x.x.x (web-server-hostname) from y.y.y.y via z.z.z.z (proxy-hostname)
    */
   @NonNull
-  public String getHttpRequestCallerInfo(final HttpServletRequest request) {
+  public static String getHttpRequestCallerInfo(final HttpServletRequest request) {
     val intro = "Web request received";
 
     return JOINER.join(intro, getLocalNetworkInfo(request), getRemoteUserNetworkInfo(request),
         getProxyNetworkInfo(request));
   }
 
-  private boolean isIpValid(final String... ipAddresses) {
+  private static boolean isIpValid(final String... ipAddresses) {
     for (val ip : ipAddresses) {
       if (isNullOrEmpty(ip) || ip.equals(RESERVED_IP_FOR_ZERO_NETWORK)) {
         return false;
@@ -63,13 +65,13 @@ public class HttpServletRequests {
     return true;
   }
 
-  private String formatNetworkInfo(final String hostName, final String ipAddress) {
+  private static String formatNetworkInfo(final String hostName, final String ipAddress) {
     val info = isNullOrEmpty(hostName) ? UNKNOWN_HOST_NAME : hostName.trim();
 
     return isNullOrEmpty(ipAddress) ? info : info + " (" + ipAddress.trim() + ")";
   }
 
-  private String getLocalNetworkInfo(final HttpServletRequest request) {
+  private static String getLocalNetworkInfo(final HttpServletRequest request) {
     String localHostName = request.getLocalName();
     String localHostIp = request.getLocalAddr();
 
@@ -87,14 +89,14 @@ public class HttpServletRequests {
     return "on " + formatNetworkInfo(localHostName, localHostIp);
   }
 
-  private String getProxyNetworkInfo(final HttpServletRequest request) {
+  private static String getProxyNetworkInfo(final HttpServletRequest request) {
     val proxyHostName = request.getRemoteHost();
     val proxyHostIp = request.getRemoteAddr();
 
     return "via " + formatNetworkInfo(proxyHostName, proxyHostIp);
   }
 
-  private String getRemoteUserNetworkInfo(final HttpServletRequest request) {
+  private static String getRemoteUserNetworkInfo(final HttpServletRequest request) {
     val userIp = request.getHeader(X_FORWARDED_FOR);
 
     val result = isNullOrEmpty(userIp) ? null : userIp.trim();
