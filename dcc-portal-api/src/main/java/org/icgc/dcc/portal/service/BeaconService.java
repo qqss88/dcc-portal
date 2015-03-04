@@ -96,8 +96,8 @@ public class BeaconService {
         allele.contains(">") ? generateInsertionOrDeletionScriptField() : generateDefaultScriptField(), params);
 
     val filter = FilterBuilders.scriptFilter(
-        "var m = doc['mutation'].value;"
-            + "var length = m.substring(m.indexOf('>')+1,m.length()).length();"
+        "m = doc['mutation'].value;"
+            + "length = m.substring(m.indexOf('>')+1,m.length()).length();"
             + "position <= doc['chromosome_start'].value+length"
         ).addParam("position", position);
     search.setPostFilter(filter);
@@ -119,10 +119,10 @@ public class BeaconService {
   }
 
   private String generateDefaultScriptField() {
-    return "var m = doc['mutation'].value;"
-        + "var offset = position - doc['chromosome_start'].value;"
-        + "var begin = m.indexOf('>') + 1 + offset;"
-        + "var end = Math.min(begin + allelelength, m.length());"
+    return "m = doc['mutation'].value;"
+        + "offset = position - doc['chromosome_start'].value;"
+        + "int begin = m.indexOf('>') + 1 + offset;"
+        + "int end = Math.min(begin + allelelength, m.length());"
         + "m = m.substring(begin,end);"
         + "m==allele";
   }
