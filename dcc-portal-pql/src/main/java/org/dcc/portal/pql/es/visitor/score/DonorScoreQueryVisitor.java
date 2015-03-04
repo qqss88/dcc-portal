@@ -15,44 +15,22 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.visitor.score;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.RootNode;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+public class DonorScoreQueryVisitor extends ScoreQueryVisitor {
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class NestedNode extends ExpressionNode {
+  public static final String SCRIPT = "g = doc['gene._gene_id']; "
+      + "x = doc['gene._summary._ssm_count']; "
+      + "g.value == '' || g.empty || x.empty || x.value < 1 ? 0 : 1";
 
-  private static final String DEFAULT_SCORE_MODE = "avg";
-
-  @NonNull
-  String path;
-
-  @NonNull
-  String scoreMode;
-
-  public NestedNode(@NonNull String path, ExpressionNode... children) {
-    this(path, DEFAULT_SCORE_MODE, children);
-  }
-
-  public NestedNode(@NonNull String path, @NonNull String scoreMode, ExpressionNode... children) {
-    super(children);
-    this.path = path;
-    this.scoreMode = scoreMode;
-  }
+  private static final String PATH = "gene";
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitNested(this);
+  public ExpressionNode visitRoot(RootNode node) {
+    return super.visitRoot(node, SCRIPT, PATH);
   }
-
-  @Override
-  public boolean hasNestedParent() {
-    return true;
-  };
 
 }

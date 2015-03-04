@@ -15,59 +15,61 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.utils;
+package org.dcc.portal.pql.es.visitor.score;
 
-import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.QueryNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
-import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
-import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
-import org.dcc.portal.pql.es.visitor.Visitors;
 import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.junit.Test;
 
-/**
- * Performs series of transformations to resolve different processing rules and to optimize the AST
- */
 @Slf4j
-public class EsAstTransformator {
+public class DonorScoreQueryVisitorTest {
 
-  private final EmptyNodesCleanerVisitor emptyNodesCleaner = new EmptyNodesCleanerVisitor();
+  DonorScoreQueryVisitor visitor = new DonorScoreQueryVisitor();
   private final AggregationsResolverVisitor facetsResolver = new AggregationsResolverVisitor();
-  private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
 
-  public ExpressionNode process(ExpressionNode esAst, Type type) {
-    log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
-    esAst = resolveFacets(esAst, type);
-    esAst = optimize(esAst);
-    esAst = score(esAst, type);
-    log.debug("ES AST after the transformations: {}", esAst);
+  @Test
+  public void visitRootTest_withQueryNode() {
+    ExpressionNode esAst = createEsAst("facets(id), eq(id, 1)");
+    esAst = facetsResolver.resolveAggregations(esAst, Type.DONOR_CENTRIC);
+    val origFilterNode = Nodes.cloneNode(esAst.getChild(1).getFirstChild());
 
-    return esAst;
+    val result = esAst.accept(visitor);
+    assertCorrectStructure(result);
+    val filterNode = result.getChild(1).getFirstChild().getFirstChild().getFirstChild();
+    assertThat(filterNode).isEqualTo(origFilterNode);
   }
 
-  private ExpressionNode score(ExpressionNode esAst, Type type) {
-    return esAst.accept(Visitors.createScoreQueryVisitor(type));
+  @Test
+  public void visitRootTest_withoutQueryNode() {
+    val esAst = createEsAst("select(id)");
+    val result = esAst.accept(visitor);
+    log.info("{}", result);
+    assertCorrectStructure(result);
   }
 
-  private ExpressionNode optimize(ExpressionNode esAst) {
-    // Clean empty filter node
-    esAst = esAst.accept(emptyNodesCleaner);
+  private static void assertCorrectStructure(ExpressionNode root) {
+    val queryNodes = Nodes.filterChildren(root, QueryNode.class);
+    assertThat(queryNodes).hasSize(1);
 
-    // Remove FilterAggregationNodes without filters
-    val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
-    if (aggsNode.isPresent()) {
-      esAst = esAst.accept(removeAggsFilterVisitor);
-    }
+    val queryNode = queryNodes.get(0);
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+    val netstedNode = (NestedNode) queryNode.getFirstChild();
+    assertThat(netstedNode.childrenCount()).isEqualTo(1);
+    assertThat(netstedNode.getPath()).isEqualTo("gene");
+    assertThat(netstedNode.getScoreMode()).isEqualTo("total");
 
-    return esAst;
-  }
-
-  private ExpressionNode resolveFacets(ExpressionNode esAst, Type type) {
-    return facetsResolver.resolveAggregations(esAst, type);
+    val functionScoreNode = (FunctionScoreQueryNode) netstedNode.getFirstChild();
+    assertThat(functionScoreNode.getScript()).isEqualTo(DonorScoreQueryVisitor.SCRIPT);
   }
 
 }

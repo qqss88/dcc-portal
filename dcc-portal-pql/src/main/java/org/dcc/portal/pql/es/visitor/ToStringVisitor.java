@@ -22,6 +22,7 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
@@ -54,8 +55,6 @@ public class ToStringVisitor extends NodeVisitor<String> {
 
   private static final String NEWLINE = System.getProperty("line.separator");
   private static final String DEFAULT_INDENT = "  ";
-  private static final String GLOBAL = "global";
-  private static final String NON_GLOBAL = "non-global";
 
   @Override
   public String visitFilter(FilterNode node) {
@@ -64,7 +63,7 @@ public class ToStringVisitor extends NodeVisitor<String> {
 
   @Override
   public String visitNested(NestedNode node) {
-    val header = format("%s [path: %s]", getCommonHeader(node), node.getPath());
+    val header = format("%s [path: %s, score_mode: %s]", getCommonHeader(node), node.getPath(), node.getScoreMode());
 
     return buildToString(node, Optional.of(header));
   }
@@ -214,6 +213,13 @@ public class ToStringVisitor extends NodeVisitor<String> {
     builder.append(node.getFilters().accept(this));
 
     return buildToString(node, Optional.of(builder.toString()));
+  }
+
+  @Override
+  public String visitFunctionScoreQuery(FunctionScoreQueryNode node) {
+    val header = format("%s [script: %s]", getCommonHeader(node), node.getScript());
+
+    return buildToString(node, Optional.of(header));
   }
 
   private String buildToString(ExpressionNode node) {

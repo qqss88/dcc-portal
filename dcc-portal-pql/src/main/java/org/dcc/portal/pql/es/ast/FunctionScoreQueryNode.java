@@ -25,34 +25,18 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class NestedNode extends ExpressionNode {
+public class FunctionScoreQueryNode extends ExpressionNode {
 
-  private static final String DEFAULT_SCORE_MODE = "avg";
+  private final String script;
 
-  @NonNull
-  String path;
-
-  @NonNull
-  String scoreMode;
-
-  public NestedNode(@NonNull String path, ExpressionNode... children) {
-    this(path, DEFAULT_SCORE_MODE, children);
-  }
-
-  public NestedNode(@NonNull String path, @NonNull String scoreMode, ExpressionNode... children) {
+  public FunctionScoreQueryNode(@NonNull String script, ExpressionNode... children) {
     super(children);
-    this.path = path;
-    this.scoreMode = scoreMode;
+    this.script = script;
   }
 
   @Override
   public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitNested(this);
+    return visitor.visitFunctionScoreQuery(this);
   }
-
-  @Override
-  public boolean hasNestedParent() {
-    return true;
-  };
 
 }

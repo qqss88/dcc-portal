@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.visitor;
 
 import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
@@ -134,6 +135,10 @@ public abstract class NodeVisitor<T> {
   }
 
   public T visitFilterAggregation(FilterAggregationNode node) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitFunctionScoreQuery(FunctionScoreQueryNode node) {
     return defaultUnimplementedMethod();
   }
 

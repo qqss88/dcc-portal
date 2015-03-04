@@ -15,44 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.visitor.score;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import lombok.val;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.utils.Nodes;
+import org.junit.Test;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class NestedNode extends ExpressionNode {
+public class DefaultScoreQueryVisitorTest {
 
-  private static final String DEFAULT_SCORE_MODE = "avg";
+  DefaultScoreQueryVisitor visitor = new DefaultScoreQueryVisitor();
 
-  @NonNull
-  String path;
-
-  @NonNull
-  String scoreMode;
-
-  public NestedNode(@NonNull String path, ExpressionNode... children) {
-    this(path, DEFAULT_SCORE_MODE, children);
+  @Test
+  public void visitRootTest() {
+    val esAst = Nodes.cloneNode(createEsAst("select(id)"));
+    val result = esAst.accept(visitor);
+    assertThat(esAst).isEqualTo(result);
   }
-
-  public NestedNode(@NonNull String path, @NonNull String scoreMode, ExpressionNode... children) {
-    super(children);
-    this.path = path;
-    this.scoreMode = scoreMode;
-  }
-
-  @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitNested(this);
-  }
-
-  @Override
-  public boolean hasNestedParent() {
-    return true;
-  };
 
 }

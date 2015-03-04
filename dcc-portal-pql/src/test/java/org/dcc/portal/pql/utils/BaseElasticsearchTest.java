@@ -29,7 +29,9 @@ import java.io.IOException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.val;
 
+import org.elasticsearch.common.settings.ImmutableSettings;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.After;
@@ -70,7 +72,8 @@ public class BaseElasticsearchTest {
 
   @Before
   public void before() {
-    es = new EsSetup();
+    val settings = ImmutableSettings.settingsBuilder().put("script.groovy.sandbox.enabled", true).build();
+    es = new EsSetup(settings);
   }
 
   @After

@@ -21,10 +21,14 @@ import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.elasticsearch.client.Client;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Visitors {
@@ -39,6 +43,12 @@ public class Visitors {
       IndexModel.getMutationCentricTypeModel());
 
   private static final RemoveAggregationFilterVisitor REMOVE_AGGS_FILTER_VISITOR = new RemoveAggregationFilterVisitor();
+
+  /*
+   * ScoreQueryVisitors
+   */
+  private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
+  private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
 
   // FIXME: implement
 
@@ -86,6 +96,15 @@ public class Visitors {
 
   public static RemoveAggregationFilterVisitor createRemoveAggregationFilterVisitor() {
     return REMOVE_AGGS_FILTER_VISITOR;
+  }
+
+  public static ScoreQueryVisitor createScoreQueryVisitor(Type type) {
+    switch (type) {
+    case DONOR_CENTRIC:
+      return DONOR_SCORE_QUERY_VISITOR;
+    default:
+      return DEFAULT_SCORE_QUERY_VISITOR;
+    }
   }
 
 }
