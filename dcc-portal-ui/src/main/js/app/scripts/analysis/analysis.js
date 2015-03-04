@@ -76,9 +76,15 @@
     };
 
     $scope.addCustomGeneSet = function() {
-      $modal.open({
+      var inst = $modal.open({
         templateUrl: '/scripts/genelist/views/upload.html',
         controller: 'GeneListController'
+      });
+
+      // Successful submit
+      inst.result.then(function() {
+        $timeout.cancel(syncSetTimeout);
+        synchronizeSets(10);
       });
     };
 
@@ -281,6 +287,7 @@
         $scope.error = true;
       });
     }
+
 
     $scope.$on('$locationChangeStart', function() {
       // Cancel any remaining polling requests

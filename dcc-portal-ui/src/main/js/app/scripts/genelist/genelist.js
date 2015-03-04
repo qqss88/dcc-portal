@@ -152,7 +152,7 @@
     var verifyPromise = null;
     var delay = 1000;
 
-    // Input params
+    // Fields for searching by custom gene identifiers
     $scope.params = {};
     $scope.params.rawText = '';
     $scope.params.state = '';
@@ -160,7 +160,12 @@
     $scope.params.fileName = '';
     $scope.params.inputMethod = 'id';
 
-    // FIXME: Need to verify if sets are valid or not
+    // Fields needed for saving into custom gene set
+    $scope.params.setName = '';
+    $scope.params.setDescription = '';
+
+
+    // FIXME: Need to verify if sets are valid or not - broadcast??
     $scope.params.savedSets = SetService.getAllGeneSets();
     $scope.params.selectedSavedSet = -1;
 
@@ -210,7 +215,8 @@
       if ($scope.analysisMode === true) {
         var setParams = {};
         setParams.type = 'gene';
-        setParams.name = 'dc test';
+        setParams.name = $scope.params.setName;
+        setParams.description = $scope.params.setDescription;
         setParams.size = $scope.out.validIds.length;
         setParams.filters = {
           gene: {
@@ -219,11 +225,9 @@
             }
           }
         };
-
-        console.log('>>>', setParams);
-        SetService.addSet(setParams.type, setParams);
-
-        $modalInstance.dismiss('cancel');
+        SetService.addSet(setParams.type, setParams).then(function(){
+          $modalInstance.close();
+        });
         return;
       }
 

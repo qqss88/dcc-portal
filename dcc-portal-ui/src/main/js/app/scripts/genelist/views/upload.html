@@ -29,13 +29,12 @@
                    <div style="padding:0.25rem" data-ng-if="analysisMode===true">
                        <div class="pull-left">
                            <div>Name:</div>
-                           <input type="text" data-ng-model="params.setName" maxlength="32" data-select-on-click data-ng-change="validateInput()"></input>
+                           <input type="text" data-ng-model="params.setName" maxlength="32" data-select-on-click data-autofocus></input>
                        </div>
                        <div class="pull-right omega">
                            <div>Note:</div>
                            <textarea cols="40" rows="1"
-                               data-ng-model="setDescription"
-                               data-ng-change="validateInput()"
+                               data-ng-model="params.setDescription"
                                placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
                        </div>
                        <div class="clearfix"/>
@@ -44,7 +43,7 @@
                            rows="3"
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
                            data-ng-focus="resetListInput()"
-                           data-autofocus data-ng-model="params.rawText" data-ng-change="updateGenelist()">
+                           data-ng-model="params.rawText" data-ng-change="updateGenelist()">
                        </textarea>
 
                    </div>
@@ -173,7 +172,7 @@
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="cancel();">Cancel</button>
                 <button class="t_button" data-ng-click="submitList()"
-                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0) && params.selectedSavedSet < 0">Submit</button>
+                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0 || (analysisMode === true && params.setName === '')) && (params.selectedSavedSet < 0)">Submit</button>
             </div>
         </div>
     </div>

@@ -197,6 +197,8 @@
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
       });
+
+      return promise;
     };
 
 
@@ -224,6 +226,8 @@
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
       });
+
+      return promise;
     };
 
 

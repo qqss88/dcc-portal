@@ -13,8 +13,19 @@
 
 /* Slightly wider modal for better fitting of our text */
 .modal {
-   width: 620px;
+   width: 42%;
+   margin-left: -21%;
+   max-height: 95%;
 }
+
+.modal.fade.in {
+  top: 2%;
+}
+
+.modal-header {
+  // padding: 0.5rem 1.0rem; !important
+}
+
 
 
 /* For file dialogs */
