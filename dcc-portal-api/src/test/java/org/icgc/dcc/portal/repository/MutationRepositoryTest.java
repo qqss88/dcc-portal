@@ -101,7 +101,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
   }
 
@@ -128,7 +128,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getTotalHits()).isEqualTo(1);
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
     FiltersParam filterNot = new FiltersParam(joinFilters(MUTATION_FILTER, DONOR_NOT_FILTER));
     Query queryNot = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterNot
@@ -150,7 +150,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hitsIs.getTotalHits()).isEqualTo(1);
     assertThat(hitsIs.getHits().length).isEqualTo(1);
 
-    assertThat(hitsIs.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hitsIs.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
 
     FiltersParam filterNot = new FiltersParam(joinFilters(MUTATION_FILTER, GENES_NOT_FILTER));
     Query queryNot = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).filters(filterNot
@@ -172,7 +172,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
 
-    assertThat(hits.getAt(0).field(FIELDS.get("id")).getValue()).isEqualTo(ID);
+    assertThat(cast(hits.getAt(0).field(FIELDS.get("id")).getValue())).isEqualTo(ID);
   }
 
   @Test

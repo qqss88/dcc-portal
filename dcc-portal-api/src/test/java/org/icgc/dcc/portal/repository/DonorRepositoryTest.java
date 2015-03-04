@@ -99,7 +99,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(3);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO2", "DO6", "DO7"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2", "DO6", "DO7"));
     }
   }
 
@@ -115,7 +115,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(6);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isNotIn(Lists.newArrayList("DO2", "DO6", "DO7"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isNotIn(Lists.newArrayList("DO2", "DO6", "DO7"));
     }
   }
 
@@ -131,7 +131,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(5);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(
           Lists.newArrayList("DO2", "DO2", "DO9", "DO1", "DO4", "DO8", "DO5"));
     }
   }
@@ -148,7 +148,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(1);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO9"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO9"));
     }
   }
 
@@ -164,7 +164,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     assertThat(hits.getHits().length).isEqualTo(1);
 
     for (SearchHit hit : hits) {
-      assertThat(hit.field(FIELDS.get("id")).getValue()).isIn(Lists.newArrayList("DO2"));
+      assertThat(cast(hit.field(FIELDS.get("id")).getValue())).isIn(Lists.newArrayList("DO2"));
     }
   }
 
