@@ -3,17 +3,18 @@
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 class="pull-left">Search Gene Set</h3>
+                <h3 class="pull-left">{{analysisMode===true?'Save Custom Gene Set':'Search Gene Set'}}</h3>
                 <button class="pull-right t_button" data-ng-click="cancel()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
 
-            <div class="t_tabs">
+            <div class="t_tabs" data-ng-if="analysisMode===false">
                <div class="t_tabs__tab t_tabs__tab__gene" data-ng-class="{active: params.inputMethod === 'id'}" data-ng-click="params.inputMethod = 'id'">
                By identifiers
                </div>
-               <div class="t_tabs__tab t_tabs__tab__gene" data-ng-class="{active: params.inputMethod === 'set'}" data-ng-click="params.inputMethod = 'set'">
+               <div class="t_tabs__tab t_tabs__tab__gene" 
+                   data-ng-class="{active: params.inputMethod === 'set'}" data-ng-click="params.inputMethod = 'set'">
                By saved gene set
                </div>
             </div>
@@ -24,7 +25,32 @@
 
                <!-- By ID -->
                <div data-ng-if="params.inputMethod === 'id'">
-                   <div style="padding:0.25rem">
+
+                   <div style="padding:0.25rem" data-ng-if="analysisMode===true">
+                       <div class="pull-left">
+                           <div>Name:</div>
+                           <input type="text" data-ng-model="params.setName" maxlength="32" data-select-on-click data-ng-change="validateInput()"></input>
+                       </div>
+                       <div class="pull-right omega">
+                           <div>Note:</div>
+                           <textarea cols="40" rows="1"
+                               data-ng-model="setDescription"
+                               data-ng-change="validateInput()"
+                               placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
+                       </div>
+                       <div class="clearfix"/>
+                       <div>Gene Identifiers:</div>
+                       <textarea
+                           rows="3"
+                           placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
+                           data-ng-focus="resetListInput()"
+                           data-autofocus data-ng-model="params.rawText" data-ng-change="updateGenelist()">
+                       </textarea>
+
+                   </div>
+
+                       
+                   <div style="padding:0.25rem" data-ng-if="analysisMode===false">
                        <textarea
                            rows="3"
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"

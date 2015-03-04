@@ -75,6 +75,13 @@
       });
     };
 
+    $scope.addCustomGeneSet = function() {
+      $modal.open({
+        templateUrl: '/scripts/genelist/views/upload.html',
+        controller: 'GeneListController'
+      });
+    };
+
     $scope.exportSet = function(id) {
       SetService.exportSet(id);
     };

@@ -16,12 +16,15 @@
  */
 
 
-(function () {
+(function() {
+
   'use strict';
+
   angular.module('icgc.genelist', [
     'icgc.genelist.controllers',
     'icgc.genelist.services'
   ]);
+
 })();
 
 
@@ -30,7 +33,46 @@
 
   var module = angular.module('icgc.genelist.services', []);
 
-  module.service('GeneSetVerificationService', function() {
+  module.service('GeneSetVerificationService', function(Restangular, LocationService, Extensions) {
+
+    /* Verify text input */
+    this.verify = function(text) {
+      var data = 'geneIds=' + encodeURI(text);
+      return Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, undefined, {'validationOnly':true});
+    };
+
+
+    /* Create new gene set based on text input - assumes input is already correct */
+    this.create = function(text) {
+      var data = 'geneIds=' + encodeURI(text);
+      return Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data);
+    };
+
+    /* Echo back the text content of file */
+    this.fileContent = function(filepath) {
+      var data = new FormData();
+      data.append('filepath', filepath);
+      return Restangular.one('ui').withHttpConfig({transformRequest: angular.identity})
+        .customPOST(data, 'file', {}, {'Content-Type': undefined});
+    };
+
+
+    this.geneSetIdFilters = function(geneSetId) {
+      var filters = LocationService.filters();
+
+      if (! filters.hasOwnProperty('gene')) {
+        filters.gene = {};
+      }
+      if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
+        filters.gene[Extensions.ENTITY] = {};
+      }
+      // Note this overwrites
+      filters.gene[Extensions.ENTITY].is = [geneSetId];
+      return filters;
+    };
+
 
     /**
      * Generate ui display table for matched genes, and compute
@@ -43,6 +85,7 @@
       angular.forEach(verifyResult.validGenes, function(type, typeName) {
         angular.forEach(type, function(geneList, inputToken) {
 
+          // Sanity check
           if (!geneList || geneList.length === 0) {
             return;
           }
@@ -98,15 +141,13 @@
 })();
 
 
-// TODO: Probably want a service
 (function () {
   'use strict';
 
-  angular.module('icgc.genelist.controllers', []);
+  var module = angular.module('icgc.genelist.controllers', []);
 
-  angular.module('icgc.genelist.controllers').controller('GeneListController',
-    function($scope, $timeout, $location, $modalInstance, Restangular, GeneSetVerificationService,
-    LocationService, FiltersUtil, Extensions, SetService) {
+  module.controller('GeneListController', function($scope, $timeout, $location, $modalInstance,
+    GeneSetVerificationService, LocationService, SetService, Page) {
 
     var verifyPromise = null;
     var delay = 1000;
@@ -119,24 +160,24 @@
     $scope.params.fileName = '';
     $scope.params.inputMethod = 'id';
 
+    // FIXME: Need to verify if sets are valid or not
     $scope.params.savedSets = SetService.getAllGeneSets();
     $scope.params.selectedSavedSet = -1;
-
 
     // Output
     $scope.out = {};
 
+    // Determine display params based on current page
+    $scope.analysisMode = Page.page() === 'analysis'? true: false;
+
+    console.log('save gene set mode', $scope.analysisMode);
 
     function verify() {
       $scope.params.state = 'verifying';
-      var data = 'geneIds=' + encodeURI($scope.params.rawText);
-
-      Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data, undefined, {'validationOnly':true}).then(function(result) {
-          var verifyResult = Restangular.stripRestangular(result);
-          $scope.params.state = 'verified';
-          $scope.out = GeneSetVerificationService.formatResult(verifyResult);
-        });
+      GeneSetVerificationService.verify($scope.params.rawText).then(function(result) {
+        $scope.params.state = 'verified';
+        $scope.out = GeneSetVerificationService.formatResult(result);
+      });
     }
 
     function verifyFile() {
@@ -146,51 +187,52 @@
 
       // The $timeout is just to give sufficent time in order to convey system state
       $timeout(function() {
-        var data = new FormData();
-        data.append('filepath', $scope.params.myFile);
-        Restangular.one('ui').withHttpConfig({transformRequest: angular.identity})
-          .customPOST(data, 'file', {}, {'Content-Type': undefined}).then(function(result) {
-            $scope.params.rawText = result.data;
-            verify();
-          });
+        GeneSetVerificationService.fileContent($scope.params.myFile).then(function(result) {
+          $scope.params.rawText = result.data;
+          verify();
+        });
       }, 1000);
     }
 
     function createNewGeneList() {
-      var data;
-      data = 'geneIds=' + encodeURI($scope.params.rawText);
+      GeneSetVerificationService.create($scope.params.rawText).then(function(result) {
+        var search = LocationService.search();
+        search.filters = angular.toJson(GeneSetVerificationService.geneSetIdFilters(result.geneListId));
 
-      Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-        .customPOST(data).then(function(result) {
-          var filters = LocationService.filters(), search = LocationService.search();
-
-          if (! filters.hasOwnProperty('gene')) {
-            filters.gene = {};
-          }
-          if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
-            filters.gene[Extensions.ENTITY] = {};
-          }
-
-          filters.gene[Extensions.ENTITY].is = [result.geneListId];
-
-          // Upload gene list redirects to gene tab, regardless of where we came from
-          search.filters = angular.toJson(filters);
-          $location.path('/search/g').search(search);
-        });
+        // Upload gene list redirects to gene tab, regardless of where we came from
+        $location.path('/search/g').search(search);
+      });
     }
 
+
     $scope.submitList = function() {
+
+      if ($scope.analysisMode === true) {
+        var setParams = {};
+        setParams.type = 'gene';
+        setParams.name = 'dc test';
+        setParams.size = $scope.out.validIds.length;
+        setParams.filters = {
+          gene: {
+            id: {
+              is: $scope.out.validIds
+            }
+          }
+        };
+
+        console.log('>>>', setParams);
+        SetService.addSet(setParams.type, setParams);
+
+        $modalInstance.dismiss('cancel');
+        return;
+      }
+
       if ($scope.params.selectedSavedSet >= 0) {
         var id = $scope.params.savedSets[$scope.params.selectedSavedSet].id;
-        var filters = LocationService.filters();
-        if (! filters.hasOwnProperty('gene')) {
-          filters.gene = {};
-        }
-        if (! filters.gene.hasOwnProperty(Extensions.ENTITY)) {
-          filters.gene[Extensions.ENTITY] = {};
-        }
-        filters.gene[Extensions.ENTITY].is = [id];
-        $location.path('/search/g').search( {filters: angular.toJson(filters)} );
+        var search = LocationService.search();
+        search.filters = angular.toJson(GeneSetVerificationService.geneSetIdFilters(id));
+        $location.path('/search/g').search(search);
+
       } else {
         createNewGeneList();
       }
@@ -223,7 +265,6 @@
       $modalInstance.dismiss('cancel');
     };
 
-
     $scope.resetListInput = function() {
       $scope.params.selectedSavedSet = -1;
     };
@@ -242,13 +283,8 @@
       if (verifyPromise) {
         $timeout.cancel(verifyPromise);
       }
-      if ($scope.myFile) {
-        $scope.myFile = null;
-      }
-
-      $scope.params.rawText = null;
-      $scope.invalidIds = null;
-      $scope.validIds = null;
+      $scope.params = null;
+      $scope.out = null;
     });
 
   });

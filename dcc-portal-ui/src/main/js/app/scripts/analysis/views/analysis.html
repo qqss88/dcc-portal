@@ -68,13 +68,16 @@
             <br>
             <small>Note: Enrichment Analysis has an upper limit of 10,000 genes, Set Operations supports up to 3 sets of the same type.</small>
             <br>
-
-            <!--<small>For more information on the Bench, please refer to <a href="">documentation</a>. </small>-->
-            <!--<small>Documentation is available on this link: <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis Documentation</a></small>-->
             <small>Please see the <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis</a> documentation resource for a general overview of this feature.</small>
-
             </span>
-            <br><br>
+
+            <div>
+                <button type="button" class="t_button" data-ng-click="addCustomGeneSet()">
+                    <i class="icon-plus"></i> Add Custom Gene Set
+                </button>
+            </div>
+
+            <br>
 
             <span class="alert-error" data-ng-if="syncError">
                 <i class="icon-attention"></i>
