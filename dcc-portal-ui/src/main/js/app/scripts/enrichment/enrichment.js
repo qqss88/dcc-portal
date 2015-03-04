@@ -26,7 +26,8 @@
     $scope.params.maxGeneSetCount = 50;
     $scope.params.fdr = 0.05;
     $scope.params.universe = 'REACTOME_PATHWAYS';
-    $scope.params.maxGeneCount = geneLimit || 10000;
+    $scope.params.maxGeneCount = Math.min(geneLimit || 10000, 10000);
+    $scope.params.geneLimit = $scope.params.maxGeneCount; // Absolute max
 
 
     function hasValidFDR(val) {
@@ -50,7 +51,7 @@
       if (isNaN(val) === true) {
         return false;
       }
-      if (angular.isNumber(v) === false || v > $scope.geneLimit || v <= 0) {
+      if (angular.isNumber(v) === false || v > geneLimit || v <= 0) {
         return false;
       }
       return true;

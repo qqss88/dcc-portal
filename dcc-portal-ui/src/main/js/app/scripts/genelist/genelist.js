@@ -166,8 +166,10 @@
 
 
     // FIXME: Need to verify if sets are valid or not - broadcast??
-    $scope.params.savedSets = SetService.getAllGeneSets();
-    $scope.params.selectedSavedSet = -1;
+    SetService.sync().then(function() {
+      $scope.params.savedSets = SetService.getAllGeneSets();
+      $scope.params.selectedSavedSet = -1;
+    });
 
     // Output
     $scope.out = {};

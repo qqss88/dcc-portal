@@ -265,6 +265,7 @@
         localStorageService.set(LIST_ENTITY, setList);
         _this.refreshList();
       });
+      return promise;
     };
 
 
