@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
-
 import java.net.URI;
 import java.util.UUID;
 
@@ -127,9 +126,7 @@ public final class AuthUtils {
    * @param redirect - redirection URL
    * @throws AuthenticationException
    */
-  public static void throwRedirectException(@NonNull String userMessage, @NonNull String logMessage,
-      @NonNull URI redirect) {
-
+  public static void throwRedirectException(@NonNull String userMessage, @NonNull String logMessage, URI redirect) {
     log.info(logMessage);
     throw new AuthenticationException(userMessage, false, redirect);
   }
@@ -141,7 +138,7 @@ public final class AuthUtils {
    * @param redirect - redirection URL
    * @throws AuthenticationException
    */
-  public static void throwRedirectException(@NonNull String userMessage, @NonNull URI redirect) {
+  public static void throwRedirectException(@NonNull String userMessage, URI redirect) {
     throwRedirectException(userMessage, userMessage, redirect);
   }
 
