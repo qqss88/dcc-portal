@@ -25,7 +25,6 @@ import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.qe.PqlParseTreeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Encapsulates {@code from} and {@code size}, because of the requirement that {@link PqlParseTreeVisitor} returns an
@@ -39,7 +38,7 @@ public class LimitNode extends ExpressionNode {
   int size;
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitLimit(this, context);
   }
 

@@ -45,129 +45,128 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
-import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Removes nodes that do not have children. E.g. MustBoolNode without children must be removed as it breaks an ES search
  * request.
  */
 @Slf4j
-public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode> {
+public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> {
 
   public static final ExpressionNode REMOVE_NODE = null;
 
   @Override
-  public ExpressionNode visitNested(NestedNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitNested(NestedNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitTerm(TermNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerm(TermNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitTerms(TermsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerms(TermsNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitNot(NotNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitNot(NotNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitSort(SortNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitSort(SortNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitTerminal(TerminalNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerminal(TerminalNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitRange(RangeNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitRange(RangeNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitGreaterEqual(GreaterEqualNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitGreaterEqual(GreaterEqualNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitGreaterThan(GreaterThanNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitGreaterThan(GreaterThanNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitLessEqual(LessEqualNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLessEqual(LessEqualNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitLessThan(LessThanNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLessThan(LessThanNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitLimit(LimitNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLimit(LimitNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitAnd(AndNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitAnd(AndNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitOr(OrNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitOr(OrNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitFields(FieldsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFields(FieldsNode node, Optional<Void> context) {
     return node;
   }
 
   @Override
-  public ExpressionNode visitQuery(QueryNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitQuery(QueryNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitRoot(RootNode node, Optional<Void> context) {
     return processChildren(node);
   }
 
   @Override
-  public ExpressionNode visitFilter(FilterNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFilter(FilterNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitBool(BoolNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitBool(BoolNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitMustBool(MustBoolNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitMustBool(MustBoolNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitAggregations(AggregationsNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
     return processChildren(node);
   }
 
   @Override
-  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<Void> context) {
     // Clean filters
     node.getFilters().accept(this, Optional.empty());
 

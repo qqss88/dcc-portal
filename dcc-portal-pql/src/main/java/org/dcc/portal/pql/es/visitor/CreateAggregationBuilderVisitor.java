@@ -17,10 +17,10 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
+
 import java.util.Optional;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,13 +34,9 @@ import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 
 @Slf4j
-@RequiredArgsConstructor
-public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggregationBuilder> {
+public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggregationBuilder, QueryContext> {
 
   private static int DEFAULT_FACETS_SIZE = 100;
-
-  @NonNull
-  private final AbstractTypeModel typeModel;
 
   @Override
   public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
@@ -50,8 +46,10 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
 
+    checkOptional(context);
+    val typeModel = context.get().getTypeModel();
     if (typeModel.isNested(fieldName)) {
-      result = createNestedAggregation(result, node);
+      result = createNestedAggregation(result, node, typeModel);
     }
 
     // If this node is not a child of a FilterAggregationNode set scope of the aggregation to global
@@ -69,9 +67,10 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
     log.debug("Visiting FilterAggregationNode: \n{}", node);
 
     log.debug("Filters: {}", node.getFilters());
+    checkOptional(context);
     val filterAggregationBuilder = AggregationBuilders.filter(node.getAggregationName())
-        .filter(resolveFilters(node))
-        .subAggregation(node.getFirstChild().accept(this, Optional.empty()));
+        .filter(resolveFilters(node, context))
+        .subAggregation(node.getFirstChild().accept(this, context));
 
     return AggregationBuilders
         .global(node.getAggregationName())
@@ -79,14 +78,14 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   }
 
   private AbstractAggregationBuilder createNestedAggregation(AbstractAggregationBuilder termsAggregation,
-      TermsAggregationNode node) {
+      TermsAggregationNode node, AbstractTypeModel typeModel) {
     return AggregationBuilders.nested(node.getAggregationName())
         .path(typeModel.getNestedPath(node.getFieldName()))
         .subAggregation(termsAggregation);
   }
 
-  private FilterBuilder resolveFilters(FilterAggregationNode parent) {
-    return parent.getFilters().accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty());
+  private FilterBuilder resolveFilters(FilterAggregationNode parent, Optional<QueryContext> context) {
+    return parent.getFilters().accept(Visitors.filterBuilderVisitor(), context);
   }
 
 }

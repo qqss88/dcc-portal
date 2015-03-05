@@ -26,7 +26,6 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
@@ -36,7 +35,6 @@ import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +51,7 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
   @Before
   public void setUp() {
     es.execute(createIndexMappings(MUTATION_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new CreateFilterBuilderVisitor(es.client(), new MutationCentricTypeModel());
+    visitor = new CreateFilterBuilderVisitor(es.client());
 
     queryContext = new QueryContext();
     queryContext.setType(MUTATION_CENTRIC);
@@ -306,7 +304,7 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
 
   private SearchResponse executeQuery(String query) {
     ExpressionNode esAst = createTree(query);
-    esAst = esAstTransformator.process(esAst, Type.MUTATION_CENTRIC);
+    esAst = esAstTransformator.process(esAst, queryContext);
     log.debug("ES AST: {}", esAst);
     val request = visitor.visit(esAst, queryContext);
     log.debug("Request - {}", request);

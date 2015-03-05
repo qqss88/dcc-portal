@@ -34,7 +34,6 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class AggregationsResolverVisitorTest {
 
   @Before
   public void setUp() {
-    resolver = new AggregationsResolverVisitor(Type.DONOR_CENTRIC);
+    resolver = new AggregationsResolverVisitor();
   }
 
   @Test
@@ -140,14 +139,6 @@ public class AggregationsResolverVisitorTest {
     val termNode = (TermNode) mustNode.getFirstChild();
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
-  }
-
-  @Test
-  public void resolveFacetsTest_malformedRootNode() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Source AST must be an instance of RootNode");
-    val esAst = createEsAst("facets(gender)");
-    resolver.resolveAggregations(esAst.getFirstChild(), Type.DONOR_CENTRIC);
   }
 
 }

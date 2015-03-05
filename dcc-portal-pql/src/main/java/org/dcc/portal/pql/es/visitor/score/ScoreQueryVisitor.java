@@ -26,11 +26,12 @@ import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Adds score queries to DonorCentric and GeneCentric type models.
  */
-public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode> {
+public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
 
   private static final String SCORE_MODE = "total";
 

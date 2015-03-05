@@ -32,7 +32,6 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
-import org.dcc.portal.pql.qe.QueryContext;
 
 import com.google.common.collect.Lists;
 
@@ -58,7 +57,7 @@ public abstract class ExpressionNode {
     }
   }
 
-  public abstract <T> T accept(NodeVisitor<T> visitor, Optional<QueryContext> context);
+  public abstract <T, A> T accept(NodeVisitor<T, A> visitor, Optional<A> context);
 
   public int childrenCount() {
     return children.size();
@@ -99,7 +98,7 @@ public abstract class ExpressionNode {
 
   @Override
   public String toString() {
-    return accept(Visitors.createToStringVisitor(), Optional.empty());
+    return accept(Visitors.createToStringVisitor(), Optional.<Void> empty());
   }
 
   public boolean hasNestedParent() {

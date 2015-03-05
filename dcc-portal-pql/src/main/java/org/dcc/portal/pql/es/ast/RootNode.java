@@ -22,7 +22,6 @@ import java.util.Optional;
 import lombok.NonNull;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
 
 public class RootNode extends ExpressionNode {
 
@@ -31,7 +30,7 @@ public class RootNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitRoot(this, context);
   }
 

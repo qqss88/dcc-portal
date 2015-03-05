@@ -27,7 +27,6 @@ import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -46,7 +45,7 @@ public class TerminalNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitTerminal(this, context);
   }
 

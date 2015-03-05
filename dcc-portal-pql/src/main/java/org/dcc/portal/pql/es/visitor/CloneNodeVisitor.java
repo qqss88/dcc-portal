@@ -45,34 +45,33 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
-import org.dcc.portal.pql.qe.QueryContext;
 
 import com.google.common.collect.Lists;
 
-public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
+public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
 
   @Override
-  public ExpressionNode visitFilter(FilterNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFilter(FilterNode node, Optional<Void> context) {
     return new FilterNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitNested(NestedNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitNested(NestedNode node, Optional<Void> context) {
     return new NestedNode(node.getPath(), visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitBool(BoolNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitBool(BoolNode node, Optional<Void> context) {
     return new BoolNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitMustBool(MustBoolNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitMustBool(MustBoolNode node, Optional<Void> context) {
     return new MustBoolNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitTerm(TermNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerm(TermNode node, Optional<Void> context) {
     val nameNode = new TerminalNode(node.getNameNode().getValue());
     val valueNode = new TerminalNode(node.getValueNode().getValue());
 
@@ -80,7 +79,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitTerms(TermsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerms(TermsNode node, Optional<Void> context) {
     val result = new TermsNode(node.getField());
     result.addChildren(visitChildren(node));
 
@@ -88,17 +87,17 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitNot(NotNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitNot(NotNode node, Optional<Void> context) {
     return new NotNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitRoot(RootNode node, Optional<Void> context) {
     return new RootNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitSort(SortNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitSort(SortNode node, Optional<Void> context) {
     val result = new SortNode();
     for (val entry : node.getFields().entrySet()) {
       result.addField(entry.getKey(), entry.getValue());
@@ -108,67 +107,67 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitTerminal(TerminalNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTerminal(TerminalNode node, Optional<Void> context) {
     return new TerminalNode(node.getValue());
   }
 
   @Override
-  public ExpressionNode visitRange(RangeNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitRange(RangeNode node, Optional<Void> context) {
     return new RangeNode(node.getFieldName(), visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitGreaterEqual(GreaterEqualNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitGreaterEqual(GreaterEqualNode node, Optional<Void> context) {
     return new GreaterEqualNode(visitChildren(node)[0]);
   }
 
   @Override
-  public ExpressionNode visitGreaterThan(GreaterThanNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitGreaterThan(GreaterThanNode node, Optional<Void> context) {
     return new GreaterThanNode(visitChildren(node)[0]);
   }
 
   @Override
-  public ExpressionNode visitLessEqual(LessEqualNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLessEqual(LessEqualNode node, Optional<Void> context) {
     return new LessEqualNode(visitChildren(node)[0]);
   }
 
   @Override
-  public ExpressionNode visitLessThan(LessThanNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLessThan(LessThanNode node, Optional<Void> context) {
     return new LessThanNode(visitChildren(node)[0]);
   }
 
   @Override
-  public ExpressionNode visitLimit(LimitNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitLimit(LimitNode node, Optional<Void> context) {
     return new LimitNode(node.getFrom(), node.getSize());
   }
 
   @Override
-  public ExpressionNode visitAnd(AndNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitAnd(AndNode node, Optional<Void> context) {
     return new AndNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitOr(OrNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitOr(OrNode node, Optional<Void> context) {
     return new OrNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitAggregations(AggregationsNode node, Optional<Void> context) {
     return new AggregationsNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitFields(FieldsNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFields(FieldsNode node, Optional<Void> context) {
     return new FieldsNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitQuery(QueryNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitQuery(QueryNode node, Optional<Void> context) {
     return new QueryNode(visitChildren(node));
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
     val result = new TermsAggregationNode(node.getAggregationName(), node.getFieldName());
     result.addChildren(visitChildren(node));
 
@@ -176,7 +175,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<Void> context) {
     val result = new FilterAggregationNode(node.getAggregationName(), node.getFilters());
     result.addChildren(visitChildren(node));
 

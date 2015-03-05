@@ -23,24 +23,21 @@ import lombok.NoArgsConstructor;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Visitors {
 
-  private static final NodeVisitor<String> TO_STRING_VISITOR = new ToStringVisitor();
-  private static final NodeVisitor<ExpressionNode> CLONE_VISITOR = new CloneNodeVisitor();
+  private static final NodeVisitor<String, Void> TO_STRING_VISITOR = new ToStringVisitor();
+  private static final NodeVisitor<ExpressionNode, Void> CLONE_VISITOR = new CloneNodeVisitor();
 
-  private static final CreateAggregationBuilderVisitor MUTATION_AGGREGATION_BUILDER_VISITOR =
-      new CreateAggregationBuilderVisitor(IndexModel.getMutationCentricTypeModel());
+  private static final CreateAggregationBuilderVisitor AGGREGATION_BUILDER_VISITOR =
+      new CreateAggregationBuilderVisitor();
 
-  private static final FilterBuilderVisitor MUTATION_FILTER_VISITOR = new FilterBuilderVisitor(
-      IndexModel.getMutationCentricTypeModel());
+  private static final FilterBuilderVisitor FILTER_BUILDER_VISITOR = new FilterBuilderVisitor();
 
   private static final RemoveAggregationFilterVisitor REMOVE_AGGS_FILTER_VISITOR = new RemoveAggregationFilterVisitor();
 
@@ -49,58 +46,52 @@ public class Visitors {
    */
   private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
+  private static final GeneScoreQueryVisitor GENE_SCORE_QUERY_VISITOR = new GeneScoreQueryVisitor();
 
   /*
    * QueryBuilderVisitor
    */
   private static final CreateQueryBuilderVisitor QUERY_BUILDER_VISITOR = new CreateQueryBuilderVisitor();
 
-  // FIXME: implement
+  private static final AggregationFiltersVisitor AGGREGATION_FILTER_VISITOR = new AggregationFiltersVisitor();
+  private static final AggregationsResolverVisitor AGGREGATIONS_RESOLVER_VISITOR = new AggregationsResolverVisitor();
+
+  private static final EmptyNodesCleanerVisitor EMPTY_NODES_CLEANER_VISITOR = new EmptyNodesCleanerVisitor();
+
+  public static EmptyNodesCleanerVisitor createEmptyNodesCleanerVisitor() {
+    return EMPTY_NODES_CLEANER_VISITOR;
+  }
+
+  public static AggregationsResolverVisitor createAggregationsResolverVisitor() {
+    return AGGREGATIONS_RESOLVER_VISITOR;
+  }
+
+  public static AggregationFiltersVisitor createAggregationFiltersVisitor() {
+    return AGGREGATION_FILTER_VISITOR;
+  }
 
   public static CreateQueryBuilderVisitor createQueryBuilderVisitor() {
     return QUERY_BUILDER_VISITOR;
   }
 
-  public static void createFacetBuilderVisitor() {
+  public static CreateFilterBuilderVisitor createFilterBuilderVisitor(Client client) {
+    return new CreateFilterBuilderVisitor(client);
   }
 
-  public static CreateFilterBuilderVisitor createFilterBuilderVisitor(Client client, AbstractTypeModel typeModel) {
-    return new CreateFilterBuilderVisitor(client, typeModel);
-  }
-
-  public static void createEmptyNodesCleanerVisitor() {
-  }
-
-  public static void createFacetFiltersVisitor() {
-  }
-
-  public static void createFacetsResolverVisitor() {
-  }
-
-  public static NodeVisitor<String> createToStringVisitor() {
+  public static NodeVisitor<String, Void> createToStringVisitor() {
     return TO_STRING_VISITOR;
   }
 
-  public static NodeVisitor<ExpressionNode> createCloneNodeVisitor() {
+  public static NodeVisitor<ExpressionNode, Void> createCloneNodeVisitor() {
     return CLONE_VISITOR;
   }
 
-  public static CreateAggregationBuilderVisitor createAggregationBuilderVisitor(AbstractTypeModel typeModel) {
-    if (typeModel instanceof MutationCentricTypeModel) {
-      return MUTATION_AGGREGATION_BUILDER_VISITOR;
-    }
-
-    // FIXME: Add the other typeModels
-
-    throw new IllegalArgumentException();
+  public static CreateAggregationBuilderVisitor createAggregationBuilderVisitor() {
+    return AGGREGATION_BUILDER_VISITOR;
   }
 
-  public static FilterBuilderVisitor filterBuilderVisitor(AbstractTypeModel typeModel) {
-    if (typeModel instanceof MutationCentricTypeModel) {
-      return MUTATION_FILTER_VISITOR;
-    }
-
-    throw new IllegalArgumentException();
+  public static FilterBuilderVisitor filterBuilderVisitor() {
+    return FILTER_BUILDER_VISITOR;
   }
 
   public static RemoveAggregationFilterVisitor createRemoveAggregationFilterVisitor() {
@@ -111,6 +102,8 @@ public class Visitors {
     switch (type) {
     case DONOR_CENTRIC:
       return DONOR_SCORE_QUERY_VISITOR;
+    case GENE_CENTRIC:
+      return GENE_SCORE_QUERY_VISITOR;
     default:
       return DEFAULT_SCORE_QUERY_VISITOR;
     }

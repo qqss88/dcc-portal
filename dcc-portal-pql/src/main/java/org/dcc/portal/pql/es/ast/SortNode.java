@@ -26,7 +26,6 @@ import lombok.Value;
 
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
 
 import com.beust.jcommander.internal.Maps;
 
@@ -37,7 +36,7 @@ public class SortNode extends ExpressionNode {
   Map<String, Order> fields = Maps.newHashMap();
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitSort(this, context);
   }
 

@@ -35,7 +35,7 @@ import org.dcc.portal.pql.qe.QueryContext;
  * {@link TermsAggregationNode}) one level up.
  */
 @Slf4j
-public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode> {
+public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
 
   private static final ExpressionNode SKIP_NODE = null;
 

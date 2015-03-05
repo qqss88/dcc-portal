@@ -15,35 +15,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast.filter;
+package org.dcc.portal.pql.es.utils;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
+import lombok.NoArgsConstructor;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+@NoArgsConstructor(access = PRIVATE)
+public class Visitors {
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class GreaterEqualNode extends ExpressionNode {
-
-  @NonNull
-  Object value;
-
-  public GreaterEqualNode(@NonNull ExpressionNode node) {
-    val terminalNode = (TerminalNode) node;
-    this.value = terminalNode.getValue();
-    addChildren(node);
-  }
-
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitGreaterEqual(this, context);
+  public static <T> void checkOptional(Optional<T> optional) {
+    checkArgument(optional.isPresent(), "The optional does not contain any reference.");
   }
 
 }

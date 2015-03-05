@@ -23,7 +23,6 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import java.util.Optional;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
@@ -31,10 +30,8 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Test;
 
-@Slf4j
 public class DonorScoreQueryVisitorTest {
 
   DonorScoreQueryVisitor visitor = new DonorScoreQueryVisitor();
@@ -43,7 +40,7 @@ public class DonorScoreQueryVisitorTest {
   @Test
   public void visitRootTest_withQueryNode() {
     ExpressionNode esAst = createEsAst("facets(id), eq(id, 1)");
-    esAst = facetsResolver.resolveAggregations(esAst, Type.DONOR_CENTRIC);
+    esAst = esAst.accept(facetsResolver, Optional.empty());
     val origFilterNode = Nodes.cloneNode(esAst.getChild(1).getFirstChild());
 
     val result = esAst.accept(visitor, Optional.empty());

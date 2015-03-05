@@ -33,23 +33,19 @@ import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.sort.SortOrder;
 
-// TODO: create static factory construction methods that return cached visitor for each type model.
-// FIXME: Remove code which is present in the FilterBuilderVisitor
+// TODO: Rename
 @Slf4j
 @RequiredArgsConstructor
 public class CreateFilterBuilderVisitor {
 
   @NonNull
   private final Client client;
-  @NonNull
-  private final AbstractTypeModel typeModel;
 
   public SearchRequestBuilder visit(@NonNull ExpressionNode node, @NonNull QueryContext queryContext) {
     SearchRequestBuilder result = client
@@ -63,12 +59,12 @@ public class CreateFilterBuilderVisitor {
 
     for (val child : node.getChildren()) {
       if (child instanceof FilterNode) {
-        result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty()));
+        result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(), Optional.of(queryContext)));
       } else if (child instanceof QueryNode) {
-        val queryBuilder = child.accept(Visitors.createQueryBuilderVisitor(), Optional.ofNullable(queryContext));
+        val queryBuilder = child.accept(Visitors.createQueryBuilderVisitor(), Optional.of(queryContext));
         result.setQuery(queryBuilder);
       } else if (child instanceof AggregationsNode) {
-        addAggregations(child, result);
+        addAggregations(child, result, queryContext);
       } else if (child instanceof FieldsNode) {
         val fieldsNode = (FieldsNode) child;
         String[] children = fieldsNode.getFields().toArray(new String[fieldsNode.getFields().size()]);
@@ -88,10 +84,10 @@ public class CreateFilterBuilderVisitor {
     return result;
   }
 
-  private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result) {
+  private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result, QueryContext queryContext) {
     log.debug("Adding aggregations for AggregationsNode\n{}", aggregationsNode);
     for (val child : aggregationsNode.getChildren()) {
-      val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(typeModel), Optional.empty());
+      val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(), Optional.of(queryContext));
       result.addAggregation(aggregationBuilder);
     }
   }

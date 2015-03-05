@@ -17,14 +17,11 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 
 import java.util.Optional;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -37,33 +34,19 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.qe.QueryContext;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 
 /**
  * Processes aggregations. Moves FilterNode to a QueryNode. Copies the FilterNode to facet's filter node except filters
  * for facets being calculated.
  */
 @Slf4j
-@NoArgsConstructor
-@AllArgsConstructor
-public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
+public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Void> {
 
-  private Type type;
-  private final AggregationFiltersVisitor aggregationFilterVisitor = new AggregationFiltersVisitor();
-
-  public ExpressionNode resolveAggregations(@NonNull ExpressionNode sourceAst, @NonNull Type type) {
-    checkArgument(sourceAst instanceof RootNode, "Source AST must be an instance of RootNode");
-    this.type = type;
-    val result = sourceAst.accept(this, Optional.empty());
-    log.debug("Resolved Aggregations to: \n{}", result);
-
-    return result;
-  }
+  private final AggregationFiltersVisitor aggregationFilterVisitor = Visitors.createAggregationFiltersVisitor();
 
   @Override
-  public ExpressionNode visitRoot(@NonNull RootNode rootNode, Optional<QueryContext> context) {
-    log.debug("Resolving aggregations for type {}. Source AST: {}", type.getId(), rootNode);
+  public ExpressionNode visitRoot(@NonNull RootNode rootNode, Optional<Void> context) {
+    log.debug("Resolving aggregations. Source AST: {}", rootNode);
 
     if (!hasAggregations(rootNode)) {
       log.debug("The source AST does not contain a AggregationsNode. Returning the original source AST back.");
@@ -82,7 +65,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
     val aggsNode = getAggregationsNodeOptional(rootNode).get();
 
     for (int i = 0; i < aggsNode.childrenCount(); i++) {
-      val childAggsNode = aggsNode.getChild(i).accept(this, Optional.empty());
+      val childAggsNode = aggsNode.getChild(i).accept(this, context);
       if (childAggsNode instanceof FilterAggregationNode) {
         aggsNode.setChild(i, childAggsNode);
       }
@@ -94,10 +77,10 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
     log.debug("Visiting TermsAggregationsNode. {}", node);
     val rootNode = node.getParent().getParent();
-    val filtersNodeOpt = getOptionalChild(rootNode, FilterNode.class);
+    val filtersNodeOpt = getFilterNodeOptional(rootNode);
     if (filtersNodeOpt.isPresent()) {
 
       // The filters are enclosed in a FilterAggregationNode with is added to the AggregationsNode (parent
@@ -117,7 +100,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   private ExpressionNode processFilters(String facetField, ExpressionNode filterNode) {
-    return aggregationFilterVisitor.visit(facetField, (FilterNode) filterNode);
+    return filterNode.accept(aggregationFilterVisitor, Optional.of(facetField));
   }
 
   private Optional<AggregationsNode> getAggregationsNodeOptional(ExpressionNode rootNode) {

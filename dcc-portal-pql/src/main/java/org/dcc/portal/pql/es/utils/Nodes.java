@@ -37,7 +37,7 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class Nodes {
 
-  private static final NodeVisitor<ExpressionNode> CLONE_VISITOR = Visitors.createCloneNodeVisitor();
+  private static final NodeVisitor<ExpressionNode, Void> CLONE_VISITOR = Visitors.createCloneNodeVisitor();
 
   public static <T> List<T> filterChildren(@NonNull ExpressionNode node, @NonNull Class<T> childType) {
     val children = filter(node.getChildren(), childType);

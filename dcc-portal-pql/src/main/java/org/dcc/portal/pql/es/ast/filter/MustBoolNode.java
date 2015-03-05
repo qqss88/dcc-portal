@@ -23,7 +23,6 @@ import lombok.NonNull;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
 
 public class MustBoolNode extends ExpressionNode {
 
@@ -32,7 +31,7 @@ public class MustBoolNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitMustBool(this, context);
   }
 

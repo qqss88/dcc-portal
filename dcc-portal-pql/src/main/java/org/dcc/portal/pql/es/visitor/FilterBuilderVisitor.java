@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.visitor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
+import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
 import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
@@ -32,8 +33,8 @@ import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import java.util.Optional;
 import java.util.Stack;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,16 +66,14 @@ import com.google.common.collect.Lists;
  * Visits {@link FilterNode} and builds FilterBuilders
  */
 @Slf4j
-@RequiredArgsConstructor
-public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
+@NoArgsConstructor
+public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContext> {
 
-  @NonNull
-  private final AbstractTypeModel typeModel;
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
 
   @Override
   public FilterBuilder visitFilter(@NonNull FilterNode node, Optional<QueryContext> context) {
-    return visitBool((BoolNode) node.getFirstChild(), Optional.empty());
+    return node.getFirstChild().accept(this, context);
   }
 
   @Override
@@ -82,7 +81,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     log.debug("Visiting And: {}", node);
     val childrenFilters = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
-      childrenFilters.add(child.accept(this, Optional.empty()));
+      childrenFilters.add(child.accept(this, context));
     }
 
     return andFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
@@ -93,7 +92,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     BoolFilterBuilder resultBuilder = boolFilter();
     val mustNode = getChild(node, MustBoolNode.class);
     if (mustNode != null) {
-      resultBuilder = resultBuilder.must(visitChildren(mustNode));
+      resultBuilder = resultBuilder.must(visitChildren(mustNode, context));
     }
 
     return resultBuilder;
@@ -139,7 +138,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   public FilterBuilder visitNested(NestedNode node, Optional<QueryContext> context) {
     log.debug("Visiting Nested: {}", node);
 
-    return nestedFilter(node.getPath(), node.getFirstChild().accept(this, Optional.empty()));
+    return nestedFilter(node.getPath(), node.getFirstChild().accept(this, context));
   }
 
   @Override
@@ -147,7 +146,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     val childrenCount = node.childrenCount();
     checkState(childrenCount == 1, "NotNode can have only one child. Found {}", childrenCount);
 
-    return notFilter(node.getFirstChild().accept(this, Optional.empty()));
+    return notFilter(node.getFirstChild().accept(this, context));
   }
 
   @Override
@@ -155,7 +154,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     log.debug("Visiting Or: {}", node);
     val childrenFilters = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
-      childrenFilters.add(child.accept(this, Optional.empty()));
+      childrenFilters.add(child.accept(this, context));
     }
 
     return orFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
@@ -167,10 +166,12 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
 
     stack.push(rangeFilter(node.getFieldName()));
     for (val child : node.getChildren()) {
-      child.accept(this, Optional.empty());
+      child.accept(this, context);
     }
 
-    return createNestedFilter(node, node.getFieldName(), stack.pop());
+    checkOptional(context);
+
+    return createNestedFilter(node, node.getFieldName(), stack.pop(), context.get().getTypeModel());
   }
 
   @Override
@@ -179,8 +180,9 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     val value = node.getValueNode().getValue();
     log.debug("[visitTerm] Name: {}, Value: {}", name, value);
     val result = termFilter(name, value);
+    checkOptional(context);
 
-    return createNestedFilter(node, name, result);
+    return createNestedFilter(node, name, result, context.get().getTypeModel());
   }
 
   @Override
@@ -190,7 +192,9 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
       values.add(((TerminalNode) child).getValue());
     }
 
-    return createNestedFilter(node, node.getField(), termsFilter(node.getField(), values));
+    checkOptional(context);
+
+    return createNestedFilter(node, node.getField(), termsFilter(node.getField(), values), context.get().getTypeModel());
   }
 
   private static <T> T getChild(BoolNode boolNode, Class<T> type) {
@@ -205,12 +209,12 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
     }
   }
 
-  private FilterBuilder[] visitChildren(ExpressionNode node) {
+  private FilterBuilder[] visitChildren(ExpressionNode node, Optional<QueryContext> context) {
     log.debug("Visiting Bool child: {}", node);
     val result = Lists.<FilterBuilder> newArrayList();
     for (val child : node.getChildren()) {
       log.debug("Sub-child: {}", child);
-      result.add(child.accept(this, Optional.empty()));
+      result.add(child.accept(this, context));
     }
 
     return result.toArray(new FilterBuilder[result.size()]);
@@ -220,7 +224,8 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
    * Wraps {@code field} in a {@code nested} query if the {@code node} which contains the {@code field} does not have a
    * {@link NestedNode} parent.
    */
-  private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter) {
+  private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter,
+      AbstractTypeModel typeModel) {
     if (typeModel.isNested(field)) {
       if (!node.hasNestedParent()) {
         val nestedPath = typeModel.getNestedPath(field);

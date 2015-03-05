@@ -48,63 +48,62 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
-import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Creates a String representation of the ES AST.
  */
-public class ToStringVisitor extends NodeVisitor<String> {
+public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   private static final String NEWLINE = System.getProperty("line.separator");
   private static final String DEFAULT_INDENT = "  ";
 
   @Override
-  public String visitFilter(FilterNode node, Optional<QueryContext> context) {
+  public String visitFilter(FilterNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitNested(NestedNode node, Optional<QueryContext> context) {
+  public String visitNested(NestedNode node, Optional<Void> context) {
     val header = format("%s [path: %s, score_mode: %s]", getCommonHeader(node), node.getPath(), node.getScoreMode());
 
     return buildToString(node, Optional.of(header));
   }
 
   @Override
-  public String visitBool(BoolNode node, Optional<QueryContext> context) {
+  public String visitBool(BoolNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitMustBool(MustBoolNode node, Optional<QueryContext> context) {
+  public String visitMustBool(MustBoolNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitTerm(TermNode node, Optional<QueryContext> context) {
+  public String visitTerm(TermNode node, Optional<Void> context) {
     return format("%s (%s = %s)", getCommonHeader(node), node.getNameNode().getValue(), node.getValueNode().getValue());
   }
 
   @Override
-  public String visitTerms(TermsNode node, Optional<QueryContext> context) {
+  public String visitTerms(TermsNode node, Optional<Void> context) {
     val header = format("%s [%s]", getCommonHeader(node), node.getField());
 
     return buildToString(node, Optional.of(header));
   }
 
   @Override
-  public String visitNot(NotNode node, Optional<QueryContext> context) {
+  public String visitNot(NotNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitRoot(RootNode node, Optional<QueryContext> context) {
+  public String visitRoot(RootNode node, Optional<Void> context) {
     val builder = new StringBuilder();
     builder.append("{");
     builder.append(NEWLINE);
 
     for (val child : node.getChildren()) {
-      builder.append(child.accept(this, Optional.empty()));
+      builder.append(child.accept(this, Optional.<Void> empty()));
       builder.append(",");
       builder.append(NEWLINE);
     }
@@ -115,7 +114,7 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitSort(SortNode node, Optional<QueryContext> context) {
+  public String visitSort(SortNode node, Optional<Void> context) {
     val builder = new StringBuilder();
     builder.append(getCommonHeader(node));
     builder.append(" [");
@@ -130,54 +129,54 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitTerminal(TerminalNode node, Optional<QueryContext> context) {
+  public String visitTerminal(TerminalNode node, Optional<Void> context) {
     return format("%s = %s", getCommonHeader(node), node.getValue());
   }
 
   @Override
-  public String visitRange(RangeNode node, Optional<QueryContext> context) {
+  public String visitRange(RangeNode node, Optional<Void> context) {
     val header = format("%s [%s]", getCommonHeader(node), node.getFieldName());
 
     return buildToString(node, Optional.of(header));
   }
 
   @Override
-  public String visitGreaterEqual(GreaterEqualNode node, Optional<QueryContext> context) {
+  public String visitGreaterEqual(GreaterEqualNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitGreaterThan(GreaterThanNode node, Optional<QueryContext> context) {
+  public String visitGreaterThan(GreaterThanNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitLessEqual(LessEqualNode node, Optional<QueryContext> context) {
+  public String visitLessEqual(LessEqualNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitLessThan(LessThanNode node, Optional<QueryContext> context) {
+  public String visitLessThan(LessThanNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitLimit(LimitNode node, Optional<QueryContext> context) {
+  public String visitLimit(LimitNode node, Optional<Void> context) {
     return format("%s [from: %d, size: %d]", getCommonHeader(node), node.getFrom(), node.getSize());
   }
 
   @Override
-  public String visitAnd(AndNode node, Optional<QueryContext> context) {
+  public String visitAnd(AndNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitOr(OrNode node, Optional<QueryContext> context) {
+  public String visitOr(OrNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitFields(FieldsNode node, Optional<QueryContext> context) {
+  public String visitFields(FieldsNode node, Optional<Void> context) {
     val builder = new StringBuilder();
     builder.append(getCommonHeader(node));
     builder.append(" [");
@@ -190,17 +189,17 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitQuery(QueryNode node, Optional<QueryContext> context) {
+  public String visitQuery(QueryNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+  public String visitAggregations(AggregationsNode node, Optional<Void> context) {
     return buildToString(node);
   }
 
   @Override
-  public String visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+  public String visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
     val header =
         format("%s%s [%s(%s)] (", calcIndent(node), node.getNodeName(), node.getAggregationName(), node.getFieldName());
 
@@ -208,7 +207,7 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
+  public String visitFilterAggregation(FilterAggregationNode node, Optional<Void> context) {
     val builder = new StringBuilder();
     builder.append(format("%s%s [%s] (", calcIndent(node), node.getNodeName(), node.getAggregationName()));
     builder.append(NEWLINE);
@@ -218,7 +217,7 @@ public class ToStringVisitor extends NodeVisitor<String> {
   }
 
   @Override
-  public String visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<QueryContext> context) {
+  public String visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<Void> context) {
     val header = format("%s [script: %s]", getCommonHeader(node), node.getScript());
 
     return buildToString(node, Optional.of(header));

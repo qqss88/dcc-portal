@@ -17,10 +17,13 @@
  */
 package org.dcc.portal.pql.es.utils;
 
+import static org.dcc.portal.pql.es.visitor.Visitors.createAggregationsResolverVisitor;
+import static org.dcc.portal.pql.es.visitor.Visitors.createEmptyNodesCleanerVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
 
 import java.util.Optional;
 
+import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,30 +33,31 @@ import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
-import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Performs series of transformations to resolve different processing rules and to optimize the AST
  */
 @Slf4j
+@NoArgsConstructor
 public class EsAstTransformator {
 
-  private final EmptyNodesCleanerVisitor emptyNodesCleaner = new EmptyNodesCleanerVisitor();
-  private final AggregationsResolverVisitor facetsResolver = new AggregationsResolverVisitor();
+  private final EmptyNodesCleanerVisitor emptyNodesCleaner = createEmptyNodesCleanerVisitor();
+  private final AggregationsResolverVisitor facetsResolver = createAggregationsResolverVisitor();
   private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
 
-  public ExpressionNode process(ExpressionNode esAst, Type type) {
+  public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
-    esAst = resolveFacets(esAst, type);
+    esAst = resolveFacets(esAst);
     esAst = optimize(esAst);
-    esAst = score(esAst, type);
+    esAst = score(esAst, context);
     log.debug("ES AST after the transformations: {}", esAst);
 
     return esAst;
   }
 
-  private ExpressionNode score(ExpressionNode esAst, Type type) {
-    return esAst.accept(Visitors.createScoreQueryVisitor(type), Optional.empty());
+  private ExpressionNode score(ExpressionNode esAst, QueryContext context) {
+    return esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
   }
 
   private ExpressionNode optimize(ExpressionNode esAst) {
@@ -69,8 +73,8 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  private ExpressionNode resolveFacets(ExpressionNode esAst, Type type) {
-    return facetsResolver.resolveAggregations(esAst, type);
+  private ExpressionNode resolveFacets(ExpressionNode esAst) {
+    return esAst.accept(facetsResolver, Optional.empty());
   }
 
 }

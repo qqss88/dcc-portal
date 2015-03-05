@@ -34,7 +34,7 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 /**
  * Creates QueryBuilder by visiting {@link QueryNode}
  */
-public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder> {
+public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryContext> {
 
   @Override
   public QueryBuilder visitQuery(QueryNode node, Optional<QueryContext> context) {
@@ -66,7 +66,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder> {
 
   @Override
   public QueryBuilder visitFilter(FilterNode node, Optional<QueryContext> context) {
-    val filterBuilder = node.accept(Visitors.filterBuilderVisitor(context.get().getTypeModel()), context);
+    val filterBuilder = node.accept(Visitors.filterBuilderVisitor(), context);
 
     return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
   }
