@@ -64,7 +64,7 @@
                    <br>
                    <div>
                        <div>Or choose a file to upload</div>
-                       <span class="t_button btn btn-file">
+                       <span class="t_button btn-file">
                            Browse <input type="file" accept=".tsv,.csv,text/*" data-file-upload="params.myFile">
                        </span>
                        {{params.fileName}}
@@ -141,7 +141,6 @@
                <div data-ng-if="params.inputMethod === 'set'">
                     
                    <div style="padding:0.5rem">
-                       <!--<div style="width:45rem; padding:0.5rem; border-radius:0.5rem; border:1px solid #CCC; overflow-y:scroll; max-height:5rem" data-ng-focus="resetCustomInput()">-->
                        <div class="select-list" style="max-height:25rem" data-ng-focus="resetCustomInput()">
                           <div data-ng-repeat="item in params.savedSets" class="select-list-item" 
                              data-ng-class="{active: $index === params.selectedSavedSet}"
@@ -155,13 +154,6 @@
                           </div>
                        </div>
                    </div>
-
-                   <!--
-                   <div data-ng-if="params.selectedSavedSet >= 0">
-                       <div>{{params.savedSets[params.selectedSavedSet].name}} - {{params.savedSets[params.selectedSavedSet].count}} genes</div>
-                       <div>{{params.savedSets[params.selectedSavedSet].description}}</div>
-                   </div>
-                   -->
                </div>
 
               

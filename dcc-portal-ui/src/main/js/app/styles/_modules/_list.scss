@@ -1,10 +1,9 @@
 .select-list {
   width: 100%;
-  padding:0.5rem; 
+  padding: 0.25rem 0.5rem; 
   border-radius:0.5rem; 
-  border:1px solid #CCC;
+  border:1px solid $greyLight;
   overflow-y: scroll;
-
 }
 
 .select-list-item {
