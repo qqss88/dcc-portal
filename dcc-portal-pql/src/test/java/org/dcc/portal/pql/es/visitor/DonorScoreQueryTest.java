@@ -36,14 +36,14 @@ import org.junit.Test;
 public class DonorScoreQueryTest extends BaseElasticsearchTest {
 
   private PqlParseListener listener;
-  private CreateFilterBuilderVisitor visitor;
+  private EsRequestBuilder visitor;
   private QueryContext queryContext;
   private EsAstTransformator esAstTransformator;
 
   @Before
   public void setUp() {
     es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new CreateFilterBuilderVisitor(es.client());
+    visitor = new EsRequestBuilder(es.client());
 
     queryContext = new QueryContext();
     queryContext.setType(DONOR_CENTRIC);
@@ -77,7 +77,7 @@ public class DonorScoreQueryTest extends BaseElasticsearchTest {
     ExpressionNode esAst = createTree(query);
     esAst = esAstTransformator.process(esAst, queryContext);
     log.debug("ES AST: {}", esAst);
-    val request = visitor.visit(esAst, queryContext);
+    val request = visitor.buildSearchRequest(esAst, queryContext);
     log.debug("Request - {}", request);
     val result = request.execute().actionGet();
     log.debug("Result - {}", result);

@@ -39,15 +39,14 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.sort.SortOrder;
 
-// TODO: Rename
 @Slf4j
 @RequiredArgsConstructor
-public class CreateFilterBuilderVisitor {
+public class EsRequestBuilder {
 
   @NonNull
   private final Client client;
 
-  public SearchRequestBuilder visit(@NonNull ExpressionNode node, @NonNull QueryContext queryContext) {
+  public SearchRequestBuilder buildSearchRequest(@NonNull ExpressionNode esAst, @NonNull QueryContext queryContext) {
     SearchRequestBuilder result = client
         .prepareSearch(queryContext.getIndex())
         .setTypes(queryContext.getType().getId());
@@ -57,7 +56,7 @@ public class CreateFilterBuilderVisitor {
       result = result.setSearchType(SearchType.COUNT);
     }
 
-    for (val child : node.getChildren()) {
+    for (val child : esAst.getChildren()) {
       if (child instanceof FilterNode) {
         result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(), Optional.of(queryContext)));
       } else if (child instanceof QueryNode) {

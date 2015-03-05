@@ -24,7 +24,7 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.Visitors;
+import org.dcc.portal.pql.es.visitor.EsRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
@@ -32,20 +32,22 @@ import org.elasticsearch.client.Client;
 public class QueryEngine {
 
   @NonNull
-  Client client;
-
-  @NonNull
   String index;
-  private final EsAstTransformator esAstTransformator = new EsAstTransformator();
+  EsAstTransformator esAstTransformator = new EsAstTransformator();
+  EsRequestBuilder requestBuilder;
+
+  public QueryEngine(@NonNull Client client, @NonNull String index) {
+    this.requestBuilder = new EsRequestBuilder(client);
+    this.index = index;
+  }
 
   public SearchRequestBuilder execute(@NonNull String pql, @NonNull QueryContext context) {
     context.setIndex(index);
 
     ExpressionNode esAst = resolvePql(pql, context);
     esAst = esAstTransformator.process(esAst, context);
-    val esVisitor = Visitors.createFilterBuilderVisitor(client);
 
-    return esVisitor.visit(esAst, context);
+    return requestBuilder.buildSearchRequest(esAst, context);
   }
 
   private static ExpressionNode resolvePql(String query, QueryContext context) {

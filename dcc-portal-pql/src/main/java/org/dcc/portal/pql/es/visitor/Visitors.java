@@ -25,7 +25,6 @@ import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
-import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -72,10 +71,6 @@ public class Visitors {
 
   public static CreateQueryBuilderVisitor createQueryBuilderVisitor() {
     return QUERY_BUILDER_VISITOR;
-  }
-
-  public static CreateFilterBuilderVisitor createFilterBuilderVisitor(Client client) {
-    return new CreateFilterBuilderVisitor(client);
   }
 
   public static NodeVisitor<String, Void> createToStringVisitor() {
