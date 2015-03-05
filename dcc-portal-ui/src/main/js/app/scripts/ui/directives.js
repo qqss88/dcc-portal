@@ -202,7 +202,7 @@ angular.module('app.ui.tooltipControl', [])
                 if(element.hasClass('sticky')){
                   var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
                     left: e.pageX,
-                    top: e.pageY,
+                    top: e.pageY - (scope.placement === 'top' ? 8 : 0),
                     width: 10,
                     height: -6
                   });

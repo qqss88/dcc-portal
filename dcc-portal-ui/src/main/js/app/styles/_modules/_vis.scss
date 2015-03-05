@@ -78,7 +78,7 @@
   fill: gray;
 }
 
-.stacked.x.axis path {
+.stacked.x.axis path, .stackedarea.x.axis.labels path  {
   display: none;
 }
 
@@ -86,6 +86,10 @@
     font-weight:normal;
     color: #999999;
     font-size: 13px;
+}
+
+.stackedareahint, .stackedareahinthighlight, .stackedarea.x.axis, .stackedarea.y.axis{
+  pointer-events: none;
 }
 
 /* modify the container of the stacked bar chart */

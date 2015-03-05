@@ -3215,7 +3215,7 @@ g.marker rect.selected {
 }
 
 /* line 81, _modules/_vis.scss */
-.stacked.x.axis path {
+.stacked.x.axis path, .stackedarea.x.axis.labels path {
   display: none;
 }
 
@@ -3226,25 +3226,30 @@ g.marker rect.selected {
   font-size: 13px;
 }
 
+/* line 91, _modules/_vis.scss */
+.stackedareahint, .stackedareahinthighlight, .stackedarea.x.axis, .stackedarea.y.axis {
+  pointer-events: none;
+}
+
 /* modify the container of the stacked bar chart */
-/* line 92, _modules/_vis.scss */
+/* line 96, _modules/_vis.scss */
 .wide.omega {
   text-align: right;
   margin-right: 30px;
   min-width: 500px;
 }
 
-/* line 98, _modules/_vis.scss */
+/* line 102, _modules/_vis.scss */
 #svgcontainer {
   min-width: 500px;
 }
 
-/* line 102, _modules/_vis.scss */
+/* line 106, _modules/_vis.scss */
 .venn-count {
   fill: #111;
 }
 
-/* line 106, _modules/_vis.scss */
+/* line 110, _modules/_vis.scss */
 .tick line {
   opacity: 0.1;
 }

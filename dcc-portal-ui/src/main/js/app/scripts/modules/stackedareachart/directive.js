@@ -18,6 +18,23 @@
   'use strict';
 
 	var module = angular.module('icgc.visualization.stackedarea', []);
+  var releaseDates = {
+      4:'May-11',
+      5:'Jun-11',
+      6:'Jul-11',
+      7:'Dec-11',
+      8:'Mar-12',
+      9:'Aug-12',
+      10:'Nov-12',
+      11:'Dec-12',
+      12:'Mar-13',
+      13:'Jul-13',
+      14:'Sep-13',
+      15:'Jan-14',
+      16:'May-14',
+      17:'Sep-14',
+      18:'Feb-15'
+    };
 
 	module.directive('donorHistory', function ($location, HighchartsService) {
 	    return {
@@ -37,7 +54,7 @@
 
                 var result = [];
                 data.forEach(function (elem) {
-                  if(includedProjects.indexOf(elem.project) >= 0){
+                  if(includedProjects.indexOf(elem.group) >= 0){
                     result.push(elem);
                   }
                 });
@@ -45,14 +62,15 @@
                 return result;
               };
               var config = {
-                margin:{top: 10, right: 40, bottom: 40, left: 40},
+                margin:{top: 10, right: 40, bottom: 60, left: 40},
                 height: 600,
                 width: 1000,
                 colours: HighchartsService.projectColours,
                 yaxis:{label:'# of Donors',ticks:8},
                 xaxis: {
                   label:'Release',
-                  ticksValueRange: [4,18]
+                  ticksValueRange: [4,18],
+                  secondaryLabel: function(data){return releaseDates[data];}
                 },
                 onClick: function(project){
                   $scope.$emit('tooltip::hide');
@@ -67,7 +85,7 @@
                   $scope.$emit('tooltip::show', {
                     element: angular.element(elem),
                     text: getLabel(),
-                    placement: 'right',
+                    placement: 'top',
                     sticky:true
                   });
                 },

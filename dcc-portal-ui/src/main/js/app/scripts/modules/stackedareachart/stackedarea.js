@@ -8,12 +8,13 @@
       width: 1000,
       colours: ['red','blue','green'],
       yaxis: {
-        label:'# of Donors',
-        ticks:8
+        label:'Count of Things',
+        ticks: 5
       },
       xaxis: {
         label:'Release',
-        ticksValueRange: [4,18]
+        ticksValueRange: [0,10],
+        secondaryLabel:{}
       },
       onClick: {},
       tooltipShowFunc: {},
@@ -61,6 +62,17 @@
           .ticks(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0])
           .tickPadding(10);
 
+      var xAxisLabels = d3.svg.axis()
+          .scale(x)
+          .orient('bottom')
+          .innerTickSize(0)
+          .outerTickSize(0)
+          .ticks(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0])
+          .tickFormat(function(d){
+            return config.xaxis.secondaryLabel(d);
+          })
+          .tickPadding(10);
+
       var yAxis = d3.svg.axis()
           .scale(y)
           .orient('left')
@@ -80,15 +92,15 @@
       var stack = d3.layout.stack()
           .offset(config.offset)
           .values(function(d) { return d.values; })
-          .x(function(d) { return d.release; })
+          .x(function(d) { return d.index; })
           .y(function(d) { return d.value; });
 
       var nest = d3.nest()
-          .key(function(d) { return d.project; });
+          .key(function(d) { return d.group; });
 
       var area = d3.svg.area()
           .interpolate('linear')
-          .x(function(d) { return x(d.release); })
+          .x(function(d) { return x(d.index); })
           .y0(function(d) { return y(d.y0); })
           .y1(function(d) { return y(d.y0 + d.y); });
 
@@ -99,6 +111,7 @@
           .attr('viewBox','0 0 '+(width + margin.left + margin.right)+
                 ' '+(height + margin.top + margin.bottom))
           .attr('preserveAspectRatio','xMidYMid')
+          .attr('id','stackedareasvg')
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -107,7 +120,7 @@
       y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
 
       var line = d3.svg.line()
-            .x(function(d) { return x(d.release); })
+            .x(function(d) { return x(d.index); })
             .y(function(d) { return y(d.value); });
 
       var project = svg.selectAll('.layer-project')
@@ -118,18 +131,36 @@
       var hintLine = svg.selectAll('.stackedareahint')
         .data([width*2]).enter()
         .append('line')
+        .style('pointer-events','none')
+        .style('fill','none')
         .attr('class','stackedareahint')
         .attr({
-          'class':'horizontalGrid',
+          'class':'stackedareahint',
           'x1' : function(d){ return d;},
           'x2' : function(d){ return d;},
           'y1' : 0,
           'y2' : height,
-          'fill' : 'none',
           'shape-rendering' : 'crispEdges',
           'stroke' : 'grey',
-          'stroke-width' : '1px'
+          'stroke-width' : '1px',
+          'pointer-events':'none'
         });
+
+      var gridBlockWidth = width/(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0]);
+      var hintHighlighter = svg.selectAll('rect').data([0]).enter()
+         .append('rect')
+         .style('opacity','0.33')
+         .attr('class','stackedareahinthighlight')
+         .style('fill','lightgrey')
+         .attr({
+        'x' : width*2,
+        'y' : height,
+        'width' : gridBlockWidth,
+        'height' :3*margin.bottom/4,
+        'stroke' : 'grey',
+        'stroke-width' : '1px',
+        'z-index':-10
+      });
 
       project.append('path')
             .attr('d', function(d) { return area(d.values); })
@@ -140,25 +171,34 @@
                   var release = Math.round(xReverser(coords[0]))-4;
                   var actualRelease = release + 4;
                   config.tooltipShowFunc(this,d.key,d.values[release].value, actualRelease);
-                  hintLine.transition().duration(100).attr('x1',x(release + 4)).attr('x2',x(actualRelease));
+                  hintLine.transition().duration(80).attr('x1',x(release + 4)).attr('x2',x(actualRelease));
+                  hintHighlighter.transition().duration(80).attr('x',x(release + 4)-gridBlockWidth/2);
                 })
             .on('mouseout', function() {
                   config.tooltipHideFunc();
-                  hintLine.transition().duration(500).attr('x1',width*2).attr('x2',width*2);
+                  hintLine.transition().duration(400).attr('x1',width*2).attr('x2',width*2);
                   project.selectAll('path').transition().duration(100).style('opacity','1');
+                  hintHighlighter.transition().duration(400).attr('x',width*2);
                 })
             .on('click',function(d){
                   config.onClick(d.key);
                 })
             .on('mouseover', function(data){
                   project.selectAll('path')
-                      .transition().duration(100).style('opacity',function(d){return d.key === data.key?'1':'0.15';});
+                      .transition().duration(100).style('opacity',function(d){return d.key === data.key?'1':'0.1';});
                 });
 
       svg.append('g')
         .attr('class', 'stackedarea x axis')
         .attr('transform', 'translate(0,' + height + ')')
         .call(xAxis);
+
+      svg.append('g')
+        .attr('class', 'stackedarea x axis labels')
+        .attr('transform', 'translate(0,' + (height+15)+ ')')
+        .call(xAxisLabels)
+        .style('font-size','10')
+        .style('fill','grey');
 
       svg.append('g')
         .attr('class', 'stackedarea y axis')
@@ -179,7 +219,7 @@
         .style('font-size','12')
         .style('fill','grey')
         .append('text')
-        .attr('y',2*margin.bottom/3)
+        .attr('y',3*margin.bottom/4)
         .attr('x',width/2)
         .attr('dy', '1em')
         .style('text-anchor', 'middle')
@@ -196,7 +236,7 @@
             .style('fill','none')
             .attr('stroke', function(d) {return color(d.key); })
             .attr('class','line')
-            .attr('stroke-width','4px');
+            .attr('stroke-width','3px');
 
         }else if(view ==='Area'){
           graphTitle.text(config.graphTitles[0]);
