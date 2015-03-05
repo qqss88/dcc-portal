@@ -2,27 +2,50 @@
 
   'use strict';
 
+  var defaultConfig = {
+      margin: {top:10,left:30,right:20,bottom:20},
+      height: 500,
+      width: 1000,
+      colours: ['red','blue','green'],
+      yaxis: {
+        label:'# of Donors',
+        ticks:8
+      },
+      xaxis: {
+        label:'Release',
+        ticksValueRange: [4,18]
+      },
+      onClick: {},
+      tooltipShowFunc: {},
+      tooltipHideFunc: {},
+      graphTitle: ['Aggregated Data','Indivudal Data'],
+      offset: 'zero'
+    };
+
 	window.dcc = window.dcc || {};
 
-	var StackedAreaChart = function(data, config){
-		this.data = data;
-		this.config = config;
-    this.selectedView = 'area';
-	};
+  var StackedAreaChart = function(data, config){
+      this.data = data;
+      this.config = config || defaultConfig;
+      this.selectedView = 'area';
+      this.margin = config.margin;
+
+      //Adjust for margin to account for tick padding
+      this.margin.left = this.margin.left +20;
+
+      this.width = config.width - this.margin.left - this.margin.right;
+      this.height = config.height - this.margin.top - this.margin.bottom;
+    };
 
 	StackedAreaChart.prototype.render = function(element){
       var data = this.data;
       var config = this.config;
-
-      var margin = config.margin;
-      margin.left = margin.left +20; // to account for padding of ticks
-      var width = config.width - margin.left - margin.right,
-          height = config.height - margin.top - margin.bottom;
+      var margin = this.margin, width = this.width, height = this.height;
 
       var x = d3.scale.linear()
-          .range([0, width]).domain([4,18]);
+          .range([0, width]).domain(config.xaxis.ticksValueRange);
       var xReverser = d3.scale.linear()
-          .domain([0, width]).range([4,18]);
+          .domain([0, width]).range(config.xaxis.ticksValueRange);
 
       var y = d3.scale.linear()
           .range([height, 0]);
@@ -33,14 +56,29 @@
 
       var xAxis = d3.svg.axis()
           .scale(x)
-          .orient('bottom').innerTickSize(-height).ticks(14).tickPadding(10);
+          .orient('bottom')
+          .innerTickSize(-height)
+          .ticks(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0])
+          .tickPadding(10);
 
       var yAxis = d3.svg.axis()
           .scale(y)
-          .orient('left').innerTickSize(-width).ticks(config.yaxis.ticks).tickFormat(d3.format('.2s')).tickPadding(10);
+          .orient('left')
+          .innerTickSize(-width)
+          .ticks(config.yaxis.ticks)
+          .tickFormat(d3.format('.2s'))
+          .tickPadding(10);
+
+      var graphTitle = d3.select(element).append('div')
+        .style('margin-bottom','30px')
+        .attr('class','graph_title')
+        .attr('y',0)
+        .attr('x',width/2)
+        .attr('dy', '1em')
+        .text(config.graphTitles[0]);
 
       var stack = d3.layout.stack()
-          .offset('zero')
+          .offset(config.offset)
           .values(function(d) { return d.values; })
           .x(function(d) { return d.release; })
           .y(function(d) { return d.value; });
@@ -58,9 +96,9 @@
       var form = d3.select(element).append('form');
 
       var svg = d3.select(element).append('svg')
-		    .attr('viewBox','0 0 '+(width + margin.left + margin.right)+
-                  ' '+(height + margin.top + margin.bottom))
-		    .attr('preserveAspectRatio','xMidYMid')
+          .attr('viewBox','0 0 '+(width + margin.left + margin.right)+
+                ' '+(height + margin.top + margin.bottom))
+          .attr('preserveAspectRatio','xMidYMid')
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
@@ -93,20 +131,6 @@
           'stroke-width' : '1px'
         });
 
-      var hintHighlighter = svg.selectAll('.stackedareahinthighlight')
-        .append('rect')
-        .style('opacity','0')
-        .attr('class','stackedareahinthighlight')
-        .attr({
-          'class':'horizontalGrid',
-          'y1' : 0,
-          'y2' : height,
-          'fill' : 'none',
-          'shape-rendering' : 'crispEdges',
-          'stroke' : 'grey',
-          'stroke-width' : '1px'
-        });
-
       project.append('path')
             .attr('d', function(d) { return area(d.values); })
             .style('fill', function(d) {return color(d.key); })
@@ -114,43 +138,31 @@
             .on('mousemove', function(d) {
                   var coords = d3.mouse(this);
                   var release = Math.round(xReverser(coords[0]))-4;
-                  var actualRelease = Math.round(xReverser(coords[0]));
+                  var actualRelease = release + 4;
                   config.tooltipShowFunc(this,d.key,d.values[release].value, actualRelease);
                   hintLine.transition().duration(100).attr('x1',x(release + 4)).attr('x2',x(actualRelease));
                 })
             .on('mouseout', function() {
                   config.tooltipHideFunc();
                   hintLine.transition().duration(500).attr('x1',width*2).attr('x2',width*2);
-                  if(project.selectAll('path').style('fill') === 'none'){
-                    project.selectAll('path').transition().duration(200).style('opacity','1');
-                  }else{
-                    project.selectAll('path')
-                      .style('opacity','1')
-                      .attr('stroke', 'none');
-                  }
+                  project.selectAll('path').transition().duration(100).style('opacity','1');
                 })
             .on('click',function(d){
                   config.onClick(d.key);
                 })
             .on('mouseover', function(data){
-                if(project.selectAll('path').style('fill') === 'none'){
-                  project.selectAll('path').transition().duration(200).style('opacity',function(d){return d.key === data.key?'1':'0.15';});
-                }else{
                   project.selectAll('path')
-                      .style('opacity',function(d){return d.key === data.key?'1':'0.15';})
-                      .attr('stroke', 'white')
-                      .attr('stroke-width','1px');
-                }
-              });
+                      .transition().duration(100).style('opacity',function(d){return d.key === data.key?'1':'0.15';});
+                });
 
       svg.append('g')
-          .attr('class', 'stackedarea x axis')
-          .attr('transform', 'translate(0,' + height + ')')
-          .call(xAxis);
+        .attr('class', 'stackedarea x axis')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(xAxis);
 
       svg.append('g')
-          .attr('class', 'stackedarea y axis')
-          .call(yAxis);
+        .attr('class', 'stackedarea y axis')
+        .call(yAxis);
 
       svg.select('.stackedarea.y.axis')
         .style('font-size','12')
@@ -171,10 +183,11 @@
         .attr('x',width/2)
         .attr('dy', '1em')
         .style('text-anchor', 'middle')
-        .text('Release');
+        .text(config.xaxis.label);
 
       var change = function changeView(view){
         if(view === 'Line'){
+          graphTitle.text(config.graphTitles[1]);
           y.domain([0, d3.max(data, function(d) { return d.value; })]);
           svg.select('.stackedarea.y.axis').transition().duration(500)
             .call(yAxis);
@@ -186,6 +199,7 @@
             .attr('stroke-width','4px');
 
         }else if(view ==='Area'){
+          graphTitle.text(config.graphTitles[0]);
           y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
           svg.select('.stackedarea.y.axis').transition().duration(500)
             .call(yAxis);
@@ -199,22 +213,22 @@
       };
 
       form.selectAll('label')
-      .data(input).enter()
-      .append('label')
-      .text(function(d) {return d;})
-      .style('margin-left','15px')
-      .insert('input')
-      .style('margin','5px')
-      .attr({
-        type: 'radio',
-        class: 'shape',
-        name: 'mode',
-        value: function(d, i) {return i;}
-      })
-        .on('change',function(e){
-          change(e);
+        .data(input).enter()
+        .append('label')
+        .text(function(d) {return d;})
+        .style('margin-left','15px')
+        .insert('input')
+        .style('margin','5px')
+        .attr({
+          type: 'radio',
+          class: 'shape',
+          name: 'mode',
+          value: function(d, i) {return i;}
         })
-        .property('checked', function(d, i) {return i===0;});
+          .on('change',function(e){
+            change(e);
+          })
+          .property('checked', function(d, i) {return i===0;});
     };
 
   StackedAreaChart.prototype.destroy = function(){

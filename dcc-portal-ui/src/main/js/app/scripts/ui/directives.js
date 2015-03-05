@@ -77,7 +77,7 @@ angular.module('icgc.ui.events', [])
           element.css('pointer-events', 'none');
           element.css('opacity', 0.65);
         } else {
-          element.css('pointer-events', null);
+          element.css('pointer-events', '');
           element.css('opacity', '1');
         }
       }

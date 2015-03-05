@@ -27,10 +27,7 @@
 		      items: '=',
           selected: '='
 		    },
-        template:'<div class="text-center">' +
-                    '<div class="graph_title" style="margin-bottom:2.5rem;">'+
-                    'Cumulative Project Donor Count over Releases</div>' +
-                    '</div>',
+        template:'<div class="text-center"></div>',
 		    link: function ($scope, $element) {
               var chart;
               var filterProjects = function(data, includedProjects){
@@ -53,6 +50,10 @@
                 width: 1000,
                 colours: HighchartsService.projectColours,
                 yaxis:{label:'# of Donors',ticks:8},
+                xaxis: {
+                  label:'Release',
+                  ticksValueRange: [4,18]
+                },
                 onClick: function(project){
                   $scope.$emit('tooltip::hide');
                   $location.path('/projects/' + project).search({});
@@ -72,7 +73,9 @@
                 },
                 tooltipHideFunc: function() {
                   $scope.$emit('tooltip::hide');
-                }
+                },
+                graphTitles: ['Cumulative Project Donor Count by Release','Individual Project Donor Count by Release'],
+                offset: 'zero'
               };
 
               $scope.$watch('selected', function (newValue){
