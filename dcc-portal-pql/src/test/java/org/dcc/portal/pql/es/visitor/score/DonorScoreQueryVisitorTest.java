@@ -56,7 +56,6 @@ public class DonorScoreQueryVisitorTest {
   public void visitRootTest_withoutQueryNode() {
     val esAst = createEsAst("select(id)");
     val result = esAst.accept(visitor, Optional.empty());
-    log.info("{}", result);
     assertCorrectStructure(result);
   }
 

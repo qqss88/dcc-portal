@@ -50,7 +50,16 @@ public class Visitors {
   private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
 
+  /*
+   * QueryBuilderVisitor
+   */
+  private static final CreateQueryBuilderVisitor QUERY_BUILDER_VISITOR = new CreateQueryBuilderVisitor();
+
   // FIXME: implement
+
+  public static CreateQueryBuilderVisitor createQueryBuilderVisitor() {
+    return QUERY_BUILDER_VISITOR;
+  }
 
   public static void createFacetBuilderVisitor() {
   }

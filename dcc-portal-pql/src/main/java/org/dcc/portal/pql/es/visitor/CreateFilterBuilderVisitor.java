@@ -18,8 +18,6 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.dcc.portal.pql.es.model.RequestType.COUNT;
-import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 
 import java.util.Optional;
 
@@ -40,7 +38,6 @@ import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 // TODO: create static factory construction methods that return cached visitor for each type model.
@@ -68,14 +65,8 @@ public class CreateFilterBuilderVisitor {
       if (child instanceof FilterNode) {
         result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty()));
       } else if (child instanceof QueryNode) {
-        val queryBuilder = Visitors.createQueryBuilderVisitor().visitQuery((QueryNode) child, typeModel);
-        val filtersNode = child.getOptionalFirstChild();
-        FilterBuilder queryFilters = null;
-        if (filtersNode.isPresent()) {
-          queryFilters = filtersNode.get().accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty());
-        }
-
-        result.setQuery(filteredQuery(matchAllQuery(), queryFilters));
+        val queryBuilder = child.accept(Visitors.createQueryBuilderVisitor(), Optional.ofNullable(queryContext));
+        result.setQuery(queryBuilder);
       } else if (child instanceof AggregationsNode) {
         addAggregations(child, result);
       } else if (child instanceof FieldsNode) {
