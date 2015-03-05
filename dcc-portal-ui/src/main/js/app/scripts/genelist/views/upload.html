@@ -10,11 +10,14 @@
             </div>
 
             <div class="t_tabs" data-ng-if="analysisMode===false">
-               <div class="t_tabs__tab t_tabs__tab__gene" data-ng-class="{active: params.inputMethod === 'id'}" data-ng-click="params.inputMethod = 'id'">
+               <div class="t_tabs__tab t_tabs__tab__gene" 
+                   data-ng-class="{active: params.inputMethod === 'id'}" 
+                   data-ng-click="params.inputMethod = 'id'; resetListInput();">
                By identifiers
                </div>
                <div class="t_tabs__tab t_tabs__tab__gene" 
-                   data-ng-class="{active: params.inputMethod === 'set'}" data-ng-click="params.inputMethod = 'set'">
+                   data-ng-class="{active: params.inputMethod === 'set'}" 
+                   data-ng-click="params.inputMethod = 'set'; resetCustomInput()">
                By saved gene set
                </div>
             </div>
@@ -42,7 +45,6 @@
                        <textarea
                            rows="3"
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
-                           data-ng-focus="resetListInput()"
                            data-ng-model="params.rawText" data-ng-change="updateGenelist()">
                        </textarea>
 
@@ -53,7 +55,6 @@
                        <textarea
                            rows="3"
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
-                           data-ng-focus="resetListInput()"
                            data-autofocus data-ng-model="params.rawText" data-ng-change="updateGenelist()">
                        </textarea>
                    </div>
@@ -155,10 +156,12 @@
                        </div>
                    </div>
 
+                   <!--
                    <div data-ng-if="params.selectedSavedSet >= 0">
                        <div>{{params.savedSets[params.selectedSavedSet].name}} - {{params.savedSets[params.selectedSavedSet].count}} genes</div>
                        <div>{{params.savedSets[params.selectedSavedSet].description}}</div>
                    </div>
+                   -->
                </div>
 
               
