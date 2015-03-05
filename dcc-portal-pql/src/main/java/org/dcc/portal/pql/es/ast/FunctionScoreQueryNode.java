@@ -17,11 +17,14 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import java.util.Optional;
+
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -35,8 +38,8 @@ public class FunctionScoreQueryNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitFunctionScoreQuery(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitFunctionScoreQuery(this, context);
   }
 
 }

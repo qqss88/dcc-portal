@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.ast;
 
 import java.util.Map;
+import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -25,6 +26,7 @@ import lombok.Value;
 
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 import com.beust.jcommander.internal.Maps;
 
@@ -35,8 +37,8 @@ public class SortNode extends ExpressionNode {
   Map<String, Order> fields = Maps.newHashMap();
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitSort(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitSort(this, context);
   }
 
   public void addField(@NonNull String field, @NonNull Order order) {

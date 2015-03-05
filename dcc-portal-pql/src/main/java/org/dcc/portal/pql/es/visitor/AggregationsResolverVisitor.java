@@ -20,6 +20,9 @@ package org.dcc.portal.pql.es.visitor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
+
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -34,9 +37,8 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-
-import com.google.common.base.Optional;
 
 /**
  * Processes aggregations. Moves FilterNode to a QueryNode. Copies the FilterNode to facet's filter node except filters
@@ -53,14 +55,14 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
   public ExpressionNode resolveAggregations(@NonNull ExpressionNode sourceAst, @NonNull Type type) {
     checkArgument(sourceAst instanceof RootNode, "Source AST must be an instance of RootNode");
     this.type = type;
-    val result = sourceAst.accept(this);
+    val result = sourceAst.accept(this, Optional.empty());
     log.debug("Resolved Aggregations to: \n{}", result);
 
     return result;
   }
 
   @Override
-  public ExpressionNode visitRoot(@NonNull RootNode rootNode) {
+  public ExpressionNode visitRoot(@NonNull RootNode rootNode, Optional<QueryContext> context) {
     log.debug("Resolving aggregations for type {}. Source AST: {}", type.getId(), rootNode);
 
     if (!hasAggregations(rootNode)) {
@@ -80,7 +82,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
     val aggsNode = getAggregationsNodeOptional(rootNode).get();
 
     for (int i = 0; i < aggsNode.childrenCount(); i++) {
-      val childAggsNode = aggsNode.getChild(i).accept(this);
+      val childAggsNode = aggsNode.getChild(i).accept(this, Optional.empty());
       if (childAggsNode instanceof FilterAggregationNode) {
         aggsNode.setChild(i, childAggsNode);
       }
@@ -92,7 +94,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode> {
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     log.debug("Visiting TermsAggregationsNode. {}", node);
     val rootNode = node.getParent().getParent();
     val filtersNodeOpt = getOptionalChild(rootNode, FilterNode.class);

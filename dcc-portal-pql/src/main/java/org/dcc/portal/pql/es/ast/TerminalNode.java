@@ -20,12 +20,14 @@ package org.dcc.portal.pql.es.ast;
 import static java.util.Collections.emptyList;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -44,8 +46,8 @@ public class TerminalNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitTerminal(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitTerminal(this, context);
   }
 
 }

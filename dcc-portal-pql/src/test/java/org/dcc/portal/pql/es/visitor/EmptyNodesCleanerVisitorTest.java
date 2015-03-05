@@ -19,6 +19,9 @@ package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor.REMOVE_NODE;
+
+import java.util.Optional;
+
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.RootNode;
@@ -39,13 +42,13 @@ public class EmptyNodesCleanerVisitorTest {
 
   @Test
   public void visitRootTest() {
-    val result = visitor.visitRoot(new RootNode(new FilterNode(new BoolNode(new MustBoolNode()))));
+    val result = visitor.visitRoot(new RootNode(new FilterNode(new BoolNode(new MustBoolNode()))), Optional.empty());
     assertThat(result.childrenCount()).isEqualTo(0);
   }
 
   @Test
   public void visitMustBoolTest() {
-    assertThat(visitor.visitMustBool(new MustBoolNode())).isEqualTo(REMOVE_NODE);
+    assertThat(visitor.visitMustBool(new MustBoolNode(), Optional.empty())).isEqualTo(REMOVE_NODE);
   }
 
 }

@@ -17,10 +17,13 @@
  */
 package org.dcc.portal.pql.es.ast.aggs;
 
+import java.util.Optional;
+
 import lombok.NonNull;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * A container for the other aggregations.
@@ -32,8 +35,8 @@ public class AggregationsNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitAggregations(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitAggregations(this, context);
   }
 
 }

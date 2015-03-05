@@ -17,13 +17,12 @@
  */
 package org.dcc.portal.pql.es.utils;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.collect.Iterables.filter;
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -33,7 +32,6 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -56,16 +54,16 @@ public class Nodes {
 
     val childrenList = filterChildren(parent, childType);
     if (childrenList.isEmpty()) {
-      return absent();
+      return Optional.empty();
     } else if (childrenList.size() > 1) {
       throw new IllegalStateException(format("RootNode contains more that one child of type %s. %s", childType, parent));
     }
 
-    return fromNullable(childrenList.get(0));
+    return Optional.ofNullable(childrenList.get(0));
   }
 
   public static ExpressionNode cloneNode(ExpressionNode original) {
-    return original.accept(Nodes.CLONE_VISITOR);
+    return original.accept(Nodes.CLONE_VISITOR, Optional.empty());
   }
 
 }

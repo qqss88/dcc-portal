@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import java.util.Optional;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -26,6 +28,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -40,7 +43,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   private final AbstractTypeModel typeModel;
 
   @Override
-  public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node) {
+  public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     val fieldName = node.getFieldName();
     AbstractAggregationBuilder result = AggregationBuilders
         .terms(node.getAggregationName())
@@ -62,13 +65,13 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   }
 
   @Override
-  public AbstractAggregationBuilder visitFilterAggregation(FilterAggregationNode node) {
+  public AbstractAggregationBuilder visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
     log.debug("Visiting FilterAggregationNode: \n{}", node);
 
     log.debug("Filters: {}", node.getFilters());
     val filterAggregationBuilder = AggregationBuilders.filter(node.getAggregationName())
         .filter(resolveFilters(node))
-        .subAggregation(node.getFirstChild().accept(this));
+        .subAggregation(node.getFirstChild().accept(this, Optional.empty()));
 
     return AggregationBuilders
         .global(node.getAggregationName())
@@ -83,7 +86,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   }
 
   private FilterBuilder resolveFilters(FilterAggregationNode parent) {
-    return parent.getFilters().accept(Visitors.filterBuilderVisitor(typeModel));
+    return parent.getFilters().accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty());
   }
 
 }

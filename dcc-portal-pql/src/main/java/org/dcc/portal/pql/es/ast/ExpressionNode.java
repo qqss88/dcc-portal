@@ -22,6 +22,7 @@ import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,8 +32,8 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
+import org.dcc.portal.pql.qe.QueryContext;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 @Getter
@@ -57,7 +58,7 @@ public abstract class ExpressionNode {
     }
   }
 
-  public abstract <T> T accept(NodeVisitor<T> visitor);
+  public abstract <T> T accept(NodeVisitor<T> visitor, Optional<QueryContext> context);
 
   public int childrenCount() {
     return children.size();
@@ -79,10 +80,10 @@ public abstract class ExpressionNode {
 
   public Optional<ExpressionNode> getOptionalFirstChild() {
     if (childrenCount() == 0) {
-      return Optional.absent();
+      return Optional.empty();
     }
 
-    return Optional.fromNullable(children.get(0));
+    return Optional.ofNullable(children.get(0));
   }
 
   public void removeChild(int index) {
@@ -98,7 +99,7 @@ public abstract class ExpressionNode {
 
   @Override
   public String toString() {
-    return accept(Visitors.createToStringVisitor());
+    return accept(Visitors.createToStringVisitor(), Optional.empty());
   }
 
   public boolean hasNestedParent() {

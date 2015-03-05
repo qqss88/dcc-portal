@@ -17,13 +17,16 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
+import java.util.Optional;
+
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.qe.QueryContext;
 
 public class DefaultScoreQueryVisitor extends ScoreQueryVisitor {
 
   @Override
-  public ExpressionNode visitRoot(RootNode node) {
+  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
     return node;
   }
 

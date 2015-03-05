@@ -17,10 +17,13 @@
  */
 package org.dcc.portal.pql.es.ast.filter;
 
+import java.util.Optional;
+
 import lombok.NonNull;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 public class BoolNode extends ExpressionNode {
 
@@ -29,8 +32,8 @@ public class BoolNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitBool(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitBool(this, context);
   }
 
 }

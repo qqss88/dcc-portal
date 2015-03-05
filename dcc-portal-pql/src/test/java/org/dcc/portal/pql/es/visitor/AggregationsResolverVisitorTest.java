@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+
+import java.util.Optional;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +57,7 @@ public class AggregationsResolverVisitorTest {
   public void visitRoot_noAggregationsNode() {
     val originalRoot = (RootNode) createEsAst("eq(gender, 'male')");
     val clone = cloneNode(originalRoot);
-    val rootNode = resolver.visitRoot(originalRoot);
+    val rootNode = resolver.visitRoot(originalRoot, Optional.empty());
     assertThat(clone).isEqualTo(rootNode);
   }
 
@@ -62,7 +65,7 @@ public class AggregationsResolverVisitorTest {
   public void visitRoot_noFilters() {
     val originalRoot = (RootNode) createEsAst("facets(gender)");
     val clone = cloneNode(originalRoot);
-    val result = resolver.visitRoot(originalRoot);
+    val result = resolver.visitRoot(originalRoot, Optional.empty());
     assertThat(clone).isEqualTo(result);
   }
 
@@ -73,7 +76,7 @@ public class AggregationsResolverVisitorTest {
   public void visitRoot_moveFilters() {
     val originalRoot = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
     val filterNode = cloneNode(originalRoot.getFirstChild());
-    val result = resolver.visitRoot(originalRoot);
+    val result = resolver.visitRoot(originalRoot, Optional.empty());
 
     // Children: Aggregations and Query
     assertThat(result.childrenCount()).isEqualTo(2);
@@ -103,7 +106,7 @@ public class AggregationsResolverVisitorTest {
     assertThat(aggsNodeOpt.isPresent()).isTrue();
 
     val filterAgg = (FilterAggregationNode) resolver.visitTermsAggregation(
-        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild());
+        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild(), Optional.empty());
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
     val filterNode = filterAgg.getFilters();
     assertThat(filterNode.childrenCount()).isEqualTo(1);
@@ -126,7 +129,7 @@ public class AggregationsResolverVisitorTest {
     assertThat(aggsNodeOpt.isPresent()).isTrue();
 
     val filterAgg = (FilterAggregationNode) resolver.visitTermsAggregation(
-        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild());
+        (TermsAggregationNode) aggsNodeOpt.get().getFirstChild(), Optional.empty());
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
     val filterNode = filterAgg.getFilters();
     assertThat(filterNode.childrenCount()).isEqualTo(1);

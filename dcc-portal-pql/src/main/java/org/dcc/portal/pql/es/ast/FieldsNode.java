@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.ast;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -25,6 +26,7 @@ import lombok.Value;
 import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 import com.google.common.collect.Lists;
 
@@ -39,8 +41,8 @@ public class FieldsNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitFields(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitFields(this, context);
   }
 
   @Override

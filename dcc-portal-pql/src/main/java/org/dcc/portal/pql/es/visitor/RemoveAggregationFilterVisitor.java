@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import java.util.Optional;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +28,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * This visitor removes a {@link FilterAggregationNode} that has an empty filter and moves it's child (
@@ -37,20 +40,20 @@ public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode> 
   private static final ExpressionNode SKIP_NODE = null;
 
   @Override
-  public ExpressionNode visitRoot(RootNode node) {
+  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
     val aggsNode = Nodes.getOptionalChild(node, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      aggsNode.get().accept(this);
+      aggsNode.get().accept(this, Optional.empty());
     }
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitAggregations(AggregationsNode node) {
+  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
     for (int i = 0; i < node.childrenCount(); i++) {
       val child = node.getChild(i);
-      val visitResult = child.accept(this);
+      val visitResult = child.accept(this, Optional.empty());
       if (visitResult != SKIP_NODE) {
         node.setChild(i, visitResult);
       }
@@ -60,7 +63,7 @@ public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode> 
   }
 
   @Override
-  public ExpressionNode visitFilterAggregation(FilterAggregationNode node) {
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
     if (node.getFilters().childrenCount() == 0) {
       log.debug("FilterAggregationNode has no filters. Requesting to remove.");
       return node.getFirstChild();
@@ -70,7 +73,7 @@ public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode> 
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     return SKIP_NODE;
   }
 

@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.val;
@@ -32,6 +34,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
  * Visits filter nodes. And removes those that match provided aggregation field name.
@@ -48,69 +51,69 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode> {
   public ExpressionNode visit(String fieldName, FilterNode filterNode) {
     log.debug("Visiting Aggregation Filters. Terms Aggregation Field: '{}'. Filters: '{}'", fieldName, filterNode);
     this.termsFieldName = fieldName;
-    val result = filterNode.accept(this);
+    val result = filterNode.accept(this, Optional.empty());
 
     return result;
   }
 
   @Override
-  public ExpressionNode visitFilter(FilterNode node) {
+  public ExpressionNode visitFilter(FilterNode node, Optional<QueryContext> context) {
     visitChild(node);
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitBool(BoolNode node) {
+  public ExpressionNode visitBool(BoolNode node, Optional<QueryContext> context) {
     visitChild(node);
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitMustBool(MustBoolNode node) {
+  public ExpressionNode visitMustBool(MustBoolNode node, Optional<QueryContext> context) {
     return processCommonCases(node);
   }
 
   @Override
-  public ExpressionNode visitTerm(TermNode node) {
+  public ExpressionNode visitTerm(TermNode node, Optional<QueryContext> context) {
     return node.getNameNode().getValue().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitNot(NotNode node) {
+  public ExpressionNode visitNot(NotNode node, Optional<QueryContext> context) {
     return visitChild(node);
   }
 
   @Override
-  public ExpressionNode visitRange(RangeNode node) {
+  public ExpressionNode visitRange(RangeNode node, Optional<QueryContext> context) {
     return node.getFieldName().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitTerms(TermsNode node) {
+  public ExpressionNode visitTerms(TermsNode node, Optional<QueryContext> context) {
     return node.getField().equals(termsFieldName) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitAnd(AndNode node) {
+  public ExpressionNode visitAnd(AndNode node, Optional<QueryContext> context) {
     return processCommonCases(node);
   }
 
   @Override
-  public ExpressionNode visitOr(OrNode node) {
+  public ExpressionNode visitOr(OrNode node, Optional<QueryContext> context) {
     return processCommonCases(node);
   }
 
   private ExpressionNode visitChild(ExpressionNode parent) {
-    return parent.getFirstChild().accept(this);
+    return parent.getFirstChild().accept(this, Optional.empty());
   }
 
   private ExpressionNode processCommonCases(ExpressionNode node) {
     for (int i = 0; i < node.childrenCount(); i++) {
       val child = node.getChild(i);
       log.debug("Visiting child: {}", child);
-      if (child.accept(this) == REMOVE_CHILD) {
+      if (child.accept(this, Optional.empty()) == REMOVE_CHILD) {
         log.debug("Removing the child from the filters.");
         node.removeChild(i);
       }

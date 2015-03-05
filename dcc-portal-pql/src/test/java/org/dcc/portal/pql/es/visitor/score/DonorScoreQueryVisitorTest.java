@@ -19,6 +19,9 @@ package org.dcc.portal.pql.es.visitor.score;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+
+import java.util.Optional;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +46,7 @@ public class DonorScoreQueryVisitorTest {
     esAst = facetsResolver.resolveAggregations(esAst, Type.DONOR_CENTRIC);
     val origFilterNode = Nodes.cloneNode(esAst.getChild(1).getFirstChild());
 
-    val result = esAst.accept(visitor);
+    val result = esAst.accept(visitor, Optional.empty());
     assertCorrectStructure(result);
     val filterNode = result.getChild(1).getFirstChild().getFirstChild().getFirstChild();
     assertThat(filterNode).isEqualTo(origFilterNode);
@@ -52,7 +55,7 @@ public class DonorScoreQueryVisitorTest {
   @Test
   public void visitRootTest_withoutQueryNode() {
     val esAst = createEsAst("select(id)");
-    val result = esAst.accept(visitor);
+    val result = esAst.accept(visitor, Optional.empty());
     log.info("{}", result);
     assertCorrectStructure(result);
   }

@@ -17,8 +17,11 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
+import java.util.Optional;
+
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.qe.QueryContext;
 
 public class DonorScoreQueryVisitor extends ScoreQueryVisitor {
 
@@ -29,7 +32,7 @@ public class DonorScoreQueryVisitor extends ScoreQueryVisitor {
   private static final String PATH = "gene";
 
   @Override
-  public ExpressionNode visitRoot(RootNode node) {
+  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
     return super.visitRoot(node, SCRIPT, PATH);
   }
 

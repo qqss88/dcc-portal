@@ -18,12 +18,16 @@
 package org.dcc.portal.pql.es.ast;
 
 import static com.google.common.base.Preconditions.checkState;
+
+import java.util.Optional;
+
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
@@ -51,8 +55,8 @@ public class TermNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitTerm(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitTerm(this, context);
   }
 
 }

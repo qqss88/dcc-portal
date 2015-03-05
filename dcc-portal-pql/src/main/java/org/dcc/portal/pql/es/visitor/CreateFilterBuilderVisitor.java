@@ -20,6 +20,9 @@ package org.dcc.portal.pql.es.visitor;
 import static org.dcc.portal.pql.es.model.RequestType.COUNT;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+
+import java.util.Optional;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -44,7 +47,7 @@ import org.elasticsearch.search.sort.SortOrder;
 // FIXME: Remove code which is present in the FilterBuilderVisitor
 @Slf4j
 @RequiredArgsConstructor
-public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
+public class CreateFilterBuilderVisitor {
 
   @NonNull
   private final Client client;
@@ -63,12 +66,13 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
 
     for (val child : node.getChildren()) {
       if (child instanceof FilterNode) {
-        result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(typeModel)));
+        result.setPostFilter(child.accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty()));
       } else if (child instanceof QueryNode) {
+        val queryBuilder = Visitors.createQueryBuilderVisitor().visitQuery((QueryNode) child, typeModel);
         val filtersNode = child.getOptionalFirstChild();
         FilterBuilder queryFilters = null;
         if (filtersNode.isPresent()) {
-          queryFilters = filtersNode.get().accept(Visitors.filterBuilderVisitor(typeModel));
+          queryFilters = filtersNode.get().accept(Visitors.filterBuilderVisitor(typeModel), Optional.empty());
         }
 
         result.setQuery(filteredQuery(matchAllQuery(), queryFilters));
@@ -96,7 +100,7 @@ public class CreateFilterBuilderVisitor extends NodeVisitor<FilterBuilder> {
   private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result) {
     log.debug("Adding aggregations for AggregationsNode\n{}", aggregationsNode);
     for (val child : aggregationsNode.getChildren()) {
-      val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(typeModel));
+      val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(typeModel), Optional.empty());
       result.addAggregation(aggregationBuilder);
     }
   }

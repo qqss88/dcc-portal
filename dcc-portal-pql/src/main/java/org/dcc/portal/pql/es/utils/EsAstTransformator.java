@@ -18,6 +18,9 @@
 package org.dcc.portal.pql.es.utils;
 
 import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
+
+import java.util.Optional;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,17 +53,17 @@ public class EsAstTransformator {
   }
 
   private ExpressionNode score(ExpressionNode esAst, Type type) {
-    return esAst.accept(Visitors.createScoreQueryVisitor(type));
+    return esAst.accept(Visitors.createScoreQueryVisitor(type), Optional.empty());
   }
 
   private ExpressionNode optimize(ExpressionNode esAst) {
     // Clean empty filter node
-    esAst = esAst.accept(emptyNodesCleaner);
+    esAst = esAst.accept(emptyNodesCleaner, Optional.empty());
 
     // Remove FilterAggregationNodes without filters
     val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      esAst = esAst.accept(removeAggsFilterVisitor);
+      esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty());
     }
 
     return esAst;

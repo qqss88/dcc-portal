@@ -17,12 +17,15 @@
  */
 package org.dcc.portal.pql.es.ast.aggs;
 
+import java.util.Optional;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
@@ -37,8 +40,8 @@ public class FilterAggregationNode extends ExpressionNode {
   }
 
   @Override
-  public <T> T accept(@NonNull NodeVisitor<T> visitor) {
-    return visitor.visitFilterAggregation(this);
+  public <T> T accept(@NonNull NodeVisitor<T> visitor, Optional<QueryContext> context) {
+    return visitor.visitFilterAggregation(this, context);
   }
 
 }

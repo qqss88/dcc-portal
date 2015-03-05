@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
+import java.util.Optional;
+
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -41,104 +43,105 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.qe.QueryContext;
 
 public abstract class NodeVisitor<T> {
 
   private static final String DEFAULT_ERROR_MESSAGE = "The method is not implemented by the subclass";
 
-  public T visitFilter(FilterNode node) {
+  public T visitFilter(FilterNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitNested(NestedNode node) {
+  public T visitNested(NestedNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitBool(BoolNode node) {
+  public T visitBool(BoolNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitMustBool(MustBoolNode node) {
+  public T visitMustBool(MustBoolNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitTerm(TermNode node) {
+  public T visitTerm(TermNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitTerms(TermsNode node) {
+  public T visitTerms(TermsNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitNot(NotNode node) {
+  public T visitNot(NotNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitRoot(RootNode node) {
+  public T visitRoot(RootNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitSort(SortNode node) {
+  public T visitSort(SortNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitTerminal(TerminalNode node) {
+  public T visitTerminal(TerminalNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitRange(RangeNode node) {
+  public T visitRange(RangeNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitGreaterEqual(GreaterEqualNode node) {
+  public T visitGreaterEqual(GreaterEqualNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitGreaterThan(GreaterThanNode node) {
+  public T visitGreaterThan(GreaterThanNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitLessEqual(LessEqualNode node) {
+  public T visitLessEqual(LessEqualNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitLessThan(LessThanNode node) {
+  public T visitLessThan(LessThanNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitLimit(LimitNode node) {
+  public T visitLimit(LimitNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitAnd(AndNode node) {
+  public T visitAnd(AndNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitOr(OrNode node) {
+  public T visitOr(OrNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitFields(FieldsNode node) {
+  public T visitFields(FieldsNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitQuery(QueryNode node) {
+  public T visitQuery(QueryNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitAggregations(AggregationsNode node) {
+  public T visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitTermsAggregation(TermsAggregationNode node) {
+  public T visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitFilterAggregation(FilterAggregationNode node) {
+  public T visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 
-  public T visitFunctionScoreQuery(FunctionScoreQueryNode node) {
+  public T visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<QueryContext> context) {
     return defaultUnimplementedMethod();
   }
 

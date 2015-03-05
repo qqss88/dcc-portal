@@ -20,6 +20,9 @@ package org.dcc.portal.pql.es.visitor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+
+import java.util.Optional;
+
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -48,14 +51,14 @@ public class AggregationFiltersVisitorTest {
   public void visitTerm_noMatch() {
     val original = (TermNode) getMustNode("eq(ageAtDiagnosis, 60)").getFirstChild();
     val clone = cloneNode(original);
-    val result = visitor.visitTerm(original);
+    val result = visitor.visitTerm(original, Optional.empty());
     assertThat(result).isEqualTo(clone);
   }
 
   @Test
   public void visitTerm_match() {
     val original = (TermNode) getMustNode("eq(gender, 'male')").getFirstChild();
-    val result = visitor.visitTerm(original);
+    val result = visitor.visitTerm(original, Optional.empty());
     assertThat(result).isEqualTo(REMOVE_CHILD);
   }
 
@@ -63,14 +66,14 @@ public class AggregationFiltersVisitorTest {
   public void visitRange_noMatch() {
     val original = (RangeNode) getMustNode("gt(ageAtDiagnosis, 60)").getFirstChild();
     val clone = cloneNode(original);
-    val result = visitor.visitRange(original);
+    val result = visitor.visitRange(original, Optional.empty());
     assertThat(result).isEqualTo(clone);
   }
 
   @Test
   public void visitRange_match() {
     val original = (RangeNode) getMustNode("gt(gender, 70)").getFirstChild();
-    val result = visitor.visitRange(original);
+    val result = visitor.visitRange(original, Optional.empty());
     assertThat(result).isEqualTo(REMOVE_CHILD);
   }
 
@@ -78,14 +81,14 @@ public class AggregationFiltersVisitorTest {
   public void visitTerms_noMatch() {
     val original = (TermsNode) getMustNode("in(ageAtDiagnosis, 60, 70)").getFirstChild();
     val clone = cloneNode(original);
-    val result = visitor.visitTerms(original);
+    val result = visitor.visitTerms(original, Optional.empty());
     assertThat(result).isEqualTo(clone);
   }
 
   @Test
   public void visitTerms_match() {
     val original = (TermsNode) getMustNode("in(gender, 'male', 'female')").getFirstChild();
-    val result = visitor.visitTerms(original);
+    val result = visitor.visitTerms(original, Optional.empty());
     assertThat(result).isEqualTo(REMOVE_CHILD);
   }
 
@@ -95,7 +98,7 @@ public class AggregationFiltersVisitorTest {
         .getFirstChild() // OrNode
         .getFirstChild();
     val andNodeClone = cloneNode(andNode);
-    val andNodeResult = visitor.visitAnd(andNode);
+    val andNodeResult = visitor.visitAnd(andNode, Optional.empty());
 
     assertThat(andNodeClone).isNotEqualTo(andNodeResult);
     // eq(gender, 70) removed
@@ -111,7 +114,7 @@ public class AggregationFiltersVisitorTest {
   public void visitOr_match() {
     val orNode = (OrNode) getMustNode("or(gt(ageAtDiagnosis, 60), eq(gender, 70))").getFirstChild();
     val orNodeClone = cloneNode(orNode);
-    val orNodeResult = visitor.visitOr(orNode);
+    val orNodeResult = visitor.visitOr(orNode, Optional.empty());
 
     assertThat(orNodeResult).isNotEqualTo(orNodeClone);
     // eq(gender, 70) removed

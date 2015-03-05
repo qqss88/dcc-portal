@@ -19,6 +19,9 @@ package org.dcc.portal.pql.es.visitor.score;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+
+import java.util.Optional;
+
 import lombok.val;
 
 import org.dcc.portal.pql.es.utils.Nodes;
@@ -31,7 +34,7 @@ public class DefaultScoreQueryVisitorTest {
   @Test
   public void visitRootTest() {
     val esAst = Nodes.cloneNode(createEsAst("select(id)"));
-    val result = esAst.accept(visitor);
+    val result = esAst.accept(visitor, Optional.empty());
     assertThat(esAst).isEqualTo(result);
   }
 
