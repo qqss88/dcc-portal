@@ -27,7 +27,7 @@
     $scope.params.fdr = 0.05;
     $scope.params.universe = 'REACTOME_PATHWAYS';
     $scope.params.maxGeneCount = Math.min(geneLimit || 10000, 10000);
-    $scope.params.geneLimit = $scope.params.maxGeneCount; // Absolute max
+    $scope.geneLimit = $scope.params.maxGeneCount; // Absolute max
 
 
     function hasValidFDR(val) {

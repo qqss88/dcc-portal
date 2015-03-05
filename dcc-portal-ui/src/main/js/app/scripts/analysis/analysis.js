@@ -10,6 +10,7 @@
   module.config(function ($stateProvider) {
     $stateProvider.state('analyses', {
       url: '/analysis',
+      reloadOnSearch: false,
       templateUrl: 'scripts/analysis/views/analysis.html',
       controller: 'AnalysisController',
       resolve: {
@@ -18,7 +19,17 @@
         },
         analysisType: function() {
           return null;
-        }
+        },
+      },
+      data: {
+        tab: 'analysis'
+      }
+    });
+    $stateProvider.state('analyses.sets', {
+      url: '/sets',
+      reloadOnSearch: false,
+      data : {
+        tab: 'sets'
       }
     });
 
@@ -40,7 +51,11 @@
           }
           return $stateParams.type;
         }]
+      },
+      data: {
+        tab: 'analysis'
       }
+
     });
   });
 
@@ -52,7 +67,7 @@
 
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
-  module.controller('AnalysisController', function ($scope, $location, $timeout, $modal, analysisId, analysisType,
+  module.controller('AnalysisController', function ($scope, $location, $timeout, $modal, $state, analysisId, analysisType,
     Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
 
     Page.setPage('analysis');
@@ -62,6 +77,20 @@
     $scope.canBeDeleted = 0;
     $scope.enrichment = {};
     $scope.syncError = false;
+    $scope.currentTab = $state.current.data.tab || 'analysis';
+
+
+    $scope.$watch(function () {
+      return $state.current.data.tab;
+    }, function () {
+      $scope.currentTab = $state.current.data.tab || 'analysis';
+    });
+
+
+    $scope.newAnalysis = function() {
+      $location.path('/analysis');
+    };
+
 
     // Selected sets
     $scope.selectedSets = [];
@@ -298,6 +327,7 @@
     // Clea up
     $scope.$on('destroy', function() {
       $timeout.cancel(analysisPromise);
+      $timeout.cancel(syncSetTimeout);
     });
 
 
@@ -377,6 +407,8 @@
 
     // Init service
     analysisList = localStorageService.get(ANALYSIS_ENTITY) || [];
+
+    console.log('I have', analysisList);
   });
 
 })();
