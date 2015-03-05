@@ -137,9 +137,9 @@
     };
   });
 
-  module.service('Settings', function (Restangular) {
+  module.service('Settings', function (RestangularNoCache) {
     this.get = function () {
-      return Restangular.one('settings').get();
+      return RestangularNoCache.one('settings').get();
     };
   });
 

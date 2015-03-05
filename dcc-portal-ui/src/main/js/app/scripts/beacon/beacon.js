@@ -213,7 +213,7 @@ var DATASET_ALL = 'All Projects';
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
-      $scope.projects.unshift({id:'——————'});
+      $scope.projects.unshift({id:'--------'});
       $scope.projects.unshift({id:DATASET_ALL});
       $scope.params = {
         project:$scope.projects[0],
