@@ -98,6 +98,9 @@
 
               $scope.$watch('selected', function (newValue){
                   if(newValue && $scope.items){
+                    if(chart){
+                      chart.destroy();
+                    }
                     $scope.selected = newValue;
                     chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
                     chart.render($element[0]);
