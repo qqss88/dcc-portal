@@ -17,7 +17,7 @@
 (function() {
   'use strict';
 
-	var module = angular.module('icgc.visualization.stackedarea', []);
+  var module = angular.module('icgc.visualization.stackedarea', []);
   var releaseDates = {
       4:'May-11',
       5:'Jun-11',
@@ -36,93 +36,93 @@
       18:'Feb-15'
     };
 
-	module.directive('donorHistory', function ($location, HighchartsService) {
-	    return {
-		    restrict: 'E',
-		    replace: true,
-		    scope: {
-		      items: '=',
-          selected: '='
-		    },
-        template:'<div class="text-center"></div>',
-		    link: function ($scope, $element) {
-              var chart;
-              var filterProjects = function(data, includedProjects){
-                if(!includedProjects){
-                  return data;
-                }
+  module.directive('donorHistory', function ($location, HighchartsService) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        items: '=',
+        selected: '='
+      },
+      template:'<div class="text-center"></div>',
+      link: function ($scope, $element) {
+        var chart;
+        var filterProjects = function(data, includedProjects){
+          if(!includedProjects){
+            return data;
+          }
 
-                var result = [];
-                data.forEach(function (elem) {
-                  if(includedProjects.indexOf(elem.group) >= 0){
-                    result.push(elem);
-                  }
-                });
-
-                return result;
-              };
-              var config = {
-                margin:{top: 10, right: 40, bottom: 60, left: 40},
-                height: 600,
-                width: 1000,
-                colours: HighchartsService.projectColours,
-                yaxis:{label:'# of Donors',ticks:8},
-                xaxis: {
-                  label:'Release',
-                  ticksValueRange: [4,18],
-                  secondaryLabel: function(data){return releaseDates[data];}
-                },
-                onClick: function(project){
-                  $scope.$emit('tooltip::hide');
-                  $location.path('/projects/' + project).search({});
-                  $scope.$apply();
-                },
-                tooltipShowFunc: function(elem, project, currentDonors,release) {
-                  function getLabel() {
-                    return '<strong>'+project+'</strong><br>Release: '+release+'<br># of donors: '+currentDonors;
-                  }
-
-                  $scope.$emit('tooltip::show', {
-                    element: angular.element(elem),
-                    text: getLabel(),
-                    placement: 'top',
-                    sticky:true
-                  });
-                },
-                tooltipHideFunc: function() {
-                  $scope.$emit('tooltip::hide');
-                },
-                graphTitles: ['Cumulative Project Donor Count by Release','Individual Project Donor Count by Release'],
-                offset: 'zero'
-              };
-
-              $scope.$watch('selected', function (newValue){
-                  if(newValue && $scope.items){
-                    if(chart){
-                      chart.destroy();
-                    }
-                    $scope.selected = newValue;
-                    chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
-                    chart.render($element[0]);
-                  }
-                },true);
-
-              $scope.$watch('items', function (newValue) {
-                if(!chart && newValue){
-                  chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
-                  chart.render($element[0]);
-                }else if(newValue){
-                  $scope.items = newValue;
-                }
-              }, true);
-
-              $scope.$on('$destroy', function () {
-                if (chart) {
-                  chart.destroy();
-                }
-              });
-
+          var result = [];
+          data.forEach(function (elem) {
+            if(includedProjects.indexOf(elem.group) >= 0){
+              result.push(elem);
             }
-      };
-    });
+          });
+
+          return result;
+        };
+        var config = {
+          margin:{top: 10, right: 40, bottom: 60, left: 40},
+          height: 600,
+          width: 1000,
+          colours: HighchartsService.projectColours,
+          yaxis:{label:'# of Donors',ticks:8},
+          xaxis: {
+            label:'Release',
+            ticksValueRange: [4,18],
+            secondaryLabel: function(data){return releaseDates[data];}
+          },
+          onClick: function(project){
+            $scope.$emit('tooltip::hide');
+            $location.path('/projects/' + project).search({});
+            $scope.$apply();
+          },
+          tooltipShowFunc: function(elem, project, currentDonors,release) {
+            function getLabel() {
+              return '<strong>'+project+'</strong><br>Release: '+release+'<br># of donors: '+currentDonors;
+            }
+
+            $scope.$emit('tooltip::show', {
+              element: angular.element(elem),
+              text: getLabel(),
+              placement: 'top',
+              sticky:true
+            });
+          },
+          tooltipHideFunc: function() {
+            $scope.$emit('tooltip::hide');
+          },
+          graphTitles: ['Cumulative Project Donor Count by Release','Individual Project Donor Count by Release'],
+          offset: 'zero'
+        };
+
+        $scope.$watch('selected', function (newValue){
+            if(newValue && $scope.items){
+              if(chart){
+                chart.destroy();
+              }
+              $scope.selected = newValue;
+              chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
+              chart.render($element[0]);
+            }
+          },true);
+
+        $scope.$watch('items', function (newValue) {
+          if(!chart && newValue){
+            chart = new dcc.StackedAreaChart(filterProjects($scope.items,$scope.selected),config);
+            chart.render($element[0]);
+          }else if(newValue){
+            $scope.items = newValue;
+          }
+        }, true);
+
+        $scope.$on('$destroy', function () {
+          if (chart) {
+            chart.destroy();
+          }
+        });
+
+      }
+    };
+  });
 })();

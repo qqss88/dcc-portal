@@ -23,46 +23,49 @@
       offset: 'zero'
     };
 
-	window.dcc = window.dcc || {};
+  window.dcc = window.dcc || {};
 
   var StackedAreaChart = function(data, config){
-      this.data = data;
-      this.config = config || defaultConfig;
-      this.selectedView = 'area';
-      this.margin = config.margin;
+    //clear everything before we start
+    d3.select(this.element).selectAll('*').remove();
 
-      //Adjust for margin to account for tick padding
-      this.margin.left = this.margin.left +20;
+    this.data = data;
+    this.config = config || defaultConfig;
+    this.selectedView = 'area';
+    this.margin = config.margin;
 
-      this.width = config.width - this.margin.left - this.margin.right;
-      this.height = config.height - this.margin.top - this.margin.bottom;
+    //Adjust for margin to account for tick padding
+    this.margin.left = this.margin.left +20;
 
-      this.x = d3.scale.linear()
-      .range([0, this.width]).domain(config.xaxis.ticksValueRange);
-      this.xReverser = d3.scale.linear()
-      .domain([0, this.width]).range(config.xaxis.ticksValueRange);
+    this.width = config.width - this.margin.left - this.margin.right;
+    this.height = config.height - this.margin.top - this.margin.bottom;
 
-      this.y = d3.scale.linear()
-      .range([this.height, 0]);
+    this.x = d3.scale.linear()
+    .range([0, this.width]).domain(config.xaxis.ticksValueRange);
+    this.xReverser = d3.scale.linear()
+    .domain([0, this.width]).range(config.xaxis.ticksValueRange);
 
-      this.colour = d3.scale.ordinal()
-      .domain(d3.keys(config.colours))
-      .range(d3.values(config.colours));
-    };
+    this.y = d3.scale.linear()
+    .range([this.height, 0]);
 
-	StackedAreaChart.prototype.render = function(element){
-      var data = this.data;
-      var config = this.config;
-      var margin = this.margin, width = this.width, height = this.height, colour = this.colour;
+    this.colour = d3.scale.ordinal()
+    .domain(d3.keys(config.colours))
+    .range(d3.values(config.colours));
+  };
 
-      var xAxis = d3.svg.axis()
+  StackedAreaChart.prototype.render = function(element){
+    var data = this.data;
+    var config = this.config;
+    var margin = this.margin, width = this.width, height = this.height, colour = this.colour;
+
+    var xAxis = d3.svg.axis()
       .scale(this.x)
       .orient('bottom')
       .innerTickSize(-height)
       .ticks(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0])
       .tickPadding(10);
 
-      var xAxisLabels = d3.svg.axis()
+    var xAxisLabels = d3.svg.axis()
       .scale(this.x)
       .orient('bottom')
       .innerTickSize(0)
@@ -73,7 +76,7 @@
       })
       .tickPadding(10);
 
-      var yAxis = d3.svg.axis()
+    var yAxis = d3.svg.axis()
       .scale(this.y)
       .orient('left')
       .innerTickSize(-width)
@@ -81,7 +84,7 @@
       .tickFormat(d3.format('.2s'))
       .tickPadding(10);
 
-      var graphTitle = d3.select(element).append('div')
+    var graphTitle = d3.select(element).append('div')
       .style('margin-bottom','30px')
       .attr('class','graph_title')
       .attr('y',0)
@@ -89,26 +92,26 @@
       .attr('dy', '1em')
       .text(config.graphTitles[0]);
 
-      var stack = d3.layout.stack()
+    var stack = d3.layout.stack()
       .offset(config.offset)
       .values(function(d) { return d.values; })
       .x(function(d) { return d.index; })
       .y(function(d) { return d.value; });
 
-      var nest = d3.nest()
+    var nest = d3.nest()
       .key(function(d) { return d.group; });
 
-      var x = this.x, y=this.y;
-      var area = d3.svg.area()
+    var x = this.x, y=this.y;
+    var area = d3.svg.area()
       .interpolate('linear')
       .x(function(d) { return x(d.index); })
       .y0(function(d) { return y(d.y0); })
       .y1(function(d) { return y(d.y0 + d.y); });
 
-      var input = ['Area','Line'];
-      var form = d3.select(element).append('form');
+    var input = ['Area','Line'];
+    var form = d3.select(element).append('form');
 
-      var svg = d3.select(element).append('svg')
+    var svg = d3.select(element).append('svg')
       .attr('viewBox','0 0 '+(width + margin.left + margin.right)+
             ' '+(height + margin.top + margin.bottom))
       .attr('preserveAspectRatio','xMidYMid')
@@ -116,20 +119,20 @@
       .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-      var layers = stack(nest.entries(data));
+    var layers = stack(nest.entries(data));
 
-      this.y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
+    this.y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
 
-      var line = d3.svg.line()
+    var line = d3.svg.line()
       .x(function(d) { return x(d.index); })
       .y(function(d) { return y(d.value); });
 
-      var project = svg.selectAll('.layer-project')
+    var project = svg.selectAll('.layer-project')
       .data(layers)
       .enter().append('g')
       .attr('class', 'layer-project');
 
-      var hintLine = svg.selectAll('.stackedareahint')
+    var hintLine = svg.selectAll('.stackedareahint')
       .data([width*2]).enter()
       .append('line')
       .style('pointer-events','none')
@@ -146,23 +149,23 @@
         'pointer-events':'none'
       });
 
-      var gridBlockWidth = width/(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0]);
-      var hintHighlighter = svg.selectAll('rect').data([0]).enter()
-       .append('rect')
-       .style('opacity','0.33')
-       .attr('class','stackedareahinthighlight')
-       .style('fill','lightgrey')
-       .attr({
-          'x' : width*2,
-          'y' : height,
-          'width' : gridBlockWidth,
-          'height' :3*margin.bottom/4,
-          'stroke' : 'grey',
-          'stroke-width' : '1px',
-          'z-index':-10
-        });
-      var xReverser = this.xReverser;
-      project.append('path')
+    var gridBlockWidth = width/(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0]);
+    var hintHighlighter = svg.selectAll('rect').data([0]).enter()
+     .append('rect')
+     .style('opacity','0.33')
+     .attr('class','stackedareahinthighlight')
+     .style('fill','lightgrey')
+     .attr({
+        'x' : width*2,
+        'y' : height,
+        'width' : gridBlockWidth,
+        'height' :3*margin.bottom/4,
+        'stroke' : 'grey',
+        'stroke-width' : '1px',
+        'z-index':-10
+      });
+    var xReverser = this.xReverser;
+    project.append('path')
       .attr('d', function(d) { return area(d.values); })
       .style('fill', function(d) {return colour(d.key); })
       .style('sharp-rengering','crispEdges')
@@ -189,23 +192,23 @@
                 .transition().duration(100).style('opacity',function(d){return d.key === data.key?'1':'0.1';});
           });
 
-      svg.append('g')
+    svg.append('g')
       .attr('class', 'stackedarea x axis')
       .attr('transform', 'translate(0,' + height + ')')
       .call(xAxis);
 
-      svg.append('g')
+    svg.append('g')
       .attr('class', 'stackedarea x axis labels')
       .attr('transform', 'translate(0,' + (height+15)+ ')')
       .call(xAxisLabels)
       .style('font-size','10')
       .style('fill','grey');
 
-      svg.append('g')
+    svg.append('g')
       .attr('class', 'stackedarea y axis')
       .call(yAxis);
 
-      svg.select('.stackedarea.y.axis')
+    svg.select('.stackedarea.y.axis')
       .style('font-size','12')
       .style('fill','grey')
       .append('text')
@@ -216,7 +219,7 @@
       .style('text-anchor', 'middle')
       .text(config.yaxis.label);
 
-      svg.select('.stackedarea.x.axis')
+    svg.select('.stackedarea.x.axis')
       .style('font-size','12')
       .style('fill','grey')
       .append('text')
@@ -226,34 +229,32 @@
       .style('text-anchor', 'middle')
       .text(config.xaxis.label);
 
-      var change = function changeView(view){
-        if(view === 'Line'){
-          graphTitle.text(config.graphTitles[1]);
-          y.domain([0, d3.max(data, function(d) { return d.value; })]);
-          svg.select('.stackedarea.y.axis').transition().duration(500)
-          .call(yAxis);
-          project.selectAll('path').transition().duration(500)
+    var change = function changeView(view){
+      if(view === 'Line'){
+        graphTitle.text(config.graphTitles[1]);
+        y.domain([0, d3.max(data, function(d) { return d.value; })]);
+        svg.select('.stackedarea.y.axis').transition().duration(500).call(yAxis);
+        project.selectAll('path').transition().duration(500)
           .attr('d', function(d){return line(d.values);})
           .style('fill','none')
           .attr('stroke', function(d) {return colour(d.key); })
           .attr('class','line')
           .attr('stroke-width','3px');
 
-        }else if(view ==='Area'){
-          graphTitle.text(config.graphTitles[0]);
-          y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
-          svg.select('.stackedarea.y.axis').transition().duration(500)
-          .call(yAxis);
-          project.selectAll('path').transition().duration(500)
+      }else if(view ==='Area'){
+        graphTitle.text(config.graphTitles[0]);
+        y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
+        svg.select('.stackedarea.y.axis').transition().duration(500).call(yAxis);
+        project.selectAll('path').transition().duration(500)
           .attr('d', function(d) { return area(d.values); }).transition()
           .style('fill', function(d) {return colour(d.key); })
           .attr('stroke','none')
           .attr('class','')
           .attr('stroke-width','0px');
-        }
-      };
+      }
+    };
 
-      form.selectAll('label')
+    form.selectAll('label')
       .data(input).enter()
       .append('label')
       .text(function(d) {return d;})
@@ -270,12 +271,12 @@
           change(e);
         })
       .property('checked', function(d, i) {return i===0;});
-    };
+  };
 
   StackedAreaChart.prototype.destroy = function(){
-      this.data = null;
-      d3.select(this.element).selectAll('*').remove();
-    };
+    this.data = null;
+    d3.select(this.element).selectAll('*').remove();
+  };
 
   dcc.StackedAreaChart = StackedAreaChart;
 
