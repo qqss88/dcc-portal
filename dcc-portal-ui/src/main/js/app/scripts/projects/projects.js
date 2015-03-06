@@ -182,11 +182,11 @@
             });
           });
 
-        if(!_ctrl.donorData){
-          $http.get('data/releasehistory.json').success(function(data) {
-            _ctrl.donorData = data;
-          });
-        }
+        Restangular.one('projects/history', '').get({}).then(function(data) {
+          // Remove restangular attributes to make data easier to parse
+          data = Restangular.stripRestangular(data);
+          _ctrl.donorData = data;
+        });
       }
     }
 
