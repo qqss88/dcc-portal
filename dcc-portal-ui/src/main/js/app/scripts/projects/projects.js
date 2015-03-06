@@ -63,7 +63,7 @@
 
   module.controller('ProjectsCtrl',
     function ($q, $scope, $state, ProjectState, Page, Projects,
-               HighchartsService, Donors, Restangular, LocationService, $http) {
+               HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
