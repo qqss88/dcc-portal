@@ -77,8 +77,8 @@ angular.module('icgc.ui.events', [])
           element.css('pointer-events', 'none');
           element.css('opacity', 0.65);
         } else {
-          element.css('pointer-events', null);
-          element.css('opacity', null);
+          element.css('pointer-events', '');
+          element.css('opacity', '1');
         }
       }
 
@@ -202,7 +202,7 @@ angular.module('app.ui.tooltipControl', [])
                 if(element.hasClass('sticky')){
                   var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
                     left: e.pageX,
-                    top: e.pageY,
+                    top: e.pageY - (scope.placement === 'top' ? 8 : 0),
                     width: 10,
                     height: -6
                   });
