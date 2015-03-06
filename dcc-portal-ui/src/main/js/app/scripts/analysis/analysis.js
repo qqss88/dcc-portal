@@ -3,7 +3,6 @@
 
   var module = angular.module('icgc.analysis', [
     'icgc.analysis.controllers',
-    'icgc.bench.controllers',
     'ui.router'
   ]);
 
@@ -35,7 +34,7 @@
 
     /**
     * :id is a UUID generated server-side
-    * :type can be one of "enrichment", "setop"
+    * :type can be one of "enrichment", "set|union"
     */
     $stateProvider.state('analysis', {
       url: '/analysis/:type/:id',
@@ -55,7 +54,6 @@
       data: {
         tab: 'analysis'
       }
-
     });
   });
 
@@ -68,104 +66,17 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
 
-  module.controller('NewAnalysisController', function($scope, $modal, $location, Restangular, SetService, Extensions) {
-    var _this = this;
-
-    _this.analysisType = null; // One of "enrichment", "set", "phenotype" or "coverage"
-    _this.filteredList = [];
-    _this.filteredSetType = 'donor';
-    _this.selectedIds = [];
-
-    _this.toggle = function(setId) {
-      if (_this.selectedIds.indexOf(setId) >= 0) {
-        console.log('remove', setId);
-        _.remove(_this.selectedIds, function(id) {
-          return id === setId;
-        });
-      } else {
-        console.log('add', setId);
-        _this.selectedIds.push(setId);
-      }
-    };
-
-    _this.applyFilter = function(type) {
-      if (type === 'enrichment') {
-        _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          // FIXME: also do gene limit (< 1000)
-          return set.type === 'gene';
-        });
-      } else if (type === 'set') {
-        _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          return set.type === _this.filteredSetType;
-        });
-      } else if (type === 'phenotype') {
-        _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          return set.type === 'donor';
-        });
-      } else {
-        _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          return set.type === 'donor';
-        });
-      }
-    };
-
-    _this.launchSet = function(type, setIds) {
-      var payload = {
-        lists: setIds,
-        type: type.toUpperCase()
-      };
-      console.log('payload', payload);
-      var promise = Restangular.one('analysis').post('union', payload, {}, {'Content-Type': 'application/json'});
-      promise.then(function(data) {
-        if (!data.id) {
-          console.log('cannot create set operation');
-        }
-        $location.path('analysis/set/' + data.id);
-      });
-    };
-
-    _this.launchEnrichment = function(setId) {
-      var filters = {
-        gene: {}
-      };
-      filters.gene[Extensions.ENTITY] = { is: [setId] };
-
-      $modal.open({
-        templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
-        controller: 'EnrichmentUploadController',
-        resolve: {
-          geneLimit: function() {
-            return undefined;
-          },
-          filters: function() {
-            return filters;
-          }
-        }
-      });
-    };
-
-
-    $scope.$watch(function() {
-      return _this.analysisType;
-    }, function(n) {
-      if (!n) return;
-      _this.applyFilter(n);
-    });
-  });
-
-
   module.controller('AnalysisController', function ($scope, $location, $timeout, $modal, $state, analysisId, analysisType,
     Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
-    $scope.entityLists = SetService.getAll();
-    $scope.canBeDeleted = 0;
-    $scope.enrichment = {};
-    $scope.syncError = false;
-    $scope.currentTab = $state.current.data.tab || 'analysis';
 
+    $scope.enrichment = {};
+    $scope.currentTab = $state.current.data.tab || 'analysis';
+    $scope.analysisId = analysisId;
+    $scope.analysisType = analysisType;
 
 
     $scope.$watch(function () {
@@ -174,187 +85,11 @@
       $scope.currentTab = $state.current.data.tab || 'analysis';
     });
 
-    $scope.newAnalysis = function() {
-      $location.path('/analysis');
-    };
 
-
-
-
-
-    // ==== deprecated =====
-
-
-    // Selected sets
-    $scope.selectedSets = [];
-    $scope.addSelection = function(set) {
-      $scope.selectedSets.push(set);
-    };
-
-    $scope.removeSelection = function(set) {
-      _.remove($scope.selectedSets, function(s) {
-        return s.id === set.id;
-      });
-    };
-
-    $scope.addCustomGeneSet = function() {
-      var inst = $modal.open({
-        templateUrl: '/scripts/genelist/views/upload.html',
-        controller: 'GeneListController'
-      });
-
-      // Successful submit
-      inst.result.then(function() {
-        $timeout.cancel(syncSetTimeout);
-        synchronizeSets(10);
-      });
-    };
-
-    $scope.exportSet = function(id) {
-      SetService.exportSet(id);
-    };
-
-    // Send IDs generate new set operations analysis
-    /*
-    $scope.launchSetAnalysis = function() {
-      var selected = $scope.selectedSets;
-
-      var type = selected[0].type.toUpperCase();
-      var ids  = _.pluck(selected, 'id');
-
-      var payload = {
-        lists: ids,
-        type: type
-      };
-      var promise = Restangular.one('analysis').post('union', payload, {}, {'Content-Type': 'application/json'});
-
-      promise.then(function(data) {
-        if (!data.id) {
-          console.log('cannot create set operation');
-        }
-        $location.path('analysis/set/' + data.id);
-      });
-    };
-    */
-
-
-    /*
-    $scope.launchEnrichmentAnalysis = function() {
-      var filters = {
-        gene: {}
-      };
-      filters.gene[Extensions.ENTITY] = { is: [$scope.enrichmentSet] };
-
-      $modal.open({
-        templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
-        controller: 'EnrichmentUploadController',
-        resolve: {
-          geneLimit: function() {
-            return undefined;
-          },
-          filters: function() {
-            return filters;
-          }
-        }
-      });
-    };
-    */
-
-
-    $scope.update = function() {
-
-      $scope.enrichmentSet = null;
-      $scope.setop = null;
-
-      // Check if delete button should be enabled
-      $scope.canBeDeleted = _.filter($scope.selectedSets, function(set) {
-        if (set.readonly && set.readonly === true) {
-          return false;
-        }
-        return true;
-      }).length;
-
-
-      // Check which analyses are applicable
-      var selected = $scope.selectedSets, uniqued = [];
-      uniqued = _.uniq(_.pluck(selected, 'type'));
-
-
-      // If there are unfinished, do not proceed
-      if (_.some(selected, function(s) { return s.state !== 'FINISHED'; })) {
-        return;
-      }
-
-
-      // Enrichment analysis takes only ONE gene set
-      if (selected.length === 1 && uniqued[0] === 'gene') {
-        $scope.enrichmentSet = selected[0].id;
-        $scope.totalCount = selected[0].count;
-      }
-
-      // Set operations takes up to 3 sets of the same type
-      if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
-        $scope.setop = true;
-      }
-    };
-
-
-    $scope.removeLists = function() {
-      var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
-      if (!confirmRemove || confirmRemove === false) {
-        return;
-      }
-
-      var toRemove = _.filter($scope.selectedSets, function(set) {
-        return !angular.isDefined(set.readonly);
-      });
-
-
-      if (toRemove.length > 0) {
-
-        _.remove($scope.selectedSets, function(set) {
-          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
-        });
-
-        SetService.removeSeveral(_.pluck(toRemove, 'id'));
-        $scope.update();
-      }
-    };
 
     var analysisPromise;
-    var pollTimeout, syncSetTimeout;
+    var pollTimeout;
 
-
-    $scope.analysisId = analysisId;
-    $scope.analysisType = analysisType;
-
-
-    function synchronizeSets(numTries) {
-
-      var pendingLists, pendingListsIDs, promise;
-      pendingLists = _.filter($scope.entityLists, function(d) {
-        return d.state !== 'FINISHED';
-      });
-      pendingListsIDs = _.pluck(pendingLists, 'id');
-
-      if (pendingLists.length <= 0) {
-        return;
-      }
-
-      if (numTries <= 0) {
-        console.log('Stopping, numTries runs out');
-        $scope.syncError = true;
-        return;
-      }
-
-      promise = SetService.getMetaData(pendingListsIDs);
-      promise.then(function(results) {
-        SetService.updateSets(results);
-        syncSetTimeout = $timeout(function() {
-          synchronizeSets(--numTries);
-        }, 3000);
-      });
-    }
 
     function wait(id, type) {
       $scope.error = null;
@@ -418,13 +153,11 @@
     $scope.$on('$locationChangeStart', function() {
       // Cancel any remaining polling requests
       $timeout.cancel(pollTimeout);
-      $timeout.cancel(syncSetTimeout);
     });
 
     // Clea up
     $scope.$on('destroy', function() {
       $timeout.cancel(analysisPromise);
-      $timeout.cancel(syncSetTimeout);
     });
 
 
@@ -432,9 +165,10 @@
     init();
 
     // Only do synchronization on analysis home tab
+    /*
     if (! $scope.analysisId || ! $scope.analysisType) {
       synchronizeSets(10);
-    }
+    }*/
 
   });
 

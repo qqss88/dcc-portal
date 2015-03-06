@@ -1,0 +1,104 @@
+(function () {
+  'use strict';
+
+  var module = angular.module('icgc.analysis.controllers');
+
+  module.controller('SavedSetController', function($scope, $window, $timeout, $location, RestangularNoCache, SetService) {
+    var _this = this;
+    var syncSetTimeout;
+
+    _this.syncError = false;
+    _this.entityLists = SetService.getAll();
+    _this.selectedSets = [];
+
+    // Selected sets
+    _this.selectedSets = [];
+    _this.addSelection = function(set) {
+      _this.selectedSets.push(set);
+    };
+    _this.removeSelection = function(set) {
+      _.remove(_this.selectedSets, function(s) {
+        return s.id === set.id;
+      });
+    };
+
+    _this.exportSet = function(id) {
+      SetService.exportSet(id);
+    };
+
+    _this.addCustomGeneSet = function() {
+      var inst = $modal.open({
+        templateUrl: '/scripts/genelist/views/upload.html',
+        controller: 'GeneListController'
+      });
+
+      // Successful submit
+      inst.result.then(function() {
+        $timeout.cancel(syncSetTimeout);
+        synchronizeSets(10);
+      });
+    };
+
+
+    _this.removeLists = function() {
+      var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
+      if (!confirmRemove || confirmRemove === false) {
+        return;
+      }
+
+      var toRemove = _.filter(_this.selectedSets, function(set) {
+        return !angular.isDefined(set.readonly);
+      });
+
+
+      if (toRemove.length > 0) {
+        _.remove(_this.selectedSets, function(set) {
+          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
+        });
+
+        SetService.removeSeveral(_.pluck(toRemove, 'id'));
+      }
+    };
+
+
+
+    function synchronizeSets(numTries) {
+      var pendingLists, pendingListsIDs, promise;
+      pendingLists = _.filter(_this.entityLists, function(d) {
+        return d.state !== 'FINISHED';
+      });
+      pendingListsIDs = _.pluck(pendingLists, 'id');
+
+      if (pendingLists.length <= 0) {
+        return;
+      }
+
+      if (numTries <= 0) {
+        console.log('Stopping, numTries runs out');
+        _this.syncError = true;
+        return;
+      }
+
+      promise = SetService.getMetaData(pendingListsIDs);
+      promise.then(function(results) {
+        SetService.updateSets(results);
+        syncSetTimeout = $timeout(function() {
+          synchronizeSets(--numTries);
+        }, 3000);
+      });
+    }
+
+
+    $scope.$on('destroy', function() {
+      $timeout.cancel(syncSetTimeout);
+    });
+
+
+    synchronizeSets(10);
+
+
+
+  });
+
+})();
+

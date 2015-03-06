@@ -1,26 +1,22 @@
 <section>
-    <!--<div class="narrow" data-ng-controller="BenchController">-->
-    <div style="float:left; width:20rem; margin-right:2rem" data-ng-controller="BenchController">
-
+    <div style="float:left; width:20rem; margin-right:2rem" data-ng-controller="AnalysisListController as ListController">
 
         <div>
-            <span class="t_button" data-ng-click="newAnalysis()" data-ng-disabled="!analysisId"><i class="icon-plus"></i>Create New</span>
-            <span class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0"
+            <span class="t_button" data-ng-click="ListController.newAnalysis()" data-ng-disabled="!analysisId"><i class="icon-plus"></i>Create New</span>
+            <span class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="ListController.analysisList.length===0"
                 data-tooltip="Delete All Analyses">
                 <i class="icon-trash"></i>
             </span>
         </div>
 
-
-
-        <span>Existing Analyses</span>
-        <div class="select-list" style="margin-top: 0rem">
+        <span>{{ListController.analysisList.length | number}} Existing analyses</span>
+        <div class="select-list" style="margin-top: 0rem; max-height:40rem">
             <div class="select-list-item"
-                 data-ng-repeat="item in analysisList" 
-                 data-ng-click="getAnalysis(item.id, item.type)"
+                 data-ng-repeat="item in ListController.analysisList" 
+                 data-ng-click="ListController.getAnalysis(item.id, item.type)"
                  data-ng-class="{active:  item.id === analysisId}">
                <span>
-                   {{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}
+                   {{ ListController.analysisName(item.type) }}
                    <small class="pull-right t_suggest_detail"> 
                       {{item.timestamp | date:"yyyy-MM-dd"}}
                    </small><br>
@@ -30,15 +26,13 @@
                    <small data-ng-if="item.type === 'union'" class="t_suggest_detail">
                        {{item.dataType | trans:true}}
                    </small>
-                   <span class="" data-ng-click="$event.stopPropagation(); remove(item.id);">
+                   <span class="" data-ng-click="$event.stopPropagation(); ListController.remove(item.id);">
                        <i class="icon-cancel pull-right select-list-cancel"
                           data-tooltip="Delete Analysis"
                           data-tooltip-placement="right">
                        </i>
                    </span>
-
                </span>
-
             </div>
         </div>
     </div>
@@ -49,7 +43,7 @@
             <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>
         </div>
 
-        <div style="margin: 1rem" data-ng-if="analysisId">
+        <div style="margin: 0rem 1rem" data-ng-if="analysisId">
             <div data-ng-if="analysisType === 'enrichment'" >
                 <div data-ng-if="!error">
                     <enrichment-result data-item="analysisResult"></enrichment-result>

@@ -1,5 +1,5 @@
-<section>
-    <div class="alert-error" data-ng-if="syncError"><i class="icon-attention"></i>
+<section data-ng-controller="SavedSetController as SavedSetController">
+    <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
         Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
     </div>
 
@@ -7,7 +7,8 @@
 
 
     <div style="padding:.5rem 0">
-        <button class="t_button t_button__destructive" data-ng-click="removeLists()" data-ng-disabled="canBeDeleted === 0"
+        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeLists()" 
+            data-ng-disabled="SavedSetController.selectedSets.length === 0"
             data-tooltip="Delete">
             <i class="icon-trash"></i>
         </button>   
@@ -26,10 +27,10 @@
                 <th></th>
             </thead>
             <tbody>
-                <tr data-ng-repeat="item in entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
+                <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
                     <td class="text-center">
                         <span data-ng-if="(item.state === 'FINISHED' || syncError) && $index > 0" style="cursor:pointer" 
-                              data-ng-click="checked = !checked; checked === true? addSelection(item) : removeSelection(item); update();">
+                              data-ng-click="checked = !checked; checked === true? SavedSetController.addSelection(item) : SavedSetController.removeSelection(item); update();">
                             <i class="{{checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                         </span>
                     </td>
@@ -42,7 +43,7 @@
                     <td data-ng-if="item.state === 'FINISHED'">
                         <span style="float:left; font-size:1.25rem">
                             <span class="t_tools__tool" data-tooltip="Export as TSV">
-                                <i class="icon-file" data-ng-click="exportSet(item.id)"></i>
+                                <i class="icon-file" data-ng-click="SavedSetController.exportSet(item.id)"></i>
                             </span>
                         </span>
                     </td>
