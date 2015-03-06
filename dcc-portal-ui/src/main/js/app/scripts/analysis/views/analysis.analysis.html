@@ -1,0 +1,72 @@
+<section>
+    <!--<div class="narrow" data-ng-controller="BenchController">-->
+    <div style="float:left; width:20rem; margin-right:2rem" data-ng-controller="BenchController">
+
+
+        <div>
+            <span class="t_button" data-ng-click="newAnalysis()" data-ng-disabled="!analysisId"><i class="icon-plus"></i>Create New</span>
+            <span class="t_button t_button__destructive" data-ng-click="removeAllAnalyses()" data-ng-disabled="analysisList.length===0"
+                data-tooltip="Delete All Analyses">
+                <i class="icon-trash"></i>
+            </span>
+        </div>
+
+
+
+        <span>Existing Analyses</span>
+        <div class="select-list" style="margin-top: 0rem">
+            <div class="select-list-item"
+                 data-ng-repeat="item in analysisList" 
+                 data-ng-click="getAnalysis(item.id, item.type)"
+                 data-ng-class="{active:  item.id === analysisId}">
+               <span>
+                   {{ ["set", "union"].indexOf(item.type) !== -1? "Set Operations" : "Enrichment Analysis"}}
+                   <small class="pull-right t_suggest_detail"> 
+                      {{item.timestamp | date:"yyyy-MM-dd"}}
+                   </small><br>
+                   <small data-ng-if="item.type === 'enrichment'" class="t_suggest_detail">
+                       {{item.universe | define}} - {{item.maxGeneCount | number}} {{item.maxGeneCount !== 1? "genes": "gene" }}
+                   </small>
+                   <small data-ng-if="item.type === 'union'" class="t_suggest_detail">
+                       {{item.dataType | trans:true}}
+                   </small>
+                   <span class="" data-ng-click="$event.stopPropagation(); remove(item.id);">
+                       <i class="icon-cancel pull-right select-list-cancel"
+                          data-tooltip="Delete Analysis"
+                          data-tooltip-placement="right">
+                       </i>
+                   </span>
+
+               </span>
+
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="wide">
+        <div data-ng-if="!analysisId">
+            <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>
+        </div>
+
+        <div style="margin: 1rem" data-ng-if="analysisId">
+            <div data-ng-if="analysisType === 'enrichment'" >
+                <div data-ng-if="!error">
+                    <enrichment-result data-item="analysisResult"></enrichment-result>
+                </div>
+            </div>
+            <div data-ng-if="analysisType === 'set' || analysisType === 'union'">
+                <div data-ng-if="!error">
+                    <set-operation data-item="analysisResult"></set-operation>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+    
+            <div data-ng-if="error" class="alert-error">
+                <i class="icon-attention"></i><span>Analysis <strong>{{analysisId}}</strong> cannot be found on the server. It may no longer be valid with respect to current portal data.</span>
+            </div>
+        </div>
+
+    </div>
+</section>
+

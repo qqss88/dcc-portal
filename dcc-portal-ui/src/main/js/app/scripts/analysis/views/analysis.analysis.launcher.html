@@ -1,0 +1,104 @@
+<div style="margin: 0rem 1rem" data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC">
+    <h3 style="margin-top:0">Launch New Analysis</h3>
+    <div>
+        <span>1. Select the analysis type you want to perform</span>
+        <div>
+            <div style="display:inline-block; margin-right:1rem">
+                <span class="t_button"
+                    data-ng-class="{t_button__active: NAC.analysisType==='enrichment'}"
+                    data-ng-click="NAC.analysisType='enrichment'">
+                    <i class="icon-beaker"></i>Enrichment Analysis</span>
+            </div>
+            <div style="display:inline-block; margin-right:1rem">
+                <span class="t_button"
+                    data-ng-class="{t_button__active: NAC.analysisType==='set'}"
+                    data-ng-click="NAC.analysisType='set'">
+                    <i class="icon-beaker"></i>Set Analysis</span>
+            </div>
+            <!--
+            <div style="display:inline-block; margin-right:1rem">
+                <span class="t_button"
+                    data-ng-class="{t_button__active: NAC.analysisType==='phenotype'}"
+                    data-ng-click="NAC.analysisType='phenotype'">Phenotype Comparison</span>
+            </div>
+            <div style="display:inline-block; margin-right:1rem">
+                <span class="t_button"
+                    data-ng-class="{t_button__active: NAC.analysisType==='coverage'}"
+                    data-ng-click="NAC.analysisType='coverage'">Mutation Coverage</span>
+            </div>
+            -->
+        </div>
+    </div>
+    <br> 
+    <div data-ng-show="NAC.analysisType">
+
+        <!-- enrichment -->
+        <div data-ng-if="NAC.analysisType === 'enrichment'">
+            <span>2. Select the gene set you want to analyze</span>
+            <table class="table table-selectable">
+                <thead>
+                    <th></th>
+                    <th>Item type</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th class="text-right"># of items</th>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="item in NAC.filteredList" data-ng-init="checked=false">
+                        <td class="text-center" style="width:2rem">
+                            <span class="t_button" data-ng-click="NAC.launchEnrichment(item.id)">Run</span>
+                        </td>
+                        <td>{{item.type | trans:true}}</td>
+                        <td>{{item.name}}</td>
+                        <td style="max-width: 30rem">{{item.description}}</td>
+                        <td class="text-right"> 
+                            <a href="{{item.advLink}}">{{item.count | number}}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- set -->
+        <div data-ng-if="NAC.analysisType === 'set'">
+            <div>
+                <span>2. Select the type: </span>
+                <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="donor"><span> Donor </span>
+                <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="mutation"><span> Mutation </span>
+                <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="gene"><span> Gene </span>
+            </div>
+            <table class="table table-selectable" style="margin-bottom:0.25rem">
+                <thead>
+                    <th></th>
+                    <th>Item type</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                    <th class="text-right"># of items</th>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="item in NAC.filteredList"> 
+                        <td class="text-center" style="width:1rem" data-ng-click="NAC.toggle(item.id)">
+                           <span>
+                              <i data-ng-class="{'icon-check-empty': NAC.selectedIds.indexOf(item.id) === -1, 'icon-check': NAC.selectedIds.indexOf(item.id) >=0}"></i>
+                           </span>
+                        </td>
+                        <td>{{item.type | trans:true}}</td>
+                        <td>{{item.name}}</td>
+                        <td style="max-width: 30rem">{{item.description}}</td>
+                        <td class="text-right"> 
+                            <a href="{{item.advLink}}">{{item.count | number}}</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <button class="t_button" 
+                data-ng-disabled="NAC.selectedIds.length < 2 || NAC.selectedIds.length > 3"
+                data-ng-click="NAC.launchSet(NAC.filteredSetType, NAC.selectedIds)">Run</button>
+
+        </div>
+
+
+    </div>
+</div>
+
+

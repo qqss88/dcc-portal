@@ -3694,6 +3694,15 @@ td {
   background: #166aa2;
   color: white;
 }
+/* line 31, _modules/_list.scss */
+.select-list-item .select-list-cancel {
+  background: none;
+  border-radius: 0.25rem;
+}
+/* line 34, _modules/_list.scss */
+.select-list-item .select-list-cancel:hover {
+  background: #dc502e;
+}
 
 /* line 24, styles.scss */
 html {
