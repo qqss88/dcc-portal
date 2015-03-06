@@ -61,6 +61,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.mergeFilters;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -86,6 +87,7 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Project;
 import org.icgc.dcc.portal.model.Projects;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.MutationService;
@@ -94,8 +96,12 @@ import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -681,4 +687,19 @@ public class ProjectResource {
     return counts;
   }
 
+  @Path("/history")
+  @GET
+  @Timed
+  @ApiOperation(value = "Returns history of donor count of all projects at every release")
+  public JsonNode getHistory() {
+    try {
+      return JsonUtils.MAPPER.readTree(Resources.getResource("data/project-history.json"));
+    } catch (JsonParseException e) {
+      throw new BadRequestException("Couldn't parse release history data - file missing or corrupted");
+    } catch (JsonMappingException e) {
+      throw new BadRequestException("Couldn't map release history data - file missing or corrupted");
+    } catch (IOException e) {
+      throw new BadRequestException("Couldn't read release history data - file missing or corrupted");
+    }
+  }
 }
