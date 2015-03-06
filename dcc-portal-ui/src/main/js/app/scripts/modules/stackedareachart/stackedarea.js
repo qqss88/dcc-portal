@@ -168,11 +168,12 @@
       .style('sharp-rengering','crispEdges')
       .on('mousemove', function(d) {
             var coords = d3.mouse(this);
-            var release = Math.round(xReverser(coords[0]))-4;
-            var actualRelease = release + 4;
-            config.tooltipShowFunc(this,d.key,d.values[release].value, actualRelease);
-            hintLine.transition().duration(80).attr('x1',x(release + 4)).attr('x2',x(actualRelease));
-            hintHighlighter.transition().duration(80).attr('x',x(release + 4)-gridBlockWidth/2);
+            var indexOffset = config.xaxis.ticksValueRange[0];
+            var index = Math.round(xReverser(coords[0])) - indexOffset;
+            var actualIndex = index + indexOffset;
+            config.tooltipShowFunc(this,d.key,d.values[index].value, actualIndex);
+            hintLine.transition().duration(80).attr('x1',x(index + indexOffset)).attr('x2',x(actualIndex));
+            hintHighlighter.transition().duration(80).attr('x',x(index + indexOffset)-gridBlockWidth/2);
           })
       .on('mouseout', function() {
             config.tooltipHideFunc();
