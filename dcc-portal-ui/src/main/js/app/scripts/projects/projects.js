@@ -183,7 +183,7 @@
           });
 
         if(!_ctrl.donorData){
-          $http.get('scripts/modules/stackedareachart/data.json').success(function(data) {
+          $http.get('data/releasehistory.json').success(function(data) {
             _ctrl.donorData = data;
           });
         }
