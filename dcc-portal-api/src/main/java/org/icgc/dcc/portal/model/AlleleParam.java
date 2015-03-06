@@ -43,7 +43,8 @@ public class AlleleParam extends AbstractParam<AlleleMutation> {
   protected AlleleMutation parse(String input) throws Exception {
     String allele = input.trim();
 
-    checkArgument(isValidAllele(allele), "'allele' parameter is not valid: Must be [ACTG]+ or an indel");
+    checkArgument(isValidAllele(allele), "'allele' parameter is not valid for input '%s': Must be [ACTG]+ or an indel",
+        input);
 
     return AlleleParser.parseAllele(allele);
   }

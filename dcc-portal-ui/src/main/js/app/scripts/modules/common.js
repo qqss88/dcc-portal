@@ -19,7 +19,8 @@
 
   angular.module('icgc.visualization', [
     'icgc.visualization.projectmutationviewer',
-    'icgc.visualization.stackedbar'
+    'icgc.visualization.stackedbar',
+    'icgc.visualization.stackedarea'
   ]);
   
 })();
