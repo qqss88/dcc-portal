@@ -51,9 +51,9 @@
       var y = d3.scale.linear()
           .range([height, 0]);
 
-      var color = d3.scale.ordinal()
-		    .domain(d3.keys(config.colours))
-		    .range(d3.values(config.colours));
+      var colour = d3.scale.ordinal()
+          .domain(d3.keys(config.colours))
+          .range(d3.values(config.colours));
 
       var xAxis = d3.svg.axis()
           .scale(x)
@@ -82,12 +82,12 @@
           .tickPadding(10);
 
       var graphTitle = d3.select(element).append('div')
-        .style('margin-bottom','30px')
-        .attr('class','graph_title')
-        .attr('y',0)
-        .attr('x',width/2)
-        .attr('dy', '1em')
-        .text(config.graphTitles[0]);
+          .style('margin-bottom','30px')
+          .attr('class','graph_title')
+          .attr('y',0)
+          .attr('x',width/2)
+          .attr('dy', '1em')
+          .text(config.graphTitles[0]);
 
       var stack = d3.layout.stack()
           .offset(config.offset)
@@ -120,51 +120,50 @@
       y.domain([0, d3.max(data, function(d) { return d.y+d.y0; })]);
 
       var line = d3.svg.line()
-            .x(function(d) { return x(d.index); })
-            .y(function(d) { return y(d.value); });
+          .x(function(d) { return x(d.index); })
+          .y(function(d) { return y(d.value); });
 
       var project = svg.selectAll('.layer-project')
-            .data(layers)
-            .enter().append('g')
-            .attr('class', 'layer-project');
+          .data(layers)
+          .enter().append('g')
+          .attr('class', 'layer-project');
 
       var hintLine = svg.selectAll('.stackedareahint')
-        .data([width*2]).enter()
-        .append('line')
-        .style('pointer-events','none')
-        .style('fill','none')
-        .attr('class','stackedareahint')
-        .attr({
-          'class':'stackedareahint',
-          'x1' : function(d){ return d;},
-          'x2' : function(d){ return d;},
-          'y1' : 0,
-          'y2' : height,
-          'shape-rendering' : 'crispEdges',
-          'stroke' : 'grey',
-          'stroke-width' : '1px',
-          'pointer-events':'none'
-        });
+          .data([width*2]).enter()
+          .append('line')
+          .style('pointer-events','none')
+          .style('fill','none')
+          .attr({
+            'class':'stackedareahint',
+            'x1' : function(d){ return d;},
+            'x2' : function(d){ return d;},
+            'y1' : 0,
+            'y2' : height,
+            'shape-rendering' : 'crispEdges',
+            'stroke' : 'grey',
+            'stroke-width' : '1px',
+            'pointer-events':'none'
+          });
 
       var gridBlockWidth = width/(config.xaxis.ticksValueRange[1]-config.xaxis.ticksValueRange[0]);
       var hintHighlighter = svg.selectAll('rect').data([0]).enter()
-         .append('rect')
-         .style('opacity','0.33')
-         .attr('class','stackedareahinthighlight')
-         .style('fill','lightgrey')
-         .attr({
-        'x' : width*2,
-        'y' : height,
-        'width' : gridBlockWidth,
-        'height' :3*margin.bottom/4,
-        'stroke' : 'grey',
-        'stroke-width' : '1px',
-        'z-index':-10
-      });
+           .append('rect')
+           .style('opacity','0.33')
+           .attr('class','stackedareahinthighlight')
+           .style('fill','lightgrey')
+           .attr({
+            'x' : width*2,
+            'y' : height,
+            'width' : gridBlockWidth,
+            'height' :3*margin.bottom/4,
+            'stroke' : 'grey',
+            'stroke-width' : '1px',
+            'z-index':-10
+          });
 
       project.append('path')
             .attr('d', function(d) { return area(d.values); })
-            .style('fill', function(d) {return color(d.key); })
+            .style('fill', function(d) {return colour(d.key); })
             .style('sharp-rengering','crispEdges')
             .on('mousemove', function(d) {
                   var coords = d3.mouse(this);
@@ -189,41 +188,41 @@
                 });
 
       svg.append('g')
-        .attr('class', 'stackedarea x axis')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(xAxis);
+            .attr('class', 'stackedarea x axis')
+            .attr('transform', 'translate(0,' + height + ')')
+            .call(xAxis);
 
       svg.append('g')
-        .attr('class', 'stackedarea x axis labels')
-        .attr('transform', 'translate(0,' + (height+15)+ ')')
-        .call(xAxisLabels)
-        .style('font-size','10')
-        .style('fill','grey');
+            .attr('class', 'stackedarea x axis labels')
+            .attr('transform', 'translate(0,' + (height+15)+ ')')
+            .call(xAxisLabels)
+            .style('font-size','10')
+            .style('fill','grey');
 
       svg.append('g')
-        .attr('class', 'stackedarea y axis')
-        .call(yAxis);
+            .attr('class', 'stackedarea y axis')
+            .call(yAxis);
 
       svg.select('.stackedarea.y.axis')
-        .style('font-size','12')
-        .style('fill','grey')
-        .append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', -margin.left)
-        .attr('x',-height / 2 + margin.top)
-        .attr('dy', '1em')
-        .style('text-anchor', 'middle')
-        .text(config.yaxis.label);
+            .style('font-size','12')
+            .style('fill','grey')
+            .append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', -margin.left)
+            .attr('x',-height / 2 + margin.top)
+            .attr('dy', '1em')
+            .style('text-anchor', 'middle')
+            .text(config.yaxis.label);
 
       svg.select('.stackedarea.x.axis')
-        .style('font-size','12')
-        .style('fill','grey')
-        .append('text')
-        .attr('y',3*margin.bottom/4)
-        .attr('x',width/2)
-        .attr('dy', '1em')
-        .style('text-anchor', 'middle')
-        .text(config.xaxis.label);
+            .style('font-size','12')
+            .style('fill','grey')
+            .append('text')
+            .attr('y',3*margin.bottom/4)
+            .attr('x',width/2)
+            .attr('dy', '1em')
+            .style('text-anchor', 'middle')
+            .text(config.xaxis.label);
 
       var change = function changeView(view){
         if(view === 'Line'){
@@ -234,7 +233,7 @@
           project.selectAll('path').transition().duration(500)
             .attr('d', function(d){return line(d.values);})
             .style('fill','none')
-            .attr('stroke', function(d) {return color(d.key); })
+            .attr('stroke', function(d) {return colour(d.key); })
             .attr('class','line')
             .attr('stroke-width','3px');
 
@@ -245,7 +244,7 @@
             .call(yAxis);
           project.selectAll('path').transition().duration(500)
             .attr('d', function(d) { return area(d.values); }).transition()
-            .style('fill', function(d) {return color(d.key); })
+            .style('fill', function(d) {return colour(d.key); })
             .attr('stroke','none')
             .attr('class','')
             .attr('stroke-width','0px');
@@ -253,22 +252,22 @@
       };
 
       form.selectAll('label')
-        .data(input).enter()
-        .append('label')
-        .text(function(d) {return d;})
-        .style('margin-left','15px')
-        .insert('input')
-        .style('margin','5px')
-        .attr({
-          type: 'radio',
-          class: 'shape',
-          name: 'mode',
-          value: function(d, i) {return i;}
-        })
-          .on('change',function(e){
-            change(e);
-          })
-          .property('checked', function(d, i) {return i===0;});
+            .data(input).enter()
+            .append('label')
+            .text(function(d) {return d;})
+            .style('margin-left','15px')
+            .insert('input')
+            .style('margin','5px')
+            .attr({
+              type: 'radio',
+              class: 'shape',
+              name: 'mode',
+              value: function(d, i) {return i;}
+            })
+            .on('change',function(e){
+                change(e);
+            })
+            .property('checked', function(d, i) {return i===0;});
     };
 
   StackedAreaChart.prototype.destroy = function(){
