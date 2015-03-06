@@ -61,7 +61,6 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.mergeFilters;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +86,6 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Project;
 import org.icgc.dcc.portal.model.Projects;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.GeneService;
 import org.icgc.dcc.portal.service.MutationService;
@@ -96,8 +94,6 @@ import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
@@ -124,6 +120,7 @@ public class ProjectResource {
       "{mutation:{id:{is:['%s']}},donor:{projectId:{is:['%s']}}}";
   private static final String GENE_PROJECT_FILTER_TEMPLATE =
       "{gene:{id:{is:['%s']}},donor:{projectId:{is:['%s']}}}";
+  private static final String RELEASE_HISTORY_FILE_PATH = "data/project-history.json";
 
   private final ProjectService projectService;
   private final GeneService geneService;
@@ -693,13 +690,11 @@ public class ProjectResource {
   @ApiOperation(value = "Returns history of donor count of all projects at every release")
   public JsonNode getHistory() {
     try {
-      return JsonUtils.MAPPER.readTree(Resources.getResource("data/project-history.json"));
-    } catch (JsonParseException e) {
-      throw new BadRequestException("Couldn't parse release history data - file missing or corrupted");
-    } catch (JsonMappingException e) {
-      throw new BadRequestException("Couldn't map release history data - file missing or corrupted");
-    } catch (IOException e) {
-      throw new BadRequestException("Couldn't read release history data - file missing or corrupted");
+      return JsonUtils.MAPPER.readTree(Resources.getResource(RELEASE_HISTORY_FILE_PATH));
+    } catch (Exception e) {
+      throw new IllegalStateException("Couldn't read or parse release histroy data - file '"
+          + RELEASE_HISTORY_FILE_PATH
+          + "' might be corrupt or missing.", e);
     }
   }
 }
