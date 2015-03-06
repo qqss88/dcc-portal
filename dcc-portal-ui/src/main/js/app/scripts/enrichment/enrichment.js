@@ -60,11 +60,10 @@
 
     function buildEnrichmentRequest() {
       var data, geneSortParam;
-
       // Check if we should use a provided filter or the default (LocationService)
       if (angular.isDefined(filters)) {
         data = 'params=' + JSON.stringify($scope.params) + '&' +
-          'filters=' + JSON.stringify($scope.filters) + '&' ;
+          'filters=' + JSON.stringify(filters) + '&' ;
       } else {
         data = 'params=' + JSON.stringify($scope.params) + '&' +
           'filters=' + JSON.stringify(LocationService.filters()) + '&' ;

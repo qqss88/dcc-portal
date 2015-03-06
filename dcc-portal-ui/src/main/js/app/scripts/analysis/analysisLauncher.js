@@ -60,18 +60,18 @@
       });
     };
 
-    _this.launchEnrichment = function(setId) {
+    _this.launchEnrichment = function(set) {
       var filters = {
         gene: {}
       };
-      filters.gene[Extensions.ENTITY] = { is: [setId] };
+      filters.gene[Extensions.ENTITY] = { is: [set.id] };
 
       $modal.open({
         templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
         controller: 'EnrichmentUploadController',
         resolve: {
           geneLimit: function() {
-            return undefined;
+            return set.count;
           },
           filters: function() {
             return filters;

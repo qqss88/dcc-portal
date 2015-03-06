@@ -46,7 +46,7 @@
                 <tbody>
                     <tr data-ng-repeat="item in NAC.filteredList" data-ng-init="checked=false">
                         <td class="text-center" style="width:2rem">
-                            <span class="t_button" data-ng-click="NAC.launchEnrichment(item.id)">Run</span>
+                            <span class="t_button" data-ng-click="NAC.launchEnrichment(item)">Run</span>
                         </td>
                         <td>{{item.type | trans:true}}</td>
                         <td>{{item.name}}</td>
