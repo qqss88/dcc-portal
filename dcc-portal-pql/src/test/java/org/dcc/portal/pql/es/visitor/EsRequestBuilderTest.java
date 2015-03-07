@@ -24,8 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
-import org.dcc.portal.pql.es.utils.EsAstTransformator;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
@@ -41,12 +39,9 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 @Slf4j
-public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
+public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
-  private PqlParseListener listener;
   private EsRequestBuilder visitor;
-  private QueryContext queryContext;
-  private EsAstTransformator esAstTransformator;
 
   @Before
   public void setUp() {
@@ -58,7 +53,6 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     queryContext.setIndex(INDEX_NAME);
 
     listener = new PqlParseListener(queryContext);
-    esAstTransformator = new EsAstTransformator();
   }
 
   @Test
@@ -302,6 +296,11 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     }
   }
 
+  // Location tests
+  @Test
+  public void locationTest() {
+  }
+
   private SearchResponse executeQuery(String query) {
     ExpressionNode esAst = createTree(query);
     esAst = esAstTransformator.process(esAst, queryContext);
@@ -312,14 +311,6 @@ public class CreateFilterBuilderVisitorTest extends BaseElasticsearchTest {
     log.debug("Result - {}", result);
 
     return result;
-  }
-
-  private ExpressionNode createTree(String query) {
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-
-    return listener.getEsAst();
   }
 
   private static void containsOnlyIds(SearchResponse response, String... ids) {

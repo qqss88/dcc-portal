@@ -18,10 +18,6 @@
 package org.dcc.portal.pql.utils;
 
 import static com.github.tlrx.elasticsearch.test.EsSetup.createIndex;
-import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.Preconditions.checkState;
-import static org.apache.commons.lang.StringUtils.join;
-import static org.icgc.dcc.portal.util.JsonUtils.parseFilters;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +27,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.utils.EsAstTransformator;
+import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.qe.PqlParseListener;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -46,7 +47,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tlrx.elasticsearch.test.EsSetup;
 import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
-import com.google.common.io.Files;
 
 public class BaseElasticsearchTest {
 
@@ -70,6 +70,13 @@ public class BaseElasticsearchTest {
    */
   protected EsSetup es;
 
+  /**
+   * Parser's setup
+   */
+  protected PqlParseListener listener;
+  protected QueryContext queryContext;
+  protected EsAstTransformator esAstTransformator = new EsAstTransformator();
+
   @Before
   public void before() {
     val settings = ImmutableSettings.settingsBuilder().put("script.groovy.sandbox.enabled", true).build();
@@ -79,37 +86,6 @@ public class BaseElasticsearchTest {
   @After
   public void after() {
     es.terminate();
-  }
-
-  protected String joinFilters(String... filters) {
-    return "{" + join(filters, ",") + "}";
-  }
-
-  @SneakyThrows
-  public void bulkInsert(JSONProvider provider) {
-    byte[] content = provider.toJson().getBytes("UTF-8");
-    checkState(!es.client()
-        .prepareBulk()
-        .add(content, 0, content.length, true)
-        .setRefresh(true)
-        .execute()
-        .actionGet()
-        .hasFailures());
-  }
-
-  @SneakyThrows
-  public void bulkInsert() {
-    bulkInsert(bulkFile(getClass()));
-  }
-
-  /**
-   * Creates the index, settings and {@code TypeName} mapping
-   * 
-   * @param typeName - the index type to create
-   * @return
-   */
-  protected static CreateIndex createIndexMapping(Type typeName) {
-    return createIndexMappings(typeName);
   }
 
   protected static CreateIndex createIndexMappings(Type... typeNames) {
@@ -123,29 +99,8 @@ public class BaseElasticsearchTest {
     return request;
   }
 
-  protected static FileJSONProvider jsonFile(File file) {
-    return new FileJSONProvider(file);
-  }
-
-  protected static BulkJSONProvider bulkFile(File file) {
-    return new BulkJSONProvider(file);
-  }
-
-  protected static BulkJSONProvider bulkFile(String fileName) {
-    return new BulkJSONProvider(new File(FIXTURES_DIR, fileName));
-  }
-
   protected static BulkJSONProvider bulkFile(Class<?> testClass) {
     return new BulkJSONProvider(new File(FIXTURES_DIR, testClass.getSimpleName() + ".txt"));
-  }
-
-  protected static ObjectNode filters(String jsonish) {
-    return (ObjectNode) parseFilters(jsonish);
-  }
-
-  @SneakyThrows
-  private static String settingsSource() {
-    return settingsSource(SETTINGS_FILE);
   }
 
   @SneakyThrows
@@ -181,23 +136,6 @@ public class BaseElasticsearchTest {
   }
 
   /**
-   * {@link JSONProvider} implementation that can read files from the local file system.
-   */
-  @RequiredArgsConstructor
-  private static class FileJSONProvider implements JSONProvider {
-
-    @NonNull
-    private final File file;
-
-    @Override
-    @SneakyThrows
-    public String toJson() {
-      return Files.toString(file, UTF_8);
-    }
-
-  }
-
-  /**
    * {@link JSONProvider} implementation that can read formatted concatenated Elasticsearch bulk load files as specified
    * in http://www.elasticsearch.org/guide/reference/api/bulk/.
    */
@@ -224,5 +162,13 @@ public class BaseElasticsearchTest {
 
       return builder.toString();
     }
+  }
+
+  protected ExpressionNode createTree(String query) {
+    val parser = ParseTrees.getParser(query);
+    parser.addParseListener(listener);
+    parser.statement();
+
+    return listener.getEsAst();
   }
 }
