@@ -29,10 +29,11 @@
             <tbody>
                 <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
                     <td class="text-center">
-                        <span data-ng-if="(item.state === 'FINISHED' || syncError) && $index > 0" style="cursor:pointer" 
+                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true) && $index > 0" style="cursor:pointer" 
                               data-ng-click="checked = !checked; checked === true? SavedSetController.addSelection(item) : SavedSetController.removeSelection(item); update();">
                             <i class="{{checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                         </span>
+                        <span data-ng-if="$index==0">--</span>
                     </td>
                     <td>{{item.type | trans:true}}</td>
                     <td>{{item.name}}</td>

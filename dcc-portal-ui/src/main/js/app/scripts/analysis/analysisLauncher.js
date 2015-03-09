@@ -84,7 +84,9 @@
     $scope.$watch(function() {
       return _this.analysisType;
     }, function(n) {
-      if (!n) return;
+      if (!n) {
+        return;
+      }
       _this.applyFilter(n);
     });
   });
