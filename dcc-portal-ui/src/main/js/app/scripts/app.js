@@ -85,10 +85,17 @@
     .run(function($state, $stateParams, $window, $rootScope) {
       function scroll() {
         var state, offset, to;
-
         state = $state.$current;
+
+        // Prevents browser window from jumping around while navigating analyses
+        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+          return;
+        }
+
+
         // Default behaviour is to scroll to top
         // Any string that isn't [top,none] is treated as a jq selector
+        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
         if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
           $window.scrollTo(0, 0);
         } else {
@@ -214,8 +221,8 @@
 
     // Close any modal dialogs on location chagne
     $rootScope.$on('$locationChangeSuccess', function (newVal, oldVal) {
-      console.log('rootscope location change success', oldVal, newVal);
-      console.log('modal stack', $modalStack.getTop());
+      // console.log('rootscope location change success', oldVal, newVal);
+      // console.log('modal stack', $modalStack.getTop());
       
       if (oldVal !== newVal && $modalStack.getTop()) { 
         $modalStack.dismiss($modalStack.getTop().key);

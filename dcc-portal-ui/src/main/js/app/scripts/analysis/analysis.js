@@ -12,14 +12,6 @@
       reloadOnSearch: false,
       templateUrl: 'scripts/analysis/views/analysis.html',
       controller: 'AnalysisController',
-      resolve: {
-        analysisId: function() {
-          return null;
-        },
-        analysisType: function() {
-          return null;
-        },
-      },
       data: {
         tab: 'analysis'
       }
@@ -31,26 +23,9 @@
         tab: 'sets'
       }
     });
-
-    /**
-    * :id is a UUID generated server-side
-    * :type can be one of "enrichment", "set|union"
-    */
-    $stateProvider.state('analysis', {
-      url: '/analysis/:type/:id',
-      templateUrl: 'scripts/analysis/views/analysis.html',
-      controller: 'AnalysisController',
-      resolve: {
-        analysisId: ['$stateParams', function($stateParams) {
-          return $stateParams.id;
-        }],
-        analysisType: ['$stateParams', function($stateParams) {
-          if ($stateParams.type === 'set') {
-            return 'union';
-          }
-          return $stateParams.type;
-        }]
-      },
+    $stateProvider.state('analyses.analysis', {
+      url: '/:type/:id',
+      reloadOnSearch: false,
       data: {
         tab: 'analysis'
       }
@@ -66,23 +41,39 @@
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
 
-  module.controller('AnalysisController', function ($scope, $location, $timeout, $modal, $state, analysisId, analysisType,
-    Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
+  /**
+   * Top level set analyses controller
+   *
+   * AnalysisController: view analysis
+   *   - SavedSetController: manage saved sets
+   *   - AnalysisListController: manage saved analysis
+   *   - NewAnalysisController: creates new analysis
+   */
+  module.controller('AnalysisController', function ($scope, $timeout, $state, Page, AnalysisService) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
 
-    $scope.enrichment = {};
     $scope.currentTab = $state.current.data.tab || 'analysis';
-    $scope.analysisId = analysisId;
-    $scope.analysisType = analysisType;
+    // $scope.analysisId = $state.params.id;
+    // $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
+
+    console.log($scope.analysisId, $scope.analysisType);
 
 
     $scope.$watch(function () {
       return $state.current.data.tab;
     }, function () {
       $scope.currentTab = $state.current.data.tab || 'analysis';
+    });
+
+    $scope.$watch(function() {
+      return $state.params;
+    }, function() {
+      $scope.analysisId = $state.params.id;
+      $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
+      init();
     });
 
 
@@ -162,7 +153,7 @@
 
 
     // Start
-    init();
+    // init();
 
     // Only do synchronization on analysis home tab
     /*
@@ -199,7 +190,7 @@
     };
 
     /**
-     * Add analysis to local storage 
+     * Add analysis to local storage
      */
     this.addAnalysis = function(analysis, type) {
       var ids = _.pluck(analysisList, 'id');
@@ -239,7 +230,6 @@
     // Init service
     analysisList = localStorageService.get(ANALYSIS_ENTITY) || [];
 
-    console.log('I have', analysisList);
   });
 
 })();

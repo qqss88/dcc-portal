@@ -41,10 +41,8 @@
       }
 
       if (id) {
-        //$scope.analysisId = id;
         $location.path('analysis/' + routeType + '/' + id);
       } else {
-        //$scope.analysisId = null;
         $location.path('analysis');
       }
     };
@@ -75,7 +73,6 @@
       }
 
       if (AnalysisService.remove(id) === true) {
-        $scope.analysis = null;
         $location.path('analysis');
       }
     };
