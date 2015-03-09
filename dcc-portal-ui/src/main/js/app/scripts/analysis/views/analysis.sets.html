@@ -21,8 +21,8 @@
     <div class="wide">
         <table class="table table-selectable">
             <thead>
-                <th class="text-center">
-                    <i class="icon-check-empty"></i>
+                <th class="text-center"  data-ng-click="SavedSetController.toggleSelectAll(); SavedSetController.update()">
+                    <i class="{{ SavedSetController.checkAll === true? 'icon-check' : 'icon-check-empty' }}"></i>
                 </th>
                 <th>Item type</th>
                 <th>Name</th>
@@ -32,11 +32,11 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="item in SavedSetController.entityLists" 
-                    data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
+                    data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="item.checked=false">
                     <td class="text-center">
                         <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true) && $index > 0" style="cursor:pointer" 
-                              data-ng-click="checked = !checked; checked === true? SavedSetController.addSelection(item) : SavedSetController.removeSelection(item); update();">
-                            <i class="{{checked === true? 'icon-check': 'icon-check-empty'}}"></i>
+                              data-ng-click="item.checked = !item.checked; SavedSetController.update();">
+                            <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                         </span>
                         <span data-ng-if="$index==0">--</span>
                     </td>

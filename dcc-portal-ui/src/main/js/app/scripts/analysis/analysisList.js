@@ -52,6 +52,7 @@
       confirmRemove  = $window.confirm(REMOVE_ALL);
       if (confirmRemove) {
         AnalysisService.removeAll();
+        _this.analysisList = AnalysisService.getAll();
         $location.path('analysis');
       }
     };

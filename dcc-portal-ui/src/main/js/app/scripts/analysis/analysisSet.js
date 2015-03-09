@@ -12,15 +12,37 @@
     _this.syncError = false;
     _this.entityLists = SetService.getAll();
     _this.selectedSets = [];
+    _this.checkAll = false;
+
 
     // Selected sets
     _this.selectedSets = [];
+    /*
     _this.addSelection = function(set) {
       _this.selectedSets.push(set);
     };
     _this.removeSelection = function(set) {
       _.remove(_this.selectedSets, function(s) {
         return s.id === set.id;
+      });
+    };
+    */
+
+    _this.update = function() {
+      _this.selectedSets = [];
+      _this.entityLists.forEach(function(set) {
+        if (set.checked === true) {
+          _this.selectedSets.push(set);
+        }
+      });
+    };
+
+    /* Select all / de-select all */
+    _this.toggleSelectAll = function() {
+      _this.checkAll = !_this.checkAll;
+
+      _this.entityLists.forEach(function(set) {
+        set.checked = _this.checkAll;
       });
     };
 
@@ -41,7 +63,6 @@
       });
     };
 
-
     _this.removeLists = function() {
       var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
       if (!confirmRemove || confirmRemove === false) {
@@ -52,7 +73,6 @@
         return !angular.isDefined(set.readonly);
       });
 
-
       if (toRemove.length > 0) {
         _.remove(_this.selectedSets, function(set) {
           return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
@@ -61,8 +81,6 @@
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
       }
     };
-
-
 
     function synchronizeSets(numTries) {
       var pendingLists, pendingListsIDs, promise;
@@ -90,17 +108,13 @@
       });
     }
 
-
     $scope.$on('destroy', function() {
       $timeout.cancel(syncSetTimeout);
     });
 
-
     synchronizeSets(10);
-
-
-
   });
+
 
 })();
 
