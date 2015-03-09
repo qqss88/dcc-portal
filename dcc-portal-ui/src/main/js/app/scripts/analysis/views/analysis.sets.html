@@ -3,7 +3,11 @@
         Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
     </div>
 
-    <p>This is a place to manage sets</p>
+    <p>
+    These are your saved sets. You can create <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
+    interest in <a href="/search">Advanced Search</a>. <br>
+    You can also save a <a href="" data-ng-click="SavedSetController.addCustomGeneSet()"><i class="icon-floppy"></i>Custom gene set</a>.
+    </p>
 
 
     <div style="padding:.5rem 0">
@@ -27,7 +31,8 @@
                 <th></th>
             </thead>
             <tbody>
-                <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
+                <tr data-ng-repeat="item in SavedSetController.entityLists" 
+                    data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="checked=false">
                     <td class="text-center">
                         <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true) && $index > 0" style="cursor:pointer" 
                               data-ng-click="checked = !checked; checked === true? SavedSetController.addSelection(item) : SavedSetController.removeSelection(item); update();">

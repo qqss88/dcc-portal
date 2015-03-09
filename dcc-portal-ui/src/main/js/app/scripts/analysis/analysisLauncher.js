@@ -4,6 +4,12 @@
   var module = angular.module('icgc.analysis.controllers');
 
 
+  /**
+   * Manages the launch of an analysis, one of
+   * - gene set enrichment
+   * - set operations
+   * - phenotype analysis
+   */
   module.controller('NewAnalysisController', function($scope, $modal, $location, Restangular, SetService, Extensions) {
     var _this = this;
 
@@ -44,6 +50,12 @@
         });
       }
     };
+
+
+    _this.launchPhenotype = function(setIds) {
+      console.log('launching phenotype analysis with', setIds);
+    };
+
 
     _this.launchSet = function(type, setIds) {
       var payload = {
@@ -91,5 +103,5 @@
     });
   });
 })();
-  
+
 

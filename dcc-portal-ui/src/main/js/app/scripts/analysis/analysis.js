@@ -25,7 +25,7 @@
     });
     $stateProvider.state('analyses.analysis', {
       url: '/:type/:id',
-      reloadOnSearch: false,
+      //reloadOnSearch: false,
       data: {
         tab: 'analysis'
       }
@@ -58,8 +58,6 @@
     $scope.currentTab = $state.current.data.tab || 'analysis';
     // $scope.analysisId = $state.params.id;
     // $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
-
-    console.log($scope.analysisId, $scope.analysisType);
 
 
     $scope.$watch(function () {
@@ -109,6 +107,7 @@
 
     function init() {
       $timeout.cancel(pollTimeout);
+      $scope.error = null;
 
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
