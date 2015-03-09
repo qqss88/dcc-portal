@@ -21,6 +21,7 @@ import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 import static javax.ws.rs.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.util.HttpServletRequests.getHttpRequestCallerInfo;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getLocalNetworkInfo;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -41,22 +42,18 @@ public class HttpServletRequestsTest {
   @Builder
   public static class MockHttpRequestValue {
 
-    String localHostName;
-    String localHostIp;
     String userIp;
     String proxyHostName;
     String proxyHostIp;
 
   }
 
-  private final static String MESSAGE_FORMAT_TEMPLATE = "Web request received on %1$s (%2$s) from %3$s via %4$s (%5$s)";
+  private final static String MESSAGE_FORMAT_TEMPLATE = "Web request received %1$s from %2$s via %3$s (%4$s)";
   private final static MockHttpRequestValueBuilder BUILDER = MockHttpRequestValue.builder();
 
-  private static MockHttpRequestValue createMockValue(final String localHostName, final String localHostIp,
-      final String userIp, final String proxyHostName, final String proxyHostIp) {
+  private static MockHttpRequestValue createMockValue(final String userIp, final String proxyHostName,
+      final String proxyHostIp) {
     return BUILDER
-        .localHostName(localHostName)
-        .localHostIp(localHostIp)
         .proxyHostName(proxyHostName)
         .proxyHostIp(proxyHostIp)
         .userIp(userIp)
@@ -66,8 +63,6 @@ public class HttpServletRequestsTest {
   private static HttpServletRequest createMock(final MockHttpRequestValue value) {
     val request = new MockHttpServletRequest(GET, "/foo");
 
-    request.setLocalName(value.localHostName);
-    request.setLocalAddr(value.localHostIp);
     request.setRemoteHost(value.proxyHostName);
     request.setRemoteAddr(value.proxyHostIp);
     request.addHeader(X_FORWARDED_FOR, value.userIp);
@@ -75,12 +70,11 @@ public class HttpServletRequestsTest {
     return request;
   }
 
-  private static void test(final String localHostName, final String localHostIp,
-      final String userIp, final String proxyHostName, final String proxyHostIp) {
-    val mockValue = createMockValue(localHostName, localHostIp, userIp, proxyHostName, proxyHostIp);
+  private static void test(final String userIp, final String proxyHostName, final String proxyHostIp) {
+    val mockValue = createMockValue(userIp, proxyHostName, proxyHostIp);
     val request = createMock(mockValue);
     val expectedResult =
-        String.format(MESSAGE_FORMAT_TEMPLATE, localHostName, localHostIp, userIp, proxyHostName, proxyHostIp);
+        String.format(MESSAGE_FORMAT_TEMPLATE, getLocalNetworkInfo(), userIp, proxyHostName, proxyHostIp);
 
     System.out.println("Expected string is: " + expectedResult);
 
@@ -89,12 +83,7 @@ public class HttpServletRequestsTest {
 
   @Test
   public void testRequest1() {
-    test("webserver1", "1.1.1.1", "1.1.1.3", "proxy1", "1.1.1.2");
-  }
-
-  @Test
-  public void testRequest2() {
-    test("webserver1", "0.0.0.1", "1.1.1.3", "proxy1", "1.1.1.2");
+    test("1.1.1.1", "proxy1", "1.1.1.2");
   }
 
 }

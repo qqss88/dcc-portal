@@ -38,7 +38,6 @@ import com.google.common.base.Joiner;
 @NoArgsConstructor(access = PRIVATE)
 public final class HttpServletRequests {
 
-  private static final String RESERVED_IP_FOR_ZERO_NETWORK = "0.0.0.0";
   private static final String UNKNOWN_HOST_NAME = "Unknown";
   private static final char SPACE = ' ';
   private static final Joiner JOINER = Joiner.on(SPACE).skipNulls();
@@ -51,18 +50,8 @@ public final class HttpServletRequests {
   public static String getHttpRequestCallerInfo(final HttpServletRequest request) {
     val intro = "Web request received";
 
-    return JOINER.join(intro, getLocalNetworkInfo(request), getRemoteUserNetworkInfo(request),
+    return JOINER.join(intro, getLocalNetworkInfo(), getRemoteUserNetworkInfo(request),
         getProxyNetworkInfo(request));
-  }
-
-  private static boolean isIpValid(final String... ipAddresses) {
-    for (val ip : ipAddresses) {
-      if (isNullOrEmpty(ip) || ip.equals(RESERVED_IP_FOR_ZERO_NETWORK)) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   private static String formatNetworkInfo(final String hostName, final String ipAddress) {
@@ -71,19 +60,17 @@ public final class HttpServletRequests {
     return isNullOrEmpty(ipAddress) ? info : info + " (" + ipAddress.trim() + ")";
   }
 
-  private static String getLocalNetworkInfo(final HttpServletRequest request) {
-    String localHostName = request.getLocalName();
-    String localHostIp = request.getLocalAddr();
+  public static String getLocalNetworkInfo() {
+    String localHostName = null;
+    String localHostIp = null;
 
-    if (!isIpValid(localHostName, localHostIp)) {
-      try {
-        val host = InetAddress.getLocalHost();
+    try {
+      val host = InetAddress.getLocalHost();
 
-        localHostName = host.getHostName();
-        localHostIp = host.getHostAddress();
-      } catch (Exception e) {
-        // Simply ignore this.
-      }
+      localHostName = host.getHostName();
+      localHostIp = host.getHostAddress();
+    } catch (Exception e) {
+      // Simply ignore this.
     }
 
     return "on " + formatNetworkInfo(localHostName, localHostIp);

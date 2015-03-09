@@ -47,8 +47,12 @@ angular.module('app.ui', [
 
 
 
-// Select content on click
-angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
+/**
+ * select-on-click: Select content on click event
+ * disable-events: Disable pointer events reduce opacity to give it a disabled look and feel
+ */
+angular.module('icgc.ui.events', [])
+.directive('selectOnClick', function() {
   return {
     restrict: 'A',
     link: function(scope, element) {
@@ -57,11 +61,43 @@ angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
       });
     }
   };
+})
+.directive('disableEvents', function() {
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      disableEvents: '='
+    },
+    link: function(scope, element) {
+      console.log('init disable');
+
+      function toggleEvents(predicate) {
+        if (predicate === true) {
+          element.css('pointer-events', 'none');
+          element.css('opacity', 0.65);
+        } else {
+          element.css('pointer-events', '');
+          element.css('opacity', '1');
+        }
+      }
+
+      scope.$watch('disableEvents', function(n) {
+        if (angular.isDefined(n)) {
+          toggleEvents(n);
+        }
+      });
+    }
+  };
 });
 
 
-// See: https://github.com/angular/angular.js/issues/1375
-// See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
+/**
+ * File chooser detector
+ *
+ * See: https://github.com/angular/angular.js/issues/1375
+ * See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
+ */
 angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse) {
   return {
     restrict: 'A',
@@ -86,7 +122,10 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
 });
 
 
-// Centralized tooltip directive. There should be only one per application
+/**
+ * Centralized tooltip directive. There should be only one per application
+ * This act as the tooltip "server" that waits for tooltip events
+ */
 angular.module('app.ui.tooltipControl', [])
   .directive('tooltipControl', function ($position, $rootScope, $sce, $window) {
     return {
@@ -163,7 +202,7 @@ angular.module('app.ui.tooltipControl', [])
                 if(element.hasClass('sticky')){
                   var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
                     left: e.pageX,
-                    top: e.pageY,
+                    top: e.pageY - (scope.placement === 'top' ? 8 : 0),
                     width: 10,
                     height: -6
                   });
@@ -189,7 +228,9 @@ angular.module('app.ui.tooltipControl', [])
   });
 
 
-// Light weight directive for request tooltips
+/**
+ * Light weight directive for request tooltips
+ */
 angular.module('app.ui.tooltip', [])
   .directive('tooltip', function($timeout) {
     return {
