@@ -17,12 +17,10 @@
  */
 package org.icgc.dcc.portal.model;
 
-import static com.yammer.dropwizard.testing.JsonHelpers.asJson;
 import static com.yammer.dropwizard.testing.JsonHelpers.jsonFixture;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.List;
 
 import lombok.val;
 
@@ -30,21 +28,16 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * Test suite for UnionAnalysisResult
+ * Test suite related to data versioning for EnrichmentAnalysis
  */
-public class UnionAnalysisResultTest {
+public class EnrichmentAnalysisTest {
 
-  private final static Class<UnionAnalysisResult> TEST_TARGET_CLASS = UnionAnalysisResult.class;
-  private final static String TIMESTAMP_FIELD_NAME = "timestamp";
+  private final static Class<EnrichmentAnalysis> TEST_TARGET_CLASS = EnrichmentAnalysis.class;
   private final static ObjectMapper MAPPER = new ObjectMapper();
 
-  private final static Object NULL_OBJECT = null;
-  private final static List<UnionUnitWithCount> NULL_UNION_UNITS = null;
-
-  private final static String TEST_JSON_DIRECTORY = "fixtures/model/UnionAnalysisResultTest/";
+  private final static String TEST_JSON_DIRECTORY = "fixtures/model/EnrichmentAnalysisTest/";
   private final static String TEST_JSON_FILE_FOR_VERSION_1 = TEST_JSON_DIRECTORY + "version1.json";
   private final static String TEST_JSON_FILE_FOR_VERSION_2 = TEST_JSON_DIRECTORY + "version2.json";
 
@@ -53,19 +46,9 @@ public class UnionAnalysisResultTest {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_1;
 
     val version1 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
-    val testObjectId = version1.getId();
-    val testObjectState = version1.getState();
-    val testObjectType = version1.getType();
-    val testObjectInputCount = (Integer) NULL_OBJECT;
-    val testObjectDataVersion = (Integer) NULL_OBJECT;
+    val enrichmentAnalysis = new EnrichmentAnalysis();
 
-    val analysisResult =
-        new UnionAnalysisResult(testObjectId, testObjectState, testObjectType, testObjectInputCount,
-            testObjectDataVersion, NULL_UNION_UNITS);
-
-    test(analysisResult, expectedJsonFileName);
-    assertThat(analysisResult.getVersion()).isEqualTo(version1.getVersion());
-    assertThat(analysisResult.getInputCount()).isEqualTo(version1.getInputCount());
+    assertThat(enrichmentAnalysis.getVersion()).isEqualTo(version1.getVersion());
   }
 
   @Test
@@ -73,29 +56,10 @@ public class UnionAnalysisResultTest {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_2;
 
     val version2 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
-    val testObjectId = version2.getId();
-    val testObjectState = version2.getState();
-    val testObjectType = version2.getType();
-    val testObjectInputCount = version2.getInputCount();
-    val testObjectDataVersion = version2.getVersion();
+    val enrichmentAnalysis = new EnrichmentAnalysis()
+        .setVersion(2);
 
-    val analysisResult =
-        new UnionAnalysisResult(testObjectId, testObjectState, testObjectType, testObjectInputCount,
-            testObjectDataVersion, NULL_UNION_UNITS);
-
-    test(analysisResult, expectedJsonFileName);
-    assertThat(analysisResult.getVersion()).isEqualTo(version2.getVersion());
-    assertThat(analysisResult.getInputCount()).isEqualTo(version2.getInputCount());
+    assertThat(enrichmentAnalysis.getVersion()).isEqualTo(version2.getVersion());
   }
 
-  private void test(final UnionAnalysisResult testAnalysisResult, final String expectedJsonFixtureFilePath)
-      throws JsonProcessingException, IOException {
-    val jsonNode = MAPPER.readTree(jsonFixture(expectedJsonFixtureFilePath));
-    // Fix the timestamp
-    ((ObjectNode) jsonNode).put(TIMESTAMP_FIELD_NAME, testAnalysisResult.getTimestamp());
-    val expectedJson = MAPPER.readValue(asJson(jsonNode), TEST_TARGET_CLASS);
-
-    assertThat(MAPPER.readTree(asJson(testAnalysisResult)))
-        .isEqualTo(MAPPER.readTree(asJson(expectedJson)));
-  }
 }

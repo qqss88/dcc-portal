@@ -95,7 +95,7 @@ public class EnrichmentAnalyzerTest extends AbstractSpringIntegrationTest {
                 .build());
 
     log.info("Saving...");
-    repository.save(analysis);
+    repository.save(analysis, analysis.getVersion());
 
     log.info("Starting...");
     analyzer.analyze(analysis.getId());
