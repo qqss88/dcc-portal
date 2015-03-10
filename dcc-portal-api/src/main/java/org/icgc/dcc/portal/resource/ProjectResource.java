@@ -94,8 +94,10 @@ import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -108,8 +110,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/projects")
 @Produces(APPLICATION_JSON)
-@Api(value = "/projects", description = "Operations about " + PROJECT)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/projects", description = "Resources relating to " + PROJECT)
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ProjectResource {
 
   private static final String PROJECT_FILTER_TEMPLATE = "{donor:{projectId:{is:['%s']}}}";
@@ -118,6 +120,7 @@ public class ProjectResource {
       "{mutation:{id:{is:['%s']}},donor:{projectId:{is:['%s']}}}";
   private static final String GENE_PROJECT_FILTER_TEMPLATE =
       "{gene:{id:{is:['%s']}},donor:{projectId:{is:['%s']}}}";
+  private static final String RELEASE_HISTORY_FILE_PATH = "data/project-history.json";
 
   private final ProjectService projectService;
   private final GeneService geneService;
@@ -681,4 +684,17 @@ public class ProjectResource {
     return counts;
   }
 
+  @Path("/history")
+  @GET
+  @Timed
+  @ApiOperation(value = "Returns history of donor count of all projects at every release")
+  public JsonNode getHistory() {
+    try {
+      return JsonUtils.MAPPER.readTree(Resources.getResource(RELEASE_HISTORY_FILE_PATH));
+    } catch (Exception e) {
+      throw new IllegalStateException("Couldn't read or parse release histroy data - file '"
+          + RELEASE_HISTORY_FILE_PATH
+          + "' might be corrupt or missing.", e);
+    }
+  }
 }

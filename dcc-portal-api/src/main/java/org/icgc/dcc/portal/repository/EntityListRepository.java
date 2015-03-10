@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import java.util.UUID;
 
-import org.icgc.dcc.portal.model.EntityList;
+import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.repository.JsonRepository.JsonMapperFactory;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -27,19 +27,22 @@ import org.skife.jdbi.v2.sqlobject.SqlUpdate;
 import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
 
 /**
- *
+ * DAO for entity_set table in Postgres
  */
 @RegisterMapperFactory(JsonMapperFactory.class)
 public interface EntityListRepository extends JsonRepository {
 
   public final static String TABLE_NAME = "entity_set";
+  public final static String VERSION_FIELD_NAME = "version";
 
   @SqlQuery("SELECT " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
-  EntityList find(@Bind(ID_FIELD_NAME) UUID id);
+  EntitySet find(@Bind(ID_FIELD_NAME) UUID id);
 
-  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + ", " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
-  int save(@BindValue EntityList list);
+  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + ", " + DATA_FIELD_NAME + ", " + VERSION_FIELD_NAME
+      + ") VALUES (:id, :data, :version)")
+  int save(@BindValue EntitySet list, @Bind(VERSION_FIELD_NAME) int dataVersion);
 
-  @SqlUpdate("UPDATE " + TABLE_NAME + " SET " + DATA_FIELD_NAME + " = :data WHERE " + ID_FIELD_NAME + " = :id")
-  int update(@BindValue EntityList list);
+  @SqlUpdate("UPDATE " + TABLE_NAME + " SET " + DATA_FIELD_NAME + " = :data, " + VERSION_FIELD_NAME
+      + " = :version WHERE " + ID_FIELD_NAME + " = :id")
+  int update(@BindValue EntitySet list, @Bind(VERSION_FIELD_NAME) int dataVersion);
 }

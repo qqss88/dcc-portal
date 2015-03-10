@@ -30,10 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.analysis.EnrichmentReporter;
-import org.icgc.dcc.portal.model.BaseEntityList.Type;
+import org.icgc.dcc.portal.model.BaseEntitySet.Type;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
-import org.icgc.dcc.portal.model.EntityList;
-import org.icgc.dcc.portal.model.EntityList.SubType;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EnrichmentAnalysisService {
 
   /**
@@ -74,9 +74,9 @@ public class EnrichmentAnalysisService {
     log.info("Saving analysis '{}'...", analysis.getId());
 
     // Save this as an entity list too in order to capture the subtype information.
-    val newEntityList = EntityList.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0);
-    newEntityList.setSubtype(SubType.ENRICHMENT);
-    entityListRepository.save(newEntityList);
+    val newEntitySet = EntitySet.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0);
+    newEntitySet.setSubtype(SubType.ENRICHMENT);
+    entityListRepository.save(newEntitySet, newEntitySet.getVersion());
 
     val insertCount = repository.save(analysis);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);

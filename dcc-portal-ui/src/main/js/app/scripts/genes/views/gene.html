@@ -111,8 +111,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['hgnc']">
-                            <a data-ng-href="http://www.genenames.org/data/hgnc_data.php?hgnc_id={{ id }}"
-                               target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneHGNC(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -122,16 +121,14 @@
             <tr>
                 <th>Ensembl (release 75)</th>
                 <td>
-                    <a data-ng-href="http://feb2014.archive.ensembl.org/Homo_sapiens/Gene/Summary?db=core;g={{GeneCtrl.gene.id}}"
-                       target="_blank">
+                    <a data-ng-href="{{GeneCtrl.ExternalLinks.geneEnsembl(GeneCtrl.gene.id)}}" target="_blank">
                         <i class="icon-external-link"></i> {{ GeneCtrl.gene.id }}</a>
                 </td>
             </tr>
             <tr>
                 <th>COSMIC</th>
                 <td>
-                    <a data-ng-href="http://cancer.sanger.ac.uk/cosmic/gene/analysis?ln={{ GeneCtrl.gene.symbol }}"
-                       target="_blank">
+                    <a data-ng-href="{{GeneCtrl.ExternalLinks.geneCOSMIC(GeneCtrl.gene.symbol)}}" target="_blank">
                         <i class="icon-external-link"></i> {{ GeneCtrl.gene.symbol }}</a>
                 </td>
             </tr>
@@ -140,7 +137,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['entrez_gene']">
-                            <a data-ng-href="http://www.ncbi.nlm.nih.gov/gene/{{ id }}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneEntrez(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -152,7 +149,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['omim_gene']">
-                            <a data-ng-href="http://omim.org/entry/{{id}}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneOMIM(id)}}" target="_blankc">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>
@@ -164,7 +161,7 @@
                 <td>
                     <ul>
                         <li data-ng-repeat="id in GeneCtrl.gene.externalDbIds['uniprotkb_swissprot']">
-                            <a data-ng-href="http://www.uniprot.org/uniprot/{{ id }}" target="_blank">
+                            <a data-ng-href="{{GeneCtrl.ExternalLinks.geneUniProt(id)}}" target="_blank">
                                 <i class="icon-external-link"></i> {{ id }}</a>
                         </li>
                     </ul>

@@ -22,14 +22,13 @@ angular.module('app.download.controllers', ['app.download.services']);
 // Note download may result in unwarranted warnings, see:
 // http://stackoverflow.com/questions/15393210/chrome-showing-canceled-on-successful-file-download-200-status
 angular.module('app.download.controllers').controller('DownloadController',
-  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular, ProjectCache, API) {
+  function ($window, $filter, $scope, Page, $stateParams, DownloadService, Restangular, ProjectCache, API, Settings) {
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
     $scope.path = $stateParams.path;
     $scope.slugs = [];
     $scope.API = API;
-
     $scope.deprecatedReleases = ['release_15'];
 
     function buildBreadcrumbs() {
@@ -45,97 +44,109 @@ angular.module('app.download.controllers').controller('DownloadController',
       }
     }
 
-    buildBreadcrumbs();
 
-    DownloadService.folder($scope.path).then(function (response) {
-      var files, firstSort;
-      files = response;
+    function getFiles() {
+      DownloadService.folder($scope.path).then(function (response) {
+        var files, firstSort;
+        files = response;
 
-      files.forEach(function (file) {
-        var name, tName, extension;
+        files.forEach(function (file) {
+          var name, tName, extension;
 
-        // For convienence
-        file.baseName = file.name.split('/').pop();
+          // For convienence
+          file.baseName = file.name.split('/').pop();
 
-        // Check if there is a translation code for directories (projects)
-        if (file.type === 'd') {
-          name = (file.name).split('/').pop();
+          // Check if there is a translation code for directories (projects)
+          if (file.type === 'd') {
+            name = (file.name).split('/').pop();
 
-          //tName = $filter('define')(name);
-          ProjectCache.getData().then(function(cache) {
-            tName = cache[name];
-            if (tName) {
-              file.translation = tName;
-            }
-          });
+            //tName = $filter('define')(name);
+            ProjectCache.getData().then(function(cache) {
+              tName = cache[name];
+              if (tName) {
+                file.translation = tName;
+              }
+            });
+          }
+
+          // Check file extension
+          extension = file.name.split('.').pop();
+          if (_.contains(['txt', 'md'], extension.toLowerCase())) {
+            file.isText = true;
+          } else {
+            file.isText = false;
+          }
+
+        });
+
+        // Order the files and folders, see DCC-1648, basically
+        // readme > current > others releases > legacy releases
+        function logicalSort(file) {
+          var pattern, name;
+
+          name = file.name.split('/').pop();
+
+          pattern = /notice\.(txt|md)$/i;
+          if (pattern.test(name)) {
+            return -4;
+          }
+
+          pattern = /readme\.(txt|md)$/i;
+          if (pattern.test(name)) {
+            return -3;
+          }
+
+          pattern = /^current/i;
+          if (pattern.test(name)) {
+            return -2;
+          }
+
+          pattern = /^summary/i;
+          if (pattern.test(name)) {
+            return -1;
+          }
+
+          pattern = /^legacy_data_releases/i;
+          if (pattern.test(name)) {
+            return files.length + 1;
+          }
+          return firstSort.indexOf(file.name);
         }
 
-        // Check file extension
-        extension = file.name.split('.').pop();
-        if (_.contains(['txt', 'md'], extension.toLowerCase())) {
-          file.isText = true;
+        if ($scope.slugs.length > 0) {
+          files = $filter('orderBy')(files, 'name');
+          firstSort = _.pluck(files, 'name');
+          files = $filter('orderBy')(files, logicalSort);
         } else {
-          file.isText = false;
+          files = $filter('orderBy')(files, 'date', 'reverse');
+          firstSort = _.pluck(files, 'name');
+          files = $filter('orderBy')(files, logicalSort);
         }
 
-      });
+        $scope.files = files;
 
-      // Order the files and folders, see DCC-1648, basically
-      // readme > current > others releases > legacy releases
-      function logicalSort(file) {
-        var pattern, name;
-
-        name = file.name.split('/').pop();
-
-        pattern = /notice\.(txt|md)$/i;
-        if (pattern.test(name)) {
-          return -4;
-        }
-
-        pattern = /readme\.(txt|md)$/i;
-        if (pattern.test(name)) {
-          return -3;
-        }
-
-        pattern = /^current/i;
-        if (pattern.test(name)) {
-          return -2;
-        }
-
-        pattern = /^summary/i;
-        if (pattern.test(name)) {
-          return -1;
-        }
-
-        pattern = /^legacy_data_releases/i;
-        if (pattern.test(name)) {
-          return files.length + 1;
-        }
-        return firstSort.indexOf(file.name);
-      }
-
-      if ($scope.slugs.length > 0) {
-        files = $filter('orderBy')(files, 'name');
-        firstSort = _.pluck(files, 'name');
-        files = $filter('orderBy')(files, logicalSort);
-      } else {
-        files = $filter('orderBy')(files, 'date', 'reverse');
-        firstSort = _.pluck(files, 'name');
-        files = $filter('orderBy')(files, logicalSort);
-      }
-
-      $scope.files = files;
-
-      // Fetch data content if file is plain text
-      $scope.textFiles = _.filter(files, function(f) {
-        return f.type === 'f' && f.isText === true;
-      });
-      $scope.textFiles.forEach(function(f) {
-        Restangular.one('download').get( {'fn':f.name}).then(function(data) {
-          f.textContent = data;
+        // Fetch data content if file is plain text
+        $scope.textFiles = _.filter(files, function(f) {
+          return f.type === 'f' && f.isText === true;
+        });
+        $scope.textFiles.forEach(function(f) {
+          Restangular.one('download').get( {'fn':f.name}).then(function(data) {
+            f.textContent = data;
+          });
         });
       });
+    }
 
+    // Check if download is disabled or not
+    Settings.get().then(function(settings) {
+      if (settings.downloadEnabled && settings.downloadEnabled === true) {
+        buildBreadcrumbs();
+        getFiles();
+        $scope.downloadEnabled = true;
+      } else {
+        $scope.downloadEnabled = false;
+      }
     });
+
 
   });

@@ -26,9 +26,9 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.BaseEntityList.Type;
-import org.icgc.dcc.portal.model.EntityList;
-import org.icgc.dcc.portal.model.EntityList.SubType;
+import org.icgc.dcc.portal.model.BaseEntitySet.Type;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
  * User "gene set" related operations.
  */
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserGeneSetService {
 
   /**
@@ -56,12 +56,12 @@ public class UserGeneSetService {
 
   public UUID save(@NonNull Set<String> geneIds) {
     val id = UUID.randomUUID();
-    val newList = EntityList.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
-    newList.setSubtype(SubType.UPLOAD);
+    val newSet = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
+    newSet.setSubtype(SubType.UPLOAD);
 
     termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
 
-    repository.save(newList);
+    repository.save(newSet, newSet.getVersion());
 
     return id;
   }

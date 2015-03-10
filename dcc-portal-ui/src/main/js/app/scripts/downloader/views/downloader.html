@@ -27,6 +27,11 @@
 
     <div class="alert alert-error" data-ng-if="error">{{error}}</div>
 
+    <div class="alert alert-warning" data-ng-if="!downloadEnabled">
+        Data Download is currently disabled due to maintenance.<br>
+        Please contact <a href="mailto:dcc-support@icgc.org">support</a> if you require assistance.
+    </div>
+
 
     <div class="wide" data-ng-if="!error">
         <div data-ng-show="jobs.length === 0">

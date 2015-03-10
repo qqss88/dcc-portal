@@ -38,7 +38,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class SearchService {
 
   private final SearchRepository searchRepository;

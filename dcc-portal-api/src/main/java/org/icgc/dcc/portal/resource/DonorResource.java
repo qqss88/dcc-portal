@@ -98,8 +98,8 @@ import com.yammer.metrics.annotation.Timed;
 @Slf4j
 @Path("/v1/donors")
 @Produces(APPLICATION_JSON)
-@Api(value = "/donors", description = "Operations about " + DONOR)
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@Api(value = "/donors", description = "Resources relating to " + DONOR)
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorResource {
 
   private static final String DONOR_FILTER_TEMPLATE = "{donor:{id:{is:['%s']}}}";

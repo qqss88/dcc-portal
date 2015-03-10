@@ -55,7 +55,7 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
-              AdvancedMutationService) {
+              AdvancedMutationService, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -63,6 +63,11 @@
 
       _ctrl.Page = Page;
       _ctrl.state = State;
+
+      _ctrl.observationDialog = {
+        modal: false,
+        observation: null
+      };
 
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
@@ -100,16 +105,22 @@
       // Setup
       _ctrl.setTab($state.current.data.tab);
       _ctrl.setSubTab($state.current.data.subTab);
+
+      Settings.get().then(function(settings) {
+        _ctrl.downloadEnabled = settings.downloadEnabled || false;
+      });
       refresh();
 
       // Refresh when filters change
       // Data is cached so refreshing on tab switch
       // should be free
       $scope.$on('$locationChangeSuccess', function (event, next) {
+        _ctrl.observationDialog.modal = false;
         if (next.indexOf('search') !== -1) {
           refresh();
         }
       });
+
 
       // Tabs need to update when using browser buttons
       // Shouldn't have to worry about refreshing data here

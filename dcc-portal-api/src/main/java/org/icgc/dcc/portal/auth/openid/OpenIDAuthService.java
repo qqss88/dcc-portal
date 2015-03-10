@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal.auth.openid;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwRedirectException;
 
@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OpenIDAuthService {
 
   public static final String OPENID_EMAIL = "http://schema.openid.net/contact/email";
@@ -141,7 +141,7 @@ public class OpenIDAuthService {
     val discoveryInfoOptional = sessionService.getDiscoveryInfo(sessionTokenUuid);
     sessionService.removeDiscoveryInfo(sessionTokenUuid);
 
-    checkState(discoveryInfoOptional.isPresent(), _("[%s] Authentication failed because of missing discovery "
+    checkState(discoveryInfoOptional.isPresent(), String.format("[%s] Authentication failed because of missing discovery "
         + "information for session", sessionToken), redirect);
     val discoveryInfo = discoveryInfoOptional.get();
     log.debug("[{}] Found discovery info in the cache. {}", sessionToken, discoveryInfo);
@@ -165,12 +165,12 @@ public class OpenIDAuthService {
     // AKA OpenID URL or XRI
     val userIdentifier = verification.getVerifiedId();
     log.debug("[{}] User identifier: {}", sessionToken, userIdentifier);
-    checkState(userIdentifier != null, _("[%s] Received null user identifier", sessionToken), redirect);
+    checkState(userIdentifier != null, String.format("[%s] Received null user identifier", sessionToken), redirect);
 
     // sessionToken is not generated as it's set couple steps later
     User user = new User();
     user.setOpenIDIdentifier(userIdentifier.getIdentifier());
-    checkState(setUserEmail(verification, user), _("[%s] Failed to set user's email", sessionToken), redirect);
+    checkState(setUserEmail(verification, user), String.format("[%s] Failed to set user's email", sessionToken), redirect);
 
     val sessionTokenUuid = stringToUuid(sessionToken, redirect);
     user = configureDacoAccess(sessionTokenUuid, checkOtherSessions(user, redirect, sessionToken), redirect);
@@ -216,7 +216,7 @@ public class OpenIDAuthService {
 
     } catch (Exception e) {
       throwRedirectException(DEFAULT_USER_MESSAGE,
-          _("Failed to check DACO access settings for the user. %s", e.getMessage()), redirect);
+          String.format("Failed to check DACO access settings for the user. %s", e.getMessage()), redirect);
     }
 
     return user;

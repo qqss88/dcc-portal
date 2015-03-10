@@ -1,6 +1,6 @@
 package org.icgc.dcc.portal.model;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 
 import java.util.EnumMap;
 import java.util.List;
@@ -635,16 +635,16 @@ public class IndexModel {
           ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_PATHWAY.getType()))
       .put(GeneSetType.GENE_SET_TYPE_GO.getType(),
           ImmutableList.<String> of(
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
       .put(GeneSetType.GENE_SET_TYPE_ALL.getType(),
           ImmutableList.<String> of(
               GeneSetType.GENE_SET_TYPE_CURATED.getType(),
               GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
-              _("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
+              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
       .build();
 
   private String index;

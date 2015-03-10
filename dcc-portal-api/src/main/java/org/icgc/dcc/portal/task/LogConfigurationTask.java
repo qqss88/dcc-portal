@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.task;
 
-import static org.icgc.dcc.common.core.util.FormatUtils._;
+
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -64,7 +64,7 @@ public class LogConfigurationTask extends Task {
     for (val loggerName : loggerNames) {
       val logger = loggerContext.getLogger(loggerName);
       logger.setLevel(loggerLevel);
-      output.println(_("Configured logging level for %s to %s", loggerName, loggerLevel));
+      output.println(String.format("Configured logging level for %s to %s", loggerName, loggerLevel));
       output.flush();
     }
   }

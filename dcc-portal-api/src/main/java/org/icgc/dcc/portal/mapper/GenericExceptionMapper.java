@@ -20,6 +20,8 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getHttpRequestCallerInfo;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getLocalNetworkInfo;
 
 import java.util.Date;
 import java.util.Random;
@@ -29,6 +31,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -46,9 +49,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Provider
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
+  private static final boolean SEND_EMAIL_ASYNC = true;
   private static final Random RANDOM = new Random();
 
   @NonNull
@@ -59,68 +63,76 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
   @Context
   private HttpServletRequest request;
 
-  @Override
-  @SneakyThrows
-  public Response toResponse(Throwable t) {
-    val id = randomId();
-    if (t instanceof WebApplicationException) {
-      val response = ((WebApplicationException) t).getResponse();
-
-      val ok = response.getStatus() >= 200 && response.getStatus() < 400;
-      if (ok) {
-        return Response.fromResponse(response).build();
-      } else {
-        // Add an error response payload
-        log.error(t.getMessage());
-        return Response.fromResponse(response)
-            .type(APPLICATION_JSON_TYPE)
-            .entity(webErrorResponse(t, id, response.getStatus()))
-            .build();
-      }
-    }
-
-    logException(id, t);
-    sendEmail(id, t);
-
-    return serverError()
-        .type(APPLICATION_JSON_TYPE)
-        .entity(errorResponse(t, id))
+  private static Response buildErrorResponse(@NonNull final ResponseBuilder builder, @NonNull final Error error) {
+    return builder.type(APPLICATION_JSON_TYPE)
+        .entity(error)
         .build();
   }
 
-  private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
+  private static Error webErrorResponse(Throwable t, final long id, final int statusCode) {
     return new Error(statusCode, t.getMessage());
   }
 
-  private Error errorResponse(Throwable t, final long id) {
+  private static Error errorResponse(Throwable t, final long id) {
     return new Error(INTERNAL_SERVER_ERROR, formatResponseEntity(id, t));
   }
 
-  protected void logException(long id, Throwable t) {
+  protected static void logException(long id, Throwable t) {
     log.error(formatLogMessage(id, t), t);
   }
 
-  protected String formatResponseEntity(long id, Throwable exception) {
-    return String.format("There was an error processing your request. It has been logged (ID %016x).%n", id);
+  protected static String formatResponseEntity(long id, Throwable t) {
+    val message =
+        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).%n";
+    return String.format(message, t.getMessage(), id);
   }
 
-  protected String formatLogMessage(long id, Throwable exception) {
-    return String.format("Error handling a request: %016x", id);
+  protected static String formatLogMessage(long id, Throwable t) {
+    val message = "Error handling a request: %016x, with the message of '%s'.";
+    return String.format(message, id, t.getMessage());
   }
 
   protected static long randomId() {
     return RANDOM.nextLong();
   }
 
+  @Override
+  @SneakyThrows
+  public Response toResponse(Throwable t) {
+    val id = randomId();
+
+    if (t instanceof WebApplicationException) {
+      val response = ((WebApplicationException) t).getResponse();
+      val responseBuilder = Response.fromResponse(response);
+      val statusCode = response.getStatus();
+
+      val ok = statusCode < 400;
+      if (ok) {
+        return responseBuilder.build();
+      } else {
+        logException(id, t);
+
+        if (statusCode >= 500) {
+          sendEmail(id, t);
+        }
+
+        return buildErrorResponse(responseBuilder, webErrorResponse(t, id, statusCode));
+      }
+    }
+
+    logException(id, t);
+    sendEmail(id, t);
+
+    return buildErrorResponse(serverError(), errorResponse(t, id));
+  }
+
   protected void sendEmail(long id, Throwable t) {
     try {
-      val subject = "DCC Portal - Exception @ " + new Date();
-      val message =
-          request.getRemoteHost() + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
-              + getStackTraceAsString(t);
-      val async = true;
+      val subject = "DCC Portal - Exception " + getLocalNetworkInfo() + " @ " + new Date();
+      val message = getHttpRequestCallerInfo(request) + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
+          + getStackTraceAsString(t);
 
-      mailService.sendEmail(subject, message, async);
+      mailService.sendEmail(subject, message, SEND_EMAIL_ASYNC);
     } catch (Exception e) {
       log.error("Exception mailing:", e);
     }

@@ -114,7 +114,7 @@ import com.yammer.metrics.annotation.Timed;
 
 @Component
 @Slf4j
-@Api(value = "/v1/download", description = "Operations about archive downloading")
+@Api(value = "/v1/download", description = "Resources relating to archive downloading")
 @Path("/v1/download")
 @Consumes(APPLICATION_JSON)
 public class DownloadResource {
@@ -126,13 +126,7 @@ public class DownloadResource {
   private static final String APPLICATION_GZIP = "application/x-gzip";
   private static final String APPLICATION_TAR = "application/x-tar";
 
-  @Data
-  public static class ServiceStatus {
-
-    private final boolean serviceStatus;
-  }
-
-  // additional states for UI
+  // Additional states for UI
   private static final String FOUND_STATUS = "FOUND";
   private static final String NOT_FOUND_STATUS = "NOT_FOUND";
   private static final String EXPIRED_STATUS = "EXPIRED";
@@ -140,10 +134,17 @@ public class DownloadResource {
   private static final String INDIVIDUAL_TYPE_ARCHIVE_EXTENSION = ".tsv.gz";
   private static final String FULL_ARCHIVE_EXTENSION = ".tar";
 
+  /**
+   * Dependencies.
+   */
   private final DonorService donorService;
   private final DownloaderClient downloader;
   private final ExportedDataFileSystem fs;
-  private Stage env;
+
+  /**
+   * Configuration.
+   */
+  private final Stage env;
 
   private final static ImmutableMap<DataType, List<DataType>> DataTypeGroupMap = ImmutableMap
       .<DataType, List<DataType>> builder()
@@ -213,12 +214,6 @@ public class DownloadResource {
     return new ServiceStatus(downloader.isServiceAvailable() && !downloader.isOverCapacity());
   }
 
-  @Data
-  public static class JobInfo {
-
-    private final String downloadId;
-  }
-
   @Autowired
   public DownloadResource(DonorService donorService, DownloaderClient downloader, ExportedDataFileSystem fs, Stage env) {
     this.donorService = donorService;
@@ -228,7 +223,7 @@ public class DownloadResource {
     log.debug("Download Resource in {} mode", env);
   }
 
-  @ApiOperation("submit job to request archive generation")
+  @ApiOperation("Submit job to request archive generation")
   @Path("/submit")
   @Produces(APPLICATION_JSON)
   @GET
@@ -297,17 +292,16 @@ public class DownloadResource {
     }
   }
 
-  @ApiOperation("Get download service availability")
+  @ApiOperation("Cancel a download job associated with the supplied 'download id'")
   @Path("/{downloadId}/cancel")
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public Map<String, Object> cancel(
+  public Map<String, Object> cancelJob(
       @Auth(required = false) User user,
 
       @ApiParam(value = "download id") @PathParam("downloadId") String downloadId) throws BadRequestException {
     try {
-
       Map<String, Map<String, String>> jobInfoMap = downloader.getJobInfo(ImmutableSet.of(downloadId));
       boolean isControlled = containsControlledData(jobInfoMap);
       if (isPermissionDenied(user, isControlled)) {
@@ -315,19 +309,9 @@ public class DownloadResource {
       } else {
         return standardizeStatus(downloadId, downloader.cancelJob(downloadId));
       }
-
     } catch (IOException e) {
       log.error("fail to cancel the job with id: {}", downloadId, e);
       throw new BadRequestException("fail to cancel the job with id: " + downloadId);
-    }
-
-  }
-
-  private boolean isPermissionDenied(User user, boolean isControlled) {
-    if (isControlled && !isLogin(user)) {
-      return true;
-    } else {
-      return false;
     }
   }
 
@@ -336,7 +320,7 @@ public class DownloadResource {
   @Produces(APPLICATION_JSON)
   @GET
   @Timed
-  public List<Map<String, Object>> getStatus(
+  public List<Map<String, Object>> getJobStatus(
 
       @Auth(required = false) User user,
 
@@ -366,47 +350,6 @@ public class DownloadResource {
       log.error("status retrieval error: ", e);
       throw new NotFoundException(downloadIds, "download");
     }
-  }
-
-  private Map<String, Object> standardizeStatus(String id, JobStatus jobStatus) {
-    if (jobStatus.isNotFound()) {
-      return ImmutableMap.<String, Object> of("downloadId", id, "status", NOT_FOUND_STATUS);
-    }
-
-    Map<DataType, JobProgress> jobProgressMap = jobStatus.getProgressMap();
-    Set<DataType> selectedGroups = Sets.intersection(jobProgressMap.keySet(), DataTypeGroupMap.keySet());
-    ImmutableList.Builder<Map<String, String>> groupProgressListBuilder = ImmutableList.builder();
-
-    for (DataType selectedGroup : selectedGroups) {
-      ImmutableMap.Builder<String, String> uiBuilder = ImmutableMap.builder();
-      JobProgress groupProgress = new JobProgress(0, 0);
-      for (DataType dataType : DataTypeGroupMap.get(selectedGroup)) {
-        groupProgress
-            .setDenominator(jobProgressMap.get(dataType).getDenominator() + groupProgress.getDenominator());
-        groupProgress.setNumerator(jobProgressMap.get(dataType).getNumerator() + groupProgress.getNumerator());
-      }
-      uiBuilder.put("dataType", selectedGroup.name);
-      uiBuilder.put("completed", String.valueOf(groupProgress.isCompleted()));
-      uiBuilder.put("numerator", String.valueOf(groupProgress.getNumerator()));
-      uiBuilder.put("denominator", String.valueOf(groupProgress.getDenominator()));
-      uiBuilder.put("percentage", String.valueOf(groupProgress.getPercentage()));
-      groupProgressListBuilder.add(uiBuilder.build());
-    }
-    String status = getUIStates(jobStatus);
-    return ImmutableMap.<String, Object> of("downloadId", id, "status", status,
-        "progress",
-        groupProgressListBuilder.build());
-  }
-
-  private String getUIStates(JobStatus jobStatus) {
-
-    String status = jobStatus.getWorkflowStatus().name();
-    if (jobStatus.isNotFound()) {
-      status = NOT_FOUND_STATUS;
-    } else if (jobStatus.isExpired()) {
-      status = EXPIRED_STATUS;
-    }
-    return status;
   }
 
   @ApiOperation("Get download size by type subject to the supplied filter condition(s)")
@@ -500,20 +443,6 @@ public class DownloadResource {
     } finally {
       log.debug("Request job info for : {}", downloadIds.get());
     }
-  }
-
-  /**
-   * @param jobInfoMap
-   * @return
-   */
-  private boolean containsControlledData(Map<String, Map<String, String>> jobInfoMap) {
-    for (val entry : jobInfoMap.entrySet()) {
-      String isControlled = entry.getValue().get(IS_CONTROLLED);
-      if (isControlled != null && Boolean.valueOf(isControlled)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   @ApiOperation("Get file info under the specified directory")
@@ -725,6 +654,82 @@ public class DownloadResource {
                 .creationDate(new Date())
                 .build())
         .build();
+  }
+
+  @Data
+  public static class ServiceStatus {
+
+    private final boolean serviceStatus;
+
+  }
+
+  @Data
+  public static class JobInfo {
+
+    private final String downloadId;
+  }
+
+  private boolean isPermissionDenied(User user, boolean isControlled) {
+    if (isControlled && !isLogin(user)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  private Map<String, Object> standardizeStatus(String id, JobStatus jobStatus) {
+    if (jobStatus.isNotFound()) {
+      return ImmutableMap.<String, Object> of("downloadId", id, "status", NOT_FOUND_STATUS);
+    }
+
+    Map<DataType, JobProgress> jobProgressMap = jobStatus.getProgressMap();
+    Set<DataType> selectedGroups = Sets.intersection(jobProgressMap.keySet(), DataTypeGroupMap.keySet());
+    ImmutableList.Builder<Map<String, String>> groupProgressListBuilder = ImmutableList.builder();
+
+    for (DataType selectedGroup : selectedGroups) {
+      ImmutableMap.Builder<String, String> uiBuilder = ImmutableMap.builder();
+      JobProgress groupProgress = new JobProgress(0, 0);
+      for (DataType dataType : DataTypeGroupMap.get(selectedGroup)) {
+        groupProgress
+            .setDenominator(jobProgressMap.get(dataType).getDenominator() + groupProgress.getDenominator());
+        groupProgress.setNumerator(jobProgressMap.get(dataType).getNumerator() + groupProgress.getNumerator());
+      }
+      uiBuilder.put("dataType", selectedGroup.name);
+      uiBuilder.put("completed", String.valueOf(groupProgress.isCompleted()));
+      uiBuilder.put("numerator", String.valueOf(groupProgress.getNumerator()));
+      uiBuilder.put("denominator", String.valueOf(groupProgress.getDenominator()));
+      uiBuilder.put("percentage", String.valueOf(groupProgress.getPercentage()));
+      groupProgressListBuilder.add(uiBuilder.build());
+    }
+    String status = getUIStates(jobStatus);
+    return ImmutableMap.<String, Object> of("downloadId", id, "status", status,
+        "progress",
+        groupProgressListBuilder.build());
+  }
+
+  private String getUIStates(JobStatus jobStatus) {
+
+    String status = jobStatus.getWorkflowStatus().name();
+    if (jobStatus.isNotFound()) {
+      status = NOT_FOUND_STATUS;
+    } else if (jobStatus.isExpired()) {
+      status = EXPIRED_STATUS;
+    }
+    return status;
+  }
+
+  /**
+   * @param jobInfoMap
+   * @return
+   */
+  private boolean containsControlledData(Map<String, Map<String, String>> jobInfoMap) {
+    for (val entry : jobInfoMap.entrySet()) {
+      String isControlled = entry.getValue().get(IS_CONTROLLED);
+      if (isControlled != null && Boolean.valueOf(isControlled)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private StreamingOutput archiveStream(final String downloadId, final List<DataType> selectedDataTypes) {

@@ -17,11 +17,8 @@
  */
 package org.icgc.dcc.portal.auth.openid;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore.ASSOCIATIONS_CACHE_NAME;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,31 +93,6 @@ public class DistributedConsumerAssociationStoreTest {
   public void removeTest() {
     associationStore.remove(OP_URL, OLDER_ASSOCIATION_HANDLE);
     verify(map).remove(OP_URL, olderAssociation);
-  }
-
-  @Test
-  public void argumentsTest() {
-    catchException(associationStore).remove("", "");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).remove(null, null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).load("", "");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).load(null, null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).load("");
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).load(null);
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-
-    catchException(associationStore).save("", mock(Association.class));
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).save(null, mock(Association.class));
-    assertThat(caughtException()).isInstanceOf(IllegalArgumentException.class);
-    catchException(associationStore).save(null, null);
-    assertThat(caughtException()).isInstanceOf(NullPointerException.class);
   }
 
   private void setupAssociations() {

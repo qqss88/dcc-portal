@@ -37,14 +37,18 @@
         <h3>
             Donors
 
-            <span data-ng-init="calc=false"></span>
-            <dl-button data-calc="calc"></dl-button>
 
             <span class="action-toolbar pull-right">
                <span class="action-item">
                    <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('donor', AdvancedCtrl.Donor.donors.pagination.total)">Save Donor Set</a>
                </span>
-               <span class="action-item">
+               <span class="action-item" data-ng-if="!AdvancedCtrl.downloadEnabled">
+                   <i class="icon-download"></i><span>Data download is<br> currently unavailable</span>
+               </span>
+               <span class="action-item" data-ng-if="AdvancedCtrl.downloadEnabled">
+                   <span data-ng-init="calc=false"></span>
+                   <dl-button data-calc="calc"></dl-button>
+
                    <span data-ng-show="calc===false">
                       <i class="icon-download"></i><a href="" data-ng-click="calc=!calc">Download Donor Data</a>
                    </span>

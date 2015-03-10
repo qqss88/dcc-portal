@@ -41,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.DerivedEntityListDefinition;
+import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.service.BadRequestException;
@@ -59,7 +59,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Slf4j
 @Component
 @Path("/v1/analysis/union")
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UnionAnalysisResource {
 
   @NonNull
@@ -102,9 +102,9 @@ public class UnionAnalysisResource {
   @Path("/preview")
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Retrievs a sample data of a set analysis as preview.", response = String.class, responseContainer = "List")
+  @ApiOperation(value = "Retrieves a sample data of a set analysis as preview.", response = String.class, responseContainer = "List")
   public List<String> previewSetUnion(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntityListDefinition listDefinition
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition
       ) {
     if (null == listDefinition) {
       throw new BadRequestException("The payload of /analysis/union/preview is null.");

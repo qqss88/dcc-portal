@@ -18,20 +18,32 @@
 package org.icgc.dcc.portal.model;
 
 import lombok.Value;
-import lombok.experimental.Builder;
+import lombok.Builder;
 
 @Value
 @Builder
 public class Settings {
 
-  String ssoUrl;
+  /**
+   * Release settings.
+   */
   String releaseDate;
 
+  /**
+   * Download settings.
+   */
+  boolean downloadEnabled;
+
+  /**
+   * Crowd settings.
+   */
+  String ssoUrl;
+
+  /**
+   * Set analysis settings.
+   */
   String demoListUuid;
   int maxNumberOfHits;
   int maxMultiplier;
 
-  public static SettingsBuilder builder() {
-    return new SettingsBuilder();
-  }
 }

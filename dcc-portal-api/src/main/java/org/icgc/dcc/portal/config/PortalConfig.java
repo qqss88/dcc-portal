@@ -44,6 +44,7 @@ import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
 import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
+import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
@@ -115,7 +116,7 @@ public class PortalConfig {
 
   @PostConstruct
   public void createDemoEntityList() {
-    entityListService.createDemoEntityList();
+    entityListService.createDemoEntitySet();
   }
 
   @Bean
@@ -139,11 +140,6 @@ public class PortalConfig {
   @Qualifier
   public List<DataSource> dataSources() {
     return properties.getBrowser().getDataSources();
-  }
-
-  @Bean
-  public MailProperties mailConfig() {
-    return properties.getMail();
   }
 
   @Bean
@@ -173,14 +169,18 @@ public class PortalConfig {
 
   @Bean
   public Settings settings() {
-    val setOperationConfig = properties.getSetOperation();
+    val crowd = properties.getCrowd();
+    val release = properties.getRelease();
+    val download = properties.getDownload();
+    val setAnalysis = properties.getSetOperation();
 
     return Settings.builder()
-        .ssoUrl(properties.getCrowd().getSsoUrl())
-        .releaseDate(properties.getRelease().getReleaseDate())
-        .demoListUuid(setOperationConfig.demoListUuid)
-        .maxNumberOfHits(setOperationConfig.maxNumberOfHits)
-        .maxMultiplier(setOperationConfig.maxMultiplier)
+        .ssoUrl(crowd.getSsoUrl())
+        .releaseDate(release.getReleaseDate())
+        .downloadEnabled(download.isEnabled())
+        .demoListUuid(setAnalysis.demoListUuid)
+        .maxNumberOfHits(setAnalysis.maxNumberOfHits)
+        .maxMultiplier(setAnalysis.maxMultiplier)
         .build();
   }
 
@@ -198,11 +198,6 @@ public class PortalConfig {
         .build();
 
     return ICGCClient.create(icgcConfig).shortUrl();
-  }
-
-  @Bean
-  public ICGCProperties icgcConfiguration() {
-    return properties.getIcgc();
   }
 
   @Bean
@@ -272,17 +267,32 @@ public class PortalConfig {
   }
 
   @Bean
-  public CrowdProperties crowdConfig() {
+  public MailProperties mailProperties() {
+    return properties.getMail();
+  }
+
+  @Bean
+  public ICGCProperties icgcProperties() {
+    return properties.getIcgc();
+  }
+
+  @Bean
+  public DownloadProperties downloadProperties() {
+    return properties.getDownload();
+  }
+
+  @Bean
+  public CrowdProperties crowdProperties() {
     return properties.getCrowd();
   }
 
   @Bean
-  public CacheProperties cacheConfiguration() {
+  public CacheProperties cacheProperties() {
     return properties.getCache();
   }
 
   @Bean
-  public WebProperties webConfiguration() {
+  public WebProperties webProperties() {
     return properties.getWeb();
   }
 

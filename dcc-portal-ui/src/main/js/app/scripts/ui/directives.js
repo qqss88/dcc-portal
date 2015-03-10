@@ -47,8 +47,12 @@ angular.module('app.ui', [
 
 
 
-// Select content on click
-angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
+/**
+ * select-on-click: Select content on click event
+ * disable-events: Disable pointer events reduce opacity to give it a disabled look and feel
+ */
+angular.module('icgc.ui.events', [])
+.directive('selectOnClick', function() {
   return {
     restrict: 'A',
     link: function(scope, element) {
@@ -57,11 +61,43 @@ angular.module('icgc.ui.events', []).directive('selectOnClick', function() {
       });
     }
   };
+})
+.directive('disableEvents', function() {
+  return {
+    restrict: 'A',
+    replace: true,
+    scope: {
+      disableEvents: '='
+    },
+    link: function(scope, element) {
+      console.log('init disable');
+
+      function toggleEvents(predicate) {
+        if (predicate === true) {
+          element.css('pointer-events', 'none');
+          element.css('opacity', 0.65);
+        } else {
+          element.css('pointer-events', '');
+          element.css('opacity', '1');
+        }
+      }
+
+      scope.$watch('disableEvents', function(n) {
+        if (angular.isDefined(n)) {
+          toggleEvents(n);
+        }
+      });
+    }
+  };
 });
 
 
-// See: https://github.com/angular/angular.js/issues/1375
-// See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
+/**
+ * File chooser detector
+ *
+ * See: https://github.com/angular/angular.js/issues/1375
+ * See: http://uncorkedstudios.com/blog/multipartformdata-file-upload-with-angularjs
+ */
 angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse) {
   return {
     restrict: 'A',
@@ -86,9 +122,12 @@ angular.module('app.ui.fileUpload', []).directive('fileUpload', function($parse)
 });
 
 
-// Centralized tooltip directive. There should be only one per application
+/**
+ * Centralized tooltip directive. There should be only one per application
+ * This act as the tooltip "server" that waits for tooltip events
+ */
 angular.module('app.ui.tooltipControl', [])
-  .directive('tooltipControl', function ($position, $rootScope, $sce) {
+  .directive('tooltipControl', function ($position, $rootScope, $sce, $window) {
     return {
       restrict: 'E',
       replace: true,
@@ -99,13 +138,14 @@ angular.module('app.ui.tooltipControl', [])
         scope.placement = 'right';
         scope.html = '???';
 
-        function calculatePlacement(placement, target) {
-          var position = $position.offset(target);
-          var result = {};
+        function calculateAbsoluteCoordinates(placement, target, targetPosition) {
+          var position = targetPosition || $position.offset(target);
+          var arrowOffset = 10;
 
-
-          var ttWidth = element.prop('offsetWidth');
-          var ttHeight = element.prop('offsetHeight');
+          var tooltip = {
+            width: element.prop('offsetWidth'),
+            height: element.prop('offsetHeight')
+          };
 
           // FIXME:
           // Need to make this work better for SVG, maybe use d3-tip plugin for calc
@@ -115,31 +155,31 @@ angular.module('app.ui.tooltipControl', [])
 
           switch(placement) {
           case 'right':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left + position.width
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left + position.width + arrowOffset
             };
-            break;
           case 'left':
-            result = {
-              top: position.top + position.height / 2 - ttHeight / 2,
-              left: position.left - ttWidth
+            return {
+              top: position.top + position.height / 2 - tooltip.height / 2,
+              left: position.left - tooltip.width - arrowOffset
             };
-            break;
           case 'top':
-            result = {
-              top: position.top - ttHeight,
-              left: position.left > ttWidth / 4 ? (position.left + position.width / 2 - ttWidth / 2) : 0
+            return {
+              top: position.top - tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
             };
-            break;
+          case 'bottom':
+            return {
+              top: position.top + tooltip.height - arrowOffset,
+              left: position.left > tooltip.width / 4 ? (position.left + position.width / 2 - tooltip.width / 2) : 0
+            };
           default:
-            result = {
-              top: position.top,
+            return {
+              top: position.top + arrowOffset,
               left: position.left + position.width / 2
             };
           }
-
-          return result;
         }
 
         $rootScope.$on('tooltip::show', function(evt, params) {
@@ -152,11 +192,34 @@ angular.module('app.ui.tooltipControl', [])
             }
           });
 
-          var position = calculatePlacement(params.placement, params.element);
-          element.css('top', position.top);
-          element.css('left', position.left);
+          element.css('visibility', 'visible');
+
+          if(params.sticky){
+            element.addClass('sticky');
+
+            if(!$window.onmousemove){
+              $window.onmousemove = function(e){
+                if(element.hasClass('sticky')){
+                  var position = calculateAbsoluteCoordinates(scope.placement, params.element, {
+                    left: e.pageX,
+                    top: e.pageY - (scope.placement === 'top' ? 8 : 0),
+                    width: 10,
+                    height: -6
+                  });
+                  element.css('top', position.top);
+                  element.css('left', position.left);
+                }
+              };
+            }
+          }else{
+            var position = calculateAbsoluteCoordinates(params.placement, params.element, params.elementPosition);
+            element.css('top', position.top);
+            element.css('left', position.left);
+            element.removeClass('sticky');
+          }
         });
         $rootScope.$on('tooltip::hide', function() {
+          element.css('visibility', 'hidden');
           element.css('top', -999);
           element.css('left', -999);
         });
@@ -165,7 +228,9 @@ angular.module('app.ui.tooltipControl', [])
   });
 
 
-// Light weight directive for request tooltips
+/**
+ * Light weight directive for request tooltips
+ */
 angular.module('app.ui.tooltip', [])
   .directive('tooltip', function($timeout) {
     return {

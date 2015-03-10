@@ -94,7 +94,7 @@ var DATASET_ALL = 'All Projects';
         $scope.params.reference = LocationService.getParam('ref');
       }
       $scope.params.allele = LocationService.getParam('ale')?
-        LocationService.getParam('ale').replace( /[^ACTGactg]+/g, '').toUpperCase():'';
+        LocationService.getParam('ale').replace( /[^ACTGactg>-]+/g, '').toUpperCase():'';
       $scope.result.exists = LocationService.getParam('result') === 'true'?true:false;
       $scope.checkParams();
     };
@@ -124,6 +124,16 @@ var DATASET_ALL = 'All Projects';
       }
       if($scope.params.reference && ($scope.params.reference !== 'GRCh37')){
         $scope.invalidParams.isReference = true;
+        $scope.hasInvalidParams = true;
+      }
+
+      if($scope.params.allele && !(
+         /^[ACTG]+$/.test($scope.params.allele) ||
+         /^([ACTG])>\1[ACTG]+$/.test($scope.params.allele) ||
+         /^->[ACTG]+$/.test($scope.params.allele) ||
+         /^([ACTG])[ACTG]+>\\1$/.test($scope.params.allele) ||
+         /^[ACTG]+>-$/.test($scope.params.allele))){
+        $scope.invalidParams.isAllele = true;
         $scope.hasInvalidParams = true;
       }
       if(!($scope.params.reference && $scope.params.position && $scope.params.allele)){
@@ -203,6 +213,7 @@ var DATASET_ALL = 'All Projects';
 
     projectsPromise.then(function(data){
       $scope.projects = data.hits;
+      $scope.projects.unshift({id:'--------'});
       $scope.projects.unshift({id:DATASET_ALL});
       $scope.params = {
         project:$scope.projects[0],
@@ -239,12 +250,6 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
-
-        element.bind('keypress', function(event) {
-          if(event.keyCode === 32) {
-            event.preventDefault();
-          }
-        });
       }
     };
   });
@@ -261,7 +266,7 @@ var DATASET_ALL = 'All Projects';
           if (angular.isUndefined(val)) {
             val = '';
           }
-          var clean = val.replace( /[^ACTGactg]+/g, '');
+          var clean = val.replace( /[^ACTGactg>-]+/g, '');
           clean = clean.toUpperCase();
           if (val !== clean) {
             ngModelCtrl.$setViewValue(clean);
@@ -269,14 +274,58 @@ var DATASET_ALL = 'All Projects';
           }
           return clean;
         });
+      }
+    };
+  });
 
+  module.directive('searchOnEnter', function() {
+    return {
+      require: '?ngModel',
+      link: function(scope, element) {
         element.bind('keypress', function(event) {
           if(event.keyCode === 32) {
             event.preventDefault();
+          }else if(event.keyCode === 13) {
+            scope.checkParams();
+            if(!scope.hasInvalidParams){
+              scope.submitQuery();
+            }
           }
         });
       }
     };
   });
 
+  /** From github issue 638 (https://github.com/angular/angular.js/issues/638)
+      on angularjs page. In short, it allows for certain options in ng-options to be disabled
+      if they are true for a certain condition. See "options-disabled" in beacon.html for use.**/
+
+  module.directive('optionsDisabled', function($parse) {
+    var disableOptions = function(scope, attr, element, data, fnDisableIfTrue) {
+      // refresh the disabled options in the select element.
+      angular.forEach(element.find('option'), function(value, index){
+        var elem = angular.element(value);
+        if(elem.val()!==''){
+          var locals = {};
+          locals[attr] = data[index];
+          elem.attr('disabled', fnDisableIfTrue(scope, locals));
+        }
+      });
+    };
+    return {
+      priority: 0,
+      require: 'ngModel',
+      link: function(scope, iElement, iAttrs) {
+        // parse expression and build array of disabled options
+        var expElements = iAttrs.optionsDisabled.match(/^\s*(.+)\s+for\s+(.+)\s+in\s+(.+)?\s*/);
+        var attrToWatch = expElements[3];
+        var fnDisableIfTrue = $parse(expElements[1]);
+        scope.$watch(attrToWatch, function(newValue) {
+          if(newValue){
+            disableOptions(scope, expElements[2], iElement, newValue, fnDisableIfTrue);
+          }
+        }, true);
+      }
+    };
+  });
 })();

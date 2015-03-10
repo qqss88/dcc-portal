@@ -42,7 +42,7 @@ import com.google.common.base.Joiner;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @_(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EnrichmentReporter {
 
   /**

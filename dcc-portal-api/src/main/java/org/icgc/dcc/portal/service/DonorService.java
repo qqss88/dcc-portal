@@ -42,7 +42,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @_({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
@@ -132,7 +132,7 @@ public class DonorService {
                   eRecord.putAll(saRecord);
                   // eRecord.put("raw_sequence_repository", external.getRepository());
                   eRecord.put("repository", external.getRepository());
-                  eRecord.put("library_strategy", external.getLibraryStrategy());
+                  eRecord.put("sequencing_strategy", external.getLibraryStrategy());
                   eRecord.put("analysis_data_uri", external.getDataUri());
                   eRecord.put("raw_data_accession", external.getRawDataAccession());
                   records.add(eRecord);
@@ -176,7 +176,7 @@ public class DonorService {
             "specimen_type_other",
             "analyzed_sample_interval",
             "repository",
-            "library_strategy",
+            "sequencing_strategy",
             "raw_data_accession",
             "study"
         };
