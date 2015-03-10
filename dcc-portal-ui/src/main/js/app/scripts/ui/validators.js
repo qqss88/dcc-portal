@@ -1,4 +1,4 @@
-
+'use strict';
 
 angular.module('icgc.ui.validators', []).directive('integerValidator', function() {
     return {
