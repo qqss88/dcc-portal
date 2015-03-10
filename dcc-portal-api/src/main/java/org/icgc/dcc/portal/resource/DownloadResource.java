@@ -473,7 +473,7 @@ public class DownloadResource {
       ) throws IOException {
     try {
 
-      if (downloadIds.get() != null || downloadIds.get().size() != 0) {
+      if (downloadIds.get() != null && downloadIds.get().size() != 0) {
         Map<String, Map<String, String>> jobInfoMap = downloader.getJobInfo(ImmutableSet.copyOf(downloadIds.get()));
         ImmutableMap.Builder<String, Object> reportMapBuilder = ImmutableMap.builder();
         boolean isControlled = containsControlledData(jobInfoMap);
@@ -583,7 +583,7 @@ public class DownloadResource {
     Predicate<File> predicate =
         (isLogin ? new LoginUserAccessiblePredicate() : new EveryoneAccessiblePredicate());
 
-    if (fs.isFile(downloadFile) && predicate.apply(downloadFile)) {
+    if (fs.exists(downloadFile) && fs.isFile(downloadFile) && predicate.apply(downloadFile)) {
       long contentLength = fs.getSize(downloadFile);
       archiveStream = archiveStream(downloadFile);
       rb.header(CONTENT_LENGTH, contentLength);
