@@ -18,7 +18,14 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.MOLECULAR_FUNCTION;
+import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
+import static org.icgc.dcc.portal.model.IndexModel.Type.GENE_CENTRIC;
+import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
 
 import java.util.Optional;
 
@@ -27,10 +34,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,7 +50,7 @@ public class GeneSetFilterVisitorTest {
 
   @Before
   public void setUp() {
-    context.setType(Type.DONOR_CENTRIC);
+    context.setType(DONOR_CENTRIC);
   }
 
   @Test
@@ -68,11 +76,7 @@ public class GeneSetFilterVisitorTest {
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
     val orNode = (OrNode) nestedNode.getFirstChild();
-    assertThat(orNode.childrenCount()).isEqualTo(3);
-
-    assertTermsNode(orNode.getChild(0), "gene.go_term.cellular_component", "GO:0003674");
-    assertTermsNode(orNode.getChild(1), "gene.go_term.biological_process", "GO:0003674");
-    assertTermsNode(orNode.getChild(2), "gene.go_term.molecular_function", "GO:0003674");
+    assertGoTerm(orNode, getTypeModel(DONOR_CENTRIC), "GO:0003674");
   }
 
   @Test
@@ -85,14 +89,168 @@ public class GeneSetFilterVisitorTest {
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertThat(orNode.childrenCount()).isEqualTo(5);
+    assertGeneSetId(nestedNode.getFirstChild(), getTypeModel(DONOR_CENTRIC), "123");
+  }
 
-    assertTermsNode(orNode.getChild(0), "gene.go_term.cellular_component", "123");
-    assertTermsNode(orNode.getChild(1), "gene.go_term.biological_process", "123");
-    assertTermsNode(orNode.getChild(2), "gene.go_term.molecular_function", "123");
-    assertTermsNode(orNode.getChild(3), "gene.pathway", "123");
-    assertTermsNode(orNode.getChild(4), "gene.curated_set", "123");
+  @Test
+  public void existsCurratedSetTest() {
+    val root = createEsAst("exists(gene.curatedSetId)");
+    val result = root.accept(visitor, Optional.of(context)).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "gene.curated_set");
+  }
+
+  @Test
+  public void existsCurratedSetTest_gene() {
+    val root = createEsAst("exists(gene.curatedSetId)", GENE_CENTRIC);
+    val result = root.accept(visitor, getGeneContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "curated_set");
+  }
+
+  @Test
+  public void existsCurratedSetTest_mutation() {
+    val root = createEsAst("exists(gene.curatedSetId)", MUTATION_CENTRIC);
+    val result = root.accept(visitor, getMutationContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "transcript.gene.curated_set");
+  }
+
+  @Test
+  public void existsPathwayIdTest() {
+    val root = createEsAst("exists(gene.pathwayId)");
+    val result = root.accept(visitor, Optional.of(context)).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "gene.pathway");
+  }
+
+  @Test
+  public void existsPathwayIdTest_gene() {
+    val root = createEsAst("exists(gene.pathwayId)", GENE_CENTRIC);
+    val result = root.accept(visitor, getGeneContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "pathway");
+  }
+
+  @Test
+  public void existsPathwayIdTest_mutation() {
+    val root = createEsAst("exists(gene.pathwayId)", MUTATION_CENTRIC);
+    val result = root.accept(visitor, getMutationContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "transcript.gene.pathway");
+  }
+
+  @Test
+  public void existsGoTermTest() {
+    val root = createEsAst("exists(gene.GoTerm)");
+    val result = root.accept(visitor, Optional.of(context)).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "gene.go_term");
+  }
+
+  @Test
+  public void existsGoTermTest_gene() {
+    val root = createEsAst("exists(gene.GoTerm)", GENE_CENTRIC);
+    val result = root.accept(visitor, getGeneContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "go_term");
+  }
+
+  @Test
+  public void existsGoTermTest_mutation() {
+    val root = createEsAst("exists(gene.GoTerm)", MUTATION_CENTRIC);
+    val result = root.accept(visitor, getMutationContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    assertExists(result, "transcript.gene.go_term");
+  }
+
+  @Test
+  public void goTermTest_gene() {
+    val root = createEsAst("in(gene.goTermId, 'GO:0003674')", GENE_CENTRIC);
+    val result = root.accept(visitor, getGeneContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    // FilterNode - BoolNode - MustBoolNode - OrNode (3 TermsNode)
+    val orNode = (OrNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertGoTerm(orNode, getTypeModel(GENE_CENTRIC), "GO:0003674");
+  }
+
+  @Test
+  public void curatedSetTest_gene() {
+    val root = createEsAst("in(curatedSetId, 'ID1')", GENE_CENTRIC);
+    assertPathwayAndCuratedSet(root, "curated_set", "ID1");
+  }
+
+  @Test
+  public void pathwayIdTest_gene() {
+    val root = createEsAst("in(pathwayId, 'REACT_6326')", GENE_CENTRIC);
+    assertPathwayAndCuratedSet(root, "pathway", "REACT_6326");
+  }
+
+  @Test
+  public void geneSetIdTest_gene() {
+    val root = createEsAst("in(gene.geneSetId, '123')", GENE_CENTRIC);
+    val result = root.accept(visitor, getGeneContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    // FilterNode - BoolNode - MustBoolNode - OrNode (3 TermsNode)
+    val orNode = (OrNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertGeneSetId(orNode, getTypeModel(GENE_CENTRIC), "123");
+  }
+
+  @Test
+  public void goTermTest_mutation() {
+    val root = createEsAst("in(gene.goTermId, 'GO:0003674')", MUTATION_CENTRIC);
+    val result = root.accept(visitor, getMutationContextOptional()).get();
+
+    // FilterNode - BoolNode - MustBoolNode - NestedNode - OrNode (3 TermsNode)
+    val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+
+    val orNode = (OrNode) nestedNode.getFirstChild();
+    assertGoTerm(orNode, getTypeModel(MUTATION_CENTRIC), "GO:0003674");
+  }
+
+  @Test
+  public void curatedSetTest_mutation() {
+    val root = createEsAst("in(gene.curatedSetId, 'ID1')", MUTATION_CENTRIC);
+    assertPathwayAndCuratedSet(root, "transcript.gene.curated_set", "ID1");
+  }
+
+  @Test
+  public void pathwayIdTest_mutation() {
+    val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", MUTATION_CENTRIC);
+    log.debug("After GeneSetFilterVisitor: {}", root);
+    assertPathwayAndCuratedSet(root, "transcript.gene.pathway", "REACT_6326");
+  }
+
+  @Test
+  public void geneSetIdTest_mutation() {
+    val root = createEsAst("in(gene.geneSetId, '123')", MUTATION_CENTRIC);
+    val result = root.accept(visitor, getMutationContextOptional()).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    // FilterNode - BoolNode - MustBoolNode - NestedNode - OrNode (3 TermsNode)
+    val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+
+    val orNode = (OrNode) nestedNode.getFirstChild();
+    assertGeneSetId(orNode, getTypeModel(MUTATION_CENTRIC), "123");
+  }
+
+  private static void assertExists(ExpressionNode node, String value) {
+    // FilterNode - BoolNode - MustBoolNode - ExistsNode
+    val existsNode = (ExistsNode) node.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(existsNode.getField()).isEqualTo(value);
   }
 
   private static void assertTermsNode(ExpressionNode node, String fieldName, String value) {
@@ -117,6 +275,38 @@ public class GeneSetFilterVisitorTest {
 
   private static TerminalNode getTerminalNode(ExpressionNode termsNode) {
     return (TerminalNode) termsNode.getFirstChild();
+  }
+
+  private static Optional<QueryContext> getGeneContextOptional() {
+    val result = new QueryContext();
+    result.setType(GENE_CENTRIC);
+
+    return Optional.of(result);
+  }
+
+  private Optional<QueryContext> getMutationContextOptional() {
+    val result = new QueryContext();
+    result.setType(MUTATION_CENTRIC);
+
+    return Optional.of(result);
+  }
+
+  private static void assertGeneSetId(ExpressionNode orNode, AbstractTypeModel typeModel, String value) {
+    assertThat(orNode.childrenCount()).isEqualTo(5);
+
+    assertTermsNode(orNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
+    assertTermsNode(orNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
+    assertTermsNode(orNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
+    assertTermsNode(orNode.getChild(3), typeModel.getField("gene.pathwayId"), value);
+    assertTermsNode(orNode.getChild(4), typeModel.getField("gene.curatedSetId"), value);
+  }
+
+  private static void assertGoTerm(OrNode orNode, AbstractTypeModel typeModel, String value) {
+    assertThat(orNode.childrenCount()).isEqualTo(3);
+
+    assertTermsNode(orNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
+    assertTermsNode(orNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
+    assertTermsNode(orNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
   }
 
 }

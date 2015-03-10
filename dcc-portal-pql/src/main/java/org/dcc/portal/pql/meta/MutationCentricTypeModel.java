@@ -24,6 +24,7 @@ import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
+import java.util.Map;
 
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
@@ -31,11 +32,12 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class MutationCentricTypeModel extends AbstractTypeModel {
 
   public MutationCentricTypeModel() {
-    super(defineFields());
+    super(defineFields(), defineInternalAliases());
   }
 
   @Override
@@ -61,6 +63,10 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         .add(arrayOfStrings("consequence_type", "consequenceType"))
         .add(arrayOfStrings("functional_impact_prediction_summary", "functionalImpact"))
         .add(defineSummary())
+
+        // Fake fields for GeneSetFilterVisitor
+        .add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID))
+        .add(string(GENE_SET_ID, GENE_SET_ID))
         .build();
   }
 
@@ -80,7 +86,14 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
             object("consequence", string("consequence_type", "consequenceTypeNested")),
             object("gene",
                 string("_gene_id", "gene.id"),
-                string("biotype", "gene.type")
+                string("biotype", "gene.type"),
+                // FIXME: check if the following fields are nested
+                arrayOfStrings("pathway", "gene.pathwayId"),
+                arrayOfStrings("curated_set", "gene.curatedSetId"),
+                object("go_term", "gene.GoTerm",
+                    arrayOfStrings("biological_process"),
+                    arrayOfStrings("cellular_component"),
+                    arrayOfStrings("molecular_function"))
             )));
   }
 
@@ -114,6 +127,14 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
             string("_age_at_diagnosis_group", "donor.ageAtDiagnosisGroup"),
             arrayOfStrings("_available_data_type", "donor.availableDataTypes"),
             arrayOfStrings("experimental_analysis_performed", "donor.analysisTypes")));
+  }
+
+  private static Map<String, String> defineInternalAliases() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(BIOLOGICAL_PROCESS, "transcript.gene.go_term.biological_process")
+        .put(CELLULAR_COMPONENT, "transcript.gene.go_term.cellular_component")
+        .put(MOLECULAR_FUNCTION, "transcript.gene.go_term.molecular_function")
+        .build();
   }
 
 }

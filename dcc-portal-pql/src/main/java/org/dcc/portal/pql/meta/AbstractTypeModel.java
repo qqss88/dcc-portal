@@ -41,14 +41,28 @@ import com.google.common.collect.Maps;
 @Slf4j
 public abstract class AbstractTypeModel {
 
+  /**
+   * Following public constants used to resolve the special cases in the API.
+   */
+  public static final String MOLECULAR_FUNCTION = "go_term.molecular_function";
+  public static final String BIOLOGICAL_PROCESS = "go_term.biological_process";
+  public static final String CELLULAR_COMPONENT = "go_term.cellular_component";
+
+  public static final String GENE_PATHWAY_ID = "gene.pathwayId";
+  public static final String GENE_SET_ID = "gene.geneSetId";
+  public static final String GENE_GO_TERM_ID = "gene.goTermId";
+  public static final String GENE_CURATED_SET_ID = "gene.curatedSetId";
+
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
+  protected final Map<String, String> fieldsByInternalAlias;
 
-  public AbstractTypeModel(List<? extends FieldModel> fields) {
+  public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases) {
     fieldsByFullPath = initFieldsByFullPath(fields);
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
     fieldsByAlias = initFieldsByAlias(fields);
     log.debug("FieldsByAlias Map: {}", fieldsByAlias);
+    this.fieldsByInternalAlias = internalAliases;
   }
 
   public abstract String getType();
@@ -135,6 +149,19 @@ public abstract class AbstractTypeModel {
     }
 
     return alias;
+  }
+
+  /**
+   * Returns fully qualified name by an internal alias.
+   * @throws NoSuchElementException if there is a field with such an alias.
+   */
+  public final String getInternalField(@NonNull String internalAlias) {
+    val result = fieldsByInternalAlias.get(internalAlias);
+    if (result == null) {
+      throw new SemanticException("Field %s is not defined in the type model", internalAlias);
+    }
+
+    return result;
   }
 
   @Override

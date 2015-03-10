@@ -24,6 +24,7 @@ import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.val;
 
@@ -33,11 +34,13 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class GeneCentricTypeModel extends AbstractTypeModel {
 
   public GeneCentricTypeModel() {
-    super(defineFields());
+    super(defineFields(), defineInternalAliases());
   }
 
   @Override
@@ -59,7 +62,16 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(arrayOfStrings("synonyms", "synonyms"))
         .add(defineExternalDbIds())
         .add(defineSummary())
-        .add(arrayOfStrings("pathways", "pathways"))
+        .add(arrayOfStrings("pathway", ImmutableSet.of("pathways", "pathwayId", "gene.pathwayId")))
+        .add(arrayOfStrings("curated_set", ImmutableSet.of("curatedSetId", "gene.curatedSetId")))
+        .add(object("go_term", "gene.GoTerm",
+            arrayOfStrings("biological_process"),
+            arrayOfStrings("cellular_component"),
+            arrayOfStrings("molecular_function")))
+
+        // Fake fields for GeneSetFilterVisitor
+        .add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID))
+        .add(string(GENE_SET_ID, GENE_SET_ID))
         .build();
   }
 
@@ -123,6 +135,14 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         string("verification_status", "verificationStatus"));
 
     return nestedArrayOfObjects("observation", element);
+  }
+
+  private static Map<String, String> defineInternalAliases() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(BIOLOGICAL_PROCESS, "go_term.biological_process")
+        .put(CELLULAR_COMPONENT, "go_term.cellular_component")
+        .put(MOLECULAR_FUNCTION, "go_term.molecular_function")
+        .build();
   }
 
 }

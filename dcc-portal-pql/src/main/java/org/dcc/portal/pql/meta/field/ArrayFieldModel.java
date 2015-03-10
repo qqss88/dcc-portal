@@ -69,6 +69,10 @@ public class ArrayFieldModel extends FieldModel {
     return new ArrayFieldModel(name, alias, EMPTY_STRING_FIELD);
   }
 
+  public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull Set<String> aliases) {
+    return new ArrayFieldModel(name, aliases, EMPTY_STRING_FIELD);
+  }
+
   public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name) {
     return new ArrayFieldModel(name, NESTED, EMPTY_STRING_FIELD);
   }

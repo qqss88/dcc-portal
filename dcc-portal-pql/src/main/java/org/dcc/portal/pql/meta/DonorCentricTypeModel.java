@@ -27,6 +27,7 @@ import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.val;
 
@@ -36,12 +37,13 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 public class DonorCentricTypeModel extends AbstractTypeModel {
 
   public DonorCentricTypeModel() {
-    super(initFields());
+    super(initFields(), defineInternalAliases());
   }
 
   @Override
@@ -73,8 +75,8 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(initProject());
 
     // This is a fake field to which is resolved by GeneSetFilterVisitor
-    fields.add(string("gene.goTermId", "gene.goTermId"));
-    fields.add(string("gene.geneSetId", "gene.geneSetId"));
+    fields.add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID));
+    fields.add(string(GENE_SET_ID, GENE_SET_ID));
 
     return fields.build();
   }
@@ -126,7 +128,9 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         string("symbol", "gene.symbol"),
         nestedArrayOfStrings("pathway", ImmutableSet.of("gene.pathways", "gene.pathwayId")),
         arrayOfStrings("curated_set", "gene.curatedSetId"),
-        object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component"),
+        object("go_term", "gene.GoTerm",
+            arrayOfStrings("biological_process"),
+            arrayOfStrings("cellular_component"),
             arrayOfStrings("molecular_function")),
         nestedArrayOfObjects("ssm", initSmm()));
 
@@ -184,6 +188,14 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         string("_project_id", "projectId"),
         string("primary_site", "primarySite"),
         string("project_name", "projectName"));
+  }
+
+  private static Map<String, String> defineInternalAliases() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(BIOLOGICAL_PROCESS, "gene.go_term.biological_process")
+        .put(CELLULAR_COMPONENT, "gene.go_term.cellular_component")
+        .put(MOLECULAR_FUNCTION, "gene.go_term.molecular_function")
+        .build();
   }
 
 }

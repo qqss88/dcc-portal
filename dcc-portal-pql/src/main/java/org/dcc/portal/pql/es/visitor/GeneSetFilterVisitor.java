@@ -18,6 +18,13 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_CURATED_SET_ID;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_GO_TERM_ID;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_PATHWAY_ID;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_SET_ID;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.MOLECULAR_FUNCTION;
 
 import java.util.Optional;
 
@@ -46,14 +53,6 @@ import org.dcc.portal.pql.qe.QueryContext;
  */
 @Slf4j
 public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
-
-  private static final String GENE_PATHWAY = "gene.pathway";
-  private static final String GENE_CURATED_SET_ID = "gene.curated_set";
-  private static final String GENE_SET_ID = "gene.geneSetId";
-  private static final String MOLECULAR_FUNCTION = "gene.go_term.molecular_function";
-  private static final String BIOLOGICAL_PROCESS = "gene.go_term.biological_process";
-  private static final String CELLULAR_COMPONENT = "gene.go_term.cellular_component";
-  private static final String GENE_GO_TERM_ID = "gene.goTermId";
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
@@ -133,35 +132,45 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    val orNode = new OrNode(createGoTermChildren(termsNode));
-    orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode));
+    val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
+    orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode, typeModel));
+    val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
 
-    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
+    if (typeModel.isNested(fullyQualifiedName)) {
+      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
+    }
 
-    return Optional.of(result);
+    return Optional.of(orNode);
   }
 
-  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode) {
-    val pathwayTermsNode = new TermsNode(GENE_PATHWAY, termsNode.getChildrenArray());
-    val curatedSetIdTermsNode = new TermsNode(GENE_CURATED_SET_ID, termsNode.getChildrenArray());
+  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode, AbstractTypeModel typeModel) {
+    val pathwayTermsNode = new TermsNode(typeModel.getField(GENE_PATHWAY_ID), termsNode.getChildrenArray());
+    val curatedSetIdTermsNode = new TermsNode(typeModel.getField(GENE_CURATED_SET_ID), termsNode.getChildrenArray());
 
     return new ExpressionNode[] { pathwayTermsNode, curatedSetIdTermsNode };
   }
 
-  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    val orNode = new OrNode(createGoTermChildren(termsNode));
-    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
-
-    return Optional.of(result);
+  private static Optional<ExpressionNode> createNestedNodeOptional(String path, ExpressionNode... children) {
+    return Optional.of(new NestedNode(path, children));
   }
 
-  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode) {
+  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+    val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
+    val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
+
+    if (typeModel.isNested(fullyQualifiedName)) {
+      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
+    }
+
+    return Optional.of(orNode);
+  }
+
+  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode, AbstractTypeModel typeModel) {
     ExpressionNode[] children = termsNode.getChildrenArray();
 
     return new ExpressionNode[] {
-        new TermsNode(CELLULAR_COMPONENT, children),
-        new TermsNode(BIOLOGICAL_PROCESS, children),
-        new TermsNode(MOLECULAR_FUNCTION, children) };
+        new TermsNode(typeModel.getInternalField(CELLULAR_COMPONENT), children),
+        new TermsNode(typeModel.getInternalField(BIOLOGICAL_PROCESS), children),
+        new TermsNode(typeModel.getInternalField(MOLECULAR_FUNCTION), children) };
   }
-
 }

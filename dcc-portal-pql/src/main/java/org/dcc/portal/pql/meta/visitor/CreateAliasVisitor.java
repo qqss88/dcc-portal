@@ -72,6 +72,7 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   @Override
   public Map<String, String> visitObjectField(ObjectFieldModel field) {
     val result = new ImmutableMap.Builder<String, String>();
+    result.putAll(getAlias(field));
     for (val child : field.getFields()) {
       result.putAll(prefixFieldName(field.getName(), child.accept(this)));
     }

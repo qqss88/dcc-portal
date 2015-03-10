@@ -15,45 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.meta;
+package org.dcc.portal.pql.meta.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
+public class CreateAliasVistorTest {
 
-@Slf4j
-public class DonorCentricTypeModelTest extends DonorCentricTypeModel {
-
-  DonorCentricTypeModel model = new DonorCentricTypeModel();
+  CreateAliasVisitor visitor = new CreateAliasVisitor();
 
   @Test
-  public void nestedTest() {
-    val nestedFields = Lists.<String> newArrayList();
-    for (val entry : this.fieldsByFullPath.entrySet()) {
-      if (entry.getValue().isNested()) nestedFields.add(entry.getKey());
-    }
-    log.debug("Nested Fields: {}", nestedFields);
+  public void visitObjectFieldTest() {
+    val object = ObjectFieldModel.object("go_term", "gene.GoTerm");
+    val fieldsByAliases = object.accept(visitor);
 
-    assertThat(nestedFields.size()).isEqualTo(5);
-    assertThat(nestedFields).contains("gene");
-    assertThat(nestedFields).contains("gene.pathways");
-    assertThat(nestedFields).contains("gene.ssm");
-    assertThat(nestedFields).contains("gene.ssm.consequence");
-    assertThat(nestedFields).contains("gene.ssm.observation");
-  }
-
-  @Test
-  public void goTermTest() {
-    assertThat(this.fieldsByAlias.get("gene.GoTerm")).isEqualTo("gene.go_term");
-  }
-
-  @Test
-  public void getInternalAliasTest() {
-    assertThat(getInternalField(BIOLOGICAL_PROCESS)).isEqualTo("gene.go_term.biological_process");
+    assertThat(fieldsByAliases).isNotEmpty();
+    assertThat(fieldsByAliases.get("gene.GoTerm")).isEqualTo("go_term");
   }
 
 }
