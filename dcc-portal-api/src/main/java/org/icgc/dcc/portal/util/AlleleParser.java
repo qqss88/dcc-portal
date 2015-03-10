@@ -34,10 +34,10 @@ public class AlleleParser {
       return new AlleleMutation(NO_ALLELE_SYMBOL, allele, allele);
     }
 
-    return generateNormalMutation(allele);
+    return parseNormalMutation(allele);
   }
 
-  private static AlleleMutation generateNormalMutation(String allele) {
+  private static AlleleMutation parseNormalMutation(String allele) {
     String from = allele.substring(0, allele.indexOf(INDEL_SYMBOL));
     String to = allele.substring(allele.indexOf(INDEL_SYMBOL) + 1);
 

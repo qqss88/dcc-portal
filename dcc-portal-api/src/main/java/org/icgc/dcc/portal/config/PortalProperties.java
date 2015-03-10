@@ -278,15 +278,14 @@ public class PortalProperties extends Configuration {
     boolean enabled = false;
 
     String smtpServer = "***REMOVED***";
+    int smtpPort = 25;
 
     @Email
     String senderEmail = "no-reply@oicr.on.ca";
 
     String senderName = "DCC Portal";
 
-    @Email
     String recipientEmail = "***REMOVED***";
-
   }
 
   @Data
@@ -296,6 +295,9 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     String releaseDate;
 
+    @JsonProperty
+    @Min(1)
+    int dataVersion;
   }
 
   @Data
