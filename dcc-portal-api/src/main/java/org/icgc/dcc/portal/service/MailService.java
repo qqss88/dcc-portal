@@ -35,8 +35,10 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,9 +64,12 @@ public class MailService {
   /**
    * Instance variables
    */
-  private InternetAddress emailSender = null;
-  private Collection<InternetAddress> recipients = null;
-  private Properties smtpConfig = null;
+  @Getter(lazy = true)
+  private final InternetAddress emailSender = loadEmailSender();
+  @Getter(lazy = true)
+  private final Collection<InternetAddress> emailRecipients = loadEmailRecipients();
+  @Getter(lazy = true)
+  private final Properties smtpConfig = loadSmtpConfig();
 
   @NonNull
   private final MailProperties config;
@@ -144,49 +149,39 @@ public class MailService {
   /*
    * Helpers to lazily load various settings
    */
-  private Properties getEmailConfig() {
-    if (null == smtpConfig) {
-      val smtpServer = config.getSmtpServer();
-      val smtpPort = config.getSmtpPort();
+  private Properties loadSmtpConfig() {
+    val smtpServer = config.getSmtpServer();
+    val smtpPort = config.getSmtpPort();
 
-      val props = new Properties();
-      props.put(SMTP_CONFIG_KEY_HOST, smtpServer);
-      props.put(SMTP_CONFIG_KEY_PORT, smtpPort);
+    val props = new Properties();
+    props.put(SMTP_CONFIG_KEY_HOST, smtpServer);
+    props.put(SMTP_CONFIG_KEY_PORT, smtpPort);
 
-      smtpConfig = props;
-    }
-    return smtpConfig;
+    return props;
   }
 
-  private Iterable<InternetAddress> getEmailRecipients() {
-    if (null == recipients) {
-      val emailAddressSetting = config.getRecipientEmail();
-      val emailAddresses = parseEmailAddresses(emailAddressSetting);
+  private Collection<InternetAddress> loadEmailRecipients() {
+    val emailAddressSetting = config.getRecipientEmail();
+    val emailAddresses = parseEmailAddresses(emailAddressSetting);
 
-      log.info("Email recipients are: {}.", emailAddresses);
-      checkState(emailAddresses.size() > 0, "Error parsing any recipient email addresses from config: "
-          + emailAddressSetting);
+    log.info("Email recipients are: {}.", emailAddresses);
+    checkState(emailAddresses.size() > 0, "Error parsing any recipient email addresses from config: "
+        + emailAddressSetting);
 
-      recipients = emailAddresses;
-    }
-
-    return recipients;
+    return emailAddresses;
   }
 
-  private InternetAddress getEmailSender() throws UnsupportedEncodingException {
-    if (null == emailSender) {
-      val senderEmail = config.getSenderEmail();
-      val senderName = config.getSenderName();
+  @SneakyThrows
+  private InternetAddress loadEmailSender() {
+    val senderEmail = config.getSenderEmail();
+    val senderName = config.getSenderName();
 
-      emailSender = new InternetAddress(senderEmail, senderName);
-    }
-
-    return emailSender;
+    return new InternetAddress(senderEmail, senderName);
   }
 
   private Message buildEmailMessage(final String subject, final String emailBody)
       throws UnsupportedEncodingException, MessagingException {
-    val message = createMessage(getEmailConfig(), getEmailSender(), getEmailRecipients());
+    val message = createMessage(getSmtpConfig(), getEmailSender(), getEmailRecipients());
 
     message.setSubject(subject);
     message.setText(emailBody);
