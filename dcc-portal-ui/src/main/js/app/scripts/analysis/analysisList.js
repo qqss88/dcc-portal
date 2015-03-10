@@ -62,6 +62,8 @@
         return 'Set Operations';
       } else if (type === 'enrichment') {
         return 'Enrichment Analysis';
+      } else if (type === 'phenotype') {
+        return 'Phenotype Analysis';
       } else {
         return '???';
       }

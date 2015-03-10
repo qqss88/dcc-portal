@@ -104,7 +104,6 @@
       });
     }
 
-
     function init() {
       $timeout.cancel(pollTimeout);
       $scope.error = null;
@@ -135,6 +134,17 @@
         wait(id, type);
 
       }, function() {
+        // FIXME: test only
+        AnalysisService.addAnalysis({
+          id: 'test',
+          type: type
+        }, type);
+        $scope.analysisResult = {
+          state: 'FINISHED'
+        };
+        return;
+        // end test
+
         $scope.error = true;
       });
     }

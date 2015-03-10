@@ -195,7 +195,7 @@
         //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis/set">Set Analysis</a>', 4000, 'trustedHtml');
       });
 
       return promise;

@@ -374,6 +374,168 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
   };
 });
 
+angular.module('highcharts.directives').directive('groupedBar', function ($location) {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      items: '='
+    },
+    template: '<div id="container" style="margin: 0 auto">not working</div>',
+    link: function ($scope, $element, $attrs) {
+      var c, renderChart, chartsDefaults;
+
+      renderChart = function (settings) {
+        if (c) {
+          c.destroy();
+        }
+        c = new Highcharts.Chart(settings);
+      };
+
+      chartsDefaults = {
+        credits: {enabled: false},
+        chart: {
+          renderTo: $element[0],
+          type: 'column',
+          height: $attrs.height || null,
+          width: $attrs.width || null
+        },
+        title: {
+          text: $attrs.heading || '',
+          margin: 25,
+          style: {
+            fontSize: '1.25rem'
+          }
+        },
+        xAxis: {
+          labels: {
+            rotation: -45,
+            align: 'right',
+            x: 10,
+            formatter: function () {
+              if (this.value.length > 15) {
+                return this.value.substring(0, 15) + '...';
+              } else {
+                return this.value;
+              }
+            }
+          },
+          categories: angular.isDefined($scope.items) ? $scope.items.categories : []
+        },
+        tooltip: {
+          enabled: false
+        },
+        legend: {
+          enabled: false
+        },
+        yAxis: {
+          //allowDecimals:false,
+          min: 0,
+          showFirstLabel: true,
+          showLastLabel: true,
+          title: {
+            text: $attrs.ylabel,
+            style: {
+              color: 'hsl(0, 0%, 60%)',
+              fontSize: '0.75rem',
+              fontWeight: '300'
+            },
+            margin: 5
+          },
+          labels: {
+            enabled: true,
+            formatter: function () {
+              if ($attrs.format === 'percentage') {
+                return this.value * 100;
+              }
+              return this.value;
+            }
+          }
+        },
+        series: angular.isDefined($scope.items) ? $scope.items.series : [],
+        plotOptions: {
+          column: {
+            pointPadding: 0.10,
+            borderWidth: 0,
+            events: {
+              click: function (e) {
+                if (e.point.link) {
+                  $location.path(e.point.link);
+                  $scope.$apply();
+                }
+              }
+            }
+          },
+          series: {
+            stickyTracking : true,
+            point: {
+              events: {
+                mouseOver: function (event) {
+                  var getLabel = function () {
+                    var num;
+                    if ($attrs.format && $attrs.format === 'percentage') {
+                      num = Number(event.target.y * 100).toFixed(2);
+                    } else {
+                      num = event.target.y;
+                    }
+
+                    return '<div>' +
+                           '<strong>' + event.target.category + '</strong><br/>' +
+                           num + ' ' + $attrs.ylabel +
+                           '</div>';
+                  };
+                  $scope.$emit('tooltip::show', {
+                    element: angular.element(this),
+                    placement:'right',
+                    text: getLabel(),
+                    sticky:true
+                  });
+                },
+                mouseOut: function () {
+                  $scope.$emit('tooltip::hide');
+                }
+              }
+            }
+          }
+        }
+      };
+
+      $scope.$watch('items', function (newValue) {
+        var deepCopy, newSettings;
+
+        if (!newValue) {
+          return;
+        }
+        // We need deep copy in order to NOT override original chart object.
+        // This allows us to override chart data member and still the keep
+        // our original renderTo will be the same
+        deepCopy = true;
+        newSettings = {};
+        jQuery.extend(deepCopy, newSettings, chartsDefaults);
+        newSettings.xAxis.categories = newValue.x;
+
+        if (!$attrs.format || $attrs.format !== 'percentage') {
+          if (newSettings.yAxis) {
+            newSettings.yAxis.allowDecimals = false;
+          }
+        }
+
+        newSettings.series = newValue.series;
+        newSettings.xAxis.categories = newValue.categories;
+        renderChart(newSettings);
+      }, true);
+
+      renderChart(chartsDefaults);
+
+      $scope.$on('$destroy', function () {
+        c.destroy();
+      });
+    }
+  };
+});
+
+
+
 angular.module('highcharts.directives').directive('bar', function ($location) {
   return {
     restrict: 'E',

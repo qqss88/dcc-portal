@@ -54,6 +54,9 @@
 
     _this.launchPhenotype = function(setIds) {
       console.log('launching phenotype analysis with', setIds);
+
+      // FIXME: Stub
+      $location.path('analysis/phenotype/test');
     };
 
 

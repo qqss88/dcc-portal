@@ -1,5 +1,5 @@
 <section>
-    <div style="float:left; width:20rem; margin-right:2rem" data-ng-controller="AnalysisListController as ListController">
+    <div style="float:left; width:19rem; margin-right:2rem" data-ng-controller="AnalysisListController as ListController">
 
         <div>
             <span class="t_button" data-ng-click="ListController.newAnalysis()" data-ng-disabled="!analysisId"><i class="icon-plus"></i>Create New</span>
@@ -38,7 +38,7 @@
     </div>
     
 
-    <div class="wide">
+    <div class="wide" style="width:73%">
         <div data-ng-if="!analysisId">
             <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>
         </div>
@@ -54,6 +54,13 @@
                     <set-operation data-item="analysisResult"></set-operation>
                 </div>
             </div>
+            <div data-ng-if="analysisType === 'phenotype'">
+                <div data-ng-if="!error">
+                    <phenotype-result data-item="analysisResult"></phenotype-result>
+                </div>
+            </div>
+
+
             <div class="clearfix"></div>
     
             <div data-ng-if="error" class="alert-error">

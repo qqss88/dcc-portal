@@ -3,8 +3,7 @@
 
   var module = angular.module('icgc.analysis.controllers');
 
-  module.controller('SavedSetController',
-    function($scope, $window, $timeout, $location, $modal, RestangularNoCache, SetService) {
+  module.controller('SavedSetController', function($scope, $window, $timeout, $modal, SetService) {
 
     var _this = this;
     var syncSetTimeout;
@@ -17,16 +16,6 @@
 
     // Selected sets
     _this.selectedSets = [];
-    /*
-    _this.addSelection = function(set) {
-      _this.selectedSets.push(set);
-    };
-    _this.removeSelection = function(set) {
-      _.remove(_this.selectedSets, function(s) {
-        return s.id === set.id;
-      });
-    };
-    */
 
     _this.update = function() {
       _this.selectedSets = [];
@@ -64,7 +53,7 @@
     };
 
     _this.removeLists = function() {
-      var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
+      var confirmRemove = $window.confirm('Are you sure you want to remove selected sets?');
       if (!confirmRemove || confirmRemove === false) {
         return;
       }

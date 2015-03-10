@@ -1,0 +1,162 @@
+<h3>Phenotype Analysis
+    <span style="font-size:1rem" class="pull-right" data-ng-if="!isDeprecated">
+        <share-button></share-button>
+    </span>
+</h3>
+<div data-ng-if="isDeprecated" class="alert-error">
+    <i class="icon-attention"></i>This analysis is deprecated. This analysis was created against an old version of the data and may no longer be valid. Please remove or recreate it again.
+</div>
+<div data-ng-if="item && item.state === 'FINISHED'" data-disable-events="isDeprecated">
+    <div>Your selected donor sets</div>
+    <div class="wide">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Set name</th>
+                    <th># of items</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Blah blah</th>
+                    <td>1000</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="clearfix"></div>
+
+    <br>
+    <div>Gender comparision</div>
+    <div class="half">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th colspan="2">Set name #1</th>
+                    <th colspan="2">Set name #2</th>
+                    <th colspan="2">Set name #3</th>
+                </tr>
+                <tr>
+                    <th>Gender</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Male</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <td>Female</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    <div class="third omega">
+        <grouped-bar data-items="testChart" ylabel="test label" height="200"></grouped-bar>
+    </div>
+    <div class="clearfix"></div>
+
+
+    <br>
+    <div>Vital status comparision</div>
+    <div class="half">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th colspan="2">Set name #1</th>
+                    <th colspan="2">Set name #2</th>
+                    <th colspan="2">Set name #3</th>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>X</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="third omega">
+        <grouped-bar data-items="testChart" ylabel="test label" height="200"></grouped-bar>
+    </div>
+    <div class="clearfix"></div>
+
+
+    <br>
+    <div>Age at diagnosis comparison</div>
+    <div class="half">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th colspan="2">Set name #1</th>
+                    <th colspan="2">Set name #2</th>
+                    <th colspan="2">Set name #3</th>
+                </tr>
+                <tr>
+                    <th>Age</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                    <th># of items</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>90 to 99</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>10</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="half omega">
+        <grouped-bar data-items="testChart2" ylabel="test label" height="200"></grouped-bar>
+    </div>
+    <div class="clearfix"></div>
+
+
+
+</div>
+
+

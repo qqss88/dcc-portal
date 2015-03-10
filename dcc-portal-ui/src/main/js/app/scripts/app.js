@@ -66,6 +66,7 @@
     'icgc.enrichment',
     'icgc.sets',
     'icgc.analysis',
+    'icgc.phenotype',
     'icgc.beacon',
     'icgc.downloader',
 
@@ -223,11 +224,11 @@
     $rootScope.$on('$locationChangeSuccess', function (newVal, oldVal) {
       // console.log('rootscope location change success', oldVal, newVal);
       // console.log('modal stack', $modalStack.getTop());
-      
-      if (oldVal !== newVal && $modalStack.getTop()) { 
+
+      if (oldVal !== newVal && $modalStack.getTop()) {
         $modalStack.dismiss($modalStack.getTop().key);
       }
-      
+
     });
 
   });
