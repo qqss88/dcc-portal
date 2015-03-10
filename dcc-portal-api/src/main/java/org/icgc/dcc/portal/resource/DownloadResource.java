@@ -512,7 +512,16 @@ public class DownloadResource {
     Predicate<File> predicate =
         (isLogin ? new LoginUserAccessiblePredicate() : new EveryoneAccessiblePredicate());
 
-    if (fs.exists(downloadFile) && fs.isFile(downloadFile) && predicate.apply(downloadFile)) {
+    boolean hasValidPermission = false;
+    try {
+      if (fs.isFile(downloadFile) && predicate.apply(downloadFile)) {
+        hasValidPermission = true;
+      }
+    } catch (IOException e) {
+      log.error("Permission Denied", e);
+    }
+
+    if (hasValidPermission) {
       long contentLength = fs.getSize(downloadFile);
       archiveStream = archiveStream(downloadFile);
       rb.header(CONTENT_LENGTH, contentLength);
