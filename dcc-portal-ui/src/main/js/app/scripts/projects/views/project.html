@@ -335,7 +335,7 @@
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
                             </a>/
-                            <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]}},"availableDataTypes":{"is":["ssm"]}}}'>
+                            <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]},"availableDataTypes":{"is":["ssm"]}}}'>
                                 {{p.countTotal | number}}
                             </a>
                             <em>({{p.percentage * 100 | number:2}}%)</em>
