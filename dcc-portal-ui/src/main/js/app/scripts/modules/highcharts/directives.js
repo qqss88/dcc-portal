@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -166,15 +166,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
             }
           },
           tooltip: {
-            shared: true,
             enabled: false,
-            formatter: function () {
-              var name = this.point.term ? $filter('trans')(this.point.name, true) : 'No Data';
-              return '<div class="t_hc_tooltip">' +
-                   '<strong>' + name + '</strong><br/>' +
-                   Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
-                   '</div>';
-            }
           },
           series: [
             {
@@ -299,19 +291,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           }
         },
         tooltip: {
-          shared: true,
           enabled: false,
-          useHTML: true,
-          borderWidth: 0,
-          borderRadius: 0,
-          backgroundColor: 'none',
-          shadow: false,
-          formatter: function () {
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + $filter('define')(this.point.name) + '</strong><br>' +
-                   Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
-                   '</div>';
-          }
         },
         series: [
           {
@@ -400,6 +380,8 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
           height: $attrs.height || null,
           width: $attrs.width || null
         },
+        /* D3 cat 10 */
+        colors: ['#1f77b4', '#ff7f0e', '#2ca02c'],
         title: {
           text: $attrs.heading || '',
           margin: 25,
@@ -429,7 +411,6 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
           enabled: false
         },
         yAxis: {
-          //allowDecimals:false,
           min: 0,
           showFirstLabel: true,
           showLastLabel: true,
@@ -480,7 +461,7 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
                     }
 
                     return '<div>' +
-                           '<strong>' + event.target.category + '</strong><br/>' +
+                           '<strong>' + event.target.category + ' - ' + event.target.series.name + '</strong><br>' +
                            num + ' ' + $attrs.ylabel +
                            '</div>';
                   };
@@ -591,26 +572,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
           categories: angular.isDefined($scope.items) ? $scope.items.x : []
         },
         tooltip: {
-          shared: true,
           enabled: false,
-          useHTML: true,
-          borderWidth: 0,
-          borderRadius: 0,
-          backgroundColor: 'none',
-          shadow: false,
-          formatter: function () {
-            var num;
-            if ($attrs.format && $attrs.format === 'percentage') {
-              num = Number(this.y * 100).toFixed(2);
-            } else {
-              num = this.y;
-            }
-
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + this.x + '</strong><br/>' +
-                   num + ' ' + $attrs.ylabel +
-                   '</div>';
-          }
         },
         yAxis: {
           //allowDecimals:false,
