@@ -17,11 +17,15 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_STRING_FIELD;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NESTED;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
+
+import java.util.Set;
+
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -36,16 +40,24 @@ public class ArrayFieldModel extends FieldModel {
     this(name, EMPTY_UI_ALIAS, element);
   }
 
-  private ArrayFieldModel(String name, String uiAlias, FieldModel element) {
-    this(name, uiAlias, NOT_NESTED, element);
+  private ArrayFieldModel(String name, String alias, FieldModel element) {
+    this(name, singleton(alias), element);
+  }
+
+  private ArrayFieldModel(String name, Set<String> aliases, FieldModel element) {
+    this(name, aliases, NOT_NESTED, element);
   }
 
   private ArrayFieldModel(String name, boolean nested, FieldModel element) {
     this(name, EMPTY_UI_ALIAS, nested, element);
   }
 
-  private ArrayFieldModel(String name, String uiAlias, boolean nested, FieldModel element) {
-    super(name, uiAlias, ARRAY, nested);
+  private ArrayFieldModel(String name, String alias, boolean nested, FieldModel element) {
+    this(name, singleton(alias), nested, element);
+  }
+
+  private ArrayFieldModel(String name, Set<String> aliases, boolean nested, FieldModel element) {
+    super(name, aliases, ARRAY, nested);
     this.element = element;
   }
 
@@ -62,6 +74,10 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull String alias) {
+    return new ArrayFieldModel(name, alias, NESTED, EMPTY_STRING_FIELD);
+  }
+
+  public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull Set<String> alias) {
     return new ArrayFieldModel(name, alias, NESTED, EMPTY_STRING_FIELD);
   }
 

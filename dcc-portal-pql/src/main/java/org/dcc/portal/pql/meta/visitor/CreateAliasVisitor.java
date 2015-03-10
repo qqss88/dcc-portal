@@ -17,8 +17,6 @@
  */
 package org.dcc.portal.pql.meta.visitor;
 
-import static java.util.Collections.singletonMap;
-import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
 import static org.dcc.portal.pql.meta.Constants.NO_NAME;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
@@ -87,8 +85,16 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   }
 
   private static Map<String, String> getAlias(FieldModel field) {
-    return field.getAlias().equals(EMPTY_UI_ALIAS) ?
-        Collections.<String, String> emptyMap() : singletonMap(field.getAlias(), field.getName());
+    if (field.getAlias().isEmpty()) {
+      return Collections.<String, String> emptyMap();
+    }
+
+    val result = new ImmutableMap.Builder<String, String>();
+    for (val alias : field.getAlias()) {
+      result.put(alias, field.getName());
+    }
+
+    return result.build();
   }
 
   private static Map<String, String> prefixFieldName(String name, Map<String, String> fieldNameByAliasMap) {

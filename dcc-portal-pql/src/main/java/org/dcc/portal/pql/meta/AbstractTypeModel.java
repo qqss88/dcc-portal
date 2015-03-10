@@ -117,8 +117,7 @@ public abstract class AbstractTypeModel {
     throw new IllegalArgumentException("Can't get nested path for a non-nested field");
   }
 
-  @Deprecated
-  public final String getFullName(String path) {
+  private String getFullName(String path) {
     val uiAlias = fieldsByAlias.get(path);
 
     return uiAlias == null ? path : uiAlias;

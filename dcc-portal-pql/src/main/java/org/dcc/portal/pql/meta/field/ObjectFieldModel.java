@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NESTED;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
@@ -24,6 +25,7 @@ import static org.dcc.portal.pql.meta.Constants.NO_NAME;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
 import java.util.List;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -42,7 +44,11 @@ public class ObjectFieldModel extends FieldModel {
     this(name, EMPTY_UI_ALIAS, fields);
   }
 
-  private ObjectFieldModel(String name, String uiAlias, List<? extends FieldModel> fields) {
+  private ObjectFieldModel(String name, String alias, List<? extends FieldModel> fields) {
+    this(name, alias, NOT_NESTED, fields);
+  }
+
+  private ObjectFieldModel(String name, Set<String> uiAlias, List<? extends FieldModel> fields) {
     this(name, uiAlias, NOT_NESTED, fields);
   }
 
@@ -51,6 +57,11 @@ public class ObjectFieldModel extends FieldModel {
   }
 
   private ObjectFieldModel(String name, String uiAlias, boolean nested, List<? extends FieldModel> fields) {
+    super(name, singleton(uiAlias), OBJECT, nested);
+    this.fields = fields;
+  }
+
+  private ObjectFieldModel(String name, Set<String> uiAlias, boolean nested, List<? extends FieldModel> fields) {
     super(name, uiAlias, OBJECT, nested);
     this.fields = fields;
   }

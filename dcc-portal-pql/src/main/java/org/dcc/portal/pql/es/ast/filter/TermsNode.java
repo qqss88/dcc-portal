@@ -15,47 +15,32 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
-
-import static com.google.common.base.Preconditions.checkState;
+package org.dcc.portal.pql.es.ast.filter;
 
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
-import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class TermNode extends ExpressionNode {
+public class TermsNode extends ExpressionNode {
 
   @NonNull
-  TerminalNode nameNode;
+  String field;
 
-  @NonNull
-  TerminalNode valueNode;
-
-  public TermNode(@NonNull TerminalNode name, @NonNull TerminalNode value) {
-    super(new ExpressionNode[] { name, value });
-    this.nameNode = name;
-    this.valueNode = value;
-  }
-
-  public TermNode(@NonNull String name, @NonNull Object value) {
-    checkState(!name.isEmpty());
-    val nameNode = new TerminalNode(name);
-    val valueNode = new TerminalNode(value);
-    super.addChildren(nameNode, valueNode);
-    this.nameNode = nameNode;
-    this.valueNode = valueNode;
+  public TermsNode(String field, ExpressionNode... children) {
+    super(children);
+    this.field = field;
   }
 
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitTerm(this, context);
+    return visitor.visitTerms(this, context);
   }
 
 }

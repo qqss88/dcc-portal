@@ -17,9 +17,13 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.BOOLEAN;
+
+import java.util.Set;
+
 import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
@@ -34,11 +38,19 @@ public class BooleanFieldModel extends FieldModel {
     this(name, alias, NOT_NESTED);
   }
 
+  private BooleanFieldModel(String name, Set<String> alias) {
+    this(name, alias, NOT_NESTED);
+  }
+
   private BooleanFieldModel(String name, boolean nested) {
     this(name, EMPTY_UI_ALIAS, nested);
   }
 
   private BooleanFieldModel(String name, String alias, boolean nested) {
+    super(name, singleton(alias), BOOLEAN, nested);
+  }
+
+  private BooleanFieldModel(String name, Set<String> alias, boolean nested) {
     super(name, alias, BOOLEAN, nested);
   }
 

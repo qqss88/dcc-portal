@@ -17,9 +17,13 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
+
+import java.util.Set;
+
 import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
@@ -30,16 +34,24 @@ public class LongFieldModel extends FieldModel {
     this(name, EMPTY_UI_ALIAS);
   }
 
-  private LongFieldModel(String name, String uiAlias) {
-    this(name, uiAlias, NOT_NESTED);
+  private LongFieldModel(String name, String alias) {
+    this(name, alias, NOT_NESTED);
+  }
+
+  private LongFieldModel(String name, Set<String> aliases) {
+    this(name, aliases, NOT_NESTED);
   }
 
   private LongFieldModel(String name, boolean nested) {
     this(name, EMPTY_UI_ALIAS, nested);
   }
 
-  private LongFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, LONG, nested);
+  private LongFieldModel(String name, String alias, boolean nested) {
+    this(name, singleton(alias), nested);
+  }
+
+  private LongFieldModel(String name, Set<String> aliases, boolean nested) {
+    super(name, aliases, LONG, nested);
   }
 
   public static LongFieldModel long_(@NonNull String name) {

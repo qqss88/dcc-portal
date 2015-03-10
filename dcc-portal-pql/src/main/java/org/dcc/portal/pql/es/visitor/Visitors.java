@@ -57,6 +57,12 @@ public class Visitors {
 
   private static final EmptyNodesCleanerVisitor EMPTY_NODES_CLEANER_VISITOR = new EmptyNodesCleanerVisitor();
 
+  private static final GeneSetFilterVisitor GENE_SET_FILTER_VISITOR = new GeneSetFilterVisitor();
+
+  public static GeneSetFilterVisitor createGeneSetFilterVisitor() {
+    return GENE_SET_FILTER_VISITOR;
+  }
+
   public static EmptyNodesCleanerVisitor createEmptyNodesCleanerVisitor() {
     return EMPTY_NODES_CLEANER_VISITOR;
   }

@@ -36,6 +36,7 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class DonorCentricTypeModel extends AbstractTypeModel {
 
@@ -70,6 +71,10 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(string("donor_vital_status", "vitalStatus"));
     fields.add(initGene());
     fields.add(initProject());
+
+    // This is a fake field to which is resolved by GeneSetFilterVisitor
+    fields.add(string("gene.goTermId", "gene.goTermId"));
+    fields.add(string("gene.geneSetId", "gene.geneSetId"));
 
     return fields.build();
   }
@@ -119,8 +124,10 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         long_("end", "gene.end"),
         long_("start", "gene.start"),
         string("symbol", "gene.symbol"),
-        nestedArrayOfStrings("pathways", "gene.pathways"),
-        object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component")),
+        nestedArrayOfStrings("pathway", ImmutableSet.of("gene.pathways", "gene.pathwayId")),
+        arrayOfStrings("curated_set", "gene.curatedSetId"),
+        object("go_term", arrayOfStrings("biological_process"), arrayOfStrings("cellular_component"),
+            arrayOfStrings("molecular_function")),
         nestedArrayOfObjects("ssm", initSmm()));
 
     return nestedArrayOfObjects("gene", element);

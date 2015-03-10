@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -27,7 +29,7 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public abstract class FieldModel {
 
   String name;
-  String alias;
+  Set<String> alias;
   FieldType type;
   boolean nested;
 

@@ -29,11 +29,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.ast.TermNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

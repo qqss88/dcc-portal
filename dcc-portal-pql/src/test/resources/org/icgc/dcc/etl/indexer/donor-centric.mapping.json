@@ -34,7 +34,7 @@
              }
 	        }           
           },
-          "pathways":{
+          "pathway":{
             "type":"nested"
           }          
         }

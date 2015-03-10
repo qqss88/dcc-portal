@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.utils;
 
 import static org.dcc.portal.pql.es.visitor.Visitors.createAggregationsResolverVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createEmptyNodesCleanerVisitor;
+import static org.dcc.portal.pql.es.visitor.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
 
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
+import org.dcc.portal.pql.es.visitor.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -45,9 +47,11 @@ public class EsAstTransformator {
   private final EmptyNodesCleanerVisitor emptyNodesCleaner = createEmptyNodesCleanerVisitor();
   private final AggregationsResolverVisitor facetsResolver = createAggregationsResolverVisitor();
   private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
+  private final GeneSetFilterVisitor geneSetFilterVisitor = createGeneSetFilterVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
+    esAst = resoveSpecialCases(esAst, context);
     esAst = resolveFacets(esAst);
     esAst = optimize(esAst);
     esAst = score(esAst, context);
@@ -58,6 +62,10 @@ public class EsAstTransformator {
 
   private ExpressionNode score(ExpressionNode esAst, QueryContext context) {
     return esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
+  }
+
+  private ExpressionNode resoveSpecialCases(ExpressionNode esAst, QueryContext context) {
+    return esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
   }
 
   private ExpressionNode optimize(ExpressionNode esAst) {

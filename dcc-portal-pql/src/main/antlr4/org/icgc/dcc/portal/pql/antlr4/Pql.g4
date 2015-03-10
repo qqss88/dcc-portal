@@ -1,4 +1,4 @@
-// Copyright 2014(c) The Ontario Institute for Cancer Research. All rights reserved.
+// Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
 //
 // Description:
 //  Grammar definition for Portal Query Language.
@@ -69,7 +69,7 @@ le
   ;
 
 in
-  : 'in' OPAR ID COMMA value (COMMA value)+ CPAR
+  : 'in' OPAR ID (COMMA value)+ CPAR
   | ID '=' value (COMMA value)+
   ;
 

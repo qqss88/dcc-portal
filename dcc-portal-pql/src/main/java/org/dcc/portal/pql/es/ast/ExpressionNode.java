@@ -63,6 +63,10 @@ public abstract class ExpressionNode {
     return children.size();
   }
 
+  public ExpressionNode[] getChildrenArray() {
+    return children.toArray(new ExpressionNode[childrenCount()]);
+  }
+
   public void addChildren(@NonNull ExpressionNode... children) {
     val childrenList = Lists.newArrayList(children);
     this.children.addAll(childrenList);

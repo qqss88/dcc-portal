@@ -17,9 +17,13 @@
  */
 package org.dcc.portal.pql.meta.field;
 
+import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.DOUBLE;
+
+import java.util.Set;
+
 import lombok.NonNull;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
@@ -30,16 +34,20 @@ public class DoubleFieldModel extends FieldModel {
     this(name, EMPTY_UI_ALIAS);
   }
 
-  private DoubleFieldModel(String name, String uiAlias) {
-    this(name, uiAlias, NOT_NESTED);
+  private DoubleFieldModel(String name, Set<String> aliases) {
+    this(name, aliases, NOT_NESTED);
   }
 
   private DoubleFieldModel(String name, boolean nested) {
     this(name, EMPTY_UI_ALIAS, nested);
   }
 
-  private DoubleFieldModel(String name, String uiAlias, boolean nested) {
-    super(name, uiAlias, DOUBLE, nested);
+  private DoubleFieldModel(String name, String alias, boolean nested) {
+    this(name, singleton(alias), nested);
+  }
+
+  private DoubleFieldModel(String name, Set<String> aliases, boolean nested) {
+    super(name, aliases, DOUBLE, nested);
   }
 
   public static DoubleFieldModel double_(@NonNull String name) {

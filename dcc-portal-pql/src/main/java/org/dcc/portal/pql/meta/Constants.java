@@ -19,9 +19,14 @@ package org.dcc.portal.pql.meta;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
+
+import java.util.Set;
+
 import lombok.NoArgsConstructor;
 
 import org.dcc.portal.pql.meta.field.StringFieldModel;
+
+import com.google.common.collect.ImmutableSet;
 
 @NoArgsConstructor(access = PRIVATE)
 public final class Constants {
@@ -30,7 +35,7 @@ public final class Constants {
   public static final boolean NOT_NESTED = false;
   public static final String NO_NAME = "";
   public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
-  public static final String EMPTY_UI_ALIAS = "";
+  public static final Set<String> EMPTY_UI_ALIAS = ImmutableSet.of();
   public static final String FIELD_SEPARATOR = ".";
 
 }
