@@ -43,6 +43,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
@@ -110,12 +111,22 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   @Override
+  public Optional<ExpressionNode> visitNested(@NonNull NestedNode node, @NonNull Optional<QueryContext> context) {
+    return visitChildren(node, context);
+  }
+
+  @Override
   public Optional<ExpressionNode> visitRange(@NonNull RangeNode node, @NonNull Optional<QueryContext> context) {
     return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitExists(@NonNull ExistsNode node, @NonNull Optional<QueryContext> context) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitTerm(@NonNull TermNode node, @NonNull Optional<QueryContext> context) {
     return Optional.empty();
   }
 
