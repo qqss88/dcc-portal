@@ -66,6 +66,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
@@ -313,6 +314,15 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", aggsNode);
 
     return aggsNode;
+  }
+
+  @Override
+  public ExpressionNode visitNot(@NonNull NotContext nodeContext) {
+    val childNode = nodeContext.filter().accept(this);
+    val notNode = new NotNode(childNode);
+    log.debug("{}", notNode);
+
+    return notNode;
   }
 
   private TerminalNode createNameNode(@NonNull String field) {

@@ -38,6 +38,9 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
+/**
+ * Contains 3 mutations: MU1, MU2, MU3
+ */
 @Slf4j
 public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
@@ -294,6 +297,13 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
         assertThat(bucket.getDocCount()).isEqualTo(3);
       }
     }
+  }
+
+  @Test
+  public void notTest() {
+    val result = executeQuery("not(in(id, 'MU1', 'MU2'))");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU3");
   }
 
   // Location tests

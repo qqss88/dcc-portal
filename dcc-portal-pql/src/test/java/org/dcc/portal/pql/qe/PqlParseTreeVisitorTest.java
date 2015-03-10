@@ -52,6 +52,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
@@ -401,6 +402,23 @@ public class PqlParseTreeVisitorTest {
 
     termsFacetNode = (TermsAggregationNode) facetsNode.getChild(1);
     assertThat(termsFacetNode.getFieldName()).isEqualTo("_donor_id");
+  }
+
+  @Test
+  public void visitNotTest() {
+    val parseTree = createParseTree("not(in(id, 'DO1'))");
+    val notContext = (NotContext) parseTree.getChild(0);
+    val notNode = (NotNode) VISITOR.visitNot(notContext);
+    log.debug("Not node: \n{}", notNode);
+
+    assertThat(notNode.childrenCount()).isEqualTo(1);
+
+    val termsNode = (TermsNode) notNode.getFirstChild();
+    assertThat(termsNode.childrenCount()).isEqualTo(1);
+    assertThat(termsNode.getField()).isEqualTo("_donor_id");
+
+    val terminalNode = (TerminalNode) termsNode.getFirstChild();
+    assertThat(terminalNode.getValue()).isEqualTo("DO1");
   }
 
 }

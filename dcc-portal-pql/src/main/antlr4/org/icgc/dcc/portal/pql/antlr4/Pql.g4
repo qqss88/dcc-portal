@@ -24,6 +24,7 @@ function
 
 filter
   : 'nested' OPAR ID (COMMA filter)+ CPAR   # nested
+  | 'not' OPAR filter CPAR                  # not
   | eq                                      # equal
   | ne                                      # notEqual
   | gt                                      # greaterThan
