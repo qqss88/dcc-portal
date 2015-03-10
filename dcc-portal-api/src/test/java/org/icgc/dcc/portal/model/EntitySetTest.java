@@ -40,6 +40,8 @@ public class EntitySetTest {
   private final static String TIMESTAMP_FIELD_NAME = "timestamp";
   private final static ObjectMapper MAPPER = new ObjectMapper();
 
+  private final static Object NULL_OBJECT = null;
+
   private final static String TEST_JSON_DIRECTORY = "fixtures/model/EntitySetTest/";
   private final static String TEST_JSON_FILE_FOR_VERSION_1 = TEST_JSON_DIRECTORY + "version1.json";
   private final static String TEST_JSON_FILE_FOR_VERSION_2 = TEST_JSON_DIRECTORY + "version2.json";
@@ -47,6 +49,7 @@ public class EntitySetTest {
   @Test
   public void testVersion1() throws JsonProcessingException, IOException {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_1;
+
     val version1 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
     val testObjectId = version1.getId();
     val testObjectState = version1.getState();
@@ -54,19 +57,20 @@ public class EntitySetTest {
     val testObjectName = version1.getName();
     val testObjectDescription = version1.getDescription();
     val testObjectType = version1.getType();
-    final Integer testObjectDataVersion = null;
+    val testObjectDataVersion = (Integer) NULL_OBJECT;
+
     val entitySet =
         new EntitySet(testObjectId, testObjectState, testObjectCount, testObjectName, testObjectDescription,
             testObjectType, testObjectDataVersion);
 
     test(entitySet, expectedJsonFileName);
-
     assertThat(entitySet.getVersion()).isEqualTo(version1.getVersion());
   }
 
   @Test
   public void testVersion2() throws JsonProcessingException, IOException {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_2;
+
     val version2 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
     val testObjectId = version2.getId();
     val testObjectState = version2.getState();
@@ -75,12 +79,12 @@ public class EntitySetTest {
     val testObjectDescription = version2.getDescription();
     val testObjectType = version2.getType();
     val testObjectDataVersion = version2.getVersion();
+
     val entitySet =
         new EntitySet(testObjectId, testObjectState, testObjectCount, testObjectName, testObjectDescription,
             testObjectType, testObjectDataVersion);
 
     test(entitySet, expectedJsonFileName);
-
     assertThat(entitySet.getVersion()).isEqualTo(version2.getVersion());
   }
 

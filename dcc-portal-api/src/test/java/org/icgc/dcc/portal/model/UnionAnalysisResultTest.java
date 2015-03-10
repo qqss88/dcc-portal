@@ -41,6 +41,9 @@ public class UnionAnalysisResultTest {
   private final static String TIMESTAMP_FIELD_NAME = "timestamp";
   private final static ObjectMapper MAPPER = new ObjectMapper();
 
+  private final static Object NULL_OBJECT = null;
+  private final static List<UnionUnitWithCount> NULL_UNION_UNITS = null;
+
   private final static String TEST_JSON_DIRECTORY = "fixtures/model/UnionAnalysisResultTest/";
   private final static String TEST_JSON_FILE_FOR_VERSION_1 = TEST_JSON_DIRECTORY + "version1.json";
   private final static String TEST_JSON_FILE_FOR_VERSION_2 = TEST_JSON_DIRECTORY + "version2.json";
@@ -48,19 +51,19 @@ public class UnionAnalysisResultTest {
   @Test
   public void testVersion1() throws JsonProcessingException, IOException {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_1;
+
     val version1 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
     val testObjectId = version1.getId();
     val testObjectState = version1.getState();
     val testObjectType = version1.getType();
-    final Integer testObjectInputCount = null;
-    final Integer testObjectDataVersion = null;
-    final List<UnionUnitWithCount> testObjectUnionResult = null;
+    val testObjectInputCount = (Integer) NULL_OBJECT;
+    val testObjectDataVersion = (Integer) NULL_OBJECT;
+
     val analysisResult =
         new UnionAnalysisResult(testObjectId, testObjectState, testObjectType, testObjectInputCount,
-            testObjectDataVersion, testObjectUnionResult);
+            testObjectDataVersion, NULL_UNION_UNITS);
 
     test(analysisResult, expectedJsonFileName);
-
     assertThat(analysisResult.getVersion()).isEqualTo(version1.getVersion());
     assertThat(analysisResult.getInputCount()).isEqualTo(version1.getInputCount());
   }
@@ -68,19 +71,19 @@ public class UnionAnalysisResultTest {
   @Test
   public void testVersion2() throws JsonProcessingException, IOException {
     val expectedJsonFileName = TEST_JSON_FILE_FOR_VERSION_2;
+
     val version2 = MAPPER.readValue(jsonFixture(expectedJsonFileName), TEST_TARGET_CLASS);
     val testObjectId = version2.getId();
     val testObjectState = version2.getState();
     val testObjectType = version2.getType();
     val testObjectInputCount = version2.getInputCount();
     val testObjectDataVersion = version2.getVersion();
-    final List<UnionUnitWithCount> testObjectUnionResult = null;
+
     val analysisResult =
         new UnionAnalysisResult(testObjectId, testObjectState, testObjectType, testObjectInputCount,
-            testObjectDataVersion, testObjectUnionResult);
+            testObjectDataVersion, NULL_UNION_UNITS);
 
     test(analysisResult, expectedJsonFileName);
-
     assertThat(analysisResult.getVersion()).isEqualTo(version2.getVersion());
     assertThat(analysisResult.getInputCount()).isEqualTo(version2.getInputCount());
   }
