@@ -74,9 +74,9 @@ public class EnrichmentAnalysisService {
     log.info("Saving analysis '{}'...", analysis.getId());
 
     // Save this as an entity list too in order to capture the subtype information.
-    val newEntityList = EntitySet.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0);
-    newEntityList.setSubtype(SubType.ENRICHMENT);
-    entityListRepository.save(newEntityList);
+    val newEntitySet = EntitySet.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0);
+    newEntitySet.setSubtype(SubType.ENRICHMENT);
+    entityListRepository.save(newEntitySet, newEntitySet.getVersion());
 
     val insertCount = repository.save(analysis);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);

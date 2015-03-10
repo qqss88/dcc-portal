@@ -184,3 +184,5 @@ setOperation:
 # Portal release configuration
 release:
   releaseDate: "Month Day, Year"
+  dataVersion: 2
+

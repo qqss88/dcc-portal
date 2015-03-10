@@ -229,3 +229,4 @@ setOperation:
 
 release:
   releaseDate: "placeholder"
+  dataVersion: 2

@@ -35,6 +35,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 
 import lombok.Cleanup;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -58,7 +59,7 @@ import org.supercsv.io.CsvListWriter;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 /**
- * TODO
+ * A service to facilitate entity set operations.
  */
 @Slf4j
 @Service
@@ -67,22 +68,24 @@ public class EntityListService {
 
   @NonNull
   private final EntityListRepository repository;
-
   @NonNull
   private final UnionAnalyzer analyzer;
-
   @NonNull
   private final PortalProperties properties;
 
-  private DemoEntityList demoEntityList;
+  @Getter(lazy = true)
+  private final int currentDataVersion = setCurrentDataVersion();
+
+  private DemoEntitySet demoEntitySet;
 
   @PostConstruct
   private void init() {
     val config = properties.getSetOperation();
     val uuid = config.getDemoListUuid();
     val filter = config.getDemoListFilterParam();
+    val dataVersion = getCurrentDataVersion();
 
-    demoEntityList = new DemoEntityList(uuid, filter);
+    demoEntitySet = new DemoEntitySet(uuid, filter, dataVersion);
   }
 
   @SneakyThrows
@@ -101,12 +104,12 @@ public class EntityListService {
     for (val s : symbols) {
       isNode.add(s);
     }
-    val result = root.toString();
 
+    val result = root.toString();
     return URLEncoder.encode(result, UTF_8.name());
   }
 
-  private static final class DemoEntityList {
+  private static final class DemoEntitySet {
 
     private static final String NAME = "DEMO gene set";
     private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";
@@ -116,30 +119,29 @@ public class EntityListService {
     private final BaseEntitySet.Type TYPE = BaseEntitySet.Type.GENE;
 
     private final EntitySetDefinition definition;
-    private final EntitySet demoList;
+    private final EntitySet demoSet;
 
-    private DemoEntityList(@NonNull final String uuid, @NonNull final String geneSymbols) {
-      this.demoList = new EntitySet(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE);
+    private DemoEntitySet(@NonNull final String uuid, @NonNull final String geneSymbols, final int dataVersion) {
+      this.demoSet = new EntitySet(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE, dataVersion);
       this.definition =
           new EntitySetDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
               TYPE, 0);
     }
   }
 
-  public EntitySet getEntityList(@NonNull final UUID listId) {
-    val list = repository.find(listId);
+  public EntitySet getEntityList(@NonNull final UUID entitySetId) {
+    val list = repository.find(entitySetId);
 
     if (null == list) {
-      log.error("No list is found for id: '{}'.", listId);
+      log.error("No list is found for id: '{}'.", entitySetId);
     } else {
       log.debug("Got enity list: '{}'.", list);
     }
+
     return list;
   }
 
-  public EntitySet createEntityList(
-      @NonNull final EntitySetDefinition listDefinition) {
-
+  public EntitySet createEntityList(@NonNull final EntitySetDefinition listDefinition) {
     val newList = createAndSaveNewListFrom(listDefinition);
 
     analyzer.materializeList(newList.getId(), listDefinition);
@@ -148,76 +150,85 @@ public class EntityListService {
   }
 
   @Async
-  public void createDemoEntityList() {
+  public void createDemoEntitySet() {
+    val newEntitySet = demoEntitySet.demoSet;
+    val entitySetId = newEntitySet.getId();
 
-    val newList = demoEntityList.demoList;
-    val listId = newList.getId();
-
-    val list = repository.find(listId);
+    val list = repository.find(entitySetId);
     if (null == list) {
       // Create the demo record if it doesn't exist in the relational database.
       log.info(
           "The demo record in the relational store does not exist therefore is now being recreated: '{}'",
-          newList);
-      val insertCount = repository.save(newList);
+          newEntitySet);
+
+      val insertCount = repository.save(newEntitySet, newEntitySet.getVersion());
       checkState(insertCount == 1, "Could not save the demo list - Insert count: %s", insertCount);
     }
 
-    analyzer.materializeList(listId, demoEntityList.definition);
+    analyzer.materializeList(entitySetId, demoEntitySet.definition);
   }
 
-  public EntitySet deriveEntityList(
-      @NonNull final DerivedEntitySetDefinition listDefinition) {
+  public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition) {
+    val newEntitySet =
+        (entitySetDefinition.isTransient()) ? createAndSaveNewListFrom(entitySetDefinition, SubType.TRANSIENT) : createAndSaveNewListFrom(entitySetDefinition);
 
-    val newList =
-        (listDefinition.isTransient()) ? createAndSaveNewListFrom(listDefinition, SubType.TRANSIENT) : createAndSaveNewListFrom(listDefinition);
+    analyzer.combineLists(newEntitySet.getId(), entitySetDefinition);
 
-    analyzer.combineLists(newList.getId(), listDefinition);
-
-    return newList;
+    return newEntitySet;
   }
 
-  private EntitySet createAndSaveNewListFrom(final BaseEntitySet listDefinition, final SubType subtype) {
-    val newList = EntitySet.createFromDefinition(listDefinition);
+  private int setCurrentDataVersion() {
+    return properties.getRelease().getDataVersion();
+  }
+
+  private EntitySet createAndSaveNewListFrom(final BaseEntitySet entitySetDefinition, final SubType subtype) {
+    val dataVersion = getCurrentDataVersion();
+    val newEntitySet = EntitySet.createFromDefinition(entitySetDefinition, dataVersion);
+
     if (null != subtype) {
-      newList.setSubtype(subtype);
+      newEntitySet.setSubtype(subtype);
     }
 
-    val insertCount = repository.save(newList);
+    val insertCount = repository.save(newEntitySet, dataVersion);
     checkState(insertCount == 1, "Could not save list - Insert count: %s", insertCount);
 
-    return newList;
+    return newEntitySet;
   }
 
-  private EntitySet createAndSaveNewListFrom(final BaseEntitySet listDefinition) {
-    return createAndSaveNewListFrom(listDefinition, null);
+  private EntitySet createAndSaveNewListFrom(final BaseEntitySet entitySetDefinition) {
+    return createAndSaveNewListFrom(entitySetDefinition, null);
   }
 
   // Helpers to facilitate exportListItems() only. They should not be used in anywhere else.
   private List<List<String>> convertToListOfList(@NonNull final List<String> list) {
     val result = new ArrayList<List<String>>(list.size());
+
     for (val v : list) {
       result.add(Arrays.asList(v));
     }
+
     return result;
   }
 
   private List<List<String>> convertToListOfListForGene(@NonNull final Map<String, String> map) {
     val result = new ArrayList<List<String>>(map.size());
     val entrySet = map.entrySet();
+
     for (val v : entrySet) {
       result.add(Arrays.asList(v.getKey(), v.getValue()));
     }
+
     return result;
   }
 
-  public void exportListItems(@NonNull EntitySet entityList, @NonNull OutputStream outputStream) throws IOException {
+  public void exportListItems(@NonNull EntitySet entitySet, @NonNull OutputStream outputStream) throws IOException {
+    val isGeneType = BaseEntitySet.Type.GENE == entitySet.getType();
     val content =
         // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
         // overload.
-        (BaseEntitySet.Type.GENE == entityList.getType()) ? convertToListOfListForGene(analyzer
-            .retrieveGeneIdsAndSymbolsByListId(entityList.getId())) : convertToListOfList(analyzer
-            .retriveListItems(entityList));
+        isGeneType ? convertToListOfListForGene(analyzer
+            .retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : convertToListOfList(analyzer
+            .retriveListItems(entitySet));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
@@ -225,6 +236,7 @@ public class EntityListService {
     for (val v : content) {
       writer.write(v);
     }
+
     writer.flush();
   }
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.val;
 
@@ -48,6 +49,9 @@ public class UnionAnalysisRequest {
   @ApiModelProperty(value = "The type of set analysis.", required = true)
   private final BaseEntitySet.Type type;
 
+  @Getter
+  private final int inputCount;
+
   private final static class JsonPropertyName {
 
     final static String lists = "lists";
@@ -59,8 +63,9 @@ public class UnionAnalysisRequest {
       @NonNull @JsonProperty(JsonPropertyName.lists) final Iterable<UUID> lists,
       @NonNull @JsonProperty(JsonPropertyName.type) final BaseEntitySet.Type type) {
     val uniqueItems = ImmutableSet.copyOf(lists);
+    val inputCount = uniqueItems.size();
 
-    if (uniqueItems.size() < REQUIRED_ELEMENT_COUNT) {
+    if (inputCount < REQUIRED_ELEMENT_COUNT) {
       throw new IllegalArgumentException(
           "The entityLists argument must contain at least " +
               REQUIRED_ELEMENT_COUNT +
@@ -68,6 +73,7 @@ public class UnionAnalysisRequest {
     }
     this.lists = uniqueItems;
     this.type = type;
+    this.inputCount = inputCount;
   }
 
   /*

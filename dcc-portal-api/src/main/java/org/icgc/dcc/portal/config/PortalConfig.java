@@ -116,7 +116,7 @@ public class PortalConfig {
 
   @PostConstruct
   public void createDemoEntityList() {
-    entityListService.createDemoEntityList();
+    entityListService.createDemoEntitySet();
   }
 
   @Bean
