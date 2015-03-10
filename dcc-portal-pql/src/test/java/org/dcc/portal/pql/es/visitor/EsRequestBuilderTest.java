@@ -306,6 +306,13 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     containsOnlyIds(result, "MU3");
   }
 
+  @Test
+  public void existsTest() {
+    val result = executeQuery("exists(assemblyVersion)");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU3");
+  }
+
   // Location tests
   @Test
   public void locationTest() {

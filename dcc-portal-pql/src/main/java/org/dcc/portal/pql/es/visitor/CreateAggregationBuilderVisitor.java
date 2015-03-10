@@ -40,13 +40,13 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
 
   @Override
   public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+    checkOptional(context);
     val fieldName = node.getFieldName();
     AbstractAggregationBuilder result = AggregationBuilders
         .terms(node.getAggregationName())
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
 
-    checkOptional(context);
     val typeModel = context.get().getTypeModel();
     if (typeModel.isNested(fieldName)) {
       result = createNestedAggregation(result, node, typeModel);
@@ -64,10 +64,10 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
 
   @Override
   public AbstractAggregationBuilder visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
-    log.debug("Visiting FilterAggregationNode: \n{}", node);
-
-    log.debug("Filters: {}", node.getFilters());
     checkOptional(context);
+    log.debug("Visiting FilterAggregationNode: \n{}", node);
+    log.debug("Filters: {}", node.getFilters());
+
     val filterAggregationBuilder = AggregationBuilders.filter(node.getAggregationName())
         .filter(resolveFilters(node, context))
         .subAggregation(node.getFirstChild().accept(this, context));

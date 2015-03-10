@@ -23,6 +23,7 @@ import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
 import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
 import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.elasticsearch.index.query.FilterBuilders.existsFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.notFilter;
 import static org.elasticsearch.index.query.FilterBuilders.orFilter;
@@ -43,6 +44,7 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
@@ -162,6 +164,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
 
   @Override
   public FilterBuilder visitRange(@NonNull RangeNode node, Optional<QueryContext> context) {
+    checkOptional(context);
     checkState(node.childrenCount() > 0, "RangeNode has no children");
 
     stack.push(rangeFilter(node.getFieldName()));
@@ -169,30 +172,37 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
       child.accept(this, context);
     }
 
-    checkOptional(context);
-
     return createNestedFilter(node, node.getFieldName(), stack.pop(), context.get().getTypeModel());
   }
 
   @Override
   public FilterBuilder visitTerm(@NonNull TermNode node, Optional<QueryContext> context) {
+    checkOptional(context);
     val name = node.getNameNode().getValue().toString();
     val value = node.getValueNode().getValue();
     log.debug("[visitTerm] Name: {}, Value: {}", name, value);
     val result = termFilter(name, value);
-    checkOptional(context);
 
     return createNestedFilter(node, name, result, context.get().getTypeModel());
   }
 
   @Override
+  public FilterBuilder visitExists(@NonNull ExistsNode node, Optional<QueryContext> context) {
+    checkOptional(context);
+    val field = node.getField();
+    log.debug("[visitExists] Field: {}", field);
+    val result = existsFilter(field);
+
+    return createNestedFilter(node, field, result, context.get().getTypeModel());
+  }
+
+  @Override
   public FilterBuilder visitTerms(@NonNull TermsNode node, Optional<QueryContext> context) {
+    checkOptional(context);
     val values = Lists.newArrayList();
     for (val child : node.getChildren()) {
       values.add(((TerminalNode) child).getValue());
     }
-
-    checkOptional(context);
 
     return createNestedFilter(node, node.getField(), termsFilter(node.getField(), values), context.get().getTypeModel());
   }
@@ -226,15 +236,11 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
    */
   private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter,
       AbstractTypeModel typeModel) {
-    if (typeModel.isNested(field)) {
-      if (!node.hasNestedParent()) {
-        val nestedPath = typeModel.getNestedPath(field);
-        log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'",
-            node, nestedPath);
-        val nestedFilter = nestedFilter(nestedPath, sourceFilter);
+    if (typeModel.isNested(field) && !node.hasNestedParent()) {
+      val nestedPath = typeModel.getNestedPath(field);
+      log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'", node, nestedPath);
 
-        return nestedFilter;
-      }
+      return nestedFilter(nestedPath, sourceFilter);
     }
 
     return sourceFilter;

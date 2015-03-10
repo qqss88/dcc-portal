@@ -37,6 +37,7 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
@@ -219,6 +220,13 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
   @Override
   public String visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<Void> context) {
     val header = format("%s [script: %s]", getCommonHeader(node), node.getScript());
+
+    return buildToString(node, Optional.of(header));
+  }
+
+  @Override
+  public String visitExists(ExistsNode node, Optional<Void> context) {
+    val header = format("%s [%s]", getCommonHeader(node), node.getField());
 
     return buildToString(node, Optional.of(header));
   }

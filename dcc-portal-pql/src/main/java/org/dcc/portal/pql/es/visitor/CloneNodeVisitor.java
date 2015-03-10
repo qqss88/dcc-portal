@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import java.util.Optional;
 
+import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -34,6 +35,7 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
@@ -180,6 +182,11 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
     result.addChildren(visitChildren(node));
 
     return result;
+  }
+
+  @Override
+  public ExpressionNode visitExists(@NonNull ExistsNode node, Optional<Void> context) {
+    return new ExistsNode(node.getField());
   }
 
   private ExpressionNode[] visitChildren(ExpressionNode parent) {

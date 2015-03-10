@@ -37,6 +37,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
@@ -53,6 +54,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.ExistsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FacetsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
@@ -323,6 +325,15 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", notNode);
 
     return notNode;
+  }
+
+  @Override
+  public ExpressionNode visitExists(@NonNull ExistsContext nodeContext) {
+    val field = getField(nodeContext.ID().getText());
+    val existsNode = new ExistsNode(field);
+    log.debug("{}", existsNode);
+
+    return existsNode;
   }
 
   private TerminalNode createNameNode(@NonNull String field) {

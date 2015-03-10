@@ -34,6 +34,7 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
@@ -171,6 +172,11 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
     node.getFilters().accept(this, Optional.empty());
 
     return processChildren(node);
+  }
+
+  @Override
+  public ExpressionNode visitExists(ExistsNode node, Optional<Void> context) {
+    return node;
   }
 
   // TODO: find a better name

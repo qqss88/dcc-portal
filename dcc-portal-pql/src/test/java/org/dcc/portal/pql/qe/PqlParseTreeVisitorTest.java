@@ -31,6 +31,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
@@ -45,6 +46,7 @@ import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.ExistsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FacetsContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
@@ -419,6 +421,17 @@ public class PqlParseTreeVisitorTest {
 
     val terminalNode = (TerminalNode) termsNode.getFirstChild();
     assertThat(terminalNode.getValue()).isEqualTo("DO1");
+  }
+
+  @Test
+  public void visitExistsTest() {
+    val parseTree = createParseTree("exists(id)");
+    val existsContext = (ExistsContext) parseTree.getChild(0);
+    val existsNode = (ExistsNode) VISITOR.visitExists(existsContext);
+    log.debug("Exists node: \n{}", existsNode);
+
+    assertThat(existsNode.childrenCount()).isEqualTo(0);
+    assertThat(existsNode.getField()).isEqualTo("_donor_id");
   }
 
 }

@@ -30,6 +30,7 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
@@ -79,38 +80,6 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.of(node);
   }
 
-  private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    val orNode = new OrNode(createGoTermChildren(termsNode));
-    orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode));
-
-    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
-
-    return Optional.of(result);
-  }
-
-  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode) {
-    val pathwayTermsNode = new TermsNode(GENE_PATHWAY, termsNode.getChildrenArray());
-    val curatedSetIdTermsNode = new TermsNode(GENE_CURATED_SET_ID, termsNode.getChildrenArray());
-
-    return new ExpressionNode[] { pathwayTermsNode, curatedSetIdTermsNode };
-  }
-
-  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    val orNode = new OrNode(createGoTermChildren(termsNode));
-    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
-
-    return Optional.of(result);
-  }
-
-  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode) {
-    ExpressionNode[] children = termsNode.getChildrenArray();
-
-    return new ExpressionNode[] {
-        new TermsNode(CELLULAR_COMPONENT, children),
-        new TermsNode(BIOLOGICAL_PROCESS, children),
-        new TermsNode(MOLECULAR_FUNCTION, children) };
-  }
-
   @Override
   public Optional<ExpressionNode> visitFilter(@NonNull FilterNode node, @NonNull Optional<QueryContext> context) {
     return visitChildren(node, context);
@@ -146,6 +115,11 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.empty();
   }
 
+  @Override
+  public Optional<ExpressionNode> visitExists(@NonNull ExistsNode node, @NonNull Optional<QueryContext> context) {
+    return Optional.empty();
+  }
+
   private Optional<ExpressionNode> visitChildren(ExpressionNode parent, Optional<QueryContext> context) {
     for (int i = 0; i < parent.childrenCount(); i++) {
       val child = parent.getChild(i);
@@ -156,6 +130,38 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     }
 
     return Optional.empty();
+  }
+
+  private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+    val orNode = new OrNode(createGoTermChildren(termsNode));
+    orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode));
+
+    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
+
+    return Optional.of(result);
+  }
+
+  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode) {
+    val pathwayTermsNode = new TermsNode(GENE_PATHWAY, termsNode.getChildrenArray());
+    val curatedSetIdTermsNode = new TermsNode(GENE_CURATED_SET_ID, termsNode.getChildrenArray());
+
+    return new ExpressionNode[] { pathwayTermsNode, curatedSetIdTermsNode };
+  }
+
+  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+    val orNode = new OrNode(createGoTermChildren(termsNode));
+    val result = new NestedNode(typeModel.getNestedPath(CELLULAR_COMPONENT), orNode);
+
+    return Optional.of(result);
+  }
+
+  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode) {
+    ExpressionNode[] children = termsNode.getChildrenArray();
+
+    return new ExpressionNode[] {
+        new TermsNode(CELLULAR_COMPONENT, children),
+        new TermsNode(BIOLOGICAL_PROCESS, children),
+        new TermsNode(MOLECULAR_FUNCTION, children) };
   }
 
 }
