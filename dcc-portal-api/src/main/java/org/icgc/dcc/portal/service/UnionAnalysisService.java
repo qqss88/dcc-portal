@@ -22,12 +22,14 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
@@ -36,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * TODO
+ * A service to create and retrieve results of entity set union analysis.
  */
 @Slf4j
 @Service
@@ -45,9 +47,13 @@ public class UnionAnalysisService {
 
   @NonNull
   private final UnionAnalysisRepository repository;
-
   @NonNull
   private final UnionAnalyzer analyzer;
+  @NonNull
+  private final PortalProperties properties;
+
+  @Getter(lazy = true)
+  private final int currentDataVersion = setCurrentDataVersion();
 
   public UnionAnalysisResult getAnalysis(@NonNull final UUID analysisId) {
     val result = repository.find(analysisId);
@@ -57,15 +63,17 @@ public class UnionAnalysisService {
     } else {
       log.debug("Got analysis: '{}'", result);
     }
+
     return result;
   }
 
   public UnionAnalysisResult submitAnalysis(@NonNull final UnionAnalysisRequest request) {
     val entityType = request.getType();
+    val inputCount = request.getInputCount();
+    val dataVersion = getCurrentDataVersion();
+    val newAnalysis = UnionAnalysisResult.createForNewlyCreated(entityType, inputCount, dataVersion);
 
-    val newAnalysis = UnionAnalysisResult.createForNewlyCreated(entityType);
-
-    val insertCount = repository.save(newAnalysis);
+    val insertCount = repository.save(newAnalysis, dataVersion);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
     analyzer.calculateUnionUnitCounts(newAnalysis.getId(), request);
@@ -73,7 +81,12 @@ public class UnionAnalysisService {
     return newAnalysis;
   }
 
-  public List<String> previewSetUnion(@NonNull final DerivedEntitySetDefinition listDefinition) {
-    return analyzer.previewSetUnion(listDefinition);
+  public List<String> previewSetUnion(@NonNull final DerivedEntitySetDefinition entitySetDefinition) {
+    return analyzer.previewSetUnion(entitySetDefinition);
   }
+
+  private int setCurrentDataVersion() {
+    return properties.getRelease().getDataVersion();
+  }
+
 }

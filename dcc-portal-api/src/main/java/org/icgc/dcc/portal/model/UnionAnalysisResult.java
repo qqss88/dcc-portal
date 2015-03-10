@@ -31,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
@@ -50,7 +49,12 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
   private final BaseEntitySet.Type type;
 
   private final long timestamp = new Date().getTime();
+  private final Integer inputCount;
 
+  /*
+   * This is the default value and is used for migration when this version field is introduced.
+   */
+  private int version = 1;
   private List<UnionUnitWithCount> result;
 
   public UnionAnalysisResult updateStateToInProgress() {
@@ -71,50 +75,47 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
 
   private final static class JsonPropertyName {
 
-    final static String id = "id";
-    final static String state = "state";
-    final static String result = "result";
-    final static String type = "type";
+    final static String ID = "id";
+    final static String STATE = "state";
+    final static String RESULT = "result";
+    final static String TYPE = "type";
+    final static String VERSION = "version";
+    final static String INPUT_COUNT = "inputCount";
+
   }
 
   @JsonCreator
   public UnionAnalysisResult(
-      @JsonProperty(JsonPropertyName.id) final UUID id,
-      @JsonProperty(JsonPropertyName.state) final State state,
-      @JsonProperty(JsonPropertyName.type) final BaseEntitySet.Type type,
-      @JsonProperty(JsonPropertyName.result) final List<UnionUnitWithCount> result) {
+      @JsonProperty(JsonPropertyName.ID) final UUID id,
+      @JsonProperty(JsonPropertyName.STATE) final State state,
+      @JsonProperty(JsonPropertyName.TYPE) final BaseEntitySet.Type type,
+      @JsonProperty(JsonPropertyName.INPUT_COUNT) final Integer inputCount,
+      @JsonProperty(JsonPropertyName.VERSION) final Integer dataVersion,
+      @JsonProperty(JsonPropertyName.RESULT) final List<UnionUnitWithCount> result) {
     this.id = id;
     this.state = state;
     this.type = type;
+    this.inputCount = inputCount;
     this.result = result;
+
+    if (null != dataVersion && dataVersion > 1) {
+      /*
+       * Use the default value 1 if it is null. This is used to migrate the JSON when the version field is introduced.
+       */
+      this.version = dataVersion;
+    }
   }
 
   // static constructors
-  public static UnionAnalysisResult createForNewlyCreated(final BaseEntitySet.Type entityType) {
+  public static UnionAnalysisResult createForNewlyCreated(final BaseEntitySet.Type entityType,
+      final Integer inputCount, final int dataVersion) {
     return new UnionAnalysisResult(
         UUID.randomUUID(),
         State.PENDING,
         entityType,
+        inputCount,
+        dataVersion,
         null);
-  }
-
-  public static UnionAnalysisResult createForInProgress(final UUID id, final BaseEntitySet.Type entityType) {
-    return new UnionAnalysisResult(
-        id,
-        State.IN_PROGRESS,
-        entityType,
-        null);
-  }
-
-  public static UnionAnalysisResult createWithResult(final UUID id, final BaseEntitySet.Type entityType,
-      @NonNull List<UnionUnitWithCount> result) {
-    Preconditions.checkArgument(!result.isEmpty(), "The 'result' argument must not be empty.");
-
-    return new UnionAnalysisResult(
-        id,
-        State.FINISHED,
-        entityType,
-        result);
   }
 
   @RequiredArgsConstructor
@@ -126,6 +127,9 @@ public class UnionAnalysisResult implements Identifiable<UUID> {
     FINISHED("finished"),
     ERROR("error");
 
+    @NonNull
     private final String name;
+
   }
+
 }

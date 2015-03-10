@@ -295,6 +295,9 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     String releaseDate;
 
+    @JsonProperty
+    @Min(1)
+    int dataVersion;
   }
 
   @Data
