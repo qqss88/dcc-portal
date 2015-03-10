@@ -33,7 +33,7 @@
                 </td>
                 <td>
                     <input search-on-enter tabindex="3" data-ng-class="{'invalid': invalidParams.isPosition}"
-                           placeholder="eg. 29885594" type="text" position-validator data-ng-model="params.position"
+                           placeholder="eg. 29885594" type="text" integer-validator data-ng-model="params.position"
                            data-ng-change="checkParams();">
                            <i data-tooltip="Must be less than Chromosome {{params.chr}}'s length: {{lengths[params.chr]}}"
                               data-tooltip-placement="right" class="invalid-icon icon-attention"
