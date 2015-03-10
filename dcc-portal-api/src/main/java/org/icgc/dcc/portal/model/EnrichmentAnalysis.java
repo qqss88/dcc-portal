@@ -52,6 +52,11 @@ public class EnrichmentAnalysis implements Identifiable<UUID> {
    */
   private long timestamp = new Date().getTime();
 
+  /*
+   * This is the default value and is used for migration when this version field is introduced.
+   */
+  private int version = 1;
+
   /**
    * State of the analysis
    */

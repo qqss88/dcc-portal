@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.analysis.EnrichmentAnalyzer;
 import org.icgc.dcc.portal.analysis.EnrichmentReporter;
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet.Type;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EntitySet;
@@ -55,6 +57,11 @@ public class EnrichmentAnalysisService {
   private final EnrichmentAnalysisRepository repository;
   @NonNull
   private final EntityListRepository entityListRepository;
+  @NonNull
+  private final PortalProperties properties;
+
+  @Getter(lazy = true)
+  private final int dataVersion = loadDataVersion();
 
   @NonNull
   public EnrichmentAnalysis getAnalysis(@NonNull UUID analysisId) {
@@ -67,23 +74,24 @@ public class EnrichmentAnalysisService {
   }
 
   public void submitAnalysis(@NonNull EnrichmentAnalysis analysis) {
+    val dataVersion = getDataVersion();
     val id = createAnalysisId();
     analysis.setId(id);
 
     // Ensure persisted for polling
-    log.info("Saving analysis '{}'...", analysis.getId());
+    log.info("Saving analysis '{}'...", id);
 
     // Save this as an entity list too in order to capture the subtype information.
-    val newEntitySet = EntitySet.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0);
+    val newEntitySet = EntitySet.createForStatusFinished(id, "Input gene set", "", Type.GENE, 0, dataVersion);
     newEntitySet.setSubtype(SubType.ENRICHMENT);
-    entityListRepository.save(newEntitySet, newEntitySet.getVersion());
+    entityListRepository.save(newEntitySet, dataVersion);
 
-    val insertCount = repository.save(analysis);
+    val insertCount = repository.save(analysis, dataVersion);
     checkState(insertCount == 1, "Could not save analysis. Insert count: %s", insertCount);
 
     // Execute asynchronously
-    log.info("Executing analysis '{}'...", analysis.getId());
-    analyzer.analyze(analysis.getId());
+    log.info("Executing analysis '{}'...", id);
+    analyzer.analyze(id);
   }
 
   public void reportAnalysis(@NonNull EnrichmentAnalysis analysis, @NonNull OutputStream outputStream)
@@ -95,6 +103,10 @@ public class EnrichmentAnalysisService {
     }
 
     reporter.report(analysis, outputStream);
+  }
+
+  private int loadDataVersion() {
+    return properties.getRelease().getDataVersion();
   }
 
   private static UUID createAnalysisId() {

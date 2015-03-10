@@ -10,8 +10,9 @@ CREATE TABLE IF NOT EXISTS user_gene_set(
    data TEXT 
 );
 CREATE TABLE IF NOT EXISTS enrichment_analysis(
-   id   UUID PRIMARY KEY,
-   data TEXT 
+   id       UUID PRIMARY KEY,
+   version  INT,
+   data     TEXT 
 );
 CREATE TABLE IF NOT EXISTS union_analysis (
    id       UUID PRIMARY KEY,
