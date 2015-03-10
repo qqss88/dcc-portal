@@ -26,6 +26,9 @@
                    <small data-ng-if="item.type === 'union'" class="t_suggest_detail">
                        {{item.dataType | trans:true}}
                    </small>
+                   <small data-ng-if="item.type === 'phenotype'" class="t_suggest_detail">
+                   Donor
+                   </small>
                    <span class="" data-ng-click="$event.stopPropagation(); ListController.remove(item.id);">
                        <i class="icon-cancel pull-right select-list-cancel"
                           data-tooltip="Delete Analysis"

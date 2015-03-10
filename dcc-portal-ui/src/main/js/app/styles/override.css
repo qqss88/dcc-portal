@@ -18,6 +18,10 @@
    max-height: 95%;
 }
 
+.modal-body {
+   max-height: 500px;
+}
+
 .modal.fade.in {
   top: 2%;
 }
