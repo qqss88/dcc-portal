@@ -124,6 +124,7 @@
         }
 
         if (data.state === 'FINISHED') {
+          $scope.analysisResult = null;
           $timeout(function() {
             $scope.analysisResult = data;
           }, 150);
