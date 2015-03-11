@@ -421,7 +421,7 @@
               $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
 
               // Check if the analysis is still valid with respect to current data
-              if (! n.dataVersion || settings.dataVersion !== n.dataVersion) {
+              if (! n.version || settings.dataVersion !== n.version) {
                 $scope.isDeprecated = true;
               } else {
                 $scope.isDeprecated = false;

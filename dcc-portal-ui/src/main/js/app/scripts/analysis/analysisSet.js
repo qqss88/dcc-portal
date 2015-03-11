@@ -68,6 +68,7 @@
         });
 
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
+        _this.checkAll = false; // reset
       }
     };
 

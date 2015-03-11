@@ -146,7 +146,7 @@
         return;
         // end test
 
-        $scope.error = true;
+        //$scope.error = true;
       });
     }
 
@@ -219,6 +219,7 @@
         payload.maxGeneCount = analysis.params.maxGeneCount;
       } else {
         payload.dataType = analysis.type.toLowerCase();
+        payload.inputSetCount = analysis.inputCount || '';
       }
 
       analysisList.unshift( payload );

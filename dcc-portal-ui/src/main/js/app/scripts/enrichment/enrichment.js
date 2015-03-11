@@ -172,7 +172,7 @@
 
           // Check if the analysis is still valid with respect to current data
           Settings.get().then(function(settings) {
-            if (! enrichment.dataVersion || settings.dataVersion !== enrichment.dataVersion) {
+            if (! enrichment.version || settings.dataVersion !== enrichment.version) {
               $scope.isDeprecated = true;
             } else {
               $scope.isDeprecated = false;
