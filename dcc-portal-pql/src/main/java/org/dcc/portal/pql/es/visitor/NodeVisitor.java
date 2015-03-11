@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import java.util.Optional;
 
+import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -151,6 +152,10 @@ public abstract class NodeVisitor<T, A> {
   }
 
   public T visitMissing(MissingNode node, Optional<A> context) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitConstantScore(ConstantScoreNode node, Optional<A> context) {
     return defaultUnimplementedMethod();
   }
 

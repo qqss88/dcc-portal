@@ -29,7 +29,8 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 @EqualsAndHashCode(callSuper = true)
 public class FunctionScoreQueryNode extends ExpressionNode {
 
-  private final String script;
+  @NonNull
+  String script;
 
   public FunctionScoreQueryNode(@NonNull String script, ExpressionNode... children) {
     super(children);

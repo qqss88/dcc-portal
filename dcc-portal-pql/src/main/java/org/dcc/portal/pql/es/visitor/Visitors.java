@@ -24,6 +24,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.ScoreMutatationQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
@@ -48,6 +49,7 @@ public class Visitors {
   private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
   private static final GeneScoreQueryVisitor GENE_SCORE_QUERY_VISITOR = new GeneScoreQueryVisitor();
+  private static final ScoreMutatationQueryVisitor SCORE_MUTATOIN_QUERY_VISITOR = new ScoreMutatationQueryVisitor();
 
   /*
    * QueryBuilderVisitor
@@ -61,6 +63,15 @@ public class Visitors {
 
   private static final GeneSetFilterVisitor GENE_SET_FILTER_VISITOR = new GeneSetFilterVisitor();
   private static final LocationFilterVisitor LOCATION_FILTER_VISITOR = new LocationFilterVisitor();
+  private static final ScoreSortVisitor SCORE_SORT_VISITOR = new ScoreSortVisitor();
+
+  public static ScoreMutatationQueryVisitor createScoreMutatationQueryVisitor() {
+    return SCORE_MUTATOIN_QUERY_VISITOR;
+  }
+
+  public static ScoreSortVisitor createScoreSortVisitor() {
+    return SCORE_SORT_VISITOR;
+  }
 
   public static GeneSetFilterVisitor createGeneSetFilterVisitor() {
     return GENE_SET_FILTER_VISITOR;

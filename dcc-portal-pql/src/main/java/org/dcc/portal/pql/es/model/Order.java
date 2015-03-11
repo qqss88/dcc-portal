@@ -28,7 +28,8 @@ import org.icgc.dcc.common.core.model.Identifiable;
 @RequiredArgsConstructor(access = PRIVATE)
 public enum Order implements Identifiable {
 
-  ASC("+"), DESC("-");
+  ASC("+"),
+  DESC("-");
 
   private final String sign;
 

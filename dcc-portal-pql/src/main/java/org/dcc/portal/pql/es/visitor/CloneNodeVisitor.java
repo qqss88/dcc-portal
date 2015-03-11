@@ -22,6 +22,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -52,6 +53,11 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import com.google.common.collect.Lists;
 
 public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
+
+  @Override
+  public ExpressionNode visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
+    return new ConstantScoreNode(node.getBoost(), visitChildren(node));
+  }
 
   @Override
   public ExpressionNode visitFilter(FilterNode node, Optional<Void> context) {

@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
@@ -66,7 +67,8 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   @Override
   public String visitNested(NestedNode node, Optional<Void> context) {
-    val header = format("%s [path: %s, score_mode: %s]", getCommonHeader(node), node.getPath(), node.getScoreMode());
+    val header = format("%s [path: %s, score_mode: %s]", getCommonHeader(node), node.getPath(),
+        node.getScoreMode().getId());
 
     return buildToString(node, Optional.of(header));
   }
@@ -221,6 +223,13 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
   @Override
   public String visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<Void> context) {
     val header = format("%s [script: %s]", getCommonHeader(node), node.getScript());
+
+    return buildToString(node, Optional.of(header));
+  }
+
+  @Override
+  public String visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
+    val header = format("%s [boost: %s]", getCommonHeader(node), node.getBoost());
 
     return buildToString(node, Optional.of(header));
   }

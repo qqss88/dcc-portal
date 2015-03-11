@@ -17,41 +17,28 @@
  */
 package org.dcc.portal.pql.es.ast;
 
-import java.util.List;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
-import lombok.val;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-import com.google.common.collect.Lists;
-
 @Value
-@EqualsAndHashCode(callSuper = false)
-public class FieldsNode extends ExpressionNode {
+@EqualsAndHashCode(callSuper = true)
+public class ConstantScoreNode extends ExpressionNode {
 
-  List<String> fields = Lists.newArrayList();
+  float boost;
 
-  public FieldsNode(ExpressionNode... children) {
+  public ConstantScoreNode(float boost, ExpressionNode... children) {
     super(children);
-    addChildren(children);
+    this.boost = boost;
   }
 
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitFields(this, context);
-  }
-
-  @Override
-  public void addChildren(@NonNull ExpressionNode... children) {
-    super.addChildren(children);
-    for (val child : children) {
-      val value = ((TerminalNode) child).getValue().toString();
-      fields.add(value);
-    }
+    return visitor.visitConstantScore(this, context);
   }
 
 }

@@ -22,6 +22,7 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.utils.Nodes;
@@ -33,7 +34,7 @@ import org.dcc.portal.pql.qe.QueryContext;
  */
 public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
 
-  private static final String SCORE_MODE = "total";
+  private static final ScoreMode SCORE_MODE = ScoreMode.TOTAL;
 
   protected ExpressionNode visitRoot(RootNode node, String script, String path) {
     val queryNode = Nodes.getOptionalChild(node, QueryNode.class);

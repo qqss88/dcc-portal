@@ -22,6 +22,8 @@ import static org.dcc.portal.pql.es.visitor.Visitors.createEmptyNodesCleanerVisi
 import static org.dcc.portal.pql.es.visitor.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
+import static org.dcc.portal.pql.es.visitor.Visitors.createScoreMutatationQueryVisitor;
+import static org.dcc.portal.pql.es.visitor.Visitors.createScoreSortVisitor;
 
 import java.util.Optional;
 
@@ -34,6 +36,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
+import org.dcc.portal.pql.es.visitor.ScoreSortVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
@@ -51,6 +54,7 @@ public class EsAstTransformator {
   private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
   private final GeneSetFilterVisitor geneSetFilterVisitor = createGeneSetFilterVisitor();
   private final LocationFilterVisitor locationFilterVisitor = createLocationFilterVisitor();
+  private final ScoreSortVisitor scoreSortVisitor = createScoreSortVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -58,6 +62,9 @@ public class EsAstTransformator {
     esAst = resolveFacets(esAst);
     esAst = optimize(esAst);
     esAst = score(esAst, context);
+
+    // Must be run last. Read the class description
+    esAst = esAst.accept(createScoreMutatationQueryVisitor(), Optional.of(context)).get();
     log.debug("ES AST after the transformations: {}", esAst);
 
     return esAst;
@@ -68,6 +75,7 @@ public class EsAstTransformator {
   }
 
   private ExpressionNode resoveSpecialCases(ExpressionNode esAst, QueryContext context) {
+    esAst = esAst.accept(scoreSortVisitor, Optional.empty());
     esAst = esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
     esAst = esAst.accept(locationFilterVisitor, Optional.of(context)).get();
 

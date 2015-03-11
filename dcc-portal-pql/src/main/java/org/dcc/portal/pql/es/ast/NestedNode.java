@@ -17,31 +17,35 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.icgc.dcc.common.core.model.Identifiable;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
 public class NestedNode extends ExpressionNode {
 
-  private static final String DEFAULT_SCORE_MODE = "avg";
+  private static final ScoreMode DEFAULT_SCORE_MODE = ScoreMode.AVG;
 
   @NonNull
   String path;
 
   @NonNull
-  String scoreMode;
+  ScoreMode scoreMode;
 
   public NestedNode(@NonNull String path, ExpressionNode... children) {
     this(path, DEFAULT_SCORE_MODE, children);
   }
 
-  public NestedNode(@NonNull String path, @NonNull String scoreMode, ExpressionNode... children) {
+  public NestedNode(@NonNull String path, @NonNull ScoreMode scoreMode, ExpressionNode... children) {
     super(children);
     this.path = path;
     this.scoreMode = scoreMode;
@@ -56,5 +60,19 @@ public class NestedNode extends ExpressionNode {
   public boolean hasNestedParent() {
     return true;
   };
+
+  @NoArgsConstructor(access = PRIVATE)
+  public static enum ScoreMode implements Identifiable {
+    AVG,
+    TOTAL, // Is not present in the documentation but still supported
+    SUM,
+    MAX,
+    NONE;
+
+    @Override
+    public String getId() {
+      return name().toLowerCase();
+    }
+  }
 
 }

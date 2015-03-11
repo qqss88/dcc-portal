@@ -27,6 +27,7 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
@@ -65,7 +66,7 @@ public class DonorScoreQueryVisitorTest {
     val netstedNode = (NestedNode) queryNode.getFirstChild();
     assertThat(netstedNode.childrenCount()).isEqualTo(1);
     assertThat(netstedNode.getPath()).isEqualTo("gene");
-    assertThat(netstedNode.getScoreMode()).isEqualTo("total");
+    assertThat(netstedNode.getScoreMode()).isEqualTo(ScoreMode.TOTAL);
 
     val functionScoreNode = (FunctionScoreQueryNode) netstedNode.getFirstChild();
     assertThat(functionScoreNode.getScript()).isEqualTo(DonorScoreQueryVisitor.SCRIPT);

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -59,6 +60,11 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitNested(NestedNode node, Optional<Void> context) {
+    return defaultProcessing(node);
+  }
+
+  @Override
+  public ExpressionNode visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 

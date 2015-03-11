@@ -47,7 +47,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
 
     return QueryBuilders
         .nestedQuery(node.getPath(), functionScoreQuery)
-        .scoreMode(node.getScoreMode());
+        .scoreMode(node.getScoreMode().getId());
   }
 
   @Override
