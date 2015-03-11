@@ -72,6 +72,8 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         // Fake fields for LocationFilterVisitor
         .add(string(GENE_LOCATION, GENE_LOCATION))
         .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
+
+        .add(string(SCORE, SCORE))
         .build();
   }
 

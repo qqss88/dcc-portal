@@ -82,6 +82,8 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(string(GENE_LOCATION, GENE_LOCATION));
     fields.add(string(MUTATION_LOCATION, MUTATION_LOCATION));
 
+    fields.add(string(SCORE, SCORE));
+
     return fields.build();
   }
 

@@ -56,6 +56,8 @@ public abstract class AbstractTypeModel {
   public static final String GENE_LOCATION = "gene.location";
   public static final String MUTATION_LOCATION = "mutation.location";
 
+  public static final String SCORE = "_score";
+
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
