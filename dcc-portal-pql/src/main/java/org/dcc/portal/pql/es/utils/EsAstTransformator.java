@@ -32,9 +32,9 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
-import org.dcc.portal.pql.es.visitor.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
+import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**

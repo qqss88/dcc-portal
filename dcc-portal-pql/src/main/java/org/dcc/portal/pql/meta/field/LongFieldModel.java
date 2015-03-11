@@ -62,6 +62,10 @@ public class LongFieldModel extends FieldModel {
     return new LongFieldModel(name, alias);
   }
 
+  public static LongFieldModel long_(@NonNull String name, @NonNull Set<String> alias) {
+    return new LongFieldModel(name, alias);
+  }
+
   @Override
   public <T> T accept(@NonNull FieldVisitor<T> visitor) {
     return visitor.visitLongField(this);

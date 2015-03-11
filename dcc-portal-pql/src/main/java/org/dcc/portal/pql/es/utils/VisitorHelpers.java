@@ -23,12 +23,43 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
+import lombok.val;
+
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 @NoArgsConstructor(access = PRIVATE)
-public class Visitors {
+public class VisitorHelpers {
 
+  /**
+   * Checks if {@code optional} has a reference.
+   * @throws IllegalArgumentException
+   */
   public static <T> void checkOptional(Optional<T> optional) {
     checkArgument(optional.isPresent(), "The optional does not contain any reference.");
+  }
+
+  /**
+   * The methods visits children of {@code parent} with {@code visitor}. Each child returns an
+   * {@code Optional<ExpressionNode>}. If the optional is not empty the child is replaced with the
+   * {@link ExpressionNode} from the {@code Optional}.<br>
+   * 
+   * @param visitor applied to the {@code parent}
+   * @param parent to be visited
+   * @param context - query context
+   */
+  public static Optional<ExpressionNode> visitChildren(NodeVisitor<Optional<ExpressionNode>, QueryContext> visitor,
+      ExpressionNode parent, Optional<QueryContext> context) {
+    for (int i = 0; i < parent.childrenCount(); i++) {
+      val child = parent.getChild(i);
+      val childResult = child.accept(visitor, context);
+      if (childResult.isPresent()) {
+        parent.setChild(i, childResult.get());
+      }
+    }
+
+    return Optional.empty();
   }
 
 }

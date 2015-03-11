@@ -47,7 +47,7 @@ public class TermNode extends ExpressionNode {
   }
 
   public TermNode(@NonNull String name, @NonNull Object value) {
-    checkState(!name.isEmpty());
+    checkState(!name.isEmpty(), "Term node has an empty name.");
     val nameNode = new TerminalNode(name);
     val valueNode = new TerminalNode(value);
     super.addChildren(nameNode, valueNode);

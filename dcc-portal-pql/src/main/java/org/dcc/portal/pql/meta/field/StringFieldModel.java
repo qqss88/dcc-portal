@@ -36,6 +36,10 @@ public class StringFieldModel extends FieldModel {
     this(name, singleton(alias), NOT_NESTED);
   }
 
+  private StringFieldModel(String name, Set<String> alias) {
+    this(name, alias, NOT_NESTED);
+  }
+
   private StringFieldModel(String name, Set<String> alias, boolean nested) {
     super(name, alias, STRING, nested);
   }
@@ -45,6 +49,10 @@ public class StringFieldModel extends FieldModel {
   }
 
   public static StringFieldModel string(String name, String alias) {
+    return new StringFieldModel(name, alias);
+  }
+
+  public static StringFieldModel string(String name, Set<String> alias) {
     return new StringFieldModel(name, alias);
   }
 

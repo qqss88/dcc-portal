@@ -15,9 +15,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.visitor.special;
 
-import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_CURATED_SET_ID;
@@ -46,6 +47,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
@@ -82,37 +84,37 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
 
   @Override
   public Optional<ExpressionNode> visitFilter(@NonNull FilterNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitAnd(@NonNull AndNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitOr(@NonNull OrNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitBool(@NonNull BoolNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitMustBool(@NonNull MustBoolNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitNot(@NonNull NotNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitNested(@NonNull NestedNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(node, context);
+    return visitChildren(this, node, context);
   }
 
   @Override
@@ -127,18 +129,6 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
 
   @Override
   public Optional<ExpressionNode> visitTerm(@NonNull TermNode node, @NonNull Optional<QueryContext> context) {
-    return Optional.empty();
-  }
-
-  private Optional<ExpressionNode> visitChildren(ExpressionNode parent, Optional<QueryContext> context) {
-    for (int i = 0; i < parent.childrenCount(); i++) {
-      val child = parent.getChild(i);
-      val childResult = child.accept(this, context);
-      if (childResult.isPresent()) {
-        parent.setChild(i, childResult.get());
-      }
-    }
-
     return Optional.empty();
   }
 

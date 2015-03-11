@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.visitor.special;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
@@ -37,6 +37,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Before;
@@ -143,7 +144,7 @@ public class GeneSetFilterVisitorTest {
     val result = root.accept(visitor, getMutationContextOptional()).get();
     log.debug("After GeneSetFilterVisitor: {}", result);
 
-    assertExists(result, "transcript.gene.pathway");
+    assertExists(result, "transcript.gene.pathways");
   }
 
   @Test
@@ -230,7 +231,7 @@ public class GeneSetFilterVisitorTest {
   public void pathwayIdTest_mutation() {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", MUTATION_CENTRIC);
     log.debug("After GeneSetFilterVisitor: {}", root);
-    assertPathwayAndCuratedSet(root, "transcript.gene.pathway", "REACT_6326");
+    assertPathwayAndCuratedSet(root, "transcript.gene.pathways", "REACT_6326");
   }
 
   @Test

@@ -54,8 +54,9 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(string("symbol", "symbol"))
         .add(string("name", "name"))
         .add(string("biotype", "type"))
-        .add(string("chromosome", "chromosome"))
-        .add(long_("start", "start"))
+        .add(string("chromosome", ImmutableSet.of("chromosome", "gene.chromosome")))
+        .add(long_("start", ImmutableSet.of("start", "gene.start")))
+        .add(long_("end", ImmutableSet.of("end", "gene.end")))
         .add(long_("strand", "strand"))
         .add(defineDonor())
         .add(string("description", "description"))
@@ -72,6 +73,10 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         // Fake fields for GeneSetFilterVisitor
         .add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID))
         .add(string(GENE_SET_ID, GENE_SET_ID))
+
+        // Fake fields for LocationFilterVisitor
+        .add(string(GENE_LOCATION, GENE_LOCATION))
+        .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
         .build();
   }
 
@@ -114,6 +119,9 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
     val element = object(
         string("_mutation_id", "mutation.id"),
         string("mutation_type", "mutation.type"),
+        string("chromosome", "mutation.chromosome"),
+        long_("chromosome_end", "mutation.end"),
+        long_("chromosome_start", "mutation.start"),
         defineConsequence(),
         defineObservation());
 

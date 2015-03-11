@@ -78,6 +78,10 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID));
     fields.add(string(GENE_SET_ID, GENE_SET_ID));
 
+    // This is a fake field to which is resolved by LocationFilterVisitor
+    fields.add(string(GENE_LOCATION, GENE_LOCATION));
+    fields.add(string(MUTATION_LOCATION, MUTATION_LOCATION));
+
     return fields.build();
   }
 

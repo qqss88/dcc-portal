@@ -53,6 +53,9 @@ public abstract class AbstractTypeModel {
   public static final String GENE_GO_TERM_ID = "gene.goTermId";
   public static final String GENE_CURATED_SET_ID = "gene.curatedSetId";
 
+  public static final String GENE_LOCATION = "gene.location";
+  public static final String MUTATION_LOCATION = "mutation.location";
+
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;

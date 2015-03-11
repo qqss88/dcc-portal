@@ -41,6 +41,11 @@ public class GreaterEqualNode extends ExpressionNode {
     addChildren(node);
   }
 
+  public GreaterEqualNode(@NonNull Object value) {
+    this.value = value;
+    addChildren(new TerminalNode(value));
+  }
+
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitGreaterEqual(this, context);

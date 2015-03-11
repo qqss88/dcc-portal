@@ -33,6 +33,7 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class MutationCentricTypeModel extends AbstractTypeModel {
 
@@ -48,9 +49,9 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
   private static List<FieldModel> defineFields() {
     return new ImmutableList.Builder<FieldModel>()
         .add(string("assembly_version", "assemblyVersion"))
-        .add(string("chromosome", "chromosome"))
-        .add(long_("chromosome_start", "start"))
-        .add(long_("chromosome_end", "end"))
+        .add(string("chromosome", ImmutableSet.of("chromosome", "mutation.chromosome")))
+        .add(long_("chromosome_start", ImmutableSet.of("start", "mutation.start")))
+        .add(long_("chromosome_end", ImmutableSet.of("end", "mutation.end")))
         .add(string("_mutation_id", "id"))
         .add(string("mutation", "mutation"))
         .add(string("mutation_type", "type"))
@@ -67,6 +68,10 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         // Fake fields for GeneSetFilterVisitor
         .add(string(GENE_GO_TERM_ID, GENE_GO_TERM_ID))
         .add(string(GENE_SET_ID, GENE_SET_ID))
+
+        // Fake fields for LocationFilterVisitor
+        .add(string(GENE_LOCATION, GENE_LOCATION))
+        .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
         .build();
   }
 
@@ -87,8 +92,11 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
             object("gene",
                 string("_gene_id", "gene.id"),
                 string("biotype", "gene.type"),
+                string("chromosome", "gene.chromosome"),
+                long_("end", "gene.end"),
+                long_("start", "gene.start"),
                 // FIXME: check if the following fields are nested
-                arrayOfStrings("pathway", "gene.pathwayId"),
+                arrayOfStrings("pathways", "gene.pathwayId"),
                 arrayOfStrings("curated_set", "gene.curatedSetId"),
                 object("go_term", "gene.GoTerm",
                     arrayOfStrings("biological_process"),

@@ -20,7 +20,7 @@ package org.dcc.portal.pql.es.visitor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
-import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.FilterBuilders.existsFilter;

@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor;
 
-import static org.dcc.portal.pql.es.utils.Visitors.checkOptional;
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 
 import java.util.Optional;
 

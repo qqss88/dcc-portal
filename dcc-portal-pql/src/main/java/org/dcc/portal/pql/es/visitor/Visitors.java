@@ -25,6 +25,7 @@ import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @NoArgsConstructor(access = PRIVATE)
