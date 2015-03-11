@@ -26,6 +26,7 @@ filter
   : 'nested' OPAR ID (COMMA filter)+ CPAR   # nested
   | 'not' OPAR filter CPAR                  # not
   | 'exists' OPAR ID CPAR                   # exists
+  | 'missing' OPAR ID CPAR                  # missing
   | eq                                      # equal
   | ne                                      # notEqual
   | gt                                      # greaterThan

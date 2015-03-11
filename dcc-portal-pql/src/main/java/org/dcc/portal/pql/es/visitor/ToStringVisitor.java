@@ -43,6 +43,7 @@ import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
@@ -226,6 +227,13 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   @Override
   public String visitExists(ExistsNode node, Optional<Void> context) {
+    val header = format("%s [%s]", getCommonHeader(node), node.getField());
+
+    return buildToString(node, Optional.of(header));
+  }
+
+  @Override
+  public String visitMissing(MissingNode node, Optional<Void> context) {
     val header = format("%s [%s]", getCommonHeader(node), node.getField());
 
     return buildToString(node, Optional.of(header));

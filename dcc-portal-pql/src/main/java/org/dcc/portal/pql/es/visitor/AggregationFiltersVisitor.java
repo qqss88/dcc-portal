@@ -31,6 +31,7 @@ import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
@@ -94,6 +95,13 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, Strin
 
   @Override
   public ExpressionNode visitExists(ExistsNode node, Optional<String> context) {
+    checkOptional(context);
+
+    return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
+  }
+
+  @Override
+  public ExpressionNode visitMissing(MissingNode node, Optional<String> context) {
     checkOptional(context);
 
     return node.getField().equals(context.get()) ? REMOVE_CHILD : node;

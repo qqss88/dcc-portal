@@ -36,6 +36,7 @@ import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
@@ -53,6 +54,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.InArrayContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.MissingContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotEqualContext;
@@ -432,6 +434,17 @@ public class PqlParseTreeVisitorTest {
 
     assertThat(existsNode.childrenCount()).isEqualTo(0);
     assertThat(existsNode.getField()).isEqualTo("_donor_id");
+  }
+
+  @Test
+  public void visitMissingTest() {
+    val parseTree = createParseTree("missing(id)");
+    val missingContext = (MissingContext) parseTree.getChild(0);
+    val missingNode = (MissingNode) VISITOR.visitMissing(missingContext);
+    log.debug("Missing node: \n{}", missingNode);
+
+    assertThat(missingNode.childrenCount()).isEqualTo(0);
+    assertThat(missingNode.getField()).isEqualTo("_donor_id");
   }
 
 }

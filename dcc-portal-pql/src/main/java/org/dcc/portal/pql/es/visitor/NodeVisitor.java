@@ -38,6 +38,7 @@ import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
@@ -146,6 +147,10 @@ public abstract class NodeVisitor<T, A> {
   }
 
   public T visitExists(ExistsNode node, Optional<A> context) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitMissing(MissingNode node, Optional<A> context) {
     return defaultUnimplementedMethod();
   }
 

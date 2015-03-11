@@ -313,9 +313,19 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     containsOnlyIds(result, "MU3");
   }
 
+  @Test
+  public void missingTest() {
+    val result = executeQuery("missing(assemblyVersion)");
+    assertTotalHitsCount(result, 2);
+    containsOnlyIds(result, "MU1", "MU2");
+  }
+
   // Location tests
   @Test
   public void locationTest() {
+    val result = executeQuery("eq(mutation.location, 'chr1:1-41020906')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "MU1");
   }
 
   private SearchResponse executeQuery(String query) {

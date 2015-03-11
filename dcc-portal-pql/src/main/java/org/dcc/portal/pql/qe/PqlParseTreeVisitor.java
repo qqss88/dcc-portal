@@ -42,6 +42,7 @@ import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessThanNode;
+import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
@@ -66,6 +67,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.LeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessEqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LessThanContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.LtContext;
+import org.icgc.dcc.portal.pql.antlr4.PqlParser.MissingContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NestedContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.NotContext;
@@ -334,6 +336,15 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", existsNode);
 
     return existsNode;
+  }
+
+  @Override
+  public ExpressionNode visitMissing(@NonNull MissingContext nodeContext) {
+    val field = getField(nodeContext.ID().getText());
+    val missingNode = new MissingNode(field);
+    log.debug("{}", missingNode);
+
+    return missingNode;
   }
 
   private TerminalNode createNameNode(@NonNull String field) {

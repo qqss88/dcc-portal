@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.utils;
 import static org.dcc.portal.pql.es.visitor.Visitors.createAggregationsResolverVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createEmptyNodesCleanerVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createGeneSetFilterVisitor;
+import static org.dcc.portal.pql.es.visitor.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
 
 import java.util.Optional;
@@ -35,6 +36,7 @@ import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.Visitors;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
+import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
@@ -48,6 +50,7 @@ public class EsAstTransformator {
   private final AggregationsResolverVisitor facetsResolver = createAggregationsResolverVisitor();
   private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
   private final GeneSetFilterVisitor geneSetFilterVisitor = createGeneSetFilterVisitor();
+  private final LocationFilterVisitor locationFilterVisitor = createLocationFilterVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -65,7 +68,10 @@ public class EsAstTransformator {
   }
 
   private ExpressionNode resoveSpecialCases(ExpressionNode esAst, QueryContext context) {
-    return esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
+    esAst = esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
+    esAst = esAst.accept(locationFilterVisitor, Optional.of(context)).get();
+
+    return esAst;
   }
 
   private ExpressionNode optimize(ExpressionNode esAst) {
