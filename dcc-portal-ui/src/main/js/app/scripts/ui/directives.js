@@ -25,7 +25,8 @@ angular.module('icgc.ui', [
   'icgc.ui.trees',
   'icgc.ui.lists',
   'icgc.ui.query',
-  'icgc.ui.events'
+  'icgc.ui.events',
+  'icgc.ui.validators'
 ]);
 
 
@@ -44,8 +45,6 @@ angular.module('app.ui', [
   // 'app.ui.exists2',
   // 'app.ui.scrolled',
 ]);
-
-
 
 /**
  * select-on-click: Select content on click event

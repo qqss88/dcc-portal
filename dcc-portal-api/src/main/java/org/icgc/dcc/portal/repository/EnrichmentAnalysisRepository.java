@@ -36,14 +36,17 @@ public interface EnrichmentAnalysisRepository extends JsonRepository {
    * Schema constants.
    */
   static final String TABLE_NAME = "enrichment_analysis";
+  static final String VERSION_FIELD_NAME = "version";
 
   @SqlQuery("SELECT  " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
   EnrichmentAnalysis find(@Bind(ID_FIELD_NAME) UUID id);
 
-  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + " , " + DATA_FIELD_NAME + ") VALUES (:id, :data)")
-  int save(@BindValue EnrichmentAnalysis analysis);
+  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + " , " + DATA_FIELD_NAME + ", " + VERSION_FIELD_NAME
+      + ") VALUES (:id, :data, :version)")
+  int save(@BindValue EnrichmentAnalysis analysis, @Bind(VERSION_FIELD_NAME) int dataVersion);
 
-  @SqlUpdate("UPDATE " + TABLE_NAME + " SET  " + DATA_FIELD_NAME + " = :data WHERE " + ID_FIELD_NAME + " = :id")
-  int update(@BindValue EnrichmentAnalysis analysis);
+  @SqlUpdate("UPDATE " + TABLE_NAME + " SET  " + DATA_FIELD_NAME + " = :data, " + VERSION_FIELD_NAME
+      + " = :version WHERE " + ID_FIELD_NAME + " = :id")
+  int update(@BindValue EnrichmentAnalysis analysis, @Bind(VERSION_FIELD_NAME) int dataVersion);
 
 }

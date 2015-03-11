@@ -53,7 +53,7 @@ public class UnionAnalysisService {
   private final PortalProperties properties;
 
   @Getter(lazy = true)
-  private final int currentDataVersion = setCurrentDataVersion();
+  private final int currentDataVersion = loadDataVersion();
 
   public UnionAnalysisResult getAnalysis(@NonNull final UUID analysisId) {
     val result = repository.find(analysisId);
@@ -85,7 +85,7 @@ public class UnionAnalysisService {
     return analyzer.previewSetUnion(entitySetDefinition);
   }
 
-  private int setCurrentDataVersion() {
+  private int loadDataVersion() {
     return properties.getRelease().getDataVersion();
   }
 

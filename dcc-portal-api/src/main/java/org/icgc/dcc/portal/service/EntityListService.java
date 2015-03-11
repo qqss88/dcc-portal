@@ -74,7 +74,7 @@ public class EntityListService {
   private final PortalProperties properties;
 
   @Getter(lazy = true)
-  private final int currentDataVersion = setCurrentDataVersion();
+  private final int currentDataVersion = loadDataVersion();
 
   private DemoEntitySet demoEntitySet;
 
@@ -177,7 +177,7 @@ public class EntityListService {
     return newEntitySet;
   }
 
-  private int setCurrentDataVersion() {
+  private int loadDataVersion() {
     return properties.getRelease().getDataVersion();
   }
 
@@ -223,12 +223,11 @@ public class EntityListService {
 
   public void exportListItems(@NonNull EntitySet entitySet, @NonNull OutputStream outputStream) throws IOException {
     val isGeneType = BaseEntitySet.Type.GENE == entitySet.getType();
+    // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
+    // overload.
     val content =
-        // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
-        // overload.
-        isGeneType ? convertToListOfListForGene(analyzer
-            .retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : convertToListOfList(analyzer
-            .retriveListItems(entitySet));
+        isGeneType ? convertToListOfListForGene(analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId()))
+            : convertToListOfList(analyzer.retriveListItems(entitySet));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
