@@ -408,6 +408,9 @@
               $scope.setMap[set.id] = set;
             });
 
+             // Because SVG urls are based on <base> tag, we need absolute path
+            config.urlPath = $location.path();
+
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);
           });
