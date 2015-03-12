@@ -3,12 +3,13 @@
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 class="pull-left">{{analysisMode===true?'Save Custom Gene Set':'Search Gene Set'}}</h3>
+                <h3 class="pull-left">{{analysisMode===true?'Upload Custom Gene Set':'Upload Gene Set'}}</h3>
                 <button class="pull-right t_button" data-ng-click="cancel()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
 
+            <!--
             <div class="t_tabs" data-ng-if="analysisMode===false">
                <div class="t_tabs__tab t_tabs__tab__gene" 
                    data-ng-class="{active: params.inputMethod === 'id'}" 
@@ -21,6 +22,7 @@
                By saved gene set
                </div>
             </div>
+            -->
 
 
             <!-- body -->
@@ -65,7 +67,7 @@
                           <a href=""><i class="icon-help"></i></a>
                        </span>
                        <textarea
-                           rows="3"
+                           rows="4"
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
                            data-autofocus data-ng-model="params.rawText" data-ng-change="updateGenelist()">
                        </textarea>
