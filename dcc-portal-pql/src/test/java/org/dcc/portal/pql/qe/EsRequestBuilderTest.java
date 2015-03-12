@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.qe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.model.RequestType;
+import org.dcc.portal.pql.qe.EsRequestBuilder;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;

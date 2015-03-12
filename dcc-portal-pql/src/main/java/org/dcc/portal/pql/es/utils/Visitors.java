@@ -15,12 +15,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.utils;
 
 import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.CreateQueryBuilderVisitor;
+import org.dcc.portal.pql.es.visitor.FilterBuilderVisitor;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
@@ -29,6 +36,10 @@ import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
+import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
+import org.dcc.portal.pql.es.visitor.util.CloneNodeVisitor;
+import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
+import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 
 @NoArgsConstructor(access = PRIVATE)

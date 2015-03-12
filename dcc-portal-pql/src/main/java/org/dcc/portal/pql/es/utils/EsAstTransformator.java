@@ -17,13 +17,13 @@
  */
 package org.dcc.portal.pql.es.utils;
 
-import static org.dcc.portal.pql.es.visitor.Visitors.createAggregationsResolverVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createEmptyNodesCleanerVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createGeneSetFilterVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createLocationFilterVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createRemoveAggregationFilterVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createScoreMutatationQueryVisitor;
-import static org.dcc.portal.pql.es.visitor.Visitors.createScoreSortVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createAggregationsResolverVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createEmptyNodesCleanerVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createScoreMutatationQueryVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
 
 import java.util.Optional;
 
@@ -33,14 +33,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
-import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
-import org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor;
-import org.dcc.portal.pql.es.visitor.RemoveAggregationFilterVisitor;
-import org.dcc.portal.pql.es.visitor.ScoreSortVisitor;
-import org.dcc.portal.pql.es.visitor.Visitors;
+import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
+import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
+import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**

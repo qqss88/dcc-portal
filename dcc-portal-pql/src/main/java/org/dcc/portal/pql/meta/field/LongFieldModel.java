@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
-import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
 
 import java.util.Set;
@@ -35,11 +34,11 @@ public class LongFieldModel extends FieldModel {
   }
 
   private LongFieldModel(String name, String alias) {
-    this(name, alias, NOT_NESTED);
+    this(name, alias, FieldModel.NOT_NESTED);
   }
 
   private LongFieldModel(String name, Set<String> aliases) {
-    this(name, aliases, NOT_NESTED);
+    this(name, aliases, FieldModel.NOT_NESTED);
   }
 
   private LongFieldModel(String name, boolean nested) {

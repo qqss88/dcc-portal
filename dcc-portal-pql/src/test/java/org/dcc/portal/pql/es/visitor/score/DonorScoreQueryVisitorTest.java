@@ -26,12 +26,12 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
-import org.dcc.portal.pql.es.ast.QueryNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.junit.Test;
 
 @Slf4j
@@ -48,8 +48,10 @@ public class DonorScoreQueryVisitorTest {
 
     val result = esAst.accept(visitor, Optional.empty());
     assertCorrectStructure(result);
-    val filterNode = result.getChild(1).getFirstChild().getFirstChild().getFirstChild();
-    assertThat(filterNode).isEqualTo(origFilterNode);
+
+    // FIXME: Filters are not moved to the Query anymore. Rework the tests to reflect this.
+    // val filterNode = result.getChild(1).getFirstChild().getFirstChild().getFirstChild();
+    // assertThat(filterNode).isEqualTo(origFilterNode);
   }
 
   @Test

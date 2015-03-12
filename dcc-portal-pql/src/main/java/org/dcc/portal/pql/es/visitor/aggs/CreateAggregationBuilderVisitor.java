@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.visitor.aggs;
 
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 
@@ -27,6 +27,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.utils.Visitors;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.FilterBuilder;

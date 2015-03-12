@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
-import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.DOUBLE;
 
 import java.util.Set;
@@ -35,7 +34,7 @@ public class DoubleFieldModel extends FieldModel {
   }
 
   private DoubleFieldModel(String name, Set<String> aliases) {
-    this(name, aliases, NOT_NESTED);
+    this(name, aliases, FieldModel.NOT_NESTED);
   }
 
   private DoubleFieldModel(String name, boolean nested) {

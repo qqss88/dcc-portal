@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.visitor.aggs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
@@ -33,6 +33,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
 import org.junit.Before;
 import org.junit.Test;
 

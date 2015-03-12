@@ -24,12 +24,13 @@ import java.util.Optional;
 
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ConstantScoreNode;
-import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;

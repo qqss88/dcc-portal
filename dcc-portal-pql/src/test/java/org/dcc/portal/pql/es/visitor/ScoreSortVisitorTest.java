@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
 import org.junit.Test;
 
 @Slf4j

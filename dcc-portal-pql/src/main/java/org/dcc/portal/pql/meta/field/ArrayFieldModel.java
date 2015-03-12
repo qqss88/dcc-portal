@@ -20,8 +20,6 @@ package org.dcc.portal.pql.meta.field;
 import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_STRING_FIELD;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
-import static org.dcc.portal.pql.meta.Constants.NESTED;
-import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
 
 import java.util.Set;
@@ -45,7 +43,7 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   private ArrayFieldModel(String name, Set<String> aliases, FieldModel element) {
-    this(name, aliases, NOT_NESTED, element);
+    this(name, aliases, FieldModel.NOT_NESTED, element);
   }
 
   private ArrayFieldModel(String name, boolean nested, FieldModel element) {
@@ -73,24 +71,12 @@ public class ArrayFieldModel extends FieldModel {
     return new ArrayFieldModel(name, aliases, EMPTY_STRING_FIELD);
   }
 
-  public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name) {
-    return new ArrayFieldModel(name, NESTED, EMPTY_STRING_FIELD);
-  }
-
-  public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull String alias) {
-    return new ArrayFieldModel(name, alias, NESTED, EMPTY_STRING_FIELD);
-  }
-
   public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull Set<String> alias) {
-    return new ArrayFieldModel(name, alias, NESTED, EMPTY_STRING_FIELD);
-  }
-
-  public static ArrayFieldModel arrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, element);
+    return new ArrayFieldModel(name, alias, FieldModel.NESTED, EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, NESTED, element);
+    return new ArrayFieldModel(name, FieldModel.NESTED, element);
   }
 
   @Override

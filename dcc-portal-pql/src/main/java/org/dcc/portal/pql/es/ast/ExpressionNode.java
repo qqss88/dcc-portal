@@ -30,8 +30,8 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 
+import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.es.visitor.Visitors;
 
 import com.google.common.collect.Lists;
 

@@ -27,13 +27,13 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
-import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.qe.QueryContext;

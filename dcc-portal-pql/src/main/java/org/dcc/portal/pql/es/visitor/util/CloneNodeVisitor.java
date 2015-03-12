@@ -15,19 +15,17 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.es.visitor.util;
 
 import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
@@ -49,6 +47,9 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 import com.google.common.collect.Lists;
 

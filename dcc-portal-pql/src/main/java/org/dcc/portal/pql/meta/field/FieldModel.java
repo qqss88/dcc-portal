@@ -20,18 +20,23 @@ package org.dcc.portal.pql.meta.field;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
-@Data
+@Getter
 @AllArgsConstructor
 public abstract class FieldModel {
 
-  String name;
-  Set<String> alias;
-  FieldType type;
-  boolean nested;
+  public static final boolean NOT_NESTED = false;
+  public static final boolean NESTED = true;
+
+  private String name;
+  private Set<String> alias;
+  private FieldType type;
+  @Setter
+  private boolean nested;
 
   public static enum FieldType {
     LONG,

@@ -15,30 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.ast.query;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
-import lombok.Value;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class ConstantScoreNode extends ExpressionNode {
+public class QueryNode extends ExpressionNode {
 
-  float boost;
-
-  public ConstantScoreNode(float boost, ExpressionNode... children) {
+  public QueryNode(ExpressionNode... children) {
     super(children);
-    this.boost = boost;
   }
 
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitConstantScore(this, context);
+    return visitor.visitQuery(this, context);
   }
 
 }

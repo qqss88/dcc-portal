@@ -31,8 +31,6 @@ import com.google.common.collect.ImmutableSet;
 @NoArgsConstructor(access = PRIVATE)
 public final class Constants {
 
-  public static final boolean NESTED = true;
-  public static final boolean NOT_NESTED = false;
   public static final String NO_NAME = "";
   public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
   public static final Set<String> EMPTY_UI_ALIAS = ImmutableSet.of();

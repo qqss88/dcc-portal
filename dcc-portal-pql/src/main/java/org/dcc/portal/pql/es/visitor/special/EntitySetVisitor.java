@@ -19,6 +19,10 @@ package org.dcc.portal.pql.es.visitor.special;
 
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.ENTITY_SET_ID;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_INDEX;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_PATH;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_TYPE;
 
 import java.util.Optional;
 
@@ -69,6 +73,10 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
   @Override
   public Optional<ExpressionNode> visitTerms(@NonNull TermsNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
+    if (!isProcess(node.getField())) {
+      return Optional.empty();
+    }
+
     val field = resolveField(node, context.get().getTypeModel());
     val lookupInfo = resolveLookup(getValue(node), context.get().getTypeModel());
 
@@ -138,10 +146,14 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
 
   private static LookupInfo resolveLookup(String field, AbstractTypeModel typeModel) {
     return new LookupInfo(
-        typeModel.getInternalField(AbstractTypeModel.LOOKUP_INDEX),
-        typeModel.getInternalField(AbstractTypeModel.LOOKUP_TYPE),
+        typeModel.getInternalField(LOOKUP_INDEX),
+        typeModel.getInternalField(LOOKUP_TYPE),
         field,
-        typeModel.getInternalField(AbstractTypeModel.LOOKUP_PATH));
+        typeModel.getInternalField(LOOKUP_PATH));
+  }
+
+  private boolean isProcess(String field) {
+    return field.endsWith(ENTITY_SET_ID);
   }
 
 }

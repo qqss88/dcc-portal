@@ -15,40 +15,31 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.es.visitor.EmptyNodesCleanerVisitor.REMOVE_NODE;
+package org.dcc.portal.pql.es.ast.query;
 
 import java.util.Optional;
 
-import lombok.val;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.Value;
 
-import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.ast.filter.BoolNode;
-import org.dcc.portal.pql.es.ast.filter.FilterNode;
-import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
-import org.junit.Before;
-import org.junit.Test;
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-public class EmptyNodesCleanerVisitorTest {
+@Value
+@EqualsAndHashCode(callSuper = true)
+public class ConstantScoreNode extends ExpressionNode {
 
-  EmptyNodesCleanerVisitor visitor;
+  float boost;
 
-  @Before
-  public void setUp() {
-    visitor = new EmptyNodesCleanerVisitor();
+  public ConstantScoreNode(float boost, ExpressionNode... children) {
+    super(children);
+    this.boost = boost;
   }
 
-  @Test
-  public void visitRootTest() {
-    val result = visitor.visitRoot(new RootNode(new FilterNode(new BoolNode(new MustBoolNode()))), Optional.empty());
-    assertThat(result.childrenCount()).isEqualTo(0);
-  }
-
-  @Test
-  public void visitMustBoolTest() {
-    assertThat(visitor.visitMustBool(new MustBoolNode(), Optional.empty())).isEqualTo(REMOVE_NODE);
+  @Override
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
+    return visitor.visitConstantScore(this, context);
   }
 
 }

@@ -30,7 +30,6 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.es.visitor.Visitors;
 
 import com.google.common.collect.Lists;
 

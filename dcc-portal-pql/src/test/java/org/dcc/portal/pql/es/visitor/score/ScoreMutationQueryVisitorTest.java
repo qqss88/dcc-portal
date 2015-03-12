@@ -28,11 +28,11 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
-import org.dcc.portal.pql.es.ast.QueryNode;
+import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Before;
@@ -40,6 +40,8 @@ import org.junit.Test;
 
 @Slf4j
 public class ScoreMutationQueryVisitorTest {
+
+  // FIXME: Rework test after decided if filters are moved to the query
 
   ScoreMutatationQueryVisitor visitor = new ScoreMutatationQueryVisitor();
   QueryContext queryContext;

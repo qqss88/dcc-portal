@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
 import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
-import static org.dcc.portal.pql.meta.Constants.NOT_NESTED;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.STRING;
 
 import java.util.Set;
@@ -29,15 +28,15 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class StringFieldModel extends FieldModel {
 
   private StringFieldModel(String name) {
-    this(name, EMPTY_UI_ALIAS, NOT_NESTED);
+    this(name, EMPTY_UI_ALIAS, FieldModel.NOT_NESTED);
   }
 
   private StringFieldModel(String name, String alias) {
-    this(name, singleton(alias), NOT_NESTED);
+    this(name, singleton(alias), FieldModel.NOT_NESTED);
   }
 
   private StringFieldModel(String name, Set<String> alias) {
-    this(name, alias, NOT_NESTED);
+    this(name, alias, FieldModel.NOT_NESTED);
   }
 
   private StringFieldModel(String name, Set<String> alias, boolean nested) {

@@ -24,7 +24,6 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.es.visitor.EsRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 

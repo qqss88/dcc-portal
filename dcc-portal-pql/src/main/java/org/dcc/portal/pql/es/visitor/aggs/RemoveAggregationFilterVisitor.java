@@ -15,47 +15,67 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
-
-import static org.dcc.portal.pql.meta.AbstractTypeModel.SCORE;
+package org.dcc.portal.pql.es.visitor.aggs;
 
 import java.util.Optional;
 
-import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.ast.SortNode;
-import org.dcc.portal.pql.es.model.Order;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.qe.QueryContext;
 
 /**
- * If sorting does not contain field {@code _score} or is not sorted. Add sorting by {@code _score} descending.
+ * This visitor removes a {@link FilterAggregationNode} that has an empty filter and moves it's child (
+ * {@link TermsAggregationNode}) one level up.
  */
-public class ScoreSortVisitor extends NodeVisitor<ExpressionNode, Void> {
+@Slf4j
+public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
+
+  private static final ExpressionNode SKIP_NODE = null;
 
   @Override
-  public ExpressionNode visitRoot(@NonNull RootNode node, Optional<Void> context) {
-    val sortNode = Nodes.getOptionalChild(node, SortNode.class);
-    if (sortNode.isPresent()) {
-      sortNode.get().accept(this, context);
-    } else {
-      val newSortNode = new SortNode();
-      newSortNode.addField(SCORE, Order.DESC);
-      node.addChildren(newSortNode);
+  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
+    val aggsNode = Nodes.getOptionalChild(node, AggregationsNode.class);
+    if (aggsNode.isPresent()) {
+      aggsNode.get().accept(this, Optional.empty());
     }
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitSort(@NonNull SortNode node, Optional<Void> context) {
-    if (!node.getFields().containsKey(SCORE)) {
-      node.addField(SCORE, Order.DESC);
+  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+    for (int i = 0; i < node.childrenCount(); i++) {
+      val child = node.getChild(i);
+      val visitResult = child.accept(this, Optional.empty());
+      if (visitResult != SKIP_NODE) {
+        node.setChild(i, visitResult);
+      }
     }
 
     return node;
+  }
+
+  @Override
+  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
+    if (node.getFilters().childrenCount() == 0) {
+      log.debug("FilterAggregationNode has no filters. Requesting to remove.");
+      return node.getFirstChild();
+    }
+
+    return SKIP_NODE;
+  }
+
+  @Override
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+    return SKIP_NODE;
   }
 
 }

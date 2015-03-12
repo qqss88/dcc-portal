@@ -15,31 +15,41 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast;
+package org.dcc.portal.pql.es.visitor.util;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor.REMOVE_NODE;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.val;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
+import org.junit.Before;
+import org.junit.Test;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class FunctionScoreQueryNode extends ExpressionNode {
+public class EmptyNodesCleanerVisitorTest {
 
-  @NonNull
-  String script;
+  EmptyNodesCleanerVisitor visitor;
 
-  public FunctionScoreQueryNode(@NonNull String script, ExpressionNode... children) {
-    super(children);
-    this.script = script;
+  @Before
+  public void setUp() {
+    visitor = new EmptyNodesCleanerVisitor();
   }
 
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitFunctionScoreQuery(this, context);
+  @Test
+  public void visitRootTest() {
+    val result = visitor.visitRoot(new RootNode(new FilterNode(new BoolNode(new MustBoolNode()))), Optional.empty());
+    assertThat(result.childrenCount()).isEqualTo(0);
+  }
+
+  @Test
+  public void visitMustBoolTest() {
+    assertThat(visitor.visitMustBool(new MustBoolNode(), Optional.empty())).isEqualTo(REMOVE_NODE);
   }
 
 }
