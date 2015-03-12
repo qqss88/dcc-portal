@@ -96,7 +96,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
 
   private static void verifyQueryChildren(QueryNode node) {
     checkState(node.childrenCount() < 3, format("The QueryNode has more than 2 children. Valid children: "
-        + "QueryNode, FilterNode. The QueryNode: \n{}", node));
+        + "QueryNode, FilterNode. The QueryNode: \n%s", node));
 
     if (node.childrenCount() > 1) {
       verifyProperChildren(node);

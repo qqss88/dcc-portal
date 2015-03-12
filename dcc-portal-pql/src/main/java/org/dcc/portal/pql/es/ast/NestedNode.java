@@ -41,7 +41,7 @@ public class NestedNode extends ExpressionNode {
   @NonNull
   ScoreMode scoreMode;
 
-  public NestedNode(@NonNull String path, ExpressionNode... children) {
+  public NestedNode(String path, ExpressionNode... children) {
     this(path, DEFAULT_SCORE_MODE, children);
   }
 
