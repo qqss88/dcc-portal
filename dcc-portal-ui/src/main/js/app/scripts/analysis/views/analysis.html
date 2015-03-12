@@ -7,13 +7,14 @@
 <article class="full">
     <div class="t_tabs t_tabs__isolated">
         <div class="t_tabs__tab t_tabs__tab__donor" 
-            data-ng-click="currentTab = 'analysis'" 
-            data-ng-class="{active: currentTab === 'analysis'}" 
-            data-nested data-href="analysis">Set Analyses</div>
-        <div class="t_tabs__tab t_tabs__tab__donor" 
             data-ng-click="currentTab = 'sets'" 
             data-ng-class="{active: currentTab === 'sets'}" 
-            data-nested data-href="analysis/sets">Manage Sets</div>
+            data-nested data-href="analysis/sets">Saved Sets</div>
+
+        <div class="t_tabs__tab t_tabs__tab__donor" 
+            data-ng-click="currentTab = 'analysis'" 
+            data-ng-class="{active: currentTab === 'analysis'}" 
+            data-nested data-href="analysis">Analyses</div>
     </div>
 
     <div class="t_tab_pane" data-ng-class="{active: currentTab === 'sets'}">

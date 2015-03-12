@@ -1,13 +1,7 @@
 <div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC">
-    <h3>Create Analysis</h3>
-    <!--
+    <h3>Conduct Analysis</h3>
     <div>
-    You can create data analyses here to conduct research on gene, donor and mutations. For detailed documentation of this feature, 
-    please see the <a href="https://docs.icgc.org/methods#setanalysis">Set Analysis</a> documentation.
-    </div>
-    -->
-    <div>
-        <span>1. Select the analysis</span>
+        <span>1. Select the analysis you want to perform</span>
         <div>
             <div style="display:inline-block; margin-right:1rem">
                 <span class="t_button"
@@ -37,12 +31,32 @@
         </div>
     </div>
     <br> 
-    <div data-ng-show="NAC.analysisType">
+    <div data-ng-if="!NAC.analysisType">
+        <table class="table table-selectable">
+            <thead>
+                <th>Item type</th>
+                <th>Name</th>
+                <th>Note</th>
+                <th class="text-right"># of items</th>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="item in NAC.allSets" data-ng-init="checked=false">
+                    <td>{{item.type | trans:true}}</td>
+                    <td>{{item.name}}</td>
+                    <td style="max-width: 30rem">{{item.description}}</td>
+                    <td class="text-right"> 
+                        <a href="{{item.advLink}}">{{item.count | number}}</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div data-ng-if="NAC.analysisType">
 
         <!-- enrichment -->
         <div data-ng-if="NAC.analysisType === 'enrichment'">
             <span>2. Select the gene set you want to analyze</span>
-            <table class="table table-selectable">
+            <table class="table table-selectable" style="margin-bottom:0.25rem">
                 <thead>
                     <th></th>
                     <th>Item type</th>
@@ -51,9 +65,11 @@
                     <th class="text-right"># of items</th>
                 </thead>
                 <tbody>
-                    <tr data-ng-repeat="item in NAC.filteredList" data-ng-init="checked=false">
+                    <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                         <td class="text-center" style="width:2rem">
-                            <span class="t_button" data-ng-click="NAC.launchEnrichment(item)">Run</span>
+                            <i class="{{NAC.selectedIds.indexOf(item.id) === -1?'icon-circle-empty':'icon-dot-circled'}}"
+                               data-ng-click="NAC.selectedIds=[item.id]"
+                               data-ng-if="NAC.isInFilter(item)"></i>
                         </td>
                         <td>{{item.type | trans:true}}</td>
                         <td>{{item.name}}</td>
@@ -64,14 +80,18 @@
                     </tr>
                 </tbody>
             </table>
+            <button class="t_button" 
+                data-ng-disabled="NAC.selectedIds.length !== 1"
+                data-ng-click="NAC.launchEnrichment(NAC.selectedIds[0])">Run</button>
+
         </div>
 
         <!-- phenotype -->
         <div data-ng-if="NAC.analysisType === 'phenotype'">
             <div>2. Select 2-3 donor sets</div>
 
-            <div data-ng-if="NAC.filteredList.length > 0">
-                <table class="table table-selectable" style="margin-bottom:0.25rem" data-ng-if="NAC.filteredList.length > 0">
+            <div> 
+                <table class="table table-selectable" style="margin-bottom:0.25rem">
                     <thead>
                         <th></th>
                         <th>Item type</th>
@@ -80,9 +100,9 @@
                         <th class="text-right"># of items</th>
                     </thead>
                     <tbody>
-                        <tr data-ng-repeat="item in NAC.filteredList"> 
+                        <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:1rem" data-ng-click="NAC.toggle(item.id)">
-                               <span>
+                               <span data-ng-if="NAC.isInFilter(item)">
                                   <i data-ng-class="{'icon-check-empty': NAC.selectedIds.indexOf(item.id) === -1, 'icon-check': NAC.selectedIds.indexOf(item.id) >=0}"></i>
                                </span>
                             </td>
@@ -106,15 +126,26 @@
         <div data-ng-if="NAC.analysisType === 'set'">
             <div>
                 <span>2. Select 2-3 sets the type: </span>
+                <span data-ng-click="NAC.filteredSetType = 'donor'; NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []">
+                   <i class="{{NAC.filteredSetType !== 'donor'? 'icon-circle-empty':'icon-dot-circled'}}"></i>Donor
+                </span>
+                <span data-ng-click="NAC.filteredSetType = 'gene'; NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []">
+                   <i class="{{NAC.filteredSetType !== 'gene'? 'icon-circle-empty':'icon-dot-circled'}}"></i>Gene
+                </span>
+                <span data-ng-click="NAC.filteredSetType = 'mutation'; NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []">
+                   <i class="{{NAC.filteredSetType !== 'mutation'? 'icon-circle-empty':'icon-dot-circled'}}"></i>Mutation
+                </span>
+                <!--
                 <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="donor"><span> Donor </span>
                 <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="mutation"><span> Mutation </span>
                 <input type="radio" data-ng-model="NAC.filteredSetType" data-ng-change="NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []" value="gene"><span> Gene </span>
+                -->
             </div>
             <div data-ng-if="NAC.filteredList.length === 0">
-               Not {{NAC.filteredSetType}} sets available.
+               You have no {{NAC.filteredSetType}} sets available.
             </div>
-            <div data-ng-if="NAC.filteredList.length > 0">
-                <table class="table table-selectable" style="margin-bottom:0.25rem" data-ng-if="NAC.filteredList.length > 0">
+            <div> 
+                <table class="table table-selectable" style="margin-bottom:0.25rem"> 
                     <thead>
                         <th></th>
                         <th>Item type</th>
@@ -123,9 +154,9 @@
                         <th class="text-right"># of items</th>
                     </thead>
                     <tbody>
-                        <tr data-ng-repeat="item in NAC.filteredList"> 
-                            <td class="text-center" style="width:1rem" data-ng-click="NAC.toggle(item.id)">
-                               <span>
+                        <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
+                            <td class="text-center" style="width:2rem" data-ng-click="NAC.toggle(item.id)">
+                               <span data-ng-if="NAC.isInFilter(item)">
                                   <i data-ng-class="{'icon-check-empty': NAC.selectedIds.indexOf(item.id) === -1, 'icon-check': NAC.selectedIds.indexOf(item.id) >=0}"></i>
                                </span>
                             </td>

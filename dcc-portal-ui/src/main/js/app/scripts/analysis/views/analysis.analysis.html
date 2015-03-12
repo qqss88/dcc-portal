@@ -4,16 +4,27 @@
     -->
     <div class="sidepanel" data-ng-controller="AnalysisListController as ListController">
 
+        <!--
+        <div class="t_button" data-ng-click="newAnalysis()" style="margin-right:0.5rem">
+            <i class="icon-plus"></i>Conduct Analysis
+        </div>
+        -->
         <div>
-            <span class="t_button" data-ng-click="ListController.newAnalysis()" data-ng-disabled="!analysisId"><i class="icon-plus"></i>Create New</span>
-            <span class="t_button t_button__destructive" data-ng-click="ListController.removeAllAnalyses()" data-ng-disabled="ListController.analysisList.length===0"
+            <button class="t_button t_button__destructive" data-ng-click="ListController.removeAllAnalyses()" 
+                data-ng-disabled="ListController.analysisList.length === 0"
                 data-tooltip="Delete All Analyses">
-                <i class="icon-trash"></i>
-            </span>
+                <i class="icon-trash"></i> Delete all
+            </button>
+            <button class="t_button" data-ng-click="newAnalysis()" style="margin-left:0.5rem">
+                <i class="icon-plus"></i>Conduct Analysis
+            </button>
         </div>
 
-        <span>{{ListController.analysisList.length | number}} Existing analyses</span>
-        <div class="select-list" style="margin-top: 0rem; max-height:40rem">
+        <div class="select-list" style="margin-top: 0.5rem" data-ng-if="ListController.analysisList.length === 0">
+        You have no saved analyses.
+        </div>
+
+        <div class="select-list" style="margin-top: 0.5rem; max-height:40rem" data-ng-if="ListController.analysisList.length > 0">
             <div class="select-list-item"
                  data-ng-repeat="item in ListController.analysisList" 
                  data-ng-click="ListController.getAnalysis(item.id, item.type)"
@@ -45,7 +56,7 @@
     
 
     <!--<div class="wide" style="width:73%">-->
-    <div class="content">
+    <div class="content ng-cloak">
 
         <div style="margin: 0rem 1rem" data-ng-if="!analysisId">
             <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>

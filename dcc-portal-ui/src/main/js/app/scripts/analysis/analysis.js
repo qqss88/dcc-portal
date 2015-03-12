@@ -49,7 +49,7 @@
    *   - AnalysisListController: manage saved analysis
    *   - NewAnalysisController: creates new analysis
    */
-  module.controller('AnalysisController', function ($scope, $timeout, $state, Page, AnalysisService) {
+  module.controller('AnalysisController', function ($scope, $timeout, $state, $location, Page, AnalysisService) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
@@ -75,6 +75,15 @@
     });
 
 
+    $scope.newAnalysis = function() {
+      console.log('new analysis request');
+
+      if ($scope.analysisId !== undefined) {
+        $location.path('analysis');
+      } else {
+        $scope.$broadcast('analysis::reload', {});
+      }
+    };
 
     var analysisPromise;
     var pollTimeout;

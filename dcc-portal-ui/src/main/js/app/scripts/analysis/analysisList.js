@@ -30,7 +30,7 @@
     var REMOVE_ALL = 'Are you sure you want to remove all analyses?';
 
     _this.newAnalysis = function() {
-      $location.path('analysis');
+      $location.path('analysis').search({});
     };
 
     _this.getAnalysis = function(id, type) {
