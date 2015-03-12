@@ -17,8 +17,8 @@
  */
 package org.icgc.dcc.portal.model;
 
-import lombok.Value;
 import lombok.Builder;
+import lombok.Value;
 
 @Value
 @Builder
@@ -28,6 +28,7 @@ public class Settings {
    * Release settings.
    */
   String releaseDate;
+  int dataVersion;
 
   /**
    * Download settings.

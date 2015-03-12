@@ -134,10 +134,10 @@ public class EntitySet extends BaseEntitySet implements Identifiable<UUID> {
    * This constructor is used for instantiating an existing entity set and setting the status to State.FINISHED.
    */
   public static EntitySet createForStatusFinished(final UUID id, final String name, final String description,
-      final Type type, final long count) {
+      final Type type, final long count, final int dataVersion) {
     checkArgument(count >= 0, "The 'count' argument must be a positive integer.");
 
-    return new EntitySet(id, State.FINISHED, count, name, description, type, null);
+    return new EntitySet(id, State.FINISHED, count, name, description, type, dataVersion);
   }
 
   @RequiredArgsConstructor

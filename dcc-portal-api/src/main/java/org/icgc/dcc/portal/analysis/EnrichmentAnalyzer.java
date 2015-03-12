@@ -109,12 +109,13 @@ public class EnrichmentAnalyzer {
 
     log.info("[{}] Getting analysis...", analysisId);
     val analysis = analysisRepository.find(analysisId);
+    val dataVersion = analysis.getVersion();
 
     // Updated state for UI polling
     analysis.setState(ANALYZING);
 
     log.info("[{}] Updating initial analysis @ {} ...", analysisId, watch);
-    analysisRepository.update(analysis);
+    analysisRepository.update(analysis, dataVersion);
 
     try {
 
@@ -187,7 +188,7 @@ public class EnrichmentAnalyzer {
       analysis.setState(POST_PROCESSING);
 
       log.info("[{}] Updating initial analysis @ {} ...", analysisId, watch);
-      analysisRepository.update(analysis);
+      analysisRepository.update(analysis, dataVersion);
 
       /**
        * Phase 2: Post-Processing
@@ -200,7 +201,7 @@ public class EnrichmentAnalyzer {
       analysis.setState(FINISHED);
 
       log.info("[{}] Updating final analysis @ {} ...", analysisId, watch);
-      analysisRepository.update(analysis);
+      analysisRepository.update(analysis, dataVersion);
 
       log.info("Finished analyzing in {}", watch);
     } catch (Throwable t) {
@@ -208,7 +209,7 @@ public class EnrichmentAnalyzer {
       analysis.setState(ERROR);
 
       log.error("[{}] Error analyzing @ {}: {}", new Object[] { analysisId, watch, t.getMessage() });
-      analysisRepository.update(analysis);
+      analysisRepository.update(analysis, dataVersion);
 
       throw t;
     }
