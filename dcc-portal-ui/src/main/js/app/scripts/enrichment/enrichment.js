@@ -97,7 +97,7 @@
       promise.then(function(result) {
         var id = result.id;
         $modalInstance.dismiss('cancel');
-        $location.path('/analysis/enrichment/' + id).search({});
+        $location.path('/analysis/view/enrichment/' + id).search({});
       });
     };
 

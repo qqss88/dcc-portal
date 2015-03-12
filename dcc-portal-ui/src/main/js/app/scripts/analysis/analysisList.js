@@ -41,7 +41,7 @@
       }
 
       if (id) {
-        $location.path('analysis/' + routeType + '/' + id);
+        $location.path('analysis/view/' + routeType + '/' + id);
       } else {
         $location.path('analysis');
       }
@@ -57,17 +57,8 @@
       }
     };
 
-    _this.analysisName = function(type) {
-      if (['set', 'union'].indexOf(type) >= 0) {
-        return 'Set Operations';
-      } else if (type === 'enrichment') {
-        return 'Enrichment Analysis';
-      } else if (type === 'phenotype') {
-        return 'Phenotype Analysis';
-      } else {
-        return '???';
-      }
-    };
+    _this.analysisName = AnalysisService.analysisName;
+
 
     _this.remove = function(id) {
       var confirmRemove = window.confirm(REMOVE_ONE);

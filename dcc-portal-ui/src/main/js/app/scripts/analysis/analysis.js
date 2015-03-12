@@ -23,11 +23,19 @@
         tab: 'sets'
       }
     });
-    $stateProvider.state('analyses.analysis', {
-      url: '/:type/:id',
+
+    // FIXME: this is weird...
+    $stateProvider.state('analyses.viewhome', {
+      url: '/view',
+      data: {
+        tab: 'view'
+      }
+    });
+    $stateProvider.state('analyses.view', {
+      url: '/view/:type/:id',
       //reloadOnSearch: false,
       data: {
-        tab: 'analysis'
+        tab: 'view'
       }
     });
   });
@@ -207,6 +215,20 @@
       analysisList = [];
       localStorageService.set(ANALYSIS_ENTITY, analysisList);
     };
+
+    this.analysisName = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Set Operations';
+      } else if (type === 'enrichment') {
+        return 'Enrichment Analysis';
+      } else if (type === 'phenotype') {
+        return 'Phenotype Analysis';
+      } else {
+        return '???';
+      }
+    };
+
+
 
     /**
      * Add analysis to local storage

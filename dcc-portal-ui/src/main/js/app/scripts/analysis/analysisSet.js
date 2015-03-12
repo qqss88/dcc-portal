@@ -3,7 +3,7 @@
 
   var module = angular.module('icgc.analysis.controllers');
 
-  module.controller('SavedSetController', function($scope, $window, $timeout, $modal, SetService) {
+  module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal, SetService) {
 
     var _this = this;
     var syncSetTimeout;
@@ -24,6 +24,10 @@
           _this.selectedSets.push(set);
         }
       });
+    };
+
+    _this.newAnalysis = function() {
+      $location.path('analysis');
     };
 
     /* Select all / de-select all */

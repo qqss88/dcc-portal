@@ -15,9 +15,11 @@
                 data-tooltip="Delete All Analyses">
                 <i class="icon-trash"></i> Delete all
             </button>
+            <!--
             <button class="t_button" data-ng-click="newAnalysis()" style="margin-left:0.5rem">
                 <i class="icon-plus"></i>Conduct Analysis
             </button>
+            -->
         </div>
 
         <div class="select-list" style="margin-top: 0.5rem" data-ng-if="ListController.analysisList.length === 0">
@@ -58,9 +60,11 @@
     <!--<div class="wide" style="width:73%">-->
     <div class="content ng-cloak">
 
+        <!--
         <div style="margin: 0rem 1rem" data-ng-if="!analysisId">
             <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>
         </div>
+        -->
 
         <div style="margin: 0rem 1rem" data-ng-if="analysisId">
             <div data-ng-if="analysisType === 'enrichment'" >

@@ -1,8 +1,45 @@
-<div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC">
+<section>
+<div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC" class="analysis wide">
     <h3>Conduct Analysis</h3>
+
     <div>
-        <span>1. Select the analysis you want to perform</span>
+        <a href="" data-ng-click="NAC.analysisType = null"><i class="icon-beaker"></i>Select analysis</a>  
+        <span data-ng-show="NAC.analysis !== null">&gt;</span>
+        <a href="" data-ng-show="NAC.analysisType !== null">Select sets for {{NAC.analysisName(NAC.analysisType)}}</a>
+    </div>
+
+    <div data-ng-show="NAC.analysisType === null">
+        <!--<span>Select the analysis you want to perform</span>-->
         <div>
+            <div class="analysis-tiles">
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='enrichment'">
+                    <i class="icon-beaker"></i>Enrichment Analysis <br>
+                    <span class="analysis-tile-detail">This is the short description for gene set enrichment analysis....placeholder</span>
+                </div>
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='phenotype'">
+                    <i class="icon-beaker"></i>Phenotype Analysis <br>
+                    <span class="analysis-tile-detail">Compare two or three sets of donors</span>
+                </div>
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='set'">
+                    <i class="icon-beaker"></i>Set Analysis <br>
+                    <span class="analysis-tile-detail">This is the short description for gene set enrichment analysis....placeholder</span>
+                </div>
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='???'">
+                    <i class="icon-beaker"></i>Mutation Frequency<br>
+                    <span class="analysis-tile-detail">This is the short description for gene set enrichment analysis....placeholder</span>
+                </div>
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='???'">
+                    <i class="icon-beaker"></i>Some other stuff<br>
+                    <span class="analysis-tile-detail">This is the short description for gene set enrichment analysis....placeholder</span>
+                </div>
+                <div class="analysis-tile" data-ng-click="NAC.analysisType='???'">
+                    <i class="icon-beaker"></i>Some other stuff<br>
+                    <span class="analysis-tile-detail">This is the short description for gene set enrichment analysis....placeholder</span>
+                </div>
+
+            </div>
+
+<!--
             <div style="display:inline-block; margin-right:1rem">
                 <span class="t_button"
                     data-ng-class="{t_button__active: NAC.analysisType==='enrichment'}"
@@ -21,6 +58,7 @@
                     data-ng-click="NAC.analysisType='phenotype'; NAC.applyFilter('phenotype')">
                     <i class="icon-beaker"></i>Phenotype Comparison</span>
             </div>
+            -->
             <!--
             <div style="display:inline-block; margin-right:1rem">
                 <span class="t_button"
@@ -31,6 +69,7 @@
         </div>
     </div>
     <br> 
+    <!--
     <div data-ng-if="!NAC.analysisType">
         <table class="table table-selectable">
             <thead>
@@ -51,11 +90,12 @@
             </tbody>
         </table>
     </div>
+    -->
     <div data-ng-if="NAC.analysisType">
 
         <!-- enrichment -->
         <div data-ng-if="NAC.analysisType === 'enrichment'">
-            <span>2. Select the gene set you want to analyze</span>
+            <span>Select the gene set you want to analyze</span>
             <table class="table table-selectable" style="margin-bottom:0.25rem">
                 <thead>
                     <th></th>
@@ -88,7 +128,7 @@
 
         <!-- phenotype -->
         <div data-ng-if="NAC.analysisType === 'phenotype'">
-            <div>2. Select 2-3 donor sets</div>
+            <div>Select 2-3 donor sets</div>
 
             <div> 
                 <table class="table table-selectable" style="margin-bottom:0.25rem">
@@ -125,7 +165,7 @@
         <!-- set -->
         <div data-ng-if="NAC.analysisType === 'set'">
             <div>
-                <span>2. Select 2-3 sets the type: </span>
+                <span>Select 2-3 sets the type: </span>
                 <span data-ng-click="NAC.filteredSetType = 'donor'; NAC.applyFilter(NAC.analysisType); NAC.selectedIds = []">
                    <i class="{{NAC.filteredSetType !== 'donor'? 'icon-circle-empty':'icon-dot-circled'}}"></i>Donor
                 </span>
@@ -179,5 +219,5 @@
 
     </div>
 </div>
-
+</section>
 

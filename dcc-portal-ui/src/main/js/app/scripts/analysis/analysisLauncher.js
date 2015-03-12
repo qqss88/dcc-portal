@@ -10,7 +10,9 @@
    * - set operations
    * - phenotype analysis
    */
-  module.controller('NewAnalysisController', function($scope, $modal, $location, Restangular, SetService, Extensions) {
+  module.controller('NewAnalysisController',
+    function($scope, $modal, $location, AnalysisService, Restangular, SetService, Extensions) {
+
     var _this = this;
 
     _this.analysisType = null; // One of "enrichment", "set", "phenotype" or "coverage"
@@ -19,6 +21,8 @@
     _this.selectedIds = [];
 
     _this.allSets = SetService.getAll();
+    
+    _this.analysisName = AnalysisService.analysisName;
 
     _this.toggle = function(setId) {
       if (_this.selectedIds.indexOf(setId) >= 0) {
@@ -66,7 +70,7 @@
       console.log('launching phenotype analysis with', setIds);
 
       // FIXME: Stub
-      $location.path('analysis/phenotype/test');
+      $location.path('analysis/view/phenotype/test');
     };
 
 
@@ -81,7 +85,7 @@
         if (!data.id) {
           console.log('cannot create set operation');
         }
-        $location.path('analysis/set/' + data.id);
+        $location.path('analysis/view/set/' + data.id);
       });
     };
 
