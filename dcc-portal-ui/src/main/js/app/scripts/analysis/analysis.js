@@ -64,6 +64,10 @@
 
 
     $scope.currentTab = $state.current.data.tab || 'analysis';
+    $scope.savedAnalyses = AnalysisService.getAll();
+
+    $scope.AnalysisService = AnalysisService;
+
     // $scope.analysisId = $state.params.id;
     // $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
 

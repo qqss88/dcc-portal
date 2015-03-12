@@ -17,6 +17,7 @@
             data-nested data-href="analysis">Conduct Analyses</div>
 
         <div class="t_tabs__tab t_tabs__tab__donor" 
+            data-ng-show="AnalysisService.getAll().length > 0"
             data-ng-click="currentTab = 'view'" 
             data-ng-class="{active: currentTab === 'view'}" 
             data-nested data-href="analysis/view">View Saved Analyses</div>

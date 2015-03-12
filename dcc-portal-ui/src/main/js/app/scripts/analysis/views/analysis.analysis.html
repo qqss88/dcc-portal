@@ -45,7 +45,7 @@
                    <small data-ng-if="item.type === 'phenotype'" class="t_suggest_detail">
                    Donor
                    </small>
-                   <span class="" data-ng-click="$event.stopPropagation(); ListController.remove(item.id);">
+                   <span class="" data-ng-click="$event.stopPropagation(); ListController.remove(item.id, analysisId);">
                        <i class="icon-cancel pull-right select-list-cancel"
                           data-tooltip="Delete Analysis"
                           data-tooltip-placement="right">
