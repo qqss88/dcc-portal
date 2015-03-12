@@ -178,13 +178,13 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
           ]
         };
 
-      $scope.$watch('items', function (newValue, oldValue) {
-        if (!newValue || angular.equals(newValue, oldValue)) {
+      $scope.$watch('items', function (newValue) {
+        // if (!newValue || angular.equals(newValue, oldValue)) {
+        if (!newValue) {
           return;
         }
         c.series[0].setData(formatSeriesData(newValue), true);
       });
-
       c = new Highcharts.Chart(chartsDefaults);
 
       $scope.$on('$destroy', function () {
