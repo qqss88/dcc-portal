@@ -83,6 +83,9 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(string(MUTATION_LOCATION, MUTATION_LOCATION));
 
     fields.add(string(SCORE, SCORE));
+    fields.add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID));
+    fields.add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID));
+    fields.add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID));
 
     return fields.build();
   }
@@ -201,6 +204,10 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         .put(BIOLOGICAL_PROCESS, "gene.go_term.biological_process")
         .put(CELLULAR_COMPONENT, "gene.go_term.cellular_component")
         .put(MOLECULAR_FUNCTION, "gene.go_term.molecular_function")
+        .put(DONOR_ENTITY_SET_ID, "_donor_id")
+        .put(GENE_ENTITY_SET_ID, "gene._gene_id")
+        .put(MUTATION_ENTITY_SET_ID, "gene.ssm._mutation_id")
+        .put(LOOKUP_TYPE, "donor-ids")
         .build();
   }
 

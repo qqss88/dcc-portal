@@ -17,9 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import static org.icgc.dcc.portal.model.IndexModel.Type.GENE_CENTRIC;
 import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
@@ -83,47 +81,24 @@ public class ScoreMutationQueryVisitorTest {
   }
 
   @Test
-  public void withQueryNodeTest_noNested() {
+  public void withQueryNodeTest_withFilter() {
     val root = createAst("eq(id, 'ID1')");
-    root.addChildren(new QueryNode(root.getFirstChild()));
-
-    log.debug("Before visitor: {}", root);
-    val result = visit(root);
-    log.debug("{}", result);
-
-    fail("Implement");
-  }
-
-  @Test
-  public void withQueryNodeTest_withNested() {
-    val root = createAst("nested(ssm_occurrence, eq(id, 'ID1'))");
+    val originalFilter = Nodes.cloneNode(root.getFirstChild());
     root.addChildren(new QueryNode(root.getFirstChild()));
     val result = visit(root);
     log.debug("{}", result);
 
-    // Filter below nested node (BoolNode)
-    val originalNesteNodeChild = Nodes.cloneNode(getNestedNodeFromQuery(root).getFirstChild());
-    log.debug("originalNesteNodeChild: \n{}", originalNesteNodeChild);
-
-    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode
-    val nestedNode = getNestedNodeFromQuery(result);
+    // QueryNode - NestedNode - ConstantScore - FilterNode
+    val nestedNode = (NestedNode) result.getChild(1).getFirstChild();
     log.debug("NestedNode: \n{}", nestedNode);
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
     assertThat(nestedNode.getPath()).isEqualTo("ssm_occurrence");
     assertThat(nestedNode.getScoreMode()).isEqualTo(ScoreMode.TOTAL);
 
     val constantScoreNode = (ConstantScoreNode) nestedNode.getFirstChild();
+    assertThat(constantScoreNode.getBoost()).isEqualTo(1f);
     assertThat(constantScoreNode.childrenCount()).isEqualTo(1);
-    assertThat(constantScoreNode.getFirstChild()).isEqualTo(originalNesteNodeChild);
-  }
-
-  private static NestedNode getNestedNodeFromQuery(ExpressionNode root) {
-
-    val queryNode = Nodes.getOptionalChild(root, QueryNode.class);
-    checkState(queryNode.isPresent());
-
-    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode
-    return (NestedNode) queryNode.get().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(constantScoreNode.getFirstChild()).isEqualTo(originalFilter);
   }
 
   private static ExpressionNode createAst(@NonNull String pql) {

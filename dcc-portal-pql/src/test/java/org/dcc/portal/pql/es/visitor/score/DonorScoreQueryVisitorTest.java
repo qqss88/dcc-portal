@@ -23,6 +23,7 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import java.util.Optional;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FunctionScoreQueryNode;
@@ -33,6 +34,7 @@ import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.AggregationsResolverVisitor;
 import org.junit.Test;
 
+@Slf4j
 public class DonorScoreQueryVisitorTest {
 
   DonorScoreQueryVisitor visitor = new DonorScoreQueryVisitor();
@@ -58,6 +60,7 @@ public class DonorScoreQueryVisitorTest {
   }
 
   private static void assertCorrectStructure(ExpressionNode root) {
+    log.debug("Asserting ES AST: {}", root);
     val queryNodes = Nodes.filterChildren(root, QueryNode.class);
     assertThat(queryNodes).hasSize(1);
 

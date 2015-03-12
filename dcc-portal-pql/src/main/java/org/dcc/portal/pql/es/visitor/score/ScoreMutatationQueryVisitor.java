@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 
 import java.util.Optional;
@@ -31,6 +33,7 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -39,21 +42,14 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 /**
  * Scores queries made against the MutationCentric type.<br>
  * <br>
- * Sets scoring mode on the nested on 'ssm_occurrence' queries to 'sum' and wraps the nested's query child query in a
- * constant score query with boost 1.<br>
- * <br>
- * If there is no nested query in the current request the class creates one.<br>
+ * Creates a NestedNode with a ConstantScoreNode child. Sets scoring mode on the nested on 'ssm_occurrence' queries to
+ * 'total'. The ConstantScoreNode has boost 1. If the original QueryNode has a FilterNode then the FilterNode is added
+ * as a child of the ConstantScoreNode.<br>
  * <br>
  * <b>NB:</b> This visitor must be run as the latest one, after all the other processing rules applied.
  */
 @Slf4j
 public class ScoreMutatationQueryVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
-
-  // Implementation details:
-  // If any visited child returns an Optional<NestedNode> that means that the QueryNode contains a nested node on the
-  // NESTED_PATH and the correct processing happened in the visitNested method.
-  // If a method returns an empty Optional that means neither the child nor its children are nested node on the
-  // NESTED_PATH. Thus, NestedNode with a ConstantScoreNode child must be created.
 
   private static final float BOOST = 1f;
   private static final String NESTED_PATH = "ssm_occurrence";
@@ -81,15 +77,16 @@ public class ScoreMutatationQueryVisitor extends NodeVisitor<Optional<Expression
   }
 
   private void processQueryNode(QueryNode queryNode, Optional<QueryContext> context) {
-    for (val child : queryNode.getChildren()) {
-      val visitResult = child.accept(this, context);
-      if (visitResult.isPresent()) {
-        // Nothing to do. There is a proper nested node which has been processed
-        // FIXME: How correctly process nested fields which are nested on a deeper level (ssm_occurrence.observation)?
-        // FIXME: How process multiple fields on the same nested level but which are not explicitly nested
-        return;
-      }
-    }
+    verifyQueryNodeStructure(queryNode);
+    val filterNode = Nodes.cloneNode(queryNode.getFirstChild());
+    val constantScoreNode = new ConstantScoreNode(BOOST, filterNode);
+    val nestedNode = new NestedNode(NESTED_PATH, ScoreMode.TOTAL, constantScoreNode);
+    queryNode.setChild(0, nestedNode);
+  }
+
+  private void verifyQueryNodeStructure(QueryNode queryNode) {
+    checkState(queryNode.childrenCount() == 1 && queryNode.getFirstChild() instanceof FilterNode,
+        format("Malformed QueryNode. At this stage a QueryNode can have a FilterNode child only. %s", queryNode));
   }
 
   private static ExpressionNode createQueryNode(RootNode node) {

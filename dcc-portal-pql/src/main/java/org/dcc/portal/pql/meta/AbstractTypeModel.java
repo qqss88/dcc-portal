@@ -56,7 +56,16 @@ public abstract class AbstractTypeModel {
   public static final String GENE_LOCATION = "gene.location";
   public static final String MUTATION_LOCATION = "mutation.location";
 
+  public static final String ENTITY_SET_ID = "entitySetId";
+  public static final String DONOR_ENTITY_SET_ID = format("%s.%s", "donor", ENTITY_SET_ID);
+  public static final String GENE_ENTITY_SET_ID = format("%s.%s", "gene", ENTITY_SET_ID);
+  public static final String MUTATION_ENTITY_SET_ID = format("%s.%s", "mutation", ENTITY_SET_ID);
+
   public static final String SCORE = "_score";
+
+  public static final String LOOKUP_PATH = "lookup.path";
+  public static final String LOOKUP_INDEX = "lookup.index";
+  public static final String LOOKUP_TYPE = "lookup.type";
 
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
@@ -67,30 +76,10 @@ public abstract class AbstractTypeModel {
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
     fieldsByAlias = initFieldsByAlias(fields);
     log.debug("FieldsByAlias Map: {}", fieldsByAlias);
-    this.fieldsByInternalAlias = internalAliases;
+    this.fieldsByInternalAlias = defineInternalAliases(internalAliases);
   }
 
   public abstract String getType();
-
-  private static Map<String, FieldModel> initFieldsByFullPath(List<? extends FieldModel> fields) {
-    val result = Maps.<String, FieldModel> newHashMap();
-    val visitor = new CreateFullyQualifiedNameVisitor();
-    for (val field : fields) {
-      result.putAll(field.accept(visitor));
-    }
-
-    return result;
-  }
-
-  private static Map<String, String> initFieldsByAlias(List<? extends FieldModel> fields) {
-    val result = new ImmutableMap.Builder<String, String>();
-    val visitor = new CreateAliasVisitor();
-    for (val field : fields) {
-      result.putAll(field.accept(visitor));
-    }
-
-    return result.build();
-  }
 
   /**
    * Checks if {@code field} is nested field.
@@ -110,37 +99,6 @@ public abstract class AbstractTypeModel {
     }
 
     return false;
-  }
-
-  private List<String> split(String fullName) {
-    val result = new ImmutableList.Builder<String>();
-    val list = Splitter.on(FIELD_SEPARATOR).splitToList(fullName);
-    String prefix = "";
-    for (int i = 0; i < list.size(); i++) {
-      result.add(prefix + list.get(i));
-      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
-    }
-
-    return result.build().reverse();
-  }
-
-  public final String getNestedPath(@NonNull String field) {
-    val fullName = getFullName(field);
-    for (val token : split(fullName)) {
-      val tokenByFullPath = fieldsByFullPath.get(token);
-      if (tokenByFullPath.isNested()) {
-        return token;
-      }
-    }
-
-    throw new IllegalArgumentException("Can't get nested path for a non-nested field");
-  }
-
-  private String getFullName(String path) {
-    val uiAlias = fieldsByAlias.get(path);
-
-    return uiAlias == null ? path : uiAlias;
-
   }
 
   /**
@@ -180,6 +138,68 @@ public abstract class AbstractTypeModel {
     }
 
     return builder.toString();
+  }
+
+  private List<String> split(String fullName) {
+    val result = new ImmutableList.Builder<String>();
+    val list = Splitter.on(FIELD_SEPARATOR).splitToList(fullName);
+    String prefix = "";
+    for (int i = 0; i < list.size(); i++) {
+      result.add(prefix + list.get(i));
+      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
+    }
+
+    return result.build().reverse();
+  }
+
+  public final String getNestedPath(@NonNull String field) {
+    val fullName = getFullName(field);
+    for (val token : split(fullName)) {
+      val tokenByFullPath = fieldsByFullPath.get(token);
+      if (tokenByFullPath.isNested()) {
+        return token;
+      }
+    }
+
+    throw new IllegalArgumentException("Can't get nested path for a non-nested field");
+  }
+
+  private String getFullName(String path) {
+    val uiAlias = fieldsByAlias.get(path);
+
+    return uiAlias == null ? path : uiAlias;
+
+  }
+
+  /**
+   * Defines common aliases and adds type specific ones.
+   */
+  private Map<String, String> defineInternalAliases(Map<String, String> internalAliases) {
+    return new ImmutableMap.Builder<String, String>()
+        .put(LOOKUP_INDEX, "terms-lookup")
+        .put(LOOKUP_PATH, "values")
+        .putAll(internalAliases)
+        .build();
+  }
+
+  private static Map<String, FieldModel> initFieldsByFullPath(List<? extends FieldModel> fields) {
+    val result = Maps.<String, FieldModel> newHashMap();
+    val visitor = new CreateFullyQualifiedNameVisitor();
+    for (val field : fields) {
+      result.putAll(field.accept(visitor));
+    }
+
+    return result;
+  }
+
+  private static Map<String, String> initFieldsByAlias(List<? extends FieldModel> fields) {
+    val result = new ImmutableMap.Builder<String, String>();
+    val visitor = new CreateAliasVisitor();
+    for (val field : fields) {
+      result.putAll(field.accept(visitor));
+    }
+
+    return result.build();
   }
 
 }

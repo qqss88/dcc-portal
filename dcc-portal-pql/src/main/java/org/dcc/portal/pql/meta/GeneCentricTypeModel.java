@@ -79,6 +79,9 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
 
         .add(string(SCORE, SCORE))
+        .add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID))
+        .add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID))
+        .add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID))
         .build();
   }
 
@@ -152,6 +155,10 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .put(BIOLOGICAL_PROCESS, "go_term.biological_process")
         .put(CELLULAR_COMPONENT, "go_term.cellular_component")
         .put(MOLECULAR_FUNCTION, "go_term.molecular_function")
+        .put(DONOR_ENTITY_SET_ID, "donor._donor_id")
+        .put(GENE_ENTITY_SET_ID, "_gene_id")
+        .put(MUTATION_ENTITY_SET_ID, "donor.ssm._mutation_id")
+        .put(LOOKUP_TYPE, "gene-ids")
         .build();
   }
 

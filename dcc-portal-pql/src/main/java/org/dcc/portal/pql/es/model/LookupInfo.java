@@ -15,50 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.utils;
+package org.dcc.portal.pql.es.model;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static lombok.AccessLevel.PRIVATE;
+import lombok.NonNull;
+import lombok.Value;
 
-import java.util.Optional;
+@Value
+public class LookupInfo {
 
-import lombok.NoArgsConstructor;
-import lombok.val;
+  @NonNull
+  String index;
+  @NonNull
+  String type;
+  @NonNull
+  String id;
+  @NonNull
+  String path;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
-
-@NoArgsConstructor(access = PRIVATE)
-public class VisitorHelpers {
-
-  /**
-   * Checks if {@code optional} has a reference.
-   * @throws IllegalArgumentException
-   */
-  public static <T> void checkOptional(Optional<T> optional) {
-    checkArgument(optional.isPresent(), "The optional does not contain any reference.");
-  }
-
-  /**
-   * The methods visits children of {@code parent} with {@code visitor}. Each child returns an
-   * {@code Optional<ExpressionNode>}. If the optional is not empty the child is replaced with the
-   * {@link ExpressionNode} from the {@code Optional}.<br>
-   * 
-   * @param visitor applied to the {@code parent}
-   * @param parent to be visited
-   * @param context - query context
-   */
-  public static <T> Optional<ExpressionNode> visitChildren(NodeVisitor<Optional<ExpressionNode>, T> visitor,
-      ExpressionNode parent, Optional<T> context) {
-    for (int i = 0; i < parent.childrenCount(); i++) {
-      val child = parent.getChild(i);
-      val childResult = child.accept(visitor, context);
-      if (childResult.isPresent()) {
-        parent.setChild(i, childResult.get());
-      }
-    }
-
-    return Optional.empty();
+  public boolean isDefine() {
+    return !index.isEmpty();
   }
 
 }

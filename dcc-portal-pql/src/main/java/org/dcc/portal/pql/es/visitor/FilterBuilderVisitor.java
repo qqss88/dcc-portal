@@ -62,6 +62,7 @@ import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 
 import com.google.common.collect.Lists;
@@ -216,7 +217,19 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
       values.add(((TerminalNode) child).getValue());
     }
 
-    return createNestedFilter(node, node.getField(), termsFilter(node.getField(), values), context.get().getTypeModel());
+    FilterBuilder termsFilter;
+    val lookupInfo = node.getLookup();
+    if (lookupInfo.isDefine()) {
+      termsFilter = FilterBuilders.termsLookupFilter(node.getField())
+          .lookupIndex(lookupInfo.getIndex())
+          .lookupType(lookupInfo.getType())
+          .lookupPath(lookupInfo.getPath())
+          .lookupId(lookupInfo.getId());
+    } else {
+      termsFilter = termsFilter(node.getField(), values);
+    }
+
+    return createNestedFilter(node, node.getField(), termsFilter, context.get().getTypeModel());
   }
 
   private static <T> T getChild(BoolNode boolNode, Class<T> type) {

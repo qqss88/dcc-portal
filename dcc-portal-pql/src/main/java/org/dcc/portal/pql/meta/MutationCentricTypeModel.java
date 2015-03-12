@@ -74,6 +74,9 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
 
         .add(string(SCORE, SCORE))
+        .add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID))
+        .add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID))
+        .add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID))
         .build();
   }
 
@@ -128,6 +131,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
 
   private static ObjectFieldModel defineDonor() {
     return object("donor",
+        string("_donor_id"),
         string("donor_sex", "donor.gender"),
         string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
@@ -144,6 +148,10 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         .put(BIOLOGICAL_PROCESS, "transcript.gene.go_term.biological_process")
         .put(CELLULAR_COMPONENT, "transcript.gene.go_term.cellular_component")
         .put(MOLECULAR_FUNCTION, "transcript.gene.go_term.molecular_function")
+        .put(DONOR_ENTITY_SET_ID, "ssm_occurrence.donor._donor_id")
+        .put(GENE_ENTITY_SET_ID, "transcript.gene._gene_id")
+        .put(MUTATION_ENTITY_SET_ID, "_mutation_id")
+        .put(LOOKUP_TYPE, "mutation-ids")
         .build();
   }
 
