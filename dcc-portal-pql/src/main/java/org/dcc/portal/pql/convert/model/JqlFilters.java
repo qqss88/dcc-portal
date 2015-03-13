@@ -23,19 +23,15 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.dcc.portal.pql.convert.JqlDeserializer;
+import org.dcc.portal.pql.convert.JqlFiltersDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @Value
-@JsonDeserialize(using = JqlDeserializer.class)
-public class JqlEntry {
+@JsonDeserialize(using = JqlFiltersDeserializer.class)
+public class JqlFilters {
 
   @NonNull
   Map<String, List<JqlField>> typeValues;
-
-  public String toPql() {
-    return "Hello, PQL!";
-  }
 
 }

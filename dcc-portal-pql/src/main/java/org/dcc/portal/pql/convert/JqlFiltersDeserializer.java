@@ -33,8 +33,8 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.convert.model.JqlArrayValue;
-import org.dcc.portal.pql.convert.model.JqlEntry;
 import org.dcc.portal.pql.convert.model.JqlField;
+import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.dcc.portal.pql.convert.model.JqlSingleValue;
 import org.dcc.portal.pql.convert.model.JqlValue;
 import org.dcc.portal.pql.convert.model.Operation;
@@ -49,12 +49,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 @Slf4j
-public class JqlDeserializer extends JsonDeserializer<JqlEntry> {
+public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
 
   private static final List<String> VALID_TYPES = ImmutableList.of(DONOR.getId(), GENE.getId(), MUTATION.getId());
 
   @Override
-  public JqlEntry deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public JqlFilters deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
     configureJsonParser(jp);
 
     JsonNode node = jp.getCodec().readTree(jp);
@@ -67,7 +67,7 @@ public class JqlDeserializer extends JsonDeserializer<JqlEntry> {
       elements.putAll(parseType(nodeFields.next()));
     }
 
-    return new JqlEntry(elements.build());
+    return new JqlFilters(elements.build());
   }
 
   private static Map<String, List<JqlField>> parseType(Entry<String, JsonNode> entry) {
@@ -87,6 +87,10 @@ public class JqlDeserializer extends JsonDeserializer<JqlEntry> {
     val fieldName = next.getKey();
     val fieldValue = next.getValue();
     log.debug("Parsing field {} - {}", fieldName, fieldValue);
+
+    if (fieldName.startsWith("has")) {
+      return new JqlField(fieldName, Operation.HAS, parseSingleValue(fieldValue));
+    }
 
     return new JqlField(fieldName, parseOperation(fieldValue), parseValue(fieldValue));
   }

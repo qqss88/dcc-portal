@@ -23,7 +23,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.convert.model.JqlArrayValue;
-import org.dcc.portal.pql.convert.model.JqlEntry;
+import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.dcc.portal.pql.convert.model.Operation;
 import org.dcc.portal.pql.exception.SemanticException;
 import org.junit.Rule;
@@ -112,9 +112,20 @@ public class JqlDeserializerTest {
     convert("{donor:{}, gene:{}, mutation:{}}");
   }
 
+  @Test
+  public void hasTest() {
+    val result = convert("{donor:{hasPathway:true}}").getTypeValues().get("donor");
+    assertThat(result.size()).isEqualTo(1);
+
+    val pathway = result.get(0);
+    assertThat(pathway.getName()).isEqualTo("hasPathway");
+    assertThat(pathway.getOperation()).isEqualTo(Operation.HAS);
+    assertThat(pathway.getValue().get()).isEqualTo(Boolean.TRUE);
+  }
+
   @SneakyThrows
-  private JqlEntry convert(String jql) {
-    val result = mapper.readValue(jql, JqlEntry.class);
+  private JqlFilters convert(String jql) {
+    val result = mapper.readValue(jql, JqlFilters.class);
     log.debug("{}", result);
 
     return result;
@@ -126,7 +137,7 @@ public class JqlDeserializerTest {
 
   private ObjectMapper registerJqlDeserializer(ObjectMapper mapper) {
     val module = new SimpleModule();
-    module.addDeserializer(JqlEntry.class, new JqlDeserializer());
+    module.addDeserializer(JqlFilters.class, new JqlFiltersDeserializer());
     mapper.registerModule(module);
 
     return configureMapper(mapper);

@@ -20,6 +20,7 @@ package org.dcc.portal.pql.convert.model;
 import java.util.List;
 
 import lombok.NonNull;
+import lombok.val;
 
 public class JqlArrayValue extends JqlValue {
 
@@ -35,6 +36,19 @@ public class JqlArrayValue extends JqlValue {
   @Override
   public List<Object> get() {
     return values;
+  }
+
+  public String valuesToString() {
+    val result = new StringBuilder();
+    for (int i = 0; i < values.size(); i++) {
+      val value = values.get(i);
+      result.append(isString(values.get(i)) ? asString(value) : value);
+      if (i != values.size() - 1) {
+        result.append(",");
+      }
+    }
+
+    return result.toString();
   }
 
 }

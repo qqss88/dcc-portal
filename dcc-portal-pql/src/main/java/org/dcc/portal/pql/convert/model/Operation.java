@@ -18,9 +18,11 @@
 package org.dcc.portal.pql.convert.model;
 
 import static java.lang.String.format;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Collection;
 
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
@@ -28,10 +30,13 @@ import org.icgc.dcc.common.core.model.Identifiable;
 
 import com.google.common.collect.ImmutableList;
 
+@AllArgsConstructor(access = PRIVATE)
 public enum Operation implements Identifiable {
 
   IS,
-  NOT;
+  NOT,
+  // Represent filters hasCuratedSet, hasPathway, hasGoTerm
+  HAS;
 
   private static final Collection<String> OPERATION_IDS = initOperationIds();
 
@@ -57,6 +62,10 @@ public enum Operation implements Identifiable {
   private static Collection<String> initOperationIds() {
     val result = new ImmutableList.Builder<String>();
     for (val name : values()) {
+      if (name == HAS) {
+        continue;
+      }
+
       result.add(name.getId());
     }
 

@@ -15,35 +15,60 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert.model;
+package org.dcc.portal.pql.convert;
 
-import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.model.Query;
+import org.junit.Test;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.ToString;
+import com.google.common.collect.ImmutableList;
 
-@ToString
-@AllArgsConstructor
-@EqualsAndHashCode
-public abstract class JqlValue {
+@Slf4j
+public class Jql2PqlConverterTest {
 
-  @NonNull
-  protected final List<Object> values;
+  Jql2PqlConverter converter = new Jql2PqlConverter();
 
-  public abstract boolean isArray();
-
-  public abstract Object get();
-
-  public static boolean isString(Object value) {
-    return value instanceof String;
+  @Test
+  public void fieltdsTest() {
+    val query = Query.builder().fields(ImmutableList.of("id", "age")).build();
+    assertResponse(query, "select(id,age)");
   }
 
-  public static String asString(Object value) {
-    return format("'%s'", value);
+  @Test
+  public void fieldsWithFilterTest() {
+    val query = Query.builder()
+        .fields(ImmutableList.of("id", "age"))
+        .filters(new FiltersParam("{donor:{id:{is:1}}}").get())
+        .build();
+    assertResponse(query, "select(id,age),eq(donor.id,1)");
+  }
+
+  @Test
+  public void sizeTest() {
+    val query = Query.builder().size(100).build();
+    assertResponse(query, "limit(100)");
+  }
+
+  @Test
+  public void fromSizeTest() {
+    val query = Query.builder().size(100).from(10).build();
+    assertResponse(query, "limit(9,100)");
+  }
+
+  @Test
+  public void sortTest() {
+    val query = Query.builder().sort("id").order("asc").build();
+    assertResponse(query, "sort(+id)");
+  }
+
+  private void assertResponse(Query query, String exectedResult) {
+    val result = converter.convert(query);
+    log.debug("{}", result);
+    assertThat(result).isEqualTo(exectedResult);
   }
 
 }
