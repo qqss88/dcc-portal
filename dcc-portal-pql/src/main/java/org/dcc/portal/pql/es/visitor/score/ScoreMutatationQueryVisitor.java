@@ -36,8 +36,8 @@ import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 
 /**
  * Scores queries made against the MutationCentric type.<br>

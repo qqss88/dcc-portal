@@ -27,11 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.icgc.dcc.portal.model.FiltersParam;
-import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.model.Query;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
@@ -84,12 +82,6 @@ public class TestingHelpers {
     }
 
     return result;
-  }
-
-  public static Query createQuery(String query) {
-    return Query.builder()
-        .filters(new FiltersParam(query).get())
-        .build();
   }
 
 }

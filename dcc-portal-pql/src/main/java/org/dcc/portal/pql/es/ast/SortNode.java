@@ -27,7 +27,7 @@ import lombok.Value;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-import com.beust.jcommander.internal.Maps;
+import com.google.common.collect.Maps;
 
 @Value
 @EqualsAndHashCode(callSuper = true)

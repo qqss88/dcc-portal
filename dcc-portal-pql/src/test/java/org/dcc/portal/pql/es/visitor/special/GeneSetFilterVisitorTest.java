@@ -22,10 +22,10 @@ import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.MOLECULAR_FUNCTION;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
-import static org.icgc.dcc.portal.model.IndexModel.Type.GENE_CENTRIC;
-import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
 
 import java.util.Optional;
 
@@ -37,7 +37,6 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Before;

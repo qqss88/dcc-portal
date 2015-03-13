@@ -40,7 +40,7 @@ import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
 import org.dcc.portal.pql.es.visitor.util.CloneNodeVisitor;
 import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
-import org.icgc.dcc.portal.model.IndexModel.Type;
+import org.dcc.portal.pql.meta.Type;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Visitors {

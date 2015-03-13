@@ -15,27 +15,21 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.meta;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import org.dcc.portal.pql.es.model.RequestType;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.meta.Type;
+@Getter
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public enum Type {
+  DONOR("donor"),
+  GENE("gene"),
+  MUTATION("mutation"),
+  DONOR_CENTRIC("donor-centric"),
+  GENE_CENTRIC("gene-centric"),
+  MUTATION_CENTRIC("mutation-centric");
 
-@Data
-public class QueryContext {
-
-  private String index;
-  private Type type;
-  private RequestType requestType;
-
-  public AbstractTypeModel getTypeModel() {
-    checkNotNull(type);
-
-    return IndexModel.getTypeModel(type);
-  }
-
+  private final String id;
 }

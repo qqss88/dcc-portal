@@ -57,8 +57,17 @@ public class Jql2PqlConverter {
     boolean hasPreviousClause = false;
 
     if (query.hasFields() || query.getIncludes() != null) {
-      val combinedFields = Lists.newArrayList(query.getFields());
-      combinedFields.addAll(query.getIncludes());
+      val combinedFields = Lists.<String> newArrayList();
+      val fields = query.getFields();
+      if (fields != null) {
+        combinedFields.addAll(fields);
+      }
+
+      val includes = query.getIncludes();
+      if (includes != null) {
+        combinedFields.addAll(query.getIncludes());
+      }
+
       result.append(parseFields(combinedFields));
       hasPreviousClause = true;
     }
@@ -106,7 +115,7 @@ public class Jql2PqlConverter {
     }
 
     // FIXME: implement
-    checkState(query.getOrder() == null && query.getQuery() == null, "Not implemented");
+    checkState(query.getScore() == null && query.getQuery() == null, "Not implemented");
 
     return result.toString();
   }

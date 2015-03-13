@@ -31,7 +31,6 @@ import lombok.val;
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;

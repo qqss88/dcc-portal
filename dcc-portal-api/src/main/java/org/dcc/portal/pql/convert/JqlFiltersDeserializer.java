@@ -38,7 +38,6 @@ import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.dcc.portal.pql.convert.model.JqlSingleValue;
 import org.dcc.portal.pql.convert.model.JqlValue;
 import org.dcc.portal.pql.convert.model.Operation;
-import org.dcc.portal.pql.exception.SemanticException;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -153,7 +152,7 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
 
   private static void checkState(boolean expression, String message) {
     if (!expression) {
-      throw new SemanticException(message);
+      throw new IllegalStateException(message);
     }
   }
 

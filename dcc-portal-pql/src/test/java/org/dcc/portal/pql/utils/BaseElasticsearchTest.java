@@ -30,11 +30,10 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.common.settings.ImmutableSettings;
-import org.icgc.dcc.portal.model.IndexModel;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.After;
 import org.junit.Before;
 
@@ -58,7 +57,6 @@ public class BaseElasticsearchTest {
   protected static final String JSON_DIR = "src/test/resources/org/icgc/dcc/etl/indexer";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
   protected static final File SETTINGS_FILE = new File(JSON_DIR, SETTINGS_FILE_NAME);
-  protected static final IndexModel INDEX = new IndexModel(INDEX_NAME);
 
   /**
    * Test data.

@@ -18,7 +18,7 @@
 package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 

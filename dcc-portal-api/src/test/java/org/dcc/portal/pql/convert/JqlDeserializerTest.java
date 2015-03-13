@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.dcc.portal.pql.convert.model.Operation;
-import org.dcc.portal.pql.exception.SemanticException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -101,7 +100,7 @@ public class JqlDeserializerTest {
 
   @Test
   public void invalidTypesTest() {
-    thrown.expect(SemanticException.class);
+    thrown.expect(IllegalStateException.class);
     thrown.expectMessage("Node has no valid types.");
 
     convert("{test:1}");

@@ -19,10 +19,10 @@ package org.dcc.portal.pql.es.visitor.special;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
-import static org.icgc.dcc.portal.model.IndexModel.Type.GENE_CENTRIC;
-import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
 
 import java.util.Optional;
 
@@ -35,8 +35,8 @@ import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.junit.Before;
 import org.junit.Test;
 

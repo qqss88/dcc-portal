@@ -18,9 +18,9 @@
 package org.dcc.portal.pql.es.visitor.score;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
-import static org.icgc.dcc.portal.model.IndexModel.Type.GENE_CENTRIC;
-import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION_CENTRIC;
 
 import java.util.Optional;
 

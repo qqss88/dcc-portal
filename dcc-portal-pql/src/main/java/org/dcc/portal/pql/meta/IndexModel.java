@@ -21,8 +21,6 @@ import static java.lang.String.format;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.icgc.dcc.portal.model.IndexModel.Type;
-
 @Value
 public class IndexModel {
 
