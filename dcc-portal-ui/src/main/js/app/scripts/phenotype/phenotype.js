@@ -42,7 +42,7 @@
                     {term:'female', count: 50}, {term: 'male', count: 100}
                   ],
                   summary: {
-                     total: 250
+                    total: 250
                   }
                 },
                 {
@@ -52,7 +52,7 @@
                     {term:'female', count: 150}, {term: 'male', count: 10}
                   ],
                   summary: {
-                     total: 170
+                    total: 170
                   }
                 },
                 {
@@ -62,7 +62,7 @@
                     {term:'female', count: 50}, {term: 'male', count: 50}
                   ],
                   summary: {
-                     total: 101
+                    total: 101
                   }
                 }
 
@@ -79,7 +79,7 @@
                     {term:'alive', count: 150}, {term: 'deceased', count: 100}
                   ],
                   summary: {
-                     total: 250
+                    total: 250
                   }
                 },
                 {
@@ -89,7 +89,7 @@
                     {term:'alive', count: 150}, {term: 'deceased', count: 20}
                   ],
                   summary: {
-                     total: 170
+                    total: 170
                   }
                 },
                 {
@@ -99,7 +99,7 @@
                     {term:'alive', count: 0}, {term: 'deceased', count: 0}
                   ],
                   summary: {
-                     total: 101
+                    total: 101
                   }
                 }
 
@@ -125,7 +125,7 @@
                     {term: '90-99', count: 10}
                   ],
                   summary: {
-                     total: 250
+                    total: 250
                   }
                 },
                 {
@@ -144,7 +144,7 @@
                     {term: '90-99', count: 10}
                   ],
                   summary: {
-                     total: 170
+                    total: 170
                   }
                 },
                 {
@@ -163,7 +163,7 @@
                     {term: '90-99', count: 10}
                   ],
                   summary: {
-                     total: 101
+                    total: 101
                   }
                 }
 
@@ -212,42 +212,6 @@
         $scope.age = PhenotypeService.buildAnalysis(age);
 
 
-
-        $scope.testChart = {};
-        $scope.testChart.series = [
-          {
-            name: 'S1',
-            data: [40, 50, 60]
-          },
-          {
-            name: 'S2',
-            data: [80, 50, 20]
-          },
-          {
-            name: 'S3',
-            data: [10, 90, 20]
-          }
-
-        ];
-        $scope.testChart.categories = ['Male', 'Female', 'No Data'];
-
-        $scope.testChart2 = {};
-        $scope.testChart2.series = [
-          {
-            name: 'S1',
-            data: [40, 50, 60, 10, 20, 40, 60, 90]
-          },
-          {
-            name: 'S2',
-            data: [30, 40, 30, 20, 30, 40, 30, 20]
-          },
-          {
-            name: 'S3',
-            data: [10, 20, 40, 40, 80, 10, 10, 10]
-          }
-        ];
-        $scope.testChart2.categories = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80'];
-
       }
     };
   });
@@ -263,7 +227,7 @@
   module.service('PhenotypeService', function(Extensions) {
 
     function getTermCount(analysis, term, donorSetId) {
-      var data, term;
+      var data, termObj;
       data = _.find(analysis.data, function(set) {
         return donorSetId === set.id;
       });
@@ -272,17 +236,17 @@
       if (term === 'missing') {
         return data.missing || 0;
       }
-      term = _.find(data.terms, function(t) {
+      termObj = _.find(data.terms, function(t) {
         return t.term === term;
       });
-      if (term) {
-        return term.count;
+      if (termObj) {
+        return termObj.count;
       }
       return 0;
     }
 
     function getSummary(analysis, donorSetId) {
-      var data, term;
+      var data;
       data = _.find(analysis.data, function(set) {
         return donorSetId === set.id;
       });
@@ -291,7 +255,7 @@
 
     this.entityFilters = function(id) {
       var filters = {
-         donor:{}
+        donor:{}
       };
       filters.donor[Extensions.ENTITY] = {
         is: [id]
@@ -319,29 +283,29 @@
 
       // Build table row
       terms.forEach(function(term) {
-         var row = {};
-         row.term = term;
+        var row = {};
+        row.term = term;
 
-         setIds.forEach(function(donorSetId) {
-           var count = getTermCount(analysis, term, donorSetId);
-           var summary = getSummary(analysis, donorSetId);
-           var advQuery = {};
-           advQuery[Extensions.ENTITY] = {
-             is: [donorSetId]
-           };
-           advQuery[analysis.name] = {
-             is: [term === 'missing'? '_missing':term]
-           };
+        setIds.forEach(function(donorSetId) {
+          var count = getTermCount(analysis, term, donorSetId);
+          var summary = getSummary(analysis, donorSetId);
+          var advQuery = {};
+          advQuery[Extensions.ENTITY] = {
+            is: [donorSetId]
+          };
+          advQuery[analysis.name] = {
+            is: [term === 'missing'? '_missing':term]
+          };
 
-           row[donorSetId] = {};
-           row[donorSetId].count = count;
-           row[donorSetId].total = summary.total;
-           row[donorSetId].percentage = count/summary.total;
-           row[donorSetId].advQuery = {
-             donor: advQuery
-           };
-         });
-         uiTable.push(row);
+          row[donorSetId] = {};
+          row[donorSetId].count = count;
+          row[donorSetId].total = summary.total;
+          row[donorSetId].percentage = count/summary.total;
+          row[donorSetId].advQuery = {
+            donor: advQuery
+          };
+        });
+        uiTable.push(row);
       });
 
       // Build graph series

@@ -21,7 +21,7 @@
     _this.selectedIds = [];
 
     _this.allSets = SetService.getAll();
-    
+
     // Pass-thru
     _this.analysisName = AnalysisService.analysisName;
     _this.analysisDescription = AnalysisService.analysisDescription;
@@ -40,7 +40,7 @@
       // Apply filer to disable irrelevant results
       if (_this.selectedIds.length === 0) {
         _this.filteredSetType = '';
-      } 
+      }
       _this.applyFilter(_this.analysisType);
       // console.log('after', _this.selectedIds);
 
@@ -140,6 +140,7 @@
       if (!n) {
         return;
       }
+      _this.selectedIds = [];
       _this.applyFilter(n);
     });
   });
