@@ -359,12 +359,12 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
     restrict: 'E',
     replace: true,
     scope: {
-      items: '='
+      items: '=',
+      colours: '='
     },
     template: '<div id="container" style="margin: 0 auto">not working</div>',
     link: function ($scope, $element, $attrs) {
       var c, renderChart, chartsDefaults;
-
       renderChart = function (settings) {
         if (c) {
           c.destroy();
@@ -381,7 +381,8 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
           width: $attrs.width || null
         },
         /* D3 cat 10 */
-        colors: ['#1f77b4', '#ff7f0e', '#2ca02c'],
+        //colors: ['#1f77b4', '#ff7f0e', '#2ca02c'],
+        colors: $scope.colours || ['#1f77b4', '#ff7f0e', '#2ca02c'],
         title: {
           text: $attrs.heading || '',
           margin: 25,

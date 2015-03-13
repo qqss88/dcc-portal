@@ -1660,8 +1660,8 @@ footer .dcc-col {
 /* line 12, _sections/_analysis.scss */
 .analysis .analysis-tile {
   float: left;
-  width: 12rem;
-  height: 10rem;
+  width: 13rem;
+  height: 11rem;
   border: 1px solid #999999;
   background: #e6e6e6;
   border-radius: 0.5rem;
@@ -1677,21 +1677,34 @@ footer .dcc-col {
   text-decoration: none;
 }
 /* line 30, _sections/_analysis.scss */
-.analysis .analysis-tile .analysis-tile-detail {
-  font-size: 0.8rem;
-  line-height: 1.5rem;
+.analysis .analysis-tile.in-progress {
+  border-style: dashed;
+  transition: none;
+  background: none;
+  color: #999999;
 }
 /* line 36, _sections/_analysis.scss */
+.analysis .analysis-tile.in-progress:hover {
+  color: #999999;
+  background: none;
+}
+/* line 43, _sections/_analysis.scss */
+.analysis .analysis-tile .analysis-tile-detail {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.25rem;
+}
+/* line 50, _sections/_analysis.scss */
 .analysis .sidepanel {
   float: left;
-  width: 22%;
+  width: 20%;
   margin-right: 1rem;
 }
-/* line 42, _sections/_analysis.scss */
+/* line 56, _sections/_analysis.scss */
 .analysis .content {
   float: left;
   clear: right;
-  width: 75%;
+  width: 77%;
   min-height: 20rem;
 }
 

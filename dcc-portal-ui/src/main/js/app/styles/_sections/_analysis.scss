@@ -11,8 +11,8 @@
 
    .analysis-tile {
       float: left;
-      width: 12rem;
-      height: 10rem;
+      width: 13rem;
+      height: 11rem;
       border: 1px solid $grey;
       background: $greyLighter;
       border-radius: 0.5rem;
@@ -27,22 +27,36 @@
         text-decoration: none;
       }
 
+      &.in-progress {
+        border-style: dashed;
+        transition: none;
+        background: none;
+        color: $grey;
+
+        &:hover {
+          color: $grey;
+          background: none;
+        }
+      }
+
+
       .analysis-tile-detail {
+         margin-top: 0.5rem;
          font-size: 0.8rem;
-         line-height: 1.5rem;
+         line-height: 1.25rem;
       }
    }
 
    .sidepanel {
       float: left;
-      width: 22%;
+      width: 20%;
       margin-right: 1rem;
    }
 
    .content {
       float: left;
       clear: right;
-      width: 75%;
+      width: 77%;
       min-height: 20rem; // Prevent complete collapse when switching content
    }
 }

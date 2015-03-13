@@ -157,17 +157,20 @@
 
       }, function() {
         // FIXME: test only
-        AnalysisService.addAnalysis({
-          id: 'test',
-          type: type
-        }, type);
-        $scope.analysisResult = {
-          state: 'FINISHED'
-        };
-        return;
+        if ($scope.analysisType === 'phenotype') {
+          AnalysisService.addAnalysis({
+            id: 'test',
+            type: type
+          }, type);
+          $scope.analysisResult = {
+            state: 'FINISHED'
+          };
+          return;
+        }
+        
         // end test
 
-        //$scope.error = true;
+        $scope.error = true;
       });
     }
 
@@ -232,6 +235,20 @@
       }
     };
 
+    this.analysisDescription = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Display Venn diagram and find out intersection or union, etc. of your sets of the same type.';
+      } else if (type === 'enrichment') {
+        return 'Find out statistically significantly over-represented groups ' +
+          'of gene sets when comparing with your gene set.';
+      } else if (type === 'phenotype') {
+        return 'Compare some characteristics (e.g. gender, vital status and age at diagnosis) between your Donor sets.';
+      } else if (type === 'coverage') {
+        return 'Compare mutations occurring in your Donor sets.';
+      } else {
+        return '';
+      }
+    };
 
 
     /**
@@ -246,7 +263,8 @@
       var payload = {
         id: analysis.id,
         timestamp: analysis.timestamp || '--',
-        type: type
+        // Type is used in the UI route, we convert union to set so it makes more logical sense
+        type: type === 'union'? 'set' : type
       };
 
       if (type === 'enrichment') {

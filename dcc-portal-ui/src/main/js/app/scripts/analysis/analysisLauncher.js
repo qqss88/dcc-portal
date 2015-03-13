@@ -17,23 +17,33 @@
 
     _this.analysisType = null; // One of "enrichment", "set", "phenotype" or "coverage"
     _this.filteredList = [];
-    _this.filteredSetType = 'donor';
+    _this.filteredSetType = '';
     _this.selectedIds = [];
 
     _this.allSets = SetService.getAll();
     
+    // Pass-thru
     _this.analysisName = AnalysisService.analysisName;
+    _this.analysisDescription = AnalysisService.analysisDescription;
 
     _this.toggle = function(setId) {
       if (_this.selectedIds.indexOf(setId) >= 0) {
-        console.log('remove', setId);
         _.remove(_this.selectedIds, function(id) {
           return id === setId;
         });
       } else {
-        console.log('add', setId);
         _this.selectedIds.push(setId);
       }
+
+      // console.log(_this.selectedIds);
+
+      // Apply filer to disable irrelevant results
+      if (_this.selectedIds.length === 0) {
+        _this.filteredSetType = '';
+      } 
+      _this.applyFilter(_this.analysisType);
+      // console.log('after', _this.selectedIds);
+
     };
 
     _this.isInFilter = function(set) {
@@ -43,7 +53,7 @@
     };
 
     _this.applyFilter = function(type) {
-      _this.selectedIds = [];
+      // _this.selectedIds = [];
 
       if (type === 'enrichment') {
         _this.filteredList = _.filter(SetService.getAll(), function(set) {
@@ -52,7 +62,10 @@
         });
       } else if (type === 'set') {
         _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          return set.type === _this.filteredSetType;
+          if (_this.filteredSetType !== '') {
+            return set.type === _this.filteredSetType;
+          }
+          return true;
         });
       } else if (type === 'phenotype') {
         _this.filteredList = _.filter(SetService.getAll(), function(set) {
