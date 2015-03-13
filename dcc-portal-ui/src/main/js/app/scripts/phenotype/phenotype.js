@@ -70,7 +70,7 @@
               ]
             },
             {
-              name: 'vital',
+              name: 'vitalStatus',
               data: [
                 {
                   id: 'uuid-1',
@@ -188,13 +188,20 @@
 
         // Globals
         $scope.setIds = _.pluck($scope.item.result[0].data, 'id');
+        $scope.setCounts = $scope.item.result[0].data.map(function(d) {
+          return d.summary.total;
+        });
+        $scope.setFilters = $scope.setIds.map(function(id) {
+          return PhenotypeService.entityFilters(id);
+        });
+
 
         // Fetch analyses
         var gender = _.find($scope.item.result, function(subAnalysis) {
           return subAnalysis.name === 'gender';
         });
         var vital = _.find($scope.item.result, function(subAnalysis) {
-          return subAnalysis.name === 'vital';
+          return subAnalysis.name === 'vitalStatus';
         });
         var age = _.find($scope.item.result, function(subAnalysis) {
           return subAnalysis.name === 'ageAtDiagnosisGroup';
@@ -253,7 +260,7 @@
 
   var module = angular.module('icgc.phenotype.services', ['icgc.donors.models']);
 
-  module.service('PhenotypeService', function() {
+  module.service('PhenotypeService', function(Extensions) {
 
     function getTermCount(analysis, term, donorSetId) {
       var data, term;
@@ -282,6 +289,16 @@
       return data.summary;
     }
 
+    this.entityFilters = function(id) {
+      var filters = {
+         donor:{}
+      };
+      filters.donor[Extensions.ENTITY] = {
+        is: [id]
+      };
+      return filters;
+    };
+
 
     this.submitAnalysis = function() {
     };
@@ -308,10 +325,21 @@
          setIds.forEach(function(donorSetId) {
            var count = getTermCount(analysis, term, donorSetId);
            var summary = getSummary(analysis, donorSetId);
+           var advQuery = {};
+           advQuery[Extensions.ENTITY] = {
+             is: [donorSetId]
+           };
+           advQuery[analysis.name] = {
+             is: [term === 'missing'? '_missing':term]
+           };
+
            row[donorSetId] = {};
            row[donorSetId].count = count;
            row[donorSetId].total = summary.total;
            row[donorSetId].percentage = count/summary.total;
+           row[donorSetId].advQuery = {
+             donor: advQuery
+           };
          });
          uiTable.push(row);
       });
