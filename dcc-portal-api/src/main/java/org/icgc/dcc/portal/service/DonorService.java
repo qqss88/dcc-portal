@@ -24,6 +24,7 @@ import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -46,6 +47,7 @@ import com.google.common.collect.Ordering;
 public class DonorService {
 
   private final DonorRepository donorRepository;
+  private final QueryEngine queryEngine;
 
   private Donors buildDonors(SearchResponse response, Query query) {
     val hits = response.getHits();

@@ -41,20 +41,17 @@ import org.junit.Test;
 @Slf4j
 public class ScoreMutationQueryVisitorTest {
 
-  // FIXME: Rework test after decided if filters are moved to the query
-
   ScoreMutatationQueryVisitor visitor = new ScoreMutatationQueryVisitor();
   QueryContext queryContext;
 
   @Before
   public void setUp() {
-    queryContext = new QueryContext();
-    queryContext.setType(MUTATION_CENTRIC);
+    queryContext = new QueryContext("", MUTATION_CENTRIC);
   }
 
   @Test
   public void wrongTypeTest() {
-    queryContext.setType(GENE_CENTRIC);
+    queryContext = new QueryContext("", GENE_CENTRIC);
     val root = createEsAst("select(id)", GENE_CENTRIC);
     val rootClone = Nodes.cloneNode(root);
     val result = visit(rootClone);

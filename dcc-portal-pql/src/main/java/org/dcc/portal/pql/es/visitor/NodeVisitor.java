@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import java.util.Optional;
 
+import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -50,6 +51,10 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 public abstract class NodeVisitor<T, A> {
 
   private static final String DEFAULT_ERROR_MESSAGE = "The method is not implemented by the subclass";
+
+  public T visitCount(CountNode node, Optional<A> context) {
+    return defaultUnimplementedMethod();
+  }
 
   public T visitFilter(FilterNode node, Optional<A> context) {
     return defaultUnimplementedMethod();

@@ -39,19 +39,13 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.junit.Before;
 import org.junit.Test;
 
 @Slf4j
 public class GeneSetFilterVisitorTest {
 
   GeneSetFilterVisitor visitor = new GeneSetFilterVisitor();
-  QueryContext context = new QueryContext();
-
-  @Before
-  public void setUp() {
-    context.setType(DONOR_CENTRIC);
-  }
+  QueryContext context = new QueryContext("", DONOR_CENTRIC);
 
   @Test
   public void pathwayIdTest() {
@@ -278,17 +272,11 @@ public class GeneSetFilterVisitorTest {
   }
 
   private static Optional<QueryContext> getGeneContextOptional() {
-    val result = new QueryContext();
-    result.setType(GENE_CENTRIC);
-
-    return Optional.of(result);
+    return Optional.of(new QueryContext("", GENE_CENTRIC));
   }
 
   private Optional<QueryContext> getMutationContextOptional() {
-    val result = new QueryContext();
-    result.setType(MUTATION_CENTRIC);
-
-    return Optional.of(result);
+    return Optional.of(new QueryContext("", MUTATION_CENTRIC));
   }
 
   private static void assertGeneSetId(ExpressionNode orNode, AbstractTypeModel typeModel, String value) {

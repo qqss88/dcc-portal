@@ -40,11 +40,7 @@ public class DonorScoreQueryTest extends BaseElasticsearchTest {
   public void setUp() {
     es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
     visitor = new EsRequestBuilder(es.client());
-
-    queryContext = new QueryContext();
-    queryContext.setType(DONOR_CENTRIC);
-    queryContext.setIndex(INDEX_NAME);
-
+    queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
     listener = new PqlParseListener(queryContext);
   }
 

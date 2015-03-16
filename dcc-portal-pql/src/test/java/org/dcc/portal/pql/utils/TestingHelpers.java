@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.utils;
 
+import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
 import lombok.NoArgsConstructor;
@@ -60,28 +61,21 @@ public class TestingHelpers {
   }
 
   public static QueryContext initQueryContext() {
-    val result = new QueryContext();
-    result.setType(Type.DONOR_CENTRIC);
-
-    return result;
+    return new QueryContext("", Type.DONOR_CENTRIC);
   }
 
   public static QueryContext initQueryContext(Type type) {
-    val result = new QueryContext();
 
     switch (type) {
     case DONOR_CENTRIC:
-      result.setType(Type.DONOR_CENTRIC);
-      break;
+      return new QueryContext("", Type.DONOR_CENTRIC);
     case GENE_CENTRIC:
-      result.setType(Type.GENE_CENTRIC);
-      break;
+      return new QueryContext("", Type.GENE_CENTRIC);
     case MUTATION_CENTRIC:
-      result.setType(Type.MUTATION_CENTRIC);
-      break;
+      return new QueryContext("", Type.MUTATION_CENTRIC);
     }
 
-    return result;
+    throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
   }
 
 }

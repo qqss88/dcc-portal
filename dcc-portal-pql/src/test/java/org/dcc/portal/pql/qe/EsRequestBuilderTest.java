@@ -23,7 +23,6 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.model.RequestType;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -48,11 +47,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   public void setUp() {
     es.execute(createIndexMappings(MUTATION_CENTRIC).withData(bulkFile(getClass())));
     visitor = new EsRequestBuilder(es.client());
-
-    queryContext = new QueryContext();
-    queryContext.setType(MUTATION_CENTRIC);
-    queryContext.setIndex(INDEX_NAME);
-
+    queryContext = new QueryContext(INDEX_NAME, MUTATION_CENTRIC);
     listener = new PqlParseListener(queryContext);
   }
 
@@ -74,7 +69,6 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void countTest() {
     val esAst = createTree("count()");
-    queryContext.setRequestType(RequestType.COUNT);
     val request = visitor.buildSearchRequest(esAst, queryContext);
     val result = request.execute().actionGet();
     assertTotalHitsCount(result, 3);
@@ -83,7 +77,6 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void countTest_withFilter() {
     val esAst = createTree("count(), gt(start, 60000000)");
-    queryContext.setRequestType(RequestType.COUNT);
     val request = visitor.buildSearchRequest(esAst, queryContext);
     val result = request.execute().actionGet();
     assertTotalHitsCount(result, 1);

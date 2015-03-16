@@ -15,25 +15,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.es.ast;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import lombok.Value;
+import java.util.Optional;
 
-import org.dcc.portal.pql.meta.AbstractTypeModel;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.meta.Type;
+import lombok.NonNull;
 
-@Value
-public class QueryContext {
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-  private String index;
-  private Type type;
+public class CountNode extends ExpressionNode {
 
-  public AbstractTypeModel getTypeModel() {
-    checkNotNull(type);
-
-    return IndexModel.getTypeModel(type);
+  @Override
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
+    return visitor.visitCount(this, context);
   }
 
 }

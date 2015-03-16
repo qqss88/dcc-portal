@@ -17,6 +17,10 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static java.lang.String.format;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
@@ -24,6 +28,7 @@ import lombok.val;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
@@ -35,14 +40,21 @@ public class QueryEngine {
   EsAstTransformator esAstTransformator = new EsAstTransformator();
   EsRequestBuilder requestBuilder;
 
+  QueryContext donorContext;
+  QueryContext geneContext;
+  QueryContext mutationContext;
+
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
     this.index = index;
+
+    this.donorContext = new QueryContext(index, DONOR_CENTRIC);
+    this.geneContext = new QueryContext(index, GENE_CENTRIC);
+    this.mutationContext = new QueryContext(index, MUTATION_CENTRIC);
   }
 
-  public SearchRequestBuilder execute(@NonNull String pql, @NonNull QueryContext context) {
-    context.setIndex(index);
-
+  public SearchRequestBuilder execute(@NonNull String pql, @NonNull Type type) {
+    val context = createQueryContext(type);
     ExpressionNode esAst = resolvePql(pql, context);
     esAst = esAstTransformator.process(esAst, context);
 
@@ -56,6 +68,19 @@ public class QueryEngine {
     parser.statement();
 
     return pqlListener.getEsAst();
+  }
+
+  private QueryContext createQueryContext(Type type) {
+    switch (type) {
+    case DONOR_CENTRIC:
+      return donorContext;
+    case GENE_CENTRIC:
+      return geneContext;
+    case MUTATION_CENTRIC:
+      return mutationContext;
+    default:
+      throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
+    }
   }
 
 }

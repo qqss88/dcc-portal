@@ -35,7 +35,6 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.junit.Before;
 import org.junit.Test;
 
 @Slf4j
@@ -43,11 +42,6 @@ public class EntitySetVisitorTest {
 
   EntitySetVisitor visitor = new EntitySetVisitor();
   QueryContext queryContext;
-
-  @Before
-  public void setUp() {
-    queryContext = new QueryContext();
-  }
 
   @Test
   public void noFilterTest() {
@@ -59,63 +53,63 @@ public class EntitySetVisitorTest {
 
   @Test
   public void donorEntitySetTest_donor() {
-    queryContext.setType(DONOR_CENTRIC);
+    queryContext = new QueryContext("", DONOR_CENTRIC);
     val root = createEsAst("in(donor.entitySetId, 'ID1')", DONOR_CENTRIC);
     assertStructure(root, "_donor_id");
   }
 
   @Test
   public void donorEntitySetTest_gene() {
-    queryContext.setType(GENE_CENTRIC);
+    queryContext = new QueryContext("", GENE_CENTRIC);
     val root = createEsAst("in(donor.entitySetId, 'ID1')", GENE_CENTRIC);
     assertStructure(root, "donor._donor_id");
   }
 
   @Test
   public void donorEntitySetTest_mutation() {
-    queryContext.setType(MUTATION_CENTRIC);
+    queryContext = new QueryContext("", MUTATION_CENTRIC);
     val root = createEsAst("in(donor.entitySetId, 'ID1')", MUTATION_CENTRIC);
     assertStructure(root, "ssm_occurrence.donor._donor_id");
   }
 
   @Test
   public void geneEntitySetTest_donor() {
-    queryContext.setType(DONOR_CENTRIC);
+    queryContext = new QueryContext("", DONOR_CENTRIC);
     val root = createEsAst("in(gene.entitySetId, 'ID1')", DONOR_CENTRIC);
     assertStructure(root, "gene._gene_id");
   }
 
   @Test
   public void geneEntitySetTest_gene() {
-    queryContext.setType(GENE_CENTRIC);
+    queryContext = new QueryContext("", GENE_CENTRIC);
     val root = createEsAst("in(gene.entitySetId, 'ID1')", GENE_CENTRIC);
     assertStructure(root, "_gene_id");
   }
 
   @Test
   public void geneEntitySetTest_mutation() {
-    queryContext.setType(MUTATION_CENTRIC);
+    queryContext = new QueryContext("", MUTATION_CENTRIC);
     val root = createEsAst("in(gene.entitySetId, 'ID1')", MUTATION_CENTRIC);
     assertStructure(root, "transcript.gene._gene_id");
   }
 
   @Test
   public void mutationEntitySetTest_donor() {
-    queryContext.setType(DONOR_CENTRIC);
+    queryContext = new QueryContext("", DONOR_CENTRIC);
     val root = createEsAst("in(mutation.entitySetId, 'ID1')", DONOR_CENTRIC);
     assertStructure(root, "gene.ssm._mutation_id");
   }
 
   @Test
   public void mutationEntitySetTest_gene() {
-    queryContext.setType(GENE_CENTRIC);
+    queryContext = new QueryContext("", GENE_CENTRIC);
     val root = createEsAst("in(mutation.entitySetId, 'ID1')", GENE_CENTRIC);
     assertStructure(root, "donor.ssm._mutation_id");
   }
 
   @Test
   public void mutationEntitySetTest_mutation() {
-    queryContext.setType(MUTATION_CENTRIC);
+    queryContext = new QueryContext("", MUTATION_CENTRIC);
     val root = createEsAst("in(mutation.entitySetId, 'ID1')", MUTATION_CENTRIC);
     assertStructure(root, "_mutation_id");
   }

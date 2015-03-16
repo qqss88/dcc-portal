@@ -37,7 +37,6 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
-import org.junit.Before;
 import org.junit.Test;
 
 @Slf4j
@@ -52,62 +51,50 @@ public class LocationFilterVisitorTest {
   LocationFilterVisitor visitor = new LocationFilterVisitor();
   QueryContext queryContext;
 
-  @Before
-  public void setUp() {
-    queryContext = new QueryContext();
-
-  }
-
   @Test
   public void geneLocation_donor() {
-    queryContext.setType(DONOR_CENTRIC);
     val root = createEsAst(GENE_FILTER, DONOR_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", DONOR_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "gene", GENE_CENTRIC);
   }
 
   @Test
   public void mutationLocation_donor() {
-    queryContext.setType(DONOR_CENTRIC);
     val root = createEsAst(MUTATION_FILTER, DONOR_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", DONOR_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "gene.ssm", MUTATION_CENTRIC);
   }
 
   @Test
   public void geneLocation_gene() {
-    queryContext.setType(GENE_CENTRIC);
     val root = createEsAst(GENE_FILTER, GENE_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", GENE_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "", GENE_CENTRIC);
   }
 
   @Test
   public void mutationLocation_gene() {
-    queryContext.setType(GENE_CENTRIC);
     val root = createEsAst(MUTATION_FILTER, GENE_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", GENE_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "donor.ssm", MUTATION_CENTRIC);
   }
 
   @Test
   public void geneLocation_mutation() {
-    queryContext.setType(MUTATION_CENTRIC);
     val root = createEsAst(GENE_FILTER, MUTATION_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "transcript.gene", GENE_CENTRIC);
   }
 
   @Test
   public void mutationLocation_mutation() {
-    queryContext.setType(MUTATION_CENTRIC);
     val root = createEsAst(MUTATION_FILTER, MUTATION_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
     log.debug("After visitor: {}", result);
     assertGeneLocation(result, "", MUTATION_CENTRIC);
   }

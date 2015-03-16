@@ -25,6 +25,7 @@ import static org.dcc.portal.pql.utils.TestingHelpers.initQueryContext;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -42,7 +43,6 @@ import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.es.model.RequestType;
 import org.junit.Test;
 
 @Slf4j
@@ -133,19 +133,21 @@ public class PqlParseListenerTest {
   @Test
   public void countTest() {
     val esAst = createEsAst("count()", listener);
-    assertThat(listener.getQueryContext().getRequestType()).isEqualTo(RequestType.COUNT);
+    assertThat(esAst.childrenCount()).isEqualTo(1);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
-    assertThat(esAst.childrenCount()).isEqualTo(0);
+    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(CountNode.class);
   }
 
   @Test
   public void countTest_withFilters() {
     val esAst = createEsAst("count(),eq(id, 10)", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
-    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
-    assertThat(esAst.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
-    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
-    val mustNode = esAst.getFirstChild().getFirstChild().getFirstChild();
+    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(CountNode.class);
+
+    val filterNode = esAst.getChild(1);
+    assertThat(filterNode.getFirstChild()).isExactlyInstanceOf(BoolNode.class);
+    assertThat(filterNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
+    val mustNode = filterNode.getFirstChild().getFirstChild();
     assertThat(mustNode.getFirstChild().childrenCount()).isEqualTo(2);
     childrenContainValue(mustNode, "_donor_id");
     childrenContainValue(mustNode, 10);

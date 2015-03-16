@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static org.dcc.portal.pql.es.model.RequestType.COUNT;
+import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 
 import java.util.Optional;
 
@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -51,7 +52,7 @@ public class EsRequestBuilder {
         .prepareSearch(queryContext.getIndex())
         .setTypes(queryContext.getType().getId());
 
-    if (queryContext.getRequestType() == COUNT) {
+    if (getOptionalChild(esAst, CountNode.class).isPresent()) {
       log.debug("Setting search type to count");
       result = result.setSearchType(SearchType.COUNT);
     }

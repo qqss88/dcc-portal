@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import lombok.val;
 
+import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
@@ -60,6 +61,11 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   private static final String NEWLINE = System.getProperty("line.separator");
   private static final String DEFAULT_INDENT = "  ";
+
+  @Override
+  public String visitCount(CountNode node, Optional<Void> context) {
+    return buildToString(node);
+  }
 
   @Override
   public String visitFilter(FilterNode node, Optional<Void> context) {

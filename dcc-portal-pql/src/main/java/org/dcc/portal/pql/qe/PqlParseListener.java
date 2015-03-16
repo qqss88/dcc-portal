@@ -25,12 +25,12 @@ import lombok.Value;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
-import org.dcc.portal.pql.es.model.RequestType;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
@@ -54,12 +54,9 @@ public class PqlParseListener extends PqlBaseListener {
   @Override
   public void exitStatement(@NonNull StatementContext context) {
     log.debug("Starting to process query - {}", context.toStringTree());
-    // FIXME: Remove and define query type by CountNode
     if (context.count() != null) {
       log.debug("Processing count() type query");
-      queryContext.setRequestType(RequestType.COUNT);
-    } else {
-      queryContext.setRequestType(RequestType.SEARCH);
+      esAst.addChildren(new CountNode());
     }
 
     val filters = context.filter();
