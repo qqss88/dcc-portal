@@ -1,5 +1,5 @@
 <section>
-<div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC" class="analysis wide">
+<div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC" class="analysis">
     <!--<h3>Launch Analyses</h3>-->
 
     <div style="font-size:1.25rem">
@@ -69,7 +69,7 @@
         </table>
     </div>
     -->
-    <div data-ng-if="NAC.analysisType">
+    <div data-ng-if="NAC.analysisType" class="wide">
 
         <!-- enrichment -->
         <div data-ng-if="NAC.analysisType === 'enrichment'">

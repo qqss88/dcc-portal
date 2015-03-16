@@ -68,10 +68,6 @@
 
     $scope.AnalysisService = AnalysisService;
 
-    // $scope.analysisId = $state.params.id;
-    // $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
-
-
     $scope.$watch(function () {
       return $state.current.data.tab;
     }, function () {
@@ -185,16 +181,6 @@
       $timeout.cancel(analysisPromise);
     });
 
-
-    // Start
-    // init();
-
-    // Only do synchronization on analysis home tab
-    /*
-    if (! $scope.analysisId || ! $scope.analysisType) {
-      synchronizeSets(10);
-    }*/
-
   });
 
 })();
@@ -229,7 +215,7 @@
       } else if (type === 'enrichment') {
         return 'Enrichment Analysis';
       } else if (type === 'phenotype') {
-        return 'Phenotype Analysis';
+        return 'Phenotype Comparison';
       } else {
         return '???';
       }

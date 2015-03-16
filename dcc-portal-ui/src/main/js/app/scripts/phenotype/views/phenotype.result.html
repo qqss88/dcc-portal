@@ -18,7 +18,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="donorSet in setIds">
-                    <td>{{donorSet}}</th>
+                    <td style="color:{{seriesColours[$index]}}">{{donorSet}}</th>
                     <td class="text-right"><a href="/search?filters={{setFilters[$index]}}">
                       {{setCounts[$index]}}
                     </a></th>
@@ -31,9 +31,9 @@
 
 
     <br>
-    <div>Gender comparison</div>
+    <div><strong>Gender comparison</strong></div>
     <div class="half">
-        <table class="table">
+        <table class="table" id="phenotype-gender">
             <thead>
                 <tr>
                     <th></th>
@@ -65,15 +65,15 @@
         </table>
     </div>
     <div class="third omega">
-        <grouped-bar data-items="gender.uiGraph" ylabel="% Donors" height="200" format="percentage" data-colours="seriesColours"></grouped-bar>
+        <grouped-bar data-items="gender.uiGraph" ylabel="% Donors" width="380" height="200" format="percentage" data-colours="seriesColours"></grouped-bar>
     </div>
     <div class="clearfix"></div>
 
 
     <br>
-    <div>Vital status comparison</div>
+    <div><strong>Vital status comparison</strong></div>
     <div class="half">
-        <table class="table">
+        <table class="table" id="phenotype-status">
             <thead>
                 <tr>
                     <th></th>
@@ -82,7 +82,7 @@
                     <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setIds[2]}}</th>
                 </tr>
                 <tr>
-                    <th>Gender</th>
+                    <th>Status</th>
                     <th># of items</th>
                     <th>%</th>
                     <th># of items</th>
@@ -105,15 +105,15 @@
         </table>
     </div>
     <div class="third omega">
-        <grouped-bar data-items="vital.uiGraph" ylabel="% Donors" height="200" format="percentage" data-colours="seriesColours"></grouped-bar>
+        <grouped-bar data-items="vital.uiGraph" ylabel="% Donors" format="percentage" width="380" height="200" data-colours="seriesColours"></grouped-bar>
     </div>
     <div class="clearfix"></div>
 
 
     <br>
-    <div>Age at diagnosis comparison</div>
+    <div><strong>Age at diagnosis comparison</strong></div>
     <div class="half">
-        <table class="table">
+        <table class="table" id="phenotype-age">
             <thead>
                 <tr>
                     <th></th>
@@ -122,7 +122,7 @@
                     <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setIds[2]}}</th>
                 </tr>
                 <tr>
-                    <th>Gender</th>
+                    <th>Age group</th>
                     <th># of items</th>
                     <th>%</th>
                     <th># of items</th>
@@ -145,11 +145,9 @@
         </table>
     </div>
     <div class="half omega">
-        <grouped-bar data-items="age.uiGraph" ylabel="% Donors" height="300" format="percentage" data-colours="seriesColours"></grouped-bar>
+        <grouped-bar data-items="age.uiGraph" ylabel="% Donors" height="300" width="380" format="percentage" data-colours="seriesColours"></grouped-bar>
     </div>
     <div class="clearfix"></div>
-
-
 
 </div>
 

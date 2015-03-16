@@ -35,8 +35,6 @@
         _this.selectedIds.push(setId);
       }
 
-      // console.log(_this.selectedIds);
-
       // Apply filer to disable irrelevant results
       if (_this.selectedIds.length === 0) {
         _this.filteredSetType = '';

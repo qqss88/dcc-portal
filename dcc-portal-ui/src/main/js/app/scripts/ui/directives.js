@@ -37,7 +37,7 @@ angular.module('app.ui', [
   'app.ui.scrollSpy',
   'app.ui.pagination',
   'app.ui.tpls',
-  'app.ui.dl',
+  // 'app.ui.dl',
   'app.ui.autofocus',
   'app.ui.param', 'app.ui.nested', 'app.ui.mutation',
   'app.ui.hidetext', 'app.ui.exists',
