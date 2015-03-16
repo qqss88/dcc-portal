@@ -417,6 +417,7 @@
         }
 
         $scope.$watch('item', function(n) {
+          $scope.isDeprecated = false;
           if (n && n.result) {
             Settings.get().then(function(settings) {
 

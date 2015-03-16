@@ -40,8 +40,6 @@
         _this.filteredSetType = '';
       }
       _this.applyFilter(_this.analysisType);
-      // console.log('after', _this.selectedIds);
-
     };
 
     _this.isInFilter = function(set) {
@@ -51,12 +49,10 @@
     };
 
     _this.applyFilter = function(type) {
-      // _this.selectedIds = [];
 
       if (type === 'enrichment') {
         _this.filteredList = _.filter(SetService.getAll(), function(set) {
-          // FIXME: also do gene limit (< 1000)
-          return set.type === 'gene';
+          return set.type === 'gene' && set.count <= 10000;
         });
       } else if (type === 'set') {
         _this.filteredList = _.filter(SetService.getAll(), function(set) {
@@ -123,12 +119,22 @@
       });
     };
 
+    /*
     $scope.$on('analysis::reload', function() {
       console.log('here');
       _this.analysisType = null;
       _this.selectedIds = [];
       _this.filteredSetType = 'donor';
       _this.filteredList = [];
+    });
+    */
+
+
+    $scope.$on('$locationChangeSuccess', function() {
+      _this.filteredList = [];
+      _this.selectedIds = [];
+      _this.analysisType = null;
+      _this.filteredSetType = '';
     });
 
 

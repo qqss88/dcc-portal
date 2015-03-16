@@ -1,4 +1,5 @@
 .analysis {
+
    h3 {
       margin-top: 0;
    }
@@ -11,14 +12,25 @@
 
    .analysis-tile {
       float: left;
-      width: 14rem;
-      height: 12rem;
+      width: 14.5rem;
+      height: 13rem;
       border: 1px solid $grey;
       background: $greyLighter;
       border-radius: 0.5rem;
       padding: 0.5rem;
       margin: 0.5rem;
       transition: color .5s, background .5s;
+
+      // background-image: url("/styles/images/icgc-logo.png");
+      // background-repeat: no-repeat;
+      // background-position: right bottom;
+      // filter: grayscale(70%) opacity(25%);
+      // -webkit-filter: grayscale(70%) opacity(25%);
+      // -o-filter: grayscale(70%) opacity(25%);
+      // -ms-filter: grayscale(70%) opacity(25%);
+      // -moz-filter: grayscale(70%) opacity(25%);
+      
+      
 
       &:hover {
         cursor: pointer;
@@ -42,7 +54,7 @@
 
       .analysis-tile-detail {
          margin-top: 0.5rem;
-         font-size: 0.8rem;
+         font-size: 0.85rem;
          line-height: 1.25rem;
       }
    }

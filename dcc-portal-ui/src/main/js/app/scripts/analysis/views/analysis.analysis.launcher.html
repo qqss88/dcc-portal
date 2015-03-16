@@ -73,9 +73,9 @@
 
         <!-- enrichment -->
         <div data-ng-if="NAC.analysisType === 'enrichment'">
-            <div>{{NAC.analysisDescription('enrichment')}}</div>
-            <div>Select the gene set you want to analyze. <small>(Maximum 10,000 genes)</small></div>
+            <div><em>{{NAC.analysisDescription('enrichment')}}</em></div>
             <br>
+            <div>Select the gene set you want to analyze. <small>(Maximum 10,000 genes)</small></div>
             <table class="table table-selectable"> 
                 <thead>
                     <th></th>
@@ -109,10 +109,9 @@
 
         <!-- phenotype -->
         <div data-ng-if="NAC.analysisType === 'phenotype'">
-            <div>{{NAC.analysisDescription('phenotype')}}</div>
-            <div>Select 2 or 3 Donor sets</div>
+            <div><em>{{NAC.analysisDescription('phenotype')}}</em></div>
             <br>
-
+            <div>Select 2 or 3 Donor sets</div>
             <div> 
                 <table class="table table-selectable"> 
                     <thead>
@@ -148,9 +147,9 @@
 
         <!-- set -->
         <div data-ng-if="NAC.analysisType === 'set'">
-            <div>{{NAC.analysisDescription('set')}}</div>
-            <div>Select 2 or 3 sets of the same type: </div>
+            <div><em>{{NAC.analysisDescription('set')}}</em></div>
             <br>
+            <div>Select 2 or 3 sets of the same type: </div>
             <div> 
                 <table class="table table-selectable"> 
                     <thead>
