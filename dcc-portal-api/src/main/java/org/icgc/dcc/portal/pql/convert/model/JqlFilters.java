@@ -15,19 +15,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert.model;
+package org.icgc.dcc.portal.pql.convert.model;
+
+import java.util.List;
+import java.util.Map;
 
 import lombok.NonNull;
 import lombok.Value;
 
+import org.icgc.dcc.portal.pql.convert.JqlFiltersDeserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 @Value
-public class JqlField {
+@JsonDeserialize(using = JqlFiltersDeserializer.class)
+public class JqlFilters {
 
   @NonNull
-  String name;
-  @NonNull
-  Operation operation;
-  @NonNull
-  JqlValue value;
+  Map<String, List<JqlField>> typeValues;
 
 }

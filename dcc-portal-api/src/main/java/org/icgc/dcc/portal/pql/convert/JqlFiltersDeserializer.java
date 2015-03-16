@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert;
+package org.icgc.dcc.portal.pql.convert;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
@@ -32,12 +32,12 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.convert.model.JqlArrayValue;
-import org.dcc.portal.pql.convert.model.JqlField;
-import org.dcc.portal.pql.convert.model.JqlFilters;
-import org.dcc.portal.pql.convert.model.JqlSingleValue;
-import org.dcc.portal.pql.convert.model.JqlValue;
-import org.dcc.portal.pql.convert.model.Operation;
+import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
+import org.icgc.dcc.portal.pql.convert.model.JqlField;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.JqlSingleValue;
+import org.icgc.dcc.portal.pql.convert.model.JqlValue;
+import org.icgc.dcc.portal.pql.convert.model.Operation;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;

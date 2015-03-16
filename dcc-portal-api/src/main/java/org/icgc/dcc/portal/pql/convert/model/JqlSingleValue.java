@@ -15,23 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert.model;
+package org.icgc.dcc.portal.pql.convert.model;
 
-import java.util.List;
-import java.util.Map;
-
+import static java.util.Collections.singletonList;
 import lombok.NonNull;
-import lombok.Value;
 
-import org.dcc.portal.pql.convert.JqlFiltersDeserializer;
+public class JqlSingleValue extends JqlValue {
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+  public JqlSingleValue(@NonNull Object value) {
+    super(singletonList(value));
+  }
 
-@Value
-@JsonDeserialize(using = JqlFiltersDeserializer.class)
-public class JqlFilters {
+  @Override
+  public Object get() {
+    return values.get(0);
+  }
 
-  @NonNull
-  Map<String, List<JqlField>> typeValues;
+  @Override
+  public boolean isArray() {
+    return false;
+  }
 
 }

@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert;
+package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
@@ -27,9 +27,9 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;

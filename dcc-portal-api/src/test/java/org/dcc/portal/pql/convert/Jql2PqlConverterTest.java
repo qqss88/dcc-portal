@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

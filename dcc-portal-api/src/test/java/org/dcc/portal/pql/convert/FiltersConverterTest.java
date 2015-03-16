@@ -21,8 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.dcc.portal.pql.convert.model.JqlFilters;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.pql.convert.FiltersConverter;
+import org.icgc.dcc.portal.pql.convert.JqlFiltersDeserializer;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

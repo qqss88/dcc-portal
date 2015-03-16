@@ -15,14 +15,14 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert;
+package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.lang.String.format;
-import static org.dcc.portal.pql.convert.model.JqlValue.asString;
-import static org.dcc.portal.pql.convert.model.JqlValue.isString;
-import static org.dcc.portal.pql.convert.model.Operation.IS;
-import static org.dcc.portal.pql.convert.model.Operation.NOT;
+import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
+import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
+import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
+import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
 import java.util.List;
 import java.util.Map.Entry;
@@ -30,10 +30,10 @@ import java.util.Map.Entry;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.convert.model.JqlArrayValue;
-import org.dcc.portal.pql.convert.model.JqlField;
-import org.dcc.portal.pql.convert.model.JqlFilters;
-import org.dcc.portal.pql.convert.model.Operation;
+import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
+import org.icgc.dcc.portal.pql.convert.model.JqlField;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.Operation;
 
 @Slf4j
 public class FiltersConverter {

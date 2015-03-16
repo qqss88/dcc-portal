@@ -15,25 +15,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert.model;
+package org.icgc.dcc.portal.pql.convert.model;
 
-import static java.util.Collections.singletonList;
 import lombok.NonNull;
+import lombok.Value;
 
-public class JqlSingleValue extends JqlValue {
+@Value
+public class JqlField {
 
-  public JqlSingleValue(@NonNull Object value) {
-    super(singletonList(value));
-  }
-
-  @Override
-  public Object get() {
-    return values.get(0);
-  }
-
-  @Override
-  public boolean isArray() {
-    return false;
-  }
+  @NonNull
+  String name;
+  @NonNull
+  Operation operation;
+  @NonNull
+  JqlValue value;
 
 }

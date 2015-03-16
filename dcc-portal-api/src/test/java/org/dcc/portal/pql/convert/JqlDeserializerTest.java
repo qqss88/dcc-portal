@@ -22,9 +22,10 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.convert.model.JqlArrayValue;
-import org.dcc.portal.pql.convert.model.JqlFilters;
-import org.dcc.portal.pql.convert.model.Operation;
+import org.icgc.dcc.portal.pql.convert.JqlFiltersDeserializer;
+import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
+import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.Operation;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
