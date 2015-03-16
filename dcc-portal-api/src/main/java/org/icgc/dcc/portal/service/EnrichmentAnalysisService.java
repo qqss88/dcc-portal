@@ -77,6 +77,7 @@ public class EnrichmentAnalysisService {
     val dataVersion = getDataVersion();
     val id = createAnalysisId();
     analysis.setId(id);
+    analysis.setVersion(dataVersion);
 
     // Ensure persisted for polling
     log.info("Saving analysis '{}'...", id);
