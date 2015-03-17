@@ -50,6 +50,13 @@ public class Jql2PqlConverterTest {
   }
 
   @Test
+  public void allFieldsTest() {
+    val query = Query.builder()
+        .build();
+    assertResponse(query, "select(*)");
+  }
+
+  @Test
   public void sizeTest() {
     val query = Query.builder().size(100).build();
     assertResponse(query, "limit(100)");

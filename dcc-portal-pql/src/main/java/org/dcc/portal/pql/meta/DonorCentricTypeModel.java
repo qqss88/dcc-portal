@@ -61,8 +61,6 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
       "projectId",
       "primarySite",
       "projectName",
-      "tumourType",
-      "tumourSubtype",
       "ssmCount",
       "cnsmExists",
       "stsmExists",
@@ -94,17 +92,12 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
       "studies");
 
   public DonorCentricTypeModel() {
-    super(initFields(), defineInternalAliases());
+    super(initFields(), defineInternalAliases(), PUBLIC_FIELDS);
   }
 
   @Override
   public List<String> getFacets() {
     return AVAILABLE_FACETS;
-  }
-
-  @Override
-  public List<String> getFields() {
-    return PUBLIC_FIELDS;
   }
 
   @Override

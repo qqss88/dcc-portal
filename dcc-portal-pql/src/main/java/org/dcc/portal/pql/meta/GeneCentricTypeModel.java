@@ -56,24 +56,17 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
       "affectedDonorCountTotal",
       "affectedDonorCountFiltered",
       "affectedTranscriptIds",
-      "location",
+      "gene.location",
       "pathwayId",
-      "pathwayName",
-      "pathways",
-      "sets");
+      "pathways");
 
   public GeneCentricTypeModel() {
-    super(defineFields(), defineInternalAliases());
+    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS);
   }
 
   @Override
   public List<String> getFacets() {
     return AVAILABLE_FACETS;
-  }
-
-  @Override
-  public List<String> getFields() {
-    return PUBLIC_FIELDS;
   }
 
   @Override
@@ -111,7 +104,7 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(string(GENE_LOCATION, GENE_LOCATION))
         .add(string(MUTATION_LOCATION, MUTATION_LOCATION))
 
-        .add(string(SCORE, SCORE))
+        .add(string(SCORE, ImmutableSet.of(SCORE, "affectedDonorCountFiltered")))
         .add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID))
         .add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID))
         .add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID))

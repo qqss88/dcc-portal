@@ -38,7 +38,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 @Slf4j
 public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggregationBuilder, QueryContext> {
 
-  private static int DEFAULT_FACETS_SIZE = 100;
+  private static int DEFAULT_FACETS_SIZE = 1000;
 
   @Override
   public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {

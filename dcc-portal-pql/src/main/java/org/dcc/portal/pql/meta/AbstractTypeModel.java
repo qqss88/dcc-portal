@@ -87,8 +87,10 @@ public abstract class AbstractTypeModel {
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
+  protected final List<String> allowedFields;
 
-  public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases) {
+  public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
+      @NonNull List<String> allowedAliases) {
     fieldsByFullPath = initFieldsByFullPath(fields);
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
 
@@ -96,6 +98,7 @@ public abstract class AbstractTypeModel {
     log.debug("FieldsByAlias Map: {}", fieldsByAlias);
 
     this.fieldsByInternalAlias = defineInternalAliases(internalAliases);
+    this.allowedFields = defineAllowedFields(allowedAliases);
   }
 
   /**
@@ -106,7 +109,9 @@ public abstract class AbstractTypeModel {
   /**
    * Returns a list of fields for select(*)
    */
-  public abstract List<String> getFields();
+  public List<String> getFields() {
+    return allowedFields;
+  }
 
   /**
    * Returns a prefix of the TypeModel. E.g. 'donor.id' has prefix 'donor'.
@@ -229,6 +234,15 @@ public abstract class AbstractTypeModel {
     val visitor = new CreateAliasVisitor();
     for (val field : fields) {
       result.putAll(field.accept(visitor));
+    }
+
+    return result.build();
+  }
+
+  private List<String> defineAllowedFields(List<String> allowedAliases) {
+    val result = new ImmutableList.Builder<String>();
+    for (val alias : allowedAliases) {
+      result.add(fieldsByAlias.get(alias));
     }
 
     return result.build();

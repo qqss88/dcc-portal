@@ -27,7 +27,6 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.Query;
@@ -59,21 +58,18 @@ public class Jql2PqlConverter {
     boolean hasPreviousClause = false;
 
     val combinedFields = Lists.<String> newArrayList();
-    if (query.hasFields()) {
-      combinedFields.addAll(query.getFields());
-    } else {
-      combinedFields.addAll(IndexModel.getTypeModel(type).getFields());
-    }
-
     if (query.getIncludes() != null) {
       val includes = Lists.newArrayList(query.getIncludes());
-      if (includes != null) {
-        if (includes.contains("facets")) {
-          includes.remove("facets");
-          result.append(parseFacets(type));
-        }
-        combinedFields.addAll(includes);
+      if (includes.contains("facets")) {
+        includes.remove("facets");
+        result.append(parseFacets(type));
       }
+
+      combinedFields.addAll(includes);
+    }
+
+    if (query.hasFields()) {
+      combinedFields.addAll(query.getFields());
     }
 
     // Have facets been included?
@@ -143,6 +139,10 @@ public class Jql2PqlConverter {
   }
 
   private static String parseFields(List<String> fields) {
+    if (fields.isEmpty()) {
+      return "select(*)";
+    }
+
     val result = new StringBuilder();
     result.append("select(");
     for (int i = 0; i < fields.size(); i++) {
