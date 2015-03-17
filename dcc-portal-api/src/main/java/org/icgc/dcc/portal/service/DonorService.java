@@ -73,7 +73,7 @@ public class DonorService {
     }
 
     Donors donors = new Donors(list.build());
-    donors.setFacets(aggregationsConverter.convert(response.getAggregations()));
+    donors.addFacets(aggregationsConverter.convert(response.getAggregations()));
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;

@@ -30,7 +30,7 @@ public class Paginated {
     }
   }
 
-  public void setFacets(Map<String, TermFacet> facets) {
+  public void addFacets(Map<String, TermFacet> facets) {
     this.facets = facets;
   }
 
