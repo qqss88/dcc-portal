@@ -82,6 +82,14 @@ public class Jql2PqlConverterTest {
     assertThat(result).contains("facets(*)");
   }
 
+  @Test
+  public void existsTest() {
+    val query = Query.builder()
+        .filters(new FiltersParam("{donor:{hasPathway:true}}").get())
+        .build();
+    assertResponse(query, "select(*),exists(gene.pathwayId)");
+  }
+
   private void assertResponse(Query query, String exectedResult) {
     val result = converter.convert(query, Type.DONOR_CENTRIC);
     log.debug("{}", result);

@@ -49,6 +49,10 @@ public abstract class AbstractTypeModel {
   public static final String BIOLOGICAL_PROCESS = "go_term.biological_process";
   public static final String CELLULAR_COMPONENT = "go_term.cellular_component";
 
+  public static final String HAS_PATHWAY = "hasPathway";
+  public static final String HAS_GO_TERM = "hasGoTerm";
+  public static final String HAS_CURATED_SET = "hasCuratedSet";
+
   public static final String GENE_PATHWAY_ID = "gene.pathwayId";
   public static final String GENE_SET_ID = "gene.geneSetId";
   public static final String GENE_GO_TERM_ID = "gene.goTermId";
@@ -77,6 +81,9 @@ public abstract class AbstractTypeModel {
       GENE_PATHWAY_ID,
       GENE_SET_ID,
       GENE_GO_TERM_ID,
+      HAS_PATHWAY,
+      HAS_GO_TERM,
+      HAS_CURATED_SET,
       GENE_CURATED_SET_ID,
       GENE_LOCATION,
       MUTATION_LOCATION,
@@ -88,6 +95,10 @@ public abstract class AbstractTypeModel {
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
   protected final List<String> allowedFields;
+  private final Map<String, String> hasFieldsMapping = ImmutableMap.of(
+      HAS_PATHWAY, GENE_PATHWAY_ID,
+      HAS_CURATED_SET, GENE_CURATED_SET_ID,
+      HAS_GO_TERM, GENE_GO_TERM_ID);
 
   public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
       @NonNull List<String> allowedAliases) {
@@ -143,6 +154,10 @@ public abstract class AbstractTypeModel {
    * @throws NoSuchElementException if there is a field with such an alias.
    */
   public final String getField(@NonNull String field) {
+    if (hasFieldsMapping.keySet().contains(field)) {
+      return hasFieldsMapping.get(field);
+    }
+
     val alias = fieldsByAlias.get(field);
     if (alias == null) {
       throw new SemanticException("Field %s is not defined in the type model", field);

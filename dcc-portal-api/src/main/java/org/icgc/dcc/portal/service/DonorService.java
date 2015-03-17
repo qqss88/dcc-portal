@@ -3,6 +3,7 @@ package org.icgc.dcc.portal.service;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.StreamingOutput;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -31,6 +33,8 @@ import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,12 +46,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
   private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
+  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   private Donors buildDonors(SearchResponse response, Query query) {
     val hits = response.getHits();
@@ -66,14 +73,23 @@ public class DonorService {
     }
 
     Donors donors = new Donors(list.build());
-    donors.setFacets(response.getFacets());
+    donors.setFacets(aggregationsConverter.convert(response.getAggregations()));
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;
   }
 
   public Donors findAllCentric(Query query) {
-    return buildDonors(donorRepository.findAllCentric(query), query);
+    val pql = converter.convert(query, DONOR_CENTRIC);
+    log.debug("Query: {}. PQL: {}", query, pql);
+
+    val request = queryEngine.execute(pql, DONOR_CENTRIC);
+    log.debug("Request: {}", request);
+
+    val response = request.execute().actionGet();
+    log.debug("Response: {}", response);
+
+    return buildDonors(response, query);
   }
 
   public Donors findAll(Query query) {

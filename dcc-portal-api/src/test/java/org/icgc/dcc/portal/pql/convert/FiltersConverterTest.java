@@ -18,12 +18,11 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import lombok.SneakyThrows;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.FiltersParam;
-import org.icgc.dcc.portal.pql.convert.FiltersConverter;
-import org.icgc.dcc.portal.pql.convert.JqlFiltersDeserializer;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import org.junit.Test;
 
@@ -37,50 +36,50 @@ public class FiltersConverterTest {
 
   @Test
   public void convertToEqualTest() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{is:'DO1'}}}"));
+    val result = converter.convertFilters(createFilters("{donor:{id:{is:'DO1'}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("eq(donor.id,'DO1')");
   }
 
   @Test
   public void convertToArrayTest() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{is:['DO1']}}}"));
+    val result = converter.convertFilters(createFilters("{donor:{id:{is:['DO1']}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("in(donor.id,'DO1')");
   }
 
   @Test
   public void convertToArrayTest_multivalue() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{is:['DO1', 'DO2']}}}"));
+    val result = converter.convertFilters(createFilters("{donor:{id:{is:['DO1', 'DO2']}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("in(donor.id,'DO1','DO2')");
   }
 
   @Test
   public void notTest() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{not:'DO1'}}}"));
+    val result = converter.convertFilters(createFilters("{donor:{id:{not:'DO1'}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("ne(donor.id,'DO1')");
   }
 
   @Test
   public void notTest_array() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{not:['DO1','DO2']}}}"));
+    val result = converter.convertFilters(createFilters("{donor:{id:{not:['DO1','DO2']}}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("not(in(donor.id,'DO1','DO2'))");
   }
 
   @Test
   public void existsTest() {
-    val result = converter.convertFilters(createFilters("{donor:{hasCuratedSet:true}}"));
-    assertThat(result).isEqualTo("exists(hasCuratedSet)");
+    val result = converter.convertFilters(createFilters("{donor:{hasCuratedSet:true}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("exists(gene.curatedSetId)");
   }
 
   @Test
   public void missingTest() {
-    val result = converter.convertFilters(createFilters("{donor:{id:{not:'DO1'}, hasPathway:false}}"));
-    assertThat(result).isEqualTo("ne(donor.id,'DO1'),missing(hasPathway)");
+    val result = converter.convertFilters(createFilters("{donor:{id:{not:'DO1'}, hasPathway:false}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("ne(donor.id,'DO1'),missing(gene.pathwayId)");
   }
 
   @Test
   public void multiFilterTest() {
-    val result = converter.convertFilters(createFilters("{donor:{hasPathway:false}}"));
-    assertThat(result).isEqualTo("missing(hasPathway)");
+    val result = converter.convertFilters(createFilters("{donor:{hasPathway:false}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("missing(gene.pathwayId)");
   }
 
   @SneakyThrows

@@ -39,6 +39,8 @@ import com.google.common.collect.ImmutableMap;
 @Slf4j
 public class AggregationToFacetConverter {
 
+  private static final AggregationToFacetConverter INSTANCE = new AggregationToFacetConverter();
+
   public Map<String, TermFacet> convert(Aggregations aggregations) {
     val result = new ImmutableMap.Builder<String, TermFacet>();
     for (val aggregation : aggregations) {
@@ -48,6 +50,10 @@ public class AggregationToFacetConverter {
     }
 
     return result.build();
+  }
+
+  public static AggregationToFacetConverter getInstance() {
+    return INSTANCE;
   }
 
   private static TermFacet createTermFacet(Terms termsAgg) {

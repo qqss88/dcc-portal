@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
@@ -85,7 +86,25 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
 
   @Override
   public Optional<ExpressionNode> visitTerms(@NonNull TermsNode node, @NonNull Optional<QueryContext> context) {
-    return Optional.empty();
+    if (!node.getField().equals(GENE_LOCATION) && !node.getField().equals(MUTATION_LOCATION)) {
+      return Optional.empty();
+    }
+
+    checkOptional(context);
+    val result = new OrNode();
+    for (val child : node.getChildren()) {
+      // visitTerm has already implemented logic. Let's reuse it by creating a TermNode and visiting it.
+      val visitTermNodeResult = createTermNode(node.getField(), child).accept(this, context);
+      result.addChildren(visitTermNodeResult.get());
+    }
+
+    return Optional.of(result);
+  }
+
+  private ExpressionNode createTermNode(String field, ExpressionNode child) {
+    val terminalNode = (TerminalNode) child;
+
+    return new TermNode(field, terminalNode.getValue());
   }
 
   @Override

@@ -42,6 +42,8 @@ import com.google.common.collect.Lists;
 @Slf4j
 public class Jql2PqlConverter {
 
+  private final static Jql2PqlConverter INSTANCE = new Jql2PqlConverter();
+
   private final static FiltersConverter FILTERS_CONVERTER = new FiltersConverter();
   private final static ObjectMapper mapper = createObjectMapper();
   private final static String SEPARATOR = ",";
@@ -85,7 +87,7 @@ public class Jql2PqlConverter {
         result.append(SEPARATOR);
       }
 
-      result.append(convertFilters(query.getFilters().toString()));
+      result.append(convertFilters(query.getFilters().toString(), type));
       hasPreviousClause = true;
     }
 
@@ -94,7 +96,7 @@ public class Jql2PqlConverter {
         result.append(SEPARATOR);
       }
 
-      result.append(convertFilters(query.getScoreFilters().toString()));
+      result.append(convertFilters(query.getScoreFilters().toString(), type));
       hasPreviousClause = true;
     }
 
@@ -128,6 +130,10 @@ public class Jql2PqlConverter {
     return result.toString();
   }
 
+  public static Jql2PqlConverter getInstance() {
+    return INSTANCE;
+  }
+
   private String parseFacets(Type type) {
     return "facets(*)";
   }
@@ -158,11 +164,11 @@ public class Jql2PqlConverter {
   }
 
   @SneakyThrows
-  private static String convertFilters(@NonNull String jqlFilters) {
+  private static String convertFilters(@NonNull String jqlFilters, Type indexType) {
     val filtersEntry = mapper.readValue(jqlFilters, JqlFilters.class);
     log.debug("Parsed JQL filters: {}", filtersEntry);
 
-    return FILTERS_CONVERTER.convertFilters(filtersEntry);
+    return FILTERS_CONVERTER.convertFilters(filtersEntry, indexType);
   }
 
   private static ObjectMapper createObjectMapper() {

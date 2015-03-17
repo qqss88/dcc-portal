@@ -27,6 +27,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
@@ -115,6 +116,11 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, Strin
 
   @Override
   public ExpressionNode visitOr(OrNode node, Optional<String> context) {
+    return processCommonCases(node, context);
+  }
+
+  @Override
+  public ExpressionNode visitNested(NestedNode node, Optional<String> context) {
     return processCommonCases(node, context);
   }
 

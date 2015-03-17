@@ -30,6 +30,8 @@ import java.util.Map.Entry;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -46,12 +48,12 @@ public class FiltersConverter {
   private static String EXISTS_TEMPLATE = "exists(%s)";
   private static String MISSING_TEMPLATE = "missing(%s)";
 
-  public String convertFilters(JqlFilters filters) {
+  public String convertFilters(JqlFilters filters, Type indexType) {
     val lastType = getLast(filters.getTypeValues().keySet());
     val result = new StringBuilder();
 
     for (val type : filters.getTypeValues().entrySet()) {
-      result.append(convertType(type));
+      result.append(convertType(type, indexType));
       if (!lastType.equals(type.getKey())) {
         result.append(QUERY_SEPARATOR);
       }
@@ -60,14 +62,14 @@ public class FiltersConverter {
     return result.toString();
   }
 
-  private static String convertType(Entry<String, List<JqlField>> type) {
+  private static String convertType(Entry<String, List<JqlField>> type, Type indexType) {
     log.debug("Converting type '{}' {}", type.getKey(), type.getValue());
     val result = new StringBuilder();
 
     val typePrefix = type.getKey();
     for (int i = 0; i < type.getValue().size(); i++) {
       val jqlField = type.getValue().get(i);
-      result.append(createFilter(typePrefix, jqlField));
+      result.append(createFilter(typePrefix, jqlField, indexType));
       if (i != type.getValue().size() - 1) {
         result.append(QUERY_SEPARATOR);
       }
@@ -76,11 +78,14 @@ public class FiltersConverter {
     return result.toString();
   }
 
-  private static String createFilter(String typePrefix, JqlField jqlField) {
+  private static String createFilter(String typePrefix, JqlField jqlField, Type indexType) {
     if (jqlField.getOperation() == Operation.HAS) {
+      val typeModel = IndexModel.getTypeModel(indexType);
+      val fieldName = typeModel.getField(jqlField.getName());
+
       return jqlField.getValue().get() == Boolean.TRUE ?
-          format(EXISTS_TEMPLATE, jqlField.getName()) :
-          format(MISSING_TEMPLATE, jqlField.getName());
+          format(EXISTS_TEMPLATE, fieldName) :
+          format(MISSING_TEMPLATE, fieldName);
     }
 
     val filterType = parseFilterType(typePrefix, jqlField);
