@@ -30,6 +30,8 @@ import javax.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.val;
 
+import org.dcc.portal.pql.qe.QueryEngine;
+import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
@@ -295,6 +297,11 @@ public class PortalConfig {
   @Bean
   public WebProperties webProperties() {
     return properties.getWeb();
+  }
+
+  @Bean
+  public QueryEngine queryEngine(Client client) {
+    return new QueryEngine(client, properties.getElastic().getIndexName());
   }
 
   private boolean isDistributed() {

@@ -15,15 +15,16 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.convert;
+package org.icgc.dcc.portal.pql.convert;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -66,10 +67,24 @@ public class Jql2PqlConverterTest {
     assertResponse(query, "sort(+id)");
   }
 
-  private void assertResponse(Query query, String exectedResult) {
-    val result = converter.convert(query);
+  @Test
+  public void includeFacetsTest() {
+    val query = Query.builder().includes(singletonList("facets")).build();
+    val result = converter.convert(query, Type.DONOR_CENTRIC);
     log.debug("{}", result);
-    assertThat(result).isEqualTo(exectedResult);
+    assertThat(result).contains("facets(*)");
+  }
+
+  private void assertResponse(Query query, String exectedResult) {
+    val result = converter.convert(query, Type.DONOR_CENTRIC);
+    log.debug("{}", result);
+
+    if (query.hasFields()) {
+      assertThat(result).isEqualTo(exectedResult);
+    } else {
+      assertThat(result).contains(exectedResult);
+    }
+
   }
 
 }

@@ -45,6 +45,7 @@ import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ExistsContext;
@@ -339,6 +340,16 @@ public class PqlParseTreeVisitorTest {
   }
 
   @Test
+  public void visitSelectAllTest() {
+    val parseTree = createParseTree("select(*)");
+    val selectContext = (SelectContext) parseTree.getChild(0);
+    val fieldsNode = (FieldsNode) VISITOR.visitSelect(selectContext);
+
+    val fields = IndexModel.getDonorCentricTypeModel().getFields();
+    assertThat(fieldsNode.getFields()).containsExactly(fields.toArray(new String[fields.size()]));
+  }
+
+  @Test
   public void visitLimitTest() {
     val parseTree = createParseTree("select(gender),limit(1, 5)");
     val rangeContext = (RangeContext) parseTree.getChild(2);
@@ -445,6 +456,25 @@ public class PqlParseTreeVisitorTest {
 
     assertThat(missingNode.childrenCount()).isEqualTo(0);
     assertThat(missingNode.getField()).isEqualTo("_donor_id");
+  }
+
+  @Test
+  public void prefixTest_sameType() {
+    val query = "eq(donor.id, 'ID1')";
+    val parseTree = createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val termNode = (TermNode) VISITOR.visitEqual(eqContext);
+    log.info("{}", termNode);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_donor_id");
+  }
+
+  @Test
+  public void prefixTest_differentType() {
+    val query = "eq(gene.id, 'ID1')";
+    val parseTree = createParseTree(query);
+    val eqContext = (EqualContext) parseTree.getChild(0);
+    val termNode = (TermNode) VISITOR.visitEqual(eqContext);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("gene._gene_id");
   }
 
 }

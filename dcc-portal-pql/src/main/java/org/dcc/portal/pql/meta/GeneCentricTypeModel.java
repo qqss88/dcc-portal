@@ -38,13 +38,47 @@ import com.google.common.collect.ImmutableSet;
 
 public class GeneCentricTypeModel extends AbstractTypeModel {
 
+  private final static String TYPE_PREFIX = "gene";
+  private static final List<String> AVAILABLE_FACETS = ImmutableList.of("type");
+
+  private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
+      "id",
+      "symbol",
+      "name",
+      "type",
+      "chromosome",
+      "start",
+      "end",
+      "strand",
+      "description",
+      "synonyms",
+      "externalDbIds",
+      "affectedDonorCountTotal",
+      "affectedDonorCountFiltered",
+      "affectedTranscriptIds",
+      "location",
+      "pathwayId",
+      "pathwayName",
+      "pathways",
+      "sets");
+
   public GeneCentricTypeModel() {
     super(defineFields(), defineInternalAliases());
   }
 
   @Override
-  public String getType() {
-    return Type.GENE.getId();
+  public List<String> getFacets() {
+    return AVAILABLE_FACETS;
+  }
+
+  @Override
+  public List<String> getFields() {
+    return PUBLIC_FIELDS;
+  }
+
+  @Override
+  public String prefix() {
+    return TYPE_PREFIX;
   }
 
   private static List<FieldModel> defineFields() {
@@ -64,7 +98,7 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(defineSummary())
         .add(arrayOfStrings("pathway", ImmutableSet.of("pathways", "pathwayId", "gene.pathwayId")))
         .add(arrayOfStrings("curated_set", ImmutableSet.of("curatedSetId", "gene.curatedSetId")))
-        .add(object("go_term", "gene.GoTerm",
+        .add(object("go_term", GENE_GO_TERM,
             arrayOfStrings("biological_process"),
             arrayOfStrings("cellular_component"),
             arrayOfStrings("molecular_function")))

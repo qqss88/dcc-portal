@@ -19,7 +19,9 @@ count
 
 function
   : 'select' OPAR ID (COMMA ID)* CPAR       # select
+  | 'select' OPAR ASTERISK CPAR             # select
   | 'facets' OPAR ID (COMMA ID)* CPAR       # facets
+  | 'facets' OPAR ASTERISK CPAR             # facets
   ;
 
 filter
@@ -95,6 +97,10 @@ value
 /*------------------------------------------------------------------------------
  * LEXER RULES
  *----------------------------------------------------------------------------*/
+
+ASTERISK
+  : '*'
+  ;
 
 COMMA
   : ','

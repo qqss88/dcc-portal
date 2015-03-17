@@ -36,13 +36,64 @@ import com.google.common.collect.ImmutableSet;
 
 public class MutationCentricTypeModel extends AbstractTypeModel {
 
+  private final static String TYPE_PREFIX = "mutation";
+  private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
+      "type",
+      "consequenceTypeNested",
+      "consequenceType",
+      "platform",
+      "verificationStatus",
+      "platformNested",
+      "verificationStatusNested",
+      "functionalImpact",
+      "functionalImpactNested",
+      "sequencingStrategy",
+      "sequencingStrategyNested");
+
+  private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
+      "id",
+      "mutation",
+      "type",
+      "chromosome",
+      "start",
+      "end",
+      "affectedDonorCountTotal",
+      "testedDonorCount",
+      "consequenceType",
+      "consequenceTypeNested",
+      "platform",
+      "platformNested",
+      "verificationStatus",
+      "verificationStatusNested",
+      "assemblyVersion",
+      "referenceGenomeAllele",
+      "affectedProjectCount",
+      "affectedProjectIds",
+      "affectedDonorCountFiltered",
+      "transcriptId",
+      "functionalImpact",
+      "functionalImpactNested",
+      "location",
+      "sequencingStrategy",
+      "sequencingStrategyNested");
+
   public MutationCentricTypeModel() {
     super(defineFields(), defineInternalAliases());
   }
 
   @Override
-  public String getType() {
-    return Type.MUTATION.getId();
+  public List<String> getFacets() {
+    return AVAILABLE_FACETS;
+  }
+
+  @Override
+  public List<String> getFields() {
+    return PUBLIC_FIELDS;
+  }
+
+  @Override
+  public String prefix() {
+    return TYPE_PREFIX;
   }
 
   private static List<FieldModel> defineFields() {

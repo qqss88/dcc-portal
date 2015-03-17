@@ -41,13 +41,75 @@ import com.google.common.collect.ImmutableSet;
 
 public class DonorCentricTypeModel extends AbstractTypeModel {
 
+  private final static String TYPE_PREFIX = "donor";
+  private final static List<String> AVAILABLE_FACETS = ImmutableList.of(
+      "projectId",
+      "primarySite",
+      "gender",
+      "tumourStageAtDiagnosis",
+      "vitalStatus",
+      "diseaseStatusLastFollowup",
+      "relapseType",
+      "ageAtDiagnosisGroup",
+      "availableDataTypes",
+      "analysisTypes",
+      "projectName");
+
+  private final static List<String> PUBLIC_FIELDS = ImmutableList.of(
+      "id",
+      "submittedDonorId",
+      "projectId",
+      "primarySite",
+      "projectName",
+      "tumourType",
+      "tumourSubtype",
+      "ssmCount",
+      "cnsmExists",
+      "stsmExists",
+      "sgvExists",
+      "pexpExists",
+      "mirnaSeqExists",
+      "methSeqExists",
+      "methArrayExists",
+      "expSeqExists",
+      "expArrayExists",
+      "jcnExists",
+      "ageAtDiagnosis",
+      "ageAtDiagnosisGroup",
+      "ageAtEnrollment",
+      "ageAtLastFollowup",
+      "diagnosisIcd10",
+      "diseaseStatusLastFollowup",
+      "intervalOfLastFollowup",
+      "gender",
+      "vitalStatus",
+      "tumourStageAtDiagnosis",
+      "tumourStagingSystemAtDiagnosis",
+      "tumourStageAtDiagnosisSupplemental",
+      "relapseType",
+      "relapseInterval",
+      "survivalTime",
+      "availableDataTypes",
+      "analysisTypes",
+      "studies");
+
   public DonorCentricTypeModel() {
     super(initFields(), defineInternalAliases());
   }
 
   @Override
-  public String getType() {
-    return Type.DONOR.getId();
+  public List<String> getFacets() {
+    return AVAILABLE_FACETS;
+  }
+
+  @Override
+  public List<String> getFields() {
+    return PUBLIC_FIELDS;
+  }
+
+  @Override
+  public String prefix() {
+    return TYPE_PREFIX;
   }
 
   private static List<FieldModel> initFields() {
@@ -81,7 +143,7 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
     fields.add(string(GENE_LOCATION, GENE_LOCATION));
     fields.add(string(MUTATION_LOCATION, MUTATION_LOCATION));
 
-    fields.add(string(SCORE, SCORE));
+    fields.add(string(SCORE, ImmutableSet.of(SCORE, "ssmAffectedGenes")));
     fields.add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID));
     fields.add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID));
     fields.add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID));

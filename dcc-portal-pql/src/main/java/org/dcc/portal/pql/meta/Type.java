@@ -24,9 +24,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public enum Type {
-  DONOR("donor"),
-  GENE("gene"),
-  MUTATION("mutation"),
   DONOR_CENTRIC("donor-centric"),
   GENE_CENTRIC("gene-centric"),
   MUTATION_CENTRIC("mutation-centric");

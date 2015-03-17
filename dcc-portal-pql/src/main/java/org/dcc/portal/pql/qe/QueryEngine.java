@@ -22,7 +22,6 @@ import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import lombok.NonNull;
-import lombok.Value;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -32,21 +31,17 @@ import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
-@Value
 public class QueryEngine {
 
-  @NonNull
-  String index;
-  EsAstTransformator esAstTransformator = new EsAstTransformator();
-  EsRequestBuilder requestBuilder;
+  private static final EsAstTransformator esAstTransformator = new EsAstTransformator();
+  private final EsRequestBuilder requestBuilder;
 
-  QueryContext donorContext;
-  QueryContext geneContext;
-  QueryContext mutationContext;
+  private final QueryContext donorContext;
+  private final QueryContext geneContext;
+  private final QueryContext mutationContext;
 
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
-    this.index = index;
 
     this.donorContext = new QueryContext(index, DONOR_CENTRIC);
     this.geneContext = new QueryContext(index, GENE_CENTRIC);

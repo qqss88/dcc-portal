@@ -44,6 +44,7 @@ public abstract class AbstractTypeModel {
   /**
    * Following public constants used to resolve the special cases in the API.
    */
+  public static final String GENE_GO_TERM = "gene.GoTerm";
   public static final String MOLECULAR_FUNCTION = "go_term.molecular_function";
   public static final String BIOLOGICAL_PROCESS = "go_term.biological_process";
   public static final String CELLULAR_COMPONENT = "go_term.cellular_component";
@@ -67,6 +68,22 @@ public abstract class AbstractTypeModel {
   public static final String LOOKUP_INDEX = "lookup.index";
   public static final String LOOKUP_TYPE = "lookup.type";
 
+  /**
+   * Contains fields that help to resolve 'the special cases in the API'. This fields should not be split when alias to
+   * fully qualified field is resolved.
+   */
+  public static final List<String> SPECIAL_CASES_FIELDS = ImmutableList.of(
+      GENE_GO_TERM,
+      GENE_PATHWAY_ID,
+      GENE_SET_ID,
+      GENE_GO_TERM_ID,
+      GENE_CURATED_SET_ID,
+      GENE_LOCATION,
+      MUTATION_LOCATION,
+      DONOR_ENTITY_SET_ID,
+      GENE_ENTITY_SET_ID,
+      MUTATION_ENTITY_SET_ID);
+
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
@@ -74,12 +91,27 @@ public abstract class AbstractTypeModel {
   public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases) {
     fieldsByFullPath = initFieldsByFullPath(fields);
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
+
     fieldsByAlias = initFieldsByAlias(fields);
     log.debug("FieldsByAlias Map: {}", fieldsByAlias);
+
     this.fieldsByInternalAlias = defineInternalAliases(internalAliases);
   }
 
-  public abstract String getType();
+  /**
+   * Returns a list of available facets.
+   */
+  public abstract List<String> getFacets();
+
+  /**
+   * Returns a list of fields for select(*)
+   */
+  public abstract List<String> getFields();
+
+  /**
+   * Returns a prefix of the TypeModel. E.g. 'donor.id' has prefix 'donor'.
+   */
+  public abstract String prefix();
 
   /**
    * Checks if {@code field} is nested field.

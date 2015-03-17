@@ -27,6 +27,8 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -52,25 +54,35 @@ public class Jql2PqlConverter {
   private final static String ASC_SORT = "+";
   private final static String DESC_SORT = "-";
 
-  public String convert(@NonNull Query query) {
+  public String convert(@NonNull Query query, Type type) {
     val result = new StringBuilder();
     boolean hasPreviousClause = false;
 
-    if (query.hasFields() || query.getIncludes() != null) {
-      val combinedFields = Lists.<String> newArrayList();
-      val fields = query.getFields();
-      if (fields != null) {
-        combinedFields.addAll(fields);
-      }
-
-      val includes = query.getIncludes();
-      if (includes != null) {
-        combinedFields.addAll(query.getIncludes());
-      }
-
-      result.append(parseFields(combinedFields));
-      hasPreviousClause = true;
+    val combinedFields = Lists.<String> newArrayList();
+    if (query.hasFields()) {
+      combinedFields.addAll(query.getFields());
+    } else {
+      combinedFields.addAll(IndexModel.getTypeModel(type).getFields());
     }
+
+    if (query.getIncludes() != null) {
+      val includes = Lists.newArrayList(query.getIncludes());
+      if (includes != null) {
+        if (includes.contains("facets")) {
+          includes.remove("facets");
+          result.append(parseFacets(type));
+        }
+        combinedFields.addAll(includes);
+      }
+    }
+
+    // Have facets been included?
+    if (result.length() != 0) {
+      result.append(SEPARATOR);
+    }
+
+    result.append(parseFields(combinedFields));
+    hasPreviousClause = true;
 
     if (query.hasFilters()) {
       if (hasPreviousClause) {
@@ -118,6 +130,10 @@ public class Jql2PqlConverter {
     checkState(query.getScore() == null && query.getQuery() == null, "Not implemented");
 
     return result.toString();
+  }
+
+  private String parseFacets(Type type) {
+    return "facets(*)";
   }
 
   private static String parseSort(String field, SortOrder order) {

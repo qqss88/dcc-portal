@@ -32,6 +32,9 @@ import com.google.common.collect.ImmutableList;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TermFacet {
 
+  private static final String FACET_TYPE = "terms";
+  private static final long DEFAULT_COUNT = 0L;
+
   String type;
   Long missing;
   Long total;
@@ -42,12 +45,24 @@ public class TermFacet {
     return new TermFacet(facet);
   }
 
+  public static TermFacet of(long total, ImmutableList<Term> terms) {
+    return new TermFacet(total, terms);
+  }
+
   private TermFacet(TermsFacet facet) {
     this.type = facet.getType();
     this.missing = facet.getMissingCount();
     this.total = facet.getTotalCount();
     this.other = facet.getOtherCount();
     this.terms = buildTerms(facet.getEntries(), facet.getMissingCount());
+  }
+
+  private TermFacet(long total, ImmutableList<Term> terms) {
+    this.type = FACET_TYPE;
+    this.missing = DEFAULT_COUNT;
+    this.total = total;
+    this.other = DEFAULT_COUNT;
+    this.terms = terms;
   }
 
   private ImmutableList<Term> buildTerms(List<? extends TermsFacet.Entry> entries, Long missing) {
@@ -62,9 +77,10 @@ public class TermFacet {
   }
 
   @Value
-  private static class Term {
+  public static class Term {
 
     String term;
-    Integer count;
+    long count;
   }
+
 }

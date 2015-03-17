@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.qe;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 
 import java.util.List;
 
@@ -228,10 +227,15 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitSelect(@NonNull SelectContext nodeContext) {
+    if (nodeContext.ASTERISK() != null) {
+      return addAllFields();
+    }
+
     val fieldsNode = new FieldsNode();
     for (val field : nodeContext.ID()) {
       fieldsNode.addChildren(new TerminalNode(getField(field.getText())));
     }
+
     log.debug("FieldsNode: {}", fieldsNode);
 
     return fieldsNode;
@@ -310,6 +314,10 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
    */
   @Override
   public ExpressionNode visitFacets(@NonNull FacetsContext nodeContext) {
+    if (nodeContext.ASTERISK() != null) {
+      return addAllFacets();
+    }
+
     val aggsNode = new AggregationsNode();
     for (val child : nodeContext.ID()) {
       aggsNode.addChildren(new TermsAggregationNode(child.getText(), getField(child.getText())));
@@ -352,16 +360,48 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   private String getField(String alias) {
-    return typeModel.getField(alias);
+    return typeModel.getField(resolveAlias(alias));
   }
 
-  // TODO: Force prefixes
-  @SuppressWarnings("unused")
+  private String resolveAlias(String alias) {
+    if (AbstractTypeModel.SPECIAL_CASES_FIELDS.contains(alias)) {
+      return alias;
+    }
+
+    val components = splitFields(alias);
+    if (components.size() == 1 || !typeModel.prefix().equals(components.get(0))) {
+      return alias;
+    }
+
+    return components.get(1);
+  }
+
   private static List<String> splitFields(String fullyQualifiedFieldName) {
     val fields = FIELD_SPLITTER.splitToList(fullyQualifiedFieldName);
-    checkState(fields.size() == 2, format("Can't determine TypeIndex for field %s ", fullyQualifiedFieldName));
 
     return fields;
+  }
+
+  private ExpressionNode addAllFields() {
+    val fieldsNode = new FieldsNode();
+    for (val field : typeModel.getFields()) {
+      fieldsNode.addChildren(new TerminalNode(field));
+    }
+
+    log.debug("FieldsNode: {}", fieldsNode);
+
+    return fieldsNode;
+  }
+
+  private ExpressionNode addAllFacets() {
+    val aggsNode = new AggregationsNode();
+    for (val child : typeModel.getFacets()) {
+      aggsNode.addChildren(new TermsAggregationNode(child, getField(child)));
+    }
+
+    log.debug("{}", aggsNode);
+
+    return aggsNode;
   }
 
 }
