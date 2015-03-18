@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
+import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
@@ -142,6 +143,11 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitFields(FieldsNode node, Optional<Void> context) {
+    return defaultProcessing(node);
+  }
+
+  @Override
+  public ExpressionNode visitSource(SourceNode node, Optional<Void> context) {
     return node;
   }
 

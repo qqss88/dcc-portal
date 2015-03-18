@@ -75,8 +75,23 @@ public class ArrayFieldModel extends FieldModel {
     return new ArrayFieldModel(name, alias, FieldModel.NESTED, EMPTY_STRING_FIELD);
   }
 
+  public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull Set<String> aliases,
+      @NonNull ObjectFieldModel element) {
+    return new ArrayFieldModel(name, aliases, FieldModel.NESTED, element);
+  }
+
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
     return new ArrayFieldModel(name, FieldModel.NESTED, element);
+  }
+
+  public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull String alias,
+      @NonNull ObjectFieldModel element) {
+    return new ArrayFieldModel(name, alias, FieldModel.NESTED, element);
+  }
+
+  public static ArrayFieldModel arrayOfObjects(@NonNull String name, @NonNull String alias,
+      @NonNull ObjectFieldModel element) {
+    return new ArrayFieldModel(name, alias, FieldModel.NOT_NESTED, element);
   }
 
   @Override

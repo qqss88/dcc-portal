@@ -57,64 +57,33 @@ public class Jql2PqlConverter {
 
   public String convert(@NonNull Query query, Type type) {
     val result = new StringBuilder();
-    boolean hasPreviousClause = false;
+    result.append(parseFields(query.getFields()));
 
-    val combinedFields = Lists.<String> newArrayList();
     if (query.getIncludes() != null) {
-      val includes = Lists.newArrayList(query.getIncludes());
-      if (includes.contains("facets")) {
-        includes.remove("facets");
-        result.append(parseFacets(type));
-      }
-
-      combinedFields.addAll(includes);
-    }
-
-    if (query.hasFields()) {
-      combinedFields.addAll(query.getFields());
-    }
-
-    // Have facets been included?
-    if (result.length() != 0) {
       result.append(SEPARATOR);
+      result.append(parseIncludes(query.getIncludes()));
     }
-
-    result.append(parseFields(combinedFields));
-    hasPreviousClause = true;
 
     if (query.hasFilters()) {
-      if (hasPreviousClause) {
-        result.append(SEPARATOR);
-      }
-
+      result.append(SEPARATOR);
       result.append(convertFilters(query.getFilters().toString(), type));
-      hasPreviousClause = true;
     }
 
     if (query.hasScoreFilters()) {
-      if (hasPreviousClause) {
-        result.append(SEPARATOR);
-      }
-
+      result.append(SEPARATOR);
       result.append(convertFilters(query.getScoreFilters().toString(), type));
-      hasPreviousClause = true;
     }
 
     val sort = query.getSort();
     if (sort != null && !sort.isEmpty()) {
       val order = query.getOrder();
       checkState(order != null, "The query is missing sort order");
-      if (hasPreviousClause) {
-        result.append(SEPARATOR);
-      }
-
+      result.append(SEPARATOR);
       result.append(parseSort(sort, order));
     }
 
     if (query.getSize() > 0) {
-      if (hasPreviousClause) {
-        result.append(SEPARATOR);
-      }
+      result.append(SEPARATOR);
 
       // TODO: implement limit
       checkState(query.getLimit() == null, "Limit is not implemented");
@@ -130,11 +99,31 @@ public class Jql2PqlConverter {
     return result.toString();
   }
 
+  private String parseIncludes(List<String> queryIncludes) {
+    val includes = Lists.newArrayList(queryIncludes);
+    val result = new StringBuilder();
+    if (includes.contains("facets")) {
+      includes.remove("facets");
+      result.append(parseFacets());
+    }
+
+    if (!includes.isEmpty()) {
+      // Added facets
+      if (result.length() != 0) {
+        result.append(SEPARATOR);
+      }
+
+      result.append(parseFields(includes));
+    }
+
+    return result.toString();
+  }
+
   public static Jql2PqlConverter getInstance() {
     return INSTANCE;
   }
 
-  private String parseFacets(Type type) {
+  private String parseFacets() {
     return "facets(*)";
   }
 
@@ -145,7 +134,7 @@ public class Jql2PqlConverter {
   }
 
   private static String parseFields(List<String> fields) {
-    if (fields.isEmpty()) {
+    if (fields == null || fields.isEmpty()) {
       return "select(*)";
     }
 

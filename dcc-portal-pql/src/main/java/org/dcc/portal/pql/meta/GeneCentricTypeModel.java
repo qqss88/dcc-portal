@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.meta;
 
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
@@ -41,6 +42,10 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
   private final static String TYPE_PREFIX = "gene";
   private static final List<String> AVAILABLE_FACETS = ImmutableList.of("type");
 
+  // Including real fields, not aliases. Because after the AST is built by PqlParseTreeVisitor includes are resolved to
+  // the real fields
+  private static final List<String> INCLUDE_FIELDS = ImmutableList.of("transcripts", "external_db_ids", "project");
+
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",
       "symbol",
@@ -61,7 +66,7 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
       "pathways");
 
   public GeneCentricTypeModel() {
-    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS);
+    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override
@@ -91,6 +96,8 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(defineSummary())
         .add(arrayOfStrings("pathway", ImmutableSet.of("pathways", "pathwayId", "gene.pathwayId")))
         .add(arrayOfStrings("curated_set", ImmutableSet.of("curatedSetId", "gene.curatedSetId")))
+        .add(arrayOfObjects("transcripts", "transcripts", object()))
+        .add(nestedArrayOfObjects("project", "projects", object()))
         .add(object("go_term", GENE_GO_TERM,
             arrayOfStrings("biological_process"),
             arrayOfStrings("cellular_component"),

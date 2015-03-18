@@ -37,6 +37,10 @@ import com.google.common.collect.ImmutableSet;
 public class MutationCentricTypeModel extends AbstractTypeModel {
 
   private final static String TYPE_PREFIX = "mutation";
+
+  // Including real fields, not aliases. Because after the AST is built by PqlParseTreeVisitor includes are resolved to
+  // the real fields
+  private static final List<String> INCLUDE_FIELDS = ImmutableList.of("transcript", "ssm_occurrence");
   private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
       "type",
       "consequenceTypeNested",
@@ -78,7 +82,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
       "sequencingStrategyNested");
 
   public MutationCentricTypeModel() {
-    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS);
+    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override
@@ -134,7 +138,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
   }
 
   private static ArrayFieldModel defineTranscript() {
-    return nestedArrayOfObjects("transcript",
+    return nestedArrayOfObjects("transcript", ImmutableSet.of("transcripts", "consequences"),
         object(
             string("id", "transcriptId"),
             string("functional_impact_prediction_summary", "functionalImpactNested"),
@@ -156,7 +160,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
   }
 
   private static ArrayFieldModel defineSsmOccurrence() {
-    return nestedArrayOfObjects("ssm_occurrence",
+    return nestedArrayOfObjects("ssm_occurrence", "occurrences",
         object(
             defineDonor(),
             defineProject(),

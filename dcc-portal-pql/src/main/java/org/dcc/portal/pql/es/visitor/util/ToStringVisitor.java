@@ -30,6 +30,7 @@ import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.SortNode;
+import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
@@ -193,6 +194,19 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   @Override
   public String visitFields(FieldsNode node, Optional<Void> context) {
+    val builder = new StringBuilder();
+    builder.append(getCommonHeader(node));
+    builder.append(" [");
+    for (val field : node.getFields()) {
+      builder.append(field + " ");
+    }
+    builder.append("]");
+
+    return builder.toString();
+  }
+
+  @Override
+  public String visitSource(SourceNode node, Optional<Void> context) {
     val builder = new StringBuilder();
     builder.append(getCommonHeader(node));
     builder.append(" [");

@@ -29,20 +29,23 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 import com.google.common.collect.Lists;
 
+/**
+ * Node for source filtering.
+ */
 @Value
 @EqualsAndHashCode(callSuper = false)
-public class FieldsNode extends ExpressionNode {
+public class SourceNode extends ExpressionNode {
 
   List<String> fields = Lists.newArrayList();
 
-  public FieldsNode(ExpressionNode... children) {
+  public SourceNode(ExpressionNode... children) {
     super(children);
     addChildren(children);
   }
 
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitFields(this, context);
+    return visitor.visitSource(this, context);
   }
 
   @Override

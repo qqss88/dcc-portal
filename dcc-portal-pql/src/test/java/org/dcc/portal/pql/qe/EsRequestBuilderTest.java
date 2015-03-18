@@ -67,6 +67,15 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   }
 
   @Test
+  public void selectTest_withIncludes() {
+    val result = executeQuery("select(transcripts)");
+    assertTotalHitsCount(result, 3);
+    val hit = getFirstSearchResult(result);
+    assertThat(hit.fields().size()).isEqualTo(0);
+    assertThat(hit.getSource().get("transcript")).isNotNull();
+  }
+
+  @Test
   public void countTest() {
     val esAst = createTree("count()");
     val request = visitor.buildSearchRequest(esAst, queryContext);

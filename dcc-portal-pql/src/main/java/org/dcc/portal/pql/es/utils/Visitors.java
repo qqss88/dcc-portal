@@ -34,6 +34,7 @@ import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreMutatationQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
+import org.dcc.portal.pql.es.visitor.special.FieldsToSourceVisitor;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
@@ -78,6 +79,11 @@ public class Visitors {
   private static final ScoreSortVisitor SCORE_SORT_VISITOR = new ScoreSortVisitor();
 
   private static final EntitySetVisitor ENTITY_SET_VISITOR = new EntitySetVisitor();
+  private static final FieldsToSourceVisitor FIELDS_TO_SOURCE_VISITOR = new FieldsToSourceVisitor();
+
+  public static FieldsToSourceVisitor createFieldsToSourceVisitor() {
+    return FIELDS_TO_SOURCE_VISITOR;
+  }
 
   public static EntitySetVisitor createEntitySetVisitor() {
     return ENTITY_SET_VISITOR;

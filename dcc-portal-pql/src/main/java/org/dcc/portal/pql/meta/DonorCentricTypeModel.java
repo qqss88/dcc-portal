@@ -42,6 +42,10 @@ import com.google.common.collect.ImmutableSet;
 public class DonorCentricTypeModel extends AbstractTypeModel {
 
   private final static String TYPE_PREFIX = "donor";
+
+  // Including real fields, not aliases. Because after the AST is built by PqlParseTreeVisitor includes are resolved to
+  // the real fields
+  private static final List<String> INCLUDE_FIELDS = ImmutableList.of();
   private final static List<String> AVAILABLE_FACETS = ImmutableList.of(
       "projectId",
       "primarySite",
@@ -92,7 +96,7 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
       "studies");
 
   public DonorCentricTypeModel() {
-    super(initFields(), defineInternalAliases(), PUBLIC_FIELDS);
+    super(initFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override

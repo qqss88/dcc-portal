@@ -35,9 +35,17 @@ public class Jql2PqlConverterTest {
   Jql2PqlConverter converter = new Jql2PqlConverter();
 
   @Test
-  public void fieltdsTest() {
+  public void fieldsTest() {
     val query = Query.builder().fields(ImmutableList.of("id", "age")).build();
     assertResponse(query, "select(id,age)");
+  }
+
+  @Test
+  public void allFieldsWithIncludesTest() {
+    val query = Query.builder()
+        .includes(ImmutableList.of("transcript"))
+        .build();
+    assertResponse(query, "select(*),select(transcript)");
   }
 
   @Test

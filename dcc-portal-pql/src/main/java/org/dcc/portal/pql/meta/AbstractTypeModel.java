@@ -95,13 +95,22 @@ public abstract class AbstractTypeModel {
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
   protected final List<String> allowedFields;
+
+  /**
+   * Represents fields added as includes to the Query.<br>
+   * <br>
+   * <b>NB:</b> The list contains fully qualified names, not aliases. Because after the AST is built by
+   * PqlParseTreeVisitor includes are resolved to the real fields
+   */
+  protected final List<String> includeFields;
+
   private final Map<String, String> hasFieldsMapping = ImmutableMap.of(
       HAS_PATHWAY, GENE_PATHWAY_ID,
       HAS_CURATED_SET, GENE_CURATED_SET_ID,
       HAS_GO_TERM, GENE_GO_TERM_ID);
 
   public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
-      @NonNull List<String> allowedAliases) {
+      @NonNull List<String> allowedAliases, @NonNull List<String> includeFields) {
     fieldsByFullPath = initFieldsByFullPath(fields);
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
 
@@ -110,6 +119,11 @@ public abstract class AbstractTypeModel {
 
     this.fieldsByInternalAlias = defineInternalAliases(internalAliases);
     this.allowedFields = defineAllowedFields(allowedAliases);
+    this.includeFields = includeFields;
+  }
+
+  public List<String> getIncludeFields() {
+    return includeFields;
   }
 
   /**

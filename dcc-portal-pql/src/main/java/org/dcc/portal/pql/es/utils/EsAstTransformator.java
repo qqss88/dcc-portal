@@ -19,6 +19,8 @@ package org.dcc.portal.pql.es.utils;
 
 import static org.dcc.portal.pql.es.utils.Visitors.createAggregationsResolverVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createEmptyNodesCleanerVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createEntitySetVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createFieldsToSourceVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
@@ -36,6 +38,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
+import org.dcc.portal.pql.es.visitor.special.FieldsToSourceVisitor;
 import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
@@ -55,7 +58,8 @@ public class EsAstTransformator {
   private final GeneSetFilterVisitor geneSetFilterVisitor = createGeneSetFilterVisitor();
   private final LocationFilterVisitor locationFilterVisitor = createLocationFilterVisitor();
   private final ScoreSortVisitor scoreSortVisitor = createScoreSortVisitor();
-  private final EntitySetVisitor entitySetVisitor = Visitors.createEntitySetVisitor();
+  private final EntitySetVisitor entitySetVisitor = createEntitySetVisitor();
+  private final FieldsToSourceVisitor fieldsToSourceVisitor = createFieldsToSourceVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -76,6 +80,7 @@ public class EsAstTransformator {
   }
 
   private ExpressionNode resoveSpecialCases(ExpressionNode esAst, QueryContext context) {
+    esAst = esAst.accept(fieldsToSourceVisitor, Optional.of(context)).get();
     esAst = esAst.accept(entitySetVisitor, Optional.of(context)).get();
     esAst = esAst.accept(scoreSortVisitor, Optional.empty());
     esAst = esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();

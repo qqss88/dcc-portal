@@ -31,6 +31,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.LimitNode;
 import org.dcc.portal.pql.es.ast.SortNode;
+import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
@@ -43,6 +44,8 @@ import org.elasticsearch.search.sort.SortOrder;
 @Slf4j
 @RequiredArgsConstructor
 public class EsRequestBuilder {
+
+  private static final String[] EMPTY_EXCLUDE_FIELDS = null;
 
   @NonNull
   private final Client client;
@@ -69,6 +72,10 @@ public class EsRequestBuilder {
         val fieldsNode = (FieldsNode) child;
         String[] children = fieldsNode.getFields().toArray(new String[fieldsNode.getFields().size()]);
         result.addFields(children);
+      } else if (child instanceof SourceNode) {
+        val sourceNode = (SourceNode) child;
+        String[] children = sourceNode.getFields().toArray(new String[sourceNode.getFields().size()]);
+        result.setFetchSource(children, EMPTY_EXCLUDE_FIELDS);
       } else if (child instanceof LimitNode) {
         val limitNode = (LimitNode) child;
         result.setFrom(limitNode.getFrom());
