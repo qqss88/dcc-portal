@@ -38,6 +38,11 @@
       data: {tab:'summary'}
     });
 
+    $stateProvider.state('projects.history', {
+      url: '/history',
+      data: {tab:'history'}
+    });
+
     $stateProvider.state('project', {
       url: '/projects/:id',
       templateUrl: 'scripts/projects/views/project.html',
@@ -176,6 +181,12 @@
               _ctrl.stacked = genes.hits;
             });
           });
+
+        Restangular.one('projects/history', '').get({}).then(function(data) {
+          // Remove restangular attributes to make data easier to parse
+          data = Restangular.stripRestangular(data);
+          _ctrl.donorData = data;
+        });
       }
     }
 

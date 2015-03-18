@@ -71,6 +71,12 @@
   }
 }
 
+.t_tabs__tab__history {
+  &.active, &:hover {
+    border-top-color: $history;
+  }
+}
+
 aside {
   .t_tabs {
     margin-top: 0;

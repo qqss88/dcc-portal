@@ -103,6 +103,7 @@ public class DownloadResourceTest extends ResourceTest {
   public void testPublicDataAccessFile() throws IOException {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.UNCHECKED);
     when(fs.isFile(any(File.class))).thenReturn(true);
+    when(fs.exists(any(File.class))).thenReturn(true);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
 
     ClientResponse response = client()
@@ -120,6 +121,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.OPEN);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
     when(fs.isFile(any(File.class))).thenReturn(true);
+    when(fs.exists(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -136,6 +138,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(fs.getPermission(any(File.class))).thenReturn(AccessPermission.CONTROLLED);
     when(fs.createInputStream((any(File.class)), anyInt())).thenReturn(new ByteArrayInputStream("test".getBytes()));
     when(fs.isFile(any(File.class))).thenReturn(true);
+    when(fs.exists(any(File.class))).thenReturn(true);
 
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -285,26 +288,26 @@ public class DownloadResourceTest extends ResourceTest {
   }
 
   @Test
-    public void testGetJobStatusWithOverCapacity() {
-      when(downloader.isServiceAvailable()).thenReturn(true);
-      when(downloader.isOverCapacity()).thenReturn(true);
-      Map<String, Object> response = client()
-          .resource(RESOURCE + "/status")
-          .get(new GenericType<Map<String, Object>>() {});
-      assertThat(response.get("serviceStatus")).isEqualTo(false);
-    }
+  public void testGetJobStatusWithOverCapacity() {
+    when(downloader.isServiceAvailable()).thenReturn(true);
+    when(downloader.isOverCapacity()).thenReturn(true);
+    Map<String, Object> response = client()
+        .resource(RESOURCE + "/status")
+        .get(new GenericType<Map<String, Object>>() {});
+    assertThat(response.get("serviceStatus")).isEqualTo(false);
+  }
 
   @Test
-    public void testGetJobStatusWithUnavailable() {
-      when(downloader.isServiceAvailable()).thenReturn(false);
-      when(downloader.isOverCapacity()).thenReturn(false);
-      Map<String, Object> response = client()
-          .resource(RESOURCE + "/status")
-          .queryParam("filters", "")
-          .queryParam("info", "")
-          .get(new GenericType<Map<String, Object>>() {});
-      assertThat(response.get("serviceStatus")).isEqualTo(false);
-    }
+  public void testGetJobStatusWithUnavailable() {
+    when(downloader.isServiceAvailable()).thenReturn(false);
+    when(downloader.isOverCapacity()).thenReturn(false);
+    Map<String, Object> response = client()
+        .resource(RESOURCE + "/status")
+        .queryParam("filters", "")
+        .queryParam("info", "")
+        .get(new GenericType<Map<String, Object>>() {});
+    assertThat(response.get("serviceStatus")).isEqualTo(false);
+  }
 
   private static final class SelectionEntryArgumentMatcher extends ArgumentMatcher<List<DataType>> {
 

@@ -23,6 +23,31 @@ import static org.elasticsearch.action.search.SearchType.SCAN;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.icgc.dcc.common.core.model.ConsequenceType.CODING_SEQUENCE_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.DISRUPTIVE_INFRAME_DELETION;
+import static org.icgc.dcc.common.core.model.ConsequenceType.DISRUPTIVE_INFRAME_INSERTION;
+import static org.icgc.dcc.common.core.model.ConsequenceType.EXON_LOSS_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.EXON_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.FRAMESHIFT_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.INFRAME_DELETION;
+import static org.icgc.dcc.common.core.model.ConsequenceType.INFRAME_INSERTION;
+import static org.icgc.dcc.common.core.model.ConsequenceType.INITIATOR_CODON_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.MISSENSE_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.NON_CANONICAL_START_CODON;
+import static org.icgc.dcc.common.core.model.ConsequenceType.RARE_AMINO_ACID_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.SPLICE_ACCEPTOR_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.SPLICE_DONOR_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.SPLICE_REGION_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.START_LOST;
+import static org.icgc.dcc.common.core.model.ConsequenceType.STOP_GAINED;
+import static org.icgc.dcc.common.core.model.ConsequenceType.STOP_LOST;
+import static org.icgc.dcc.common.core.model.ConsequenceType.STOP_RETAINED_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType.SYNONYMOUS_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType._3_PRIME_UTR_TRUNCATION;
+import static org.icgc.dcc.common.core.model.ConsequenceType._3_PRIME_UTR_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT;
+import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_TRUNCATION;
+import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_VARIANT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
@@ -232,26 +257,35 @@ public class OccurrenceRepository {
   }
 
   public Map<String, Map<String, Integer>> getProjectDonorMutationDistribution() {
-    // TODO: Move out
-    val consequenceList =
-        ImmutableList.<String> of(
-            "frameshift_variant",
-            "missense",
-            "non_conservative_missense_variant",
-            "initiator_codon_variant",
-            "stop_gained",
-            "stop_lost",
-            "start_gained",
-            "exon_lost",
-            "coding_sequence_variant",
-            "inframe_deletion",
-            "inframe_insertion",
-            "splice_region_variant",
-            "non_coding_exon_variant",
-            "5_prime_UTR_variant",
-            "synonymous_variant",
-            "stop_retained_variant",
-            "3_prime_UTR_variant");
+
+    // See DCC-2612
+    val consequenceList = ImmutableList.<String> of(
+        _3_PRIME_UTR_TRUNCATION.toString(),
+        _3_PRIME_UTR_VARIANT.toString(),
+        _5_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT.toString(),
+        _5_PRIME_UTR_TRUNCATION.toString(),
+        _5_PRIME_UTR_VARIANT.toString(),
+        CODING_SEQUENCE_VARIANT.toString(),
+        DISRUPTIVE_INFRAME_DELETION.toString(),
+        DISRUPTIVE_INFRAME_INSERTION.toString(),
+        EXON_LOSS_VARIANT.toString(),
+        EXON_VARIANT.toString(),
+        FRAMESHIFT_VARIANT.toString(),
+        INFRAME_DELETION.toString(),
+        INFRAME_INSERTION.toString(),
+        INITIATOR_CODON_VARIANT.toString(),
+        MISSENSE_VARIANT.toString(),
+        RARE_AMINO_ACID_VARIANT.toString(),
+        SPLICE_ACCEPTOR_VARIANT.toString(),
+        SPLICE_DONOR_VARIANT.toString(),
+        SPLICE_REGION_VARIANT.toString(),
+        START_LOST.toString(),
+        STOP_GAINED.toString(),
+        STOP_LOST.toString(),
+        STOP_RETAINED_VARIANT.toString(),
+        SYNONYMOUS_VARIANT.toString(),
+        NON_CANONICAL_START_CODON.toString()
+        );
 
     String list = Joiner.on("\",\"").skipNulls().join(consequenceList);
 

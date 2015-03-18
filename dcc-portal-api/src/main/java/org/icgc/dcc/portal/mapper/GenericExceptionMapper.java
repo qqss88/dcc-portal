@@ -20,6 +20,8 @@ import static com.google.common.base.Throwables.getStackTraceAsString;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.serverError;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getHttpRequestCallerInfo;
+import static org.icgc.dcc.portal.util.HttpServletRequests.getLocalNetworkInfo;
 
 import java.util.Date;
 import java.util.Random;
@@ -67,6 +69,33 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
         .build();
   }
 
+  private static Error webErrorResponse(Throwable t, final long id, final int statusCode) {
+    return new Error(statusCode, t.getMessage());
+  }
+
+  private static Error errorResponse(Throwable t, final long id) {
+    return new Error(INTERNAL_SERVER_ERROR, formatResponseEntity(id, t));
+  }
+
+  protected static void logException(long id, Throwable t) {
+    log.error(formatLogMessage(id, t), t);
+  }
+
+  protected static String formatResponseEntity(long id, Throwable t) {
+    val message =
+        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).%n";
+    return String.format(message, t.getMessage(), id);
+  }
+
+  protected static String formatLogMessage(long id, Throwable t) {
+    val message = "Error handling a request: %016x, with the message of '%s'.";
+    return String.format(message, id, t.getMessage());
+  }
+
+  protected static long randomId() {
+    return RANDOM.nextLong();
+  }
+
   @Override
   @SneakyThrows
   public Response toResponse(Throwable t) {
@@ -97,39 +126,11 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
     return buildErrorResponse(serverError(), errorResponse(t, id));
   }
 
-  private Error webErrorResponse(Throwable t, final long id, final int statusCode) {
-    return new Error(statusCode, t.getMessage());
-  }
-
-  private Error errorResponse(Throwable t, final long id) {
-    return new Error(INTERNAL_SERVER_ERROR, formatResponseEntity(id, t));
-  }
-
-  protected void logException(long id, Throwable t) {
-    log.error(formatLogMessage(id, t), t);
-  }
-
-  protected String formatResponseEntity(long id, Throwable t) {
-    val message =
-        "There was an error processing your request, with the message of '%s'. It has been logged (ID %016x).\n";
-    return String.format(message, t.getMessage(), id);
-  }
-
-  protected String formatLogMessage(long id, Throwable t) {
-    val message = "Error handling a request: %016x, with the message of '%s'.";
-    return String.format(message, id, t.getMessage());
-  }
-
-  protected static long randomId() {
-    return RANDOM.nextLong();
-  }
-
   protected void sendEmail(long id, Throwable t) {
     try {
-      val subject = "DCC Portal - Exception @ " + new Date();
-      val message =
-          request.getRemoteHost() + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
-              + getStackTraceAsString(t);
+      val subject = "DCC Portal - Exception " + getLocalNetworkInfo() + " @ " + new Date();
+      val message = getHttpRequestCallerInfo(request) + " " + request + "\n\n" + formatLogMessage(id, t) + "\n\n"
+          + getStackTraceAsString(t);
 
       mailService.sendEmail(subject, message, SEND_EMAIL_ASYNC);
     } catch (Exception e) {

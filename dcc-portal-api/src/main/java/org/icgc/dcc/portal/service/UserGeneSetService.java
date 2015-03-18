@@ -22,10 +22,12 @@ import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.GENE
 import java.util.Set;
 import java.util.UUID;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet.Type;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
@@ -47,6 +49,11 @@ public class UserGeneSetService {
   private final EntityListRepository repository;
   @NonNull
   private final TermsLookupService termsLookupService;
+  @NonNull
+  private final PortalProperties properties;
+
+  @Getter(lazy = true)
+  private final int dataVersion = loadDataVersion();
 
   /*
    * This was not used in anywhere at all. To be removed.
@@ -56,14 +63,19 @@ public class UserGeneSetService {
 
   public UUID save(@NonNull Set<String> geneIds) {
     val id = UUID.randomUUID();
-    val newList = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size());
-    newList.setSubtype(SubType.UPLOAD);
+    val version = getDataVersion();
+
+    val newEntitySet = EntitySet.createForStatusFinished(id, "Uploaded gene set", "", Type.GENE, geneIds.size(), version);
+    newEntitySet.setSubtype(SubType.UPLOAD);
 
     termsLookupService.createTermsLookup(GENE_IDS, id, geneIds);
-
-    repository.save(newList);
+    repository.save(newEntitySet, version);
 
     return id;
+  }
+
+  private int loadDataVersion() {
+    return properties.getRelease().getDataVersion();
   }
 
 }

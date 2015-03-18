@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.UUID;
 
@@ -30,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -54,6 +54,11 @@ public class EntitySet extends BaseEntitySet implements Identifiable<UUID> {
   @ApiModelProperty(value = "Number of elements in this entity set.")
   private Long count;
 
+  /*
+   * This is the default value and is used for migration when this version field is introduced.
+   */
+  private int version = 1;
+
   @NonNull
   @ApiModelProperty(value = "Sub-type for this entity set.", required = true)
   private SubType subtype = SubType.NORMAL;
@@ -64,6 +69,8 @@ public class EntitySet extends BaseEntitySet implements Identifiable<UUID> {
   }
 
   public EntitySet updateStateToFinished(final long count) {
+    checkArgument(count >= 0, "The 'count' argument must be a positive integer.");
+
     this.state = State.FINISHED;
     this.count = count;
     return this;
@@ -76,75 +83,61 @@ public class EntitySet extends BaseEntitySet implements Identifiable<UUID> {
 
   private final static class JsonPropertyName {
 
-    final static String id = "id";
-    final static String state = "state";
-    final static String count = "count";
-    final static String name = "name";
-    final static String description = "description";
-    final static String type = "type";
+    final static String ID = "id";
+    final static String STATE = "state";
+    final static String COUNT = "count";
+    final static String VERSION = "version";
+    final static String NAME = "name";
+    final static String DESCRIPTION = "description";
+    final static String TYPE = "type";
   }
 
   @JsonCreator
   public EntitySet(
-      @JsonProperty(JsonPropertyName.id) final UUID id,
-      @JsonProperty(JsonPropertyName.state) final State state,
-      @JsonProperty(JsonPropertyName.count) final Long count,
-      @JsonProperty(JsonPropertyName.name) final String name,
-      @JsonProperty(JsonPropertyName.description) final String description,
-      @JsonProperty(JsonPropertyName.type) final Type type) {
+      @JsonProperty(JsonPropertyName.ID) final UUID id,
+      @JsonProperty(JsonPropertyName.STATE) final State state,
+      @JsonProperty(JsonPropertyName.COUNT) final Long count,
+      @JsonProperty(JsonPropertyName.NAME) @NonNull final String name,
+      @JsonProperty(JsonPropertyName.DESCRIPTION) final String description,
+      @JsonProperty(JsonPropertyName.TYPE) @NonNull final Type type,
+      @JsonProperty(JsonPropertyName.VERSION) final Integer dataVersion) {
     super(name, description, type);
 
     this.id = id;
     this.state = state;
     this.count = count;
-  }
 
-  private EntitySet(final UUID id, @NonNull final String name, final String description,
-      @NonNull final Type type, final State status, final Long count) {
-    super(name, description, type);
-
-    this.id = id;
-    this.state = status;
-    this.count = count;
+    if (null != dataVersion && dataVersion > 1) {
+      /*
+       * Use the default value 1 if it is null. This is used to migrate the JSON when the version field is introduced.
+       */
+      this.version = dataVersion;
+    }
   }
 
   // static constructors
-  public static EntitySet createFromDefinition(@NonNull final BaseEntitySet definition) {
+  /*
+   * This constructor is used for creating a brand-new entity set.
+   */
+  public static EntitySet createFromDefinition(@NonNull final BaseEntitySet definition, final int dataVersion) {
     return new EntitySet(
         UUID.randomUUID(),
+        State.PENDING,
+        null,
         definition.getName(),
         definition.getDescription(),
         definition.getType(),
-        State.PENDING,
-        null);
+        dataVersion);
   }
 
-  public static EntitySet forNewlyCreated(@NonNull final String name, final String description, @NonNull final Type type) {
-    return new EntitySet(
-        UUID.randomUUID(),
-        name,
-        description,
-        type,
-        State.PENDING,
-        null);
-  }
-
-  public static EntitySet createForStatusInProgress(final UUID id, @NonNull final String name,
-      final String description, @NonNull final Type type) {
-    return new EntitySet(
-        id,
-        name,
-        description,
-        type,
-        State.IN_PROGRESS,
-        null);
-  }
-
+  /*
+   * This constructor is used for instantiating an existing entity set and setting the status to State.FINISHED.
+   */
   public static EntitySet createForStatusFinished(final UUID id, final String name, final String description,
-      final Type type, final long count) {
-    Preconditions.checkArgument(count >= 0, "The 'count' argument must be a positive number.");
+      final Type type, final long count, final int dataVersion) {
+    checkArgument(count >= 0, "The 'count' argument must be a positive integer.");
 
-    return new EntitySet(id, name, description, type, State.FINISHED, count);
+    return new EntitySet(id, State.FINISHED, count, name, description, type, dataVersion);
   }
 
   @RequiredArgsConstructor

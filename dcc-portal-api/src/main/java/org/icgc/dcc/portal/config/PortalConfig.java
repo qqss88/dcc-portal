@@ -116,7 +116,7 @@ public class PortalConfig {
 
   @PostConstruct
   public void createDemoEntityList() {
-    entityListService.createDemoEntityList();
+    entityListService.createDemoEntitySet();
   }
 
   @Bean
@@ -177,6 +177,7 @@ public class PortalConfig {
     return Settings.builder()
         .ssoUrl(crowd.getSsoUrl())
         .releaseDate(release.getReleaseDate())
+        .dataVersion(release.getDataVersion())
         .downloadEnabled(download.isEnabled())
         .demoListUuid(setAnalysis.demoListUuid)
         .maxNumberOfHits(setAnalysis.maxNumberOfHits)

@@ -49,12 +49,12 @@ public class EnrichmentAnalysisRepositoryTest {
     val id1 = UUID.randomUUID();
 
     val analysis1 = new EnrichmentAnalysis().setId(id1);
-    val count1 = repository.save(analysis1);
+    val count1 = repository.save(analysis1, analysis1.getVersion());
     assertThat(count1).isEqualTo(1);
 
     val id2 = UUID.randomUUID();
     val analysis2 = new EnrichmentAnalysis().setId(id2);
-    val count2 = repository.save(analysis2);
+    val count2 = repository.save(analysis2, analysis2.getVersion());
     assertThat(count2).isEqualTo(1);
 
     assertThat(id1).isNotEqualTo(id2);
@@ -65,7 +65,7 @@ public class EnrichmentAnalysisRepositoryTest {
     val actualData2 = repository.find(id2).getId();
     assertThat(id2).isEqualTo(actualData2);
 
-    repository.update(analysis1);
+    repository.update(analysis1, analysis1.getVersion());
     val actualData3 = repository.find(id1).getId();
     assertThat(actualData3).isEqualTo(actualData1);
   }
