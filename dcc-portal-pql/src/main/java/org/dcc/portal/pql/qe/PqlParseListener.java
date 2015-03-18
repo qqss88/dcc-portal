@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static java.lang.String.format;
+
 import java.util.Collection;
 
 import lombok.EqualsAndHashCode;
@@ -27,10 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
@@ -90,7 +95,24 @@ public class PqlParseListener extends PqlBaseListener {
 
   private void processFunctions(Collection<FunctionContext> functions, ExpressionNode rootNode) {
     for (val child : functions) {
-      rootNode.addChildren(child.accept(pqlVisitor));
+      val visitResult = child.accept(pqlVisitor);
+      if (visitResult instanceof FieldsNode) {
+        resolveFields(visitResult, rootNode, FieldsNode.class);
+      } else if (visitResult instanceof AggregationsNode) {
+        resolveFields(visitResult, rootNode, AggregationsNode.class);
+      } else {
+        throw new IllegalArgumentException(format("Unrecognized function %s", visitResult));
+      }
+    }
+  }
+
+  private static <T extends ExpressionNode> void resolveFields(ExpressionNode child, ExpressionNode rootNode,
+      Class<T> clazz) {
+    val childOpt = Nodes.getOptionalChild(rootNode, clazz);
+    if (childOpt.isPresent()) {
+      childOpt.get().addChildren(child.getChildrenArray());
+    } else {
+      rootNode.addChildren(child);
     }
   }
 

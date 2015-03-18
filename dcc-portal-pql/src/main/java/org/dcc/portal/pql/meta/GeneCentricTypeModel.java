@@ -97,7 +97,6 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .add(arrayOfStrings("pathway", ImmutableSet.of("pathways", "pathwayId", "gene.pathwayId")))
         .add(arrayOfStrings("curated_set", ImmutableSet.of("curatedSetId", "gene.curatedSetId")))
         .add(arrayOfObjects("transcripts", "transcripts", object()))
-        .add(nestedArrayOfObjects("project", "projects", object()))
         .add(object("go_term", GENE_GO_TERM,
             arrayOfStrings("biological_process"),
             arrayOfStrings("cellular_component"),
@@ -139,8 +138,13 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         string("disease_status_last_followup", "donor.diseaseStatusLastFollowup"),
         string("donor_relapse_type", "donor.relapseType"),
         string("donor_sex", "donor.gender"),
-        string("donor_tumour_stage_at_diagnosis", "donor.tumorStageAtDiagnosis"),
+        // FIXME: This field has different spelling in different types
+        string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
+        object("project",
+            string("_project_id", "donor.projectId"),
+            string("primary_site", "donor.primarySite"),
+            string("project_name", "donor.projectName")),
         defineSsm());
 
     return nestedArrayOfObjects("donor", element);
@@ -178,7 +182,7 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
     val element = object(
         string("platform", "mutation.platform"),
         string("sequencing_strategy", "mutation.sequencingStrategy"),
-        string("verification_status", "verificationStatus"));
+        string("verification_status", "mutation.verificationStatus"));
 
     return nestedArrayOfObjects("observation", element);
   }

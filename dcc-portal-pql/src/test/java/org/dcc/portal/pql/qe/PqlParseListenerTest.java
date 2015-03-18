@@ -131,6 +131,15 @@ public class PqlParseListenerTest {
   }
 
   @Test
+  public void multiSelectTest() {
+    val esAst = createEsAst("select(id),select(gender)", listener);
+    assertThat(esAst.childrenCount()).isEqualTo(1);
+    val fieldsNode = (FieldsNode) esAst.getFirstChild();
+    assertThat(fieldsNode.childrenCount()).isEqualTo(2);
+    assertThat(fieldsNode.getFields()).containsOnly("_donor_id", "donor_sex");
+  }
+
+  @Test
   public void countTest() {
     val esAst = createEsAst("count()", listener);
     assertThat(esAst.childrenCount()).isEqualTo(1);

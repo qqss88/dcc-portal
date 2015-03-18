@@ -198,7 +198,7 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
     builder.append(getCommonHeader(node));
     builder.append(" [");
     for (val field : node.getFields()) {
-      builder.append(field + " ");
+      builder.append(field + ", ");
     }
     builder.append("]");
 

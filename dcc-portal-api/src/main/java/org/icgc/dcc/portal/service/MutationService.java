@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.facet.Facets;
 import org.elasticsearch.search.facet.terms.TermsFacet;
@@ -21,6 +23,8 @@ import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.MutationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,11 +40,23 @@ import com.google.common.collect.Sets;
 public class MutationService {
 
   private final MutationRepository mutationRepository;
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
+  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   public Mutations findAllCentric(Query query) {
     log.info("{}", query);
 
-    val response = mutationRepository.findAllCentric(query);
+    val pql = converter.convert(query, Type.MUTATION_CENTRIC);
+    log.debug("Query: {}. PQL: {}", query, pql);
+
+    val request = queryEngine.execute(pql, Type.MUTATION_CENTRIC);
+    log.debug("Request: {}", request);
+
+    // val response = mutationRepository.findAllCentric(query);
+    val response = request.execute().actionGet();
+    log.debug("Response: {}", response);
+
     val hits = response.getHits();
 
     // Include _score if either: no custom fields or custom fields include affectedDonorCountFiltered
@@ -57,13 +73,14 @@ public class MutationService {
     }
 
     Mutations mutations = new Mutations(list.build());
-    Facets mergedFacets = mergeFacets(response.getFacets(), "consequenceTypeNested", "consequenceType");
-    mergedFacets = mergeFacets(mergedFacets, "platformNested", "platform");
-    mergedFacets = mergeFacets(mergedFacets, "verificationStatusNested", "verificationStatus");
-    mergedFacets = mergeFacets(mergedFacets, "functionalImpactNested", "functionalImpact");
-    mergedFacets = mergeFacets(mergedFacets, "sequencingStrategyNested", "sequencingStrategy");
-
-    mutations.setFacets(mergedFacets);
+    // Facets mergedFacets = mergeFacets(response.getFacets(), "consequenceTypeNested", "consequenceType");
+    // mergedFacets = mergeFacets(mergedFacets, "platformNested", "platform");
+    // mergedFacets = mergeFacets(mergedFacets, "verificationStatusNested", "verificationStatus");
+    // mergedFacets = mergeFacets(mergedFacets, "functionalImpactNested", "functionalImpact");
+    // mergedFacets = mergeFacets(mergedFacets, "sequencingStrategyNested", "sequencingStrategy");
+    //
+    // mutations.setFacets(mergedFacets);
+    mutations.addFacets(aggregationsConverter.convert(response.getAggregations()));
     mutations.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return mutations;
