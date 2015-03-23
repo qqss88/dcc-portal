@@ -361,14 +361,6 @@
       return true;
     };
 
-    /*
-    this.findSetIdsByState = function(state) {
-      var filtered = _.filter(setList, function(d) {
-        return d.state === state;
-      });
-      return _.pluck(filtered, 'id');
-    }; */
-
 
     // Make sure the demo is in place
     this.initDemo = function() {
@@ -386,7 +378,7 @@
           setList.unshift(demo); // Demo always goes first
           localStorageService.set(LIST_ENTITY, setList);
         } else {
-          setList[0] = demo;
+          setList[0] = demo; // Always overwrite demo in order to get updates
           localStorageService.set(LIST_ENTITY, setList);
         }
         // console.log(setList.length, setList);

@@ -1,10 +1,8 @@
 <section>
 <div data-ng-if="!analysisId" data-ng-controller="NewAnalysisController as NAC" class="analysis">
-    <!--<h3>Launch Analyses</h3>-->
-
     <div style="font-size:1.25rem">
-        <a href="" data-ng-click="NAC.analysisType = null"><i class="icon-beaker"></i>Launch analysis</a>  
-        <span data-ng-show="NAC.analysis !== null">&gt;</span>
+        <a href="" data-ng-click="NAC.analysisType = null"><i class="icon-beaker"></i>Launch Analysis</a>  
+        <span data-ng-show="NAC.analysisType !== null">&gt;</span>
         <span data-ng-show="NAC.analysisType !== null">
             Select {{NAC.analysisType === 'enrichment'?'set':'sets'}} for 
             <strong>{{NAC.analysisName(NAC.analysisType)}}</strong>
@@ -12,7 +10,6 @@
     </div>
 
     <div data-ng-show="NAC.analysisType === null">
-        <!--<span>Select the analysis you want to perform</span>-->
         <div>
             <div class="analysis-tiles">
                 <div class="analysis-tile" data-ng-click="NAC.analysisType='enrichment'">
@@ -47,28 +44,6 @@
         </div>
     </div>
     <br> 
-    <!--
-    <div data-ng-if="!NAC.analysisType">
-        <table class="table table-selectable">
-            <thead>
-                <th>Item type</th>
-                <th>Name</th>
-                <th>Note</th>
-                <th class="text-right"># of items</th>
-            </thead>
-            <tbody>
-                <tr data-ng-repeat="item in NAC.allSets" data-ng-init="checked=false">
-                    <td>{{item.type | trans:true}}</td>
-                    <td>{{item.name}}</td>
-                    <td style="max-width: 30rem">{{item.description}}</td>
-                    <td class="text-right"> 
-                        <a href="{{item.advLink}}">{{item.count | number}}</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    -->
     <div data-ng-if="NAC.analysisType" class="wide">
 
         <!-- enrichment -->

@@ -2,14 +2,18 @@
     <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
         Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
     </div>
-
-    <p>
-        These are your saved sets. You can create <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
-        interest in <a href="/search">Advanced Search</a>, and conduct a new analysis from the 
-        <a href="/analysis"><i class="icon-beaker"></i>Launch Analyses</a> section.
+    <div>
+        These are your saved sets. You can create new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
+        interest in <a href="/search">Advanced Search</a>. 
         <br>
-        You can also save a <a href="" data-ng-click="SavedSetController.addCustomGeneSet()"><i class="icon-floppy"></i>Custom gene set</a>.
-    </p>
+
+        You can save <a href="" data-ng-click="SavedSetController.addCustomGeneSet()"><i class="icon-floppy"></i><strong>Customized gene set</strong></a>.
+        <br>
+
+        You can use saved sets to <a href="/analysis"><i class="icon-beaker"></i><strong>Launch Analysis</strong></a>. 
+        <br>
+    </div>
+    <br>
 
 
     <div style="padding:.5rem 0">
@@ -18,11 +22,6 @@
             data-tooltip="Delete">
             <i class="icon-trash"></i>
         </button>   
-        <!--
-        <button class="t_button" data-ng-click="SavedSetController.newAnalysis()">
-            <i class="icon-beaker"></i>Launch Analyses
-        </button>
-        -->
     </div>
 
     <div class="wide">
