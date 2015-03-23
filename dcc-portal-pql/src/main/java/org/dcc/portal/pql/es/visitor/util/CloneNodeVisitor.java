@@ -33,6 +33,7 @@ import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
@@ -191,6 +192,14 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
   @Override
   public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
     val result = new TermsAggregationNode(node.getAggregationName(), node.getFieldName());
+    result.addChildren(visitChildren(node));
+
+    return result;
+  }
+
+  @Override
+  public ExpressionNode visitMissingAggregation(MissingAggregationNode node, Optional<Void> context) {
+    val result = new MissingAggregationNode(node.getAggregationName(), node.getFieldName());
     result.addChildren(visitChildren(node));
 
     return result;

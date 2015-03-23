@@ -27,6 +27,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
@@ -71,6 +72,7 @@ public class Visitors {
 
   private static final AggregationFiltersVisitor AGGREGATION_FILTER_VISITOR = new AggregationFiltersVisitor();
   private static final AggregationsResolverVisitor AGGREGATIONS_RESOLVER_VISITOR = new AggregationsResolverVisitor();
+  private static final MissingAggregationVisitor MISSING_AGGREGATION_VISITOR = new MissingAggregationVisitor();
 
   private static final EmptyNodesCleanerVisitor EMPTY_NODES_CLEANER_VISITOR = new EmptyNodesCleanerVisitor();
 
@@ -111,6 +113,10 @@ public class Visitors {
 
   public static AggregationsResolverVisitor createAggregationsResolverVisitor() {
     return AGGREGATIONS_RESOLVER_VISITOR;
+  }
+
+  public static MissingAggregationVisitor createMissingAggregationVisitor() {
+    return MISSING_AGGREGATION_VISITOR;
   }
 
   public static AggregationFiltersVisitor createAggregationFiltersVisitor() {

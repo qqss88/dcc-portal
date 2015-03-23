@@ -34,6 +34,7 @@ import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
@@ -230,6 +231,14 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   @Override
   public String visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
+    val header =
+        format("%s%s [%s(%s)] (", calcIndent(node), node.getNodeName(), node.getAggregationName(), node.getFieldName());
+
+    return buildToString(node, Optional.of(header));
+  }
+
+  @Override
+  public String visitMissingAggregation(MissingAggregationNode node, Optional<Void> context) {
     val header =
         format("%s%s [%s(%s)] (", calcIndent(node), node.getNodeName(), node.getAggregationName(), node.getFieldName());
 

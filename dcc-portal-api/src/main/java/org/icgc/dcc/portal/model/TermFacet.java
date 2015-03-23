@@ -45,8 +45,8 @@ public class TermFacet {
     return new TermFacet(facet);
   }
 
-  public static TermFacet of(long total, ImmutableList<Term> terms) {
-    return new TermFacet(total, terms);
+  public static TermFacet of(long total, long missing, ImmutableList<Term> terms) {
+    return new TermFacet(total, missing, terms);
   }
 
   private TermFacet(TermsFacet facet) {
@@ -57,9 +57,9 @@ public class TermFacet {
     this.terms = buildTerms(facet.getEntries(), facet.getMissingCount());
   }
 
-  private TermFacet(long total, ImmutableList<Term> terms) {
+  private TermFacet(long total, long missing, ImmutableList<Term> terms) {
     this.type = FACET_TYPE;
-    this.missing = DEFAULT_COUNT;
+    this.missing = missing;
     this.total = total;
     this.other = DEFAULT_COUNT;
     this.terms = terms;

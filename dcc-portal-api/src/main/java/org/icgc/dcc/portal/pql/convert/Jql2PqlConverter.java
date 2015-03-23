@@ -89,7 +89,6 @@ public class Jql2PqlConverter {
       checkState(query.getLimit() == null, "Limit is not implemented");
       val from = query.getFrom();
       val size = query.getSize();
-      checkState(from < size, "From must be greater then size. From: {}, Size: {}", from, size);
       result.append(from > 0 ? format(LIMIT_TEMPLATE, from, size) : format(LIMIT_NO_FROM_TEMPLATE, size));
     }
 

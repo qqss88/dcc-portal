@@ -24,8 +24,10 @@ import java.util.Optional;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -49,19 +51,18 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
 
-    val typeModel = context.get().getTypeModel();
-    if (typeModel.isNested(fieldName)) {
-      result = createNestedAggregation(result, node, typeModel);
-    }
+    return nest(result, node, context.get());
+  }
 
-    // If this node is not a child of a FilterAggregationNode set scope of the aggregation to global
-    if (node.getParent() instanceof AggregationsNode) {
-      return AggregationBuilders
-          .global(node.getAggregationName())
-          .subAggregation(result);
-    }
+  @Override
+  public AbstractAggregationBuilder visitMissingAggregation(MissingAggregationNode node, Optional<QueryContext> context) {
+    checkOptional(context);
+    val fieldName = node.getFieldName();
+    AbstractAggregationBuilder result = AggregationBuilders
+        .missing(node.getAggregationName())
+        .field(fieldName);
 
-    return result;
+    return nest(result, node, context.get());
   }
 
   @Override
@@ -79,15 +80,51 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .subAggregation(filterAggregationBuilder);
   }
 
-  private AbstractAggregationBuilder createNestedAggregation(AbstractAggregationBuilder termsAggregation,
-      TermsAggregationNode node, AbstractTypeModel typeModel) {
-    return AggregationBuilders.nested(node.getAggregationName())
-        .path(typeModel.getNestedPath(node.getFieldName()))
+  private static AbstractAggregationBuilder nest(AbstractAggregationBuilder builder, ExpressionNode node,
+      QueryContext context) {
+    val aggName = getAggName(node);
+    val fieldName = getFieldName(node);
+
+    val typeModel = context.getTypeModel();
+    if (typeModel.isNested(fieldName)) {
+      builder = createNestedAggregation(builder, aggName, fieldName, typeModel);
+    }
+
+    // If this node is not a child of a FilterAggregationNode set scope of the aggregation to global
+    if (node.getParent() instanceof AggregationsNode) {
+      return AggregationBuilders
+          .global(aggName)
+          .subAggregation(builder);
+    }
+
+    return builder;
+  }
+
+  private static AbstractAggregationBuilder createNestedAggregation(AbstractAggregationBuilder termsAggregation,
+      String aggName, String fieldName, AbstractTypeModel typeModel) {
+    return AggregationBuilders.nested(aggName)
+        .path(typeModel.getNestedPath(fieldName))
         .subAggregation(termsAggregation);
   }
 
-  private FilterBuilder resolveFilters(FilterAggregationNode parent, Optional<QueryContext> context) {
+  private static FilterBuilder resolveFilters(FilterAggregationNode parent, Optional<QueryContext> context) {
     return parent.getFilters().accept(Visitors.filterBuilderVisitor(), context);
+  }
+
+  private static String getFieldName(ExpressionNode node) {
+    if (node instanceof MissingAggregationNode) {
+      return ((MissingAggregationNode) node).getFieldName();
+    } else {
+      return ((TermsAggregationNode) node).getFieldName();
+    }
+  }
+
+  private static String getAggName(ExpressionNode node) {
+    if (node instanceof MissingAggregationNode) {
+      return ((MissingAggregationNode) node).getAggregationName();
+    } else {
+      return ((TermsAggregationNode) node).getAggregationName();
+    }
   }
 
 }

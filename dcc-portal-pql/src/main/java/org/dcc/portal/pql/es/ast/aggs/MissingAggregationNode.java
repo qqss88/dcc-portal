@@ -20,7 +20,6 @@ package org.dcc.portal.pql.es.ast.aggs;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
-import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -28,14 +27,14 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class TermsAggregationNode extends ExpressionNode {
+public class MissingAggregationNode extends ExpressionNode {
 
   private final String aggregationName;
   private final String fieldName;
 
   @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitTermsAggregation(this, context);
+  public <T, A> T accept(NodeVisitor<T, A> visitor, Optional<A> context) {
+    return visitor.visitMissingAggregation(this, context);
   }
 
 }

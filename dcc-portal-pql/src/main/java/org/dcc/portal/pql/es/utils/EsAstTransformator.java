@@ -23,6 +23,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createEntitySetVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createFieldsToSourceVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreMutatationQueryVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
 import org.dcc.portal.pql.es.visitor.special.FieldsToSourceVisitor;
@@ -60,6 +62,7 @@ public class EsAstTransformator {
   private final ScoreSortVisitor scoreSortVisitor = createScoreSortVisitor();
   private final EntitySetVisitor entitySetVisitor = createEntitySetVisitor();
   private final FieldsToSourceVisitor fieldsToSourceVisitor = createFieldsToSourceVisitor();
+  private final MissingAggregationVisitor missingAggregationVisitor = createMissingAggregationVisitor();
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -103,7 +106,10 @@ public class EsAstTransformator {
   }
 
   private ExpressionNode resolveFacets(ExpressionNode esAst) {
-    return esAst.accept(facetsResolver, Optional.empty());
+    esAst = esAst.accept(facetsResolver, Optional.empty());
+    esAst = esAst.accept(missingAggregationVisitor, Optional.empty());
+
+    return esAst;
   }
 
 }

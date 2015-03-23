@@ -28,6 +28,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
+import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.junit.Before;
@@ -237,6 +238,22 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
         assertThat(bucket.getDocCount()).isEqualTo(4);
       }
     }
+
+    Global globalMissing = result.getAggregations().get("verificationStatusNested_missing");
+    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatusNested_missing");
+    Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
+    assertThat(missing.getDocCount()).isEqualTo(0L);
+  }
+
+  @Test
+  public void facetsTest_missing() {
+    val result = executeQuery("facets(verificationStatusNested)");
+    assertTotalHitsCount(result, 3);
+
+    Global globalMissing = result.getAggregations().get("verificationStatusNested_missing");
+    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatusNested_missing");
+    Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
+    assertThat(missing.getDocCount()).isEqualTo(0L);
   }
 
   @Test

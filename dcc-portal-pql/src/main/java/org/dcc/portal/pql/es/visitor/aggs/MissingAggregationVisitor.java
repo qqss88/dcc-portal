@@ -19,6 +19,7 @@ package org.dcc.portal.pql.es.visitor.aggs;
 
 import java.util.Optional;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,58 +31,59 @@ import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
+
+import com.google.common.collect.Lists;
 
 /**
- * This visitor removes a {@link FilterAggregationNode} that has an empty filter and moves it's child (
- * {@link TermsAggregationNode}) one level up.
+ * TermsAggregations do not report number of documents without value (i.e. the missing field in facets). There is
+ * MissingAggregation for this purpose.<br>
+ * <br>
+ * This class creates a missing aggregation for each TermsAggregation it encounters.
  */
 @Slf4j
-public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
+public class MissingAggregationVisitor extends NodeVisitor<ExpressionNode, Void> {
 
-  private static final ExpressionNode SKIP_NODE = null;
+  public static final String MISSING_SUFFIX = "_missing";
 
   @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
+  public ExpressionNode visitRoot(@NonNull RootNode node, Optional<Void> context) {
     val aggsNode = Nodes.getOptionalChild(node, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      aggsNode.get().accept(this, Optional.empty());
+      aggsNode.get().accept(this, context);
     }
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
-    for (int i = 0; i < node.childrenCount(); i++) {
-      val child = node.getChild(i);
-      val visitResult = child.accept(this, Optional.empty());
-      if (visitResult != SKIP_NODE) {
-        node.setChild(i, visitResult);
-      }
+  public ExpressionNode visitAggregations(@NonNull AggregationsNode node, Optional<Void> context) {
+    val missingAggregations = Lists.<ExpressionNode> newArrayList();
+
+    for (val child : node.getChildren()) {
+      missingAggregations.add(child.accept(this, context));
+    }
+
+    if (!missingAggregations.isEmpty()) {
+      node.addChildren(missingAggregations.toArray(new ExpressionNode[missingAggregations.size()]));
     }
 
     return node;
   }
 
   @Override
-  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
-    if (node.getFilters().childrenCount() == 0) {
-      log.debug("FilterAggregationNode has no filters. Requesting to remove.");
-      return node.getFirstChild();
-    }
-
-    return SKIP_NODE;
+  public ExpressionNode visitTermsAggregation(@NonNull TermsAggregationNode node, Optional<Void> context) {
+    return new MissingAggregationNode(node.getAggregationName() + MISSING_SUFFIX, node.getFieldName());
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
-    return SKIP_NODE;
-  }
+  public ExpressionNode visitFilterAggregation(@NonNull FilterAggregationNode node, Optional<Void> context) {
+    val child = node.getFirstChild().accept(this, context);
 
-  @Override
-  public ExpressionNode visitMissingAggregation(MissingAggregationNode node, Optional<QueryContext> context) {
-    return SKIP_NODE;
+    val result = new FilterAggregationNode(node.getAggregationName() + MISSING_SUFFIX, node.getFilters());
+    result.addChildren(child);
+    log.debug("\n{}", result);
+
+    return result;
   }
 
 }

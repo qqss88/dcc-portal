@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static java.lang.String.format;
+import static org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor.MISSING_SUFFIX;
 
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
+import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.icgc.dcc.portal.model.TermFacet;
@@ -44,7 +46,12 @@ public class AggregationToFacetConverter {
   public Map<String, TermFacet> convert(Aggregations aggregations) {
     val result = new ImmutableMap.Builder<String, TermFacet>();
     for (val aggregation : aggregations) {
-      val termFacet = createTermFacet(findTermsAggregation(aggregation));
+      val aggName = aggregation.getName();
+      if (aggName.endsWith(MISSING_SUFFIX)) {
+        continue;
+      }
+
+      val termFacet = createTermFacet(aggName, aggregations);
       log.debug("Created TermFacet - {}", termFacet);
       result.put(aggregation.getName(), termFacet);
     }
@@ -56,7 +63,8 @@ public class AggregationToFacetConverter {
     return INSTANCE;
   }
 
-  private static TermFacet createTermFacet(Terms termsAgg) {
+  private static TermFacet createTermFacet(String termAggName, Aggregations aggregations) {
+    val termsAgg = findTermsAggregation(aggregations.get(termAggName));
     val terms = new ImmutableList.Builder<Term>();
     long total = 0;
     for (val bucket : termsAgg.getBuckets()) {
@@ -65,29 +73,37 @@ public class AggregationToFacetConverter {
       total += docsCount;
     }
 
-    return TermFacet.of(total, terms.build());
+    val missingAgg = findMissingAggregation(aggregations.get(termAggName + MISSING_SUFFIX));
+
+    return TermFacet.of(total, missingAgg.getDocCount(), terms.build());
   }
 
   private static Terms findTermsAggregation(Aggregation aggregation) {
-    if (aggregation instanceof Terms) {
-      return (Terms) aggregation;
-    }
+    return (Terms) resolveCommonAggregations(aggregation);
+  }
 
+  private static Missing findMissingAggregation(Aggregation aggregation) {
+    return (Missing) resolveCommonAggregations(aggregation);
+  }
+
+  private static Aggregation resolveCommonAggregations(Aggregation aggregation) {
     if (aggregation instanceof Global) {
       Global agg = (Global) aggregation;
 
-      return findTermsAggregation(getSubaggregation(agg.getAggregations()));
+      return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
     } else if (aggregation instanceof Filter) {
       Filter agg = (Filter) aggregation;
 
-      return findTermsAggregation(getSubaggregation(agg.getAggregations()));
+      return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
     } else if (aggregation instanceof Nested) {
       Nested agg = (Nested) aggregation;
 
-      return findTermsAggregation(getSubaggregation(agg.getAggregations()));
+      return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
+    } else if (aggregation instanceof Missing || aggregation instanceof Terms) {
+      return aggregation;
     }
 
-    throw new IllegalArgumentException(format("Failed to find TermsAggretaion in %s", aggregation));
+    throw new IllegalArgumentException(format("Encountered an unknown aggregation %s", aggregation));
   }
 
   private static Aggregation getSubaggregation(Aggregations aggregations) {
