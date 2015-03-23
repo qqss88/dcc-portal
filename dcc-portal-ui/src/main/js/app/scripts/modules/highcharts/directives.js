@@ -462,7 +462,8 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
                     }
 
                     return '<div>' +
-                           '<strong>' + event.target.category + ' - ' + event.target.series.name + '</strong><br>' +
+                           // '<strong>' + event.target.category + ' - ' + event.target.series.name + '</strong><br>' +
+                           '<strong>' + event.target.series.name + '</strong><br>' +
                            num + ' ' + $attrs.ylabel +
                            '</div>';
                   };

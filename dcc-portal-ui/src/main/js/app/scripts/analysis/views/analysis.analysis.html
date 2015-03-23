@@ -43,7 +43,7 @@
                        {{item.dataType | trans:true}} - {{item.inputSetCount}} sets
                    </small>
                    <small data-ng-if="item.type === 'phenotype'" class="t_suggest_detail">
-                   Donor
+                   Donor - {{item.inputSetCount}} sets
                    </small>
                    <span class="" data-ng-click="$event.stopPropagation(); ListController.remove(item.id, analysisId);">
                        <i class="icon-cancel pull-right select-list-cancel"

@@ -45,11 +45,6 @@
 
           // Globals
           $scope.setIds = _.pluck($scope.item.results[0].data, 'id');
-          /*
-          $scope.setCounts = $scope.item.results[0].data.map(function(d) {
-            return d.summary.total;
-          });
-          */
           $scope.setFilters = $scope.setIds.map(function(id) {
             return PhenotypeService.entityFilters(id);
           });
@@ -61,30 +56,29 @@
               set.advLink = SetService.createAdvLink(set);
               $scope.setMap[set.id] = set;
             });
+
+            // Fetch analyses
+            var gender = _.find($scope.item.results, function(subAnalysis) {
+              return subAnalysis.name === 'gender';
+            });
+            var vital = _.find($scope.item.results, function(subAnalysis) {
+              return subAnalysis.name === 'vitalStatus';
+            });
+            var age = _.find($scope.item.results, function(subAnalysis) {
+              return subAnalysis.name === 'ageAtDiagnosisGroup';
+            });
+
+            $scope.gender = PhenotypeService.buildAnalysis(gender, $scope.setMap);
+            $scope.vital = PhenotypeService.buildAnalysis(vital, $scope.setMap);
+            $scope.age = PhenotypeService.buildAnalysis(age, $scope.setMap);
+            $scope.meanAge = age.data.map(function(d) { return d.summary.mean; });
+
           });
 
-
-          // Fetch analyses
-          var gender = _.find($scope.item.results, function(subAnalysis) {
-            return subAnalysis.name === 'gender';
-          });
-          var vital = _.find($scope.item.results, function(subAnalysis) {
-            return subAnalysis.name === 'vitalStatus';
-          });
-          var age = _.find($scope.item.results, function(subAnalysis) {
-            return subAnalysis.name === 'ageAtDiagnosisGroup';
-          });
-
-          $scope.gender = PhenotypeService.buildAnalysis(gender);
-          $scope.vital = PhenotypeService.buildAnalysis(vital);
-          $scope.age = PhenotypeService.buildAnalysis(age);
-
-          console.log($scope.gender);
         }
 
         $scope.$watch('item', function(n) {
           if (n) {
-            console.log('lllll', n);
             normalize();
             buildAnalyses();
           }
@@ -102,7 +96,7 @@
 
   var module = angular.module('icgc.phenotype.services', ['icgc.donors.models']);
 
-  module.service('PhenotypeService', function(Extensions, Restangular) {
+  module.service('PhenotypeService', function($filter, Extensions) {
 
     function getTermCount(analysis, term, donorSetId) {
       var data, termObj;
@@ -111,8 +105,7 @@
       });
 
       // Special case
-      if (term === 'missing') {
-        //return data.missing || 0;
+      if (term === '_missing') {
         return data.summary.missing || 0;
       }
       termObj = _.find(data.terms, function(t) {
@@ -143,28 +136,17 @@
     };
 
 
-    /*
-    this.submitAnalysis = function(donorSetIds) {
-      var payload = encodeURIComponent(donorSetIds);
-      Restangular.one('
-    };
-    */
-
-
-    this.getAnalysis = function() {
-    };
-
-
     /**
      * Returns UI representation
      */
-    this.buildAnalysis = function(analysis) {
+    this.buildAnalysis = function(analysis, setMap) {
       var uiTable = [];
       var uiSeries = [];
       var terms = _.pluck(analysis.data[0].terms, 'term');
       var setIds = _.pluck(analysis.data, 'id');
 
-      terms.push('missing');
+      // Create 'no data' term
+      terms.push('_missing');
 
       // Build table row
       terms.forEach(function(term) {
@@ -179,7 +161,7 @@
             is: [donorSetId]
           };
           advQuery[analysis.name] = {
-            is: [term === 'missing'? '_missing':term]
+            is: [term]
           };
 
           row[donorSetId] = {};
@@ -196,7 +178,7 @@
       // Build graph series
       setIds.forEach(function(setId) {
         uiSeries.push({
-          name: setId,
+          name: setMap[setId].name || setId,
           data: _.pluck(uiTable.map(function(row) { return row[setId]; }), 'percentage')
         });
       });
@@ -205,7 +187,7 @@
       return {
         uiTable: uiTable,
         uiGraph: {
-          categories: terms,
+          categories: terms.map(function(term) { return $filter('trans')(term, true); }),
           series: uiSeries
         }
       };
