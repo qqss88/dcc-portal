@@ -104,6 +104,13 @@
       promise.then(function(data) {
         var rate = 1000;
 
+        // FIXME: Should unify analyses return format
+        if (type === 'phenotype' || data.result) {
+          data.state = 'FINISHED';
+          $scope.analysisResult = data;
+          return;
+        }
+
         if (data.state !== 'FINISHED') {
           $scope.analysisResult = data;
 
@@ -152,20 +159,6 @@
         wait(id, type);
 
       }, function() {
-        // FIXME: test only
-        if ($scope.analysisType === 'phenotype') {
-          AnalysisService.addAnalysis({
-            id: 'test',
-            type: type
-          }, type);
-          $scope.analysisResult = {
-            state: 'FINISHED'
-          };
-          return;
-        }
-        
-        // end test
-
         $scope.error = true;
       });
     }
@@ -256,6 +249,9 @@
       if (type === 'enrichment') {
         payload.universe = analysis.params.universe;
         payload.maxGeneCount = analysis.params.maxGeneCount;
+      } else if (type === 'phenotype') {
+        payload.dataType = 'donor';
+        payload.inputSetCount = analysis.inputCount || '';
       } else {
         payload.dataType = analysis.type.toLowerCase();
         payload.inputSetCount = analysis.inputCount || '';

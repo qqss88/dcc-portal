@@ -18,10 +18,8 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="donorSet in setIds">
-                    <td style="color:{{seriesColours[$index]}}">{{donorSet}}</th>
-                    <td class="text-right"><a href="/search?filters={{setFilters[$index]}}">
-                      {{setCounts[$index]}}
-                    </a></th>
+                    <td style="color:{{seriesColours[$index]}}">{{setMap[donorSet].name}}</th>
+                    <td class="text-right"><a href="/search?filters={{setFilters[$index]}}">{{setMap[donorSet].count}}</a></th>
                 </tr>
             </tbody>
         </table>
@@ -37,9 +35,9 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setIds[0]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setIds[1]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setIds[2]}}</th>
+                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setMap[setIds[0]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setMap[setIds[1]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setMap[setIds[2]].name}}</th>
                 </tr>
                 <tr>
                     <th>Gender</th>
@@ -53,7 +51,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in gender.uiTable">
-                    <td>{{row.term}}</td>
+                    <td>{{row.term | trans:true}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count}}</a></td>
@@ -77,9 +75,9 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setIds[0]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setIds[1]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setIds[2]}}</th>
+                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setMap[setIds[0]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setMap[setIds[1]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setMap[setIds[2]].name}}</th>
                 </tr>
                 <tr>
                     <th>Status</th>
@@ -93,7 +91,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in vital.uiTable">
-                    <td>{{row.term}}</td>
+                    <td>{{row.term | trans:true}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count}}</a></td>
@@ -117,9 +115,9 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setIds[0]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setIds[1]}}</th>
-                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setIds[2]}}</th>
+                    <th colspan="2" style="color:{{seriesColours[0]}}">{{setMap[setIds[0]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[1]}}">{{setMap[setIds[1]].name}}</th>
+                    <th colspan="2" style="color:{{seriesColours[2]}}" data-ng-if="setIds[2]">{{setMap[setIds[2]].name}}</th>
                 </tr>
                 <tr>
                     <th>Age group</th>
@@ -133,7 +131,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in age.uiTable">
-                    <td>{{row.term}}</td>
+                    <td>{{row.term | trans:true}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count}}</a></td>

@@ -14,7 +14,7 @@
 
   var module = angular.module('icgc.phenotype.directives', ['icgc.phenotype.services']);
 
-  module.directive('phenotypeResult', function(PhenotypeService) {
+  module.directive('phenotypeResult', function(SetService, PhenotypeService) {
     return {
       restrict: 'E',
       scope: {
@@ -26,191 +26,69 @@
         // From D3's cat10 scale
         $scope.seriesColours = ['#1f77b4', '#ff7f0e', '#2ca02c'];
 
-
-        $scope.item = {
-          id: 'abc-def-ghi',
-          inputCount: 2,
-          state: 'FINISHED',
-          result: [
-            {
-              name: 'gender',
-              data: [
-                {
-                  id: 'uuid-1',
-                  missing: 100,
-                  terms: [
-                    {term:'female', count: 50}, {term: 'male', count: 100}
-                  ],
-                  summary: {
-                    total: 250
-                  }
-                },
-                {
-                  id: 'uuid-2',
-                  missing: 10,
-                  terms: [
-                    {term:'female', count: 150}, {term: 'male', count: 10}
-                  ],
-                  summary: {
-                    total: 170
-                  }
-                },
-                {
-                  id: 'uuid-3',
-                  missing: 1,
-                  terms: [
-                    {term:'female', count: 50}, {term: 'male', count: 50}
-                  ],
-                  summary: {
-                    total: 101
-                  }
-                }
-
-
-              ]
-            },
-            {
-              name: 'vitalStatus',
-              data: [
-                {
-                  id: 'uuid-1',
-                  missing: 0,
-                  terms: [
-                    {term:'alive', count: 150}, {term: 'deceased', count: 100}
-                  ],
-                  summary: {
-                    total: 250
-                  }
-                },
-                {
-                  id: 'uuid-2',
-                  missing: 0,
-                  terms: [
-                    {term:'alive', count: 150}, {term: 'deceased', count: 20}
-                  ],
-                  summary: {
-                    total: 170
-                  }
-                },
-                {
-                  id: 'uuid-3',
-                  missing: 101,
-                  terms: [
-                    {term:'alive', count: 0}, {term: 'deceased', count: 0}
-                  ],
-                  summary: {
-                    total: 101
-                  }
-                }
-
-
-              ]
-            },
-            {
-              name: 'ageAtDiagnosisGroup',
-              data: [
-                {
-                  id: 'uuid-1',
-                  missing: 0,
-                  terms: [
-                    {term:  '1-9',  count: 1},
-                    {term: '10-19', count: 2},
-                    {term: '20-29', count: 3},
-                    {term: '30-39', count: 4},
-                    {term: '40-49', count: 5},
-                    {term: '50-59', count: 6},
-                    {term: '60-69', count: 7},
-                    {term: '70-79', count: 8},
-                    {term: '80-89', count: 9},
-                    {term: '90-99', count: 10}
-                  ],
-                  summary: {
-                    total: 250
-                  }
-                },
-                {
-                  id: 'uuid-2',
-                  missing: 0,
-                  terms: [
-                    {term:  '1-9',  count: 1},
-                    {term: '10-19', count: 2},
-                    {term: '20-29', count: 3},
-                    {term: '30-39', count: 4},
-                    {term: '40-49', count: 5},
-                    {term: '50-59', count: 6},
-                    {term: '60-69', count: 7},
-                    {term: '70-79', count: 8},
-                    {term: '80-89', count: 9},
-                    {term: '90-99', count: 10}
-                  ],
-                  summary: {
-                    total: 170
-                  }
-                },
-                {
-                  id: 'uuid-3',
-                  missing: 0,
-                  terms: [
-                    {term:  '1-9',  count: 1},
-                    {term: '10-19', count: 2},
-                    {term: '20-29', count: 3},
-                    {term: '30-39', count: 4},
-                    {term: '40-49', count: 5},
-                    {term: '50-59', count: 6},
-                    {term: '60-69', count: 7},
-                    {term: '70-79', count: 8},
-                    {term: '80-89', count: 9},
-                    {term: '90-99', count: 10}
-                  ],
-                  summary: {
-                    total: 101
-                  }
-                }
-
-              ]
-            },
-
-          ]
-        };
-
-
-        // 0) Normalize results: Sort by id, then sort by terms
-        $scope.item.result.forEach(function(subAnalysis) {
-          subAnalysis.data.forEach(function(d) {
-            d.terms = _.sortBy(d.terms, function(term) {
-              return term.term;
+        function normalize() {
+          // Normalize results: Sort by id, then sort by terms
+          $scope.item.results.forEach(function(subAnalysis) {
+            subAnalysis.data.forEach(function(d) {
+              d.terms = _.sortBy(d.terms, function(term) {
+                return term.term;
+              });
+            });
+            subAnalysis.data = _.sortBy(subAnalysis.data, function(d) {
+              return d.id;
             });
           });
-          subAnalysis.data = _.sortBy(subAnalysis.data, function(d) {
-            return d.id;
+        }
+
+
+        function buildAnalyses() {
+
+          // Globals
+          $scope.setIds = _.pluck($scope.item.results[0].data, 'id');
+          /*
+          $scope.setCounts = $scope.item.results[0].data.map(function(d) {
+            return d.summary.total;
           });
-        });
-
-        // Globals
-        $scope.setIds = _.pluck($scope.item.result[0].data, 'id');
-        $scope.setCounts = $scope.item.result[0].data.map(function(d) {
-          return d.summary.total;
-        });
-        $scope.setFilters = $scope.setIds.map(function(id) {
-          return PhenotypeService.entityFilters(id);
-        });
+          */
+          $scope.setFilters = $scope.setIds.map(function(id) {
+            return PhenotypeService.entityFilters(id);
+          });
 
 
-        // Fetch analyses
-        var gender = _.find($scope.item.result, function(subAnalysis) {
-          return subAnalysis.name === 'gender';
-        });
-        var vital = _.find($scope.item.result, function(subAnalysis) {
-          return subAnalysis.name === 'vitalStatus';
-        });
-        var age = _.find($scope.item.result, function(subAnalysis) {
-          return subAnalysis.name === 'ageAtDiagnosisGroup';
-        });
+          SetService.getMetaData($scope.setIds).then(function(results) {
+            $scope.setMap = {};
+            results.forEach(function(set) {
+              set.advLink = SetService.createAdvLink(set);
+              $scope.setMap[set.id] = set;
+            });
+          });
 
-        $scope.gender = PhenotypeService.buildAnalysis(gender);
-        $scope.vital = PhenotypeService.buildAnalysis(vital);
-        $scope.age = PhenotypeService.buildAnalysis(age);
 
+          // Fetch analyses
+          var gender = _.find($scope.item.results, function(subAnalysis) {
+            return subAnalysis.name === 'gender';
+          });
+          var vital = _.find($scope.item.results, function(subAnalysis) {
+            return subAnalysis.name === 'vitalStatus';
+          });
+          var age = _.find($scope.item.results, function(subAnalysis) {
+            return subAnalysis.name === 'ageAtDiagnosisGroup';
+          });
+
+          $scope.gender = PhenotypeService.buildAnalysis(gender);
+          $scope.vital = PhenotypeService.buildAnalysis(vital);
+          $scope.age = PhenotypeService.buildAnalysis(age);
+
+          console.log($scope.gender);
+        }
+
+        $scope.$watch('item', function(n) {
+          if (n) {
+            console.log('lllll', n);
+            normalize();
+            buildAnalyses();
+          }
+        });
 
       }
     };
@@ -224,7 +102,7 @@
 
   var module = angular.module('icgc.phenotype.services', ['icgc.donors.models']);
 
-  module.service('PhenotypeService', function(Extensions) {
+  module.service('PhenotypeService', function(Extensions, Restangular) {
 
     function getTermCount(analysis, term, donorSetId) {
       var data, termObj;
@@ -234,7 +112,8 @@
 
       // Special case
       if (term === 'missing') {
-        return data.missing || 0;
+        //return data.missing || 0;
+        return data.summary.missing || 0;
       }
       termObj = _.find(data.terms, function(t) {
         return t.term === term;
@@ -264,11 +143,17 @@
     };
 
 
-    this.submitAnalysis = function() {
+    /*
+    this.submitAnalysis = function(donorSetIds) {
+      var payload = encodeURIComponent(donorSetIds);
+      Restangular.one('
     };
+    */
+
 
     this.getAnalysis = function() {
     };
+
 
     /**
      * Returns UI representation
@@ -299,8 +184,8 @@
 
           row[donorSetId] = {};
           row[donorSetId].count = count;
-          row[donorSetId].total = summary.total;
-          row[donorSetId].percentage = count/summary.total;
+          row[donorSetId].total = (summary.total + summary.missing);
+          row[donorSetId].percentage = count/(summary.total + summary.missing);
           row[donorSetId].advQuery = {
             donor: advQuery
           };

@@ -73,11 +73,17 @@
     };
 
 
+    /* Phenotype comparison only takes in donor set ids */
     _this.launchPhenotype = function(setIds) {
       console.log('launching phenotype analysis with', setIds);
 
-      // FIXME: Stub
-      $location.path('analysis/view/phenotype/test');
+      var payload = setIds;
+      var promise = Restangular.one('analysis').post('phenotype', payload, {}, {'Content-Type': 'application/json'});
+      promise.then(function(data) {
+        if (data.id) {
+          $location.path('analysis/view/phenotype/' + data.id);
+        }
+      });
     };
 
 
