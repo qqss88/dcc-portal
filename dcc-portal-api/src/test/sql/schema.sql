@@ -24,4 +24,8 @@ CREATE TABLE IF NOT EXISTS entity_set(
    version  INT,
    data     TEXT
 );
-
+CREATE TABLE IF NOT EXISTS phenotype_analysis(
+   id       UUID PRIMARY KEY,
+   version  INT,
+   data     TEXT
+);

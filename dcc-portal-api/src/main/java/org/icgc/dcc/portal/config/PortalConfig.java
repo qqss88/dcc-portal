@@ -53,6 +53,7 @@ import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.repository.EnrichmentAnalysisRepository;
 import org.icgc.dcc.portal.repository.EntityListRepository;
+import org.icgc.dcc.portal.repository.PhenotypeAnalysisRepository;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.repository.UserGeneSetRepository;
 import org.icgc.dcc.portal.service.EntityListService;
@@ -165,6 +166,11 @@ public class PortalConfig {
   @Bean
   public UnionAnalysisRepository unionAnalysisRepository(final DBI dbi) {
     return dbi.open(UnionAnalysisRepository.class);
+  }
+
+  @Bean
+  public PhenotypeAnalysisRepository phenotypeAnalysisRepository(final DBI dbi) {
+    return dbi.open(PhenotypeAnalysisRepository.class);
   }
 
   @Bean
