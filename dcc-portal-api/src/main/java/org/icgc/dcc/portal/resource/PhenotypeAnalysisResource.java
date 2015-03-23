@@ -37,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.PhenotypeAnalysis;
-import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.PhenotypeAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ public class PhenotypeAnalysisResource {
   @GET
   @Path("/{" + API_ANALYSIS_ID_PARAM + "}")
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Retrieves a set analysis by its ID.", response = UnionAnalysisResult.class)
+  @ApiOperation(value = "Retrieves the result of a phenotype analysis by its ID.", response = PhenotypeAnalysis.class)
   public PhenotypeAnalysis getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) final UUID analysisId
       ) {

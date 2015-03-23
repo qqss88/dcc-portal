@@ -414,7 +414,6 @@ public class DonorRepository implements Repository {
 
     for (val setId : setIds) {
       val search = getSearchBuilderForPhenotypeAnalysis();
-
       search.setQuery(filteredQuery(matchAll, getDonorSetIdFilterBuilder(setId)));
 
       // Adding terms_stats facets
@@ -446,7 +445,7 @@ public class DonorRepository implements Repository {
     val typeId = Type.DONOR_CENTRIC.getId();
 
     val fieldMap = DONORS_FIELDS_MAPPING_FOR_PHENOTYPE;
-    final String[] fields = fieldMap.values().toArray(new String[fieldMap.size()]);
+    final String[] fields = fieldMap.values().stream().toArray(String[]::new);;
 
     val searchBuilder = client.prepareSearch(index)
         .setTypes(typeId)
