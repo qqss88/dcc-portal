@@ -11,7 +11,7 @@
    * - phenotype analysis
    */
   module.controller('NewAnalysisController',
-    function($scope, $modal, $location, AnalysisService, Restangular, SetService, Extensions) {
+    function($scope, $modal, $location, $timeout, Page, AnalysisService, Restangular, SetService, Extensions) {
 
     var _this = this;
 
@@ -102,10 +102,182 @@
       });
     };
 
+
+    // Wait for sets to materialize
+    function wait(ids, numTries, callback) {
+      if (numTries <= 0) {
+        return;
+      }
+      SetService.getMetaData(ids).then(function(data) {
+        var finished = _.filter(data, function(d) {
+          return d.state === 'FINISHED';
+        });
+
+
+        if (finished.length === ids.length) {
+          callback(data);
+        } else {
+          $timeout(function() {
+            wait(ids, --numTries, callback);
+          }, 1000);
+        }
+      });
+    }
+
+    _this.demoPhenotype = function() {
+      var p1, p2, p3, type = 'donor';
+      p1 = {
+        filters: {
+          donor:{ primarySite: { is: ['Brain'] } }
+        },
+        isTransient: true,
+        type: type,
+        name: 'Brain Cancer'
+      };
+
+      p2 = {
+        filters: {
+          donor:{ primarySite: { is: ['Breast'] } }
+        },
+        isTransient: true,
+        type: type,
+        name: 'Breast Cancer'
+      };
+
+      p3 = {
+        filters: {
+          donor:{ primarySite: { is: ['Colorectal'] } }
+        },
+        isTransient: true,
+        type: type,
+        name: 'Colorectal Cancer'
+      };
+
+      var demoSetIds = [];
+      Page.startWork();
+      SetService.addSet(type, p1).then(function(r1) {
+        demoSetIds.push(r1.id);
+        SetService.addSet(type, p2).then(function(r2) {
+          demoSetIds.push(r2.id);
+          SetService.addSet(type, p3).then(function(r3) {
+            demoSetIds.push(r3.id);
+
+            function proxyLaunch() {
+              Page.stopWork();
+              _this.launchPhenotype(demoSetIds);
+            }
+            wait(demoSetIds, 7, proxyLaunch);
+          });
+        });
+      });
+
+    };
+
+    _this.demoSetOperation = function() {
+      var p1, p2, p3, type = 'mutation';
+      p1 = {
+        filters: {
+          donor:{
+            primarySite: {is: ['Brain']},
+            projectId: {is: ['GBM-US']}
+          },
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        },
+        type: type,
+        isTransient: true,
+        name: 'GBM-US High Impact Mutation'
+      };
+      p2 = {
+        filters: {
+          donor:{
+            primarySite: {is: ['Brain']},
+            projectId: {is: ['LGG-US']}
+          },
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        },
+        type: type,
+        isTransient: true,
+        name: 'LGG-US High Impact Mutation'
+      };
+      p3 = {
+        filters: {
+          donor:{
+            primarySite: {is: ['Brain']},
+            projectId: {is: ['PBCA-DE']}
+          },
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        },
+        type: type,
+        isTransient: true,
+        name: 'PBCA-DE High Impact Mutation'
+      };
+
+      var demoSetIds = [];
+      Page.startWork();
+      SetService.addSet(type, p1).then(function(r1) {
+        demoSetIds.push(r1.id);
+        SetService.addSet(type, p2).then(function(r2) {
+          demoSetIds.push(r2.id);
+          SetService.addSet(type, p3).then(function(r3) {
+            demoSetIds.push(r3.id);
+
+            function proxyLaunch() {
+              Page.stopWork();
+              _this.launchSet('mutation', demoSetIds);
+            }
+            wait(demoSetIds, 7, proxyLaunch);
+          });
+        });
+      });
+
+    };
+
+    _this.demoEnrichment = function() {
+      var filters, type, params;
+      filters = {
+        gene: {
+          symbol: {
+            is: ['TP53','NRG1','FIP1L1','CAMTA1','FHIT','PIK3CA','ALK','RUNX1','NTRK3',
+              'PDE4DIP','LPP','KRAS','PTPRK','BRAF','ZNF521','FOXP1','STAG2','GPHN','EBF1',
+              'CUX1','RANBP17','PRDM16','NF1','SETBP1','CDH11','MAML2','GOPC','ERC1','PTEN',
+              'ATRX','APC','PBX1','EGFR','ARID1A','GAS7','NCOA2','CACNA1D','ERG','SRGAP3',
+              'AKAP9','CTNNB1','EIF3E','EXT1','LHFP','RSPO2','PTPRB','NOTCH2','KMT2D','PTPRC','GPC3']
+          }
+        }
+      };
+      type = 'gene';
+      params = {
+        filters: filters,
+        type: type,
+        isTransient: true,
+        name: 'Demo'
+      };
+
+      // Create a temporary set, then launch the enrichment analysis
+      Page.startWork();
+      SetService.addSet(type, params).then(function(result) {
+        function proxyLaunch(sets) {
+          Page.stopWork();
+          launchEnrichment(sets[0]);
+        }
+        wait([result.id], 5, proxyLaunch);
+      });
+    };
+
     _this.launchEnrichment = function(setId) {
       var set = _.filter(_this.filteredList, function(set) {
         return set.id === setId;
       })[0];
+      launchEnrichment(set);
+    };
+
+    function launchEnrichment(set) {
       var filters = {
         gene: {}
       };
@@ -123,18 +295,7 @@
           }
         }
       });
-    };
-
-    /*
-    $scope.$on('analysis::reload', function() {
-      console.log('here');
-      _this.analysisType = null;
-      _this.selectedIds = [];
-      _this.filteredSetType = 'donor';
-      _this.filteredList = [];
-    });
-    */
-
+    }
 
     $scope.$on('$locationChangeSuccess', function() {
       _this.filteredList = [];

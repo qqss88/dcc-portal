@@ -191,8 +191,13 @@
           return;
         }
 
+        // If flagged as transient, don't save to local storage
+        // FIXME: use subtype when it is available
+        if (params.isTransient === true) {
+          return;
+        }
+
         data.type = data.type.toLowerCase();
-        //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name,
