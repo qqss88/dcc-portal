@@ -100,7 +100,7 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
-import org.icgc.dcc.portal.model.TermFacetForEntitySet;
+import org.icgc.dcc.portal.model.EntitySetTermFacet;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -301,7 +301,7 @@ public class DonorRepository implements Repository {
         "The number of queries does not match the number of responses in a multi-search.");
 
     val resultBuilders = FACETS_FOR_PHENOTYPE.keySet().stream()
-        .collect(Collectors.toMap(name -> name, name -> new ImmutableList.Builder<TermFacetForEntitySet>()));
+        .collect(Collectors.toMap(name -> name, name -> new ImmutableList.Builder<EntitySetTermFacet>()));
 
     for (int i = 0; i < responseItemCount; i++) {
       val facets = responseItems[i].getResponse().getFacets();
@@ -325,7 +325,7 @@ public class DonorRepository implements Repository {
           val summary = new Statistics(termsFacet.getTotalCount(), termsFacet.getMissingCount(), mean);
 
           resultBuilders.get(facetName)
-              .add(new TermFacetForEntitySet(entitySetId, termFacetList, summary));
+              .add(new EntitySetTermFacet(entitySetId, termFacetList, summary));
         }
 
       }
@@ -414,22 +414,23 @@ public class DonorRepository implements Repository {
 
     for (val setId : setIds) {
       val search = getSearchBuilderForPhenotypeAnalysis();
+
       search.setQuery(filteredQuery(matchAll, getDonorSetIdFilterBuilder(setId)));
 
       // Adding terms_stats facets
       FACETS_FOR_PHENOTYPE.values().stream()
           .filter(v -> wantsStatistics(v))
-          .forEach(optional -> {
-            val kv = optional.get();
-            val statsFacetName = kv.getKey();
-            val statsFacetField = kv.getValue();
+          .map(Optional::get)
+          .forEach(kv -> {
+              val statsFacetName = kv.getKey();
+              val statsFacetField = kv.getValue();
 
-            val statsBuilder = FacetBuilders.termsStatsFacet(statsFacetName)
-                .keyField("_type")
-                .valueField(DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetField))
-                .size(MAX_FACET_TERM_COUNT);
-            search.addFacet(statsBuilder);
-          });
+              val statsBuilder = FacetBuilders.termsStatsFacet(statsFacetName)
+                  .keyField("_type")
+                  .valueField(DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetField))
+                  .size(MAX_FACET_TERM_COUNT);
+              search.addFacet(statsBuilder);
+            });
 
       log.info("Sub-search for DonorSet ID [{}] is: '{}'", setId, search);
       multiSearch.add(search);
@@ -445,7 +446,7 @@ public class DonorRepository implements Repository {
     val typeId = Type.DONOR_CENTRIC.getId();
 
     val fieldMap = DONORS_FIELDS_MAPPING_FOR_PHENOTYPE;
-    final String[] fields = fieldMap.values().stream().toArray(String[]::new);;
+    final String[] fields = fieldMap.values().stream().toArray(String[]::new);
 
     val searchBuilder = client.prepareSearch(index)
         .setTypes(typeId)
@@ -469,7 +470,8 @@ public class DonorRepository implements Repository {
     }
 
     val mustFilterFieldName = "_id";
-    // TODO: should not reference TermsLookupService here
+    // Note: We should not reference TermsLookupService here but for now we'll wait for the PQL module and see how we
+    // can move the createTermsLookupFilter() routine out of TermsLookupService.
     val termsLookupFilter = createTermsLookupFilter(mustFilterFieldName, TermLookupType.DONOR_IDS, donorId);
 
     return boolFilter().must(termsLookupFilter);

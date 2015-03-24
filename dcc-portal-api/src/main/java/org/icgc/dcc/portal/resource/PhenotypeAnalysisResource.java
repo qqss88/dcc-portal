@@ -83,4 +83,5 @@ public class PhenotypeAnalysisResource {
 
     return service.getAnalysisResult(analysisId);
   }
+
 }

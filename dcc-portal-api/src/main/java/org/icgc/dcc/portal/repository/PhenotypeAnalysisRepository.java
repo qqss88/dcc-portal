@@ -41,4 +41,5 @@ public interface PhenotypeAnalysisRepository extends JsonRepository {
   @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + ", " + DATA_FIELD_NAME + ", " + VERSION_FIELD_NAME
       + ") VALUES (:id, :data, :version)")
   int save(@BindValue PhenotypeAnalysis analysis, @Bind(VERSION_FIELD_NAME) int dataVersion);
+
 }

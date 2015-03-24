@@ -28,10 +28,11 @@ import com.wordnik.swagger.annotations.ApiModel;
  * Represents a TermsFacet for an entity set with summary info.
  */
 @Value
-@ApiModel(value = "TermFacetForEntitySet")
-public class TermFacetForEntitySet {
+@ApiModel(value = "EntitySetTermFacet")
+public class EntitySetTermFacet {
 
   UUID id;
   List<TermFacet.Term> terms;
   Statistics summary;
+
 }
