@@ -90,8 +90,10 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.termsstats.TermsStatsFacet;
+import org.elasticsearch.search.facet.termsstats.TermsStatsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.AndQuery;
+import org.icgc.dcc.portal.model.EntitySetTermFacet;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -100,7 +102,6 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
-import org.icgc.dcc.portal.model.EntitySetTermFacet;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -360,11 +361,11 @@ public class DonorRepository implements Repository {
     facets.facets().stream()
         .filter(facet -> facet instanceof TermsFacet)
         .forEach(facet -> {
-          val termFacet = TermFacet.of((TermsFacet) facet);
-          val terms = termFacet.getTerms();
+          final TermFacet termFacet = TermFacet.of((TermsFacet) facet);
+          final List<Term> terms = termFacet.getTerms();
 
           if (isNotEmpty(terms)) {
-            val innerBuilder = ImmutableMap.<String, Integer> builder();
+            final ImmutableMap.Builder<String, Integer> innerBuilder = ImmutableMap.<String, Integer> builder();
             terms.forEach(term -> innerBuilder.put(term.getTerm(), 0));
 
             builder.put(facet.getName(), innerBuilder.build());
@@ -422,15 +423,15 @@ public class DonorRepository implements Repository {
           .filter(v -> wantsStatistics(v))
           .map(Optional::get)
           .forEach(kv -> {
-              val statsFacetName = kv.getKey();
-              val statsFacetField = kv.getValue();
+            final String statsFacetName = kv.getKey();
+            final String statsFacetField = kv.getValue();
 
-              val statsBuilder = FacetBuilders.termsStatsFacet(statsFacetName)
-                  .keyField("_type")
-                  .valueField(DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetField))
-                  .size(MAX_FACET_TERM_COUNT);
-              search.addFacet(statsBuilder);
-            });
+            final TermsStatsFacetBuilder statsBuilder = FacetBuilders.termsStatsFacet(statsFacetName)
+                .keyField("_type")
+                .valueField(DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetField))
+                .size(MAX_FACET_TERM_COUNT);
+            search.addFacet(statsBuilder);
+          });
 
       log.info("Sub-search for DonorSet ID [{}] is: '{}'", setId, search);
       multiSearch.add(search);

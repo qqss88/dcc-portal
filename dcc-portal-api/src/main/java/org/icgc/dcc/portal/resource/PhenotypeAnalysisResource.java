@@ -79,6 +79,7 @@ public class PhenotypeAnalysisResource {
     if (null == analysisId) {
       throw new BadRequestException(API_ANALYSIS_ID_PARAM + " is null.");
     }
+
     log.info("Received request with {} of '{}'", API_ANALYSIS_ID_PARAM, analysisId);
 
     return service.getAnalysisResult(analysisId);
