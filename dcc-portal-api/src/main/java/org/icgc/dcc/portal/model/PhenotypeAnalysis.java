@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModel;
 
 /**
- * 
+ * Represents the result set of a phenotype analysis.
  */
 @Data
 @ApiModel(value = "PhenotypeAnalysis")
@@ -49,6 +51,7 @@ public class PhenotypeAnalysis implements Identifiable<UUID> {
   private List<PhenotypeResult> results;
 
   private int version = 1;
+  private State state = State.FINISHED;
   private final long timestamp = new Date().getTime();
 
   private final static class JsonPropertyName {
@@ -70,6 +73,18 @@ public class PhenotypeAnalysis implements Identifiable<UUID> {
     this.entitySetIds = entitySetIds;
     this.inputCount = inputCount;
     this.version = dataVersion;
+  }
+
+  @RequiredArgsConstructor
+  @Getter
+  public enum State {
+
+    FINISHED("finished"),
+    ERROR("error");
+
+    @NonNull
+    private final String name;
+
   }
 
 }
