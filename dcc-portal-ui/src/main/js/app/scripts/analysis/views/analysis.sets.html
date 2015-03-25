@@ -4,14 +4,32 @@
     </div>
     <div>
         These are your saved sets. You can create new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
-        interest in <a href="/search">Advanced Search</a>. 
+        interest in <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span>. 
         <br>
 
+        <!--
         You can save <a href="" data-ng-click="SavedSetController.addCustomGeneSet()"><i class="icon-floppy"></i><strong>Customized gene set</strong></a>.
         <br>
+        -->
 
-        You can use saved sets to <a href="/analysis"><i class="icon-beaker"></i><strong>Launch Analysis</strong></a>. 
+        
+        You can save 
+        <span class="action-toolbar">
+            <span class="action-item">
+                <i class="icon-floppy"></i>
+                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Customized gene set</a>
+            </span>
+        </span>
         <br>
+
+        You can use saved sets to 
+        <span class="action-toolbar">
+            <span class="action-item">
+                <i class="icon-beaker"></i>
+                <a href="/analysis">Launch Analysis</a>
+            </span>
+        </span>
+
     </div>
     <br>
 
@@ -33,18 +51,16 @@
                 <th>Item type</th>
                 <th>Name</th>
                 <th>Note</th>
-                <th class="text-right"># of items</th>
+                <th class="text-right"># Items</th>
                 <th></th>
             </thead>
             <tbody>
-                <tr data-ng-repeat="item in SavedSetController.entityLists" 
-                    data-ng-style="{'font-weight': $index===0? '600':''}" data-ng-init="item.checked=false">
+                <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-init="item.checked=false">
                     <td class="text-center">
-                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true) && $index > 0" style="cursor:pointer" 
+                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer" 
                               data-ng-click="item.checked = !item.checked; SavedSetController.update();">
                             <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                         </span>
-                        <span data-ng-if="$index==0">--</span>
                     </td>
                     <td>{{item.type | trans:true}}</td>
                     <td>{{item.name}}</td>

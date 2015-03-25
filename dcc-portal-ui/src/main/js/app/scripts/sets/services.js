@@ -406,7 +406,9 @@
 
     // Initialize
     var setList = _this.initService();
-    _this.initDemo();
+    _this.refreshList();
+
+    // _this.initDemo();
   });
 
 })();

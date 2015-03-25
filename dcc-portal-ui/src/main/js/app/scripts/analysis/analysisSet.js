@@ -15,7 +15,6 @@
 
 
     // Selected sets
-    _this.selectedSets = [];
 
     _this.update = function() {
       _this.selectedSets = [];
@@ -24,6 +23,7 @@
           _this.selectedSets.push(set);
         }
       });
+
     };
 
     _this.newAnalysis = function() {
@@ -62,18 +62,24 @@
         return;
       }
 
+      var toRemove = _this.selectedSets;
+      /*
       var toRemove = _.filter(_this.selectedSets, function(set) {
         return !angular.isDefined(set.readonly);
       });
+      */
 
       if (toRemove.length > 0) {
+        /*
         _.remove(_this.selectedSets, function(set) {
           return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
         });
+        */
 
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         _this.checkAll = false; // reset
       }
+
     };
 
     function synchronizeSets(numTries) {
