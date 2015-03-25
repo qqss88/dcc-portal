@@ -63,7 +63,8 @@ module.exports = function(config){
     browsers : ['PhantomJS'],
 
     // progress is the default reporter
-    reporters: ['progress'],
+    // reporters: ['progress'],
+    reporters: ['spec'],
 
     // map of preprocessors that is used mostly for plugins
     preprocessors: {
@@ -72,6 +73,7 @@ module.exports = function(config){
 
     // list of karma plugins
     plugins : [
+        'karma-spec-reporter',
         'karma-junit-reporter',
         'karma-chrome-launcher',
         'karma-firefox-launcher',
