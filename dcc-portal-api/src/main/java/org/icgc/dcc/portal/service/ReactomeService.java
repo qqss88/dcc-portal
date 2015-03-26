@@ -18,16 +18,16 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.uniqueIndex;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,6 @@ import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
 
-@Slf4j
 @Service
 @NoArgsConstructor
 public class ReactomeService {
@@ -54,7 +53,7 @@ public class ReactomeService {
             @Override
             public boolean processLine(String line) {
               String[] values = line.split("\t");
-              map.put(values[0], values[1]);
+              map.put(values[0], checkNotNull(parseUniprotId(values[1])));
               return true;
             }
 
@@ -63,22 +62,18 @@ public class ReactomeService {
               return true;
             }
           });
-    } catch (MalformedURLException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
     } catch (IOException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
+      throw new RuntimeException("Failed to get reactome protein list", e);
     }
     return map;
   }
 
+  private String parseUniprotId(String uniprotId) {
+    return uniprotId.split(":")[1];
+  }
+
   public Map<String, String> matchProteinIds(List<String> ids) {
     val proteinMap = getProteinIdMap();
-    val map = Maps.<String, String> newHashMap();
-    ids.forEach(id -> {
-      map.put(id, proteinMap.get(id));
-    });
-    return map;
+    return uniqueIndex(ids, id -> proteinMap.get(id));
   }
 }
