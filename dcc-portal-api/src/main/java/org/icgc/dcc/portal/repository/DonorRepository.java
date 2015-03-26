@@ -298,11 +298,13 @@ public class DonorRepository implements Repository {
     checkState(responseItemCount == setIds.size(),
         "The number of queries does not match the number of responses in a multi-search.");
 
-    val results = FACETS_FOR_PHENOTYPE.keySet().stream().collect(
-        Collectors.toMap(name -> name, name -> new ImmutableList.Builder<EntitySetTermFacet>()));
-
     val facetKeyValuePairs = FACETS_FOR_PHENOTYPE.entrySet();
 
+    // Building a map with facet name as the key and a list builder as the value.
+    val results = facetKeyValuePairs.stream().collect(
+        Collectors.toMap(entry -> entry.getKey(), notUsed -> new ImmutableList.Builder<EntitySetTermFacet>()));
+
+    // Here we enumerate the response collection by entity-set UUIDs (the same grouping as in the multi-search).
     for (int i = 0; i < responseItemCount; i++) {
       val facets = responseItems[i].getResponse().getFacets();
 
@@ -311,6 +313,8 @@ public class DonorRepository implements Repository {
       val facetMap = facets.facetsAsMap();
       val entitySetId = setIds.get(i);
 
+      // We go through the main Results map for each facet and build the inner list by populating it with instances of
+      // EntitySetTermFacet.
       for (val facetKv : facetKeyValuePairs) {
         val facetName = facetKv.getKey();
         val facet = facetMap.get(facetName);
@@ -373,12 +377,14 @@ public class DonorRepository implements Repository {
   private static List<Term> buildTermFacetList(@NonNull final TermsFacet termsFacet,
       @NonNull Map<String, Map<String, Integer>> baseline) {
     val results = ImmutableMap.<String, Integer> builder();
+
+    // First we populate with the terms facets from the search response
     termsFacet.getEntries().stream().forEach(entry -> {
       results.put(entry.getTerm().toString(), entry.getCount());
     });
 
     val facetName = termsFacet.getName();
-    // Augmenting the result here in case of missing terms in the response.
+    // Then augment the result in case of missing terms in the response.
     if (baseline.containsKey(facetName)) {
       val difference = Maps.difference(results.build(), baseline.get(facetName)).entriesOnlyOnRight();
 
