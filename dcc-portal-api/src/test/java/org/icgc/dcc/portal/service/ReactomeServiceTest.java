@@ -19,16 +19,16 @@ package org.icgc.dcc.portal.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.repository.BaseRepositoryTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 /**
- * 
+ * Test the ability to get a list of dbIds and matching Uniprot ids from Reactome's restAPI
  */
-@Slf4j
 public class ReactomeServiceTest extends BaseRepositoryTest {
 
   private ReactomeService service;
@@ -39,11 +39,11 @@ public class ReactomeServiceTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void testSuccesfullyFound() {
-    val result = service.getProteinIdMap();
-    log.info(result.toString());
+  public void testSuccessMapping() {
+    val result = service.matchProteinIds(Lists.newArrayList("49127", "6026238", "5791649"));
     assertThat(result).isNotNull();
-    assertThat(result).isNotEmpty();
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get("49127")).isEqualTo("UniProt:P30154");
   }
 
 }

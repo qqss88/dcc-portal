@@ -49,7 +49,6 @@ import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.service.ReactomeService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
@@ -134,10 +133,9 @@ public class UIResource {
 
   @Path("/reactome-proteins")
   @GET
-  @Cacheable("reactomeIds")
   public Map<String, String> getReactomeProteinList(
       @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinIds) {
-    return reactomeService.getProteinIdMap();
+    return reactomeService.matchProteinIds(proteinIds.get());
   }
 
 }

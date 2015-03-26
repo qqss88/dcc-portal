@@ -22,12 +22,14 @@ import static com.google.common.base.Charsets.UTF_8;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
+import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
@@ -36,17 +38,17 @@ import com.google.common.io.Resources;
 
 @Slf4j
 @Service
+@NoArgsConstructor
 public class ReactomeService {
 
-  @Autowired
-  public ReactomeService() {
+  private static final String REACTOME_ENDPOINT_URL =
+      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs";
 
-  }
-
+  @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
     val map = Maps.<String, String> newHashMap();
     try {
-      Resources.readLines(new URL("http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs"),
+      Resources.readLines(new URL(REACTOME_ENDPOINT_URL),
           UTF_8, new LineProcessor<Boolean>() {
 
             @Override
@@ -68,7 +70,15 @@ public class ReactomeService {
       log.error("Error getting Reactome Protein list");
       e.printStackTrace();
     }
+    return map;
+  }
 
+  public Map<String, String> matchProteinIds(List<String> ids) {
+    val proteinMap = getProteinIdMap();
+    val map = Maps.<String, String> newHashMap();
+    ids.forEach(id -> {
+      map.put(id, proteinMap.get(id));
+    });
     return map;
   }
 }
