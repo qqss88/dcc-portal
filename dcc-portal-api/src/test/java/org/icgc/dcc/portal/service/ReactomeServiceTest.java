@@ -17,58 +17,33 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static com.google.common.base.Charsets.UTF_8;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.icgc.dcc.portal.repository.BaseRepositoryTest;
+import org.junit.Before;
+import org.junit.Test;
 
-import com.google.common.collect.Maps;
-import com.google.common.io.LineProcessor;
-import com.google.common.io.Resources;
-
+/**
+ * 
+ */
 @Slf4j
-@Service
-public class ReactomeService {
+public class ReactomeServiceTest extends BaseRepositoryTest {
 
-  @Autowired
-  public ReactomeService() {
+  private ReactomeService service;
 
+  @Before
+  public void setUp() throws Exception {
+    service = new ReactomeService();
   }
 
-  public Map<String, String> getProteinIdMap() {
-    val map = Maps.<String, String> newHashMap();
-    try {
-      Resources.readLines(new URL("http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs"),
-          UTF_8, new LineProcessor<Boolean>() {
-
-            @Override
-            public boolean processLine(String line) {
-              String[] values = line.split("\t");
-              map.put(values[0], values[1]);
-              return true;
-            }
-
-            @Override
-            public Boolean getResult() {
-              return true;
-            }
-          });
-    } catch (MalformedURLException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
-    } catch (IOException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
-    }
-
-    return map;
+  @Test
+  public void testSuccesfullyFound() {
+    val result = service.getProteinIdMap();
+    log.info(result.toString());
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEmpty();
   }
+
 }

@@ -46,6 +46,7 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
+import org.icgc.dcc.portal.service.ReactomeService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -71,6 +72,7 @@ public class UIResource {
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
+  private final ReactomeService reactomeService;
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
@@ -132,10 +134,10 @@ public class UIResource {
 
   @Path("/reactome-proteins")
   @GET
-  @Cacheable
+  @Cacheable("reactomeIds")
   public Map<String, String> getReactomeProteinList(
-      @ApiParam(value = "Protein dbId. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinIds) {
-    return null;
+      @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinIds) {
+    return reactomeService.getProteinIdMap();
   }
 
 }

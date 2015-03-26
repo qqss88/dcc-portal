@@ -15,60 +15,65 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.config;
 
-import static com.google.common.base.Charsets.UTF_8;
+import static java.util.concurrent.TimeUnit.DAYS;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.google.common.cache.CacheBuilder;
 
-import com.google.common.collect.Maps;
-import com.google.common.io.LineProcessor;
-import com.google.common.io.Resources;
+/**
+ * Server wide caching configuration.
+ */
+@Lazy
+@Configuration
+@EnableCaching
+public class CacheConfig extends CachingConfigurerSupport {
 
-@Slf4j
-@Service
-public class ReactomeService {
+  /**
+   * Constants.
+   */
+  private static final int CACHE_TTL_DAYS = 7;
 
-  @Autowired
-  public ReactomeService() {
+  @Override
+  public CacheManager cacheManager() {
+    return new ConcurrentMapCacheManager() {
 
+      @Override
+      protected Cache createConcurrentMapCache(String name) {
+        return new ConcurrentMapCache(name, createStore(), false);
+      }
+
+      /**
+       * @return Guava cache instance with a suitable TTL.
+       */
+      private ConcurrentMap<Object, Object> createStore() {
+        return CacheBuilder
+            .newBuilder()
+            .expireAfterWrite(CACHE_TTL_DAYS, DAYS)
+            .maximumSize(100)
+            .build()
+            .asMap();
+      }
+
+    };
   }
 
-  public Map<String, String> getProteinIdMap() {
-    val map = Maps.<String, String> newHashMap();
-    try {
-      Resources.readLines(new URL("http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs"),
-          UTF_8, new LineProcessor<Boolean>() {
-
-            @Override
-            public boolean processLine(String line) {
-              String[] values = line.split("\t");
-              map.put(values[0], values[1]);
-              return true;
-            }
-
-            @Override
-            public Boolean getResult() {
-              return true;
-            }
-          });
-    } catch (MalformedURLException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
-    } catch (IOException e) {
-      log.error("Error getting Reactome Protein list");
-      e.printStackTrace();
-    }
-
-    return map;
+  @Override
+  public KeyGenerator keyGenerator() {
+    return new SimpleKeyGenerator();
   }
+
 }
