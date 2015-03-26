@@ -52,7 +52,7 @@ public class PhenotypeAnalysisService {
   private final PortalProperties properties;
 
   @Getter(lazy = true, value = PRIVATE)
-  private final int currentDataVersion = loadDataVersion();
+  private final int currentDataVersion = resolveDataVersion();
 
   public PhenotypeAnalysis createAnalysis(@NonNull final List<UUID> entitySetIds) {
     val dataVersion = getCurrentDataVersion();
@@ -78,7 +78,8 @@ public class PhenotypeAnalysisService {
     return analysis;
   }
 
-  private int loadDataVersion() {
+  private int resolveDataVersion() {
     return properties.getRelease().getDataVersion();
   }
+
 }

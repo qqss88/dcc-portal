@@ -31,5 +31,6 @@ import com.wordnik.swagger.annotations.ApiModel;
 public class PhenotypeResult {
 
   String name;
-  List<TermFacetForEntitySet> data;
+  List<EntitySetTermFacet> data;
+
 }

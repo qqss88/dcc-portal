@@ -15,31 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.repository;
+package org.icgc.dcc.portal.model;
 
+import java.util.List;
 import java.util.UUID;
 
-import org.icgc.dcc.portal.model.PhenotypeAnalysis;
-import org.icgc.dcc.portal.repository.JsonRepository.JsonMapperFactory;
-import org.skife.jdbi.v2.sqlobject.Bind;
-import org.skife.jdbi.v2.sqlobject.SqlQuery;
-import org.skife.jdbi.v2.sqlobject.SqlUpdate;
-import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapperFactory;
+import lombok.Value;
+
+import com.wordnik.swagger.annotations.ApiModel;
 
 /**
- * DAO for phenotype_analysis table in Postgres
+ * Represents a TermsFacet for an entity set with summary info.
  */
-@RegisterMapperFactory(JsonMapperFactory.class)
-public interface PhenotypeAnalysisRepository extends JsonRepository {
+@Value
+@ApiModel(value = "EntitySetTermFacet")
+public class EntitySetTermFacet {
 
-  public final static String TABLE_NAME = "phenotype_analysis";
-  public final static String VERSION_FIELD_NAME = "version";
-
-  @SqlQuery("SELECT " + DATA_FIELD_NAME + " FROM " + TABLE_NAME + " WHERE " + ID_FIELD_NAME + " = :id")
-  PhenotypeAnalysis find(@Bind(ID_FIELD_NAME) UUID id);
-
-  @SqlUpdate("INSERT INTO " + TABLE_NAME + " (" + ID_FIELD_NAME + ", " + DATA_FIELD_NAME + ", " + VERSION_FIELD_NAME
-      + ") VALUES (:id, :data, :version)")
-  int save(@BindValue PhenotypeAnalysis analysis, @Bind(VERSION_FIELD_NAME) int dataVersion);
+  UUID id;
+  List<TermFacet.Term> terms;
+  Statistics summary;
 
 }

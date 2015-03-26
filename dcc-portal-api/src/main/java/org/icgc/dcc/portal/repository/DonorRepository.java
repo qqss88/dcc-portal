@@ -17,10 +17,15 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.base.Functions.constant;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static lombok.AccessLevel.PRIVATE;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -90,17 +95,17 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.termsstats.TermsStatsFacet;
+import org.elasticsearch.search.facet.termsstats.TermsStatsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.AndQuery;
+import org.icgc.dcc.portal.model.EntitySetTermFacet;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.PhenotypeResult;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
-import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
-import org.icgc.dcc.portal.model.TermFacetForEntitySet;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -151,10 +156,6 @@ public class DonorRepository implements Repository {
 
   private static final Optional<SimpleImmutableEntry<String, String>> EMPTY_PAIR = Optional.empty();
 
-  private static Optional<SimpleImmutableEntry<String, String>> createPair(String first, String second) {
-    return Optional.of(new SimpleImmutableEntry<String, String>(first, second));
-  }
-
   private static boolean wantsStatistics(Optional<SimpleImmutableEntry<String, String>> value) {
     return value.isPresent();
   }
@@ -179,8 +180,7 @@ public class DonorRepository implements Repository {
           PhenotypeFacetNames.VITAL_STATUS, "donor_vital_status");
 
   @Getter(lazy = true, value = PRIVATE)
-  private final ImmutableMap<String, ImmutableMap<String, Integer>> baselineTermsFacetsOfPhenotype =
-      loadBaselineTermsFacetsOfPhenotype();
+  private final Map<String, Map<String, Integer>> baselineTermsFacetsOfPhenotype = loadBaselineTermsFacetsOfPhenotype();
 
   private static final int SCAN_BATCH_SIZE = 1000;
 
@@ -289,19 +289,19 @@ public class DonorRepository implements Repository {
   }
 
   public List<PhenotypeResult> getPhenotypeAnalysisResult(@NonNull final Collection<UUID> entitySetIds) {
-    val baseline = getBaselineTermsFacetsOfPhenotype();
-
     // Here we eliminate duplicates and impose ordering (needed for reading the response items).
     val setIds = ImmutableSet.copyOf(entitySetIds).asList();
 
-    val multiResponse = performMultiSearchForPhenotypeAnalysis(setIds);
+    val multiResponse = performPhenotypeAnalysisMultiSearch(setIds);
     val responseItems = multiResponse.getResponses();
     val responseItemCount = responseItems.length;
     checkState(responseItemCount == setIds.size(),
         "The number of queries does not match the number of responses in a multi-search.");
 
-    val resultBuilders = FACETS_FOR_PHENOTYPE.keySet().stream()
-        .collect(Collectors.toMap(name -> name, name -> new ImmutableList.Builder<TermFacetForEntitySet>()));
+    val results = FACETS_FOR_PHENOTYPE.keySet().stream().collect(
+        Collectors.toMap(name -> name, name -> new ImmutableList.Builder<EntitySetTermFacet>()));
+
+    val facetKeyValuePairs = FACETS_FOR_PHENOTYPE.entrySet();
 
     for (int i = 0; i < responseItemCount; i++) {
       val facets = responseItems[i].getResponse().getFacets();
@@ -310,90 +310,83 @@ public class DonorRepository implements Repository {
 
       val facetMap = facets.facetsAsMap();
       val entitySetId = setIds.get(i);
-      val keyValues = FACETS_FOR_PHENOTYPE.entrySet();
 
-      for (val facetKv : keyValues) {
+      for (val facetKv : facetKeyValuePairs) {
         val facetName = facetKv.getKey();
         val facet = facetMap.get(facetName);
 
-        if (facet instanceof TermsFacet) {
-          val termsFacet = (TermsFacet) facet;
-          val termFacetList = buildTermFacetList(termsFacet, baseline);
+        if (!(facet instanceof TermsFacet)) continue;
 
-          val maybe = facetKv.getValue();
-          val mean = wantsStatistics(maybe) ? getMeanFromTermsStatsFacet(facetMap.get(maybe.get().getKey())) : null;
-          val summary = new Statistics(termsFacet.getTotalCount(), termsFacet.getMissingCount(), mean);
-
-          resultBuilders.get(facetName)
-              .add(new TermFacetForEntitySet(entitySetId, termFacetList, summary));
-        }
-
+        results.get(facetName).add(
+            buildEntitySetTermFacet(entitySetId, (TermsFacet) facet, facetMap, facetKv.getValue()));
       }
 
     }
 
-    val result = resultBuilders.entrySet().stream()
-        .map(entry -> new PhenotypeResult(entry.getKey(), entry.getValue().build()))
-        .collect(Collectors.toList());
+    val finalResult = transform(results.entrySet(),
+        entry -> new PhenotypeResult(entry.getKey(), entry.getValue().build()));
 
-    return ImmutableList.copyOf(result);
+    return ImmutableList.copyOf(finalResult);
   }
 
-  private ImmutableMap<String, ImmutableMap<String, Integer>> loadBaselineTermsFacetsOfPhenotype() {
-    val search = getSearchBuilderForPhenotypeAnalysis();
+  private EntitySetTermFacet buildEntitySetTermFacet(final UUID entitySetId, final TermsFacet termsFacet,
+      final Map<String, Facet> facetMap, final Optional<SimpleImmutableEntry<String, String>> statsFacetConfigMap) {
+    val termFacetList = buildTermFacetList(termsFacet, getBaselineTermsFacetsOfPhenotype());
+
+    val mean = wantsStatistics(statsFacetConfigMap) ?
+        getMeanFromTermsStatsFacet(facetMap.get(statsFacetConfigMap.get().getKey())) : null;
+    val summary = new Statistics(termsFacet.getTotalCount(), termsFacet.getMissingCount(), mean);
+
+    return new EntitySetTermFacet(entitySetId, termFacetList, summary);
+  }
+
+  private Map<String, Map<String, Integer>> loadBaselineTermsFacetsOfPhenotype() {
+    val search = getPhenotypeAnalysisSearchBuilder();
     val response = search.execute().actionGet();
 
     log.debug("ES query is: '{}'", search);
     log.debug("ES response is: '{}'", response);
 
-    val builder = ImmutableMap.<String, ImmutableMap<String, Integer>> builder();
-
     val facets = response.getFacets();
-    log.debug("facetGroups are: '{}'", facets);
+    checkNotNull(facets, "Query response does not contain any facets.");
 
-    if (null == facets) {
-      val message = "Query response does not contain any facets.";
-      log.error(message);
-      throw new RuntimeException(message);
+    val results = ImmutableMap.<String, Map<String, Integer>> builder();
+
+    for (val facet : facets.facets()) {
+      val entries = ((TermsFacet) facet).getEntries();
+      val terms = transform(entries, entry -> entry.getTerm().string());
+
+      // Map all term values to zero
+      results.put(facet.getName(), toMap(terms, constant(0)));
     }
 
-    facets.facets().stream()
-        .filter(facet -> facet instanceof TermsFacet)
-        .forEach(facet -> {
-          val termFacet = TermFacet.of((TermsFacet) facet);
-          val terms = termFacet.getTerms();
-
-          if (isNotEmpty(terms)) {
-            val innerBuilder = ImmutableMap.<String, Integer> builder();
-            terms.forEach(term -> innerBuilder.put(term.getTerm(), 0));
-
-            builder.put(facet.getName(), innerBuilder.build());
-          }
-
-        });
-
-    return builder.build();
+    return results.build();
   }
 
-  private static ImmutableList<Term> buildTermFacetList(@NonNull final TermsFacet termsFacet,
-      @NonNull final ImmutableMap<String, ImmutableMap<String, Integer>> baseline) {
-    val mapBuilder = ImmutableMap.<String, Integer> builder();
-    TermFacet.of(termsFacet).getTerms()
-        .forEach(term -> mapBuilder.put(term.getTerm(), term.getCount()));
+  private static Optional<SimpleImmutableEntry<String, String>> createPair(final String first, final String second) {
+    checkArgument(isNotBlank(first));
+    checkArgument(isNotBlank(second));
+
+    return Optional.of(new SimpleImmutableEntry<String, String>(first, second));
+  }
+
+  private static List<Term> buildTermFacetList(@NonNull final TermsFacet termsFacet,
+      @NonNull Map<String, Map<String, Integer>> baseline) {
+    val results = ImmutableMap.<String, Integer> builder();
+    termsFacet.getEntries().stream().forEach(entry -> {
+      results.put(entry.getTerm().toString(), entry.getCount());
+    });
 
     val facetName = termsFacet.getName();
-
     // Augmenting the result here in case of missing terms in the response.
     if (baseline.containsKey(facetName)) {
-      val baselineMap = baseline.get(facetName);
-      val difference = Maps.difference(mapBuilder.build(), baselineMap).entriesOnlyOnRight();
-      mapBuilder.putAll(difference);
+      val difference = Maps.difference(results.build(), baseline.get(facetName)).entriesOnlyOnRight();
+
+      results.putAll(difference);
     }
 
-    val termFacetList = mapBuilder.build().entrySet().stream()
-        .map(m -> new Term(m.getKey(), m.getValue()))
-        .collect(Collectors.toList());
-    log.debug("termFacetList is: '{}'", termFacetList);
+    val termFacetList = transform(results.build().entrySet(),
+        entry -> new Term(entry.getKey(), entry.getValue()));
 
     return ImmutableList.copyOf(termFacetList);
   }
@@ -408,28 +401,22 @@ public class DonorRepository implements Repository {
     return (stats.size() > 0) ? stats.get(0).getMean() : 0;
   }
 
-  private MultiSearchResponse performMultiSearchForPhenotypeAnalysis(final List<UUID> setIds) {
+  private MultiSearchResponse performPhenotypeAnalysisMultiSearch(@NonNull final List<UUID> setIds) {
     val multiSearch = client.prepareMultiSearch();
     val matchAll = matchAllQuery();
 
     for (val setId : setIds) {
-      val search = getSearchBuilderForPhenotypeAnalysis();
-
+      val search = getPhenotypeAnalysisSearchBuilder();
       search.setQuery(filteredQuery(matchAll, getDonorSetIdFilterBuilder(setId)));
 
       // Adding terms_stats facets
       FACETS_FOR_PHENOTYPE.values().stream()
           .filter(v -> wantsStatistics(v))
-          .forEach(optional -> {
-            val kv = optional.get();
-            val statsFacetName = kv.getKey();
-            val statsFacetField = kv.getValue();
+          .map(Optional::get)
+          .forEach(statsFacetNameFieldPair -> {
+            final String actualFieldName = DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetNameFieldPair.getValue());
 
-            val statsBuilder = FacetBuilders.termsStatsFacet(statsFacetName)
-                .keyField("_type")
-                .valueField(DONORS_FIELDS_MAPPING_FOR_PHENOTYPE.get(statsFacetField))
-                .size(MAX_FACET_TERM_COUNT);
-            search.addFacet(statsBuilder);
+            search.addFacet(buildTermsStatsFacetBuilder(statsFacetNameFieldPair.getKey(), actualFieldName));
           });
 
       log.info("Sub-search for DonorSet ID [{}] is: '{}'", setId, search);
@@ -442,24 +429,31 @@ public class DonorRepository implements Repository {
     return multiResponse;
   }
 
-  private SearchRequestBuilder getSearchBuilderForPhenotypeAnalysis() {
-    val typeId = Type.DONOR_CENTRIC.getId();
+  private static TermsStatsFacetBuilder buildTermsStatsFacetBuilder(final String facetName, final String facetField) {
+    return FacetBuilders.termsStatsFacet(facetName)
+        .keyField("_type")
+        .valueField(facetField)
+        .size(MAX_FACET_TERM_COUNT);
+  }
 
+  private SearchRequestBuilder getPhenotypeAnalysisSearchBuilder() {
+    val type = Type.DONOR_CENTRIC;
     val fieldMap = DONORS_FIELDS_MAPPING_FOR_PHENOTYPE;
-    final String[] fields = fieldMap.values().toArray(new String[fieldMap.size()]);
 
     val searchBuilder = client.prepareSearch(index)
-        .setTypes(typeId)
+        .setTypes(type.getId())
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(0)
-        .addFields(fields);
+        .addFields(fieldMap.values().stream().toArray(String[]::new));
 
-    FACETS_FOR_PHENOTYPE.keySet().stream().map(name ->
-        FacetBuilders.termsFacet(name)
-            .field(fieldMap.get(name))
-            .size(MAX_FACET_TERM_COUNT)).forEach(facetBuilder ->
-        searchBuilder.addFacet(facetBuilder));
+    for (val name : FACETS_FOR_PHENOTYPE.keySet()) {
+      val facetbuilder = FacetBuilders.termsFacet(name)
+          .field(fieldMap.get(name))
+          .size(MAX_FACET_TERM_COUNT);
+
+      searchBuilder.addFacet(facetbuilder);
+    }
 
     return searchBuilder;
   }
@@ -470,7 +464,8 @@ public class DonorRepository implements Repository {
     }
 
     val mustFilterFieldName = "_id";
-    // TODO: should not reference TermsLookupService here
+    // Note: We should not reference TermsLookupService here but for now we'll wait for the PQL module and see how we
+    // can move the createTermsLookupFilter() routine out of TermsLookupService.
     val termsLookupFilter = createTermsLookupFilter(mustFilterFieldName, TermLookupType.DONOR_IDS, donorId);
 
     return boolFilter().must(termsLookupFilter);

@@ -17,21 +17,29 @@
  */
 package org.icgc.dcc.portal.model;
 
-import java.util.List;
-import java.util.UUID;
-
-import lombok.Value;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
- * Represents a TermsFacet for an entity set with summary info.
+ * Base class for EntitySetDefinition and DerivedEntitySetDefinition
  */
-@Value
-@ApiModel(value = "TermFacetForEntitySet")
-public class TermFacetForEntitySet {
+@Data
+@EqualsAndHashCode(callSuper = false)
+@ApiModel(value = "BaseEntitySetDefinition")
+public abstract class BaseEntitySetDefinition extends BaseEntitySet {
 
-  UUID id;
-  List<TermFacet.Term> terms;
-  Statistics summary;
+  /*
+   * This flag indicates whether the resulting set is meant to be temporary.
+   */
+  @ApiModelProperty(value = "This flag indicates whether the resulting set should be temporary.")
+  private boolean isTransient;
+
+  public BaseEntitySetDefinition(String name, String description, Type type, boolean isTransient) {
+    super(name, description, type);
+    this.isTransient = isTransient;
+  }
+
 }
