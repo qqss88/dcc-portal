@@ -48,6 +48,7 @@ import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
@@ -127,6 +128,14 @@ public class UIResource {
   @GET
   public Map<String, Map<String, Integer>> getProjectDonorMutation() {
     return occurrenceService.getProjectMutationDistribution();
+  }
+
+  @Path("/reactome-proteins")
+  @GET
+  @Cacheable
+  public Map<String, String> getReactomeProteinList(
+      @ApiParam(value = "Protein dbId. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinIds) {
+    return null;
   }
 
 }
