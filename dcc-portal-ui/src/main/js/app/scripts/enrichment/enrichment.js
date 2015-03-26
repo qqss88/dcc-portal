@@ -147,6 +147,10 @@
 
         $scope.TooltipText = TooltipText;
 
+        $scope.encode = function(f) {
+          return encodeURIComponent(JSON.stringify(f));
+        };
+
         function refresh() {
 
           var enrichment = $scope.item;
