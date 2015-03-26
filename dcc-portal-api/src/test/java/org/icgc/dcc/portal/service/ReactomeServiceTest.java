@@ -40,10 +40,9 @@ public class ReactomeServiceTest extends BaseRepositoryTest {
 
   @Test
   public void testSuccessMapping() {
-    val result = service.matchProteinIds(Lists.newArrayList("49127", "6020621", "5791649"));
+    val result = service.matchProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get("49127")).isEqualTo("P30154");
   }
-
 }

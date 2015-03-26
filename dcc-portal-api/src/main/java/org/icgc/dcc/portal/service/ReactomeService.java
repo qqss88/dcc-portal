@@ -74,6 +74,8 @@ public class ReactomeService {
 
   public Map<String, String> matchProteinIds(List<String> ids) {
     val proteinMap = getProteinIdMap();
-    return uniqueIndex(ids, id -> proteinMap.get(id));
+    val map = Maps.<String, String> newHashMap();
+    ids.forEach(id -> map.put(id, proteinMap.get(id)));
+    return map;
   }
 }
