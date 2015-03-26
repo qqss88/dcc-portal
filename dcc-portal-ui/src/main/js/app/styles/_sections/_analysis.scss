@@ -71,4 +71,10 @@
       width: 77%;
       min-height: 20rem; // Prevent complete collapse when switching content
    }
+
+
+   // Smaller sub heading lines
+   .multi-line-heading {
+      line-height: 1.5rem;
+   }
 }

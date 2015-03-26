@@ -460,11 +460,10 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
                     } else {
                       num = event.target.y;
                     }
-
                     return '<div>' +
                            // '<strong>' + event.target.category + ' - ' + event.target.series.name + '</strong><br>' +
                            '<strong>' + event.target.series.name + '</strong><br>' +
-                           num + ' ' + $attrs.ylabel +
+                           num +  $attrs.ylabel + ' (' + event.target.count + ')' +
                            '</div>';
                   };
                   $scope.$emit('tooltip::show', {

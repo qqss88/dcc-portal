@@ -1707,6 +1707,10 @@ footer .dcc-col {
   width: 77%;
   min-height: 20rem;
 }
+/* line 77, _sections/_analysis.scss */
+.analysis .multi-line-heading {
+  line-height: 1.5rem;
+}
 
 /* line 1, _modules/_button.scss */
 .t_button, a.t_button {
