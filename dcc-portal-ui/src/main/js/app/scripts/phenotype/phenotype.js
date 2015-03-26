@@ -184,7 +184,7 @@
             return {
               y: row[setId].percentage,
               count: row[setId].count
-            }
+            };
           })
         });
       });

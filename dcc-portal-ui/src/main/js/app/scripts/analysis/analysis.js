@@ -104,13 +104,6 @@
       promise.then(function(data) {
         var rate = 1000;
 
-        // FIXME: Should unify analyses return format
-        if (type === 'phenotype' || data.result) {
-          data.state = 'FINISHED';
-          $scope.analysisResult = data;
-          return;
-        }
-
         if (data.state !== 'FINISHED') {
           $scope.analysisResult = data;
 
