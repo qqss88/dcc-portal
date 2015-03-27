@@ -51,31 +51,33 @@
             <div><em>{{NAC.analysisDescription('enrichment')}}</em></div>
             <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">Enrichment Analysis on top 50 genes in Cancer Gene Census</a></div>
             <br>
-            <div>Select the gene set you want to analyze. <small>(Maximum 10,000 genes)</small></div>
-            <table class="table table-selectable"> 
-                <thead>
-                    <th></th>
-                    <th>Item Type</th>
-                    <th>Name</th>
-                    <th>Note</th>
-                    <th class="text-right"># Items</th>
-                </thead>
-                <tbody>
-                    <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
-                        <td class="text-center" style="width:2rem">
-                            <i class="{{NAC.selectedIds.indexOf(item.id) === -1?'icon-circle-empty':'icon-dot-circled'}}"
-                               data-ng-click="NAC.selectedIds=[item.id]"
-                               data-ng-if="NAC.isInFilter(item)"></i>
-                        </td>
-                        <td>{{item.type | trans:true}}</td>
-                        <td>{{item.name}}</td>
-                        <td style="max-width: 30rem">{{item.description}}</td>
-                        <td class="text-right"> 
-                            <a href="{{item.advLink}}">{{item.count | number}}</a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div>
+                <div>Select the gene set you want to analyze. <small>(Maximum 10,000 genes)</small></div>
+                <table class="table table-selectable"> 
+                    <thead>
+                        <th></th>
+                        <th>Item Type</th>
+                        <th>Name</th>
+                        <th>Note</th>
+                        <th class="text-right"># Items</th>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
+                            <td class="text-center" style="width:2rem">
+                                <i class="{{NAC.selectedIds.indexOf(item.id) === -1?'icon-circle-empty':'icon-dot-circled'}}"
+                                   data-ng-click="NAC.selectedIds=[item.id]"
+                                   data-ng-if="NAC.isInFilter(item)"></i>
+                            </td>
+                            <td>{{item.type | trans:true}}</td>
+                            <td>{{item.name}}</td>
+                            <td style="max-width: 30rem">{{item.description}}</td>
+                            <td class="text-right"> 
+                                <a href="{{item.advLink}}">{{item.count | number}}</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
             <br>
             <button class="t_button" 
                 data-ng-disabled="NAC.selectedIds.length !== 1"

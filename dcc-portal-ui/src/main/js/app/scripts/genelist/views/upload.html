@@ -34,11 +34,12 @@
                    <div style="padding:0.25rem" data-ng-if="analysisMode===true">
                        <div> 
                            <div>Name:</div>
-                           <input type="text" data-ng-model="params.setName" maxlength="32" data-select-on-click data-autofocus></input>
+                           <input type="text" tabindex=1 data-ng-model="params.setName" maxlength="32" data-select-on-click data-autofocus></input>
                        </div>
                        <div>
                            <div>Note:</div>
                            <textarea cols="40" rows="2"
+                               tabindex=2
                                data-ng-model="params.setDescription"
                                placeholder="(Optional)" maxlength="256" data-select-on-click></textarea>
                        </div>
@@ -52,6 +53,7 @@
 
                        <textarea
                            rows="3"
+                           tabindex=3
                            placeholder="e.g. TTN, ENSG00000151952, Q9Y5I3"
                            data-ng-model="params.rawText" data-ng-change="updateGenelist()">
                        </textarea>

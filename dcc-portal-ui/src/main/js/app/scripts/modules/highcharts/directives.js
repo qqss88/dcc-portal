@@ -413,6 +413,7 @@ angular.module('highcharts.directives').directive('groupedBar', function ($locat
         },
         yAxis: {
           min: 0,
+          // max: 1.0,
           showFirstLabel: true,
           showLastLabel: true,
           title: {

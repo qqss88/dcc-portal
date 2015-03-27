@@ -187,7 +187,7 @@
     </div>
     <br>
     <div class="clearfix"></div>
-    <div> 
+    <div data-ng-class="{wide: setIds.length === 2}"> 
         <grouped-bar data-items="age.uiGraph" ylabel="% Donors" height="250" format="percentage" data-colours="seriesColours"></grouped-bar>
     </div>
     <div class="clearfix"></div>
@@ -196,21 +196,12 @@
     <table class="hidden" id="phenotype-gender">
         <tr>
             <td></td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
+            <td>{{setMap[setIds[0]].name}} ({{setMap[setIds[0]].count}} donors)</td>
+            <td>{{setMap[setIds[0]].name}} ({{setMap[setIds[0]].count}} donors)</td>
+            <td>{{setMap[setIds[1]].name}} ({{setMap[setIds[1]].count}} donors)</td>
+            <td>{{setMap[setIds[1]].name}} ({{setMap[setIds[1]].count}} donors)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{setMap[setIds[2]].count}} donors)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{setMap[setIds[2]].count}} donors)</td>
         </tr>
         <tr>
             <td>Gender</td>
@@ -218,8 +209,8 @@
             <td>%</td>
             <td># Donors</td>
             <td>%</td>
-            <td># Donors</td>
-            <td>%</td>
+            <td data-ng-if="setIds[2]"># Donors</td>
+            <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in gender.uiTable">
             <td>{{row.term | trans:true}}</td>
@@ -227,29 +218,20 @@
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>
             <td>{{row[setIds[1]].percentage*100 | number:2}}</td>
-            <td>{{row[setIds[2]].count}}</td>
-            <td>{{row[setIds[2]].percentage*100 | number:2}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].count}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
         </tr>
     </table>
 
     <table class="hidden" id="phenotype-status">
         <tr>
             <td></td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
+            <td>{{setMap[setIds[0]].name}} ({{seMap[setIds[0]].count}} donors)</td>
+            <td>{{setMap[setIds[0]].name}} ({{seMap[setIds[0]].count}} donors)</td>
+            <td>{{setMap[setIds[1]].name}} ({{seMap[setIds[0]].count}} donors)</td>
+            <td>{{setMap[setIds[1]].name}} ({{seMap[setIds[0]].count}} donors)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{seMap[setIds[0]].count}} donors)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{seMap[setIds[0]].count}} donors)</td>
         </tr>
         <tr>
             <td>Status</td>
@@ -257,8 +239,8 @@
             <td>%</td>
             <td># Donors</td>
             <td>%</td>
-            <td># Donors</td>
-            <td>%</td>
+            <td data-ng-if="setIds[2]"># Donors</td>
+            <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in vital.uiTable">
             <td>{{row.term | trans:true}}</td>
@@ -266,38 +248,20 @@
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>
             <td>{{row[setIds[1]].percentage*100 | number:2}}</td>
-            <td>{{row[setIds[2]].count}}</td>
-            <td>{{row[setIds[2]].percentage*100 | number:2}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].count}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
         </tr>
     </table>
 
     <table class="hidden" id="phenotype-age">
         <tr>
             <td></td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[0]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[1]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-            <td>{{setMap[setIds[2]].name}}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[0]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[1]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
-            <td>Donor count: {{setMap[setIds[2]].count}}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Average age: {{meanAge[0] | number:2}}</td>
-            <td>Average age: {{meanAge[0] | number:2}}</td>
-            <td>Average age: {{meanAge[1] | number:2}}</td>
-            <td>Average age: {{meanAge[1] | number:2}}</td>
-            <td>Average age: {{meanAge[2] | number:2}}</td>
-            <td>Average age: {{meanAge[2] | number:2}}</td>
+            <td>{{setMap[setIds[0]].name}} ({{setMap[setIds[0]].count}} donors, {{meanAge[0]|number:2}} average age)</td>
+            <td>{{setMap[setIds[0]].name}} ({{setMap[setIds[0]].count}} donors, {{meanAge[0]|number:2}} average age)</td>
+            <td>{{setMap[setIds[1]].name}} ({{setMap[setIds[1]].count}} donors, {{meanAge[1]|number:2}} average age)</td>
+            <td>{{setMap[setIds[1]].name}} ({{setMap[setIds[1]].count}} donors, {{meanAge[1]|number:2}} average age)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{setMap[setIds[2]].count}} donors, {{meanAge[2]|number:2}} average age)</td>
+            <td data-ng-if="setIds[2]">{{setMap[setIds[2]].name}} ({{setMap[setIds[2]].count}} donors, {{meanAge[2]|number:2}} average age)</td>
         </tr>
         <tr>
             <td>Age group</td>
@@ -305,8 +269,8 @@
             <td>%</td>
             <td># Donors</td>
             <td>%</td>
-            <td># Donors</td>
-            <td>%</td>
+            <td data-ng-if="setIds[2]"># Donors</td>
+            <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in vital.uiTable">
             <td>{{row.term | trans:true}}</td>
@@ -314,13 +278,10 @@
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>
             <td>{{row[setIds[1]].percentage*100 | number:2}}</td>
-            <td>{{row[setIds[2]].count}}</td>
-            <td>{{row[setIds[2]].percentage*100 | number:2}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].count}}</td>
+            <td data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
         </tr>
     </table>
-
-
-
 </div>
 
 
