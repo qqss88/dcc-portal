@@ -17,7 +17,10 @@
  */
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.primitives.Doubles.tryParse;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 
@@ -34,6 +37,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -44,6 +48,7 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.service.ReactomeService;
@@ -136,6 +141,18 @@ public class UIResource {
   public Map<String, String> getReactomeProteinMap(
       @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinDbIds) {
     return reactomeService.matchProteinIds(proteinDbIds.get());
+  }
+
+  @Path("/reactome-pathway-diagram")
+  @GET
+  @Produces(APPLICATION_XML)
+  public Response getReactomePathwayDiagram(
+      @ApiParam(value = "A pathway  Reactome Id", required = true) @QueryParam("pathwayId") String pathwayId) {
+    if (isNullOrEmpty(pathwayId) || !(pathwayId.startsWith("REACT_") && tryParse(pathwayId.substring(6)) != null)) {
+      throw new BadRequestException("Pathway id is empty or not valid");
+    }
+
+    return Response.ok(reactomeService.getPathwayStream(pathwayId), APPLICATION_XML).build();
   }
 
 }

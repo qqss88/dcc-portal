@@ -18,6 +18,10 @@
 package org.icgc.dcc.portal.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
 import lombok.val;
 
 import org.junit.Before;
@@ -43,6 +47,17 @@ public class ReactomeServiceTest {
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get("49127")).isEqualTo("P30154");
+  }
+
+  @Test
+  public void testSuccessPathway() {
+    val result = service.getPathwayStream("REACT_578.8");
+    assertThat(result).isNotNull();
+    try {
+      assertThat(result.read()).isEqualTo("<".charAt(0));
+    } catch (IOException e) {
+      fail();
+    }
   }
 
 }

@@ -19,14 +19,19 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.readLines;
+import static com.google.common.net.HttpHeaders.ACCEPT;
+import static org.icgc.dcc.common.core.util.Jackson.DEFAULT;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -39,17 +44,20 @@ import com.google.common.io.LineProcessor;
 @NoArgsConstructor
 public class ReactomeService {
 
-  private static final String REACTOME_ENDPOINT_URL =
+  private static final String REACTOME_PROTEIN_ENDPOINT_URL =
       "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs";
+  private static final String REACTOME_PATHWAY_ENDPOINT_URL =
+      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/pathwayDiagram/%s/XML";
+  private static final String REACTOME_QUERY_BY_ID_ENDPOINT_URL =
+      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/queryById/Pathway/%s";
 
   @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
-
     try {
-      return readLines(new URL(REACTOME_ENDPOINT_URL),
+      return readLines(new URL(REACTOME_PROTEIN_ENDPOINT_URL),
           UTF_8, new LineProcessor<Map<String, String>>() {
 
-            Map<String, String> map = Maps.<String, String> newHashMap();
+            Map<String, String> map = newHashMap();
 
             @Override
             public boolean processLine(String line) {
@@ -63,8 +71,8 @@ public class ReactomeService {
             public Map<String, String> getResult() {
               return map;
             }
-          });
 
+          });
     } catch (IOException e) {
       throw new RuntimeException("Failed to get reactome protein list", e);
     }
@@ -80,6 +88,24 @@ public class ReactomeService {
     ids.forEach(id -> map.put(id, proteinMap.get(id)));
 
     return map;
+  }
+
+  public InputStream getPathwayStream(String id) {
+    try {
+      val url = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(id)));
+      val connection = url.openConnection();
+      connection.setRequestProperty(ACCEPT, "*/*");
+
+      return (InputStream) connection.getContent();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to get pathway diagram from reactome", e);
+    }
+  }
+
+  @SneakyThrows
+  private String getStableId(String id) {
+    val tree = DEFAULT.readTree(new URL(String.format(REACTOME_QUERY_BY_ID_ENDPOINT_URL, id)));
+    return tree.path("dbId").asText();
   }
 
 }
