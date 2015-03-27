@@ -131,11 +131,11 @@ public class UIResource {
     return occurrenceService.getProjectMutationDistribution();
   }
 
-  @Path("/reactome-proteins")
+  @Path("/reactome-protein-map")
   @GET
-  public Map<String, String> getReactomeProteinList(
-      @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinIds) {
-    return reactomeService.matchProteinIds(proteinIds.get());
+  public Map<String, String> getReactomeProteinMap(
+      @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinDbIds) {
+    return reactomeService.matchProteinIds(proteinDbIds.get());
   }
 
 }

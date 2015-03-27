@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
 
-import org.icgc.dcc.portal.repository.BaseRepositoryTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,7 +28,7 @@ import com.google.common.collect.Lists;
 /**
  * Test the ability to get a list of dbIds and matching Uniprot ids from Reactome's restAPI
  */
-public class ReactomeServiceTest extends BaseRepositoryTest {
+public class ReactomeServiceTest {
 
   private ReactomeService service;
 
@@ -45,4 +44,5 @@ public class ReactomeServiceTest extends BaseRepositoryTest {
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get("49127")).isEqualTo("P30154");
   }
+
 }

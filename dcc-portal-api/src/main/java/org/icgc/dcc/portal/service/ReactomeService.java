@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.io.Resources.readLines;
 
 import java.io.IOException;
 import java.net.URL;
@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
-import com.google.common.io.Resources;
 
 @Service
 @NoArgsConstructor
@@ -45,27 +44,30 @@ public class ReactomeService {
 
   @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
-    val map = Maps.<String, String> newHashMap();
+
     try {
-      Resources.readLines(new URL(REACTOME_ENDPOINT_URL),
-          UTF_8, new LineProcessor<Boolean>() {
+      return readLines(new URL(REACTOME_ENDPOINT_URL),
+          UTF_8, new LineProcessor<Map<String, String>>() {
+
+            Map<String, String> map = Maps.<String, String> newHashMap();
 
             @Override
             public boolean processLine(String line) {
               String[] values = line.split("\t");
-              map.put(values[0], checkNotNull(parseUniprotId(values[1])));
+              val dbId = values[0];
+              map.put(dbId, checkNotNull(parseUniprotId(values[1])));
               return true;
             }
 
             @Override
-            public Boolean getResult() {
-              return true;
+            public Map<String, String> getResult() {
+              return map;
             }
           });
+
     } catch (IOException e) {
       throw new RuntimeException("Failed to get reactome protein list", e);
     }
-    return map;
   }
 
   private String parseUniprotId(String uniprotId) {
@@ -76,6 +78,8 @@ public class ReactomeService {
     val proteinMap = getProteinIdMap();
     val map = Maps.<String, String> newHashMap();
     ids.forEach(id -> map.put(id, proteinMap.get(id)));
+
     return map;
   }
+
 }
