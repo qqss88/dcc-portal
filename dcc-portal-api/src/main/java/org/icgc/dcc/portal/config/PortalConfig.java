@@ -115,7 +115,8 @@ public class PortalConfig {
 
   }
 
-  @PostConstruct
+  // NOTE: We no longer (re)generate the demo entity-set at startup.
+  // @PostConstruct
   public void createDemoEntityList() {
     entityListService.createDemoEntitySet();
   }
