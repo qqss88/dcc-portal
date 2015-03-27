@@ -24,7 +24,7 @@
       }
     });
 
-    // FIXME: this is weird...
+    // We can't seem to have a single state for /x and /x/y
     $stateProvider.state('analyses.viewhome', {
       url: '/view',
       data: {

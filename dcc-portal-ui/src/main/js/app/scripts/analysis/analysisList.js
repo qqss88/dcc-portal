@@ -82,11 +82,6 @@
         });
         var max = _this.analysisList.length - 1;
         var nextIndex = currentIndex <  max ? currentIndex+1 : currentIndex-1;
-
-        console.log('current index', currentIndex);
-        console.log('max', max);
-        console.log('next will be', nextIndex);
-
         var nextAnalysis = _this.analysisList[nextIndex];
         if (AnalysisService.remove(id) === true) {
           $location.path('analysis/view/' + nextAnalysis.type + '/' + nextAnalysis.id);
@@ -97,10 +92,6 @@
           $location.path('analysis');
         }
       }
-
-      /*if (AnalysisService.remove(id) === true) {
-        $location.path('analysis');
-      }*/
     };
 
     _this.analysisList = AnalysisService.getAll();

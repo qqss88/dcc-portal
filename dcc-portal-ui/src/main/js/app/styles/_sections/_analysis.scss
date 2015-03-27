@@ -21,17 +21,6 @@
       margin: 0.5rem;
       transition: color .5s, background .5s;
 
-      // background-image: url("/styles/images/icgc-logo.png");
-      // background-repeat: no-repeat;
-      // background-position: right bottom;
-      // filter: grayscale(70%) opacity(25%);
-      // -webkit-filter: grayscale(70%) opacity(25%);
-      // -o-filter: grayscale(70%) opacity(25%);
-      // -ms-filter: grayscale(70%) opacity(25%);
-      // -moz-filter: grayscale(70%) opacity(25%);
-      
-      
-
       &:hover {
         cursor: pointer;
         color: $white;

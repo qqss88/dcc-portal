@@ -169,7 +169,6 @@
     $scope.params.savedSets = SetService.getAllGeneSets();
     $scope.params.selectedSavedSet = -1;
 
-    // FIXME: Need to verify if sets are valid or not - broadcast??
     syncResult = SetService.sync();
     if (syncResult) {
       syncResult.then(function() {

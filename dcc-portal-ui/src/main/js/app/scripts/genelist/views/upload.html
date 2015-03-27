@@ -9,22 +9,6 @@
                 </button>
             </div>
 
-            <!--
-            <div class="t_tabs" data-ng-if="analysisMode===false">
-               <div class="t_tabs__tab t_tabs__tab__gene" 
-                   data-ng-class="{active: params.inputMethod === 'id'}" 
-                   data-ng-click="params.inputMethod = 'id'; resetListInput();">
-               By identifiers
-               </div>
-               <div class="t_tabs__tab t_tabs__tab__gene" 
-                   data-ng-class="{active: params.inputMethod === 'set'}" 
-                   data-ng-click="params.inputMethod = 'set'; resetCustomInput()">
-               By saved gene set
-               </div>
-            </div>
-            -->
-
-
             <!-- body -->
             <div class="modal-body" style="height:{{params.state==='verified'? '35rem' : analysisMode !== true? '22rem' : '26rem' }}; margin:0">
 
@@ -171,23 +155,6 @@
                        </div>
                    </div>
                </div>
-
-              
-               <!-- left -->
-               <!--
-               <div class="pull-left half"> 
-                   <div>
-                       <span>Type or copy-and-paste a list of genes</span>
-                       <span class="pull-right"
-                          data-tooltip=" - Gene identifier: Symbol or Ensembl ID or UniProtKB-SwissProt ID <br> - Delimiters between gene identifiers: comma, space or one gene per line <br> - If you upload a file, format file is text file (.txt, .csv, .tsv)"
-                          data-tooltip-placement="left">
-                          <a href=""><i class="icon-help"></i></a>
-                       </span>
-                   </div>
-               </div>
-                -->
-
-
             </div>
 
             <!-- footer -->
