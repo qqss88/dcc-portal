@@ -183,7 +183,6 @@
     // Determine display params based on current page
     $scope.analysisMode = Page.page() === 'analysis'? true: false;
 
-    console.log('save gene set mode', $scope.analysisMode);
 
     function verify() {
       $scope.params.state = 'verifying';

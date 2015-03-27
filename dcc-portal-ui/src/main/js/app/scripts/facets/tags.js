@@ -199,7 +199,6 @@
 
     /* Used for special cases where the relation is one-to-many instead of one-to-one */
     $scope.removeSpecificTerm = function(type, facet, term) {
-      console.log('specific term removal', term, type, facet);
       Facets.removeTerm({
         type: type,
         facet: facet,

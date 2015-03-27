@@ -109,7 +109,6 @@
         this.max = this.data[i][0].count;
       }
     }
-    //console.log('max', this.max);
 
     // Scale function - FIXME: need to find max
     // this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
@@ -547,7 +546,6 @@
     var config = _this.config;
 
     var uniqueIds = this.getDistinctIds();
-    //console.log('uniqueIds', uniqueIds);
 
     _this.svg = d3.select(element).append('svg')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)

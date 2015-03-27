@@ -28,7 +28,6 @@
       templateUrl: '/scripts/share/views/share.html',
       controller: 'shareCtrl as shareCtrl',
       link: function () {
-        // element.after($compile('<share-popup></share-popup>')(scope));
       }
     };
   });

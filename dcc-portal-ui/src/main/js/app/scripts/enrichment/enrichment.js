@@ -79,8 +79,6 @@
       } else {
         data += 'sort=affectedDonorCountFiltered&order=DESC';
       }
-
-      console.log('data', data);
       return data;
     }
 

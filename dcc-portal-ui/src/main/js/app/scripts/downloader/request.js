@@ -53,7 +53,7 @@
 
     $scope.validateEmail = function () {
       // No email provided
-      if ($scope.params.emailAddress === '') {
+      if (_.isEmpty($scope.params.emailAddress)) {
         $scope.params.isValidEmail = true;
         return;
       }

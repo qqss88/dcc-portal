@@ -75,7 +75,6 @@
 
     /* Phenotype comparison only takes in donor set ids */
     _this.launchPhenotype = function(setIds) {
-      console.log('launching phenotype analysis with', setIds);
 
       var payload = setIds;
       var promise = Restangular.one('analysis').post('phenotype', payload, {}, {'Content-Type': 'application/json'});
@@ -92,7 +91,6 @@
         lists: setIds,
         type: type.toUpperCase()
       };
-      console.log('payload', payload);
       var promise = Restangular.one('analysis').post('union', payload, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         if (!data.id) {

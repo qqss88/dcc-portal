@@ -192,8 +192,7 @@
         }
 
         // If flagged as transient, don't save to local storage
-        // FIXME: use subtype when it is available
-        if (params.isTransient === true) {
+        if (data.subtype === 'TRANSIENT') {
           return;
         }
 
@@ -386,7 +385,6 @@
           setList[0] = demo; // Always overwrite demo in order to get updates
           localStorageService.set(LIST_ENTITY, setList);
         }
-        // console.log(setList.length, setList);
       }
 
       settingsPromise.then(function(settings) {
@@ -403,12 +401,9 @@
 
     };
 
-
     // Initialize
     var setList = _this.initService();
     _this.refreshList();
-
-    // _this.initDemo();
   });
 
 })();
