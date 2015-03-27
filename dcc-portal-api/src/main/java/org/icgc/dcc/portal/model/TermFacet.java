@@ -62,7 +62,7 @@ public class TermFacet {
   }
 
   @Value
-  private static class Term {
+  public static class Term {
 
     String term;
     Integer count;
