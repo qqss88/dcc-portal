@@ -78,7 +78,6 @@
      * like facets but are structured in different ways
      */
     $scope.removeTerm = function(type, facet, term) {
-      console.log('current remove term', type, facet, term);
 
       if (type === 'gene' && facet === 'hasPathway') {
         Facets.removeFacet({

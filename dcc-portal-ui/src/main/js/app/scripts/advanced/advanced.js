@@ -54,7 +54,7 @@
   var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services']);
 
   module.controller('AdvancedCtrl',
-    function ($scope, $state, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
+    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
               AdvancedMutationService, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
@@ -64,10 +64,6 @@
       _ctrl.Page = Page;
       _ctrl.state = State;
 
-      _ctrl.observationDialog = {
-        modal: false,
-        observation: null
-      };
 
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
@@ -87,11 +83,72 @@
         _ctrl.Mutation.ajax();
       }
 
+      _ctrl.downloadDonorData = function() {
+        $modal.open({
+          templateUrl: '/scripts/downloader/views/request.html',
+          controller: 'DownloadRequestController',
+          resolve: {
+            filters: function() { return undefined; }
+          }
+        });
+      };
+
       _ctrl.saveSet = function(type, limit) {
         _ctrl.setLimit = limit;
         _ctrl.setType = type;
-        _ctrl.setModal = true;
+
+        $modal.open({
+          templateUrl: '/scripts/sets/views/sets.upload.html',
+          controller: 'SetUploadController',
+          resolve: {
+            setType: function() {
+              return _ctrl.setType;
+            },
+            setLimit: function() {
+              return _ctrl.setLimit;
+            },
+            setUnion: function() {
+              return undefined;
+            }
+          }
+        });
       };
+
+
+      /**
+       * Create new enrichment analysis
+       */
+      _ctrl.enrichmentAnalysis = function(limit) {
+        $modal.open({
+          templateUrl: '/scripts/enrichment/views/enrichment.upload.html',
+          controller: 'EnrichmentUploadController',
+          resolve: {
+            geneLimit: function() {
+              return limit;
+            },
+            filters: function() {
+              return undefined;
+            }
+          }
+        });
+      };
+
+
+      /**
+       * View observation/experimental details
+       */
+      _ctrl.viewObservationDetail = function(observation) {
+        $modal.open({
+          templateUrl: '/scripts/advanced/views/advanced.observation.popup.html',
+          controller: 'ObservationDetailController',
+          resolve: {
+            observation: function() {
+              return observation;
+            }
+          }
+        });
+      };
+
 
       _ctrl.setTab = function (tab) {
         _ctrl.state.setTab(tab);
@@ -115,7 +172,6 @@
       // Data is cached so refreshing on tab switch
       // should be free
       $scope.$on('$locationChangeSuccess', function (event, next) {
-        _ctrl.observationDialog.modal = false;
         if (next.indexOf('search') !== -1) {
           refresh();
         }
@@ -138,6 +194,18 @@
         _ctrl.setSubTab($state.current.data.subTab);
       });
     });
+
+
+  /**
+   * Container to observation popup
+   */
+  module.controller('ObservationDetailController', function($scope, $modalInstance, observation) {
+    $scope.observation = observation;
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+  });
+
 
   module.service('AdvancedDonorService',
     function(Page, LocationService, HighchartsService, Donors, State, Extensions) {

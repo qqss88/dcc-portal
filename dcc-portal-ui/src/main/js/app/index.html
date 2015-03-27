@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-~ Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+~ Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
 ~
 ~ This program and the accompanying materials are made available under the terms of the GNU Public
 ~ License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -62,8 +62,8 @@
     <!-- Genome Browser -->
 
     <!-- build:css styles/styles.css -->
-    <link rel="stylesheet" href="styles/override.css"/>
     <link rel="stylesheet" href="styles/styles.css"/>
+    <link rel="stylesheet" href="styles/override.css"/>
     <!-- endbuild -->
     
 </head>
@@ -107,7 +107,7 @@
                 src="styles/images/OICR2logo.png"></a></div>
         <div style="clear:both"></div>
         <div>
-            <small> &copy; 2014 <a href="http://icgc.org">International Cancer Genome Consortium.</a> All Rights
+            <small> &copy; 2015 <a href="http://icgc.org">International Cancer Genome Consortium.</a> All Rights
                 reserved.
             </small>
         </div>
@@ -168,7 +168,6 @@
 <script src="bower_components/showdown/src/extensions/table.js"></script>
 <script src="bower_components/x2js/xml2json.js"></script>
 <script src="vendor/scripts/table2CSV.js"></script>
-<script src="vendor/scripts/bootstrap.min-2.3.2.js"></script>
 <!-- endbuild -->
 
 
@@ -210,7 +209,6 @@
 <script src="scripts/ui/directives.js"></script>
 <script src="scripts/ui/tpls.js"></script>
 <script src="scripts/ui/suggest.js"></script>
-<script src="scripts/ui/dl_button.js"></script>
 <script src="scripts/ui/table.js"></script>
 <script src="scripts/ui/toolbar.js"></script>
 <script src="scripts/ui/open_in.js"></script>
@@ -218,6 +216,9 @@
 <script src="scripts/ui/trees.js"></script>
 <script src="scripts/ui/lists.js"></script>
 <script src="scripts/ui/query.js"></script>
+<script src="scripts/ui/tooltip.js"></script>
+<script src="scripts/ui/events.js"></script>
+<script src="scripts/ui/scroll.js"></script>
 <script src="scripts/modules/common.js"></script>
 <script src="scripts/modules/highcharts/service.js"></script>
 <script src="scripts/modules/highcharts/directives.js"></script>
@@ -246,6 +247,7 @@
 <script src="scripts/downloader/services.js"></script>
 <script src="scripts/downloader/models.js"></script>
 <script src="scripts/downloader/controllers.js"></script>
+<script src="scripts/downloader/request.js"></script>
 <script src="scripts/repository/routes.js"></script>
 <script src="scripts/repository/services.js"></script>
 <script src="scripts/repository/model.js"></script>
@@ -261,8 +263,11 @@
 <script src="scripts/auth/auth.js"></script>
 <script src="scripts/genelist/genelist.js"></script>
 <script src="scripts/enrichment/enrichment.js"></script>
+<script src="scripts/phenotype/phenotype.js"></script>
 <script src="scripts/analysis/analysis.js"></script>
-<script src="scripts/analysis/bench.js"></script>
+<script src="scripts/analysis/analysisList.js"></script>
+<script src="scripts/analysis/analysisLauncher.js"></script>
+<script src="scripts/analysis/analysisSet.js"></script>
 <script src="scripts/sets/services.js"></script>
 <script src="scripts/sets/sets.js"></script>
 <script src="scripts/beacon/beacon.js"></script>

@@ -191,12 +191,19 @@
           return;
         }
 
+        // If flagged as transient, don't save to local storage
+        if (data.subtype === 'TRANSIENT') {
+          return;
+        }
+
         data.type = data.type.toLowerCase();
-        //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name,
+          'View in <a href="/analysis/sets">Set Analysis</a>', 4000, 'trustedHtml');
       });
+
+      return promise;
     };
 
 
@@ -222,8 +229,11 @@
         //setList.unshift(data);
         setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
-        toaster.pop('', 'Saving ' + data.name, 'View in <a href="/analysis">Set Analysis</a>', 4000, 'trustedHtml');
+        toaster.pop('', 'Saving ' + data.name,
+          'View in <a href="/analysis/sets">Set Analysis</a>', 4000, 'trustedHtml');
       });
+
+      return promise;
     };
 
 
@@ -261,6 +271,7 @@
         localStorageService.set(LIST_ENTITY, setList);
         _this.refreshList();
       });
+      return promise;
     };
 
 
@@ -301,6 +312,12 @@
     /****** Local storage related API ******/
     this.getAll = function() {
       return setList;
+    };
+
+    this.getAllGeneSets = function() {
+      return _.filter(setList, function(s) {
+        return s.type === 'gene';
+      });
     };
 
     this.initService = function() {
@@ -348,14 +365,6 @@
       return true;
     };
 
-    /*
-    this.findSetIdsByState = function(state) {
-      var filtered = _.filter(setList, function(d) {
-        return d.state === state;
-      });
-      return _.pluck(filtered, 'id');
-    }; */
-
 
     // Make sure the demo is in place
     this.initDemo = function() {
@@ -373,10 +382,9 @@
           setList.unshift(demo); // Demo always goes first
           localStorageService.set(LIST_ENTITY, setList);
         } else {
-          setList[0] = demo;
+          setList[0] = demo; // Always overwrite demo in order to get updates
           localStorageService.set(LIST_ENTITY, setList);
         }
-        // console.log(setList.length, setList);
       }
 
       settingsPromise.then(function(settings) {
@@ -393,10 +401,9 @@
 
     };
 
-
     // Initialize
     var setList = _this.initService();
-    _this.initDemo();
+    _this.refreshList();
   });
 
 })();

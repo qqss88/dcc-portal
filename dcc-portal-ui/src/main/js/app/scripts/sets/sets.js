@@ -21,8 +21,111 @@
 
   angular.module('icgc.sets', [
     'icgc.sets.directives',
+    'icgc.sets.controllers',
     'icgc.sets.services'
   ]);
+})();
+
+
+(function() {
+  'use strict';
+
+  var module = angular.module('icgc.sets.controllers', []);
+
+  module.controller('SetUploadController',
+    function($scope, $modalInstance, LocationService, SetService, Settings, setType, setLimit, setUnion) {
+
+    $scope.setLimit = setLimit;
+    $scope.isValid = true;
+
+
+    // Input data parameters
+    $scope.params = {};
+    $scope.params.setName = '';
+    $scope.params.setDescription = '';
+    $scope.params.setType = setType;
+    $scope.params.setLimit  = setLimit;
+    $scope.params.setSize = 0;
+    $scope.params.setUnion = setUnion;
+
+
+    /**
+     * Save either a new set from search filters, or a derived set from existing sets
+     */
+    $scope.submitNewSet = function() {
+      var params = {}, sortParam;
+
+      params.type = $scope.params.setType;
+      params.name = $scope.params.setName;
+      params.description = $scope.params.setDescription;
+      params.size = $scope.params.setSize;
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        params.filters = LocationService.filters();
+        sortParam = LocationService.getJsonParam($scope.setType + 's');
+
+        if (angular.isDefined(sortParam)) {
+          params.sortBy = sortParam.sort;
+          if (sortParam.order === 'asc') {
+            params.sortOrder = 'ASCENDING';
+          } else {
+            params.sortOrder = 'DESCENDING';
+          }
+        }
+      }
+      if (angular.isDefined($scope.params.setUnion)) {
+        params.union = $scope.params.setUnion;
+      }
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        SetService.addSet(setType, params);
+      } else {
+        SetService.addDerivedSet(setType, params);
+      }
+
+      // Reset
+      $modalInstance.dismiss('cancel');
+    };
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
+
+    /**
+     * Validate size, name
+     */
+    $scope.validateInput = function() {
+      if (_.isEmpty($scope.params.setName) === true) {
+        $scope.isValid = false;
+        return;
+      }
+
+      if ($scope.params.setLimit) {
+        if (isNaN($scope.params.setSize) === true) {
+          $scope.isValid = false;
+          return;
+        }
+
+        if ($scope.params.setSize <= 0 || $scope.params.setSize > $scope.params.setSizeLimit) {
+          $scope.isValid = false;
+          return;
+        }
+      }
+      $scope.isValid = true;
+    };
+
+
+    // Start. Get limit restrictions from the server side
+    Settings.get().then(function(settings) {
+      $scope.params.setSize = Math.min($scope.setLimit || 0, settings.maxNumberOfHits);
+      $scope.params.setSizeLimit = $scope.params.setSize;
+      $scope.params.setName = 'My ' + setType + ' set';
+      $scope.uiFilters = LocationService.filters();
+    });
+
+  });
+
 })();
 
 
@@ -30,108 +133,6 @@
   'use strict';
 
   var module = angular.module('icgc.sets.directives', []);
-
-  module.directive('setUpload', function(LocationService, SetService, Settings) {
-    return {
-      restruct: 'E',
-      scope: {
-        setModal: '=',
-        setType: '=',
-        setUnion: '=',
-        setLimit: '='
-      },
-      templateUrl: '/scripts/sets/views/sets.upload.html',
-      link: function($scope) {
-
-        $scope.setDescription = null;
-        $scope.setSize = 0;
-        $scope.isValid = true;
-
-        // Validate size, name
-        $scope.validateInput = function() {
-          if (_.isEmpty($scope.setName) === true) {
-            $scope.isValid = false;
-            return;
-          }
-
-          if ($scope.setLimit) {
-            if (isNaN($scope.setSize) === true) {
-              $scope.isValid = false;
-              return;
-            }
-
-            if ($scope.setSize <= 0 || $scope.setSize > $scope.setSizeLimit) {
-              $scope.isValid = false;
-              return;
-            }
-          }
-          $scope.isValid = true;
-        };
-
-        $scope.submitNewSet = function() {
-          var params = {}, sortParam;
-
-          params.type = $scope.setType;
-          params.name = $scope.setName;
-          params.description = $scope.setDescription;
-          params.size = $scope.setSize;
-
-          if (angular.isDefined($scope.setLimit)) {
-            params.filters = LocationService.filters();
-            sortParam = LocationService.getJsonParam($scope.setType + 's');
-
-            if (angular.isDefined(sortParam)) {
-              params.sortBy = sortParam.sort;
-              if (sortParam.order === 'asc') {
-                params.sortOrder = 'ASCENDING';
-              } else {
-                params.sortOrder = 'DESCENDING';
-              }
-            }
-          }
-
-          if (angular.isDefined($scope.setUnion)) {
-            params.union = $scope.setUnion;
-          }
-
-          if (angular.isDefined($scope.setLimit)) {
-            SetService.addSet($scope.setType, params);
-          } else {
-            SetService.addDerivedSet($scope.setType, params);
-          }
-
-          // Reset
-          $scope.setDescription = null;
-          $scope.setType = null;
-        };
-
-        $scope.cancel = function() {
-          $scope.setDescription = null;
-          $scope.setType = null;
-          $scope.setModal = false;
-        };
-
-        $scope.$watch('setModal', function(n) {
-          if (n) {
-            Settings.get().then(function(settings) {
-              $scope.setSize = Math.min($scope.setLimit || 0, settings.maxNumberOfHits);
-              $scope.setSizeLimit = $scope.setSize;
-              $scope.setName = 'My ' + $scope.setType + ' set';
-              $scope.uiFilters = LocationService.filters();
-            });
-          }
-        });
-
-        // Remove self if location change detected
-        $scope.$on('$locationChangeStart', function() {
-          if ($scope.setModal === true) {
-            $scope.setModal = false;
-          }
-        });
-      }
-    };
-  });
-
 
   /**
    * Display s subset from set operations using set notation
@@ -165,7 +166,7 @@
     };
   });
 
-  module.directive('setOperation', function($location, $timeout, $filter, Page, LocationService,
+  module.directive('setOperation', function($location, $timeout, $filter, $modal, Page, LocationService,
     Settings, SetService, SetOperationService, Extensions) {
 
     return {
@@ -182,7 +183,6 @@
         $scope.selected = [];
 
         $scope.dialog = {
-          setModal: false
         };
 
         function toggleSelection(intersection, count) {
@@ -245,6 +245,25 @@
           }
           return union;
         }
+
+        $scope.saveDerivedSet = function() {
+
+          $modal.open({
+            templateUrl: '/scripts/sets/views/sets.upload.html',
+            controller: 'SetUploadController',
+            resolve: {
+              setType: function() {
+                return $scope.item.type.toLowerCase();
+              },
+              setLimit: function() {
+                return undefined;
+              },
+              setUnion: function() {
+                return $scope.dialog.setUnion;
+              }
+            }
+          });
+        };
 
 
         // Export the subset(s), materialize the set along the way
@@ -389,17 +408,29 @@
               $scope.setMap[set.id] = set;
             });
 
+             // Because SVG urls are based on <base> tag, we need absolute path
+            config.urlPath = $location.path();
+
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);
           });
         }
 
         $scope.$watch('item', function(n) {
+          $scope.isDeprecated = false;
           if (n && n.result) {
             Settings.get().then(function(settings) {
 
               // The maximum allowed items from union operation
               $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
+
+              // Check if the analysis is still valid with respect to current data
+              if (! n.version || settings.dataVersion !== n.version) {
+                $scope.isDeprecated = true;
+              } else {
+                $scope.isDeprecated = false;
+              }
+
               initVennDiagram();
             });
           }
