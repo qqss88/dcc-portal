@@ -197,7 +197,8 @@
         }
 
         data.type = data.type.toLowerCase();
-        setList.splice(1, 0, data);
+        //setList.splice(1, 0, data);
+        setList.unshift(data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name,
           'View in <a href="/analysis/sets">Set Analysis</a>', 4000, 'trustedHtml');

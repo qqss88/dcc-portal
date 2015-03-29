@@ -41,8 +41,14 @@
             <div><em>{{NAC.analysisDescription('enrichment')}}</em></div>
             <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">Enrichment Analysis on top 50 genes in Cancer Gene Census</a></div>
             <br>
-            <div>
-                <div>Select the gene set you want to analyze. <small>(Maximum 10,000 genes)</small></div>
+
+            <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
+                <br><h3>Your have no saved sets.</h3><br>
+            </div>
+            <div class="clearfix"></div>
+
+            <div data-ng-if="NAC.allSets.length > 0">
+                <div>Select the gene set you want to analyze, then click on Run. <small>(Maximum 10,000 genes)</small></div>
                 <table class="table table-selectable"> 
                     <thead>
                         <th></th>
@@ -67,11 +73,11 @@
                         </tr>
                     </tbody>
                 </table>
+                <br>
+                <button class="t_button" 
+                    data-ng-disabled="NAC.selectedIds.length !== 1"
+                    data-ng-click="NAC.launchEnrichment(NAC.selectedIds[0])">Run</button>
             </div>
-            <br>
-            <button class="t_button" 
-                data-ng-disabled="NAC.selectedIds.length !== 1"
-                data-ng-click="NAC.launchEnrichment(NAC.selectedIds[0])">Run</button>
         </div>
 
         <!-- phenotype -->
@@ -79,8 +85,15 @@
             <div><em>{{NAC.analysisDescription('phenotype')}}</em></div>
             <div>Demo: <a href="" data-ng-click="NAC.demoPhenotype()">Compare donors across brain, breast, and colorectal cancers</a></div>
             <br>
-            <div>Select 2 or 3 Donor sets</div>
-            <div> 
+
+            <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
+                <br><h3>Your have no saved sets.</h3><br>
+            </div>
+            <div class="clearfix"></div>
+
+
+            <div data-ng-if="NAC.allSets.length > 0"> 
+                <div>Select 2 or 3 Donor sets, then click on Run.</div>
                 <table class="table table-selectable"> 
                     <thead>
                         <th></th>
@@ -118,8 +131,14 @@
             <div><em>{{NAC.analysisDescription('set')}}</em></div>
             <div>Demo: <a href="" data-ng-click="NAC.demoSetOperation()">Comparing high impact mutations in brain cancers across GBM-US, LGG-US, PCBA-DE</a></div>
             <br>
-            <div>Select 2 or 3 sets of the same type: </div>
-            <div> 
+
+            <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
+                <br><h3>Your have no saved sets.</h3><br>
+            </div>
+            <div class="clearfix"></div>
+
+            <div data-ng-if="NAC.allSets.length > 0"> 
+                <div>Select 2 or 3 sets of the same type, then click on Run.</div>
                 <table class="table table-selectable"> 
                     <thead>
                         <th></th>
