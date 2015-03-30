@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import lombok.val;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -33,12 +32,7 @@ import com.google.common.collect.Lists;
  */
 public class ReactomeServiceTest {
 
-  private ReactomeService service;
-
-  @Before
-  public void setUp() throws Exception {
-    service = new ReactomeService();
-  }
+  private ReactomeService service = new ReactomeService();
 
   @Test
   public void testSuccessMapping() {

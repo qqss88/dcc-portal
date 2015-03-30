@@ -90,10 +90,6 @@ public class ReactomeService {
     }
   }
 
-  private String parseUniprotId(String uniprotId) {
-    return uniprotId.split(":")[1];
-  }
-
   public Map<String, String> mapProteinIds(@NonNull List<String> proteinDbIds) {
     val proteinMap = getProteinIdMap();
     val map = Maps.<String, String> newHashMap();
@@ -102,7 +98,7 @@ public class ReactomeService {
     return map;
   }
 
-  public InputStream getPathwayDiagramStream(String pathwayDbId) {
+  public InputStream getPathwayDiagramStream(@NonNull String pathwayDbId) {
     try {
       val diagramUrl = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(pathwayDbId)));
       val connection = diagramUrl.openConnection();
@@ -123,6 +119,10 @@ public class ReactomeService {
     } catch (IOException e) {
       throw new RuntimeException("Failed to get stable id for pathway " + pathwayDbId);
     }
+  }
+
+  private static String parseUniprotId(String uniprotId) {
+    return uniprotId.split(":")[1];
   }
 
 }

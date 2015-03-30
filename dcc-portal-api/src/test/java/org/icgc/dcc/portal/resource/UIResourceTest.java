@@ -57,13 +57,6 @@ public class UIResourceTest extends ResourceTest {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
     addProvider(IllegalArgumentExceptionMapper.class);
-
-  }
-
-  @SneakyThrows
-  private InputStream getTestStream() {
-    return URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
-        .openStream();
   }
 
   @Test
@@ -93,6 +86,12 @@ public class UIResourceTest extends ResourceTest {
         .resource(RESOURCE).path("/reactome/pathway-diagram")
         .queryParam("pathwayId", id)
         .get(ClientResponse.class);
+  }
+
+  @SneakyThrows
+  private static InputStream getTestStream() {
+    return URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
+        .openStream();
   }
 
 }
