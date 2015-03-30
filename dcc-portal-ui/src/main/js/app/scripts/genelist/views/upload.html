@@ -163,7 +163,7 @@
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="cancel();">Cancel</button>
                 <button class="t_button" data-ng-click="submitList()"
-                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0 || (analysisMode === true && params.setName === '')) && (params.selectedSavedSet < 0)">Submit</button>
+                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0 || (analysisMode === true && params.setName === '')) && (params.selectedSavedSet < 0)">{{analysisMode === true? 'Save':'Submit'}}</button>
             </div>
         </div>
     </div>
