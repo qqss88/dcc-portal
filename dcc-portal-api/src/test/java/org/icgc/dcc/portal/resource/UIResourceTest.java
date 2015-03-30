@@ -21,12 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
+import lombok.SneakyThrows;
 import lombok.val;
 
+import org.icgc.dcc.common.core.util.URLs;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.mapper.IllegalArgumentExceptionMapper;
 import org.icgc.dcc.portal.service.ReactomeService;
@@ -53,18 +53,15 @@ public class UIResourceTest extends ResourceTest {
   @InjectMocks
   private UIResource resource;
 
+  @SneakyThrows
   @Override
   protected final void setUpResources() {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
     addProvider(IllegalArgumentExceptionMapper.class);
-    try {
-      TEST_STREAM =
-          (new URL(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML"))
-              .openStream();
-    } catch (IOException e) {
-      // Another test will catch this
-    }
+
+    TEST_STREAM = URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
+        .openStream();
   }
 
   @Test

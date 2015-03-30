@@ -18,11 +18,10 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.readLines;
 import static com.google.common.net.HttpHeaders.ACCEPT;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static javax.ws.rs.core.MediaType.TEXT_XML_TYPE;
 import static org.icgc.dcc.common.core.util.Jackson.DEFAULT;
 
 import java.io.IOException;
@@ -47,19 +46,15 @@ import com.google.common.io.LineProcessor;
  * 
  * See <a href="http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/ReactomeRESTFulAPI.html"> Reactome API
  * documentation</a>
- *
  */
 @Service
 @Slf4j
 public class ReactomeService {
 
   public static final String REACTOME_BASE_URL = "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/";
-  private static final String REACTOME_PROTEIN_ENDPOINT_URL =
-      REACTOME_BASE_URL + "getUniProtRefSeqs";
-  private static final String REACTOME_PATHWAY_ENDPOINT_URL =
-      REACTOME_BASE_URL + "pathwayDiagram/%s/XML";
-  private static final String REACTOME_QUERY_BY_ID_ENDPOINT_URL =
-      REACTOME_BASE_URL + "queryById/Pathway/%s";
+  private static final String REACTOME_PROTEIN_ENDPOINT_URL = REACTOME_BASE_URL + "getUniProtRefSeqs";
+  private static final String REACTOME_PATHWAY_ENDPOINT_URL = REACTOME_BASE_URL + "pathwayDiagram/%s/XML";
+  private static final String REACTOME_QUERY_BY_ID_ENDPOINT_URL = REACTOME_BASE_URL + "queryById/Pathway/%s";
 
   @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
@@ -77,15 +72,14 @@ public class ReactomeService {
               String[] values = line.split("\t");
               val dbId = values[0];
               val reactId = values[1];
-              map.put(dbId, checkNotNull(parseUniprotId(reactId)));
+              map.put(dbId, parseUniprotId(reactId));
 
               return true;
             }
 
             @Override
             public Map<String, String> getResult() {
-              stopwatch.stop();
-              log.info("Completed mapping in " + stopwatch.elapsed(MILLISECONDS) + "ms");
+              log.info("Completed mapping in {}", stopwatch);
 
               return map;
             }
@@ -112,7 +106,7 @@ public class ReactomeService {
     try {
       val diagramUrl = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(pathwayDbId)));
       val connection = diagramUrl.openConnection();
-      connection.setRequestProperty(ACCEPT, "*/*");
+      connection.setRequestProperty(ACCEPT, TEXT_XML_TYPE.getType());
 
       return (InputStream) connection.getContent();
     } catch (IOException e) {
