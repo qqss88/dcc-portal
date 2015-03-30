@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -43,21 +42,17 @@ public class ReactomeServiceTest {
 
   @Test
   public void testSuccessMapping() {
-    val result = service.matchProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
+    val result = service.mapProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get("49127")).isEqualTo("P30154");
   }
 
   @Test
-  public void testSuccessPathway() {
-    val result = service.getPathwayStream("REACT_578.8");
+  public void testSuccessPathway() throws IOException {
+    val result = service.getPathwayDiagramStream("REACT_578.8");
     assertThat(result).isNotNull();
-    try {
-      assertThat(result.read()).isEqualTo("<".charAt(0));
-    } catch (IOException e) {
-      fail();
-    }
+    assertThat(result.read()).isEqualTo("<".charAt(0));
   }
 
 }

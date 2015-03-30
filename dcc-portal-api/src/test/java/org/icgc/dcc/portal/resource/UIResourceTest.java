@@ -60,7 +60,7 @@ public class UIResourceTest extends ResourceTest {
     addProvider(IllegalArgumentExceptionMapper.class);
     try {
       TEST_STREAM =
-          (new URL("http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/pathwayDiagram/109581/XML"))
+          (new URL(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML"))
               .openStream();
     } catch (IOException e) {
       // Another test will catch this
@@ -69,7 +69,7 @@ public class UIResourceTest extends ResourceTest {
 
   @Test
   public void testSuccessfulPathwayFetch() {
-    when(service.getPathwayStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
     val response = generateResponse("REACT_578.8");
     assertThat(response.getStatus()).isEqualTo(OK_CODE);
     assertThat(response.toString()).isNotEmpty();
@@ -77,21 +77,21 @@ public class UIResourceTest extends ResourceTest {
 
   @Test
   public void testBadId() {
-    when(service.getPathwayStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
     val response = generateResponse("aly");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
   @Test
   public void testTruncatedId() {
-    when(service.getPathwayStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
     val response = generateResponse("REACT_");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
   private ClientResponse generateResponse(String id) {
     return client()
-        .resource(RESOURCE + "/reactome-pathway-diagram")
+        .resource(RESOURCE).path("/reactome-pathway-diagram")
         .queryParam("pathwayId", id)
         .get(ClientResponse.class);
   }

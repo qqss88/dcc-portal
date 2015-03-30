@@ -22,6 +22,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.readLines;
 import static com.google.common.net.HttpHeaders.ACCEPT;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.icgc.dcc.common.core.util.Jackson.DEFAULT;
 
 import java.io.IOException;
@@ -30,29 +31,41 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
 
+/**
+ * Based on reactome RESTful API
+ * 
+ * See <a href="http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/ReactomeRESTFulAPI.html"> Reactome API
+ * documentation</a>
+ *
+ */
 @Service
-@NoArgsConstructor
+@Slf4j
 public class ReactomeService {
 
+  public static final String REACTOME_BASE_URL = "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/";
   private static final String REACTOME_PROTEIN_ENDPOINT_URL =
-      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/getUniProtRefSeqs";
+      REACTOME_BASE_URL + "getUniProtRefSeqs";
   private static final String REACTOME_PATHWAY_ENDPOINT_URL =
-      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/pathwayDiagram/%s/XML";
+      REACTOME_BASE_URL + "pathwayDiagram/%s/XML";
   private static final String REACTOME_QUERY_BY_ID_ENDPOINT_URL =
-      "http://reactomews.oicr.on.ca:8080/ReactomeRESTfulAPI/RESTfulWS/queryById/Pathway/%s";
+      REACTOME_BASE_URL + "queryById/Pathway/%s";
 
   @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
+    log.info("Getting new protein id map from Reactome...");
+    val stopwatch = Stopwatch.createStarted();
+
     try {
       return readLines(new URL(REACTOME_PROTEIN_ENDPOINT_URL),
           UTF_8, new LineProcessor<Map<String, String>>() {
@@ -63,12 +76,17 @@ public class ReactomeService {
             public boolean processLine(String line) {
               String[] values = line.split("\t");
               val dbId = values[0];
-              map.put(dbId, checkNotNull(parseUniprotId(values[1])));
+              val reactId = values[1];
+              map.put(dbId, checkNotNull(parseUniprotId(reactId)));
+
               return true;
             }
 
             @Override
             public Map<String, String> getResult() {
+              stopwatch.stop();
+              log.info("Completed mapping in " + stopwatch.elapsed(MILLISECONDS) + "ms");
+
               return map;
             }
 
@@ -82,30 +100,35 @@ public class ReactomeService {
     return uniprotId.split(":")[1];
   }
 
-  public Map<String, String> matchProteinIds(List<String> ids) {
+  public Map<String, String> mapProteinIds(@NonNull List<String> proteinDbIds) {
     val proteinMap = getProteinIdMap();
     val map = Maps.<String, String> newHashMap();
-    ids.forEach(id -> map.put(id, proteinMap.get(id)));
+    proteinDbIds.forEach(proteinDbId -> map.put(proteinDbId, proteinMap.get(proteinDbId)));
 
     return map;
   }
 
-  public InputStream getPathwayStream(String id) {
+  public InputStream getPathwayDiagramStream(String pathwayDbId) {
     try {
-      val url = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(id)));
-      val connection = url.openConnection();
+      val diagramUrl = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(pathwayDbId)));
+      val connection = diagramUrl.openConnection();
       connection.setRequestProperty(ACCEPT, "*/*");
 
       return (InputStream) connection.getContent();
     } catch (IOException e) {
-      throw new RuntimeException("Failed to get pathway diagram from reactome", e);
+      throw new RuntimeException("Failed to get pathway diagram with id '" + pathwayDbId + "' from reactome", e);
     }
   }
 
-  @SneakyThrows
-  private String getStableId(String id) {
-    val tree = DEFAULT.readTree(new URL(String.format(REACTOME_QUERY_BY_ID_ENDPOINT_URL, id)));
-    return tree.path("dbId").asText();
+  private String getStableId(String pathwayDbId) {
+    try {
+      val querlUrl = new URL(String.format(REACTOME_QUERY_BY_ID_ENDPOINT_URL, pathwayDbId));
+      val response = DEFAULT.readTree(querlUrl);
+
+      return response.path("dbId").asText();
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to get stable id for pathway " + pathwayDbId);
+    }
   }
 
 }

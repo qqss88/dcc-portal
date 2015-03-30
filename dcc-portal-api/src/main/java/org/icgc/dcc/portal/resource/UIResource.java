@@ -136,23 +136,27 @@ public class UIResource {
     return occurrenceService.getProjectMutationDistribution();
   }
 
-  @Path("/reactome-protein-map")
+  @Path("/reactome/protein-map")
   @GET
   public Map<String, String> getReactomeProteinMap(
       @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinDbIds) {
-    return reactomeService.matchProteinIds(proteinDbIds.get());
+    return reactomeService.mapProteinIds(proteinDbIds.get());
   }
 
-  @Path("/reactome-pathway-diagram")
+  @Path("/reactome/pathway-diagram")
   @GET
   @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
       @ApiParam(value = "A pathway  Reactome Id", required = true) @QueryParam("pathwayId") String pathwayId) {
-    if (isNullOrEmpty(pathwayId) || !(pathwayId.startsWith("REACT_") && tryParse(pathwayId.substring(6)) != null)) {
-      throw new BadRequestException("Pathway id is empty or not valid");
+    if (isValidPathwayId(pathwayId)) {
+      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
-    return Response.ok(reactomeService.getPathwayStream(pathwayId), APPLICATION_XML).build();
+    return Response.ok(reactomeService.getPathwayDiagramStream(pathwayId), APPLICATION_XML).build();
+  }
+
+  private Boolean isValidPathwayId(String id) {
+    return isNullOrEmpty(id) || !(id.startsWith("REACT_") && tryParse(id.substring(6)) != null);
   }
 
 }
