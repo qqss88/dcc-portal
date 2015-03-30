@@ -28,12 +28,14 @@
     <br>
 
     <!-- abinitio -->
+    <!--
     <div class="text-center wide" data-ng-if="SavedSetController.entitySets.length === 0">
         <br>
         <h3>Your saved gene, donor and mutation sets appear here.</h3>
         <br>
     </div>
     <div class="clearfix"></div>
+    -->
 
 
     <div style="padding:.5rem 0" data-ng-if="SavedSetController.entitySets.length > 0">
@@ -43,7 +45,7 @@
             <i class="icon-trash"></i>
         </button>   
     </div>
-    <div class="wide" data-ng-if="SavedSetController.entitySets.length > 0">
+    <div class="wide"> 
         <table class="table table-selectable">
             <thead>
                 <th class="text-center"  data-ng-click="SavedSetController.toggleSelectAll(); SavedSetController.update()">
@@ -56,6 +58,9 @@
                 <th></th>
             </thead>
             <tbody>
+                <tr data-ng-if="SavedSetController.entitySets.length === 0">
+                    <td colspan="6" class="text-center"><strong>No saved set</strong></td>
+                </tr>
                 <tr data-ng-repeat="item in SavedSetController.entitySets" data-ng-init="item.checked=false">
                     <td class="text-center">
                         <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer" 

@@ -42,12 +42,14 @@
             <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">Enrichment Analysis on top 50 genes in Cancer Gene Census</a></div>
             <br>
 
+            <!--
             <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
                 <br><h3>Your have no saved sets.</h3><br>
             </div>
             <div class="clearfix"></div>
+            -->
 
-            <div data-ng-if="NAC.allSets.length > 0">
+            <div> 
                 <div>Select the gene set you want to analyze, then click on Run. <small>(Maximum 10,000 genes)</small></div>
                 <table class="table table-selectable"> 
                     <thead>
@@ -58,6 +60,9 @@
                         <th class="text-right"># Items</th>
                     </thead>
                     <tbody>
+                        <tr data-ng-if="NAC.allSets.length === 0">
+                            <td colspan="5" class="text-center"><strong>No saved sets</strong></td>
+                        </tr>
                         <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:2rem">
                                 <i class="{{NAC.selectedIds.indexOf(item.id) === -1?'icon-circle-empty':'icon-dot-circled'}}"
@@ -86,13 +91,14 @@
             <div>Demo: <a href="" data-ng-click="NAC.demoPhenotype()">Compare donors across brain, breast, and colorectal cancers</a></div>
             <br>
 
+            <!--
             <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
                 <br><h3>Your have no saved sets.</h3><br>
             </div>
             <div class="clearfix"></div>
+            -->
 
-
-            <div data-ng-if="NAC.allSets.length > 0"> 
+            <div> 
                 <div>Select 2 or 3 Donor sets, then click on Run.</div>
                 <table class="table table-selectable"> 
                     <thead>
@@ -103,6 +109,9 @@
                         <th class="text-right"># Items</th>
                     </thead>
                     <tbody>
+                        <tr data-ng-if="NAC.allSets.length === 0">
+                            <td colspan="5" class="text-center"><strong>No saved set</strong></td>
+                        </tr>
                         <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:1rem">
                                <span data-ng-if="NAC.isInFilter(item)" data-ng-click="NAC.toggle(item.id)">
@@ -132,12 +141,14 @@
             <div>Demo: <a href="" data-ng-click="NAC.demoSetOperation()">Comparing high impact mutations in brain cancers across GBM-US, LGG-US, PCBA-DE</a></div>
             <br>
 
+            <!--
             <div class="text-center wide" data-ng-if="NAC.allSets.length === 0">
                 <br><h3>Your have no saved sets.</h3><br>
             </div>
             <div class="clearfix"></div>
+            -->
 
-            <div data-ng-if="NAC.allSets.length > 0"> 
+            <div> 
                 <div>Select 2 or 3 sets of the same type, then click on Run.</div>
                 <table class="table table-selectable"> 
                     <thead>
@@ -148,6 +159,9 @@
                         <th class="text-right"># Items</th>
                     </thead>
                     <tbody>
+                        <tr data-ng-if="NAC.allSets.length === 0">
+                            <td colspan="5" class="text-center"><strong>No saved set</strong></td>
+                        </tr>
                         <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:2rem"> 
                                <span data-ng-if="NAC.isInFilter(item)" data-ng-click="NAC.filteredSetType = item.type; NAC.toggle(item.id)">
