@@ -1,20 +1,17 @@
 <section data-ng-controller="SavedSetController as SavedSetController">
     <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
         Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state. 
-        <!--
-        <a href="" data-ng-click="SavedSetController.removeInvalidSets()"> Remove unretrievable sets</a>
-        -->
     </div>
     <div>
-        These are your saved sets. You can create new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
-        interest in <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span> 
+        You can create and save new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
+        interest from <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span> 
         <br>
         
-        You can save a
+        You can also
         <span class="action-toolbar">
             <span class="action-item">
                 <i class="icon-floppy"></i>
-                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Custom gene set</a>
+                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Upload your own gene set</a>
             </span>
         </span>
         <br>
