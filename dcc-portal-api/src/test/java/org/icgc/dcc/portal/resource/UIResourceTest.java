@@ -91,7 +91,7 @@ public class UIResourceTest extends ResourceTest {
 
   private ClientResponse generateResponse(String id) {
     return client()
-        .resource(RESOURCE).path("/reactome-pathway-diagram")
+        .resource(RESOURCE).path("/reactome/pathway-diagram")
         .queryParam("pathwayId", id)
         .get(ClientResponse.class);
   }
