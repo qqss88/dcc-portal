@@ -45,7 +45,6 @@ public class UIResourceTest extends ResourceTest {
   private final static String RESOURCE = "/v1/ui";
   private final static int BAD_REQUEST_CODE = ClientResponse.Status.BAD_REQUEST.getStatusCode();
   private final static int OK_CODE = ClientResponse.Status.OK.getStatusCode();
-  private static InputStream TEST_STREAM = null;
 
   @Mock
   private ReactomeService service;
@@ -53,20 +52,23 @@ public class UIResourceTest extends ResourceTest {
   @InjectMocks
   private UIResource resource;
 
-  @SneakyThrows
   @Override
   protected final void setUpResources() {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
     addProvider(IllegalArgumentExceptionMapper.class);
 
-    TEST_STREAM = URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
+  }
+
+  @SneakyThrows
+  private InputStream getTestStream() {
+    return URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
         .openStream();
   }
 
   @Test
   public void testSuccessfulPathwayFetch() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
     val response = generateResponse("REACT_578.8");
     assertThat(response.getStatus()).isEqualTo(OK_CODE);
     assertThat(response.toString()).isNotEmpty();
@@ -74,14 +76,14 @@ public class UIResourceTest extends ResourceTest {
 
   @Test
   public void testBadId() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
     val response = generateResponse("aly");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
   @Test
   public void testTruncatedId() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(TEST_STREAM);
+    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
     val response = generateResponse("REACT_");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
