@@ -31,7 +31,7 @@ RendererUtils.prototype.generateLines = function (reactions) {
 
   for (var i = 0; i < reactions.length; i++) {
     var outputs = 0;
-    var id = reactions[i].id;
+    var id = reactions[i].reactomeId;
 
     reactions[i].nodes.forEach(function (node) {
       if(!node.base || node.base.length === 0) return;

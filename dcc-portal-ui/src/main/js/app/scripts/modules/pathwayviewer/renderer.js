@@ -2,7 +2,6 @@ var Renderer = function(svg, config) {
   this.svg = svg;
   this.config = config;
   defineDefs(svg);
-  console.log(config);
 }
 
 var strokeColor = '#1693c0';
@@ -118,7 +117,7 @@ Renderer.prototype.renderNodes = function (nodes) {
 
   svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
     'class': function (d) {
-      return"RenderableRect " + d.type + " entity"+d.id;
+      console.log(d.reactomeId);return"RenderableRect " + d.type + " entity"+d.reactomeId;
     },
     'x': function (d) {
       return d.position.x;
@@ -190,7 +189,7 @@ Renderer.prototype.renderNodes = function (nodes) {
 
   svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
     .attr({
-      class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
+      class: function(d){return 'RenderableOct RenderableComplex entity'+d.reactomeId;},
       points: function (d) {
         return getPointsMap(d.position.x, d.position.y, d.size.width, d.size.height, 3);
       },
@@ -206,8 +205,8 @@ Renderer.prototype.renderNodes = function (nodes) {
       'class':function(d){return d.type+"Text RenderableText";},
       'x':function(d){return d.type==='RenderableCompartment'?d.text.position.x:d.position.x;},
       'y':function(d){return d.type==='RenderableCompartment'?d.text.position.y:d.position.y;},
-      'width':function(d){return d.size.width;},
-      'height':function(d){return d.size.height;},
+      'width':function(d){return d.type==='RenderableCompartment'?'100%':d.size.width;},
+      'height':function(d){return d.type==='RenderableCompartment'?'100%':d.size.height;},
       'pointer-events':'none',
       'fill':'none'
     }).append("xhtml:body")//.append('div')
@@ -233,11 +232,12 @@ Renderer.prototype.renderEdges = function (edges) {
 
 Renderer.prototype.highlightEntity = function (ids) {
   var svg = this.svg;
-
+console.log("updating..");
+  console.log(ids);
   ids.forEach(function (id) {
     var obj = svg.select(".entity"+id);
     var objType = obj[0][0] ? obj[0][0].nodeName : 'nothing';
-
+      console.log("changing color");
     if(objType === 'line'){
       obj.attr("stroke-width","3px");
     }else{

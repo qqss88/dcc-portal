@@ -3872,8 +3872,6 @@ td {
 
 /* line 69, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
-  width: 100%;
-  height: 100%;
   margin: 0;
   background: none;
 }

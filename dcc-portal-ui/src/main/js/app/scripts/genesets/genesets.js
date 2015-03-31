@@ -309,11 +309,17 @@
       });
 
       var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
-        .get({'proteinDbIds' : uniprotIds.join(',')});
-      reactomePromise.then(function(map){
-        console.log(map);
-      });
+        .get({'proteinUniprotIds' : uniprotIds.join(',')});
 
+      reactomePromise.then(function(map){
+        var dbIds = [];
+        uniprotIds.forEach(function (uniprotId) {
+          dbIds.push(map[uniprotId]);
+        });
+        console.log(dbIds);
+        console.log("setting...");
+        _ctrl.pathwayHighlights = dbIds;
+      });
 
     }
 

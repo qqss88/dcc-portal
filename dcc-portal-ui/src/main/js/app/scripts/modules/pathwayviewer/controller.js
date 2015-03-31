@@ -62,7 +62,7 @@ ReactomePathway.prototype.render = function (xml) {
   });
 
   // Render everything
-  var renderer = new Renderer(svg, {
+  this.renderer = new Renderer(svg, {
     onClick: function (d) {
       config.onClick(d);
     }
@@ -70,11 +70,14 @@ ReactomePathway.prototype.render = function (xml) {
   var rendererUtils = new RendererUtils();
 
   t0 = performance.now();
-  renderer.renderNodes(rendererUtils.unshiftCompartments(model.getNodes()));
-  renderer.renderEdges(rendererUtils.generateLines(model.getReactions()));
+  this.renderer.renderNodes(rendererUtils.unshiftCompartments(model.getNodes()));
+  this.renderer.renderEdges(rendererUtils.generateLines(model.getReactions()));
   t1 = performance.now();
 
-//  renderer.highlightEntity(["48", "50", "114"]);
 
   console.log("Rendered in " + (t1 - t0).toFixed(3) + " ms");
+};
+
+ReactomePathway.prototype.highlight = function (ids) {
+  this.renderer.highlightEntity(ids);
 };

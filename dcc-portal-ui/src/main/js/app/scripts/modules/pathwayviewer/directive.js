@@ -24,7 +24,8 @@
       restrict: 'E',
       replace: true,
       scope: {
-        items: '='
+        items: '=',
+        highlights: '='
       },
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
       link: function ($scope, $element) {
@@ -41,15 +42,18 @@
 
 
         $scope.$watch('items', function (newValue) {
-     //     console.log(newValue);
           if(newValue){
             controller.render(newValue);
           }
         }, true);
-
-        $scope.$on('$destroy', function () {
-
-        });
+      //  console.log($scope);
+        $scope.$watch('highlights', function (newValue) {
+          console.log("changggeeee");
+          if(newValue){
+            console.log("new value!!");
+            controller.highlight(newValue);
+          }
+        },true);
 
       }
     };
