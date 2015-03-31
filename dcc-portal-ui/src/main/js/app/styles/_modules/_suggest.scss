@@ -104,10 +104,27 @@
     color: $white;
   }
 
+  // Detail line item
+  .t_suggest_detail {
+    color: #BBB
+  }
+
+  .t_suggest_cancel {
+    background: none;
+    border-radius: 0.25rem;
+    &:hover {
+      background: $red;
+    }
+  }
+
   &.selected {
     background: $blue;
     color: $white;
     cursor: default;
+
+    .t_suggest_detail {
+      color: $white
+    }
   }
 }
 

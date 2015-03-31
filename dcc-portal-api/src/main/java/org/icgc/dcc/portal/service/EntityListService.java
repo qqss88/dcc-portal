@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
+import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -45,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
+import org.icgc.dcc.portal.model.BaseEntitySetDefinition;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.EntitySet;
 import org.icgc.dcc.portal.model.EntitySet.State;
@@ -73,8 +75,8 @@ public class EntityListService {
   @NonNull
   private final PortalProperties properties;
 
-  @Getter(lazy = true)
-  private final int currentDataVersion = loadDataVersion();
+  @Getter(lazy = true, value = PRIVATE)
+  private final int currentDataVersion = resolveDataVersion();
 
   private DemoEntitySet demoEntitySet;
 
@@ -123,9 +125,8 @@ public class EntityListService {
 
     private DemoEntitySet(@NonNull final String uuid, @NonNull final String geneSymbols, final int dataVersion) {
       this.demoSet = new EntitySet(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE, dataVersion);
-      this.definition =
-          new EntitySetDefinition(toFilterParamForGeneSymbols(geneSymbols), SORT_BY, SORT_ORDER, NAME, DESCRIPTION,
-              TYPE, 0);
+      this.definition = new EntitySetDefinition(toFilterParamForGeneSymbols(geneSymbols),
+          SORT_BY, SORT_ORDER, NAME, DESCRIPTION, TYPE, 0, false);
     }
   }
 
@@ -141,12 +142,12 @@ public class EntityListService {
     return list;
   }
 
-  public EntitySet createEntityList(@NonNull final EntitySetDefinition listDefinition) {
-    val newList = createAndSaveNewListFrom(listDefinition);
+  public EntitySet createEntityList(@NonNull final EntitySetDefinition entitySetDefinition) {
+    val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
 
-    analyzer.materializeList(newList.getId(), listDefinition);
+    analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
 
-    return newList;
+    return newEntitySet;
   }
 
   @Async
@@ -169,15 +170,14 @@ public class EntityListService {
   }
 
   public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition) {
-    val newEntitySet =
-        (entitySetDefinition.isTransient()) ? createAndSaveNewListFrom(entitySetDefinition, SubType.TRANSIENT) : createAndSaveNewListFrom(entitySetDefinition);
+    val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
 
     analyzer.combineLists(newEntitySet.getId(), entitySetDefinition);
 
     return newEntitySet;
   }
 
-  private int loadDataVersion() {
+  private int resolveDataVersion() {
     return properties.getRelease().getDataVersion();
   }
 
@@ -195,8 +195,9 @@ public class EntityListService {
     return newEntitySet;
   }
 
-  private EntitySet createAndSaveNewListFrom(final BaseEntitySet entitySetDefinition) {
-    return createAndSaveNewListFrom(entitySetDefinition, null);
+  private EntitySet createAndSaveNewListFrom(final BaseEntitySetDefinition entitySetDefinition) {
+    val subtype = entitySetDefinition.isTransient() ? SubType.TRANSIENT : null;
+    return createAndSaveNewListFrom(entitySetDefinition, subtype);
   }
 
   // Helpers to facilitate exportListItems() only. They should not be used in anywhere else.

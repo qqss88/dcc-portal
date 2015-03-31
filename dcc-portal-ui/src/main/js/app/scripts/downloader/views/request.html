@@ -1,33 +1,21 @@
-<!--
-<button class="t_button" type="button" data-ng-click="calculateSize()">
-    <i data-ng-class="{'icon-download':!calc, 'icon-spin icon-spinner':calc}"></i>
-        <span> 
-            <span data-ng-if="!calc"> Download Donor Data</span>
-            <span data-ng-if="calc"> Calculating file sizes...</span>
-        </span>
-</button>
--->
-<div data-modal=modal data-options="opts">
+<div> 
     <div class="modal-dialog light">
         <div class="modal-content">
             <div class="modal-header clearfix">
                 <h3 class="pull-left">Download Donor Data</h3>
-                <button class="pull-right t_button" data-ng-click="modal=false;reset();"><i
+                <button class="pull-right t_button" data-ng-click="cancel();"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
             <div class="modal-body" style="max-height:none">
-                <span data-ng-init="totalSize=0"></span>
-                <div class="alert alert-error" data-ng-if="errorConcurrentLimit" style="margin-bottom: 0">
-                    The number of concurrent users downloading data is exceeding the system limit. Please try again in a
-                    few minutes.
-                </div>
-                <div>
+
+                <div data-ng-if="params.dataTypes.length > 0">
                     <div class="alert alert-info">
                       To browse and download unfiltered data, please visit the
                       <a href="/repository" data-ng-click="modal=false"><i class="icon-database"></i><strong>Data Repository</strong></a> section.
                     </div>
-                    Search criteria results in <strong>{{totalDonor | number}}</strong> donors. Select data types to download
+
+                    <span>Search criteria results in <strong>{{totalDonor | number}}</strong> donors. Select data types to download</span>
                     <table class="table table-info">
                         <thead>
                         <tr>
@@ -37,7 +25,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr data-ng-repeat="type in dataTypes" data-ng-click="toggle(type)">
+                        <tr data-ng-repeat="type in params.dataTypes" data-ng-click="toggle(type)">
                             <td>
                                 <span>{{type.uiLabel}}</span>
                             </td>
@@ -67,21 +55,21 @@
                    <div>
                       <input type="text" size="45" 
                           placeholder="Send email notifications"
-                          ng-model="emailAddress" 
-                          ng-change="validateEmail()"></input>
+                          data-ng-model="params.emailAddress" 
+                          data-ng-change="validateEmail()"></input>
 
                       <span data-ng-if="emailAddress.length > 0">
-                         <i style="font-size:2.0em" class="icon icon-ok" data-ng-show="isValidEmail"></i>
-                         <i style="font-size:2.0em" class="icon icon-cancel" data-ng-hide="isValidEmail"></i>
+                         <i style="font-size:2.0em" class="icon icon-ok" data-ng-show="params.isValidEmail"></i>
+                         <i style="font-size:2.0em" class="icon icon-cancel" data-ng-hide="params.isValidEmail"></i>
                       </span>
                    </div>
-                </div>
-
+               </div>
             </div>
+
             <div class="modal-footer">
-                <button class="t_button" data-ng-click="modal=false;reset()">Cancel</button>
-                <button class="t_button" data-ng-click="dlFiles();"
-                        data-ng-disabled="dlTotal==0 || errorMaxFileSize || !isValidEmail"><i class="icon-download"></i>Submit
+                <button class="t_button" data-ng-click="cancel()">Cancel</button>
+                <button class="t_button" data-ng-click="sendRequest();"
+                        data-ng-disabled="dlTotal==0 || !params.isValidEmail"><i class="icon-download"></i>Submit
                 </button>
             </div>
         </div>

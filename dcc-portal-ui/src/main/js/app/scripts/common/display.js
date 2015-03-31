@@ -62,7 +62,6 @@
     this.buildGeneSetFilterByType = function(type, geneSetIds) {
       var filter = {gene:{}};
       filter.gene[type] = {is: geneSetIds};
-      console.log('building', JSON.stringify(filter));
       return filter;
     };
 

@@ -10,20 +10,13 @@
                 <i class="icon-floppy"></i><a href="" data-ng-click="AdvancedCtrl.saveSet('gene', AdvancedCtrl.Gene.genes.pagination.total)">Save Gene Set</a>
             </span>
             <span class="action-item">
-               <i class="icon-beaker"></i><a href="" data-ng-click="enrichmentModal=true">Enrichment Analysis</a>
+               <i class="icon-beaker"></i><a href="" data-ng-click="AdvancedCtrl.enrichmentAnalysis(AdvancedCtrl.Gene.genes.pagination.total)">Enrichment Analysis</a>
             </span>
             <span class="action-item">
                <i class="icon-chart"></i><a href="/browser/g?filters={{AdvancedCtrl.Location.filters()}}">Genome Viewer</a>
             </span>
         </span>
     </h3>
-
-
-
-    <enrichment-upload 
-        data-gene-limit="{{AdvancedCtrl.Gene.genes.pagination.total}}"
-        data-enrichment-modal="enrichmentModal">
-    </enrichment-upload>
 
     <div class="t_table_top">
         <span data-table-counts data-label="genes" data-page="AdvancedCtrl.Gene.genes.pagination"></span>

@@ -18,18 +18,22 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.bench.controllers', ['icgc.analysis.services']);
+  var module = angular.module('icgc.analysis.controllers');
 
-  /** 
+  /**
    * Controls list of existing analyses (bench)
    */
-  module.controller('BenchController',
-    function($scope, $window, $location, RestangularNoCache, AnalysisService) {
+  module.controller('AnalysisListController', function($window, $location, AnalysisService) {
+    var _this = this;
 
     var REMOVE_ONE = 'Are you sure you want to remove this analysis?';
     var REMOVE_ALL = 'Are you sure you want to remove all analyses?';
 
-    $scope.getAnalysis = function(id, type) {
+    _this.newAnalysis = function() {
+      $location.path('analysis').search({});
+    };
+
+    _this.getAnalysis = function(id, type) {
       var routeType = type;
 
       if (type === 'union') {
@@ -37,36 +41,60 @@
       }
 
       if (id) {
-        $scope.analysisId = id;
-        $location.path('analysis/' + routeType + '/' + id);
+        $location.path('analysis/view/' + routeType + '/' + id);
       } else {
-        $scope.analysisId = null;
         $location.path('analysis');
       }
     };
 
-    $scope.removeAllAnalyses = function() {
+    _this.removeAllAnalyses = function() {
       var confirmRemove;
       confirmRemove  = $window.confirm(REMOVE_ALL);
       if (confirmRemove) {
         AnalysisService.removeAll();
+        _this.analysisList = AnalysisService.getAll();
         $location.path('analysis');
       }
     };
 
-    $scope.remove = function(id) {
+    _this.analysisName = AnalysisService.analysisName;
+
+
+    _this.remove = function(id, selectedId) {
       var confirmRemove = window.confirm(REMOVE_ONE);
       if (! confirmRemove) {
         return;
       }
 
-      if (AnalysisService.remove(id) === true) {
-        $scope.analysis = null;
-        $location.path('analysis');
+      // 1) Deletion of item that is not currently selected
+      if (id !== selectedId) {
+        AnalysisService.remove(id);
+        return;
+      }
+
+
+      // 2) Delete of item we are on, need to find out where to move next
+      var hasNext = _this.analysisList.length > 1? true : false;
+
+      if (hasNext === true) {
+        var currentIndex = _.findIndex(_this.analysisList, function(analysis) {
+          return analysis.id === id;
+        });
+        var max = _this.analysisList.length - 1;
+        var nextIndex = currentIndex <  max ? currentIndex+1 : currentIndex-1;
+        var nextAnalysis = _this.analysisList[nextIndex];
+        if (AnalysisService.remove(id) === true) {
+          $location.path('analysis/view/' + nextAnalysis.type + '/' + nextAnalysis.id);
+        }
+
+      } else {
+        if (AnalysisService.remove(id) === true) {
+          $location.path('analysis');
+        }
       }
     };
 
-    $scope.analysisList = AnalysisService.getAll();
+    _this.analysisList = AnalysisService.getAll();
   });
 
 })();
