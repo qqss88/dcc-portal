@@ -106,7 +106,6 @@
       $scope.expanded = !$scope.expanded;
       if (!$scope.collapsed) {
         $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
-        console.log($scope.displayLimit);
       }
     };
 

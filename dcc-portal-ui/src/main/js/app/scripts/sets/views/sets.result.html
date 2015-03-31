@@ -1,8 +1,16 @@
+<h3>Set Operations
+    <span style="font-size:1rem" class="pull-right" data-ng-if="!isDeprecated">
+        <share-button></share-button>
+    </span>
+</h3>
+
 <div data-ng-if="!item || item.state === 'IN_PROGRESS'">
     <h1 class="text-center"><i class="icon-spinner icon-spin" style="font-size:5rem"></i></h1>
 </div>
-<div data-ng-if="item && item.state === 'FINISHED'">
-
+<div data-ng-if="isDeprecated" class="alert-error">
+    <i class="icon-attention"></i>This analysis is deprecated. This analysis was created against an old version of the data and may no longer be valid. Please remove or recreate it again.
+</div>
+<div data-ng-if="item && item.state === 'FINISHED'" data-disable-events="isDeprecated">
 
     <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
 
@@ -13,9 +21,9 @@
             <thead>
                 <tr>
                     <th>Alias</th>
-                    <th>Set name</th>
-                    <th class="text-right"># of items</th>
-                    <th>Item type</th>
+                    <th>Set Name</th>
+                    <th class="text-right"># Items</th>
+                    <th>Item Type</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,8 +45,8 @@
                     <th data-ng-click="checked=!checked; checked? selectAll() : selectNone()" class="text-center">
                         <i class="{{checked? 'icon-check':'icon-check-empty'}}"></i>
                     </th>
-                    <th>Set operations</th>
-                    <th class="text-right"># of items</th>
+                    <th>Set Operations</th>
+                    <th class="text-right"># Items</th>
                     <th></th>
                 </tr>
             </thead>
@@ -60,7 +68,7 @@
                     <td>
                         <span style="float:left; font-size:1.25rem"> 
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
-                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(item); dialog.setModal=true"></i>
+                                <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(item); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
                             </span>
                         </span>
@@ -76,7 +84,7 @@
                     <td>
                         <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
                             <span class="t_tools__tool">
-                                <i class="icon-floppy" data-tooltip="Save as new list" data-ng-click="calculateUnion(); dialog.setModal=true"></i>
+                                <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
                         </span>
@@ -85,6 +93,6 @@
                 </tr>
             </tbody>
         </table>
-        <small>Set Operations has an upper limit of managing {{unionMaxLimit | number }} items.</small>
+        <small>Set operations has an upper limit of managing {{unionMaxLimit | number }} items.</small>
     </div>
 </div>

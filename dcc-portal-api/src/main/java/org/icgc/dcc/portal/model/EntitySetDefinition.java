@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,7 +28,6 @@ import lombok.Value;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Preconditions;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -37,7 +37,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Value
 @EqualsAndHashCode(callSuper = false)
 @ApiModel(value = "EntitySetDefinition")
-public class EntitySetDefinition extends BaseEntitySet {
+public class EntitySetDefinition extends BaseEntitySetDefinition {
 
   private final static int MIN_SIZE = 1;
   private final static int MAX_SIZE = Integer.MAX_VALUE;
@@ -56,27 +56,30 @@ public class EntitySetDefinition extends BaseEntitySet {
 
   private final static class JsonPropertyName {
 
-    final static String filters = "filters";
-    final static String sortBy = "sortBy";
-    final static String sortOrder = "sortOrder";
-    final static String name = "name";
-    final static String description = "description";
-    final static String type = "type";
-    final static String size = "size";
+    final static String FILTERS = "filters";
+    final static String SORT_BY = "sortBy";
+    final static String SORT_ORDER = "sortOrder";
+    final static String NAME = "name";
+    final static String DESCRIPTION = "description";
+    final static String TYPE = "type";
+    final static String SIZE = "size";
+    final static String IS_TRANSIENT = "isTransient";
+
   }
 
   @JsonCreator
   public EntitySetDefinition(
-      @JsonProperty(JsonPropertyName.filters) final String filters,
-      @JsonProperty(JsonPropertyName.sortBy) final String sortBy,
-      @JsonProperty(JsonPropertyName.sortOrder) final SortOrder sortOrder,
-      @NonNull @JsonProperty(JsonPropertyName.name) final String name,
-      @JsonProperty(JsonPropertyName.description) final String description,
-      @NonNull @JsonProperty(JsonPropertyName.type) final Type type,
-      @JsonProperty(JsonPropertyName.size) final int limit) {
-    super(name, description, type);
+      @JsonProperty(JsonPropertyName.FILTERS) final String filters,
+      @JsonProperty(JsonPropertyName.SORT_BY) final String sortBy,
+      @JsonProperty(JsonPropertyName.SORT_ORDER) final SortOrder sortOrder,
+      @NonNull @JsonProperty(JsonPropertyName.NAME) final String name,
+      @JsonProperty(JsonPropertyName.DESCRIPTION) final String description,
+      @NonNull @JsonProperty(JsonPropertyName.TYPE) final Type type,
+      @JsonProperty(JsonPropertyName.SIZE) final int limit,
+      @JsonProperty(JsonPropertyName.IS_TRANSIENT) final boolean isTransient) {
+    super(name, description, type, isTransient);
 
-    Preconditions.checkArgument(!isNullOrEmpty(sortBy), "The 'sortBy' argument must contain a valid expression.");
+    checkArgument(!isNullOrEmpty(sortBy), "The 'sortBy' argument must contain a valid expression.");
 
     this.sortBy = sortBy;
     this.filters = FiltersParam.parseFilters(filters);
@@ -96,5 +99,7 @@ public class EntitySetDefinition extends BaseEntitySet {
     DESCENDING("desc");
 
     private final String name;
+
   }
+
 }

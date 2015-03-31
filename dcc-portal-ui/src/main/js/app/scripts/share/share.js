@@ -20,26 +20,14 @@
 
   var module = angular.module('icgc.share', []);
 
-  module.directive('selectOnClick', function () {
-    return {
-      restrict: 'A',
-      link: function (scope, element) {
-        element.on('click', function () {
-          this.select();
-        });
-      }
-    };
-  });
-
-  module.directive('shareButton', function ($compile) {
+  module.directive('shareButton', function () {
     return {
       restrict: 'E',
       replace: true,
       transclude: true,
       templateUrl: '/scripts/share/views/share.html',
       controller: 'shareCtrl as shareCtrl',
-      link: function (scope, element) {
-        element.after($compile('<share-popup></share-popup>')(scope));
+      link: function () {
       }
     };
   });
@@ -62,7 +50,15 @@
     };
   });
 
-  module.controller('shareCtrl', function (Share) {
+
+  module.controller('SharePopupController', function($scope, $modalInstance, shortUrl) {
+    $scope.shortUrl = shortUrl;
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+  });
+
+  module.controller('shareCtrl', function ($modal, Share) {
     var _ctrl= this;
 
     _ctrl.toggle = function(opt) {
@@ -74,7 +70,18 @@
 
       Share.getShortUrl().then(function(url) {
         _ctrl.shortUrl = url.shortUrl;
+
+        $modal.open({
+          templateUrl: '/scripts/share/views/share.popup.html',
+          controller: 'SharePopupController',
+          resolve: {
+            shortUrl: function() {
+              return _ctrl.shortUrl;
+            }
+          }
+        });
       });
     };
+
   });
 })();

@@ -1,0 +1,87 @@
+<section data-ng-controller="SavedSetController as SavedSetController">
+    <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
+        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
+    </div>
+    <div>
+        These are your saved sets. You can create new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
+        interest in <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span>. 
+        <br>
+        
+        You can save a
+        <span class="action-toolbar">
+            <span class="action-item">
+                <i class="icon-floppy"></i>
+                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Customized gene set</a>
+            </span>
+        </span>
+        <br>
+
+        You can use saved sets to 
+        <span class="action-toolbar">
+            <span class="action-item">
+                <i class="icon-beaker"></i>
+                <a href="/analysis">Launch Analysis</a>
+            </span>
+        </span>
+
+    </div>
+    <br>
+
+    <!-- abinitio -->
+    <div class="text-center wide" data-ng-if="SavedSetController.entityLists.length === 0">
+        <br>
+        <h3>Your saved gene, donor and mutation sets appear here.</h3>
+        <br>
+    </div>
+    <div class="clearfix"></div>
+
+
+    <div style="padding:.5rem 0" data-ng-if="SavedSetController.entityLists.length > 0">
+        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeLists()" 
+            data-ng-disabled="SavedSetController.selectedSets.length === 0"
+            data-tooltip="Delete">
+            <i class="icon-trash"></i>
+        </button>   
+    </div>
+    <div class="wide" data-ng-if="SavedSetController.entityLists.length > 0">
+        <table class="table table-selectable">
+            <thead>
+                <th class="text-center"  data-ng-click="SavedSetController.toggleSelectAll(); SavedSetController.update()">
+                    <i class="{{ SavedSetController.checkAll === true? 'icon-check' : 'icon-check-empty' }}"></i>
+                </th>
+                <th>Item Type</th>
+                <th>Name</th>
+                <th>Note</th>
+                <th class="text-right"># Items</th>
+                <th></th>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-init="item.checked=false">
+                    <td class="text-center">
+                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer" 
+                              data-ng-click="item.checked = !item.checked; SavedSetController.update();">
+                            <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
+                        </span>
+                    </td>
+                    <td>{{item.type | trans:true}}</td>
+                    <td>{{item.name}}</td>
+                    <td style="max-width: 30rem">{{item.description}}</td>
+                    <td class="text-right" data-ng-if="item.state === 'FINISHED'">
+                        <a href="{{item.advLink}}">{{item.count | number}}</a>
+                    </td>
+                    <td data-ng-if="item.state === 'FINISHED'">
+                        <span style="float:left; font-size:1.25rem">
+                            <span class="t_tools__tool" data-tooltip="Export as TSV">
+                                <i class="icon-file" data-ng-click="SavedSetController.exportSet(item.id)"></i>
+                            </span>
+                        </span>
+                    </td>
+                    <td colspan="2" data-ng-if="item.state !== 'FINISHED'">
+                        Processing ... <i class="icon-spinner icon-spin"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+

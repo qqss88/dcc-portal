@@ -654,14 +654,14 @@ body {
   max-width: 1200px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -692,14 +692,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -717,14 +717,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -752,14 +752,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -777,14 +777,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -796,14 +796,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -864,14 +864,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -933,14 +933,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -1647,6 +1647,71 @@ footer .dcc-col {
   color: #999999;
 }
 
+/* line 3, _sections/_analysis.scss */
+.analysis h3 {
+  margin-top: 0;
+}
+/* line 7, _sections/_analysis.scss */
+.analysis .analysis-tiles {
+  display: block;
+  padding: 1rem;
+  display: table;
+}
+/* line 13, _sections/_analysis.scss */
+.analysis .analysis-tile {
+  float: left;
+  width: 14.5rem;
+  height: 13rem;
+  border: 1px solid #999999;
+  background: #e6e6e6;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  transition: color .5s, background .5s;
+}
+/* line 24, _sections/_analysis.scss */
+.analysis .analysis-tile:hover {
+  cursor: pointer;
+  color: white;
+  background: #166aa2;
+  text-decoration: none;
+}
+/* line 31, _sections/_analysis.scss */
+.analysis .analysis-tile.in-progress {
+  border-style: dashed;
+  transition: none;
+  background: none;
+  color: #999999;
+}
+/* line 37, _sections/_analysis.scss */
+.analysis .analysis-tile.in-progress:hover {
+  color: #999999;
+  background: none;
+}
+/* line 44, _sections/_analysis.scss */
+.analysis .analysis-tile .analysis-tile-detail {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.25rem;
+}
+/* line 51, _sections/_analysis.scss */
+.analysis .sidepanel {
+  float: left;
+  width: 20%;
+  margin-right: 1rem;
+}
+/* line 57, _sections/_analysis.scss */
+.analysis .content {
+  float: left;
+  clear: right;
+  width: 77%;
+  min-height: 20rem;
+}
+/* line 66, _sections/_analysis.scss */
+.analysis .multi-line-heading {
+  line-height: 1.5rem;
+}
+
 /* line 1, _modules/_button.scss */
 .t_button, a.t_button {
   color: #fafafa;
@@ -1701,7 +1766,7 @@ input {
   border-radius: .5rem;
   border: 1px solid #cccccc;
   vertical-align: middle;
-  line-height: 2rem;
+  line-height: 1.5rem;
 }
 /* line 11, _modules/_form.scss */
 textarea:focus,
@@ -1897,14 +1962,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2008,14 +2073,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2040,26 +2105,43 @@ input.valid:focus {
 .t_suggest_flyout__hits__hit.active a:hover, .t_suggest_flyout__hits__hit:hover a:hover {
   background: none;
 }
-/* line 107, _modules/_suggest.scss */
+/* line 108, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit .t_suggest_detail {
+  color: #bbbbbb;
+}
+/* line 112, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit .t_suggest_cancel {
+  background: none;
+  border-radius: 0.25rem;
+}
+/* line 115, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit .t_suggest_cancel:hover {
+  background: #dc502e;
+}
+/* line 120, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit.selected {
   background: #166aa2;
   color: white;
   cursor: default;
 }
+/* line 125, _modules/_suggest.scss */
+.t_suggest_flyout__hits__hit.selected .t_suggest_detail {
+  color: white;
+}
 
-/* line 114, _modules/_suggest.scss */
+/* line 131, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__type {
   vertical-align: middle;
   text-align: center;
   width: 4rem;
 }
 
-/* line 120, _modules/_suggest.scss */
+/* line 137, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text {
   padding: .7rem 1rem;
 }
 
-/* line 124, _modules/_suggest.scss */
+/* line 141, _modules/_suggest.scss */
 .t_suggest_flyout__hits__hit__text__details {
   font-style: italic;
   font-weight: 300;
@@ -2070,12 +2152,12 @@ input.valid:focus {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 136, _modules/_suggest.scss */
+  /* line 153, _modules/_suggest.scss */
   .t_suggest__embedded__left {
     top: 2.4rem;
   }
 
-  /* line 140, _modules/_suggest.scss */
+  /* line 157, _modules/_suggest.scss */
   .t_suggest__embedded__right {
     top: 2.4rem;
   }
@@ -2270,14 +2352,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2433,14 +2515,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -3668,7 +3750,49 @@ td {
   fill: #1693c0;
 }
 
-/* line 24, styles.scss */
+/* line 1, _modules/_list.scss */
+.select-list {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cccccc;
+  overflow-y: scroll;
+}
+
+/* line 9, _modules/_list.scss */
+.select-list-item {
+  cursor: pointer;
+  padding: 0.50rem;
+}
+/* line 13, _modules/_list.scss */
+.select-list-item:nth-child(even) {
+  background: #f2f2f2;
+}
+/* line 17, _modules/_list.scss */
+.select-list-item:nth-child(odd) {
+  background: #fafafa;
+}
+/* line 21, _modules/_list.scss */
+.select-list-item:hover {
+  background: #1693c0;
+  color: white;
+}
+/* line 26, _modules/_list.scss */
+.select-list-item.active {
+  background: #166aa2;
+  color: white;
+}
+/* line 31, _modules/_list.scss */
+.select-list-item .select-list-cancel {
+  background: none;
+  border-radius: 0.25rem;
+}
+/* line 34, _modules/_list.scss */
+.select-list-item .select-list-cancel:hover {
+  background: #dc502e;
+}
+
+/* line 25, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: .7rem;
@@ -3676,30 +3800,30 @@ html {
   overflow-y: scroll;
 }
 @media (min-width: 1025px) {
-  /* line 24, styles.scss */
+  /* line 25, styles.scss */
   html {
     font-size: .8rem;
   }
 }
 @media (min-width: 1535px) {
-  /* line 24, styles.scss */
+  /* line 25, styles.scss */
   html {
     font-size: 0.9rem;
   }
 }
 
-/* line 38, styles.scss */
+/* line 39, styles.scss */
 b, i {
   font-weight: normal;
   font-style: normal;
 }
 
-/* line 43, styles.scss */
+/* line 44, styles.scss */
 .amp {
   font-family: serif;
 }
 
-/* line 47, styles.scss */
+/* line 48, styles.scss */
 .caps, h1, h4 {
   text-transform: uppercase;
 }
@@ -3712,39 +3836,39 @@ b, i {
     text-decoration: underline;
   }
 }*/
-/* line 63, styles.scss */
+/* line 64, styles.scss */
 .highlight {
   background: transparent;
   border: 0;
 }
 
-/* line 69, styles.scss */
+/* line 70, styles.scss */
 abbr {
   border-bottom: 1px dashed #e9931c;
 }
 
-/* line 73, styles.scss */
+/* line 74, styles.scss */
 code, pre {
   font-family: "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace, serif;
 }
 
-/* line 81, styles.scss */
+/* line 82, styles.scss */
 pre {
   overflow: auto;
 }
 
-/* line 87, styles.scss */
+/* line 88, styles.scss */
 html, body {
   background: #f2f2f2;
 }
 
-/* line 91, styles.scss */
+/* line 92, styles.scss */
 article {
   border-top: 1px solid #cccccc;
   border-left: 1px solid #cccccc;
 }
 
-/* line 100, styles.scss */
+/* line 101, styles.scss */
 section {
   padding: 2rem;
   margin: 0;
@@ -3754,21 +3878,21 @@ section {
   border-bottom: 1px solid #cccccc;
 }
 
-/* line 109, styles.scss */
+/* line 110, styles.scss */
 section:last-child {
   border: none;
 }
 
-/* line 113, styles.scss */
+/* line 114, styles.scss */
 aside {
   font-size: .9rem;
 }
-/* line 115, styles.scss */
+/* line 116, styles.scss */
 aside section {
   padding: 1rem;
 }
 
-/* line 120, styles.scss */
+/* line 121, styles.scss */
 article.full {
   width: 100%;
   float: right;
@@ -3778,92 +3902,92 @@ article.full {
   border: 0;
 }
 
-/* line 125, styles.scss */
+/* line 126, styles.scss */
 ul, ul li {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 131, styles.scss */
+/* line 132, styles.scss */
 ol {
   vertical-align: middle;
 }
-/* line 133, styles.scss */
+/* line 134, styles.scss */
 ol p {
   margin: .2rem 0;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
 }
 
-/* line 142, styles.scss */
+/* line 143, styles.scss */
 .match {
   font-weight: 700;
 }
 
-/* line 146, styles.scss */
+/* line 147, styles.scss */
 .empty, .loading {
   color: #666666;
 }
-/* line 148, styles.scss */
+/* line 149, styles.scss */
 .empty h3, .loading h3 {
   color: #666666;
   margin-bottom: 0;
 }
 
-/* line 154, styles.scss */
+/* line 155, styles.scss */
 .loading-text {
   margin: 2rem;
 }
 
-/* line 158, styles.scss */
+/* line 159, styles.scss */
 .loading-icon {
   margin-top: 2rem;
   text-align: center;
 }
 
-/* line 163, styles.scss */
+/* line 164, styles.scss */
 .data-available {
   color: #1a9900;
 }
 
-/* line 167, styles.scss */
+/* line 168, styles.scss */
 .data-missing {
   color: #dc502e;
 }
 
-/* line 171, styles.scss */
+/* line 172, styles.scss */
 .text-center {
   text-align: center;
 }
 
-/* line 175, styles.scss */
+/* line 176, styles.scss */
 .text-left {
   text-align: left;
 }
 
-/* line 179, styles.scss */
+/* line 180, styles.scss */
 .text-right {
   text-align: right;
 }
 
-/* line 183, styles.scss */
+/* line 184, styles.scss */
 .link {
   cursor: pointer;
 }
 
-/* line 187, styles.scss */
+/* line 188, styles.scss */
 .ui-scrollfix {
   position: fixed;
   z-index: 99;
 }
 
-/* line 192, styles.scss */
+/* line 193, styles.scss */
 .h1-wrap {
   height: 5rem;
 }
 
-/* line 196, styles.scss */
+/* line 197, styles.scss */
 h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
   width: 1200px;
   top: 0;
@@ -3872,44 +3996,44 @@ h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
   border-bottom: 1px solid #f2f2f2;
 }
 @media (min-width: 1535px) {
-  /* line 196, styles.scss */
+  /* line 197, styles.scss */
   h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
     width: 1440px;
   }
 }
 
-/* line 209, styles.scss */
+/* line 210, styles.scss */
 aside.ui-scrollfix {
   top: 5rem;
 }
-/* line 211, styles.scss */
+/* line 212, styles.scss */
 aside.ui-scrollfix section {
   background: transparent;
 }
 
-/* line 216, styles.scss */
+/* line 217, styles.scss */
 .open-in {
   font-size: 1rem;
   color: #999999;
   text-transform: uppercase;
 }
 
-/* line 223, styles.scss */
+/* line 224, styles.scss */
 h3:hover .pilcrow {
   opacity: 1;
 }
 
-/* line 228, styles.scss */
+/* line 229, styles.scss */
 .pilcrow {
   opacity: .1;
 }
 
-/* line 232, styles.scss */
+/* line 233, styles.scss */
 .t_sidebar {
   position: relative;
 }
 
-/* line 236, styles.scss */
+/* line 237, styles.scss */
 .t_notify_popup, #buorg {
   position: fixed;
   z-index: 1000000;
@@ -3923,37 +4047,37 @@ h3:hover .pilcrow {
   font-family: inherit;
 }
 
-/* line 249, styles.scss */
+/* line 250, styles.scss */
 .t_notify_link {
   cursor: pointer;
   color: #FFF;
 }
 
-/* line 254, styles.scss */
+/* line 255, styles.scss */
 .t_notify_link:hover {
   text-decoration: underline;
 }
 
-/* line 259, styles.scss */
+/* line 260, styles.scss */
 .t_notify_body {
   font-size: 1rem;
 }
 
-/* line 263, styles.scss */
+/* line 264, styles.scss */
 .t_notify_warning {
   background: #e9931c;
 }
 
-/* line 267, styles.scss */
+/* line 268, styles.scss */
 .t_notify_success {
   background: #1a9900;
 }
 
-/* line 273, styles.scss */
+/* line 274, styles.scss */
 #buorg div {
   padding: 0;
 }
-/* line 277, styles.scss */
+/* line 278, styles.scss */
 #buorg #buorgclose {
   position: relative;
   float: right;
@@ -3967,7 +4091,7 @@ h3:hover .pilcrow {
   padding-right: 1rem;
 }
 
-/* line 291, styles.scss */
+/* line 292, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -3981,18 +4105,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 305, styles.scss */
+/* line 306, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 310, styles.scss */
+/* line 311, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 314, styles.scss */
+/* line 315, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;

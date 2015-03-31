@@ -3,43 +3,39 @@
 
   var module = angular.module('icgc.analysis', [
     'icgc.analysis.controllers',
-    'icgc.bench.controllers',
     'ui.router'
   ]);
 
   module.config(function ($stateProvider) {
     $stateProvider.state('analyses', {
       url: '/analysis',
+      reloadOnSearch: false,
       templateUrl: 'scripts/analysis/views/analysis.html',
       controller: 'AnalysisController',
-      resolve: {
-        analysisId: function() {
-          return null;
-        },
-        analysisType: function() {
-          return null;
-        }
+      data: {
+        tab: 'analysis'
+      }
+    });
+    $stateProvider.state('analyses.sets', {
+      url: '/sets',
+      reloadOnSearch: false,
+      data : {
+        tab: 'sets'
       }
     });
 
-    /**
-    * :id is a UUID generated server-side
-    * :type can be one of "enrichment", "setop"
-    */
-    $stateProvider.state('analysis', {
-      url: '/analysis/:type/:id',
-      templateUrl: 'scripts/analysis/views/analysis.html',
-      controller: 'AnalysisController',
-      resolve: {
-        analysisId: ['$stateParams', function($stateParams) {
-          return $stateParams.id;
-        }],
-        analysisType: ['$stateParams', function($stateParams) {
-          if ($stateParams.type === 'set') {
-            return 'union';
-          }
-          return $stateParams.type;
-        }]
+    // We can't seem to have a single state for /x and /x/y
+    $stateProvider.state('analyses.viewhome', {
+      url: '/view',
+      data: {
+        tab: 'view'
+      }
+    });
+    $stateProvider.state('analyses.view', {
+      url: '/view/:type/:id',
+      //reloadOnSearch: false,
+      data: {
+        tab: 'view'
       }
     });
   });
@@ -52,159 +48,54 @@
 
   var module = angular.module('icgc.analysis.controllers', ['icgc.analysis.services']);
 
-  module.controller('AnalysisController', function ($scope, $location, $timeout, analysisId, analysisType,
-    Restangular, RestangularNoCache, Page, SetService, AnalysisService, Extensions) {
+
+  /**
+   * Top level set analyses controller
+   *
+   * AnalysisController: view analysis
+   *   - SavedSetController: manage saved sets
+   *   - AnalysisListController: manage saved analysis
+   *   - NewAnalysisController: creates new analysis
+   */
+  module.controller('AnalysisController', function ($scope, $timeout, $state, $location, Page, AnalysisService) {
 
     Page.setPage('analysis');
     Page.setTitle('Analysis');
 
-    $scope.entityLists = SetService.getAll();
-    $scope.canBeDeleted = 0;
-    $scope.enrichment = {};
-    $scope.syncError = false;
 
-    // Selected sets
-    $scope.selectedSets = [];
-    $scope.addSelection = function(set) {
-      $scope.selectedSets.push(set);
-    };
+    $scope.currentTab = $state.current.data.tab || 'analysis';
+    $scope.savedAnalyses = AnalysisService.getAll();
 
-    $scope.removeSelection = function(set) {
-      _.remove($scope.selectedSets, function(s) {
-        return s.id === set.id;
-      });
-    };
+    $scope.AnalysisService = AnalysisService;
 
-    $scope.exportSet = function(id) {
-      SetService.exportSet(id);
-    };
+    $scope.$watch(function () {
+      return $state.current.data.tab;
+    }, function () {
+      $scope.currentTab = $state.current.data.tab || 'analysis';
+    });
 
-    // Send IDs generate new set operations analysis
-    $scope.launchSetAnalysis = function() {
-      var selected = $scope.selectedSets;
-
-      var type = selected[0].type.toUpperCase();
-      var ids  = _.pluck(selected, 'id');
-
-      var payload = {
-        lists: ids,
-        type: type
-      };
-      var promise = Restangular.one('analysis').post('union', payload, {}, {'Content-Type': 'application/json'});
-
-      promise.then(function(data) {
-        if (!data.id) {
-          console.log('cannot create set operation');
-        }
-        $location.path('analysis/set/' + data.id);
-      });
-    };
-
-    $scope.launchEnrichmentAnalysis = function() {
-      var filters = {
-        gene: {}
-      };
-      filters.gene[Extensions.ENTITY] = { is: [$scope.enrichmentSet] };
-
-      $scope.enrichment.filters = filters;
-      $scope.enrichment.modal = true;
-    };
+    $scope.$watch(function() {
+      return $state.params;
+    }, function() {
+      $scope.analysisId = $state.params.id;
+      $scope.analysisType = $state.params.type === 'set'? 'union' : $state.params.type;
+      init();
+    });
 
 
-    $scope.update = function() {
+    $scope.newAnalysis = function() {
+      console.log('new analysis request');
 
-      $scope.enrichmentSet = null;
-      $scope.setop = null;
-
-      // Check if delete button should be enabled
-      $scope.canBeDeleted = _.filter($scope.selectedSets, function(set) {
-        if (set.readonly && set.readonly === true) {
-          return false;
-        }
-        return true;
-      }).length;
-
-
-      // Check which analyses are applicable
-      var selected = $scope.selectedSets, uniqued = [];
-      uniqued = _.uniq(_.pluck(selected, 'type'));
-
-
-      // If there are unfinished, do not proceed
-      if (_.some(selected, function(s) { return s.state !== 'FINISHED'; })) {
-        return;
-      }
-
-
-      // Enrichment analysis takes only ONE gene set
-      if (selected.length === 1 && uniqued[0] === 'gene') {
-        $scope.enrichmentSet = selected[0].id;
-        $scope.totalCount = selected[0].count;
-      }
-
-      // Set operations takes up to 3 sets of the same type
-      if (selected.length > 1 && selected.length < 4 && uniqued.length === 1) {
-        $scope.setop = true;
-      }
-    };
-
-
-    $scope.removeLists = function() {
-      var confirmRemove = window.confirm('Are you sure you want to remove selected sets?');
-      if (!confirmRemove || confirmRemove === false) {
-        return;
-      }
-
-      var toRemove = _.filter($scope.selectedSets, function(set) {
-        return !angular.isDefined(set.readonly);
-      });
-
-
-      if (toRemove.length > 0) {
-
-        _.remove($scope.selectedSets, function(set) {
-          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
-        });
-
-        SetService.removeSeveral(_.pluck(toRemove, 'id'));
-        $scope.update();
+      if ($scope.analysisId !== undefined) {
+        $location.path('analysis');
+      } else {
+        $scope.$broadcast('analysis::reload', {});
       }
     };
 
     var analysisPromise;
-    var pollTimeout, syncSetTimeout;
+    var pollTimeout;
 
-
-    $scope.analysisId = analysisId;
-    $scope.analysisType = analysisType;
-
-
-    function synchronizeSets(numTries) {
-
-      var pendingLists, pendingListsIDs, promise;
-      pendingLists = _.filter($scope.entityLists, function(d) {
-        return d.state !== 'FINISHED';
-      });
-      pendingListsIDs = _.pluck(pendingLists, 'id');
-
-      if (pendingLists.length <= 0) {
-        return;
-      }
-
-      if (numTries <= 0) {
-        console.log('Stopping, numTries runs out');
-        $scope.syncError = true;
-        return;
-      }
-
-      promise = SetService.getMetaData(pendingListsIDs);
-      promise.then(function(results) {
-        SetService.updateSets(results);
-        syncSetTimeout = $timeout(function() {
-          synchronizeSets(--numTries);
-        }, 3000);
-      });
-    }
 
     function wait(id, type) {
       $scope.error = null;
@@ -230,9 +121,9 @@
       });
     }
 
-
     function init() {
       $timeout.cancel(pollTimeout);
+      $scope.error = null;
 
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
@@ -250,6 +141,7 @@
         }
 
         if (data.state === 'FINISHED') {
+          $scope.analysisResult = null;
           $timeout(function() {
             $scope.analysisResult = data;
           }, 150);
@@ -264,25 +156,16 @@
       });
     }
 
+
     $scope.$on('$locationChangeStart', function() {
       // Cancel any remaining polling requests
       $timeout.cancel(pollTimeout);
-      $timeout.cancel(syncSetTimeout);
     });
 
     // Clea up
     $scope.$on('destroy', function() {
       $timeout.cancel(analysisPromise);
     });
-
-
-    // Start
-    init();
-
-    // Only do synchronization on analysis home tab
-    if (! $scope.analysisId || ! $scope.analysisType) {
-      synchronizeSets(10);
-    }
 
   });
 
@@ -312,8 +195,36 @@
       localStorageService.set(ANALYSIS_ENTITY, analysisList);
     };
 
+    this.analysisName = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Set Operations';
+      } else if (type === 'enrichment') {
+        return 'Enrichment Analysis';
+      } else if (type === 'phenotype') {
+        return 'Phenotype Comparison';
+      } else {
+        return '???';
+      }
+    };
+
+    this.analysisDescription = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Display Venn diagram and find out intersection or union, etc. of your sets of the same type.';
+      } else if (type === 'enrichment') {
+        return 'Find out statistically significantly over-represented groups ' +
+          'of gene sets when comparing with your gene set.';
+      } else if (type === 'phenotype') {
+        return 'Compare some characteristics (e.g. gender, vital status and age at diagnosis) between your Donor sets.';
+      } else if (type === 'coverage') {
+        return 'Compare mutations occurring in your Donor sets.';
+      } else {
+        return '';
+      }
+    };
+
+
     /**
-     * Add analysis to local storage 
+     * Add analysis to local storage
      */
     this.addAnalysis = function(analysis, type) {
       var ids = _.pluck(analysisList, 'id');
@@ -324,14 +235,19 @@
       var payload = {
         id: analysis.id,
         timestamp: analysis.timestamp || '--',
-        type: type
+        // Type is used in the UI route, we convert union to set so it makes more logical sense
+        type: type === 'union'? 'set' : type
       };
 
       if (type === 'enrichment') {
         payload.universe = analysis.params.universe;
         payload.maxGeneCount = analysis.params.maxGeneCount;
+      } else if (type === 'phenotype') {
+        payload.dataType = 'donor';
+        payload.inputSetCount = analysis.inputCount || '';
       } else {
         payload.dataType = analysis.type.toLowerCase();
+        payload.inputSetCount = analysis.inputCount || '';
       }
 
       analysisList.unshift( payload );
@@ -352,6 +268,7 @@
 
     // Init service
     analysisList = localStorageService.get(ANALYSIS_ENTITY) || [];
+
   });
 
 })();

@@ -17,13 +17,19 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.junit.Assert.fail;
 
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
+
+import lombok.val;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.collect.Sets;
@@ -33,6 +39,8 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.TermsLookupService;
+import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -245,6 +253,60 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
   public void testFind404() throws Exception {
     Query query = Query.builder().build();
     donorRepository.findOne(MISSING_ID, query);
+  }
+
+  @Test
+  public void testPhenotypeAnalysis() {
+    val id1 = UUID.randomUUID();
+    val id2 = UUID.randomUUID();
+    setUpTermsLookup(id1, id2);
+
+    val results = donorRepository.getPhenotypeAnalysisResult(newArrayList(id1, id2));
+
+    // Here we are only interested in results that contain stats, which is under "ageAtDiagnosisGroup", and we use
+    // flatMap to flatten/unwrap the result to a simple list.
+    val data = results.stream()
+        .filter(result ->
+            result.getName().equals("ageAtDiagnosisGroup"))
+        .flatMap(result ->
+            result.getData().stream())
+        .collect(Collectors.toList());
+
+    assertThat(data.size()).isEqualTo(2);
+
+    for (val analysisResult : data) {
+      val uuid = analysisResult.getId();
+      val mean = analysisResult.getSummary().getMean();
+
+      // Note: the expected mean values used below depend on the fixture data defined in
+      // /dcc-portal-api/src/test/resources/fixtures/DonorRepositoryTest.json. If data in that file has changed, these
+      // values might no longer represent the expected result. In that case, update these accordingly.
+      if (uuid.equals(id1)) {
+        assertThat(mean).isEqualTo(109.6);
+      } else if (uuid.equals(id2)) {
+        assertThat(mean).isEqualTo(135.66666666666666);
+      } else {
+        // We shouldn't be here but, if this happens, we fail this test.
+        fail("Encountered an unexpected UUID in query result.");
+      }
+
+    }
+
+  }
+
+  protected Object cast(Object object) {
+    return object;
+  }
+
+  private void setUpTermsLookup(final UUID id1, final UUID id2) {
+    val termsLookupService = new TermsLookupService(es.client());
+    val lookupType = TermLookupType.DONOR_IDS;
+
+    val donorSet1 = newArrayList("DO1", "DO3", "DO5", "DO7", "DO9");
+    termsLookupService.createTermsLookup(lookupType, id1, donorSet1);
+
+    val donorSet2 = newArrayList("DO2", "DO4", "DO5", "DO6", "DO8");
+    termsLookupService.createTermsLookup(lookupType, id2, donorSet2);
   }
 
 }
