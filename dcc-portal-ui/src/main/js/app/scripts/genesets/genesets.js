@@ -43,7 +43,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page,
-      Genes, Projects, Mutations, Donors, FiltersUtil, ExternalLinks, geneSet) {
+      Genes, Projects, Mutations, Donors, FiltersUtil, ExternalLinks, geneSet, Restangular) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -267,9 +267,16 @@
       });
 
       refresh();
+
+      // for pathway viewer
+      var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
+        .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
+      reactomePromise.then(function(data){
+        _ctrl.pathwayXml = data;
+      });
     });
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
+  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil,Restangular) {
     var _ctrl = this, _geneSet = '', _filter = {};
 
     function success(genes) {
@@ -280,7 +287,6 @@
         if (_.isEmpty(_ctrl.genes.hits)) {
           return;
         }
-
 
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
           'counts').get({filters: _filter}).then(function (data) {
@@ -293,9 +299,22 @@
               g.advQuery = LocationService.mergeIntoFilters({
                 gene: geneFilter
               });
+
             });
           });
       }
+      var uniprotIds = [];
+      _ctrl.genes.hits.forEach(function (gene) {
+        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
+      });
+
+      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+        .get({'proteinDbIds' : uniprotIds.join(',')});
+      reactomePromise.then(function(map){
+        console.log(map);
+      });
+
+
     }
 
     function refresh() {

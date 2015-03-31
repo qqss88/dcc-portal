@@ -36,10 +36,10 @@ public class ReactomeServiceTest {
 
   @Test
   public void testSuccessMapping() {
-    val result = service.mapProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
+    val result = service.mapProteinIds(Lists.newArrayList("Q9C035", "Q13477", "P30613"));
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(3);
-    assertThat(result.get("49127")).isEqualTo("P30154");
+    assertThat(result.get("Q9C035")).isEqualTo("103827");
   }
 
   @Test

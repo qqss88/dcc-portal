@@ -72,7 +72,7 @@ public class ReactomeService {
               String[] values = line.split("\t");
               val dbId = values[0];
               val reactId = values[1];
-              map.put(dbId, parseUniprotId(reactId));
+              map.put(parseUniprotId(reactId), dbId);
 
               return true;
             }
@@ -90,11 +90,10 @@ public class ReactomeService {
     }
   }
 
-  public Map<String, String> mapProteinIds(@NonNull List<String> proteinDbIds) {
+  public Map<String, String> mapProteinIds(@NonNull List<String> proteinUniprotIds) {
     val proteinMap = getProteinIdMap();
     val map = Maps.<String, String> newHashMap();
-    proteinDbIds.forEach(proteinDbId -> map.put(proteinDbId, proteinMap.get(proteinDbId)));
-
+    proteinUniprotIds.forEach(id -> map.put(id, proteinMap.get(id)));
     return map;
   }
 

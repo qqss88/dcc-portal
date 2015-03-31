@@ -139,8 +139,12 @@ public class UIResource {
   @Path("/reactome/protein-map")
   @GET
   public Map<String, String> getReactomeProteinMap(
-      @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinDbIds) {
-    return reactomeService.mapProteinIds(proteinDbIds.get());
+      @ApiParam(value = "Protein uniprot ID(s). Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinUniprotIds") IdsParam proteinUniprotIds) {
+    if (proteinUniprotIds.get() == null || proteinUniprotIds.get().size() == 0) {
+      throw new BadRequestException("Protein id list is invalid or empty");
+    }
+
+    return reactomeService.mapProteinIds(proteinUniprotIds.get());
   }
 
   @Path("/reactome/pathway-diagram")
