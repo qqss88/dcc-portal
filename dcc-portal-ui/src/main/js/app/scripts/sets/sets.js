@@ -385,6 +385,7 @@
           clickFunc: function(d) {
             $scope.$apply(function() {
               toggleSelection(d.data, d.count);
+              $scope.current = [];
             });
           },
 
