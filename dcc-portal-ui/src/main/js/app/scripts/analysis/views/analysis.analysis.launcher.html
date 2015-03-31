@@ -99,7 +99,7 @@
             -->
 
             <div> 
-                <div>Select 2 or 3 Donor sets, then click on Run.</div>
+                <div>Select 2 or 3 donor sets, then click on Run.</div>
                 <table class="table table-selectable"> 
                     <thead>
                         <th></th>
@@ -110,7 +110,7 @@
                     </thead>
                     <tbody>
                         <tr data-ng-if="NAC.allSets.length === 0">
-                            <td colspan="5" class="text-center"><strong>No saved set</strong></td>
+                            <td colspan="5" class="text-center"><strong>No saved sets</strong></td>
                         </tr>
                         <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:1rem">
@@ -160,7 +160,7 @@
                     </thead>
                     <tbody>
                         <tr data-ng-if="NAC.allSets.length === 0">
-                            <td colspan="5" class="text-center"><strong>No saved set</strong></td>
+                            <td colspan="5" class="text-center"><strong>No saved sets</strong></td>
                         </tr>
                         <tr data-ng-repeat="item in NAC.allSets" style="color:{{NAC.isInFilter(item)?'':'#CCC'}}"> 
                             <td class="text-center" style="width:2rem"> 
