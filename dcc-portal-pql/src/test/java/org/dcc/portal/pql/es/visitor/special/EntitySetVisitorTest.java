@@ -118,8 +118,13 @@ public class EntitySetVisitorTest {
     val result = root.accept(visitor, Optional.of(queryContext));
     log.debug("After Visitor: {}", result);
 
-    // FilterNode - BoolNode - MustBoolNode - TermsNode
-    val termsNode = (TermsNode) result.get().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    // QueryNode - FilterNode - BoolNode - MustBoolNode - TermsNode
+    val termsNode = (TermsNode) result.get()
+        .getFirstChild() // Query
+        .getFirstChild() // Filter
+        .getFirstChild() // Bool
+        .getFirstChild() // Must
+        .getFirstChild(); // Terms
     assertThat(termsNode.childrenCount()).isEqualTo(1);
     assertThat(termsNode.getField()).isEqualTo(expectedField);
 

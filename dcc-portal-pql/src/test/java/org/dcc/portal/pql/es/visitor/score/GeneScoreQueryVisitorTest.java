@@ -17,15 +17,34 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import org.dcc.portal.pql.meta.IndexModel;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 
-public class GeneScoreQueryVisitor extends ScoreQueryVisitor {
+import java.util.Optional;
 
-  public GeneScoreQueryVisitor() {
-    super(createdFunctionScoreNestedNode(SCRIPT, PATH), IndexModel.getGeneCentricTypeModel());
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.qe.QueryContext;
+import org.junit.Before;
+import org.junit.Test;
+
+@Slf4j
+public class GeneScoreQueryVisitorTest {
+
+  GeneScoreQueryVisitor visitor = new GeneScoreQueryVisitor();
+  QueryContext queryContext;
+
+  @Before
+  public void setUp() {
+    queryContext = new QueryContext("", GENE_CENTRIC);
   }
 
-  public static final String SCRIPT = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";
-  private static final String PATH = "donor";
+  @Test
+  public void test() {
+    val root = createEsAst("nested(donor,in(donor.projectId,'ALL-US'),in(donor.primarySite,'Blood'))", GENE_CENTRIC);
+    val result = root.accept(visitor, Optional.of(queryContext)).get();
+    log.warn("{}", result);
+  }
 
 }

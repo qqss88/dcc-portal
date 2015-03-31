@@ -17,65 +17,116 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import java.util.Optional;
+
+import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
-import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
-import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
- * Adds score queries to DonorCentric and GeneCentric type models.
+ * Adds score queries. When initialized accepts an initialized {@link NestedNode} which is different for MutationCentic
+ * and the other types.
  */
-public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
+@Slf4j
+public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
 
   private static final ScoreMode SCORE_MODE = ScoreMode.TOTAL;
 
-  protected ExpressionNode visitRoot(RootNode node, String script, String path) {
+  private final NestedNode nestedNode;
+  private final String nestingPath;
+  private final AbstractTypeModel typeModel;
+
+  protected ScoreQueryVisitor(@NonNull NestedNode nestedNode, AbstractTypeModel typeModel) {
+    this.nestedNode = nestedNode;
+    this.nestingPath = nestedNode.getPath();
+    this.typeModel = typeModel;
+  }
+
+  public String getPath() {
+    return nestedNode.getPath();
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
     val queryNode = Nodes.getOptionalChild(node, QueryNode.class);
     if (queryNode.isPresent()) {
-      visitQueryNode(queryNode.get(), script, path);
+      queryNode.get().accept(this, context);
     } else {
-      createQueryNode(node, script, path);
+      createQueryNode(node);
     }
 
-    return node;
+    return Optional.of(node);
   }
 
-  private void visitQueryNode(QueryNode queryNode, String script, String path) {
-    val children = removeChildren(queryNode);
-    val nestedNode = createNodesStructure(script, path, children);
-    nestedNode.setParent(queryNode);
-    queryNode.addChildren(nestedNode);
+  // FIXME: rework!
+  @Override
+  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode queryNode, @NonNull Optional<QueryContext> context) {
+    // This method must always get a QueryNode with a FilterNode that represent a filtered query.
+    log.debug("Adding scores to QueryNode: \n{}", queryNode);
+    val filterNodeOpt = Nodes.getOptionalChild(queryNode, FilterNode.class);
+    checkState(filterNodeOpt.isPresent(), "Malformed QueryNode \n%s", queryNode);
+
+    // Remove all the chilren from the query node (FilterNode only). Add filters with non-nested fields
+    // as well a fields nested under the nestingPath
+    queryNode.removeAllChildren();
+
+    // Preparing filters with non-nested fields.
+    val scoreQueryContext = Optional.of(new ScoreQueryContext(nestingPath, typeModel));
+    ExpressionNode filtersClone = Nodes.cloneNode(filterNodeOpt.get());
+    // Returns a FilterNode with filters non-nested under the path.
+    val nonNestedChildren = filtersClone.accept(Visitors.createNonNestedFieldsVisitor(), scoreQueryContext).get();
+
+    val mustNode = new MustBoolNode();
+    mustNode.addChildren(nonNestedChildren);
+    log.debug("Added non nested filters \n{}", nonNestedChildren);
+
+    // Preparing filters with nested fields.
+    filtersClone = Nodes.cloneNode(filterNodeOpt.get());
+    val requestContext = new NestedFieldsVisitor.RequestContext(typeModel, nestedNode);
+    val nestedChildren = filtersClone.accept(Visitors.createNestedFieldsVisitor(), Optional.of(requestContext)).get();
+
+    // TODO: if nestedChildren is of type FilterNode add it's children
+    mustNode.addChildren(nestedChildren);
+    log.debug("Added nested filters \n{}", nestedChildren);
+
+    // Result: QueryNode - BoolNode - MustBoolNode - ...
+    queryNode.addChildren(new BoolNode(mustNode));
+
+    return Optional.of(queryNode);
   }
 
-  private void createQueryNode(RootNode rootNode, String script, String path) {
-    val nestedNode = createNodesStructure(script, path);
-    val queryNode = new QueryNode(nestedNode);
-    nestedNode.setParent(queryNode);
+  private void createQueryNode(RootNode rootNode) {
+    val nestedNodeClone = Nodes.cloneNode(nestedNode);
+    val queryNode = new QueryNode(nestedNodeClone);
     rootNode.addChildren(queryNode);
   }
 
-  private static ExpressionNode[] removeChildren(QueryNode queryNode) {
-    ExpressionNode[] children = new ExpressionNode[queryNode.childrenCount()];
-    for (int i = queryNode.childrenCount() - 1; i >= 0; i--) {
-      children[i] = queryNode.getChild(i);
-      queryNode.removeChild(i);
-    }
-
-    return children;
-  }
-
   private static NestedNode createNodesStructure(String script, String path, ExpressionNode... children) {
-    val functionScoreQueryNode = new FunctionScoreQueryNode(script, children);
+    val functionScoreQueryNode = new FunctionScoreNode(script, children);
     val nestedNode = new NestedNode(path, SCORE_MODE, functionScoreQueryNode);
 
     return nestedNode;
+  }
+
+  static NestedNode createdFunctionScoreNestedNode(String script, String path) {
+    return createNodesStructure(script, path);
   }
 
 }

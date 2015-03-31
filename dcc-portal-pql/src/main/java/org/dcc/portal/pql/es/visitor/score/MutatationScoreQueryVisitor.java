@@ -15,32 +15,39 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast.query;
-
-import java.util.Optional;
-
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+package org.dcc.portal.pql.es.visitor.score;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
+import org.dcc.portal.pql.meta.IndexModel;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class FunctionScoreQueryNode extends ExpressionNode {
+/**
+ * Scores queries made against the MutationCentric type.<br>
+ * <br>
+ * Creates a NestedNode with a ConstantScoreNode child. Sets scoring mode on the nested on 'ssm_occurrence' queries to
+ * 'total'. The ConstantScoreNode has boost 1. If the original QueryNode has a FilterNode then the FilterNode is added
+ * as a child of the ConstantScoreNode.<br>
+ * <br>
+ * <b>NB:</b> This visitor must be run as the latest one, after all the other processing rules applied.
+ */
+public class MutatationScoreQueryVisitor extends ScoreQueryVisitor {
 
-  @NonNull
-  String script;
+  private static final String NESTED_PATH = "ssm_occurrence";
+  private static final ScoreMode DEFAULT_SCORE_MODE = ScoreMode.TOTAL;
+  private static final String SCRIPT = "1";
 
-  public FunctionScoreQueryNode(@NonNull String script, ExpressionNode... children) {
-    super(children);
-    this.script = script;
+  public MutatationScoreQueryVisitor() {
+    super(createNestedNode(), IndexModel.getMutationCentricTypeModel());
   }
 
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitFunctionScoreQuery(this, context);
+  private static NestedNode createNestedNode() {
+    return new NestedNode(NESTED_PATH, DEFAULT_SCORE_MODE, createFunctionScoreNode());
+  }
+
+  private static ExpressionNode createFunctionScoreNode() {
+    return new FunctionScoreNode(SCRIPT);
   }
 
 }

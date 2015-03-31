@@ -17,15 +17,17 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import org.dcc.portal.pql.meta.IndexModel;
+import lombok.NonNull;
+import lombok.Value;
 
-public class GeneScoreQueryVisitor extends ScoreQueryVisitor {
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 
-  public GeneScoreQueryVisitor() {
-    super(createdFunctionScoreNestedNode(SCRIPT, PATH), IndexModel.getGeneCentricTypeModel());
-  }
+@Value
+public class ScoreQueryContext {
 
-  public static final String SCRIPT = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";
-  private static final String PATH = "donor";
+  @NonNull
+  String nestingPath;
+  @NonNull
+  AbstractTypeModel typeModel;
 
 }

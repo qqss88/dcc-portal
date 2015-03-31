@@ -199,4 +199,9 @@ public class GeneCentricTypeModel extends AbstractTypeModel {
         .build();
   }
 
+  @Override
+  public Type getType() {
+    return Type.GENE_CENTRIC;
+  }
+
 }

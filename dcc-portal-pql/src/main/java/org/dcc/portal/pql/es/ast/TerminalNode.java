@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.es.ast;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.emptyList;
 
 import java.util.List;
@@ -47,6 +48,12 @@ public class TerminalNode extends ExpressionNode {
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitTerminal(this, context);
+  }
+
+  public String getValueAsString() {
+    checkState(value instanceof String, "Value %s is not a String", value);
+
+    return (String) value;
   }
 
 }

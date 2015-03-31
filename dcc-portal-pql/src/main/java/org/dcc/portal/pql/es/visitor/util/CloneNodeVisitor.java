@@ -51,6 +51,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
@@ -61,6 +62,11 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
   @Override
   public ExpressionNode visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
     return new ConstantScoreNode(node.getBoost(), visitChildren(node));
+  }
+
+  @Override
+  public ExpressionNode visitFunctionScore(FunctionScoreNode node, Optional<Void> context) {
+    return new FunctionScoreNode(node.getScript(), node.getBoost(), visitChildren(node));
   }
 
   @Override
@@ -75,7 +81,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
 
   @Override
   public ExpressionNode visitNested(NestedNode node, Optional<Void> context) {
-    return new NestedNode(node.getPath(), visitChildren(node));
+    return new NestedNode(node.getPath(), node.getScoreMode(), visitChildren(node));
   }
 
   @Override

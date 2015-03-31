@@ -35,6 +35,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseListener;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
@@ -69,7 +70,7 @@ public class PqlParseListener extends PqlBaseListener {
 
     // process filters
     if (!filters.isEmpty()) {
-      val parentNode = new FilterNode(processFilters(filters));
+      val parentNode = new QueryNode(new FilterNode(processFilters(filters)));
       esAst.addChildren(parentNode);
     }
 

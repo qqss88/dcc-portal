@@ -57,4 +57,8 @@ public class IndexModel {
     return mutationCentric;
   }
 
+  public static AbstractTypeModel getGeneCentricTypeModel() {
+    return geneCentric;
+  }
+
 }

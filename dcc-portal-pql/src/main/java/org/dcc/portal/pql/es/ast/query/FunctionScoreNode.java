@@ -15,17 +15,48 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor.score;
+package org.dcc.portal.pql.es.ast.query;
 
-import org.dcc.portal.pql.meta.IndexModel;
+import java.util.Optional;
 
-public class GeneScoreQueryVisitor extends ScoreQueryVisitor {
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.Value;
 
-  public GeneScoreQueryVisitor() {
-    super(createdFunctionScoreNestedNode(SCRIPT, PATH), IndexModel.getGeneCentricTypeModel());
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+
+@Value
+@EqualsAndHashCode(callSuper = true)
+public class FunctionScoreNode extends ExpressionNode {
+
+  public static final String MISSING_SCRIPT = "FunctionScoreNode.missing";
+
+  @NonNull
+  String script;
+  float boost;
+
+  public FunctionScoreNode(@NonNull String script, ExpressionNode... children) {
+    super(children);
+    this.script = script;
+    this.boost = -1f;
   }
 
-  public static final String SCRIPT = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";
-  private static final String PATH = "donor";
+  public FunctionScoreNode(float boost, ExpressionNode... children) {
+    super(children);
+    this.script = MISSING_SCRIPT;
+    this.boost = boost;
+  }
+
+  public FunctionScoreNode(@NonNull String script, float boost, ExpressionNode... children) {
+    super(children);
+    this.script = script;
+    this.boost = boost;
+  }
+
+  @Override
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
+    return visitor.visitFunctionScore(this, context);
+  }
 
 }

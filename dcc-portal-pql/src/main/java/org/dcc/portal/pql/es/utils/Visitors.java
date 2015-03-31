@@ -32,7 +32,9 @@ import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
-import org.dcc.portal.pql.es.visitor.score.ScoreMutatationQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.MutatationScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.NestedFieldsVisitor;
+import org.dcc.portal.pql.es.visitor.score.NonNestedFieldsVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
 import org.dcc.portal.pql.es.visitor.special.FieldsToSourceVisitor;
@@ -63,7 +65,7 @@ public class Visitors {
   private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
   private static final GeneScoreQueryVisitor GENE_SCORE_QUERY_VISITOR = new GeneScoreQueryVisitor();
-  private static final ScoreMutatationQueryVisitor SCORE_MUTATOIN_QUERY_VISITOR = new ScoreMutatationQueryVisitor();
+  private static final MutatationScoreQueryVisitor MUTATOIN_SCORE_QUERY_VISITOR = new MutatationScoreQueryVisitor();
 
   /*
    * QueryBuilderVisitor
@@ -83,6 +85,17 @@ public class Visitors {
   private static final EntitySetVisitor ENTITY_SET_VISITOR = new EntitySetVisitor();
   private static final FieldsToSourceVisitor FIELDS_TO_SOURCE_VISITOR = new FieldsToSourceVisitor();
 
+  private static final NonNestedFieldsVisitor NON_NESTED_FIELDS_VISITOR = new NonNestedFieldsVisitor();
+  private static final NestedFieldsVisitor NESTED_FIELDS_VISITOR = new NestedFieldsVisitor();
+
+  public static NestedFieldsVisitor createNestedFieldsVisitor() {
+    return NESTED_FIELDS_VISITOR;
+  }
+
+  public static NonNestedFieldsVisitor createNonNestedFieldsVisitor() {
+    return NON_NESTED_FIELDS_VISITOR;
+  }
+
   public static FieldsToSourceVisitor createFieldsToSourceVisitor() {
     return FIELDS_TO_SOURCE_VISITOR;
   }
@@ -91,8 +104,8 @@ public class Visitors {
     return ENTITY_SET_VISITOR;
   }
 
-  public static ScoreMutatationQueryVisitor createScoreMutatationQueryVisitor() {
-    return SCORE_MUTATOIN_QUERY_VISITOR;
+  public static MutatationScoreQueryVisitor createScoreMutatationQueryVisitor() {
+    return MUTATOIN_SCORE_QUERY_VISITOR;
   }
 
   public static ScoreSortVisitor createScoreSortVisitor() {
@@ -153,6 +166,8 @@ public class Visitors {
       return DONOR_SCORE_QUERY_VISITOR;
     case GENE_CENTRIC:
       return GENE_SCORE_QUERY_VISITOR;
+    case MUTATION_CENTRIC:
+      return MUTATOIN_SCORE_QUERY_VISITOR;
     default:
       return DEFAULT_SCORE_QUERY_VISITOR;
     }

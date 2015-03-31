@@ -61,8 +61,21 @@ public class Nodes {
     return Optional.ofNullable(childrenList.get(0));
   }
 
-  public static ExpressionNode cloneNode(ExpressionNode original) {
+  public static ExpressionNode cloneNode(@NonNull ExpressionNode original) {
     return original.accept(Nodes.CLONE_VISITOR, Optional.empty());
+  }
+
+  // TODO: find where it could be used. There are 3-4 places
+  public static <T extends ExpressionNode> Optional<T> findParent(@NonNull ExpressionNode node, @NonNull Class<T> type) {
+    if (type.isInstance(node)) {
+      node = node.getParent();
+    }
+
+    while (node != null && !type.isInstance(node)) {
+      node = node.getParent();
+    }
+
+    return node == null ? Optional.empty() : Optional.of((T) node);
   }
 
 }

@@ -20,14 +20,20 @@ package org.dcc.portal.pql.es.visitor.score;
 import java.util.Optional;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.qe.QueryContext;
 
 public class DefaultScoreQueryVisitor extends ScoreQueryVisitor {
 
+  public DefaultScoreQueryVisitor() {
+    // FIXME:
+    super(new NestedNode(""), null);
+  }
+
   @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
-    return node;
+  public Optional<ExpressionNode> visitRoot(RootNode node, Optional<QueryContext> context) {
+    return Optional.of(node);
   }
 
 }

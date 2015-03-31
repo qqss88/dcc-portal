@@ -27,54 +27,126 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
-import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
+import org.dcc.portal.pql.es.utils.EsAstTransformator;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
+import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Test;
 
 @Slf4j
 public class DonorScoreQueryVisitorTest {
 
   DonorScoreQueryVisitor visitor = new DonorScoreQueryVisitor();
-  private final AggregationsResolverVisitor facetsResolver = new AggregationsResolverVisitor();
+  private EsAstTransformator transformator = new EsAstTransformator();
+  private QueryContext context = new QueryContext("", Type.DONOR_CENTRIC);
 
   @Test
-  public void visitRootTest_withQueryNode() {
-    ExpressionNode esAst = createEsAst("facets(id), eq(id, 1)");
-    esAst = esAst.accept(facetsResolver, Optional.empty());
-    val origFilterNode = Nodes.cloneNode(esAst.getChild(1).getFirstChild());
+  public void noFilterTest() {
+    ExpressionNode esAst = createEsAst("select(id)");
+    esAst = transform(esAst);
 
     val result = esAst.accept(visitor, Optional.empty());
-    assertCorrectStructure(result);
-
-    // FIXME: Filters are not moved to the Query anymore. Rework the tests to reflect this.
-    // val filterNode = result.getChild(1).getFirstChild().getFirstChild().getFirstChild();
-    // assertThat(filterNode).isEqualTo(origFilterNode);
-  }
-
-  @Test
-  public void visitRootTest_withoutQueryNode() {
-    val esAst = createEsAst("select(id)");
-    val result = esAst.accept(visitor, Optional.empty());
-    assertCorrectStructure(result);
-  }
-
-  private static void assertCorrectStructure(ExpressionNode root) {
-    log.debug("Asserting ES AST: {}", root);
-    val queryNodes = Nodes.filterChildren(root, QueryNode.class);
-    assertThat(queryNodes).hasSize(1);
-
-    val queryNode = queryNodes.get(0);
+    log.debug("{}", result);
+    val queryNode = Nodes.getOptionalChild(esAst, QueryNode.class).get();
     assertThat(queryNode.childrenCount()).isEqualTo(1);
-    val netstedNode = (NestedNode) queryNode.getFirstChild();
-    assertThat(netstedNode.childrenCount()).isEqualTo(1);
-    assertThat(netstedNode.getPath()).isEqualTo("gene");
-    assertThat(netstedNode.getScoreMode()).isEqualTo(ScoreMode.TOTAL);
 
-    val functionScoreNode = (FunctionScoreQueryNode) netstedNode.getFirstChild();
-    assertThat(functionScoreNode.getScript()).isEqualTo(DonorScoreQueryVisitor.SCRIPT);
+    val nestedNode = (NestedNode) queryNode.getFirstChild();
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+    assertThat(nestedNode.getPath()).isEqualTo(DonorScoreQueryVisitor.PATH);
+    assertThat(nestedNode.getScoreMode()).isEqualTo(NestedNode.ScoreMode.TOTAL);
+
+    val scoreNode = (FunctionScoreNode) nestedNode.getFirstChild();
+    assertThat(scoreNode.childrenCount()).isEqualTo(0);
+    assertThat(scoreNode.getScript()).isEqualTo(DonorScoreQueryVisitor.SCRIPT);
   }
 
+  @Test
+  public void withFilterTest() {
+    ExpressionNode esAst = createEsAst("select(id),eq(id, 'DO1')");
+    esAst = transform(esAst);
+
+    val result = esAst.accept(visitor, Optional.empty()).get();
+    log.debug("{}", result);
+    val queryNode = Nodes.getOptionalChild(esAst, QueryNode.class).get();
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+    BoolNode boolNode = (BoolNode) queryNode.getFirstChild();
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+    MustBoolNode mustNode = (MustBoolNode) boolNode.getFirstChild();
+    assertThat(mustNode.childrenCount()).isEqualTo(2);
+
+    val nestedNode = mustNode.getFirstChild();
+    assertThat(nestedNode.getFirstChild().childrenCount()).isEqualTo(0);
+
+    val filterNode = mustNode.getChild(1);
+    assertThat(filterNode.childrenCount()).isEqualTo(1);
+    boolNode = (BoolNode) filterNode.getFirstChild();
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+    mustNode = (MustBoolNode) boolNode.getFirstChild();
+    assertThat(mustNode.childrenCount()).isEqualTo(1);
+
+    val termNode = (TermNode) mustNode.getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_donor_id");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("DO1");
+  }
+
+  @Test
+  public void withNestedFilterTest() {
+    ExpressionNode esAst = createEsAst("select(id),eq(gene.id, 'DO1')");
+    esAst = transform(esAst);
+
+    val result = esAst.accept(visitor, Optional.empty()).get();
+    log.debug("{}", result);
+
+    // QueryNode - Bool - Must
+    val mustNode = result.getFirstChild() // Query
+        .getFirstChild() // Bool
+        .getFirstChild(); // Must
+
+    // Nested = FunctionScore - FilterNode
+    val nestedFilterNode = mustNode.getFirstChild() // Nested
+        .getFirstChild() // FunctionScore
+        .getFirstChild(); // Filter
+
+    val termNode = (TermNode) nestedFilterNode.getFirstChild().getFirstChild().getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("gene._gene_id");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("DO1");
+
+    val mustNode2 = mustNode.getChild(1).getFirstChild().getFirstChild();
+    assertThat(mustNode2.childrenCount()).isEqualTo(0);
+  }
+
+  @Test
+  public void filterTest_noNesting() {
+    ExpressionNode esAst =
+        createEsAst("select(id),eq(id, 'DO1'), nested(gene.ssm, eq(gene.type, 'protein')), gt(gene.id, 'G1')");
+    esAst = transform(esAst);
+
+    val result = esAst.accept(visitor, Optional.empty()).get();
+    log.debug("{}", result);
+  }
+
+  @Test
+  public void breaking() {
+    ExpressionNode esAst =
+        createEsAst(
+            "nested(gene,and(nested(gene.ssm,and(nested(gene.ssm.consequence,in(mutation.consequenceType,'start_lost'),in(mutation.functionalImpact,'High')),in(mutation.type,'single base substitution'))),in(gene.id,'ENSG00000182909')))",
+            Type.DONOR_CENTRIC);
+    esAst = transform(esAst);
+
+    val result = esAst.accept(visitor, Optional.empty()).get();
+    log.debug("{}", result);
+  }
+
+  private ExpressionNode transform(ExpressionNode root) {
+    ExpressionNode result = transformator.resolveSpecialCases(root, context);
+    result = transformator.resolveFacets(result);
+    log.debug("[transform] {}", result);
+
+    return result;
+  }
 }

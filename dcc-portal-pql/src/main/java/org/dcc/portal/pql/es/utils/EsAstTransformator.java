@@ -25,7 +25,6 @@ import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
-import static org.dcc.portal.pql.es.utils.Visitors.createScoreMutatationQueryVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
 
 import java.util.Optional;
@@ -66,23 +65,23 @@ public class EsAstTransformator {
 
   public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
-    esAst = resoveSpecialCases(esAst, context);
+    esAst = resolveSpecialCases(esAst, context);
     esAst = resolveFacets(esAst);
-    esAst = optimize(esAst);
     esAst = score(esAst, context);
+    esAst = optimize(esAst);
 
-    // Must be run last. Read the class description
-    esAst = esAst.accept(createScoreMutatationQueryVisitor(), Optional.of(context)).get();
     log.debug("ES AST after the transformations: {}", esAst);
 
     return esAst;
   }
 
-  private ExpressionNode score(ExpressionNode esAst, QueryContext context) {
-    return esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
+  public ExpressionNode score(ExpressionNode esAst, QueryContext context) {
+    log.debug("[score]");
+    return esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context)).get();
   }
 
-  private ExpressionNode resoveSpecialCases(ExpressionNode esAst, QueryContext context) {
+  public ExpressionNode resolveSpecialCases(ExpressionNode esAst, QueryContext context) {
+    log.debug("[resoveSpecialCases]");
     esAst = esAst.accept(fieldsToSourceVisitor, Optional.of(context)).get();
     esAst = esAst.accept(entitySetVisitor, Optional.of(context)).get();
     esAst = esAst.accept(scoreSortVisitor, Optional.empty());
@@ -92,7 +91,8 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  private ExpressionNode optimize(ExpressionNode esAst) {
+  public ExpressionNode optimize(ExpressionNode esAst) {
+    log.debug("[optimize]");
     // Clean empty filter node
     esAst = esAst.accept(emptyNodesCleaner, Optional.empty());
 
@@ -105,7 +105,8 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  private ExpressionNode resolveFacets(ExpressionNode esAst) {
+  public ExpressionNode resolveFacets(ExpressionNode esAst) {
+    log.debug("[resolveFacets]");
     esAst = esAst.accept(facetsResolver, Optional.empty());
     esAst = esAst.accept(missingAggregationVisitor, Optional.empty());
 

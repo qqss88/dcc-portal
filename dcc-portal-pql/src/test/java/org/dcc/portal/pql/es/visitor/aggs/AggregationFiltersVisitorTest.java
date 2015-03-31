@@ -24,6 +24,7 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import java.util.Optional;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
@@ -33,10 +34,10 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
 import org.junit.Before;
 import org.junit.Test;
 
+@Slf4j
 public class AggregationFiltersVisitorTest {
 
   private static final ExpressionNode REMOVE_CHILD = null;
@@ -116,6 +117,24 @@ public class AggregationFiltersVisitorTest {
     val orNode = (OrNode) getMustNode("or(gt(ageAtDiagnosis, 60), eq(gender, 70))").getFirstChild();
     val orNodeClone = cloneNode(orNode);
     val orNodeResult = visitor.visitOr(orNode, AGGREGATION_FIELD);
+    log.info("Result {}", orNodeResult);
+
+    assertThat(orNodeResult).isNotEqualTo(orNodeClone);
+    // eq(gender, 70) removed
+    assertThat(orNodeResult.childrenCount()).isEqualTo(1);
+
+    val rangeNode = (RangeNode) orNodeResult.getFirstChild();
+    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
+    val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
+    assertThat(gtNode.getValue()).isEqualTo(60);
+  }
+
+  @Test
+  public void missingTest() {
+    val orNode = (OrNode) getMustNode("or(missing(donor.gender),in(donor.gender,'male'))").getFirstChild();
+    val orNodeClone = cloneNode(orNode);
+    val orNodeResult = visitor.visitOr(orNode, AGGREGATION_FIELD);
+    log.info("Result {}", orNodeResult);
 
     assertThat(orNodeResult).isNotEqualTo(orNodeClone);
     // eq(gender, 70) removed
@@ -130,9 +149,9 @@ public class AggregationFiltersVisitorTest {
   private ExpressionNode getMustNode(String query) {
     ExpressionNode filterNode = createEsAst(query).getFirstChild();
 
-    // FilterNode - BoolNode - MustBoolNode
+    // QueryNode - FilterNode - BoolNode - MustBoolNode
     // Make a clean copy of the must node
-    val mustNode = Nodes.cloneNode(filterNode.getFirstChild().getFirstChild());
+    val mustNode = Nodes.cloneNode(filterNode.getFirstChild().getFirstChild().getFirstChild());
 
     return mustNode;
   }

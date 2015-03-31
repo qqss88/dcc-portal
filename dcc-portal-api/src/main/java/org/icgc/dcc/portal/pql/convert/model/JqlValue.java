@@ -46,4 +46,8 @@ public abstract class JqlValue {
     return format("'%s'", value);
   }
 
+  public boolean contains(@NonNull Object value) {
+    return values.contains(value);
+  }
+
 }

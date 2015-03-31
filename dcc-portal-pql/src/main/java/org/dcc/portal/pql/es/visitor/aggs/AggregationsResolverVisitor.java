@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.es.visitor.aggs;
 
-import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 
 import java.util.Optional;
@@ -38,16 +37,15 @@ import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 /**
- * Processes aggregations. Moves FilterNode to a QueryNode. Copies the FilterNode to facet's filter node except filters
- * for facets being calculated.
+ * Processes aggregations. Copies the FilterNode to facet's filter node except filters for facets being calculated.
  */
 @Slf4j
-public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Void> {
+public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, FilterNode> {
 
   private final AggregationFiltersVisitor aggregationFilterVisitor = Visitors.createAggregationFiltersVisitor();
 
   @Override
-  public ExpressionNode visitRoot(@NonNull RootNode rootNode, Optional<Void> context) {
+  public ExpressionNode visitRoot(@NonNull RootNode rootNode, Optional<FilterNode> context) {
     log.debug("Resolving aggregations. Source AST: {}", rootNode);
 
     if (!hasAggregations(rootNode)) {
@@ -61,45 +59,33 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Voi
       return rootNode;
     }
 
-    // FilterNode is altered during the aggregations processing. We need to clone the structure to have the original
-    // filter.
-    val filterNodeClone = Nodes.cloneNode(filterNodeOpt.get());
     val aggsNode = getAggregationsNodeOptional(rootNode).get();
-
     for (int i = 0; i < aggsNode.childrenCount(); i++) {
-      val childAggsNode = aggsNode.getChild(i).accept(this, context);
+      val childAggsNode = aggsNode.getChild(i).accept(this, filterNodeOpt);
       if (childAggsNode instanceof FilterAggregationNode) {
         aggsNode.setChild(i, childAggsNode);
       }
     }
 
-    // TODO: decide if this should be removed
-    // moveFiltersToQuery(rootNode, filterNodeClone);
-
     return rootNode;
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
+  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<FilterNode> filtersNodeOpt) {
     log.debug("Visiting TermsAggregationsNode. {}", node);
-    val rootNode = node.getParent().getParent();
-    val filtersNodeOpt = getFilterNodeOptional(rootNode);
-    if (filtersNodeOpt.isPresent()) {
 
-      // The filters are enclosed in a FilterAggregationNode with is added to the AggregationsNode (parent
-      // of the current TermsAggregationNode node). The current node then is added as a child to the
-      // FilterAggregationNode.
-      // Such a nodes order reflects how aggregations are built in ES
+    // The filters are enclosed in a FilterAggregationNode with is added to the AggregationsNode (parent
+    // of the current TermsAggregationNode node). The current node then is added as a child to the
+    // FilterAggregationNode.
+    // Such a nodes order reflects how aggregations are built in ES
 
-      val newFilterNode = processFilters(node.getFieldName(), Nodes.cloneNode(filtersNodeOpt.get()));
-      val filterAggregationNode = new FilterAggregationNode(node.getAggregationName(), newFilterNode);
-      newFilterNode.setParent(filterAggregationNode);
-      filterAggregationNode.addChildren(node);
+    val newFilterNode = processFilters(node.getFieldName(), Nodes.cloneNode(filtersNodeOpt.get()));
+    val filterAggregationNode = new FilterAggregationNode(node.getAggregationName(), newFilterNode);
+    newFilterNode.setParent(filterAggregationNode);
+    filterAggregationNode.addChildren(node);
 
-      return filterAggregationNode;
-    }
+    return filterAggregationNode;
 
-    return node;
   }
 
   private ExpressionNode processFilters(String facetField, ExpressionNode filterNode) {
@@ -114,24 +100,13 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Voi
     return getOptionalChild(rootNode, AggregationsNode.class).isPresent() ? true : false;
   }
 
-  private static void moveFiltersToQuery(ExpressionNode rootNode, ExpressionNode filters) {
-    val filterNodeIndex = getFilterNodeIndex(rootNode);
-    rootNode.removeChild(filterNodeIndex);
-    rootNode.addChildren(new QueryNode(filters));
-  }
-
-  private static int getFilterNodeIndex(ExpressionNode rootNode) {
-    for (int i = 0; i < rootNode.childrenCount(); i++) {
-      if (rootNode.getChild(i) instanceof FilterNode) {
-        return i;
-      }
+  private static Optional<FilterNode> getFilterNodeOptional(ExpressionNode rootNode) {
+    val queryNode = getOptionalChild(rootNode, QueryNode.class);
+    if (queryNode.isPresent()) {
+      return getOptionalChild(queryNode.get(), FilterNode.class);
     }
 
-    throw new IllegalStateException(format("Could not find FilterNode in RootNode: %s", rootNode));
-  }
-
-  private static Optional<FilterNode> getFilterNodeOptional(ExpressionNode rootNode) {
-    return getOptionalChild(rootNode, FilterNode.class);
+    return Optional.empty();
   }
 
 }

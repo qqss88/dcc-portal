@@ -43,6 +43,7 @@ import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.junit.Test;
 
 @Slf4j
@@ -58,7 +59,7 @@ public class PqlParseListenerTest {
     val esAst = createEsAst(query);
     log.info("{}", esAst);
     assertFilterStructure(esAst);
-    val mustNode = (MustBoolNode) esAst.getFirstChild().getFirstChild().getFirstChild();
+    val mustNode = (MustBoolNode) esAst.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(5);
 
     val orNode = mustNode.getFirstChild();
@@ -153,7 +154,10 @@ public class PqlParseListenerTest {
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.getFirstChild()).isExactlyInstanceOf(CountNode.class);
 
-    val filterNode = esAst.getChild(1);
+    val queryNode = (QueryNode) esAst.getChild(1);
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+
+    val filterNode = queryNode.getFirstChild();
     assertThat(filterNode.getFirstChild()).isExactlyInstanceOf(BoolNode.class);
     assertThat(filterNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
     val mustNode = filterNode.getFirstChild().getFirstChild();
@@ -167,20 +171,26 @@ public class PqlParseListenerTest {
     val esAst = createEsAst("nested(gene, eq(projectId, 'D01'))", listener);
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    assertThat(esAst.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
-    assertThat(esAst.getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(esAst.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
-    assertThat(esAst.getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
-    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
-    assertThat(esAst.getFirstChild().getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(
+    val queryNode = (QueryNode) esAst.getFirstChild();
+
+    assertThat(queryNode.getFirstChild()).isExactlyInstanceOf(FilterNode.class);
+    assertThat(queryNode.getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(queryNode.getFirstChild().getFirstChild()).isExactlyInstanceOf(BoolNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(MustBoolNode.class);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().childrenCount()).isEqualTo(1);
+    assertThat(queryNode.getFirstChild().getFirstChild().getFirstChild().getFirstChild()).isExactlyInstanceOf(
         NestedNode.class);
   }
 
   private static void assertFilterStructure(ExpressionNode esAst) {
     assertThat(esAst).isExactlyInstanceOf(RootNode.class);
     assertThat(esAst.childrenCount()).isEqualTo(1);
-    val postFilterNode = (FilterNode) esAst.getFirstChild();
+
+    val queryNode = (QueryNode) esAst.getFirstChild();
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+
+    val postFilterNode = (FilterNode) queryNode.getFirstChild();
     assertThat(postFilterNode.childrenCount()).isEqualTo(1);
     val boolNode = (BoolNode) postFilterNode.getFirstChild();
     assertThat(boolNode.childrenCount()).isEqualTo(1);

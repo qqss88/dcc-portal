@@ -49,9 +49,11 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
 
 import com.google.common.base.Splitter;
@@ -76,12 +78,19 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
-    val filterNode = Nodes.getOptionalChild(node, FilterNode.class);
+    val filterNode = Nodes.getOptionalChild(node, QueryNode.class);
     if (filterNode.isPresent()) {
       filterNode.get().accept(this, context);
     }
 
     return Optional.of(node);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode node, @NonNull Optional<QueryContext> context) {
+    checkState(node.childrenCount() == 1, "Malformed QueryNode %s", node);
+
+    return visitChildren(this, node, context);
   }
 
   @Override
@@ -94,17 +103,19 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     val result = new OrNode();
     for (val child : node.getChildren()) {
       // visitTerm has already implemented logic. Let's reuse it by creating a TermNode and visiting it.
-      val visitTermNodeResult = createTermNode(node.getField(), child).accept(this, context);
+      val termNode = createTermNode(node.getField(), child);
+
+      // Wrap with a NestedNode so when the child is visited it will not create own NestedNode
+      val nestedNodeOpt = createNestedNode(node, context.get().getTypeModel());
+      if (nestedNodeOpt.isPresent()) {
+        nestedNodeOpt.get().addChildren(termNode);
+      }
+
+      val visitTermNodeResult = termNode.accept(this, context);
       result.addChildren(visitTermNodeResult.get());
     }
 
-    return Optional.of(result);
-  }
-
-  private ExpressionNode createTermNode(String field, ExpressionNode child) {
-    val terminalNode = (TerminalNode) child;
-
-    return new TermNode(field, terminalNode.getValue());
+    return Optional.of(nest(node.getField(), result, context.get().getTypeModel(), node));
   }
 
   @Override
@@ -174,7 +185,76 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     result.addChildren(createGreaterEqualNode(resolveStartField(field, typeModel), parseStart(locationValue)));
     result.addChildren(createLessEqualNode(resolveEndField(field, typeModel), parseEnd(locationValue)));
 
-    return Optional.of(result);
+    return Optional.of(nest(field, result, context.get().getTypeModel(), node));
+  }
+
+  private static ExpressionNode createTermNode(String field, ExpressionNode child) {
+    val terminalNode = (TerminalNode) child;
+
+    return new TermNode(field, terminalNode.getValue());
+  }
+
+  private static Optional<NestedNode> createNestedNode(TermsNode node, AbstractTypeModel typeModel) {
+    val field = node.getField();
+    if (isNonNestedField(field, typeModel)) {
+      return Optional.empty();
+    }
+
+    val nestedNodeOpt = Nodes.findParent(node, NestedNode.class);
+    if (nestedNodeOpt.isPresent()) {
+      val nestedNodeClone = Nodes.cloneNode(nestedNodeOpt.get());
+      nestedNodeClone.removeAllChildren();
+
+      return Optional.of((NestedNode) nestedNodeClone);
+    }
+
+    val nestedPath = typeModel.getNestedPath(resolveAlias(field));
+
+    return Optional.of(new NestedNode(nestedPath));
+  }
+
+  private static ExpressionNode nest(String field, ExpressionNode visitResultNode, AbstractTypeModel typeModel,
+      ExpressionNode originalNode) {
+    if (isNonNestedField(field, typeModel)) {
+      return visitResultNode;
+    }
+
+    val nestedPath = typeModel.getNestedPath(resolveAlias(field));
+    log.debug("Nested path: '{}' for field '{}'", nestedPath, field);
+    val nestedNodeOpt = Nodes.findParent(originalNode, NestedNode.class);
+    if (nestedNodeOpt.isPresent()) {
+      val nestedNode = nestedNodeOpt.get();
+      if (nestedNode.getPath().equals(nestedPath)) {
+        // The node is correctly nested. Nothing to do
+        return visitResultNode;
+      }
+
+      checkNestingLevels(nestedPath, nestedNodeOpt.get().getPath());
+    }
+
+    return new NestedNode(nestedPath, visitResultNode);
+  }
+
+  private static boolean isNonNestedField(String field, AbstractTypeModel typeModel) {
+    val type = typeModel.getType();
+
+    return type == Type.GENE_CENTRIC && field.equals(GENE_LOCATION) ||
+        type == Type.MUTATION_CENTRIC && field.equals(MUTATION_LOCATION);
+  }
+
+  private static String resolveAlias(String field) {
+    return field.equals(MUTATION_LOCATION) ? MUTATION_CHROMOSOME : GENE_CHROMOSOME;
+  }
+
+  /**
+   * @param fieldNestedPath - path at which location nodes are nested
+   * @param nestedNodePath - path of the closest {@link NestedNode} parent
+   */
+  private static void checkNestingLevels(String fieldNestedPath, String nestedNodePath) {
+    // Assuming the longer String the deeper nesting
+    checkState(fieldNestedPath.startsWith(nestedNodePath), "Location nodes must be nested deeper than the parent "
+        + "NestedNode. Location nodes nesting level: '%s'. Parent's nesting level: '%s", fieldNestedPath,
+        nestedNodePath);
   }
 
   /**

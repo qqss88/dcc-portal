@@ -22,7 +22,6 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.pql.convert.JqlFiltersDeserializer;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import org.icgc.dcc.portal.pql.convert.model.Operation;
@@ -32,6 +31,7 @@ import org.junit.rules.ExpectedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.collect.Iterables;
 
 @Slf4j
 public class JqlDeserializerTest {
@@ -49,7 +49,7 @@ public class JqlDeserializerTest {
 
     val donorType = result.getTypeValues().get("donor");
     assertThat(donorType.size()).isEqualTo(1);
-    val age = donorType.get(0);
+    val age = Iterables.get(donorType, 0);
     assertThat(age.getName()).isEqualTo("age");
     assertThat(age.getOperation()).isEqualTo(Operation.NOT);
     assertThat(age.getValue().isArray()).isFalse();
@@ -57,7 +57,7 @@ public class JqlDeserializerTest {
 
     val geneType = result.getTypeValues().get("gene");
     assertThat(geneType.size()).isEqualTo(1);
-    val id = geneType.get(0);
+    val id = Iterables.get(geneType, 0);
     assertThat(id.getName()).isEqualTo("id");
     assertThat(id.getOperation()).isEqualTo(Operation.IS);
     assertThat(id.getValue().isArray()).isFalse();
@@ -72,13 +72,13 @@ public class JqlDeserializerTest {
     val donorValues = result.getTypeValues().get("donor");
     assertThat(donorValues.size()).isEqualTo(2);
 
-    val idValue = donorValues.get(0);
+    val idValue = Iterables.get(donorValues, 0);
     assertThat(idValue.getName()).isEqualTo("id");
     assertThat(idValue.getOperation()).isEqualTo(Operation.IS);
     assertThat(idValue.getValue().isArray()).isFalse();
     assertThat(idValue.getValue().get()).isEqualTo("DO1");
 
-    val ageValue = donorValues.get(1);
+    val ageValue = Iterables.get(donorValues, 1);
     assertThat(ageValue.getName()).isEqualTo("age");
     assertThat(ageValue.getOperation()).isEqualTo(Operation.NOT);
     assertThat(ageValue.getValue().isArray()).isFalse();
@@ -92,7 +92,7 @@ public class JqlDeserializerTest {
 
     val donorValues = result.getTypeValues().get("donor");
     assertThat(donorValues.size()).isEqualTo(1);
-    val idValue = donorValues.get(0).getValue();
+    val idValue = Iterables.get(donorValues, 0).getValue();
 
     assertThat(idValue.isArray()).isTrue();
     val values = (JqlArrayValue) idValue;
@@ -117,7 +117,7 @@ public class JqlDeserializerTest {
     val result = convert("{donor:{hasPathway:true}}").getTypeValues().get("donor");
     assertThat(result.size()).isEqualTo(1);
 
-    val pathway = result.get(0);
+    val pathway = Iterables.get(result, 0);
     assertThat(pathway.getName()).isEqualTo("hasPathway");
     assertThat(pathway.getOperation()).isEqualTo(Operation.HAS);
     assertThat(pathway.getValue().get()).isEqualTo(Boolean.TRUE);

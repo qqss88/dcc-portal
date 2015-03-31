@@ -19,9 +19,12 @@ package org.icgc.dcc.portal.pql.convert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import lombok.SneakyThrows;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import org.junit.Test;
@@ -29,6 +32,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+@Slf4j
 public class FiltersConverterTest {
 
   FiltersConverter converter = new FiltersConverter();
@@ -77,9 +81,80 @@ public class FiltersConverterTest {
   }
 
   @Test
+  public void missingValueTest() {
+    val result = converter.convertFilters(createFilters("{donor:{id:{is:['_missing']}}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("missing(donor.id)");
+  }
+
+  @Test
+  public void missingValueTest_array() {
+    val result = converter.convertFilters(createFilters("{donor:{id:{is:['_missing', 'DO1']}}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("or(missing(donor.id),in(donor.id,'DO1'))");
+  }
+
+  @Test
   public void multiFilterTest() {
     val result = converter.convertFilters(createFilters("{donor:{hasPathway:false}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("missing(gene.pathwayId)");
+  }
+
+  @Test
+  public void geneHasPathwayOtherTypeModelTest() {
+    val result = converter.convertFilters(createFilters("{gene:{hasPathway:false}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("missing(gene.pathwayId)");
+  }
+
+  @Test
+  public void mutationLocationTest() {
+    val result =
+        converter.convertFilters(createFilters("{mutation:{location:{is:['chr12:43566-3457633']}}}"), DONOR_CENTRIC);
+    assertThat(result).isEqualTo("in(mutation.location,'chr12:43566-3457633')");
+  }
+
+  @Test
+  public void mutationNestedFiltersTest_gene() {
+    val filters = createFilters("{donor:{id:{is:'DO1'}},mutation:{id:{is:'MU1'},consequenceType:{is:'start_lost'}}}");
+    val result = converter.convertFilters(filters, GENE_CENTRIC);
+    log.info("PQL: {}", result);
+    assertThat(result)
+        .isEqualTo(
+            "nested(donor,"
+                + "and(nested(donor.ssm,and("
+                + "nested(donor.ssm.consequence,eq(mutation.consequenceType,'start_lost')),"
+                + "eq(mutation.id,'MU1'))),eq(donor.id,'DO1')))");
+  }
+
+  @Test
+  public void goTermTest_mutation() {
+    val filters = createFilters("{gene:{goTermId:{is:['GO:123']}}}");
+    val result = converter.convertFilters(filters, Type.MUTATION_CENTRIC);
+    log.info("{}", result);
+    assertThat(result).isEqualTo("nested(donor.ssm.observation,in(mutation.platform,'Illumina GA sequencing')),"
+        + "nested(donor.ssm.consequence,in(mutation.consequenceType,'frameshift_variant'))");
+  }
+
+  @Test
+  public void donorFiltersTest_donor() {
+    val filters = createFilters("{donor:{primarySite:{is:['Brain']},ageAtDiagnosisGroup:{is:['60 - 69']}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("in(donor.primarySite,'Brain'),in(donor.ageAtDiagnosisGroup,'60 - 69')");
+  }
+
+  @Test
+  public void donorFiltersTest_mutation() {
+    val filters = createFilters("{donor:{consequenceType:{is:['Brain']}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("in(donor.primarySite,'Brain'),in(donor.ageAtDiagnosisGroup,'60 - 69')");
+  }
+
+  @Test
+  public void tmp() {
+    val filters =
+        createFilters("{donor:{gender:{is:['_missing','male']}},gene:{type:{is:['antisense']}},"
+            + "mutation:{id:{is:'MU1'}}}");
+    val result = converter.convertFilters(filters, Type.MUTATION_CENTRIC);
+    log.info("{}", result);
+    assertThat(result).isEqualTo("in(donor.primarySite,'Brain'),in(donor.ageAtDiagnosisGroup,'60 - 69')");
   }
 
   @SneakyThrows

@@ -122,6 +122,8 @@ public abstract class AbstractTypeModel {
     this.includeFields = includeFields;
   }
 
+  public abstract Type getType();
+
   public List<String> getIncludeFields() {
     return includeFields;
   }
@@ -161,6 +163,20 @@ public abstract class AbstractTypeModel {
     }
 
     return false;
+  }
+
+  /**
+   * Checks if {@code field} is nested under the {@code path}. The {@code field} may nested couple time. Returns
+   * <b>true</b> if one of the parent is nested under the {@code path}.
+   */
+  public final boolean isNested(@NonNull String field, @NonNull String path) {
+    if (!isNested(field)) {
+      return false;
+    }
+
+    val nestedPath = getNestedPath(field);
+
+    return nestedPath.startsWith(path);
   }
 
   /**

@@ -47,7 +47,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
-import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 
 public abstract class NodeVisitor<T, A> {
@@ -158,7 +158,7 @@ public abstract class NodeVisitor<T, A> {
     return defaultUnimplementedMethod();
   }
 
-  public T visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<A> context) {
+  public T visitFunctionScore(FunctionScoreNode node, Optional<A> context) {
     return defaultUnimplementedMethod();
   }
 

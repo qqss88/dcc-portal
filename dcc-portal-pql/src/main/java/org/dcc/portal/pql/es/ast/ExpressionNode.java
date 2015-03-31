@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.ast;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -63,6 +64,10 @@ public abstract class ExpressionNode {
     return children.size();
   }
 
+  public boolean hasChildren() {
+    return childrenCount() != 0;
+  }
+
   public ExpressionNode[] getChildrenArray() {
     return children.toArray(new ExpressionNode[childrenCount()]);
   }
@@ -71,6 +76,10 @@ public abstract class ExpressionNode {
     val childrenList = Lists.newArrayList(children);
     this.children.addAll(childrenList);
     assignParent(childrenList, this);
+  }
+
+  public void addChildren(@NonNull List<ExpressionNode> children) {
+    addChildren(children.toArray(new ExpressionNode[children.size()]));
   }
 
   public ExpressionNode getChild(int index) {
@@ -94,10 +103,42 @@ public abstract class ExpressionNode {
     children.remove(index);
   }
 
+  public void removeChild(ExpressionNode node) {
+    checkState(hasChildren(), "Can't remove the child. Node has no children");
+    int removeIndex = getRemoveIndex(node);
+
+    if (removeIndex != -1) {
+      removeChild(removeIndex);
+
+      return;
+    }
+
+    throw new IllegalArgumentException("Failed to remove node");
+  }
+
+  private int getRemoveIndex(ExpressionNode node) {
+    for (int i = 0; i < childrenCount(); i++) {
+      val child = getChild(i);
+      if (child.equals(node)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  public void removeAllChildren() {
+    for (int i = children.size() - 1; i >= 0; i--) {
+      children.remove(i);
+    }
+  }
+
   public void setChild(int index, @NonNull ExpressionNode newChild) {
     checkChildrenBoundaries(index);
+    val oldChild = children.get(index);
+    oldChild.parent = null;
     children.set(index, newChild);
-    newChild.setParent(this);
+    newChild.parent = this;
   }
 
   @Override

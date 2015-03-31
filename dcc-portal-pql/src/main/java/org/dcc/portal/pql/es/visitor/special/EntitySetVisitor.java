@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor.special;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.ENTITY_SET_ID;
@@ -44,6 +45,7 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.model.LookupInfo;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -51,18 +53,27 @@ import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
- * <b>NB:</b> Must be run first because it does not modify structure of the AST, just 'enriches' search parameters.
+ * Resolves querying by {@code entitySetId}.<br>
+ * <b>NB:</b> Must be run one of the first because it does not modify structure of the AST, just 'enriches' search
+ * parameters.
  */
 public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, Optional<QueryContext> context) {
-    val filterNodeOpt = Nodes.getOptionalChild(node, FilterNode.class);
+    val filterNodeOpt = Nodes.getOptionalChild(node, QueryNode.class);
     if (filterNodeOpt.isPresent()) {
       filterNodeOpt.get().accept(this, context);
     }
 
     return Optional.of(node);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode node, Optional<QueryContext> context) {
+    checkState(node.childrenCount() == 1, "Malformed node %s", node);
+
+    return visitChildren(this, node, context);
   }
 
   @Override

@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.pql.convert.model;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 import lombok.NonNull;
@@ -32,6 +32,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 public class JqlFilters {
 
   @NonNull
-  Map<String, List<JqlField>> typeValues;
+  Map<String, Collection<JqlField>> typeValues;
 
 }

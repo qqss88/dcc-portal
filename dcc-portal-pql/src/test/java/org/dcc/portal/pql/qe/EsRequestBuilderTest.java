@@ -357,7 +357,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     return result;
   }
 
-  private static void containsOnlyIds(SearchResponse response, String... ids) {
+  public static void containsOnlyIds(SearchResponse response, String... ids) {
     val resopnseIds = Lists.<String> newArrayList();
 
     for (val hit : response.getHits()) {

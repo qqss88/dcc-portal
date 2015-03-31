@@ -25,17 +25,21 @@ import java.util.Optional;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
-import org.dcc.portal.pql.es.ast.query.FunctionScoreQueryNode;
+import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.qe.QueryContext;
+import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 
 /**
@@ -61,17 +65,18 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
   }
 
   @Override
-  public QueryBuilder visitFunctionScoreQuery(FunctionScoreQueryNode node, Optional<QueryContext> context) {
-    val scoreFunctionBuilder = ScoreFunctionBuilders.scriptFunction(node.getScript());
-
+  public QueryBuilder visitFunctionScore(FunctionScoreNode node, Optional<QueryContext> context) {
+    FunctionScoreQueryBuilder result = null;
     val filterNode = Nodes.getOptionalChild(node, FilterNode.class);
+
     if (filterNode.isPresent()) {
       val filteredQuery = filterNode.get().accept(this, context);
-
-      return QueryBuilders.functionScoreQuery(filteredQuery, scoreFunctionBuilder);
+      result = QueryBuilders.functionScoreQuery(filteredQuery).boostMode(CombineFunction.REPLACE);
+    } else {
+      result = QueryBuilders.functionScoreQuery().boostMode(CombineFunction.REPLACE);
     }
 
-    return QueryBuilders.functionScoreQuery(scoreFunctionBuilder);
+    return result.add(ScoreFunctionBuilders.scriptFunction(node.getScript()));
   }
 
   @Override
@@ -93,6 +98,23 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
     val filterBuilder = node.accept(Visitors.filterBuilderVisitor(), context);
 
     return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+  }
+
+  @Override
+  public QueryBuilder visitBool(BoolNode node, Optional<QueryContext> context) {
+    checkState(node.childrenCount() == 1, "Malformed BoolNode \n%s", node);
+    val boolQueryBuilder = QueryBuilders.boolQuery();
+    val child = node.getFirstChild();
+
+    if (child instanceof MustBoolNode) {
+      for (val subChild : child.getChildren()) {
+        boolQueryBuilder.must(subChild.accept(this, context));
+      }
+
+      return boolQueryBuilder;
+    }
+
+    throw new IllegalStateException(format("Operation type %s is not supported", child.getNodeName()));
   }
 
   private static void verifyQueryChildren(QueryNode node) {

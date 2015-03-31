@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor.special;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
@@ -47,7 +48,9 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -60,12 +63,19 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
-    val filterNode = Nodes.getOptionalChild(node, FilterNode.class);
+    val filterNode = Nodes.getOptionalChild(node, QueryNode.class);
     if (filterNode.isPresent()) {
       filterNode.get().accept(this, context);
     }
 
     return Optional.of(node);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode node, @NonNull Optional<QueryContext> context) {
+    checkState(node.childrenCount() == 1, "Malformed QueryNode %s", node);
+
+    return visitChildren(this, node, context);
   }
 
   @Override
@@ -143,7 +153,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
 
-    if (typeModel.isNested(fullyQualifiedName)) {
+    if (typeModel.isNested(fullyQualifiedName) && !hasNestedParent(termsNode, typeModel)) {
       return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
     }
 
@@ -165,11 +175,32 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
 
-    if (typeModel.isNested(fullyQualifiedName)) {
+    if (typeModel.isNested(fullyQualifiedName) && !hasNestedParent(termsNode, typeModel)) {
       return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
     }
 
     return Optional.of(orNode);
+  }
+
+  private boolean hasNestedParent(ExpressionNode node, AbstractTypeModel typeModel) {
+    val nestedPath = getNestedPath(typeModel);
+
+    while (node != null && !(node instanceof NestedNode)) {
+      node = node.getParent();
+    }
+
+    if (node != null) {
+      val nestedNode = (NestedNode) node;
+      if (nestedNode.getPath().startsWith(nestedPath)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private String getNestedPath(AbstractTypeModel typeModel) {
+    return Visitors.createScoreQueryVisitor(typeModel.getType()).getPath();
   }
 
   private static ExpressionNode[] createGoTermChildren(TermsNode termsNode, AbstractTypeModel typeModel) {

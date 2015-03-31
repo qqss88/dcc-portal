@@ -30,11 +30,13 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Test;
@@ -42,8 +44,8 @@ import org.junit.Test;
 @Slf4j
 public class LocationFilterVisitorTest {
 
-  private static final String GENE_FILTER = "eq(gene.location, 'chr12:123-456')";
-  private static final String MUTATION_FILTER = "eq(mutation.location, 'chr12:123-456')";
+  private static final String GENE_FILTER = "in(gene.location, ['chr12:123-456'])";
+  private static final String MUTATION_FILTER = "in(mutation.location, ['chr12:123-456'])";
   private static final String CHROMOSOME_VALUE = "12";
   private static final long CHROMOSOME_START = 123L;
   private static final long CHROMOSOME_END = 456L;
@@ -99,9 +101,46 @@ public class LocationFilterVisitorTest {
     assertGeneLocation(result, "", MUTATION_CENTRIC);
   }
 
+  @Test
+  public void nestedTest() {
+    val root = createEsAst(format("nested(transcript, %s)", GENE_FILTER), MUTATION_CENTRIC);
+    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
+    log.debug("After visitor: {}", result);
+
+    // Query - Filter - Bool - Must - Nested - Bool - Must - And
+    val andNode = (AndNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild()
+        .getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    val nestedNode = Nodes.findParent(andNode, NestedNode.class).get();
+    assertThat(nestedNode.getPath()).isEqualTo("transcript");
+    assertThat(Nodes.findParent(nestedNode, NestedNode.class).isPresent()).isFalse();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void wrongNestingLevel() {
+    val root = createEsAst(format("nested(transcript.ssm, %s)", GENE_FILTER), MUTATION_CENTRIC);
+    root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
+  }
+
   private static void assertGeneLocation(ExpressionNode result, String prefix, Type type) {
-    // FilterNode - BoolNode - MustBoolNode - AndNode
-    val andNode = (AndNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode - AndNode
+    AndNode andNode = null;
+    if (prefix.equals("")) {
+      andNode =
+          (AndNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild()
+              .getFirstChild();
+    } else {
+      val nestedNode =
+          (NestedNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+
+      if (prefix.equals("transcript.gene")) {
+        assertThat(nestedNode.getPath()).isEqualTo("transcript");
+      } else {
+        assertThat(nestedNode.getPath()).isEqualTo(prefix);
+      }
+
+      andNode = (AndNode) nestedNode.getFirstChild().getFirstChild();
+    }
+
     assertThat(andNode.childrenCount()).isEqualTo(3);
 
     val termNode = (TermNode) andNode.getChild(0);

@@ -17,11 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import java.util.Optional;
-
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.meta.IndexModel;
 
 public class DonorScoreQueryVisitor extends ScoreQueryVisitor {
 
@@ -29,11 +25,10 @@ public class DonorScoreQueryVisitor extends ScoreQueryVisitor {
       + "x = doc['gene._summary._ssm_count']; "
       + "g.value == '' || g.empty || x.empty || x.value < 1 ? 0 : 1";
 
-  private static final String PATH = "gene";
+  public static final String PATH = "gene";
 
-  @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
-    return super.visitRoot(node, SCRIPT, PATH);
+  public DonorScoreQueryVisitor() {
+    super(createdFunctionScoreNestedNode(SCRIPT, PATH), IndexModel.getDonorCentricTypeModel());
   }
 
 }

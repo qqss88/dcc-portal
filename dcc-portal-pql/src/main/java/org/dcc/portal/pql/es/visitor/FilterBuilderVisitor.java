@@ -58,6 +58,8 @@ import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
+import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.BoolFilterBuilder;
@@ -79,6 +81,13 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   @Override
   public FilterBuilder visitFilter(@NonNull FilterNode node, Optional<QueryContext> context) {
     return node.getFirstChild().accept(this, context);
+  }
+
+  @Override
+  public FilterBuilder visitQuery(@NonNull QueryNode node, Optional<QueryContext> context) {
+    val queryBuilder = node.accept(Visitors.createQueryBuilderVisitor(), context);
+
+    return FilterBuilders.queryFilter(queryBuilder);
   }
 
   @Override

@@ -24,10 +24,14 @@ import java.util.Optional;
 
 import lombok.NoArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+import com.google.common.collect.Maps;
+
+@Slf4j
 @NoArgsConstructor(access = PRIVATE)
 public class VisitorHelpers {
 
@@ -48,13 +52,28 @@ public class VisitorHelpers {
    * @param parent to be visited
    * @param context - query context
    */
+  // FIXME: Find the other places in code that replace children while looping through the children
   public static <T> Optional<ExpressionNode> visitChildren(NodeVisitor<Optional<ExpressionNode>, T> visitor,
       ExpressionNode parent, Optional<T> context) {
+    log.debug("[visitChildren] Processing node - \n{}", parent);
+    // TODO: is there a way exclude the autoboxing here?
+    val childrenToBeReplaced = Maps.<Integer, ExpressionNode> newHashMap();
+
     for (int i = 0; i < parent.childrenCount(); i++) {
       val child = parent.getChild(i);
       val childResult = child.accept(visitor, context);
       if (childResult.isPresent()) {
-        parent.setChild(i, childResult.get());
+
+        childrenToBeReplaced.put(i, childResult.get());
+      }
+    }
+
+    if (!childrenToBeReplaced.isEmpty()) {
+      for (val entry : childrenToBeReplaced.entrySet()) {
+        val index = entry.getKey();
+        val value = entry.getValue();
+        log.debug("[visitChildren] Replacing child \n{} \nwith \n{}", parent.getChild(index), value);
+        parent.setChild(index, value);
       }
     }
 

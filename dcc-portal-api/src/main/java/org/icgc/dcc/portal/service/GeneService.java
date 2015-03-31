@@ -111,7 +111,7 @@ public class GeneService {
     log.debug("Request: {}", request);
 
     // val response = geneRepository.findAllCentric(query);
-    val response = request.execute().actionGet(1000000L);
+    val response = request.execute().actionGet();
     log.debug("Response: {}", response);
     val hits = response.getHits();
 

@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta;
 
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
-import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfStrings;
 import static org.dcc.portal.pql.meta.field.BooleanFieldModel.bool;
 import static org.dcc.portal.pql.meta.field.DoubleFieldModel.double_;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
@@ -193,9 +192,7 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         long_("end", "gene.end"),
         long_("start", "gene.start"),
         string("symbol", "gene.symbol"),
-        // FIXME: the cluster contains an incorrect type model. Uncomment the line below and delete 2 below
-        // nestedArrayOfStrings("pathway", ImmutableSet.of("gene.pathways", "gene.pathwayId")),
-        nestedArrayOfStrings("pathways", ImmutableSet.of("gene.pathways", "gene.pathwayId")),
+        arrayOfStrings("pathway", ImmutableSet.of("gene.pathways", "gene.pathwayId")),
         arrayOfStrings("curated_set", "gene.curatedSetId"),
         object("go_term", "gene.GoTerm",
             arrayOfStrings("biological_process"),
@@ -269,6 +266,11 @@ public class DonorCentricTypeModel extends AbstractTypeModel {
         .put(MUTATION_ENTITY_SET_ID, "gene.ssm._mutation_id")
         .put(LOOKUP_TYPE, "donor-ids")
         .build();
+  }
+
+  @Override
+  public Type getType() {
+    return Type.DONOR_CENTRIC;
   }
 
 }

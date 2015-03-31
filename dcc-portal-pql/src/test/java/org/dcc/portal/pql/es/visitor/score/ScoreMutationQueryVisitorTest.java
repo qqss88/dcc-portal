@@ -41,7 +41,7 @@ import org.junit.Test;
 @Slf4j
 public class ScoreMutationQueryVisitorTest {
 
-  ScoreMutatationQueryVisitor visitor = new ScoreMutatationQueryVisitor();
+  MutatationScoreQueryVisitor visitor = new MutatationScoreQueryVisitor();
   QueryContext queryContext;
 
   @Before

@@ -180,7 +180,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
 
   private static ObjectFieldModel defineDonor() {
     return object("donor",
-        string("_donor_id"),
+        string("_donor_id", "donor.id"),
         string("donor_sex", "donor.gender"),
         string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
@@ -202,6 +202,11 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         .put(MUTATION_ENTITY_SET_ID, "_mutation_id")
         .put(LOOKUP_TYPE, "mutation-ids")
         .build();
+  }
+
+  @Override
+  public Type getType() {
+    return Type.MUTATION_CENTRIC;
   }
 
 }
