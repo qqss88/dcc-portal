@@ -4,7 +4,7 @@ var Renderer = function(svg, config) {
   defineDefs(svg);
 }
 
-var strokeColor = '#1693c0';
+var strokeColor = '#696969';
 
 function defineDefs(svg){
   var defs = [
@@ -45,7 +45,7 @@ function defineDefs(svg){
         fill:'white'
       },
       viewBox:  '-10 -10 30 20',
-      refX: '5'
+      refX: '42'
     },
     {
       id:'RenderableInteraction',
@@ -64,15 +64,15 @@ function defineDefs(svg){
       id:'Catalyst',
       element:'circle',
       attr:{
-        'cx':10,'cy':0,'r':8
+        'cx':15,'cy':0,'r':15
       },
       style:{
         fill:'white',
         stroke:strokeColor,
-        'stroke-width':'1.5px'
+        'stroke-width':'2px'
       },
-      viewBox:'0 -10 25 25',
-      refX:'10'
+      viewBox:'0 -17 35 35',
+      refX:'67'
     },
     {
       id:'GeneArrow',
@@ -163,7 +163,7 @@ Renderer.prototype.renderNodes = function (nodes) {
     }
   }).on('mouseover', function (e) {
     if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
-      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'white');
+      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
     }
   }).on('mouseout', function (e) {
     if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
@@ -196,7 +196,7 @@ Renderer.prototype.renderNodes = function (nodes) {
       stroke: 'Red',
       'stroke-width': 1
     }).on('mouseover', function () {
-      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'white');
+      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
     }).on('mouseout', function () {
       d3.select(this).style('fill', d3.select(this).attr('fill-old'));
     }).on('click',function(d){config.onClick(d);});
@@ -225,9 +225,46 @@ Renderer.prototype.renderEdges = function (edges) {
     'y1':function(d){return d.y1;},
     'x2':function(d){return d.x2;},
     'y2':function(d){return d.y2;},
-  }).attr('stroke',function(d){return d.color;})
+  }).attr('stroke',strokeColor)//function(d){return d.color;})
     .style('marker-start',function(d){return d.isLast && isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';})
     .style('marker-end',function(d){return d.isLast && !isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';});
+};
+
+Renderer.prototype.renderReactionLabels = function (labels) {
+  var size = 8, svg = this.svg;
+  var circular = ['Association','Dissociation','Binding'];
+  var filled = ['Association','Binding'];
+
+  svg.selectAll('.RenderableReactionLabel').data(labels).enter().append('rect')
+  .attr({
+    'class':'RenderableReactionLabel',
+    'x':function(d){return +d.x - (size/2);},
+    'y':function(d){return +d.y - (size/2);},
+    'rx':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
+    'ry':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
+    'width':size,
+    'height':size,
+    'stroke':strokeColor
+  })
+  .style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white'})
+
+  svg.selectAll('.ReactionLabelText').data(labels).enter().append('text')
+  .attr({
+    'class':'ReactionLabelText',
+    'x':function(d){return +d.x - (size/4);},
+    'y':function(d){return +d.y + (size/4);},
+    'font-weight':'bold',
+    'font-size':'6px',
+    'fill':strokeColor
+  }).text(function(d){
+    if(d.reactionType === 'Omitted Process'){
+      return '\\\\';
+    }else if(d.reactionType === 'Uncertain'){
+      return '?';
+    }else{
+      return '';
+    }
+  });
 };
 
 Renderer.prototype.highlightEntity = function (ids) {

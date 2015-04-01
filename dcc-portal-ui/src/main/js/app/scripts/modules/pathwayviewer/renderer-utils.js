@@ -12,6 +12,24 @@ RendererUtils.prototype.unshiftCompartments = function (nodes) {
   return nodes;
 }
 
+RendererUtils.prototype.generateReactionLabels = function (reactions) {
+  var labels = [];
+  reactions.forEach(function (reaction) {
+    var hasBase = false;
+    reaction.nodes.forEach(function (node) {
+      hasBase =  hasBase || (node.base && node.base.length > 0)
+    });
+    if(hasBase){
+      labels.push({
+        x:reaction.base[1].x,
+        y:reaction.base[1].y,
+        reactionType:reaction.type
+      });
+    }
+  });
+  return labels;
+}
+
 RendererUtils.prototype.generateLines = function (model) {
   var lines = [];
   var reactions = model.getReactions();
@@ -69,12 +87,12 @@ RendererUtils.prototype.generateLines = function (model) {
           break;
         case 'Activator':
           base.push(reactions[i].base[1]);
-          base.reverse();
+          base[0] = getNodeCenter(node.id);
           generateLine(base, 'blue', 'Activator',id);
           break;
         case 'Catalyst':
           base.push(reactions[i].base[1]);
-          base.reverse();
+          base[0] = getNodeCenter(node.id);
           generateLine(base, 'purple', 'Catalyst',id);
           break;
         case 'Inhibitor':

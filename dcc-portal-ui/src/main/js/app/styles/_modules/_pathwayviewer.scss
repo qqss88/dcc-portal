@@ -1,25 +1,27 @@
 /** PATHWAY CUSTOMIZATION **/
 
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
-  fill:#ffdc7d;
-  stroke:#e9931c;
+  fill:#37a321;
+  stroke:#1a9900;
 }
 
-.RenderableComplex, .RenderableEntitySet{
-  fill:#D6F1FA;
-  stroke: #1693c0;
+// TODO double border this guy
+.RenderableEntitySet{
+  fill:#6ABAD7;
+  stroke: #1693C0;
   stroke-width:0.5px;
 }
 
 .RenderableComplex{
+  fill:#45A9CD;
   stroke-width:1px;
   stroke: #34495e;
 }
 
 .ProcessNode{
-  stroke: #e9931c;
+  stroke: #666;
   stroke-width:0.6px;
-  fill:white;
+  fill:#999;
 }
 
 .RenderableGene{
@@ -29,7 +31,6 @@
 
 .RenderableText {
   font-size: 7px;
-  fill: #34495e;
 }
 
 .RenderableCompartment{
@@ -54,7 +55,7 @@
   text-align: center;
   height: 100%;
   width: 100%;
-  color: #34495e;
+  color: white;
 }
 
 .RenderableCompartmentText{
@@ -79,4 +80,8 @@
 .pathwayviewercontainer body{
   margin:0;
   background: none;
+}
+
+#pathway-viewer-mini{
+  border: 1px dashed #b3b3b3;
 }

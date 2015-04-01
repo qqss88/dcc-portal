@@ -73,6 +73,7 @@ ReactomePathway.prototype.render = function (xml) {
   t0 = performance.now();
   this.renderer.renderEdges(rendererUtils.generateLines(model));
   this.renderer.renderNodes(rendererUtils.unshiftCompartments(model.getNodes()));
+  this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
   t1 = performance.now();
 
 

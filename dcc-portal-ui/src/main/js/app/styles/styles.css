@@ -3795,43 +3795,43 @@ td {
 /** PATHWAY CUSTOMIZATION **/
 /* line 3, _modules/_pathwayviewer.scss */
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode {
-  fill: #ffdc7d;
-  stroke: #e9931c;
+  fill: #37a321;
+  stroke: #1a9900;
 }
 
-/* line 8, _modules/_pathwayviewer.scss */
-.RenderableComplex, .RenderableEntitySet {
-  fill: #D6F1FA;
-  stroke: #1693c0;
+/* line 9, _modules/_pathwayviewer.scss */
+.RenderableEntitySet {
+  fill: #6ABAD7;
+  stroke: #1693C0;
   stroke-width: 0.5px;
 }
 
-/* line 14, _modules/_pathwayviewer.scss */
+/* line 15, _modules/_pathwayviewer.scss */
 .RenderableComplex {
+  fill: #45A9CD;
   stroke-width: 1px;
   stroke: #34495e;
 }
 
-/* line 19, _modules/_pathwayviewer.scss */
+/* line 21, _modules/_pathwayviewer.scss */
 .ProcessNode {
-  stroke: #e9931c;
+  stroke: #666;
   stroke-width: 0.6px;
-  fill: white;
+  fill: #999;
 }
 
-/* line 25, _modules/_pathwayviewer.scss */
+/* line 27, _modules/_pathwayviewer.scss */
 .RenderableGene {
   stroke: #333;
   fill: none;
 }
 
-/* line 30, _modules/_pathwayviewer.scss */
+/* line 32, _modules/_pathwayviewer.scss */
 .RenderableText {
   font-size: 7px;
-  fill: #34495e;
 }
 
-/* line 35, _modules/_pathwayviewer.scss */
+/* line 36, _modules/_pathwayviewer.scss */
 .RenderableCompartment {
   fill: #f2f2f2;
   stroke: #34495e;
@@ -3840,51 +3840,56 @@ td {
   fill-opacity: 0.15;
 }
 
-/* line 43, _modules/_pathwayviewer.scss */
+/* line 44, _modules/_pathwayviewer.scss */
 .RenderableStroke {
   stroke-width: 0.7px;
 }
 
 /** ESSENTIAL **/
-/* line 49, _modules/_pathwayviewer.scss */
+/* line 50, _modules/_pathwayviewer.scss */
 .Note {
   fill: none;
 }
 
-/* line 53, _modules/_pathwayviewer.scss */
+/* line 54, _modules/_pathwayviewer.scss */
 .RenderableNodeText .RenderableNodeTextCell {
   text-align: center;
   height: 100%;
   width: 100%;
-  color: #34495e;
+  color: white;
 }
 
-/* line 60, _modules/_pathwayviewer.scss */
+/* line 61, _modules/_pathwayviewer.scss */
 .RenderableCompartmentText {
   font-size: 9px;
   fill: #34495e;
   line-height: 1.1em;
 }
 
-/* line 67, _modules/_pathwayviewer.scss */
+/* line 68, _modules/_pathwayviewer.scss */
 .RenderableNodeText td {
   padding: none;
 }
 
-/* line 71, _modules/_pathwayviewer.scss */
+/* line 72, _modules/_pathwayviewer.scss */
 .RenderableNodeText tbody {
   line-height: normal;
 }
 
-/* line 75, _modules/_pathwayviewer.scss */
+/* line 76, _modules/_pathwayviewer.scss */
 .RenderableBorder {
   fill: none;
 }
 
-/* line 79, _modules/_pathwayviewer.scss */
+/* line 80, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
   margin: 0;
   background: none;
+}
+
+/* line 85, _modules/_pathwayviewer.scss */
+#pathway-viewer-mini {
+  border: 1px dashed #b3b3b3;
 }
 
 /* line 25, styles.scss */

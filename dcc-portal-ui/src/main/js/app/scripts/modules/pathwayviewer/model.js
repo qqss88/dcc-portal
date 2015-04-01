@@ -46,8 +46,7 @@ PathwayModel.prototype.parse = function (xml) {
   for (var i = 0; i < collection.length; i++) {
     var points = collection[i].attributes['points'].nodeValue.split(',');
 
-    var base = [],
-      nodes = [];
+    var base = [], nodes=[], description;
 
     // Curated "base" line of the reaction
     for (var j = 0; j < points.length; j++) {
@@ -61,6 +60,10 @@ PathwayModel.prototype.parse = function (xml) {
     // Add nodes that are attached to reaction including their type
     for (var j = 0; j < $(collection[i].children).length; j++) {
       var name = $(collection[i].children[j]) ? $(collection[i].children[j].children[0])[0].localName : 'missing';
+
+      if(name === 'displayname'){
+        description = $(collection[i].children[j].children[0])[0].innerText;
+      }
 
       if (['input', 'output', 'catalyst', 'activator', 'inhibitor'].indexOf(name) < 0) {
         continue;
@@ -93,7 +96,8 @@ PathwayModel.prototype.parse = function (xml) {
       nodes: nodes,
       reactomeId: collection[i].attributes['reactomeId'] ? collection[i].attributes['reactomeId'].nodeValue : 'missing',
       id: collection[i].attributes['id'].nodeValue,
-      type: collection[i].attributes['reactionType'] ? collection[i].attributes['reactionType'].nodeValue : 'missing'
+      type: collection[i].attributes['reactionType'] ? collection[i].attributes['reactionType'].nodeValue : 'missing',
+      description: description
     });
   }
 
