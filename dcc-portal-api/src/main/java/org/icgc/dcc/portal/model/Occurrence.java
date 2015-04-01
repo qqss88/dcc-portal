@@ -154,7 +154,8 @@ public class Occurrence {
     verificationStatus = (String) fieldMap.get(fields.get("verificationStatus"));
     xrefEnsemblVarId = (String) fieldMap.get(fields.get("xrefEnsemblVarId"));
     mutation = (String) fieldMap.get(fields.get("mutation"));
-    observations = buildObservations((List<Map<String, Object>>) fieldMap.get("ssm.observation"));
+    val ssm = (Map<String, Object>) fieldMap.get("ssm");
+    observations = buildObservations((List<Map<String, Object>>) ssm.get("observation"));
   }
 
   private List<Observation> buildObservations(List<Map<String, Object>> list) {

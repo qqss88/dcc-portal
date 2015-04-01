@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Throwables.propagate;
+import static java.util.Collections.emptyMap;
 
 import java.util.Collections;
 import java.util.Map;
@@ -84,6 +85,7 @@ public class OccurrenceService {
       for (Map.Entry<String, SearchHitField> field : hit.getFields().entrySet()) {
         fieldMap.put(field.getKey(), field.getValue().getValue());
       }
+      fieldMap.putAll(processIncludes(hit));
       list.add(new Occurrence(fieldMap));
     }
 
@@ -91,6 +93,15 @@ public class OccurrenceService {
     occurrences.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return occurrences;
+  }
+
+  private Map<String, Object> processIncludes(SearchHit searchHit) {
+    val source = searchHit.getSource();
+    if (source == null) {
+      return emptyMap();
+    }
+
+    return source;
   }
 
   public long count(Query query) {
