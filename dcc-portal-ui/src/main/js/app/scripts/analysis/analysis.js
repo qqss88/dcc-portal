@@ -209,12 +209,12 @@
 
     this.analysisDescription = function(type) {
       if (['set', 'union'].indexOf(type) >= 0) {
-        return 'Display Venn diagram and find out intersection or union, etc. of your sets of the same type.';
+        return 'Display venn diagram and find out intersection or union, etc. of your sets of the same type.';
       } else if (type === 'enrichment') {
-        return 'Find out statistically significantly over-represented groups ' +
-          'of gene sets when comparing with your gene set.';
+        return 'Find out statistically significantly over-represented groups of gene sets ' +
+          '(e.g. reactome pathways) when comparing with your gene set.';
       } else if (type === 'phenotype') {
-        return 'Compare some characteristics (e.g. gender, vital status and age at diagnosis) between your Donor sets.';
+        return 'Compare some characteristics (e.g. gender, vital status and age at diagnosis) between your donor sets.';
       } else if (type === 'coverage') {
         return 'Compare mutations occurring in your Donor sets.';
       } else {

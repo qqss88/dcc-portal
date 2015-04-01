@@ -3,14 +3,14 @@
         <div class="modal-content">
             <!-- header -->
             <div class="modal-header clearfix">
-                <h3 class="pull-left">{{analysisMode===true?'Upload Custom Gene Set':'Upload Gene Set'}}</h3>
+                <h3 class="pull-left">Upload Gene Set</h3>
                 <button class="pull-right t_button" data-ng-click="cancel()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
 
             <!-- body -->
-            <div class="modal-body" style="height:{{params.state==='verified'? '35rem' : analysisMode !== true? '22rem' : '26rem' }}; margin:0">
+            <div class="modal-body" style="height:{{params.state==='verified'? '43rem' : analysisMode !== true? '30rem' : '34rem' }}; margin:0">
 
                <!-- By ID -->
                <div data-ng-if="params.inputMethod === 'id'">
@@ -80,14 +80,15 @@
                        </div>
 
                        <div data-ng-if="out.validIds.length > 0 && out.warnings.length === 0">
+                          <br>
                           <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
                               <a href="">
                                    {{out.totalInput}} submitted gene identifier(s) mapped to {{out.totalMatch}} Ensembl ID
                                   <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>
                               </a>
+                              <span data-toolbar data-dl="genelist"></span>
                           </span>
                           <div data-ng-show="expanded">
-                              <span data-toolbar data-dl="genelist"></span>
                               <table class="table table-info" id="genelist">
                                   <thead>
                                       <tr>
@@ -138,8 +139,8 @@
                </div>
 
                <!-- By Set -->
+               <!-- disable upload set for now
                <div data-ng-if="params.inputMethod === 'set'">
-                    
                    <div style="padding:0.5rem">
                        <div class="select-list" style="max-height:25rem" data-ng-focus="resetCustomInput()">
                           <div data-ng-repeat="item in params.savedSets" class="select-list-item" 
@@ -155,13 +156,14 @@
                        </div>
                    </div>
                </div>
+               -->
             </div>
 
             <!-- footer -->
             <div class="modal-footer">
                 <button class="t_button" data-ng-click="cancel();">Cancel</button>
                 <button class="t_button" data-ng-click="submitList()"
-                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0 || (analysisMode === true && params.setName === '')) && (params.selectedSavedSet < 0)">Submit</button>
+                    data-ng-disabled="(params.state !== 'verified' || out.validIds.length === 0 || (analysisMode === true && params.setName === '')) && (params.selectedSavedSet < 0)">{{analysisMode === true? 'Save':'Submit'}}</button>
             </div>
         </div>
     </div>

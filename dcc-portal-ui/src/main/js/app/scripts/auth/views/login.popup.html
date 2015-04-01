@@ -1,9 +1,9 @@
-<div class="ng-cloak" data-modal=loginModal data-options="opts">
+<div class="ng-cloak" data-options="opts">
     <div class="modal-dialog light">
         <div class="modal-content">
             <div class="modal-header clearfix">
                 <h3 class="pull-left">Login</h3>
-                <button class="pull-right t_button" data-ng-click="loginModal=false;reset();"><i
+                <button class="pull-right t_button" data-ng-click="closeLoginPopup()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
@@ -65,7 +65,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button class="t_button t_button_large" data-ng-click="loginModal=false;reset()">Cancel</button>
+                <button class="t_button t_button_large" data-ng-click="closeLoginPopup();reset()">Cancel</button>
                 <button class="t_button t_button_large" data-ng-click="tryLogin()"
                         data-ng-disabled="params.provider=='openid'&&!openIDUrl||params.provider=='verisign'&&!verisignUsername||connecting">
                     <span ng-hide="connecting"><i class="icon-login"></i>Login</span>

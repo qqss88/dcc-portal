@@ -1,17 +1,17 @@
 <section data-ng-controller="SavedSetController as SavedSetController">
     <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
-        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state.
+        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state. 
     </div>
     <div>
-        These are your saved sets. You can create new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of your
-        interest in <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span>. 
+        You can create and save new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of interest from 
+        <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search</a></span></span> 
         <br>
         
-        You can save a
+        You can also
         <span class="action-toolbar">
             <span class="action-item">
                 <i class="icon-floppy"></i>
-                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Customized gene set</a>
+                <a href="" data-ng-click="SavedSetController.addCustomGeneSet()">Upload your own gene set</a>
             </span>
         </span>
         <br>
@@ -28,22 +28,24 @@
     <br>
 
     <!-- abinitio -->
-    <div class="text-center wide" data-ng-if="SavedSetController.entityLists.length === 0">
+    <!--
+    <div class="text-center wide" data-ng-if="SavedSetController.entitySets.length === 0">
         <br>
         <h3>Your saved gene, donor and mutation sets appear here.</h3>
         <br>
     </div>
     <div class="clearfix"></div>
+    -->
 
 
-    <div style="padding:.5rem 0" data-ng-if="SavedSetController.entityLists.length > 0">
-        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeLists()" 
+    <div style="padding:.5rem 0" data-ng-if="SavedSetController.entitySets.length > 0">
+        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeSets()" 
             data-ng-disabled="SavedSetController.selectedSets.length === 0"
-            data-tooltip="Delete">
-            <i class="icon-trash"></i>
+            data-tooltip="Delete selected sets">
+            <i class="icon-trash"></i>Delete selected
         </button>   
     </div>
-    <div class="wide" data-ng-if="SavedSetController.entityLists.length > 0">
+    <div class="wide"> 
         <table class="table table-selectable">
             <thead>
                 <th class="text-center"  data-ng-click="SavedSetController.toggleSelectAll(); SavedSetController.update()">
@@ -56,7 +58,10 @@
                 <th></th>
             </thead>
             <tbody>
-                <tr data-ng-repeat="item in SavedSetController.entityLists" data-ng-init="item.checked=false">
+                <tr data-ng-if="SavedSetController.entitySets.length === 0">
+                    <td colspan="6" class="text-center"><strong>No saved set</strong></td>
+                </tr>
+                <tr data-ng-repeat="item in SavedSetController.entitySets" data-ng-init="item.checked=false">
                     <td class="text-center">
                         <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer" 
                               data-ng-click="item.checked = !item.checked; SavedSetController.update();">
