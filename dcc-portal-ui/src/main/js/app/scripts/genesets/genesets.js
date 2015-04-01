@@ -268,12 +268,14 @@
 
       refresh();
 
-      // for pathway viewer
-      var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
-        .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
-      reactomePromise.then(function(data){
-        _ctrl.pathwayXml = data;
-      });
+      if(_ctrl.geneSet.source === 'Reactome'){
+        // for pathway viewer
+        var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
+          .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
+        reactomePromise.then(function(data){
+          _ctrl.pathwayXml = data;
+        });
+      }
     });
 
   module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil,Restangular) {
@@ -303,6 +305,7 @@
             });
           });
       }
+
       var uniprotIds = [];
       _ctrl.genes.hits.forEach(function (gene) {
         uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);

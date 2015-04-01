@@ -48,7 +48,8 @@
 /** ESSENTIAL **/
 
 .Note{
-  fill:none;
+  stroke:gray;
+  fill:#999;
 }
 
 .RenderableNodeText .RenderableNodeTextCell{
@@ -84,4 +85,24 @@
 
 #pathway-viewer-mini{
   border: 1px dashed #b3b3b3;
+  position: relative;
+}
+
+.pathway-infobar{
+  position: absolute;
+  top: 0;
+  left: 70%;
+  width: 25%;
+  height: 40%;
+  margin:3%;
+  margin-top: -1px;
+  opacity: 0.8;
+ // border-radius: 5%;
+  border: 1px dashed #b3b3b3;
+
+  border-top: 1px solid white;
+  background: white;
+//  -webkit-box-shadow: 0px 0px 6px 0px rgba(50, 50, 50, 0.25);
+//-moz-box-shadow:    0px 0px 6px 0px rgba(50, 50, 50, 0.25);
+//box-shadow:         0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 }

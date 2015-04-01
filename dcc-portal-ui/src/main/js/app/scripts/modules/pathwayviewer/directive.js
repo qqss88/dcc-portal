@@ -30,7 +30,7 @@
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
       link: function ($scope, $element) {
 
-        var controller = new ReactomePathway({
+        var controller = new dcc.ReactomePathway({
           width: 500,
           height: 300,
           container: "#pathway-viewer-mini",
@@ -47,7 +47,6 @@
         }, true);
 
         $scope.$watch('highlights', function (newValue) {
-          console.log("changggeeee");
           if(newValue){
             console.log("new value!!");
             controller.highlight(newValue);
