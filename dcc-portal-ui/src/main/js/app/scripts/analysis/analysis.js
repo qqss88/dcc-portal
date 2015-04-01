@@ -124,6 +124,7 @@
     function init() {
       $timeout.cancel(pollTimeout);
       $scope.error = null;
+      $scope.analysisResult = null;
 
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
