@@ -23,7 +23,7 @@ ReactomePathway.prototype.render = function (xml) {
   });
 
   var s = Math.min(config.height / (height - minHeight), config.width / (width - minWidth));
-  var zoom = d3.behavior.zoom().scaleExtent([s, 6]);
+  var zoom = d3.behavior.zoom().scaleExtent([s*0.9, 6]);
 
   var svg = d3.select(config.container).append("svg")
     .attr('class', 'pathwaysvg')
@@ -65,13 +65,14 @@ ReactomePathway.prototype.render = function (xml) {
   this.renderer = new Renderer(svg, {
     onClick: function (d) {
       config.onClick(d);
-    }
+    },
+    urlPath: config.urlPath
   });
   var rendererUtils = new RendererUtils();
 
   t0 = performance.now();
+  this.renderer.renderEdges(rendererUtils.generateLines(model));
   this.renderer.renderNodes(rendererUtils.unshiftCompartments(model.getNodes()));
-  this.renderer.renderEdges(rendererUtils.generateLines(model.getReactions()));
   t1 = performance.now();
 
 

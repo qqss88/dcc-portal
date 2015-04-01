@@ -317,7 +317,7 @@
           dbIds.push(map[uniprotId]);
         });
         console.log(dbIds);
-        console.log("setting...");
+        console.log("setting higlights...");
         _ctrl.pathwayHighlights = dbIds;
       });
 

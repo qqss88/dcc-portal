@@ -12,13 +12,13 @@ function defineDefs(svg){
       id:'Output',
       element:'path',
       attr:{
-        d:'M0,-7L14,0L0,7L0,-7',
+        d:'M0,-10L20,0L0,10L0,-10',
         stroke:strokeColor
       },
       style:{
         fill:strokeColor
       },
-      viewBox:  '-10 -5 25 10',
+      viewBox:  '-10 -10 30 20',
       refX: '5'
     },
     {
@@ -38,14 +38,14 @@ function defineDefs(svg){
       id:'Activator',
       element:'path',
       attr:{
-        d:'M0,-5L10,0L0,5L0,-5',
+        d:'M0,-10L20,0L0,10L0,-10',
         stroke:strokeColor
       },
       style:{
         fill:'white'
       },
-      viewBox:'0 -6 13 13',
-      refX:'24'
+      viewBox:  '-10 -10 30 20',
+      refX: '5'
     },
     {
       id:'RenderableInteraction',
@@ -64,15 +64,15 @@ function defineDefs(svg){
       id:'Catalyst',
       element:'circle',
       attr:{
-        'cx':5,'cy':0,'r':5
+        'cx':10,'cy':0,'r':8
       },
       style:{
         fill:'white',
         stroke:strokeColor,
         'stroke-width':'1.5px'
       },
-      viewBox:'0 -6 13 13',
-      refX:'5'
+      viewBox:'0 -10 25 25',
+      refX:'10'
     },
     {
       id:'GeneArrow',
@@ -117,7 +117,7 @@ Renderer.prototype.renderNodes = function (nodes) {
 
   svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
     'class': function (d) {
-      console.log(d.reactomeId);return"RenderableRect " + d.type + " entity"+d.reactomeId;
+      return "RenderableRect " + d.type + " entity"+d.reactomeId;
     },
     'x': function (d) {
       return d.position.x;
@@ -172,14 +172,14 @@ Renderer.prototype.renderNodes = function (nodes) {
   }).on('click',function(d){config.onClick(d);});
 
   var getPointsMap = function(x,y,w,h,a){
-    var points = [{x:+x+ +a,y:+y},
-                 {x:+x+ +w- +a,y:+y},
-                 {x:+x+ +w,y:+y+ +a},
-                 {x:+x+ +w,y:+y+ +h- +a},
-                 {x:+x+ +w- +a,y:+y+ +h},
-                 {x:+x+ +a,y:+y+ +h},
-                 {x:+x,y:+y+ +h- +a},
-                 {x:+x,y:+y+ +a}]
+    var points = [{x:x+a,   y:y},
+                  {x:x+w-a, y:y},
+                  {x:x+w,   y:y+a},
+                  {x:x+w,   y:y+h-a},
+                  {x:x+w-a, y:y+h},
+                  {x:x+a,   y:y+h},
+                  {x:x,     y:y+h-a},
+                  {x:x,     y:y+a}]
     var val = "";
     points.forEach(function (elem) {
       val= val+elem.x+","+elem.y+" ";
@@ -191,7 +191,7 @@ Renderer.prototype.renderNodes = function (nodes) {
     .attr({
       class: function(d){return 'RenderableOct RenderableComplex entity'+d.reactomeId;},
       points: function (d) {
-        return getPointsMap(d.position.x, d.position.y, d.size.width, d.size.height, 3);
+        return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 3);
       },
       stroke: 'Red',
       'stroke-width': 1
@@ -205,18 +205,18 @@ Renderer.prototype.renderNodes = function (nodes) {
       'class':function(d){return d.type+"Text RenderableText";},
       'x':function(d){return d.type==='RenderableCompartment'?d.text.position.x:d.position.x;},
       'y':function(d){return d.type==='RenderableCompartment'?d.text.position.y:d.position.y;},
-      'width':function(d){return d.type==='RenderableCompartment'?'100%':d.size.width;},
-      'height':function(d){return d.type==='RenderableCompartment'?'100%':d.size.height;},
+      'width':function(d){return d.size.width;},
+      'height':function(d){return d.size.height;},
       'pointer-events':'none',
       'fill':'none'
-    }).append("xhtml:body")//.append('div')
-    .attr('class',function(d){return d.type==='RenderableCompartment'?'':'RenderableNodeText'})
-    .html(function(d){return "<div class='RenderableNodeTextCell'>"+d.text.content+"</div>";});
+    }).append("xhtml:body")
+    .attr('class',function(d){return d.type==='RenderableCompartment'?'RenderableCompartmentText':'RenderableNodeText'})
+    .html(function(d){return "<table class='RenderableNodeTextCell'><tr><td valign='middle'>"+d.text.content+"</td></tr></table>";});
 
 };
 
 Renderer.prototype.renderEdges = function (edges) {
-  var svg = this.svg;
+  var svg = this.svg, config = this.config;
   var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;}
 
   svg.selectAll('line').data(edges).enter().append('line').attr({
@@ -225,14 +225,14 @@ Renderer.prototype.renderEdges = function (edges) {
     'y1':function(d){return d.y1;},
     'x2':function(d){return d.x2;},
     'y2':function(d){return d.y2;},
-  }).attr('stroke',strokeColor)//function(d){return d.color;})
-    .style('marker-start',function(d){return d.isLast && isStartMarker(d.marker)?'url(#'+d.marker+')':'';})
-    .style('marker-end',function(d){return d.isLast && !isStartMarker(d.marker)?'url(#'+d.marker+')':'';});
+  }).attr('stroke',function(d){return d.color;})
+    .style('marker-start',function(d){return d.isLast && isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';})
+    .style('marker-end',function(d){return d.isLast && !isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';});
 };
 
 Renderer.prototype.highlightEntity = function (ids) {
   var svg = this.svg;
-console.log("updating..");
+  console.log("updating..");
   console.log(ids);
   ids.forEach(function (id) {
     var obj = svg.select(".entity"+id);

@@ -40,11 +40,6 @@
   fill-opacity: 0.15;
 }
 
-.RenderableCompartmentText{
-  font-size: 9px;
-  fill: #34495e;
-}
-
 .RenderableStroke{
   stroke-width:0.7px;
 }
@@ -60,6 +55,21 @@
   height: 100%;
   width: 100%;
   color: #34495e;
+}
+
+.RenderableCompartmentText{
+  font-size: 9px;
+  fill: #34495e;
+  line-height: 1.1em;
+}
+
+// Undo the effects of the general table css
+.RenderableNodeText td{
+  padding: none;
+}
+// Undo the effects of the general table css
+.RenderableNodeText tbody{
+  line-height: normal;
 }
 
 .RenderableBorder{

@@ -12,8 +12,10 @@ RendererUtils.prototype.unshiftCompartments = function (nodes) {
   return nodes;
 }
 
-RendererUtils.prototype.generateLines = function (reactions) {
+RendererUtils.prototype.generateLines = function (model) {
   var lines = [];
+  var reactions = model.getReactions();
+
   var generateLine = function (points, color, type, id) {
     for (var j = 0; j < points.length - 1; j++) {
       lines.push({
@@ -27,10 +29,26 @@ RendererUtils.prototype.generateLines = function (reactions) {
         id:id
       });
     }
+  };
+
+  var getNodeCenter = function(nodeId){
+    var node = model.getNodeById(nodeId);
+    return { x: (+node.position.x + +node.size.width/2),
+             y: (+node.position.y + +node.size.height/2)};
+  };
+
+  var getFirstInputNode =  function(nodes){
+    var node;
+    nodes.forEach(function (n) {
+      if(n.type === 'Input'){
+        node = n;
+      }
+    });
+    return node;
   }
 
   for (var i = 0; i < reactions.length; i++) {
-    var outputs = 0;
+    var outputs = 0, inputs=0;
     var id = reactions[i].reactomeId;
 
     reactions[i].nodes.forEach(function (node) {
@@ -39,7 +57,9 @@ RendererUtils.prototype.generateLines = function (reactions) {
       switch (node.type) {
         case 'Input':
           base.push(reactions[i].base[0]);
+          base[0] = getNodeCenter(node.id);
           generateLine(base, 'red', 'Input',id);
+          inputs = inputs + 1;
           break;
         case 'Output':
           base.push(reactions[i].base[(reactions[i].base.length - 1)]);
@@ -48,22 +68,25 @@ RendererUtils.prototype.generateLines = function (reactions) {
           outputs =  outputs +1;
           break;
         case 'Activator':
-          base.push(reactions[i].base[(reactions[i].base.length - 2)]);
+          base.push(reactions[i].base[1]);
           base.reverse();
           generateLine(base, 'blue', 'Activator',id);
           break;
         case 'Catalyst':
-          base.push(reactions[i].base[(reactions[i].base.length - 2)]);
+          base.push(reactions[i].base[1]);
           base.reverse();
           generateLine(base, 'purple', 'Catalyst',id);
           break;
         case 'Inhibitor':
-          base.push(reactions[i].base[(reactions[i].base.length - 2)]);
+          base.push(reactions[i].base[1]);
           generateLine(base, 'orange', 'Inhibitor',id);
           break;
         }
 
     });
+    if(inputs === 0){
+      reactions[i].base[0] = getNodeCenter(getFirstInputNode(reactions[i].nodes).id);
+    }
     generateLine(reactions[i].base,outputs==0?'black':'black',outputs==0?'Output':reactions[i].type,id);
   }
 

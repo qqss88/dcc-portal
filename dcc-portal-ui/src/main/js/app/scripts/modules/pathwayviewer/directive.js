@@ -29,24 +29,23 @@
       },
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
       link: function ($scope, $element) {
-//        console.log($element);
+
         var controller = new ReactomePathway({
           width: 500,
           height: 300,
           container: "#pathway-viewer-mini",
           onClick: function (d) {
             console.log(d);
-          }
+          },
+          urlPath: $location.path()
         });
-
-
 
         $scope.$watch('items', function (newValue) {
           if(newValue){
             controller.render(newValue);
           }
         }, true);
-      //  console.log($scope);
+
         $scope.$watch('highlights', function (newValue) {
           console.log("changggeeee");
           if(newValue){
