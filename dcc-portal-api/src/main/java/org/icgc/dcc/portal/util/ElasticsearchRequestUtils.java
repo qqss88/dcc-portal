@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static java.util.Collections.singletonList;
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
@@ -70,9 +71,16 @@ public class ElasticsearchRequestUtils {
     case PROJECT:
       sourceFields = prepareProjectIncludes(query, kind);
       break;
+    case OCCURRENCE:
+      sourceFields = prepareOccurrenceIncludes();
+      break;
     }
 
     return sourceFields;
+  }
+
+  private static List<String> prepareOccurrenceIncludes() {
+    return singletonList("ssm.observation");
   }
 
   private static List<String> prepareMutationIncludes(Query query) {

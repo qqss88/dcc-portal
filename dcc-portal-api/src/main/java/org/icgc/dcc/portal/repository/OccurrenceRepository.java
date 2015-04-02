@@ -68,6 +68,7 @@ import static org.icgc.dcc.portal.service.QueryService.remapD2P;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
@@ -218,6 +219,7 @@ public class OccurrenceRepository {
     val filters = remapFilters(query.getFilters());
     search.setPostFilter(getFilters(filters));
     search.addFields(getFields(query, KIND));
+    addIncludes(search, query, KIND);
 
     return search;
   }

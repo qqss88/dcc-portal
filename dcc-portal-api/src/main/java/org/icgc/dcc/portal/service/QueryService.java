@@ -113,6 +113,9 @@ public class QueryService {
       fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedDonorCounts"));
       fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedSampleCounts"));
       break;
+    case OCCURRENCE:
+      fields.remove(typeFieldsMap.get("observation"));
+      break;
     }
   }
 

@@ -39,7 +39,7 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, Page, donor, Projects, Mutations, Settings) {
+  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings) {
 
     var _ctrl = this;
 
@@ -47,6 +47,20 @@
     Page.setPage('entity');
 
     _ctrl.donor = donor;
+
+    _ctrl.downloadDonorData = function() {
+      $modal.open({
+        templateUrl: '/scripts/downloader/views/request.html',
+        controller: 'DownloadRequestController',
+        resolve: {
+          filters: function() {
+            return {
+              donor: { id: { is: [_ctrl.donor.id] } }
+            };
+          }
+        }
+      });
+    };
 
     Projects.getList().then(function (projects) {
       var p = _.find(projects.hits, function (item) {

@@ -108,7 +108,8 @@
 .icon-pencil:before { content: '\e837'; } /* '' */
 .icon-share-1:before { content: '\e838'; } /* '' */
 .icon-flow-branch:before { content: '\e839'; } /* '' */
-
+.icon-circle-empty:before { content: '\e83a'; } /* '' */
+.icon-dot-circled:before { content: '\e83b'; } /* '' */
 
 /*
    Animation example, for spinners

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -166,15 +166,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
             }
           },
           tooltip: {
-            shared: true,
             enabled: false,
-            formatter: function () {
-              var name = this.point.term ? $filter('trans')(this.point.name, true) : 'No Data';
-              return '<div class="t_hc_tooltip">' +
-                   '<strong>' + name + '</strong><br/>' +
-                   Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
-                   '</div>';
-            }
           },
           series: [
             {
@@ -186,13 +178,13 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
           ]
         };
 
-      $scope.$watch('items', function (newValue, oldValue) {
-        if (!newValue || angular.equals(newValue, oldValue)) {
+      $scope.$watch('items', function (newValue) {
+        // if (!newValue || angular.equals(newValue, oldValue)) {
+        if (!newValue) {
           return;
         }
         c.series[0].setData(formatSeriesData(newValue), true);
       });
-
       c = new Highcharts.Chart(chartsDefaults);
 
       $scope.$on('$destroy', function () {
@@ -299,19 +291,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
           }
         },
         tooltip: {
-          shared: true,
           enabled: false,
-          useHTML: true,
-          borderWidth: 0,
-          borderRadius: 0,
-          backgroundColor: 'none',
-          shadow: false,
-          formatter: function () {
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + $filter('define')(this.point.name) + '</strong><br>' +
-                   Highcharts.numberFormat(this.point.y, 0) + ' ' + this.series.name +
-                   '</div>';
-          }
         },
         series: [
           {
@@ -374,6 +354,171 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
   };
 });
 
+angular.module('highcharts.directives').directive('groupedBar', function ($location) {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      items: '=',
+      colours: '='
+    },
+    template: '<div id="container" style="margin: 0 auto">not working</div>',
+    link: function ($scope, $element, $attrs) {
+      var c, renderChart, chartsDefaults;
+      renderChart = function (settings) {
+        if (c) {
+          c.destroy();
+        }
+        c = new Highcharts.Chart(settings);
+      };
+
+      chartsDefaults = {
+        credits: {enabled: false},
+        chart: {
+          renderTo: $element[0],
+          type: 'column',
+          height: $attrs.height || null,
+          width: $attrs.width || null
+        },
+        /* D3 cat 10 */
+        //colors: ['#1f77b4', '#ff7f0e', '#2ca02c'],
+        colors: $scope.colours || ['#1f77b4', '#ff7f0e', '#2ca02c'],
+        title: {
+          text: $attrs.heading || '',
+          margin: 25,
+          style: {
+            fontSize: '1.25rem'
+          }
+        },
+        xAxis: {
+          labels: {
+            rotation: -45,
+            align: 'right',
+            x: 10,
+            formatter: function () {
+              if (this.value.length > 15) {
+                return this.value.substring(0, 15) + '...';
+              } else {
+                return this.value;
+              }
+            }
+          },
+          categories: angular.isDefined($scope.items) ? $scope.items.categories : []
+        },
+        tooltip: {
+          enabled: false
+        },
+        legend: {
+          enabled: false
+        },
+        yAxis: {
+          min: 0,
+          // max: 1.0,
+          showFirstLabel: true,
+          showLastLabel: true,
+          title: {
+            text: $attrs.ylabel,
+            style: {
+              color: 'hsl(0, 0%, 60%)',
+              fontSize: '0.75rem',
+              fontWeight: '300'
+            },
+            margin: 5
+          },
+          labels: {
+            enabled: true,
+            formatter: function () {
+              if ($attrs.format === 'percentage') {
+                return this.value * 100;
+              }
+              return this.value;
+            }
+          }
+        },
+        series: angular.isDefined($scope.items) ? $scope.items.series : [],
+        plotOptions: {
+          column: {
+            pointPadding: 0.10,
+            borderWidth: 0,
+            events: {
+              click: function (e) {
+                if (e.point.link) {
+                  $location.path(e.point.link);
+                  $scope.$apply();
+                }
+              }
+            }
+          },
+          series: {
+            stickyTracking : true,
+            point: {
+              events: {
+                mouseOver: function (event) {
+                  var getLabel = function () {
+                    var num;
+                    if ($attrs.format && $attrs.format === 'percentage') {
+                      num = Number(event.target.y * 100).toFixed(2);
+                    } else {
+                      num = event.target.y;
+                    }
+                    return '<div>' +
+                           // '<strong>' + event.target.category + ' - ' + event.target.series.name + '</strong><br>' +
+                           '<strong>' + event.target.series.name + '</strong><br>' +
+                           num +  $attrs.ylabel + ' (' + event.target.count + ')' +
+                           '</div>';
+                  };
+                  $scope.$emit('tooltip::show', {
+                    element: angular.element(this),
+                    placement:'right',
+                    text: getLabel(),
+                    sticky:true
+                  });
+                },
+                mouseOut: function () {
+                  $scope.$emit('tooltip::hide');
+                }
+              }
+            }
+          }
+        }
+      };
+
+      $scope.$watch('items', function (newValue) {
+        var deepCopy, newSettings;
+
+        if (!newValue) {
+          return;
+        }
+        // We need deep copy in order to NOT override original chart object.
+        // This allows us to override chart data member and still the keep
+        // our original renderTo will be the same
+        deepCopy = true;
+        newSettings = {};
+        jQuery.extend(deepCopy, newSettings, chartsDefaults);
+        newSettings.xAxis.categories = newValue.x;
+
+        if (!$attrs.format || $attrs.format !== 'percentage') {
+          if (newSettings.yAxis) {
+            newSettings.yAxis.allowDecimals = false;
+          }
+        }
+
+        newSettings.series = newValue.series;
+        newSettings.xAxis.categories = newValue.categories;
+        renderChart(newSettings);
+      }, true);
+
+      renderChart(chartsDefaults);
+
+      $scope.$on('$destroy', function () {
+        c.destroy();
+      });
+    }
+  };
+});
+
+
+
 angular.module('highcharts.directives').directive('bar', function ($location) {
   return {
     restrict: 'E',
@@ -429,26 +574,7 @@ angular.module('highcharts.directives').directive('bar', function ($location) {
           categories: angular.isDefined($scope.items) ? $scope.items.x : []
         },
         tooltip: {
-          shared: true,
           enabled: false,
-          useHTML: true,
-          borderWidth: 0,
-          borderRadius: 0,
-          backgroundColor: 'none',
-          shadow: false,
-          formatter: function () {
-            var num;
-            if ($attrs.format && $attrs.format === 'percentage') {
-              num = Number(this.y * 100).toFixed(2);
-            } else {
-              num = this.y;
-            }
-
-            return '<div class="t_hc_tooltip">' +
-                   '<strong>' + this.x + '</strong><br/>' +
-                   num + ' ' + $attrs.ylabel +
-                   '</div>';
-          }
         },
         yAxis: {
           //allowDecimals:false,

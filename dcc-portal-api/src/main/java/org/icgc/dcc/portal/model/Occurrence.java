@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.model;
 
+import static java.util.Collections.emptyList;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.List;
@@ -113,7 +114,6 @@ public class Occurrence {
   @ApiModelProperty(value = "Observation", required = true)
   List<Observation> observations;
 
-  @SuppressWarnings("unchecked")
   @JsonCreator
   public Occurrence(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.OCCURRENCE);
@@ -154,7 +154,18 @@ public class Occurrence {
     verificationStatus = (String) fieldMap.get(fields.get("verificationStatus"));
     xrefEnsemblVarId = (String) fieldMap.get(fields.get("xrefEnsemblVarId"));
     mutation = (String) fieldMap.get(fields.get("mutation"));
-    observations = buildObservations((List<Map<String, Object>>) fieldMap.get("ssm.observation"));
+    observations = buildObservations(getObservations(fieldMap));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<Map<String, Object>> getObservations(Map<String, Object> fieldMap) {
+    if (!fieldMap.containsKey("smm")) {
+      return emptyList();
+    }
+
+    val ssm = (Map<String, Object>) fieldMap.get("ssm");
+
+    return (List<Map<String, Object>>) ssm.get("observation");
   }
 
   private List<Observation> buildObservations(List<Map<String, Object>> list) {

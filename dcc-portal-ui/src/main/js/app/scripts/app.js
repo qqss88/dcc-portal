@@ -28,6 +28,8 @@
     'ui.scrollfix',
     'ui.bootstrap.modal',
     'ui.bootstrap.position',
+    'template/modal/backdrop.html',
+    'template/modal/window.html',
     'ui.router',
     'infinite-scroll',
     'angular-lodash',
@@ -64,7 +66,9 @@
     'icgc.enrichment',
     'icgc.sets',
     'icgc.analysis',
+    'icgc.phenotype',
     'icgc.beacon',
+    'icgc.downloader',
 
     // old
     'app.ui',
@@ -82,10 +86,17 @@
     .run(function($state, $stateParams, $window, $rootScope) {
       function scroll() {
         var state, offset, to;
-
         state = $state.$current;
+
+        // Prevents browser window from jumping around while navigating analyses
+        if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
+          return;
+        }
+
+
         // Default behaviour is to scroll to top
         // Any string that isn't [top,none] is treated as a jq selector
+        // FIXME: Is this still valid??? The scrollTo doesn't seem to be applicable anymore??? -DC
         if (!state.scrollTo || state.scrollTo === 'none' || state.scrollTo === 'top') {
           $window.scrollTo(0, 0);
         } else {
@@ -125,6 +136,8 @@
     // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
     // Use to connect to local API when running UI using JS dev server
     // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
+    // Openstack
+    // RestangularProvider.setBaseUrl('http://10.5.74.170:5381' + API.BASE_URL);
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
@@ -162,7 +175,8 @@
     localStorageServiceProvider.setPrefix('icgc');
   });
 
-  module.run(function ($http, $state, $timeout, $interval, Restangular, Angularytics, Compatibility, Notify) {
+  module.run(function ($http, $state, $timeout, $interval, $rootScope, $modalStack,
+    Restangular, Angularytics, Compatibility, Notify) {
 
     var ignoreNotFound = [
       '/analysis/',
@@ -207,6 +221,19 @@
     Angularytics.init();
     // Browser compatibility tests
     Compatibility.run();
+
+
+    // Close any modal dialogs on location chagne
+    $rootScope.$on('$locationChangeSuccess', function (newVal, oldVal) {
+      // console.log('rootscope location change success', oldVal, newVal);
+      // console.log('modal stack', $modalStack.getTop());
+
+      if (oldVal !== newVal && $modalStack.getTop()) {
+        $modalStack.dismiss($modalStack.getTop().key);
+      }
+
+    });
+
   });
 
 
