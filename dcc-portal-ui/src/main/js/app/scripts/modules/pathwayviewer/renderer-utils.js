@@ -38,17 +38,22 @@
     var lines = [];
     var reactions = model.getReactions();
 
-    var generateLine = function (points, color, type, id) {
+    var isLegalLineType = function(type){
+      return ['entitysetandmemberlink','entitysetandentitysetlink'].indexOf(type) < 0;
+    }
+
+    var generateLine = function (points, color, type, id, lineType) {
       for (var j = 0; j < points.length - 1; j++) {
         lines.push({
           x1: points[j].x,
           y1: points[j].y,
           x2: points[j+1].x,
           y2: points[j+1].y,
-          isLast: j === points.length-2,
+          marked: j === points.length-2 && isLegalLineType(lineType),
           marker: type,
           color: color,
-          id:id
+          id:id,
+          type: lineType
         });
       }
     };
@@ -69,7 +74,7 @@
       return node;
     };
 
-    var getNodeLines = function (reaction, node, reactionId) {
+    var getNodeLines = function (reaction, node, reactionId,reactionClass) {
         var count = {inputs:0,outputs:0};
         if(!node.base || node.base.length === 0){
           return 'missing';
@@ -79,29 +84,29 @@
         case 'Input':
           base.push(reaction.base[0]);
           base[0] = getNodeCenter(node.id);
-          generateLine(base, 'red', 'Input',reactionId);
+          generateLine(base, 'red', 'Input',reactionId,reactionClass);
           count.inputs = count.inputs + 1;
           break;
         case 'Output':
           base.push(reaction.base[(reaction.base.length - 1)]);
           base.reverse();
-          generateLine(base, 'green', 'Output',reactionId);
+          generateLine(base, 'green', 'Output',reactionId,reactionClass);
           count.outputs = count.outputs + 1;
           break;
         case 'Activator':
           base.push(reaction.base[1]);
           base[0] = getNodeCenter(node.id);
-          generateLine(base, 'blue', 'Activator',reactionId);
+          generateLine(base, 'blue', 'Activator',reactionId,reactionClass);
           break;
         case 'Catalyst':
           base.push(reaction.base[1]);
           base[0] = getNodeCenter(node.id);
-          generateLine(base, 'purple', 'Catalyst',reactionId);
+          generateLine(base, 'purple', 'Catalyst',reactionId,reactionClass);
           break;
         case 'Inhibitor':
           base.push(reaction.base[1]);
           base[0] = getNodeCenter(node.id);
-          generateLine(base, 'orange', 'Inhibitor',reactionId);
+          generateLine(base, 'orange', 'Inhibitor',reactionId,reactionClass);
           break;
         }
 
@@ -124,7 +129,8 @@
         reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
       }
       generateLine(reaction.base,
-                   outputs===0?'hotpink':'black', outputs === 0 ?'Output':reaction.type,id);
+                   outputs===0?'hotpink':'black',
+                   outputs === 0 ?'Output':reaction.type,id,reaction.class);
     });
 
     return lines;

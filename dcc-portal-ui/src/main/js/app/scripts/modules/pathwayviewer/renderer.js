@@ -111,8 +111,8 @@
   Renderer.prototype.renderNodes = function (nodes) {
     var svg = this.svg, config = this.config;
 
-    var octs = _.filter(nodes,function(n){return n.type === 'RenerableComplex';});
-    var rects = _.filter(nodes,function(n){return n.type !== 'RenerableComplex';});
+    var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
+    var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
 
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {
@@ -191,7 +191,7 @@
       .attr({
         class: function(d){return 'RenderableOct RenderableComplex entity'+d.reactomeId;},
         points: function (d) {
-          return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 3);
+          return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
         },
         stroke: 'Red',
         'stroke-width': 1
@@ -224,7 +224,7 @@
     var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
-      'class':function(d){return 'RenderableStroke entity'+d.id;},
+      'class':function(d){return 'RenderableStroke entity'+d.id+' '+d.type;},
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
@@ -232,11 +232,11 @@
       'stroke':strokeColor
     }).style({
       'marker-start':function(d){
-        return d.isLast && isStartMarker(d.marker)?
+        return d.marked && isStartMarker(d.marker)?
           'url('+config.urlPath+'#'+d.marker+')':'';
       },
       'marker-end':function(d){
-        return d.isLast && !isStartMarker(d.marker)?
+        return d.marked && !isStartMarker(d.marker)?
           'url('+config.urlPath+'#'+d.marker+')':'';
       }
     });

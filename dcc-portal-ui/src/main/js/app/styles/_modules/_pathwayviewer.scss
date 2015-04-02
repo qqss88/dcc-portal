@@ -45,6 +45,15 @@
   stroke-width:0.7px;
 }
 
+.renderableinteraction{
+  stroke-width:1.1px;
+}
+
+.entitysetandmemberlink, .entitysetandentitysetlink{
+  stroke-dasharray:5 7;
+  stroke-width:0.5px;
+}
+
 /** ESSENTIAL **/
 
 .Note{

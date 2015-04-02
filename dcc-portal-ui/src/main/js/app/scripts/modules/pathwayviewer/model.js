@@ -82,7 +82,8 @@
         reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
         id: this.attributes.id.nodeValue,
         type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',
-        description: displayName ? displayName.innerText : 'no details'
+        description: displayName ? displayName.innerText : 'no details',
+        class: this.localName.substring(this.localName.lastIndexOf('.') + 1)
       });
     });
   };
