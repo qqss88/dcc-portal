@@ -77,12 +77,10 @@
     });
     var rendererUtils = new dcc.RendererUtils();
 
-    // Put compartments first so they are rendered in the background
-    var sortedNodes = _.sortBy(model.getNodes(),function(n){return n.type==='RenderableCompartment'?0:1;});
-
     t0 = performance.now();
+    this.renderer.renderCompartments(_.filter(model.getNodes().slice(),function(n){return n.type==='RenderableCompartment'}));
     this.renderer.renderEdges(rendererUtils.generateLines(model));
-    this.renderer.renderNodes(sortedNodes);
+    this.renderer.renderNodes(_.filter(model.getNodes().slice(),function(n){return n.type!=='RenderableCompartment'}));
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     t1 = performance.now();
     //d3.select(config.container).append('div').attr('class','pathway-infobar').html('hi');

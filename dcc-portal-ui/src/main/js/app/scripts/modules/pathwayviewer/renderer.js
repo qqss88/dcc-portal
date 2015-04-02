@@ -49,7 +49,7 @@
           fill:'white'
         },
         viewBox:  '-10 -10 30 20',
-        refX: '42'
+        refX: '35'
       },
       {
         id:'RenderableInteraction',
@@ -108,9 +108,43 @@
     }
   }
 
+  Renderer.prototype.renderCompartments = function (compartments) {
+    this.svg.selectAll('.RenderableCompartment').data(compartments).enter().append('rect').attr({
+      'class': function (d) {
+        return d.type + ' entity'+d.reactomeId;
+      },
+      'x': function (d) {
+        return d.position.x;
+      },
+      'y': function (d) {
+        return d.position.y;
+      },
+      'width': function (d) {
+        return d.size.width;
+      },
+      'height': function (d) {
+        return d.size.height;
+      }
+    });
+
+    this.svg.selectAll('.RenderableCompartmentText').data(compartments).enter().append('foreignObject').attr({
+        'class':function(d){return d.type+'Text RenderableCompartmentText';},
+        'x':function(d){return d.text.position.x;},
+        'y':function(d){return d.text.position.y;},
+        'width':function(d){return d.size.width;},
+        'height':function(d){return d.size.height;},
+        'pointer-events':'none',
+        'fill':'none'
+      }).append('xhtml:body')
+      .attr('class','RenderableCompartmentText')
+      .html(function(d){
+        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          d.text.content+'</td></tr></table>';
+      });
+  };
+
   Renderer.prototype.renderNodes = function (nodes) {
     var svg = this.svg, config = this.config;
-
     var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
 
@@ -162,13 +196,9 @@
         }
       }
     }).on('mouseover', function () {
-      if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
-        d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
-      }
+      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
     }).on('mouseout', function () {
-      if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
-        d3.select(this).style('fill', d3.select(this).attr('fill-old'));
-      }
+      d3.select(this).style('fill', d3.select(this).attr('fill-old'));
     }).on('click',function(d){config.onClick(d);});
 
     var getPointsMap = function(x,y,w,h,a){
@@ -203,16 +233,15 @@
 
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableText';},
-        'x':function(d){return d.type==='RenderableCompartment'?d.text.position.x:d.position.x;},
-        'y':function(d){return d.type==='RenderableCompartment'?d.text.position.y:d.position.y;},
+        'x':function(d){return d.position.x;},
+        'y':function(d){return d.position.y;},
         'width':function(d){return d.size.width;},
         'height':function(d){return d.size.height;},
         'pointer-events':'none',
         'fill':'none'
       }).append('xhtml:body')
-      .attr('class',function(d){
-        return d.type==='RenderableCompartment'?'RenderableCompartmentText':'RenderableNodeText';
-      }).html(function(d){
+      .attr('class','RenderableNodeText')
+      .html(function(d){
         return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
           d.text.content+'</td></tr></table>';
       });
