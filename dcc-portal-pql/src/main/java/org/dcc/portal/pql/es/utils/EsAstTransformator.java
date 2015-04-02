@@ -69,31 +69,33 @@ public class EsAstTransformator {
     esAst = resolveFacets(esAst);
     esAst = score(esAst, context);
     esAst = optimize(esAst);
-
     log.debug("ES AST after the transformations: {}", esAst);
 
     return esAst;
   }
 
   public ExpressionNode score(ExpressionNode esAst, QueryContext context) {
-    log.debug("[score]");
-    return esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context)).get();
+    log.debug("[score] Before: {}", esAst);
+    val result = esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
+    log.debug("[score] After: {}", result);
+
+    return result;
   }
 
   public ExpressionNode resolveSpecialCases(ExpressionNode esAst, QueryContext context) {
-    log.debug("[resoveSpecialCases]");
+    log.debug("[resoveSpecialCases] Before: {}", esAst);
     esAst = esAst.accept(fieldsToSourceVisitor, Optional.of(context)).get();
     esAst = esAst.accept(entitySetVisitor, Optional.of(context)).get();
     esAst = esAst.accept(scoreSortVisitor, Optional.empty());
     esAst = esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
     esAst = esAst.accept(locationFilterVisitor, Optional.of(context)).get();
+    log.debug("[resoveSpecialCases] After: {}", esAst);
 
     return esAst;
   }
 
   public ExpressionNode optimize(ExpressionNode esAst) {
-    log.debug("[optimize]");
-    // Clean empty filter node
+    log.debug("[optimize] Before: {}", esAst);
     esAst = esAst.accept(emptyNodesCleaner, Optional.empty());
 
     // Remove FilterAggregationNodes without filters
@@ -101,14 +103,16 @@ public class EsAstTransformator {
     if (aggsNode.isPresent()) {
       esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty());
     }
+    log.debug("[optimize] After: {}", esAst);
 
     return esAst;
   }
 
   public ExpressionNode resolveFacets(ExpressionNode esAst) {
-    log.debug("[resolveFacets]");
+    log.debug("[resolveFacets] Before: {}", esAst);
     esAst = esAst.accept(facetsResolver, Optional.empty());
     esAst = esAst.accept(missingAggregationVisitor, Optional.empty());
+    log.debug("[resolveFacets] After: {}", esAst);
 
     return esAst;
   }

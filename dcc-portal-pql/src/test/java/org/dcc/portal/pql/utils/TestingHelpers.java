@@ -19,6 +19,7 @@ package org.dcc.portal.pql.utils;
 
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.PqlParseListener;
@@ -76,6 +78,12 @@ public class TestingHelpers {
     }
 
     throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
+  }
+
+  public static void assertTermNode(@NonNull ExpressionNode node, @NonNull String field, @NonNull Object value) {
+    val termNode = (TermNode) node;
+    assertThat(termNode.getNameNode().getValueAsString()).isEqualTo(field);
+    assertThat(termNode.getValueNode().getValue()).isEqualTo(value);
   }
 
 }

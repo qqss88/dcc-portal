@@ -17,8 +17,6 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Optional;
 
 import lombok.val;
@@ -40,8 +38,8 @@ import org.dcc.portal.pql.es.utils.VisitorHelpers;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 /**
- * Returns an AST with filters that are not nested under the path. All methods beneath visitFilter return nodes then
- * must be removed because they are not nested.
+ * Returns an AST with filters that are not nested under the nesting path. All methods beneath visitFilter return nodes
+ * which must be removed because they are nested.
  */
 public class NonNestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, ScoreQueryContext> {
 
@@ -49,8 +47,6 @@ public class NonNestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>
   public Optional<ExpressionNode> visitFilter(FilterNode node, Optional<ScoreQueryContext> context) {
     VisitorHelpers.checkOptional(context);
     processChildren(node, context);
-
-    checkState(node.hasChildren());
 
     return Optional.of(node);
   }

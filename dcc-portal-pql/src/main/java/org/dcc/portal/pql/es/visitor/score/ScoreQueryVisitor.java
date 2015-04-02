@@ -18,6 +18,8 @@
 package org.dcc.portal.pql.es.visitor.score;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.es.utils.Visitors.createNestedFieldsVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createNonNestedFieldsVisitor;
 
 import java.util.Optional;
 
@@ -35,7 +37,6 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -45,7 +46,7 @@ import org.dcc.portal.pql.qe.QueryContext;
  * and the other types.
  */
 @Slf4j
-public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
+public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
 
   private static final ScoreMode SCORE_MODE = ScoreMode.TOTAL;
 
@@ -53,7 +54,7 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionN
   private final String nestingPath;
   private final AbstractTypeModel typeModel;
 
-  protected ScoreQueryVisitor(@NonNull NestedNode nestedNode, AbstractTypeModel typeModel) {
+  protected ScoreQueryVisitor(@NonNull NestedNode nestedNode, @NonNull AbstractTypeModel typeModel) {
     this.nestedNode = nestedNode;
     this.nestingPath = nestedNode.getPath();
     this.typeModel = typeModel;
@@ -64,20 +65,19 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionN
   }
 
   @Override
-  public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
+  public ExpressionNode visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
     val queryNode = Nodes.getOptionalChild(node, QueryNode.class);
     if (queryNode.isPresent()) {
       queryNode.get().accept(this, context);
     } else {
-      createQueryNode(node);
+      node.addChildren(createQueryNode(nestedNode));
     }
 
-    return Optional.of(node);
+    return node;
   }
 
-  // FIXME: rework!
   @Override
-  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode queryNode, @NonNull Optional<QueryContext> context) {
+  public ExpressionNode visitQuery(@NonNull QueryNode queryNode, @NonNull Optional<QueryContext> context) {
     // This method must always get a QueryNode with a FilterNode that represent a filtered query.
     log.debug("Adding scores to QueryNode: \n{}", queryNode);
     val filterNodeOpt = Nodes.getOptionalChild(queryNode, FilterNode.class);
@@ -85,13 +85,17 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionN
 
     // Remove all the chilren from the query node (FilterNode only). Add filters with non-nested fields
     // as well a fields nested under the nestingPath
+    // NB: By 'non-nested' fields we mean fields that are not nested under the nesting path of the scoring node
+    // E.g. nesting path for a MutationCentric type is 'ssm_occurrence'. Fields nested under 'transcript' are non-nested
+    // in this context.
     queryNode.removeAllChildren();
 
     // Preparing filters with non-nested fields.
     val scoreQueryContext = Optional.of(new ScoreQueryContext(nestingPath, typeModel));
     ExpressionNode filtersClone = Nodes.cloneNode(filterNodeOpt.get());
+
     // Returns a FilterNode with filters non-nested under the path.
-    val nonNestedChildren = filtersClone.accept(Visitors.createNonNestedFieldsVisitor(), scoreQueryContext).get();
+    val nonNestedChildren = filtersClone.accept(createNonNestedFieldsVisitor(), scoreQueryContext).get();
 
     val mustNode = new MustBoolNode();
     mustNode.addChildren(nonNestedChildren);
@@ -100,22 +104,26 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionN
     // Preparing filters with nested fields.
     filtersClone = Nodes.cloneNode(filterNodeOpt.get());
     val requestContext = new NestedFieldsVisitor.RequestContext(typeModel, nestedNode);
-    val nestedChildren = filtersClone.accept(Visitors.createNestedFieldsVisitor(), Optional.of(requestContext)).get();
+    val nestedChildren = filtersClone.accept(createNestedFieldsVisitor(), Optional.of(requestContext)).get();
 
-    // TODO: if nestedChildren is of type FilterNode add it's children
     mustNode.addChildren(nestedChildren);
     log.debug("Added nested filters \n{}", nestedChildren);
 
-    // Result: QueryNode - BoolNode - MustBoolNode - ...
+    // Result: QueryNode - BoolNode - MustBoolNode - children
+    // children are [NestedNode - FunctionScoreNode] and [FilterNode (with non-nested fields)]
     queryNode.addChildren(new BoolNode(mustNode));
 
-    return Optional.of(queryNode);
+    return queryNode;
   }
 
-  private void createQueryNode(RootNode rootNode) {
+  private static ExpressionNode createQueryNode(ExpressionNode nestedNode) {
     val nestedNodeClone = Nodes.cloneNode(nestedNode);
-    val queryNode = new QueryNode(nestedNodeClone);
-    rootNode.addChildren(queryNode);
+
+    return new QueryNode(nestedNodeClone);
+  }
+
+  static NestedNode createdFunctionScoreNestedNode(String script, String path) {
+    return createNodesStructure(script, path);
   }
 
   private static NestedNode createNodesStructure(String script, String path, ExpressionNode... children) {
@@ -123,10 +131,6 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<Optional<ExpressionN
     val nestedNode = new NestedNode(path, SCORE_MODE, functionScoreQueryNode);
 
     return nestedNode;
-  }
-
-  static NestedNode createdFunctionScoreNestedNode(String script, String path) {
-    return createNodesStructure(script, path);
   }
 
 }

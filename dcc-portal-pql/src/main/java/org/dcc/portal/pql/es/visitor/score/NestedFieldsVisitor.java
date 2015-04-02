@@ -50,10 +50,9 @@ import org.dcc.portal.pql.meta.AbstractTypeModel;
 
 import com.google.common.collect.ImmutableList;
 
-// FIXME: This class is difficult to understand even for me. Rework!
 /**
- * Returns an AST with filters that are nested under the path. All methods beneath visitFilter return nodes they must be
- * included in the result set.
+ * Returns an AST with filters that are nested under the nesting path. All methods beneath visitFilter return nodes
+ * which must be included in the result set.
  */
 @Slf4j
 public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, RequestContext> {
@@ -65,6 +64,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
     AbstractTypeModel typeModel;
     @NonNull
     NestedNode nestedNode;
+
   }
 
   @Override
@@ -72,21 +72,23 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
     VisitorHelpers.checkOptional(context);
     log.debug("[visitFilter] Processing \n{}", node);
 
-    // This method assumes that node has no FilterNode child otherwise this method will be called for that FilterNode
-    // and will return incorrect results.
+    // This method assumes that this FilterNode has no FilterNode children otherwise this method will be called for that
+    // FilterNode again and will return incorrect results.
     validateFilterNode(node);
 
     val result = processChildren(node, context);
     if (result.isPresent()) {
       // processChildren() return result of type of the current method, FilterNode in our case. But scoring works only
-      // in a query context
-      val resultChild = result.get().getFirstChild();
+      // in a query context. Thus, we have to return children of the result(FilterNode).
       checkState(result.get().childrenCount() == 1, "Malfrormed FilterNode. %s", result.get());
+      val resultChild = result.get().getFirstChild();
       log.debug("Prepared nested score node with filters: \n{}", resultChild);
 
       return Optional.of(resultChild);
     }
 
+    // After visiting all the chilren of this FilterNode none of them was added to the final result. Therefore,
+    // a NestedNode with FunctionScoreNode child will be returned.
     log.debug("Prepared nested score node with filters: \n{}", context.get().getNestedNode());
 
     return Optional.of(context.get().getNestedNode());
@@ -95,7 +97,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   /**
    * Checks that the {@code node} has not FilterNode children.
    */
-  private void validateFilterNode(FilterNode node) {
+  private static void validateFilterNode(FilterNode node) {
     for (val child : node.getChildren()) {
       validateFilterNodeChild(child);
     }
@@ -136,40 +138,40 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   @Override
   public Optional<ExpressionNode> visitNested(NestedNode node, Optional<RequestContext> context) {
     log.debug("[visitNested] Path: {}\n{}", node.getPath(), node);
-    val globalNestedNode = context.get().getNestedNode();
-    val globalNestingPath = globalNestedNode.getPath();
+    val scoredNestedNode = context.get().getNestedNode();
+    val scoredNestingPath = scoredNestedNode.getPath();
 
-    // This assumes that globalNesting is first level only. If it's deeper the method will produce wrong results
-    if (globalNestingPath.equals(node.getPath())) {
+    // This assumes that scoredNesting is first level only. If it's deeper the method will produce wrong results
+    if (scoredNestingPath.equals(node.getPath())) {
       checkState(node.childrenCount() == 1, "NestedNode has no children. \n%s", node);
       val childToVisit = node.getFirstChild();
 
       // Now we need to create a new correct structure so the visited children could detect that they don't need to
       // create another nested scored node
       // NestedNode - ScoreNode - nestedNodeChild
-      val nestedClone = Nodes.cloneNode(globalNestedNode);
+      val nestedClone = Nodes.cloneNode(scoredNestedNode);
       val scoreNode = nestedClone.getFirstChild();
       scoreNode.addChildren(childToVisit);
 
       // Now visit the children
-      val visitChildResult_ = childToVisit.accept(this, context).get();
+      val visitChildResult = childToVisit.accept(this, context).get();
 
       // and replace children of the filterNode with the correct children
       // Wrap visitChildResult in a filterNode for filter caching.
       scoreNode.removeAllChildren();
-      scoreNode.addChildren(new FilterNode(visitChildResult_));
+      scoreNode.addChildren(new FilterNode(visitChildResult));
       log.debug("[visitNested] Path: {}. Result -\n{}", node.getPath(), nestedClone);
 
       return Optional.of(nestedClone);
     }
 
     // We could come here because of couple reasons:
-    // - node.path - donor, globalNestingPath - gene
-    // - node.path - gene.ssm, globalNestingPath - gene
+    // - node.path - donor, scoredNestingPath - gene
+    // - node.path - gene.ssm, scoredNestingPath - gene
 
-    // Case: node.path - donor, globalNestingPath - gene
-    // This node must be included by the NonNestedFieldsVisitor TODO: test this case in the NonNestedFieldsVisitor
-    if (!node.getPath().startsWith(globalNestingPath)) {
+    // Case: node.path - donor, scoredNestingPath - gene
+    // This node is included by the NonNestedFieldsVisitor
+    if (!node.getPath().startsWith(scoredNestingPath)) {
       return Optional.empty();
     }
 
@@ -178,7 +180,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
       return Optional.of(node);
     }
 
-    val result = Nodes.cloneNode(globalNestedNode);
+    val result = Nodes.cloneNode(scoredNestedNode);
     result.getFirstChild().addChildren(new FilterNode(node));
     log.debug("[visitNested] Path: {}. Result -\n{}", node.getPath(), result);
 
@@ -216,17 +218,16 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
       return Optional.empty();
     }
 
-    val newNode = wrapInNested(field, node, context.get());
-
-    val nestedNodeClone = Nodes.cloneNode(context.get().getNestedNode());
-
     if (hasScoring(node)) {
       // Already in a scored nested node
       return Optional.of(node);
     }
 
-    // Wrap in a FilterNode to create a filtered query
-    nestedNodeClone.getFirstChild().addChildren(new FilterNode(newNode));
+    val nestedNodeClone = Nodes.cloneNode(context.get().getNestedNode());
+    val enclosedNode = encloseInNestedNode(field, node, context.get());
+
+    // Enclose in a FilterNode to create a filtered query
+    nestedNodeClone.getFirstChild().addChildren(new FilterNode(enclosedNode));
 
     // Any nested node must be enclosed in a QueryNode. Otherwise, the nested scoring node will be created in a filter
     // context what's incorrect.
@@ -253,9 +254,9 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   }
 
   /**
-   * 'Wraps' this {@code node} in a NestedNode if this {@code node} in nested deeper than the 'global nested node'
+   * Encloses this {@code node} in a NestedNode if this {@code node} in nested deeper than the 'global nested node'
    */
-  private ExpressionNode wrapInNested(String field, ExpressionNode node, RequestContext requestContext) {
+  private ExpressionNode encloseInNestedNode(String field, ExpressionNode node, RequestContext requestContext) {
     val nodeNestedPath = requestContext.getTypeModel().getNestedPath(field);
     val globalNestedPath = requestContext.getNestedNode().getPath();
 

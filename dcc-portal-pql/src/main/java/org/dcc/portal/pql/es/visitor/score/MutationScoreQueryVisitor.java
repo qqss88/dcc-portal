@@ -17,34 +17,24 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 
-import java.util.Optional;
+/**
+ * Scores queries made against the MutationCentric type.<br>
+ * <br>
+ * Creates a NestedNode with a ConstantScoreNode child. Sets scoring mode on the nested on 'ssm_occurrence' queries to
+ * 'total'. The ConstantScoreNode has boost 1. If the original QueryNode has a FilterNode then the FilterNode is added
+ * as a child of the ConstantScoreNode.<br>
+ * <br>
+ * <b>NB:</b> This visitor must be run as the latest one, after all the other processing rules applied.
+ */
+public class MutationScoreQueryVisitor extends ScoreQueryVisitor {
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+  public static final String PATH = "ssm_occurrence";
+  public static final String SCRIPT = "1";
 
-import org.dcc.portal.pql.qe.QueryContext;
-import org.junit.Before;
-import org.junit.Test;
-
-@Slf4j
-public class GeneScoreQueryVisitorTest {
-
-  GeneScoreQueryVisitor visitor = new GeneScoreQueryVisitor();
-  QueryContext queryContext;
-
-  @Before
-  public void setUp() {
-    queryContext = new QueryContext("", GENE_CENTRIC);
-  }
-
-  @Test
-  public void test() {
-    val root = createEsAst("nested(donor,in(donor.projectId,'ALL-US'),in(donor.primarySite,'Blood'))", GENE_CENTRIC);
-    val result = root.accept(visitor, Optional.of(queryContext)).get();
-    log.warn("{}", result);
+  public MutationScoreQueryVisitor() {
+    super(createdFunctionScoreNestedNode(SCRIPT, PATH), getMutationCentricTypeModel());
   }
 
 }

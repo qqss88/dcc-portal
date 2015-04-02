@@ -17,37 +17,35 @@
  */
 package org.dcc.portal.pql.es.visitor.score;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
-import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 
 /**
- * Scores queries made against the MutationCentric type.<br>
- * <br>
- * Creates a NestedNode with a ConstantScoreNode child. Sets scoring mode on the nested on 'ssm_occurrence' queries to
- * 'total'. The ConstantScoreNode has boost 1. If the original QueryNode has a FilterNode then the FilterNode is added
- * as a child of the ConstantScoreNode.<br>
- * <br>
- * <b>NB:</b> This visitor must be run as the latest one, after all the other processing rules applied.
+ * Helps to test ScoreVisitors. Assumes that all the tests are performed with MutationScoreQueryVisitor
  */
-public class MutatationScoreQueryVisitor extends ScoreQueryVisitor {
+public class ScoreVisitorHelpers {
 
-  private static final String NESTED_PATH = "ssm_occurrence";
-  private static final ScoreMode DEFAULT_SCORE_MODE = ScoreMode.TOTAL;
-  private static final String SCRIPT = "1";
-
-  public MutatationScoreQueryVisitor() {
-    super(createNestedNode(), IndexModel.getMutationCentricTypeModel());
+  public static void assertQueryNode(QueryNode queryNode) {
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
   }
 
-  private static NestedNode createNestedNode() {
-    return new NestedNode(NESTED_PATH, DEFAULT_SCORE_MODE, createFunctionScoreNode());
+  public static void assertNestedNode(NestedNode nestedNode) {
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+    assertThat(nestedNode.getPath()).isEqualTo(MutationScoreQueryVisitor.PATH);
+    assertThat(nestedNode.getScoreMode()).isEqualTo(ScoreMode.TOTAL);
   }
 
-  private static ExpressionNode createFunctionScoreNode() {
-    return new FunctionScoreNode(SCRIPT);
+  public static void assertFunctionScoreNode(FunctionScoreNode node, boolean hasChildren) {
+    assertThat(node.getScript()).isEqualTo(MutationScoreQueryVisitor.SCRIPT);
+    if (hasChildren) {
+      assertThat(node.childrenCount()).isEqualTo(1);
+    } else {
+      assertThat(node.childrenCount()).isEqualTo(0);
+    }
   }
 
 }

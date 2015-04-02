@@ -29,10 +29,9 @@ import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
-import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
-import org.dcc.portal.pql.es.visitor.score.MutatationScoreQueryVisitor;
+import org.dcc.portal.pql.es.visitor.score.MutationScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.NestedFieldsVisitor;
 import org.dcc.portal.pql.es.visitor.score.NonNestedFieldsVisitor;
 import org.dcc.portal.pql.es.visitor.score.ScoreQueryVisitor;
@@ -62,10 +61,9 @@ public class Visitors {
   /*
    * ScoreQueryVisitors
    */
-  private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
   private static final GeneScoreQueryVisitor GENE_SCORE_QUERY_VISITOR = new GeneScoreQueryVisitor();
-  private static final MutatationScoreQueryVisitor MUTATOIN_SCORE_QUERY_VISITOR = new MutatationScoreQueryVisitor();
+  private static final MutationScoreQueryVisitor MUTATION_SCORE_QUERY_VISITOR = new MutationScoreQueryVisitor();
 
   /*
    * QueryBuilderVisitor
@@ -104,8 +102,8 @@ public class Visitors {
     return ENTITY_SET_VISITOR;
   }
 
-  public static MutatationScoreQueryVisitor createScoreMutatationQueryVisitor() {
-    return MUTATOIN_SCORE_QUERY_VISITOR;
+  public static MutationScoreQueryVisitor createScoreMutatationQueryVisitor() {
+    return MUTATION_SCORE_QUERY_VISITOR;
   }
 
   public static ScoreSortVisitor createScoreSortVisitor() {
@@ -167,9 +165,9 @@ public class Visitors {
     case GENE_CENTRIC:
       return GENE_SCORE_QUERY_VISITOR;
     case MUTATION_CENTRIC:
-      return MUTATOIN_SCORE_QUERY_VISITOR;
+      return MUTATION_SCORE_QUERY_VISITOR;
     default:
-      return DEFAULT_SCORE_QUERY_VISITOR;
+      throw new IllegalArgumentException();
     }
   }
 
