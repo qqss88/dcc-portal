@@ -163,7 +163,7 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
         typeModel.getInternalField(LOOKUP_PATH));
   }
 
-  private boolean isProcess(String field) {
+  private static boolean isProcess(String field) {
     return field.endsWith(ENTITY_SET_ID);
   }
 

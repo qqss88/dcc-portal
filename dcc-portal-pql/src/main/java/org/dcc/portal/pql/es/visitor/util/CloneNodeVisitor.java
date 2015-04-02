@@ -66,7 +66,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
 
   @Override
   public ExpressionNode visitFunctionScore(FunctionScoreNode node, Optional<Void> context) {
-    return new FunctionScoreNode(node.getScript(), node.getBoost(), visitChildren(node));
+    return new FunctionScoreNode(node.getScript(), visitChildren(node));
   }
 
   @Override

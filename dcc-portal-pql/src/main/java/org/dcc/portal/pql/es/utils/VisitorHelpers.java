@@ -63,7 +63,6 @@ public class VisitorHelpers {
       val child = parent.getChild(i);
       val childResult = child.accept(visitor, context);
       if (childResult.isPresent()) {
-
         childrenToBeReplaced.put(i, childResult.get());
       }
     }

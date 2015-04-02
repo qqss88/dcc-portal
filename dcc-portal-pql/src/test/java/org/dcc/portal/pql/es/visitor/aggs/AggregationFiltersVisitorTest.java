@@ -137,13 +137,7 @@ public class AggregationFiltersVisitorTest {
     log.info("Result {}", orNodeResult);
 
     assertThat(orNodeResult).isNotEqualTo(orNodeClone);
-    // eq(gender, 70) removed
-    assertThat(orNodeResult.childrenCount()).isEqualTo(1);
-
-    val rangeNode = (RangeNode) orNodeResult.getFirstChild();
-    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
-    val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
-    assertThat(gtNode.getValue()).isEqualTo(60);
+    assertThat(orNodeResult.hasChildren()).isFalse();
   }
 
   private ExpressionNode getMustNode(String query) {

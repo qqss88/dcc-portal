@@ -15,34 +15,69 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast.query;
+package org.dcc.portal.pql.es.visitor.special;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.SortNode;
+import org.dcc.portal.pql.es.model.Order;
+import org.junit.Test;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class FunctionScoreNode extends ExpressionNode {
+@Slf4j
+public class ScoreSortVisitorTest {
 
-  public static final String MISSING_SCRIPT = "FunctionScoreNode.missing";
+  ScoreSortVisitor visitor = new ScoreSortVisitor();
 
-  @NonNull
-  String script;
-
-  public FunctionScoreNode(@NonNull String script, ExpressionNode... children) {
-    super(children);
-    this.script = script;
+  @Test
+  public void noScoreNodeTest() {
+    val result = visit(new RootNode());
+    val sortNode = assertRoot(result);
+    val fields = sortNode.getFields();
+    assertThat(fields.size()).isEqualTo(1);
+    assertThat(fields.get("_score")).isEqualTo(Order.DESC);
   }
 
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitFunctionScore(this, context);
+  @Test
+  public void hasScoreTest() {
+    val sortNode = new SortNode();
+    sortNode.addField("_score", Order.DESC);
+    val result = visit(new RootNode(sortNode));
+    val sortNodeResult = assertRoot(result);
+    assertThat(sortNode).isEqualTo(sortNodeResult);
+  }
+
+  @Test
+  public void sortWithoutScoreTest() {
+    val sortNode = new SortNode();
+    sortNode.addField("id", Order.DESC);
+    val result = visit(new RootNode(sortNode));
+
+    val sortNodeResult = assertRoot(result);
+    val fields = sortNodeResult.getFields();
+    assertThat(fields.size()).isEqualTo(2);
+    assertThat(fields.get("id")).isEqualTo(Order.DESC);
+    assertThat(fields.get("_score")).isEqualTo(Order.DESC);
+  }
+
+  private SortNode assertRoot(ExpressionNode root) {
+    assertThat(root.childrenCount()).isEqualTo(1);
+
+    return (SortNode) root.getFirstChild();
+  }
+
+  private ExpressionNode visit(ExpressionNode ast) {
+    log.debug("Visiting \n{}", ast);
+    val result = ast.accept(visitor, Optional.empty());
+    log.debug("Result \n{}", result);
+
+    return result;
   }
 
 }
