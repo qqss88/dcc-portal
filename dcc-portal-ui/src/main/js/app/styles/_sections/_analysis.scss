@@ -6,45 +6,58 @@
 
    .analysis-tiles {
       display: block;
-      padding: 1rem;
+      padding-left: 1rem;
       display: table;
    }
 
-   .analysis-tile {
+   .analysis-tile-container {
       float: left;
-      width: 14.5rem;
-      height: 13rem;
-      border: 1px solid $grey;
-      background: $greyLighter;
-      border-radius: 0.5rem;
-      padding: 0.5rem;
+      width: 15rem;
+      height: 14rem;
       margin: 0.5rem;
-      transition: color .5s, background .5s;
 
-      &:hover {
-        cursor: pointer;
-        color: $white;
-        background: $blue;
-        text-decoration: none;
+      .analysis-tile-extra {
+         font-size: 0.8rem;
+         line-height: 1rem;
+         padding: 0.25rem 0.75rem;
+         color: $grey;
       }
 
-      &.in-progress {
-        border-style: dashed;
-        transition: none;
-        background: none;
-        color: $grey;
+      .analysis-tile {
+         //float: left;
+         // width: 15rem;
+         height: 12rem;
+         border: 1px solid $grey;
+         background: $greyLighter;
+         border-radius: 0.5rem;
+         padding: 0.5rem;
+         transition: color .5s, background .5s;
 
-        &:hover {
-          color: $grey;
-          background: none;
-        }
-      }
+         &:hover {
+           cursor: pointer;
+           color: $white;
+           background: $blue;
+           text-decoration: none;
+         }
 
+         &.in-progress {
+           border-style: dashed;
+           transition: none;
+           background: none;
+           color: $grey;
+           display: block;
 
-      .analysis-tile-detail {
-         margin-top: 0.5rem;
-         font-size: 0.85rem;
-         line-height: 1.25rem;
+           &:hover {
+             color: $grey;
+             background: none;
+           }
+         }
+
+         .analysis-tile-detail {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            line-height: 1.25rem;
+         }
       }
    }
 

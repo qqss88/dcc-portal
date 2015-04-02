@@ -81,7 +81,7 @@
 
                        <div data-ng-if="out.validIds.length > 0 && out.warnings.length === 0">
                           <br>
-                          <span data-ng-init="expanded=false" data-ng-click="expanded=!expanded">
+                          <span data-ng-init="expanded=true" data-ng-click="expanded=!expanded">
                               <a href="">
                                    {{out.totalInput}} submitted gene identifier(s) mapped to {{out.totalMatch}} Ensembl ID
                                   <i class="{{ expanded? 'icon-caret-down':'icon-caret-left'}}"></i>

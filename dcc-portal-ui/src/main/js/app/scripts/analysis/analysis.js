@@ -124,6 +124,7 @@
     function init() {
       $timeout.cancel(pollTimeout);
       $scope.error = null;
+      $scope.analysisResult = null;
 
       if (! $scope.analysisId || ! $scope.analysisType) {
         return;
@@ -207,12 +208,24 @@
       }
     };
 
+    this.analysisDemoDescription = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Compare high impact mutations in brain cancers across GBM-US, LGG-US, and PCBA-DE.';
+      } else if (type === 'enrichment') {
+        return 'Perform enrichment analysis on top 50 genes in Cancer Gene Census.';
+      } else if (type === 'phenotype') {
+        return 'Compare phenotypes across brain, breast, and colorectal cancer donors.';
+      } else {
+        return '';
+      }
+    };
+
     this.analysisDescription = function(type) {
       if (['set', 'union'].indexOf(type) >= 0) {
-        return 'Display venn diagram and find out intersection or union, etc. of your sets of the same type.';
+        return 'Display Venn diagram and find out intersection or union, etc. of your sets of the same type.';
       } else if (type === 'enrichment') {
         return 'Find out statistically significantly over-represented groups of gene sets ' +
-          '(e.g. reactome pathways) when comparing with your gene set.';
+          '(e.g. Reactome pathways) when comparing with your gene set.';
       } else if (type === 'phenotype') {
         return 'Compare some characteristics (e.g. gender, vital status and age at diagnosis) between your donor sets.';
       } else if (type === 'coverage') {
