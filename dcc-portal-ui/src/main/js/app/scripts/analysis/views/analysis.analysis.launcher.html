@@ -12,25 +12,51 @@
     <div data-ng-show="NAC.analysisType === null">
         <div>
             <div class="analysis-tiles">
-                <div class="analysis-tile" data-ng-click="NAC.analysisType='enrichment'">
-                    <i class="icon-beaker"></i><strong>{{NAC.analysisName('enrichment')}}</strong><br>
-                    <div class="analysis-tile-detail">{{NAC.analysisDescription('enrichment')}}</div>
+                <div class="analysis-tile-container">
+                    <div class="analysis-tile" data-ng-click="NAC.analysisType='enrichment'">
+                        <i class="icon-beaker"></i><strong>{{NAC.analysisName('enrichment')}}</strong><br>
+                        <div class="analysis-tile-detail">{{NAC.analysisDescription('enrichment')}}</div>
+                    </div>
+                    <div class="analysis-tile-extra">
+                       <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">{{NAC.analysisDemoDescription('enrichment')}}</a></div>
+                    </div>
                 </div>
-                <div class="analysis-tile" data-ng-click="NAC.analysisType='phenotype'">
-                    <i class="icon-beaker"></i><strong>{{NAC.analysisName('phenotype')}}</strong><br>
-                    <div class="analysis-tile-detail">{{NAC.analysisDescription('phenotype')}}</div>
+                <div class="analysis-tile-container">
+                    <div class="analysis-tile" data-ng-click="NAC.analysisType='phenotype'">
+                        <i class="icon-beaker"></i><strong>{{NAC.analysisName('phenotype')}}</strong><br>
+                        <div class="analysis-tile-detail">{{NAC.analysisDescription('phenotype')}}</div>
+                    </div>
+                    <div class="analysis-tile-extra">
+                        <div>Demo: <a href="" data-ng-click="NAC.demoPhenotype()">{{NAC.analysisDemoDescription('phenotype')}}</a></div>
+                    </div>
                 </div>
-                <div class="analysis-tile" data-ng-click="NAC.analysisType='set'">
-                    <i class="icon-beaker"></i><strong>{{NAC.analysisName('set')}}</strong><br>
-                    <div class="analysis-tile-detail">{{NAC.analysisDescription('set')}}</div>
+                <div class="analysis-tile-container">
+                    <div class="analysis-tile" data-ng-click="NAC.analysisType='set'">
+                        <i class="icon-beaker"></i><strong>{{NAC.analysisName('set')}}</strong><br>
+                        <div class="analysis-tile-detail">{{NAC.analysisDescription('set')}}</div>
+                    </div>
+                    <div class="analysis-tile-extra">
+                        <div>Demo: <a href="" data-ng-click="NAC.demoSetOperation()">{{NAC.analysisDemoDescription('set')}}</a></div>
+                    </div>
                 </div>
-
-                <a class="analysis-tile in-progress" href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback">
-                    <i class="icon-beaker"></i><strong>More?</strong><br>
-                    <div class="analysis-tile-detail">Do you have a specific type of analysis you want to see? Leave feedback and let us know. </div>
-                </a>
+                <div class="analysis-tile-container">
+                    <a class="analysis-tile in-progress" href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback">
+                        <i class="icon-beaker"></i><strong>More?</strong><br>
+                        <div class="analysis-tile-detail">Do you have a specific type of analysis you want to see? Leave feedback and let us know. </div>
+                    </a>
+                </div>
             </div>
+<!--
+            <div class="analysis-tiles">
+                <div class="analysis-tile-container">
+                    <a class="analysis-tile in-progress" href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback">
+                        <i class="icon-beaker"></i><strong>More?</strong><br>
+                        <div class="analysis-tile-detail">Do you have a specific type of analysis you want to see? Leave feedback and let us know. </div>
+                    </a>
+                </div>
 
+            </div>
+-->
         </div>
     </div>
     <br> 
@@ -39,7 +65,7 @@
         <!-- enrichment -->
         <div data-ng-if="NAC.analysisType === 'enrichment'">
             <div><em>{{NAC.analysisDescription('enrichment')}}</em></div>
-            <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">Enrichment Analysis on top 50 genes in Cancer Gene Census</a></div>
+            <div>Demo: <a href="" data-ng-click="NAC.demoEnrichment()">{{NAC.analysisDemoDescription('enrichment')}}</a></div>
             <br>
 
             <!--
@@ -88,7 +114,7 @@
         <!-- phenotype -->
         <div data-ng-if="NAC.analysisType === 'phenotype'">
             <div><em>{{NAC.analysisDescription('phenotype')}}</em></div>
-            <div>Demo: <a href="" data-ng-click="NAC.demoPhenotype()">Compare donors across brain, breast, and colorectal cancers</a></div>
+            <div>Demo: <a href="" data-ng-click="NAC.demoPhenotype()">{{NAC.analysisDemoDescription('phenotype')}}</a></div>
             <br>
 
             <!--
@@ -138,7 +164,7 @@
         <!-- set -->
         <div data-ng-if="NAC.analysisType === 'set'">
             <div><em>{{NAC.analysisDescription('set')}}</em></div>
-            <div>Demo: <a href="" data-ng-click="NAC.demoSetOperation()">Comparing high impact mutations in brain cancers across GBM-US, LGG-US, PCBA-DE</a></div>
+            <div>Demo: <a href="" data-ng-click="NAC.demoSetOperation()">{{NAC.analysisDemoDescription('set')}}</a></div>
             <br>
 
             <!--

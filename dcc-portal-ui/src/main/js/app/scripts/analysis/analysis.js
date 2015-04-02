@@ -208,6 +208,18 @@
       }
     };
 
+    this.analysisDemoDescription = function(type) {
+      if (['set', 'union'].indexOf(type) >= 0) {
+        return 'Compare high impact mutations in brain cancers across GBM-US, LGG-US, and PCBA-DE.';
+      } else if (type === 'enrichment') {
+        return 'Perform enrichment analysis on top 50 genes in Cancer Gene Census.';
+      } else if (type === 'phenotype') {
+        return 'Compare phenotypes across brain, breast, and colorectal cancer donors.';
+      } else {
+        return '';
+      }
+    };
+
     this.analysisDescription = function(type) {
       if (['set', 'union'].indexOf(type) >= 0) {
         return 'Display Venn diagram and find out intersection or union, etc. of your sets of the same type.';
