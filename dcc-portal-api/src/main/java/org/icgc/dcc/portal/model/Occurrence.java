@@ -159,7 +159,7 @@ public class Occurrence {
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getObservations(Map<String, Object> fieldMap) {
-    if (!fieldMap.containsKey("smm")) {
+    if (!fieldMap.containsKey("ssm")) {
       return emptyList();
     }
 
