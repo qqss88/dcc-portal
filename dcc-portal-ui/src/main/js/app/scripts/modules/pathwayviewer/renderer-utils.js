@@ -14,14 +14,14 @@
       }
     }
     return nodes;
-  }
+  };
 
   RendererUtils.prototype.generateReactionLabels = function (reactions) {
     var labels = [];
     reactions.forEach(function (reaction) {
       var hasBase = false;
       reaction.nodes.forEach(function (node) {
-        hasBase =  hasBase || (node.base && node.base.length > 0)
+        hasBase =  hasBase || (node.base && node.base.length > 0);
       });
       if(hasBase){
         labels.push({
@@ -32,7 +32,7 @@
       }
     });
     return labels;
-  }
+  };
 
   RendererUtils.prototype.generateLines = function (model) {
     var lines = [];
@@ -55,8 +55,8 @@
 
     var getNodeCenter = function(nodeId){
       var node = model.getNodeById(nodeId);
-      return { x: (+node.position.x + +node.size.width/2),
-               y: (+node.position.y + +node.size.height/2)};
+      return { x: ((+node.position.x) + (+node.size.width/2)),
+               y: ((+node.position.y) + (+node.size.height/2))};
     };
 
     var getFirstInputNode =  function(nodes){
@@ -67,53 +67,68 @@
         }
       });
       return node;
-    }
+    };
 
-    for (var i = 0; i < reactions.length; i++) {
-      var outputs = 0, inputs=0;
-      var id = reactions[i].reactomeId;
-
-      reactions[i].nodes.forEach(function (node) {
-        if(!node.base || node.base.length === 0) return;
+    var getNodeLines = function (reaction, node, reactionId) {
+        var count = {inputs:0,outputs:0};
+        if(!node.base || node.base.length === 0){
+          return 'missing';
+        }
         var base =  node.base.slice();
         switch (node.type) {
-          case 'Input':
-            base.push(reactions[i].base[0]);
-            base[0] = getNodeCenter(node.id);
-            generateLine(base, 'red', 'Input',id);
-            inputs = inputs + 1;
-            break;
-          case 'Output':
-            base.push(reactions[i].base[(reactions[i].base.length - 1)]);
-            base.reverse();
-            generateLine(base, 'green', 'Output',id);
-            outputs =  outputs +1;
-            break;
-          case 'Activator':
-            base.push(reactions[i].base[1]);
-            base[0] = getNodeCenter(node.id);
-            generateLine(base, 'blue', 'Activator',id);
-            break;
-          case 'Catalyst':
-            base.push(reactions[i].base[1]);
-            base[0] = getNodeCenter(node.id);
-            generateLine(base, 'purple', 'Catalyst',id);
-            break;
-          case 'Inhibitor':
-            base.push(reactions[i].base[1]);
-            generateLine(base, 'orange', 'Inhibitor',id);
-            break;
-          }
+        case 'Input':
+          base.push(reaction.base[0]);
+          base[0] = getNodeCenter(node.id);
+          generateLine(base, 'red', 'Input',reactionId);
+          count.inputs = count.inputs + 1;
+          break;
+        case 'Output':
+          base.push(reaction.base[(reaction.base.length - 1)]);
+          base.reverse();
+          generateLine(base, 'green', 'Output',reactionId);
+          count.outputs = count.outputs + 1;
+          break;
+        case 'Activator':
+          base.push(reaction.base[1]);
+          base[0] = getNodeCenter(node.id);
+          generateLine(base, 'blue', 'Activator',reactionId);
+          break;
+        case 'Catalyst':
+          base.push(reaction.base[1]);
+          base[0] = getNodeCenter(node.id);
+          generateLine(base, 'purple', 'Catalyst',reactionId);
+          break;
+        case 'Inhibitor':
+          base.push(reaction.base[1]);
+          base[0] = getNodeCenter(node.id);
+          generateLine(base, 'orange', 'Inhibitor',reactionId);
+          break;
+        }
 
-      });
-      if(inputs === 0){
-        reactions[i].base[0] = getNodeCenter(getFirstInputNode(reactions[i].nodes).id);
+        return node.type;
+      };
+
+    reactions.forEach(function (reaction) {
+      var id = reaction.reactomeId;
+      var inputs = 0, outputs = 0;
+
+      for(var i=0; i<reaction.nodes.length;i++){
+        var type = getNodeLines(reaction,reaction.nodes[i],id);
+        if(type === 'Input'){
+          inputs ++;
+        }else if(type === 'Output'){
+          outputs++;
+        }
       }
-      generateLine(reactions[i].base,outputs==0?'black':'black',outputs==0?'Output':reactions[i].type,id);
-    }
+      if(inputs === 0){
+        reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
+      }
+      generateLine(reaction.base,
+                   outputs===0?'hotpink':'black', outputs === 0 ?'Output':reaction.type,id);
+    });
 
     return lines;
-  }
+  };
 
   dcc.RendererUtils = RendererUtils;
 

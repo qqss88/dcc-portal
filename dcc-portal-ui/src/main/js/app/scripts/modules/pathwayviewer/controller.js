@@ -6,7 +6,7 @@
 
   var ReactomePathway = function (config) {
     this.config = config;
-  }
+  };
 
   ReactomePathway.prototype.render = function (xml) {
     var config = this.config;
@@ -22,15 +22,14 @@
       minWidth = 100000;
 
     model.getNodes().forEach(function (node) {
-      height = Math.max(+node.position.y + +node.size.height, height);
-      width = Math.max(+node.position.x + +node.size.width, width);
+      height = Math.max((+node.position.y) + (+node.size.height), height);
+      width = Math.max((+node.position.x) + (+node.size.width), width);
       minHeight = Math.min(node.position.y, minHeight);
       minWidth = Math.min(node.position.x, minWidth);
     });
 
     var s = Math.min(config.height / (height - minHeight), config.width / (width - minWidth));
-    console.log(s);
-    var zoom = d3.behavior.zoom().scaleExtent([s*0.9, s*10]);
+    var zoom = d3.behavior.zoom().scaleExtent([s*0.9, s*15]);
 
     var svg = d3.select(config.container).append('svg')
       .attr('class', 'pathwaysvg')
@@ -65,7 +64,8 @@
     // Reset view on double click
     d3.select('.pathwaysvg').on('dblclick', function () {
       zoom.scale(s).translate([-minWidth * s + offsetX, -minHeight * s + offsetY]);
-      svg.transition().attr('transform', 'translate(' + [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
+      svg.transition().attr('transform', 'translate(' +
+                            [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     });
 
     // Render everything
@@ -78,7 +78,7 @@
     var rendererUtils = new dcc.RendererUtils();
 
     // Put compartments first so they are rendered in the background
-    var sortedNodes = _.sortBy(model.getNodes(),function(n){return n.type==='RenderableCompartment'?0:1});
+    var sortedNodes = _.sortBy(model.getNodes(),function(n){return n.type==='RenderableCompartment'?0:1;});
 
     t0 = performance.now();
     this.renderer.renderEdges(rendererUtils.generateLines(model));

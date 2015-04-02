@@ -6,7 +6,7 @@
     this.svg = svg;
     this.config = config;
     defineDefs(svg);
-  }
+  };
 
   var strokeColor = '#696969';
 
@@ -68,7 +68,9 @@
         id:'Catalyst',
         element:'circle',
         attr:{
-          'cx':15,'cy':0,'r':15
+          'cx':15,
+          'cy':0,
+          'r':15
         },
         style:{
           fill:'white',
@@ -109,8 +111,8 @@
   Renderer.prototype.renderNodes = function (nodes) {
     var svg = this.svg, config = this.config;
 
-    var octs = _.filter(nodes,function(n){return n.type === 'RenerableComplex';})
-    var rects = _.filter(nodes,function(n){return n.type !== 'RenerableComplex';})
+    var octs = _.filter(nodes,function(n){return n.type === 'RenerableComplex';});
+    var rects = _.filter(nodes,function(n){return n.type !== 'RenerableComplex';});
 
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {
@@ -153,16 +155,17 @@
         }
       },
       'stroke-dasharray': function (d) {
-        if (d.type === 'RenderableGene')
-          return 0 + ' ' + (+d.size.width + 1) + ' ' + (+d.size.height + +d.size.width) + ' 0';
-        else
+        if (d.type === 'RenderableGene'){
+          return 0 + ' ' + ((+d.size.width) + 1) + ' ' + ((+d.size.height) + (+d.size.width)) + ' 0';
+        }else{
           return '';
+        }
       }
-    }).on('mouseover', function (e) {
+    }).on('mouseover', function () {
       if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
         d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
       }
-    }).on('mouseout', function (e) {
+    }).on('mouseout', function () {
       if (d3.select(this).attr('class').indexOf('RenderableCompartment') < 0) {
         d3.select(this).style('fill', d3.select(this).attr('fill-old'));
       }
@@ -176,13 +179,13 @@
                     {x:x+w-a, y:y+h},
                     {x:x+a,   y:y+h},
                     {x:x,     y:y+h-a},
-                    {x:x,     y:y+a}]
+                    {x:x,     y:y+a}];
       var val = '';
       points.forEach(function (elem) {
         val= val+elem.x+','+elem.y+' ';
       });
       return val;
-    }
+    };
 
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
@@ -207,24 +210,36 @@
         'pointer-events':'none',
         'fill':'none'
       }).append('xhtml:body')
-      .attr('class',function(d){return d.type==='RenderableCompartment'?'RenderableCompartmentText':'RenderableNodeText'})
-      .html(function(d){return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+d.text.content+'</td></tr></table>';});
+      .attr('class',function(d){
+        return d.type==='RenderableCompartment'?'RenderableCompartmentText':'RenderableNodeText';
+      }).html(function(d){
+        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          d.text.content+'</td></tr></table>';
+      });
 
   };
 
   Renderer.prototype.renderEdges = function (edges) {
     var svg = this.svg, config = this.config;
-    var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;}
+    var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
-      'class':function(d){return 'RenderableStroke entity'+d.id},
+      'class':function(d){return 'RenderableStroke entity'+d.id;},
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-    }).attr('stroke',strokeColor)//function(d){return d.color;})
-      .style('marker-start',function(d){return d.isLast && isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';})
-      .style('marker-end',function(d){return d.isLast && !isStartMarker(d.marker)?'url('+config.urlPath+'#'+d.marker+')':'';});
+      'stroke':strokeColor
+    }).style({
+      'marker-start':function(d){
+        return d.isLast && isStartMarker(d.marker)?
+          'url('+config.urlPath+'#'+d.marker+')':'';
+      },
+      'marker-end':function(d){
+        return d.isLast && !isStartMarker(d.marker)?
+          'url('+config.urlPath+'#'+d.marker+')':'';
+      }
+    });
   };
 
   Renderer.prototype.renderReactionLabels = function (labels) {
@@ -242,8 +257,7 @@
       'width':size,
       'height':size,
       'stroke':strokeColor
-    })
-    .style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white'})
+    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white';});
 
     svg.selectAll('.ReactionLabelText').data(labels).enter().append('text')
     .attr({
@@ -271,7 +285,6 @@
     ids.forEach(function (id) {
       var obj = svg.select('.entity'+id);
       var objType = obj[0][0] ? obj[0][0].nodeName : 'nothing';
-        console.log('changing color');
       if(objType === 'line'){
         obj.attr('stroke-width','3px');
       }else{

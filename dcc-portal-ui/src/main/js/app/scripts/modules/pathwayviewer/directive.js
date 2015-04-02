@@ -28,12 +28,12 @@
         highlights: '='
       },
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
-      link: function ($scope, $element) {
+      link: function ($scope) {
 
         var controller = new dcc.ReactomePathway({
           width: 500,
           height: 300,
-          container: "#pathway-viewer-mini",
+          container: '#pathway-viewer-mini',
           onClick: function (d) {
             console.log(d);
           },
@@ -48,7 +48,7 @@
 
         $scope.$watch('highlights', function (newValue) {
           if(newValue){
-            console.log("new value!!");
+            console.log('new value!!');
             controller.highlight(newValue);
           }
         },true);
