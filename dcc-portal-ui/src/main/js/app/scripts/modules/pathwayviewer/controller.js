@@ -12,16 +12,12 @@
     var config = this.config;
     var model = new dcc.PathwayModel();
     this.model = model;
-    
-    var t0 = performance.now();
     model.parse(xml);
-    var t1 = performance.now();
-    console.log('Parsed in ' + (t1 - t0).toFixed(3) + ' ms');
 
     var height = 0,
       width = 0,
       minHeight = 10000,
-      minWidth = 100000;
+      minWidth = 10000;
 
     // Find out the size of the actual contents of the pathway so we can center it
     model.getNodes().forEach(function (node) {
@@ -43,7 +39,7 @@
       .attr('preserveAspectRatio', 'xMidYMid')
       .append('g')
       .call(zoom)
-      .on('dblclick.zoom', null)
+      .on('dblclick.zoom', null) // Make double click reset instead of zoom a level
       .append('g');
     
     zoom.on('zoom', function () {
@@ -51,8 +47,8 @@
     });
 
     // Set initial positioning and zoom out a little
-    s = s * 0.95; 
-    var offsetX = (config.width - (width - minWidth) * s) / 2; 
+    s = s * 0.95;
+    var offsetX = (config.width - (width - minWidth) * s) / 2;
     var offsetY = (config.height - (height - minHeight) * s) / 2;
 
     zoom.scale(s).translate([-minWidth * s + offsetX, -minHeight * s + offsetY]);
@@ -83,7 +79,6 @@
     });
     var rendererUtils = new dcc.RendererUtils();
 
-    t0 = performance.now();
     this.renderer.renderCompartments(_.filter(model.getNodes().slice(),
                                               function(n){return n.type==='RenderableCompartment';}));
     this.renderer.renderEdges(rendererUtils.generateLines(model));
@@ -99,8 +94,6 @@
                  n.type==='RenderableComplex'||
                  n.type==='RenderableEntitySet');
     }));
-    
-    t1 = performance.now();
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -135,9 +128,6 @@
       svg.transition().duration(3000).ease('elastic',3,0.3).delay(2000).attr('transform', 'translate(' +
                             [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     }
-    
-    
-    console.log('Rendered in ' + (t1 - t0).toFixed(3) + ' ms');
   };
 
   ReactomePathway.prototype.highlight = function (ids) {

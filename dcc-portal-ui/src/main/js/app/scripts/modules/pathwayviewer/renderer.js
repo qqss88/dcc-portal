@@ -17,7 +17,7 @@
         id:'Output',
         element:'path',
         attr:{
-          d:'M0,-10L20,0L0,10L0,-10', 
+          d:'M0,-10L20,0L0,10L0,-10',
           stroke:strokeColor
         },
         style:{
@@ -114,35 +114,35 @@
     }
     
     // Drop shadow
-    var filter = svg.append('svg:defs').append("filter")
-        .attr("id", "drop-shadow").attr("x","-90%").attr("y","-100%").attr("height","300%").attr("width","240%");
+    var filter = svg.append('svg:defs').append('filter')
+        .attr('id', 'drop-shadow').attr('x','-90%').attr('y','-100%').attr('height','300%').attr('width','240%');
 
-    filter.append("feGaussianBlur")
-        .attr("in", "SourceAlpha")
-        .attr("stdDeviation", 20)
-        .attr("result", "blur");
-    filter.append("feOffset")
-        .attr("in", "blur")
-        .attr("dx", 0)
-        .attr("dy", 0)
-        .attr("result", "offsetBlur");
-    filter.append("feFlood")
-        .attr("in", "offsetBlur")
-        .attr("flood-color", "red")
-        .attr("flood-opacity", "0.6")
-        .attr("result", "offsetColor");
-    filter.append("feComposite")
-        .attr("in", "offsetColor")
-        .attr("in2", "offsetBlur")
-        .attr("operator", "in")
-        .attr("result", "offsetBlur");
+    filter.append('feGaussianBlur')
+        .attr('in', 'SourceAlpha')
+        .attr('stdDeviation', 20)
+        .attr('result', 'blur');
+    filter.append('feOffset')
+        .attr('in', 'blur')
+        .attr('dx', 0)
+        .attr('dy', 0)
+        .attr('result', 'offsetBlur');
+    filter.append('feFlood')
+        .attr('in', 'offsetBlur')
+        .attr('flood-color', 'red')
+        .attr('flood-opacity', '0.6')
+        .attr('result', 'offsetColor');
+    filter.append('feComposite')
+        .attr('in', 'offsetColor')
+        .attr('in2', 'offsetBlur')
+        .attr('operator', 'in')
+        .attr('result', 'offsetBlur');
 
-    var feMerge = filter.append("feMerge");
+    var feMerge = filter.append('feMerge');
 
-    feMerge.append("feMergeNode")
-        .attr("in", "offsetBlur")
-    feMerge.append("feMergeNode")
-        .attr("in", "SourceGraphic");
+    feMerge.append('feMergeNode')
+        .attr('in', 'offsetBlur');
+    feMerge.append('feMergeNode')
+        .attr('in', 'SourceGraphic');
   }
 
   /*
@@ -240,9 +240,9 @@
         }
       }
     }).on('mouseover', function () {
-      d3.select(this).style("filter", 'url('+config.urlPath+'#drop-shadow)');
+      d3.select(this).style('filter', 'url('+config.urlPath+'#drop-shadow)');
     }).on('mouseout', function () {
-      d3.select(this).style("filter", '');
+      d3.select(this).style('filter', '');
     }).on('click',function(d){config.onClick(d);});
 
     // Create a point map for the octagons
@@ -271,9 +271,9 @@
         stroke: 'Red',
         'stroke-width': 1
       }).on('mouseover', function () {
-        d3.select(this).style("filter", 'url('+config.urlPath+'#drop-shadow)');
+        d3.select(this).style('filter', 'url('+config.urlPath+'#drop-shadow)');
       }).on('mouseout', function () {
-        d3.select(this).style("filter", '');
+        d3.select(this).style('filter', '');
       }).on('click',function(d){config.onClick(d);});
 
     // Add a foreignObject to contain all text so that warpping is done for us
@@ -361,7 +361,7 @@
 
   /*
   * Highlights the given list of nodes with a red border and puts
-  *   the "value" of the node in a badge in the top right corner
+  *   the 'value' of the node in a badge in the top right corner
   */
   Renderer.prototype.highlightEntity = function (nodes) {
     var svg = this.svg;

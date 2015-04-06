@@ -24,10 +24,11 @@
         <ul class="t_subnav__items">
             <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a>
             </li>
-            <li data-spy="pathway" class="t_subnav__items__item"><a data-scrollto href="#pathway">Pathway Viewer</a></li>
             <li data-spy="projects" class="t_subnav__items__item"><a data-scrollto href="#projects">Cancer
                 Distribution</a></li>
             <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Genes</a></li>
+          
+            <li data-spy="pathway" class="t_subnav__items__item"><a data-scrollto href="#pathway">Pathway Viewer</a></li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
             <li><br></li>
@@ -408,6 +409,7 @@
 <section id="pathway"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <h3><i class="icon-flame"></i>Pathway Viewer</h3>
+      <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
     <pathway-viewer data-items="GeneSetCtrl.pathwayXml" data-zooms="GeneSetCtrl.pathwayZooms" data-highlights="GeneSetGenesCtrl.pathwayHighlights"></pathway-viewer>
 </section>
 <section id="mutations"
