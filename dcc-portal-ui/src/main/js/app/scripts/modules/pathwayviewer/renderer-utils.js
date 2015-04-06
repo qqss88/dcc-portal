@@ -40,7 +40,7 @@
 
     var isLegalLineType = function(type){
       return ['entitysetandmemberlink','entitysetandentitysetlink'].indexOf(type) < 0;
-    }
+    };
 
     var generateLine = function (points, color, type, id, lineType) {
       for (var j = 0; j < points.length - 1; j++) {

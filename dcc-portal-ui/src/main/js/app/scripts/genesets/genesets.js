@@ -269,11 +269,17 @@
       refresh();
 
       if(_ctrl.geneSet.source === 'Reactome'){
-        // for pathway viewer
+        // get pathway xml
         var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
           .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
         reactomePromise.then(function(data){
           _ctrl.pathwayXml = data;
+        });
+        // get list of stuff to zoom in on
+        reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
+          .get({'pathwayId' : _ctrl.uiParentPathways[0].geneSetId},{'Accept':'application/json'});
+        reactomePromise.then(function(data){
+          _ctrl.pathwayZooms = data;
         });
       }
     });

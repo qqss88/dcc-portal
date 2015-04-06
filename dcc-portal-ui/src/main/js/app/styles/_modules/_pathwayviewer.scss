@@ -1,21 +1,21 @@
 /** PATHWAY CUSTOMIZATION **/
 
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
-  fill:#37a321;
+  fill:#b5f9a7;
   stroke:#1a9900;
 }
 
 // TODO double border this guy
 .RenderableEntitySet{
-  fill:#6ABAD7;
-  stroke: #1693C0;
+  fill:#9cd8ff;
+  stroke: #166aa2;
   stroke-width:0.5px;
 }
 
 .RenderableComplex{
-  fill:#45A9CD;
-  stroke-width:1px;
-  stroke: #34495e;
+  fill:#9cd8ff;
+  stroke-width:1.5px;
+  stroke: #166aa2;
 }
 
 .ProcessNode{
@@ -34,11 +34,10 @@
 }
 
 .RenderableCompartment{
-  fill:#f8e9db;
+  fill:#fbf7f4;
   stroke:#ffc38b;
   stroke-width:1px;
-  z-index: -1;
-  fill-opacity: 0.4;
+  fill-opacity: 0.25;
 }
 
 .RenderableStroke{
@@ -65,7 +64,7 @@
   text-align: center;
   height: 100%;
   width: 100%;
-  color: white;
+  color: #444;
 }
 
 .RenderableCompartmentText{

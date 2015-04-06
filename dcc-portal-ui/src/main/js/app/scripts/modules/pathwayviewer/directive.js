@@ -25,7 +25,8 @@
       replace: true,
       scope: {
         items: '=',
-        highlights: '='
+        highlights: '=',
+        zooms: '='
       },
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
       link: function ($scope) {
@@ -39,10 +40,22 @@
           },
           urlPath: $location.path()
         });
+        var zoomedOn = [];
+        var items = "";
 
         $scope.$watch('items', function (newValue) {
-          if(newValue){
-            controller.render(newValue);
+          if(newValue && zoomedOn.length > 0){
+            controller.render(newValue,zoomedOn);
+          }else if(newValue){
+            items = newValue;
+          }
+        }, true);
+        
+        $scope.$watch('zooms', function (newValue) {
+          if(newValue && items.length > 0){
+            controller.render(items,newValue);
+          }else if(newValue){
+            zoomedOn = newValue;
           }
         }, true);
 

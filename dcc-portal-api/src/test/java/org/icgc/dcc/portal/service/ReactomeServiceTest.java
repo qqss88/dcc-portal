@@ -49,4 +49,12 @@ public class ReactomeServiceTest {
     assertThat(result.read()).isEqualTo("<".charAt(0));
   }
 
+  @Test
+  public void testSuccessPathwaySection() {
+    val result = service.getShownPathwaySection("REACT_13797");
+    assertThat(result).isNotNull();
+    assertThat(result[0]).isEqualTo("143468");
+    assertThat(result.length).isEqualTo(6);
+  }
+  
 }

@@ -151,12 +151,23 @@ public class UIResource {
   @GET
   @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
-      @ApiParam(value = "A pathway  Reactome Id", required = true) @QueryParam("pathwayId") String pathwayId) {
+      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
     if (isValidPathwayId(pathwayId)) {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
     return Response.ok(reactomeService.getPathwayDiagramStream(pathwayId), APPLICATION_XML).build();
+  }
+
+  @Path("/reactome/pathway-sub-diagram")
+  @GET
+  public String[] getShownPathwaySection(
+      @ApiParam(value = "A non-diagrammed pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
+    if (isValidPathwayId(pathwayId)) {
+      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
+    }
+
+    return reactomeService.getShownPathwaySection(pathwayId);
   }
 
   private Boolean isValidPathwayId(String id) {

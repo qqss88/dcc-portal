@@ -111,7 +111,7 @@
   Renderer.prototype.renderCompartments = function (compartments) {
     this.svg.selectAll('.RenderableCompartment').data(compartments).enter().append('rect').attr({
       'class': function (d) {
-        return d.type + ' entity'+d.reactomeId;
+        return d.type + ' compartment'+d.reactomeId;
       },
       'x': function (d) {
         return d.position.x;
@@ -150,7 +150,7 @@
 
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {
-        return 'RenderableRect ' + d.type + ' entity'+d.reactomeId;
+        return 'RenderableRect ' + d.type + ' entity'+d.id;
       },
       'x': function (d) {
         return d.position.x;
@@ -219,7 +219,7 @@
 
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
-        class: function(d){return 'RenderableOct RenderableComplex entity'+d.reactomeId;},
+        class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
         points: function (d) {
           return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
         },
@@ -307,18 +307,43 @@
     });
   };
 
-  Renderer.prototype.highlightEntity = function (ids) {
+  Renderer.prototype.highlightEntity = function (nodes) {
     var svg = this.svg;
-    console.log('updating..');
-    console.log(ids);
-    ids.forEach(function (id) {
-      var obj = svg.select('.entity'+id);
-      var objType = obj[0][0] ? obj[0][0].nodeName : 'nothing';
-      if(objType === 'line'){
-        obj.attr('stroke-width','3px');
-      }else{
-        obj.style('fill','hotpink');
+    console.log("leggoo");
+    
+    nodes.forEach(function (node) {
+      var svgNode = svg.selectAll('.entity'+node.id);
+      if(svgNode[0].length <= 0){
+        return;
       }
+      svgNode.style('stroke','red');
+      svgNode.style('stroke-width','3px');
+      
+      var value = Math.round(Math.random()*200 + 1);
+      
+      // generate a bunch of random numbers
+      svg.append('rect')
+        .attr({
+          class:'value-banner',
+          x: (+node.position.x)+(+node.size.width) - 10,
+          y: (+node.position.y)- 7,
+          width:(value.toString().length*5)+10,
+          height:15,
+          rx: 3,
+          ry: 3
+        }).style({
+          fill:'red'
+        });
+      
+     svg.append('text').attr({
+        'class':'banner-text',
+        'x':(+node.position.x)+(+node.size.width) - 5,
+        'y':(+node.position.y)+4,
+        'pointer-events':'none',
+        'font-size':'9px',
+        'font-weight':'bold',
+        'fill':'white'
+      }).text(value);
     });
   };
 

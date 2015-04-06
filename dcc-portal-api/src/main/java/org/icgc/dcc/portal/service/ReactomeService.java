@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.io.LineProcessor;
+import com.google.common.io.Resources;
 
 /**
  * Based on reactome RESTful API
@@ -55,6 +56,7 @@ public class ReactomeService {
   private static final String REACTOME_PROTEIN_ENDPOINT_URL = REACTOME_BASE_URL + "getUniProtRefSeqs";
   private static final String REACTOME_PATHWAY_ENDPOINT_URL = REACTOME_BASE_URL + "pathwayDiagram/%s/XML";
   private static final String REACTOME_QUERY_BY_ID_ENDPOINT_URL = REACTOME_BASE_URL + "queryById/Pathway/%s";
+  private static final String REACTOME_PATHWAY_SECTION_ENDPOINT_URL = REACTOME_BASE_URL + "getContainedEventIds/%s";
 
   @Cacheable("reactomeIds")
   public Map<String, String> getProteinIdMap() {
@@ -98,19 +100,30 @@ public class ReactomeService {
     return map;
   }
 
-  public InputStream getPathwayDiagramStream(@NonNull String pathwayDbId) {
+  public InputStream getPathwayDiagramStream(@NonNull String pathwayId) {
     try {
-      val diagramUrl = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getStableId(pathwayDbId)));
+      val diagramUrl = new URL(String.format(REACTOME_PATHWAY_ENDPOINT_URL, getPathwayDbId(pathwayId)));
       val connection = diagramUrl.openConnection();
       connection.setRequestProperty(ACCEPT, TEXT_XML_TYPE.getType());
 
       return (InputStream) connection.getContent();
     } catch (IOException e) {
-      throw new RuntimeException("Failed to get pathway diagram with id '" + pathwayDbId + "' from reactome", e);
+      throw new RuntimeException("Failed to get pathway diagram with id '" + pathwayId + "' from reactome", e);
     }
   }
 
-  private String getStableId(String pathwayDbId) {
+  public String[] getShownPathwaySection(@NonNull String pathwayId) {
+    try {
+      val diagramUrl = new URL(String.format(REACTOME_PATHWAY_SECTION_ENDPOINT_URL, getPathwayDbId(pathwayId)));
+
+      return Resources.readLines(diagramUrl, UTF_8).get(0).split(",");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to get shown section of pathway with id '" + pathwayId + "' from reactome", e);
+    }
+  }
+
+  @Cacheable("pathwayId")
+  private String getPathwayDbId(String pathwayDbId) {
     try {
       val querlUrl = new URL(String.format(REACTOME_QUERY_BY_ID_ENDPOINT_URL, pathwayDbId));
       val response = DEFAULT.readTree(querlUrl);

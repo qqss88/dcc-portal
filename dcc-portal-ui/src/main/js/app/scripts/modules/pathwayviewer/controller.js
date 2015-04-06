@@ -8,9 +8,10 @@
     this.config = config;
   };
 
-  ReactomePathway.prototype.render = function (xml) {
+  ReactomePathway.prototype.render = function (xml, zoomedOnElements) {
     var config = this.config;
     var model = new dcc.PathwayModel();
+    
     var t0 = performance.now();
     model.parse(xml);
     var t1 = performance.now();
@@ -30,7 +31,7 @@
 
     var s = Math.min(config.height / (height - minHeight), config.width / (width - minWidth));
     var zoom = d3.behavior.zoom().scaleExtent([s*0.9, s*15]);
-
+    
     var svg = d3.select(config.container).append('svg')
       .attr('class', 'pathwaysvg')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
@@ -39,7 +40,7 @@
       .call(zoom)
       .on('dblclick.zoom', null)
       .append('g');
-
+    
     zoom.on('zoom', function () {
       svg.attr('transform', 'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')');
     });
@@ -78,21 +79,55 @@
     var rendererUtils = new dcc.RendererUtils();
 
     t0 = performance.now();
-    this.renderer.renderCompartments(_.filter(model.getNodes().slice(),function(n){return n.type==='RenderableCompartment'}));
+    this.renderer.renderCompartments(_.filter(model.getNodes().slice(),
+                                              function(n){return n.type==='RenderableCompartment';}));
     this.renderer.renderEdges(rendererUtils.generateLines(model));
-    this.renderer.renderNodes(_.filter(model.getNodes().slice(),function(n){return n.type!=='RenderableCompartment'}));
+    this.renderer.renderNodes(_.filter(model.getNodes().slice(),
+                                       function(n){return n.type!=='RenderableCompartment';}));
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
+    
+    
+    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
+                                           function(n){
+      return    (n.type==='RenderableProtein'||
+                 n.type==='RenderableEntity'||
+                 n.type==='RenderableComplex'||
+                 n.type==='RenderableEntitySet');}));
+    
     t1 = performance.now();
-    //d3.select(config.container).append('div').attr('class','pathway-infobar').html('hi');
-
-
+    
+    
+    // Zoom in on the elements on interest
+    height = 0, width = 0, minHeight = 10000, minWidth = 100000;
+    _.filter(model.getReactions().slice(),function(n){return zoomedOnElements.indexOf(n.reactomeId)>=0;})
+      .forEach(function (reaction) {
+      reaction.nodes.forEach(function (node) {
+        var modelNode = model.getNodeById(node.id);
+        height = Math.max((+modelNode.position.y) + (+modelNode.size.height), height);
+        width = Math.max((+modelNode.position.x) + (+modelNode.size.width), width);
+        minHeight = Math.min(modelNode.position.y, minHeight);
+        minWidth = Math.min(modelNode.position.x, minWidth);
+      });
+    });
+    
+    // Add some buffer to the zoomed in area
+    width = width + 50;
+    minWidth = minWidth - 50;
+    
+    s = Math.min(this.config.height / (height - minHeight), this.config.width / (width - minWidth));
+    offsetX = (this.config.width - (width - minWidth) * s) / 2;
+    offsetY = (this.config.height - (height - minHeight) * s) / 2;
+    zoom.scale(s).translate([-minWidth * s + offsetX, -minHeight * s + offsetY]);
+    svg.transition().duration(3000).ease("elastic",3,0.3).delay(2000).attr('transform', 'translate(' +
+                          [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
+    
     console.log('Rendered in ' + (t1 - t0).toFixed(3) + ' ms');
   };
 
   ReactomePathway.prototype.highlight = function (ids) {
     this.renderer.highlightEntity(ids);
   };
-
+  
   dcc.ReactomePathway = ReactomePathway;
 
 })();

@@ -162,7 +162,7 @@
 <section id="pathway"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <h3><i class="icon-flame"></i>Pathway Viewer</h3>
-    <pathway-viewer data-items="GeneSetCtrl.pathwayXml" data-highlights="GeneSetGenesCtrl.pathwayHighlights"></pathway-viewer>
+    <pathway-viewer data-items="GeneSetCtrl.pathwayXml" data-zooms="GeneSetCtrl.pathwayZooms" data-highlights="GeneSetGenesCtrl.pathwayHighlights"></pathway-viewer>
 </section>
 <section id="projects"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
