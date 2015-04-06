@@ -41,7 +41,7 @@
           urlPath: $location.path()
         });
         var zoomedOn = [];
-        var items = "";
+        var items = '';
 
         $scope.$watch('items', function (newValue) {
           if(newValue && zoomedOn.length > 0){

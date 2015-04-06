@@ -6,16 +6,9 @@
 
   var RendererUtils = function (){};
 
-  RendererUtils.prototype.unshiftCompartments = function (nodes) {
-    for (var i = 0; i < nodes.length; i++) {
-      if (nodes[i].type === 'RenderableCompartment') {
-        nodes.unshift(nodes[i]);
-        nodes.splice(i + 1, 1);
-      }
-    }
-    return nodes;
-  };
-
+  /*
+  * Create an array of reaction labels for every reaction based on its type
+  */
   RendererUtils.prototype.generateReactionLabels = function (reactions) {
     var labels = [];
     reactions.forEach(function (reaction) {
@@ -34,14 +27,20 @@
     return labels;
   };
 
+  /*
+  * Goes through the model's reactions and creates a large arrays of all lines
+  *  based on the human-curated list of points.
+  */
   RendererUtils.prototype.generateLines = function (model) {
     var lines = [];
     var reactions = model.getReactions();
 
-    var isLegalLineType = function(type){
+    // Make sure arrow heads aren't added to special dashed lines
+    var isArrowHeadLine = function(type){
       return ['entitysetandmemberlink','entitysetandentitysetlink'].indexOf(type) < 0;
     };
 
+    // Adds a line to the lines array gives an array of points and description of the line
     var generateLine = function (points, color, type, id, lineType) {
       for (var j = 0; j < points.length - 1; j++) {
         lines.push({
@@ -49,21 +48,24 @@
           y1: points[j].y,
           x2: points[j+1].x,
           y2: points[j+1].y,
-          marked: j === points.length-2 && isLegalLineType(lineType),
+          marked: j === points.length-2 && isArrowHeadLine(lineType),
           marker: type,
-          color: color,
+          color: color, // For debugging, every line type has a color
           id:id,
           type: lineType
         });
       }
     };
 
+    // Gets the center of node with its position and size
     var getNodeCenter = function(nodeId){
       var node = model.getNodeById(nodeId);
       return { x: ((+node.position.x) + (+node.size.width/2)),
                y: ((+node.position.y) + (+node.size.height/2))};
     };
 
+    // Gets the first input node in a reaction (used when the reaction
+    //  has no human-curated node lines)
     var getFirstInputNode =  function(nodes){
       var node;
       nodes.forEach(function (n) {
@@ -74,6 +76,7 @@
       return node;
     };
 
+    // Generate a line based on the type of reaction & node using human-curated points
     var getNodeLines = function (reaction, node, reactionId,reactionClass) {
         var count = {inputs:0,outputs:0};
         if(!node.base || node.base.length === 0){
@@ -89,7 +92,7 @@
           break;
         case 'Output':
           base.push(reaction.base[(reaction.base.length - 1)]);
-          base.reverse();
+          base.reverse(); // Make sure output points at the output
           generateLine(base, 'green', 'Output',reactionId,reactionClass);
           count.outputs = count.outputs + 1;
           break;
@@ -125,9 +128,11 @@
           outputs++;
         }
       }
+      // If it has not human-curated input lines, "snap" line to first input node
       if(inputs === 0){
         reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
       }
+      // This creates a base reaction line
       generateLine(reaction.base,
                    outputs===0?'hotpink':'black',
                    outputs === 0 ?'Output':reaction.type,id,reaction.class);

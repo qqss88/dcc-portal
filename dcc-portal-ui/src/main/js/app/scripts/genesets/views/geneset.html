@@ -159,11 +159,6 @@
     </div>
 
 </section>
-<section id="pathway"
-         data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
-    <h3><i class="icon-flame"></i>Pathway Viewer</h3>
-    <pathway-viewer data-items="GeneSetCtrl.pathwayXml" data-zooms="GeneSetCtrl.pathwayZooms" data-highlights="GeneSetGenesCtrl.pathwayHighlights"></pathway-viewer>
-</section>
 <section id="projects"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <h3 data-ng-if="!GeneSetCtrl.geneSet.projects"><i class="icon-spinner icon-spin"></i> Fetching Donors...</h3>
@@ -409,6 +404,11 @@
             </tbody>
         </table>
     </div>
+</section>
+<section id="pathway"
+         data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
+    <h3><i class="icon-flame"></i>Pathway Viewer</h3>
+    <pathway-viewer data-items="GeneSetCtrl.pathwayXml" data-zooms="GeneSetCtrl.pathwayZooms" data-highlights="GeneSetGenesCtrl.pathwayHighlights"></pathway-viewer>
 </section>
 <section id="mutations"
          data-ng-controller="GeneSetMutationsCtrl as GeneSetMutationsCtrl"

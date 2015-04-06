@@ -275,12 +275,16 @@
         reactomePromise.then(function(data){
           _ctrl.pathwayXml = data;
         });
-        // get list of stuff to zoom in on
-        reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
-          .get({'pathwayId' : _ctrl.uiParentPathways[0].geneSetId},{'Accept':'application/json'});
-        reactomePromise.then(function(data){
-          _ctrl.pathwayZooms = data;
-        });
+        if(_ctrl.uiParentPathways[0].diagramId !== _ctrl.uiParentPathways[0].geneSetId){
+          // get list of stuff to zoom in on
+          reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
+            .get({'pathwayId' : _ctrl.uiParentPathways[0].geneSetId},{'Accept':'application/json'});
+          reactomePromise.then(function(data){
+            _ctrl.pathwayZooms = data;
+          });
+        }else{
+          _ctrl.pathwayZooms = [''];
+        }
       }
     });
 

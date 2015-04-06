@@ -13,10 +13,11 @@
   function defineDefs(svg){
     var defs = [
       {
+        // An arrow head
         id:'Output',
         element:'path',
         attr:{
-          d:'M0,-10L20,0L0,10L0,-10',
+          d:'M0,-10L20,0L0,10L0,-10', 
           stroke:strokeColor
         },
         style:{
@@ -26,6 +27,7 @@
         refX: '5'
       },
       {
+        // A smaller arrow head
         id:'FlowLine',
         element:'path',
         attr:{
@@ -39,6 +41,7 @@
         refX: '-7'
       },
       {
+        // A "hollow" arrow head
         id:'Activator',
         element:'path',
         attr:{
@@ -52,6 +55,7 @@
         refX: '35'
       },
       {
+        // A smaller "hollow" arrow head
         id:'RenderableInteraction',
         element:'path',
         attr:{
@@ -65,6 +69,7 @@
         refX: '-7'
       },
       {
+        // A white circle with a border
         id:'Catalyst',
         element:'circle',
         attr:{
@@ -81,6 +86,7 @@
         refX:'67'
       },
       {
+        // Special right pointing arrow for genes
         id:'GeneArrow',
         element:'path',
         attr:{
@@ -106,8 +112,42 @@
       .append(defs[i].element)
       .attr(defs[i].attr).style(defs[i].style);
     }
+    
+    // Drop shadow
+    var filter = svg.append('svg:defs').append("filter")
+        .attr("id", "drop-shadow").attr("x","-90%").attr("y","-100%").attr("height","300%").attr("width","240%");
+
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha")
+        .attr("stdDeviation", 20)
+        .attr("result", "blur");
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", 0)
+        .attr("dy", 0)
+        .attr("result", "offsetBlur");
+    filter.append("feFlood")
+        .attr("in", "offsetBlur")
+        .attr("flood-color", "red")
+        .attr("flood-opacity", "0.6")
+        .attr("result", "offsetColor");
+    filter.append("feComposite")
+        .attr("in", "offsetColor")
+        .attr("in2", "offsetBlur")
+        .attr("operator", "in")
+        .attr("result", "offsetBlur");
+
+    var feMerge = filter.append("feMerge");
+
+    feMerge.append("feMergeNode")
+        .attr("in", "offsetBlur")
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
   }
 
+  /*
+  * Renders the background compartments along with its specially position text
+  */
   Renderer.prototype.renderCompartments = function (compartments) {
     this.svg.selectAll('.RenderableCompartment').data(compartments).enter().append('rect').attr({
       'class': function (d) {
@@ -143,8 +183,12 @@
       });
   };
 
+  /*
+  * Render all the nodes and their text
+  */
   Renderer.prototype.renderNodes = function (nodes) {
     var svg = this.svg, config = this.config;
+    // Split into normal rectangles and octagons based on node type
     var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
 
@@ -188,7 +232,7 @@
           return 3;
         }
       },
-      'stroke-dasharray': function (d) {
+      'stroke-dasharray': function (d) { //Gene has border on bottom and right side
         if (d.type === 'RenderableGene'){
           return 0 + ' ' + ((+d.size.width) + 1) + ' ' + ((+d.size.height) + (+d.size.width)) + ' 0';
         }else{
@@ -196,11 +240,12 @@
         }
       }
     }).on('mouseover', function () {
-      d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
+      d3.select(this).style("filter", 'url('+config.urlPath+'#drop-shadow)');
     }).on('mouseout', function () {
-      d3.select(this).style('fill', d3.select(this).attr('fill-old'));
+      d3.select(this).style("filter", '');
     }).on('click',function(d){config.onClick(d);});
 
+    // Create a point map for the octagons
     var getPointsMap = function(x,y,w,h,a){
       var points = [{x:x+a,   y:y},
                     {x:x+w-a, y:y},
@@ -226,11 +271,12 @@
         stroke: 'Red',
         'stroke-width': 1
       }).on('mouseover', function () {
-        d3.select(this).attr('fill-old', d3.select(this).style('fill')).style('fill', 'gray');
+        d3.select(this).style("filter", 'url('+config.urlPath+'#drop-shadow)');
       }).on('mouseout', function () {
-        d3.select(this).style('fill', d3.select(this).attr('fill-old'));
+        d3.select(this).style("filter", '');
       }).on('click',function(d){config.onClick(d);});
 
+    // Add a foreignObject to contain all text so that warpping is done for us
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableText';},
         'x':function(d){return d.position.x;},
@@ -248,6 +294,9 @@
 
   };
 
+  /*
+  * Renders all connecting edges and their arrow heads where appropriate 
+  */
   Renderer.prototype.renderEdges = function (edges) {
     var svg = this.svg, config = this.config;
     var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
@@ -271,6 +320,9 @@
     });
   };
 
+  /*
+  * Render a label in the middle of the line to indicate the type
+  */
   Renderer.prototype.renderReactionLabels = function (labels) {
     var size = 8, svg = this.svg;
     var circular = ['Association','Dissociation','Binding'];
@@ -307,9 +359,12 @@
     });
   };
 
+  /*
+  * Highlights the given list of nodes with a red border and puts
+  *   the "value" of the node in a badge in the top right corner
+  */
   Renderer.prototype.highlightEntity = function (nodes) {
     var svg = this.svg;
-    console.log("leggoo");
     
     nodes.forEach(function (node) {
       var svgNode = svg.selectAll('.entity'+node.id);
@@ -335,7 +390,7 @@
           fill:'red'
         });
       
-     svg.append('text').attr({
+      svg.append('text').attr({
         'class':'banner-text',
         'x':(+node.position.x)+(+node.size.width) - 5,
         'y':(+node.position.y)+4,

@@ -3,6 +3,7 @@
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
   fill:#b5f9a7;
   stroke:#1a9900;
+    -webkit-box-shadow: 0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 }
 
 // TODO double border this guy
@@ -110,7 +111,7 @@
 
   border-top: 1px solid white;
   background: white;
-//  -webkit-box-shadow: 0px 0px 6px 0px rgba(50, 50, 50, 0.25);
+
 //-moz-box-shadow:    0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 //box-shadow:         0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 }
