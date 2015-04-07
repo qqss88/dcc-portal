@@ -61,9 +61,9 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, Optional<QueryContext> context) {
-    val filterNodeOpt = Nodes.getOptionalChild(node, QueryNode.class);
-    if (filterNodeOpt.isPresent()) {
-      filterNodeOpt.get().accept(this, context);
+    val queryNodeOpt = Nodes.getOptionalChild(node, QueryNode.class);
+    if (queryNodeOpt.isPresent()) {
+      queryNodeOpt.get().accept(this, context);
     }
 
     return Optional.of(node);

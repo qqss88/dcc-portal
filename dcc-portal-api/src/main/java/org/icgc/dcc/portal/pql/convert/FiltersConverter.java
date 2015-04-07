@@ -19,6 +19,8 @@ package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.lang.String.format;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
@@ -128,15 +130,16 @@ public class FiltersConverter {
       val filter = createTypeFilter(prefixByNestedPath.get(nestedPath), sortedFields.get(nestedPath), indexType);
 
       if (i == 0) {
-        if (isNestFilter(nestedPath)) {
-          filterStack.push(format("nested(%s,%s)", nestedPath, filter));
+        if (isNestFilter(nestedPath, indexType)) {
+          filterStack.push(format("nested(%s,%s)", resolveNestedPath(nestedPath, indexType), filter));
         } else {
           filterStack.push(filter);
         }
       } else {
         val prevFilter = filterStack.pop();
-        if (isNestFilter(nestedPath)) {
-          filterStack.push(format("nested(%s,and(%s,%s))", nestedPath, prevFilter, filter));
+        if (isNestFilter(nestedPath, indexType)) {
+          filterStack
+              .push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter, filter));
         } else {
           filterStack.push(format("%s,%s", prevFilter, filter));
         }
@@ -146,20 +149,54 @@ public class FiltersConverter {
     return filterStack.pop();
   }
 
+  private static Object resolveNestedPath(String nestedPath, Type indexType) {
+    if (nestedPath.equals(SYNTETIC_GENE)) {
+      switch (indexType) {
+      case DONOR_CENTRIC:
+        return "gene";
+      case MUTATION_CENTRIC:
+        return "transcript";
+      }
+    }
+
+    return nestedPath;
+  }
+
   /**
    * Defines if filter should be nested because it's filtering on a nested field
+   * @param indexType TODO
    */
-  private static boolean isNestFilter(String nestedPath) {
+  private static boolean isNestFilter(String nestedPath, Type indexType) {
+    if ((indexType == DONOR_CENTRIC || indexType == MUTATION_CENTRIC) && nestedPath.equals(SYNTETIC_GENE)) {
+      return true;
+    }
+
     return !(nestedPath.equals(EMPTY_NESTED_PATH) || nestedPath.endsWith(SYNTETIC_PREFIX));
   }
 
   private static Map<String, String> createPrefixByNestedPath(String prefix, Set<String> nestedPaths, Type indexType) {
     val result = new ImmutableMap.Builder<String, String>();
     for (val path : nestedPaths) {
-      result.put(path, prefix);
+      if (isMutationSpecialCase(prefix, path, indexType)) {
+        result.put(path, "gene");
+      } else {
+        result.put(path, prefix);
+      }
+
     }
 
     return result.build();
+  }
+
+  /**
+   * functionalImpactNested and consequenceTypeNested fields in the MutationCentricTypeModel are nested under
+   * 'transcript' path. Under the same path all gene fields are nested. Prefix for this case must be 'gene'. Otherwise,
+   * 'mutation' prefix might override prefixByNestedPath mapping<br>
+   * E.g. transcript->gene will become transcript->mutation and all gene fields will become mutation fields:
+   * gene.id->mutation.id
+   */
+  private static boolean isMutationSpecialCase(String prefix, String path, Type indexType) {
+    return prefix.equals("mutation") && path.equals("transcript") && indexType == Type.MUTATION_CENTRIC;
   }
 
   private static String createTypeFilter(String typePrefix, Collection<JqlField> fields, Type indexType) {
@@ -188,7 +225,7 @@ public class FiltersConverter {
 
     // Because of the particularity of MutationCentric type some of its fields are remapped to nested fields
     // The fields must be correctly separated before the next steps.
-    if (indexType == Type.MUTATION_CENTRIC && typePrefix.equals("mutation")) {
+    if (indexType == MUTATION_CENTRIC && typePrefix.equals("mutation")) {
       val nonNestedFields = fields.stream()
           .filter((JqlField f) -> !f.getName().endsWith("Nested"))
           .collect(Collectors.toList());
@@ -218,7 +255,7 @@ public class FiltersConverter {
   private static boolean isTypeMatch(String typePrefix, Type indexType) {
     // Does not apply to MUTATION_CENTRIC, because its filters must be separated on nested and non-nested
     // See comment @ line 189 groupFieldsByNestedPath()
-    if (indexType == Type.MUTATION_CENTRIC) {
+    if (indexType == MUTATION_CENTRIC) {
       return false;
     }
 

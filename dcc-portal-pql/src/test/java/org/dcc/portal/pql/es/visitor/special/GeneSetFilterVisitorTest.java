@@ -25,6 +25,8 @@ import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.utils.TestingHelpers.assertAndGetNestedNode;
+import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetMustNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 
 import java.util.Optional;
@@ -36,11 +38,15 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.junit.Test;
 
@@ -55,7 +61,7 @@ public class GeneSetFilterVisitorTest {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')");
     // FIXME: uncomment one line below and delete 2 lines below because of the incorrect
     // assertPathwayAndCuratedSet(root, "gene.pathway", "REACT_6326");
-    assertPathwayAndCuratedSet(root, "gene.pathways", "REACT_6326");
+    assertPathwayAndCuratedSet(root, "gene.pathway", "REACT_6326");
   }
 
   @Test
@@ -145,7 +151,7 @@ public class GeneSetFilterVisitorTest {
 
     // FIXME: uncomment 1 line below and delete 2 lines below because of the incorrect type model
     // assertExists(result, "gene.pathway");
-    assertExists(result, "gene.pathways");
+    assertExists(result, "gene.pathway");
   }
 
   @Test
@@ -163,7 +169,7 @@ public class GeneSetFilterVisitorTest {
     val result = root.accept(visitor, getMutationContextOptional()).get();
     log.debug("After GeneSetFilterVisitor: {}", result);
 
-    assertExists(result, "transcript.gene.pathways");
+    assertExists(result, "transcript.gene.pathway");
   }
 
   @Test
@@ -250,7 +256,7 @@ public class GeneSetFilterVisitorTest {
   public void pathwayIdTest_mutation() {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", MUTATION_CENTRIC);
     log.debug("After GeneSetFilterVisitor: {}", root);
-    assertPathwayAndCuratedSet(root, "transcript.gene.pathways", "REACT_6326");
+    assertPathwayAndCuratedSet(root, "transcript.gene.pathway", "REACT_6326");
   }
 
   @Test
@@ -265,6 +271,53 @@ public class GeneSetFilterVisitorTest {
 
     val orNode = (OrNode) nestedNode.getFirstChild();
     assertGeneSetId(orNode, getTypeModel(MUTATION_CENTRIC), "123");
+  }
+
+  @Test
+  public void nestedPathwayAndGoTermTest_mutation() {
+    assertPathwayAndGoTerm(MUTATION_CENTRIC, "transcript.gene.pathway", "transcript");
+  }
+
+  @Test
+  public void nestedPathwayAndGoTermTest_donor() {
+    assertPathwayAndGoTerm(DONOR_CENTRIC, "gene.pathway", "gene");
+  }
+
+  private void assertPathwayAndGoTerm(Type indexType, String existPath, String nestedPath) {
+    val existsNode = new ExistsNode(existPath);
+    val root = createRootForPathwayAndGoTermTest(nestedPath, existsNode);
+    Optional<QueryContext> contextOpt = null;
+
+    switch (indexType) {
+    case DONOR_CENTRIC:
+      contextOpt = Optional.of(context);
+      break;
+    case MUTATION_CENTRIC:
+      contextOpt = getMutationContextOptional();
+      break;
+    }
+
+    val result = root.accept(visitor, contextOpt).get();
+    log.debug("After GeneSetFilterVisitor: {}", result);
+
+    // Root - Query - Filter - Nested
+    val nestedNode = assertAndGetNestedNode(result.getFirstChild().getFirstChild().getFirstChild(), nestedPath);
+
+    // Nested - Bool - Must
+    val mustNode = assertBoolAndGetMustNode(nestedNode.getFirstChild());
+    assertThat(mustNode.childrenCount()).isEqualTo(2);
+    assertThat(mustNode.getFirstChild()).isEqualTo(existsNode);
+
+    val orNode = (OrNode) mustNode.getChild(1);
+    assertGoTerm(orNode, getTypeModel(indexType), "GO123");
+  }
+
+  private static RootNode createRootForPathwayAndGoTermTest(String nestedPath, ExistsNode existsNode) {
+    val queryNestedNode = new NestedNode(nestedPath, new BoolNode(new MustBoolNode(
+        existsNode,
+        new TermsNode("gene.goTermId", new TerminalNode("GO123")))));
+
+    return new RootNode(new QueryNode(new FilterNode(queryNestedNode)));
   }
 
   private static void assertExists(ExpressionNode node, String value) {
@@ -306,7 +359,7 @@ public class GeneSetFilterVisitorTest {
     return Optional.of(new QueryContext("", GENE_CENTRIC));
   }
 
-  private Optional<QueryContext> getMutationContextOptional() {
+  private static Optional<QueryContext> getMutationContextOptional() {
     return Optional.of(new QueryContext("", MUTATION_CENTRIC));
   }
 
