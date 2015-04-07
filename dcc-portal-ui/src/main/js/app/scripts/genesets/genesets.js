@@ -316,22 +316,22 @@
           });
       }
 
-      var uniprotIds = [];
-      _ctrl.genes.hits.forEach(function (gene) {
-        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
-      });
-
-      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
-        .get({'proteinUniprotIds' : uniprotIds.join(',')});
-
-      reactomePromise.then(function(map){
-        var dbIds = [];
-        uniprotIds.forEach(function (uniprotId) {
-          dbIds.push(map[uniprotId]);
-        });
-        console.log(dbIds);
-        _ctrl.pathwayHighlights = dbIds;
-      });
+//      var uniprotIds = [];
+//      _ctrl.genes.hits.forEach(function (gene) {
+//        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
+//      });
+//
+//      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+//        .get({'proteinUniprotIds' : uniprotIds.join(',')});
+//
+//      reactomePromise.then(function(map){
+//        var dbIds = [];
+//        uniprotIds.forEach(function (uniprotId) {
+//          dbIds.push(map[uniprotId]);
+//        });
+//        console.log(dbIds);
+//        _ctrl.pathwayHighlights = dbIds;
+//      });
 
     }
 

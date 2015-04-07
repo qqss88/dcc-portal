@@ -6,23 +6,20 @@
     -webkit-box-shadow: 0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 }
 
-// TODO double border this guy
-.RenderableEntitySet{
-  fill:#9cd8ff;
-  stroke: #166aa2;
-  stroke-width:0.5px;
-}
-
-.RenderableComplex{
-  fill:#9cd8ff;
+.RenderableComplex, .RenderableEntitySet{
+  fill:#b6e2ff;
   stroke-width:1.5px;
   stroke: #166aa2;
 }
 
+.RenderableEntitySet{
+  stroke-width:0.5px;
+}
+
 .ProcessNode{
-  stroke: #666;
-  stroke-width:0.6px;
-  fill:#999;
+  stroke: #1a9900;
+  stroke-width:2px;
+  fill:#ebffe7;
 }
 
 .RenderableGene{
@@ -93,8 +90,12 @@
 }
 
 #pathway-viewer-mini{
-  border: 1px dashed #b3b3b3;
+  border: 1px solid #b3b3b3;
   position: relative;
+  -webkit-box-shadow: inset 0px 0px 20px 0px lightgrey;
+  -moz-box-shadow: inset 0px 0px 20px 0px lightgrey;
+  box-shadow: inset 0px 0px 20px 0px lightgrey;
+  line-height: 0px;
 }
 
 .pathway-infobar{
@@ -108,10 +109,6 @@
   opacity: 0.8;
  // border-radius: 5%;
   border: 1px dashed #b3b3b3;
-
   border-top: 1px solid white;
   background: white;
-
-//-moz-box-shadow:    0px 0px 6px 0px rgba(50, 50, 50, 0.25);
-//box-shadow:         0px 0px 6px 0px rgba(50, 50, 50, 0.25);
 }

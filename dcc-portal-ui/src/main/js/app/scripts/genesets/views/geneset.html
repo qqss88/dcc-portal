@@ -28,7 +28,8 @@
                 Distribution</a></li>
             <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Genes</a></li>
           
-            <li data-spy="pathway" class="t_subnav__items__item"><a data-scrollto href="#pathway">Pathway Viewer</a></li>
+            <li data-spy="pathway" class="t_subnav__items__item" data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'">
+              <a data-scrollto href="#pathway">Pathway Viewer</a></li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
             <li><br></li>
@@ -406,7 +407,7 @@
         </table>
     </div>
 </section>
-<section id="pathway"
+<section id="pathway" data-ng-if="GeneSetCtrl.geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
     <h3><i class="icon-flame"></i>Pathway Viewer</h3>
       <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>

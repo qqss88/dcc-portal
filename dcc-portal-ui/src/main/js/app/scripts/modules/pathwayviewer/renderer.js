@@ -112,37 +112,6 @@
       .append(defs[i].element)
       .attr(defs[i].attr).style(defs[i].style);
     }
-    
-    // Drop shadow
-    var filter = svg.append('svg:defs').append('filter')
-        .attr('id', 'drop-shadow').attr('x','-90%').attr('y','-100%').attr('height','300%').attr('width','240%');
-
-    filter.append('feGaussianBlur')
-        .attr('in', 'SourceAlpha')
-        .attr('stdDeviation', 20)
-        .attr('result', 'blur');
-    filter.append('feOffset')
-        .attr('in', 'blur')
-        .attr('dx', 0)
-        .attr('dy', 0)
-        .attr('result', 'offsetBlur');
-    filter.append('feFlood')
-        .attr('in', 'offsetBlur')
-        .attr('flood-color', 'red')
-        .attr('flood-opacity', '0.6')
-        .attr('result', 'offsetColor');
-    filter.append('feComposite')
-        .attr('in', 'offsetColor')
-        .attr('in2', 'offsetBlur')
-        .attr('operator', 'in')
-        .attr('result', 'offsetBlur');
-
-    var feMerge = filter.append('feMerge');
-
-    feMerge.append('feMergeNode')
-        .attr('in', 'offsetBlur');
-    feMerge.append('feMergeNode')
-        .attr('in', 'SourceGraphic');
   }
 
   /*
@@ -164,7 +133,9 @@
       },
       'height': function (d) {
         return d.size.height;
-      }
+      },
+      rx: 3,
+      ry: 3
     });
 
     this.svg.selectAll('.RenderableCompartmentText').data(compartments).enter().append('foreignObject').attr({
@@ -239,10 +210,11 @@
           return '';
         }
       }
-    }).on('mouseover', function () {
-      d3.select(this).style('filter', 'url('+config.urlPath+'#drop-shadow)');
-    }).on('mouseout', function () {
-      d3.select(this).style('filter', '');
+    }).on('mouseover', function (d) {
+      d.oldColor = d3.rgb(d3.select(this).style('fill'));
+      d3.select(this).style('fill', d.oldColor.brighter(0.25));
+    }).on('mouseout', function (d) {
+      d3.select(this).style('fill', d.oldColor);
     }).on('click',function(d){config.onClick(d);});
 
     // Create a point map for the octagons
@@ -270,10 +242,11 @@
         },
         stroke: 'Red',
         'stroke-width': 1
-      }).on('mouseover', function () {
-        d3.select(this).style('filter', 'url('+config.urlPath+'#drop-shadow)');
-      }).on('mouseout', function () {
-        d3.select(this).style('filter', '');
+      }).on('mouseover', function (d) {
+        d.oldColor = d3.rgb(d3.select(this).style('fill'));
+        d3.select(this).style('fill', d.oldColor.brighter(0.25));
+      }).on('mouseout', function (d) {
+        d3.select(this).style('fill', d.oldColor);
       }).on('click',function(d){config.onClick(d);});
 
     // Add a foreignObject to contain all text so that warpping is done for us
@@ -384,8 +357,8 @@
           y: (+node.position.y)- 7,
           width:(value.toString().length*5)+10,
           height:15,
-          rx: 3,
-          ry: 3
+          rx: 7,
+          ry: 7
         }).style({
           fill:'red'
         });

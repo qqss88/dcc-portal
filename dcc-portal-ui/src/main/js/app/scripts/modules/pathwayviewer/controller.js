@@ -87,13 +87,13 @@
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
     
-    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
-                                           function(n){
-      return    (n.type==='RenderableProtein'||
-                 n.type==='RenderableEntity'||
-                 n.type==='RenderableComplex'||
-                 n.type==='RenderableEntitySet');
-    }));
+//    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
+//                                           function(n){
+//      return    (n.type==='RenderableProtein'||
+//                 n.type==='RenderableEntity'||
+//                 n.type==='RenderableComplex'||
+//                 n.type==='RenderableEntitySet');
+//    }));
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
