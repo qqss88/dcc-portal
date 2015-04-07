@@ -1,25 +1,39 @@
-/** PATHWAY CUSTOMIZATION **/
+/** PATHWAY COLOR CUSTOMIZATION **/
+
+$primaryNodeColor:#b5f9a7;
+$primaryNodeBorder:#1a9900;
+$secondaryNodeColor:#b6e2ff;
+$secondaryNodeBorder:#166aa2;
+
+$lineThickness: 1px;
+$lineThicknessLight: 0.5px;
+$lineThicknessThick: 1.5px;
+$lineThicknessThicker: 2px;
+
+$nonNodeBoxColor: #ebffe7;
+
+$compartmentBackground: #fbf7f4;
+$compartmentBorder:#ffc38b;
 
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
-  fill:#b5f9a7;
-  stroke:#1a9900;
-    -webkit-box-shadow: 0px 0px 6px 0px rgba(50, 50, 50, 0.25);
+  fill:$primaryNodeColor;
+  stroke:$primaryNodeBorder;
 }
 
 .RenderableComplex, .RenderableEntitySet{
-  fill:#b6e2ff;
-  stroke-width:1.5px;
-  stroke: #166aa2;
+  fill:$secondaryNodeColor;
+  stroke-width:$lineThicknessLight;
+  stroke: $secondaryNodeBorder;
 }
 
 .RenderableEntitySet{
-  stroke-width:0.5px;
+  stroke-width:$lineThicknessThick;
 }
 
 .ProcessNode{
-  stroke: #1a9900;
-  stroke-width:2px;
-  fill:#ebffe7;
+  stroke: $primaryNodeBorder;
+  stroke-width:$lineThicknessThicker;
+  fill:$nonNodeBoxColor;
 }
 
 .RenderableGene{
@@ -32,31 +46,31 @@
 }
 
 .RenderableCompartment{
-  fill:#fbf7f4;
-  stroke:#ffc38b;
-  stroke-width:1px;
+  fill:$compartmentBackground;
+  stroke:$compartmentBorder;
+  stroke-width:$lineThickness;
   fill-opacity: 0.25;
 }
 
 .RenderableStroke{
-  stroke-width:1px;
+  stroke-width:$lineThickness;
 }
 
 .renderableinteraction{
-  stroke-width:1.3px;
+  stroke-width:$lineThicknessThick;
 }
 
 .entitysetandmemberlink, .entitysetandentitysetlink{
   stroke-dasharray:5 7;
-  stroke-width:0.5px;
+  stroke-width:$lineThicknessLight;
 }
-
-/** ESSENTIAL **/
 
 .Note{
   stroke:gray;
-  fill:#999;
+  fill:$nonNodeBoxColor;
 }
+
+/** ESSENTIALS **/
 
 .RenderableNodeText .RenderableNodeTextCell{
   text-align: center;
@@ -67,7 +81,6 @@
 
 .RenderableCompartmentText{
   font-size: 9px;
-  fill: #34495e;
   line-height: 1.1em;
 }
 
@@ -92,9 +105,9 @@
 #pathway-viewer-mini{
   border: 1px solid #b3b3b3;
   position: relative;
-  -webkit-box-shadow: inset 0px 0px 20px 0px lightgrey;
-  -moz-box-shadow: inset 0px 0px 20px 0px lightgrey;
-  box-shadow: inset 0px 0px 20px 0px lightgrey;
+  //-webkit-box-shadow: inset 0px 0px 14px 0px rgba(214,214,214,0.7);
+  //-moz-box-shadow: inset 0px 0px 14px 0px rgba(214,214,214,0.7);
+  //box-shadow: inset 0px 0px 14px 0px rgba(214,214,214,0.7);
   line-height: 0px;
 }
 
@@ -107,7 +120,6 @@
   margin:3%;
   margin-top: -1px;
   opacity: 0.8;
- // border-radius: 5%;
   border: 1px dashed #b3b3b3;
   border-top: 1px solid white;
   background: white;

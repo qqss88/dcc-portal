@@ -83,7 +83,7 @@
           'stroke-width':'2px'
         },
         viewBox:'0 -17 35 35',
-        refX:'67'
+        refX:'53'
       },
       {
         // Special right pointing arrow for genes

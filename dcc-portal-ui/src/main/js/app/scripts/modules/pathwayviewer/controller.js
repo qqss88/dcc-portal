@@ -87,13 +87,13 @@
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
     
-//    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
-//                                           function(n){
-//      return    (n.type==='RenderableProtein'||
-//                 n.type==='RenderableEntity'||
-//                 n.type==='RenderableComplex'||
-//                 n.type==='RenderableEntitySet');
-//    }));
+    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
+                                           function(n){
+      return    (n.type==='RenderableProtein'||
+                 n.type==='RenderableEntity'||
+                 n.type==='RenderableComplex'||
+                 n.type==='RenderableEntitySet');
+    }));
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -125,7 +125,7 @@
       offsetX = (this.config.width - (width - minWidth) * s) / 2;
       offsetY = (this.config.height - (height - minHeight) * s) / 2;
       zoom.scale(s).translate([-minWidth * s + offsetX, -minHeight * s + offsetY]);
-      svg.transition().duration(3000).ease('elastic',3,0.3).delay(2000).attr('transform', 'translate(' +
+      svg.transition().attr('transform', 'translate(' +
                             [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     }
   };
