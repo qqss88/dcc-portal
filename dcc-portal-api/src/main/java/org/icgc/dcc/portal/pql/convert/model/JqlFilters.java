@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.pql.convert.model;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import lombok.NonNull;
@@ -31,7 +31,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize(using = JqlFiltersDeserializer.class)
 public class JqlFilters {
 
+  // TODO: probably the field should be renamed to kindValues. In a filter like donor:{id:{is:'DO1'}}, donor is a kind
   @NonNull
-  Map<String, Collection<JqlField>> typeValues;
+  Map<String, List<JqlField>> typeValues;
 
 }

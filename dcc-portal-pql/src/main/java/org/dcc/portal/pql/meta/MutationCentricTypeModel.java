@@ -149,8 +149,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
                 string("chromosome", "gene.chromosome"),
                 long_("end", "gene.end"),
                 long_("start", "gene.start"),
-                // FIXME: check if the following fields are nested
-                arrayOfStrings("pathways", "gene.pathwayId"),
+                arrayOfStrings("pathway", "gene.pathwayId"),
                 arrayOfStrings("curated_set", "gene.curatedSetId"),
                 object("go_term", "gene.GoTerm",
                     arrayOfStrings("biological_process"),

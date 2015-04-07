@@ -24,7 +24,6 @@ import static org.icgc.dcc.portal.model.IndexModel.Type.GENE;
 import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,7 +59,7 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
     JsonNode node = jp.getCodec().readTree(jp);
     log.debug("Deserializing node: {}", node);
     validateTypes(node);
-    val elements = new ImmutableMap.Builder<String, Collection<JqlField>>();
+    val elements = new ImmutableMap.Builder<String, List<JqlField>>();
 
     val nodeFields = node.fields();
     while (nodeFields.hasNext()) {
