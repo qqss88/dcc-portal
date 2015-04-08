@@ -46,6 +46,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
@@ -118,6 +119,11 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   @Override
+  public Optional<ExpressionNode> visitShouldBool(@NonNull ShouldBoolNode node, @NonNull Optional<QueryContext> context) {
+    return visitChildren(this, node, context);
+  }
+
+  @Override
   public Optional<ExpressionNode> visitNot(@NonNull NotNode node, @NonNull Optional<QueryContext> context) {
     return visitChildren(this, node, context);
   }
@@ -171,6 +177,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+    // FIXME: replace with ShouldBoolNode
     val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
 

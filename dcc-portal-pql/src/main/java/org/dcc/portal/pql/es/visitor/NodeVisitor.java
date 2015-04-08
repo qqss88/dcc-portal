@@ -44,6 +44,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
@@ -53,6 +54,10 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 public abstract class NodeVisitor<T, A> {
 
   private static final String DEFAULT_ERROR_MESSAGE = "The method is not implemented by the subclass";
+
+  public T visitShouldBool(ShouldBoolNode node, Optional<A> context) {
+    return defaultUnimplementedMethod();
+  }
 
   public T visitCount(CountNode node, Optional<A> context) {
     return defaultUnimplementedMethod();

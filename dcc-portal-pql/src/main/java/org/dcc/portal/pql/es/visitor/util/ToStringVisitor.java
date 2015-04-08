@@ -49,6 +49,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
@@ -89,6 +90,11 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
 
   @Override
   public String visitMustBool(MustBoolNode node, Optional<Void> context) {
+    return buildToString(node);
+  }
+
+  @Override
+  public String visitShouldBool(ShouldBoolNode node, Optional<Void> context) {
     return buildToString(node);
   }
 

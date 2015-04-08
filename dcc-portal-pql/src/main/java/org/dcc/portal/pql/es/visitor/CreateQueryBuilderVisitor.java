@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
@@ -102,19 +103,23 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
 
   @Override
   public QueryBuilder visitBool(BoolNode node, Optional<QueryContext> context) {
-    checkState(node.childrenCount() == 1, "Malformed BoolNode \n%s", node);
     val boolQueryBuilder = QueryBuilders.boolQuery();
-    val child = node.getFirstChild();
-
-    if (child instanceof MustBoolNode) {
-      for (val subChild : child.getChildren()) {
-        boolQueryBuilder.must(subChild.accept(this, context));
+    for (val child : node.getChildren()) {
+      if (child instanceof MustBoolNode) {
+        for (val subChild : child.getChildren()) {
+          boolQueryBuilder.must(subChild.accept(this, context));
+        }
+      } else if (child instanceof ShouldBoolNode) {
+        for (val subChild : child.getChildren()) {
+          boolQueryBuilder.should(subChild.accept(this, context));
+        }
+      } else {
+        throw new IllegalStateException(format("Operation type %s is not supported", child.getNodeName()));
       }
 
-      return boolQueryBuilder;
     }
 
-    throw new IllegalStateException(format("Operation type %s is not supported", child.getNodeName()));
+    return boolQueryBuilder;
   }
 
   private static void verifyQueryChildren(QueryNode node) {

@@ -47,6 +47,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
@@ -100,7 +101,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     }
 
     checkOptional(context);
-    val result = new OrNode();
+    val result = new ShouldBoolNode();
     for (val child : node.getChildren()) {
       // visitTerm has already implemented logic. Let's reuse it by creating a TermNode and visiting it.
       val termNode = createTermNode(node.getField(), child);
@@ -115,7 +116,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
       result.addChildren(visitTermNodeResult.get());
     }
 
-    return Optional.of(nest(node.getField(), result, context.get().getTypeModel(), node));
+    return Optional.of(nest(node.getField(), new BoolNode(result), context.get().getTypeModel(), node));
   }
 
   @Override
@@ -140,6 +141,11 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
 
   @Override
   public Optional<ExpressionNode> visitMustBool(@NonNull MustBoolNode node, @NonNull Optional<QueryContext> context) {
+    return visitChildren(this, node, context);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitShouldBool(@NonNull ShouldBoolNode node, @NonNull Optional<QueryContext> context) {
     return visitChildren(this, node, context);
   }
 
@@ -177,13 +183,14 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
       return Optional.empty();
     }
 
-    val result = new AndNode();
-
     val locationValue = (String) node.getValueNode().getValue();
     val typeModel = context.get().getTypeModel();
-    result.addChildren(createTermNode(field, typeModel, locationValue));
-    result.addChildren(createGreaterEqualNode(resolveStartField(field, typeModel), parseStart(locationValue)));
-    result.addChildren(createLessEqualNode(resolveEndField(field, typeModel), parseEnd(locationValue)));
+
+    val result = new BoolNode(new MustBoolNode(
+        createTermNode(field, typeModel, locationValue),
+        createGreaterEqualNode(resolveStartField(field, typeModel), parseStart(locationValue)),
+        createLessEqualNode(resolveEndField(field, typeModel), parseEnd(locationValue))
+        ));
 
     return Optional.of(nest(field, result, context.get().getTypeModel(), node));
   }
@@ -215,7 +222,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
 
   private static ExpressionNode nest(String field, ExpressionNode visitResultNode, AbstractTypeModel typeModel,
       ExpressionNode originalNode) {
-    if (isNonNestedField(field, typeModel)) {
+    if (isNonNestedField(field, typeModel) || hasNestedParent(field, originalNode, typeModel)) {
       return visitResultNode;
     }
 
@@ -233,6 +240,31 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     }
 
     return new NestedNode(nestedPath, visitResultNode);
+  }
+
+  private static boolean hasNestedParent(String field, ExpressionNode node, AbstractTypeModel typeModel) {
+    val nestedPath = getNestedPath(typeModel, field);
+
+    while (node != null && !(node instanceof NestedNode)) {
+      node = node.getParent();
+    }
+
+    if (node != null) {
+      val nestedNode = (NestedNode) node;
+      if (nestedNode.getPath().equals(nestedPath)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static String getNestedPath(AbstractTypeModel typeModel, String field) {
+    if (field.equals(MUTATION_LOCATION)) {
+      return typeModel.getNestedPath(MUTATION_START);
+    }
+
+    return typeModel.getNestedPath(GENE_START);
   }
 
   private static boolean isNonNestedField(String field, AbstractTypeModel typeModel) {

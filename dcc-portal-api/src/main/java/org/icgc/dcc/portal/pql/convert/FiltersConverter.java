@@ -239,7 +239,7 @@ public class FiltersConverter {
     val indexModel = IndexModel.getTypeModel(indexType);
     for (val field : fields) {
       String nestedPath = "";
-      val fieldName = parseFieldName(typePrefix, field);
+      val fieldName = parseFieldName(field);
       if (SPECIAL_FIELDS_NESTING.containsKey(fieldName)) {
         nestedPath = SPECIAL_FIELDS_NESTING.get(fieldName);
       } else if (indexModel.isNested(fieldName)) {
@@ -289,11 +289,11 @@ public class FiltersConverter {
   }
 
   private static String createMissingFilter(String typePrefix, JqlField jqlField, Type indexType) {
-    val fieldName = parseFieldName(typePrefix, jqlField);
+    val fieldName = parseFieldName(jqlField);
 
     if (jqlField.getValue().isArray()) {
       // FIXME: assumes the operation is 'IS'
-      val arrayFilter = createArrayFilterForMissingField(typePrefix, jqlField);
+      val arrayFilter = createArrayFilterForMissingField(jqlField);
       val missingFilter = format(MISSING_TEMPLATE, fieldName);
 
       return arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
@@ -304,7 +304,7 @@ public class FiltersConverter {
         format(MISSING_TEMPLATE, fieldName);
   }
 
-  private static Optional<String> createArrayFilterForMissingField(String typePrefix, JqlField jqlField) {
+  private static Optional<String> createArrayFilterForMissingField(JqlField jqlField) {
     val values = Lists.newArrayList(((JqlArrayValue) jqlField.getValue()).get());
     values.remove(MISSING_VALUE);
 
@@ -313,13 +313,13 @@ public class FiltersConverter {
     }
 
     val newJqlValue = new JqlArrayValue(values);
-    val newJqlField = new JqlField(jqlField.getName(), jqlField.getOperation(), newJqlValue);
+    val newJqlField = new JqlField(jqlField.getName(), jqlField.getOperation(), newJqlValue, jqlField.getPrefix());
 
-    return Optional.of(createInFilter(typePrefix, newJqlField));
+    return Optional.of(createInFilter(newJqlField));
   }
 
   private static String createFilterByValueType(String prefix, JqlField jqlField) {
-    return jqlField.getValue().isArray() ? createInFilter(prefix, jqlField) : createEqFilter(prefix, jqlField);
+    return jqlField.getValue().isArray() ? createInFilter(jqlField) : createEqFilter(prefix, jqlField);
   }
 
   private static String createEqFilter(String prefix, JqlField jqlField) {
@@ -327,22 +327,22 @@ public class FiltersConverter {
     val value = isString(fieldValue) ? asString(fieldValue) : fieldValue;
 
     return jqlField.getOperation() == IS ?
-        format(EQ_TEMPLATE, parseFieldName(prefix, jqlField), value) :
-        format(NE_TEMPLATE, parseFieldName(prefix, jqlField), value);
+        format(EQ_TEMPLATE, parseFieldName(jqlField), value) :
+        format(NE_TEMPLATE, parseFieldName(jqlField), value);
   }
 
-  private static String createInFilter(String prefix, JqlField jqlField) {
+  private static String createInFilter(JqlField jqlField) {
     val arrayField = (JqlArrayValue) jqlField.getValue();
 
-    return format(IN_TEMPLATE, parseFieldName(prefix, jqlField), arrayField.valuesToString());
+    return format(IN_TEMPLATE, parseFieldName(jqlField), arrayField.valuesToString());
   }
 
-  private static String parseFieldName(String prefix, JqlField jqlField) {
+  private static String parseFieldName(JqlField jqlField) {
     if (jqlField.getName().endsWith("Nested")) {
       return jqlField.getName();
     }
 
-    return format("%s.%s", prefix, jqlField.getName());
+    return format("%s.%s", jqlField.getPrefix(), jqlField.getName());
   }
 
 }

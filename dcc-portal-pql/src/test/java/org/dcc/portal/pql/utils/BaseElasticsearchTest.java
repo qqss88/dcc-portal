@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.utils;
 
 import static com.github.tlrx.elasticsearch.test.EsSetup.createIndex;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.PqlParseListener;
 import org.dcc.portal.pql.qe.QueryContext;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +48,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tlrx.elasticsearch.test.EsSetup;
 import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
+import com.google.common.collect.Lists;
 
 public class BaseElasticsearchTest {
 
@@ -169,4 +172,18 @@ public class BaseElasticsearchTest {
 
     return listener.getEsAst();
   }
+
+  public static void containsOnlyIds(SearchResponse response, String... ids) {
+    val resopnseIds = Lists.<String> newArrayList();
+
+    for (val hit : response.getHits()) {
+      resopnseIds.add(hit.getId());
+    }
+    assertThat(resopnseIds).containsOnly(ids);
+  }
+
+  public static void assertTotalHitsCount(SearchResponse response, int expectedCount) {
+    assertThat(response.getHits().getTotalHits()).isEqualTo(expectedCount);
+  }
+
 }

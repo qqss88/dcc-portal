@@ -49,6 +49,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
@@ -56,6 +57,7 @@ import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
+// TODO: Either remove or finish
 public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>, Void> {
 
   @Override
@@ -81,6 +83,11 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitMustBool(MustBoolNode node, Optional<Void> context) {
+    return visitChildren(this, node, context);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitShouldBool(ShouldBoolNode node, Optional<Void> context) {
     return visitChildren(this, node, context);
   }
 

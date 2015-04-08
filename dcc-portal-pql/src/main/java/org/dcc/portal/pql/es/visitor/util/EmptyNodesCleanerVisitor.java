@@ -47,6 +47,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
@@ -180,6 +181,11 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitMustBool(MustBoolNode node, Optional<Void> context) {
+    return defaultProcessing(node);
+  }
+
+  @Override
+  public ExpressionNode visitShouldBool(ShouldBoolNode node, Optional<Void> context) {
     return defaultProcessing(node);
   }
 

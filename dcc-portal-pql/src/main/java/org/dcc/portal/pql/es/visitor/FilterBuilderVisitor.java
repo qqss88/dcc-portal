@@ -19,7 +19,7 @@ package org.dcc.portal.pql.es.visitor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.dcc.portal.pql.es.utils.Nodes.filterChildren;
+import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
@@ -56,6 +56,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
@@ -104,9 +105,15 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   @Override
   public FilterBuilder visitBool(@NonNull BoolNode node, Optional<QueryContext> context) {
     BoolFilterBuilder resultBuilder = boolFilter();
-    val mustNode = getChild(node, MustBoolNode.class);
-    if (mustNode != null) {
-      resultBuilder = resultBuilder.must(visitChildren(mustNode, context));
+    for (val child : node.getChildren()) {
+      val childrenResult = visitChildren(child, context);
+      if (child instanceof MustBoolNode) {
+        resultBuilder.must(childrenResult);
+      } else if (child instanceof ShouldBoolNode) {
+        resultBuilder.should(childrenResult);
+      } else {
+        throw new IllegalStateException(format("Operation type %s is not supported", child.getNodeName()));
+      }
     }
 
     return resultBuilder;
@@ -239,18 +246,6 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
     }
 
     return createNestedFilter(node, node.getField(), termsFilter, context.get().getTypeModel());
-  }
-
-  private static <T> T getChild(BoolNode boolNode, Class<T> type) {
-    val children = filterChildren(boolNode, type);
-    checkState(children.size() < 2, "A BoolExpressionNode can contain only a single node of type %s",
-        type.getSimpleName());
-
-    if (children.isEmpty()) {
-      return null;
-    } else {
-      return children.get(0);
-    }
   }
 
   private FilterBuilder[] visitChildren(ExpressionNode node, Optional<QueryContext> context) {

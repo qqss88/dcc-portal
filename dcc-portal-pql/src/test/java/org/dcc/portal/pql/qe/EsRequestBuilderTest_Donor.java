@@ -42,9 +42,10 @@ public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
   }
 
   @Test
-  public void locationTest() {
-    val result =
-        executeQuery("nested(gene,and(nested(gene.ssm,and(nested(gene.ssm.consequence,in(mutation.consequenceType,'start_lost'),in(mutation.functionalImpact,'High')),in(mutation.type,'single base substitution'))),in(gene.id,'ENSG00000182909')))");
+  public void geneLocationTest() {
+    val result = executeQuery("in(gene.location,'chr20:31446730-31549006')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "DO9");
   }
 
   @Test

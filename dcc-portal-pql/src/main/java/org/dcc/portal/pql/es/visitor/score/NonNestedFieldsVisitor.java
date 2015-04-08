@@ -32,6 +32,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.VisitorHelpers;
@@ -60,6 +61,13 @@ public class NonNestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitMustBool(MustBoolNode node, Optional<ScoreQueryContext> context) {
+    processChildren(node, context);
+
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitShouldBool(ShouldBoolNode node, Optional<ScoreQueryContext> context) {
     processChildren(node, context);
 
     return Optional.empty();

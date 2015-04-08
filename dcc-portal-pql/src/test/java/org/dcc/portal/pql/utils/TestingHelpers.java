@@ -32,6 +32,7 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
@@ -97,10 +98,18 @@ public class TestingHelpers {
     return (MustBoolNode) boolNode.getFirstChild();
   }
 
+  public static ShouldBoolNode assertBoolAndGetShouldNode(@NonNull ExpressionNode node) {
+    val boolNode = (BoolNode) node;
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+
+    return (ShouldBoolNode) boolNode.getFirstChild();
+  }
+
   public static NestedNode assertAndGetNestedNode(@NonNull ExpressionNode node, @NonNull String path) {
     val nestedNode = (NestedNode) node;
     assertThat(nestedNode.getPath()).isEqualTo(path);
     assertThat(nestedNode.getScoreMode()).isEqualTo(ScoreMode.AVG);
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
     return nestedNode;
   }

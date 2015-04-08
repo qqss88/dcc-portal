@@ -76,22 +76,22 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
     val typeFields = new ImmutableList.Builder<JqlField>();
     val nodeFields = entry.getValue().fields();
     while (nodeFields.hasNext()) {
-      typeFields.add(parseField(nodeFields.next()));
+      typeFields.add(parseField(type, nodeFields.next()));
     }
 
     return singletonMap(type, typeFields.build());
   }
 
-  private static JqlField parseField(Entry<String, JsonNode> next) {
+  private static JqlField parseField(String type, Entry<String, JsonNode> next) {
     val fieldName = next.getKey();
     val fieldValue = next.getValue();
     log.debug("Parsing field {} - {}", fieldName, fieldValue);
 
     if (fieldName.startsWith("has")) {
-      return new JqlField(fieldName, Operation.HAS, parseSingleValue(fieldValue));
+      return new JqlField(fieldName, Operation.HAS, parseSingleValue(fieldValue), type);
     }
 
-    return new JqlField(fieldName, parseOperation(fieldValue), parseValue(fieldValue));
+    return new JqlField(fieldName, parseOperation(fieldValue), parseValue(fieldValue), type);
   }
 
   private static JqlValue parseValue(JsonNode fieldValue) {

@@ -31,9 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
+import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.meta.IndexModel;
@@ -140,6 +143,47 @@ public class NestedFieldsVisitorTest {
     assertThat(ssmNestedNode.getScoreMode()).isEqualTo(NestedNode.ScoreMode.AVG);
 
     TestingHelpers.assertTermNode(ssmNestedNode.getFirstChild(), "platformNested", "1");
+  }
+
+  @Test
+  public void andTest_empty() {
+    val esAst = new AndNode(new TermNode("id", "1"));
+    val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
+    val result = esAst.accept(visitor, Optional.of(requestContext));
+    assertThat(result.isPresent()).isFalse();
+  }
+
+  @Test
+  public void andTest() {
+    val esAst = new AndNode(new TermNode("platformNested", "1"));
+    val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
+    val result = esAst.accept(visitor, Optional.of(requestContext)).get();
+    log.debug("{}", result);
+
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    assertThat(mustNode.hasChildren()).isTrue();
+  }
+
+  @Test
+  public void orTest_empty() {
+    val esAst = new OrNode(new TermNode("id", "1"));
+    val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
+    val result = esAst.accept(visitor, Optional.of(requestContext));
+    assertThat(result.isPresent()).isFalse();
+  }
+
+  @Test
+  public void orTest() {
+    val esAst = new OrNode(new TermNode("platformNested", "1"));
+    val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
+    val result = esAst.accept(visitor, Optional.of(requestContext)).get();
+    log.debug("{}", result);
+
+    val boolNode = (BoolNode) result;
+    assertThat(boolNode.childrenCount()).isEqualTo(1);
+
+    val shouldNode = (ShouldBoolNode) boolNode.getFirstChild();
+    assertThat(shouldNode.hasChildren()).isTrue();
   }
 
   private NestedNode visit(ExpressionNode nodeToVisit) {

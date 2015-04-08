@@ -34,8 +34,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
-
 /**
  * Contains 3 mutations: MU1, MU2, MU3
  */
@@ -195,7 +193,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void andTest() {
     val result =
-        executeQuery("and(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')))");
+        executeQuery("and(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE'))");
     assertTotalHitsCount(result, 1);
     assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
@@ -355,19 +353,6 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     log.debug("Result - {}", result);
 
     return result;
-  }
-
-  public static void containsOnlyIds(SearchResponse response, String... ids) {
-    val resopnseIds = Lists.<String> newArrayList();
-
-    for (val hit : response.getHits()) {
-      resopnseIds.add(hit.getId());
-    }
-    assertThat(resopnseIds).containsOnly(ids);
-  }
-
-  private static void assertTotalHitsCount(SearchResponse response, int expectedCount) {
-    assertThat(response.getHits().getTotalHits()).isEqualTo(expectedCount);
   }
 
   private static SearchHit getFirstSearchResult(SearchResponse response) {

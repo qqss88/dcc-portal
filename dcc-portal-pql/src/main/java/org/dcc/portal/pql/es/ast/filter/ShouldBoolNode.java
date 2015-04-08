@@ -15,21 +15,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.pql.convert.model;
+package org.dcc.portal.pql.es.ast.filter;
+
+import java.util.Optional;
 
 import lombok.NonNull;
-import lombok.Value;
 
-@Value
-public class JqlField {
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-  @NonNull
-  String name;
-  @NonNull
-  Operation operation;
-  @NonNull
-  JqlValue value;
-  @NonNull
-  String prefix;
+public class ShouldBoolNode extends ExpressionNode {
 
+  public ShouldBoolNode(ExpressionNode... children) {
+    super(children);
+  }
+
+  @Override
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
+    return visitor.visitShouldBool(this, context);
+  }
 }

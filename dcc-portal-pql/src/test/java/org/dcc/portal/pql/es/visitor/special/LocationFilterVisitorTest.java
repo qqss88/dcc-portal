@@ -19,6 +19,8 @@ package org.dcc.portal.pql.es.visitor.special;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_LOCATION;
+import static org.dcc.portal.pql.meta.AbstractTypeModel.MUTATION_LOCATION;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
@@ -31,21 +33,25 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
+import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
-import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 @Slf4j
 public class LocationFilterVisitorTest {
 
+  private static final String LOCATION_VALUE = "chr12:123-456";
   private static final String GENE_FILTER = "in(gene.location, ['chr12:123-456'])";
-  private static final String MUTATION_FILTER = "in(mutation.location, ['chr12:123-456'])";
   private static final String CHROMOSOME_VALUE = "12";
   private static final long CHROMOSOME_START = 123L;
   private static final long CHROMOSOME_END = 456L;
@@ -54,65 +60,125 @@ public class LocationFilterVisitorTest {
   QueryContext queryContext;
 
   @Test
-  public void geneLocation_donor() {
-    val root = createEsAst(GENE_FILTER, DONOR_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", DONOR_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "gene", GENE_CENTRIC);
+  public void geneLocationTest_donor_notNested() {
+    val esAst = new TermNode(GENE_LOCATION, LOCATION_VALUE);
+    val result = executeQuery(esAst, DONOR_CENTRIC);
+    assertLocation(result, DONOR_CENTRIC, false, GENE_LOCATION);
   }
 
   @Test
-  public void mutationLocation_donor() {
-    val root = createEsAst(MUTATION_FILTER, DONOR_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", DONOR_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "gene.ssm", MUTATION_CENTRIC);
+  public void geneLocationTest_donor_nested() {
+    val esAst = new NestedNode("gene", new TermNode(GENE_LOCATION, LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, false, GENE_LOCATION);
   }
 
   @Test
-  public void geneLocation_gene() {
-    val root = createEsAst(GENE_FILTER, GENE_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", GENE_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "", GENE_CENTRIC);
+  public void geneLocationArrayTest_donor_notNested() {
+    val esAst = new TermsNode(GENE_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, true, GENE_LOCATION);
   }
 
   @Test
-  public void mutationLocation_gene() {
-    val root = createEsAst(MUTATION_FILTER, GENE_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", GENE_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "donor.ssm", MUTATION_CENTRIC);
+  public void geneLocationArrayTest_donor_nested() {
+    val esAst = new NestedNode("gene", new TermsNode(GENE_LOCATION, new TerminalNode(LOCATION_VALUE)));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, true, GENE_LOCATION);
   }
 
   @Test
-  public void geneLocation_mutation() {
-    val root = createEsAst(GENE_FILTER, MUTATION_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "transcript.gene", GENE_CENTRIC);
+  public void geneLocationTest_gene_notNested() {
+    val esAst = new TermNode(GENE_LOCATION, LOCATION_VALUE);
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, false, GENE_LOCATION);
   }
 
   @Test
-  public void mutationLocation_mutation() {
-    val root = createEsAst(MUTATION_FILTER, MUTATION_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
-    assertGeneLocation(result, "", MUTATION_CENTRIC);
+  public void geneLocationArrayTest_gene_notNested() {
+    val esAst = new TermsNode(GENE_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, true, GENE_LOCATION);
   }
 
   @Test
-  public void nestedTest() {
-    val root = createEsAst(format("nested(transcript, %s)", GENE_FILTER), MUTATION_CENTRIC);
-    val result = root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
-    log.debug("After visitor: {}", result);
+  public void geneLocationTest_mutation_notNested() {
+    val esAst = new TermNode(GENE_LOCATION, LOCATION_VALUE);
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, false, GENE_LOCATION);
+  }
 
-    // Query - Filter - Bool - Must - Nested - Bool - Must - And
-    val andNode = (AndNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild()
-        .getFirstChild().getFirstChild().getFirstChild().getFirstChild();
-    val nestedNode = Nodes.findParent(andNode, NestedNode.class).get();
-    assertThat(nestedNode.getPath()).isEqualTo("transcript");
-    assertThat(Nodes.findParent(nestedNode, NestedNode.class).isPresent()).isFalse();
+  @Test
+  public void geneLocationTest_mutation_nested() {
+    val esAst = new NestedNode("transcript", new TermNode(GENE_LOCATION, LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, false, GENE_LOCATION);
+  }
+
+  @Test
+  public void geneLocationArrayTest_mutation_notNested() {
+    val esAst = new TermsNode(GENE_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, true, GENE_LOCATION);
+  }
+
+  @Test
+  public void geneLocationArrayTest_mutation_nested() {
+    val esAst = new NestedNode("transcript", new TermsNode(GENE_LOCATION, new TerminalNode(LOCATION_VALUE)));
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, true, GENE_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationTest_donor_notNested() {
+    val esAst = new TermNode(MUTATION_LOCATION, LOCATION_VALUE);
+    val result = executeQuery(esAst, DONOR_CENTRIC);
+    assertLocation(result, DONOR_CENTRIC, false, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationTest_donor_nested() {
+    val esAst = new NestedNode("gene.ssm", new TermNode(MUTATION_LOCATION, LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, false, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationArrayTest_donor_notNested() {
+    val esAst = new TermsNode(MUTATION_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, true, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationArrayTest_donor_nested() {
+    val esAst = new NestedNode("gene.ssm", new TermsNode(MUTATION_LOCATION, new TerminalNode(LOCATION_VALUE)));
+    assertLocation(executeQuery(esAst, DONOR_CENTRIC), DONOR_CENTRIC, true, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationTest_gene_notNested() {
+    val esAst = new TermNode(MUTATION_LOCATION, LOCATION_VALUE);
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, false, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationArrayTest_gene_notNested() {
+    val esAst = new TermsNode(MUTATION_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, true, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationTest_gene_Nested() {
+    val esAst = new NestedNode("donor.ssm", new TermNode(MUTATION_LOCATION, LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, false, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationArrayTest_gene_Nested() {
+    val esAst = new NestedNode("donor.ssm", new TermsNode(MUTATION_LOCATION, new TerminalNode(LOCATION_VALUE)));
+    assertLocation(executeQuery(esAst, GENE_CENTRIC), GENE_CENTRIC, true, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationTest_mutation_notNested() {
+    val esAst = new TermNode(MUTATION_LOCATION, LOCATION_VALUE);
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, false, MUTATION_LOCATION);
+  }
+
+  @Test
+  public void mutationLocationArrayTest_mutation_notNested() {
+    val esAst = new TermsNode(MUTATION_LOCATION, new TerminalNode(LOCATION_VALUE));
+    assertLocation(executeQuery(esAst, MUTATION_CENTRIC), MUTATION_CENTRIC, true, MUTATION_LOCATION);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -121,57 +187,85 @@ public class LocationFilterVisitorTest {
     root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
   }
 
-  private static void assertGeneLocation(ExpressionNode result, String prefix, Type type) {
-    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode - AndNode
-    AndNode andNode = null;
-    if (prefix.equals("")) {
-      andNode =
-          (AndNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild()
-              .getFirstChild();
+  private static String resolveStart(String filterType, AbstractTypeModel typeModel) {
+    val fieldName = filterType.equals(GENE_LOCATION) ? "gene.start" : "mutation.start";
+
+    return typeModel.getField(fieldName);
+  }
+
+  private static String resolveEnd(String filterType, AbstractTypeModel typeModel) {
+    val fieldName = filterType.equals(GENE_LOCATION) ? "gene.end" : "mutation.end";
+
+    return typeModel.getField(fieldName);
+  }
+
+  private static String resolveChromosome(String filterType, AbstractTypeModel typeModel) {
+    val fieldName = filterType.equals(GENE_LOCATION) ? "gene.chromosome" : "mutation.chromosome";
+
+    return typeModel.getField(fieldName);
+  }
+
+  private static void assertLocation(ExpressionNode node, Type type, boolean isArray, String filterType) {
+    val typeModel = IndexModel.getTypeModel(type);
+    ExpressionNode root = null;
+    MustBoolNode mustNode = null;
+
+    // no NestedNode
+    if (hasNested(filterType, type)) {
+      val nestedPath = typeModel.getNestedPath(resolveStart(filterType, typeModel));
+      val nestedNode = TestingHelpers.assertAndGetNestedNode(node, nestedPath);
+      root = nestedNode.getFirstChild();
     } else {
-      val nestedNode =
-          (NestedNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
-
-      if (prefix.equals("transcript.gene")) {
-        assertThat(nestedNode.getPath()).isEqualTo("transcript");
-      } else {
-        assertThat(nestedNode.getPath()).isEqualTo(prefix);
-      }
-
-      andNode = (AndNode) nestedNode.getFirstChild().getFirstChild();
+      root = node;
     }
 
-    assertThat(andNode.childrenCount()).isEqualTo(3);
+    if (isArray) {
+      val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(root);
+      mustNode = TestingHelpers.assertBoolAndGetMustNode(shouldNode.getFirstChild());
+    } else {
+      mustNode = TestingHelpers.assertBoolAndGetMustNode(root);
+    }
 
-    val termNode = (TermNode) andNode.getChild(0);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo(formatField(prefix, "chromosome"));
+    assertThat(mustNode.childrenCount()).isEqualTo(3);
+
+    val termNode = (TermNode) mustNode.getChild(0);
+    assertThat(termNode.getNameNode().getValue()).isEqualTo(resolveChromosome(filterType, typeModel));
     assertThat(termNode.getValueNode().getValue()).isEqualTo(CHROMOSOME_VALUE);
 
     // GreaterEqual chromosome start
-    RangeNode rangeNode = (RangeNode) andNode.getChild(1);
+    RangeNode rangeNode = (RangeNode) mustNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getFieldName()).isEqualTo(resolveStart(prefix, type));
+    assertThat(rangeNode.getFieldName()).isEqualTo(resolveStart(filterType, typeModel));
     val geNode = (GreaterEqualNode) rangeNode.getFirstChild();
     assertThat(geNode.getValue()).isEqualTo(CHROMOSOME_START);
 
     // LessEqual chromosome end
-    rangeNode = (RangeNode) andNode.getChild(2);
+    rangeNode = (RangeNode) mustNode.getChild(2);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
-    assertThat(rangeNode.getFieldName()).isEqualTo(resolveEnd(prefix, type));
+    assertThat(rangeNode.getFieldName()).isEqualTo(resolveEnd(filterType, typeModel));
     val leNode = (LessEqualNode) rangeNode.getFirstChild();
     assertThat(leNode.getValue()).isEqualTo(CHROMOSOME_END);
   }
 
-  private static String resolveStart(String prefix, Type type) {
-    return type == GENE_CENTRIC ? formatField(prefix, "start") : formatField(prefix, "chromosome_start");
+  /**
+   * @param filterType
+   * @param type
+   * @return
+   */
+  private static boolean hasNested(String filterType, Type type) {
+    return !(type == GENE_CENTRIC && filterType.equals(GENE_LOCATION) || type == MUTATION_CENTRIC
+        && filterType.equals(MUTATION_LOCATION));
   }
 
-  private static String resolveEnd(String prefix, Type type) {
-    return type == GENE_CENTRIC ? formatField(prefix, "end") : formatField(prefix, "chromosome_end");
-  }
+  private ExpressionNode executeQuery(ExpressionNode esAst, Type type) {
+    log.debug("ES AST: \n{}", esAst);
+    val result = esAst.accept(visitor, Optional.of(new QueryContext("", type)));
+    log.debug("Result: \n{}", result);
+    if (result.isPresent()) {
+      return result.get();
+    }
 
-  private static String formatField(String prefix, String field) {
-    return prefix.isEmpty() ? field : format("%s.%s", prefix, field);
+    return esAst;
   }
 
 }

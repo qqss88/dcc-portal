@@ -38,11 +38,8 @@ public class DonorCentricTypeModelTest extends DonorCentricTypeModel {
     }
     log.debug("Nested Fields: {}", nestedFields);
 
-    assertThat(nestedFields.size()).isEqualTo(5);
+    assertThat(nestedFields.size()).isEqualTo(4);
     assertThat(nestedFields).contains("gene");
-    // FIXME: uncomment one below and delete 2 below because of the incorrect type model
-    // assertThat(nestedFields).contains("gene.pathway");
-    assertThat(nestedFields).contains("gene.pathways");
     assertThat(nestedFields).contains("gene.ssm");
     assertThat(nestedFields).contains("gene.ssm.consequence");
     assertThat(nestedFields).contains("gene.ssm.observation");

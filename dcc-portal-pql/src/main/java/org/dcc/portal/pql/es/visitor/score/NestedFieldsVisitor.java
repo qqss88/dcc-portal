@@ -37,6 +37,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
@@ -112,7 +113,16 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
 
   @Override
   public Optional<ExpressionNode> visitAnd(AndNode node, Optional<RequestContext> context) {
-    return processChildren(node, context);
+    // Results of this visitor are added to a QueryNode and are built using QueryBuilders. QueryBuilders do not have an
+    // 'and query' it must become a Must query
+    val childrenResults = processChildren(node, context);
+    if (!childrenResults.isPresent()) {
+      return childrenResults;
+    }
+
+    val boolNode = new BoolNode(new MustBoolNode(childrenResults.get().getChildrenArray()));
+
+    return Optional.of(boolNode);
   }
 
   @Override
@@ -126,13 +136,27 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   }
 
   @Override
+  public Optional<ExpressionNode> visitShouldBool(ShouldBoolNode node, Optional<RequestContext> context) {
+    return processChildren(node, context);
+  }
+
+  @Override
   public Optional<ExpressionNode> visitNot(NotNode node, Optional<RequestContext> context) {
     return processChildren(node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitOr(OrNode node, Optional<RequestContext> context) {
-    return processChildren(node, context);
+    // Results of this visitor are added to a QueryNode and are built using QueryBuilders. QueryBuilders do not have an
+    // 'or query' it must become a Should query
+    val childrenResults = processChildren(node, context);
+    if (!childrenResults.isPresent()) {
+      return childrenResults;
+    }
+
+    val boolNode = new BoolNode(new ShouldBoolNode(childrenResults.get().getChildrenArray()));
+
+    return Optional.of(boolNode);
   }
 
   @Override

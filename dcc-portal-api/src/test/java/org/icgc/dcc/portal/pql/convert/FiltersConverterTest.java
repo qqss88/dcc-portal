@@ -234,7 +234,7 @@ public class FiltersConverterTest {
   @Test
   public void curratedSetAndNestedFilterTest_mutation() {
     val filters = createFilters("{gene:{curatedSetId:{is:['GS1']}},mutation:{consequenceTypeNested:{is:['sl']}}}");
-    val result = converter.convertFilters(filters, Type.MUTATION_CENTRIC);
+    val result = converter.convertFilters(filters, MUTATION_CENTRIC);
     assertThat(result).isEqualTo("nested(transcript,in(gene.curatedSetId,'GS1'),in(consequenceTypeNested,'sl'))");
   }
 
