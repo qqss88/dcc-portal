@@ -464,12 +464,6 @@
       };
 
       return this.all().get('', angular.extend(defaults, params)).then(function (data) {
-        _this.totalSsmTestedDonorCount = _this.totalSsmTestedDonorCount || _.reduce(data.hits, function (sum, n) {
-          if (typeof sum === 'object') {
-            sum = sum.ssmTestedDonorCount;
-          }
-          return sum + n.ssmTestedDonorCount;
-        });
 
         if (data.hasOwnProperty('facets') &&
             data.facets.hasOwnProperty('id') &&
