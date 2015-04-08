@@ -22,10 +22,12 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
 @Getter
+@ToString
 @AllArgsConstructor
 public abstract class FieldModel {
 

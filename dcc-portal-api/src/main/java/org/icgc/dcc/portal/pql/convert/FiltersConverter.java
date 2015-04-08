@@ -27,6 +27,7 @@ import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -81,7 +82,7 @@ public class FiltersConverter {
     log.debug("Fields by nested path: {}", fieldsGrouppedByNestedPath);
     val sortedDescPaths = Lists.newArrayList(Sets.newTreeSet(fieldsGrouppedByNestedPath.keySet()).descendingSet());
     log.debug("Sorted: {}", sortedDescPaths);
-    val groupedPaths = groupNestedPaths(sortedDescPaths);
+    val groupedPaths = groupNestedPaths(sortedDescPaths, IndexModel.getTypeModel(indexType));
     log.debug("Groupped paths: {}", groupedPaths);
 
     int index = groupedPaths.asMap().size();
@@ -91,7 +92,12 @@ public class FiltersConverter {
           indexType,
           fieldsGrouppedByNestedPath,
           Lists.newArrayList(Sets.newTreeSet(entry.getValue()).descendingSet()));
-      result.append(filter);
+
+      if (isEncloseWithCommonParent(entry.getValue())) {
+        result.append(encloseWithCommonParent(entry.getKey(), filter));
+      } else {
+        result.append(filter);
+      }
 
       if (--index > 0) {
         result.append(QUERY_SEPARATOR);
@@ -101,19 +107,94 @@ public class FiltersConverter {
     return result.toString();
   }
 
-  private static ArrayListMultimap<String, String> groupNestedPaths(Collection<String> sortedDescPaths) {
-    val result = ArrayListMultimap.<String, String> create();
-    for (val path : Sets.newTreeSet(sortedDescPaths)) {
-      val tokens = path.split("\\.");
-      val prefix = tokens[0];
+  private String encloseWithCommonParent(String commonPath, String filter) {
+    return format(NESTED_TEMPLATE, commonPath, filter);
+  }
 
-      result.put(prefix, path);
+  static boolean isEncloseWithCommonParent(Collection<String> nestedPaths) {
+    if (nestedPaths.size() > 1 && !hasCommonParent(nestedPaths)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Checks if {@code nestedPaths} already contains a nested path which is common for all.
+   */
+  private static boolean hasCommonParent(Collection<String> nestedPaths) {
+    List<String> list = Lists.newArrayList(nestedPaths);
+    Collections.sort(list);
+    val firstPath = list.get(0);
+    for (val path : list) {
+      if (!path.startsWith(firstPath)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Groups nested paths by most common parent, so they can be nested at the parent's level.
+   */
+  static ArrayListMultimap<String, String> groupNestedPaths(Collection<String> nestedPaths,
+      AbstractTypeModel typeModel) {
+    val result = ArrayListMultimap.<String, String> create();
+    val sortedPaths = Lists.newArrayList(Sets.newTreeSet(nestedPaths));
+
+    if (sortedPaths.size() == 1) {
+      result.put(sortedPaths.get(0), sortedPaths.get(0));
+
+      return result;
+    }
+
+    String parentPath = EMPTY_NESTED_PATH;
+    for (int i = 0; i < sortedPaths.size(); i++) {
+      val currentPath = sortedPaths.get(i);
+      if (currentPath.equals(EMPTY_NESTED_PATH)) {
+        result.put(parentPath, currentPath);
+        continue;
+      }
+
+      val resolvedPath = typeModel.getParentNestedPath(currentPath);
+
+      // DonorCentric: [gene.ssm, gene.ssm.observation]
+      if (hasNextPath(i, sortedPaths.size() - 1) && sortedPaths.get(i + 1).startsWith(currentPath)
+          && parentPath.equals(EMPTY_NESTED_PATH)) {
+        parentPath = currentPath;
+
+        // DonorCentric: [gene.ssm.consequence, gene.ssm.observation]
+      } else if (currentPath.startsWith(resolvedPath) && hasNextPath(i, sortedPaths.size() - 1)
+          && sortedPaths.get(i + 1).startsWith(resolvedPath) && parentPath.equals(EMPTY_NESTED_PATH)) {
+        parentPath = resolvedPath;
+
+        // change from one common path to another
+      } else if (currentPath.startsWith(resolvedPath) && !currentPath.startsWith(parentPath)) {
+        parentPath = currentPath;
+
+        // MutationCentric: [ssm_occurrence, transcript]
+      } else if (parentPath.equals(EMPTY_NESTED_PATH)) {
+        parentPath = currentPath;
+      }
+
+      result.put(parentPath, currentPath);
     }
 
     return result;
   }
 
-  private static String createFilterByNestedPath(Type indexType, ArrayListMultimap<String, JqlField> sortedFields,
+  private static boolean hasNextPath(int i, int size) {
+    return i < size;
+  }
+
+  /**
+   * Creates a filter for all fields with are nested under common nested path. E.g. gene - gene.ssm -
+   * gene.ssm.observation - gene.ssm.consequence
+   * 
+   * @param sortedDescPaths - descending sorted paths. E.g. gene.ssm - gene
+   */
+  static String createFilterByNestedPath(Type indexType, ArrayListMultimap<String, JqlField> sortedFields,
       List<String> sortedDescPaths) {
     val filterStack = new Stack<String>();
     for (int i = 0; i < sortedDescPaths.size(); i++) {
@@ -129,15 +210,27 @@ public class FiltersConverter {
       } else {
         val prevFilter = filterStack.pop();
         if (isNestFilter(nestedPath, indexType)) {
-          filterStack.push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter,
-              filter));
+          if (isChildNesting(nestedPath, sortedDescPaths.get(i - 1))) {
+            filterStack.push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter,
+                filter));
+          } else {
+            filterStack.push(format("nested(%s,%s),%s", nestedPath, filter, prevFilter));
+          }
         } else {
-          filterStack.push(format("%s,%s", prevFilter, filter));
+          filterStack.push(format("%s,%s", filter, prevFilter));
         }
       }
     }
 
     return filterStack.pop();
+  }
+
+  /**
+   * gene, gene.ssm - true<br>
+   * transcript, gene - false
+   */
+  private static boolean isChildNesting(String parentPath, String childPath) {
+    return childPath.startsWith(parentPath);
   }
 
   private static String resolveNestedPath(String nestedPath, Type indexType) {
@@ -174,7 +267,11 @@ public class FiltersConverter {
     return result.toString();
   }
 
-  private static ArrayListMultimap<String, JqlField> groupFieldsByNestedPath(String typePrefix,
+  /**
+   * Groups fields by the most common nested path.<br>
+   * E.g. gene, gene.ssm, gene.ssm.consequence, gene.ssm.observation are in one bucket with key 'gene'
+   */
+  static ArrayListMultimap<String, JqlField> groupFieldsByNestedPath(String typePrefix,
       List<JqlField> fields, Type indexType) {
     val result = ArrayListMultimap.<String, JqlField> create();
     if (isTypeMatch(typePrefix, indexType)) {

@@ -45,8 +45,6 @@ public class MutationService {
   private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   public Mutations findAllCentric(Query query) {
-    log.info("{}", query);
-
     val pql = converter.convert(query, Type.MUTATION_CENTRIC);
     log.debug("Query: {}. PQL: {}", query, pql);
 

@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.meta;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
 
@@ -244,6 +245,25 @@ public abstract class AbstractTypeModel {
     }
 
     throw new IllegalArgumentException("Can't get nested path for a non-nested field");
+  }
+
+  /**
+   * @return closest parent's path if one exists. Otherwise, returns {@code path}.
+   */
+  public final String getParentNestedPath(@NonNull String path) {
+    checkState(!path.isEmpty(), "Empty nested path %s", path);
+    for (val token : split(path)) {
+      if (token.equals(path)) {
+        continue;
+      }
+
+      val tokenByFullPath = fieldsByFullPath.get(token);
+      if (tokenByFullPath.isNested()) {
+        return token;
+      }
+    }
+
+    return path;
   }
 
   private String getFullName(String path) {

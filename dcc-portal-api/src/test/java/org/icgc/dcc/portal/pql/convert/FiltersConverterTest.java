@@ -17,21 +17,34 @@
  */
 package org.icgc.dcc.portal.pql.convert;
 
+import static com.google.common.collect.ImmutableList.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.icgc.dcc.portal.pql.convert.FiltersConverter.createFilterByNestedPath;
+import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupFieldsByNestedPath;
+import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupNestedPaths;
+import static org.icgc.dcc.portal.pql.convert.FiltersConverter.isEncloseWithCommonParent;
+import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.JqlSingleValue;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 @Slf4j
 public class FiltersConverterTest {
@@ -265,12 +278,199 @@ public class FiltersConverterTest {
     assertThat(result).isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M1')),eq(gene.id,'G1')))");
   }
 
+  /**
+   * Filters at different levels of nesting must be nested at the closest parent nesting level.<br>
+   * E.g. In the DonorCentric model mutation.platform is nested at gene.ssm.observation, mutation.functionalImpact is
+   * nested at gene.ssm.consequence nested path. These two siblings must be enclosed at gene.ssm level. There is another
+   * nested path 'gene'. However, as gene.ssm is closest parent to the siblings it must be used.
+   */
   @Test
   public void differentLevelsNestingTest() {
-    val filters = createFilters("{gene:{id:{is:'G1'}},donor:{id:{is:'D1'}}}");
+    val filters = createFilters("{mutation:{platform:{is:['Illumina GA sequencing']},functionalImpact:{is:['High']}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene.ssm,nested(gene.ssm.consequence,in(mutation.functionalImpact,'High')),"
+        + "nested(gene.ssm.observation,in(mutation.platform,'Illumina GA sequencing')))");
+  }
+
+  @Test
+  public void differentLevelsNestingTest_mutationCentric() {
+    val filters = createFilters("{mutation:{platformNested:{is:['p']},functionalImpactNested:{is:['f']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
-    assertThat(result).isEqualTo("nested(transcript,eq(gene.id,'G1')),"
-        + "nested(ssm_occurrence,eq(donor.id,'D1'))");
+    log.warn("{}", result);
+    assertThat(result).isEqualTo("nested(transcript,in(functionalImpactNested,'f')),"
+        + "nested(ssm_occurrence.observation,in(platformNested,'p'))");
+  }
+
+  @Test
+  public void differentLevelsNestingTest_withCommonParent() {
+    val filters = createFilters("{mutation:{"
+        + "platform:{is:['Illumina GA sequencing']},"
+        + "functionalImpact:{is:['High']},"
+        + "id:{is:'M1'}}}");
+
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene.ssm,"
+        + "and("
+        + "nested(gene.ssm.consequence,in(mutation.functionalImpact,'High')),"
+        + "nested(gene.ssm.observation,in(mutation.platform,'Illumina GA sequencing')),"
+        + "eq(mutation.id,'M1')))");
+  }
+
+  @Test
+  public void nestedTest_single() {
+    val filters = createFilters("{gene:{id:{is:'G1'}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,eq(gene.id,'G1'))");
+  }
+
+  @Test
+  public void nestedTest_two() {
+    val filters = createFilters("{gene:{id:{is:'G1'},start:{is:123}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,eq(gene.id,'G1'),eq(gene.start,123))");
+  }
+
+  @Test
+  public void nestedInNestedTest() {
+    val filters = createFilters("{gene:{id:{is:'G1'}},mutation:{id:{is:'M1'}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M1')),eq(gene.id,'G1')))");
+  }
+
+  @Test
+  public void groupNestedPathsTest_single() {
+    assertThat(groupNestedPaths(of("gene"), getDonorCentricTypeModel())
+        .get("gene"))
+        .containsExactly("gene");
+  }
+
+  @Test
+  public void groupNestedPathsTest_differentLevels_mutationCentric() {
+    val result = groupNestedPaths(of("ssm_occurrence.observation", "transcript"), getMutationCentricTypeModel());
+    log.debug("Result: {}", result);
+    assertThat(result.get("transcript")).containsExactly("transcript");
+    assertThat(result.get("ssm_occurrence.observation")).containsExactly("ssm_occurrence.observation");
+
+  }
+
+  @Test
+  public void groupNestedPathsTest_two() {
+    assertThat(groupNestedPaths(of("gene.ssm", "gene.ssm.observation"), getDonorCentricTypeModel())
+        .get("gene.ssm"))
+        .containsExactly("gene.ssm", "gene.ssm.observation");
+  }
+
+  @Test
+  public void groupNestedPathsTest_withEmptyPath() {
+    assertThat(groupNestedPaths(of("", "gene.ssm", "gene.ssm.observation"), getDonorCentricTypeModel())
+        .get("gene.ssm"))
+        .containsExactly("gene.ssm", "gene.ssm.observation");
+  }
+
+  @Test
+  public void groupNestedPathsTest_noCommonParent() {
+    assertThat(groupNestedPaths(of("gene.ssm.consequence", "gene.ssm.observation"), getDonorCentricTypeModel())
+        .get("gene.ssm"))
+        .containsExactly("gene.ssm.consequence", "gene.ssm.observation");
+  }
+
+  @Test
+  public void groupNestedPathsTest_withCommonParent() {
+    val result = groupNestedPaths(of("gene.ssm", "gene.ssm.consequence", "gene.ssm.observation"),
+        getDonorCentricTypeModel());
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get("gene.ssm")).containsExactly("gene.ssm", "gene.ssm.consequence", "gene.ssm.observation");
+  }
+
+  @Test
+  public void groupNestedPathsTest_withCommonParentAtHigherLevel() {
+    val result = groupNestedPaths(of("gene", "gene.ssm.consequence", "gene.ssm.observation"),
+        getDonorCentricTypeModel());
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get("gene")).containsExactly("gene", "gene.ssm.consequence", "gene.ssm.observation");
+  }
+
+  @Test
+  public void groupNestedPathsTest_multiple() {
+    val result = groupNestedPaths(of("ssm_occurrence", "ssm_occurrence.observation", "transcript"),
+        getMutationCentricTypeModel());
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get("ssm_occurrence")).containsExactly("ssm_occurrence", "ssm_occurrence.observation");
+    assertThat(result.get("transcript")).containsExactly("transcript");
+  }
+
+  @Test
+  public void isEncloseWithCommonParentTest() {
+    assertThat(isEncloseWithCommonParent(of("gene", "gene.ssm"))).isFalse();
+    assertThat(isEncloseWithCommonParent(of("gene.ssm.consequence", "gene.ssm.observation"))).isTrue();
+    assertThat(isEncloseWithCommonParent(of("gene.ssm", "gene.ssm.consequence", "gene.ssm.observation"))).isFalse();
+    assertThat(isEncloseWithCommonParent(of("gene", "gene.ssm.consequence", "gene.ssm.observation"))).isFalse();
+  }
+
+  @Test
+  public void createFilterByNestedPathTest_single() {
+    val values = ArrayListMultimap.<String, JqlField> create();
+
+    // gene:{id:{is:'G'}}
+    values.put("gene", new JqlField("id", IS, new JqlSingleValue("G"), "gene"));
+    assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
+        Lists.newArrayList("gene")))
+        .isEqualTo("nested(gene,eq(gene.id,'G'))");
+  }
+
+  @Test
+  public void createFilterByNestedPathTest_twoOnSameLevel() {
+    val values = ArrayListMultimap.<String, JqlField> create();
+
+    // gene:{id:{is:'G'}, start:{is:1}}
+    values.put("gene", new JqlField("id", IS, new JqlSingleValue("G"), "gene"));
+    values.put("gene", new JqlField("start", IS, new JqlSingleValue(1), "gene"));
+    assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
+        Lists.newArrayList("gene")))
+        .isEqualTo("nested(gene,eq(gene.id,'G'),eq(gene.start,1))");
+  }
+
+  @Test
+  public void createFilterByNestedPathTest_differentLevelsWithoutCommonParent() {
+    val values = ArrayListMultimap.<String, JqlField> create();
+
+    // {mutation:{platform:{is:'p'},functionalImpact:{is:'fi'}}}
+    values.put("gene.ssm.observation", new JqlField("platform", IS, new JqlSingleValue("p"), "mutation"));
+    values.put("gene.ssm.consequence", new JqlField("functionalImpact", IS, new JqlSingleValue("fi"), "mutation"));
+
+    assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
+        Lists.newArrayList("gene.ssm.observation", "gene.ssm.consequence")))
+        .isEqualTo("nested(gene.ssm.consequence,eq(mutation.functionalImpact,'fi')),"
+            + "nested(gene.ssm.observation,eq(mutation.platform,'p'))");
+
+  }
+
+  @Test
+  public void createFilterByNestedPathTest_withCommonParent() {
+    val values = ArrayListMultimap.<String, JqlField> create();
+
+    // gene:{id:{is:'G'}}, mutation:{id:{is:'M'}}
+    values.put("gene", new JqlField("id", IS, new JqlSingleValue("G"), "gene"));
+    values.put("gene.ssm", new JqlField("id", IS, new JqlSingleValue("M"), "mutation"));
+    assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
+        Lists.newArrayList("gene.ssm", "gene")))
+        .isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M')),eq(gene.id,'G')))");
+  }
+
+  @Test
+  public void groupFieldsByNestedPathTest() {
+    val fields = ImmutableList.of(
+        new JqlField("id", IS, new JqlSingleValue("M"), "mutation"),
+        new JqlField("platform", IS, new JqlSingleValue("p"), "mutation"),
+        new JqlField("functionalImpact", IS, new JqlSingleValue("fi"), "mutation"));
+
+    val result = groupFieldsByNestedPath("mutation", fields, DONOR_CENTRIC);
+    assertThat(result.size()).isEqualTo(3);
+  }
+
+  @Test
+  public void tmp() {
+    getDonorCentricTypeModel().getParentNestedPath("gene.ssm");
   }
 
   @SneakyThrows
