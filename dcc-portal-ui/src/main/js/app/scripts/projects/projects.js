@@ -447,7 +447,6 @@
   var module = angular.module('icgc.projects.models', ['restangular', 'icgc.common.location']);
 
   module.service('Projects', function (Restangular, LocationService, Project) {
-    var _this = this;
     this.all = function () {
       return Restangular.all('projects');
     };
