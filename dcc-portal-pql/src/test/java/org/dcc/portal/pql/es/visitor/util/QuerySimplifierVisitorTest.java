@@ -15,59 +15,61 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.es.visitor.util;
 
-import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.utils.BaseElasticsearchTest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.junit.Before;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
+import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
+import org.dcc.portal.pql.es.ast.filter.NotNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.junit.Test;
 
 @Slf4j
-public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
+public class QuerySimplifierVisitorTest {
 
-  private EsRequestBuilder visitor;
+  QuerySimplifierVisitor visitor = new QuerySimplifierVisitor();
 
-  @Before
-  public void setUp() {
-    es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new EsRequestBuilder(es.client());
-    queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
-    listener = new PqlParseListener(queryContext);
+  @Test
+  public void shouldAndMustTest() {
+    val esAst = new BoolNode(new ShouldBoolNode(), new MustBoolNode());
+    val result = visit(esAst);
+    assertThat(result.isPresent()).isFalse();
   }
 
   @Test
-  public void geneLocationTest() {
-    val result = executeQuery("in(gene.location,'chr20:31446730-31549006')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO9");
+  public void noChildrenTest() {
+    val esAst = new BoolNode();
+    val result = visit(esAst);
+    assertThat(result.isPresent()).isFalse();
   }
 
   @Test
-  public void mutationLocationTest() {
-    val result = executeQuery("in(mutation.location,'chrY:13463924-13463924')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO2");
+  public void oneChildWithMultipleChildrenTest() {
+    val esAst = new BoolNode(new ShouldBoolNode(new NotNode(), new NotNode()));
+    val result = visit(esAst);
+    assertThat(result.isPresent()).isFalse();
   }
 
   @Test
-  public void nonNestedTest() {
-    val result = executeQuery("select(id),facets(gender),eq(gene.chromosome, '2')");
-    containsOnlyIds(result, "DO2", "DO4", "DO8");
+  public void oneChildWithSingeChildTest() {
+    val subChild = new TermNode("name", "value");
+    val esAst = new BoolNode(new ShouldBoolNode(subChild));
+    val result = visit(esAst).get();
+    assertThat(result).isEqualTo(subChild);
   }
 
-  private SearchResponse executeQuery(String query) {
-    ExpressionNode esAst = createTree(query);
-    esAst = esAstTransformator.process(esAst, queryContext);
-    log.debug("ES AST: {}", esAst);
-    val request = visitor.buildSearchRequest(esAst, queryContext);
-    log.debug("Request - {}", request);
-    val result = request.execute().actionGet();
-    log.debug("Result - {}", result);
+  private Optional<ExpressionNode> visit(ExpressionNode esAst) {
+    log.debug("Visiting - \n{}", esAst);
+    val result = esAst.accept(visitor, Optional.empty());
+    log.debug("Visit result - \n{}", result);
 
     return result;
   }

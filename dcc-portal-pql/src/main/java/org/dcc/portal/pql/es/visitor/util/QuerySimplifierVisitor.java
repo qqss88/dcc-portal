@@ -22,6 +22,7 @@ import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 import java.util.Optional;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -57,12 +58,12 @@ import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
-// TODO: Either remove or finish
+@Slf4j
 public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>, Void> {
 
   @Override
   public Optional<ExpressionNode> visitCount(CountNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
@@ -72,13 +73,23 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitNested(NestedNode node, Optional<Void> context) {
-
     return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitBool(BoolNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    log.debug("[visitBool] Processing node - \n{}", node);
+    visitChildren(this, node, context);
+    if (node.childrenCount() != 1 || node.getFirstChild().childrenCount() != 1) {
+      log.debug("Children count not equal to one or the child has multiple children. Skipping processing.");
+
+      return Optional.empty();
+    }
+
+    val child = node.getFirstChild();
+    log.debug("The BoolNode has one child which also has one child. Moving its contents one level upper");
+
+    return Optional.of(child.getFirstChild());
   }
 
   @Override
@@ -93,13 +104,12 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitTerm(TermNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitTerms(TermsNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
@@ -119,44 +129,42 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitSort(SortNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitTerminal(TerminalNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitRange(RangeNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitGreaterEqual(GreaterEqualNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitGreaterThan(GreaterThanNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitLessEqual(LessEqualNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitLessThan(LessThanNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitLimit(LimitNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
@@ -171,14 +179,12 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitFields(FieldsNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitSource(SourceNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
@@ -222,12 +228,12 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitExists(ExistsNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
   @Override
   public Optional<ExpressionNode> visitMissing(MissingNode node, Optional<Void> context) {
-    return visitChildren(this, node, context);
+    return Optional.empty();
   }
 
 }

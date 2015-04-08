@@ -24,6 +24,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createFieldsToSourceVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
 
@@ -103,6 +104,8 @@ public class EsAstTransformator {
     if (aggsNode.isPresent()) {
       esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty());
     }
+
+    esAst = esAst.accept(createQuerySimplifierVisitor(), Optional.empty()).get();
     log.debug("[optimize] After: {}", esAst);
 
     return esAst;

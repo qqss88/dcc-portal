@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,7 +97,7 @@ public class FiltersConverterTest {
   public void mutationNestedFiltersTest_gene() {
     val filters = createFilters("{donor:{id:{is:'DO1'}},mutation:{id:{is:'MU1'},consequenceType:{is:'start_lost'}}}");
     val result = converter.convertFilters(filters, GENE_CENTRIC);
-    log.info("PQL: {}", result);
+    log.debug("PQL: {}", result);
     assertThat(result)
         .isEqualTo(
             "nested(donor,"
@@ -141,39 +140,45 @@ public class FiltersConverterTest {
   }
 
   @Test
-  public void mutationLocationTest() {
+  public void mutationLocationTest_donor() {
+    val result = converter.convertFilters(createFilters("{mutation:{location:{is:['chr12:43566-3457633']}}}"),
+        DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene.ssm,in(mutation.location,'chr12:43566-3457633'))");
+  }
+
+  @Test
+  public void mutationLocationTest_gene() {
+    val result = converter.convertFilters(createFilters("{mutation:{location:{is:['chr12:43566-3457633']}}}"),
+        GENE_CENTRIC);
+    assertThat(result).isEqualTo("nested(donor.ssm,in(mutation.location,'chr12:43566-3457633'))");
+  }
+
+  @Test
+  public void mutationLocationTest_mutation() {
     val result = converter.convertFilters(createFilters("{mutation:{location:{is:['chr12:43566-3457633']}}}"),
         MUTATION_CENTRIC);
     assertThat(result).isEqualTo("in(mutation.location,'chr12:43566-3457633')");
   }
 
   @Test
-  public void mutationLocationTest_otherType() {
-    val result = converter.convertFilters(createFilters("{mutation:{location:{is:['chr12:43566-3457633']}}}"),
+  public void geneLocationTest_donor() {
+    val result = converter.convertFilters(createFilters("{gene:{location:{is:['chr12:43566-3457633']}}}"),
         DONOR_CENTRIC);
-    assertThat(result).isEqualTo("in(mutation.location,'chr12:43566-3457633')");
+    assertThat(result).isEqualTo("nested(gene,in(gene.location,'chr12:43566-3457633'))");
   }
 
   @Test
-  public void geneLocationTest() {
+  public void geneLocationTest_gene() {
     val result = converter.convertFilters(createFilters("{gene:{location:{is:['chr12:43566-3457633']}}}"),
         GENE_CENTRIC);
     assertThat(result).isEqualTo("in(gene.location,'chr12:43566-3457633')");
   }
 
   @Test
-  public void geneLocationTest_otherType() {
+  public void geneLocationTest_mutation() {
     val result = converter.convertFilters(createFilters("{gene:{location:{is:['chr12:43566-3457633']}}}"),
         MUTATION_CENTRIC);
-    assertThat(result).isEqualTo("in(gene.location,'chr12:43566-3457633')");
-  }
-
-  @Test
-  @Ignore
-  public void pathwayTest_donor() {
-    // TODO: is such filter even possible? 'hasPathway' should be added to 'gene' type only, not 'donor'
-    val result = converter.convertFilters(createFilters("{donor:{hasPathway:false}}"), DONOR_CENTRIC);
-    assertThat(result).isEqualTo("missing(gene.pathwayId)");
+    assertThat(result).isEqualTo("nested(transcript,in(gene.location,'chr12:43566-3457633'))");
   }
 
   @Test
@@ -193,11 +198,11 @@ public class FiltersConverterTest {
     val filters = createFilters("{mutation:{id:{is:['M1','M2']}},gene:{goTermId:{is:['321']}}}");
     val result = converter.convertFilters(filters, Type.MUTATION_CENTRIC);
     log.info("{}", result);
-    assertThat(result).isEqualTo("in(mutation.id,'M1','M2'),in(gene.goTermId,'321')");
+    assertThat(result).isEqualTo("in(mutation.id,'M1','M2'),nested(transcript,in(gene.goTermId,'321'))");
   }
 
   @Test
-  public void curratedSetTest() {
+  public void curratedSetTest_gene() {
     val filters = createFilters("{gene:{curatedSetId:{is:['GS1']},hasPathway:true}}");
     val result = converter.convertFilters(filters, GENE_CENTRIC);
     assertThat(result).isEqualTo("in(gene.curatedSetId,'GS1'),exists(gene.pathwayId)");
@@ -207,7 +212,7 @@ public class FiltersConverterTest {
   public void curratedSetTest_mutation() {
     val filters = createFilters("{gene:{curatedSetId:{is:['GS1']},hasPathway:true}}");
     val result = converter.convertFilters(filters, Type.MUTATION_CENTRIC);
-    assertThat(result).isEqualTo("exists(gene.pathwayId),nested(transcript,in(gene.curatedSetId,'GS1'))");
+    assertThat(result).isEqualTo("nested(transcript,in(gene.curatedSetId,'GS1'),exists(gene.pathwayId))");
   }
 
   @Test
@@ -225,6 +230,13 @@ public class FiltersConverterTest {
   }
 
   @Test
+  public void pathwayAndGoTermTest_gene() {
+    val filters = createFilters("{gene:{hasPathway:true,goTermId:{is:['123']}}}");
+    val result = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(result).isEqualTo("exists(gene.pathwayId),in(gene.goTermId,'123')");
+  }
+
+  @Test
   public void pathwayAndGoTermTest_mutation() {
     val filters = createFilters("{gene:{hasPathway:true,goTermId:{is:['123']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
@@ -232,10 +244,33 @@ public class FiltersConverterTest {
   }
 
   @Test
+  public void pathwayAndNestedFilterTest_donor() {
+    val filters = createFilters("{gene:{hasPathway:true},mutation:{consequenceType:{is:['sl']}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,"
+        + "and(nested(gene.ssm.consequence,in(mutation.consequenceType,'sl')),exists(gene.pathwayId)))");
+  }
+
+  @Test
   public void curratedSetAndNestedFilterTest_mutation() {
     val filters = createFilters("{gene:{curatedSetId:{is:['GS1']}},mutation:{consequenceTypeNested:{is:['sl']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
     assertThat(result).isEqualTo("nested(transcript,in(gene.curatedSetId,'GS1'),in(consequenceTypeNested,'sl'))");
+  }
+
+  @Test
+  public void twoLevelsNestingTest() {
+    val filters = createFilters("{gene:{id:{is:'G1'}},mutation:{id:{is:'M1'}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,and(nested(gene.ssm,eq(mutation.id,'M1')),eq(gene.id,'G1')))");
+  }
+
+  @Test
+  public void differentLevelsNestingTest() {
+    val filters = createFilters("{gene:{id:{is:'G1'}},donor:{id:{is:'D1'}}}");
+    val result = converter.convertFilters(filters, MUTATION_CENTRIC);
+    assertThat(result).isEqualTo("nested(transcript,eq(gene.id,'G1')),"
+        + "nested(ssm_occurrence,eq(donor.id,'D1'))");
   }
 
   @SneakyThrows

@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.pql.convert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import lombok.val;
@@ -52,7 +53,12 @@ public class AggregationToFacetConverterTest extends BaseRepositoryTest {
             nested("projectId").path("gene.ssm").subAggregation(
                 terms("projectId").field("gene.ssm.mutation_type"))));
 
-    val response = converter.convert(executeQuery(aggregation).getAggregations());
+    val missingAggregation = global("projectId_missing").subAggregation(
+        filter("projectId_missing").filter(filter).subAggregation(
+            nested("projectId_missing").path("gene.ssm").subAggregation(
+                missing("projectId_missing").field("gene.ssm.mutation_type"))));
+
+    val response = converter.convert(executeQuery(aggregation, missingAggregation).getAggregations());
 
     assertThat(response).hasSize(1);
     val termFacet = response.get("projectId");
@@ -68,11 +74,12 @@ public class AggregationToFacetConverterTest extends BaseRepositoryTest {
     assertThat(firstTerm.getTerm()).isEqualTo("single base substitution");
   }
 
-  private SearchResponse executeQuery(AggregationBuilder<?> builder) {
+  private SearchResponse executeQuery(AggregationBuilder<?>... builder) {
     val request = es.client()
         .prepareSearch(INDEX.getIndex())
         .setTypes(Type.DONOR_CENTRIC.getId())
-        .addAggregation(builder);
+        .addAggregation(builder[0])
+        .addAggregation(builder[1]);
     log.debug("Request - {}", request);
 
     val response = request.execute().actionGet();

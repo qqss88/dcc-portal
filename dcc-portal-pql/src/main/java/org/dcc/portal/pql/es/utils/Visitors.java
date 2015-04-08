@@ -42,6 +42,7 @@ import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
 import org.dcc.portal.pql.es.visitor.util.CloneNodeVisitor;
 import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
+import org.dcc.portal.pql.es.visitor.util.QuerySimplifierVisitor;
 import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
 import org.dcc.portal.pql.meta.Type;
 
@@ -85,6 +86,11 @@ public class Visitors {
 
   private static final NonNestedFieldsVisitor NON_NESTED_FIELDS_VISITOR = new NonNestedFieldsVisitor();
   private static final NestedFieldsVisitor NESTED_FIELDS_VISITOR = new NestedFieldsVisitor();
+  private static final QuerySimplifierVisitor QUERY_SIMPLIFIER_VISITOR = new QuerySimplifierVisitor();
+
+  public static QuerySimplifierVisitor createQuerySimplifierVisitor() {
+    return QUERY_SIMPLIFIER_VISITOR;
+  }
 
   public static NestedFieldsVisitor createNestedFieldsVisitor() {
     return NESTED_FIELDS_VISITOR;

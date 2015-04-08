@@ -19,44 +19,38 @@ package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.lang.String.format;
-import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
+import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
-import org.icgc.dcc.portal.pql.convert.model.Operation;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Slf4j
 public class FiltersConverter {
 
-  private static final String SYNTETIC_PREFIX = "_syn";
-  private static final String SYNTETIC_GENE = "gene" + SYNTETIC_PREFIX;
-  private static final String SYNTETIC_MUTATION = "mutation" + SYNTETIC_PREFIX;
-
+  private static final String GENE_PATH = "gene";
   private static final String MISSING_VALUE = "_missing";
   private static final String EMPTY_NESTED_PATH = "";
   private final static String QUERY_SEPARATOR = ",";
@@ -66,23 +60,22 @@ public class FiltersConverter {
   private final static String NE_TEMPLATE = "ne(%s,%s)";
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
+  private static final String NESTED_TEMPLATE = "nested(%s,%s)";
 
-  private static final Map<String, String> SPECIAL_FIELDS_NESTING = ImmutableMap.of(
-      "gene.goTermId", SYNTETIC_GENE,
-      "gene.hasPathway", SYNTETIC_GENE,
-      "mutation.location", SYNTETIC_MUTATION,
-      "gene.location", SYNTETIC_GENE);
+  private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
+      "gene.goTermId",
+      "gene.hasPathway",
+      "mutation.location",
+      "gene.location");
 
   public String convertFilters(JqlFilters filters, Type indexType) {
     // These fields are required to create the correct nesting order. E.g. nested(gene, nested(gene.ssm ...))
     val fieldsGrouppedByNestedPath = ArrayListMultimap.<String, JqlField> create();
-    val prefixByNestedPath = Maps.<String, String> newHashMap();
 
     // filterKind is 'donor' in a filter {donor:{id:{is:'DO1'}}}
-    for (val filterKind : filters.getTypeValues().entrySet()) {
-      val fieldsByNestedPath = groupFieldsByNestedPath(filterKind.getKey(), filterKind.getValue(), indexType);
+    for (val filterKindEntry : filters.getTypeValues().entrySet()) {
+      val fieldsByNestedPath = groupFieldsByNestedPath(filterKindEntry.getKey(), filterKindEntry.getValue(), indexType);
       fieldsGrouppedByNestedPath.putAll(fieldsByNestedPath);
-      prefixByNestedPath.putAll(createPrefixByNestedPath(filterKind.getKey(), fieldsByNestedPath.keySet(), indexType));
     }
 
     log.debug("Fields by nested path: {}", fieldsGrouppedByNestedPath);
@@ -97,7 +90,6 @@ public class FiltersConverter {
       val filter = createFilterByNestedPath(
           indexType,
           fieldsGrouppedByNestedPath,
-          prefixByNestedPath,
           Lists.newArrayList(Sets.newTreeSet(entry.getValue()).descendingSet()));
       result.append(filter);
 
@@ -122,24 +114,23 @@ public class FiltersConverter {
   }
 
   private static String createFilterByNestedPath(Type indexType, ArrayListMultimap<String, JqlField> sortedFields,
-      Map<String, String> prefixByNestedPath, List<String> sortedDescPaths) {
-
+      List<String> sortedDescPaths) {
     val filterStack = new Stack<String>();
     for (int i = 0; i < sortedDescPaths.size(); i++) {
       val nestedPath = sortedDescPaths.get(i);
-      val filter = createTypeFilter(prefixByNestedPath.get(nestedPath), sortedFields.get(nestedPath), indexType);
+      val filter = createTypeFilter(sortedFields.get(nestedPath), indexType);
 
       if (i == 0) {
         if (isNestFilter(nestedPath, indexType)) {
-          filterStack.push(format("nested(%s,%s)", resolveNestedPath(nestedPath, indexType), filter));
+          filterStack.push(format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), filter));
         } else {
           filterStack.push(filter);
         }
       } else {
         val prevFilter = filterStack.pop();
         if (isNestFilter(nestedPath, indexType)) {
-          filterStack
-              .push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter, filter));
+          filterStack.push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter,
+              filter));
         } else {
           filterStack.push(format("%s,%s", prevFilter, filter));
         }
@@ -149,8 +140,8 @@ public class FiltersConverter {
     return filterStack.pop();
   }
 
-  private static Object resolveNestedPath(String nestedPath, Type indexType) {
-    if (nestedPath.equals(SYNTETIC_GENE)) {
+  private static String resolveNestedPath(String nestedPath, Type indexType) {
+    if (nestedPath.equals(GENE_PATH)) {
       switch (indexType) {
       case DONOR_CENTRIC:
         return "gene";
@@ -164,47 +155,17 @@ public class FiltersConverter {
 
   /**
    * Defines if filter should be nested because it's filtering on a nested field
-   * @param indexType TODO
    */
   private static boolean isNestFilter(String nestedPath, Type indexType) {
-    if ((indexType == DONOR_CENTRIC || indexType == MUTATION_CENTRIC) && nestedPath.equals(SYNTETIC_GENE)) {
-      return true;
-    }
-
-    return !(nestedPath.equals(EMPTY_NESTED_PATH) || nestedPath.endsWith(SYNTETIC_PREFIX));
+    return !(nestedPath.equals(EMPTY_NESTED_PATH));
   }
 
-  private static Map<String, String> createPrefixByNestedPath(String prefix, Set<String> nestedPaths, Type indexType) {
-    val result = new ImmutableMap.Builder<String, String>();
-    for (val path : nestedPaths) {
-      if (isMutationSpecialCase(prefix, path, indexType)) {
-        result.put(path, "gene");
-      } else {
-        result.put(path, prefix);
-      }
-
-    }
-
-    return result.build();
-  }
-
-  /**
-   * functionalImpactNested and consequenceTypeNested fields in the MutationCentricTypeModel are nested under
-   * 'transcript' path. Under the same path all gene fields are nested. Prefix for this case must be 'gene'. Otherwise,
-   * 'mutation' prefix might override prefixByNestedPath mapping<br>
-   * E.g. transcript->gene will become transcript->mutation and all gene fields will become mutation fields:
-   * gene.id->mutation.id
-   */
-  private static boolean isMutationSpecialCase(String prefix, String path, Type indexType) {
-    return prefix.equals("mutation") && path.equals("transcript") && indexType == Type.MUTATION_CENTRIC;
-  }
-
-  private static String createTypeFilter(String typePrefix, Collection<JqlField> fields, Type indexType) {
+  private static String createTypeFilter(Collection<JqlField> fields, Type indexType) {
     val result = new StringBuilder();
     val lastField = getLast(fields);
 
     for (val jqlField : fields) {
-      result.append(createFilter(typePrefix, jqlField, indexType));
+      result.append(createFilter(jqlField, indexType));
       if (!jqlField.equals(lastField)) {
         result.append(QUERY_SEPARATOR);
       }
@@ -215,7 +176,6 @@ public class FiltersConverter {
 
   private static ArrayListMultimap<String, JqlField> groupFieldsByNestedPath(String typePrefix,
       List<JqlField> fields, Type indexType) {
-
     val result = ArrayListMultimap.<String, JqlField> create();
     if (isTypeMatch(typePrefix, indexType)) {
       result.putAll(EMPTY_NESTED_PATH, fields);
@@ -238,23 +198,56 @@ public class FiltersConverter {
 
     val indexModel = IndexModel.getTypeModel(indexType);
     for (val field : fields) {
-      String nestedPath = "";
       val fieldName = parseFieldName(field);
-      if (SPECIAL_FIELDS_NESTING.containsKey(fieldName)) {
-        nestedPath = SPECIAL_FIELDS_NESTING.get(fieldName);
-      } else if (indexModel.isNested(fieldName)) {
-        nestedPath = indexModel.getNestedPath(fieldName);
-      }
-
-      result.put(nestedPath, field);
+      result.put(resolveNestedPath(fieldName, indexModel), field);
     }
 
     return result;
   }
 
+  private static String resolveNestedPath(String fieldName, AbstractTypeModel indexModel) {
+    if (SPECIAL_FIELDS_NESTING.contains(fieldName)) {
+      return resolveSpecialCasesNestedPath(fieldName, indexModel.getType());
+    }
+
+    if (indexModel.isNested(fieldName)) {
+      return indexModel.getNestedPath(fieldName);
+    }
+
+    return EMPTY_NESTED_PATH;
+  }
+
+  private static String resolveSpecialCasesNestedPath(String fieldName, Type type) {
+    switch (type) {
+    case DONOR_CENTRIC:
+      if (fieldName.startsWith("gene")) {
+        return "gene";
+      }
+
+      return "gene.ssm";
+
+    case GENE_CENTRIC:
+      if (fieldName.startsWith("gene")) {
+        return EMPTY_NESTED_PATH;
+      }
+
+      return "donor.ssm";
+
+    case MUTATION_CENTRIC:
+      if (fieldName.startsWith("gene")) {
+        return "transcript";
+      }
+
+      return EMPTY_NESTED_PATH;
+    }
+
+    throw new IllegalArgumentException(format("Could not resolve nested path for field %s in type %s", fieldName,
+        type.getId()));
+  }
+
   private static boolean isTypeMatch(String typePrefix, Type indexType) {
     // Does not apply to MUTATION_CENTRIC, because its filters must be separated on nested and non-nested
-    // See comment @ line 189 groupFieldsByNestedPath()
+    // See comment @ line 186 groupFieldsByNestedPath()
     if (indexType == MUTATION_CENTRIC) {
       return false;
     }
@@ -262,8 +255,8 @@ public class FiltersConverter {
     return indexType.getId().startsWith(typePrefix);
   }
 
-  private static String createFilter(String typePrefix, JqlField jqlField, Type indexType) {
-    if (jqlField.getOperation() == Operation.HAS) {
+  private static String createFilter(JqlField jqlField, Type indexType) {
+    if (jqlField.getOperation() == HAS) {
       val typeModel = IndexModel.getTypeModel(indexType);
       val fieldName = typeModel.getField(jqlField.getName());
 
@@ -271,15 +264,15 @@ public class FiltersConverter {
     }
 
     if (jqlField.getValue().contains(MISSING_VALUE)) {
-      return createMissingFilter(typePrefix, jqlField, indexType);
+      return createMissingFilter(jqlField, indexType);
     }
 
-    val filterType = createFilterByValueType(typePrefix, jqlField);
+    val filterType = createFilterByValueType(jqlField);
     if (jqlField.getOperation() == NOT && jqlField.getValue().isArray()) {
       return (format(NOT_TEMPLATE, filterType));
     }
 
-    return (filterType);
+    return filterType;
   }
 
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
@@ -288,7 +281,7 @@ public class FiltersConverter {
         format(MISSING_TEMPLATE, fieldName);
   }
 
-  private static String createMissingFilter(String typePrefix, JqlField jqlField, Type indexType) {
+  private static String createMissingFilter(JqlField jqlField, Type indexType) {
     val fieldName = parseFieldName(jqlField);
 
     if (jqlField.getValue().isArray()) {
@@ -318,11 +311,11 @@ public class FiltersConverter {
     return Optional.of(createInFilter(newJqlField));
   }
 
-  private static String createFilterByValueType(String prefix, JqlField jqlField) {
-    return jqlField.getValue().isArray() ? createInFilter(jqlField) : createEqFilter(prefix, jqlField);
+  private static String createFilterByValueType(JqlField jqlField) {
+    return jqlField.getValue().isArray() ? createInFilter(jqlField) : createEqFilter(jqlField);
   }
 
-  private static String createEqFilter(String prefix, JqlField jqlField) {
+  private static String createEqFilter(JqlField jqlField) {
     val fieldValue = jqlField.getValue().get();
     val value = isString(fieldValue) ? asString(fieldValue) : fieldValue;
 
