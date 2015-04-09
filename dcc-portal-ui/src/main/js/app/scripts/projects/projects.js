@@ -447,7 +447,6 @@
   var module = angular.module('icgc.projects.models', ['restangular', 'icgc.common.location']);
 
   module.service('Projects', function (Restangular, LocationService, Project) {
-    var _this = this;
     this.all = function () {
       return Restangular.all('projects');
     };
@@ -464,12 +463,6 @@
       };
 
       return this.all().get('', angular.extend(defaults, params)).then(function (data) {
-        _this.totalSsmTestedDonorCount = _this.totalSsmTestedDonorCount || _.reduce(data.hits, function (sum, n) {
-          if (typeof sum === 'object') {
-            sum = sum.ssmTestedDonorCount;
-          }
-          return sum + n.ssmTestedDonorCount;
-        });
 
         if (data.hasOwnProperty('facets') &&
             data.facets.hasOwnProperty('id') &&

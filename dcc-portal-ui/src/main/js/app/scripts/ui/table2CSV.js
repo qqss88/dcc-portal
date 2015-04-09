@@ -15,6 +15,10 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+/** 
+ * Adapated to work with ICGC table double header format 
+ */
 jQuery.fn.table2CSV = function(options) {
   var options = jQuery.extend({
         separator: ',',
