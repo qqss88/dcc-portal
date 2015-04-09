@@ -25,17 +25,23 @@
 
     </div>
 
-    <div class="t_tab_pane" data-ng-class="{active: currentTab === 'sets'}">
+    <div class="t_tab_pane" data-ng-class="{active: currentTab === 'sets'}" data-ng-if="currentTab === 'sets'">
         <div data-ng-include="'/scripts/analysis/views/analysis.sets.html'"></div>
     </div>
 
-    <div class="t_tab_pane" data-ng-class="{active: currentTab === 'analysis'}">
+    <div class="t_tab_pane" data-ng-class="{active: currentTab === 'analysis'}" data-ng-if="currentTab === 'analysis'">
         <div data-ng-include="'/scripts/analysis/views/analysis.analysis.launcher.html'"></div>
     </div>
 
     <div class="t_tab_pane" data-ng-class="{active: currentTab === 'view'}">
         <div data-ng-include="'/scripts/analysis/views/analysis.analysis.html'"></div>
     </div>
+
+    <section data-ng-if="['sets', 'analysis'].indexOf(currentTab) >=0">
+        <small>
+            Please see the <a href="http://docs.icgc.org/methods#dataanalysis">Data Analysis</a> documentation resource for a general overview of this feature.
+        </small>
+    </section>
 
 
 

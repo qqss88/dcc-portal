@@ -62,7 +62,7 @@
                             {{gene.affectedDonorCountFiltered | number}}
                         </a>
                         /
-                        <a href='/search?filters={"gene":{"id":{"is":["{{gene.id}}"]},"availableDataTypes":{"is":["ssm"]}}}'>
+                        <a href='/search?filters={"gene":{"id":{"is":["{{gene.id}}"]}},"donor":{"availableDataTypes":{"is":["ssm"]}}}'>
                             {{gene.affectedDonorCountTotal | number}}
                         </a>
                         <em>({{gene.affectedDonorCountFiltered/gene.affectedDonorCountTotal *

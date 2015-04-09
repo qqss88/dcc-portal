@@ -30,7 +30,7 @@
         var chart, config;
 
         $scope.helpText = 'Each dot represents the number of somatic mutations per megabase in ' +
-          'a given donor\'s exome. Donors are grouped by cancer projects. Horizontal red lines ' +
+          'a given donor\'s exome. Donors are grouped by cancer projects. <br>Horizontal red lines ' +
           'provide the median number of somatic and exomic mutations within each cancer project.';
 
         config = {
@@ -92,7 +92,12 @@
             if (count % 2 === 0) {
               medium = 0.5 * (points[count/2] + points[(count/2)+1]);
             } else {
-              medium = points[Math.floor(count/2) + 1];
+
+              if (count === 1) {
+                medium = points[0];
+              } else {
+                medium = points[Math.floor(count/2) + 1];
+              }
             }
 
             chartData.push({

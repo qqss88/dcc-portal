@@ -9,21 +9,19 @@
     var syncSetTimeout;
 
     _this.syncError = false;
-    _this.entityLists = SetService.getAll();
+    _this.entitySets = SetService.getAll();
     _this.selectedSets = [];
     _this.checkAll = false;
 
 
     // Selected sets
-
     _this.update = function() {
       _this.selectedSets = [];
-      _this.entityLists.forEach(function(set) {
+      _this.entitySets.forEach(function(set) {
         if (set.checked === true) {
           _this.selectedSets.push(set);
         }
       });
-
     };
 
     _this.newAnalysis = function() {
@@ -34,7 +32,7 @@
     _this.toggleSelectAll = function() {
       _this.checkAll = !_this.checkAll;
 
-      _this.entityLists.forEach(function(set) {
+      _this.entitySets.forEach(function(set) {
         set.checked = _this.checkAll;
       });
     };
@@ -56,35 +54,38 @@
       });
     };
 
-    _this.removeLists = function() {
+
+    /* To remove unretrievable sets from local store*/
+    _this.removeInvalidSets = function() {
+      var toRemove = _.filter(_this.entitySets, function(set) {
+        return set.state !== 'FINISHED';
+      });
+      if (toRemove.length > 0) {
+        SetService.removeSeveral(_.pluck(toRemove, 'id'));
+        _this.checkAll = false; // reset
+        synchronizeSets(1);
+      }
+    };
+
+
+    /* User inititated set removal */
+    _this.removeSets = function() {
       var confirmRemove = $window.confirm('Are you sure you want to remove selected sets?');
       if (!confirmRemove || confirmRemove === false) {
         return;
       }
 
       var toRemove = _this.selectedSets;
-      /*
-      var toRemove = _.filter(_this.selectedSets, function(set) {
-        return !angular.isDefined(set.readonly);
-      });
-      */
-
       if (toRemove.length > 0) {
-        /*
-        _.remove(_this.selectedSets, function(set) {
-          return _.pluck(toRemove, 'id').indexOf(set.id) >= 0;
-        });
-        */
-
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         _this.checkAll = false; // reset
       }
-
     };
+
 
     function synchronizeSets(numTries) {
       var pendingLists, pendingListsIDs, promise;
-      pendingLists = _.filter(_this.entityLists, function(d) {
+      pendingLists = _.filter(_this.entitySets, function(d) {
         return d.state !== 'FINISHED';
       });
       pendingListsIDs = _.pluck(pendingLists, 'id');
