@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.pql.convert;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import lombok.val;
@@ -96,6 +97,17 @@ public class Jql2PqlConverterTest {
         .filters(new FiltersParam("{donor:{hasPathway:true}}").get())
         .build();
     assertResponse(query, "select(*),exists(gene.pathwayId)");
+  }
+
+  @Test
+  public void emptyIncludesTest() {
+    val query = Query.builder()
+        .sort("donorId")
+        .order("desc")
+        .fields(emptyList())
+        .includes(emptyList())
+        .build();
+    assertResponse(query, "select(*),sort(-donorId)");
   }
 
   private void assertResponse(Query query, String exectedResult) {

@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 
 import java.util.List;
 
@@ -60,9 +61,12 @@ public class Jql2PqlConverter {
     val result = new StringBuilder();
     result.append(parseFields(query.getFields()));
 
-    if (query.getIncludes() != null) {
+    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
       result.append(SEPARATOR);
       result.append(parseIncludes(query.getIncludes()));
+    } else if (type == Type.OBSERVATION_CENTRIC) {
+      result.append(SEPARATOR);
+      result.append(parseIncludes(singletonList("observation")));
     }
 
     if (query.hasFilters()) {

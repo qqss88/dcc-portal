@@ -17,16 +17,19 @@
  */
 package org.dcc.portal.pql.meta;
 
-import lombok.AccessLevel;
+import static lombok.AccessLevel.PRIVATE;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = PRIVATE)
 public enum Type {
+
   DONOR_CENTRIC("donor-centric"),
   GENE_CENTRIC("gene-centric"),
-  MUTATION_CENTRIC("mutation-centric");
+  MUTATION_CENTRIC("mutation-centric"),
+  OBSERVATION_CENTRIC("observation-centric");
 
   private final String id;
+
 }

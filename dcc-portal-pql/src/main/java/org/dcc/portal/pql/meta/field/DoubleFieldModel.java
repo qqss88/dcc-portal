@@ -53,6 +53,10 @@ public class DoubleFieldModel extends FieldModel {
     return new DoubleFieldModel(name);
   }
 
+  public static DoubleFieldModel double_(@NonNull String name, @NonNull String alias) {
+    return new DoubleFieldModel(name, alias, NOT_NESTED);
+  }
+
   @Override
   public <T> T accept(FieldVisitor<T> visitor) {
     return visitor.visitDoubleField(this);

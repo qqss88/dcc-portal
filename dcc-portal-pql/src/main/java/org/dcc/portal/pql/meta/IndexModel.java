@@ -27,6 +27,7 @@ public class IndexModel {
   private static final DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
   private static final GeneCentricTypeModel geneCentric = new GeneCentricTypeModel();
   private static final MutationCentricTypeModel mutationCentric = new MutationCentricTypeModel();
+  private static final ObservationCentricTypeModel observationCentric = new ObservationCentricTypeModel();
 
   public boolean isNested(@NonNull String field, Type type) {
     return getTypeModel(type).isNested(field);
@@ -44,6 +45,8 @@ public class IndexModel {
       return geneCentric;
     case MUTATION_CENTRIC:
       return mutationCentric;
+    case OBSERVATION_CENTRIC:
+      return observationCentric;
     }
 
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));

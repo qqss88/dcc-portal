@@ -27,6 +27,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisit
 import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 
 import java.util.Optional;
 
@@ -76,6 +77,10 @@ public class EsAstTransformator {
   }
 
   public ExpressionNode score(ExpressionNode esAst, QueryContext context) {
+    if (context.getType() == OBSERVATION_CENTRIC) {
+      return esAst;
+    }
+
     log.debug("[score] Before: {}", esAst);
     val result = esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
     log.debug("[score] After: {}", result);

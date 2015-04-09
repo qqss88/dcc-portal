@@ -19,15 +19,17 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Throwables.propagate;
 import static java.util.Collections.emptyMap;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchResponse;
+import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -35,6 +37,7 @@ import org.icgc.dcc.portal.model.Occurrence;
 import org.icgc.dcc.portal.model.Occurrences;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.OccurrenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -45,17 +48,15 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   private final AtomicReference<Map<String, Map<String, Integer>>> projectMutationCache =
       new AtomicReference<Map<String, Map<String, Integer>>>();
-
-  @Autowired
-  public OccurrenceService(OccurrenceRepository occurrenceRepository) {
-    this.occurrenceRepository = occurrenceRepository;
-  }
 
   @Async
   public void init() {
@@ -75,7 +76,15 @@ public class OccurrenceService {
   }
 
   public Occurrences findAll(Query query) {
-    SearchResponse response = occurrenceRepository.findAllCentric(query);
+    val pql = converter.convert(query, OBSERVATION_CENTRIC);
+    log.debug("Query: {}. PQL: {}", query, pql);
+
+    val request = queryEngine.execute(pql, OBSERVATION_CENTRIC);
+    log.debug("Request: {}", request);
+
+    val response = request.execute().actionGet();
+    log.debug("Response: {}", response);
+
     SearchHits hits = response.getHits();
 
     val list = ImmutableList.<Occurrence> builder();
