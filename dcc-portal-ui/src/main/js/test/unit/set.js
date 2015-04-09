@@ -48,8 +48,8 @@ describe('Test SetService', function() {
     // Flush SetService
     SetService.initService();
     expect(SetService.getAll().length).toEqual(2);
-    expect(SetService.getAll()[1].name).toEqual('derived set');
-    expect(SetService.getAll()[0].name).toEqual('regular set');
+    expect(SetService.getAll()[0].name).toEqual('derived set');
+    expect(SetService.getAll()[1].name).toEqual('regular set');
   });
 
 
