@@ -18,7 +18,7 @@
             <li class="t_subnav__items__item" data-ng-if="ProjectCtrl.mutationFacets.functionalImpact.total > 0">
                 <span>Page Filters</span>
             </li>
-            <li class="t_subnav__items__box">
+            <li class="t_subnav__items__box" data-ng-if="ProjectCtrl.mutationFacets.functionalImpact.total > 0">
                 <ul class="t_facets">
                     <terms data-type="mutation"
                            data-facet-name="functionalImpact"

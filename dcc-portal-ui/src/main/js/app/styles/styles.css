@@ -1654,60 +1654,72 @@ footer .dcc-col {
 /* line 7, _sections/_analysis.scss */
 .analysis .analysis-tiles {
   display: block;
-  padding: 1rem;
+  padding-left: 1rem;
   display: table;
 }
 /* line 13, _sections/_analysis.scss */
-.analysis .analysis-tile {
+.analysis .analysis-tile-container {
   float: left;
-  width: 14.5rem;
-  height: 13rem;
+  width: 15rem;
+  height: 14rem;
+  margin: 0.5rem;
+}
+/* line 19, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile-extra {
+  font-size: 0.8rem;
+  line-height: 1rem;
+  padding: 0.25rem 0.75rem;
+  color: #999999;
+}
+/* line 26, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile {
+  height: 12rem;
   border: 1px solid #999999;
   background: #e6e6e6;
   border-radius: 0.5rem;
   padding: 0.5rem;
-  margin: 0.5rem;
   transition: color .5s, background .5s;
 }
-/* line 24, _sections/_analysis.scss */
-.analysis .analysis-tile:hover {
+/* line 36, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile:hover {
   cursor: pointer;
   color: white;
   background: #166aa2;
   text-decoration: none;
 }
-/* line 31, _sections/_analysis.scss */
-.analysis .analysis-tile.in-progress {
+/* line 43, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile.in-progress {
   border-style: dashed;
   transition: none;
   background: none;
   color: #999999;
+  display: block;
 }
-/* line 37, _sections/_analysis.scss */
-.analysis .analysis-tile.in-progress:hover {
+/* line 50, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile.in-progress:hover {
   color: #999999;
   background: none;
 }
-/* line 44, _sections/_analysis.scss */
-.analysis .analysis-tile .analysis-tile-detail {
+/* line 56, _sections/_analysis.scss */
+.analysis .analysis-tile-container .analysis-tile .analysis-tile-detail {
   margin-top: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   line-height: 1.25rem;
 }
-/* line 51, _sections/_analysis.scss */
+/* line 64, _sections/_analysis.scss */
 .analysis .sidepanel {
   float: left;
   width: 20%;
   margin-right: 1rem;
 }
-/* line 57, _sections/_analysis.scss */
+/* line 70, _sections/_analysis.scss */
 .analysis .content {
   float: left;
   clear: right;
   width: 77%;
   min-height: 20rem;
 }
-/* line 66, _sections/_analysis.scss */
+/* line 79, _sections/_analysis.scss */
 .analysis .multi-line-heading {
   line-height: 1.5rem;
 }
@@ -2606,7 +2618,7 @@ aside .t_tabs__tab {
 .t_facets__facet__terms__inactive__term__label,
 .t_facets__facet__terms__active__term__label__text {
   position: relative;
-  max-width: 70%;
+  max-width: 67%;
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;

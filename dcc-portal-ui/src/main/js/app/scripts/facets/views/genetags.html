@@ -52,16 +52,12 @@
            data-ng-click="query='';quick()" data-ng-show='query && !isBusy'></i>
     </li>
     <li> 
-        <ul class="t_facets__facet">
-            <li class="t_facets__facet__terms">
-                <ul class="t_facets__facet__terms__active">
-                    <li class="text-right" data-ng-hide="collapsed">
-                        <button type="button" class="t_button" data-ng-click="addGeneSet()">
-                            <i class="icon-search"></i> Upload Gene Set
-                        </button>
-                        <br><br>
-                    </li>
-                </ul>
+        <ul class="t_facets__facet__terms__active">
+            <li class="text-right" data-ng-hide="collapsed">
+                <button type="button" class="t_button" data-ng-click="addGeneSet()">
+                    <i class="icon-search"></i> Upload Gene Set
+                </button>
+                <br><br>
             </li>
         </ul>
     </li>

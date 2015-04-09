@@ -26,7 +26,7 @@
 
   angular.module('icgc.auth.models', []);
 
-  angular.module('icgc.auth.models').factory('Auth', function ($window, $cookies, $modal, Restangular) {
+  angular.module('icgc.auth.models').factory('Auth', function ($window, $cookies, Restangular) {
     var user = {}, handler = Restangular.one('auth').withHttpConfig({cache: false});
 
     function hasSession() {
@@ -184,25 +184,48 @@
         }
       }
 
+      var loginInstance, logoutInstance, authInstance;
+
       $scope.openLoginPopup = function() {
-        $modal.open({
+        loginInstance = $modal.open({
           templateUrl: '/scripts/auth/views/login.popup.html',
           scope: $scope
         });
       };
 
+      $scope.closeLoginPopup = function() {
+        if (loginInstance) {
+          loginInstance.dismiss('cancel');
+          loginInstance = null;
+        }
+      };
+
       $scope.openLogoutPopup = function() {
-        $modal.open({
+        logoutInstance = $modal.open({
           templateUrl: '/scripts/auth/views/logout.popup.html',
           scope: $scope
         });
       };
 
+      $scope.closeLogoutPopup = function() {
+        if (logoutInstance) {
+          logoutInstance.dismiss('cancel');
+          logoutInstance = null;
+        }
+      };
+
       $scope.openAuthPopup = function() {
-        $modal.open({
+        authInstance = $modal.open({
           templateUrl: '/scripts/auth/views/auth.popup.html',
           scope: $scope
         });
+      };
+
+      $scope.closeAuthPopup = function() {
+        if (authInstance) {
+          authInstance.dismiss('cancel');
+          authInstance = null;
+        }
       };
 
       $scope.tryLogin = function () {

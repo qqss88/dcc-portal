@@ -23,8 +23,8 @@
       templateUrl: '/scripts/phenotype/views/phenotype.result.html',
       link: function($scope) {
 
-        // From D3's cat10 scale
-        $scope.seriesColours = ['#1f77b4', '#ff7f0e', '#2ca02c'];
+        // From D3's cat20 scale
+        $scope.seriesColours = ['#6baed6', '#fd8d3c', '#74c476'];
 
         function normalize() {
           // Normalize results: Sort by id, then sort by terms

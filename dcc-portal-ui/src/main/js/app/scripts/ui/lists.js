@@ -174,7 +174,14 @@ angular.module('icgc.ui.lists').directive('hideSumList', function (Projects) {
           return s + n;
         });
 
-        scope.sumTotal = Projects.totalSsmTestedDonorCount;
+        // Calculate portal wide ssm tested donors
+        Projects.getList().then(function(projects) {
+          var total = 0;
+          projects.hits.forEach(function(project) {
+            total += project.ssmTestedDonorCount;
+          });
+          scope.sumTotal = total;
+        });
       }
 
       scope.toggle = function () {

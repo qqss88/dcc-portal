@@ -197,10 +197,11 @@
         }
 
         data.type = data.type.toLowerCase();
-        setList.splice(1, 0, data);
+        //setList.splice(1, 0, data);
+        setList.unshift(data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name,
-          'View in <a href="/analysis/sets">Set Analysis</a>', 4000, 'trustedHtml');
+          'View in <a href="/analysis/sets">Data Analysis</a>', 4000, 'trustedHtml');
       });
 
       return promise;
@@ -226,11 +227,11 @@
         }
 
         data.type = data.type.toLowerCase();
-        //setList.unshift(data);
-        setList.splice(1, 0, data);
+        setList.unshift(data);
+        // setList.splice(1, 0, data);
         localStorageService.set(LIST_ENTITY, setList);
         toaster.pop('', 'Saving ' + data.name,
-          'View in <a href="/analysis/sets">Set Analysis</a>', 4000, 'trustedHtml');
+          'View in <a href="/analysis/sets">Data Analysis</a>', 4000, 'trustedHtml');
       });
 
       return promise;

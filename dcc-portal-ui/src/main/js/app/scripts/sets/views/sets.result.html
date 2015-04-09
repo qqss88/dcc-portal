@@ -12,6 +12,8 @@
 </div>
 <div data-ng-if="item && item.state === 'FINISHED'" data-disable-events="isDeprecated">
 
+    <div>Click on the areas of the Venn diagram to include them in your result set.</div>
+
     <set-upload data-set-modal="dialog.setModal" data-set-union="dialog.setUnion" data-set-type="dialog.setType"></set-upload>
 
     <div class="canvas half"></div>
@@ -55,8 +57,10 @@
                     data-ng-mouseenter="tableMouseEnter(item.intersection)"
                     data-ng-mouseleave="tableMouseOut(item.intersection)">
 
-                    <td style="cursor:pointer" data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
-                        <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"></i>
+                    <td style="cursor:pointer" 
+                        data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
+                        <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"
+                           style="color: {{ isHighlighted(item.intersection)? '#B8D6E2' : isSelected(item.intersection)? '#7ABDDA' : ''}}"></i>
                     </td>
                     <td>
                         <set-notation data-item="item" data-set-list="setList"></set-notation>
@@ -74,12 +78,12 @@
                         </span>
                     </td>
                 </tr>
-                <tr>
-                    <td colspan="2">Union of selected sets</td>
+                <tr style="border-top: 1px solid #888; border-bottom: 1px solid #888">
+                    <td colspan="2"><strong>Union of selected sets</strong></td>
                     <td class="text-right">
-                        <a data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit" data-ng-click="redirect()" href="">{{selectedTotalCount | number}}</a>
+                        <a data-ng-if="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit" data-ng-click="redirect()" href=""><strong>{{selectedTotalCount | number}}</strong></a>
                         <span data-ng-if="selectedTotalCount===0">0</span>
-                        <span data-ng-if="selectedTotalCount > unionMaxLimit">{{selectedTotalCount}}</span>
+                        <span data-ng-if="selectedTotalCount > unionMaxLimit"><strong>{{selectedTotalCount}}</strong></span>
                     </td>
                     <td>
                         <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 

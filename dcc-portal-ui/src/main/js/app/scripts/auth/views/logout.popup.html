@@ -1,9 +1,9 @@
-<div class="ng-cloak" data-modal=logoutModal data-options="opts">
+<div class="ng-cloak" data-options="opts">
     <div class="modal-dialog light">
         <div class="modal-content">
             <div class="modal-header clearfix">
                 <h3 class="pull-left">Logout</h3>
-                <button class="pull-right t_button" data-ng-click="logoutModal=false"><i
+                <button class="pull-right t_button" data-ng-click="closeLogoutPopup()"><i
                         class="icon-cancel"></i>
                 </button>
             </div>
@@ -15,7 +15,7 @@
                 <br>
             </div>
             <div class="modal-footer">
-                <button class="t_button t_button_large" data-ng-click="logoutModal=false">Cancel</button>
+                <button class="t_button t_button_large" data-ng-click="closeLogoutPopup()">Cancel</button>
                 <button class="t_button t_button_large" data-ng-click="logout()">
                     <span ng-hide="connecting"><i class="icon-logout"></i>Logout</span>
                 </button>

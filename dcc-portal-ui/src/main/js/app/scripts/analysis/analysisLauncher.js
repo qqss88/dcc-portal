@@ -25,6 +25,7 @@
     // Pass-thru
     _this.analysisName = AnalysisService.analysisName;
     _this.analysisDescription = AnalysisService.analysisDescription;
+    _this.analysisDemoDescription = AnalysisService.analysisDemoDescription;
 
     _this.toggle = function(setId) {
       if (_this.selectedIds.indexOf(setId) >= 0) {
