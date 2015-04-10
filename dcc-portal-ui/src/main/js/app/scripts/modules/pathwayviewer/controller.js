@@ -87,13 +87,13 @@
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
     
-    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
-                                           function(n){
-      return    (n.type==='RenderableProtein'||
-                 n.type==='RenderableEntity'||
-                 n.type==='RenderableComplex'||
-                 n.type==='RenderableEntitySet');
-    }));
+//    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
+//                                           function(n){
+//      return    (n.type==='RenderableProtein'||
+//                 n.type==='RenderableEntity'||
+//                 n.type==='RenderableComplex'||
+//                 n.type==='RenderableEntitySet');
+//    }));
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -128,6 +128,38 @@
       svg.transition().attr('transform', 'translate(' +
                             [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     }
+    
+    var showingLegend = false;
+    var legendSvg;
+    var renderLegend = function(w, h){
+      if(!legendSvg){
+        legendSvg = d3.select('.pathway-legend').append('svg')
+          .attr('viewBox', '0 0 ' +w+ ' ' + h)
+          .attr('preserveAspectRatio', 'xMidYMid')
+          .append('g');
+        var legendrenderer = new dcc.Renderer(legendSvg, {
+          onClick: function (d) {},
+          urlPath: config.urlPath
+        });
+        legendrenderer.renderNodes(rendererUtils.getLegendNodes(20,0));
+      }else{
+        legendSvg.attr('opacity','1');
+      }
+    }
+    
+    d3.select('.pathway-legend-controller').on('click',function(){
+      if(showingLegend){       
+        legendSvg.transition().duration(600).attr('opacity','0');
+        $('.pathway-legend').animate({left: '100%',},600);
+        showingLegend = false;
+      }else{  
+        renderLegend($('.pathway-legend').css('width').substring(0,$('.pathway-legend').css('width').length-2),
+                    $('.pathway-legend').css('height').substring(0,$('.pathway-legend').css('height').length-2));
+        
+        $('.pathway-legend').animate({left: '75%'});
+        showingLegend = true;
+      }
+    });
   };
 
   ReactomePathway.prototype.highlight = function (ids) {

@@ -3902,19 +3902,33 @@ td {
   line-height: 0px;
 }
 
-/* line 114, _modules/_pathwayviewer.scss */
-.pathway-infobar {
+/* line 111, _modules/_pathwayviewer.scss */
+.pathway-legend {
   position: absolute;
   top: 0;
-  left: 70%;
+  left: 100%;
   width: 25%;
-  height: 40%;
-  margin: 3%;
-  margin-top: -1px;
-  opacity: 0.8;
-  border: 1px dashed #b3b3b3;
-  border-top: 1px solid white;
+  height: 100%;
+  opacity: 0.9;
+  border-left: 1px solid #b3b3b3;
   background: white;
+}
+
+/* line 122, _modules/_pathwayviewer.scss */
+.pathway-legend .RenderableNodeText .RenderableNodeTextCell {
+  font-size: 10px;
+}
+
+/* line 126, _modules/_pathwayviewer.scss */
+.pathway-legend h4, .pathway-legend-controller {
+  margin-top: 3%;
+}
+
+/* line 130, _modules/_pathwayviewer.scss */
+.pathway-legend-controller {
+  float: left;
+  margin-left: -12%;
+  font-size: 1.5em;
 }
 
 /* line 25, styles.scss */

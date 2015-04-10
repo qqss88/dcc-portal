@@ -28,7 +28,9 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center"></div>',
+      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'
+                + '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'
+                + '<h4>LEGEND</h4></div></div>',
       link: function ($scope) {
 
         var controller = new dcc.ReactomePathway({

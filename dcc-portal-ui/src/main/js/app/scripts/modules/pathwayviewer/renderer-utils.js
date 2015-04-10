@@ -140,6 +140,38 @@
 
     return lines;
   };
+  
+  /*
+  * Create a grid of all components for legend
+  */
+  RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
+    var nodes = [];
+    var x = marginLeft, y= marginTop;
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment'];
+    for(var i=0;i<types.length;i++){   
+      x = i%2==0?marginLeft:marginLeft+100+10;
+      y = Math.floor(i/2)*40 + marginTop + 10*Math.floor(i/2);
+      nodes.push({
+        position:{x:x,y:y},
+        size:{width:90,height:30},
+        type:'Renderable'+types[i],
+        id:'fake',reactomeId:'fake',
+        text:{content:types[i],position:{x:x,y:y}}
+      });
+    }
+    
+    // Add special process node
+    x = types.length%2==0?marginLeft:marginLeft+100+10;
+    nodes.push({
+        position:{x:x,y:y},
+        size:{width:90,height:30},
+        type:'ProcessNode',
+        id:'fake',reactomeId:'fake',
+        text:{content:'Pathway',position:{x:x,y:y}}
+      });
+    
+    return nodes;
+  };
 
   dcc.RendererUtils = RendererUtils;
 
