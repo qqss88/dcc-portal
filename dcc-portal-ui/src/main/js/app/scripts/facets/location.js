@@ -19,7 +19,9 @@
 
 angular.module('icgc.facets.location', []);
 
-angular.module('icgc.facets.location').controller('locationFacetCtrl', function ($scope, Facets, LocationService) {
+angular.module('icgc.facets.location')
+  .controller('locationFacetCtrl', function ($scope, Facets, LocationService, Chromosome) {
+
   var submitted;
 
   //$scope.regex = /^(chr)?[xy0-9]+(:\d+(\-\d+)?)?$/i;
@@ -36,11 +38,29 @@ angular.module('icgc.facets.location').controller('locationFacetCtrl', function 
 
   function checkLocation() {
     if (submitted) {
-      if ($scope.regex.exec($scope.location)) {
+      var input = $scope.location;
+
+      if ($scope.regex.exec(input)) {
         $scope.state = 'valid';
       } else {
         $scope.state = 'invalid';
       }
+
+      var chr = input.split(':')[0].replace('chr', '');
+      var range = input.split(':')[1];
+
+      if (angular.isDefined(range) && $scope.state === 'valid') {
+        range = range.split('-');
+        if (range.length === 2) {
+          $scope.state = Chromosome.validate(chr, range[0], range[1])? 'valid' : 'invalid';
+        } else {
+          $scope.state = Chromosome.validate(chr, range[0])? 'valid' : 'invalid';
+        }
+      }
+      if (input === '') {
+        $scope.state = 'unsubmitted';
+      }
+
     } else {
       $scope.state = 'unsubmitted';
     }
