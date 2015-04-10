@@ -142,6 +142,8 @@
           urlPath: config.urlPath
         });
         legendrenderer.renderNodes(rendererUtils.getLegendNodes(20,0));
+        legendrenderer.renderEdges(rendererUtils.getLegendLines(40,180,legendSvg));
+        legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,300,legendSvg),true);
       }else{
         legendSvg.attr('opacity','1');
       }

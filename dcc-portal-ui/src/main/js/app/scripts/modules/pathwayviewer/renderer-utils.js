@@ -172,6 +172,67 @@
     
     return nodes;
   };
+  
+  /*
+  * Create a list of reaction lines for legend
+  */
+  RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
+    var lines = [];
+    var y=marginTop;
+    var markers = ['Output','Catalyst','Activator']
+    markers.forEach(function (elem) {
+      lines.push({
+            x1: marginLeft, y1:y,
+            x2: marginLeft+80, y2: y,
+            marked: true,
+            marker: elem+'-legend',
+            color: 'black', id:'fake', type: 'fake'
+          });
+      svg.append('foreignObject').attr({
+        x: marginLeft+80, y:y-15,
+        width:90, height:30,
+        'fill':'none'
+      }).append('xhtml:body')
+      .attr('class','RenderableNodeText')
+      .html(function(d){
+        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          elem+'</td></tr></table>';
+      });
+    
+      y+=30;
+    });
+
+    return lines;
+  };
+  
+   /*
+  * Create a list of reaction lines for legend
+  */
+  RendererUtils.prototype.getLegendLabels = function (marginLeft,marginTop,svg) {
+    var labels = [];
+    var y=marginTop;
+    var reactions = ['Association','Dissociation','Transition','Omitted Process','Uncertain']
+    reactions.forEach(function (elem) {
+      labels.push({
+            x: marginLeft+40, y:y,
+            reactionType: elem
+          });
+      svg.append('foreignObject').attr({
+        x: marginLeft+80, y:y-15,
+        width:110, height:30,
+        'fill':'none'
+      }).append('xhtml:body')
+      .attr('class','RenderableNodeText')
+      .html(function(d){
+        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          (elem==='Association'?'Association/Binding':elem)+'</td></tr></table>';
+      });
+    
+      y+=30;
+    });
+
+    return labels;
+  };
 
   dcc.RendererUtils = RendererUtils;
 

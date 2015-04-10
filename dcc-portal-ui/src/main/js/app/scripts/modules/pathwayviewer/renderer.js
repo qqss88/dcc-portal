@@ -27,6 +27,22 @@
         refX: '5'
       },
       {
+        // An arrow head
+        id:'Output-legend',
+        element:'path',
+        attr:{
+          d:'M0,-5L10,0L0,5',
+          stroke:strokeColor,
+          markerWidth:'8',
+          markerHeight:'8'
+        },
+        style:{
+          fill:strokeColor
+        },
+        refX: '10',refY:'7',
+        viewBox:'0 -5 10 10'
+      },
+      {
         // A smaller arrow head
         id:'FlowLine',
         element:'path',
@@ -53,6 +69,22 @@
         },
         viewBox:  '-10 -10 30 20',
         refX: '35'
+      },
+      {
+        // A "hollow" arrow head
+        id:'Activator-legend',
+        element:'path',
+        attr:{
+           d:'M0,-5L10,0L0,5L0,-5',
+          stroke:strokeColor,
+          markerWidth:'8',
+          markerHeight:'8'
+        },
+        style:{
+          fill:'white'
+        },
+        refX: '7',refY:'7',
+        viewBox:'0 -5 10 10'
       },
       {
         // A smaller "hollow" arrow head
@@ -86,6 +118,25 @@
         refX:'53'
       },
       {
+        // A white circle with a border
+        id:'Catalyst-legend',
+        element:'circle',
+        attr:{
+          'cx':10,
+          'cy':0,
+          'r':10,
+          stroke:strokeColor,
+          'stroke-width':'2px',
+          markerWidth:'8',
+          markerHeight:'8'
+        },
+        style:{
+          fill:'white',
+        },
+        viewBox:'0 -12 24 24',
+        refX:'20',refY:'7'
+      },
+      {
         // Special right pointing arrow for genes
         id:'GeneArrow',
         element:'path',
@@ -106,8 +157,8 @@
       .attr('id', defs[i].id)
       .attr('viewBox', defs[i].viewBox)
       .attr('refX', defs[i].refX)
-      .attr('markerWidth', 8)
-      .attr('markerHeight', 6)
+      .attr('markerWidth', defs[i].attr.markerWidth?defs[i].attr.markerWidth:'8')
+      .attr('markerHeight', defs[i].attr.markerHeight?defs[i].attr.markerHeight:'6')
       .attr('orient', 'auto')
       .append(defs[i].element)
       .attr(defs[i].attr).style(defs[i].style);
@@ -296,11 +347,23 @@
   /*
   * Render a label in the middle of the line to indicate the type
   */
-  Renderer.prototype.renderReactionLabels = function (labels) {
+  Renderer.prototype.renderReactionLabels = function (labels, legend) {
     var size = 8, svg = this.svg;
     var circular = ['Association','Dissociation','Binding'];
     var filled = ['Association','Binding'];
 
+    // Add lines for legend
+    if(legend){
+      svg.selectAll('.pathway-legend-line').data(labels).enter().append('line').attr({
+        'class':'pathway-legend-line',
+        'x1':function(d){return (+d.x)-30;},
+        'y1':function(d){return d.y;},
+        'x2':function(d){return (+d.x)+30;},
+        'y2':function(d){return d.y;},
+        'stroke':strokeColor
+      });
+    }
+    
     svg.selectAll('.RenderableReactionLabel').data(labels).enter().append('rect')
     .attr({
       'class':'RenderableReactionLabel',
