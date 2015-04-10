@@ -58,10 +58,10 @@
       }
       range = lookup[chr];
 
-      if (arguments[1] && (arguments[1] > range || arguments[1] < 1)) {
+      if (angular.isDefined(arguments[1]) && (arguments[1] > range || arguments[1] < 1)) {
         return false;
       }
-      if (arguments[2] && (arguments[2] > range || arguments[2] < 1)) {
+      if (angular.isDefined(arguments[2]) && (arguments[2] > range || arguments[2] < 1)) {
         return false;
       }
       return true;
