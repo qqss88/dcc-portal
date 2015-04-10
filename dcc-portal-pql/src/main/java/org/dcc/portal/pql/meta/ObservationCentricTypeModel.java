@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.meta;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
@@ -27,6 +26,7 @@ import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.val;
 
@@ -37,12 +37,14 @@ import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.elasticsearch.common.collect.ImmutableSet;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class ObservationCentricTypeModel extends AbstractTypeModel {
 
   private final static String TYPE_PREFIX = "observation";
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of("ssm.consequence", "ssm.observation");
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
+      "observation",
       "donorId",
       "analysisId",
       "analyzedSampleId",
@@ -74,7 +76,7 @@ public class ObservationCentricTypeModel extends AbstractTypeModel {
       "verificationStatus");
 
   public ObservationCentricTypeModel() {
-    super(defineFields(), emptyMap(), PUBLIC_FIELDS, INCLUDE_FIELDS);
+    super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override
@@ -199,6 +201,18 @@ public class ObservationCentricTypeModel extends AbstractTypeModel {
         string("_age_at_diagnosis_group", "donor.ageAtDiagnosisGroup"),
         string("_available_data_type", "donor.availableDataTypes"),
         string("experimental_analysis_performed", "donor.analysisTypes"));
+  }
+
+  private static Map<String, String> defineInternalAliases() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(BIOLOGICAL_PROCESS, "ssm.consequence.gene.go_term.biological_process")
+        .put(CELLULAR_COMPONENT, "ssm.consequence.gene.go_term.cellular_component")
+        .put(MOLECULAR_FUNCTION, "ssm.consequence.gene.go_term.molecular_function")
+        .put(DONOR_ENTITY_SET_ID, "donor._donor_id")
+        .put(GENE_ENTITY_SET_ID, "ssm.consequence.gene._gene_id")
+        .put(MUTATION_ENTITY_SET_ID, "ssm._mutation_id")
+        .put(LOOKUP_TYPE, "donor-ids")
+        .build();
   }
 
 }

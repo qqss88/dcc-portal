@@ -80,6 +80,8 @@ public class TestingHelpers {
       return new QueryContext("", Type.GENE_CENTRIC);
     case MUTATION_CENTRIC:
       return new QueryContext("", Type.MUTATION_CENTRIC);
+    case OBSERVATION_CENTRIC:
+      return new QueryContext("", Type.OBSERVATION_CENTRIC);
     }
 
     throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));

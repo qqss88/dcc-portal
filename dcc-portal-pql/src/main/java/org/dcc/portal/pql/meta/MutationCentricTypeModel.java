@@ -199,7 +199,7 @@ public class MutationCentricTypeModel extends AbstractTypeModel {
         .put(DONOR_ENTITY_SET_ID, "ssm_occurrence.donor._donor_id")
         .put(GENE_ENTITY_SET_ID, "transcript.gene._gene_id")
         .put(MUTATION_ENTITY_SET_ID, "_mutation_id")
-        .put(LOOKUP_TYPE, "mutation-ids")
+        .put(LOOKUP_TYPE, "observation-ids")
         .build();
   }
 

@@ -201,6 +201,12 @@ public class FiltersConverterTest {
   }
 
   @Test
+  public void pathwayTest_observation() {
+    val result = converter.convertFilters(createFilters("{gene:{hasPathway:false}}"), Type.OBSERVATION_CENTRIC);
+    assertThat(result).isEqualTo("nested(ssm.consequence,missing(gene.pathwayId))");
+  }
+
+  @Test
   public void pathwayTest_otherType() {
     val result = converter.convertFilters(createFilters("{gene:{hasPathway:false}}"), DONOR_CENTRIC);
     assertThat(result).isEqualTo("nested(gene,missing(gene.pathwayId))");

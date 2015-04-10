@@ -25,6 +25,7 @@ import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertAndGetNestedNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetMustNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
@@ -247,6 +248,19 @@ public class GeneSetFilterVisitorTest {
   }
 
   @Test
+  public void goTermTest_observation() {
+    val root = createEsAst("in(gene.goTermId, 'GO:0003674')", OBSERVATION_CENTRIC);
+    val result = root.accept(visitor, getObservationContextOptional()).get();
+
+    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode - OrNode (3 TermsNode)
+    val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertThat(nestedNode.childrenCount()).isEqualTo(1);
+
+    val orNode = (OrNode) nestedNode.getFirstChild();
+    assertGoTerm(orNode, getTypeModel(OBSERVATION_CENTRIC), "GO:0003674");
+  }
+
+  @Test
   public void curatedSetTest_mutation() {
     val root = createEsAst("in(gene.curatedSetId, 'ID1')", MUTATION_CENTRIC);
     assertPathwayAndCuratedSet(root, "transcript.gene.curated_set", "ID1");
@@ -257,6 +271,13 @@ public class GeneSetFilterVisitorTest {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", MUTATION_CENTRIC);
     log.debug("After GeneSetFilterVisitor: {}", root);
     assertPathwayAndCuratedSet(root, "transcript.gene.pathway", "REACT_6326");
+  }
+
+  @Test
+  public void pathwayIdTest_observation() {
+    val root = createEsAst("in(gene.pathwayId, 'REACT_6326')", OBSERVATION_CENTRIC);
+    log.debug("After GeneSetFilterVisitor: {}", root);
+    assertPathwayAndCuratedSet(root, "ssm.consequence.gene.pathway", "REACT_6326");
   }
 
   @Test
@@ -361,6 +382,10 @@ public class GeneSetFilterVisitorTest {
 
   private static Optional<QueryContext> getMutationContextOptional() {
     return Optional.of(new QueryContext("", MUTATION_CENTRIC));
+  }
+
+  private static Optional<QueryContext> getObservationContextOptional() {
+    return Optional.of(new QueryContext("", OBSERVATION_CENTRIC));
   }
 
   private static void assertGeneSetId(ExpressionNode orNode, AbstractTypeModel typeModel, String value) {

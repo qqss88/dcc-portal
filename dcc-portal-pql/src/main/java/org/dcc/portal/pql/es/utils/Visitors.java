@@ -29,6 +29,7 @@ import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
+import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.MutationScoreQueryVisitor;
@@ -65,6 +66,7 @@ public class Visitors {
   private static final DonorScoreQueryVisitor DONOR_SCORE_QUERY_VISITOR = new DonorScoreQueryVisitor();
   private static final GeneScoreQueryVisitor GENE_SCORE_QUERY_VISITOR = new GeneScoreQueryVisitor();
   private static final MutationScoreQueryVisitor MUTATION_SCORE_QUERY_VISITOR = new MutationScoreQueryVisitor();
+  private static final DefaultScoreQueryVisitor DEFAULT_SCORE_QUERY_VISITOR = new DefaultScoreQueryVisitor();
 
   /*
    * QueryBuilderVisitor
@@ -172,6 +174,8 @@ public class Visitors {
       return GENE_SCORE_QUERY_VISITOR;
     case MUTATION_CENTRIC:
       return MUTATION_SCORE_QUERY_VISITOR;
+    case OBSERVATION_CENTRIC:
+      return DEFAULT_SCORE_QUERY_VISITOR;
     default:
       throw new IllegalArgumentException();
     }

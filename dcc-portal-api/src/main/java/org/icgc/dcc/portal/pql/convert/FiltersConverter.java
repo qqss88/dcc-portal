@@ -336,6 +336,13 @@ public class FiltersConverter {
       }
 
       return EMPTY_NESTED_PATH;
+
+    case OBSERVATION_CENTRIC:
+      if (fieldName.startsWith("gene")) {
+        return "ssm.consequence";
+      }
+
+      return "ssm";
     }
 
     throw new IllegalArgumentException(format("Could not resolve nested path for field %s in type %s", fieldName,
