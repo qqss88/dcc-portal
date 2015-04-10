@@ -17,7 +17,9 @@
 
 package org.icgc.dcc.portal.model;
 
+import static java.util.Collections.singletonMap;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.repository.GeneSetRepository.SOURCE_FIELDS;
 
 import java.util.List;
 import java.util.Map;
@@ -82,17 +84,18 @@ public class GeneSet {
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
     // Reactome pathway specific fields
-    hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(fields.get("hierarchy")));
+    hierarchy = buildPathwayHierarchy((List<Map<String, Object>>) fieldMap.get(SOURCE_FIELDS.get("hierarchy")));
     diagrammed = String.valueOf(fieldMap.get(fields.get("diagrammed")));
 
     // Gene ontology specific fields
     ontology = (String) fieldMap.get(fields.get("ontology"));
-    altIds = (List<String>) fieldMap.get(fields.get("altIds"));
-    synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
-    inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(fields.get("inferredTree")));
+    altIds = (List<String>) fieldMap.get(SOURCE_FIELDS.get("altIds"));
+    synonyms = (List<String>) fieldMap.get(SOURCE_FIELDS.get("synonyms"));
+    inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(SOURCE_FIELDS.get("inferredTree")));
+
   }
 
-  private List<List<Map<String, String>>> buildPathwayHierarchy(List<List<Map<String, Object>>> field) {
+  private List<List<Map<String, String>>> buildPathwayHierarchy(List<Map<String, Object>> field) {
     val result = Lists.<List<Map<String, String>>> newArrayList();
 
     if (field == null) {
@@ -101,12 +104,8 @@ public class GeneSet {
 
     for (val parentPath : field) {
       val path = Lists.<Map<String, String>> newArrayList();
-      for (val pathwayNode : parentPath) {
-        val node = Maps.<String, String> newHashMap();
-        node.put("id", (String) pathwayNode.get("id"));
-        node.put("name", (String) pathwayNode.get("name"));
-        node.put("diagrammed", String.valueOf(pathwayNode.get("diagrammed")));
-        path.add(node);
+      for (val pathwayNode : parentPath.entrySet()) {
+        path.add(singletonMap(pathwayNode.getKey(), String.valueOf(pathwayNode.getValue())));
       }
       result.add(path);
     }

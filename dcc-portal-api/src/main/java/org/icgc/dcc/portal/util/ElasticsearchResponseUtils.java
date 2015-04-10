@@ -17,12 +17,15 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -38,6 +41,7 @@ import org.elasticsearch.search.SearchHitField;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 /**
@@ -159,4 +163,48 @@ public final class ElasticsearchResponseUtils {
     fields.putAll(source);
   }
 
+  public static Map<String, Object> flatternMap(Map<String, Object> source) {
+    if (source == null) {
+      return emptyMap();
+    }
+
+    return flatternMap(Optional.empty(), source);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> flatternMap(Optional<String> prefix, Map<String, Object> source) {
+    val result = ImmutableMap.<String, Object> builder();
+
+    for (val entry : source.entrySet()) {
+      if (entry.getValue() instanceof Map) {
+        result.putAll(flatternMap(Optional.of(entry.getKey()), (Map<String, Object>) entry.getValue()));
+      } else if (isNestedList(entry.getValue())) {
+        val value = (List<List<Object>>) entry.getValue();
+        result.put(resolvePrefix(prefix, entry.getKey()), value.get(0));
+      } else {
+        result.put(resolvePrefix(prefix, entry.getKey()), entry.getValue());
+      }
+    }
+
+    return result.build();
+  }
+
+  @SuppressWarnings("unchecked")
+  private static boolean isNestedList(Object value) {
+    if (value instanceof List) {
+      val list = (List<Object>) value;
+      if (!list.isEmpty() && list.get(0) instanceof List) {
+        checkState(list.size() == 1, format("Expected that the parent list would contain only one List child, but its "
+            + "size is '%s'", list.size()));
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private static String resolvePrefix(Optional<String> prefix, String field) {
+    return prefix.isPresent() ? format("%s.%s", prefix.get(), field) : field;
+  }
 }
