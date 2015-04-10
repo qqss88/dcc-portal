@@ -47,15 +47,16 @@
      *  Params: chr, start, end
      */
     this.validate = function() {
-      var range;
+      var range, chr;
 
       if (arguments.length < 1 || arguments.length > 3) {
         return false;
       }
-      if (lookup.hasOwnProperty(arguments[0]) === false) {
+      chr = arguments[0].toUpperCase();
+      if (lookup.hasOwnProperty(chr) === false) {
         return false;
       }
-      range = lookup[arguments[0]];
+      range = lookup[chr];
 
       if (arguments[1] && (arguments[1] > range || arguments[1] < 1)) {
         return false;
