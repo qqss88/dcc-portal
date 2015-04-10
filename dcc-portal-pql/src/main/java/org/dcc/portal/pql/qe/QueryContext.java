@@ -20,7 +20,7 @@ package org.dcc.portal.pql.qe;
 import static com.google.common.base.Preconditions.checkNotNull;
 import lombok.Value;
 
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 
@@ -30,7 +30,7 @@ public class QueryContext {
   private String index;
   private Type type;
 
-  public AbstractTypeModel getTypeModel() {
+  public TypeModel getTypeModel() {
     checkNotNull(type);
 
     return IndexModel.getTypeModel(type);

@@ -66,6 +66,7 @@ public class Nodes {
   }
 
   // TODO: find where it could be used. There are 3-4 places
+  @SuppressWarnings("unchecked")
   public static <T extends ExpressionNode> Optional<T> findParent(@NonNull ExpressionNode node, @NonNull Class<T> type) {
     if (type.isInstance(node)) {
       node = node.getParent();

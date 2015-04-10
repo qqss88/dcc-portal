@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
-import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.DOUBLE;
 
 import java.util.Set;
@@ -30,7 +29,7 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class DoubleFieldModel extends FieldModel {
 
   private DoubleFieldModel(String name) {
-    this(name, EMPTY_UI_ALIAS);
+    this(name, FieldModel.EMPTY_UI_ALIAS);
   }
 
   private DoubleFieldModel(String name, Set<String> aliases) {
@@ -38,7 +37,7 @@ public class DoubleFieldModel extends FieldModel {
   }
 
   private DoubleFieldModel(String name, boolean nested) {
-    this(name, EMPTY_UI_ALIAS, nested);
+    this(name, FieldModel.EMPTY_UI_ALIAS, nested);
   }
 
   private DoubleFieldModel(String name, String alias, boolean nested) {

@@ -38,14 +38,13 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.VisitorHelpers;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.score.NestedFieldsVisitor.RequestContext;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 
 import com.google.common.collect.ImmutableList;
 
@@ -60,7 +59,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   public static class RequestContext {
 
     @NonNull
-    AbstractTypeModel typeModel;
+    TypeModel typeModel;
     @NonNull
     NestedNode nestedNode;
 
@@ -244,7 +243,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   }
 
   private boolean isScoreNode(ExpressionNode node) {
-    return node instanceof ConstantScoreNode || node instanceof FunctionScoreNode;
+    return node instanceof FunctionScoreNode;
   }
 
   /**

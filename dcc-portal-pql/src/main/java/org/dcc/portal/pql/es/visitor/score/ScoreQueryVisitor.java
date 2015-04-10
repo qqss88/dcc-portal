@@ -38,7 +38,7 @@ import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
@@ -52,9 +52,9 @@ public abstract class ScoreQueryVisitor extends NodeVisitor<ExpressionNode, Quer
 
   private final NestedNode nestedNode;
   private final String nestingPath;
-  private final AbstractTypeModel typeModel;
+  private final TypeModel typeModel;
 
-  protected ScoreQueryVisitor(@NonNull NestedNode nestedNode, @NonNull AbstractTypeModel typeModel) {
+  protected ScoreQueryVisitor(@NonNull NestedNode nestedNode, @NonNull TypeModel typeModel) {
     this.nestedNode = nestedNode;
     this.nestingPath = nestedNode.getPath();
     this.typeModel = typeModel;

@@ -18,14 +18,13 @@
 package org.dcc.portal.pql.exception;
 
 import static java.lang.String.format;
-import lombok.NonNull;
 
 /**
  * This type of exception is thrown when the query is valid, but has invalid field names etc.
  */
 public class SemanticException extends RuntimeException {
 
-  public SemanticException(@NonNull String message, Object... args) {
+  public SemanticException(String message, Object... args) {
     super(format(message, args));
   }
 

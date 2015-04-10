@@ -20,13 +20,13 @@ package org.dcc.portal.pql.es.visitor.special;
 import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_CURATED_SET_ID;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_GO_TERM_ID;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_PATHWAY_ID;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_SET_ID;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.MOLECULAR_FUNCTION;
+import static org.dcc.portal.pql.meta.TypeModel.BIOLOGICAL_PROCESS;
+import static org.dcc.portal.pql.meta.TypeModel.CELLULAR_COMPONENT;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_CURATED_SET_ID;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_GO_TERM_ID;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_PATHWAY_ID;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
+import static org.dcc.portal.pql.meta.TypeModel.MOLECULAR_FUNCTION;
 
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
@@ -141,7 +141,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.empty();
   }
 
-  private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+  private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, TypeModel typeModel) {
     val shouldNode = new ShouldBoolNode(createGoTermChildren(termsNode, typeModel));
     shouldNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
@@ -154,7 +154,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.of(result);
   }
 
-  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode, AbstractTypeModel typeModel) {
+  private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode, TypeModel typeModel) {
     val pathwayTermsNode = new TermsNode(typeModel.getField(GENE_PATHWAY_ID), termsNode.getChildrenArray());
     val curatedSetIdTermsNode = new TermsNode(typeModel.getField(GENE_CURATED_SET_ID), termsNode.getChildrenArray());
 
@@ -165,7 +165,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.of(new NestedNode(path, children));
   }
 
-  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
+  private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, TypeModel typeModel) {
     val shouldNode = new ShouldBoolNode(createGoTermChildren(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
     val result = new BoolNode(shouldNode);
@@ -177,7 +177,7 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return Optional.of(result);
   }
 
-  private boolean hasNestedParent(ExpressionNode node, AbstractTypeModel typeModel, String nestedField) {
+  private boolean hasNestedParent(ExpressionNode node, TypeModel typeModel, String nestedField) {
     val nestedPath = getNestedPath(typeModel, nestedField);
 
     while (node != null && !(node instanceof NestedNode)) {
@@ -194,11 +194,11 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
     return false;
   }
 
-  private String getNestedPath(AbstractTypeModel typeModel, String fieldName) {
+  private String getNestedPath(TypeModel typeModel, String fieldName) {
     return typeModel.getNestedPath(fieldName);
   }
 
-  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode, AbstractTypeModel typeModel) {
+  private static ExpressionNode[] createGoTermChildren(TermsNode termsNode, TypeModel typeModel) {
     ExpressionNode[] children = termsNode.getChildrenArray();
 
     return new ExpressionNode[] {

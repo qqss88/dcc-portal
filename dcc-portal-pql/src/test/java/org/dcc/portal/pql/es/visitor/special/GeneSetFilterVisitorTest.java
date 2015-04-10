@@ -18,9 +18,9 @@
 package org.dcc.portal.pql.es.visitor.special;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.BIOLOGICAL_PROCESS;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.CELLULAR_COMPONENT;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.MOLECULAR_FUNCTION;
+import static org.dcc.portal.pql.meta.TypeModel.BIOLOGICAL_PROCESS;
+import static org.dcc.portal.pql.meta.TypeModel.CELLULAR_COMPONENT;
+import static org.dcc.portal.pql.meta.TypeModel.MOLECULAR_FUNCTION;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
@@ -47,7 +47,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.TestingHelpers;
@@ -391,7 +391,7 @@ public class GeneSetFilterVisitorTest {
     return Optional.of(new QueryContext("", OBSERVATION_CENTRIC));
   }
 
-  private static void assertGeneSetId(ShouldBoolNode shouldNode, AbstractTypeModel typeModel, String value) {
+  private static void assertGeneSetId(ShouldBoolNode shouldNode, TypeModel typeModel, String value) {
     assertThat(shouldNode.childrenCount()).isEqualTo(5);
 
     assertTermsNode(shouldNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
@@ -401,7 +401,7 @@ public class GeneSetFilterVisitorTest {
     assertTermsNode(shouldNode.getChild(4), typeModel.getField("gene.curatedSetId"), value);
   }
 
-  private static void assertGoTerm(ShouldBoolNode shouldNode, AbstractTypeModel typeModel, String value) {
+  private static void assertGoTerm(ShouldBoolNode shouldNode, TypeModel typeModel, String value) {
     assertThat(shouldNode.childrenCount()).isEqualTo(3);
 
     assertTermsNode(shouldNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);

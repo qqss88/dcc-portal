@@ -29,15 +29,12 @@ import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
-import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -78,20 +75,6 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
     }
 
     return result.add(ScoreFunctionBuilders.scriptFunction(node.getScript()));
-  }
-
-  @Override
-  public QueryBuilder visitConstantScore(ConstantScoreNode node, Optional<QueryContext> context) {
-    FilterBuilder filterBuilder;
-    if (node.childrenCount() == 0) {
-      filterBuilder = FilterBuilders.matchAllFilter();
-    } else {
-      filterBuilder = node.getFirstChild().accept(Visitors.filterBuilderVisitor(), context);
-    }
-
-    return QueryBuilders
-        .constantScoreQuery(filterBuilder)
-        .boost(node.getBoost());
   }
 
   @Override

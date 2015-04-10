@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.es.ast;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -90,41 +89,9 @@ public abstract class ExpressionNode {
     return children.get(0);
   }
 
-  public Optional<ExpressionNode> getOptionalFirstChild() {
-    if (childrenCount() == 0) {
-      return Optional.empty();
-    }
-
-    return Optional.ofNullable(children.get(0));
-  }
-
   public void removeChild(int index) {
     checkChildrenBoundaries(index);
     children.remove(index);
-  }
-
-  public void removeChild(ExpressionNode node) {
-    checkState(hasChildren(), "Can't remove the child. Node has no children");
-    int removeIndex = getRemoveIndex(node);
-
-    if (removeIndex != -1) {
-      removeChild(removeIndex);
-
-      return;
-    }
-
-    throw new IllegalArgumentException("Failed to remove node");
-  }
-
-  private int getRemoveIndex(ExpressionNode node) {
-    for (int i = 0; i < childrenCount(); i++) {
-      val child = getChild(i);
-      if (child.equals(node)) {
-        return i;
-      }
-    }
-
-    return -1;
   }
 
   public void removeAllChildren() {

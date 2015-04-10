@@ -37,7 +37,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class GeneCentricTypeModel extends AbstractTypeModel {
+public class GeneCentricTypeModel extends TypeModel {
 
   private final static String TYPE_PREFIX = "gene";
   private static final List<String> AVAILABLE_FACETS = ImmutableList.of("type");

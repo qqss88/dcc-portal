@@ -21,8 +21,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_LOCATION;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.MUTATION_LOCATION;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_LOCATION;
+import static org.dcc.portal.pql.meta.TypeModel.MUTATION_LOCATION;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +51,7 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
 
@@ -189,7 +189,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new TermNode(field, terminalNode.getValue());
   }
 
-  private static Optional<NestedNode> createNestedNode(TermsNode node, AbstractTypeModel typeModel) {
+  private static Optional<NestedNode> createNestedNode(TermsNode node, TypeModel typeModel) {
     val field = node.getField();
     if (isNonNestedField(field, typeModel)) {
       return Optional.empty();
@@ -208,7 +208,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return Optional.of(new NestedNode(nestedPath));
   }
 
-  private static ExpressionNode nest(String field, ExpressionNode visitResultNode, AbstractTypeModel typeModel,
+  private static ExpressionNode nest(String field, ExpressionNode visitResultNode, TypeModel typeModel,
       ExpressionNode originalNode) {
     if (isNonNestedField(field, typeModel) || hasNestedParent(field, originalNode, typeModel)) {
       return visitResultNode;
@@ -230,7 +230,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new NestedNode(nestedPath, visitResultNode);
   }
 
-  private static boolean hasNestedParent(String field, ExpressionNode node, AbstractTypeModel typeModel) {
+  private static boolean hasNestedParent(String field, ExpressionNode node, TypeModel typeModel) {
     val nestedPath = getNestedPath(typeModel, field);
 
     while (node != null && !(node instanceof NestedNode)) {
@@ -247,7 +247,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return false;
   }
 
-  private static String getNestedPath(AbstractTypeModel typeModel, String field) {
+  private static String getNestedPath(TypeModel typeModel, String field) {
     if (field.equals(MUTATION_LOCATION)) {
       return typeModel.getNestedPath(MUTATION_START);
     }
@@ -255,7 +255,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return typeModel.getNestedPath(GENE_START);
   }
 
-  private static boolean isNonNestedField(String field, AbstractTypeModel typeModel) {
+  private static boolean isNonNestedField(String field, TypeModel typeModel) {
     val type = typeModel.getType();
 
     return type == Type.GENE_CENTRIC && field.equals(GENE_LOCATION) ||
@@ -288,7 +288,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return (Long.valueOf(startEndComponents.get(1))).longValue();
   }
 
-  private static String resolveEndField(String field, AbstractTypeModel typeModel) {
+  private static String resolveEndField(String field, TypeModel typeModel) {
     if (field.startsWith("gene")) {
       return typeModel.getField(GENE_END);
     }
@@ -302,7 +302,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new RangeNode(field, leNode);
   }
 
-  private static ExpressionNode createTermNode(String field, AbstractTypeModel typeModel, String location) {
+  private static ExpressionNode createTermNode(String field, TypeModel typeModel, String location) {
     return new TermNode(resolveChromosomeField(field, typeModel), parseChromosome(location));
   }
 
@@ -333,7 +333,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new RangeNode(field, geNode);
   }
 
-  private static String resolveStartField(String field, AbstractTypeModel typeModel) {
+  private static String resolveStartField(String field, TypeModel typeModel) {
     if (field.startsWith("gene")) {
       return typeModel.getField(GENE_START);
     }
@@ -341,7 +341,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return typeModel.getField(MUTATION_START);
   }
 
-  private static String resolveChromosomeField(String field, AbstractTypeModel typeModel) {
+  private static String resolveChromosomeField(String field, TypeModel typeModel) {
     if (field.startsWith("gene")) {
       return typeModel.getField(GENE_CHROMOSOME);
     }

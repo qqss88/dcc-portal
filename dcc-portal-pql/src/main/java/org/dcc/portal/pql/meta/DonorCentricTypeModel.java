@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class DonorCentricTypeModel extends AbstractTypeModel {
+public class DonorCentricTypeModel extends TypeModel {
 
   private final static String TYPE_PREFIX = "donor";
 

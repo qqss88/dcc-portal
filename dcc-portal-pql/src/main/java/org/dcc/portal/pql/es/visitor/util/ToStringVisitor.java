@@ -50,7 +50,6 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -252,13 +251,6 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
   @Override
   public String visitFunctionScore(FunctionScoreNode node, Optional<Void> context) {
     val header = format("%s [script: %s]", getCommonHeader(node), node.getScript());
-
-    return buildToString(node, Optional.of(header));
-  }
-
-  @Override
-  public String visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
-    val header = format("%s [boost: %s]", getCommonHeader(node), node.getBoost());
 
     return buildToString(node, Optional.of(header));
   }

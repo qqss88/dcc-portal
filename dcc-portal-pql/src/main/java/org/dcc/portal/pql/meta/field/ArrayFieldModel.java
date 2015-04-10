@@ -18,9 +18,8 @@
 package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
-import static org.dcc.portal.pql.meta.Constants.EMPTY_STRING_FIELD;
-import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.ARRAY;
+import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.Set;
 
@@ -33,9 +32,10 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class ArrayFieldModel extends FieldModel {
 
   private final FieldModel element;
+  public static final StringFieldModel EMPTY_STRING_FIELD = string(FieldModel.NO_NAME);
 
   private ArrayFieldModel(String name, FieldModel element) {
-    this(name, EMPTY_UI_ALIAS, element);
+    this(name, FieldModel.EMPTY_UI_ALIAS, element);
   }
 
   private ArrayFieldModel(String name, String alias, FieldModel element) {
@@ -47,7 +47,7 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   private ArrayFieldModel(String name, boolean nested, FieldModel element) {
-    this(name, EMPTY_UI_ALIAS, nested, element);
+    this(name, FieldModel.EMPTY_UI_ALIAS, nested, element);
   }
 
   private ArrayFieldModel(String name, String alias, boolean nested, FieldModel element) {
@@ -60,19 +60,19 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name) {
-    return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, ArrayFieldModel.EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull String alias) {
-    return new ArrayFieldModel(name, alias, EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, alias, ArrayFieldModel.EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull Set<String> aliases) {
-    return new ArrayFieldModel(name, aliases, EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, aliases, ArrayFieldModel.EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull Set<String> alias) {
-    return new ArrayFieldModel(name, alias, FieldModel.NESTED, EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, alias, FieldModel.NESTED, ArrayFieldModel.EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull Set<String> aliases,

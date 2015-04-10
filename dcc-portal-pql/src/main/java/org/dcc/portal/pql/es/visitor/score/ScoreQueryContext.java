@@ -20,7 +20,7 @@ package org.dcc.portal.pql.es.visitor.score;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 
 @Value
 public class ScoreQueryContext {
@@ -28,6 +28,6 @@ public class ScoreQueryContext {
   @NonNull
   String nestingPath;
   @NonNull
-  AbstractTypeModel typeModel;
+  TypeModel typeModel;
 
 }

@@ -19,8 +19,8 @@ package org.dcc.portal.pql.es.visitor.special;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.GENE_LOCATION;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.MUTATION_LOCATION;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_LOCATION;
+import static org.dcc.portal.pql.meta.TypeModel.MUTATION_LOCATION;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
@@ -40,7 +40,7 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -187,19 +187,19 @@ public class LocationFilterVisitorTest {
     root.accept(visitor, Optional.of(new QueryContext("", MUTATION_CENTRIC))).get();
   }
 
-  private static String resolveStart(String filterType, AbstractTypeModel typeModel) {
+  private static String resolveStart(String filterType, TypeModel typeModel) {
     val fieldName = filterType.equals(GENE_LOCATION) ? "gene.start" : "mutation.start";
 
     return typeModel.getField(fieldName);
   }
 
-  private static String resolveEnd(String filterType, AbstractTypeModel typeModel) {
+  private static String resolveEnd(String filterType, TypeModel typeModel) {
     val fieldName = filterType.equals(GENE_LOCATION) ? "gene.end" : "mutation.end";
 
     return typeModel.getField(fieldName);
   }
 
-  private static String resolveChromosome(String filterType, AbstractTypeModel typeModel) {
+  private static String resolveChromosome(String filterType, TypeModel typeModel) {
     val fieldName = filterType.equals(GENE_LOCATION) ? "gene.chromosome" : "mutation.chromosome";
 
     return typeModel.getField(fieldName);

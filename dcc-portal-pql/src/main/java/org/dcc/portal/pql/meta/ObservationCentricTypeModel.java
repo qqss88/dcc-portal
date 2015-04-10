@@ -39,7 +39,7 @@ import org.elasticsearch.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class ObservationCentricTypeModel extends AbstractTypeModel {
+public class ObservationCentricTypeModel extends TypeModel {
 
   private final static String TYPE_PREFIX = "observation";
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of("ssm.consequence", "ssm.observation");

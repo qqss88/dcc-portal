@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
-import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 @Slf4j
-public abstract class AbstractTypeModel {
+public abstract class TypeModel {
 
   /**
    * Following public constants used to resolve the special cases in the API.
@@ -110,7 +109,7 @@ public abstract class AbstractTypeModel {
       HAS_CURATED_SET, GENE_CURATED_SET_ID,
       HAS_GO_TERM, GENE_GO_TERM_ID);
 
-  public AbstractTypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
+  public TypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
       @NonNull List<String> allowedAliases, @NonNull List<String> includeFields) {
     fieldsByFullPath = initFieldsByFullPath(fields);
     log.debug("FieldsByFullPath Map: {}", fieldsByFullPath);
@@ -225,11 +224,11 @@ public abstract class AbstractTypeModel {
 
   private List<String> split(String fullName) {
     val result = new ImmutableList.Builder<String>();
-    val list = Splitter.on(FIELD_SEPARATOR).splitToList(fullName);
+    val list = Splitter.on(FieldModel.FIELD_SEPARATOR).splitToList(fullName);
     String prefix = "";
     for (int i = 0; i < list.size(); i++) {
       result.add(prefix + list.get(i));
-      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
+      prefix = prefix + list.get(i) + FieldModel.FIELD_SEPARATOR;
     }
 
     return result.build().reverse();

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
@@ -139,7 +139,7 @@ public class FiltersConverter {
    * Groups nested paths by most common parent, so they can be nested at the parent's level.
    */
   static ArrayListMultimap<String, String> groupNestedPaths(Collection<String> nestedPaths,
-      AbstractTypeModel typeModel) {
+      TypeModel typeModel) {
     val result = ArrayListMultimap.<String, String> create();
     val sortedPaths = Lists.newArrayList(Sets.newTreeSet(nestedPaths));
 
@@ -302,7 +302,7 @@ public class FiltersConverter {
     return result;
   }
 
-  private static String resolveNestedPath(String fieldName, AbstractTypeModel indexModel) {
+  private static String resolveNestedPath(String fieldName, TypeModel indexModel) {
     if (SPECIAL_FIELDS_NESTING.contains(fieldName)) {
       return resolveSpecialCasesNestedPath(fieldName, indexModel.getType());
     }

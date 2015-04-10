@@ -26,6 +26,8 @@ import lombok.ToString;
 
 import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 
+import com.google.common.collect.ImmutableSet;
+
 @Getter
 @ToString
 @AllArgsConstructor
@@ -39,6 +41,9 @@ public abstract class FieldModel {
   private FieldType type;
   @Setter
   private boolean nested;
+  public static final String FIELD_SEPARATOR = ".";
+  public static final Set<String> EMPTY_UI_ALIAS = ImmutableSet.of();
+  public static final String NO_NAME = "";
 
   public static enum FieldType {
     LONG,

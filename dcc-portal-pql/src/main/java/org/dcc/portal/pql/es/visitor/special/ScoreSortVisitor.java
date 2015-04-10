@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.visitor.special;
 
-import static org.dcc.portal.pql.meta.AbstractTypeModel.SCORE;
+import static org.dcc.portal.pql.meta.TypeModel.SCORE;
 
 import java.util.Optional;
 

@@ -20,10 +20,10 @@ package org.dcc.portal.pql.es.visitor.special;
 import static com.google.common.base.Preconditions.checkState;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.ENTITY_SET_ID;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_INDEX;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_PATH;
-import static org.dcc.portal.pql.meta.AbstractTypeModel.LOOKUP_TYPE;
+import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_INDEX;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_PATH;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 
 import java.util.Optional;
 
@@ -48,7 +48,7 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.model.LookupInfo;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
@@ -139,7 +139,7 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
     return Optional.empty();
   }
 
-  private static String resolveField(TermsNode node, AbstractTypeModel typeModel) {
+  private static String resolveField(TermsNode node, TypeModel typeModel) {
     return typeModel.getInternalField(node.getField());
   }
 
@@ -149,7 +149,7 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
     return (String) terminalNode.getValue();
   }
 
-  private static LookupInfo resolveLookup(String field, AbstractTypeModel typeModel) {
+  private static LookupInfo resolveLookup(String field, TypeModel typeModel) {
     return new LookupInfo(
         typeModel.getInternalField(LOOKUP_INDEX),
         typeModel.getInternalField(LOOKUP_TYPE),

@@ -31,7 +31,7 @@ import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
@@ -101,7 +101,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   }
 
   private static AbstractAggregationBuilder createNestedAggregation(AbstractAggregationBuilder termsAggregation,
-      String aggName, String fieldName, AbstractTypeModel typeModel) {
+      String aggName, String fieldName, TypeModel typeModel) {
     return AggregationBuilders.nested(aggName)
         .path(typeModel.getNestedPath(fieldName))
         .subAggregation(termsAggregation);

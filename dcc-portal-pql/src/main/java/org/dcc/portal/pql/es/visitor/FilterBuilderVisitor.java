@@ -57,7 +57,7 @@ import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Visitors;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -238,7 +238,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
    * {@link NestedNode} parent.
    */
   private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter,
-      AbstractTypeModel typeModel) {
+      TypeModel typeModel) {
     if (typeModel.isNested(field) && !node.hasNestedParent()) {
       val nestedPath = typeModel.getNestedPath(field);
       log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'", node, nestedPath);

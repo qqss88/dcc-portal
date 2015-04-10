@@ -18,7 +18,6 @@
 package org.dcc.portal.pql.meta.field;
 
 import static java.util.Collections.singleton;
-import static org.dcc.portal.pql.meta.Constants.EMPTY_UI_ALIAS;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.LONG;
 
 import java.util.Set;
@@ -30,7 +29,7 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class LongFieldModel extends FieldModel {
 
   private LongFieldModel(String name) {
-    this(name, EMPTY_UI_ALIAS);
+    this(name, FieldModel.EMPTY_UI_ALIAS);
   }
 
   private LongFieldModel(String name, String alias) {
@@ -42,7 +41,7 @@ public class LongFieldModel extends FieldModel {
   }
 
   private LongFieldModel(String name, boolean nested) {
-    this(name, EMPTY_UI_ALIAS, nested);
+    this(name, FieldModel.EMPTY_UI_ALIAS, nested);
   }
 
   private LongFieldModel(String name, String alias, boolean nested) {

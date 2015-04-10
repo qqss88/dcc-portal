@@ -17,8 +17,6 @@
  */
 package org.dcc.portal.pql.meta.visitor;
 
-import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
-import static org.dcc.portal.pql.meta.Constants.NO_NAME;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
 import java.util.Collections;
@@ -101,10 +99,10 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   private static Map<String, String> prefixFieldName(String name, Map<String, String> fieldNameByAliasMap) {
     val result = new ImmutableMap.Builder<String, String>();
     for (val entry : fieldNameByAliasMap.entrySet()) {
-      if (name.equals(NO_NAME)) {
+      if (name.equals(FieldModel.NO_NAME)) {
         result.put(entry.getKey(), entry.getValue());
       } else {
-        result.put(entry.getKey(), name + FIELD_SEPARATOR + entry.getValue());
+        result.put(entry.getKey(), name + FieldModel.FIELD_SEPARATOR + entry.getValue());
       }
     }
 

@@ -37,7 +37,7 @@ public class IndexModel {
     return getTypeModel(type).getNestedPath(field);
   }
 
-  public static AbstractTypeModel getTypeModel(Type type) {
+  public static TypeModel getTypeModel(Type type) {
     switch (type) {
     case DONOR_CENTRIC:
       return donorCentric;
@@ -52,15 +52,15 @@ public class IndexModel {
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
   }
 
-  public static AbstractTypeModel getDonorCentricTypeModel() {
+  public static TypeModel getDonorCentricTypeModel() {
     return donorCentric;
   }
 
-  public static AbstractTypeModel getMutationCentricTypeModel() {
+  public static TypeModel getMutationCentricTypeModel() {
     return mutationCentric;
   }
 
-  public static AbstractTypeModel getGeneCentricTypeModel() {
+  public static TypeModel getGeneCentricTypeModel() {
     return geneCentric;
   }
 

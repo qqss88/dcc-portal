@@ -48,7 +48,7 @@ import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
-import org.dcc.portal.pql.meta.AbstractTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqContext;
@@ -87,7 +87,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   private static final Splitter FIELD_SPLITTER = Splitter.on(".");
 
   @NonNull
-  private final AbstractTypeModel typeModel;
+  private final TypeModel typeModel;
 
   @Override
   public ExpressionNode visitOr(@NonNull OrContext context) {
@@ -365,7 +365,7 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
   }
 
   private String resolveAlias(String alias) {
-    if (AbstractTypeModel.SPECIAL_CASES_FIELDS.contains(alias)) {
+    if (TypeModel.SPECIAL_CASES_FIELDS.contains(alias)) {
       return alias;
     }
 

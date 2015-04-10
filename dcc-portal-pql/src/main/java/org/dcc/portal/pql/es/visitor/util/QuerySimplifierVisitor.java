@@ -51,7 +51,6 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.es.ast.query.ConstantScoreNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -187,30 +186,21 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
-
     return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitMissingAggregation(MissingAggregationNode node, Optional<Void> context) {
-
     return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitFilterAggregation(FilterAggregationNode node, Optional<Void> context) {
-
     return visitChildren(this, node, context);
   }
 
   @Override
   public Optional<ExpressionNode> visitFunctionScore(FunctionScoreNode node, Optional<Void> context) {
-
-    return visitChildren(this, node, context);
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitConstantScore(ConstantScoreNode node, Optional<Void> context) {
     return visitChildren(this, node, context);
   }
 

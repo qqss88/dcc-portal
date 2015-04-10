@@ -18,8 +18,6 @@
 package org.dcc.portal.pql.meta.visitor;
 
 import static java.util.Collections.singletonMap;
-import static org.dcc.portal.pql.meta.Constants.FIELD_SEPARATOR;
-import static org.dcc.portal.pql.meta.Constants.NO_NAME;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
 import java.util.Map;
@@ -81,10 +79,10 @@ public class CreateFullyQualifiedNameVisitor implements FieldVisitor<Map<String,
   private static Map<String, FieldModel> prefix(String name, Map<String, FieldModel> map) {
     val result = new ImmutableMap.Builder<String, FieldModel>();
     for (val entry : map.entrySet()) {
-      if (name.equals(NO_NAME)) {
+      if (name.equals(FieldModel.NO_NAME)) {
         result.put(entry.getKey(), entry.getValue());
       } else {
-        result.put(name + FIELD_SEPARATOR + entry.getKey(), entry.getValue());
+        result.put(name + FieldModel.FIELD_SEPARATOR + entry.getKey(), entry.getValue());
       }
     }
 
