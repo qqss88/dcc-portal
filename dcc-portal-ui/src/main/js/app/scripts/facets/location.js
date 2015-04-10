@@ -46,7 +46,7 @@ angular.module('icgc.facets.location')
         $scope.state = 'invalid';
       }
 
-      var chr = input.split(':')[0].replace('chr', '');
+      var chr = input.split(':')[0].replace(/chr/i, '');
       var range = input.split(':')[1];
 
       if (angular.isDefined(range) && $scope.state === 'valid') {
