@@ -1,7 +1,5 @@
 package org.icgc.dcc.portal.model;
 
-
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -548,14 +546,10 @@ public class IndexModel {
           .put("projects", "projects")
 
           // Pathway
-          .put("hierarchy", "pathway.hierarchy")
           .put("diagrammed", "pathway.diagrammed")
 
           // Gene Ontology
           .put("ontology", "go_term.ontology")
-          .put("altIds", "go_term.alt_ids")
-          .put("synonyms", "go_term.synonyms")
-          .put("inferredTree", "go_term.inferred_tree")
 
           // Curated gene set
           // ???

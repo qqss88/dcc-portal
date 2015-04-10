@@ -22,13 +22,16 @@ import static com.google.common.collect.Iterables.isEmpty;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.common.collect.Iterables.size;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.flatternMap;
 
+import java.util.Collection;
 import java.util.Map;
 
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -48,6 +51,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -60,6 +64,11 @@ public class GeneSetRepository {
    */
   private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
   private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
+  public static final Map<String, String> SOURCE_FIELDS = ImmutableMap.of(
+      "hierarchy", "pathway.hierarchy",
+      "inferredTree", "go_term.inferred_tree",
+      "altIds", "go_term.alt_ids",
+      "synonyms", "go_term.synonyms");
 
   private static final Type TYPE = Type.GENE_SET;
   private static final Kind KIND = Kind.GENE_SET;
@@ -154,10 +163,6 @@ public class GeneSetRepository {
 
     // To be interpreted as explicit arrays
     val arrayFields = ImmutableList.<String> of(
-        fields.get("hierarchy"),
-        fields.get("altIds"),
-        fields.get("synonyms"),
-        fields.get("inferredTree"),
         fields.get("projects"));
 
     // Old fields - To remove
@@ -167,10 +172,13 @@ public class GeneSetRepository {
 
     val search = client.prepareGet(index, TYPE.getId(), id);
 
+    val sourceFields = Lists.<String> newArrayList();
     if (!isEmpty(fieldNames)) {
       for (val field : fieldNames) {
         if (fields.containsKey(field)) {
           fs.add(fields.get(field));
+        } else if (isSourceField(field)) {
+          sourceFields.add(field);
         }
       }
     } else {
@@ -178,6 +186,7 @@ public class GeneSetRepository {
     }
 
     search.setFields(fs.toArray(new String[fs.size()]));
+    addSourceFields(search, sourceFields);
 
     GetResponse response = search.execute().actionGet();
 
@@ -199,10 +208,20 @@ public class GeneSetRepository {
         map.put(f.getName(), f.getValue());
       }
     }
+    map.putAll(flatternMap(response.getSource()));
 
     log.debug("{}", map);
 
     return map;
+  }
+
+  private void addSourceFields(GetRequestBuilder search, Collection<String> fields) {
+    String[] excludeFields = null;
+    if (fields.isEmpty()) {
+      fields = SOURCE_FIELDS.values();
+    }
+
+    search.setFetchSource(fields.toArray(new String[fields.size()]), excludeFields);
   }
 
   private SearchResponse findField(Iterable<String> ids, String fieldName) {
@@ -218,4 +237,9 @@ public class GeneSetRepository {
 
     return search.execute().actionGet();
   }
+
+  private static boolean isSourceField(String field) {
+    return SOURCE_FIELDS.containsKey(field);
+  }
+
 }
