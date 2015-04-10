@@ -36,7 +36,6 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
@@ -47,7 +46,6 @@ import org.dcc.portal.pql.es.ast.filter.LessThanNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -187,16 +185,6 @@ public class ToStringVisitor extends NodeVisitor<String, Void> {
   @Override
   public String visitLimit(LimitNode node, Optional<Void> context) {
     return format("%s [from: %d, size: %d]", getCommonHeader(node), node.getFrom(), node.getSize());
-  }
-
-  @Override
-  public String visitAnd(AndNode node, Optional<Void> context) {
-    return buildToString(node);
-  }
-
-  @Override
-  public String visitOr(OrNode node, Optional<Void> context) {
-    return buildToString(node);
   }
 
   @Override

@@ -35,7 +35,6 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
@@ -46,7 +45,6 @@ import org.dcc.portal.pql.es.ast.filter.LessThanNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -169,16 +167,6 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
   @Override
   public ExpressionNode visitLimit(LimitNode node, Optional<Void> context) {
     return new LimitNode(node.getFrom(), node.getSize());
-  }
-
-  @Override
-  public ExpressionNode visitAnd(AndNode node, Optional<Void> context) {
-    return new AndNode(visitChildren(node));
-  }
-
-  @Override
-  public ExpressionNode visitOr(OrNode node, Optional<Void> context) {
-    return new OrNode(visitChildren(node));
   }
 
   @Override

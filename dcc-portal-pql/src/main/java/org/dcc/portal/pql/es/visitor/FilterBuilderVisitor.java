@@ -21,13 +21,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
-import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.FilterBuilders.existsFilter;
 import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.notFilter;
-import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
@@ -43,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
@@ -54,7 +51,6 @@ import org.dcc.portal.pql.es.ast.filter.LessThanNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -89,17 +85,6 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
     val queryBuilder = node.accept(Visitors.createQueryBuilderVisitor(), context);
 
     return FilterBuilders.queryFilter(queryBuilder);
-  }
-
-  @Override
-  public FilterBuilder visitAnd(@NonNull AndNode node, Optional<QueryContext> context) {
-    log.debug("Visiting And: {}", node);
-    val childrenFilters = Lists.<FilterBuilder> newArrayList();
-    for (val child : node.getChildren()) {
-      childrenFilters.add(child.accept(this, context));
-    }
-
-    return andFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
   }
 
   @Override
@@ -168,17 +153,6 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
     checkState(childrenCount == 1, "NotNode can have only one child. Found {}", childrenCount);
 
     return notFilter(node.getFirstChild().accept(this, context));
-  }
-
-  @Override
-  public FilterBuilder visitOr(@NonNull OrNode node, Optional<QueryContext> context) {
-    log.debug("Visiting Or: {}", node);
-    val childrenFilters = Lists.<FilterBuilder> newArrayList();
-    for (val child : node.getChildren()) {
-      childrenFilters.add(child.accept(this, context));
-    }
-
-    return orFilter(childrenFilters.toArray(new FilterBuilder[childrenFilters.size()]));
   }
 
   @Override

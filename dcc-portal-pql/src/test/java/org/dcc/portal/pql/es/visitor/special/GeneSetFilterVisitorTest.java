@@ -28,6 +28,7 @@ import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertAndGetNestedNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetMustNode;
+import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetShouldNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 
 import java.util.Optional;
@@ -43,12 +44,13 @@ import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.meta.AbstractTypeModel;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 @Slf4j
@@ -77,12 +79,12 @@ public class GeneSetFilterVisitorTest {
     val result = root.accept(visitor, Optional.of(context)).get();
     log.debug("After GeneSetFilterVisitor: {}", result);
 
-    // QueryNode FilterNode - BoolNode - MustBoolNode - NestedNode - OrNode (3 TermsNode)
+    // QueryNode FilterNode - BoolNode - MustBoolNode - NestedNode - BoolNode - ShouldNode (3 TermsNode)
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertGoTerm(orNode, getTypeModel(DONOR_CENTRIC), "GO:0003674");
+    val shouldNode = assertBoolAndGetShouldNode(nestedNode.getFirstChild());
+    assertGoTerm(shouldNode, getTypeModel(DONOR_CENTRIC), "GO:0003674");
   }
 
   @Test
@@ -100,8 +102,8 @@ public class GeneSetFilterVisitorTest {
     assertThat(nestedNode.getPath()).isEqualTo("gene");
     assertThat(nestedNode.getScoreMode()).isEqualTo(NestedNode.ScoreMode.AVG);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertGoTerm(orNode, getTypeModel(DONOR_CENTRIC), "GO:0005575");
+    val shouldNode = assertBoolAndGetShouldNode(nestedNode.getFirstChild());
+    assertGoTerm(shouldNode, getTypeModel(DONOR_CENTRIC), "GO:0005575");
   }
 
   @Test
@@ -110,11 +112,11 @@ public class GeneSetFilterVisitorTest {
     val result = root.accept(visitor, Optional.of(context)).get();
     log.debug("After GeneSetFilterVisitor: {}", result);
 
-    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode - OrNode (3 TermsNode)
+    // QueryNode - FilterNode - BoolNode - MustBoolNode - NestedNode - BoolNode - ShouldNode (3 TermsNode)
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    assertGeneSetId(nestedNode.getFirstChild(), getTypeModel(DONOR_CENTRIC), "123");
+    assertGeneSetId(assertBoolAndGetShouldNode(nestedNode.getFirstChild()), getTypeModel(DONOR_CENTRIC), "123");
   }
 
   @Test
@@ -207,8 +209,9 @@ public class GeneSetFilterVisitorTest {
     log.debug("After GeneSetFilterVisitor: {}", result);
 
     // QueryNode - FilterNode - BoolNode - MustBoolNode - OrNode (3 TermsNode)
-    val orNode = (OrNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
-    assertGoTerm(orNode, getTypeModel(GENE_CENTRIC), "GO:0003674");
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result.getFirstChild().getFirstChild().getFirstChild()
+        .getFirstChild().getFirstChild());
+    assertGoTerm(shouldNode, getTypeModel(GENE_CENTRIC), "GO:0003674");
   }
 
   @Test
@@ -230,8 +233,8 @@ public class GeneSetFilterVisitorTest {
     log.debug("After GeneSetFilterVisitor: {}", result);
 
     // QueryNode - FilterNode - BoolNode - MustBoolNode - OrNode (3 TermsNode)
-    val orNode = (OrNode) result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
-    assertGeneSetId(orNode, getTypeModel(GENE_CENTRIC), "123");
+    val boolNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
+    assertGeneSetId(assertBoolAndGetShouldNode(boolNode), getTypeModel(GENE_CENTRIC), "123");
   }
 
   @Test
@@ -243,8 +246,8 @@ public class GeneSetFilterVisitorTest {
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertGoTerm(orNode, getTypeModel(MUTATION_CENTRIC), "GO:0003674");
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(nestedNode.getFirstChild());
+    assertGoTerm(shouldNode, getTypeModel(MUTATION_CENTRIC), "GO:0003674");
   }
 
   @Test
@@ -256,8 +259,8 @@ public class GeneSetFilterVisitorTest {
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertGoTerm(orNode, getTypeModel(OBSERVATION_CENTRIC), "GO:0003674");
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(nestedNode.getFirstChild());
+    assertGoTerm(shouldNode, getTypeModel(OBSERVATION_CENTRIC), "GO:0003674");
   }
 
   @Test
@@ -290,8 +293,8 @@ public class GeneSetFilterVisitorTest {
     val nestedNode = result.getFirstChild().getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(nestedNode.childrenCount()).isEqualTo(1);
 
-    val orNode = (OrNode) nestedNode.getFirstChild();
-    assertGeneSetId(orNode, getTypeModel(MUTATION_CENTRIC), "123");
+    val boolNode = nestedNode.getFirstChild();
+    assertGeneSetId(assertBoolAndGetShouldNode(boolNode), getTypeModel(MUTATION_CENTRIC), "123");
   }
 
   @Test
@@ -329,8 +332,8 @@ public class GeneSetFilterVisitorTest {
     assertThat(mustNode.childrenCount()).isEqualTo(2);
     assertThat(mustNode.getFirstChild()).isEqualTo(existsNode);
 
-    val orNode = (OrNode) mustNode.getChild(1);
-    assertGoTerm(orNode, getTypeModel(indexType), "GO123");
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(mustNode.getChild(1));
+    assertGoTerm(shouldNode, getTypeModel(indexType), "GO123");
   }
 
   private static RootNode createRootForPathwayAndGoTermTest(String nestedPath, ExistsNode existsNode) {
@@ -388,22 +391,22 @@ public class GeneSetFilterVisitorTest {
     return Optional.of(new QueryContext("", OBSERVATION_CENTRIC));
   }
 
-  private static void assertGeneSetId(ExpressionNode orNode, AbstractTypeModel typeModel, String value) {
-    assertThat(orNode.childrenCount()).isEqualTo(5);
+  private static void assertGeneSetId(ShouldBoolNode shouldNode, AbstractTypeModel typeModel, String value) {
+    assertThat(shouldNode.childrenCount()).isEqualTo(5);
 
-    assertTermsNode(orNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
-    assertTermsNode(orNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
-    assertTermsNode(orNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
-    assertTermsNode(orNode.getChild(3), typeModel.getField("gene.pathwayId"), value);
-    assertTermsNode(orNode.getChild(4), typeModel.getField("gene.curatedSetId"), value);
+    assertTermsNode(shouldNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
+    assertTermsNode(shouldNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
+    assertTermsNode(shouldNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
+    assertTermsNode(shouldNode.getChild(3), typeModel.getField("gene.pathwayId"), value);
+    assertTermsNode(shouldNode.getChild(4), typeModel.getField("gene.curatedSetId"), value);
   }
 
-  private static void assertGoTerm(OrNode orNode, AbstractTypeModel typeModel, String value) {
-    assertThat(orNode.childrenCount()).isEqualTo(3);
+  private static void assertGoTerm(ShouldBoolNode shouldNode, AbstractTypeModel typeModel, String value) {
+    assertThat(shouldNode.childrenCount()).isEqualTo(3);
 
-    assertTermsNode(orNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
-    assertTermsNode(orNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
-    assertTermsNode(orNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
+    assertTermsNode(shouldNode.getChild(0), typeModel.getInternalField(CELLULAR_COMPONENT), value);
+    assertTermsNode(shouldNode.getChild(1), typeModel.getInternalField(BIOLOGICAL_PROCESS), value);
+    assertTermsNode(shouldNode.getChild(2), typeModel.getInternalField(MOLECULAR_FUNCTION), value);
   }
 
 }

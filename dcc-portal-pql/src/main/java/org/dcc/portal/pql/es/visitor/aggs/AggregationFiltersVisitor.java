@@ -28,14 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -113,16 +111,6 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, Strin
     checkOptional(context);
 
     return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
-  }
-
-  @Override
-  public ExpressionNode visitAnd(AndNode node, Optional<String> context) {
-    return processCommonCases(node, context);
-  }
-
-  @Override
-  public ExpressionNode visitOr(OrNode node, Optional<String> context) {
-    return processCommonCases(node, context);
   }
 
   @Override

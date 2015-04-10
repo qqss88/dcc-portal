@@ -34,14 +34,12 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -99,16 +97,6 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
   public Optional<ExpressionNode> visitTerm(@NonNull TermNode node, @NonNull Optional<QueryContext> context) {
     // TODO: Think about moving all the processing from visitTerms, because visitTerms uses only the first value
     return Optional.empty();
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitAnd(@NonNull AndNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(this, node, context);
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitOr(@NonNull OrNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(this, node, context);
   }
 
   @Override

@@ -28,14 +28,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -112,20 +110,6 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   }
 
   @Override
-  public Optional<ExpressionNode> visitAnd(AndNode node, Optional<RequestContext> context) {
-    // Results of this visitor are added to a QueryNode and are built using QueryBuilders. QueryBuilders do not have an
-    // 'and query' it must become a Must query
-    val childrenResults = processChildren(node, context);
-    if (!childrenResults.isPresent()) {
-      return childrenResults;
-    }
-
-    val boolNode = new BoolNode(new MustBoolNode(childrenResults.get().getChildrenArray()));
-
-    return Optional.of(boolNode);
-  }
-
-  @Override
   public Optional<ExpressionNode> visitBool(BoolNode node, Optional<RequestContext> context) {
     return processChildren(node, context);
   }
@@ -143,20 +127,6 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
   @Override
   public Optional<ExpressionNode> visitNot(NotNode node, Optional<RequestContext> context) {
     return processChildren(node, context);
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitOr(OrNode node, Optional<RequestContext> context) {
-    // Results of this visitor are added to a QueryNode and are built using QueryBuilders. QueryBuilders do not have an
-    // 'or query' it must become a Should query
-    val childrenResults = processChildren(node, context);
-    if (!childrenResults.isPresent()) {
-      return childrenResults;
-    }
-
-    val boolNode = new BoolNode(new ShouldBoolNode(childrenResults.get().getChildrenArray()));
-
-    return Optional.of(boolNode);
   }
 
   @Override

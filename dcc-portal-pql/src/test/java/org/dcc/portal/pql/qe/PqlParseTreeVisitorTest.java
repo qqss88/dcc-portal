@@ -29,7 +29,6 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
@@ -39,13 +38,13 @@ import org.dcc.portal.pql.es.ast.filter.LessThanNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.utils.TestingHelpers;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ExistsContext;
@@ -75,25 +74,26 @@ public class PqlParseTreeVisitorTest {
     val query = "or(gt(ageAtDiagnosis, 10), lt(ageAtEnrollment, 50), eq(gender, 'male'))";
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
-    val orNode = (OrNode) VISITOR.visitOr(orContext);
-    assertThat(orNode.childrenCount()).isEqualTo(3);
+    val result = VISITOR.visitOr(orContext);
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result);
+    assertThat(shouldNode.childrenCount()).isEqualTo(3);
 
     // gt(ageAtDiagnosis, 10)
-    RangeNode rangeNode = (RangeNode) orNode.getFirstChild();
+    RangeNode rangeNode = (RangeNode) shouldNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
-    rangeNode = (RangeNode) orNode.getChild(1);
+    rangeNode = (RangeNode) shouldNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
 
     // eq(gender, 'male')
-    val termNode = (TermNode) orNode.getChild(2);
+    val termNode = (TermNode) shouldNode.getChild(2);
     assertThat(termNode.childrenCount()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
@@ -104,27 +104,28 @@ public class PqlParseTreeVisitorTest {
     val query = "or(eq(gender, 'male'), and(gt(ageAtDiagnosis, 10), lt(ageAtEnrollment, 50)))";
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
-    val orNode = (OrNode) VISITOR.visitOr(orContext);
-    assertThat(orNode.childrenCount()).isEqualTo(2);
+    val result = VISITOR.visitOr(orContext);
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result);
+    assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // eq(gender, 'male')
-    val termNode = (TermNode) orNode.getFirstChild();
+    val termNode = (TermNode) shouldNode.getFirstChild();
     assertThat(termNode.childrenCount()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
 
-    val andNode = (AndNode) orNode.getChild(1);
-    assertThat(andNode.childrenCount()).isEqualTo(2);
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(shouldNode.getChild(1));
+    assertThat(mustNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)
-    RangeNode rangeNode = (RangeNode) andNode.getFirstChild();
+    RangeNode rangeNode = (RangeNode) mustNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
-    rangeNode = (RangeNode) andNode.getChild(1);
+    rangeNode = (RangeNode) mustNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
@@ -176,25 +177,26 @@ public class PqlParseTreeVisitorTest {
     val query = "and(gt(ageAtDiagnosis, 10), lt(ageAtEnrollment, 50), eq(gender, 'male'))";
     val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
-    val andNode = (AndNode) VISITOR.visitAnd(andContext);
-    assertThat(andNode.getChildren().size()).isEqualTo(3);
+    val result = VISITOR.visitAnd(andContext);
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    assertThat(mustNode.getChildren().size()).isEqualTo(3);
 
     // gt(ageAtDiagnosis, 10)
-    RangeNode rangeNode = (RangeNode) andNode.getFirstChild();
+    RangeNode rangeNode = (RangeNode) mustNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
-    rangeNode = (RangeNode) andNode.getChild(1);
+    rangeNode = (RangeNode) mustNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();
     assertThat(ltNode.getValue()).isEqualTo(50);
 
     // eq(gender, 'male')
-    val termNode = (TermNode) andNode.getChild(2);
+    val termNode = (TermNode) mustNode.getChild(2);
     assertThat(termNode.childrenCount()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
@@ -205,27 +207,28 @@ public class PqlParseTreeVisitorTest {
     val query = "and(eq(gender, 'male'), or(gt(ageAtDiagnosis, 10), lt(ageAtEnrollment, 50)))";
     val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
-    val andNode = (AndNode) VISITOR.visitAnd(andContext);
-    assertThat(andNode.getChildren().size()).isEqualTo(2);
+    val result = VISITOR.visitAnd(andContext);
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    assertThat(mustNode.getChildren().size()).isEqualTo(2);
 
     // eq(gender, 'male')
-    val termNode = (TermNode) andNode.getFirstChild();
+    val termNode = (TermNode) mustNode.getFirstChild();
     assertThat(termNode.childrenCount()).isEqualTo(2);
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
 
-    val orNode = (OrNode) andNode.getChild(1);
-    assertThat(orNode.childrenCount()).isEqualTo(2);
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(mustNode.getChild(1));
+    assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)
-    RangeNode rangeNode = (RangeNode) orNode.getFirstChild();
+    RangeNode rangeNode = (RangeNode) shouldNode.getFirstChild();
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
     assertThat(gtNode.getValue()).isEqualTo(10);
 
     // lt(ageAtEnrollment, 50)
-    rangeNode = (RangeNode) orNode.getChild(1);
+    rangeNode = (RangeNode) shouldNode.getChild(1);
     assertThat(rangeNode.childrenCount()).isEqualTo(1);
     assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val ltNode = (LessThanNode) rangeNode.getFirstChild();

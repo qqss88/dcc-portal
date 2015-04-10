@@ -27,9 +27,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
-import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
+import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
@@ -95,49 +93,14 @@ public class AggregationFiltersVisitorTest {
   }
 
   @Test
-  public void visitAnd_match() {
-    val andNode = (AndNode) getMustNode("or(and(gt(ageAtDiagnosis, 60), eq(gender, 70)), eq(ageAtEnrollment, 1))")
-        .getFirstChild() // OrNode
-        .getFirstChild();
-    val andNodeClone = cloneNode(andNode);
-    val andNodeResult = visitor.visitAnd(andNode, AGGREGATION_FIELD);
-
-    assertThat(andNodeClone).isNotEqualTo(andNodeResult);
-    // eq(gender, 70) removed
-    assertThat(andNodeResult.childrenCount()).isEqualTo(1);
-
-    val rangeNode = (RangeNode) andNodeResult.getFirstChild();
-    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
-    val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
-    assertThat(gtNode.getValue()).isEqualTo(60);
-  }
-
-  @Test
-  public void visitOr_match() {
-    val orNode = (OrNode) getMustNode("or(gt(ageAtDiagnosis, 60), eq(gender, 70))").getFirstChild();
-    val orNodeClone = cloneNode(orNode);
-    val orNodeResult = visitor.visitOr(orNode, AGGREGATION_FIELD);
-    log.info("Result {}", orNodeResult);
-
-    assertThat(orNodeResult).isNotEqualTo(orNodeClone);
-    // eq(gender, 70) removed
-    assertThat(orNodeResult.childrenCount()).isEqualTo(1);
-
-    val rangeNode = (RangeNode) orNodeResult.getFirstChild();
-    assertThat(rangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
-    val gtNode = (GreaterThanNode) rangeNode.getFirstChild();
-    assertThat(gtNode.getValue()).isEqualTo(60);
-  }
-
-  @Test
   public void missingTest() {
-    val orNode = (OrNode) getMustNode("or(missing(donor.gender),in(donor.gender,'male'))").getFirstChild();
-    val orNodeClone = cloneNode(orNode);
-    val orNodeResult = visitor.visitOr(orNode, AGGREGATION_FIELD);
-    log.info("Result {}", orNodeResult);
+    val boolNode = (BoolNode) getMustNode("or(missing(donor.gender),in(donor.gender,'male'))").getFirstChild();
+    val boolNodeClone = cloneNode(boolNode);
+    val result = visitor.visitBool(boolNode, AGGREGATION_FIELD);
+    log.debug("Result {}", result);
 
-    assertThat(orNodeResult).isNotEqualTo(orNodeClone);
-    assertThat(orNodeResult.hasChildren()).isFalse();
+    assertThat(result).isNotEqualTo(boolNodeClone);
+    assertThat(result.getFirstChild().hasChildren()).isFalse();
   }
 
   private ExpressionNode getMustNode(String query) {

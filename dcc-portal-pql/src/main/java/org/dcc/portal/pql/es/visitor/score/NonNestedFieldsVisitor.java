@@ -23,14 +23,12 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -68,20 +66,6 @@ public class NonNestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitShouldBool(ShouldBoolNode node, Optional<ScoreQueryContext> context) {
-    processChildren(node, context);
-
-    return Optional.empty();
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitAnd(AndNode node, Optional<ScoreQueryContext> context) {
-    processChildren(node, context);
-
-    return Optional.empty();
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitOr(OrNode node, Optional<ScoreQueryContext> context) {
     processChildren(node, context);
 
     return Optional.empty();

@@ -31,7 +31,6 @@ import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
@@ -44,6 +43,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
+import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 @Slf4j
@@ -62,11 +62,11 @@ public class PqlParseListenerTest {
     val mustNode = (MustBoolNode) esAst.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(5);
 
-    val orNode = mustNode.getFirstChild();
-    assertThat(orNode.childrenCount()).isEqualTo(2);
+    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(mustNode.getFirstChild());
+    assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)
-    val gtRangeNode = (RangeNode) orNode.getFirstChild();
+    val gtRangeNode = (RangeNode) shouldNode.getFirstChild();
     assertThat(gtRangeNode.childrenCount()).isEqualTo(1);
     assertThat(gtRangeNode.getFieldName()).isEqualTo("donor_age_at_diagnosis");
     val gtRangeNode1Child = (GreaterThanNode) gtRangeNode.getFirstChild();
@@ -74,7 +74,7 @@ public class PqlParseListenerTest {
     assertThat(gtRangeNode1Child.getValue()).isEqualTo(10);
 
     // ge(ageAtEnrollment, 20)
-    val geRangeNode = (RangeNode) orNode.getChild(1);
+    val geRangeNode = (RangeNode) shouldNode.getChild(1);
     assertThat(geRangeNode.childrenCount()).isEqualTo(1);
     assertThat(geRangeNode.getFieldName()).isEqualTo("donor_age_at_enrollment");
     val gtRangeNode2Child = (GreaterEqualNode) geRangeNode.getFirstChild();
@@ -93,11 +93,11 @@ public class PqlParseListenerTest {
     childrenContainValue(notNode, "donor_relapse_interval");
     childrenContainValue(notNode, 200);
 
-    val andNode = (AndNode) mustNode.getChild(3);
-    assertThat(andNode.childrenCount()).isEqualTo(2);
+    val mustBoolNode = TestingHelpers.assertBoolAndGetMustNode(mustNode.getChild(3));
+    assertThat(mustBoolNode.childrenCount()).isEqualTo(2);
 
     // lt(ageAtLastFollowup, 30)
-    val ltRangeNode = (RangeNode) andNode.getFirstChild();
+    val ltRangeNode = (RangeNode) mustBoolNode.getFirstChild();
     assertThat(ltRangeNode.childrenCount()).isEqualTo(1);
     assertThat(ltRangeNode.getFieldName()).isEqualTo("donor_age_at_last_followup");
     val ltRangeNodeChild = (LessThanNode) ltRangeNode.getFirstChild();
@@ -105,7 +105,7 @@ public class PqlParseListenerTest {
     assertThat(ltRangeNodeChild.getValue()).isEqualTo(30);
 
     // le(intervalOfLastFollowup, 40)
-    val leRangeNode = (RangeNode) andNode.getChild(1);
+    val leRangeNode = (RangeNode) mustBoolNode.getChild(1);
     assertThat(leRangeNode.childrenCount()).isEqualTo(1);
     assertThat(leRangeNode.getFieldName()).isEqualTo("donor_interval_of_last_followup");
     val leRangeNodeChild = (LessEqualNode) leRangeNode.getFirstChild();

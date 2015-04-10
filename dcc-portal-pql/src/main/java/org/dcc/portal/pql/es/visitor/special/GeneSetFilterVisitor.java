@@ -37,14 +37,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
@@ -99,16 +97,6 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   @Override
-  public Optional<ExpressionNode> visitAnd(@NonNull AndNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(this, node, context);
-  }
-
-  @Override
-  public Optional<ExpressionNode> visitOr(@NonNull OrNode node, @NonNull Optional<QueryContext> context) {
-    return visitChildren(this, node, context);
-  }
-
-  @Override
   public Optional<ExpressionNode> visitBool(@NonNull BoolNode node, @NonNull Optional<QueryContext> context) {
     return visitChildren(this, node, context);
   }
@@ -154,15 +142,16 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   private Optional<ExpressionNode> resolveGeneSetIdArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
-    orNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode, typeModel));
+    val shouldNode = new ShouldBoolNode(createGoTermChildren(termsNode, typeModel));
+    shouldNode.addChildren(createPathwayAndCuratedSetIdNodes(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
+    val result = new BoolNode(shouldNode);
 
     if (typeModel.isNested(fullyQualifiedName) && !hasNestedParent(termsNode, typeModel, fullyQualifiedName)) {
-      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
+      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), result);
     }
 
-    return Optional.of(orNode);
+    return Optional.of(result);
   }
 
   private ExpressionNode[] createPathwayAndCuratedSetIdNodes(TermsNode termsNode, AbstractTypeModel typeModel) {
@@ -177,15 +166,15 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   }
 
   private Optional<ExpressionNode> resolveGoTermArray(TermsNode termsNode, AbstractTypeModel typeModel) {
-    // FIXME: replace with ShouldBoolNode
-    val orNode = new OrNode(createGoTermChildren(termsNode, typeModel));
+    val shouldNode = new ShouldBoolNode(createGoTermChildren(termsNode, typeModel));
     val fullyQualifiedName = typeModel.getInternalField(CELLULAR_COMPONENT);
+    val result = new BoolNode(shouldNode);
 
     if (typeModel.isNested(fullyQualifiedName) && !hasNestedParent(termsNode, typeModel, fullyQualifiedName)) {
-      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), orNode);
+      return createNestedNodeOptional(typeModel.getNestedPath(fullyQualifiedName), result);
     }
 
-    return Optional.of(orNode);
+    return Optional.of(result);
   }
 
   private boolean hasNestedParent(ExpressionNode node, AbstractTypeModel typeModel, String nestedField) {

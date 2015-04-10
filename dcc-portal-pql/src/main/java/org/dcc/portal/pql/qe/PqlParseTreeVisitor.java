@@ -34,7 +34,6 @@ import org.dcc.portal.pql.es.ast.SortNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
-import org.dcc.portal.pql.es.ast.filter.AndNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
@@ -44,8 +43,8 @@ import org.dcc.portal.pql.es.ast.filter.LessThanNode;
 import org.dcc.portal.pql.es.ast.filter.MissingNode;
 import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.NotNode;
-import org.dcc.portal.pql.es.ast.filter.OrNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
+import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
@@ -92,24 +91,26 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
   @Override
   public ExpressionNode visitOr(@NonNull OrContext context) {
-    val orNode = new OrNode();
+    val shouldNode = new ShouldBoolNode();
+    val result = new BoolNode(shouldNode);
     for (val filter : context.filter()) {
-      orNode.addChildren(filter.accept(this));
+      shouldNode.addChildren(filter.accept(this));
     }
-    log.debug("OrNode: {}", orNode);
+    log.debug("Result: {}", result);
 
-    return orNode;
+    return result;
   }
 
   @Override
   public ExpressionNode visitAnd(@NonNull AndContext context) {
-    val andNode = new AndNode();
+    val andNode = new MustBoolNode();
+    val result = new BoolNode(andNode);
     for (val filter : context.filter()) {
       andNode.addChildren(filter.accept(this));
     }
-    log.debug("AndNode: {}", andNode);
+    log.debug("Result: {}", result);
 
-    return andNode;
+    return result;
   }
 
   @Override
