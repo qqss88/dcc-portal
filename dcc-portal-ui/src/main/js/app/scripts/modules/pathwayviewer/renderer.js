@@ -215,21 +215,11 @@
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
 
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
-      'class': function (d) {
-        return 'RenderableRect ' + d.type + ' entity'+d.id;
-      },
-      'x': function (d) {
-        return d.position.x;
-      },
-      'y': function (d) {
-        return d.position.y;
-      },
-      'width': function (d) {
-        return d.size.width;
-      },
-      'height': function (d) {
-        return d.size.height;
-      },
+      'class': function (d) {return 'RenderableRect ' + d.type + ' entity'+d.id;},
+      'x': function (d) {return d.position.x;},
+      'y': function (d) {return d.position.y;},
+      'width': function (d) {return d.size.width;},
+      'height': function (d) {return d.size.height;},
       'rx': function (d) {
         switch (d.type) {
         case 'RenderableGene':
@@ -260,7 +250,8 @@
         }else{
           return '';
         }
-      }
+      },
+      'pointer-events':function(d){d.type==='RenderableGene'?'none':'';}
     }).on('mouseover', function (d) {
       d.oldColor = d3.rgb(d3.select(this).style('fill'));
       d3.select(this).style('fill', d.oldColor.brighter(0.25));
@@ -285,6 +276,7 @@
       return val;
     };
 
+    // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
         class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
@@ -315,7 +307,18 @@
         return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
           d.text.content+'</td></tr></table>';
       });
+    
+    var genes =  _.filter(nodes,function(n){return n.type === 'RenderableGene';});
 
+    svg.selectAll('.RenderableGeneArrow').data(genes).enter().append('line').attr({
+      'class':'RenderableGeneArrow',
+      'x1':function(d){return (+d.position.x)+(+d.size.width) - 0.5;},
+      'y1':function(d){return (+d.position.y) +1;},
+      'x2':function(d){return (+d.position.x)+(+d.size.width)  + 3.5;},
+      'y2':function(d){return (+d.position.y) + 1;},
+    }).attr('stroke','black')
+      .style('marker-end','url('+config.urlPath+'#GeneArrow)');
+    
   };
 
   /*

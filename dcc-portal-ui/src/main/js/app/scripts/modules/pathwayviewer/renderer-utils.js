@@ -18,8 +18,8 @@
       });
       if(hasBase){
         labels.push({
-          x:reaction.base[1].x,
-          y:reaction.base[1].y,
+          x:reaction.center.x,
+          y:reaction.center.y,
           reactionType:reaction.type
         });
       }
@@ -60,6 +60,10 @@
     // Gets the center of node with its position and size
     var getNodeCenter = function(nodeId){
       var node = model.getNodeById(nodeId);
+      // Genes are special because they are not boxes.. just an arrow
+      if(node.type === 'RenderableGene'){
+        return {x: (+node.position.x) + (+node.size.width) + 5,y:node.position.y};
+      }
       return { x: ((+node.position.x) + (+node.size.width/2)),
                y: ((+node.position.y) + (+node.size.height/2))};
     };
@@ -78,43 +82,44 @@
 
     // Generate a line based on the type of reaction & node using human-curated points
     var getNodeLines = function (reaction, node, reactionId,reactionClass) {
-        var count = {inputs:0,outputs:0};
-        if(!node.base || node.base.length === 0){
-          return 'missing';
-        }
-        var base =  node.base.slice();
-        switch (node.type) {
-        case 'Input':
-          base.push(reaction.base[0]);
-          base[0] = getNodeCenter(node.id);
-          generateLine(base, 'red', 'Input',reactionId,reactionClass);
-          count.inputs = count.inputs + 1;
-          break;
-        case 'Output':
-          base.push(reaction.base[(reaction.base.length - 1)]);
-          base.reverse(); // Make sure output points at the output
-          generateLine(base, 'green', 'Output',reactionId,reactionClass);
-          count.outputs = count.outputs + 1;
-          break;
-        case 'Activator':
-          base.push(reaction.base[1]);
-          base[0] = getNodeCenter(node.id);
-          generateLine(base, 'blue', 'Activator',reactionId,reactionClass);
-          break;
-        case 'Catalyst':
-          base.push(reaction.base[1]);
-          base[0] = getNodeCenter(node.id);
-          generateLine(base, 'purple', 'Catalyst',reactionId,reactionClass);
-          break;
-        case 'Inhibitor':
-          base.push(reaction.base[1]);
-          base[0] = getNodeCenter(node.id);
-          generateLine(base, 'orange', 'Inhibitor',reactionId,reactionClass);
-          break;
-        }
+      var count = {inputs:0,outputs:0};
+      if(!node.base || node.base.length === 0){
+        return 'missing';
+      }
+      var base =  node.base.slice();
+      
+      switch (node.type) {
+      case 'Input':
+        base.push(reaction.base[0]);
+        base[0] = getNodeCenter(node.id);
+        generateLine(base, 'red', 'Input',reactionId,reactionClass);
+        count.inputs = count.inputs + 1;
+        break;
+      case 'Output':
+        base.push(reaction.center);
+        base.reverse(); // Make sure output points at the output
+        generateLine(base, 'green', 'Output',reactionId,reactionClass);
+        count.outputs = count.outputs + 1;
+        break;
+      case 'Activator':
+        base.push(reaction.center);
+        base[0] = getNodeCenter(node.id);
+        generateLine(base, 'blue', 'Activator',reactionId,reactionClass);
+        break;
+      case 'Catalyst':
+        base.push(reaction.center);
+        base[0] = getNodeCenter(node.id);
+        generateLine(base, 'purple', 'Catalyst',reactionId,reactionClass);
+        break;
+      case 'Inhibitor':
+        base.push(reaction.center);
+        base[0] = getNodeCenter(node.id);
+        generateLine(base, 'orange', 'Inhibitor',reactionId,reactionClass);
+        break;
+      }
 
-        return node.type;
-      };
+      return node.type;
+    };
 
     reactions.forEach(function (reaction) {
       var id = reaction.reactomeId;
