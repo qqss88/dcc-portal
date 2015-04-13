@@ -141,9 +141,12 @@
           onClick: {},
           urlPath: config.urlPath
         });
-        legendrenderer.renderNodes(rendererUtils.getLegendNodes(20,0));
-        legendrenderer.renderEdges(rendererUtils.getLegendLines(40,180,legendSvg));
-        legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,300,legendSvg),true);
+        var nodes = rendererUtils.getLegendNodes(20,0);
+        console.log(nodes);
+        legendrenderer.renderNodes(nodes);
+        legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
+        legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
+        legendrenderer.highlightEntity([nodes[nodes.length-1]]);
       }else{
         legendSvg.attr('opacity','1');
       }

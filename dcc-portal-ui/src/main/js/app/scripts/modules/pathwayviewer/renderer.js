@@ -11,9 +11,11 @@
   var strokeColor = '#696969';
 
   function defineDefs(svg){
-    var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst'];
-    var filled = function(type){return ['Output','RenderableInteraction'].indexOf(type)>=0;};
-    var circular = function(type){return ['Catalyst'].indexOf(type)>=0;};
+    var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
+                  'Catalyst-legend','Activator-legend','Output-legend'];
+    var filled = function(type){return ['Output','RenderableInteraction','Output-legend'].indexOf(type)>=0;};
+    var circular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
+    var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
 //    var arrowed = function(type){
 //      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
 //    };
@@ -29,7 +31,7 @@
         'markerHeight':'8'
       },
       'viewBox':'0 -14 26 26',
-      'refX':'30'
+      'refX':'20'
     };
     
     var arrow = {
@@ -50,7 +52,7 @@
       .attr({
         'id': elem,
         'viewBox': def.viewBox,
-        'refX': def.refX,
+        'refX': (+def.refX)*(shifted(elem)?1.5:1),
         'markerHeight':def.attr.markerHeight,
         'markerWidth':def.attr.markerWidth,
         'orient':'auto'
@@ -222,7 +224,7 @@
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':strokeColor //function(d){return d.color;}
+      'stroke':strokeColor//function(d){return d.color;}
     }).style({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?

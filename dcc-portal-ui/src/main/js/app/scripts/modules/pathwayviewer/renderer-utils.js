@@ -133,12 +133,14 @@
           outputs++;
         }
       }
-      // If it has not human-curated input lines, "snap" line to first input node
-      if(inputs === 0){
+      // If it doesn't have human-curated input lines, "snap" line to first input node, if it has one
+      if(inputs === 0 && getFirstInputNode(reaction.nodes)){
         reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
       }
       var baseLine = reaction.base.slice();
-      baseLine.pop(); // It's duplicated
+      if(outputs !== 0){
+        baseLine.pop(); // It's duplicated
+      }
       
       // This creates a base reaction line
       generateLine(baseLine,
@@ -155,30 +157,19 @@
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
     var nodes = [];
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment'];
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode','Mutated'];
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 10*Math.floor(i/2);
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
-        type:'Renderable'+types[i],
-        id:'fake',
+        type:types[i]==='ProcessNode'?types[i]:'Renderable'+types[i],
+        id:types[i]==='Mutated'?'mutated':'fake',
         reactomeId:'fake',
         text:{content:types[i],position:{x:x,y:y}}
       });
     }
-    
-    // Add special process node
-    x = types.length%2===0?marginLeft:marginLeft+100+10;
-    nodes.push({
-        position:{x:x,y:y},
-        size:{width:90,height:30},
-        type:'ProcessNode',
-        id:'fake',
-        reactomeId:'fake',
-        text:{content:'Pathway',position:{x:x,y:y}}
-      });
     
     return nodes;
   };
@@ -189,7 +180,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator'];
+    var markers = ['Output','Catalyst','Activator','Link'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -197,10 +188,10 @@
         x2: marginLeft+80,
         y2: y,
         marked: true,
-        marker: elem,
+        marker: elem+'-legend',
         color: 'black',
         id:'fake',
-        type: 'fake'
+        type: elem==='Link'?'entitysetandmemberlink':'fake'
       });
       svg.append('foreignObject').attr({
         x: marginLeft+80,
