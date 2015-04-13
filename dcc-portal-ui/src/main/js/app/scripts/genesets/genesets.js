@@ -288,7 +288,7 @@
       }
     });
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil,Restangular) {
+  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
     var _ctrl = this, _geneSet = '', _filter = {};
 
     function success(genes) {

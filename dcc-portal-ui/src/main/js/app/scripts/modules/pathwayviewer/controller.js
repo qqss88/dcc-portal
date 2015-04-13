@@ -1,4 +1,4 @@
-(function() {
+(function($) {
 
   'use strict';
 
@@ -138,7 +138,7 @@
           .attr('preserveAspectRatio', 'xMidYMid')
           .append('g');
         var legendrenderer = new dcc.Renderer(legendSvg, {
-          onClick: function (d) {},
+          onClick: {},
           urlPath: config.urlPath
         });
         legendrenderer.renderNodes(rendererUtils.getLegendNodes(20,0));
@@ -147,14 +147,14 @@
       }else{
         legendSvg.attr('opacity','1');
       }
-    }
+    };
     
     d3.select('.pathway-legend-controller').on('click',function(){
-      if(showingLegend){       
+      if(showingLegend){
         legendSvg.transition().duration(600).attr('opacity','0');
         $('.pathway-legend').animate({left: '100%',},600);
         showingLegend = false;
-      }else{  
+      }else{
         renderLegend($('.pathway-legend').css('width').substring(0,$('.pathway-legend').css('width').length-2),
                     $('.pathway-legend').css('height').substring(0,$('.pathway-legend').css('height').length-2));
         
@@ -171,4 +171,4 @@
   
   dcc.ReactomePathway = ReactomePathway;
 
-})();
+})(jQuery);

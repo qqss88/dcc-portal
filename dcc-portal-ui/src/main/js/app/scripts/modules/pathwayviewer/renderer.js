@@ -11,158 +11,54 @@
   var strokeColor = '#696969';
 
   function defineDefs(svg){
-    var defs = [
-      {
-        // An arrow head
-        id:'Output',
-        element:'path',
-        attr:{
-          d:'M0,-10L20,0L0,10L0,-10',
-          stroke:strokeColor
-        },
-        style:{
-          fill:strokeColor
-        },
-        viewBox:  '-10 -10 30 20',
-        refX: '5'
+    var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst'];
+    var filled = function(type){return ['Output','RenderableInteraction'].indexOf(type)>=0;};
+    var circular = function(type){return ['Catalyst'].indexOf(type)>=0;};
+//    var arrowed = function(type){
+//      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
+//    };
+    
+    var circle = {
+      'element':'circle',
+      'attr':{
+        'cx':10,
+        'cy':0,
+        'r':10,
+        'stroke-width':'2px',
+        'markerWidth':'8',
+        'markerHeight':'8'
       },
-      {
-        // An arrow head
-        id:'Output-legend',
-        element:'path',
-        attr:{
-          d:'M0,-5L10,0L0,5',
-          stroke:strokeColor,
-          markerWidth:'8',
-          markerHeight:'8'
-        },
-        style:{
-          fill:strokeColor
-        },
-        refX: '10',refY:'7',
-        viewBox:'0 -5 10 10'
+      'viewBox':'0 -14 26 26',
+      'refX':'30'
+    };
+    
+    var arrow = {
+      'element':'path',
+      'attr':{
+        d:'M0,-5L10,0L0,5L0,-5',
+        'stroke-width':'1px',
+        markerWidth:'8',
+        markerHeight:'8'
       },
-      {
-        // A smaller arrow head
-        id:'FlowLine',
-        element:'path',
-        attr:{
-          d:'M0,-5L-10,0L0,5',
-          stroke:strokeColor
-        },
-        style:{
-          fill:strokeColor
-        },
-        viewBox:  '-10 -5 15 10',
-        refX: '-7'
-      },
-      {
-        // A "hollow" arrow head
-        id:'Activator',
-        element:'path',
-        attr:{
-          d:'M0,-10L20,0L0,10L0,-10',
-          stroke:strokeColor
-        },
-        style:{
-          fill:'white'
-        },
-        viewBox:  '-10 -10 30 20',
-        refX: '35'
-      },
-      {
-        // A "hollow" arrow head
-        id:'Activator-legend',
-        element:'path',
-        attr:{
-           d:'M0,-5L10,0L0,5L0,-5',
-          stroke:strokeColor,
-          markerWidth:'8',
-          markerHeight:'8'
-        },
-        style:{
-          fill:'white'
-        },
-        refX: '7',refY:'7',
-        viewBox:'0 -5 10 10'
-      },
-      {
-        // A smaller "hollow" arrow head
-        id:'RenderableInteraction',
-        element:'path',
-        attr:{
-          d:'M0,-5L-10,0L0,5L0,-5',
-          stroke:strokeColor
-        },
-        style:{
-          fill:'white'
-        },
-        viewBox:  '-10 -5 15 10',
-        refX: '-7'
-      },
-      {
-        // A white circle with a border
-        id:'Catalyst',
-        element:'circle',
-        attr:{
-          'cx':15,
-          'cy':0,
-          'r':15
-        },
-        style:{
-          fill:'white',
-          stroke:strokeColor,
-          'stroke-width':'2px'
-        },
-        viewBox:'0 -17 35 35',
-        refX:'53'
-      },
-      {
-        // A white circle with a border
-        id:'Catalyst-legend',
-        element:'circle',
-        attr:{
-          'cx':10,
-          'cy':0,
-          'r':10,
-          stroke:strokeColor,
-          'stroke-width':'2px',
-          markerWidth:'8',
-          markerHeight:'8'
-        },
-        style:{
-          fill:'white',
-        },
-        viewBox:'0 -12 24 24',
-        refX:'20',refY:'7'
-      },
-      {
-        // Special right pointing arrow for genes
-        id:'GeneArrow',
-        element:'path',
-        attr:{
-          d:'M0,-8L17,0L0,8',
-          stroke:'black'
-        },
-        style:{
-          fill:'black'
-        },
-        viewBox:'0 -10 20 20',
-        refX:'5'
-      }
-    ];
-
-    for(var i=0;i<defs.length;i++){
+      refX: '10',
+      viewBox:'0 -6 12 11'
+    };
+   
+    markers.forEach(function (elem) {
+      var def = circular(elem)?circle:arrow;
       svg.append('svg:defs').append('svg:marker')
-      .attr('id', defs[i].id)
-      .attr('viewBox', defs[i].viewBox)
-      .attr('refX', defs[i].refX)
-      .attr('markerWidth', defs[i].attr.markerWidth?defs[i].attr.markerWidth:'8')
-      .attr('markerHeight', defs[i].attr.markerHeight?defs[i].attr.markerHeight:'6')
-      .attr('orient', 'auto')
-      .append(defs[i].element)
-      .attr(defs[i].attr).style(defs[i].style);
-    }
+      .attr({
+        'id': elem,
+        'viewBox': def.viewBox,
+        'refX': def.refX,
+        'markerHeight':def.attr.markerHeight,
+        'markerWidth':def.attr.markerWidth,
+        'orient':'auto'
+      }).append(def.element)
+      .attr(def.attr)
+      .attr('stroke',strokeColor)
+      .style('fill',filled(elem)?strokeColor:'white');
+    });
   }
 
   /*
@@ -173,18 +69,10 @@
       'class': function (d) {
         return d.type + ' compartment'+d.reactomeId;
       },
-      'x': function (d) {
-        return d.position.x;
-      },
-      'y': function (d) {
-        return d.position.y;
-      },
-      'width': function (d) {
-        return d.size.width;
-      },
-      'height': function (d) {
-        return d.size.height;
-      },
+      'x': function (d) {return d.position.x;},
+      'y': function (d) {return d.position.y;},
+      'width': function (d) {return d.size.width;},
+      'height': function (d) {return d.size.height;},
       rx: 3,
       ry: 3
     });
@@ -251,7 +139,7 @@
           return '';
         }
       },
-      'pointer-events':function(d){d.type==='RenderableGene'?'none':'';}
+      'pointer-events':function(d){return d.type==='RenderableGene'?'none':'';}
     }).on('mouseover', function (d) {
       d.oldColor = d3.rgb(d3.select(this).style('fill'));
       d3.select(this).style('fill', d.oldColor.brighter(0.25));
@@ -351,7 +239,7 @@
   * Render a label in the middle of the line to indicate the type
   */
   Renderer.prototype.renderReactionLabels = function (labels, legend) {
-    var size = 8, svg = this.svg;
+    var size = 6, svg = this.svg;
     var circular = ['Association','Dissociation','Binding'];
     var filled = ['Association','Binding'];
 

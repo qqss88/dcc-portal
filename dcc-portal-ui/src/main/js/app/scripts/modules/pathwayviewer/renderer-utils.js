@@ -153,25 +153,27 @@
     var nodes = [];
     var x = marginLeft, y= marginTop;
     var types = ['Complex','Protein','EntitySet','Chemical','Compartment'];
-    for(var i=0;i<types.length;i++){   
-      x = i%2==0?marginLeft:marginLeft+100+10;
+    for(var i=0;i<types.length;i++){
+      x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 10*Math.floor(i/2);
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
         type:'Renderable'+types[i],
-        id:'fake',reactomeId:'fake',
+        id:'fake',
+        reactomeId:'fake',
         text:{content:types[i],position:{x:x,y:y}}
       });
     }
     
     // Add special process node
-    x = types.length%2==0?marginLeft:marginLeft+100+10;
+    x = types.length%2===0?marginLeft:marginLeft+100+10;
     nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
         type:'ProcessNode',
-        id:'fake',reactomeId:'fake',
+        id:'fake',
+        reactomeId:'fake',
         text:{content:'Pathway',position:{x:x,y:y}}
       });
     
@@ -184,25 +186,29 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator']
+    var markers = ['Output','Catalyst','Activator'];
     markers.forEach(function (elem) {
       lines.push({
-            x1: marginLeft, y1:y,
-            x2: marginLeft+80, y2: y,
-            marked: true,
-            marker: elem+'-legend',
-            color: 'black', id:'fake', type: 'fake'
-          });
+        x1: marginLeft,
+        y1:y,
+        x2: marginLeft+80,
+        y2: y,
+        marked: true,
+        marker: elem,
+        color: 'black',
+        id:'fake',
+        type: 'fake'
+      });
       svg.append('foreignObject').attr({
-        x: marginLeft+80, y:y-15,
-        width:90, height:30,
+        x: marginLeft+80,
+        y:y-15,
+        width:90,
+        height:30,
         'fill':'none'
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')
-      .html(function(d){
-        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-          elem+'</td></tr></table>';
-      });
+      .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          elem+'</td></tr></table>');
     
       y+=30;
     });
@@ -216,22 +222,23 @@
   RendererUtils.prototype.getLegendLabels = function (marginLeft,marginTop,svg) {
     var labels = [];
     var y=marginTop;
-    var reactions = ['Association','Dissociation','Transition','Omitted Process','Uncertain']
+    var reactions = ['Association','Dissociation','Transition','Omitted Process','Uncertain'];
     reactions.forEach(function (elem) {
       labels.push({
-            x: marginLeft+40, y:y,
-            reactionType: elem
-          });
+        x: marginLeft+40,
+        y:y,
+        reactionType: elem
+      });
       svg.append('foreignObject').attr({
-        x: marginLeft+80, y:y-15,
-        width:110, height:30,
+        x: marginLeft+80,
+        y:y-15,
+        width:110,
+        height:30,
         'fill':'none'
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')
-      .html(function(d){
-        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-          (elem==='Association'?'Association/Binding':elem)+'</td></tr></table>';
-      });
+      .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          (elem==='Association'?'Association/Binding':elem)+'</td></tr></table>');
     
       y+=30;
     });
