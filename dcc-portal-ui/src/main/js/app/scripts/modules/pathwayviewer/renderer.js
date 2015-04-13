@@ -267,7 +267,10 @@
       'width':size,
       'height':size,
       'stroke':strokeColor
-    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white';});
+    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white';})
+      .on('mouseover',function(d){
+        console.log(d.description);
+      });
 
     svg.selectAll('.ReactionLabelText').data(labels).enter().append('text')
     .attr({

@@ -11,6 +11,7 @@
   */
   RendererUtils.prototype.generateReactionLabels = function (reactions) {
     var labels = [];
+    
     reactions.forEach(function (reaction) {
       var hasBase = false;
       reaction.nodes.forEach(function (node) {
@@ -20,7 +21,8 @@
         labels.push({
           x:reaction.center.x,
           y:reaction.center.y,
-          reactionType:reaction.type
+          reactionType:reaction.type,
+          description:reaction.description
         });
       }
     });
