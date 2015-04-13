@@ -118,7 +118,7 @@
         } else {
           $timeout(function() {
             wait(ids, --numTries, callback);
-          }, 1000);
+          }, 1500);
         }
       });
     }
