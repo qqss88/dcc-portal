@@ -222,7 +222,7 @@
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':strokeColor
+      'stroke':strokeColor //function(d){return d.color;}
     }).style({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
@@ -239,7 +239,7 @@
   * Render a label in the middle of the line to indicate the type
   */
   Renderer.prototype.renderReactionLabels = function (labels, legend) {
-    var size = 6, svg = this.svg;
+    var size = 7, svg = this.svg;
     var circular = ['Association','Dissociation','Binding'];
     var filled = ['Association','Binding'];
 
@@ -273,7 +273,7 @@
       'x':function(d){return +d.x - (size/4);},
       'y':function(d){return +d.y + (size/4);},
       'font-weight':'bold',
-      'font-size':'6px',
+      'font-size':'5px',
       'fill':strokeColor
     }).text(function(d){
       if(d.reactionType === 'Omitted Process'){

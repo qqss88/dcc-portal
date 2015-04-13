@@ -137,9 +137,12 @@
       if(inputs === 0){
         reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
       }
+      var baseLine = reaction.base.slice();
+      baseLine.pop(); // It's duplicated
+      
       // This creates a base reaction line
-      generateLine(reaction.base,
-                   outputs===0?'hotpink':'black',
+      generateLine(baseLine,
+                   outputs === 0 ?'hotpink':'black',
                    outputs === 0 ?'Output':reaction.type,id,reaction.class);
     });
 
