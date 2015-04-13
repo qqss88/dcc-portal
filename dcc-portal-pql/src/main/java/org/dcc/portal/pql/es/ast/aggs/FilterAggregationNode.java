@@ -34,6 +34,7 @@ public class FilterAggregationNode extends ExpressionNode {
   private final ExpressionNode filters;
 
   public FilterAggregationNode(@NonNull String aggregationName, @NonNull ExpressionNode filters) {
+    // Do not call super(filters) in this constructor, because the filters will be visited twice.
     this.aggregationName = aggregationName;
     this.filters = filters;
   }

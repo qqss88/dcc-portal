@@ -55,17 +55,16 @@ public class Nodes {
     if (childrenList.isEmpty()) {
       return Optional.empty();
     } else if (childrenList.size() > 1) {
-      throw new IllegalStateException(format("RootNode contains more that one child of type %s. %s", childType, parent));
+      throw new IllegalStateException(format("Node contains more that one child of type %s. %s", childType, parent));
     }
 
     return Optional.ofNullable(childrenList.get(0));
   }
 
   public static ExpressionNode cloneNode(@NonNull ExpressionNode original) {
-    return original.accept(Nodes.CLONE_VISITOR, Optional.empty());
+    return original.accept(CLONE_VISITOR, Optional.empty());
   }
 
-  // TODO: find where it could be used. There are 3-4 places
   @SuppressWarnings("unchecked")
   public static <T extends ExpressionNode> Optional<T> findParent(@NonNull ExpressionNode node, @NonNull Class<T> type) {
     if (type.isInstance(node)) {

@@ -52,11 +52,9 @@ public class VisitorHelpers {
    * @param parent to be visited
    * @param context - query context
    */
-  // FIXME: Find the other places in code that replace children while looping through the children
   public static <T> Optional<ExpressionNode> visitChildren(NodeVisitor<Optional<ExpressionNode>, T> visitor,
       ExpressionNode parent, Optional<T> context) {
     log.debug("[visitChildren] Processing node - \n{}", parent);
-    // TODO: is there a way exclude the autoboxing here?
     val childrenToBeReplaced = Maps.<Integer, ExpressionNode> newHashMap();
 
     for (int i = 0; i < parent.childrenCount(); i++) {

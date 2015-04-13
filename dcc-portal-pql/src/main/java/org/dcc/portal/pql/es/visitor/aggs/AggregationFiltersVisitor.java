@@ -123,8 +123,6 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, Strin
   }
 
   private ExpressionNode processCommonCases(ExpressionNode node, Optional<String> context) {
-    // TODO: visit all visitors and check in which order they remove or set children. The loop must start from biggest
-    // to lowest indices. Otherwire, some children will be skipped
     for (int i = node.childrenCount() - 1; i >= 0; i--) {
       val child = node.getChild(i);
       log.debug("Visiting child: {}", child);

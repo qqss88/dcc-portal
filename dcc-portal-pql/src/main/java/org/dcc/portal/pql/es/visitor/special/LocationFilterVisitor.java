@@ -51,8 +51,8 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 import com.google.common.base.Splitter;
@@ -233,12 +233,9 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
   private static boolean hasNestedParent(String field, ExpressionNode node, TypeModel typeModel) {
     val nestedPath = getNestedPath(typeModel, field);
 
-    while (node != null && !(node instanceof NestedNode)) {
-      node = node.getParent();
-    }
-
-    if (node != null) {
-      val nestedNode = (NestedNode) node;
+    val parent = Nodes.findParent(node, NestedNode.class);
+    if (parent.isPresent()) {
+      val nestedNode = parent.get();
       if (nestedNode.getPath().equals(nestedPath)) {
         return true;
       }

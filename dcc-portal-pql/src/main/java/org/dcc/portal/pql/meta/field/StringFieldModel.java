@@ -27,15 +27,15 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class StringFieldModel extends FieldModel {
 
   private StringFieldModel(String name) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, FieldModel.NOT_NESTED);
+    this(name, EMPTY_UI_ALIAS, NOT_NESTED);
   }
 
   private StringFieldModel(String name, String alias) {
-    this(name, singleton(alias), FieldModel.NOT_NESTED);
+    this(name, singleton(alias), NOT_NESTED);
   }
 
   private StringFieldModel(String name, Set<String> alias) {
-    this(name, alias, FieldModel.NOT_NESTED);
+    this(name, alias, NOT_NESTED);
   }
 
   private StringFieldModel(String name, Set<String> alias, boolean nested) {

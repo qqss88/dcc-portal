@@ -102,7 +102,7 @@ public class EsAstTransformator {
     // Remove FilterAggregationNodes without filters
     val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty());
+      esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty()).get();
     }
 
     esAst = esAst.accept(createQuerySimplifierVisitor(), Optional.empty()).get();

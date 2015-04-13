@@ -180,12 +180,9 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
   private boolean hasNestedParent(ExpressionNode node, TypeModel typeModel, String nestedField) {
     val nestedPath = getNestedPath(typeModel, nestedField);
 
-    while (node != null && !(node instanceof NestedNode)) {
-      node = node.getParent();
-    }
-
-    if (node != null) {
-      val nestedNode = (NestedNode) node;
+    val parent = Nodes.findParent(node, NestedNode.class);
+    if (parent.isPresent()) {
+      val nestedNode = parent.get();
       if (nestedNode.getPath().startsWith(nestedPath)) {
         return true;
       }
@@ -206,4 +203,5 @@ public class GeneSetFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, 
         new TermsNode(typeModel.getInternalField(BIOLOGICAL_PROCESS), children),
         new TermsNode(typeModel.getInternalField(MOLECULAR_FUNCTION), children) };
   }
+
 }

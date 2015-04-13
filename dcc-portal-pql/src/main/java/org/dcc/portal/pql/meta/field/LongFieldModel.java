@@ -29,19 +29,19 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class LongFieldModel extends FieldModel {
 
   private LongFieldModel(String name) {
-    this(name, FieldModel.EMPTY_UI_ALIAS);
+    this(name, EMPTY_UI_ALIAS);
   }
 
   private LongFieldModel(String name, String alias) {
-    this(name, alias, FieldModel.NOT_NESTED);
+    this(name, alias, NOT_NESTED);
   }
 
   private LongFieldModel(String name, Set<String> aliases) {
-    this(name, aliases, FieldModel.NOT_NESTED);
+    this(name, aliases, NOT_NESTED);
   }
 
   private LongFieldModel(String name, boolean nested) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, nested);
+    this(name, EMPTY_UI_ALIAS, nested);
   }
 
   private LongFieldModel(String name, String alias, boolean nested) {

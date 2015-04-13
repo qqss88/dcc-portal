@@ -37,7 +37,7 @@ public class ObjectFieldModel extends FieldModel {
   private final List<? extends FieldModel> fields;
 
   private ObjectFieldModel(String name, List<? extends FieldModel> fields) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, fields);
+    this(name, EMPTY_UI_ALIAS, fields);
   }
 
   private ObjectFieldModel(String name, String alias, List<? extends FieldModel> fields) {
@@ -49,7 +49,7 @@ public class ObjectFieldModel extends FieldModel {
   }
 
   private ObjectFieldModel(String name, boolean nested, List<? extends FieldModel> fields) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, nested, fields);
+    this(name, EMPTY_UI_ALIAS, nested, fields);
   }
 
   private ObjectFieldModel(String name, String uiAlias, boolean nested, List<? extends FieldModel> fields) {
@@ -79,18 +79,12 @@ public class ObjectFieldModel extends FieldModel {
     return new ObjectFieldModel(name, alias, fieldsList.build());
   }
 
-  public static <T extends FieldModel> ObjectFieldModel object(@NonNull String name, @NonNull String alias) {
-    val fieldsList = new ImmutableList.Builder<T>();
-
-    return new ObjectFieldModel(name, alias, fieldsList.build());
-  }
-
   @SafeVarargs
   public static <T extends FieldModel> ObjectFieldModel object(@NonNull T... fields) {
     val fieldsList = new ImmutableList.Builder<T>();
     fieldsList.add(fields);
 
-    return new ObjectFieldModel(FieldModel.NO_NAME, fieldsList.build());
+    return new ObjectFieldModel(NO_NAME, fieldsList.build());
   }
 
   @SafeVarargs
@@ -98,7 +92,7 @@ public class ObjectFieldModel extends FieldModel {
     val fieldsList = new ImmutableList.Builder<T>();
     fieldsList.add(fields);
 
-    return new ObjectFieldModel(name, FieldModel.EMPTY_UI_ALIAS, NESTED, fieldsList.build());
+    return new ObjectFieldModel(name, EMPTY_UI_ALIAS, NESTED, fieldsList.build());
   }
 
   @Override

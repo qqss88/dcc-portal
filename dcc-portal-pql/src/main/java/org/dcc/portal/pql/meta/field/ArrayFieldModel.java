@@ -32,10 +32,10 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class ArrayFieldModel extends FieldModel {
 
   private final FieldModel element;
-  public static final StringFieldModel EMPTY_STRING_FIELD = string(FieldModel.NO_NAME);
+  public static final StringFieldModel EMPTY_STRING_FIELD = string(NO_NAME);
 
   private ArrayFieldModel(String name, FieldModel element) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, element);
+    this(name, EMPTY_UI_ALIAS, element);
   }
 
   private ArrayFieldModel(String name, String alias, FieldModel element) {
@@ -43,11 +43,11 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   private ArrayFieldModel(String name, Set<String> aliases, FieldModel element) {
-    this(name, aliases, FieldModel.NOT_NESTED, element);
+    this(name, aliases, NOT_NESTED, element);
   }
 
   private ArrayFieldModel(String name, boolean nested, FieldModel element) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, nested, element);
+    this(name, EMPTY_UI_ALIAS, nested, element);
   }
 
   private ArrayFieldModel(String name, String alias, boolean nested, FieldModel element) {
@@ -60,38 +60,34 @@ public class ArrayFieldModel extends FieldModel {
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name) {
-    return new ArrayFieldModel(name, ArrayFieldModel.EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull String alias) {
-    return new ArrayFieldModel(name, alias, ArrayFieldModel.EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, alias, EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel arrayOfStrings(@NonNull String name, @NonNull Set<String> aliases) {
-    return new ArrayFieldModel(name, aliases, ArrayFieldModel.EMPTY_STRING_FIELD);
-  }
-
-  public static ArrayFieldModel nestedArrayOfStrings(@NonNull String name, @NonNull Set<String> alias) {
-    return new ArrayFieldModel(name, alias, FieldModel.NESTED, ArrayFieldModel.EMPTY_STRING_FIELD);
+    return new ArrayFieldModel(name, aliases, EMPTY_STRING_FIELD);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull Set<String> aliases,
       @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, aliases, FieldModel.NESTED, element);
+    return new ArrayFieldModel(name, aliases, NESTED, element);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, FieldModel.NESTED, element);
+    return new ArrayFieldModel(name, NESTED, element);
   }
 
   public static ArrayFieldModel nestedArrayOfObjects(@NonNull String name, @NonNull String alias,
       @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, alias, FieldModel.NESTED, element);
+    return new ArrayFieldModel(name, alias, NESTED, element);
   }
 
   public static ArrayFieldModel arrayOfObjects(@NonNull String name, @NonNull String alias,
       @NonNull ObjectFieldModel element) {
-    return new ArrayFieldModel(name, alias, FieldModel.NOT_NESTED, element);
+    return new ArrayFieldModel(name, alias, NOT_NESTED, element);
   }
 
   @Override

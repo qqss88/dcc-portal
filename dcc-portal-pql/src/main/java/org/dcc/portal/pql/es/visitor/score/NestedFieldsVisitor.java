@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.visitor.score;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 
 import java.util.Optional;
 
@@ -41,7 +42,6 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.utils.VisitorHelpers;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.es.visitor.score.NestedFieldsVisitor.RequestContext;
 import org.dcc.portal.pql.meta.TypeModel;
@@ -67,7 +67,7 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
 
   @Override
   public Optional<ExpressionNode> visitFilter(FilterNode node, Optional<RequestContext> context) {
-    VisitorHelpers.checkOptional(context);
+    checkOptional(context);
     log.debug("[visitFilter] Processing \n{}", node);
 
     // This method assumes that this FilterNode has no FilterNode children otherwise this method will be called for that
@@ -231,19 +231,9 @@ public class NestedFieldsVisitor extends NodeVisitor<Optional<ExpressionNode>, R
    * Checks if the {@code node} is already enclosed in a NestedNode with scoring.
    */
   private boolean hasScoring(ExpressionNode node) {
-    while (node != null && !isScoreNode(node)) {
-      node = node.getParent();
-    }
+    val scoreNode = Nodes.findParent(node, FunctionScoreNode.class);
 
-    if (isScoreNode(node)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private boolean isScoreNode(ExpressionNode node) {
-    return node instanceof FunctionScoreNode;
+    return scoreNode.isPresent();
   }
 
   /**

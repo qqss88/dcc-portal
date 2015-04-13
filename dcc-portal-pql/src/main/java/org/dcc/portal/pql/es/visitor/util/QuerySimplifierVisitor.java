@@ -121,7 +121,6 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
     }
 
     return Optional.of(node);
-
   }
 
   @Override

@@ -29,15 +29,15 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class DoubleFieldModel extends FieldModel {
 
   private DoubleFieldModel(String name) {
-    this(name, FieldModel.EMPTY_UI_ALIAS);
+    this(name, EMPTY_UI_ALIAS);
   }
 
   private DoubleFieldModel(String name, Set<String> aliases) {
-    this(name, aliases, FieldModel.NOT_NESTED);
+    this(name, aliases, NOT_NESTED);
   }
 
   private DoubleFieldModel(String name, boolean nested) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, nested);
+    this(name, EMPTY_UI_ALIAS, nested);
   }
 
   private DoubleFieldModel(String name, String alias, boolean nested) {

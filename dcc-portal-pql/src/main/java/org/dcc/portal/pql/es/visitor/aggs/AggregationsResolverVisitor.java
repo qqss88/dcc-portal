@@ -50,12 +50,14 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Fil
 
     if (!hasAggregations(rootNode)) {
       log.debug("The source AST does not contain a AggregationsNode. Returning the original source AST back.");
+
       return rootNode;
     }
 
     val filterNodeOpt = getFilterNodeOptional(rootNode);
     if (!filterNodeOpt.isPresent()) {
       log.debug("The source AST does not contain any FilterNodes. Returning the original source AST back.");
+
       return rootNode;
     }
 
@@ -85,7 +87,6 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Fil
     filterAggregationNode.addChildren(node);
 
     return filterAggregationNode;
-
   }
 
   private ExpressionNode processFilters(String facetField, ExpressionNode filterNode) {
@@ -97,7 +98,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<ExpressionNode, Fil
   }
 
   private boolean hasAggregations(ExpressionNode rootNode) {
-    return getOptionalChild(rootNode, AggregationsNode.class).isPresent() ? true : false;
+    return getOptionalChild(rootNode, AggregationsNode.class).isPresent();
   }
 
   private static Optional<FilterNode> getFilterNodeOptional(ExpressionNode rootNode) {

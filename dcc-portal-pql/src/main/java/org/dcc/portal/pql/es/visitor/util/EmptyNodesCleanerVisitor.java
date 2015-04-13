@@ -63,7 +63,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitNested(NestedNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -83,7 +83,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitNot(NotNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -98,7 +98,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitRange(RangeNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitFields(FieldsNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -143,7 +143,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitQuery(QueryNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -153,27 +153,27 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitFilter(FilterNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitBool(BoolNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitMustBool(MustBoolNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitShouldBool(ShouldBoolNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
   public ExpressionNode visitAggregations(AggregationsNode node, Optional<Void> context) {
-    return defaultProcessing(node);
+    return processCommonCases(node);
   }
 
   @Override
@@ -204,11 +204,10 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
     return node;
   }
 
-  // TODO: find a better name
-  private ExpressionNode defaultProcessing(ExpressionNode node) {
+  private ExpressionNode processCommonCases(ExpressionNode node) {
     log.debug("Processing \n{}", node);
     node = processChildren(node);
-    if (node.childrenCount() == 0) {
+    if (!node.hasChildren()) {
       log.debug("Requesting to remove empty node {}", node);
 
       return REMOVE_NODE;
@@ -221,7 +220,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
    * Removes children if necessary, but do not remove the {@code node} ifself.
    */
   private ExpressionNode processChildren(ExpressionNode node) {
-    for (int i = 0; i < node.childrenCount(); i++) {
+    for (int i = node.childrenCount() - 1; i >= 0; i--) {
       if (node.getChild(i).accept(this, Optional.empty()) == REMOVE_NODE) {
         node.removeChild(i);
       }

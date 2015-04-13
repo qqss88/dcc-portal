@@ -26,7 +26,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.icgc.dcc.common.core.model.Identifiable;
 
@@ -60,12 +59,6 @@ public class NestedNode extends ExpressionNode {
   @Override
   public boolean hasNestedParent() {
     return true;
-  }
-
-  // FIXME: why toString does not work without this?
-  @Override
-  public String toString() {
-    return accept(Visitors.createToStringVisitor(), Optional.<Void> empty());
   }
 
   @NoArgsConstructor(access = PRIVATE)

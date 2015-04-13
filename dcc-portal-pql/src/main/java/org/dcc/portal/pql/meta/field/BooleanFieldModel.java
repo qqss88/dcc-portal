@@ -29,19 +29,19 @@ import org.dcc.portal.pql.meta.visitor.FieldVisitor;
 public class BooleanFieldModel extends FieldModel {
 
   private BooleanFieldModel(String name) {
-    this(name, FieldModel.EMPTY_UI_ALIAS);
+    this(name, EMPTY_UI_ALIAS);
   }
 
   private BooleanFieldModel(String name, String alias) {
-    this(name, alias, FieldModel.NOT_NESTED);
+    this(name, alias, NOT_NESTED);
   }
 
   private BooleanFieldModel(String name, Set<String> alias) {
-    this(name, alias, FieldModel.NOT_NESTED);
+    this(name, alias, NOT_NESTED);
   }
 
   private BooleanFieldModel(String name, boolean nested) {
-    this(name, FieldModel.EMPTY_UI_ALIAS, nested);
+    this(name, EMPTY_UI_ALIAS, nested);
   }
 
   private BooleanFieldModel(String name, String alias, boolean nested) {

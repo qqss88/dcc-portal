@@ -146,7 +146,7 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
   private static String getValue(ExpressionNode node) {
     val terminalNode = (TerminalNode) node.getFirstChild();
 
-    return (String) terminalNode.getValue();
+    return terminalNode.getValueAsString();
   }
 
   private static LookupInfo resolveLookup(String field, TypeModel typeModel) {

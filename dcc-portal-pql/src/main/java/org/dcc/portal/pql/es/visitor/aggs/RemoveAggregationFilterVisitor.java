@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.es.visitor.aggs;
 
+import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
+
 import java.util.Optional;
 
 import lombok.val;
@@ -37,51 +39,42 @@ import org.dcc.portal.pql.qe.QueryContext;
  * {@link TermsAggregationNode}) one level up.
  */
 @Slf4j
-public class RemoveAggregationFilterVisitor extends NodeVisitor<ExpressionNode, QueryContext> {
-
-  private static final ExpressionNode SKIP_NODE = null;
+public class RemoveAggregationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
 
   @Override
-  public ExpressionNode visitRoot(RootNode node, Optional<QueryContext> context) {
+  public Optional<ExpressionNode> visitRoot(RootNode node, Optional<QueryContext> context) {
     val aggsNode = Nodes.getOptionalChild(node, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      aggsNode.get().accept(this, Optional.empty());
+      aggsNode.get().accept(this, context);
     }
 
-    return node;
+    return Optional.of(node);
   }
 
   @Override
-  public ExpressionNode visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
-    for (int i = 0; i < node.childrenCount(); i++) {
-      val child = node.getChild(i);
-      val visitResult = child.accept(this, Optional.empty());
-      if (visitResult != SKIP_NODE) {
-        node.setChild(i, visitResult);
-      }
-    }
-
-    return node;
+  public Optional<ExpressionNode> visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+    return visitChildren(this, node, context);
   }
 
   @Override
-  public ExpressionNode visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
-    if (node.getFilters().childrenCount() == 0) {
+  public Optional<ExpressionNode> visitFilterAggregation(FilterAggregationNode node, Optional<QueryContext> context) {
+    if (!node.getFilters().hasChildren()) {
       log.debug("FilterAggregationNode has no filters. Requesting to remove.");
-      return node.getFirstChild();
+
+      return Optional.of(node.getFirstChild());
     }
 
-    return SKIP_NODE;
+    return Optional.empty();
   }
 
   @Override
-  public ExpressionNode visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
-    return SKIP_NODE;
+  public Optional<ExpressionNode> visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
+    return Optional.empty();
   }
 
   @Override
-  public ExpressionNode visitMissingAggregation(MissingAggregationNode node, Optional<QueryContext> context) {
-    return SKIP_NODE;
+  public Optional<ExpressionNode> visitMissingAggregation(MissingAggregationNode node, Optional<QueryContext> context) {
+    return Optional.empty();
   }
 
 }

@@ -19,6 +19,7 @@ package org.dcc.portal.pql.meta;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
+import static org.dcc.portal.pql.meta.field.FieldModel.FIELD_SEPARATOR;
 
 import java.util.List;
 import java.util.Map;
@@ -109,6 +110,8 @@ public abstract class TypeModel {
       HAS_CURATED_SET, GENE_CURATED_SET_ID,
       HAS_GO_TERM, GENE_GO_TERM_ID);
 
+  private static final Splitter FIELD_SEPARATOR_SPLITTER = Splitter.on(FIELD_SEPARATOR);
+
   public TypeModel(@NonNull List<? extends FieldModel> fields, @NonNull Map<String, String> internalAliases,
       @NonNull List<String> allowedAliases, @NonNull List<String> includeFields) {
     fieldsByFullPath = initFieldsByFullPath(fields);
@@ -124,7 +127,7 @@ public abstract class TypeModel {
 
   public abstract Type getType();
 
-  public List<String> getIncludeFields() {
+  public final List<String> getIncludeFields() {
     return includeFields;
   }
 
@@ -136,7 +139,7 @@ public abstract class TypeModel {
   /**
    * Returns a list of fields for select(*)
    */
-  public List<String> getFields() {
+  public final List<String> getFields() {
     return allowedFields;
   }
 
@@ -151,13 +154,14 @@ public abstract class TypeModel {
    * @param field - fully qualified name. Not field alias.
    */
   public final boolean isNested(String field) {
-    val fullName = getFullName(field);
-    val tokens = split(fullName);
-    log.debug("Tokens: {}", tokens);
-    for (val token : tokens) {
-      log.debug("Processing token: {}", token);
-      val tokenByFullPath = fieldsByFullPath.get(token);
-      if (tokenByFullPath.isNested()) {
+    val fullyQualifiedName = getFullName(field);
+    val nestedPaths = split(fullyQualifiedName);
+    log.debug("Nested Paths: {}", nestedPaths);
+
+    for (val path : nestedPaths) {
+      log.debug("Processing path: {}", path);
+      val pathByFullPath = fieldsByFullPath.get(path);
+      if (pathByFullPath.isNested()) {
         return true;
       }
     }
@@ -222,24 +226,24 @@ public abstract class TypeModel {
     return builder.toString();
   }
 
-  private List<String> split(String fullName) {
+  private List<String> split(String fullyQualifiedName) {
     val result = new ImmutableList.Builder<String>();
-    val list = Splitter.on(FieldModel.FIELD_SEPARATOR).splitToList(fullName);
+    val list = FIELD_SEPARATOR_SPLITTER.splitToList(fullyQualifiedName);
     String prefix = "";
     for (int i = 0; i < list.size(); i++) {
       result.add(prefix + list.get(i));
-      prefix = prefix + list.get(i) + FieldModel.FIELD_SEPARATOR;
+      prefix = prefix + list.get(i) + FIELD_SEPARATOR;
     }
 
     return result.build().reverse();
   }
 
   public final String getNestedPath(@NonNull String field) {
-    val fullName = getFullName(field);
-    for (val token : split(fullName)) {
-      val tokenByFullPath = fieldsByFullPath.get(token);
-      if (tokenByFullPath.isNested()) {
-        return token;
+    val fullyQualifiedName = getFullName(field);
+    for (val path : split(fullyQualifiedName)) {
+      val pathByFullPath = fieldsByFullPath.get(path);
+      if (pathByFullPath.isNested()) {
+        return path;
       }
     }
 

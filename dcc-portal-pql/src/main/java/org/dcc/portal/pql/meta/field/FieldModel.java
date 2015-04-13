@@ -33,6 +33,9 @@ import com.google.common.collect.ImmutableSet;
 @AllArgsConstructor
 public abstract class FieldModel {
 
+  public static final String FIELD_SEPARATOR = ".";
+  public static final Set<String> EMPTY_UI_ALIAS = ImmutableSet.of();
+  public static final String NO_NAME = "";
   public static final boolean NOT_NESTED = false;
   public static final boolean NESTED = true;
 
@@ -41,9 +44,6 @@ public abstract class FieldModel {
   private FieldType type;
   @Setter
   private boolean nested;
-  public static final String FIELD_SEPARATOR = ".";
-  public static final Set<String> EMPTY_UI_ALIAS = ImmutableSet.of();
-  public static final String NO_NAME = "";
 
   public static enum FieldType {
     LONG,

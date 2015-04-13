@@ -63,6 +63,7 @@ public class FieldsToSourceVisitor extends NodeVisitor<Optional<ExpressionNode>,
     val result = new SourceNode();
     val typeModel = context.get().getTypeModel();
     val includeFields = typeModel.getIncludeFields();
+
     for (int i = node.childrenCount() - 1; i >= 0; i--) {
       val terminalNode = (TerminalNode) node.getChild(i);
       if (includeFields.contains(terminalNode.getValue())) {

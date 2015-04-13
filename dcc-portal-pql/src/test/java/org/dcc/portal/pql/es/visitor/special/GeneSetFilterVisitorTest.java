@@ -18,14 +18,14 @@
 package org.dcc.portal.pql.es.visitor.special;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.meta.TypeModel.BIOLOGICAL_PROCESS;
-import static org.dcc.portal.pql.meta.TypeModel.CELLULAR_COMPONENT;
-import static org.dcc.portal.pql.meta.TypeModel.MOLECULAR_FUNCTION;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
+import static org.dcc.portal.pql.meta.TypeModel.BIOLOGICAL_PROCESS;
+import static org.dcc.portal.pql.meta.TypeModel.CELLULAR_COMPONENT;
+import static org.dcc.portal.pql.meta.TypeModel.MOLECULAR_FUNCTION;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertAndGetNestedNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetMustNode;
 import static org.dcc.portal.pql.utils.TestingHelpers.assertBoolAndGetShouldNode;
@@ -47,8 +47,8 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
-import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
@@ -62,8 +62,6 @@ public class GeneSetFilterVisitorTest {
   @Test
   public void pathwayIdTest() {
     val root = createEsAst("in(gene.pathwayId, 'REACT_6326')");
-    // FIXME: uncomment one line below and delete 2 lines below because of the incorrect
-    // assertPathwayAndCuratedSet(root, "gene.pathway", "REACT_6326");
     assertPathwayAndCuratedSet(root, "gene.pathway", "REACT_6326");
   }
 
@@ -152,8 +150,6 @@ public class GeneSetFilterVisitorTest {
     val result = root.accept(visitor, Optional.of(context)).get();
     log.debug("After GeneSetFilterVisitor: {}", result);
 
-    // FIXME: uncomment 1 line below and delete 2 lines below because of the incorrect type model
-    // assertExists(result, "gene.pathway");
     assertExists(result, "gene.pathway");
   }
 

@@ -46,7 +46,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     checkOptional(context);
     val fieldName = node.getFieldName();
-    AbstractAggregationBuilder result = AggregationBuilders
+    val result = AggregationBuilders
         .terms(node.getAggregationName())
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
@@ -58,7 +58,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   public AbstractAggregationBuilder visitMissingAggregation(MissingAggregationNode node, Optional<QueryContext> context) {
     checkOptional(context);
     val fieldName = node.getFieldName();
-    AbstractAggregationBuilder result = AggregationBuilders
+    val result = AggregationBuilders
         .missing(node.getAggregationName())
         .field(fieldName);
 
