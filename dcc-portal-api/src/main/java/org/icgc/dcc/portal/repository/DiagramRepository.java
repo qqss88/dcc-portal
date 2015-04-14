@@ -56,7 +56,7 @@ public class DiagramRepository {
   private final String index;
 
   @Autowired
-  DiagramRepository(Client client, IndexModel indexModel) {
+  public DiagramRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
   }

@@ -481,7 +481,7 @@ public class IndexModel {
       new ImmutableMap.Builder<String, String>()
           .put("id", "diagram_id")
           .put("xml", "xml")
-          .put("proteinMap", "proteinMap")
+          .put("proteinMap", "protein_map")
           .put("highlights", "highlights")
           .build();
 
