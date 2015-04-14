@@ -89,6 +89,12 @@
     <section data-ng-hide="isValidChromosome">
     <h3 style="color:#666666">No Genomic Context available</h3>
     </section>
-    <section data-ng-show="isValidChromosome" style="padding: 1rem" class="t_gv__navbar" data-gv-header></section>
+
+    <div style="padding: 0.25rem 1rem; font-size:1.2rem" data-ng-if="filters">Query: <a href="/search/g?filters={{filtersStr}}"><query-display data-filters="filters"></query-display></a></div>
+
+    <section data-ng-show="isValidChromosome" style="padding: 0.5rem 1rem" class="t_gv__navbar">
+       <span data-gv-header></span>
+       <span class="pull-right gv-navbar-zoom"></span>
+    </section>
     <div data-ng-show="isValidChromosome" data-genome-viewer></div>
 </article>
