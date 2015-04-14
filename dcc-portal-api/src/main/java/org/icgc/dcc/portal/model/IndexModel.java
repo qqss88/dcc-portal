@@ -1,7 +1,5 @@
 package org.icgc.dcc.portal.model;
 
-
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +59,8 @@ public class IndexModel {
     SAMPLE(""),
     SEQ_DATA(""),
     DOMAIN(""),
-    EXON("");
+    EXON(""),
+    DIAGRAM("diagram");
 
     private final String id;
   }
@@ -86,7 +85,8 @@ public class IndexModel {
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"), // FIXME: Double check name with Bob
-    PROJECT_TEXT("project-text");
+    PROJECT_TEXT("project-text"),
+    DIAGRAM("diagram"); // FIXME: Double check everything with Bob
 
     private final String id;
   }
@@ -477,6 +477,14 @@ public class IndexModel {
           .put("releaseNumber", "number")
           .build();
 
+  private static final ImmutableMap<String, String> DIAGRAM_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "diagram_id")
+          .put("xml", "xml")
+          .put("proteinMap", "proteinMap")
+          .put("highlights", "highlights")
+          .build();
+
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           // Common
@@ -591,6 +599,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.DIAGRAM, DIAGRAM_FIELDS_MAPPING);
   }
 
   /**

@@ -142,7 +142,6 @@
           urlPath: config.urlPath
         });
         var nodes = rendererUtils.getLegendNodes(20,0);
-        console.log(nodes);
         legendrenderer.renderNodes(nodes);
         legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
         legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
