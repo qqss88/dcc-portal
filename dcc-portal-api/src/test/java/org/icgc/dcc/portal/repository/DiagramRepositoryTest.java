@@ -21,8 +21,6 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -34,7 +32,6 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-@Slf4j
 public class DiagramRepositoryTest extends BaseRepositoryTest {
 
   private static final String FILTER = "{diagram_id:{is:\"REACT_163914\"}}";

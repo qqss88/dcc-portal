@@ -49,9 +49,9 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.BadRequestException;
+import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
-import org.icgc.dcc.portal.service.ReactomeService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -76,7 +76,7 @@ public class UIResource {
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
-  private final ReactomeService reactomeService;
+  private final DiagramService diagramService;
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
@@ -139,12 +139,13 @@ public class UIResource {
   @Path("/reactome/protein-map")
   @GET
   public Map<String, String> getReactomeProteinMap(
-      @ApiParam(value = "Protein uniprot ID(s). Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinUniprotIds") IdsParam proteinUniprotIds) {
+      @ApiParam(value = "Protein uniprot ID(s). Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinUniprotIds") IdsParam proteinUniprotIds,
+      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
     if (proteinUniprotIds.get() == null || proteinUniprotIds.get().size() == 0) {
       throw new BadRequestException("Protein id list is invalid or empty");
     }
 
-    return reactomeService.mapProteinIds(proteinUniprotIds.get());
+    return diagramService.mapProteinIds(proteinUniprotIds.get(), pathwayId);
   }
 
   @Path("/reactome/pathway-diagram")
@@ -156,7 +157,7 @@ public class UIResource {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
-    return Response.ok(reactomeService.getPathwayDiagramStream(pathwayId), APPLICATION_XML).build();
+    return Response.ok(diagramService.getPathwayDiagramString(pathwayId), APPLICATION_XML).build();
   }
 
   @Path("/reactome/pathway-sub-diagram")
@@ -167,7 +168,7 @@ public class UIResource {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
-    return reactomeService.getShownPathwaySection(pathwayId);
+    return diagramService.getShownPathwaySection(pathwayId);
   }
 
   private Boolean isValidPathwayId(String id) {

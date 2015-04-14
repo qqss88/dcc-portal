@@ -44,7 +44,6 @@ public class UIResourceTest extends ResourceTest {
 
   private final static String RESOURCE = "/v1/ui";
   private final static int BAD_REQUEST_CODE = ClientResponse.Status.BAD_REQUEST.getStatusCode();
-  private final static int OK_CODE = ClientResponse.Status.OK.getStatusCode();
 
   @Mock
   private ReactomeService service;
@@ -57,14 +56,6 @@ public class UIResourceTest extends ResourceTest {
     addResource(resource);
     addProvider(BadRequestExceptionMapper.class);
     addProvider(IllegalArgumentExceptionMapper.class);
-  }
-
-  @Test
-  public void testSuccessfulPathwayFetch() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
-    val response = generateResponse("REACT_578.8");
-    assertThat(response.getStatus()).isEqualTo(OK_CODE);
-    assertThat(response.toString()).isNotEmpty();
   }
 
   @Test

@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.apache.commons.lang.StringEscapeUtils.unescapeJavaScript;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.NonNull;
@@ -33,25 +34,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 @Service
 public class DiagramService {
 
   private DiagramRepository repo;
+  private final ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
   @Autowired
   public DiagramService(Client client, IndexModel index) {
     repo = new DiagramRepository(client, index);
   }
 
-  private final ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+  public Map<String, String> mapProteinIds(@NonNull List<String> proteinUniprotIds, @NonNull String pathwayId) {
+    val proteinMap = getProteinIdMap(pathwayId);
+    val map = Maps.<String, String> newHashMap();
+    proteinUniprotIds.forEach(id -> map.put(id, proteinMap.get(id)));
+
+    return map;
+  }
 
   @SuppressWarnings("unchecked")
-  public Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
+  private Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
     return (Map<String, String>) getPathway(pathwayId).get(INDEX_MODEL.get("proteinMap"));
   }
 
   public String getPathwayDiagramString(@NonNull String pathwayId) {
+    // TODO fix the escaping... (it probably wont work right now)
     return unescapeJavaScript(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
   }
 
