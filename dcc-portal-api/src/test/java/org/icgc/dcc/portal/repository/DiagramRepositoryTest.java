@@ -68,8 +68,8 @@ public class DiagramRepositoryTest extends BaseRepositoryTest {
 
     assertThat(hits.getTotalHits()).isEqualTo(1);
     assertThat(hits.getHits().length).isEqualTo(1);
-    log.info(hits.getHits()[0].field(FIELDS.get("id")).getValue());
-    assertThat(hits.getHits()[0].field(FIELDS.get("id")).getValue()).isEqualTo("REACT_163914");
+
+    assertThat(cast(hits.getHits()[0].field(FIELDS.get("id")).getValue())).isEqualTo("REACT_163914");
   }
 
   @Test
@@ -77,7 +77,11 @@ public class DiagramRepositoryTest extends BaseRepositoryTest {
     String id = "REACT_163914";
     Query query = Query.builder().build();
     Map<String, Object> response = diagramRepository.findOne(id, query);
-    assertThat(response.get(FIELDS.get("diagram_id"))).isEqualTo(id);
+    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+  }
+
+  protected Object cast(Object object) {
+    return object;
   }
 
 }
