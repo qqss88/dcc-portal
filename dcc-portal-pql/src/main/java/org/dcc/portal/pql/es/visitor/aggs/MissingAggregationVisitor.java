@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -81,6 +82,16 @@ public class MissingAggregationVisitor extends NodeVisitor<ExpressionNode, Void>
 
     val result = new FilterAggregationNode(node.getAggregationName() + MISSING_SUFFIX, node.getFilters());
     result.addChildren(child);
+    log.debug("\n{}", result);
+
+    return result;
+  }
+
+  @Override
+  public ExpressionNode visitNestedAggregation(@NonNull NestedAggregationNode node, Optional<Void> context) {
+    val child = node.getFirstChild().accept(this, context);
+
+    val result = new NestedAggregationNode(node.getAggregationName() + MISSING_SUFFIX, node.getPath(), child);
     log.debug("\n{}", result);
 
     return result;

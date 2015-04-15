@@ -29,6 +29,8 @@ import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.ResolveNestedFilterVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.SearchNonNestedFieldsVisitor;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
@@ -89,6 +91,18 @@ public class Visitors {
   private static final NonNestedFieldsVisitor NON_NESTED_FIELDS_VISITOR = new NonNestedFieldsVisitor();
   private static final NestedFieldsVisitor NESTED_FIELDS_VISITOR = new NestedFieldsVisitor();
   private static final QuerySimplifierVisitor QUERY_SIMPLIFIER_VISITOR = new QuerySimplifierVisitor();
+
+  private static final SearchNonNestedFieldsVisitor SEARCH_NON_NESTED_FILTERS_VISITOR =
+      new SearchNonNestedFieldsVisitor();
+  private static final ResolveNestedFilterVisitor RESOLVE_NESTED_FILTER_VISITOR = new ResolveNestedFilterVisitor();
+
+  public static final ResolveNestedFilterVisitor createResolveNestedFilterVisitor() {
+    return RESOLVE_NESTED_FILTER_VISITOR;
+  }
+
+  public static SearchNonNestedFieldsVisitor createSearchNonNestedFieldsVisitor() {
+    return SEARCH_NON_NESTED_FILTERS_VISITOR;
+  }
 
   public static QuerySimplifierVisitor createQuerySimplifierVisitor() {
     return QUERY_SIMPLIFIER_VISITOR;

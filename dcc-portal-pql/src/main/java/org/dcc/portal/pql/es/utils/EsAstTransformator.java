@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.es.utils;
 
+import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.Visitors.createAggregationsResolverVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createEmptyNodesCleanerVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createEntitySetVisitor;
@@ -27,16 +28,22 @@ import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisit
 import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
+import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel;
 
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.Context;
 import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
@@ -45,6 +52,8 @@ import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
 import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
+import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 
 /**
@@ -64,10 +73,19 @@ public class EsAstTransformator {
   private final FieldsToSourceVisitor fieldsToSourceVisitor = createFieldsToSourceVisitor();
   private final MissingAggregationVisitor missingAggregationVisitor = createMissingAggregationVisitor();
 
-  public ExpressionNode process(ExpressionNode esAst, QueryContext context) {
+  private static final Optional<Context> DONOR_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
+      getDonorCentricTypeModel()));
+  private static final Optional<Context> GENE_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
+      getGeneCentricTypeModel()));
+  private static final Optional<Context> MUTATION_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
+      getMutationCentricTypeModel()));
+  private static final Optional<Context> OBSERVATION_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
+      getObservationCentricTypeModel()));
+
+  public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
     esAst = resolveSpecialCases(esAst, context);
-    esAst = resolveFacets(esAst);
+    esAst = resolveFacets(esAst, context.getTypeModel());
     esAst = score(esAst, context);
     esAst = optimize(esAst);
     log.debug("ES AST after the transformations: {}", esAst);
@@ -111,13 +129,28 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  public ExpressionNode resolveFacets(ExpressionNode esAst) {
+  public ExpressionNode resolveFacets(ExpressionNode esAst, TypeModel typeModel) {
     log.debug("[resolveFacets] Before: {}", esAst);
-    esAst = esAst.accept(facetsResolver, Optional.empty());
+    esAst = esAst.accept(facetsResolver, createResolveFacetsContext(typeModel.getType())).get();
     esAst = esAst.accept(missingAggregationVisitor, Optional.empty());
     log.debug("[resolveFacets] After: {}", esAst);
 
     return esAst;
+  }
+
+  private Optional<Context> createResolveFacetsContext(Type indexType) {
+    switch (indexType) {
+    case DONOR_CENTRIC:
+      return DONOR_RESOLVE_FACETS_CONTEXT;
+    case GENE_CENTRIC:
+      return GENE_RESOLVE_FACETS_CONTEXT;
+    case MUTATION_CENTRIC:
+      return MUTATION_RESOLVE_FACETS_CONTEXT;
+    case OBSERVATION_CENTRIC:
+      return OBSERVATION_RESOLVE_FACETS_CONTEXT;
+    default:
+      throw new IllegalArgumentException(format("Unknown index type '%s'", indexType.getId()));
+    }
   }
 
 }

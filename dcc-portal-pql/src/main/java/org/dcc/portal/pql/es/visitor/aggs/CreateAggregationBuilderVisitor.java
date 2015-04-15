@@ -28,10 +28,10 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
@@ -51,7 +51,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
 
-    return nest(result, node, context.get());
+    return resolveGlobal(result, node, node.getAggregationName());
   }
 
   @Override
@@ -62,7 +62,7 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .missing(node.getAggregationName())
         .field(fieldName);
 
-    return nest(result, node, context.get());
+    return resolveGlobal(result, node, node.getAggregationName());
   }
 
   @Override
@@ -71,60 +71,41 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
     log.debug("Visiting FilterAggregationNode: \n{}", node);
     log.debug("Filters: {}", node.getFilters());
 
-    val filterAggregationBuilder = AggregationBuilders.filter(node.getAggregationName())
+    val result = AggregationBuilders.filter(node.getAggregationName())
         .filter(resolveFilters(node, context))
         .subAggregation(node.getFirstChild().accept(this, context));
 
-    return AggregationBuilders
-        .global(node.getAggregationName())
-        .subAggregation(filterAggregationBuilder);
+    return resolveGlobal(result, node, node.getAggregationName());
   }
 
-  private static AbstractAggregationBuilder nest(AbstractAggregationBuilder builder, ExpressionNode node,
-      QueryContext context) {
-    val aggName = getAggName(node);
-    val fieldName = getFieldName(node);
+  @Override
+  public AbstractAggregationBuilder visitNestedAggregation(NestedAggregationNode node, Optional<QueryContext> context) {
+    log.debug("Visiting NestedAggregationNode: \n{}", node);
+    val subAggregation = node.getFirstChild().accept(this, context);
 
-    val typeModel = context.getTypeModel();
-    if (typeModel.isNested(fieldName)) {
-      builder = createNestedAggregation(builder, aggName, fieldName, typeModel);
-    }
+    val result = AggregationBuilders.nested(node.getAggregationName())
+        .path(node.getPath())
+        .subAggregation(subAggregation);
 
-    // If this node is not a child of a FilterAggregationNode set scope of the aggregation to global
-    if (node.getParent() instanceof AggregationsNode) {
-      return AggregationBuilders
-          .global(aggName)
-          .subAggregation(builder);
-    }
-
-    return builder;
+    return resolveGlobal(result, node, node.getAggregationName());
   }
 
-  private static AbstractAggregationBuilder createNestedAggregation(AbstractAggregationBuilder termsAggregation,
-      String aggName, String fieldName, TypeModel typeModel) {
-    return AggregationBuilders.nested(aggName)
-        .path(typeModel.getNestedPath(fieldName))
-        .subAggregation(termsAggregation);
+  private static boolean isGlobal(ExpressionNode node) {
+    return node.getParent() instanceof AggregationsNode;
   }
 
   private static FilterBuilder resolveFilters(FilterAggregationNode parent, Optional<QueryContext> context) {
     return parent.getFilters().accept(Visitors.filterBuilderVisitor(), context);
   }
 
-  private static String getFieldName(ExpressionNode node) {
-    if (node instanceof MissingAggregationNode) {
-      return ((MissingAggregationNode) node).getFieldName();
-    } else {
-      return ((TermsAggregationNode) node).getFieldName();
+  private static AbstractAggregationBuilder resolveGlobal(AbstractAggregationBuilder builder, ExpressionNode node,
+      String aggregationName) {
+    if (isGlobal(node)) {
+      return AggregationBuilders.global(aggregationName)
+          .subAggregation(builder);
     }
-  }
 
-  private static String getAggName(ExpressionNode node) {
-    if (node instanceof MissingAggregationNode) {
-      return ((MissingAggregationNode) node).getAggregationName();
-    } else {
-      return ((TermsAggregationNode) node).getAggregationName();
-    }
+    return builder;
   }
 
 }

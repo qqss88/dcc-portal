@@ -15,57 +15,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.meta;
+package org.dcc.portal.pql.es.ast.aggs;
 
-import static java.lang.String.format;
+import java.util.Optional;
+
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+
 @Value
-public class IndexModel {
+@EqualsAndHashCode(callSuper = true)
+public class NestedAggregationNode extends ExpressionNode {
 
-  private static final DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
-  private static final GeneCentricTypeModel geneCentric = new GeneCentricTypeModel();
-  private static final MutationCentricTypeModel mutationCentric = new MutationCentricTypeModel();
-  private static final ObservationCentricTypeModel observationCentric = new ObservationCentricTypeModel();
+  @NonNull
+  String aggregationName;
+  @NonNull
+  String path;
 
-  public boolean isNested(@NonNull String field, Type type) {
-    return getTypeModel(type).isNested(field);
+  public NestedAggregationNode(@NonNull String aggregationName, @NonNull String path, ExpressionNode... children) {
+    super(children);
+    this.aggregationName = aggregationName;
+    this.path = path;
   }
 
-  public String getNestedPath(@NonNull String field, Type type) {
-    return getTypeModel(type).getNestedPath(field);
-  }
-
-  public static TypeModel getTypeModel(Type type) {
-    switch (type) {
-    case DONOR_CENTRIC:
-      return donorCentric;
-    case GENE_CENTRIC:
-      return geneCentric;
-    case MUTATION_CENTRIC:
-      return mutationCentric;
-    case OBSERVATION_CENTRIC:
-      return observationCentric;
-    }
-
-    throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
-  }
-
-  public static TypeModel getDonorCentricTypeModel() {
-    return donorCentric;
-  }
-
-  public static TypeModel getMutationCentricTypeModel() {
-    return mutationCentric;
-  }
-
-  public static TypeModel getGeneCentricTypeModel() {
-    return geneCentric;
-  }
-
-  public static TypeModel getObservationCentricTypeModel() {
-    return observationCentric;
+  @Override
+  public <T, A> T accept(NodeVisitor<T, A> visitor, Optional<A> context) {
+    return visitor.visitNestedAggregation(this, context);
   }
 
 }

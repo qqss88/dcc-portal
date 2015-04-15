@@ -24,17 +24,29 @@ import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 import java.util.Optional;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.RootNode;
+import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
+import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+@Slf4j
 public class AggregationsResolverVisitorTest {
 
+  private static Optional<Context> CONTEXT = createContext();
   AggregationsResolverVisitor resolver;
 
   @Rule
@@ -49,25 +61,23 @@ public class AggregationsResolverVisitorTest {
   public void visitRoot_noAggregationsNode() {
     val originalRoot = (RootNode) createEsAst("eq(gender, 'male')");
     val clone = cloneNode(originalRoot);
-    val rootNode = resolver.visitRoot(originalRoot, Optional.empty());
+    val rootNode = resolver.visitRoot(originalRoot, Optional.empty()).get();
     assertThat(clone).isEqualTo(rootNode);
   }
 
   @Test
   public void visitRoot_noFilters() {
-    val originalRoot = (RootNode) createEsAst("facets(gender)");
+    val originalRoot = (RootNode) createEsAst("facets(id)", Type.MUTATION_CENTRIC);
     val clone = cloneNode(originalRoot);
-    val result = resolver.visitRoot(originalRoot, Optional.empty());
+    val result = originalRoot.accept(resolver, CONTEXT).get();
     assertThat(clone).isEqualTo(result);
   }
 
-  /**
-   * Facets field matches filter. Filter should be copied to facet filter without the matched part.
-   */
   @Test
   public void visitTermsFacet_match() {
-    val root = (RootNode) createEsAst("facets(gender), eq(gender, 'male'), eq(ageAtDiagnosis, 60)");
-    val result = root.accept(resolver, Optional.empty());
+    val root = (RootNode) createEsAst("facets(id), eq(id, 'MU1'), eq(start, 60)", Type.MUTATION_CENTRIC);
+    val result = root.accept(resolver, CONTEXT).get();
+    log.debug("Result: {}", result);
 
     val filterAgg = (FilterAggregationNode) result.getChild(1).getFirstChild();
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
@@ -78,7 +88,7 @@ public class AggregationsResolverVisitorTest {
     val mustNode = filterNode.getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(1);
     val termNode = (TermNode) mustNode.getFirstChild();
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("chromosome_start");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
   }
 
@@ -87,8 +97,8 @@ public class AggregationsResolverVisitorTest {
    */
   @Test
   public void visitTermsFacet_noMatch() {
-    val root = (RootNode) createEsAst("facets(gender), eq(ageAtDiagnosis, 60)");
-    val result = root.accept(resolver, Optional.empty());
+    val root = (RootNode) createEsAst("facets(chromosome), eq(id, 60)", Type.MUTATION_CENTRIC);
+    val result = root.accept(resolver, CONTEXT).get();
 
     val filterAgg = (FilterAggregationNode) result.getChild(1).getFirstChild();
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
@@ -99,8 +109,82 @@ public class AggregationsResolverVisitorTest {
     val mustNode = filterNode.getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(1);
     val termNode = (TermNode) mustNode.getFirstChild();
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
+  }
+
+  //
+
+  @Test
+  public void visitRoot_removedFilterTest() {
+    val root = (RootNode) createEsAst("facets(id), eq(id, 60)", Type.MUTATION_CENTRIC);
+    val result = root.accept(resolver, CONTEXT).get();
+    val aggsNode = Nodes.getOptionalChild(result, AggregationsNode.class).get();
+    log.debug("Result - \n{}", aggsNode);
+
+    assertThat(aggsNode.childrenCount()).isEqualTo(1);
+    val termsAggNode = (TermsAggregationNode) aggsNode.getFirstChild();
+    assertThat(termsAggNode.getAggregationName()).isEqualTo("id");
+    assertThat(termsAggNode.getFieldName()).isEqualTo("_mutation_id");
+  }
+
+  @Test
+  public void visitTermsFacet_nonNestedField_nonNestedFilter() {
+    val esAst = new TermsAggregationNode("name", "_mutation_id");
+    val filter = new FilterNode(new TermNode("chromosome", "X"));
+    val filterClone = Nodes.cloneNode(filter);
+    val astClone = Nodes.cloneNode(esAst);
+    val result = (FilterAggregationNode) esAst.accept(resolver, createContext(filter)).get();
+    log.debug("\n{}", result);
+
+    assertThat(result.getFilters()).isEqualTo(filterClone);
+    assertThat(result.childrenCount()).isEqualTo(1);
+    assertThat(result.getFirstChild()).isEqualTo(astClone);
+  }
+
+  @Test
+  public void nestedFieldTest() {
+    val result = visit("facets(transcriptId)");
+    val nestedAggr = (NestedAggregationNode) result.getFirstChild();
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("transcriptId");
+    assertThat(nestedAggr.getPath()).isEqualTo("transcript");
+
+    val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("transcript.id");
+  }
+
+  @Test
+  public void nestedFieldWithNonNestedFilterTest() {
+    val result = visit("facets(transcriptId),eq(id, 'M')");
+    val filterAggr = (FilterAggregationNode) result.getFirstChild();
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(filterAggr.getFilters().getFirstChild());
+    assertThat(mustNode.childrenCount()).isEqualTo(1);
+
+    val termNode = (TermNode) mustNode.getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
+
+    val nestedAggr = (NestedAggregationNode) filterAggr.getFirstChild();
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("transcriptId");
+    assertThat(nestedAggr.getPath()).isEqualTo("transcript");
+
+    val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("transcript.id");
+  }
+
+  private ExpressionNode visit(String pql) {
+    val root = createEsAst(pql, Type.MUTATION_CENTRIC);
+    val result = root.accept(resolver, CONTEXT).get();
+    log.debug("Result - \n{}", result);
+
+    return Nodes.getOptionalChild(result, AggregationsNode.class).get();
+  }
+
+  private static Optional<Context> createContext(FilterNode filterNode) {
+    return Optional.of(new Context(filterNode, IndexModel.getMutationCentricTypeModel()));
+  }
+
+  private static Optional<Context> createContext() {
+    return Optional.of(new Context(null, IndexModel.getMutationCentricTypeModel()));
   }
 
 }

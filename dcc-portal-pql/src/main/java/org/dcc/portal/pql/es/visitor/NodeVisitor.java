@@ -30,6 +30,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
@@ -137,6 +138,10 @@ public abstract class NodeVisitor<T, A> {
   }
 
   public T visitAggregations(AggregationsNode node, Optional<A> context) {
+    return defaultUnimplementedMethod();
+  }
+
+  public T visitNestedAggregation(NestedAggregationNode node, Optional<A> context) {
     return defaultUnimplementedMethod();
   }
 

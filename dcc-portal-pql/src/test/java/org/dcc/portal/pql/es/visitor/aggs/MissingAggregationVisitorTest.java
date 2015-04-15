@@ -30,6 +30,7 @@ import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
+import org.dcc.portal.pql.meta.IndexModel;
 import org.junit.Test;
 
 @Slf4j
@@ -69,11 +70,15 @@ public class MissingAggregationVisitorTest {
   private static AggregationsNode prepareAggregationsNode(String query) {
     val esAst = createEsAst(query);
 
-    val resolvedAst = esAst.accept(Visitors.createAggregationsResolverVisitor(), Optional.empty());
+    val resolvedAst = esAst.accept(Visitors.createAggregationsResolverVisitor(), createContext()).get();
     val result = Nodes.getOptionalChild(resolvedAst, AggregationsNode.class).get();
     log.warn("Prepared - \n{}", result);
 
     return result;
+  }
+
+  private static Optional<Context> createContext() {
+    return Optional.of(new Context(null, IndexModel.getDonorCentricTypeModel()));
   }
 
 }

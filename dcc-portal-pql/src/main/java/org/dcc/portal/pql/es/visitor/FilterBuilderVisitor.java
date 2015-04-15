@@ -41,6 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
+import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
@@ -56,6 +58,7 @@ import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
+import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -239,7 +242,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
    */
   private FilterBuilder createNestedFilter(ExpressionNode node, String field, FilterBuilder sourceFilter,
       TypeModel typeModel) {
-    if (typeModel.isNested(field) && !node.hasNestedParent()) {
+    if (typeModel.isNested(field) && !node.hasNestedParent() && !isNestedAggregationFilter(node)) {
       val nestedPath = typeModel.getNestedPath(field);
       log.debug("[visitTerm] Node '{}' does not have a nested parent. Nesting at path '{}'", node, nestedPath);
 
@@ -247,6 +250,14 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
     }
 
     return sourceFilter;
+  }
+
+  /**
+   * If the {@code node} is a filter in a {@link FilterAggregationNode} which has a {@link NestedAggregationNode} parent
+   * skip nesting the filter in a {@link NestedNode} because the AST structure is already correct
+   */
+  private boolean isNestedAggregationFilter(ExpressionNode node) {
+    return Nodes.findParent(node, NestedAggregationNode.class).isPresent();
   }
 
 }

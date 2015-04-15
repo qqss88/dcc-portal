@@ -225,8 +225,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   public void facetsTest_noFilters() {
     val result = executeQuery("facets(verificationStatusNested)");
     assertTotalHitsCount(result, 3);
-    Global global = result.getAggregations().get("verificationStatusNested");
-    Nested nested = global.getAggregations().get("verificationStatusNested");
+    Nested nested = result.getAggregations().get("verificationStatusNested");
     Terms terms = nested.getAggregations().get("verificationStatusNested");
 
     for (val bucket : terms.getBuckets()) {
@@ -237,8 +236,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
       }
     }
 
-    Global globalMissing = result.getAggregations().get("verificationStatusNested_missing");
-    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatusNested_missing");
+    Nested nestedMissing = result.getAggregations().get("verificationStatusNested_missing");
     Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
     assertThat(missing.getDocCount()).isEqualTo(0L);
   }
@@ -248,8 +246,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     val result = executeQuery("facets(verificationStatusNested)");
     assertTotalHitsCount(result, 3);
 
-    Global globalMissing = result.getAggregations().get("verificationStatusNested_missing");
-    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatusNested_missing");
+    Nested nestedMissing = result.getAggregations().get("verificationStatusNested_missing");
     Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
     assertThat(missing.getDocCount()).isEqualTo(0L);
   }
@@ -280,8 +277,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU2", "MU3");
 
-    Global global = result.getAggregations().get("verificationStatusNested");
-    Nested nested = global.getAggregations().get("verificationStatusNested");
+    Nested nested = result.getAggregations().get("verificationStatusNested");
     Terms terms = nested.getAggregations().get("verificationStatusNested");
 
     for (val bucket : terms.getBuckets()) {

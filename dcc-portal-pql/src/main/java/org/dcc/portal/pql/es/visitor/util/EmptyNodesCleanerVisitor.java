@@ -33,6 +33,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
@@ -173,6 +174,11 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
 
   @Override
   public ExpressionNode visitAggregations(AggregationsNode node, Optional<Void> context) {
+    return processCommonCases(node);
+  }
+
+  @Override
+  public ExpressionNode visitNestedAggregation(NestedAggregationNode node, Optional<Void> context) {
     return processCommonCases(node);
   }
 

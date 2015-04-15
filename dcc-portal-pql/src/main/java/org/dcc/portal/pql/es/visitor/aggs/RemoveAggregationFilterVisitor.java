@@ -29,6 +29,7 @@ import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -53,6 +54,11 @@ public class RemoveAggregationFilterVisitor extends NodeVisitor<Optional<Express
 
   @Override
   public Optional<ExpressionNode> visitAggregations(AggregationsNode node, Optional<QueryContext> context) {
+    return visitChildren(this, node, context);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitNestedAggregation(NestedAggregationNode node, Optional<QueryContext> context) {
     return visitChildren(this, node, context);
   }
 
