@@ -154,7 +154,7 @@
   };
   
   /*
-  * Create a grid of all components for legend
+  * Create a grid of all nodes for legend
   */
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
     var nodes = [];
@@ -168,7 +168,7 @@
         size:{width:90,height:30},
         type:types[i]==='ProcessNode'?types[i]:'Renderable'+types[i],
         id:types[i]==='Mutated'?'mutated':'fake',
-        reactomeId:'fake',
+        reactomeId:types[i]==='Mutated'?'mutated':'fake',
         text:{content:types[i],position:{x:x,y:y}}
       });
     }

@@ -86,20 +86,17 @@
                                        function(n){return n.type!=='RenderableCompartment';}));
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
-    
-    var demoHighlightedNodes = _.filter(model.getNodes().slice(),
-                                           function(n){
-      return    (n.type==='RenderableProtein'||
-                 n.type==='RenderableEntity'||
-                 n.type==='RenderableEntitySet');
-    });
+    // ------------- temporary 
     var highlights = [];
-    demoHighlightedNodes.forEach(function (node) {
+    _.filter(model.getNodes().slice(), 
+             function(n){return    n.type==='RenderableProtein'||
+                                   n.type==='RenderableEntity'||
+                                   n.type==='RenderableEntitySet';})
+    .forEach(function (node) {
       highlights.push({id:node.reactomeId,value:Math.round(Math.random()*200 + 1)});
     });
-    console.log(highlights);
-    console.log(demoHighlightedNodes);
     this.renderer.highlightEntity(highlights,model);
+    // -------------------- end temporary
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -135,7 +132,7 @@
                             [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     }
     
-    var showingLegend = false;
+    // Only create the legend once, otherwise just make it visible again
     var legendSvg;
     var renderLegend = function(w, h){
       if(!legendSvg){
@@ -151,22 +148,28 @@
         legendrenderer.renderNodes(nodes);
         legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
         legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
-        legendrenderer.highlightEntity([nodes[nodes.length-1]]);
+        legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodeByReactomeId:function (id){return nodes[nodes.length-1];}});
       }else{
         legendSvg.attr('opacity','1');
       }
     };
     
+    // Bind to the legend's "question mark" and animate/render on click
+    var showingLegend = false;
     d3.select('.pathway-legend-controller').on('click',function(){
       if(showingLegend){
         legendSvg.transition().duration(600).attr('opacity','0');
         $('.pathway-legend').animate({left: '100%',},600);
+        $('.pathway-legend-controller').addClass('fa-question-circle');
+        $('.pathway-legend-controller').removeClass('fa-times-circle');
         showingLegend = false;
       }else{
         renderLegend($('.pathway-legend').css('width').substring(0,$('.pathway-legend').css('width').length-2),
                     $('.pathway-legend').css('height').substring(0,$('.pathway-legend').css('height').length-2));
-        
         $('.pathway-legend').animate({left: '75%'});
+        console.log($('.pathway-legend-controller'));
+        $('.pathway-legend-controller').removeClass('fa-question-circle');
+        $('.pathway-legend-controller').addClass('fa-times-circle');
         showingLegend = true;
       }
     });
