@@ -98,6 +98,16 @@
     });
     return node;
   };
+  
+  PathwayModel.prototype.getNodeByReactomeId = function (reactomeId) {
+    var node;
+    this.nodes.forEach(function (n) {
+      if (n.reactomeId === reactomeId){
+        node = n;
+      }
+    });
+    return node;
+  };
 
   PathwayModel.prototype.getReactionById = function (id) {
     var reaction;

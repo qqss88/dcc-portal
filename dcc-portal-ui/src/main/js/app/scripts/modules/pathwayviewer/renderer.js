@@ -294,27 +294,29 @@
   /*
   * Highlights the given list of nodes with a red border and puts
   *   the 'value' of the node in a badge in the top right corner
+  * 
+  * Highlight: { id, value }
+  *
   */
-  Renderer.prototype.highlightEntity = function (nodes) {
+  Renderer.prototype.highlightEntity = function (highlights, model) {
     var svg = this.svg;
-    
-    nodes.forEach(function (node) {
+    console.log(highlights);
+    highlights.forEach(function (highlight) {
+      var node = model.getNodeByReactomeId(highlight.id);
       var svgNode = svg.selectAll('.entity'+node.id);
+      
       if(svgNode[0].length <= 0){
         return;
       }
       svgNode.style('stroke','red');
       svgNode.style('stroke-width','3px');
-      
-      var value = Math.round(Math.random()*200 + 1);
-      
-      // generate a bunch of random numbers
+
       svg.append('rect')
         .attr({
           class:'value-banner',
           x: (+node.position.x)+(+node.size.width) - 10,
           y: (+node.position.y)- 7,
-          width:(value.toString().length*5)+10,
+          width:(highlight.value.toString().length*5)+10,
           height:15,
           rx: 7,
           ry: 7
@@ -330,7 +332,7 @@
         'font-size':'9px',
         'font-weight':'bold',
         'fill':'white'
-      }).text(value);
+      }).text(highlight.value);
     });
   };
 

@@ -87,13 +87,19 @@
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
     
-//    this.renderer.highlightEntity(_.filter(model.getNodes().slice(),
-//                                           function(n){
-//      return    (n.type==='RenderableProtein'||
-//                 n.type==='RenderableEntity'||
-//                 n.type==='RenderableComplex'||
-//                 n.type==='RenderableEntitySet');
-//    }));
+    var demoHighlightedNodes = _.filter(model.getNodes().slice(),
+                                           function(n){
+      return    (n.type==='RenderableProtein'||
+                 n.type==='RenderableEntity'||
+                 n.type==='RenderableEntitySet');
+    });
+    var highlights = [];
+    demoHighlightedNodes.forEach(function (node) {
+      highlights.push({id:node.reactomeId,value:Math.round(Math.random()*200 + 1)});
+    });
+    console.log(highlights);
+    console.log(demoHighlightedNodes);
+    this.renderer.highlightEntity(highlights,model);
     
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -166,9 +172,11 @@
     });
   };
 
-  ReactomePathway.prototype.highlight = function (ids) {
-    this.renderer.highlightEntity(_.filter(this.model.getNodes().slice(),
-                                           function(n){return ids.indexOf(n.reactomeId)>=0;}));
+  /**
+  * Highlight: {id, value}
+  */
+  ReactomePathway.prototype.highlight = function (highlights) {
+    this.renderer.highlightEntity(highlights, this.model);
   };
   
   dcc.ReactomePathway = ReactomePathway;
