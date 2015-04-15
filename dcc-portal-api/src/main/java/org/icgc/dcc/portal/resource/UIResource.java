@@ -143,6 +143,8 @@ public class UIResource {
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
     if (proteinUniprotIds.get() == null || proteinUniprotIds.get().size() == 0) {
       throw new BadRequestException("Protein id list is invalid or empty");
+    } else if (isValidPathwayId(pathwayId)) {
+      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
     return diagramService.mapProteinIds(proteinUniprotIds.get(), pathwayId);

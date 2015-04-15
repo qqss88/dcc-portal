@@ -17,8 +17,6 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static org.apache.commons.lang.StringEscapeUtils.unescapeJavaScript;
-
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +24,7 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.base.Joiner;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
@@ -33,6 +32,7 @@ import org.icgc.dcc.portal.repository.DiagramRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -48,9 +48,17 @@ public class DiagramService {
   }
 
   public Map<String, String> mapProteinIds(@NonNull List<String> proteinUniprotIds, @NonNull String pathwayId) {
-    val proteinMap = getProteinIdMap(pathwayId);
+    val uniprotToDbMap = ArrayListMultimap.create();
+    val dbToUniprotMap = getProteinIdMap(pathwayId);
+    dbToUniprotMap.forEach((db, uniprotsString) -> {
+      String[] uniprots = uniprotsString.split(",");
+      for (String uniprot : uniprots) {
+        uniprotToDbMap.put(uniprot, db);
+      }
+    });
+
     val map = Maps.<String, String> newHashMap();
-    proteinUniprotIds.forEach(id -> map.put(id, proteinMap.get(id)));
+    proteinUniprotIds.forEach(id -> map.put(id, Joiner.on(",").join(uniprotToDbMap.get(id))));
 
     return map;
   }
@@ -61,8 +69,7 @@ public class DiagramService {
   }
 
   public String getPathwayDiagramString(@NonNull String pathwayId) {
-    // TODO fix the escaping... (it probably wont work right now)
-    return unescapeJavaScript(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
+    return unescape(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
   }
 
   public String[] getShownPathwaySection(@NonNull String pathwayId) {
@@ -73,5 +80,27 @@ public class DiagramService {
     val query = Query.builder().build();
     return repo.findOne(id, query);
   }
+
+  /**
+   * Opposite of dcc.etl.db.importer.diagram.reader.DiagramXmlReader's escape
+   */
+  private String unescape(String xml) {
+    for (String[] replacement : replacements) {
+      xml.replace(replacement[1], replacement[0]);
+    }
+    return xml;
+  }
+
+  private String[][] replacements =
+  {
+      { "\b", "\\b" },
+      { "\n", "\\n" },
+      { "\t", "\\t" },
+      { "\f", "\\f" },
+      { "\r", "\\r" },
+      { "\"", "\\\"" },
+      { "\\", "\\\\" },
+      { "/", "\\/" }
+  };
 
 }
