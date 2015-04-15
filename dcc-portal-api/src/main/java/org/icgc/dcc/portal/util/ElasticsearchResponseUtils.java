@@ -178,9 +178,6 @@ public final class ElasticsearchResponseUtils {
     for (val entry : source.entrySet()) {
       if (entry.getValue() instanceof Map) {
         result.putAll(flatternMap(Optional.of(entry.getKey()), (Map<String, Object>) entry.getValue()));
-      } else if (isNestedList(entry.getValue())) {
-        val value = (List<List<Object>>) entry.getValue();
-        result.put(resolvePrefix(prefix, entry.getKey()), value.get(0));
       } else {
         result.put(resolvePrefix(prefix, entry.getKey()), entry.getValue());
       }

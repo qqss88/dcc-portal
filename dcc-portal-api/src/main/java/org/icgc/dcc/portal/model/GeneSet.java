@@ -17,7 +17,6 @@
 
 package org.icgc.dcc.portal.model;
 
-import static java.util.Collections.singletonMap;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.repository.GeneSetRepository.SOURCE_FIELDS;
 
@@ -84,7 +83,7 @@ public class GeneSet {
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
     // Reactome pathway specific fields
-    hierarchy = buildPathwayHierarchy((List<Map<String, Object>>) fieldMap.get(SOURCE_FIELDS.get("hierarchy")));
+    hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(SOURCE_FIELDS.get("hierarchy")));
     diagrammed = String.valueOf(fieldMap.get(fields.get("diagrammed")));
 
     // Gene ontology specific fields
@@ -95,7 +94,7 @@ public class GeneSet {
 
   }
 
-  private List<List<Map<String, String>>> buildPathwayHierarchy(List<Map<String, Object>> field) {
+  private List<List<Map<String, String>>> buildPathwayHierarchy(List<List<Map<String, Object>>> field) {
     val result = Lists.<List<Map<String, String>>> newArrayList();
 
     if (field == null) {
@@ -104,9 +103,14 @@ public class GeneSet {
 
     for (val parentPath : field) {
       val path = Lists.<Map<String, String>> newArrayList();
-      for (val pathwayNode : parentPath.entrySet()) {
-        path.add(singletonMap(pathwayNode.getKey(), String.valueOf(pathwayNode.getValue())));
+      for (val pathwayNode : parentPath) {
+        val node = Maps.<String, String> newHashMap();
+        for (val entry : pathwayNode.entrySet()) {
+          node.put(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+        path.add(node);
       }
+
       result.add(path);
     }
     return result;
