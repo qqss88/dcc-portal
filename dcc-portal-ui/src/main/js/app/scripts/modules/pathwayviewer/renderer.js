@@ -13,7 +13,7 @@
   function defineDefs(svg){
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
                   'Catalyst-legend','Activator-legend','Output-legend'];
-    var filled = function(type){return ['Output','RenderableInteraction','Output-legend'].indexOf(type)>=0;};
+    var filled = function(type){return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;};
     var circular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
     var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
 //    var arrowed = function(type){

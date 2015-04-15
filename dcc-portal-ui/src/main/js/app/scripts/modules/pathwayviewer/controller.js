@@ -160,16 +160,13 @@
       if(showingLegend){
         legendSvg.transition().duration(600).attr('opacity','0');
         $('.pathway-legend').animate({left: '100%',},600);
-        $('.pathway-legend-controller').addClass('fa-question-circle');
-        $('.pathway-legend-controller').removeClass('fa-times-circle');
+        $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-times-circle');
         showingLegend = false;
       }else{
         renderLegend($('.pathway-legend').css('width').substring(0,$('.pathway-legend').css('width').length-2),
                     $('.pathway-legend').css('height').substring(0,$('.pathway-legend').css('height').length-2));
         $('.pathway-legend').animate({left: '75%'});
-        console.log($('.pathway-legend-controller'));
-        $('.pathway-legend-controller').removeClass('fa-question-circle');
-        $('.pathway-legend-controller').addClass('fa-times-circle');
+        $('.pathway-legend-controller').removeClass('fa-question-circle').addClass('fa-times-circle');
         showingLegend = true;
       }
     });

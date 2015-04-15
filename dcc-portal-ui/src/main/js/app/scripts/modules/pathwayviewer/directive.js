@@ -30,7 +30,10 @@
       },
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
-        '<h4>LEGEND</h4></div></div>',
+        '<h4>LEGEND</h4></div>'+
+        '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
+        '<h4>DETAILS</h4><div class="pathway-info-content"></div></div>'+
+        '</div>',
       link: function ($scope) {
 
         var controller = new dcc.ReactomePathway({
@@ -38,13 +41,23 @@
           height: 300,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
-            console.log(d);
+            jQuery('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,"},<br/>"));
+            jQuery('.pathway-info').animate({left: '70%'});
+            jQuery('.pathway-info-controller').css('visibility','visible');
+            jQuery('.pathway-legend-controller').css('visibility','hidden');
           },
           urlPath: $location.path()
         });
         var zoomedOn = [];
         var items = '';
 
+        jQuery('.pathway-info-controller').on('click',function(){
+          jQuery('.pathway-info-content').html('');
+          jQuery('.pathway-info').animate({left: '100%'});
+          jQuery('.pathway-info-controller').css('visibility','hidden');
+          jQuery('.pathway-legend-controller').css('visibility','visible');
+        });
+        
         $scope.$watch('items', function (newValue) {
           if(newValue && zoomedOn.length > 0){
             controller.render(newValue,zoomedOn);

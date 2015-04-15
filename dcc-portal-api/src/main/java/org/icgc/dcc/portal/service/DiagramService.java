@@ -24,7 +24,6 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.base.Joiner;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
@@ -32,6 +31,7 @@ import org.icgc.dcc.portal.repository.DiagramRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
