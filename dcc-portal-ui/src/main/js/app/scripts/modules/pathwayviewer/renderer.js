@@ -1,6 +1,12 @@
 (function() {
 
   'use strict';
+  
+  var defaultConfig =
+      {
+        onClick:{},
+        urlPath: ""
+      };
 
   var Renderer = function(svg, config) {
     this.svg = svg;
@@ -219,7 +225,7 @@
     var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
-      'class':function(d){return 'RenderableStroke entity'+d.id+' '+d.type;},
+      'class':function(d){return 'RenderableStroke reaction'+d.id+' '+d.type;},
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
@@ -319,7 +325,8 @@
           width:(highlight.value.toString().length*5)+10,
           height:15,
           rx: 7,
-          ry: 7
+          ry: 7,
+        opacity:0.5
         }).style({
           fill:'red'
         });

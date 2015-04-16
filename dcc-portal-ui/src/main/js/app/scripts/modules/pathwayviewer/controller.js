@@ -131,45 +131,34 @@
       svg.transition().attr('transform', 'translate(' +
                             [-minWidth * s + offsetX, -minHeight * s + offsetY] + ')scale(' + s + ')');
     }
+  };
+  
+  /**
+  * Renders a legend svg in pathway-legend div given a w&h
+  */
+  ReactomePathway.prototype.renderLegend = function (w,h) {
+    var legendSvg = d3.select('.pathway-legend-svg')[0][0];
     
-    // Only create the legend once, otherwise just make it visible again
-    var legendSvg;
-    var renderLegend = function(w, h){
-      if(!legendSvg){
-        legendSvg = d3.select('.pathway-legend').append('svg')
-          .attr('viewBox', '0 0 ' +w+ ' ' + h)
-          .attr('preserveAspectRatio', 'xMidYMid')
-          .append('g');
-        var legendrenderer = new dcc.Renderer(legendSvg, {
-          onClick: {},
-          urlPath: config.urlPath
-        });
-        var nodes = rendererUtils.getLegendNodes(20,0);
-        legendrenderer.renderNodes(nodes);
-        legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
-        legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
-        legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodeByReactomeId:function (id){return nodes[nodes.length-1];}});
-      }else{
-        legendSvg.attr('opacity','1');
-      }
-    };
-    
-    // Bind to the legend's "question mark" and animate/render on click
-    var showingLegend = false;
-    d3.select('.pathway-legend-controller').on('click',function(){
-      if(showingLegend){
-        legendSvg.transition().duration(600).attr('opacity','0');
-        $('.pathway-legend').animate({left: '100%',},600);
-        $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-times-circle');
-        showingLegend = false;
-      }else{
-        renderLegend($('.pathway-legend').css('width').substring(0,$('.pathway-legend').css('width').length-2),
-                    $('.pathway-legend').css('height').substring(0,$('.pathway-legend').css('height').length-2));
-        $('.pathway-legend').animate({left: '75%'});
-        $('.pathway-legend-controller').removeClass('fa-question-circle').addClass('fa-times-circle');
-        showingLegend = true;
-      }
-    });
+    if(!legendSvg){
+      var config =  this.config;
+      var rendererUtils = new dcc.RendererUtils();
+      legendSvg = d3.select('.pathway-legend').append('svg')
+        .attr('class','pathway-legend-svg')
+        .attr('viewBox', '0 0 ' +w+ ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid')
+        .append('g');
+      var legendrenderer = new dcc.Renderer(legendSvg, {
+        onClick: {},
+        urlPath: config.urlPath
+      });
+      var nodes = rendererUtils.getLegendNodes(20,0);
+      legendrenderer.renderNodes(nodes);
+      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
+      legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
+      legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodeByReactomeId:function (id){return nodes[nodes.length-1];}});
+    }else{
+      d3.select('.pathway-legend-svg').attr('opacity','1');
+    }
   };
 
   /**

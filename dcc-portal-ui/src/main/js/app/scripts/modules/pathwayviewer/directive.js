@@ -14,7 +14,7 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-(function() {
+(function($) {
   'use strict';
 
   var module = angular.module('icgc.pathwayviewer', []);
@@ -32,31 +32,77 @@
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div class="pathway-info-content"></div></div>'+
+        '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content"></div></div>'+
         '</div>',
       link: function ($scope) {
+        var showingLegend = false;
+        var showingInfo = false;
+        
+        var openNewSideBar = function(isLegend,isInfo){
+          if(showingLegend){
+            $('.pathway-legend').animate({left: '100%'});
+          }else if(showingInfo){
+            $('.pathway-info').animate({left: '100%'});
+            $('.pathway-info-controller').css('visibility','hidden');
+            $('.pathway-legend-controller').css('visibility','visible');
+          }
+          
+          showingLegend = isLegend;
+          showingInfo = isInfo;
+          
+          if(isLegend){
+            $('.pathway-legend').animate({'left': '75%'});
+            showingLegend = true;
+          }else if(showingInfo){
+            $('.pathway-info-controller').css('visibility','visible');
+            $('.pathway-legend-controller').css('visibility','hidden');
+            $('.pathway-info').animate({left: '70%'});
+            showingInfo = true;
+          }
+        }
+        
+        var infoSvg = d3.select('.pathway-info-svg').append('svg')
+              .attr('viewBox', '0 0 ' +100+ ' ' +50)
+              .attr('preserveAspectRatio', 'xMidYMid')
+              .append('g');
+        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: {},urlPath: ''});
 
         var controller = new dcc.ReactomePathway({
           width: 500,
           height: 300,
           container: '#pathway-viewer-mini',
-          onClick: function (d) {
-            jQuery('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,"},<br/>"));
-            jQuery('.pathway-info').animate({left: '70%'});
-            jQuery('.pathway-info-controller').css('visibility','visible');
-            jQuery('.pathway-legend-controller').css('visibility','hidden');
+          onClick: function (d,thing) {
+            var padding = 3;
+            var node = $.extend({}, d);
+            if(!showingInfo){
+              openNewSideBar(false,true);
+            }
+            $('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,"},<br/>"));
+            $('.pathway-info-svg svg g').html('');
+            node.size={width:100-padding*2,height:50-padding*2};
+            node.position={x:3,y:3};
+            infoRenderer.renderNodes([node]);
           },
           urlPath: $location.path()
         });
-        var zoomedOn = [];
-        var items = '';
+        
+        d3.select('.pathway-legend-controller').on('click',function(){
+          if(showingLegend){
+            openNewSideBar(false,false);
+          }else{
+            openNewSideBar(true,false);
+            var width = $('.pathway-legend').css('width');
+            var height = $('.pathway-legend').css('height');
+            controller.renderLegend(width.substring(0,width.length-2),height.substring(0,height.length-2));
+          }
+        });
 
         jQuery('.pathway-info-controller').on('click',function(){
-          jQuery('.pathway-info-content').html('');
-          jQuery('.pathway-info').animate({left: '100%'});
-          jQuery('.pathway-info-controller').css('visibility','hidden');
-          jQuery('.pathway-legend-controller').css('visibility','visible');
+          openNewSideBar(false,false);
         });
+        
+        var zoomedOn = [];
+        var items = '';
         
         $scope.$watch('items', function (newValue) {
           if(newValue && zoomedOn.length > 0){
@@ -76,12 +122,10 @@
 
         $scope.$watch('highlights', function (newValue) {
           if(newValue){
-            console.log('new value!!');
             controller.highlight(newValue);
           }
         },true);
-
       }
     };
   });
-})();
+})(jQuery);
