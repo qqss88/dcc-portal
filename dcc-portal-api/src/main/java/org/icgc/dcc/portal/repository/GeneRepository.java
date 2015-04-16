@@ -50,7 +50,6 @@ import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
@@ -432,17 +431,28 @@ public class GeneRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val search = client.prepareGet(index, CENTRIC_TYPE.getId(), id);
-    search.setFields(getFields(query, KIND));
-    addIncludes(search, query, KIND);
+    val search = client.prepareGet(index, TYPE.getId(), id);
+    val sourceFields = prepareSourceFields(query, getFields(query, KIND));
+    String[] excludeFields = null;
+    search.setFetchSource(sourceFields, excludeFields);
 
     val response = search.execute().actionGet();
     checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query);
-    log.debug("{}", map);
+    val result = response.getSource();
+    log.debug("{}", result);
 
-    return map;
+    return result;
+  }
+
+  private String[] prepareSourceFields(Query query, String[] fields) {
+    val typeFieldsMap = FIELDS_MAPPING.get(KIND);
+    val result = Lists.newArrayList(fields);
+    result.add(typeFieldsMap.get("externalDbIds"));
+    result.add(typeFieldsMap.get("pathways"));
+    result.addAll(query.getIncludes());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /*

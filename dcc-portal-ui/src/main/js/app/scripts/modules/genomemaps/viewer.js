@@ -124,7 +124,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         icgcGeneOverviewRenderer.on({
           'feature:click': function (e) {
             scope.$apply(function () {
-              $location.path('/genes/' + e.feature.id);
+              $location.path('/genes/' + e.feature.id).search({});
             });
           }
         });
@@ -154,7 +154,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               'feature:click': function (e) {
                 var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
                 scope.$apply(function () {
-                  $location.path(path).search({});
+                  $location.path(path).search({}).search({});
                 });
               }
             }
@@ -217,7 +217,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               },
               'feature:click': function (e) {
                 scope.$apply(function () {
-                  $location.path('/mutations/' + e.feature.id);
+                  $location.path('/mutations/' + e.feature.id).search({});
                 });
               }
             }
@@ -400,7 +400,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         icgcGeneOverviewRenderer.on({
           'feature:click': function (e) {
             scope.$apply(function () {
-              $location.path('/genes/' + e.feature.id);
+              $location.path('/genes/' + e.feature.id).search({});
             });
           }
         });
@@ -430,7 +430,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
               'feature:click': function (e) {
                 var path = '/genes/' + e.feature[e.featureType === 'gene' ? 'id' : 'geneId'];
                 scope.$apply(function () {
-                  $location.path(path).search({});
+                  $location.path(path).search({}).search({});
                 });
               }
             }
@@ -493,7 +493,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
               },
               'feature:click': function (e) {
                 scope.$apply(function () {
-                  $location.path('/mutations/' + e.feature.id);
+                  $location.path('/mutations/' + e.feature.id).search({});
                 });
               }
             }

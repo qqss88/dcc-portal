@@ -56,7 +56,7 @@ IcgcNavigationBar.prototype = {
 
     _this = this;
     this.targetId = targetId || this.targetId;
-    target = jQuery('.t_gv__navbar');
+    target = jQuery('.gv-navbar-zoom');
 
 
     if (target.length < 1) {
@@ -79,7 +79,7 @@ IcgcNavigationBar.prototype = {
 
 //        icon-repeat
     this.targetDiv = target[0];
-    this.div = jQuery('<span style="float:right" ' +
+    this.div = jQuery('<span style="" ' +
       'class="unselectable" ' +
       'id="navigation-bar">' + navgationHtml + '</span>')[0];
     // @icgc - need Nav functions but not the bar

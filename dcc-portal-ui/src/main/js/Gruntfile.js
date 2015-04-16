@@ -70,6 +70,7 @@ module.exports = function (grunt) {
       },
       test: {
         options: {
+          port: 9009,
           middleware: function (connect) {
             return [
               mountFolder(connect, '.tmp'),
@@ -97,6 +98,7 @@ module.exports = function (grunt) {
       }
     },
     clean: {
+      options: { force: true },
       dist: {
         files: [
           {
@@ -334,6 +336,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'karma',
     'useminPrepare',
     'concurrent:dist',
     'concat',

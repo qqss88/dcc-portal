@@ -115,6 +115,7 @@ public class ElasticsearchRequestUtils {
     val typeFieldsMap = FIELDS_MAPPING.get(kind);
     sourceFields.add(typeFieldsMap.get("externalDbIds"));
     sourceFields.add(typeFieldsMap.get("pathways"));
+    sourceFields.add(typeFieldsMap.get("sets"));
 
     if (query.hasInclude("transcripts")) {
       sourceFields.add("transcripts");
