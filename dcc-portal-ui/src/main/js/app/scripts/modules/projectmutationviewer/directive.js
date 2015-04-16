@@ -108,10 +108,16 @@
               points: points
             });
           });
-          chartData = chartData.sort(function(a, b) {
-            //return a.mean - b.mean;
-            return a.medium - b.medium;
-          });
+
+          chartData = _.chain(chartData)
+            .sortBy( function(d) {
+              return d.id;
+            })
+            .sortBy( function(d) {
+              return d.medium;
+            })
+            .value();
+
           return chartData;
         }
 
