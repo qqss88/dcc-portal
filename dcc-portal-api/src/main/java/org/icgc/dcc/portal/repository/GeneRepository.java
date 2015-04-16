@@ -448,9 +448,15 @@ public class GeneRepository implements Repository {
   private String[] prepareSourceFields(Query query, String[] fields) {
     val typeFieldsMap = FIELDS_MAPPING.get(KIND);
     val result = Lists.newArrayList(fields);
-    result.add(typeFieldsMap.get("externalDbIds"));
-    result.add(typeFieldsMap.get("pathways"));
-    result.addAll(query.getIncludes());
+
+    if (!query.hasFields()) {
+      result.add(typeFieldsMap.get("externalDbIds"));
+      result.add(typeFieldsMap.get("pathways"));
+    }
+
+    if (query.getIncludes() != null) {
+      result.addAll(query.getIncludes());
+    }
 
     return result.toArray(new String[result.size()]);
   }
