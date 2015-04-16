@@ -3631,7 +3631,7 @@ td {
 
 /* line 30, _modules/_genomemaps.scss */
 .t_gv__navbar {
-  padding-bottom: 1rem;
+  padding-bottom: 0.25rem;
 }
 /* line 33, _modules/_genomemaps.scss */
 .t_gv__navbar button {

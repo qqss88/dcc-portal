@@ -20,13 +20,16 @@
   var module = angular.module('icgc.browser.controllers', []);
 
   module.controller('BrowserController',
-    function ($scope, $state, Page, Genes, Mutations, GMService) {
+    function ($scope, $state, Page, Genes, Mutations, GMService, LocationService) {
       Page.setTitle('Genome Viewer');
       Page.setPage('browser');
 
       var pageSize = 20, done = false;
 
       $scope.isValidChromosome = true;
+      $scope.filters = LocationService.filters();
+      $scope.filtersStr = encodeURIComponent(JSON.stringify($scope.filters));
+
 
       $scope.setRegion = function (params) {
         // Check for required parameters

@@ -314,6 +314,7 @@
 
     <div data-ng-if="GeneCtrl.gene.hasGVChromosome" class="t_gv__navbar">
        <span data-gv-header data-options="GeneCtrl.gvOptions"></span>
+       <span class="pull-right gv-navbar-zoom"></span>
     </div>
     <gvembed data-ng-show="GeneCtrl.gene.hasGVChromosome" region="{{GeneCtrl.gene.chromosome}}:{{GeneCtrl.gene.start}}-{{GeneCtrl.gene.end}}"></gvembed>
 </section>
