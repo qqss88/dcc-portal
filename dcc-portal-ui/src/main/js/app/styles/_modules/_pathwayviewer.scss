@@ -18,14 +18,14 @@ $compartmentBorder:#ffc38b;
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
   fill:$primaryNodeColor;
   stroke:$primaryNodeBorder;
-  opacity: 0.5;
+//  opacity: 0.5;
 }
 
 .RenderableComplex, .RenderableEntitySet{
   fill:$secondaryNodeColor;
   stroke-width:$lineThicknessLight;
   stroke: $secondaryNodeBorder;
-  opacity: 0.5;
+//  opacity: 0.5;
 }
 
 .RenderableEntitySet{
@@ -137,7 +137,7 @@ $compartmentBorder:#ffc38b;
 }
 
 .pathway-info h4, .pathway-legend h4, .pathway-legend-controller, .pathway-info-controller{
-  margin-top: 3%;
+  margin-top: 0.7em;
 }
 
 .pathway-legend-controller, .pathway-info-controller{

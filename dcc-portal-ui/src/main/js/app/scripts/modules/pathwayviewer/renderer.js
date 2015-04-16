@@ -326,7 +326,6 @@
           height:15,
           rx: 7,
           ry: 7,
-        opacity:0.5
         }).style({
           fill:'red'
         });

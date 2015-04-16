@@ -3797,7 +3797,6 @@ td {
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode {
   fill: #b5f9a7;
   stroke: #1a9900;
-  opacity: 0.5;
 }
 
 /* line 24, _modules/_pathwayviewer.scss */
@@ -3805,7 +3804,6 @@ td {
   fill: #b6e2ff;
   stroke-width: 0.5px;
   stroke: #166aa2;
-  opacity: 0.5;
 }
 
 /* line 31, _modules/_pathwayviewer.scss */
@@ -3936,7 +3934,7 @@ td {
 
 /* line 139, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4, .pathway-legend-controller, .pathway-info-controller {
-  margin-top: 3%;
+  margin-top: 0.7em;
 }
 
 /* line 143, _modules/_pathwayviewer.scss */

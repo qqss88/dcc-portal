@@ -37,6 +37,7 @@
       link: function ($scope) {
         var showingLegend = false;
         var showingInfo = false;
+        var highlights;
         
         var openNewSideBar = function(isLegend,isInfo){
           if(showingLegend){
@@ -77,7 +78,7 @@
             if(!showingInfo){
               openNewSideBar(false,true);
             }
-            $('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,"},<br/>"));
+            $('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,'},<br/>'));
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};
             node.position={x:3,y:3};
@@ -86,7 +87,7 @@
           urlPath: $location.path()
         });
         
-        d3.select('.pathway-legend-controller').on('click',function(){
+        $('.pathway-legend-controller').on('click',function(){
           if(showingLegend){
             openNewSideBar(false,false);
           }else{
@@ -97,7 +98,7 @@
           }
         });
 
-        jQuery('.pathway-info-controller').on('click',function(){
+        $('.pathway-info-controller').on('click',function(){
           openNewSideBar(false,false);
         });
         
@@ -122,6 +123,7 @@
 
         $scope.$watch('highlights', function (newValue) {
           if(newValue){
+            highlights = newValue;
             controller.highlight(newValue);
           }
         },true);
