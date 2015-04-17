@@ -88,12 +88,15 @@
     
     // ------------- temporary 
     var highlights = [];
+    var reactomeIds = [];
     _.filter(model.getNodes().slice(), 
              function(n){return    n.type==='RenderableProtein'||
-                                   n.type==='RenderableEntity'||
                                    n.type==='RenderableEntitySet';})
     .forEach(function (node) {
-      highlights.push({id:node.reactomeId,value:Math.round(Math.random()*200 + 1)});
+      if(reactomeIds.indexOf(node.reactomeId) < 0){
+        reactomeIds.push(node.reactomeId);
+        highlights.push({id:node.reactomeId,value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
+      }
     });
     this.renderer.highlightEntity(highlights,model);
     // -------------------- end temporary

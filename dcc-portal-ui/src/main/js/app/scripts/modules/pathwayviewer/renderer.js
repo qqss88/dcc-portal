@@ -110,6 +110,40 @@
     var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
 
+    // Create a point map for the octagons
+    var getPointsMap = function(x,y,w,h,a){
+      var points = [{x:x+a,   y:y},
+                    {x:x+w-a, y:y},
+                    {x:x+w,   y:y+a},
+                    {x:x+w,   y:y+h-a},
+                    {x:x+w-a, y:y+h},
+                    {x:x+a,   y:y+h},
+                    {x:x,     y:y+h-a},
+                    {x:x,     y:y+a}];
+      var val = '';
+      points.forEach(function (elem) {
+        val= val+elem.x+','+elem.y+' ';
+      });
+      return val;
+    };
+
+    // Render all complexes as octagons
+    svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
+      .attr({
+        class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
+        points: function (d) {
+          return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
+        },
+        stroke: 'Red',
+        'stroke-width': 1
+      }).on('mouseover', function (d) {
+        d.oldColor = d3.rgb(d3.select(this).style('fill'));
+        d3.select(this).style('fill', d.oldColor.brighter(0.25));
+      }).on('mouseout', function (d) {
+        d3.select(this).style('fill', d.oldColor);
+      }).on('click',function(d){config.onClick(d);});
+
+    // Render all other normal rectangular nodes after octagons
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {return 'RenderableRect ' + d.type + ' entity'+d.id;},
       'x': function (d) {return d.position.x;},
@@ -154,40 +188,7 @@
     }).on('mouseout', function (d) {
       d3.select(this).style('fill', d.oldColor);
     }).on('click',function(d){config.onClick(d);});
-
-    // Create a point map for the octagons
-    var getPointsMap = function(x,y,w,h,a){
-      var points = [{x:x+a,   y:y},
-                    {x:x+w-a, y:y},
-                    {x:x+w,   y:y+a},
-                    {x:x+w,   y:y+h-a},
-                    {x:x+w-a, y:y+h},
-                    {x:x+a,   y:y+h},
-                    {x:x,     y:y+h-a},
-                    {x:x,     y:y+a}];
-      var val = '';
-      points.forEach(function (elem) {
-        val= val+elem.x+','+elem.y+' ';
-      });
-      return val;
-    };
-
-    // Render all complexes as octagons
-    svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
-      .attr({
-        class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
-        points: function (d) {
-          return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
-        },
-        stroke: 'Red',
-        'stroke-width': 1
-      }).on('mouseover', function (d) {
-        d.oldColor = d3.rgb(d3.select(this).style('fill'));
-        d3.select(this).style('fill', d.oldColor.brighter(0.25));
-      }).on('mouseout', function (d) {
-        d3.select(this).style('fill', d.oldColor);
-      }).on('click',function(d){config.onClick(d);});
-
+    
     // Add a foreignObject to contain all text so that warpping is done for us
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableText';},
@@ -204,6 +205,7 @@
           d.text.content+'</td></tr></table>';
       });
     
+    // if it's a gene, we have to add a sepcial array in the top right corner
     var genes =  _.filter(nodes,function(n){return n.type === 'RenderableGene';});
 
     svg.selectAll('.RenderableGeneArrow').data(genes).enter().append('line').attr({
@@ -308,37 +310,39 @@
     var svg = this.svg;
     
     highlights.forEach(function (highlight) {
-      var node = model.getNodeByReactomeId(highlight.id);
-      var svgNode = svg.selectAll('.entity'+node.id);
+      var nodes = model.getNodesByReactomeId(highlight.id);
+      nodes.forEach(function (node) {
+        var svgNode = svg.selectAll('.entity'+node.id);
       
-      if(svgNode[0].length <= 0){
-        return;
-      }
-      svgNode.style('stroke','red');
-      svgNode.style('stroke-width','3px');
+        if(svgNode[0].length <= 0){
+          return;
+        }
+        svgNode.style('stroke','red');
+        svgNode.style('stroke-width','3px');
 
-      svg.append('rect')
-        .attr({
-          class:'value-banner',
-          x: (+node.position.x)+(+node.size.width) - 10,
-          y: (+node.position.y)- 7,
-          width:(highlight.value.toString().length*5)+10,
-          height:15,
-          rx: 7,
-          ry: 7,
-        }).style({
-          fill:'red'
-        });
-      
-      svg.append('text').attr({
-        'class':'banner-text',
-        'x':(+node.position.x)+(+node.size.width) - 5,
-        'y':(+node.position.y)+4,
-        'pointer-events':'none',
-        'font-size':'9px',
-        'font-weight':'bold',
-        'fill':'white'
-      }).text(highlight.value);
+        svg.append('rect')
+          .attr({
+            class:'value-banner',
+            x: (+node.position.x)+(+node.size.width) - 10,
+            y: (+node.position.y)- 7,
+            width:(highlight.value.toString().length*5)+10,
+            height:15,
+            rx: 7,
+            ry: 7,
+          }).style({
+            fill:'red'
+          });
+
+        svg.append('text').attr({
+          'class':'banner-text',
+          'x':(+node.position.x)+(+node.size.width) - 5,
+          'y':(+node.position.y)+4,
+          'pointer-events':'none',
+          'font-size':'9px',
+          'font-weight':'bold',
+          'fill':'white'
+        }).text(highlight.value);
+      });
     });
   };
 

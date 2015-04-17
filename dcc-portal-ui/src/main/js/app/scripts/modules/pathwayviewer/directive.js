@@ -34,7 +34,7 @@
         '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
         '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content"></div></div>'+
         '</div>',
-      link: function ($scope) {
+      link: function ($scope,_ctrl) {
         var showingLegend = false;
         var showingInfo = false;
         var highlights;

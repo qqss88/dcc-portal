@@ -44,8 +44,7 @@
         reactions: []
       });
     }
-
-
+    
     collection = $(xml).find('Edges')[0].children;
 
     var getPointsArray = function(pointString){
@@ -99,14 +98,14 @@
     return node;
   };
   
-  PathwayModel.prototype.getNodeByReactomeId = function (reactomeId) {
-    var node;
+  PathwayModel.prototype.getNodesByReactomeId = function (reactomeId) {
+    var nodes = [];
     this.nodes.forEach(function (n) {
       if (n.reactomeId === reactomeId){
-        node = n;
+        nodes.push(n);
       }
     });
-    return node;
+    return nodes;
   };
 
   PathwayModel.prototype.getReactionById = function (id) {
