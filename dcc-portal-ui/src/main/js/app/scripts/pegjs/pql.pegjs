@@ -1,3 +1,10 @@
+/**
+* This PEG grammar translates PQL into a JSON tree.
+*/
+
+/*
+* Helper functions
+*/
 {
   var altFuncMapping = {
     "&":    "and",
@@ -54,7 +61,7 @@
 }
 
 /**
-* 
+* Grammar definition starts here.
 */
 
 start = core
@@ -177,7 +184,7 @@ naryFuncSyntax1
 
 naryFuncSyntax2
   = _ OPAR l: statement _ o: naryFuncSyntax2Ops _ r: statement CPAR _
-    {o = altFuncMapping[o] || "UNKNOWN"; return toBasicUnit ([l, r], o);}
+    {o = altFuncMapping[o]; return toBasicUnit ([l, r], o);}
 
 
 orderArray

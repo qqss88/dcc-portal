@@ -85,6 +85,12 @@
       return result;
     }
 
+    function removeEmptyObject (collection) {
+      return _.filter (collection, function (o) {
+        return o !== {};
+      });
+    }
+
     function toJsonTreeFromQueryObject (query) {
       var categoryKeys = Object.keys (query || {});
 
@@ -112,9 +118,7 @@
         return termFilters;
       });
 
-      var values = _.filter (_.flatten (termArray), function (o) {
-        return o !== {};
-      });
+      var values = removeEmptyObject (_.flatten (termArray));
 
       return (values.length > 1) ? [{op: "and", values: values}] : values;
     }
@@ -179,23 +183,33 @@
       return query;
     }
 
-    function updateQuery (pql, categoryName, facetName, term, updator) {
-      var query = convertPqlToQueryObject (pql);
-      var updatedQuery = updator (categoryName, facetName, term, query);
-      var jsonTree = toJsonTreeFromQueryObject (updatedQuery);
+    function convertQueryObjectToPql (queryObject) {
+      var jsonTree = toJsonTreeFromQueryObject (queryObject);
 
       return PqlTranslationService.toPql (jsonTree);
     }
 
+    function updateQuery (pql, categoryName, facetName, term, updators) {
+      var query = convertPqlToQueryObject (pql);
+      var updatedQuery = _.reduce (updators || [], function (result, f) {
+        return _.isFunction (f) ? f (categoryName, facetName, term, result) : result;
+      }, query);
+      
+      return convertQueryObjectToPql (updatedQuery);
+    }
+
     return {
       addTerm: function (pql, categoryName, facetName, term) {
-        return updateQuery (pql, categoryName, facetName, term, addTermToQuery);
+        return updateQuery (pql, categoryName, facetName, term, [addTermToQuery]);
       },
       removeTerm: function (pql, categoryName, facetName, term) {
-        return updateQuery (pql, categoryName, facetName, term, removeTermFromQuery);
+        return updateQuery (pql, categoryName, facetName, term, [removeTermFromQuery]);
       },
       removeFacet: function (pql, categoryName, facetName) {
-        return updateQuery (pql, categoryName, facetName, null, removeFacetFromQuery);	
+        return updateQuery (pql, categoryName, facetName, null, [removeFacetFromQuery]);
+      },
+      overwrite: function (pql, categoryName, facetName, term) {
+        return updateQuery (pql, categoryName, facetName, term, [removeFacetFromQuery, addTermToQuery]);
       },
       getQuery: function (pql) {
         return convertPqlToQueryObject (pql);

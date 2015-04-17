@@ -206,6 +206,33 @@ describe('Testing PqlUtilService', function() {
     expect(testQuery).toEqual(expectedQuery);
   });
 
+  it('Testing overwrite() with "donor.gender" set to "unknown" in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
+    var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
+    // Modify the PQL in the URL location directly to simulate an input
+    location.search (paramName, originalPql);
+
+    var expectedQuery = {
+      donor: {
+        gender: {
+          "in": ["unknown"]
+        },
+        age: {
+          "in": [22]
+        }
+      },
+      mutation: {
+        foo: {
+          "in": ["bar"]
+        }
+      }
+    };
+
+    PqlUtilService.overwrite ("donor", "gender", "unknown");
+
+    var testQuery = PqlUtilService.getQuery();
+    expect(testQuery).toEqual(expectedQuery);
+  });
+
   it('Testing Builder.build()', function() {
     var expected = 'in(donor.gender,"male","female")';
     var builder = PqlUtilService.getBuilder ();

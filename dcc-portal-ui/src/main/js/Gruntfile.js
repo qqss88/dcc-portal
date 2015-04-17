@@ -345,6 +345,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'peg',
     'karma',
     'useminPrepare',
     'concurrent:dist',

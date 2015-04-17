@@ -76,6 +76,10 @@
         var pql = PqlQueryObjectService.removeFacet (getPql(), categoryName, facetName);	
         setPql (pql);
       },
+      overwrite: function (categoryName, facetName, term) {
+        var pql = PqlQueryObjectService.overwrite (getPql(), categoryName, facetName, term);
+        setPql (pql);
+      },
       getQuery: function () {
         return PqlQueryObjectService.getQuery (getPql());
       },
