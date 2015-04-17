@@ -88,7 +88,7 @@ public class ReleaseRepository {
     val response = search.execute().actionGet();
     checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query);
+    val map = createResponseMap(response, query, KIND);
     log.debug("{}", map);
 
     return map;

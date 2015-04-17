@@ -6,6 +6,7 @@ import static java.util.Collections.sort;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedWriter;
@@ -31,6 +32,7 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.Donors;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
@@ -64,10 +66,7 @@ public class DonorService {
     val list = ImmutableList.<Donor> builder();
 
     for (val hit : hits) {
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValues());
-      }
+      val fieldMap = createResponseMap(hit, query, Kind.DONOR);
       if (includeScore) fieldMap.put("_score", hit.getScore());
       list.add(new Donor(fieldMap));
     }

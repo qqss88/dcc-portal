@@ -48,7 +48,8 @@ import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
@@ -286,7 +287,10 @@ public class GeneRepository implements Repository {
     val filters = remapFilters(query.getFilters());
     search.setPostFilter(getFilters(filters));
     search.addFields(getFields(query, KIND));
-    addIncludes(search, query, KIND);
+    String[] sourceFields = resolveSourceFields(query, KIND);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
+    }
 
     val facets = getFacets(query, filters);
     for (val facet : facets) {

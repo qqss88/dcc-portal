@@ -4,7 +4,7 @@ import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.processSource;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +19,7 @@ import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
@@ -120,12 +121,7 @@ public class GeneService {
     val list = ImmutableList.<Gene> builder();
 
     for (val hit : hits) {
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValues());
-      }
-      processSource(hit.getSource(), fieldMap);
-
+      val fieldMap = createResponseMap(hit, query, Kind.GENE);
       if (includeScore) fieldMap.put("_score", hit.getScore());
       fieldMap.put("projectIds", projectIds);
       list.add(new Gene(fieldMap));

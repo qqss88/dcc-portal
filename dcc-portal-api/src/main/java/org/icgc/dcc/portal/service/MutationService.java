@@ -2,8 +2,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.addResponseIncludes;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createMapFromSearchFields;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.search.facet.Facets;
 import org.elasticsearch.search.facet.terms.TermsFacet;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Pagination;
@@ -63,10 +63,8 @@ public class MutationService {
     val list = ImmutableList.<Mutation> builder();
 
     for (val hit : hits) {
-      val map = createMapFromSearchFields(hit.getFields());
+      val map = createResponseMap(hit, query, Kind.MUTATION);
       if (includeScore) map.put("_score", hit.getScore());
-
-      addResponseIncludes(query, hit, map);
       list.add(new Mutation(map));
     }
 

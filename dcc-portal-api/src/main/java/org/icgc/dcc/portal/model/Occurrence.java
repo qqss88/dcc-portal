@@ -19,6 +19,8 @@ package org.icgc.dcc.portal.model;
 
 import static java.util.Collections.emptyList;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -117,55 +119,54 @@ public class Occurrence {
   @JsonCreator
   public Occurrence(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.OCCURRENCE);
-    donorId = (String) fieldMap.get(fields.get("donorId"));
-    mutationId = (String) fieldMap.get(fields.get("mutationId"));
-    chromosome = (String) fieldMap.get(fields.get("chromosome"));
+    donorId = getString(fieldMap.get(fields.get("donorId")));
+    mutationId = getString(fieldMap.get(fields.get("mutationId")));
+    chromosome = getString(fieldMap.get(fields.get("chromosome")));
     start = getLong(fieldMap.get(fields.get("start")));
     end = getLong(fieldMap.get(fields.get("end")));
     submittedMutationId = (String) fieldMap.get(fields.get("submittedMutationId"));
     matchedSampleId = (String) fieldMap.get(fields.get("matchedSampleId"));
     submittedMatchedSampleId = (String) fieldMap.get(fields.get("submittedMatchedSampleId"));
-    projectId = (String) fieldMap.get(fields.get("projectId"));
-    sampleId = (String) fieldMap.get(fields.get("sampleId"));
-    specimenId = (String) fieldMap.get(fields.get("specimenId"));
-    analysisId = (String) fieldMap.get(fields.get("analysisId"));
-    analyzedSampleId = (String) fieldMap.get(fields.get("analyzedSampleId"));
-    baseCallingAlgorithm = (String) fieldMap.get(fields.get("baseCallingAlgorithm"));
+    projectId = getString(fieldMap.get(fields.get("projectId")));
+    sampleId = getString(fieldMap.get(fields.get("sampleId")));
+    specimenId = getString(fieldMap.get(fields.get("specimenId")));
+    analysisId = getString(fieldMap.get(fields.get("analysisId")));
+    analyzedSampleId = getString(fieldMap.get(fields.get("analyzedSampleId")));
+    baseCallingAlgorithm = getString(fieldMap.get(fields.get("baseCallingAlgorithm")));
     strand = getLong(fieldMap.get(fields.get("strand")));
-    controlGenotype = (String) fieldMap.get(fields.get("controlGenotype"));
-    experimentalProtocol = (String) fieldMap.get(fields.get("experimentalProtocol"));
-    expressedAllele = (String) fieldMap.get(fields.get("expressedAllele"));
-    platform = (String) fieldMap.get(fields.get("platform"));
+    controlGenotype = getString(fieldMap.get(fields.get("controlGenotype")));
+    experimentalProtocol = getString(fieldMap.get(fields.get("experimentalProtocol")));
+    expressedAllele = getString(fieldMap.get(fields.get("expressedAllele")));
+    platform = getString(fieldMap.get(fields.get("platform")));
 
     probability = (Double) fieldMap.get(fields.get("probability"));
     qualityScore = (Double) fieldMap.get(fields.get("qualityScore"));
-    rawDataAccession = (String) fieldMap.get(fields.get("rawDataAccession"));
-    rawDataRepository = (String) fieldMap.get(fields.get("rawDataRepository"));
+    rawDataAccession = getString(fieldMap.get(fields.get("rawDataAccession")));
+    rawDataRepository = getString(fieldMap.get(fields.get("rawDataRepository")));
     readCount = (Double) fieldMap.get(fields.get("readCount"));
-    refsnpAllele = (String) fieldMap.get(fields.get("refsnpAllele"));
+    refsnpAllele = getString(fieldMap.get(fields.get("refsnpAllele")));
     seqCoverage = (Double) fieldMap.get(fields.get("seqCoverage"));
-    sequencingStrategy = (String) fieldMap.get(fields.get("sequencingStrategy"));
-    ssmMDbXref = (String) fieldMap.get(fields.get("ssmMDbXref"));
-    ssmMUri = (String) fieldMap.get(fields.get("ssmMUri"));
-    ssmPUri = (String) fieldMap.get(fields.get("ssmPUri"));
-    tumourGenotype = (String) fieldMap.get(fields.get("tumourGenotype"));
-    variationCallingAlgorithm = (String) fieldMap.get(fields.get("variationCallingAlgorithm"));
-    verificationPlatform = (String) fieldMap.get(fields.get("verificationPlatform"));
-    verificationStatus = (String) fieldMap.get(fields.get("verificationStatus"));
-    xrefEnsemblVarId = (String) fieldMap.get(fields.get("xrefEnsemblVarId"));
-    mutation = (String) fieldMap.get(fields.get("mutation"));
+    sequencingStrategy = getString(fieldMap.get(fields.get("sequencingStrategy")));
+    ssmMDbXref = getString(fieldMap.get(fields.get("ssmMDbXref")));
+    ssmMUri = getString(fieldMap.get(fields.get("ssmMUri")));
+    ssmPUri = getString(fieldMap.get(fields.get("ssmPUri")));
+    tumourGenotype = getString(fieldMap.get(fields.get("tumourGenotype")));
+    variationCallingAlgorithm = getString(fieldMap.get(fields.get("variationCallingAlgorithm")));
+    verificationPlatform = getString(fieldMap.get(fields.get("verificationPlatform")));
+    verificationStatus = getString(fieldMap.get(fields.get("verificationStatus")));
+    xrefEnsemblVarId = getString(fieldMap.get(fields.get("xrefEnsemblVarId")));
+    mutation = getString(fieldMap.get(fields.get("mutation")));
     observations = buildObservations(getObservations(fieldMap));
   }
 
   @SuppressWarnings("unchecked")
   private static List<Map<String, Object>> getObservations(Map<String, Object> fieldMap) {
-    if (!fieldMap.containsKey("ssm")) {
+    val observationKey = FIELDS_MAPPING.get(Kind.OCCURRENCE).get("observation");
+    if (!fieldMap.containsKey(observationKey)) {
       return emptyList();
     }
 
-    val ssm = (Map<String, Object>) fieldMap.get("ssm");
-
-    return (List<Map<String, Object>>) ssm.get("observation");
+    return (List<Map<String, Object>>) fieldMap.get(observationKey);
   }
 
   private List<Observation> buildObservations(List<Map<String, Object>> list) {
@@ -178,10 +179,4 @@ public class Occurrence {
     return observations;
   }
 
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    if (field instanceof Integer) return (long) (Integer) field;
-    else
-      return null;
-  }
 }

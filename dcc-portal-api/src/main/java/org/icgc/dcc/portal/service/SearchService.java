@@ -18,8 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.addResponseIncludes;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createMapFromSearchFields;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +52,7 @@ public class SearchService {
     val list = ImmutableList.<Keyword> builder();
 
     for (val hit : hits) {
-      val fieldMap = createMapFromSearchFields(hit.getFields());
-      addResponseIncludes(query, hit, fieldMap);
-
+      val fieldMap = createResponseMap(hit, query, Kind.KEYWORD);
       list.add(new Keyword(fieldMap));
     }
 
