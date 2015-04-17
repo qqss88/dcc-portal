@@ -25,22 +25,22 @@
 
   module.factory(serviceName, function (PqlQueryObjectService, $location, $log) {
     // This is the parameter name for PQL in the URL query params.
-    var pqlParameterName = "query";
+    var pqlParameterName = 'query';
 
     function getPql() {
       var search = $location.search();
       var pql = search [pqlParameterName] || '';
 
-      $log.debug ("The URL contains this PQL: [%s].", pql);
+      $log.debug ('The URL contains this PQL: [%s].', pql);
       return pql;
     }
 
     function setPql (pql) {
-      $log.debug ("PQL is updated to [%s].", pql);
-      $location.search (pqlParameterName, pql);      
+      $log.debug ('PQL is updated to [%s].', pql);
+      $location.search (pqlParameterName, pql);
     }
 
-    var builder = function () {
+    var Builder = function () {
       var buffer = '';
 
       return {
@@ -53,7 +53,7 @@
           return this;
         },
         removeFacet: function (categoryName, facetName) {
-          buffer = PqlQueryObjectService.removeFacet (buffer, categoryName, facetName);	
+          buffer = PqlQueryObjectService.removeFacet (buffer, categoryName, facetName);
           return this;
         },
         build: function () {
@@ -73,7 +73,7 @@
         setPql (pql);
       },
       removeFacet: function (categoryName, facetName) {
-        var pql = PqlQueryObjectService.removeFacet (getPql(), categoryName, facetName);	
+        var pql = PqlQueryObjectService.removeFacet (getPql(), categoryName, facetName);
         setPql (pql);
       },
       overwrite: function (categoryName, facetName, term) {
@@ -87,7 +87,7 @@
         return getPql();
       },
       getBuilder: function () {
-      	return new builder();
+        return new Builder();
       }
     };
   });

@@ -26,7 +26,7 @@
   module.factory(serviceName, function ($log) {
 
     var noNestingOperators = [
-      "exists", "missing", "select", "facets"
+      'exists', 'missing', 'select', 'facets'
     ];
 
     function addQuotes (s) {
@@ -34,8 +34,8 @@
     }
 
     function appendCommaIfNeeded (s) {
-        return s.length > 0 ? ',' : '';
-    };
+      return s.length > 0 ? ',' : '';
+    }
     
     function opValuesToString (op, values) {
       return '' + op + '(' + values.join() + ')';
@@ -47,16 +47,16 @@
       }
     
       var op = unit.op;
-      if ("limit" === op) {
+      if ('limit' === op) {
         return limitUnitToPql (unit);
-      } 
-      if ("sort" === op) {
+      }
+      if ('sort' === op) {
         return sortUnitToPql (unit);
       }
 
       var vals = unit.values || [];
-      var values = _.contains (noNestingOperators, op) ? 
-        vals.join() : 
+      var values = _.contains (noNestingOperators, op) ?
+        vals.join() :
         vals.map(convertNodeToPqlString).join();
 
       var parameters = unit.field || '';
@@ -65,9 +65,9 @@
         parameters += appendCommaIfNeeded(parameters) + values;
       }
 
-      var ending = ("count" === op) ? 
+      var ending = ('count' === op) ?
         ')' + appendCommaIfNeeded (parameters) + parameters :
-        parameters + ')'; 
+        parameters + ')';
 
       return '' + op + '(' + ending;
     }
@@ -89,22 +89,22 @@
 
     return {
       fromPql: function (pql) {
-      	try {
+        try {
           return PqlPegParser.parse (pql);
         } catch (e) {
-          $log.error ("Error parsing PQL [%s] with error message: [%s]", pql, e.message);
+          $log.error ('Error parsing PQL [%s] with error message: [%s]', pql, e.message);
           throw e;
         }
       },
       toPql: function (parsedTree) {
-        var result = _.isArray (parsedTree) ? 
-    	  parsedTree.map(convertNodeToPqlString).join() :
+        var result = _.isArray (parsedTree) ?
+          parsedTree.map(convertNodeToPqlString).join() :
           _.isObject (parsedTree) ? convertNodeToPqlString (parsedTree) : null;
 
         if (result === null) {
-        	$log.warn ("The input is neither an array nor an object: [%s]. toPql() is returning an empty string.", 
-        	  JSON.stringify (parsedTree));
-        	result = '';
+          $log.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',
+            JSON.stringify (parsedTree));
+          result = '';
         }
 
         return result;

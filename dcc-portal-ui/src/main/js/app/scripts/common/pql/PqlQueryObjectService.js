@@ -23,10 +23,10 @@
 
   var module = angular.module(namespace, []);
 
-  module.factory(serviceName, function (PqlTranslationService, $log) {
+  module.factory(serviceName, function (PqlTranslationService) {
 
     function convertPqlToQueryObject (pql) {
-      var pql = (pql || '').trim();
+      pql = (pql || '').trim();
 
       if (pql.length < 1) {return {};}
 
@@ -40,9 +40,7 @@
       return (node.op || '') === nodeName;
     }
 
-    var isAndNode = _.partial (isNode, "and");
-    var isSortNode = _.partial (isNode, "sort");
-    var isLimitNode = _.partial (isNode, "limit");
+    var isAndNode = _.partial (isNode, 'and');
 
     function parseIdentifier (id) {
       var splits = (id || '').split ('.');
@@ -120,7 +118,7 @@
 
       var values = removeEmptyObject (_.flatten (termArray));
 
-      return (values.length > 1) ? [{op: "and", values: values}] : values;
+      return (values.length > 1) ? [{op: 'and', values: values}] : values;
     }
 
     function addTermToQuery (categoryName, facetName, term, query) {
@@ -148,7 +146,7 @@
 
       if (_.contains (categoryKeys, categoryName)) {
         var facetKeys = Object.keys (query [categoryName] || {});
-        var inField = "in";
+        var inField = 'in';
 
         if (_.contains (facetKeys, facetName)) {
           var inValueArray = query [categoryName][facetName][inField] || [];
