@@ -23,7 +23,6 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
-
 import static org.icgc.dcc.portal.model.IndexModel.API_ENTITY_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -115,6 +114,12 @@ public class QueryService {
       break;
     case OCCURRENCE:
       fields.remove(typeFieldsMap.get("observation"));
+      break;
+    case GENE_SET:
+      fields.remove(typeFieldsMap.get("hierarchy"));
+      fields.remove(typeFieldsMap.get("inferredTree"));
+      fields.remove(typeFieldsMap.get("synonyms"));
+      fields.remove(typeFieldsMap.get("altIds"));
       break;
     }
   }

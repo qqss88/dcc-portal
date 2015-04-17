@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
@@ -45,30 +46,28 @@ public class ElasticsearchRequestUtils {
   }
 
   private static List<String> getSource(Query query, Kind kind) {
-    List<String> sourceFields = Lists.newArrayList();
-
     switch (kind) {
     case MUTATION:
-      sourceFields = prepareMutationIncludes(query);
-      break;
+      return prepareMutationIncludes(query);
     case DONOR:
-      sourceFields = prepareDonorIncludes(query);
-      break;
+      return prepareDonorIncludes(query);
     case GENE:
-      sourceFields = prepareGeneIncludes(query, kind);
-      break;
+      return prepareGeneIncludes(query, kind);
     case PATHWAY:
-      sourceFields = preparePathwayIncludes(query);
-      break;
+      return preparePathwayIncludes(query);
     case PROJECT:
-      sourceFields = prepareProjectIncludes(query, kind);
-      break;
+      return prepareProjectIncludes(query, kind);
     case OCCURRENCE:
-      sourceFields = prepareOccurrenceIncludes(query, kind);
-      break;
+      return prepareOccurrenceIncludes(query, kind);
+    case GENE_SET:
+      return prepareGeneSetIncludes(query, kind);
+    default:
+      return emptyList();
     }
+  }
 
-    return sourceFields;
+  private static List<String> prepareGeneSetIncludes(Query query, Kind kind) {
+    return resolveFields(query, kind, "hierarchy", "inferredTree", "synonyms", "altIds");
   }
 
   private static List<String> prepareOccurrenceIncludes(Query query, Kind kind) {
