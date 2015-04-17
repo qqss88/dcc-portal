@@ -18,7 +18,8 @@
 package org.icgc.dcc.portal.repository;
 
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.addIncludes;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
@@ -54,12 +55,15 @@ public class PathwayRepository {
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE.getId(), id);
     search.setFields(getFields(query, KIND));
-    addIncludes(search, query, KIND);
+    String[] sourceFields = resolveSourceFields(query, KIND);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
+    }
 
     val response = search.execute().actionGet();
     checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query);
+    val map = createResponseMap(response, query, KIND);
     log.debug("{}", map);
 
     return map;

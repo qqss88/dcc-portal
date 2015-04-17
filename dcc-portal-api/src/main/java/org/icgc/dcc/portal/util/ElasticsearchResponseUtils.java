@@ -17,11 +17,11 @@
  */
 package org.icgc.dcc.portal.util;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static lombok.AccessLevel.PRIVATE;
+import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,6 @@ import org.elasticsearch.search.SearchHitField;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 /**
@@ -92,25 +91,6 @@ public final class ElasticsearchResponseUtils {
     return (Boolean) resultList.get(0);
   }
 
-  public static void addResponseIncludes(Query query, GetResponse response, Map<String, Object> map) {
-    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
-      map.putAll(response.getSource());
-      processConsequences(map, query);
-    }
-  }
-
-  public static void addResponseIncludes(Query query, SearchHit searchHit, Map<String, Object> map) {
-    if (query.getIncludes() != null && !query.getIncludes().isEmpty()) {
-      val source = searchHit.getSource();
-      if (source == null) {
-        return;
-      }
-
-      map.putAll(searchHit.getSource());
-      processConsequences(map, query);
-    }
-  }
-
   private static void processConsequences(Map<String, Object> map, Query query) {
     if (query.hasInclude("consequences")) {
       log.debug("Copying transcripts to consequences...");
@@ -140,9 +120,16 @@ public final class ElasticsearchResponseUtils {
     return result;
   }
 
-  public static Map<String, Object> createResponseMap(GetResponse response, Query query) {
+  public static Map<String, Object> createResponseMap(GetResponse response, Query query, Kind kind) {
     val map = createMapFromGetFields(response.getFields());
-    addResponseIncludes(query, response, map);
+    map.putAll(processSource(response.getSource(), query, kind));
+
+    return map;
+  }
+
+  public static Map<String, Object> createResponseMap(SearchHit response, Query query, Kind kind) {
+    val map = createMapFromSearchFields(response.getFields());
+    map.putAll(processSource(response.getSource(), query, kind));
 
     return map;
   }
@@ -157,10 +144,15 @@ public final class ElasticsearchResponseUtils {
     }
   }
 
-  public static void processSource(Map<String, Object> source, Map<String, Object> fields) {
-    if (source == null) return;
+  private static Map<String, Object> processSource(Map<String, Object> source, Query query, Kind kind) {
+    if (source == null) {
+      return emptyMap();
+    }
 
-    fields.putAll(source);
+    val result = flatternMap(source, query, kind);
+    processConsequences(result, query);
+
+    return result;
   }
 
   public static Map<String, Object> flatternMap(Map<String, Object> source) {
@@ -168,37 +160,44 @@ public final class ElasticsearchResponseUtils {
       return emptyMap();
     }
 
-    return flatternMap(Optional.empty(), source);
+    return flatternMap(Optional.empty(), source, null, null);
+  }
+
+  public static Map<String, Object> flatternMap(Map<String, Object> source, Query query, Kind kind) {
+    if (source == null) {
+      return emptyMap();
+    }
+
+    return flatternMap(Optional.empty(), source, kind, query);
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Object> flatternMap(Optional<String> prefix, Map<String, Object> source) {
-    val result = ImmutableMap.<String, Object> builder();
+  private static Map<String, Object> flatternMap(Optional<String> prefix, Map<String, Object> source, Kind kind,
+      Query query) {
+    val result = Maps.<String, Object> newHashMap();
 
     for (val entry : source.entrySet()) {
-      if (entry.getValue() instanceof Map) {
-        result.putAll(flatternMap(Optional.of(entry.getKey()), (Map<String, Object>) entry.getValue()));
+      val fieldName = resolvePrefix(prefix, entry.getKey());
+      if (entry.getValue() instanceof Map && !isSkip(fieldName, query, kind)) {
+        result.putAll(flatternMap(Optional.of(entry.getKey()), (Map<String, Object>) entry.getValue(), kind, query));
       } else {
-        result.put(resolvePrefix(prefix, entry.getKey()), entry.getValue());
+        result.put(fieldName, entry.getValue());
       }
     }
 
-    return result.build();
+    return result;
   }
 
-  @SuppressWarnings("unchecked")
-  private static boolean isNestedList(Object value) {
-    if (value instanceof List) {
-      val list = (List<Object>) value;
-      if (!list.isEmpty() && list.get(0) instanceof List) {
-        checkState(list.size() == 1, format("Expected that the parent list would contain only one List child, but its "
-            + "size is '%s'", list.size()));
-
-        return true;
-      }
+  /**
+   * Some fields are maps and the client expects them to be a map. This methods resolves those maps and prevents them
+   * from been 'flattern' further
+   */
+  private static boolean isSkip(String fieldName, Query query, Kind kind) {
+    if (kind == null || query == null) {
+      return false;
     }
 
-    return false;
+    return (FIELDS_MAPPING.get(kind).containsValue(fieldName) || query.hasInclude(fieldName));
   }
 
   private static String resolvePrefix(Optional<String> prefix, String field) {
