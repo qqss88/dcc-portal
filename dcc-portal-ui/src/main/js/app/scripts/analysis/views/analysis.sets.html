@@ -1,6 +1,6 @@
 <section data-ng-controller="SavedSetController as SavedSetController">
     <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
-        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, delete the sets that are in "processing" state. 
+        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, <a href="" data-ng-click="SavedSetController.removeInvalidSets()"><i class="icon icon-trash"></i>DELETE THE SETS</a> that are in "processing" state. 
     </div>
     <div>
         You can create and save new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of interest from 
@@ -26,16 +26,6 @@
 
     </div>
     <br>
-
-    <!-- abinitio -->
-    <!--
-    <div class="text-center wide" data-ng-if="SavedSetController.entitySets.length === 0">
-        <br>
-        <h3>Your saved gene, donor and mutation sets appear here.</h3>
-        <br>
-    </div>
-    <div class="clearfix"></div>
-    -->
 
 
     <div style="padding:.5rem 0" data-ng-if="SavedSetController.entitySets.length > 0">
