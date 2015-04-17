@@ -137,6 +137,9 @@ public class PortalProperties extends Configuration {
     @JsonProperty
     String ssoUrl;
 
+    @JsonProperty
+    String ssoUrlGoogle;
+
   }
 
   @Data

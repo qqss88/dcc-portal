@@ -52,6 +52,7 @@ cache:
 # Authorization 
 crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
+  ssoUrlGoogle: "https://***REMOVED***/gooapi/redirect?continue="
 
 hazelcast:
   enabled: false
