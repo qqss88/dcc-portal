@@ -15,23 +15,6 @@
    margin: 0
 }
 
-/* Slightly wider modal for better fitting of our text */
-/*
-.modal {
-   width: 42%;
-   margin-left: -21%;
-   max-height: 95%;
-}
-
-.modal-body {
-   max-height: 650px;
-}
-
-.modal.fade.in {
-  top: 2%;
-}
-*/
-
 
 /* For file dialogs */
 .btn-file {
