@@ -11,7 +11,12 @@
     text-align: center;
 }
 
+.modal h3 {
+   margin: 0
+}
+
 /* Slightly wider modal for better fitting of our text */
+/*
 .modal {
    width: 42%;
    margin-left: -21%;
@@ -25,11 +30,7 @@
 .modal.fade.in {
   top: 2%;
 }
-
-.modal-header {
-  // padding: 0.5rem 1.0rem; !important
-}
-
+*/
 
 
 /* For file dialogs */
@@ -122,11 +123,11 @@ textarea {
     line-height: 20px;
 }
 
-.pagination ul>li>a {
+.pagination >li>a {
     padding: 0px 12px;
 }
 
-.pagination ul>li>a {
+.pagination >li>a {
     cursor: pointer;
 }
 

@@ -85,7 +85,7 @@ angular.module('template/pagination.html', []).run(function ($templateCache) {
   $templateCache.put('template/pagination.html',
     '<div style="margin-top: 1rem"><div ng-if="data.hits.length"><span data-table-size data-type="{{ type }}"></span>' +
     '<span ng-if="data.pagination.pages > 1" class="pull-right">' +
-    '<div class="pagination"><ul>' +
+    '<div><ul class="pagination">' +
     '<li ng-repeat="page in pages" ng-class="{active: page.active, disabled: page.disabled}">' +
     '<a ng-click="selectPage(page.number)">{{page.text}}</a></li>' +
     '</ul></div>' +
