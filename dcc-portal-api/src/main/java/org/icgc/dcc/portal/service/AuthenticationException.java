@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import java.net.URI;
+import java.util.Collection;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -29,7 +30,8 @@ public class AuthenticationException extends RuntimeException {
 
   @NonNull
   String message;
-  boolean invalidCrowdCookie;
   URI redirect;
+  @NonNull
+  Collection<String> invalidCookies;
 
 }

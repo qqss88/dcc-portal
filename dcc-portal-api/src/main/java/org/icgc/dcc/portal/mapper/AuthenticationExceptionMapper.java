@@ -22,6 +22,8 @@ import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 
+import java.util.Collection;
+
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.NewCookie;
@@ -40,6 +42,8 @@ import org.icgc.dcc.portal.resource.AuthResource;
 import org.icgc.dcc.portal.resource.OpenIDResource;
 import org.icgc.dcc.portal.service.AuthenticationException;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Lists;
 
 @Component
 @Provider
@@ -73,16 +77,23 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
     // dcc cookie is always deleted at a failed authentication because it's managed by the portal
     // crowd cookie is deleted ONLY when it's expired. I.e. we tried to authenticate with it but was rejected by the
     // ICGC API
-    return (e.isInvalidCrowdCookie()) ? invalidateCrowdCookie(response).build() : response.build();
+    val cookiesToDelete = e.getInvalidCookies();
+
+    return (cookiesToDelete.isEmpty()) ? response.build() : invalidateCrowdCookie(response, cookiesToDelete).build();
   }
 
   private static Error errorResponse(AuthenticationException e) {
     return new Error(STATUS, e.getMessage());
   }
 
-  private static ResponseBuilder invalidateCrowdCookie(ResponseBuilder responseBuilder) {
-    return responseBuilder.cookie(deleteCookie(CrowdProperties.CUD_TOKEN_NAME),
-        deleteCookie(CrowdProperties.CMS_TOKEN_NAME));
+  private static ResponseBuilder invalidateCrowdCookie(ResponseBuilder responseBuilder,
+      Collection<String> invalidCookies) {
+    val cookiesToDelete = Lists.<NewCookie> newArrayList();
+    for (val cookieName : invalidCookies) {
+      cookiesToDelete.add(deleteCookie(cookieName));
+    }
+
+    return responseBuilder.cookie(cookiesToDelete.toArray(new NewCookie[cookiesToDelete.size()]));
   }
 
   /**

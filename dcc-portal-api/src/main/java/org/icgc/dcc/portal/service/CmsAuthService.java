@@ -24,6 +24,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.common.client.api.cms.CMSClient;
+import org.icgc.dcc.common.client.api.cud.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
-public class IcgcAuthService {
+public class CmsAuthService {
 
   @NonNull
   private final CMSClient cmsClient;
@@ -42,11 +43,11 @@ public class IcgcAuthService {
   @Getter(lazy = true)
   private final String sessionName = initSessionName();
 
-  public String getUserId(@NonNull String sessionId) {
-    val response = cmsClient.getUserInfo(sessionId);
-    log.debug("Retrieved user info for session ID '{}': {}", sessionId, response);
+  public User getUserInfo(@NonNull String sessionId) {
+    val result = cmsClient.getUserInfo(sessionId);
+    log.debug("Retrieved user '{}' for session '{}'", result, sessionId);
 
-    return response.getUserName();
+    return result;
   }
 
   private String initSessionName() {
