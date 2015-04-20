@@ -32,16 +32,26 @@
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content"></div></div>'+
+        '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
+          '<table class="table pathway-gene-table">'+
+            '<tr>'+
+                '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
+                '<th class="pathway-gene-header-label pathway-gene-header">Mutations</th>' +
+            '</tr>'+
+            '<tr data-ng-repeat="gene in geneList">' +
+              '<th class="pathway-gene-label">{{gene.id}}</th>' +
+              '<th class="pathway-gene-label">{{gene.value}} mutations</th>' +
+            '</tr></table>' +
+        '</div></div>'+
         '</div>',
       link: function ($scope,_ctrl) {
-        var showingLegend = false;
-        var showingInfo = false;
-        var rendered = false;
+        var showingLegend = false, showingInfo = false, rendered = false;
+        var zoomedOn, xml, highlights;
         
         var openNewSideBar = function(isLegend,isInfo){
           if(showingLegend){
             $('.pathway-legend').animate({left: '100%'});
+            $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-times-circle');
           }else if(showingInfo){
             $('.pathway-info').animate({left: '100%'});
             $('.pathway-info-controller').css('visibility','hidden');
@@ -53,6 +63,7 @@
           
           if(isLegend){
             $('.pathway-legend').animate({'left': '75%'});
+            $('.pathway-legend-controller').addClass('fa-times-circle').removeClass('fa-question-circle');
             showingLegend = true;
           }else if(showingInfo){
             $('.pathway-info-controller').css('visibility','visible');
@@ -72,13 +83,24 @@
           width: 500,
           height: 300,
           container: '#pathway-viewer-mini',
-          onClick: function (d,thing) {
+          onClick: function (d) {
             var padding = 3;
             var node = $.extend({}, d);
             if(!showingInfo){
               openNewSideBar(false,true);
             }
-            $('.pathway-info-content').html(JSON.stringify(d,null,4).replace(/},/g,'},<br/>'));
+            
+            // Create list of uniprot ids
+            var geneList = [];
+            highlights.forEach(function (highlight) {
+              if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
+                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+              }
+            });
+            $scope.geneList = geneList;
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};
             node.position={x:3,y:3};
@@ -102,8 +124,6 @@
           openNewSideBar(false,false);
         });
         
-        var zoomedOn, xml, highlights;
-        
         var handleRender = function(){
           if(!xml || !zoomedOn){
             return;
@@ -113,6 +133,11 @@
           }
           
           if(highlights){
+            highlights.forEach(function (h) {
+              if(!(h.dbIds instanceof Array)){
+                h.dbIds = h.dbIds.split(',');
+              }
+            });
             controller.highlight(highlights);
           }
         }
@@ -129,6 +154,7 @@
 
         $scope.$watch('highlights', function (newValue) {
             highlights = newValue;
+          
             handleRender();
         },true);
       }

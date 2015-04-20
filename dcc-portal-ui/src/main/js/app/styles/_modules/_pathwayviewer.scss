@@ -128,16 +128,41 @@ $compartmentBorder:#ffc38b;
 
 .pathway-info-content{
   line-height: 1.4rem;
-  text-align: left;
   padding:5%;
+}
+
+.pathway-gene-table{
+  margin:0 auto;
+}
+
+.pathway-gene-label, .pathway-gene-header-label{
+  font-weight: lighter;
+  padding-bottom: 0.5em !important;
+  padding-top:0.5em !important;
+  text-align: center !important;
+}
+
+.pathway-gene-header-label{
+  font-weight: normal !important;
 }
 
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell{
   font-size: 10px;
 }
 
-.pathway-info h4, .pathway-legend h4, .pathway-legend-controller, .pathway-info-controller{
+.pathway-legend-controller, .pathway-info-controller{
   margin-top: 0.7em;
+}
+
+.pathway-info h4, .pathway-legend h4{
+  margin-left: 1em;
+  margin-right: 1em;
+  color: #666666;
+  border-bottom: 1px solid #b3b3b3;
+  padding-bottom: 0.5em;
+  font-size: 1.3em;
+  font-weight: normal;
+  padding-top: 0.5em;
 }
 
 .pathway-legend-controller, .pathway-info-controller{

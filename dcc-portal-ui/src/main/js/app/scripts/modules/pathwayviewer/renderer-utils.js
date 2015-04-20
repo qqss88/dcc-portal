@@ -162,7 +162,7 @@
     var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode','Mutated'];
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
-      y = Math.floor(i/2)*40 + marginTop + 10*Math.floor(i/2);
+      y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},

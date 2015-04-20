@@ -156,9 +156,9 @@
       });
       var nodes = rendererUtils.getLegendNodes(20,0);
       legendrenderer.renderNodes(nodes);
-      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.4,legendSvg));
-      legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.65,legendSvg),true);
-      legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodeByReactomeId:function (id){return nodes[nodes.length-1];}});
+      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.35,legendSvg));
+      legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.6,legendSvg),true);
+      legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodesByReactomeId:function (id){return [nodes[nodes.length-1]];}});
     }else{
       d3.select('.pathway-legend-svg').attr('opacity','1');
     }
@@ -170,11 +170,10 @@
   ReactomePathway.prototype.highlight = function (rawHighlights) {
     var highlights = [];
     rawHighlights.forEach(function (rh) {
-      rh.dbIds.split(',').forEach(function (dbId) {
+      rh.dbIds.forEach(function (dbId) {
         highlights.push({id:dbId,value:rh.value})
       });
     });
-    console.log(highlights);
     this.renderer.highlightEntity(highlights, this.model);
   };
   

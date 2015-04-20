@@ -299,6 +299,8 @@
     });
   };
 
+  var highlightColor = 'red';
+  
   /*
   * Highlights the given list of nodes with a red border and puts
   *   the 'value' of the node in a badge in the top right corner
@@ -322,7 +324,7 @@
         if(svgNode[0].length <= 0){
           return;
         }
-        svgNode.style('stroke','red');
+        svgNode.style('stroke',highlightColor);
         svgNode.style('stroke-width','3px');
 
         svg.append('rect')
@@ -335,7 +337,7 @@
             rx: 7,
             ry: 7,
           }).style({
-            fill:'red'
+            fill:highlightColor
           });
 
         svg.append('text').attr({

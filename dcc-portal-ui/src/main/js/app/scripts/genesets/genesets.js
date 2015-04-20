@@ -302,7 +302,6 @@
               value:map[uniprotId].value
             });
           });
-          console.log(pathwayHighlights);
           _ctrl.pathwayHighlights = pathwayHighlights;
         });
       }
