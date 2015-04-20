@@ -72,6 +72,7 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -394,6 +395,23 @@ public class MutationRepository implements Repository {
 
     log.debug("{}", search);
     return search.execute().actionGet();
+  }
+
+  public MultiSearchResponse countSearches(List<QueryBuilder> searches) {
+    val search = client.prepareMultiSearch();
+    for (val s : searches) {
+      search.add(buildCountSearchFromQuery(s, CENTRIC_TYPE));
+    }
+
+    log.info("{}", search);
+    return search.execute().actionGet();
+  }
+
+  public SearchRequestBuilder buildCountSearchFromQuery(QueryBuilder query, Type type) {
+    val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
+    search.setQuery(query);
+
+    return search;
   }
 
   @Override

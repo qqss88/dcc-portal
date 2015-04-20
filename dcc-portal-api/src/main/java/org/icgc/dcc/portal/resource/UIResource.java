@@ -43,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
@@ -52,6 +53,7 @@ import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
+import org.icgc.dcc.portal.service.ReactomeService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -77,6 +79,7 @@ public class UIResource {
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
   private final DiagramService diagramService;
+  private final ReactomeService r;
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
@@ -138,7 +141,7 @@ public class UIResource {
 
   @Path("/reactome/protein-map")
   @GET
-  public Map<String, String> getReactomeProteinMap(
+  public Map<String, DiagramProtein> getReactomeProteinMap(
       @ApiParam(value = "Protein uniprot ID(s). Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinUniprotIds") IdsParam proteinUniprotIds,
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
     if (proteinUniprotIds.get() == null || proteinUniprotIds.get().size() == 0) {
@@ -146,7 +149,7 @@ public class UIResource {
     } else if (isValidPathwayId(pathwayId)) {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
-
+    // return r.mapProteinIds(proteinUniprotIds.get());
     return diagramService.mapProteinIds(proteinUniprotIds.get(), pathwayId);
   }
 
@@ -158,7 +161,7 @@ public class UIResource {
     if (isValidPathwayId(pathwayId)) {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
-
+    // return Response.ok(r.getPathwayDiagramStream(pathwayId), APPLICATION_XML).build();
     return Response.ok(diagramService.getPathwayDiagramString(pathwayId), APPLICATION_XML).build();
   }
 
@@ -169,7 +172,7 @@ public class UIResource {
     if (isValidPathwayId(pathwayId)) {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
-
+    // return r.getShownPathwaySection(pathwayId);
     return diagramService.getShownPathwaySection(pathwayId);
   }
 

@@ -17,17 +17,28 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GENE;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.DiagramRepository;
+import org.icgc.dcc.portal.repository.MutationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,31 +47,61 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DiagramService {
 
-  private DiagramRepository repo;
-  private final ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+  private final DiagramRepository diagramRepo;
+  private final MutationRepository mutationRepository;
 
-  @Autowired
-  public DiagramService(Client client, IndexModel index) {
-    repo = new DiagramRepository(client, index);
-  }
+  private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
-  public Map<String, String> mapProteinIds(@NonNull List<String> proteinUniprotIds, @NonNull String pathwayId) {
+  public Map<String, DiagramProtein> mapProteinIds(@NonNull List<String> proteinUniprotIds, @NonNull String pathwayId) {
+    val queries = new ArrayList<QueryBuilder>();
+    for (val uniprotId : proteinUniprotIds) {
+      queries.add(getQuery(uniprotId));
+    }
+    val response = mutationRepository.countSearches(queries);
+
     val uniprotToDbMap = ArrayListMultimap.create();
     val dbToUniprotMap = getProteinIdMap(pathwayId);
-    dbToUniprotMap.forEach((db, uniprotsString) -> {
+
+    dbToUniprotMap.forEach((dbId, uniprotsString) -> {
       String[] uniprots = uniprotsString.split(",");
-      for (String uniprot : uniprots) {
-        uniprotToDbMap.put(uniprot, db);
+      for (String uniprotId : uniprots) {
+        uniprotToDbMap.put(parseUniprot(uniprotId), dbId);
       }
     });
 
-    val map = Maps.<String, String> newHashMap();
-    proteinUniprotIds.forEach(id -> map.put(id, Joiner.on(",").join(uniprotToDbMap.get(id))));
+    val map = Maps.<String, DiagramProtein> newHashMap();
+
+    for (int i = 0; i < proteinUniprotIds.size(); i++) {
+      val id = proteinUniprotIds.get(i);
+      val value = response.getResponses()[i].getResponse().getHits().getTotalHits();
+
+      map.put(id, getDiagramProtein(uniprotToDbMap.get(id), value));
+    }
 
     return map;
+  }
+
+  private DiagramProtein getDiagramProtein(List<Object> map, Long value) {
+    val protein = new DiagramProtein();
+    protein.setDbIds(Joiner.on(",").join(map));
+    protein.setValue(value);
+
+    return protein;
+  }
+
+  private String parseUniprot(String uniprot) {
+    return uniprot.substring(uniprot.indexOf(":") + 1);
+  }
+
+  private BoolQueryBuilder getQuery(String id) {
+    return QueryBuilders.boolQuery().must(
+        QueryBuilders.termQuery(MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "."
+            + GENE_UNIPROT_IDS, id));
   }
 
   @SuppressWarnings("unchecked")
@@ -78,7 +119,7 @@ public class DiagramService {
 
   private Map<String, Object> getPathway(String id) {
     val query = Query.builder().build();
-    return repo.findOne(id, query);
+    return diagramRepo.findOne(id, query);
   }
 
   /**
