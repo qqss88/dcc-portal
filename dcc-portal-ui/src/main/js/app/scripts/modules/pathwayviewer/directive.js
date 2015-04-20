@@ -37,7 +37,7 @@
       link: function ($scope,_ctrl) {
         var showingLegend = false;
         var showingInfo = false;
-        var highlights;
+        var rendered = false;
         
         var openNewSideBar = function(isLegend,isInfo){
           if(showingLegend){
@@ -102,30 +102,34 @@
           openNewSideBar(false,false);
         });
         
-        var zoomedOn = [];
-        var items = '';
+        var zoomedOn, xml, highlights;
+        
+        var handleRender = function(){
+          if(!xml || !zoomedOn){
+            return;
+          }else if(!rendered){
+            controller.render(xml,zoomedOn);
+            rendered = true;
+          }
+          
+          if(highlights){
+            controller.highlight(highlights);
+          }
+        }
         
         $scope.$watch('items', function (newValue) {
-          if(newValue && zoomedOn.length > 0){
-            controller.render(newValue,zoomedOn);
-          }else if(newValue){
-            items = newValue;
-          }
+          xml = newValue;
+          handleRender();
         }, true);
         
         $scope.$watch('zooms', function (newValue) {
-          if(newValue && items.length > 0){
-            controller.render(items,newValue);
-          }else if(newValue){
-            zoomedOn = newValue;
-          }
+          zoomedOn = newValue;
+          handleRender();
         }, true);
 
         $scope.$watch('highlights', function (newValue) {
-          if(newValue){
             highlights = newValue;
-            controller.highlight(newValue);
-          }
+            handleRender();
         },true);
       }
     };

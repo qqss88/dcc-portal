@@ -313,6 +313,11 @@
       var nodes = model.getNodesByReactomeId(highlight.id);
       nodes.forEach(function (node) {
         var svgNode = svg.selectAll('.entity'+node.id);
+        var renderedValue = '?';
+        
+        if(node.type !== 'RenderableEntitySet'){
+          renderedValue = highlight.value;
+        }
       
         if(svgNode[0].length <= 0){
           return;
@@ -325,7 +330,7 @@
             class:'value-banner',
             x: (+node.position.x)+(+node.size.width) - 10,
             y: (+node.position.y)- 7,
-            width:(highlight.value.toString().length*5)+10,
+            width:(renderedValue.toString().length*5)+10,
             height:15,
             rx: 7,
             ry: 7,
@@ -341,7 +346,7 @@
           'font-size':'9px',
           'font-weight':'bold',
           'fill':'white'
-        }).text(highlight.value);
+        }).text(renderedValue);
       });
     });
   };

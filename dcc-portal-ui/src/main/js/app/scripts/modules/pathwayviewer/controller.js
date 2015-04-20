@@ -87,18 +87,18 @@
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
     
     // ------------- temporary 
-    var highlights = [];
-    var reactomeIds = [];
-    _.filter(model.getNodes().slice(), 
-             function(n){return    n.type==='RenderableProtein'||
-                                   n.type==='RenderableEntitySet';})
-    .forEach(function (node) {
-      if(reactomeIds.indexOf(node.reactomeId) < 0){
-        reactomeIds.push(node.reactomeId);
-        highlights.push({id:node.reactomeId,value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
-      }
-    });
-    this.renderer.highlightEntity(highlights,model);
+//    var highlights = [];
+//    var reactomeIds = [];
+//    _.filter(model.getNodes().slice(), 
+//             function(n){return    n.type==='RenderableProtein'||
+//                                   n.type==='RenderableEntitySet';})
+//    .forEach(function (node) {
+//      if(reactomeIds.indexOf(node.reactomeId) < 0){
+//        reactomeIds.push(node.reactomeId);
+//        highlights.push({id:node.reactomeId,value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
+//      }
+//    });
+//    this.renderer.highlightEntity(highlights,model);
     // -------------------- end temporary
     
     // Zoom in on the elements on interest if there are any
@@ -167,7 +167,14 @@
   /**
   * Highlight: {id, value}
   */
-  ReactomePathway.prototype.highlight = function (highlights) {
+  ReactomePathway.prototype.highlight = function (rawHighlights) {
+    var highlights = [];
+    rawHighlights.forEach(function (rh) {
+      rh.dbIds.split(',').forEach(function (dbId) {
+        highlights.push({id:dbId,value:rh.value})
+      });
+    });
+    console.log(highlights);
     this.renderer.highlightEntity(highlights, this.model);
   };
   

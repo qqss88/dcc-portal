@@ -287,12 +287,30 @@
         }else{
           _ctrl.pathwayZooms = [''];
         }
+        
+        var test="P06400,P09884";
+        var uniprotIds =test.split(',');
+        var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+          .get({'proteinUniprotIds' : test,pathwayId:'REACT_21267'});
+
+        reactomePromise.then(function(map){
+          var pathwayHighlights = [];
+          uniprotIds.forEach(function (uniprotId) {
+            pathwayHighlights.push({
+              uniprotId:uniprotId,
+              dbIds:map[uniprotId],
+              value:Math.round(Math.random()*200 + 1)
+            });
+          });
+          console.log(pathwayHighlights);
+          _ctrl.pathwayHighlights = pathwayHighlights;
+        });
       }
     });
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
+  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil,Restangular) {
     var _ctrl = this, _geneSet = '', _filter = {};
-
+    
     function success(genes) {
       var geneSetQueryType = FiltersUtil.getGeneSetQueryType(_geneSet.type);
 
@@ -318,20 +336,19 @@
           });
       }
       
-//      var uniprotIds = [];
-//      _ctrl.genes.hits.forEach(function (gene) {
-//        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
-//      });
-//      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
-//        .get({'proteinUniprotIds' : uniprotIds.join(','),pathwayId:'REACT_21267'});
-//
-//      reactomePromise.then(function(map){
-//        var dbIds = [];
-//        uniprotIds.forEach(function (uniprotId) {
-//          dbIds.push(map[uniprotId]);
-//        });
-//        _ctrl.pathwayHighlights = dbIds;
-//      });
+      var uniprotIds =[];
+      _ctrl.genes.hits.forEach(function (gene) {
+        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
+      });
+      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+        .get({'proteinUniprotIds' : uniprotIds.join(','),pathwayId:'REACT_21267'});
+      reactomePromise.then(function(map){
+        var dbIds = [];
+        uniprotIds.forEach(function (uniprotId) {
+          dbIds.push(map[uniprotId]);
+        });
+    //    _ctrl.pathwayHighlights = dbIds;
+      });
 
     }
 
@@ -350,7 +367,7 @@
         refresh();
       }
     });
-
+    
     refresh();
   });
 
