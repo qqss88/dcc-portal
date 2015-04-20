@@ -298,8 +298,8 @@
           uniprotIds.forEach(function (uniprotId) {
             pathwayHighlights.push({
               uniprotId:uniprotId,
-              dbIds:map[uniprotId],
-              value:Math.round(Math.random()*200 + 1)
+              dbIds:map[uniprotId].dbIds,
+              value:map[uniprotId].value
             });
           });
           console.log(pathwayHighlights);
