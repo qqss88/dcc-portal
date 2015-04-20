@@ -1,7 +1,7 @@
 package org.icgc.dcc.portal.auth.openid;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-
+import static java.util.Collections.emptyList;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwRedirectException;
 
@@ -150,7 +150,7 @@ public class OpenIDAuthService {
       return consumerManager.verify(receivingUrl, parameterList, discoveryInfo);
     } catch (Exception e) {
       log.info("[{}] Failed to verify OpenID provider response. {}", sessionToken, e.getMessage());
-      throw new AuthenticationException(DEFAULT_USER_MESSAGE, false, redirect);
+      throw new AuthenticationException(DEFAULT_USER_MESSAGE, redirect, emptyList());
     }
   }
 

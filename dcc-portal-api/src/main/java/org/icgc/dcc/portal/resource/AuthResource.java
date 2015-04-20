@@ -1,47 +1,52 @@
 package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
-
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwAuthenticationException;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.common.client.api.ICGCAccessException;
+import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.AuthService;
+import org.icgc.dcc.portal.service.CmsAuthService;
 import org.icgc.dcc.portal.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 @Component
@@ -60,15 +65,22 @@ public class AuthResource extends BaseResource {
   private final AuthService authService;
   @NonNull
   private final SessionService sessionService;
+  @NonNull
+  private final CmsAuthService cmsService;
+
+  @Getter(lazy = true)
+  private final Collection<String> cookiesToDelete = initCookiesToDelete();
 
   /**
    * This is only used by UI.
    */
   @GET
   @Path("/verify")
-  public Response verify(
-      @CookieParam(value = CrowdProperties.SESSION_TOKEN_NAME) String sessionToken,
-      @CookieParam(value = CrowdProperties.CUD_TOKEN_NAME) String cudToken) {
+  public Response verify(@Context HttpHeaders requestHeaders) {
+    val cookies = requestHeaders.getCookies();
+    val sessionToken = getCookieValue(cookies.get(CrowdProperties.SESSION_TOKEN_NAME));
+    val cudToken = getCookieValue(cookies.get(CrowdProperties.CUD_TOKEN_NAME));
+    val cmsToken = getCookieValue(cookies.get(cmsService.getSessionName()));
     log.info("Received an authorization request. Session token: '{}'. CUD token: '{}'", sessionToken, cudToken);
 
     // Already logged in and knows credentials
@@ -82,31 +94,55 @@ public class AuthResource extends BaseResource {
       return verifiedResponse;
     }
 
-    if (!isNullOrEmpty(cudToken)) {
-      log.info("[{}] The user has been authenticated by the ICGC authenticator.", cudToken);
-      try {
-        log.debug("[{}] Looking for user info in the CUD", cudToken);
-        val cudUser = authService.getCudUserInfo(cudToken);
-        log.debug("[{}] Retrieved user information: {}", cudToken, cudUser);
-        val user = createUser(cudUser.getUserName(), cudToken);
-        val verifiedResponse = verifiedResponse(user);
-        log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
-            new Object[] { cudToken, cudUser.getUserName(), user.getDaco() });
+    if (!isNullOrEmpty(cudToken) || !isNullOrEmpty(cmsToken)) {
+      log.info("[{}, {}] The user has been authenticated by the ICGC authenticator.", cudToken, cmsToken);
+      val tokenUserEntry = resolveIcgcUser(cudToken, cmsToken);
+      val token = tokenUserEntry.getKey();
+      val icgcUser = tokenUserEntry.getValue();
 
-        return verifiedResponse;
-      } catch (ICGCAccessException e) {
-        log.warn("[{}] Failed to authorize CUD user. Exception: {}", cudToken, e.getMessage());
-        throwAuthenticationException("Authorization failed due to expired token", true);
-      }
+      val dccUser = createUser(icgcUser.getUserName(), token);
+      val verifiedResponse = verifiedResponse(dccUser);
+      log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
+          new Object[] { token, icgcUser.getUserName(), dccUser.getDaco() });
+
+      return verifiedResponse;
     }
 
     val userMessage = "Authorization failed due to missing token";
     val logMessage = "Couldn't authorize the user. No session token found.";
-    val invalidateCookie = true;
-    throwAuthenticationException(userMessage, logMessage, invalidateCookie);
+    throwAuthenticationException(userMessage, logMessage, getCookiesToDelete());
 
     // Will not come to this point because of throwAuthenticationException()
     return null;
+  }
+
+  private static String getCookieValue(javax.ws.rs.core.Cookie cookie) {
+    return cookie == null ? null : cookie.getValue();
+  }
+
+  private SimpleImmutableEntry<String, org.icgc.dcc.common.client.api.cud.User> resolveIcgcUser(String cudToken,
+      String cmsToken) {
+    org.icgc.dcc.common.client.api.cud.User user = null;
+    String token = null;
+
+    log.debug("[{}, {}] Looking for user info in the CUD", cudToken, cmsToken);
+    try {
+      if (!isNullOrEmpty(cudToken)) {
+        user = authService.getCudUserInfo(cudToken);
+        token = cudToken;
+      } else {
+        user = cmsService.getUserInfo(cmsToken);
+        token = cmsToken;
+      }
+    } catch (ICGCException e) {
+      log.warn("[{}, {}] Failed to authorize ICGC user. Exception: {}",
+          new Object[] { cudToken, cmsToken, e.getMessage() });
+      throwAuthenticationException("Authorization failed due to expired token", getCookiesToDelete());
+    }
+
+    log.debug("[{}] Retrieved user information: {}", token, user);
+
+    return new SimpleImmutableEntry<String, org.icgc.dcc.common.client.api.cud.User>(token, user);
   }
 
   /**
@@ -122,7 +158,7 @@ public class AuthResource extends BaseResource {
       throwAuthenticationException(
           "Authentication failed due to no User matching session token: " + sessionToken,
           String.format("[%s] Could not find any user in the cache. The session must have expired.", sessionToken),
-          true);
+          getCookiesToDelete());
     }
     log.info("[{}] Found user in the cache: {}", sessionToken, tempUserOptional.get());
 
@@ -148,9 +184,11 @@ public class AuthResource extends BaseResource {
         log.info("[{}] Granted DACO access to the user", sessionTokenString);
         user.setDaco(true);
       }
-    } catch (Exception e) {
+    } catch (ICGCEntityNotFoundException e) {
+      log.debug("[{}] User '{}' is not granted the DACO access", sessionTokenString, userName);
+    } catch (ICGCException e) {
       throwAuthenticationException("Failed to grant DACO access to the user",
-          String.format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
+          format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
     }
 
     log.debug("[{}] Saving the user in the cache", sessionTokenString);
@@ -245,15 +283,29 @@ public class AuthResource extends BaseResource {
         .build();
   }
 
-  private static Response createLogoutResponse(Status status, String message) {
+  private Response createLogoutResponse(Status status, String message) {
     val dccCookie = deleteCookie(CrowdProperties.SESSION_TOKEN_NAME);
     val crowdCookie = deleteCookie(CrowdProperties.CUD_TOKEN_NAME);
+    val cmsCookie = deleteCookie(cmsService.getSessionName());
 
     return status(status)
         .header(SET_COOKIE, dccCookie.toString())
         .header(SET_COOKIE, crowdCookie.toString())
+        .header(SET_COOKIE, cmsCookie.toString())
         .entity(new org.icgc.dcc.portal.model.Error(status, message))
         .build();
+  }
+
+  private Collection<String> initCookiesToDelete() {
+    val result = ImmutableList.<String> builder();
+    result.add(CrowdProperties.CUD_TOKEN_NAME);
+    if (cmsService == null) {
+      log.warn("Can't properly define all cookies to be deleted on a failed authentication request. CmsService is not initialized");
+    } else {
+      result.add(cmsService.getSessionName());
+    }
+
+    return result.build();
   }
 
 }

@@ -52,6 +52,7 @@ cache:
 # Authorization 
 crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
+  ssoUrlGoogle: "https://***REMOVED***/gooapi/redirect?continue="
 
 hazelcast:
   enabled: false
@@ -146,6 +147,9 @@ icgc:
   # CUD API endpoint
   cudUrl: "https://***REMOVED***/ud_rest/1"
 
+  # CMS API endpoint
+  cmsUrl: "https://***REMOVED***/cms_oauth_coop/1"
+  
   # CUD credentials. Obtained from webdev@oicr.on.ca
   cudAppId: "change_me"
   cudUser: "change_me"
