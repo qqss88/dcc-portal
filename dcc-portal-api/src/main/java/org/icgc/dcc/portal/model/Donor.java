@@ -96,8 +96,30 @@ public class Donor {
   List<String> availableDataTypes;
   @ApiModelProperty(value = "Analysis Types", required = true)
   List<String> analysisTypes;
+
+  @ApiModelProperty(value = "Prior Malignancy", required = true)
+  String priorMalignancy;
+
+  @ApiModelProperty(value = "Cancer type prior Malignancy", required = true)
+  String cancerTypePriorMalignancy;
+
+  @ApiModelProperty(value = "Caner history first degree relative", required = true)
+  String cancerHistoryFirstDegreeRelative;
+
+  @ApiModelProperty(value = "Study donor involved in", required = true)
+  List<String> studyDonorInvolvedIn;
+
   @ApiModelProperty(value = "Specimen")
   List<Specimen> specimen;
+
+  @ApiModelProperty(value = "Family")
+  List<Family> family;
+
+  @ApiModelProperty(value = "Therapy")
+  List<Therapy> therapy;
+
+  @ApiModelProperty(value = "Exposure")
+  List<Exposure> exposure;
 
   @SuppressWarnings("unchecked")
   @JsonCreator
@@ -139,7 +161,16 @@ public class Donor {
     relapseType = (String) fieldMap.get(fields.get("relapseType"));
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
     analysisTypes = (List<String>) fieldMap.get(fields.get("analysisTypes"));
+
+    priorMalignancy = (String) fieldMap.get(fields.get("priorMalignancy"));
+    cancerTypePriorMalignancy = (String) fieldMap.get(fields.get("cancerTypePriorMalignancy"));
+    cancerHistoryFirstDegreeRelative = (String) fieldMap.get(fields.get("cancerHistoryFirstDegreeRelative"));
+    studyDonorInvolvedIn = (List<String>) fieldMap.get(fields.get("studyDonorInvolvedIn"));
+
     specimen = buildSpecimen((List<Map<String, Object>>) fieldMap.get("specimen"));
+    therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy")); // FIXME
+    family = buildFamily((List<Map<String, Object>>) fieldMap.get("family")); // FIXME
+    exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure")); // FIXME
   }
 
   private Long getLong(Object field) {
@@ -148,6 +179,33 @@ public class Donor {
     else if (field instanceof Float) return ((Float) field).longValue();
     else
       return null;
+  }
+
+  private List<Exposure> buildExposure(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    val lst = Lists.<Exposure> newArrayList();
+    for (Map<String, Object> item : field) {
+      lst.add(new Exposure(item));
+    }
+    return lst;
+  }
+
+  private List<Family> buildFamily(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    val lst = Lists.<Family> newArrayList();
+    for (Map<String, Object> item : field) {
+      lst.add(new Family(item));
+    }
+    return lst;
+  }
+
+  private List<Therapy> buildTherapy(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    val lst = Lists.<Therapy> newArrayList();
+    for (Map<String, Object> item : field) {
+      lst.add(new Therapy(item));
+    }
+    return lst;
   }
 
   private List<Specimen> buildSpecimen(List<Map<String, Object>> field) {

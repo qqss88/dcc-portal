@@ -160,8 +160,11 @@ public class IndexModel {
           .put("analysisTypes", "_summary.experimental_analysis_performed")
           .put("studies", "_summary._studies")
           .put("ssmAffectedGenes", "_score")
+          .put("priorMalignancy", "") // FIXME
+          .put("cancerTypePriorMalignancy", "") // FIXME
+          .put("cancerHistoryFirstDegreeRelative", "") // FIXME
+          .put("studyDonorInvolvedIn", "") // FIXME
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-
           .build();
 
   // FIXME:
@@ -229,6 +232,9 @@ public class IndexModel {
           .put("tumourStage", "tumour_stage")
           .put("tumourStageSupplemental", "tumour_stage_supplemental")
           .put("tumourStageSystem", "tumour_stage_system")
+          .put("studySpecimenInvolvedIn", "") // FIXME
+          .put("percentCellularity", "") // FIXME
+          .put("levelOfCellularity", "") // FIXME
           .build();
 
   private static final ImmutableMap<String, String> SAMPLE_FIELDS_MAPPING =
