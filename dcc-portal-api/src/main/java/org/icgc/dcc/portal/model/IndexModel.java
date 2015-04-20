@@ -1,7 +1,5 @@
 package org.icgc.dcc.portal.model;
 
-
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +59,10 @@ public class IndexModel {
     SAMPLE(""),
     SEQ_DATA(""),
     DOMAIN(""),
-    EXON("");
+    EXON(""),
+    FAMILY(""),
+    EXPOSURE(""),
+    THERAPY("");
 
     private final String id;
   }
@@ -161,6 +162,46 @@ public class IndexModel {
           .put("ssmAffectedGenes", "_score")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
 
+          .build();
+
+  // FIXME:
+  private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("donorHasRelativeWithCancerHistory", "")
+          .put("relationshipType", "")
+          .put("relationshipTypeOther", "")
+          .put("relationshipSex", "")
+          .put("relationshipAge", "")
+          .put("relationshipDiseaseICD10", "")
+          .put("relationshipDisease", "")
+          .build();
+
+  // FIXME:
+  private static final ImmutableMap<String, String> EXPOSURE_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("exposureType", "")
+          .put("exposureIntensity", "")
+          .put("tabaccoSmokingHistoryIndicator", "")
+          .put("tabaccoSmokingIntensity", "")
+          .put("alcoholHistory", "")
+          .put("alcoholHistoryIntensity", "")
+          .build();
+
+  // FIXME:
+  private static final ImmutableMap<String, String> THERAPY_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("firstTherapyType", "")
+          .put("firstTherapyTherapeuticIntent", "")
+          .put("firstTherapyStartInterval", "")
+          .put("firstTherapyDuration", "")
+          .put("firstTherapyResponse", "")
+          .put("secondTherapyType", "")
+          .put("secondTherapyTherapeuticIntent", "")
+          .put("secondTherapyStartInterval", "")
+          .put("secondTherapyDuration", "")
+          .put("secondTherapyResponse", "")
+          .put("otherTherapy", "")
+          .put("otherTherapyResponse", "")
           .build();
 
   private static final ImmutableMap<String, String> SPECIMEN_FIELDS_MAPPING =
@@ -576,6 +617,9 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.PROJECT, PROJECTS_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.DONOR, DONORS_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SPECIMEN, SPECIMEN_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.FAMILY, FAMILY_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.EXPOSURE, EXPOSURE_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.THERAPY, THERAPY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SAMPLE, SAMPLE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SEQ_DATA, RAWSEQDATA_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE, GENES_FIELDS_MAPPING);
