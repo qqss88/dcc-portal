@@ -1,17 +1,18 @@
 package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
-
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
 import static org.icgc.dcc.portal.util.AuthUtils.throwAuthenticationException;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,8 +33,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.common.client.api.ICGCAccessException;
 import org.icgc.dcc.common.client.api.ICGCException;
+import org.icgc.dcc.common.client.api.cms.CMSClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.model.User;
@@ -60,6 +61,8 @@ public class AuthResource extends BaseResource {
   private final AuthService authService;
   @NonNull
   private final SessionService sessionService;
+  @NonNull
+  private final CMSClient cmsClient;
 
   /**
    * This is only used by UI.
@@ -68,7 +71,8 @@ public class AuthResource extends BaseResource {
   @Path("/verify")
   public Response verify(
       @CookieParam(value = CrowdProperties.SESSION_TOKEN_NAME) String sessionToken,
-      @CookieParam(value = CrowdProperties.CUD_TOKEN_NAME) String cudToken) {
+      @CookieParam(value = CrowdProperties.CUD_TOKEN_NAME) String cudToken,
+      @CookieParam(value = CrowdProperties.CMS_TOKEN_NAME) String cmsToken) {
     log.info("Received an authorization request. Session token: '{}'. CUD token: '{}'", sessionToken, cudToken);
 
     // Already logged in and knows credentials
@@ -82,22 +86,18 @@ public class AuthResource extends BaseResource {
       return verifiedResponse;
     }
 
-    if (!isNullOrEmpty(cudToken)) {
-      log.info("[{}] The user has been authenticated by the ICGC authenticator.", cudToken);
-      try {
-        log.debug("[{}] Looking for user info in the CUD", cudToken);
-        val cudUser = authService.getCudUserInfo(cudToken);
-        log.debug("[{}] Retrieved user information: {}", cudToken, cudUser);
-        val user = createUser(cudUser.getUserName(), cudToken);
-        val verifiedResponse = verifiedResponse(user);
-        log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
-            new Object[] { cudToken, cudUser.getUserName(), user.getDaco() });
+    if (!isNullOrEmpty(cudToken) || !isNullOrEmpty(cmsToken)) {
+      log.info("[{}, {}] The user has been authenticated by the ICGC authenticator.", cudToken, cmsToken);
+      val tokenUserEntry = resolveIcgcUser(cudToken, cmsToken);
+      val token = tokenUserEntry.getKey();
+      val icgcUser = tokenUserEntry.getValue();
 
-        return verifiedResponse;
-      } catch (ICGCAccessException e) {
-        log.warn("[{}] Failed to authorize CUD user. Exception: {}", cudToken, e.getMessage());
-        throwAuthenticationException("Authorization failed due to expired token", true);
-      }
+      val dccUser = createUser(icgcUser.getUserName(), token);
+      val verifiedResponse = verifiedResponse(dccUser);
+      log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
+          new Object[] { token, icgcUser.getUserName(), dccUser.getDaco() });
+
+      return verifiedResponse;
     }
 
     val userMessage = "Authorization failed due to missing token";
@@ -107,6 +107,31 @@ public class AuthResource extends BaseResource {
 
     // Will not come to this point because of throwAuthenticationException()
     return null;
+  }
+
+  private SimpleImmutableEntry<String, org.icgc.dcc.common.client.api.cud.User> resolveIcgcUser(String cudToken,
+      String cmsToken) {
+    org.icgc.dcc.common.client.api.cud.User user = null;
+    String token = null;
+
+    log.debug("[{}, {}] Looking for user info in the CUD", cudToken, cmsToken);
+    try {
+      if (!isNullOrEmpty(cudToken)) {
+        user = authService.getCudUserInfo(cudToken);
+        token = cudToken;
+      } else {
+        user = cmsClient.getUserInfo(cmsToken);
+        token = cmsToken;
+      }
+    } catch (ICGCException e) {
+      log.warn("[{}, {}] Failed to authorize ICGC user. Exception: {}",
+          new Object[] { cudToken, cmsToken, e.getMessage() });
+      throwAuthenticationException("Authorization failed due to expired token", true);
+    }
+
+    log.debug("[{}] Retrieved user information: {}", token, user);
+
+    return new SimpleImmutableEntry<String, org.icgc.dcc.common.client.api.cud.User>(token, user);
   }
 
   /**
@@ -150,7 +175,7 @@ public class AuthResource extends BaseResource {
       }
     } catch (Exception e) {
       throwAuthenticationException("Failed to grant DACO access to the user",
-          String.format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
+          format("[%s] Failed to grant DACO access to the user. Exception: %s", sessionTokenString, e.getMessage()));
     }
 
     log.debug("[{}] Saving the user in the cache", sessionTokenString);
