@@ -81,7 +81,8 @@ public class AuthenticationExceptionMapper implements ExceptionMapper<Authentica
   }
 
   private static ResponseBuilder invalidateCrowdCookie(ResponseBuilder responseBuilder) {
-    return responseBuilder.cookie(deleteCookie(CrowdProperties.CUD_TOKEN_NAME));
+    return responseBuilder.cookie(deleteCookie(CrowdProperties.CUD_TOKEN_NAME),
+        deleteCookie(CrowdProperties.CMS_TOKEN_NAME));
   }
 
   /**

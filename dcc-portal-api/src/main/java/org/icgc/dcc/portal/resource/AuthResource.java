@@ -273,10 +273,12 @@ public class AuthResource extends BaseResource {
   private static Response createLogoutResponse(Status status, String message) {
     val dccCookie = deleteCookie(CrowdProperties.SESSION_TOKEN_NAME);
     val crowdCookie = deleteCookie(CrowdProperties.CUD_TOKEN_NAME);
+    val cmsCookie = deleteCookie(CrowdProperties.CMS_TOKEN_NAME);
 
     return status(status)
         .header(SET_COOKIE, dccCookie.toString())
         .header(SET_COOKIE, crowdCookie.toString())
+        .header(SET_COOKIE, cmsCookie.toString())
         .entity(new org.icgc.dcc.portal.model.Error(status, message))
         .build();
   }
