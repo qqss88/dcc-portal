@@ -62,6 +62,18 @@
       });
     };
 
+    _ctrl.showDictionary = function(fileType) {
+      $modal.open({
+        templateUrl: '/scripts/dictionary/views/fields.html',
+        controller: 'DictionaryController',
+        resolve: {
+          fileType: function() {
+            return fileType;
+          }
+        }
+      });
+    };
+
     Projects.getList().then(function (projects) {
       var p = _.find(projects.hits, function (item) {
         return item.id === donor.projectId;

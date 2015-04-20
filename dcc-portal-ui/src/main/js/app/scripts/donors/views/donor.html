@@ -136,9 +136,10 @@
 
     </div>
 </section>
+
 <section id="clinical">
     <h3>Clinical Data</h3>
-
+    <a href="" data-ng-click="DonorCtrl.showDictionary('Clinical')">Show submission clinical fields</a><br>
     <div class="half">
         <table class="table table-info">
             <tr>
@@ -201,9 +202,148 @@
                 <th>Survival time (days)</th>
                 <td>{{ DonorCtrl.donor.survivalTime | numberPT }}</td>
             </tr>
+            <tr>
+                <th>Prior Malignancy</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Cancer Type Prior Malignancy</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Cancer history first degree relative</th>
+                <td>???</td>
+            </tr>
+        </table>
+    </div>
+    <div class="clearfix"></div>
+
+
+    <h3>Family</h3>
+    <a href="" data-ng-click="DonorCtrl.showDictionary('Family')">Show submission clinical fields</a><br>
+    <div class="half">
+        <table class="table table-info">
+            <tr>
+                <th>Donor has relative with cancer history</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relationship type</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relation type other</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relationship sex</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relationship age</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relationship disease ICD10</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Relationship disease</th>
+                <td>???</td>
+            </tr>
+        </table>
+    </div>
+    <div class="clearfix"></div>
+
+
+    <h3>Exposure</h3>
+    <a href="" data-ng-click="DonorCtrl.showDictionary('Exposure')">Show submission clinical fields</a><br>
+    <div class="half">
+        <table class="table table-info">
+            <tr>
+                <th>Exposure type</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Exposure intensity</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Tobacco smoking history indicator</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Tobacco smoking intensity</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Alcohol history</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Alcohol history intensity</th>
+                <td>???</td>
+            </tr>
+        </table>
+    </div>
+    <div class="clearfix"></div>
+
+    <h3>Therapy</h3>
+    <a href="" data-ng-click="DonorCtrl.showDictionary('Therapy')">Show submission clinical fields</a><br>
+    <div class="half">
+        <table class="table table-info">
+            <tr>
+                <th>First therapy type</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>First therapy therapeutic intent</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>First therapy start interval</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>First therapy duration</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>First therapy response</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Second therapy response</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Second therapy therapeutic intent</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Second therapy start interval</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Second therapy duration</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Second therapy response</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Other therapy</th>
+                <td>???</td>
+            </tr>
+            <tr>
+                <th>Other therapy response</th>
+                <td>???</td>
+            </tr>
         </table>
     </div>
 </section>
+
 <section id="mutations"
          data-ng-controller="DonorMutationsCtrl as DonorMutationsCtrl"
          data-ng-class="{'loading': !DonorMutationsCtrl.mutations.hits, 'empty': DonorMutationsCtrl.mutations.hits.length == 0}">
