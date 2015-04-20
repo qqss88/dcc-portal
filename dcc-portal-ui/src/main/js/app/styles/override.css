@@ -118,3 +118,12 @@ textarea {
 .match {
     font-weight: bold;
 }
+
+
+/**
+ * Fix modal jumps when opening dialog
+ * See: http://stackoverflow.com/questions/21604674/bootstrap-modal-background-jumps-to-top-on-toggle
+ */
+body.modal-open {
+   overflow: visible;
+}
