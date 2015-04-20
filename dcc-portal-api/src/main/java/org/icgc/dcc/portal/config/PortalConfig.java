@@ -184,6 +184,7 @@ public class PortalConfig {
 
     return Settings.builder()
         .ssoUrl(crowd.getSsoUrl())
+        .ssoUrlGoogle(crowd.getSsoUrlGoogle())
         .releaseDate(release.getReleaseDate())
         .dataVersion(release.getDataVersion())
         .downloadEnabled(download.isEnabled())
