@@ -25,15 +25,15 @@ import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FI
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
-import java.util.Collection;
 import java.util.Map;
 
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -86,7 +86,7 @@ public class GeneSetRepository {
   public int countGenes(@NonNull String id) {
     val geneSet = findOne(id, "geneCount");
 
-    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+    return (getLong(geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue());
   }
 
   public Map<String, Integer> countGenes(@NonNull Iterable<String> ids) {
@@ -146,7 +146,7 @@ public class GeneSetRepository {
     val map = Maps.<String, String> newLinkedHashMap();
     for (val hit : response.getHits()) {
       val id = hit.getId();
-      val count = (String) hit.getFields().get(fieldName).getValue();
+      val count = getString(hit.getFields().get(fieldName).getValue());
 
       map.put(id, count);
     }
@@ -176,15 +176,6 @@ public class GeneSetRepository {
     return map;
   }
 
-  private void addSourceFields(GetRequestBuilder search, Collection<String> fields) {
-    String[] excludeFields = null;
-    if (fields.isEmpty()) {
-      fields = SOURCE_FIELDS.values();
-    }
-
-    search.setFetchSource(fields.toArray(new String[fields.size()]), excludeFields);
-  }
-
   private SearchResponse findField(Iterable<String> ids, String fieldName) {
     val filters = new TermsFilterBuilder("_id", ids);
 
@@ -197,10 +188,6 @@ public class GeneSetRepository {
         .addField(fieldName);
 
     return search.execute().actionGet();
-  }
-
-  private static boolean isSourceField(String field) {
-    return SOURCE_FIELDS.containsKey(field);
   }
 
 }

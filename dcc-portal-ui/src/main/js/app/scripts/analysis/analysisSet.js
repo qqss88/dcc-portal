@@ -61,6 +61,7 @@
         return set.state !== 'FINISHED';
       });
       if (toRemove.length > 0) {
+        _this.syncError = false;
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         _this.checkAll = false; // reset
         synchronizeSets(1);
@@ -77,6 +78,7 @@
 
       var toRemove = _this.selectedSets;
       if (toRemove.length > 0) {
+        _this.syncError = false;
         SetService.removeSeveral(_.pluck(toRemove, 'id'));
         _this.checkAll = false; // reset
       }
