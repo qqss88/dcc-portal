@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var namespace = 'icgc.common.pqlqueryobject';
+  var namespace = 'icgc.common.pql.queryobject';
   var serviceName = 'PqlQueryObjectService';
 
   var module = angular.module(namespace, []);
@@ -32,7 +32,7 @@
 
       var jsonTree = PqlTranslationService.fromPql (pql);
 
-      return fromJsonTreeToQueryObject (jsonTree);
+      return convertJsonTreeToQueryObject (jsonTree);
     }
 
     function isNode (nodeName, node) {
@@ -41,6 +41,8 @@
     }
 
     var isAndNode = _.partial (isNode, 'and');
+    var isSortNode = _.partial (isNode, 'sort');
+    var isLimitNode = _.partial (isNode, 'limit');
 
     function parseIdentifier (id) {
       var splits = (id || '').split ('.');
@@ -73,7 +75,7 @@
       return result;
     }
 
-    function fromJsonTreeToQueryObject (jsonTree) {
+    function convertJsonTreeToQueryObject (jsonTree) {
       // Currently we expect jsonTree to be an array.
       var nodes = _.filter (jsonTree, isAndNode);
       var values = (nodes.length > 0) ? (nodes[0].values || []) : jsonTree;
@@ -89,7 +91,7 @@
       });
     }
 
-    function toJsonTreeFromQueryObject (query) {
+    function convertQueryObjectToJsonTree (query) {
       var categoryKeys = Object.keys (query || {});
 
       if (categoryKeys.length < 1) {return [];}
@@ -182,7 +184,7 @@
     }
 
     function convertQueryObjectToPql (queryObject) {
-      var jsonTree = toJsonTreeFromQueryObject (queryObject);
+      var jsonTree = convertQueryObjectToJsonTree (queryObject);
 
       return PqlTranslationService.toPql (jsonTree);
     }
@@ -194,6 +196,80 @@
       }, query);
       
       return convertQueryObjectToPql (updatedQuery);
+    }
+
+    function cleanUpArguments (args, func) {
+      var argumentArray = Array.prototype.slice.call (args);
+      return _.isFunction (func) ? _.map (argumentArray, func) : argumentArray;
+    }
+
+    function mergeQueryObjects (queryObjects) {
+      var queryObjects = removeEmptyObject (queryObjects);
+      var numberOfQueries = queryObjects.length;
+
+      if (numberOfQueries < 1) {return {};}
+      
+      return (numberOfQueries < 2) ? queryObjects [0] : _.reduce (queryObjects, _.merge, {});
+    }
+
+    function mergeQueries () {
+      var numberOfArgs = arguments.length;
+
+      if (numberOfArgs < 1) {return {};}
+
+      return mergeQueryObjects (cleanUpArguments (arguments, function (o) {
+        return _.isPlainObject (o) ? o : {};
+      }));
+    }
+
+    function mergePqlStatements () {
+      var numberOfArgs = arguments.length;
+
+      if (numberOfArgs < 1) {return '';}
+
+      var pqlArray = _.unique (_.map (cleanUpArguments (arguments, function (s) {
+        return _.isString (s) ? s.trim() : '';
+      }))); 
+
+      if (numberOfArgs < 2) return pqlArray [0];
+
+      var resultObject = mergeQueryObjects (_.map (pqlArray, convertPqlToQueryObject));
+
+      return resultObject === {} ? '' : PqlTranslationService.toPql (convertQueryObjectToJsonTree (resultObject));
+    }
+
+    function getSpecialNodeFromPql (pql, filterFunc) {
+      var pql = (pql || '').trim();
+
+      if (pql.length < 1) {return null;}
+
+      var parseArray = PqlTranslationService.fromPql (pql);
+
+      // Special nodes such as 'sort' and 'limit' must only appear in an array as a parse tree.
+      if (! _.isArray (parseArray)) {return null;}
+
+      var nodes = _.filter (parseArray, filterFunc);
+      return nodes.length > 0 ? nodes[0] : null;
+    }
+
+    function getSort (pql) {
+      var sortNode = getSpecialNodeFromPql (pql, isSortNode);
+      var defaultValue = [];
+
+      // The values field in a Sort node contains an array of sort fields.
+      return sortNode ? (sortNode.values || defaultValue) : defaultValue;
+    }
+
+    function getLimit (pql) {
+      var limitNode = getSpecialNodeFromPql (pql, isLimitNode);
+      var defaultValue = {};
+
+      if (! limitNode) {return defaultValue;}
+
+      // The JSON format for the limit node is {op: 'limit', from: {integer} [, size: {integer}]}. We return the node as is, except without the 'op' field.
+      delete limitNode.op;
+
+      return limitNode;
     }
 
     return {
@@ -209,6 +285,11 @@
       overwrite: function (pql, categoryName, facetName, term) {
         return updateQuery (pql, categoryName, facetName, term, [removeFacetFromQuery, addTermToQuery]);
       },
+      convertQueryToPql: convertQueryObjectToPql,
+      mergePqls: mergePqlStatements,
+      mergeQueries: mergeQueries,
+      getSort: getSort,
+      getLimit: getLimit,
       getQuery: function (pql) {
         return convertPqlToQueryObject (pql);
       }

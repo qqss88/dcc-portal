@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var namespace = 'icgc.common.pqlutils';
+  var namespace = 'icgc.common.pql.utils';
   var serviceName = 'PqlUtilService';
 
   var module = angular.module(namespace, []);
@@ -26,7 +26,9 @@
   module.factory(serviceName, function (PqlQueryObjectService, $location, $log) {
     // This is the parameter name for PQL in the URL query params.
     var pqlParameterName = 'query';
+    var service = PqlQueryObjectService;
 
+    // Here Pql is persisted in a query param in the URL.
     function getPql() {
       var search = $location.search();
       var pql = search [pqlParameterName] || '';
@@ -35,25 +37,31 @@
       return pql;
     }
 
+    // Retrieves pql persisted in a query param in the URL.
     function setPql (pql) {
       $log.debug ('PQL is updated to [%s].', pql);
       $location.search (pqlParameterName, pql);
     }
 
+    // A builder to allow the UI to build a PQL programmatically.
     var Builder = function () {
       var buffer = '';
 
       return {
         addTerm: function (categoryName, facetName, term) {
-          buffer = PqlQueryObjectService.addTerm (buffer, categoryName, facetName, term);
+          buffer = service.addTerm (buffer, categoryName, facetName, term);
           return this;
         },
         removeTerm: function (categoryName, facetName, term) {
-          buffer = PqlQueryObjectService.removeTerm (buffer, categoryName, facetName, term);
+          buffer = service.removeTerm (buffer, categoryName, facetName, term);
           return this;
         },
         removeFacet: function (categoryName, facetName) {
-          buffer = PqlQueryObjectService.removeFacet (buffer, categoryName, facetName);
+          buffer = service.removeFacet (buffer, categoryName, facetName);
+          return this;
+        },
+        overwrite: function (categoryName, facetName, term) {
+          buffer = service.overwrite (buffer, categoryName, facetName, term);
           return this;
         },
         build: function () {
@@ -65,27 +73,39 @@
     return {
       paramName: pqlParameterName,
       addTerm: function (categoryName, facetName, term) {
-        var pql = PqlQueryObjectService.addTerm (getPql(), categoryName, facetName, term);
+        var pql = service.addTerm (getPql(), categoryName, facetName, term);
         setPql (pql);
       },
       removeTerm: function (categoryName, facetName, term) {
-        var pql = PqlQueryObjectService.removeTerm (getPql(), categoryName, facetName, term);
+        var pql = service.removeTerm (getPql(), categoryName, facetName, term);
         setPql (pql);
       },
       removeFacet: function (categoryName, facetName) {
-        var pql = PqlQueryObjectService.removeFacet (getPql(), categoryName, facetName);
+        var pql = service.removeFacet (getPql(), categoryName, facetName);
         setPql (pql);
       },
       overwrite: function (categoryName, facetName, term) {
-        var pql = PqlQueryObjectService.overwrite (getPql(), categoryName, facetName, term);
+        var pql = service.overwrite (getPql(), categoryName, facetName, term);
         setPql (pql);
       },
+      mergeQueries: function (query1, query2) {
+        return service.mergeQueries (query1, query2);
+      },
+      mergePqls: function (pql1, pql2) {
+        return service.mergePqls (pql1, pql2);
+      },
+      getSort: function () {
+        return service.getSort (getPql());
+      },
+      getLimit: function () {
+        return service.getLimit (getPql());
+      },
+      convertQueryToPql: service.convertQueryToPql,
+      convertPqlToQuery: service.getQuery,
       getQuery: function () {
-        return PqlQueryObjectService.getQuery (getPql());
+        return service.getQuery (getPql());
       },
-      getRawPql: function () {
-        return getPql();
-      },
+      getRawPql: getPql,
       getBuilder: function () {
         return new Builder();
       }

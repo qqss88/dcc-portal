@@ -17,6 +17,10 @@ describe('Testing PqlUtilService', function() {
     location.search (paramName, '');
   }));
 
+  function setPqlInUrl (pql) {
+    location.search (paramName, pql);
+  }
+
   it('Testing getRawPql() with empty pql', function() {
      var expectedPql = '';
      var testPql = PqlUtilService.getRawPql();
@@ -26,7 +30,7 @@ describe('Testing PqlUtilService', function() {
 
   it('Testing getRawPql() with pql: eq(test,123)', function() {
     var expectedPql = "eq(test,123)";
-    location.search (paramName, expectedPql);
+    setPqlInUrl (expectedPql);
 
     var testPql = PqlUtilService.getRawPql();
     
@@ -95,6 +99,78 @@ describe('Testing PqlUtilService', function() {
     var testPql = PqlUtilService.getRawPql();
 
     expect(testPql).toEqual(expectedPql);
+  });
+
+  it('Testing getSort() with pql: eq(test,123),sort(age,-gender,+type)', function() {
+    var testPql = 'eq(test,123),sort(age,-gender,+type)';
+    setPqlInUrl (testPql);
+
+    var expectedSorts = [
+    {
+      direction: '+',
+      field: 'age'
+    },
+    {
+      direction: '-',
+      field: 'gender'
+    },
+    {
+      direction: '+',
+      field: 'type'
+    }];
+
+    var testSorts = PqlUtilService.getSort ();
+    
+    expect(testSorts).toEqual(expectedSorts);
+  });
+
+  it('Testing getSort() with no sort set in pql: eq(test,123)', function() {
+    var testPql = 'eq(test,123)';
+    setPqlInUrl (testPql);
+
+    var expectedSorts = [];
+
+    var testSorts = PqlUtilService.getSort ();
+    
+    expect(testSorts).toEqual(expectedSorts);
+  });
+
+  it('Testing getLimit() with pql: eq(test,123),sort(age,-gender,+type),limit(1,99)', function() {
+    var testPql = 'eq(test,123),sort(age,-gender,+type),limit(1,99)';
+    setPqlInUrl (testPql);
+
+    var expectedLimit = {
+      from: 1,
+      size: 99
+    };
+
+    var testLimit = PqlUtilService.getLimit ();
+    
+    expect(testLimit).toEqual (expectedLimit);
+  });
+
+  it('Testing getLimit() with pql: eq(test,123),sort(age,-gender,+type),limit(1)', function() {
+    var testPql = 'eq(test,123),sort(age,-gender,+type),limit(1)';
+    setPqlInUrl (testPql);
+
+    var expectedLimit = {
+      from: 1
+    };
+
+    var testLimit = PqlUtilService.getLimit ();
+    
+    expect(testLimit).toEqual (expectedLimit);
+  });
+
+  it('Testing getLimit() with no limit set in pql: eq(test,123)', function() {
+    var testPql = 'eq(test,123)';
+    setPqlInUrl (testPql);
+
+    var expectedLimit = {};
+
+    var testLimit = PqlUtilService.getLimit ();
+    
+    expect(testLimit).toEqual (expectedLimit);
   });
 
   it('Testing getQuery() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
@@ -208,8 +284,7 @@ describe('Testing PqlUtilService', function() {
 
   it('Testing overwrite() with "donor.gender" set to "unknown" in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
-    // Modify the PQL in the URL location directly to simulate an input
-    location.search (paramName, originalPql);
+    setPqlInUrl (originalPql);
 
     var expectedQuery = {
       donor: {
@@ -231,6 +306,172 @@ describe('Testing PqlUtilService', function() {
 
     var testQuery = PqlUtilService.getQuery();
     expect(testQuery).toEqual(expectedQuery);
+  });
+
+  it('Testing mergePqls() with eq(donor.age,123) and in(donor.gender, "male", "female")', function() {
+    var pql1 = 'eq(donor.age,123)';
+    var pql2 = 'in(donor.gender,"male","female")';
+
+    var expectedPql = 'and(' + pql1 + ',' + pql2 + ')';
+
+    var mergedPql = PqlUtilService.mergePqls (pql1, pql2);
+
+    expect(mergedPql).toEqual(expectedPql);
+  });
+
+  it('Testing mergePqls() with eq(donor.gender,"female") and eq(donor.gender,"male")', function() {
+    var pql1 = 'eq(donor.gender,"female")';
+    var pql2 = 'eq(donor.gender,"male")';
+
+    var expectedPql = 'eq(donor.gender,"male")';
+
+    var mergedPql = PqlUtilService.mergePqls (pql1, pql2);
+
+    expect(mergedPql).toEqual(expectedPql);
+  });
+
+  it('Testing mergePqls() with eq(donor.gender,"female") and and(eq(donor.gender,"male"), eq(donor.age, 22))', function() {
+    var pql1 = 'and(eq(donor.gender,"male"),eq(donor.age,22))';
+    var pql2 = 'eq(donor.gender,"female")';
+
+    var expectedPql = 'and(eq(donor.gender,"female"),eq(donor.age,22))';
+
+    var mergedPql = PqlUtilService.mergePqls (pql1, pql2);
+
+    expect(mergedPql).toEqual(expectedPql);
+  });
+
+  it('Testing mergePqls() with and(eq(donor.gender,"female"),in(mutation.foo, 3, 5)) and and(eq(donor.gender,"male"), eq(donor.age, 22))', function() {
+    var pql1 = 'and(eq(donor.gender,"female"),in(mutation.foo,3,5))';
+    var pql2 = 'and(eq(donor.gender,"male"),eq(donor.age,22))';
+
+    var expectedPql = 'and(eq(donor.gender,"male"),eq(donor.age,22),in(mutation.foo,3,5))';
+
+    var mergedPql = PqlUtilService.mergePqls (pql1, pql2);
+
+    expect(mergedPql).toEqual(expectedPql);
+  });
+
+  it('Testing mergePqls() with no argument', function() {
+    var expectedPql = '';
+    var mergedPql = PqlUtilService.mergePqls ();
+
+    expect(mergedPql).toEqual(expectedPql);
+  });
+
+  it('Testing mergePqls() with one argument: eq(donor.gender,"female")', function() {
+    var pql1 = 'eq(donor.gender,"female")';
+    var mergedPql = PqlUtilService.mergePqls (pql1);
+
+    expect(mergedPql).toEqual(pql1);
+  });
+
+
+  it('Testing mergeQueries() with eq(donor.age,123) and in(donor.gender, "male", "female")', function() {
+    var query1 = {
+      donor: {
+        age: {
+          "in": [123]
+        }
+      }
+    };
+    var query2 = {
+      donor: {
+        gender: {
+          'in': ['male', 'female']
+        }
+      }
+    };
+
+    var expectedQuery = {
+      donor: {
+        age: {
+          "in": [123]
+        },
+        gender: {
+          'in': ['male', 'female']
+        }
+      }
+    };
+
+    var mergedQuery = PqlUtilService.mergeQueries (query1, query2);
+
+    expect(mergedQuery).toEqual (expectedQuery);
+  });
+
+  it('Testing mergeQueries() with eq(donor.gender,"female") and eq(donor.gender,"male")', function() {
+    var query1 = {
+      donor: {
+        gender: {
+          'in': ['female']
+        }
+      }
+    };
+    var query2 = {
+      donor: {
+        gender: {
+          'in': ['male']
+        }
+      }
+    };
+
+    var expectedQuery = {
+      donor: {
+        gender: {
+          'in': ['male']
+        }
+      }
+    };
+
+    var mergedQuery = PqlUtilService.mergeQueries (query1, query2);
+
+    expect(mergedQuery).toEqual (expectedQuery);
+  });
+
+  it('Testing convertQueryToPql() for pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
+    var testQuery = {
+      donor: {
+        gender: {
+          "in": ["male", "female"]
+        },
+        age: {
+          "in": [22]
+        }
+      },
+      mutation: {
+        foo: {
+          "in": ["bar"]
+        }
+      }
+    };
+
+    var expectedPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
+    var testPql = PqlUtilService.convertQueryToPql (testQuery);
+
+    expect(testPql).toEqual (expectedPql);
+  });
+
+  it('Testing convertPqlToQuery() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
+    var expectedQuery = {
+      donor: {
+        gender: {
+          "in": ["male", "female"]
+        },
+        age: {
+          "in": [22]
+        }
+      },
+      mutation: {
+        foo: {
+          "in": ["bar"]
+        }
+      }
+    };
+
+    var testPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
+    var testQuery = PqlUtilService.convertPqlToQuery (testPql);
+
+    expect(testQuery).toEqual (expectedQuery);
   });
 
   it('Testing Builder.build()', function() {

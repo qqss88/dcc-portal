@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var namespace = 'icgc.common.pqltranslation';
+  var namespace = 'icgc.common.pql.translation';
   var serviceName = 'PqlTranslationService';
 
   var module = angular.module(namespace, []);
@@ -73,7 +73,8 @@
     }
 
     function limitUnitToPql (limit) {
-      var from = limit.from || 0;
+      limit = limit || {};
+      var from = _.isNumber (limit.from) ? limit.from : 0;
       var values = _.isNumber (limit.size) ? [from, limit.size] : [from];
 
       return opValuesToString (limit.op, values);
@@ -96,14 +97,14 @@
           throw e;
         }
       },
-      toPql: function (parsedTree) {
-        var result = _.isArray (parsedTree) ?
-          parsedTree.map(convertNodeToPqlString).join() :
-          _.isObject (parsedTree) ? convertNodeToPqlString (parsedTree) : null;
+      toPql: function (parseTree) {
+        var result = _.isArray (parseTree) ?
+          parseTree.map(convertNodeToPqlString).join() :
+          _.isObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
 
         if (result === null) {
           $log.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',
-            JSON.stringify (parsedTree));
+            JSON.stringify (parseTree));
           result = '';
         }
 
