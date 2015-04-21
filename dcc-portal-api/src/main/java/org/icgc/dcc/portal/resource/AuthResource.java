@@ -99,8 +99,9 @@ public class AuthResource extends BaseResource {
       val tokenUserEntry = resolveIcgcUser(cudToken, cmsToken);
       val token = tokenUserEntry.getKey();
       val icgcUser = tokenUserEntry.getValue();
+      val userType = resolveUserType(cudToken, cmsToken);
 
-      val dccUser = createUser(icgcUser.getUserName(), token);
+      val dccUser = createUser(icgcUser.getUserName(), token, userType);
       val verifiedResponse = verifiedResponse(dccUser);
       log.info("[{}] Finished authorization for user '{}'. DACO access: '{}'",
           new Object[] { token, icgcUser.getUserName(), dccUser.getDaco() });
@@ -114,6 +115,10 @@ public class AuthResource extends BaseResource {
 
     // Will not come to this point because of throwAuthenticationException()
     return null;
+  }
+
+  private static UserType resolveUserType(String cudToken, String cmsToken) {
+    return isNullOrEmpty(cudToken) ? UserType.OPENID : UserType.CUD;
   }
 
   private static String getCookieValue(javax.ws.rs.core.Cookie cookie) {
@@ -170,7 +175,7 @@ public class AuthResource extends BaseResource {
    * 
    * @throws AuthenticationException
    */
-  private User createUser(String userName, String cudToken) {
+  private User createUser(String userName, String cudToken, UserType userType) {
     val sessionToken = randomUUID();
     val sessionTokenString = cudToken == null ? sessionToken.toString() : cudToken;
     log.info("[{}] Creating and persisting user '{}' in the cache.", sessionTokenString, userName);
@@ -180,7 +185,7 @@ public class AuthResource extends BaseResource {
 
     try {
       log.debug("[{}] Checking if the user has the DACO access", sessionTokenString);
-      if (authService.hasDacoAccess(userName, UserType.CUD)) {
+      if (authService.hasDacoAccess(userName, userType)) {
         log.info("[{}] Granted DACO access to the user", sessionTokenString);
         user.setDaco(true);
       }
@@ -225,7 +230,7 @@ public class AuthResource extends BaseResource {
           String.format("[%s] Failed to login the user. Exception %s", username, e.getMessage()));
     }
 
-    return verifiedResponse(createUser(username, null));
+    return verifiedResponse(createUser(username, null, UserType.CUD));
   }
 
   @POST
