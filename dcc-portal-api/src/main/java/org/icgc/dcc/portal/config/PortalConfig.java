@@ -34,6 +34,7 @@ import org.dcc.portal.pql.qe.QueryEngine;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
+import org.icgc.dcc.common.client.api.cms.CMSClient;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
@@ -185,6 +186,7 @@ public class PortalConfig {
 
     return Settings.builder()
         .ssoUrl(crowd.getSsoUrl())
+        .ssoUrlGoogle(crowd.getSsoUrlGoogle())
         .releaseDate(release.getReleaseDate())
         .dataVersion(release.getDataVersion())
         .downloadEnabled(download.isEnabled())
@@ -215,6 +217,7 @@ public class PortalConfig {
     val icgcConfig = ICGCClientConfig.builder()
         .cgpServiceUrl(icgc.getCgpUrl())
         .cudServiceUrl(icgc.getCudUrl())
+        .cmsServiceUrl(icgc.getCmsUrl())
         .cudAppId(icgc.getCudAppId())
         .consumerKey(icgc.getConsumerKey())
         .consumerSecret(icgc.getConsumerSecret())
@@ -235,6 +238,11 @@ public class PortalConfig {
   @Bean
   public CUDClient cudClient(ICGCClient icgcClient) {
     return icgcClient.cud();
+  }
+
+  @Bean
+  public CMSClient cmsClient(ICGCClient icgcClient) {
+    return icgcClient.cms();
   }
 
   @Bean

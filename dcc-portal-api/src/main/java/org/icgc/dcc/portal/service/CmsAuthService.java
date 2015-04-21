@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -17,21 +17,44 @@
  */
 package org.icgc.dcc.portal.service;
 
-import java.net.URI;
-import java.util.Collection;
-
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.Value;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class AuthenticationException extends RuntimeException {
+import org.icgc.dcc.common.client.api.cms.CMSClient;
+import org.icgc.dcc.common.client.api.cud.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ * Authenticates with the ICGC authenticator. The service is used to retrieve user information authenticate by the
+ * Google API.
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+public class CmsAuthService {
 
   @NonNull
-  String message;
-  URI redirect;
-  @NonNull
-  Collection<String> invalidCookies;
+  private final CMSClient cmsClient;
+
+  @Getter(lazy = true)
+  private final String sessionName = initSessionName();
+
+  public User getUserInfo(@NonNull String sessionId) {
+    val result = cmsClient.getUserInfo(sessionId);
+    log.debug("Retrieved user '{}' for session '{}'", result, sessionId);
+
+    return result;
+  }
+
+  private String initSessionName() {
+    val result = cmsClient.getSessionName();
+    log.debug("Initializing ICGC session cookie name to '{}'", result);
+
+    return result;
+  }
 
 }

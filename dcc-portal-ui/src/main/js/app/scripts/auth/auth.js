@@ -80,9 +80,13 @@
   });
 
   angular.module('icgc.auth.models').factory('CUD', function ($window, Settings) {
-    function login() {
+    function login(provider) {
       Settings.get().then(function(settings) {
-        redirect(settings.ssoUrl);
+        if (provider === 'icgc') {
+          redirect(settings.ssoUrl);
+        } else if (provider === 'google') {
+          redirect(settings.ssoUrlGoogle);
+        }
       });
     }
 
@@ -230,11 +234,9 @@
 
       $scope.tryLogin = function () {
         $scope.connecting = true;
-        if ($scope.params.provider === 'icgc') {
-          CUD.login({
-            username: $scope.params.cudUsername,
-            password: $scope.params.cudPassword
-          });
+        // if ($scope.params.provider === 'icgc') {
+        if ( ['icgc', 'google'].indexOf($scope.params.provider) >= 0) {
+          CUD.login( $scope.params.provider );
         } else {
           OpenID.provider(providerMap($scope.params.provider)).then(
             function () {},

@@ -39,6 +39,7 @@ public class Settings {
    * Crowd settings.
    */
   String ssoUrl;
+  String ssoUrlGoogle;
 
   /**
    * Set analysis settings.
