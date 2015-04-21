@@ -6,7 +6,8 @@
 
 <!-- body -->
 <div class="modal-body"> 
-    <table class="table">
+
+    <table class="table" data-ng-if="fileType==='Clinical'">
         <thead>
             <tr>
                 <th>Name</th>
@@ -16,11 +17,253 @@
         </thead>
         <tbody>
             <tr>
-                <td>Something</td>
-                <td>The quick brown fox jumps over the lazy dog</td>
-                <td>1</td>
+                <td>Age at diagnosis</td>
+                <td>Age at primary diagnosis in years.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Age at enrollment</td>
+                <td>Age (in years) at which first specimen was collected.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Age at last followup</td>
+                <td>Age (in years) at last followup</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Diagnosis ICD-10 code</td>
+                <td>ICD-10 diagnostic code</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Disease status at last followup</td>
+                <td>Donor's last known disease status.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Interval of last followup (days)</td>
+                <td>Interval from primary diagnosis to last followup date. ICGC requests that patients be followed up every 6 months while alive.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Gender</td>
+                <td>Donor biological sex. 'Other' has been removed from the controlled vocabulary due to identifiability concerns.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Vital status</td>
+                <td>Donor's last known vital status</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Tumour stage at diagnosis</td>
+                <td>Stage at diagnosis using indicated staging system. Note that this is supplementary to specimen's pathological staging.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Tumour staging system at diagnosis</td>
+                <td>Clinical staging system used at time of diagnosis, if determined. Note that this is supplementary to specimen's pathological staging.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Tumour stage at diagnosis supplemental</td>
+                <td>Optional additional staging provided as a comma-delimited list of 'staging system:stage'</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Relapse type</td>
+                <td>Type of relapse or progression (for liquid tumours), if applicable</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Relapse interval (days)</td>
+                <td>If donor was clinically disease free following primary therapy and relapse or progression (for liquid tumours) occurred, length of disease free interval, in days.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Survival time (days)</td>
+                <td>How long has donor survived since primary diagnosis, in days. If source data was collected in months, use a multiplier value of '30.44' to convert value to days when preparing submission.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Prior Malignancy</td>
+                <td>Prior malignancy affecting patient.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Cancer Type Prior Malignancy</td>
+                <td>ICD-10 diagnostic code for type of cancer in a prior malignancy.</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Cancer history first degree relative</td>
+                <td>Does patient have a first degree relative that has a history of cancer? If yes, please provide clincial informration about relative's cancer history in Donor Family file</td>
+                <td>???</td>
             </tr>
         </tbody>
     </table>
+
+    <table class="table" data-ng-if="fileType==='Family'">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>CV Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Relative with cancer history</td>
+                <td>Does patient have any relatives with a history of cancer?</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td>Relationship to the donor</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Type Other</td>
+                <td>If 'other' answered in relationship_type field, specify the relationship type here</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Sex</td>
+                <td>Biological sex of related individual</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Age</td>
+                <td>Age of relative at primary diagnosis (in years)</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Disease ICD10</td>	
+                <td>ICD-10 code of disease affecting family member specified in the 'relationship_type' field</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Disease</td>
+                <td>Disease name</td>
+                <td>???</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table" data-ng-if="fileType==='Exposure'">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>CV Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Exposure type</td>
+                <td>Type of exposure. This is a controlled vocabulary term to be developed by the submitting group.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Exposure intensity</td>
+                <td>Extent of the exposure. This is a controlled vocabulary term to be developed by the submitting group. Units to be specified by submitting group.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Tabacco smoking history indicator</td>
+                <td>Donor's smoking history</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Tabacco smoking intensity</td>
+                <td>Smoking intensity in Pack Years: Number of pack years defined as the number of cigarettes smoked per day times (x) the number of years smoked divided (/) by 20. If patient has no tobacco smoking history (ie. tobacco_smoking_history_indicator is either '1' (non-smoker) or '6' (not documented), enter '-888' (not applicable) in this field.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Alcohol history</td>
+                <td>A response to a question that asks whether the patient has consumed at least 12 drinks of any alcoholic beverage in their lifetime.</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Alcohol history intensity</td>
+                <td>Alcohol exposure intensity. If patient does not have alcohol history (ie. alcohol_history field is either '2'(no) or '3'(do not know), enter '-888' (not applicable) in this field.</td>
+                <td>???</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table" data-ng-if="fileType==='Therapy'">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>CV Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>First therapy type</td>
+                <td>Type of first postresection therapy</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>First therapy therapeutic intent</td>
+                <td>The therapeutic intent of the first post resection therapy</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>First therapy start interval</td>
+                <td>Interval between primary diagnosis and initiation of the first postresection therapy, in days</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>First therapy duration</td>
+                <td>Duration of first postresection therapy, in days</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>First therapy response</td>
+                <td>What was the clinical effect of the first postresection therapy?</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Second therapy type</td>
+                <td>Type of second postresection therapy</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Second therapy therapeutic intent</td>
+                <td>The therapeutic intent of the second postresection therapy</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Second therapy start interval</td>
+                <td>Interval between primary diagnosis and initiation of the second postresection therapy, in days</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Second therapy duration</td>
+                <td>Duration of second postresection therapy, in days</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Second therapy response</td>
+                <td>What was the clinical effect of the second postresection therapy?</td>
+                <td>???</td>
+            </tr>
+            <tr>
+                <td>Other therapy</td>
+                <td>Other postresection therapy</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Other therapy response</td>
+                <td>What is the clinical effect of the postresection therapy</td>
+                <td>-</td>
+            </tr>
+        </tbody>
+    </table>
+
 </div>
 

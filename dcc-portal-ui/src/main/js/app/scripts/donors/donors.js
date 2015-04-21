@@ -65,6 +65,7 @@
     _ctrl.showDictionary = function(fileType) {
       $modal.open({
         templateUrl: '/scripts/dictionary/views/fields.html',
+        size: 'lg',
         controller: 'DictionaryController',
         resolve: {
           fileType: function() {

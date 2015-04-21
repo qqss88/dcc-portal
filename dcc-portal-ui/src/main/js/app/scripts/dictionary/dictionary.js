@@ -13,8 +13,13 @@
   /**
    * View dictionary fields of fileType (injected)
    */
-  module.controller('DictionaryController', function($scope, fileType) {
+  module.controller('DictionaryController', function($scope, $modalInstance, fileType) {
     $scope.fileType = fileType;
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
   });
 
 })();
