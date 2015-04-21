@@ -22,6 +22,7 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.reverseNested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
@@ -37,47 +38,62 @@ import org.junit.Test;
 @Slf4j
 public class AggregationToFacetConverterTest extends BaseRepositoryTest {
 
+  private static final String AGG_NAME = "consequenceTypeNested";
+  private static final String MISSING_AGG_NAME = AGG_NAME + "_missing";
+
   AggregationToFacetConverter converter = new AggregationToFacetConverter();
 
   @Before
   public void setUp() {
-    es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC).withData(bulkFile(getClass())));
+    es.execute(createIndexMappings(Type.MUTATION_CENTRIC).withData(bulkFile(getClass())));
   }
 
   @Test
   public void convertTest() {
-    val filter = FilterBuilders.existsFilter("_donor_id");
+    val filter = FilterBuilders.existsFilter("chromosome");
 
-    val aggregation = global("projectId").subAggregation(
-        filter("projectId").filter(filter).subAggregation(
-            nested("projectId").path("gene.ssm").subAggregation(
-                terms("projectId").field("gene.ssm.mutation_type"))));
+    val aggregation =
+        global(AGG_NAME).subAggregation(
+            filter(AGG_NAME).filter(filter).subAggregation(
+                nested(AGG_NAME).path("transcript").subAggregation(
+                    terms(AGG_NAME).field("transcript.consequence.consequence_type").subAggregation(
+                        reverseNested(AGG_NAME)))));
 
-    val missingAggregation = global("projectId_missing").subAggregation(
-        filter("projectId_missing").filter(filter).subAggregation(
-            nested("projectId_missing").path("gene.ssm").subAggregation(
-                missing("projectId_missing").field("gene.ssm.mutation_type"))));
+    val missingAggregation = global(MISSING_AGG_NAME).subAggregation(
+        filter(MISSING_AGG_NAME).filter(filter).subAggregation(
+            nested(MISSING_AGG_NAME).path("transcript").subAggregation(
+                missing(MISSING_AGG_NAME).field("transcript.consequence.consequence_type").subAggregation(
+                    reverseNested(MISSING_AGG_NAME)))));
 
     val response = converter.convert(executeQuery(aggregation, missingAggregation).getAggregations());
+    log.info("{}", response);
 
     assertThat(response).hasSize(1);
-    val termFacet = response.get("projectId");
+    val termFacet = response.get(AGG_NAME);
     assertThat(termFacet.getType()).isEqualTo("terms");
     assertThat(termFacet.getMissing()).isEqualTo(0L);
     assertThat(termFacet.getOther()).isEqualTo(0L);
-    assertThat(termFacet.getTotal()).isEqualTo(211L);
+    assertThat(termFacet.getTotal()).isEqualTo(6L);
 
     val terms = termFacet.getTerms();
-    assertThat(terms).hasSize(1);
-    val firstTerm = terms.get(0);
-    assertThat(firstTerm.getCount()).isEqualTo(211L);
-    assertThat(firstTerm.getTerm()).isEqualTo("single base substitution");
+    assertThat(terms).hasSize(3);
+    val missenseTerm = terms.get(0);
+    assertThat(missenseTerm.getCount()).isEqualTo(3L);
+    assertThat(missenseTerm.getTerm()).isEqualTo("missense_variant");
+
+    val frameshiftTerm = terms.get(1);
+    assertThat(frameshiftTerm.getCount()).isEqualTo(2L);
+    assertThat(frameshiftTerm.getTerm()).isEqualTo("frameshift_variant");
+
+    val intergenicTerm = terms.get(2);
+    assertThat(intergenicTerm.getCount()).isEqualTo(1L);
+    assertThat(intergenicTerm.getTerm()).isEqualTo("intergenic_region");
   }
 
   private SearchResponse executeQuery(AggregationBuilder<?>... builder) {
     val request = es.client()
         .prepareSearch(INDEX.getIndex())
-        .setTypes(Type.DONOR_CENTRIC.getId())
+        .setTypes(Type.MUTATION_CENTRIC.getId())
         .addAggregation(builder[0])
         .addAggregation(builder[1]);
     log.debug("Request - {}", request);

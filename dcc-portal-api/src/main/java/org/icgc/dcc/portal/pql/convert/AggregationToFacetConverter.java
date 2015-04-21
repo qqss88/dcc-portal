@@ -31,7 +31,9 @@ import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
+import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 
@@ -68,14 +70,35 @@ public class AggregationToFacetConverter {
     val terms = new ImmutableList.Builder<Term>();
     long total = 0;
     for (val bucket : termsAgg.getBuckets()) {
-      val docsCount = bucket.getDocCount();
+      val docsCount = resolveDocCount(termAggName, bucket);
       terms.add(new Term(bucket.getKey(), docsCount));
       total += docsCount;
     }
 
-    val missingAgg = findMissingAggregation(aggregations.get(termAggName + MISSING_SUFFIX));
+    val missingAggName = termAggName + MISSING_SUFFIX;
+    val missingAgg = findMissingAggregation(aggregations.get(missingAggName));
 
-    return TermFacet.of(total, missingAgg.getDocCount(), terms.build());
+    return TermFacet.of(total, resolveMissingDocCount(missingAggName, missingAgg), terms.build());
+  }
+
+  private static long resolveMissingDocCount(String missingAggName, Missing missingAgg) {
+    val aggregations = missingAgg.getAggregations();
+    if (aggregations != null) {
+      return 0L;
+    }
+
+    return missingAgg.getDocCount();
+  }
+
+  private static long resolveDocCount(String aggName, Bucket bucket) {
+    val aggregations = bucket.getAggregations();
+    if (aggregations != null) {
+      ReverseNested reverseNestedAggregation = aggregations.get(aggName);
+
+      return reverseNestedAggregation.getDocCount();
+    }
+
+    return bucket.getDocCount();
   }
 
   private static Terms findTermsAggregation(Aggregation aggregation) {
