@@ -15,6 +15,11 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+* This is the Angular service that provides lots of helper functions for PQL translations.
+* It hides the implementation details of PqlTranslationService and PqlQueryObjectService.
+*/
+
 (function () {
   'use strict';
 

@@ -15,15 +15,13 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-(function () {
+/*
+* PqlTranslator translates a PQL into a parse tree in JSON. This can be used without AngularJS.
+*/
+
+var dcc = dcc || {};
+dcc.PqlTranslator = (function (LOGGER) {
   'use strict';
-
-  var namespace = 'icgc.common.pql.translation';
-  var serviceName = 'PqlTranslationService';
-
-  var module = angular.module(namespace, []);
-
-  module.factory(serviceName, function ($log) {
 
     var noNestingOperators = [
       'exists', 'missing', 'select', 'facets'
@@ -93,7 +91,7 @@
         try {
           return PqlPegParser.parse (pql);
         } catch (e) {
-          $log.error ('Error parsing PQL [%s] with error message: [%s]', pql, e.message);
+          LOGGER.error ('Error parsing PQL [%s] with error message: [%s]', pql, e.message);
           throw e;
         }
       },
@@ -103,7 +101,7 @@
           _.isObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
 
         if (result === null) {
-          $log.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',
+          LOGGER.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',
             JSON.stringify (parseTree));
           result = '';
         }
@@ -111,5 +109,26 @@
         return result;
       }
     };
+});
+
+/*
+* This is the Angular service that wraps around the PqlTranslator.
+*/
+(function () {
+  'use strict';
+
+  var namespace = 'icgc.common.pql.translation';
+  var serviceName = 'PqlTranslationService';
+
+  var module = angular.module (namespace, []);
+
+  module.factory (serviceName, function ($log) {
+    var translator = dcc.PqlTranslator ($log);
+
+    return {
+      fromPql: translator.fromPql,
+      toPql: translator.toPql
+    }
   });
 })();
+

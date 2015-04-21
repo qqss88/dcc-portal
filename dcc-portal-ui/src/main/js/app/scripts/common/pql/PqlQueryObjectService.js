@@ -15,6 +15,10 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+* This is the Angular service that translates a parse tree of PQL into an object model to be consumed by UI-centric code.
+*/
+
 (function () {
   'use strict';
 
