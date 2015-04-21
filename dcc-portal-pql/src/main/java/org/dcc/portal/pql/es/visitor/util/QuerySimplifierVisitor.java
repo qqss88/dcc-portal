@@ -37,6 +37,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.ReverseNestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.BoolNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
@@ -186,6 +187,12 @@ public class QuerySimplifierVisitor extends NodeVisitor<Optional<ExpressionNode>
 
   @Override
   public Optional<ExpressionNode> visitTermsAggregation(TermsAggregationNode node, Optional<Void> context) {
+    return visitChildren(this, node, context);
+  }
+
+  @Override
+  public Optional<ExpressionNode> visitReverseNestedAggregation(ReverseNestedAggregationNode node,
+      Optional<Void> context) {
     return visitChildren(this, node, context);
   }
 

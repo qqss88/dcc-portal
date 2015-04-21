@@ -25,6 +25,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createFieldsToSourceVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createGeneSetFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createLocationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createNestedAggregationVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
@@ -42,16 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
-import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.Context;
-import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
-import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
-import org.dcc.portal.pql.es.visitor.special.EntitySetVisitor;
-import org.dcc.portal.pql.es.visitor.special.FieldsToSourceVisitor;
-import org.dcc.portal.pql.es.visitor.special.GeneSetFilterVisitor;
-import org.dcc.portal.pql.es.visitor.special.LocationFilterVisitor;
-import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
-import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.qe.QueryContext;
@@ -62,16 +54,6 @@ import org.dcc.portal.pql.qe.QueryContext;
 @Slf4j
 @NoArgsConstructor
 public class EsAstTransformator {
-
-  private final EmptyNodesCleanerVisitor emptyNodesCleaner = createEmptyNodesCleanerVisitor();
-  private final AggregationsResolverVisitor facetsResolver = createAggregationsResolverVisitor();
-  private final RemoveAggregationFilterVisitor removeAggsFilterVisitor = createRemoveAggregationFilterVisitor();
-  private final GeneSetFilterVisitor geneSetFilterVisitor = createGeneSetFilterVisitor();
-  private final LocationFilterVisitor locationFilterVisitor = createLocationFilterVisitor();
-  private final ScoreSortVisitor scoreSortVisitor = createScoreSortVisitor();
-  private final EntitySetVisitor entitySetVisitor = createEntitySetVisitor();
-  private final FieldsToSourceVisitor fieldsToSourceVisitor = createFieldsToSourceVisitor();
-  private final MissingAggregationVisitor missingAggregationVisitor = createMissingAggregationVisitor();
 
   private static final Optional<Context> DONOR_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
       getDonorCentricTypeModel()));
@@ -103,11 +85,11 @@ public class EsAstTransformator {
 
   public ExpressionNode resolveSpecialCases(ExpressionNode esAst, QueryContext context) {
     log.debug("[resoveSpecialCases] Before: {}", esAst);
-    esAst = esAst.accept(fieldsToSourceVisitor, Optional.of(context)).get();
-    esAst = esAst.accept(entitySetVisitor, Optional.of(context)).get();
-    esAst = esAst.accept(scoreSortVisitor, Optional.empty());
-    esAst = esAst.accept(geneSetFilterVisitor, Optional.of(context)).get();
-    esAst = esAst.accept(locationFilterVisitor, Optional.of(context)).get();
+    esAst = esAst.accept(createFieldsToSourceVisitor(), Optional.of(context)).get();
+    esAst = esAst.accept(createEntitySetVisitor(), Optional.of(context)).get();
+    esAst = esAst.accept(createScoreSortVisitor(), Optional.empty());
+    esAst = esAst.accept(createGeneSetFilterVisitor(), Optional.of(context)).get();
+    esAst = esAst.accept(createLocationFilterVisitor(), Optional.of(context)).get();
     log.debug("[resoveSpecialCases] After: {}", esAst);
 
     return esAst;
@@ -115,12 +97,12 @@ public class EsAstTransformator {
 
   public ExpressionNode optimize(ExpressionNode esAst) {
     log.debug("[optimize] Before: {}", esAst);
-    esAst = esAst.accept(emptyNodesCleaner, Optional.empty());
+    esAst = esAst.accept(createEmptyNodesCleanerVisitor(), Optional.empty());
 
     // Remove FilterAggregationNodes without filters
     val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
     if (aggsNode.isPresent()) {
-      esAst = esAst.accept(removeAggsFilterVisitor, Optional.empty()).get();
+      esAst = esAst.accept(createRemoveAggregationFilterVisitor(), Optional.empty()).get();
     }
 
     esAst = esAst.accept(createQuerySimplifierVisitor(), Optional.empty()).get();
@@ -131,8 +113,9 @@ public class EsAstTransformator {
 
   public ExpressionNode resolveFacets(ExpressionNode esAst, TypeModel typeModel) {
     log.debug("[resolveFacets] Before: {}", esAst);
-    esAst = esAst.accept(facetsResolver, createResolveFacetsContext(typeModel.getType())).get();
-    esAst = esAst.accept(missingAggregationVisitor, Optional.empty());
+    esAst = esAst.accept(createAggregationsResolverVisitor(), createResolveFacetsContext(typeModel.getType())).get();
+    esAst = esAst.accept(createMissingAggregationVisitor(), Optional.empty());
+    esAst = esAst.accept(createNestedAggregationVisitor(), Optional.of(typeModel));
     log.debug("[resolveFacets] After: {}", esAst);
 
     return esAst;

@@ -29,6 +29,7 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.MissingAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
+import org.dcc.portal.pql.es.ast.aggs.ReverseNestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
@@ -45,11 +46,16 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
   @Override
   public AbstractAggregationBuilder visitTermsAggregation(TermsAggregationNode node, Optional<QueryContext> context) {
     checkOptional(context);
+
     val fieldName = node.getFieldName();
     val result = AggregationBuilders
         .terms(node.getAggregationName())
         .size(DEFAULT_FACETS_SIZE)
         .field(fieldName);
+
+    if (node.hasChildren()) {
+      result.subAggregation(node.getFirstChild().accept(this, context));
+    }
 
     return resolveGlobal(result, node, node.getAggregationName());
   }
@@ -61,6 +67,10 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
     val result = AggregationBuilders
         .missing(node.getAggregationName())
         .field(fieldName);
+
+    if (node.hasChildren()) {
+      result.subAggregation(node.getFirstChild().accept(this, context));
+    }
 
     return resolveGlobal(result, node, node.getAggregationName());
   }
@@ -88,6 +98,13 @@ public class CreateAggregationBuilderVisitor extends NodeVisitor<AbstractAggrega
         .subAggregation(subAggregation);
 
     return resolveGlobal(result, node, node.getAggregationName());
+  }
+
+  @Override
+  public AbstractAggregationBuilder visitReverseNestedAggregation(ReverseNestedAggregationNode node,
+      Optional<QueryContext> context) {
+
+    return AggregationBuilders.reverseNested(node.getAggregationName());
   }
 
   private static boolean isGlobal(ExpressionNode node) {

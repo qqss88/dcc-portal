@@ -28,6 +28,7 @@ import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.NestedAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.ResolveNestedFilterVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.SearchNonNestedFieldsVisitor;
@@ -78,6 +79,7 @@ public class Visitors {
   private static final AggregationFiltersVisitor AGGREGATION_FILTER_VISITOR = new AggregationFiltersVisitor();
   private static final AggregationsResolverVisitor AGGREGATIONS_RESOLVER_VISITOR = new AggregationsResolverVisitor();
   private static final MissingAggregationVisitor MISSING_AGGREGATION_VISITOR = new MissingAggregationVisitor();
+  private static final NestedAggregationVisitor NESTED_AGGREGATION_VISITOR = new NestedAggregationVisitor();
 
   private static final EmptyNodesCleanerVisitor EMPTY_NODES_CLEANER_VISITOR = new EmptyNodesCleanerVisitor();
 
@@ -154,6 +156,10 @@ public class Visitors {
 
   public static AggregationFiltersVisitor createAggregationFiltersVisitor() {
     return AGGREGATION_FILTER_VISITOR;
+  }
+
+  public static NestedAggregationVisitor createNestedAggregationVisitor() {
+    return NESTED_AGGREGATION_VISITOR;
   }
 
   public static CreateQueryBuilderVisitor createQueryBuilderVisitor() {
