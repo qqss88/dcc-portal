@@ -16,7 +16,8 @@
  */
 
 /*
-* This is the Angular service that translates a parse tree of PQL into an object model to be consumed by UI-centric code.
+* This is the Angular service that translates a parse tree of PQL into an object model to be
+* consumed by UI-centric code.
 */
 
 (function () {

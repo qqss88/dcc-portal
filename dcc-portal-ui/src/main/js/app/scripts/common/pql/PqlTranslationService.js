@@ -19,10 +19,11 @@
 * PqlTranslator translates a PQL into a parse tree in JSON. This can be used without AngularJS.
 */
 
-var dcc = dcc || {};
-dcc.PqlTranslator = (function (LOGGER) {
+(function () {
   'use strict';
+  window.dcc = window.dcc || {};
 
+  dcc.PqlTranslator = function (LOGGER) {
     var noNestingOperators = [
       'exists', 'missing', 'select', 'facets'
     ];
@@ -109,7 +110,8 @@ dcc.PqlTranslator = (function (LOGGER) {
         return result;
       }
     };
-});
+  };
+})();
 
 /*
 * This is the Angular service that wraps around the PqlTranslator.
@@ -128,7 +130,7 @@ dcc.PqlTranslator = (function (LOGGER) {
     return {
       fromPql: translator.fromPql,
       toPql: translator.toPql
-    }
+    };
   });
 })();
 
