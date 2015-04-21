@@ -203,8 +203,8 @@
       return _.isFunction (func) ? _.map (argumentArray, func) : argumentArray;
     }
 
-    function mergeQueryObjects (queryObjects) {
-      var queryObjects = removeEmptyObject (queryObjects);
+    function mergeQueryObjects (queryObjs) {
+      var queryObjects = removeEmptyObject (queryObjs);
       var numberOfQueries = queryObjects.length;
 
       if (numberOfQueries < 1) {return {};}
@@ -229,9 +229,9 @@
 
       var pqlArray = _.unique (_.map (cleanUpArguments (arguments, function (s) {
         return _.isString (s) ? s.trim() : '';
-      }))); 
+      })));
 
-      if (numberOfArgs < 2) return pqlArray [0];
+      if (numberOfArgs < 2) {return pqlArray [0];}
 
       var resultObject = mergeQueryObjects (_.map (pqlArray, convertPqlToQueryObject));
 
@@ -239,7 +239,7 @@
     }
 
     function getSpecialNodeFromPql (pql, filterFunc) {
-      var pql = (pql || '').trim();
+      pql = (pql || '').trim();
 
       if (pql.length < 1) {return null;}
 
@@ -266,7 +266,8 @@
 
       if (! limitNode) {return defaultValue;}
 
-      // The JSON format for the limit node is {op: 'limit', from: {integer} [, size: {integer}]}. We return the node as is, except without the 'op' field.
+      // The JSON format for the limit node is {op: 'limit', from: {integer} [, size: {integer}]}.
+      // We return the node as is, except without the 'op' field.
       delete limitNode.op;
 
       return limitNode;
