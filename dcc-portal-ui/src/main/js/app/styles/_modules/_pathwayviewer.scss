@@ -129,6 +129,8 @@ $compartmentBorder:#ffc38b;
 .pathway-info-content{
   line-height: 1.4rem;
   padding:5%;
+  height: 70%;
+  overflow-y: scroll;
 }
 
 .pathway-gene-table{

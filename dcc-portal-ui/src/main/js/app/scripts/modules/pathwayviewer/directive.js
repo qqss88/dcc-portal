@@ -33,15 +33,16 @@
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
         '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
-          '<table class="table pathway-gene-table">'+
+          '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
                 '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
                 '<th class="pathway-gene-header-label pathway-gene-header">Mutations</th>' +
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
               '<th class="pathway-gene-label">{{gene.id}}</th>' +
-              '<th class="pathway-gene-label">{{gene.value}} mutations</th>' +
+              '<th class="pathway-gene-label">{{gene.value}}</th>' +
             '</tr></table>' +
+            '<div data-ng-if="geneList.length==0">No associated genes</div>'+
         '</div></div>'+
         '</div>',
       link: function ($scope,_ctrl) {
@@ -94,10 +95,9 @@
             var geneList = [];
             highlights.forEach(function (highlight) {
               if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
-                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
-                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
-                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
-                geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                for(var i=0;i<Math.round(Math.random()*30)+1;i++){
+                  geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                }
               }
             });
             $scope.geneList = geneList;

@@ -158,8 +158,9 @@
   */
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
     var nodes = [];
+    var mutatedNodeText = 'Mutated';
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode','Mutated'];
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',mutatedNodeText];
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
@@ -167,8 +168,8 @@
         position:{x:x,y:y},
         size:{width:90,height:30},
         type:types[i]==='ProcessNode'?types[i]:'Renderable'+types[i],
-        id:types[i]==='Mutated'?'mutated':'fake',
-        reactomeId:types[i]==='Mutated'?'mutated':'fake',
+        id:types[i]===mutatedNodeText?'mutated':'fake',
+        reactomeId:types[i]===mutatedNodeText?'mutated':'fake',
         text:{content:types[i],position:{x:x,y:y}}
       });
     }
