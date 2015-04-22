@@ -18,54 +18,52 @@
 package org.dcc.portal.pql.meta;
 
 import static java.lang.String.format;
-import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class IndexModel {
 
-  private static final DonorCentricTypeModel donorCentric = new DonorCentricTypeModel();
-  private static final GeneCentricTypeModel geneCentric = new GeneCentricTypeModel();
-  private static final MutationCentricTypeModel mutationCentric = new MutationCentricTypeModel();
-  private static final ObservationCentricTypeModel observationCentric = new ObservationCentricTypeModel();
-
-  public boolean isNested(@NonNull String field, Type type) {
-    return getTypeModel(type).isNested(field);
-  }
-
-  public String getNestedPath(@NonNull String field, Type type) {
-    return getTypeModel(type).getNestedPath(field);
-  }
+  private static final DonorCentricTypeModel DONOR_CENTRIC_TYPE_MODEL = new DonorCentricTypeModel();
+  private static final GeneCentricTypeModel GENE_CENTRIC_TYPE_MODEL = new GeneCentricTypeModel();
+  private static final MutationCentricTypeModel MUTATION_CENTRIC_TYPE_MODEL = new MutationCentricTypeModel();
+  private static final ObservationCentricTypeModel OBSERVATION_CENTRIC_TYPE_MODEL = new ObservationCentricTypeModel();
+  private static final ProjectTypeModel PROJECT_TYPE_MODEL = new ProjectTypeModel();
 
   public static TypeModel getTypeModel(Type type) {
     switch (type) {
     case DONOR_CENTRIC:
-      return donorCentric;
+      return DONOR_CENTRIC_TYPE_MODEL;
     case GENE_CENTRIC:
-      return geneCentric;
+      return GENE_CENTRIC_TYPE_MODEL;
     case MUTATION_CENTRIC:
-      return mutationCentric;
+      return MUTATION_CENTRIC_TYPE_MODEL;
     case OBSERVATION_CENTRIC:
-      return observationCentric;
+      return OBSERVATION_CENTRIC_TYPE_MODEL;
+    case PROJECT:
+      return PROJECT_TYPE_MODEL;
     }
 
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
   }
 
   public static TypeModel getDonorCentricTypeModel() {
-    return donorCentric;
+    return DONOR_CENTRIC_TYPE_MODEL;
   }
 
   public static TypeModel getMutationCentricTypeModel() {
-    return mutationCentric;
+    return MUTATION_CENTRIC_TYPE_MODEL;
   }
 
   public static TypeModel getGeneCentricTypeModel() {
-    return geneCentric;
+    return GENE_CENTRIC_TYPE_MODEL;
   }
 
   public static TypeModel getObservationCentricTypeModel() {
-    return observationCentric;
+    return OBSERVATION_CENTRIC_TYPE_MODEL;
+  }
+
+  public static TypeModel getProjectTypeModel() {
+    return PROJECT_TYPE_MODEL;
   }
 
 }

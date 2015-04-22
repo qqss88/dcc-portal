@@ -196,6 +196,8 @@ public class Visitors {
       return MUTATION_SCORE_QUERY_VISITOR;
     case OBSERVATION_CENTRIC:
       return DEFAULT_SCORE_QUERY_VISITOR;
+    case PROJECT:
+      return DEFAULT_SCORE_QUERY_VISITOR;
     default:
       throw new IllegalArgumentException();
     }

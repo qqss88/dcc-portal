@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static org.dcc.portal.pql.es.visitor.aggs.MissingAggregationVisitor.MISSING_SUFFIX;
 
 import java.util.Map;
@@ -46,6 +47,10 @@ public class AggregationToFacetConverter {
   private static final AggregationToFacetConverter INSTANCE = new AggregationToFacetConverter();
 
   public Map<String, TermFacet> convert(Aggregations aggregations) {
+    if (aggregations == null) {
+      return emptyMap();
+    }
+
     val result = new ImmutableMap.Builder<String, TermFacet>();
     for (val aggregation : aggregations) {
       val aggName = aggregation.getName();
@@ -92,7 +97,7 @@ public class AggregationToFacetConverter {
 
   private static long resolveDocCount(String aggName, Bucket bucket) {
     val aggregations = bucket.getAggregations();
-    if (aggregations != null) {
+    if (aggregations != null && !aggregations.asList().isEmpty()) {
       ReverseNested reverseNestedAggregation = aggregations.get(aggName);
 
       return reverseNestedAggregation.getDocCount();

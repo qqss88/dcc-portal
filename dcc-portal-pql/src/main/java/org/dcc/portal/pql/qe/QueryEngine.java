@@ -22,6 +22,7 @@ import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
 import lombok.NonNull;
 import lombok.val;
 
@@ -41,6 +42,7 @@ public class QueryEngine {
   private final QueryContext geneContext;
   private final QueryContext mutationContext;
   private final QueryContext observationContext;
+  private final QueryContext projectContext;
 
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
@@ -49,6 +51,7 @@ public class QueryEngine {
     this.geneContext = new QueryContext(index, GENE_CENTRIC);
     this.mutationContext = new QueryContext(index, MUTATION_CENTRIC);
     this.observationContext = new QueryContext(index, OBSERVATION_CENTRIC);
+    this.projectContext = new QueryContext(index, PROJECT);
   }
 
   public SearchRequestBuilder execute(@NonNull String pql, @NonNull Type type) {
@@ -78,6 +81,8 @@ public class QueryEngine {
       return mutationContext;
     case OBSERVATION_CENTRIC:
       return observationContext;
+    case PROJECT:
+      return projectContext;
     default:
       throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
     }

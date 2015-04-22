@@ -22,6 +22,7 @@ import static java.util.Collections.singletonMap;
 import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR;
 import static org.icgc.dcc.portal.model.IndexModel.Type.GENE;
 import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION;
+import static org.icgc.dcc.portal.model.IndexModel.Type.PROJECT;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,7 +51,11 @@ import com.google.common.collect.ImmutableMap;
 @Slf4j
 public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
 
-  private static final List<String> VALID_TYPES = ImmutableList.of(DONOR.getId(), GENE.getId(), MUTATION.getId());
+  private static final List<String> VALID_TYPES = ImmutableList.of(
+      DONOR.getId(),
+      GENE.getId(),
+      MUTATION.getId(),
+      PROJECT.getId());
 
   @Override
   public JqlFilters deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {

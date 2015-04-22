@@ -28,7 +28,8 @@ public enum Type {
   DONOR_CENTRIC("donor-centric"),
   GENE_CENTRIC("gene-centric"),
   MUTATION_CENTRIC("mutation-centric"),
-  OBSERVATION_CENTRIC("observation-centric");
+  OBSERVATION_CENTRIC("observation-centric"),
+  PROJECT("project");
 
   private final String id;
 

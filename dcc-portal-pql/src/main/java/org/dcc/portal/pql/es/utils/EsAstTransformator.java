@@ -33,6 +33,7 @@ import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel;
 
 import java.util.Optional;
 
@@ -63,6 +64,8 @@ public class EsAstTransformator {
       getMutationCentricTypeModel()));
   private static final Optional<Context> OBSERVATION_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
       getObservationCentricTypeModel()));
+  private static final Optional<Context> PROJECT_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
+      getProjectTypeModel()));
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -131,6 +134,8 @@ public class EsAstTransformator {
       return MUTATION_RESOLVE_FACETS_CONTEXT;
     case OBSERVATION_CENTRIC:
       return OBSERVATION_RESOLVE_FACETS_CONTEXT;
+    case PROJECT:
+      return PROJECT_RESOLVE_FACETS_CONTEXT;
     default:
       throw new IllegalArgumentException(format("Unknown index type '%s'", indexType.getId()));
     }

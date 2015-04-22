@@ -20,6 +20,7 @@ package org.dcc.portal.pql.meta;
 import static java.util.Collections.emptyList;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfStrings;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
+import static org.dcc.portal.pql.meta.field.DoubleFieldModel.double_;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.nestedObject;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
@@ -31,7 +32,6 @@ import java.util.Map;
 import lombok.val;
 
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
-import org.dcc.portal.pql.meta.field.DoubleFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 import org.elasticsearch.common.collect.ImmutableSet;
@@ -138,7 +138,7 @@ public class ObservationCentricTypeModel extends TypeModel {
         string("platform", "platform"),
         long_("probability", "probability"),
         string("_project_id", "projectId"),
-        DoubleFieldModel.double_("quality_score", "qualityScore"),
+        double_("quality_score", "qualityScore"),
         string("raw_data_accession", "rawDataAccession"),
         string("raw_data_repository", "rawDataRepository"),
         long_("read_count", "readCount"),
@@ -211,7 +211,7 @@ public class ObservationCentricTypeModel extends TypeModel {
         .put(DONOR_ENTITY_SET_ID, "donor._donor_id")
         .put(GENE_ENTITY_SET_ID, "ssm.consequence.gene._gene_id")
         .put(MUTATION_ENTITY_SET_ID, "ssm._mutation_id")
-        .put(LOOKUP_TYPE, "donor-ids")
+        .put(LOOKUP_TYPE, "observation-ids")
         .build();
   }
 
