@@ -10,7 +10,10 @@
 </aside>
 <div class="specimen-wrap">
     <div class="clearfix">
-        <h3>{{ DonorSpecimenCtrl.specimen.id }}</h3>
+        <h3>
+            {{ DonorSpecimenCtrl.specimen.id }}
+            <span style="font-size: 0.5rem" class="badge">PCAWG</span>
+        </h3>
 
         <div class="half">
             <table class="table table-info">
@@ -120,6 +123,7 @@
                 <tr>
                     <th>Sample ID</th>
                     <th>Submitted Sample ID</th>
+                    <th>Study</th>
                     <th>Interval<br>(days)</th>
                     <th>Analyses</th>
                     <th>Sequence Repo</th>
@@ -130,6 +134,7 @@
                 <tr data-ng-repeat="sample in DonorSpecimenCtrl.specimen.samples">
                     <td>{{ sample.id }}</td>
                     <td>{{ sample.analyzedId }}</td>
+                    <td>???</td>
                     <td>{{ sample.analyzedInterval | numberPT }}</td>
                     <td>
                         <ul>
@@ -168,6 +173,7 @@
                 <tr>
                     <th>Sample ID</th>
                     <th>Submitted Sample ID</th>
+                    <th>Study</th>
                     <th>Interval (days)</th>
                     <th>Analyses</th>
                     <th>Sequence Repo</th>
@@ -178,6 +184,7 @@
                 <tr data-ng-repeat="sample in DonorSpecimenCtrl.specimen.samples">
                     <td>{{sample.id}}</td>
                     <td>{{sample.analyzedId}}</td>
+                    <td>???</td>
                     <td>{{sample.analyzedInterval}}</td>
                     <td>{{ (sample.availableRawSequenceData | unique | pluck:'libraryStrategy').join(', ') }}</td>
                     <td>{{ (sample.availableRawSequenceData | unique | pluck:'repository').join(', ') }}</td>

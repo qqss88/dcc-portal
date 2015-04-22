@@ -1,6 +1,7 @@
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge__donor"></span>
         {{ DonorCtrl.donor.id }}
+        <span style="font-size: 0.5rem" class="badge">PCAWG</span>
     </h1>
 </div>
 <div data-scroll-spy="">
@@ -139,7 +140,6 @@
 
 <section id="clinical">
     <h3>Clinical Data</h3>
-    <a href="" data-ng-click="DonorCtrl.showDictionary('Clinical')">Show submission clinical fields</a><br>
     <div class="half">
         <table class="table table-info">
             <tr>
@@ -219,8 +219,7 @@
     <div class="clearfix"></div>
 
 
-    <h3>Family</h3>
-    <a href="" data-ng-click="DonorCtrl.showDictionary('Family')">Show submission clinical fields</a><br>
+    <h3>Donor Family</h3>
     <div>
         <table class="table table-info">
             <thead>
@@ -246,45 +245,11 @@
                 </tr>
             </tbody>
         </table>
-
-        <!--
-        <table class="table table-info">
-            <tr>
-                <th>Donor has relative with cancer history</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relationship type</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relation type other</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relationship sex</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relationship age</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relationship disease ICD10</th>
-                <td>???</td>
-            </tr>
-            <tr>
-                <th>Relationship disease</th>
-                <td>???</td>
-            </tr>
-        </table>
-        -->
     </div>
     <div class="clearfix"></div>
 
 
-    <h3>Exposure</h3>
-    <a href="" data-ng-click="DonorCtrl.showDictionary('Exposure')">Show submission clinical fields</a><br>
+    <h3>Donor Exposure</h3>
     <div class="half">
         <table class="table table-info">
             <tr>
@@ -315,8 +280,8 @@
     </div>
     <div class="clearfix"></div>
 
-    <h3>Therapy</h3>
-    <a href="" data-ng-click="DonorCtrl.showDictionary('Therapy')">Show submission clinical fields</a><br>
+
+    <h3>Donor Postresection Therapy</h3>
     <div class="half">
         <table class="table table-info">
             <tr>
