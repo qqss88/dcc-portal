@@ -3,14 +3,14 @@
   'use strict';
   
   var defaultConfig =
-      {
-        onClick:{},
-        urlPath: ""
-      };
+  {
+    onClick:{},
+    urlPath: ''
+  };
 
   var Renderer = function(svg, config) {
     this.svg = svg;
-    this.config = config;
+    this.config = config || defaultConfig;
     defineDefs(svg);
   };
 
@@ -19,7 +19,9 @@
   function defineDefs(svg){
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
                   'Catalyst-legend','Activator-legend','Output-legend'];
-    var filled = function(type){return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;};
+    var filled = function(type){
+      return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;
+    };
     var circular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
     var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
 //    var arrowed = function(type){
@@ -55,17 +57,17 @@
     markers.forEach(function (elem) {
       var def = circular(elem)?circle:arrow;
       svg.append('svg:defs').append('svg:marker')
-      .attr({
-        'id': elem,
-        'viewBox': def.viewBox,
-        'refX': (+def.refX)*(shifted(elem)?1.5:1),
-        'markerHeight':def.attr.markerHeight,
-        'markerWidth':def.attr.markerWidth,
-        'orient':'auto'
-      }).append(def.element)
-      .attr(def.attr)
-      .attr('stroke',strokeColor)
-      .style('fill',filled(elem)?strokeColor:'white');
+        .attr({
+          'id': elem,
+          'viewBox': def.viewBox,
+          'refX': (+def.refX)*(shifted(elem)?1.5:1),
+          'markerHeight':def.attr.markerHeight,
+          'markerWidth':def.attr.markerWidth,
+          'orient':'auto'
+        }).append(def.element)
+        .attr(def.attr)
+        .attr('stroke',strokeColor)
+        .style('fill',filled(elem)?strokeColor:'white');
     });
   }
 

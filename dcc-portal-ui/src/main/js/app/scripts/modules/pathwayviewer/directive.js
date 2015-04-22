@@ -31,7 +31,8 @@
       template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
-        '<div class="pathway-info"><i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
+        '<div class="pathway-info">'+
+        '<i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
         '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
           '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
@@ -45,7 +46,7 @@
             '<div data-ng-if="geneList.length==0">No associated genes</div>'+
         '</div></div>'+
         '</div>',
-      link: function ($scope,_ctrl) {
+      link: function ($scope) {
         var showingLegend = false, showingInfo = false, rendered = false;
         var zoomedOn, xml, highlights;
         
@@ -72,7 +73,7 @@
             $('.pathway-info').animate({left: '70%'});
             showingInfo = true;
           }
-        }
+        };
         
         var infoSvg = d3.select('.pathway-info-svg').append('svg')
               .attr('viewBox', '0 0 ' +100+ ' ' +50)
@@ -140,7 +141,7 @@
             });
             controller.highlight(highlights);
           }
-        }
+        };
         
         $scope.$watch('items', function (newValue) {
           xml = newValue;
@@ -153,9 +154,8 @@
         }, true);
 
         $scope.$watch('highlights', function (newValue) {
-            highlights = newValue;
-          
-            handleRender();
+          highlights = newValue;
+          handleRender();
         },true);
       }
     };

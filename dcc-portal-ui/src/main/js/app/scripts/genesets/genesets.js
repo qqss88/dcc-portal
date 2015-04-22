@@ -288,12 +288,12 @@
           _ctrl.pathwayZooms = [''];
         }
         
-        var test="P06400,P09884";
+        var test='P06400,P09884';
         var uniprotIds =test.split(',');
-        var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+        var reactomeMapPromise = Restangular.one('ui').one('reactome').one('protein-map')
           .get({'proteinUniprotIds' : test,pathwayId:'REACT_21267'});
 
-        reactomePromise.then(function(map){
+        reactomeMapPromise.then(function(map){
           var pathwayHighlights = [];
           uniprotIds.forEach(function (uniprotId) {
             pathwayHighlights.push({

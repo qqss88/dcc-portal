@@ -1,4 +1,4 @@
-(function($) {
+(function() {
 
   'use strict';
 
@@ -95,7 +95,8 @@
 //    .forEach(function (node) {
 //      if(reactomeIds.indexOf(node.reactomeId) < 0){
 //        reactomeIds.push(node.reactomeId);
-//        highlights.push({id:node.reactomeId,value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
+//        highlights.push({id:node.reactomeId,
+//                         value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
 //      }
 //    });
 //    this.renderer.highlightEntity(highlights,model);
@@ -158,7 +159,10 @@
       legendrenderer.renderNodes(nodes);
       legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.35,legendSvg));
       legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.6,legendSvg),true);
-      legendrenderer.highlightEntity([{id:'Mutated',value:99}],{getNodesByReactomeId:function (id){return [nodes[nodes.length-1]];}});
+      legendrenderer.highlightEntity(
+        [{id:'Mutated',value:99}],
+        {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
+      });
     }else{
       d3.select('.pathway-legend-svg').attr('opacity','1');
     }
@@ -171,7 +175,7 @@
     var highlights = [];
     rawHighlights.forEach(function (rh) {
       rh.dbIds.forEach(function (dbId) {
-        highlights.push({id:dbId,value:rh.value})
+        highlights.push({id:dbId,value:rh.value});
       });
     });
     this.renderer.highlightEntity(highlights, this.model);
@@ -179,4 +183,4 @@
   
   dcc.ReactomePathway = ReactomePathway;
 
-})(jQuery);
+})();
