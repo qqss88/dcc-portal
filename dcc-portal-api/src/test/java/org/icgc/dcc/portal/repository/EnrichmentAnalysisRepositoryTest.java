@@ -35,7 +35,7 @@ public class EnrichmentAnalysisRepositoryTest {
 
   @Before
   public void setUp() {
-    val dbi = new DBI("jdbc:h2:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
+    val dbi = new DBI("jdbc:h2:mem:genelist;MODE=PostgreSQL;INIT=runscript from 'src/test/sql/schema.sql'");
     this.repository = dbi.open(EnrichmentAnalysisRepository.class);
   }
 

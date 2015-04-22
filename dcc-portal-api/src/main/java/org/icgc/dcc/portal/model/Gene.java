@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -85,15 +87,15 @@ public class Gene {
   @JsonCreator
   public Gene(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.GENE);
-    id = (String) fieldMap.get(fields.get("id"));
-    symbol = (String) fieldMap.get(fields.get("symbol"));
-    name = (String) fieldMap.get(fields.get("name"));
-    type = (String) fieldMap.get(fields.get("type"));
-    chromosome = (String) fieldMap.get(fields.get("chromosome"));
+    id = getString(fieldMap.get(fields.get("id")));
+    symbol = getString(fieldMap.get(fields.get("symbol")));
+    name = getString(fieldMap.get(fields.get("name")));
+    type = getString(fieldMap.get(fields.get("type")));
+    chromosome = getString(fieldMap.get(fields.get("chromosome")));
     start = getLong(fieldMap.get(fields.get("start")));
     end = getLong(fieldMap.get(fields.get("end")));
     strand = getLong(fieldMap.get(fields.get("strand")));
-    description = (String) fieldMap.get(fields.get("description"));
+    description = getString(fieldMap.get(fields.get("description")));
     synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
     externalDbIds = (Map<String, List<String>>) fieldMap.get(fields.get("externalDbIds"));
     affectedTranscriptIds = (List<String>) fieldMap.get(fields.get("affectedTranscriptIds"));
@@ -150,11 +152,4 @@ public class Gene {
     }
   }
 
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    else if (field instanceof Integer) return (long) (Integer) field;
-    else if (field instanceof Float) return ((Float) field).longValue();
-    else
-      return null;
-  }
 }

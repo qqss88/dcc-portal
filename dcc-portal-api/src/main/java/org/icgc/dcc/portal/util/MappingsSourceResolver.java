@@ -28,6 +28,7 @@ import lombok.val;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
@@ -58,14 +59,24 @@ public class MappingsSourceResolver {
     // Get cluster state
     val clusterState = client.admin().cluster()
         .prepareState()
-        .setFilterIndices(indexName)
+        .setIndices(indexName)
         .execute()
         .actionGet()
         .getState();
 
     val indexMetaData = clusterState.getMetaData().index(indexName);
     val mappings = indexMetaData.getMappings();
-    return mappings;
+
+    return convertToMap(mappings);
+  }
+
+  private Map<String, MappingMetaData> convertToMap(ImmutableOpenMap<String, MappingMetaData> sourceMap) {
+    val result = new ImmutableMap.Builder<String, MappingMetaData>();
+    for (val entry : sourceMap) {
+      result.put(entry.key, entry.value);
+    }
+
+    return result.build();
   }
 
   private ObjectNode convertMapping(String type, MappingMetaData metadata) throws IOException {

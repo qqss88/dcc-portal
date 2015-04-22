@@ -69,7 +69,7 @@ public class MutationParser {
 
     List<Object> mutations = newArrayList();
     for (JsonNode hit : response.get("hits").get("hits")) {
-      val mutation = getMutation(projectFilters, hit.get("fields"));
+      val mutation = getMutation(projectFilters, hit);
       mutations.add(mutation);
     }
 
@@ -134,7 +134,7 @@ public class MutationParser {
     val request = client.prepareSearch(indexName)
         .setTypes(INDEX_TYPE)
         .setSearchType(QUERY_AND_FETCH)
-        .setFilter(filter)
+        .setPostFilter(filter)
         .addFields(
             "_mutation_id",
             "chromosome",
@@ -147,7 +147,7 @@ public class MutationParser {
             "ssm_occurrence.project._project_id",
             "ssm_occurrence.project.project_name",
             "ssm_occurrence.project._summary._ssm_tested_donor_count")
-        .addPartialField("transcript",
+        .setFetchSource(
             includes(
                 "transcript.gene.symbol",
                 "transcript.consequence._transcript_id",
@@ -177,7 +177,7 @@ public class MutationParser {
     val request = client.prepareSearch(indexName)
         .setTypes(INDEX_TYPE)
         .setSearchType(QUERY_AND_FETCH)
-        .setFilter(filter)
+        .setPostFilter(filter)
         .addFacet(histogramFacet)
         .setFrom(0)
         .setSize(0);
@@ -190,7 +190,8 @@ public class MutationParser {
   /**
    * Builds a mutation.
    */
-  private static Mutation getMutation(List<String> projectFilters, JsonNode hit) throws IOException {
+  private static Mutation getMutation(List<String> projectFilters, JsonNode response) throws IOException {
+    JsonNode hit = response.get("fields");
     val projectKeys = asList(hit.get("ssm_occurrence.project._project_id"));
     val projectNames = asList(hit.get("ssm_occurrence.project.project_name"));
     val projectSsmTestedDonorCount = asList(hit.get("ssm_occurrence.project._summary._ssm_tested_donor_count"));
@@ -210,7 +211,7 @@ public class MutationParser {
     }
 
     List<List<String>> consequences = newArrayList();
-    for (val transcript : hit.get("transcript").get("transcript")) {
+    for (val transcript : response.get("_source").get("transcript")) {
       List<String> consequence = getConsequence(
           transcript.path("consequence"),
           transcript.path("gene"));
@@ -219,21 +220,24 @@ public class MutationParser {
     }
 
     List<String> functionalImpact = newArrayList();
-    for (val fi : (ArrayNode) hit.get("functional_impact_prediction_summary")) {
-      functionalImpact.add(fi.asText());
+    val functionalImpactTmp = hit.get("functional_impact_prediction_summary");
+    if (functionalImpactTmp != null) {
+      for (val fi : (ArrayNode) functionalImpactTmp) {
+        functionalImpact.add(fi.asText());
+      }
     }
 
     // Reference genome allele's accross ssm occurrences are same. This will be changed later so that the Reference
     // Genome Allele is at the source level instead of nested.
-    val refGenAllele = hit.get("reference_genome_allele").asText();
+    val refGenAllele = hit.get("reference_genome_allele").get(0).asText();
 
     val mutation = Mutation.builder()
-        .id(hit.path("_mutation_id").asText())
-        .chromosome(hit.path("chromosome").asText())
-        .start(hit.path("chromosome_start").asLong())
-        .end(hit.path("chromosome_end").asLong())
-        .mutationType(hit.path("mutation_type").asText())
-        .mutation(hit.path("mutation").asText())
+        .id(hit.path("_mutation_id").get(0).asText())
+        .chromosome(hit.path("chromosome").get(0).asText())
+        .start(hit.path("chromosome_start").get(0).asLong())
+        .end(hit.path("chromosome_end").get(0).asLong())
+        .mutationType(hit.path("mutation_type").get(0).asText())
+        .mutation(hit.path("mutation").get(0).asText())
         .refGenAllele(refGenAllele)
         .total(totalNumberOfDonors)
         .projectInfo(projectInfo)
@@ -374,7 +378,7 @@ public class MutationParser {
     return consequenceFilter;
   }
 
-  private static void logRequest(ActionRequestBuilder<?, ?, ?> builder) {
+  private static void logRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
     String requestType = builder.request().getClass().getSimpleName();
     String message = formatRequest(builder);
 
