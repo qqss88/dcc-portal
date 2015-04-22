@@ -36,7 +36,6 @@ import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
-import org.dcc.portal.pql.es.utils.VisitorHelpers;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.TypeModel;
@@ -57,6 +56,29 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
       return Optional.of(rootNode);
     }
 
+    // The filters are enclosed in a FilterAggregationNode with is added to the AggregationsNode (parent
+    // of the current TermsAggregationNode node). The current node then is added as a child to the
+    // FilterAggregationNode.
+    // Such a nodes order reflects how aggregations are built in ES
+
+    // NB: If a Terms aggregation is created on a nested field and has at least 2 nested filters on different levels the
+    // following processing structure should be created to correctly calculate Terms Aggregations:
+
+    // 1) Create a FilterAggregationNode with filters resolved by processFilters() method. The filters contain all the
+    // conditions selected on the UI except filters applied to the field this aggregation is being created for.
+
+    // 2) Create a NestedAggregation on the path used to nest the field.
+
+    // 3) Create a FilterAggregationNode with filters which are nested at the path used in the previous step, but remove
+    // the NestedNode from the filters. This step is mandatory, because an ES query with filters from step 1. Will
+    // return parent documents and they may contain nested children that do not satisfy the condition. That's why we
+    // need to apply the nested filters one more time.
+
+    // 4) Create Terms aggregation node on the field used for aggregation.
+
+    // E.g. The described case is valid for the MUTATION-CENTRIC type which may have filters nested at 'transcript' and
+    // 'ssm_occurrence' levels.
+
     val filterNodeOpt = getFilterNodeOptional(rootNode);
     val aggsNode = getAggregationsNodeOptional(rootNode).get();
     val typeModel = context.get().getTypeModel();
@@ -74,7 +96,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
       }
 
       if (filterNodeOpt.isPresent()) {
-        val filters = resolveFilters(child.getFieldName(), cloneNode(filterNodeOpt.get()));
+        val filters = resolveFilters(child.getFieldName(), cloneNode(filterNodeOpt.get()), typeModel);
         if (filters.isPresent()) {
           filtersAggregation = Optional.of(createFilterAggregationNode(child.getAggregationName(), filters.get()));
         }
@@ -108,54 +130,6 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     }
 
     return Optional.empty();
-  }
-
-  // TODO: is this method is used?
-  @Override
-  public Optional<ExpressionNode> visitTermsAggregation(TermsAggregationNode node, Optional<Context> context) {
-    log.debug("Visiting TermsAggregationsNode. {}", node);
-    VisitorHelpers.checkOptional(context);
-
-    // The filters are enclosed in a FilterAggregationNode with is added to the AggregationsNode (parent
-    // of the current TermsAggregationNode node). The current node then is added as a child to the
-    // FilterAggregationNode.
-    // Such a nodes order reflects how aggregations are built in ES
-
-    // NB: If a Terms aggregation is created on a nested field and has at least 2 nested filters on different levels the
-    // following processing structure should be created to correctly calculate Terms Aggregations:
-
-    // 1) Create a FilterAggregationNode with filters resolved by processFilters() method. The filters contain all the
-    // conditions selected on the UI except filters applied to the field this aggregation is being created for.
-
-    // 2) Create a NestedAggregation on the path used to nest the field.
-
-    // 3) Create a FilterAggregationNode with filters which are nested at the path used in the previous step, but remove
-    // the NestedNode from the filters. This step is mandatory, because an ES query with filters from step 1. Will
-    // return parent documents and they may contain nested children that do not satisfy the condition. That's why we
-    // need to apply the nested filters one more time.
-
-    // 4) Create Terms aggregation node on the field used for aggregation.
-
-    // E.g. The described case is valid for the MUTATION-CENTRIC type which may have filters nested at 'transcript' and
-    // 'ssm_occurrence' levels.
-
-    val typeModel = context.get().getTypeModel();
-    val field = node.getFieldName();
-    val filtersNodeOpt = resolveFilters(node.getFieldName(), cloneNode(context.get().getFilterNode()));
-
-    if (typeModel.isNested(field)) {
-      return Optional.of(createNestedNode(filtersNodeOpt, typeModel, node));
-    }
-
-    if (!filtersNodeOpt.isPresent()) {
-      return Optional.empty();
-    }
-
-    // FilterAgg (global) - TermsAgg
-    val filterAggregationNode = createFilterAggregationNode(node.getAggregationName(), filtersNodeOpt.get());
-    filterAggregationNode.addChildren(node);
-
-    return Optional.of(filterAggregationNode);
   }
 
   /**
@@ -208,11 +182,27 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     return cloneNode.accept(createResolveNestedFilterVisitor(), context);
   }
 
-  private static Optional<ExpressionNode> resolveFilters(String facetField, ExpressionNode filterNode) {
+  private static Optional<ExpressionNode> resolveFilters(String facetField, ExpressionNode filterNode,
+      TypeModel typeModel) {
     val resolvedFilters = filterNode.accept(createAggregationFiltersVisitor(), Optional.of(facetField));
+    if (!hasNonNestedFilters(facetField, typeModel, resolvedFilters)) {
+      return Optional.empty();
+    }
+
     val result = resolvedFilters.accept(Visitors.createEmptyNodesCleanerVisitor(), Optional.empty());
 
     return result == null ? Optional.empty() : Optional.of(result);
+  }
+
+  private static Boolean hasNonNestedFilters(String facetField, TypeModel typeModel,
+      ExpressionNode resolvedFilters) {
+    if (!typeModel.isNested(facetField)) {
+      return true;
+    }
+
+    val context = new VisitContext(typeModel.getNestedPath(facetField), typeModel);
+
+    return resolvedFilters.accept(Visitors.createSearchNonNestedFieldsVisitor(), Optional.of(context));
   }
 
   private static Optional<AggregationsNode> getAggregationsNodeOptional(ExpressionNode rootNode) {

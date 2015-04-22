@@ -81,8 +81,7 @@ public class NestedAggregationVisitorTest extends BaseElasticsearchTest {
     val result = executeQuery("facets(consequenceTypeNested), eq(transcriptId, 'T7')");
 
     Global global = result.getAggregations().get("consequenceTypeNested");
-    Filter globalFilter = global.getAggregations().get("consequenceTypeNested");
-    Nested nested = globalFilter.getAggregations().get("consequenceTypeNested");
+    Nested nested = global.getAggregations().get("consequenceTypeNested");
     Filter nestedFilter = nested.getAggregations().get("consequenceTypeNested");
     Terms terms = nestedFilter.getAggregations().get("consequenceTypeNested");
 

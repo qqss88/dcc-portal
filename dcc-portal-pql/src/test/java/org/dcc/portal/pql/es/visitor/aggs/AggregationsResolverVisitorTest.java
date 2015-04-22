@@ -129,20 +129,6 @@ public class AggregationsResolverVisitorTest {
   }
 
   @Test
-  public void visitTermsFacet_nonNestedField_nonNestedFilter() {
-    val esAst = new TermsAggregationNode("name", "_mutation_id");
-    val filter = new FilterNode(new TermNode("chromosome", "X"));
-    val filterClone = Nodes.cloneNode(filter);
-    val astClone = Nodes.cloneNode(esAst);
-    val result = (FilterAggregationNode) esAst.accept(resolver, createContext(filter)).get();
-    log.debug("\n{}", result);
-
-    assertThat(result.getFilters()).isEqualTo(filterClone);
-    assertThat(result.childrenCount()).isEqualTo(1);
-    assertThat(result.getFirstChild()).isEqualTo(astClone);
-  }
-
-  @Test
   public void nestedFieldTest() {
     val result = visit("facets(transcriptId)");
     val nestedAggr = (NestedAggregationNode) result.getFirstChild();
@@ -169,6 +155,25 @@ public class AggregationsResolverVisitorTest {
 
     val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
     assertThat(termsAggr.getFieldName()).isEqualTo("transcript.id");
+  }
+
+  @Test
+  public void nestedAggregationWithNestedFilterTest() {
+    val result = visit("facets(consequenceTypeNested),eq(transcriptId, 'T1')");
+
+    val nestedNode = (NestedAggregationNode) result.getFirstChild();
+    assertThat(nestedNode.getPath()).isEqualTo("transcript");
+
+    val filterNode = (FilterAggregationNode) nestedNode.getFirstChild();
+    val filter = filterNode.getFilters();
+    val mustNode = TestingHelpers.assertBoolAndGetMustNode(filter.getFirstChild());
+    assertThat(mustNode.childrenCount()).isEqualTo(1);
+    val termNode = (TermNode) mustNode.getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("transcript.id");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
+
+    val termAggregationNode = (TermsAggregationNode) filterNode.getFirstChild();
+    assertThat(termAggregationNode.getFieldName()).isEqualTo("transcript.consequence.consequence_type");
   }
 
   private ExpressionNode visit(String pql) {
