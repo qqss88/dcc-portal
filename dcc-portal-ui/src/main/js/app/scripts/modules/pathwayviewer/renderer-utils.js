@@ -39,7 +39,7 @@
 
     // Make sure arrow heads aren't added to special dashed lines
     var isArrowHeadLine = function(type){
-      return ['entitysetandmemberlink','entitysetandentitysetlink'].indexOf(type) < 0;
+      return ['entitysetandmemberlink','entitysetandentitysetlink','missing'].indexOf(type) < 0;
     };
 
     // Adds a line to the lines array gives an array of points and description of the line
@@ -50,7 +50,7 @@
           y1: points[j].y,
           x2: points[j+1].x,
           y2: points[j+1].y,
-          marked: j === points.length-2 && isArrowHeadLine(lineType),
+          marked: j === points.length-2 && isArrowHeadLine(lineType) && type!=='missing',
           marker: type,
           color: color, // For debugging, every line type has a color
           id:id,
@@ -128,7 +128,7 @@
       var inputs = 0, outputs = 0;
 
       for(var i=0; i<reaction.nodes.length;i++){
-        var type = getNodeLines(reaction,reaction.nodes[i],id);
+        var type = getNodeLines(reaction,reaction.nodes[i],id,reaction.class);
         if(type === 'Input'){
           inputs ++;
         }else if(type === 'Output'){

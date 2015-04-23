@@ -39,7 +39,7 @@
         'markerWidth':'8',
         'markerHeight':'8'
       },
-      'viewBox':'0 -14 26 26',
+      'viewBox':'0 -14 26 28',
       'refX':'20'
     };
     
@@ -227,6 +227,11 @@
   */
   Renderer.prototype.renderEdges = function (edges) {
     var svg = this.svg, config = this.config;
+
+    // In the odd case that there are layers of the same node/reaction, order things so that the
+    // edges with markers (arrow heads, etc.) are on top.
+    edges = _.sortBy(edges,function(n){return n.marked?1:0;});
+
     var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({

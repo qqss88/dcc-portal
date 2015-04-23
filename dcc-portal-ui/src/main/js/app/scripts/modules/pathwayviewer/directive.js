@@ -109,8 +109,8 @@
           },
           urlPath: $location.path(),
           strokeColor: '#696969',
-          highlightColor: 'red',
-          subPathwayColor: 'blue'
+          highlightColor: '#9b315b',
+          subPathwayColor: '#1a9900'
         });
         
         $('.pathway-legend-controller').on('click',function(){
