@@ -138,12 +138,14 @@
     function convertQueryObjectToJsonTree (query) {
       // Result should be an array because, for now, the UI does not need/support 'count'
       var result = [];
-      result.push ({
-        op: 'select',
-        values: ['*']
-      });
-
       var queryParams = query.params || {};
+
+      if (queryParams.select) {
+        result.push ({
+          op: 'select',
+          values: ['*']
+        });
+      }
 
       if (queryParams.facets) {
         result.push ({
