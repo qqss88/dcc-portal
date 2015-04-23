@@ -107,7 +107,10 @@
             node.position={x:3,y:3};
             infoRenderer.renderNodes([node]);
           },
-          urlPath: $location.path()
+          urlPath: $location.path(),
+          strokeColor: '#696969',
+          highlightColor: 'red',
+          subPathwayColor: 'blue'
         });
         
         $('.pathway-legend-controller').on('click',function(){

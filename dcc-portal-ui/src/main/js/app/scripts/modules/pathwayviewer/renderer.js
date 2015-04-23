@@ -5,18 +5,19 @@
   var defaultConfig =
   {
     onClick:{},
-    urlPath: ''
+    urlPath: '',
+    strokeColor: '#696969',
+    highlightColor: 'red'
   };
 
   var Renderer = function(svg, config) {
     this.svg = svg;
     this.config = config || defaultConfig;
-    defineDefs(svg);
+    defineDefs(svg,config);
   };
 
-  var strokeColor = '#696969';
-
-  function defineDefs(svg){
+  function defineDefs(svg, config){
+    var strokeColor =  config.strokeColor;
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
                   'Catalyst-legend','Activator-legend','Output-legend'];
     var filled = function(type){
@@ -234,7 +235,7 @@
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':strokeColor//function(d){return d.color;}
+      'stroke':config.strokeColor//function(d){return d.color;}
     }).style({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
@@ -251,7 +252,7 @@
   * Render a label in the middle of the line to indicate the type
   */
   Renderer.prototype.renderReactionLabels = function (labels, legend) {
-    var size = 7, svg = this.svg;
+    var size = 7, svg = this.svg, config = this.config;
     var circular = ['Association','Dissociation','Binding'];
     var filled = ['Association','Binding'];
 
@@ -263,7 +264,7 @@
         'y1':function(d){return d.y;},
         'x2':function(d){return (+d.x)+30;},
         'y2':function(d){return d.y;},
-        'stroke':strokeColor
+        'stroke':config.strokeColor
       });
     }
     
@@ -276,8 +277,8 @@
       'ry':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
       'width':size,
       'height':size,
-      'stroke':strokeColor
-    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?strokeColor:'white';})
+      'stroke':config.strokeColor
+    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?config.strokeColor:'white';})
       .on('mouseover',function(d){
         console.log(d.description);
       });
@@ -289,7 +290,7 @@
       'y':function(d){return +d.y + (size/4);},
       'font-weight':'bold',
       'font-size':'5px',
-      'fill':strokeColor
+      'fill':config.strokeColor
     }).text(function(d){
       if(d.reactionType === 'Omitted Process'){
         return '\\\\';
@@ -301,17 +302,16 @@
     });
   };
 
-  var highlightColor = 'red';
-  
   /*
   * Highlights the given list of nodes with a red border and puts
   *   the 'value' of the node in a badge in the top right corner
   * 
+  * Takes an array of Highlight and the model 
   * Highlight: { id, value }
   *
   */
   Renderer.prototype.highlightEntity = function (highlights, model) {
-    var svg = this.svg;
+    var svg = this.svg, config = this.config;
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
@@ -326,7 +326,7 @@
         if(svgNode[0].length <= 0){
           return;
         }
-        svgNode.style('stroke',highlightColor);
+        svgNode.style('stroke',config.highlightColor);
         svgNode.style('stroke-width','3px');
 
         svg.append('rect')
@@ -339,7 +339,7 @@
             rx: 7,
             ry: 7,
           }).style({
-            fill:highlightColor
+            fill:config.highlightColor
           });
 
         svg.append('text').attr({

@@ -3,11 +3,27 @@
   'use strict';
 
   window.dcc = window.dcc || {};
-
-  var ReactomePathway = function (config) {
-    this.config = config;
+  
+  var defaultConfig =
+  {
+    width: 500,
+    height: 500,
+    onClick:{},
+    urlPath: '',
+    strokeColor: 'black',
+    highlightColor: 'red',
+    subPathwayColor: 'blue'
   };
 
+  var ReactomePathway = function (config) {
+    this.config = config || defaultConfig;
+  };
+
+  /*
+  * Takes in an xml of the pathway diagram and a list of reactions to zoom in 
+  * on and highlight. The color of the reactions is set with config.subPathwayColor
+  *
+  */
   ReactomePathway.prototype.render = function (xml, zoomedOnElements) {
     var config = this.config;
     var model = new dcc.PathwayModel();
@@ -75,7 +91,9 @@
       onClick: function (d) {
         config.onClick(d);
       },
-      urlPath: config.urlPath
+      urlPath: config.urlPath,
+      strokeColor: config.strokeColor,
+      highlightColor: config.highlightColor
     });
     var rendererUtils = new dcc.RendererUtils();
 
@@ -85,23 +103,7 @@
     this.renderer.renderNodes(_.filter(model.getNodes().slice(),
                                        function(n){return n.type!=='RenderableCompartment';}));
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
-    
-    // ------------- temporary 
-//    var highlights = [];
-//    var reactomeIds = [];
-//    _.filter(model.getNodes().slice(), 
-//             function(n){return    n.type==='RenderableProtein'||
-//                                   n.type==='RenderableEntitySet';})
-//    .forEach(function (node) {
-//      if(reactomeIds.indexOf(node.reactomeId) < 0){
-//        reactomeIds.push(node.reactomeId);
-//        highlights.push({id:node.reactomeId,
-//                         value:(node.type==='RenderableEntitySet'?'?':Math.round(Math.random()*200 + 1))});
-//      }
-//    });
-//    this.renderer.highlightEntity(highlights,model);
-    // -------------------- end temporary
-    
+
     // Zoom in on the elements on interest if there are any
     if(zoomedOnElements[0].length !== 0){
       
@@ -114,13 +116,14 @@
       // For all zoomed in elements, go through their positions/size and form the zoomed in size
       _.filter(model.getReactions().slice(),function(n){return zoomedOnElements.indexOf(n.reactomeId)>=0;})
         .forEach(function (reaction) {
-        reaction.nodes.forEach(function (node) {
-          var modelNode = model.getNodeById(node.id);
-          height = Math.max((+modelNode.position.y) + (+modelNode.size.height), height);
-          width = Math.max((+modelNode.position.x) + (+modelNode.size.width), width);
-          minHeight = Math.min(modelNode.position.y, minHeight);
-          minWidth = Math.min(modelNode.position.x, minWidth);
-        });
+          svg.selectAll('.reaction'+reaction.reactomeId).attr('stroke',config.subPathwayColor);
+          reaction.nodes.forEach(function (node) {
+            var modelNode = model.getNodeById(node.id);
+            height = Math.max((+modelNode.position.y) + (+modelNode.size.height), height);
+            width = Math.max((+modelNode.position.x) + (+modelNode.size.width), width);
+            minHeight = Math.min(modelNode.position.y, minHeight);
+            minWidth = Math.min(modelNode.position.x, minWidth);
+          });
       });
 
       // Add some buffer to the zoomed in area
@@ -138,7 +141,11 @@
   };
   
   /**
-  * Renders a legend svg in pathway-legend div given a w&h
+  * Renders a legend svg in pathway-legend div given a width and height
+  * Assumes the existance of a div with the class 'pathway-legend-svg'.
+  *
+  * On the other hand, if it already rendered it, it will simply set the opacity
+  * of this div to 1.
   */
   ReactomePathway.prototype.renderLegend = function (w,h) {
     var legendSvg = d3.select('.pathway-legend-svg')[0][0];
@@ -153,7 +160,9 @@
         .append('g');
       var legendrenderer = new dcc.Renderer(legendSvg, {
         onClick: {},
-        urlPath: config.urlPath
+        urlPath: config.urlPath,
+        strokeColor: config.strokeColor,
+        highlightColor: config.highlightColor
       });
       var nodes = rendererUtils.getLegendNodes(20,0);
       legendrenderer.renderNodes(nodes);
@@ -169,7 +178,11 @@
   };
 
   /**
-  * Highlight: {id, value}
+  *  Takes in raw highlight data of the form:
+  *  [{dbIds:[123,124,125],value:10, uniprotId: X0000}...]
+  *
+  *  and transforms and renders with the form:
+  *  [{id:123, value:10},{id:124, value:10},...]
   */
   ReactomePathway.prototype.highlight = function (rawHighlights) {
     var highlights = [];

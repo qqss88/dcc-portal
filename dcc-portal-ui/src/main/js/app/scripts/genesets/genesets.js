@@ -271,27 +271,30 @@
       // GET all data to create the pathway viewer
     
       if(_ctrl.geneSet.source === 'Reactome'){
+        
+        _ctrl.pathway = {};
+        
         // get pathway xml
         var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
           .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
         reactomePromise.then(function(data){
-          _ctrl.pathwayXml = data;
+          _ctrl.pathway.xml = data;
         });
         // if the digram itself isnt the one being diagrammed, get list of stuff to zoom in on
         if(_ctrl.uiParentPathways[0].diagramId !== _ctrl.uiParentPathways[0].geneSetId){
           reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
             .get({'pathwayId' : _ctrl.uiParentPathways[0].geneSetId},{'Accept':'application/json'});
           reactomePromise.then(function(data){
-            _ctrl.pathwayZooms = data;
+            _ctrl.pathway.zooms = data;
           });
         }else{
-          _ctrl.pathwayZooms = [''];
+          _ctrl.pathway.zooms = [''];
         }
         
         var test='P06400,P09884';
         var uniprotIds =test.split(',');
         var reactomeMapPromise = Restangular.one('ui').one('reactome').one('protein-map')
-          .get({'proteinUniprotIds' : test,pathwayId:'REACT_21267'});
+          .get({'proteinUniprotIds' : test, pathwayId:_ctrl.uiParentPathways[0].geneSetId});
 
         reactomeMapPromise.then(function(map){
           var pathwayHighlights = [];
@@ -302,7 +305,7 @@
               value:map[uniprotId].value
             });
           });
-          _ctrl.pathwayHighlights = pathwayHighlights;
+          _ctrl.pathway.highlights = pathwayHighlights;
         });
       }
     });
