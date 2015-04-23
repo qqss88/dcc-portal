@@ -37,6 +37,7 @@
           // In fact, this is translated to 'select(*)' in PQL as we don't support
           // column projection from the UI.
           select: true,
+          facets: false,
           sort: [],
           limit: {}
         },

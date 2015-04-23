@@ -55,6 +55,24 @@
       setPql (pql);
     }
 
+    function getSort() {
+      return service.getSort (getPql());
+    }
+
+    function setSort (sort) {
+      getSetPql (service.setSort, sort);
+    }
+
+    function addSort (field, direction) {
+      if (! (field && direction)) {return;}
+
+      var sort = getSort();
+      sort = _.isArray (sort) ? sort : [];
+      sort.push ({field: field, direction: direction});
+
+      setSort (sort);
+    }
+
     // A builder to allow the UI to build a PQL programmatically.
     var Builder = function () {
       var buffer = '';
@@ -117,9 +135,7 @@
       mergePqls: function (pql1, pql2) {
         return service.mergePqls (pql1, pql2);
       },
-      getSort: function () {
-        return service.getSort (getPql());
-      },
+      getSort: getSort,
       getLimit: function () {
         return service.getLimit (getPql());
       },
@@ -134,8 +150,18 @@
       setLimit: function (limit) {
         getSetPql (service.setLimit, limit);
       },
-      setSort: function (sort) {
-        getSetPql (service.setSort, sort);
+      limitFromSize: function (from, size) {
+        this.setLimit ({from: from, size: size});
+      },
+      limitSize: function (size) {
+        this.setLimit ({size: size});
+      },
+      setSort: setSort,
+      sortAsc: function (field) {
+        addSort (field, '+');
+      },
+      sortDesc: function (field) {
+        addSort (field, '-');
       },
       getRawPql: getPql,
       getBuilder: function () {

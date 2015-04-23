@@ -206,6 +206,28 @@ describe('Testing PqlUtilService', function() {
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
 
+  it('Testing limitFromSize() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(99,88)';
+
+    PqlUtilService.limitFromSize (99, 88);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing limitSize() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(77)';
+
+    PqlUtilService.limitSize (77);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
   it('Testing setLimit() with "size" set to a float (2.51) in pql: eq(donor.test,123)', function() {
     var originalPql = 'eq(donor.test,123)';
     setPqlInUrl (originalPql);
@@ -226,6 +248,28 @@ describe('Testing PqlUtilService', function() {
 
     var sort = [{field: 'donor.age', direction: '+'}, {field: 'donor.foo', direction: '-'}];
     PqlUtilService.setSort (sort);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing sortAsc() in pql: eq(donor.test,123),sort(-donor.foo)', function() {
+    var originalPql = 'eq(donor.test,123),sort(-donor.foo)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),eq(donor.test,123),sort(-donor.foo,+donor.age)';
+
+    PqlUtilService.sortAsc ('donor.age');
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing sortDesc() in pql: eq(donor.test,123),sort(donor.foo)', function() {
+    var originalPql = 'eq(donor.test,123),sort(donor.foo)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),eq(donor.test,123),sort(+donor.foo,-donor.age)';
+
+    PqlUtilService.sortDesc ('donor.age');
 
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
