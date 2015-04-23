@@ -209,21 +209,7 @@
     function addTermToQueryFilter (categoryName, facetName, term, queryFilter) {
       if (! term) {return queryFilter;}
 
-      queryFilter = queryFilter || {};
-      var category = queryFilter [categoryName] || {};
-      var facet = category [facetName] || {};
-      var inValueArray = facet.in || [];
-
-      if (_.contains (inValueArray, term)) {return queryFilter;}
-
-      inValueArray.push (term);
-
-      // update the original filter.
-      facet.in = inValueArray;
-      category [facetName] = facet;
-      queryFilter [categoryName] = category;
-
-      return queryFilter;
+      return addMultipleTermsToQueryFilter (categoryName, facetName, [term], queryFilter);
     }
 
     function addMultipleTermsToQueryFilter (categoryName, facetName, terms, queryFilter) {
@@ -237,7 +223,7 @@
       var inValueArray = facet.in || [];
 
       _.each (terms, function (term) {
-        if (! _.contains (inValueArray, term)) {
+        if (term && ! _.contains (inValueArray, term)) {
           inValueArray.push (term);
         }
       });
