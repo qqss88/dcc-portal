@@ -16,9 +16,9 @@
  */
 
 /*
-* This is the Angular service that provides lots of helper functions for PQL translations.
-* It hides the implementation details of PqlTranslationService and PqlQueryObjectService.
-*/
+ * This is the Angular service that provides lots of helper functions for PQL translations.
+ * It hides the implementation details of PqlTranslationService and PqlQueryObjectService.
+ */
 
 (function () {
   'use strict';
@@ -48,6 +48,13 @@
       $log.debug ('PQL is updated to [%s].', pql);
     }
 
+    function getSetPql () {
+      var args = Array.prototype.slice.call (arguments);
+      var func = _.head (args);
+      var pql = func.apply (null, [getPql()].concat (_.tail (args)));
+      setPql (pql);
+    }
+
     // A builder to allow the UI to build a PQL programmatically.
     var Builder = function () {
       var buffer = '';
@@ -73,6 +80,14 @@
           buffer = service.includesFacets (buffer);
           return this;
         },
+        setLimit: function (limit) {
+          buffer = service.setLimit (buffer, limit);
+          return this;
+        },
+        setSort: function (sort) {
+          buffer = service.setSort (buffer, sort);
+          return this;
+        },
         build: function () {
           return buffer;
         }
@@ -82,20 +97,16 @@
     return {
       paramName: pqlParameterName,
       addTerm: function (categoryName, facetName, term) {
-        var pql = service.addTerm (getPql(), categoryName, facetName, term);
-        setPql (pql);
+        getSetPql (service.addTerm, categoryName, facetName, term);
       },
       removeTerm: function (categoryName, facetName, term) {
-        var pql = service.removeTerm (getPql(), categoryName, facetName, term);
-        setPql (pql);
+        getSetPql (service.removeTerm, categoryName, facetName, term);
       },
       removeFacet: function (categoryName, facetName) {
-        var pql = service.removeFacet (getPql(), categoryName, facetName);
-        setPql (pql);
+        getSetPql (service.removeFacet, categoryName, facetName);
       },
       overwrite: function (categoryName, facetName, term) {
-        var pql = service.overwrite (getPql(), categoryName, facetName, term);
-        setPql (pql);
+        getSetPql (service.overwrite, categoryName, facetName, term);
       },
       mergeQueries: function (query1, query2) {
         return service.mergeQueries (query1, query2);
@@ -115,8 +126,13 @@
       },
       convertPqlToQuery: service.convertPqlToQueryObject,
       includesFacets: function () {
-        var pql = service.includesFacets (getPql());
-        setPql (pql);
+        getSetPql (service.includesFacets);
+      },
+      setLimit: function (limit) {
+        getSetPql (service.setLimit, limit);
+      },
+      setSort: function (sort) {
+        getSetPql (service.setSort, sort);
       },
       getRawPql: getPql,
       getBuilder: function () {
