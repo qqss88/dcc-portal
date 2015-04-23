@@ -1,10 +1,10 @@
 /**
-* This PEG grammar translates PQL into a JSON tree.
-*/
+ * This PEG grammar translates PQL into a JSON tree.
+ */
 
 /*
-* Helper functions
-*/
+ * Helper functions
+ */
 {
   var altFuncMapping = {
     "&":    "and",
@@ -41,13 +41,13 @@
     return {op: op, field: field, value: value};
   }
 
-  function toLimitUnit (from, size) {
+  function toLimitUnit (first, second) {
     var op = "limit";
-    from = from || 0;
-    if (size) {
-      return {op: op, from: from, size: size};
+
+    if (second !== undefined) {
+      return {op: op, from: first, size: second};
     } else {
-      return {op: op, from: from};
+      return {op: op, size: first};
     }
   }
 
@@ -195,8 +195,8 @@ orderFilter
     {return toBasicUnit (list, o);}
 
 limitFilter
-  = _ o:"limit" OPAR from: INT CPAR
-    {return toLimitUnit (from);}
+  = _ o:"limit" OPAR size: INT CPAR
+    {return toLimitUnit (size);}
   / _ o:"limit" OPAR from: INT COMMA size: INT CPAR
     {return toLimitUnit (from, size);}
 

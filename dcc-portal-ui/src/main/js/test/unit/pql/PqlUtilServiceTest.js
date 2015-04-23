@@ -154,7 +154,7 @@ describe('Testing PqlUtilService', function() {
     setPqlInUrl (testPql);
 
     var expectedLimit = {
-      from: 1
+      size: 1
     };
 
     var testLimit = PqlUtilService.getLimit ();
@@ -191,6 +191,18 @@ describe('Testing PqlUtilService', function() {
     var expectedPql = 'select(*),' + originalPql + ',limit(1,99)';
 
     var limit = {from: 1, size: 99};
+    PqlUtilService.setLimit (limit);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing setLimit() with "size" set to a float (2.51) in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(3)';
+
+    var limit = {size: 2.51};
     PqlUtilService.setLimit (limit);
 
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
