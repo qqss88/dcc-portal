@@ -16,8 +16,8 @@
  */
 
 /*
-* PqlTranslator translates a PQL into a parse tree in JSON. This can be used without AngularJS.
-*/
+ * PqlTranslator translates a PQL into a parse tree in JSON. This can be used without AngularJS.
+ */
 
 (function () {
   'use strict';
@@ -61,7 +61,7 @@
       var parameters = unit.field || '';
     
       if (values.length > 0) {
-        parameters += appendCommaIfNeeded(parameters) + values;
+        parameters += appendCommaIfNeeded (parameters) + values;
       }
 
       var ending = ('count' === op) ?
@@ -72,7 +72,10 @@
     }
 
     function limitUnitToPql (limit) {
-      limit = limit || {};
+      if (! limit) {return '';}
+      if (! _.isPlainObject (limit)) {return '';}
+      if (_.isEqual ({op: 'limit'}, limit)) {return '';}
+
       var from = _.isNumber (limit.from) ? limit.from : 0;
       var values = _.isNumber (limit.size) ? [from, limit.size] : [from];
 
@@ -80,7 +83,14 @@
     }
 
     function sortUnitToPql (sort) {
-      var values = sort.values.map (function (obj) {
+      if (! sort) {return '';}
+      if (! sort.values) {return '';}
+
+      var sortArray = sort.values;
+      if (! _.isArray (sortArray)) {return '';}
+      if (sortArray.length < 1) {return '';}
+
+      var values = sortArray.map (function (obj) {
         return '' + obj.direction + obj.field;
       });
 
@@ -98,7 +108,9 @@
       },
       toPql: function (parseTree) {
         var result = _.isArray (parseTree) ?
-          parseTree.map(convertNodeToPqlString).join() :
+          _.filter (parseTree.map (convertNodeToPqlString), function (s) {
+            return s.trim().length > 1;
+          }).join() :
           _.isObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
 
         if (result === null) {
@@ -114,8 +126,8 @@
 })();
 
 /*
-* This is the Angular service that wraps around the PqlTranslator.
-*/
+ * This is the Angular service that wraps around the PqlTranslator.
+ */
 (function () {
   'use strict';
 

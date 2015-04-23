@@ -36,7 +36,7 @@
     // Here Pql is persisted in a query param in the URL.
     function getPql() {
       var search = $location.search();
-      var pql = search [pqlParameterName] || '';
+      var pql = (search [pqlParameterName] || '').trim();
 
       $log.debug ('The URL contains this PQL: [%s].', pql);
       return pql;
@@ -44,8 +44,8 @@
 
     // Retrieves pql persisted in a query param in the URL.
     function setPql (pql) {
-      $log.debug ('PQL is updated to [%s].', pql);
       $location.search (pqlParameterName, pql);
+      $log.debug ('PQL is updated to [%s].', pql);
     }
 
     // A builder to allow the UI to build a PQL programmatically.
@@ -67,6 +67,10 @@
         },
         overwrite: function (categoryName, facetName, term) {
           buffer = service.overwrite (buffer, categoryName, facetName, term);
+          return this;
+        },
+        includesFacets: function () {
+          buffer = service.includesFacets (buffer);
           return this;
         },
         build: function () {
@@ -106,9 +110,13 @@
         return service.getLimit (getPql());
       },
       convertQueryToPql: service.convertQueryToPql,
-      convertPqlToQuery: service.getQuery,
-      getQuery: function () {
-        return service.getQuery (getPql());
+      getFilters: function () {
+        return service.getFilters (getPql());
+      },
+      convertPqlToQuery: service.convertPqlToQueryObject,
+      includesFacets: function () {
+        var pql = service.includesFacets (getPql());
+        setPql (pql);
       },
       getRawPql: getPql,
       getBuilder: function () {

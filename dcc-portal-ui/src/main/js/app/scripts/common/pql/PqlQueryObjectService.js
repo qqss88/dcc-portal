@@ -16,8 +16,8 @@
  */
 
 /*
-* This is the Angular service that translates a parse tree of PQL into an object model to be
-* consumed by UI-centric code.
+ * This is the Angular service that translates a parse tree of PQL into an object model to be
+ * consumed by UI-centric code.
 */
 
 (function () {
@@ -30,10 +30,24 @@
 
   module.factory(serviceName, function (PqlTranslationService) {
 
+    function getEmptyQueryObject () {
+      return {
+        params: {
+          // For query object, we always enforce the 'select' function.
+          // In fact, this is translated to 'select(*)' in PQL as we don't support
+          // column projection from the UI.
+          select: true,
+          sort: [],
+          limit: {}
+        },
+        filters: {}
+      };
+    }
+
     function convertPqlToQueryObject (pql) {
       pql = (pql || '').trim();
 
-      if (pql.length < 1) {return {};}
+      if (pql.length < 1) {return getEmptyQueryObject();}
 
       var jsonTree = PqlTranslationService.fromPql (pql);
 
@@ -48,6 +62,7 @@
     var isAndNode = _.partial (isNode, 'and');
     var isSortNode = _.partial (isNode, 'sort');
     var isLimitNode = _.partial (isNode, 'limit');
+    var isFacetsNode = _.partial (isNode, 'facets');
 
     function parseIdentifier (id) {
       var splits = (id || '').split ('.');
@@ -59,7 +74,7 @@
       return (category && facet) ? {category: category, facet: facet} : null;
     }
 
-    function processTreeNode (result, node) {
+    function reduceFilterArrayToQueryFilters (result, node) {
       if (! node) {return result;}
 
       // For our current need, we should only expect two operators, namely 'in' and 'eq'.
@@ -80,29 +95,89 @@
       return result;
     }
 
-    function convertJsonTreeToQueryObject (jsonTree) {
-      // Currently we expect jsonTree to be an array.
-      var nodes = _.filter (jsonTree, isAndNode);
-      var values = (nodes.length > 0) ? (nodes[0].values || []) : jsonTree;
+    function getSpecialNodeFromTreeArray (treeArray, filterFunc) {
+      var nodes = _.filter (treeArray, filterFunc);
+      return (nodes.length > 0) ? nodes [0] : null;
+    }
 
-      var result = _.reduce (values, processTreeNode, {});
+    function removeOp (jsonObject) {
+      delete (jsonObject || {}).op;
+      return jsonObject;
+    }
+
+    function convertJsonTreeToQueryObject (treeArray) {
+      var result = getEmptyQueryObject();
+
+      // Currently we expect the input (treeArray) to be an array,
+      // namely we don't support/expect 'count' yet.
+      var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
+      // For our current need, there should always be one 'And' node.
+      var filterValues = andNode ? (andNode.values || []) : treeArray;
+
+      result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
+
+      // Again, currently the UI doesn't care about projection on facets so we treat any 'facets' as 'facets(*)'
+      result.params.facets = (null !== getSpecialNodeFromTreeArray (treeArray, isFacetsNode));
+
+      var sortNode = getSpecialNodeFromTreeArray (treeArray, isSortNode);
+      // The values field in a 'sort' node contains an array of sort fields.
+      result.params.sort = sortNode ? (sortNode.values || []) : [];
+
+      var limitNode = getSpecialNodeFromTreeArray (treeArray, isLimitNode);
+      result.params.limit = limitNode ? removeOp (limitNode) : {};
 
       return result;
     }
 
     function removeEmptyObject (collection) {
       return _.filter (collection, function (o) {
-        return o !== {};
+        return (! _.isEqual (o, {}));
       });
     }
 
     function convertQueryObjectToJsonTree (query) {
-      var categoryKeys = Object.keys (query || {});
+      // Result should be an array because, for now, the UI does not need/support 'count'
+      var result = [];
+      result.push ({
+        op: 'select',
+        values: ['*']
+      });
+
+      var queryParams = query.params || {};
+
+      if (queryParams.facets) {
+        result.push ({
+          op: 'facets',
+          values: ['*']
+        });
+      }
+
+      result = result.concat (convertQueryFilterToJsonTree (query.filters));
+
+      var sort = queryParams.sort;
+      if (sort.length > 0) {
+        result.push ({
+          op: 'sort',
+          values: sort
+        });
+      }
+
+      var limit = queryParams.limit;
+      if (! _.isEqual (limit, {})) {
+        limit.op = 'limit';
+        result.push (limit);
+      }
+
+      return result;
+    }
+
+    function convertQueryFilterToJsonTree (queryFilter) {
+      var categoryKeys = Object.keys (queryFilter || {});
 
       if (categoryKeys.length < 1) {return [];}
 
       var termArray = _.map (categoryKeys, function (categoryKey) {
-        var category = query [categoryKey];
+        var category = queryFilter [categoryKey];
         var facetKeys = Object.keys (category || {});
 
         var termFilters = _.map (facetKeys, function (facetKey) {
@@ -118,6 +193,7 @@
           } else {
             return {};
           }
+
         });
 
         return termFilters;
@@ -128,79 +204,87 @@
       return (values.length > 1) ? [{op: 'and', values: values}] : values;
     }
 
-    function addTermToQuery (categoryName, facetName, term, query) {
-      if (! term) {return query;}
+    function addTermToQueryFilter (categoryName, facetName, term, queryFilter) {
+      if (! term) {return queryFilter;}
 
-      query = query || {};
-      var category = query [categoryName] || {};
+      queryFilter = queryFilter || {};
+      var category = queryFilter [categoryName] || {};
       var facet = category [facetName] || {};
       var inValueArray = facet.in || [];
 
-      if (_.contains (inValueArray, term)) {return query;}
+      if (_.contains (inValueArray, term)) {return queryFilter;}
 
       inValueArray.push (term);
     
-      // update the original query object.
+      // update the original filter.
       facet.in = inValueArray;
       category [facetName] = facet;
-      query [categoryName] = category;
+      queryFilter [categoryName] = category;
     
-      return query;
+      return queryFilter;
     }
 
-    function removeTermFromQuery (categoryName, facetName, term, query) {
-      var categoryKeys = Object.keys (query || {});
+    function removeTermFromQueryFilter (categoryName, facetName, term, queryFilter) {
+      var categoryKeys = Object.keys (queryFilter || {});
 
       if (_.contains (categoryKeys, categoryName)) {
-        var facetKeys = Object.keys (query [categoryName] || {});
+        var facetKeys = Object.keys (queryFilter [categoryName] || {});
         var inField = 'in';
 
         if (_.contains (facetKeys, facetName)) {
-          var inValueArray = query [categoryName][facetName][inField] || [];
-          query [categoryName][facetName][inField] = _.remove (inValueArray, function (s) {
+          var inValueArray = queryFilter [categoryName][facetName][inField] || [];
+          queryFilter [categoryName][facetName][inField] = _.remove (inValueArray, function (s) {
             return s !== term;
           });
             
-          if (query [categoryName][facetName][inField].length < 1) {
-            query = removeFacetFromQuery (categoryName, facetName, null, query);
+          if (queryFilter [categoryName][facetName][inField].length < 1) {
+            queryFilter = removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter);
           }
         }
       }
 
-      return query;
+      return queryFilter;
     }
 
-    function removeFacetFromQuery (categoryName, facetName, term, query) {
-      var categoryKeys = Object.keys (query || {});
+    function removeFacetFromQueryFilter (categoryName, facetName, term, queryFilter) {
+      var categoryKeys = Object.keys (queryFilter || {});
 
       if (_.contains (categoryKeys, categoryName)) {
-        var facetKeys = Object.keys ( query [categoryName] || {} );
+        var facetKeys = Object.keys (queryFilter [categoryName] || {});
 
         if (_.contains (facetKeys, facetName)) {
-          delete query [categoryName][facetName];
+          delete queryFilter [categoryName][facetName];
             
-          if (Object.keys (query [categoryName] || {}).length < 1) {
-            delete query [categoryName];
+          if (Object.keys (queryFilter [categoryName] || {}).length < 1) {
+            delete queryFilter [categoryName];
           }
         }
       }
 
-      return query;
+      return queryFilter;
+    }
+
+    function includesFacets (pql) {
+      var query = convertPqlToQueryObject (pql);
+      query.params.facets = true;
+
+      return convertQueryObjectToPql (query);
     }
 
     function convertQueryObjectToPql (queryObject) {
       var jsonTree = convertQueryObjectToJsonTree (queryObject);
-
-      return PqlTranslationService.toPql (jsonTree);
+      var result = PqlTranslationService.toPql (jsonTree);
+      return result;
     }
 
-    function updateQuery (pql, categoryName, facetName, term, updators) {
+    function updateQueryFilter (pql, categoryName, facetName, term, updators) {
       var query = convertPqlToQueryObject (pql);
-      var updatedQuery = _.reduce (updators || [], function (result, f) {
+
+      query.filters = _.reduce (updators || [], function (result, f) {
         return _.isFunction (f) ? f (categoryName, facetName, term, result) : result;
-      }, query);
+      }, query.filters);
       
-      return convertQueryObjectToPql (updatedQuery);
+      return convertQueryObjectToPql (query);
     }
 
     function cleanUpArguments (args, func) {
@@ -208,8 +292,8 @@
       return _.isFunction (func) ? _.map (argumentArray, func) : argumentArray;
     }
 
-    function mergeQueryObjects (queryObjs) {
-      var queryObjects = removeEmptyObject (queryObjs);
+    function mergeQueryObjects (queryArray) {
+      var queryObjects = removeEmptyObject (queryArray);
       var numberOfQueries = queryObjects.length;
 
       if (numberOfQueries < 1) {return {};}
@@ -218,86 +302,87 @@
     }
 
     function mergeQueries () {
-      var numberOfArgs = arguments.length;
+      var emptyValue = {};
+      var args = cleanUpArguments (arguments, function (o) {
+        return _.isPlainObject (o) ? o : emptyValue;
+      });
 
-      if (numberOfArgs < 1) {return {};}
+      var numberOfArgs = args.length;
 
-      return mergeQueryObjects (cleanUpArguments (arguments, function (o) {
-        return _.isPlainObject (o) ? o : {};
-      }));
+      if (numberOfArgs < 1) {return emptyValue;}
+
+      return mergeQueryObjects (args);
     }
 
     function mergePqlStatements () {
-      var numberOfArgs = arguments.length;
+      var emptyValue = '';
+      var args = cleanUpArguments (arguments, function (s) {
+        return _.isString (s) ? s.trim() : emptyValue;
+      });
 
-      if (numberOfArgs < 1) {return '';}
+      var pqlArray = _.unique (_.filter (args, function (s) {
+        return s !== emptyValue;
+      }));
 
-      var pqlArray = _.unique (_.map (cleanUpArguments (arguments, function (s) {
-        return _.isString (s) ? s.trim() : '';
-      })));
+      var numberOfPql = pqlArray.length;
 
-      if (numberOfArgs < 2) {return pqlArray [0];}
+      if (numberOfPql < 1) {return emptyValue;}
+      if (numberOfPql < 2) {return pqlArray [0];}
 
       var resultObject = mergeQueryObjects (_.map (pqlArray, convertPqlToQueryObject));
 
-      return resultObject === {} ? '' : PqlTranslationService.toPql (convertQueryObjectToJsonTree (resultObject));
+      return resultObject === {} ? '' :
+        PqlTranslationService.toPql (convertQueryObjectToJsonTree (resultObject));
     }
 
-    function getSpecialNodeFromPql (pql, filterFunc) {
-      pql = (pql || '').trim();
-
-      if (pql.length < 1) {return null;}
-
-      var parseArray = PqlTranslationService.fromPql (pql);
-
-      // Special nodes such as 'sort' and 'limit' must only appear in an array as a parse tree.
-      if (! _.isArray (parseArray)) {return null;}
-
-      var nodes = _.filter (parseArray, filterFunc);
-      return nodes.length > 0 ? nodes[0] : null;
+    function updateQueryWithCustomAction (pql, action) {
+      var query = convertPqlToQueryObject (pql);
+      action (query);
+      return convertQueryObjectToPql (query);
     }
 
-    function getSort (pql) {
-      var sortNode = getSpecialNodeFromPql (pql, isSortNode);
-      var defaultValue = [];
-
-      // The values field in a Sort node contains an array of sort fields.
-      return sortNode ? (sortNode.values || defaultValue) : defaultValue;
-    }
-
-    function getLimit (pql) {
-      var limitNode = getSpecialNodeFromPql (pql, isLimitNode);
-      var defaultValue = {};
-
-      if (! limitNode) {return defaultValue;}
-
-      // The JSON format for the limit node is {op: 'limit', from: {integer} [, size: {integer}]}.
-      // We return the node as is, except without the 'op' field.
-      delete limitNode.op;
-
-      return limitNode;
+    function updateQueryParam (pql, param, value) {
+      return updateQueryWithCustomAction (pql, function (query) {
+        query.params [param] = value;
+      });
     }
 
     return {
       addTerm: function (pql, categoryName, facetName, term) {
-        return updateQuery (pql, categoryName, facetName, term, [addTermToQuery]);
+        return updateQueryFilter (pql, categoryName, facetName, term, [addTermToQueryFilter]);
       },
       removeTerm: function (pql, categoryName, facetName, term) {
-        return updateQuery (pql, categoryName, facetName, term, [removeTermFromQuery]);
+        return updateQueryFilter (pql, categoryName, facetName, term, [removeTermFromQueryFilter]);
       },
       removeFacet: function (pql, categoryName, facetName) {
-        return updateQuery (pql, categoryName, facetName, null, [removeFacetFromQuery]);
+        return updateQueryFilter (pql, categoryName, facetName, null, [removeFacetFromQueryFilter]);
       },
       overwrite: function (pql, categoryName, facetName, term) {
-        return updateQuery (pql, categoryName, facetName, term, [removeFacetFromQuery, addTermToQuery]);
+        return updateQueryFilter (pql, categoryName, facetName, term,
+          [removeFacetFromQueryFilter, addTermToQueryFilter]);
       },
+      includesFacets: includesFacets,
       convertQueryToPql: convertQueryObjectToPql,
+      convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,
       mergeQueries: mergeQueries,
-      getSort: getSort,
-      getLimit: getLimit,
-      getQuery: function (pql) {
-        return convertPqlToQueryObject (pql);
+      getSort: function (pql) {
+        var query = convertPqlToQueryObject (pql);
+        return query.params.sort;
+      },
+      setSort: function (pql, sortArray) {
+        return updateQueryParam (pql, 'sort', sortArray);
+      },
+      getLimit: function (pql) {
+        var query = convertPqlToQueryObject (pql);
+        return query.params.limit;
+      },
+      setLimit: function (pql, limit) {
+        return updateQueryParam (pql, 'limit', limit);
+      },
+      getFilters: function (pql) {
+        var queryObject = convertPqlToQueryObject (pql);
+        return queryObject.filters;
       }
     };
   });
