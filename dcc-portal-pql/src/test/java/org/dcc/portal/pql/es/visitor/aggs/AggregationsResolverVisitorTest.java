@@ -32,7 +32,6 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
-import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.IndexModel;
@@ -182,10 +181,6 @@ public class AggregationsResolverVisitorTest {
     log.debug("Result - \n{}", result);
 
     return Nodes.getOptionalChild(result, AggregationsNode.class).get();
-  }
-
-  private static Optional<Context> createContext(FilterNode filterNode) {
-    return Optional.of(new Context(filterNode, IndexModel.getMutationCentricTypeModel()));
   }
 
   private static Optional<Context> createContext() {
