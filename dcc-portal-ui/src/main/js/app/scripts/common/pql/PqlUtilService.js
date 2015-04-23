@@ -96,6 +96,9 @@
 
     return {
       paramName: pqlParameterName,
+      reset: function () {
+        setPql ('');
+      },
       addTerm: function (categoryName, facetName, term) {
         getSetPql (service.addTerm, categoryName, facetName, term);
       },

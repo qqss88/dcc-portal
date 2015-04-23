@@ -37,6 +37,16 @@ describe('Testing PqlUtilService', function() {
     expect(testPql).toEqual(expectedPql);
   });
 
+  it('Testing reset() with pql: eq(test,123)', function() {
+    var originalPql = "eq(test,123)";
+    setPqlInUrl (originalPql);
+
+    PqlUtilService.reset();
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual('');
+  });
+
   it('Testing getRawPql() with pql: eq(donor.gender,"male")', function() {
     var category = "donor";
     var facet = "gender";
@@ -200,7 +210,7 @@ describe('Testing PqlUtilService', function() {
     var originalPql = 'eq(donor.test,123)';
     setPqlInUrl (originalPql);
 
-    var expectedPql = 'select(*),' + originalPql + ',limit(3)';
+    var expectedPql = 'select(*),' + originalPql + ',limit(2)';
 
     var limit = {size: 2.51};
     PqlUtilService.setLimit (limit);
@@ -350,6 +360,32 @@ describe('Testing PqlUtilService', function() {
     };
 
     PqlUtilService.overwrite ("donor", "gender", "unknown");
+
+    var testQuery = PqlUtilService.getFilters();
+    expect(testQuery).toEqual(expectedQuery);
+  });
+
+  it('Testing overwrite() with "donor.gender" set to ["unknown", "male", "alien"] in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
+    var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
+    setPqlInUrl (originalPql);
+
+    var expectedQuery = {
+      donor: {
+        gender: {
+          "in": ["unknown", "male", "alien"]
+        },
+        age: {
+          "in": [22]
+        }
+      },
+      mutation: {
+        foo: {
+          "in": ["bar"]
+        }
+      }
+    };
+
+    PqlUtilService.overwrite ("donor", "gender", ["unknown", "male", "alien"]);
 
     var testQuery = PqlUtilService.getFilters();
     expect(testQuery).toEqual(expectedQuery);

@@ -72,7 +72,7 @@
     }
 
     function positiveInteger (n) {
-      return (n > 0) ? Math.round (n) : 0;
+      return (n > 0) ? Math.floor (n) : 0;
     }
 
     function limitUnitToPql (limit) {
