@@ -284,7 +284,7 @@
       donors.hits.forEach(function (donor) {
         donor.embedQuery = LocationService.merge(filters, {donor: {id: {is: [donor.id]}}}, 'facet');
 
-        // Remove gene entity set because gene id is the key
+        // Remove donor entity set because donor id is the key
         if (donor.embedQuery.hasOwnProperty('donor')) {
           var donorFilters = donor.embedQuery.donor;
           delete donorFilters[Extensions.ENTITY];
@@ -316,7 +316,9 @@
       if (State.isTab('gene') && _this.genes && _this.genes.hits && _this.genes.hits.length) {
         _this.mutationCounts = null;
         var geneIds = _.pluck(_this.genes.hits, 'id').join(',');
-        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
+
+
+
 
         // Get Mutations counts
         Genes.one(geneIds).handler
@@ -328,20 +330,44 @@
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
           _this.genes.hits.forEach(function (gene) {
+
+            var geneFilter = LocationService.filters();
+            if (geneFilter.hasOwnProperty('gene')) {
+              delete geneFilter.gene[ Extensions.ENTITY ];
+              delete geneFilter.gene.id;
+              geneFilter.gene.id = {
+                is: [gene.id]
+              };
+            } else {
+              geneFilter.gene = {
+                id: {
+                  is: [gene.id]
+                }
+              };
+            }
+
             Donors.getList({
               size: 0,
               include: 'facets',
-              filters: LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet')
+              filters: geneFilter
             }).then(function (data) {
               gene.uiDonors = [];
               if (data.facets.projectId.terms) {
-                var _f = FiltersUtil.removeExtensions(LocationService.filters());
+
+                var _f = LocationService.filters();
                 if (_f.hasOwnProperty('donor')) {
                   delete _f.donor.projectId;
                   if (_.isEmpty(_f.donor)) {
                     delete _f.donor;
                   }
                 }
+                if (_f.hasOwnProperty('gene')) {
+                  delete _f.gene[ Extensions.ENTITY ];
+                  if (_.isEmpty(_f.gene)) {
+                    delete _f.gene;
+                  }
+                }
+
 
                 gene.uiDonorsLink = LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet');
                 gene.uiDonors = data.facets.projectId.terms;
@@ -370,8 +396,8 @@
       _this.loading = false;
 
       genes.hits.forEach(function (gene) {
-        var uniqueGeneFilter = FiltersUtil.removeExtensions(LocationService.filters());
-        gene.embedQuery = LocationService.merge(uniqueGeneFilter, {gene: {id: {is: [gene.id]}}}, 'facet');
+        var filters = LocationService.filters();
+        gene.embedQuery = LocationService.merge(filters, {gene: {id: {is: [gene.id]}}}, 'facet');
 
         // Remove gene entity set because gene id is the key
         if (gene.embedQuery.hasOwnProperty('gene')) {
@@ -402,13 +428,31 @@
 
       _this.ajax = function () {
         if (State.isTab('mutation') && _this.mutations && _this.mutations.hits && _this.mutations.hits.length) {
+
+
           // Need to get SSM Test Donor counts from projects
           Projects.getList().then(function (projects) {
             _this.mutations.hits.forEach(function (mutation) {
+
+              var mutationFilter = LocationService.filters();
+              if (mutationFilter.hasOwnProperty('mutation')) {
+                delete mutationFilter.mutation[ Extensions.ENTITY ];
+                delete mutationFilter.mutation.id;
+                mutationFilter.mutation.id = {
+                  is: [mutation.id]
+                };
+              } else {
+                mutationFilter.mutation = {
+                  id: {
+                    is: [mutation.id]
+                  }
+                };
+              }
+
               Donors.getList({
                 size: 0,
                 include: 'facets',
-                filters: LocationService.overwriteFilters({mutation: {id: {is: mutation.id}}}, 'facet')
+                filters: mutationFilter
               }).then(function (data) {
                 mutation.uiDonors = [];
                 if (data.facets.projectId.terms) {
@@ -419,6 +463,13 @@
                       delete _f.donor;
                     }
                   }
+                  if (_f.hasOwnProperty('mutation')) {
+                    delete _f.mutation[ Extensions.ENTITY ];
+                    if (_.isEmpty(_f.mutation)) {
+                      delete _f.mutation;
+                    }
+                  }
+
                   mutation.uiDonorsLink = LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet');
                   mutation.uiDonors = data.facets.projectId.terms;
                   mutation.uiDonors.forEach(function (facet) {
@@ -471,7 +522,7 @@
           var filters = LocationService.filters();
           mutation.embedQuery = LocationService.merge(filters, {mutation: {id: {is: [mutation.id]}}}, 'facet');
 
-          // Remove gene entity set because gene id is the key
+          // Remove mutation entity set because mutation id is the key
           if (mutation.embedQuery.hasOwnProperty('mutation')) {
             var mutationFilters = mutation.embedQuery.mutation;
             delete mutationFilters[Extensions.ENTITY];
