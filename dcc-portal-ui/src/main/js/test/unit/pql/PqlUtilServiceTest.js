@@ -24,7 +24,7 @@ describe('Testing PqlUtilService', function() {
   it('Testing getRawPql() with empty pql', function() {
      var expectedPql = '';
      var testPql = PqlUtilService.getRawPql();
-    
+
      expect(testPql).toEqual(expectedPql);
   });
 
@@ -33,8 +33,18 @@ describe('Testing PqlUtilService', function() {
     setPqlInUrl (expectedPql);
 
     var testPql = PqlUtilService.getRawPql();
-    
+
     expect(testPql).toEqual(expectedPql);
+  });
+
+  it('Testing reset() with pql: eq(test,123)', function() {
+    var originalPql = "eq(test,123)";
+    setPqlInUrl (originalPql);
+
+    PqlUtilService.reset();
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual('');
   });
 
   it('Testing getRawPql() with pql: eq(donor.gender,"male")', function() {
@@ -120,7 +130,7 @@ describe('Testing PqlUtilService', function() {
     }];
 
     var testSorts = PqlUtilService.getSort ();
-    
+
     expect(testSorts).toEqual(expectedSorts);
   });
 
@@ -131,7 +141,7 @@ describe('Testing PqlUtilService', function() {
     var expectedSorts = [];
 
     var testSorts = PqlUtilService.getSort ();
-    
+
     expect(testSorts).toEqual(expectedSorts);
   });
 
@@ -145,7 +155,7 @@ describe('Testing PqlUtilService', function() {
     };
 
     var testLimit = PqlUtilService.getLimit ();
-    
+
     expect(testLimit).toEqual (expectedLimit);
   });
 
@@ -154,11 +164,11 @@ describe('Testing PqlUtilService', function() {
     setPqlInUrl (testPql);
 
     var expectedLimit = {
-      from: 1
+      size: 1
     };
 
     var testLimit = PqlUtilService.getLimit ();
-    
+
     expect(testLimit).toEqual (expectedLimit);
   });
 
@@ -169,7 +179,7 @@ describe('Testing PqlUtilService', function() {
     var expectedLimit = {};
 
     var testLimit = PqlUtilService.getLimit ();
-    
+
     expect(testLimit).toEqual (expectedLimit);
   });
 
@@ -180,7 +190,87 @@ describe('Testing PqlUtilService', function() {
     var expectedPql = 'select(*),facets(*),' + originalPql;
 
     PqlUtilService.includesFacets ();
-    
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing setLimit() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(1,99)';
+
+    var limit = {from: 1, size: 99};
+    PqlUtilService.setLimit (limit);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing limitFromSize() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(99,88)';
+
+    PqlUtilService.limitFromSize (99, 88);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing limitSize() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(77)';
+
+    PqlUtilService.limitSize (77);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing setLimit() with "size" set to a float (2.51) in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',limit(2)';
+
+    var limit = {size: 2.51};
+    PqlUtilService.setLimit (limit);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing setSort() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),' + originalPql + ',sort(+donor.age,-donor.foo)';
+
+    var sort = [{field: 'donor.age', direction: '+'}, {field: 'donor.foo', direction: '-'}];
+    PqlUtilService.setSort (sort);
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing sortAsc() in pql: eq(donor.test,123),sort(-donor.foo)', function() {
+    var originalPql = 'eq(donor.test,123),sort(-donor.foo)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),eq(donor.test,123),sort(-donor.foo,+donor.age)';
+
+    PqlUtilService.sortAsc ('donor.age');
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
+  it('Testing sortDesc() in pql: eq(donor.test,123),sort(donor.foo)', function() {
+    var originalPql = 'eq(donor.test,123),sort(donor.foo)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),eq(donor.test,123),sort(+donor.foo,-donor.age)';
+
+    PqlUtilService.sortDesc ('donor.age');
+
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
 
@@ -314,6 +404,32 @@ describe('Testing PqlUtilService', function() {
     };
 
     PqlUtilService.overwrite ("donor", "gender", "unknown");
+
+    var testQuery = PqlUtilService.getFilters();
+    expect(testQuery).toEqual(expectedQuery);
+  });
+
+  it('Testing overwrite() with "donor.gender" set to ["unknown", "male", "alien"] in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
+    var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
+    setPqlInUrl (originalPql);
+
+    var expectedQuery = {
+      donor: {
+        gender: {
+          "in": ["unknown", "male", "alien"]
+        },
+        age: {
+          "in": [22]
+        }
+      },
+      mutation: {
+        foo: {
+          "in": ["bar"]
+        }
+      }
+    };
+
+    PqlUtilService.overwrite ("donor", "gender", ["unknown", "male", "alien"]);
 
     var testQuery = PqlUtilService.getFilters();
     expect(testQuery).toEqual(expectedQuery);
@@ -550,7 +666,7 @@ describe('Testing PqlUtilService', function() {
     expect(builder.build()).toEqual(expected);
   });
 
-  it('Testing Builder includesFacets', function() {
+  it('Testing Builder.includesFacets()', function() {
     var expected = 'select(*),facets(*),in(donor.gender,"male","female")';
     var builder = PqlUtilService.getBuilder ();
 
@@ -560,5 +676,33 @@ describe('Testing PqlUtilService', function() {
 
     expect(builder.build()).toEqual(expected);
   });
- 
+
+  it('Testing Builder.setLimit()', function() {
+    var expected = 'select(*),facets(*),in(donor.gender,"male","female"),limit(1,99)';
+    var limit = {from: 1, size: 99};
+
+    var builder = PqlUtilService.getBuilder ();
+    builder.addTerm ("donor", "gender", "male")
+      .includesFacets()
+      .setLimit (limit)
+      .addTerm ("donor", "gender", "female");
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder.setSort()', function() {
+    var expected = 'select(*),facets(*),in(donor.gender,"male","female"),sort(+donor.age,-donor.foo),limit(1,99)';
+    var limit = {from: 1, size: 99};
+    var sort = [{field: 'donor.age', direction: '+'}, {field: 'donor.foo', direction: '-'}];
+
+    var builder = PqlUtilService.getBuilder ();
+    builder.setSort (sort)
+      .addTerm ("donor", "gender", "male")
+      .includesFacets()
+      .setLimit (limit)
+      .addTerm ("donor", "gender", "female");
+
+    expect(builder.build()).toEqual(expected);
+  });
+
 });

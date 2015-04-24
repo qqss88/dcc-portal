@@ -35,7 +35,7 @@
     function appendCommaIfNeeded (s) {
       return s.length > 0 ? ',' : '';
     }
-    
+
     function opValuesToString (op, values) {
       return '' + op + '(' + values.join() + ')';
     }
@@ -44,7 +44,7 @@
       if (! _.isObject(unit)) {
         return _.isString (unit) ? addQuotes (unit) : '' + unit;
       }
-    
+
       var op = unit.op;
       if ('limit' === op) {
         return limitUnitToPql (unit);
@@ -59,7 +59,7 @@
         vals.map(convertNodeToPqlString).join();
 
       var parameters = unit.field || '';
-    
+
       if (values.length > 0) {
         parameters += appendCommaIfNeeded (parameters) + values;
       }
@@ -71,13 +71,17 @@
       return '' + op + '(' + ending;
     }
 
+    function positiveInteger (n) {
+      return (n > 0) ? Math.floor (n) : 0;
+    }
+
     function limitUnitToPql (limit) {
       if (! limit) {return '';}
       if (! _.isPlainObject (limit)) {return '';}
       if (_.isEqual ({op: 'limit'}, limit)) {return '';}
 
-      var from = _.isNumber (limit.from) ? limit.from : 0;
-      var values = _.isNumber (limit.size) ? [from, limit.size] : [from];
+      var size = _.isNumber (limit.size) ? positiveInteger (limit.size) : 0;
+      var values = _.isNumber (limit.from) ? [positiveInteger (limit.from), size] : [size];
 
       return opValuesToString (limit.op, values);
     }

@@ -37,6 +37,7 @@
           // In fact, this is translated to 'select(*)' in PQL as we don't support
           // column projection from the UI.
           select: true,
+          facets: false,
           sort: [],
           limit: {}
         },
@@ -209,20 +210,30 @@
     function addTermToQueryFilter (categoryName, facetName, term, queryFilter) {
       if (! term) {return queryFilter;}
 
+      return addMultipleTermsToQueryFilter (categoryName, facetName, [term], queryFilter);
+    }
+
+    function addMultipleTermsToQueryFilter (categoryName, facetName, terms, queryFilter) {
+      if (! terms) {return queryFilter;}
+      if (! _.isArray (terms)) {return queryFilter;}
+      if (terms.length < 1) {return queryFilter;}
+
       queryFilter = queryFilter || {};
       var category = queryFilter [categoryName] || {};
       var facet = category [facetName] || {};
       var inValueArray = facet.in || [];
 
-      if (_.contains (inValueArray, term)) {return queryFilter;}
+      _.each (terms, function (term) {
+        if (term && ! _.contains (inValueArray, term)) {
+          inValueArray.push (term);
+        }
+      });
 
-      inValueArray.push (term);
-    
       // update the original filter.
       facet.in = inValueArray;
       category [facetName] = facet;
       queryFilter [categoryName] = category;
-    
+
       return queryFilter;
     }
 
@@ -238,7 +249,7 @@
           queryFilter [categoryName][facetName][inField] = _.remove (inValueArray, function (s) {
             return s !== term;
           });
-            
+
           if (queryFilter [categoryName][facetName][inField].length < 1) {
             queryFilter = removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter);
           }
@@ -256,7 +267,7 @@
 
         if (_.contains (facetKeys, facetName)) {
           delete queryFilter [categoryName][facetName];
-            
+
           if (Object.keys (queryFilter [categoryName] || {}).length < 1) {
             delete queryFilter [categoryName];
           }
@@ -285,7 +296,7 @@
       query.filters = _.reduce (updators || [], function (result, f) {
         return _.isFunction (f) ? f (categoryName, facetName, term, result) : result;
       }, query.filters);
-      
+
       return convertQueryObjectToPql (query);
     }
 
@@ -299,7 +310,7 @@
       var numberOfQueries = queryObjects.length;
 
       if (numberOfQueries < 1) {return {};}
-      
+
       return (numberOfQueries < 2) ? queryObjects [0] : _.reduce (queryObjects, _.merge, {});
     }
 
@@ -361,7 +372,7 @@
       },
       overwrite: function (pql, categoryName, facetName, term) {
         return updateQueryFilter (pql, categoryName, facetName, term,
-          [removeFacetFromQueryFilter, addTermToQueryFilter]);
+          [removeFacetFromQueryFilter, _.isArray (term) ? addMultipleTermsToQueryFilter : addTermToQueryFilter]);
       },
       includesFacets: includesFacets,
       convertQueryToPql: convertQueryObjectToPql,
