@@ -274,6 +274,17 @@ describe('Testing PqlUtilService', function() {
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
 
+  it('Testing removeSort() in pql: eq(donor.test,123),sort(-donor.foo,+donor.bar)', function() {
+    var originalPql = 'eq(donor.test,123),sort(-donor.foo,+donor.bar)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),eq(donor.test,123),sort(+donor.bar)';
+
+    PqlUtilService.removeSort ('donor.foo');
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
   it('Testing getFilters() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var category = "donor";
     var facet = "gender";
@@ -662,6 +673,28 @@ describe('Testing PqlUtilService', function() {
 
     builder.addTerm ("donor", "gender", "male")
       .addTerm ("donor", "gender", "female");
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder initialized with a PQL', function() {
+    var initialPql = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"))';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    var expected = 'select(*),facets(*),and(in(donor.gender,"male","female"),in(donor.id,"uuid1","uuid3"),in(donor.foo,123,789)),sort(-donor.age),limit(20,30)';
+
+    builder.removeTerm ('removing', 'something', 'non-existent')
+      .includesFacets()
+      .overwrite ('donor', 'id', ['uuid1', 'uuid2', 'uuid3'])
+      .setSort ([{field: 'donor.age', direction: '-'}])
+      .addTerm ('donor', 'gender', 'female')
+      .addTerm ('donor', 'foo', 123)
+      .addTerm ('remove', 'this', 'soon')
+      .setLimit ({from: 20, size:30})
+      .removeTerm ('donor', 'id', 'uuid2')
+      .removeFacet ('remove', 'this')
+      .addTerm ('donor', 'foo', 789)
+      ;
 
     expect(builder.build()).toEqual(expected);
   });

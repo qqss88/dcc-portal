@@ -157,16 +157,16 @@
 
       result = result.concat (convertQueryFilterToJsonTree (query.filters));
 
-      var sort = queryParams.sort;
-      if (sort.length > 0) {
+      var sort = queryParams.sort || [];
+      if (! _.isEmpty (sort)) {
         result.push ({
           op: 'sort',
           values: sort
         });
       }
 
-      var limit = queryParams.limit;
-      if (! _.isEqual (limit, {})) {
+      var limit = queryParams.limit || {};
+      if (! _.isEmpty (limit)) {
         limit.op = 'limit';
         result.push (limit);
       }

@@ -48,7 +48,7 @@
       $log.debug ('PQL is updated to [%s].', pql);
     }
 
-    function getSetPql () {
+    function updatePql () {
       var args = Array.prototype.slice.call (arguments);
       var func = _.head (args);
       var pql = func.apply (null, [getPql()].concat (_.tail (args)));
@@ -60,7 +60,7 @@
     }
 
     function setSort (sort) {
-      getSetPql (service.setSort, sort);
+      updatePql (service.setSort, sort);
     }
 
     function addSort (field, direction) {
@@ -73,41 +73,88 @@
       setSort (sort);
     }
 
+    function removeSort (field) {
+      if (! field) {return;}
+
+      var sort = getSort();
+      sort = _.isArray (sort) ? sort : [];
+      var updatedSort = _.remove (sort, function (o) {
+        return o.field !== field;
+      });
+
+      setSort (updatedSort);
+    }
+
     // A builder to allow the UI to build a PQL programmatically.
-    var Builder = function () {
-      var buffer = '';
+    var Builder = function (pql) {
+      function addTerm (buffer, categoryName, facetName, term) {
+        return service.addTerm (buffer, categoryName, facetName, term);
+      }
+
+      function removeTerm (buffer, categoryName, facetName, term) {
+        return service.removeTerm (buffer, categoryName, facetName, term);
+      }
+
+      function removeFacet (buffer, categoryName, facetName) {
+        return service.removeFacet (buffer, categoryName, facetName);
+      }
+
+      function overwrite (buffer, categoryName, facetName, term) {
+        return service.overwrite (buffer, categoryName, facetName, term);
+      }
+
+      function includesFacets (buffer) {
+        return service.includesFacets (buffer);
+      }
+
+      function setLimit (buffer, limit) {
+        return service.setLimit (buffer, limit);
+      }
+
+      function setSort (buffer, sort) {
+        return service.setSort (buffer, sort);
+      }
+
+      var initialPql = pql || '';
+      var actions = [];
+
+      function addAction (func, args) {
+        actions.push ({func: func, args: args});
+      }
 
       return {
         addTerm: function (categoryName, facetName, term) {
-          buffer = service.addTerm (buffer, categoryName, facetName, term);
+          addAction (addTerm, [categoryName, facetName, term]);
           return this;
         },
         removeTerm: function (categoryName, facetName, term) {
-          buffer = service.removeTerm (buffer, categoryName, facetName, term);
+          addAction (removeTerm, [categoryName, facetName, term]);
           return this;
         },
         removeFacet: function (categoryName, facetName) {
-          buffer = service.removeFacet (buffer, categoryName, facetName);
+          addAction (removeFacet, [categoryName, facetName]);
           return this;
         },
         overwrite: function (categoryName, facetName, term) {
-          buffer = service.overwrite (buffer, categoryName, facetName, term);
+          addAction (overwrite, [categoryName, facetName, term]);
           return this;
         },
         includesFacets: function () {
-          buffer = service.includesFacets (buffer);
+          addAction (includesFacets, []);
           return this;
         },
         setLimit: function (limit) {
-          buffer = service.setLimit (buffer, limit);
+          addAction (setLimit, [limit]);
           return this;
         },
         setSort: function (sort) {
-          buffer = service.setSort (buffer, sort);
+          addAction (setSort, [sort]);
           return this;
         },
         build: function () {
-          return buffer;
+          return _.reduce (actions, function (result, action) {
+            return action.func.apply (null, [result].concat (action.args));
+          }, initialPql);
         }
       };
     };
@@ -118,16 +165,16 @@
         setPql ('');
       },
       addTerm: function (categoryName, facetName, term) {
-        getSetPql (service.addTerm, categoryName, facetName, term);
+        updatePql (service.addTerm, categoryName, facetName, term);
       },
       removeTerm: function (categoryName, facetName, term) {
-        getSetPql (service.removeTerm, categoryName, facetName, term);
+        updatePql (service.removeTerm, categoryName, facetName, term);
       },
       removeFacet: function (categoryName, facetName) {
-        getSetPql (service.removeFacet, categoryName, facetName);
+        updatePql (service.removeFacet, categoryName, facetName);
       },
       overwrite: function (categoryName, facetName, term) {
-        getSetPql (service.overwrite, categoryName, facetName, term);
+        updatePql (service.overwrite, categoryName, facetName, term);
       },
       mergeQueries: function (query1, query2) {
         return service.mergeQueries (query1, query2);
@@ -145,10 +192,10 @@
       },
       convertPqlToQuery: service.convertPqlToQueryObject,
       includesFacets: function () {
-        getSetPql (service.includesFacets);
+        updatePql (service.includesFacets);
       },
       setLimit: function (limit) {
-        getSetPql (service.setLimit, limit);
+        updatePql (service.setLimit, limit);
       },
       limitFromSize: function (from, size) {
         this.setLimit ({from: from, size: size});
@@ -156,6 +203,7 @@
       limitSize: function (size) {
         this.setLimit ({size: size});
       },
+      removeSort: removeSort,
       setSort: setSort,
       sortAsc: function (field) {
         addSort (field, '+');
@@ -164,8 +212,8 @@
         addSort (field, '-');
       },
       getRawPql: getPql,
-      getBuilder: function () {
-        return new Builder();
+      getBuilder: function (pql) {
+        return new Builder(pql);
       }
     };
   });
