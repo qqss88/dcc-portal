@@ -21,8 +21,8 @@ import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.customScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
+import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
@@ -48,6 +48,9 @@ import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
 import static org.icgc.dcc.portal.util.Filters.inputGeneListFilter;
@@ -57,14 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -75,6 +74,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
@@ -208,7 +208,7 @@ public class GeneRepository implements Repository {
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(maxGenes)
-        .setFilter(getFilters(filters))
+        .setPostFilter(getFilters(filters))
         .addField(symbolFieldName);
 
     val response = search.execute().actionGet();
@@ -277,21 +277,20 @@ public class GeneRepository implements Repository {
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search =
-        client.prepareSearch(index)
-            .setTypes(type.getId())
-            .setSearchType(QUERY_THEN_FETCH)
-            .setFrom(query.getFrom())
-            .setSize(query.getSize());
+    val search = client
+        .prepareSearch(index)
+        .setTypes(type.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize());
 
-    ObjectNode filters = remapFilters(query.getFilters());
-    search.setFilter(getFilters(filters));
-
+    val filters = remapFilters(query.getFilters());
+    search.setPostFilter(getFilters(filters));
     search.addFields(getFields(query, KIND));
-
-    if (query.hasInclude("transcripts")) search.addField("transcripts");
-    if (query.hasInclude("projects")) search.addField("project");
-    if (query.hasInclude("pathways")) search.addField("pathways");
+    String[] sourceFields = resolveSourceFields(query, KIND);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
+    }
 
     val facets = getFacets(query, filters);
     for (val facet : facets) {
@@ -368,7 +367,7 @@ public class GeneRepository implements Repository {
         boolFilter.must(getFilters(remappedFilters));
       }
 
-      search.setFilter(boolFilter);
+      search.setPostFilter(boolFilter);
     }
 
     log.debug("{}", search);
@@ -410,7 +409,7 @@ public class GeneRepository implements Repository {
 
     if (query.hasFilters()) {
       val filters = remapFilters(query.getFilters());
-      search.setFilter(getFilters(filters));
+      search.setPostFilter(getFilters(filters));
 
       // Remove score from below to significantly speed up results
       val countQuery = nestedQuery(
@@ -427,8 +426,8 @@ public class GeneRepository implements Repository {
   public NestedQueryBuilder buildQuery(Query query) {
     return nestedQuery(
         "donor",
-        customScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query.getFilters()))).script(SCORE))
-        .scoreMode("total");
+        functionScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query.getFilters())),
+            ScoreFunctionBuilders.scriptFunction(SCORE))).scoreMode("total");
   }
 
   public ObjectNode remapFilters(ObjectNode filters) {
@@ -436,49 +435,34 @@ public class GeneRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val fieldMapping = FIELDS_MAPPING.get(KIND);
-    val fs = Lists.<String> newArrayList();
-
     val search = client.prepareGet(index, TYPE.getId(), id);
+    val sourceFields = prepareSourceFields(query, getFields(query, KIND));
+    String[] excludeFields = null;
+    search.setFetchSource(sourceFields, excludeFields);
 
-    if (query.hasFields()) {
-      for (String field : query.getFields()) {
-        if (fieldMapping.containsKey(field)) {
-          fs.add(fieldMapping.get(field));
-        }
-      }
-    } else
-      fs.addAll(fieldMapping.values().asList());
+    val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (query.hasInclude("transcripts")) fs.add("transcripts");
-    if (query.hasInclude("projects")) fs.add("project");
-    if (query.hasInclude("pathways")) fs.add("pathways");
+    val result = response.getSource();
+    log.debug("{}", result);
 
-    search.setFields(fs.toArray(new String[fs.size()]));
+    return result;
+  }
 
-    GetResponse response = search.execute().actionGet();
+  private String[] prepareSourceFields(Query query, String[] fields) {
+    val typeFieldsMap = FIELDS_MAPPING.get(KIND);
+    val result = Lists.newArrayList(fields);
 
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
-      String msg = String.format("{\"code\": 404, \"message\":\"%s %s not found.\"}", type, id);
-      throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND)
-          .entity(msg).build());
+    if (!query.hasFields()) {
+      result.add(typeFieldsMap.get("externalDbIds"));
+      result.add(typeFieldsMap.get("pathways"));
     }
 
-    val map = Maps.<String, Object> newHashMap();
-    for (val f : response.getFields().values()) {
-      if (Lists.newArrayList(fieldMapping.get("affectedTranscriptIds"), fieldMapping.get("synonyms"), "transcripts",
-          "project", fieldMapping.get("sets")).contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
+    if (query.getIncludes() != null) {
+      result.addAll(query.getIncludes());
     }
 
-    log.debug("{}", map);
-
-    return map;
+    return result.toArray(new String[result.size()]);
   }
 
   /*

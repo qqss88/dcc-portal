@@ -137,6 +137,9 @@ public class PortalProperties extends Configuration {
     @JsonProperty
     String ssoUrl;
 
+    @JsonProperty
+    String ssoUrlGoogle;
+
   }
 
   @Data
@@ -242,6 +245,9 @@ public class PortalProperties extends Configuration {
 
     @JsonProperty
     String cudUrl;
+
+    @JsonProperty
+    String cmsUrl;
 
     @JsonProperty
     String cudAppId;

@@ -109,10 +109,10 @@
     };
   });
 
-  module.controller('NotifyCtrl', function ($scope, Notify) {
+  module.controller('NotifyCtrl', function ($scope, Page, Notify) {
     $scope.notify = Notify;
     $scope.$on('$locationChangeSuccess', function() {
-      if (Notify.isVisible()) {
+      if (Notify.isVisible() && Page.page() !== 'error') {
         Notify.hide();
       }
     });

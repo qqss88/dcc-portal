@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.repository;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.junit.Assert.fail;
 
 import java.util.Map;
@@ -217,7 +218,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     String id = "DO1";
     Query query = Query.builder().build();
     Map<String, Object> response = donorRepository.findOne(id, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
   }
 
   @Test
@@ -225,7 +226,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
     String id = "DO1";
     Query query = Query.builder().fields(Lists.newArrayList("id", "primarySite")).build();
     Map<String, Object> response = donorRepository.findOne(id, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("primarySite")));
   }
 
@@ -236,7 +237,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> response = donorRepository.findOne(id, query);
 
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
     assertThat(response.containsKey("specimen")).isFalse();
 
     Query queryInclude =
@@ -244,7 +245,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = donorRepository.findOne(id, queryInclude);
 
-    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(id);
     assertThat(responseInclude.containsKey("specimen")).isTrue();
   }
 

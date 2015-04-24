@@ -41,7 +41,7 @@ module.exports = function(config){
       'app/scripts/**/*.js',
 
       // include unit test specs
-      'test/unit/*.js'
+      'test/unit/**/*.js'
     ],
 
     // files to exclude
