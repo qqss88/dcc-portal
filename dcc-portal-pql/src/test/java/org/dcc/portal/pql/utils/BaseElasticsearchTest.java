@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ import com.github.tlrx.elasticsearch.test.EsSetup;
 import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 
 public class BaseElasticsearchTest {
 
@@ -57,9 +59,14 @@ public class BaseElasticsearchTest {
    */
   protected static final String INDEX_NAME = "dcc-release-etl-cli";
   protected static final String SETTINGS_FILE_NAME = "index.settings.json";
-  protected static final String JSON_DIR = "src/test/resources/org/icgc/dcc/etl/indexer";
+  protected static final String JSON_DIR = "mappings";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
-  protected static final File SETTINGS_FILE = new File(JSON_DIR, SETTINGS_FILE_NAME);
+  protected static final URL SETTINGS_FILE = getMappingFileUrl(SETTINGS_FILE_NAME);
+
+  @SneakyThrows
+  private static URL getMappingFileUrl(String fileName) {
+    return Resources.getResource(JSON_DIR + "/" + fileName);
+  }
 
   /**
    * Test data.
@@ -105,7 +112,7 @@ public class BaseElasticsearchTest {
   }
 
   @SneakyThrows
-  private static String settingsSource(File settingsFile) {
+  private static String settingsSource(URL settingsFile) {
     // Override production values that would introduce test timing delays / issues
     return objectNode(settingsFile)
         .put("index.number_of_shards", 1)
@@ -118,22 +125,22 @@ public class BaseElasticsearchTest {
   }
 
   @SneakyThrows
-  private static String mappingSource(File mappingFile) {
+  private static String mappingSource(URL mappingFile) {
     return json(mappingFile);
   }
 
-  private static File mappingFile(Type typeName) {
+  private static URL mappingFile(Type typeName) {
     String mappingFileName = typeName.getId() + ".mapping.json";
-    return new File(JSON_DIR, mappingFileName);
+    return getMappingFileUrl(mappingFileName);
   }
 
-  private static String json(File file) throws IOException, JsonProcessingException {
-    return objectNode(file).toString();
+  private static String json(URL url) throws IOException, JsonProcessingException {
+    return objectNode(url).toString();
   }
 
-  private static ObjectNode objectNode(File file) throws IOException, JsonProcessingException {
+  private static ObjectNode objectNode(URL url) throws IOException, JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    return (ObjectNode) mapper.readTree(file);
+    return (ObjectNode) mapper.readTree(url);
   }
 
   /**
