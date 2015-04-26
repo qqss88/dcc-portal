@@ -312,6 +312,29 @@
 
     var _this = this;
 
+    _this.projectGeneQuery = function(projectId, geneId) {
+      var f = LocationService.filters();
+      if (f.hasOwnProperty('gene')) {
+        delete f.gene.id;
+        delete f.gene[Extensions.ENTITY];
+      }
+      if (f.hasOwnProperty('donor')) {
+        delete f.donor.projectId;
+      }
+
+      if (f.hasOwnProperty('gene') === false) {
+        f.gene = {};
+      }
+      if (f.hasOwnProperty('donor') === false) {
+        f.donor = {};
+      }
+      f.gene.id = { is: [geneId] };
+      f.donor.projectId = { is: [projectId] };
+
+      return encodeURIComponent(JSON.stringify(f));
+    };
+
+
     _this.ajax = function () {
       if (State.isTab('gene') && _this.genes && _this.genes.hits && _this.genes.hits.length) {
         _this.mutationCounts = null;
@@ -425,6 +448,28 @@
   module.service('AdvancedMutationService',
     function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State, Extensions) {
       var _this = this;
+
+      _this.projectMutationQuery = function(projectId, mutationId) {
+        var f = LocationService.filters();
+        if (f.hasOwnProperty('mutation')) {
+          delete f.mutation.id;
+          delete f.mutation[Extensions.ENTITY];
+        }
+        if (f.hasOwnProperty('donor')) {
+          delete f.donor.projectId;
+        }
+
+        if (f.hasOwnProperty('mutation') === false) {
+          f.mutation = {};
+        }
+        if (f.hasOwnProperty('donor') === false) {
+          f.donor = {};
+        }
+        f.mutation.id = { is: [mutationId] };
+        f.donor.projectId = { is: [projectId] };
+        return encodeURIComponent(JSON.stringify(f));
+      };
+
 
       _this.ajax = function () {
         if (State.isTab('mutation') && _this.mutations && _this.mutations.hits && _this.mutations.hits.length) {
