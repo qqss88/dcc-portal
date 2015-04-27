@@ -19,6 +19,10 @@ package org.dcc.portal.pql.es.visitor.aggs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
+import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFieldVisitor;
+import static org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor.createNestedAggregaionNode;
+import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
 
 import java.util.Optional;
@@ -27,16 +31,17 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
+import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.FilterAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.NestedAggregationNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,21 +79,17 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void visitTermsFacet_match() {
-    val root = (RootNode) createEsAst("facets(id), eq(id, 'MU1'), eq(start, 60)", Type.MUTATION_CENTRIC);
-    val result = root.accept(resolver, CONTEXT).get();
-    log.debug("Result: {}", result);
+    val result = visit("facets(id), eq(id, 'MU1'), eq(start, 60)");
+    log.debug("Result: \n{}", result);
 
-    val filterAgg = (FilterAggregationNode) result.getChild(1).getFirstChild();
+    val filterAgg = (FilterAggregationNode) result.getFirstChild();
     assertThat(filterAgg.childrenCount()).isEqualTo(1);
     val filterNode = filterAgg.getFilters();
     assertThat(filterNode.childrenCount()).isEqualTo(1);
 
-    // FilterNode - BoolNode - MustNode
-    val mustNode = filterNode.getFirstChild().getFirstChild();
-    assertThat(mustNode.childrenCount()).isEqualTo(1);
-    val termNode = (TermNode) mustNode.getFirstChild();
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("chromosome_start");
-    assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
+    val startTermNode = (TermNode) filterNode.getFirstChild();
+    assertThat(startTermNode.getNameNode().getValue()).isEqualTo("chromosome_start");
+    assertThat(startTermNode.getValueNode().getValue()).isEqualTo(60);
   }
 
   /**
@@ -112,17 +113,13 @@ public class AggregationsResolverVisitorTest {
     assertThat(termNode.getValueNode().getValue()).isEqualTo(60);
   }
 
-  //
-
   @Test
   public void visitRoot_removedFilterTest() {
-    val root = (RootNode) createEsAst("facets(id), eq(id, 60)", Type.MUTATION_CENTRIC);
-    val result = root.accept(resolver, CONTEXT).get();
-    val aggsNode = Nodes.getOptionalChild(result, AggregationsNode.class).get();
-    log.debug("Result - \n{}", aggsNode);
+    val result = visit("facets(id), eq(id, 60)");
+    log.debug("Result - \n{}", result);
 
-    assertThat(aggsNode.childrenCount()).isEqualTo(1);
-    val termsAggNode = (TermsAggregationNode) aggsNode.getFirstChild();
+    assertThat(result.childrenCount()).isEqualTo(1);
+    val termsAggNode = (TermsAggregationNode) result.getFirstChild();
     assertThat(termsAggNode.getAggregationName()).isEqualTo("id");
     assertThat(termsAggNode.getFieldName()).isEqualTo("_mutation_id");
   }
@@ -142,10 +139,8 @@ public class AggregationsResolverVisitorTest {
   public void nestedFieldWithNonNestedFilterTest() {
     val result = visit("facets(transcriptId),eq(id, 'M')");
     val filterAggr = (FilterAggregationNode) result.getFirstChild();
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(filterAggr.getFilters().getFirstChild());
-    assertThat(mustNode.childrenCount()).isEqualTo(1);
 
-    val termNode = (TermNode) mustNode.getFirstChild();
+    val termNode = (TermNode) filterAggr.getFilters().getFirstChild();
     assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
 
     val nestedAggr = (NestedAggregationNode) filterAggr.getFirstChild();
@@ -165,9 +160,7 @@ public class AggregationsResolverVisitorTest {
 
     val filterNode = (FilterAggregationNode) nestedNode.getFirstChild();
     val filter = filterNode.getFilters();
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(filter.getFirstChild());
-    assertThat(mustNode.childrenCount()).isEqualTo(1);
-    val termNode = (TermNode) mustNode.getFirstChild();
+    val termNode = (TermNode) filter.getFirstChild();
     assertThat(termNode.getNameNode().getValue()).isEqualTo("transcript.id");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
 
@@ -175,9 +168,154 @@ public class AggregationsResolverVisitorTest {
     assertThat(termAggregationNode.getFieldName()).isEqualTo("transcript.consequence.consequence_type");
   }
 
+  @Test
+  public void doubleNestedFieldTest() {
+    val result = visit("facets(platformNested)");
+    val nestedAggr = (NestedAggregationNode) result.getFirstChild();
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
+
+    val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("ssm_occurrence.observation.platform");
+  }
+
+  @Test
+  public void doubleNestedFieldTest_nonNestedFilter() {
+    val result = visit("facets(platformNested), eq(chromosome, '12')");
+
+    // FilterAgg - NestedAgg - TermsAgg
+    val filterAggr = (FilterAggregationNode) result.getFirstChild();
+    val termNode = (TermNode) filterAggr.getFilters().getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("chromosome");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo("12");
+
+    val nestedAggr = (NestedAggregationNode) filterAggr.getFirstChild();
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
+
+    val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("ssm_occurrence.observation.platform");
+  }
+
+  @Test
+  public void doubleNestedFieldTest_nestedFilter() {
+    val result = visit("facets(platformNested), eq(donor.projectId, 'ALL-US')");
+    val nestedAggr = (NestedAggregationNode) result.getFirstChild();
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence");
+
+    val ssmFilterAggr = (FilterAggregationNode) nestedAggr.getFirstChild();
+    val ssmFilter = (TermNode) ssmFilterAggr.getFilters().getFirstChild();
+    assertThat(ssmFilter.getNameNode().getValue()).isEqualTo("ssm_occurrence.project._project_id");
+    assertThat(ssmFilter.getValueNode().getValue()).isEqualTo("ALL-US");
+
+    val observationNestedAggr = (NestedAggregationNode) ssmFilterAggr.getFirstChild();
+    assertThat(observationNestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
+
+    val termsAggr = (TermsAggregationNode) observationNestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("ssm_occurrence.observation.platform");
+  }
+
+  @Test
+  public void doubleNestedFieldTest_doubleNestedFilter() {
+    val result = visit("facets(platformNested), eq(verificationStatusNested, 'tested')");
+    val nestedAggr = (NestedAggregationNode) result.getFirstChild();
+    assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
+
+    val filtersAggr = (FilterAggregationNode) nestedAggr.getFirstChild();
+    assertThat(filtersAggr.getFilters()).isNotNull();
+
+    val termsAggr = (TermsAggregationNode) filtersAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("ssm_occurrence.observation.platform");
+  }
+
+  @Test
+  public void doubleNestedFieldTest_allFilters() {
+    val result = visit("facets(platformNested), "
+        + "eq(chromosome, '12'), "
+        + "nested(ssm_occurrence, eq(donor.projectId, 'ALL-US'), "
+        + "nested(ssm_occurrence.observation, eq(verificationStatusNested, 'tested')))");
+
+    val globalFistersAggr = (FilterAggregationNode) result.getFirstChild();
+    assertThat(globalFistersAggr.getFilters()).isNotNull();
+
+    val nestedAggr = (NestedAggregationNode) globalFistersAggr.getFirstChild();
+    assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence");
+
+    val secondLevelFiltersAggr = (FilterAggregationNode) nestedAggr.getFirstChild();
+    assertThat(secondLevelFiltersAggr.getFilters()).isNotNull();
+
+    val secondLevelNestedAggr = (NestedAggregationNode) secondLevelFiltersAggr.getFirstChild();
+    assertThat(secondLevelNestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
+
+    val termsAggr = (TermsAggregationNode) secondLevelNestedAggr.getFirstChild();
+    assertThat(termsAggr.getFieldName()).isEqualTo("ssm_occurrence.observation.platform");
+  }
+
+  @Test
+  public void createNestedAggrTest_sameLevel_noFilters() {
+    val result = createNestedAggregaionNode("transcript", "transcript", "name", Optional.empty(),
+        getMutationCentricTypeModel()).get();
+    assertThat(result.getPath()).isEqualTo("transcript");
+    assertThat(result.getAggregationName()).isEqualTo("name");
+    assertThat(result.hasChildren()).isFalse();
+  }
+
+  @Test
+  public void createNestedAggrTest_differentLevels_noFilters() {
+    val result = createNestedAggregaionNode("ssm_occurrence", "ssm_occurrence.observation", "name", Optional.empty(),
+        getMutationCentricTypeModel());
+    assertThat(result.isPresent()).isFalse();
+  }
+
+  @Test
+  public void createNestedAggrTest_sameLevel_withFilters() {
+    val filters = Optional.of(
+        new FilterNode(
+            new NestedNode("transcript",
+                new TermNode("transcript.id", 1))));
+    val result = createNestedAggregaionNode("transcript", "transcript", "name", filters,
+        getMutationCentricTypeModel()).get();
+
+    assertThat(result.getPath()).isEqualTo("transcript");
+    assertThat(result.getAggregationName()).isEqualTo("name");
+    assertThat(result.hasChildren()).isTrue();
+    assertThat(result.getFirstChild()).isInstanceOf(FilterAggregationNode.class);
+  }
+
+  @Test
+  public void createNestedAggrTest_sameLevel_noMatchingFilters() {
+    val filters = Optional.of(new FilterNode(new TermNode("chromosome", 1)));
+    val result = createNestedAggregaionNode("transcript", "transcript", "name", filters,
+        getMutationCentricTypeModel()).get();
+
+    assertThat(result.getPath()).isEqualTo("transcript");
+    assertThat(result.getAggregationName()).isEqualTo("name");
+    assertThat(result.hasChildren()).isFalse();
+  }
+
+  @Test
+  public void createNestedAggrTest_multiLevel_secondLevelFilters() {
+    val filters = Optional.of(new FilterNode(
+        new NestedNode("ssm_occurrence.observation",
+            new TermNode("ssm_occurrence.observation.verification_status", 1))));
+
+    val result = createNestedAggregaionNode("ssm_occurrence", "ssm_occurrence.observation", "name", filters,
+        getMutationCentricTypeModel());
+    assertThat(result.isPresent()).isFalse();
+  }
+
   private ExpressionNode visit(String pql) {
-    val root = createEsAst(pql, Type.MUTATION_CENTRIC);
-    val result = root.accept(resolver, CONTEXT).get();
+    ExpressionNode root = createEsAst(pql, Type.MUTATION_CENTRIC);
+    root = root.accept(createQuerySimplifierVisitor(), Optional.empty()).get();
+
+    log.warn("Before: {}", root);
+    root = root.accept(createResolveNestedFieldVisitor(), Optional.of(getMutationCentricTypeModel())).get();
+    log.warn("After: {}", root);
+
+    ExpressionNode result = root.accept(resolver, CONTEXT).get();
+
+    result = result.accept(createQuerySimplifierVisitor(), Optional.empty()).get();
     log.debug("Result - \n{}", result);
 
     return Nodes.getOptionalChild(result, AggregationsNode.class).get();

@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -54,11 +54,11 @@ public class FiltersConverter {
   private static final String GENE_PATH = "gene";
   private static final String MISSING_VALUE = "_missing";
   private static final String EMPTY_NESTED_PATH = "";
-  private final static String QUERY_SEPARATOR = ",";
-  private final static String NOT_TEMPLATE = "not(%s)";
-  private final static String IN_TEMPLATE = "in(%s,%s)";
-  private final static String EQ_TEMPLATE = "eq(%s,%s)";
-  private final static String NE_TEMPLATE = "ne(%s,%s)";
+  private static final String QUERY_SEPARATOR = ",";
+  private static final String NOT_TEMPLATE = "not(%s)";
+  private static final String IN_TEMPLATE = "in(%s,%s)";
+  private static final String EQ_TEMPLATE = "eq(%s,%s)";
+  private static final String NE_TEMPLATE = "ne(%s,%s)";
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";

@@ -17,14 +17,13 @@
  */
 package org.dcc.portal.pql.es.visitor.aggs;
 
-import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 import java.util.Optional;
 
-import javax.annotation.concurrent.ThreadSafe;
-
+import lombok.NonNull;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -38,93 +37,93 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.utils.VisitorHelpers;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 
 /**
- * Visits filter nodes. And removes those that match provided aggregation field name.
+ * Checks if the visited filter AST has filter at some particular level. The AST must be processed by the
+ * {@link ResolveNestedFilterVisitor} first.
  */
-@Slf4j
-@ThreadSafe
-public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, String> {
-
-  private static final ExpressionNode REMOVE_CHILD = null;
+public class VerifyNestedFilterVisitor extends NodeVisitor<Boolean, String> {
 
   @Override
-  public ExpressionNode visitFilter(FilterNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitFilter(@NonNull FilterNode node, @NonNull Optional<String> context) {
+    return visitChildren(node, context);
   }
 
   @Override
-  public ExpressionNode visitBool(BoolNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitBool(@NonNull BoolNode node, @NonNull Optional<String> context) {
+    return visitChildren(node, context);
   }
 
   @Override
-  public ExpressionNode visitMustBool(MustBoolNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitMustBool(@NonNull MustBoolNode node, @NonNull Optional<String> context) {
+    return visitChildren(node, context);
   }
 
   @Override
-  public ExpressionNode visitShouldBool(ShouldBoolNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitShouldBool(ShouldBoolNode node, Optional<String> context) {
+    return visitChildren(node, context);
   }
 
   @Override
-  public ExpressionNode visitTerm(TermNode node, Optional<String> context) {
-    checkOptional(context);
-
-    return node.getNameNode().getValue().equals(context.get()) ? REMOVE_CHILD : node;
+  public Boolean visitTerm(TermNode node, Optional<String> context) {
+    return false;
   }
 
   @Override
-  public ExpressionNode visitNot(NotNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitNot(NotNode node, Optional<String> context) {
+    return visitChildren(node, context);
   }
 
   @Override
-  public ExpressionNode visitRange(RangeNode node, Optional<String> context) {
-    checkOptional(context);
-
-    return node.getFieldName().equals(context.get()) ? REMOVE_CHILD : node;
+  public Boolean visitRange(RangeNode node, Optional<String> context) {
+    return false;
   }
 
   @Override
-  public ExpressionNode visitTerms(TermsNode node, Optional<String> context) {
-    checkOptional(context);
-
-    return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
+  public Boolean visitTerms(TermsNode node, Optional<String> context) {
+    return false;
   }
 
   @Override
-  public ExpressionNode visitExists(ExistsNode node, Optional<String> context) {
-    checkOptional(context);
-
-    return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
+  public Boolean visitExists(ExistsNode node, Optional<String> context) {
+    return false;
   }
 
   @Override
-  public ExpressionNode visitMissing(MissingNode node, Optional<String> context) {
-    checkOptional(context);
-
-    return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
+  public Boolean visitMissing(MissingNode node, Optional<String> context) {
+    return false;
   }
 
   @Override
-  public ExpressionNode visitNested(NestedNode node, Optional<String> context) {
-    return processCommonCases(node, context);
+  public Boolean visitNested(NestedNode node, Optional<String> context) {
+    VisitorHelpers.checkOptional(context);
+    val searchPath = context.get();
+    val nodePath = node.getPath();
+    if (isParentNesting(searchPath, nodePath)) {
+      return visitChildren(node, context);
+    }
+
+    if (searchPath.equals(nodePath)) {
+      return true;
+    }
+
+    return false;
   }
 
-  private ExpressionNode processCommonCases(ExpressionNode node, Optional<String> context) {
-    for (int i = node.childrenCount() - 1; i >= 0; i--) {
-      val child = node.getChild(i);
-      log.debug("Visiting child: {}", child);
-      if (child.accept(this, context) == REMOVE_CHILD) {
-        log.debug("Removing the child from the filters.");
-        node.removeChild(i);
+  private boolean isParentNesting(String searchPath, String nodePath) {
+    return !searchPath.equals(nodePath) && searchPath.startsWith(nodePath);
+  }
+
+  private Boolean visitChildren(ExpressionNode node, Optional<String> context) {
+    for (val child : node.getChildren()) {
+      if (child.accept(this, context)) {
+        return TRUE;
       }
     }
 
-    return node;
+    return FALSE;
   }
 
 }

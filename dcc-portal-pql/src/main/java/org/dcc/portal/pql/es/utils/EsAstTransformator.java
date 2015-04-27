@@ -28,6 +28,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createMissingAggregationVisit
 import static org.dcc.portal.pql.es.utils.Visitors.createNestedAggregationVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createRemoveAggregationFilterVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFieldVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createScoreSortVisitor;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
@@ -69,6 +70,17 @@ public class EsAstTransformator {
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
+
+    // Locations should be resolved first, otherwise the ResolveNestedFieldVisitor will not be able to find location
+    // fields
+    log.debug("Resolving location filters...");
+    esAst = esAst.accept(createLocationFilterVisitor(), Optional.of(context)).get();
+    log.debug("Resolved location filters. Resulting AST: {}", esAst);
+
+    log.debug("Resolving filters on nested fields...");
+    esAst = esAst.accept(createResolveNestedFieldVisitor(), Optional.of(context.getTypeModel())).get();
+    log.debug("Resolved nested filters. Resulting AST: {}", esAst);
+
     esAst = resolveSpecialCases(esAst, context);
     esAst = resolveFacets(esAst, context.getTypeModel());
     esAst = score(esAst, context);
@@ -79,47 +91,70 @@ public class EsAstTransformator {
   }
 
   public ExpressionNode score(ExpressionNode esAst, QueryContext context) {
-    log.debug("[score] Before: {}", esAst);
+    val tag = "[score]";
+    log.debug("{} Adding scores to the query...", tag);
     val result = esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
-    log.debug("[score] After: {}", result);
+    log.debug("{} Added scores to the query. Resulting AST: {}", tag, result);
 
     return result;
   }
 
   public ExpressionNode resolveSpecialCases(ExpressionNode esAst, QueryContext context) {
-    log.debug("[resoveSpecialCases] Before: {}", esAst);
+    val tag = "[resoveSpecialCases]";
+    log.debug("Resolving the special cases...");
+
+    log.debug("{} Moving object fields to _source...", tag);
     esAst = esAst.accept(createFieldsToSourceVisitor(), Optional.of(context)).get();
+    log.debug("{} Moved object fields to _source. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Resolving EntitySets...", tag);
     esAst = esAst.accept(createEntitySetVisitor(), Optional.of(context)).get();
+    log.debug("{} Resolved EntitySets. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Resolving sorting by score...", tag);
     esAst = esAst.accept(createScoreSortVisitor(), Optional.empty());
+    log.debug("{} Resolved sorting by score. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Resolving GeneSets...", tag);
     esAst = esAst.accept(createGeneSetFilterVisitor(), Optional.of(context)).get();
-    esAst = esAst.accept(createLocationFilterVisitor(), Optional.of(context)).get();
-    log.debug("[resoveSpecialCases] After: {}", esAst);
+    log.debug("{} Resolved GeneSets. Resulting AST: {}", tag, esAst);
 
     return esAst;
   }
 
   public ExpressionNode optimize(ExpressionNode esAst) {
-    log.debug("[optimize] Before: {}", esAst);
+    val tag = "[optimize]";
+    log.debug("{} Cleaning empty nodes...", tag);
     esAst = esAst.accept(createEmptyNodesCleanerVisitor(), Optional.empty());
+    log.debug("{} Cleaned empty nodes. Resulting AST: {}", tag, esAst);
 
     // Remove FilterAggregationNodes without filters
+    // TODO: check if this is needed anymore
     val aggsNode = Nodes.getOptionalChild(esAst, AggregationsNode.class);
     if (aggsNode.isPresent()) {
       esAst = esAst.accept(createRemoveAggregationFilterVisitor(), Optional.empty()).get();
     }
 
+    log.debug("{} Simplifying the resulting AST...", tag);
     esAst = esAst.accept(createQuerySimplifierVisitor(), Optional.empty()).get();
-    log.debug("[optimize] After: {}", esAst);
+    log.debug("{} Simplified the resulting AST. Resulting AST: {}", tag, esAst);
 
     return esAst;
   }
 
   public ExpressionNode resolveFacets(ExpressionNode esAst, TypeModel typeModel) {
-    log.debug("[resolveFacets] Before: {}", esAst);
+    val tag = "[resolveFacets]";
+    log.debug("{} Resolving aggregations...", tag);
     esAst = esAst.accept(createAggregationsResolverVisitor(), createResolveFacetsContext(typeModel.getType())).get();
+    log.debug("{} Resolved aggregations. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Adding missing aggregations...", tag);
     esAst = esAst.accept(createMissingAggregationVisitor(), Optional.empty());
+    log.debug("{} Added missing aggregations. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Resolving aggregations on nested fields...", tag);
     esAst = esAst.accept(createNestedAggregationVisitor(), Optional.of(typeModel));
-    log.debug("[resolveFacets] After: {}", esAst);
+    log.debug("{} Resolved aggregations on nested fields. Resulting AST: {}", tag, esAst);
 
     return esAst;
   }

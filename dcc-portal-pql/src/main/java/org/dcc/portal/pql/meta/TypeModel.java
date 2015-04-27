@@ -125,8 +125,15 @@ public abstract class TypeModel {
     this.includeFields = includeFields;
   }
 
+  /**
+   * @return {@link Type} of this type model.
+   */
   public abstract Type getType();
 
+  /**
+   * @return fields which are objects and must be retrieved from the {@code _source}. They are located in the includes
+   * of the {@code Query} object in the portal-api.
+   */
   public final List<String> getIncludeFields() {
     return includeFields;
   }
@@ -137,7 +144,7 @@ public abstract class TypeModel {
   public abstract List<String> getFacets();
 
   /**
-   * Returns a list of fields for select(*)
+   * Returns a list of available fields for select(*)
    */
   public final List<String> getFields() {
     return allowedFields;
@@ -153,7 +160,7 @@ public abstract class TypeModel {
    * 
    * @param field - fully qualified name. Not field alias.
    */
-  public final boolean isNested(String field) {
+  public final boolean isNested(@NonNull String field) {
     val fullyQualifiedName = getFullName(field);
     val nestedPaths = split(fullyQualifiedName);
     log.debug("Nested Paths: {}", nestedPaths);
@@ -238,6 +245,10 @@ public abstract class TypeModel {
     return result.build().reverse();
   }
 
+  /**
+   * @param field - field alias
+   * @return path under which the {@code field} is nested
+   */
   public final String getNestedPath(@NonNull String field) {
     val fullyQualifiedName = getFullName(field);
     for (val path : split(fullyQualifiedName)) {
@@ -267,6 +278,23 @@ public abstract class TypeModel {
     }
 
     return path;
+  }
+
+  /**
+   * @param path - nested path which may be nested itself
+   * @return all parent nested paths + {@code path}
+   */
+  public final List<String> getNestedPaths(@NonNull String path) {
+    checkState(!path.isEmpty(), "Empty nested path %s", path);
+    val result = ImmutableList.<String> builder();
+    for (val token : split(path)) {
+      val tokenByFullPath = fieldsByFullPath.get(token);
+      if (tokenByFullPath.isNested()) {
+        result.add(token);
+      }
+    }
+
+    return result.build().reverse();
   }
 
   private String getFullName(String path) {

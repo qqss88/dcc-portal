@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.visitor.aggs;
 import static org.dcc.portal.pql.es.utils.Nodes.cloneNode;
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 import static org.dcc.portal.pql.es.utils.Visitors.createAggregationFiltersVisitor;
+import static org.dcc.portal.pql.es.utils.Visitors.createEmptyNodesCleanerVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFilterVisitor;
 
 import java.util.Optional;
@@ -47,7 +48,7 @@ import org.dcc.portal.pql.meta.TypeModel;
 public class AggregationsResolverVisitor extends NodeVisitor<Optional<ExpressionNode>, Context> {
 
   @Override
-  public Optional<ExpressionNode> visitRoot(@NonNull RootNode rootNode, Optional<Context> context) {
+  public Optional<ExpressionNode> visitRoot(@NonNull RootNode rootNode, @NonNull Optional<Context> context) {
     log.debug("Resolving aggregations. Source AST: {}", rootNode);
 
     if (!hasAggregations(rootNode)) {
@@ -87,16 +88,16 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
       val child = (TermsAggregationNode) aggsNode.getChild(i);
       val field = child.getFieldName();
 
-      Optional<ExpressionNode> nestedAggregation = Optional.empty();
+      Optional<NestedAggregationNode> nestedAggregation = Optional.empty();
       Optional<ExpressionNode> filtersAggregation = Optional.empty();
 
       if (typeModel.isNested(field)) {
-        nestedAggregation =
-            Optional.of(createNestedNode(filterNodeOpt, typeModel, (TermsAggregationNode) cloneNode(child)));
+        nestedAggregation = Optional.of(createNestedNode(filterNodeOpt, typeModel,
+            (TermsAggregationNode) cloneNode(child)));
       }
 
-      if (filterNodeOpt.isPresent()) {
-        val filters = resolveFilters(child.getFieldName(), cloneNode(filterNodeOpt.get()), typeModel);
+      if (filterNodeOpt.isPresent() && hasNonNestedFilters(filterNodeOpt.get(), nestedAggregation, typeModel)) {
+        val filters = resolveFilters(field, cloneNode(filterNodeOpt.get()), typeModel);
         if (filters.isPresent()) {
           filtersAggregation = Optional.of(createFilterAggregationNode(child.getAggregationName(), filters.get()));
         }
@@ -111,8 +112,21 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     return Optional.of(rootNode);
   }
 
-  private static Optional<ExpressionNode> createResultNode(Optional<ExpressionNode> filtersAggregation,
-      Optional<ExpressionNode> nestedAggregation, ExpressionNode termsAggregation) {
+  private static boolean hasNonNestedFilters(FilterNode filters, Optional<NestedAggregationNode> nestedAggregation,
+      TypeModel typeModel) {
+
+    if (!nestedAggregation.isPresent()) {
+      return true;
+    }
+
+    val nestedPath = nestedAggregation.get().getPath();
+    val context = new VisitContext(nestedPath, typeModel);
+
+    return filters.accept(Visitors.createSearchNonNestedFieldsVisitor(), Optional.of(context));
+  }
+
+  private static Optional<? extends ExpressionNode> createResultNode(Optional<ExpressionNode> filtersAggregation,
+      Optional<? extends ExpressionNode> nestedAggregation, ExpressionNode termsAggregation) {
 
     if (filtersAggregation.isPresent()) {
       val result = filtersAggregation.get();
@@ -137,35 +151,72 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
    * 
    * @param filters - All filters except ones the Aggregation is being created for.
    */
-  private static ExpressionNode createNestedNode(Optional<? extends ExpressionNode> filters, TypeModel typeModel,
+  private static NestedAggregationNode createNestedNode(Optional<? extends ExpressionNode> filters,
+      TypeModel typeModel,
       TermsAggregationNode node) {
 
-    val field = node.getFieldName();
-    val nestedPath = typeModel.getNestedPath(field);
-    val result = new NestedAggregationNode(node.getAggregationName(), nestedPath);
+    val nestedPath = typeModel.getNestedPath(node.getFieldName());
+    NestedAggregationNode result = null;
 
-    // NestedAggregation - TermsAggregation
-    if (!filters.isPresent()) {
-      result.addChildren(node);
+    for (val path : typeModel.getNestedPaths(nestedPath)) {
+      val nestedAggrOpt = createNestedAggregaionNode(path, nestedPath, node.getAggregationName(), filters, typeModel);
+      if (nestedAggrOpt.isPresent()) {
+        if (result == null) {
+          result = nestedAggrOpt.get();
+        } else {
+          val child = getDeepestChild(result);
+          child.addChildren(nestedAggrOpt.get());
+        }
 
-      return result;
+        // This is the final NestedAggregationNode. Add the TermsAggregationNode
+        if (nestedPath.equals(path)) {
+          getDeepestChild(result).addChildren(cloneNode(node));
+        }
+      }
+
     }
-
-    // NestedAggregation - TermsAggregation
-    val nestedFiltersOpt = resolveNestedFilters(typeModel.getNestedPath(field), cloneNode(filters.get()), typeModel);
-    if (!nestedFiltersOpt.isPresent()) {
-      result.addChildren(node);
-
-      return result;
-    }
-
-    // NestedAggregation - FilterAggragation(nested filters) - TermsAggregation
-    val nestedFilters = nestedFiltersOpt.get();
-    val nestedFilterAggregation = createFilterAggregationNode(node.getAggregationName(), nestedFilters);
-    result.addChildren(nestedFilterAggregation);
-    nestedFilterAggregation.addChildren(node);
 
     return result;
+  }
+
+  private static ExpressionNode getDeepestChild(ExpressionNode node) {
+    while (node.hasChildren()) {
+      node = node.getFirstChild();
+    }
+
+    return node;
+  }
+
+  /**
+   * Creates {@link NestedAggregationNode} nested at {@code nestingPath} with filters that which are nested on the same
+   * {@code nestingPath} and below.
+   * 
+   * @param nestingPath - nesting path
+   * @param filters - all filters
+   * 
+   * @return <ul>
+   * <li>{@link NestedAggregationNode} with {@link FilterAggregationNode} if there are filters at the
+   * {@code nestingPath} level.</li>
+   * <li>{@link NestedAggregationNode} if there are no filters but {@code nestingPath} is the same as
+   * {@code fieldNestingPath}. This means that the node will be used to enclose the {@link TermsAggregationNode}</li>
+   * <li>empty optional in all the other cases</li>
+   * </ul>
+   */
+  static Optional<NestedAggregationNode> createNestedAggregaionNode(String nestingPath, String fieldNestingPath,
+      String aggregationName, Optional<? extends ExpressionNode> filters, TypeModel typeModel) {
+    val result = new NestedAggregationNode(aggregationName, nestingPath);
+    val filtersNode = resolveNestedFilters(nestingPath, filters, typeModel);
+    if (filtersNode.isPresent()) {
+      result.addChildren(createFilterAggregationNode(aggregationName, filtersNode.get()));
+
+      return Optional.of(result);
+    }
+
+    if (nestingPath.equals(fieldNestingPath)) {
+      return Optional.of(result);
+    }
+
+    return Optional.empty();
   }
 
   private static FilterAggregationNode createFilterAggregationNode(String aggregationName, ExpressionNode filters) {
@@ -175,34 +226,39 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     return result;
   }
 
-  private static Optional<ExpressionNode> resolveNestedFilters(String nestedPath, ExpressionNode cloneNode,
+  /**
+   * Returns filters nested under the {@code nestedPath} and below if there are filters at the {@code nestedPath}.
+   * Otherwise, returns an empty Optional because the lower level filters will be added during the next iteration.
+   */
+  private static Optional<ExpressionNode> resolveNestedFilters(String nestedPath,
+      Optional<? extends ExpressionNode> filters,
       TypeModel typeModel) {
-    val context = Optional.of(new VisitContext(nestedPath, typeModel));
+    if (!hasFiltersAtLevel(filters, nestedPath)) {
+      return Optional.empty();
+    }
 
-    return cloneNode.accept(createResolveNestedFilterVisitor(), context);
+    val context = Optional.of(new VisitContext(nestedPath, typeModel));
+    val filtersClone = cloneNode(filters.get());
+
+    return filtersClone.accept(createResolveNestedFilterVisitor(), context);
+  }
+
+  private static boolean hasFiltersAtLevel(Optional<? extends ExpressionNode> filters, String nestedPath) {
+    if (filters.isPresent()) {
+      val filtersClone = cloneNode(filters.get());
+
+      return filtersClone.accept(Visitors.createVerifyNestedFilterVisitor(), Optional.of(nestedPath));
+    }
+
+    return false;
   }
 
   private static Optional<ExpressionNode> resolveFilters(String facetField, ExpressionNode filterNode,
       TypeModel typeModel) {
     val resolvedFilters = filterNode.accept(createAggregationFiltersVisitor(), Optional.of(facetField));
-    if (!hasNonNestedFilters(facetField, typeModel, resolvedFilters)) {
-      return Optional.empty();
-    }
-
-    val result = resolvedFilters.accept(Visitors.createEmptyNodesCleanerVisitor(), Optional.empty());
+    val result = resolvedFilters.accept(createEmptyNodesCleanerVisitor(), Optional.empty());
 
     return result == null ? Optional.empty() : Optional.of(result);
-  }
-
-  private static Boolean hasNonNestedFilters(String facetField, TypeModel typeModel,
-      ExpressionNode resolvedFilters) {
-    if (!typeModel.isNested(facetField)) {
-      return true;
-    }
-
-    val context = new VisitContext(typeModel.getNestedPath(facetField), typeModel);
-
-    return resolvedFilters.accept(Visitors.createSearchNonNestedFieldsVisitor(), Optional.of(context));
   }
 
   private static Optional<AggregationsNode> getAggregationsNodeOptional(ExpressionNode rootNode) {

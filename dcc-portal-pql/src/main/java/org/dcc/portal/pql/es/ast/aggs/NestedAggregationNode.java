@@ -46,4 +46,9 @@ public class NestedAggregationNode extends ExpressionNode {
     return visitor.visitNestedAggregation(this, context);
   }
 
+  @Override
+  public String toString() {
+    return super.toString();
+  }
+
 }

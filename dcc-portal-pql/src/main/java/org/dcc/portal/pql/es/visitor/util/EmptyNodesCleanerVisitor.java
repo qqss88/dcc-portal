@@ -220,7 +220,7 @@ public class EmptyNodesCleanerVisitor extends NodeVisitor<ExpressionNode, Void> 
     log.debug("Processing \n{}", node);
     node = processChildren(node);
     if (!node.hasChildren()) {
-      log.debug("Requesting to remove empty node {}", node);
+      log.debug("Requesting to remove empty node \n{}", node);
 
       return REMOVE_NODE;
     }

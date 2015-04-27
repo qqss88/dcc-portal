@@ -75,4 +75,9 @@ public class NestedNode extends ExpressionNode {
     }
   }
 
+  @Override
+  public String toString() {
+    return super.toString();
+  }
+
 }

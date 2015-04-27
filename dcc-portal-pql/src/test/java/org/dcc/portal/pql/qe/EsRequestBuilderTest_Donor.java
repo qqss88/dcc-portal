@@ -21,7 +21,6 @@ import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Before;
@@ -30,14 +29,14 @@ import org.junit.Test;
 @Slf4j
 public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
 
-  private EsRequestBuilder visitor;
+  QueryEngine queryEngine;
 
   @Before
   public void setUp() {
     es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    visitor = new EsRequestBuilder(es.client());
     queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
     listener = new PqlParseListener(queryContext);
+    queryEngine = new QueryEngine(es.client(), INDEX_NAME);
   }
 
   @Test
@@ -61,10 +60,7 @@ public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
   }
 
   private SearchResponse executeQuery(String query) {
-    ExpressionNode esAst = createTree(query);
-    esAst = esAstTransformator.process(esAst, queryContext);
-    log.debug("ES AST: {}", esAst);
-    val request = visitor.buildSearchRequest(esAst, queryContext);
+    val request = queryEngine.execute(query, DONOR_CENTRIC);
     log.debug("Request - {}", request);
     val result = request.execute().actionGet();
     log.debug("Result - {}", result);

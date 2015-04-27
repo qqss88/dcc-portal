@@ -31,6 +31,7 @@ import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class ProjectTypeModel extends TypeModel {
 
@@ -92,10 +93,10 @@ public class ProjectTypeModel extends TypeModel {
 
   private static List<FieldModel> defineFields() {
     val fields = new ImmutableList.Builder<FieldModel>();
-    fields.add(string("_project_id", "id"));
+    fields.add(string("_project_id", ImmutableSet.of("id", "donor.projectId")));
     fields.add(string("icgc_id", "icgcId"));
-    fields.add(string("primary_site", "primarySite"));
-    fields.add(string("project_name", "name"));
+    fields.add(string("primary_site", ImmutableSet.of("primarySite", "donor.primarySite")));
+    fields.add(string("project_name", ImmutableSet.of("name", "donor.projectName")));
     fields.add(string("tumour_type", "tumourType"));
     fields.add(string("tumour_subtype", "tumourSubtype"));
     fields.add(arrayOfStrings("primary_countries", "primaryCountries"));

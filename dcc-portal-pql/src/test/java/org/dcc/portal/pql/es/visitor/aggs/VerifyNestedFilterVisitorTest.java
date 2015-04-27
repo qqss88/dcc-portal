@@ -15,37 +15,41 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast.filter;
+package org.dcc.portal.pql.es.visitor.aggs;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.val;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.ast.NestedNode;
+import org.dcc.portal.pql.es.ast.filter.TermNode;
+import org.junit.Test;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class RangeNode extends ExpressionNode {
+public class VerifyNestedFilterVisitorTest {
 
-  @NonNull
-  String fieldName;
+  VerifyNestedFilterVisitor visitor = new VerifyNestedFilterVisitor();
 
-  public RangeNode(@NonNull String name, ExpressionNode... children) {
-    super(children);
-    this.fieldName = name;
+  @Test
+  public void upperLevelTest() {
+    val node = new NestedNode("ssm_occurrence", new TermNode("ssm_occurrence.something", 1));
+    val result = node.accept(visitor, Optional.of("ssm_occurrence.occurrence"));
+    assertThat(result).isFalse();
   }
 
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitRange(this, context);
+  @Test
+  public void sameLevelTest() {
+    val node = new NestedNode("ssm_occurrence", new TermNode("ssm_occurrence.something", 1));
+    val result = node.accept(visitor, Optional.of("ssm_occurrence"));
+    assertThat(result).isTrue();
   }
 
-  @Override
-  public String toString() {
-    return super.toString();
+  @Test
+  public void lowerLevelTest() {
+    val node = new NestedNode("ssm_occurrence.occurrence", new TermNode("ssm_occurrence.occurrence.something", 1));
+    val result = node.accept(visitor, Optional.of("ssm_occurrence"));
+    assertThat(result).isFalse();
   }
 
 }

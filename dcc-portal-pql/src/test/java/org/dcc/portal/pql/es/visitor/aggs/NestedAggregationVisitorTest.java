@@ -91,6 +91,27 @@ public class NestedAggregationVisitorTest extends BaseElasticsearchTest {
     assertThat(intergenicNested.getDocCount()).isEqualTo(1L);
   }
 
+  @Test
+  public void nestedAggregationTest_withNestedFilter() {
+    val result = executeQuery("facets(platformNested), eq(donor.projectId, 'ALL-US')");
+
+    Global global = result.getAggregations().get("platformNested");
+    Nested nested = global.getAggregations().get("platformNested");
+    Filter nestedFilter = nested.getAggregations().get("platformNested");
+    nested = nestedFilter.getAggregations().get("platformNested");
+    Terms terms = nested.getAggregations().get("platformNested");
+
+    val solidSeq = terms.getBucketByKey("SOLiD sequencing");
+    assertThat(solidSeq.getDocCount()).isEqualTo(2L);
+    ReverseNested solidSeqNested = solidSeq.getAggregations().get("platformNested");
+    assertThat(solidSeqNested.getDocCount()).isEqualTo(1L);
+
+    val illuminaGa = terms.getBucketByKey("SOLiD sequencing");
+    assertThat(illuminaGa.getDocCount()).isEqualTo(2L);
+    ReverseNested illuminaGaNested = illuminaGa.getAggregations().get("platformNested");
+    assertThat(illuminaGaNested.getDocCount()).isEqualTo(1L);
+  }
+
   private SearchResponse executeQuery(String query) {
     val request = queryEngine.execute(query, MUTATION_CENTRIC);
     log.debug("Request - {}", request);

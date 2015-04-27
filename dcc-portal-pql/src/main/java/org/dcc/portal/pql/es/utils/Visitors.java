@@ -24,6 +24,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.CreateQueryBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.FilterBuilderVisitor;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.es.visitor.ResolveNestedFilterFieldVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationFiltersVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.CreateAggregationBuilderVisitor;
@@ -32,6 +33,7 @@ import org.dcc.portal.pql.es.visitor.aggs.NestedAggregationVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.RemoveAggregationFilterVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.ResolveNestedFilterVisitor;
 import org.dcc.portal.pql.es.visitor.aggs.SearchNonNestedFieldsVisitor;
+import org.dcc.portal.pql.es.visitor.aggs.VerifyNestedFilterVisitor;
 import org.dcc.portal.pql.es.visitor.score.DefaultScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.DonorScoreQueryVisitor;
 import org.dcc.portal.pql.es.visitor.score.GeneScoreQueryVisitor;
@@ -97,6 +99,16 @@ public class Visitors {
   private static final SearchNonNestedFieldsVisitor SEARCH_NON_NESTED_FILTERS_VISITOR =
       new SearchNonNestedFieldsVisitor();
   private static final ResolveNestedFilterVisitor RESOLVE_NESTED_FILTER_VISITOR = new ResolveNestedFilterVisitor();
+  private static final ResolveNestedFilterFieldVisitor RESOLVE_NESTED_FIELD_VISITOR = new ResolveNestedFilterFieldVisitor();
+  private static final VerifyNestedFilterVisitor VERIFY_NESTED_FILTER_VISITOR = new VerifyNestedFilterVisitor();
+
+  public static final VerifyNestedFilterVisitor createVerifyNestedFilterVisitor() {
+    return VERIFY_NESTED_FILTER_VISITOR;
+  }
+
+  public static final ResolveNestedFilterFieldVisitor createResolveNestedFieldVisitor() {
+    return RESOLVE_NESTED_FIELD_VISITOR;
+  }
 
   public static final ResolveNestedFilterVisitor createResolveNestedFilterVisitor() {
     return RESOLVE_NESTED_FILTER_VISITOR;

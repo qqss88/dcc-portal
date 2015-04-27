@@ -81,6 +81,7 @@ public class TermFacet {
 
     String term;
     long count;
+
   }
 
 }
