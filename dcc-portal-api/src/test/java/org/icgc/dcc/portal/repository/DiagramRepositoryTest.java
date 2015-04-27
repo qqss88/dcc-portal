@@ -22,8 +22,6 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHits;
-import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
@@ -33,8 +31,6 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 
 public class DiagramRepositoryTest extends BaseRepositoryTest {
-
-  private static final String FILTER = "{diagram_id:{is:\"REACT_163914\"}}";
 
   DiagramRepository diagramRepository;
 
@@ -56,29 +52,11 @@ public class DiagramRepositoryTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void testFindAllWithIsFilters() throws Exception {
-    FiltersParam filter = new FiltersParam(FILTER);
-    Query query = Query.builder().from(1).size(10).filters(filter.get())
-        .build();
-    SearchResponse response = diagramRepository.findAll(query);
-    SearchHits hits = response.getHits();
-
-    assertThat(hits.getTotalHits()).isEqualTo(1);
-    assertThat(hits.getHits().length).isEqualTo(1);
-
-    assertThat(cast(hits.getHits()[0].field(FIELDS.get("id")).getValue())).isEqualTo("REACT_163914");
-  }
-
-  @Test
   public void testFind() throws Exception {
     String id = "REACT_163914";
     Query query = Query.builder().build();
     Map<String, Object> response = diagramRepository.findOne(id, query);
     assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
-  }
-
-  protected Object cast(Object object) {
-    return object;
   }
 
 }

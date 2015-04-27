@@ -92,16 +92,18 @@
               openNewSideBar(false,true);
             }
             
-            // Create list of uniprot ids
-            var geneList = [];
-            highlights.forEach(function (highlight) {
-              if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
-                for(var i=0;i<Math.round(Math.random()*30)+1;i++){
-                  geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+            // Create list of uniprot ids if we have any
+            if(highlights){
+              var geneList = [];
+              highlights.forEach(function (highlight) {
+                if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
+                  for(var i=0;i<Math.round(Math.random()*30)+1;i++){
+                    geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                  }
                 }
-              }
-            });
-            $scope.geneList = geneList;
+              });
+              $scope.geneList = geneList; 
+            }
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};
             node.position={x:3,y:3};
