@@ -317,7 +317,7 @@
   */
   Renderer.prototype.highlightEntity = function (highlights, model) {
     var svg = this.svg, config = this.config;
-    var highlighted = [];  
+    var highlighted = [];
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
