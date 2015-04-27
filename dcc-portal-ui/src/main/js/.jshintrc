@@ -34,7 +34,7 @@
   "globals": {
     "angular": false,
     "jQuery": false,
-	  "Highcharts": false,
+    "Highcharts": false,
     "_": false,
     "GenomeViewer": false,
     "Region": false,
@@ -50,6 +50,7 @@
     "base64": false,
     "X2JS": false,
     "dcc": false,
-    "d3": false
+    "d3": false,
+    "PqlPegParser": false
   }
 }
