@@ -23,23 +23,27 @@
   module.config(function ($stateProvider) {
     $stateProvider.state('projects', {
       url: '/projects?filters',
+      reloadOnSearch: false,
       templateUrl: 'scripts/projects/views/projects.html',
       controller: 'ProjectsCtrl as ProjectsCtrl',
       data: {tab: 'summary'}
     });
-      
+
     $stateProvider.state('projects.details', {
       url: '/details',
+      reloadOnSearch: false,
       data: {tab:'details'}
     });
-      
+
     $stateProvider.state('projects.summary', {
       url: '/summary',
+      reloadOnSearch: false,
       data: {tab:'summary'}
     });
 
     $stateProvider.state('projects.history', {
       url: '/history',
+      reloadOnSearch: false,
       data: {tab:'history'}
     });
 
@@ -68,22 +72,22 @@
     var _ctrl = this;
     Page.setTitle('Cancer Projects');
     Page.setPage('projects');
-      
+
     _ctrl.Page = Page;
     _ctrl.state = ProjectState;
-    
+
     _ctrl.setTab = function (tab) {
         _ctrl.state.setTab(tab);
       };
     _ctrl.setTab($state.current.data.tab);
-      
-    
+
+
     $scope.$watch(function () {
         return $state.current.data.tab;
       }, function () {
         _ctrl.setTab($state.current.data.tab);
       });
-      
+
     // This is needed to translate projects filters to donor filters
     $scope.createAdvanceFilters = function(dataType) {
       var currentFilters = LocationService.filters();
@@ -177,7 +181,7 @@
 
                 gene.uiFIProjects = uiFIProjects;
               });
-              
+
               _ctrl.stacked = genes.hits;
             });
           });
@@ -196,9 +200,23 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
+
+      function hasPath(p) {
+        return dest.indexOf(p) >= 0;
+      }
+
+      // Sub tabs
+      if (hasPath('/projects/details') || hasPath('/projects/summary') || hasPath('/projects/history') ) {
+        refresh();
+        return;
+      }
+
+      // Main
       if (dest.indexOf('projects') !== -1 && dest.indexOf('projects/') === -1) {
         refresh();
+        return;
       }
+
     });
 
     refresh();
@@ -447,7 +465,6 @@
   var module = angular.module('icgc.projects.models', ['restangular', 'icgc.common.location']);
 
   module.service('Projects', function (Restangular, LocationService, Project) {
-    var _this = this;
     this.all = function () {
       return Restangular.all('projects');
     };
@@ -464,12 +481,6 @@
       };
 
       return this.all().get('', angular.extend(defaults, params)).then(function (data) {
-        _this.totalSsmTestedDonorCount = _this.totalSsmTestedDonorCount || _.reduce(data.hits, function (sum, n) {
-          if (typeof sum === 'object') {
-            sum = sum.ssmTestedDonorCount;
-          }
-          return sum + n.ssmTestedDonorCount;
-        });
 
         if (data.hasOwnProperty('facets') &&
             data.facets.hasOwnProperty('id') &&
@@ -533,7 +544,7 @@
       };
       return this.handler.one('mutations', '').get(angular.extend(defaults, params));
     };
-      
+
   });
 
   module.value('X2JS', new X2JS());
@@ -569,15 +580,15 @@
       });
     };
   });
-    
+
   module.service('ProjectState', function () {
-      
+
     this.visitedTab = {};
 
     this.hasVisitedTab = function(tab) {
       return this.visitedTab[tab];
     };
-      
+
     this.setTab = function (tab) {
       this.tab = tab;
       this.visitedTab[tab] = true;
@@ -588,7 +599,7 @@
     this.isTab = function (tab) {
       return this.tab === tab;
     };
-      
+
   });
-    
+
 })();

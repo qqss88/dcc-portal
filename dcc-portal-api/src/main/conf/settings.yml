@@ -195,6 +195,9 @@ icgc:
 
   # CUD API endpoint
   cudUrl: "https://***REMOVED***/ud_rest/1"
+  
+  # CMS API endpoint
+  cmsUrl: "https://***REMOVED***/cms_oauth_coop/1"
 
   # CUD credentials. Obtained from webdev@oicr.on.ca
   cudAppId: ""

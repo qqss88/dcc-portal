@@ -23,7 +23,6 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.numericRangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
-
 import static org.icgc.dcc.portal.model.IndexModel.API_ENTITY_LIST_ID_FIELD_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.GENE_SET_QUERY_ID_FIELDS;
@@ -81,18 +80,47 @@ public class QueryService {
   }
 
   public static String[] getFields(Query query, Kind kind) {
-    val typeMap = FIELDS_MAPPING.get(kind);
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+    val result = Lists.<String> newArrayList();
+
     if (query.hasFields()) {
-      val fs = Lists.<String> newArrayList();
-      for (String field : query.getFields()) {
-        if (typeMap.containsKey(field)) {
-          fs.add(typeMap.get(field));
+      for (val field : query.getFields()) {
+        if (typeFieldsMap.containsKey(field)) {
+          result.add(typeFieldsMap.get(field));
         }
       }
-      return fs.toArray(new String[fs.size()]);
     } else {
-      val fs = typeMap.values();
-      return fs.toArray(new String[fs.size()]);
+      result.addAll(typeFieldsMap.values().asList());
+    }
+    clearInvalidFields(result, kind);
+
+    return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Remove fields that are objects in ES. They must be retrieved from source
+   */
+  private static void clearInvalidFields(List<String> fields, Kind kind) {
+    val typeFieldsMap = FIELDS_MAPPING.get(kind);
+
+    switch (kind) {
+    case GENE:
+      fields.remove(typeFieldsMap.get("externalDbIds"));
+      fields.remove(typeFieldsMap.get("pathways"));
+      break;
+    case PROJECT:
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedDonorCounts"));
+      fields.remove(typeFieldsMap.get("experimentalAnalysisPerformedSampleCounts"));
+      break;
+    case OCCURRENCE:
+      fields.remove(typeFieldsMap.get("observation"));
+      break;
+    case GENE_SET:
+      fields.remove(typeFieldsMap.get("hierarchy"));
+      fields.remove(typeFieldsMap.get("inferredTree"));
+      fields.remove(typeFieldsMap.get("synonyms"));
+      fields.remove(typeFieldsMap.get("altIds"));
+      break;
     }
   }
 

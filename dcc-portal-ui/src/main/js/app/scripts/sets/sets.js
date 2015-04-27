@@ -343,6 +343,10 @@
           $scope.selectedTotalCount = 0;
         };
 
+        $scope.isHighlighted = function(ids) {
+          return SetOperationService.isEqual(ids, $scope.current);
+        };
+
         $scope.isSelected = function(ids) {
           var existIdex = _.findIndex($scope.selected, function(subset) {
             return SetOperationService.isEqual(ids, subset);
@@ -381,6 +385,7 @@
           clickFunc: function(d) {
             $scope.$apply(function() {
               toggleSelection(d.data, d.count);
+              $scope.current = [];
             });
           },
 

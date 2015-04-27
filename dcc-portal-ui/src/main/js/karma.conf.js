@@ -1,56 +1,83 @@
-// Karma configuration
+module.exports = function(config){
+    config.set({
+    //  root path location that will be used to resolve all relative paths in files and exclude sections, should be the root of your project
+    // basePath : '../',
+    basePath : '.',
 
-// base path, that will be used to resolve files and exclude
-basePath = '';
+    // files to include, ordered by dependencies
+    files : [
+      // include relevant Angular files and libs
+      'app/bower_components/jquery/dist/jquery.js',
+      'app/bower_components/lodash/dist/lodash.js',
+      'app/bower_components/angularjs/angular.js',
+      'app/bower_components/angular-sanitize/angular-sanitize.js',
+      'app/bower_components/angular-animate/angular-animate.js',
+      'app/bower_components/angular-cookies/angular-cookies.js',
+      'app/bower_components/angular-loading-bar/build/loading-bar.js',
+      'app/bower_components/restangular/dist/restangular.js',
+      'app/bower_components/angular-ui-router/release/angular-ui-router.js',
+      'app/bower_components/ngInfiniteScroll/build/ng-infinite-scroll.js',
+      'app/bower_components/angular-local-storage/dist/angular-local-storage.js',
+      'app/bower_components/angularytics/dist/angularytics.js',
+      'app/bower_components/angular-ui-utils/scrollfix.js',
+      'app/bower_components/angular-markdown-directive/markdown.js',
+      'app/bower_components/angular-lodash/angular-lodash.js',
+      'app/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js',
+      'app/bower_components/angularjs-toaster/toaster.js',
+      'app/bower_components/highcharts/highcharts.js',
+      'app/bower_components/d3/d3.min.js',
+      'app/bower_components/Blob/Blob.js',
+      'app/bower_components/FileSaver/FileSaver.min.js',
+      'app/bower_components/showdown/src/showdown.js',
+      'app/bower_components/showdown/src/extensions/table.js',
+      'app/bower_components/x2js/xml2json.js',
+      'app/vendor/scripts/table2CSV.js',
 
-// list of files / patterns to load in the browser
-files = [
-  JASMINE,
-  JASMINE_ADAPTER,
-  'app/bower_components/angular/angular.js',
-  'app/bower_components/angular-mocks/angular-mocks.js',
-  'app/scripts/*.js',
-  'app/scripts/**/*.js',
-  'test/mock/**/*.js',
-  'test/spec/**/*.js'
-];
+      // === Test, mock files ===
+      'app/bower_components/angular-mocks/angular-mocks.js',
 
-// list of files to exclude
-exclude = [];
+      // === Application files ===
+      'app/scripts/app.js',
+      'app/scripts/**/*.js',
 
-// test results reporter to use
-// possible values: dots || progress || growl
-reporters = ['progress'];
+      // include unit test specs
+      'test/unit/**/*.js'
+    ],
 
-// web server port
-port = 8080;
+    // files to exclude
+    exclude : [
+        'app/lib/angular/angular-loader.js'
+      , 'app/lib/angular/*.min.js'
+      , 'app/lib/angular/angular-scenario.js'
+    ],
 
-// cli runner port
-runnerPort = 9100;
+    // karma has its own autoWatch feature but Grunt watch can also do this
+    autoWatch : false,
 
-// enable / disable colors in the output (reporters and logs)
-colors = true;
+    // testing framework, be sure to install the karma plugin
+    frameworks: ['jasmine'],
 
-// level of logging
-// possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
-logLevel = LOG_INFO;
+    // browsers to test against, be sure to install the correct karma browser launcher plugin
+    // browsers : ['Chrome', 'PhantomJS', 'Firefox'],
+    // browsers : ['Chrome'],
+    browsers : ['PhantomJS'],
 
-// enable / disable watching file and executing tests whenever any file changes
-autoWatch = false;
+    // progress is the default reporter
+    // reporters: ['progress'],
+    reporters: ['spec'],
 
-// Start these browsers, currently available:
-// - Chrome
-// - ChromeCanary
-// - Firefox
-// - Opera
-// - Safari (only Mac)
-// - PhantomJS
-// - IE (only Windows)
-browsers = ['Chrome'];
+    // map of preprocessors that is used mostly for plugins
+    preprocessors: {
 
-// If browser does not capture in given timeout [ms], kill it
-captureTimeout = 5000;
+    },
 
-// Continuous Integration mode
-// if true, it capture browsers, run tests and exit
-singleRun = false;
+    // list of karma plugins
+    plugins : [
+        'karma-spec-reporter',
+        'karma-junit-reporter',
+        'karma-chrome-launcher',
+        'karma-firefox-launcher',
+        'karma-jasmine',
+        'karma-phantomjs-launcher'
+    ]
+})}

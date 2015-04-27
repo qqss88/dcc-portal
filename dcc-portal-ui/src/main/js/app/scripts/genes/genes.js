@@ -102,6 +102,7 @@
       geneProjectPromise.then(function(projects) {
         var mutationPromise, donorPromise;
         if ( !projects.hits || projects.hits.length === 0) {
+          _ctrl.gene.projects = [];
           return;
         }
 
@@ -137,9 +138,7 @@
           _ctrl.totalDonors = projectDonors.Total;
         });
 
-
         _ctrl.gene.projects = projects.hits;
-        console.log(_ctrl.gene.projects);
       });
 
       var params = {

@@ -4,6 +4,8 @@ import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +17,7 @@ import lombok.val;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.GeneRepository;
@@ -52,24 +55,20 @@ public class GeneService {
       val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
 
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValue());
-      }
+      val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
       val matchedGene = new Gene(fieldMap);
 
       for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
         if (highlightedFields.containsKey(searchField)) {
           if (searchField.equals(GENE_UNIPROT_IDS)) {
-            @SuppressWarnings("unchecked")
-            val keys = (List<String>) fields.get(searchField).getValue();
+            val keys = fields.get(searchField).getValues();
             for (val key : keys) {
               if (ids.contains(key)) {
-                result.get(searchField).put(key, matchedGene);
+                result.get(searchField).put(getString(key), matchedGene);
               }
             }
           } else {
-            val key = (String) fields.get(searchField).getValue();
+            val key = getString(fields.get(searchField).getValues());
             result.get(searchField).put(key, matchedGene);
           }
 
@@ -102,12 +101,7 @@ public class GeneService {
     val list = ImmutableList.<Gene> builder();
 
     for (val hit : hits) {
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-
-        fieldMap.put(field.getKey(), field.getValue().getValue());
-
-      }
+      val fieldMap = createResponseMap(hit, query, Kind.GENE);
       if (includeScore) fieldMap.put("_score", hit.getScore());
       fieldMap.put("projectIds", projectIds);
       list.add(new Gene(fieldMap));

@@ -1,9 +1,11 @@
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Project;
 import org.icgc.dcc.portal.model.Projects;
@@ -13,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
@@ -25,7 +26,7 @@ public class ProjectService {
     val response = projectRepository.findAll(query);
     val hits = response.getHits();
 
-    val projectList = getProjectList(hits);
+    val projectList = getProjectList(hits, query);
 
     Projects projects = new Projects(projectList);
     projects.setFacets(response.getFacets());
@@ -34,15 +35,13 @@ public class ProjectService {
     return projects;
   }
 
-  private ImmutableList<Project> getProjectList(SearchHits hits) {
+  private ImmutableList<Project> getProjectList(SearchHits hits, Query query) {
     val projectList = ImmutableList.<Project> builder();
     for (val hit : hits) {
-      val fieldMap = Maps.<String, Object> newHashMap();
-      for (val field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValue());
-      }
+      val fieldMap = createResponseMap(hit, query, Kind.PROJECT);
       projectList.add(new Project(fieldMap));
     }
+
     return projectList.build();
   }
 

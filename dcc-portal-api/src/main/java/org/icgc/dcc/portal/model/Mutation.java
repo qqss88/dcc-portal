@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "Mutation")
 public class Mutation {
+
+  private static final int DEFAULT_SSM_OCCURRENCE_FIELDS_NUM = 3;
 
   @ApiModelProperty(value = "Mutation ID", required = true)
   String id;
@@ -85,14 +89,14 @@ public class Mutation {
   @JsonCreator
   public Mutation(Map<String, Object> fieldMap) {
     ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.MUTATION);
-    id = (String) fieldMap.get(fields.get("id"));
-    type = (String) fieldMap.get(fields.get("type"));
-    chromosome = (String) fieldMap.get(fields.get("chromosome"));
+    id = getString(fieldMap.get(fields.get("id")));
+    type = getString(fieldMap.get(fields.get("type")));
+    chromosome = getString(fieldMap.get(fields.get("chromosome")));
     start = getLong(fieldMap.get(fields.get("start")));
     end = getLong(fieldMap.get(fields.get("end")));
-    mutation = (String) fieldMap.get(fields.get("mutation"));
-    assemblyVersion = (String) fieldMap.get(fields.get("assemblyVersion"));
-    referenceGenomeAllele = (String) fieldMap.get(fields.get("referenceGenomeAllele"));
+    mutation = getString(fieldMap.get(fields.get("mutation")));
+    assemblyVersion = getString(fieldMap.get(fields.get("assemblyVersion")));
+    referenceGenomeAllele = getString(fieldMap.get(fields.get("referenceGenomeAllele")));
     testedDonorCount = getLong(fieldMap.get(fields.get("testedDonorCount")));
     affectedDonorCountTotal = getLong(fieldMap.get(fields.get("affectedDonorCountTotal")));
     affectedDonorCountFiltered = getLong(fieldMap.get(fields.get("affectedDonorCountFiltered")));
@@ -108,12 +112,25 @@ public class Mutation {
   }
 
   private List<EmbOccurrence> buildOccurrences(List<Map<String, Object>> occurrences) {
-    if (occurrences == null) return null;
+    if (!hasOccurrences(occurrences)) return null;
     val lst = Lists.<EmbOccurrence> newArrayList();
     for (val item : occurrences) {
       lst.add(new EmbOccurrence(item));
     }
     return lst;
+  }
+
+  /**
+   * Checks if <code>occurrences</code> object enclosed in a List is a comprehensive one or a projection of couple
+   * fields only.
+   */
+  private static boolean hasOccurrences(List<Map<String, Object>> occurrences) {
+    if (occurrences == null) return false;
+    val occurrenceObject = occurrences.get(0);
+    if (occurrenceObject == null) return false;
+
+    // If request was made with ssm_occurrences included fields number will be significantly greater
+    return occurrenceObject.keySet().size() > DEFAULT_SSM_OCCURRENCE_FIELDS_NUM;
   }
 
   private List<Transcript> buildTranscripts(List<Map<String, Object>> transcripts) {
@@ -160,11 +177,4 @@ public class Mutation {
     return lst;
   }
 
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    else if (field instanceof Integer) return (long) (Integer) field;
-    else if (field instanceof Float) return ((Float) field).longValue();
-    else
-      return null;
-  }
 }

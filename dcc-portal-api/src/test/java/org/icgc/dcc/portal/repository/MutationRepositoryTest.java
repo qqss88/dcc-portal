@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -192,7 +193,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Query query = Query.builder().build();
     Map<String, Object> response = mutationRepository.findOne(ID, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
   }
 
   @Test
@@ -200,7 +201,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Query query = Query.builder().fields(Lists.newArrayList("id", "mutation")).build();
     Map<String, Object> response = mutationRepository.findOne(ID, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("mutation")));
   }
 
@@ -211,7 +212,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> response = mutationRepository.findOne(ID, query);
 
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(ID);
     assertThat(response.containsKey("transcripts")).isFalse();
     assertThat(response.containsKey("consequence")).isFalse();
   }
@@ -224,7 +225,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isTrue();
     assertThat(responseInclude.containsKey("consequence")).isFalse();
   }
@@ -237,7 +238,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isFalse();
     assertThat(responseInclude.containsKey("consequences")).isTrue();
   }
@@ -250,7 +251,7 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
 
     Map<String, Object> responseInclude = mutationRepository.findOne(ID, query);
 
-    assertThat(responseInclude.get(FIELDS.get("id"))).isEqualTo(ID);
+    assertThat(getString(responseInclude.get(FIELDS.get("id")))).isEqualTo(ID);
     assertThat(responseInclude.containsKey("transcript")).isTrue();
     assertThat(responseInclude.containsKey("consequences")).isTrue();
   }
@@ -261,7 +262,4 @@ public class MutationRepositoryTest extends BaseRepositoryTest {
     mutationRepository.findOne(MISSING_ID, query);
   }
 
-  protected Object cast(Object object) {
-    return object;
-  }
 }

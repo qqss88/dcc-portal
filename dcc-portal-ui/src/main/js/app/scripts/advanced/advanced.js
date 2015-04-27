@@ -290,6 +290,9 @@
           delete donorFilters[Extensions.ENTITY];
         }
 
+        // Proper encode
+        donor.embedQuery = encodeURIComponent(JSON.stringify(donor.embedQuery));
+
       });
       _this.donors = donors;
       _this.ajax();
@@ -375,6 +378,9 @@
           var geneFilters = gene.embedQuery.gene;
           delete geneFilters[Extensions.ENTITY];
         }
+
+        // Proper encode
+        gene.embedQuery = encodeURIComponent(JSON.stringify(gene.embedQuery));
 
       });
       _this.genes = genes;
@@ -470,6 +476,9 @@
             var mutationFilters = mutation.embedQuery.mutation;
             delete mutationFilters[Extensions.ENTITY];
           }
+
+          // Proper encode
+          mutation.embedQuery = encodeURIComponent(JSON.stringify(mutation.embedQuery));
 
         });
         _this.mutations = mutations;
