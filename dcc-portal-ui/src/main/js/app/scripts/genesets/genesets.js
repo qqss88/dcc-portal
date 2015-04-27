@@ -277,9 +277,11 @@
         // get pathway xml
         var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
           .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'});
+        
         reactomePromise.then(function(data){
           _ctrl.pathway.xml = data;
         });
+        
         // if the digram itself isnt the one being diagrammed, get list of stuff to zoom in on
         if(_ctrl.uiParentPathways[0].diagramId !== _ctrl.uiParentPathways[0].geneSetId){
           reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
@@ -291,26 +293,26 @@
           _ctrl.pathway.zooms = [''];
         }
         
-        var test='P06400,P09884';
-        var uniprotIds =test.split(',');
-        var reactomeMapPromise = Restangular.one('ui').one('reactome').one('protein-map')
-          .get({'proteinUniprotIds' : test, pathwayId:_ctrl.uiParentPathways[0].geneSetId});
+        reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+          .get({pathwayId:_ctrl.uiParentPathways[0].geneSetId});
 
-        reactomeMapPromise.then(function(map){
+        reactomePromise.then(function(map){
           var pathwayHighlights = [];
-          uniprotIds.forEach(function (uniprotId) {
-            pathwayHighlights.push({
-              uniprotId:uniprotId,
-              dbIds:map[uniprotId].dbIds,
-              value:map[uniprotId].value
-            });
-          });
+          for(var id in map){
+            if(map[id] && map[id].dbIds){
+              pathwayHighlights.push({
+                uniprotId:id,
+                dbIds:map[id].dbIds,
+                value:map[id].value
+              });
+            }
+          }
           _ctrl.pathway.highlights = pathwayHighlights;
         });
       }
     });
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil,Restangular) {
+  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
     var _ctrl = this, _geneSet = '', _filter = {};
     
     function success(genes) {
@@ -337,21 +339,6 @@
             });
           });
       }
-      
-      var uniprotIds =[];
-      _ctrl.genes.hits.forEach(function (gene) {
-        uniprotIds.push(gene.externalDbIds.uniprotkb_swissprot[0]);
-      });
-      var reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
-        .get({'proteinUniprotIds' : uniprotIds.join(','),pathwayId:'REACT_21267'});
-      reactomePromise.then(function(map){
-        var dbIds = [];
-        uniprotIds.forEach(function (uniprotId) {
-          dbIds.push(map[uniprotId]);
-        });
-    //    _ctrl.pathwayHighlights = dbIds;
-      });
-
     }
 
     function refresh() {

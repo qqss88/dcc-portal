@@ -30,11 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -45,17 +45,16 @@ public class DiagramRepository {
   private static final Kind KIND = Kind.DIAGRAM;
 
   private final Client client;
-
-  private final String index;
+  private final String indexName;
 
   @Autowired
-  public DiagramRepository(@NonNull Client client, @NonNull IndexModel indexName) {
-    this.index = indexName.getIndex();
+  public DiagramRepository(@NonNull Client client, @Value("#{indexName}") String index) {
+    this.indexName = index;
     this.client = client;
   }
 
   public SearchResponse findAll(Query query) {
-    val search = client.prepareSearch(index)
+    val search = client.prepareSearch(indexName)
         .setTypes(TYPE.getId())
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
@@ -71,7 +70,7 @@ public class DiagramRepository {
   }
 
   public Map<String, Object> findOne(@NonNull String id, @NonNull Query query) {
-    val search = client.prepareGet(index, TYPE.getId(), id);
+    val search = client.prepareGet(indexName, TYPE.getId(), id);
 
     val response = search.execute().actionGet();
     checkResponseState(id, response, KIND);

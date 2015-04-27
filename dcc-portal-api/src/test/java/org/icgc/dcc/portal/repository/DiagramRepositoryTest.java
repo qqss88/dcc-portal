@@ -39,7 +39,7 @@ public class DiagramRepositoryTest extends BaseRepositoryTest {
     es.execute(
         createIndexMapping(Type.DIAGRAM)
             .withData(bulkFile(getClass())));
-    diagramRepository = new DiagramRepository(es.client(), INDEX);
+    diagramRepository = new DiagramRepository(es.client(), INDEX.getIndex());
   }
 
   @Test

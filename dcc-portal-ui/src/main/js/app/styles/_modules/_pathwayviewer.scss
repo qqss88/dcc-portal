@@ -72,6 +72,10 @@ $compartmentBorder:#ffc38b;
   fill:$nonNodeBoxColor;
 }
 
+.pathway-sub-reaction-line{
+  stroke-width:2.3px;
+}
+
 /** ESSENTIALS **/
 
 .RenderableNodeText .RenderableNodeTextCell{
@@ -99,6 +103,8 @@ $compartmentBorder:#ffc38b;
   fill:none;
 }
 
+/** CONTAINER AND INFO BAR STYLES **/
+
 .pathwayviewercontainer body{
   margin:0;
   background: none;
@@ -124,6 +130,7 @@ $compartmentBorder:#ffc38b;
 
 .pathway-info{
   width: 30%;
+  opacity: 0.95;
 }
 
 .pathway-info-content{

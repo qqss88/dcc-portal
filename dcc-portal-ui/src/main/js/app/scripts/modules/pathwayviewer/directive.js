@@ -97,9 +97,7 @@
               var geneList = [];
               highlights.forEach(function (highlight) {
                 if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
-                  for(var i=0;i<Math.round(Math.random()*30)+1;i++){
-                    geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
-                  }
+                  geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
                 }
               });
               $scope.geneList = geneList;
@@ -112,7 +110,7 @@
           urlPath: $location.path(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          subPathwayColor: '#1a9900'
+          subPathwayColor: 'hotpink'
         });
         
         $('.pathway-legend-controller').on('click',function(){

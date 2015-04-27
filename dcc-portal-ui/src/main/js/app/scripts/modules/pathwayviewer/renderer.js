@@ -261,7 +261,7 @@
     var circular = ['Association','Dissociation','Binding'];
     var filled = ['Association','Binding'];
 
-    // Add lines for legend
+    // Add lines behind labels for legend to make it looks more realistic
     if(legend){
       svg.selectAll('.pathway-legend-line').data(labels).enter().append('line').attr({
         'class':'pathway-legend-line',
@@ -317,6 +317,7 @@
   */
   Renderer.prototype.highlightEntity = function (highlights, model) {
     var svg = this.svg, config = this.config;
+    var highlighted = [];  
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
@@ -324,11 +325,12 @@
         var svgNode = svg.selectAll('.entity'+node.id);
         var renderedValue = '?';
         
-        if(node.type !== 'RenderableEntitySet'){
+        if(highlighted.indexOf(highlight.id) < 0){
           renderedValue = highlight.value;
         }
+        highlighted.push(highlight.id);
       
-        if(svgNode[0].length <= 0){
+        if(svgNode[0].length <= 0 || highlight.value <= 0){
           return;
         }
         svgNode.style('stroke',config.highlightColor);

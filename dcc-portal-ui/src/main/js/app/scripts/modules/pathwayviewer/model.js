@@ -58,7 +58,7 @@
       });
       return points;
     };
-
+    
     // Parse all the reactions
     var reactions =  this.reactions;
     $(collection).each(function(){
@@ -108,35 +108,12 @@
     return nodes;
   };
 
-  PathwayModel.prototype.getReactionById = function (id) {
-    var reaction;
-    this.reactions.forEach(function (r) {
-      if (r.id === id){
-        reaction = r;
-      }
-    });
-    return reaction;
-  };
-
   PathwayModel.prototype.getNodes = function () {
     return this.nodes;
   };
 
   PathwayModel.prototype.getReactions = function () {
     return this.reactions;
-  };
-
-  PathwayModel.prototype.addReactionsToNodes = function() {
-    var nodes = this.nodes;
-    this.reactions.forEach(function (reaction) {
-      reaction.nodes.forEach(function (reactionNode) {
-        nodes.forEach(function (node) {
-          if (node.id === reactionNode.id){
-            node.reactions.push(reaction.id);
-          }
-        });
-      });
-    });
   };
 
   dcc.PathwayModel = PathwayModel;
