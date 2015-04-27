@@ -102,7 +102,7 @@
                   }
                 }
               });
-              $scope.geneList = geneList; 
+              $scope.geneList = geneList;
             }
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};

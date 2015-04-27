@@ -8,7 +8,7 @@
   {
     width: 500,
     height: 500,
-    onClick:{},
+    onClick: {},
     urlPath: '',
     strokeColor: 'black',
     highlightColor: 'red',
@@ -124,7 +124,7 @@
             minHeight = Math.min(modelNode.position.y, minHeight);
             minWidth = Math.min(modelNode.position.x, minWidth);
           });
-      });
+        });
 
       // Add some buffer to the zoomed in area
       width = width + 50;

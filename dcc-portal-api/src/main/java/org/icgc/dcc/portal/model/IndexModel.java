@@ -75,7 +75,7 @@ public class IndexModel {
     MUTATION("mutation"),
     RELEASE("release"),
     PATHWAY("pathway"),
-    GENE_SET("gene-set"), // FIXME: Double check name with Bob
+    GENE_SET("gene-set"),
     DONOR_CENTRIC("donor-centric"),
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
@@ -84,9 +84,9 @@ public class IndexModel {
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
-    GENESET_TEXT("gene-set-text"), // FIXME: Double check name with Bob
+    GENESET_TEXT("gene-set-text"),
     PROJECT_TEXT("project-text"),
-    DIAGRAM("diagram"); // FIXME: Double check everything with Bob
+    DIAGRAM("diagram");
 
     private final String id;
   }

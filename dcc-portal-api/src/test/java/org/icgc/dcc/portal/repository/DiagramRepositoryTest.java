@@ -18,10 +18,8 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import lombok.val;
 
-import java.util.Map;
-
-import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
@@ -46,16 +44,16 @@ public class DiagramRepositoryTest extends BaseRepositoryTest {
 
   @Test
   public void testFindAll() throws Exception {
-    Query query = Query.builder().from(1).size(10).build();
-    SearchResponse response = diagramRepository.findAll(query);
+    val query = Query.builder().from(1).size(10).build();
+    val response = diagramRepository.findAll(query);
     assertThat(response.getHits().getTotalHits()).isEqualTo(1);
   }
 
   @Test
   public void testFind() throws Exception {
-    String id = "REACT_163914";
-    Query query = Query.builder().build();
-    Map<String, Object> response = diagramRepository.findOne(id, query);
+    val id = "REACT_163914";
+    val query = Query.builder().build();
+    val response = diagramRepository.findOne(id, query);
     assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
   }
 

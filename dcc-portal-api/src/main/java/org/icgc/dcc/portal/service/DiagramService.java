@@ -17,9 +17,12 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GENE;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +31,11 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.icgc.dcc.common.core.util.Joiners;
+import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -42,95 +45,18 @@ import org.icgc.dcc.portal.repository.MutationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DiagramService {
 
+  @NonNull
   private final DiagramRepository diagramRepo;
+  @NonNull
   private final MutationRepository mutationRepository;
-
-  private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
-
-  public Map<String, DiagramProtein> mapProteinIds(@NonNull List<String> proteinUniprotIds, @NonNull String pathwayId) {
-    val queries = new ArrayList<QueryBuilder>();
-    for (val uniprotId : proteinUniprotIds) {
-      queries.add(getQuery(uniprotId));
-    }
-    val response = mutationRepository.countSearches(queries);
-
-    val uniprotToDbMap = ArrayListMultimap.create();
-    val dbToUniprotMap = getProteinIdMap(pathwayId);
-
-    dbToUniprotMap.forEach((dbId, uniprotsString) -> {
-      String[] uniprots = uniprotsString.split(",");
-      for (String uniprotId : uniprots) {
-        uniprotToDbMap.put(parseUniprot(uniprotId), dbId);
-      }
-    });
-
-    val map = Maps.<String, DiagramProtein> newHashMap();
-
-    for (int i = 0; i < proteinUniprotIds.size(); i++) {
-      val id = proteinUniprotIds.get(i);
-      val value = response.getResponses()[i].getResponse().getHits().getTotalHits();
-
-      map.put(id, getDiagramProtein(uniprotToDbMap.get(id), value));
-    }
-
-    return map;
-  }
-
-  private DiagramProtein getDiagramProtein(List<Object> map, Long value) {
-    val protein = new DiagramProtein();
-    protein.setDbIds(Joiner.on(",").join(map));
-    protein.setValue(value);
-
-    return protein;
-  }
-
-  private String parseUniprot(String uniprot) {
-    return uniprot.substring(uniprot.indexOf(":") + 1);
-  }
-
-  private BoolQueryBuilder getQuery(String id) {
-    return QueryBuilders.boolQuery().must(
-        QueryBuilders.termQuery(MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "."
-            + GENE_UNIPROT_IDS, id));
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
-    return (Map<String, String>) getPathway(pathwayId).get(INDEX_MODEL.get("proteinMap"));
-  }
-
-  public String getPathwayDiagramString(@NonNull String pathwayId) {
-    return unescape(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
-  }
-
-  public String[] getShownPathwaySection(@NonNull String pathwayId) {
-    return getPathway(pathwayId).get(INDEX_MODEL.get("highlights")).toString().split(",");
-  }
-
-  private Map<String, Object> getPathway(String id) {
-    val query = Query.builder().build();
-    return diagramRepo.findOne(id, query);
-  }
-
-  /**
-   * Opposite of dcc.etl.db.importer.diagram.reader.DiagramXmlReader's escape
-   */
-  private String unescape(String xml) {
-    for (String[] replacement : replacements) {
-      xml.replace(replacement[1], replacement[0]);
-    }
-    return xml;
-  }
 
   private String[][] replacements =
   {
@@ -143,5 +69,83 @@ public class DiagramService {
       { "\\", "\\\\" },
       { "/", "\\/" }
   };
+
+  private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+
+  public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId) {
+    val dbToUniprotMap = getProteinIdMap(pathwayId);
+    val uniprotToDbMap = getReverseMap(dbToUniprotMap);
+
+    val queries = new ArrayList<QueryBuilder>();
+    uniprotToDbMap.keySet().forEach(id -> {
+      queries.add(getQuery(id.toString()));
+    });
+
+    val response = mutationRepository.countSearches(queries);
+
+    val map = Maps.<String, DiagramProtein> newHashMap();
+
+    int count = 0;
+    for (val uniprotId : uniprotToDbMap.keySet()) {
+      val mutations = getTotalHitCount(response.getResponses()[count].getResponse());
+
+      val protein = new DiagramProtein();
+      protein.setValue(mutations);
+      protein.setDbIds(Joiners.COMMA.join(uniprotToDbMap.get(uniprotId)));
+
+      map.put(uniprotId.toString(), protein);
+      count++;
+    }
+
+    return map;
+  }
+
+  public String getPathwayDiagramString(@NonNull String pathwayId) {
+    return unescape(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
+  }
+
+  public List<String> getShownPathwaySection(@NonNull String pathwayId) {
+    return Splitters.COMMA.splitToList(((String) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"))));
+  }
+
+  private Map<String, Object> getPathway(String id) {
+    val query = Query.builder().build();
+    return diagramRepo.findOne(id, query);
+  }
+
+  private ArrayListMultimap<Object, Object> getReverseMap(Map<String, String> map) {
+    val reverse = ArrayListMultimap.create();
+    map.forEach((dbId, uniprotsString) -> {
+      String[] uniprots = uniprotsString.split(",");
+      for (String uniprotId : uniprots) {
+        reverse.put(parseUniprot(uniprotId), dbId);
+      }
+    });
+    return reverse;
+  }
+
+  /**
+   * Opposite of dcc.etl.db.importer.diagram.reader.DiagramXmlReader's escape
+   */
+  private String unescape(String xml) {
+    for (String[] replacement : replacements) {
+      xml.replace(replacement[1], replacement[0]);
+    }
+    return xml;
+  }
+
+  private String parseUniprot(String uniprot) {
+    return uniprot.substring(uniprot.indexOf(":") + 1);
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
+    return (Map<String, String>) getPathway(pathwayId).get(INDEX_MODEL.get("proteinMap"));
+  }
+
+  private BoolQueryBuilder getQuery(String id) {
+    val uniprotIdsFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "." + GENE_UNIPROT_IDS;
+    return boolQuery().must(termQuery(uniprotIdsFieldName, id));
+  }
 
 }

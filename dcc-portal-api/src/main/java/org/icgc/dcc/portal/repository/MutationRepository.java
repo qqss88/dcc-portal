@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -386,7 +387,7 @@ public class MutationRepository implements Repository {
   }
 
   @Override
-  public MultiSearchResponse counts(LinkedHashMap<String, Query> queries) {
+  public MultiSearchResponse counts(@NonNull LinkedHashMap<String, Query> queries) {
     MultiSearchRequestBuilder search = client.prepareMultiSearch();
     for (val id : queries.keySet()) {
       search.add(buildCountRequest(queries.get(id), CENTRIC_TYPE));
@@ -396,7 +397,7 @@ public class MutationRepository implements Repository {
     return search.execute().actionGet();
   }
 
-  public MultiSearchResponse countSearches(List<QueryBuilder> searches) {
+  public MultiSearchResponse countSearches(@NonNull List<QueryBuilder> searches) {
     val search = client.prepareMultiSearch();
     for (val s : searches) {
       search.add(buildCountSearchFromQuery(s, CENTRIC_TYPE));

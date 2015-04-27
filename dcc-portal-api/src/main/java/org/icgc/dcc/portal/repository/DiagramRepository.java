@@ -24,10 +24,10 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponse
 
 import java.util.Map;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -49,26 +49,28 @@ public class DiagramRepository {
   private final String index;
 
   @Autowired
-  public DiagramRepository(Client client, IndexModel indexModel) {
-    this.index = indexModel.getIndex();
+  public DiagramRepository(@NonNull Client client, @NonNull IndexModel indexName) {
+    this.index = indexName.getIndex();
     this.client = client;
   }
 
   public SearchResponse findAll(Query query) {
-    SearchRequestBuilder search =
-        client.prepareSearch(index).setTypes(TYPE.getId()).setSearchType(QUERY_THEN_FETCH).setFrom(query.getFrom())
-            .setSize(query.getSize());
+    val search = client.prepareSearch(index)
+        .setTypes(TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize());
 
     search.addFields(getFields(query, KIND));
-
     log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
+
+    val response = search.execute().actionGet();
     log.debug("{}", response);
 
     return response;
   }
 
-  public Map<String, Object> findOne(String id, Query query) {
+  public Map<String, Object> findOne(@NonNull String id, @NonNull Query query) {
     val search = client.prepareGet(index, TYPE.getId(), id);
 
     val response = search.execute().actionGet();
@@ -79,4 +81,5 @@ public class DiagramRepository {
 
     return map;
   }
+
 }

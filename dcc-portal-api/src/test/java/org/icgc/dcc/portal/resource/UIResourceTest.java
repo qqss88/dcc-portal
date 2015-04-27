@@ -20,16 +20,11 @@ package org.icgc.dcc.portal.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-
-import lombok.SneakyThrows;
 import lombok.val;
 
-import org.icgc.dcc.common.core.util.URLs;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.mapper.IllegalArgumentExceptionMapper;
-import org.icgc.dcc.portal.service.ReactomeService;
+import org.icgc.dcc.portal.service.DiagramService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -46,7 +41,7 @@ public class UIResourceTest extends ResourceTest {
   private final static int BAD_REQUEST_CODE = ClientResponse.Status.BAD_REQUEST.getStatusCode();
 
   @Mock
-  private ReactomeService service;
+  private DiagramService service;
 
   @InjectMocks
   private UIResource resource;
@@ -60,14 +55,14 @@ public class UIResourceTest extends ResourceTest {
 
   @Test
   public void testBadId() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
+    when(service.getPathwayDiagramString(any(String.class))).thenReturn("");
     val response = generateResponse("aly");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
 
   @Test
   public void testTruncatedId() {
-    when(service.getPathwayDiagramStream(any(String.class))).thenReturn(getTestStream());
+    when(service.getPathwayDiagramString(any(String.class))).thenReturn("");
     val response = generateResponse("REACT_");
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST_CODE);
   }
@@ -77,12 +72,6 @@ public class UIResourceTest extends ResourceTest {
         .resource(RESOURCE).path("/reactome/pathway-diagram")
         .queryParam("pathwayId", id)
         .get(ClientResponse.class);
-  }
-
-  @SneakyThrows
-  private static InputStream getTestStream() {
-    return URLs.getUrl(ReactomeService.REACTOME_BASE_URL + "pathwayDiagram/109581/XML")
-        .openStream();
   }
 
 }
