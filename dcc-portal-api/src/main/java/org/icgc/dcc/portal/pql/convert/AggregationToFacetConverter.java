@@ -88,7 +88,7 @@ public class AggregationToFacetConverter {
 
   private static long resolveMissingDocCount(String missingAggName, Missing missingAgg) {
     val aggregations = missingAgg.getAggregations();
-    if (aggregations != null) {
+    if (aggregations != null && !aggregations.asList().isEmpty()) {
       return 0L;
     }
 

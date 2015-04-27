@@ -49,7 +49,7 @@ public class AggregationToFacetConverterTest extends BaseRepositoryTest {
   }
 
   @Test
-  public void convertTest() {
+  public void convertNestedAggregationTest() {
     val filter = FilterBuilders.existsFilter("chromosome");
 
     val aggregation =
@@ -88,6 +88,30 @@ public class AggregationToFacetConverterTest extends BaseRepositoryTest {
     val intergenicTerm = terms.get(2);
     assertThat(intergenicTerm.getCount()).isEqualTo(1L);
     assertThat(intergenicTerm.getTerm()).isEqualTo("intergenic_region");
+  }
+
+  @Test
+  public void convertNonNestedAggregationTest() {
+    val field = "platform";
+    val aggr = terms(AGG_NAME).field(field);
+    val missingAggr = missing(MISSING_AGG_NAME).field(field);
+
+    val response = converter.convert(executeQuery(aggr, missingAggr).getAggregations());
+    log.info("{}", response);
+
+    assertThat(response).hasSize(1);
+    val termFacet = response.get(AGG_NAME);
+    assertThat(termFacet.getType()).isEqualTo("terms");
+    assertThat(termFacet.getMissing()).isEqualTo(1L);
+    assertThat(termFacet.getOther()).isEqualTo(0L);
+    assertThat(termFacet.getTotal()).isEqualTo(2L);
+
+    val terms = termFacet.getTerms();
+    assertThat(terms).hasSize(1);
+
+    val illuminaTerm = terms.get(0);
+    assertThat(illuminaTerm.getCount()).isEqualTo(2L);
+    assertThat(illuminaTerm.getTerm()).isEqualTo("Illumina HiSeq");
   }
 
   private SearchResponse executeQuery(AggregationBuilder<?>... builder) {
