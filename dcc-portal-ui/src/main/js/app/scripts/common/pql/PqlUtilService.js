@@ -91,6 +91,10 @@
         return service.addTerm (buffer, categoryName, facetName, term);
       }
 
+      function addTerms (buffer, categoryName, facetName, terms) {
+        return service.addTerms (buffer, categoryName, facetName, terms);
+      }
+
       function removeTerm (buffer, categoryName, facetName, term) {
         return service.removeTerm (buffer, categoryName, facetName, term);
       }
@@ -127,6 +131,10 @@
           addAction (addTerm, [categoryName, facetName, term]);
           return this;
         },
+        addTerms: function (categoryName, facetName, terms) {
+          addAction (addTerms, [categoryName, facetName, terms]);
+          return this;
+        },
         removeTerm: function (categoryName, facetName, term) {
           addAction (removeTerm, [categoryName, facetName, term]);
           return this;
@@ -151,6 +159,10 @@
           addAction (setSort, [sort]);
           return this;
         },
+        reset: function () {
+          actions = [];
+          return this;
+        },
         build: function () {
           return _.reduce (actions, function (result, action) {
             return action.func.apply (null, [result].concat (action.args));
@@ -166,6 +178,9 @@
       },
       addTerm: function (categoryName, facetName, term) {
         updatePql (service.addTerm, categoryName, facetName, term);
+      },
+      addTerms: function (categoryName, facetName, terms) {
+        updatePql (service.addTerms, categoryName, facetName, terms);
       },
       removeTerm: function (categoryName, facetName, term) {
         updatePql (service.removeTerm, categoryName, facetName, term);

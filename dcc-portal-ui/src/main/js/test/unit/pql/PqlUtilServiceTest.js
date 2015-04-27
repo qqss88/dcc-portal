@@ -76,6 +76,16 @@ describe('Testing PqlUtilService', function() {
     expect(testPql).toEqual(expectedPql);
   });
 
+  it('Testing addTerms() with pql: in(donor.gender,"male", "female", "unknown")', function() {
+    var expectedPql = 'select(*),in(donor.gender,"male","female","unknown")';
+
+    PqlUtilService.addTerms ('donor', 'gender', ['male', 'female', 'unknown']);
+
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
   it('Testing getRawPql() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22))', function() {
     var category = "donor";
     var facet = "gender";
@@ -694,6 +704,48 @@ describe('Testing PqlUtilService', function() {
       .removeTerm ('donor', 'id', 'uuid2')
       .removeFacet ('remove', 'this')
       .addTerm ('donor', 'foo', 789)
+      ;
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder.reset()', function() {
+    var initialPql = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"))';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    var expected = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"),eq(donor.age,23)),limit(30)';
+
+    builder.removeTerm ('removing', 'something', 'non-existent')
+      .includesFacets()
+      .overwrite ('donor', 'id', ['uuid1', 'uuid2', 'uuid3'])
+      .setSort ([{field: 'donor.age', direction: '-'}])
+      .addTerm ('donor', 'gender', 'female')
+      .addTerm ('donor', 'foo', 123)
+      .addTerm ('remove', 'this', 'soon')
+      .setLimit ({from: 20, size:30})
+      .removeTerm ('donor', 'id', 'uuid2')
+      .removeFacet ('remove', 'this')
+      .addTerm ('donor', 'foo', 789)
+      .reset()
+      .setLimit ({size: 30})
+      .addTerm ('donor', 'age', 23)
+      ;
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder.addTerms()', function() {
+    var initialPql = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"))';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    var expected = 'select(*),facets(*),in(donor.foo,789,333,1)';
+
+    builder.removeTerm ('removing', 'something', 'non-existent')
+      .removeFacet ('donor', 'id')
+      .includesFacets()
+      .removeFacet ('donor', 'gender')
+      .includesFacets()
+      .addTerms ('donor', 'foo', [789, 333, 1]);
       ;
 
     expect(builder.build()).toEqual(expected);
