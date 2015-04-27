@@ -76,17 +76,17 @@
         };
         
         var infoSvg = d3.select('.pathway-info-svg').append('svg')
-              .attr('viewBox', '0 0 ' +100+ ' ' +50)
+              .attr('viewBox', '0 0 ' +150+ ' ' +50)
               .attr('preserveAspectRatio', 'xMidYMid')
               .append('g');
-        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: {},urlPath: ''});
+        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: {},highlightColor: '#9b315b'});
 
         var controller = new dcc.ReactomePathway({
           width: 500,
           height: 300,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
-            var padding = 3;
+            var padding = 7, displayedCount = '?';
             var node = $.extend({}, d);
             if(!showingInfo){
               openNewSideBar(false,true);
@@ -100,12 +100,20 @@
                   geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
                 }
               });
-              $scope.geneList = geneList;
+              if(geneList.length === 1){
+                displayedCount = geneList[0].value;
+              }
+              $scope.geneList = _.sortBy(geneList,function(n){return -n.value;});
             }
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};
-            node.position={x:3,y:3};
+            node.position={x:padding+25,y:padding};
+            
             infoRenderer.renderNodes([node]);
+            if(geneList.length > 0){
+              infoRenderer.highlightEntity([{id:d.reactomeId,value:displayedCount}],
+                                           {getNodesByReactomeId:function (){return [node];}});
+            }
           },
           urlPath: $location.path(),
           strokeColor: '#696969',
@@ -134,6 +142,8 @@
           }else if(!rendered){
             controller.render(xml,zoomedOn);
             rendered = true;
+          }else{
+            openNewSideBar(false,false);
           }
           
           if(highlights){

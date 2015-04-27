@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.service;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GENE;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
@@ -34,6 +35,7 @@ import lombok.val;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.model.DiagramProtein;
@@ -72,13 +74,13 @@ public class DiagramService {
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
-  public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId) {
+  public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
     val uniprotToDbMap = getReverseMap(dbToUniprotMap);
 
     val queries = new ArrayList<QueryBuilder>();
     uniprotToDbMap.keySet().forEach(id -> {
-      queries.add(getQuery(id.toString()));
+      queries.add(getQuery(id.toString(), impactFilter));
     });
 
     val response = mutationRepository.countSearches(queries);
@@ -143,9 +145,15 @@ public class DiagramService {
     return (Map<String, String>) getPathway(pathwayId).get(INDEX_MODEL.get("proteinMap"));
   }
 
-  private BoolQueryBuilder getQuery(String id) {
+  private BoolQueryBuilder getQuery(String id, String[] impacts) {
     val uniprotIdsFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "." + GENE_UNIPROT_IDS;
-    return boolQuery().must(termQuery(uniprotIdsFieldName, id));
-  }
+    val functionalImpactFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 
+    val query = boolQuery().must(termQuery(uniprotIdsFieldName, id));
+    if (impacts.length > 0) {
+      query.must(QueryBuilders.termsQuery(functionalImpactFieldName, impacts));
+    }
+
+    return query;
+  }
 }

@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.Donors;
+import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
@@ -141,12 +142,13 @@ public class UIResource {
   @Path("/reactome/protein-map")
   @GET
   public Map<String, DiagramProtein> getReactomeProteinMap(
-      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
+      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId,
+      @ApiParam(value = "The functional impact filter", required = true) @QueryParam("impactFilter") FieldsParam impactFilter) {
     if (isValidPathwayId(pathwayId)) {
       throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
     }
 
-    return diagramService.mapProteinIds(pathwayId);
+    return diagramService.mapProteinIds(pathwayId, impactFilter.get());
   }
 
   @Path("/reactome/pathway-diagram")

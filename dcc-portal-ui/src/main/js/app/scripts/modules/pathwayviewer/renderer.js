@@ -319,26 +319,32 @@
     var svg = this.svg, config = this.config;
     var highlighted = [];
     
+    // Remove old highlights if there are any
+    svg.selectAll('.banner-text').remove();
+    svg.selectAll('.value-banner').remove();
+    
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
       nodes.forEach(function (node) {
         var svgNode = svg.selectAll('.entity'+node.id);
-        var renderedValue = '?';
-        
-        if(highlighted.indexOf(highlight.id) < 0){
-          renderedValue = highlight.value;
+        var renderedValue = highlight.value;
+
+        if(highlighted.indexOf(highlight.id) >= 0){
+          svg.select('.banner-text'+highlight.id).text('?');
+          svg.select('.value-banner'+highlight.id).attr('width',15);
+          return;
         }
         highlighted.push(highlight.id);
       
-        if(svgNode[0].length <= 0 || highlight.value <= 0){
+        if(svgNode[0].length <= 0){
           return;
         }
         svgNode.style('stroke',config.highlightColor);
         svgNode.style('stroke-width','3px');
-
+        
         svg.append('rect')
           .attr({
-            class:'value-banner',
+            class:'value-banner value-banner'+highlight.id,
             x: (+node.position.x)+(+node.size.width) - 10,
             y: (+node.position.y)- 7,
             width:(renderedValue.toString().length*5)+10,
@@ -350,7 +356,7 @@
           });
 
         svg.append('text').attr({
-          'class':'banner-text',
+          'class':'banner-text banner-text'+highlight.id,
           'x':(+node.position.x)+(+node.size.width) - 5,
           'y':(+node.position.y)+4,
           'pointer-events':'none',
