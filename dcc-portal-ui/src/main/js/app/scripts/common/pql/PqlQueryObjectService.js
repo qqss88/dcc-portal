@@ -30,13 +30,15 @@
 
   module.factory(serviceName, function (PqlTranslationService) {
 
+    var defaultProjection = ['*'];
+
     function getEmptyQueryObject () {
       return {
         params: {
           // For query object, we always enforce the 'select' function.
           // In fact, this is translated to 'select(*)' in PQL as we don't support
           // column projection from the UI.
-          select: true,
+          select: defaultProjection,
           facets: false,
           sort: [],
           limit: {}
@@ -63,6 +65,7 @@
     var isAndNode = _.partial (isNode, 'and');
     var isSortNode = _.partial (isNode, 'sort');
     var isLimitNode = _.partial (isNode, 'limit');
+    var isSelectNode = _.partial (isNode, 'select');
     var isFacetsNode = _.partial (isNode, 'facets');
 
     function parseIdentifier (id) {
@@ -117,6 +120,10 @@
 
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
 
+      var selectNode = getSpecialNodeFromTreeArray (treeArray, isSelectNode);
+
+      result.params.select = selectNode ? (selectNode.values || defaultProjection) : defaultProjection;
+
       // Again, currently the UI doesn't care about projection on facets so we treat any 'facets' as 'facets(*)'
       result.params.facets = (null !== getSpecialNodeFromTreeArray (treeArray, isFacetsNode));
 
@@ -141,12 +148,13 @@
       var result = [];
       var queryParams = query.params || {};
 
-      if (queryParams.select) {
-        result.push ({
-          op: 'select',
-          values: ['*']
-        });
-      }
+      var projection = _.isArray (queryParams.select) && (! _.isEmpty (queryParams.select)) ?
+        queryParams.select : defaultProjection;
+
+      result.push ({
+        op: 'select',
+        values: projection
+      });
 
       if (queryParams.facets) {
         result.push ({
@@ -280,6 +288,23 @@
       return updateQueryParam (pql, 'facets', true);
     }
 
+    function addProjection (pql, selectField) {
+      var star = defaultProjection[0];
+      if (star === selectField) return pql;
+
+      var query = convertPqlToQueryObject (pql);
+      var projection = query.params.select;
+      projection.push (selectField);
+
+      return updateQueryParam (pql, 'select', _.remove (projection, function (s) {
+        return s !== star;
+      }));
+    }
+
+    function includesConsequences (pql) {
+      return addProjection (pql, 'consequences');
+    }
+
     function convertQueryObjectToPql (queryObject) {
       var jsonTree = convertQueryObjectToJsonTree (queryObject);
       var result = PqlTranslationService.toPql (jsonTree);
@@ -368,6 +393,7 @@
           [removeFacetFromQueryFilter, _.isArray (term) ? addMultipleTermsToQueryFilter : addTermToQueryFilter]);
       },
       includesFacets: includesFacets,
+      includesConsequences: includesConsequences,
       convertQueryToPql: convertQueryObjectToPql,
       convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,

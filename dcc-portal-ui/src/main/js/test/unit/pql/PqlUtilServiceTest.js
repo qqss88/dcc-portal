@@ -204,6 +204,17 @@ describe('Testing PqlUtilService', function() {
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
 
+  it('Testing includesConsequences() in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(consequences),' + originalPql;
+
+    PqlUtilService.includesConsequences ();
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
   it('Testing setLimit() in pql: eq(donor.test,123)', function() {
     var originalPql = 'eq(donor.test,123)';
     setPqlInUrl (originalPql);
@@ -609,7 +620,7 @@ describe('Testing PqlUtilService', function() {
   it('Testing convertQueryToPql() for pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var testQuery = {
       params: {
-        select: true,
+        select: ['*'],
         limit: {},
         sort: []
       },
@@ -639,7 +650,7 @@ describe('Testing PqlUtilService', function() {
   it('Testing convertPqlToQuery() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var expectedQuery = {
       params: {
-        select: true,
+        select: ['*'],
         facets: false,
         limit: {},
         sort: []
@@ -757,6 +768,17 @@ describe('Testing PqlUtilService', function() {
 
     builder.addTerm ("donor", "gender", "male")
       .includesFacets()
+      .addTerm ("donor", "gender", "female");
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder.includesConsequences()', function() {
+    var expected = 'select(consequences),in(donor.gender,"male","female")';
+    var builder = PqlUtilService.getBuilder ();
+
+    builder.addTerm ("donor", "gender", "male")
+      .includesConsequences()
       .addTerm ("donor", "gender", "female");
 
     expect(builder.build()).toEqual(expected);
