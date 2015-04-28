@@ -41,7 +41,7 @@
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
               '<th class="pathway-gene-label">{{gene.id}}</th>' +
-              '<th class="pathway-gene-label">{{gene.value}}</th>' +
+              '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
             '</tr></table>' +
             '<div data-ng-if="geneList.length==0">No associated genes</div>'+
         '</div></div>'+
@@ -88,16 +88,21 @@
           onClick: function (d) {
             var padding = 7, displayedCount = '?';
             var node = $.extend({}, d);
+            var geneList = [];
+            
             if(!showingInfo){
               openNewSideBar(false,true);
             }
             
             // Create list of uniprot ids if we have any
             if(highlights){
-              var geneList = [];
               highlights.forEach(function (highlight) {
                 if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
-                  geneList.push({id:'Uniprot:'+highlight.uniprotId,value:highlight.value});
+                  geneList.push({
+                    id:'Uniprot:'+highlight.uniprotId,
+                    value:highlight.value,
+                    advQuery:highlight.advQuery
+                  });
                 }
               });
               if(geneList.length === 1){

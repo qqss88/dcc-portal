@@ -246,18 +246,20 @@
         // 4) if it's a reactome pathway, get diagram
         if(_ctrl.geneSet.source === 'Reactome'){
           _ctrl.pathway = {};
+          var pathwayId = _ctrl.uiParentPathways[0].diagramId;
+          var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
           // get pathway xml
           var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
-            .get({'pathwayId' : _ctrl.uiParentPathways[0].diagramId},{'Accept':'application/xml'})
+            .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
             .then(function(data){
               _ctrl.pathway.xml = data;
             });
 
           // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
-          if(_ctrl.uiParentPathways[0].diagramId !== _ctrl.uiParentPathways[0].geneSetId){
+          if(pathwayId !== parentPathwayId){
             reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
-              .get({'pathwayId' : _ctrl.uiParentPathways[0].geneSetId},{'Accept':'application/json'})
+              .get({'pathwayId' : parentPathwayId},{'Accept':'application/json'})
               .then(function(data){
                 _ctrl.pathway.zooms = data;
               });
@@ -266,19 +268,30 @@
           }
           
           reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
-            .get({pathwayId:_ctrl.uiParentPathways[0].geneSetId,
+            .get({pathwayId:parentPathwayId,
                   impactFilter:_filter.mutation?_filter.mutation.functionalImpact.is.join(','):''})
             .then(function(map){
               var pathwayHighlights = [];
-              for(var id in map){
-                if(map[id] && map[id].dbIds){
+              _.forEach(map,function(value,id){
+                if(value && value.dbIds){
                   pathwayHighlights.push({
                     uniprotId:id,
-                    dbIds:map[id].dbIds,
-                    value:map[id].value
+                    dbIds:value.dbIds,
+                    value:value.value
                   });
                 }
-              }
+              });
+            
+              // Get ensembl ids for all the genes so we can link to advSearch page
+              Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
+                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','), undefined, {'validationOnly':true})
+                .then(function(data){
+                  _.forEach(pathwayHighlights,function(n){
+                    var ensemblId = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId][0].id;
+                    n.advQuery =  LocationService.mergeIntoFilters({gene:{id:{is:[ensemblId]},pathwayId:{is:[pathwayId]}}});
+                  });
+              });
+            
               _ctrl.pathway.highlights = pathwayHighlights;
             });
         }
@@ -330,7 +343,6 @@
               g.advQuery = LocationService.mergeIntoFilters({
                 gene: geneFilter
               });
-
             });
           });
       }
