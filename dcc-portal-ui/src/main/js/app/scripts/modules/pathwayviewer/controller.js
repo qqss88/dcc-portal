@@ -27,6 +27,7 @@
   ReactomePathway.prototype.render = function (xml, zoomedOnElements) {
     var config = this.config;
     var model = new dcc.PathwayModel();
+    var nodesInPathway = [];
     this.model = model;
     model.parse(xml);
 
@@ -94,6 +95,7 @@
     // Render everything
     this.renderer = new dcc.Renderer(svg, {
       onClick: function (d) {
+        d.isPartOfPathway = nodesInPathway.indexOf(d.reactomeId) >= 0;
         config.onClick(d);
       },
       urlPath: config.urlPath,
@@ -121,8 +123,15 @@
       // For all zoomed in elements, go through their positions/size and form the zoomed in size
       _.filter(model.getReactions().slice(),function(n){return zoomedOnElements.indexOf(n.reactomeId)>=0;})
         .forEach(function (reaction) {
+          // Add nodes in this pathway to list
+          nodesInPathway = nodesInPathway.concat(model.getNodesInReaction(reaction.reactomeId));
+        
+          // Highlight the lines of this reaction
           svg.selectAll('.reaction'+reaction.reactomeId)
-            .attr('stroke',config.subPathwayColor).classed('pathway-sub-reaction-line',true);
+            .attr('stroke',config.subPathwayColor)
+            .classed('pathway-sub-reaction-line',true);
+        
+          // Update height/width calcuations accordingly
           reaction.nodes.forEach(function (node) {
             var modelNode = model.getNodeById(node.id);
             height = Math.max((+modelNode.position.y) + (+modelNode.size.height), height);
@@ -131,7 +140,7 @@
             minWidth = Math.min(modelNode.position.x, minWidth);
           });
         });
-
+ 
       // Add some buffer to the zoomed in area
       width = width + 50;
       minWidth = minWidth - 50;
@@ -146,6 +155,8 @@
                                                          -minHeight * scaleFactor + offsetY] + ')'+
                             'scale(' + scaleFactor + ')');
     }
+
+    this.nodesInPathway = nodesInPathway;
   };
   
   /**
@@ -194,9 +205,14 @@
   */
   ReactomePathway.prototype.highlight = function (rawHighlights) {
     var highlights = [];
+    var nodesInPathway = this.nodesInPathway;
     rawHighlights.forEach(function (rh) {
       rh.dbIds.forEach(function (dbId) {
-        highlights.push({id:dbId,value:rh.value});
+        
+        // Only highlight it if it's part of the pathway we're zooming in on
+        if(nodesInPathway.indexOf(dbId) >= 0){
+          highlights.push({id:dbId,value:rh.value});
+        }
       });
     });
     this.renderer.highlightEntity(highlights, this.model);

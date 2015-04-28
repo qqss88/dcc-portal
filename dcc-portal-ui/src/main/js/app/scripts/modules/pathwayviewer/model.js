@@ -115,6 +115,19 @@
   PathwayModel.prototype.getReactions = function () {
     return this.reactions;
   };
+  
+  PathwayModel.prototype.getNodesInReaction = function (reactomeId){
+    var nodes = [];
+    var model = this;
+    this.reactions.forEach(function (reaction) {
+      if(reaction.reactomeId === reactomeId){
+        reaction.nodes.forEach(function (elem) {
+          nodes.push(model.getNodeById(elem.id).reactomeId);
+        });
+      }
+    });
+    return nodes;
+  };
 
   dcc.PathwayModel = PathwayModel;
 

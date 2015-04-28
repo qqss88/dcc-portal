@@ -95,7 +95,7 @@
             }
             
             // Create list of uniprot ids if we have any
-            if(highlights){
+            if(highlights && d.isPartOfPathway){
               highlights.forEach(function (highlight) {
                 if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
                   geneList.push({
@@ -109,6 +109,8 @@
                 displayedCount = geneList[0].value;
               }
               $scope.geneList = _.sortBy(geneList,function(n){return -n.value;});
+            }else{
+              $scope.geneList = [];
             }
             $('.pathway-info-svg svg g').html('');
             node.size={width:100-padding*2,height:50-padding*2};
@@ -133,6 +135,8 @@
             openNewSideBar(true,false);
             var width = $('.pathway-legend').css('width');
             var height = $('.pathway-legend').css('height');
+            
+            // Create legend with width and height but with 'px' removed
             controller.renderLegend(width.substring(0,width.length-2),height.substring(0,height.length-2));
           }
         });

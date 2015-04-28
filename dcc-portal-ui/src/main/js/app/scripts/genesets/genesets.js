@@ -284,13 +284,18 @@
             
               // Get ensembl ids for all the genes so we can link to advSearch page
               Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','), undefined, {'validationOnly':true})
+                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','),
+                            undefined, {'validationOnly':true})
                 .then(function(data){
                   _.forEach(pathwayHighlights,function(n){
+                    if(!data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId]){
+                      return;
+                    }
                     var ensemblId = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId][0].id;
-                    n.advQuery =  LocationService.mergeIntoFilters({gene:{id:{is:[ensemblId]},pathwayId:{is:[pathwayId]}}});
+                    n.advQuery =  LocationService.mergeIntoFilters({gene:{id:{is:[ensemblId]},
+                                                                          pathwayId:{is:[parentPathwayId]}}});
                   });
-              });
+                });
             
               _ctrl.pathway.highlights = pathwayHighlights;
             });
