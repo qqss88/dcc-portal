@@ -493,38 +493,6 @@ public class DownloadResource {
     }
   }
 
-  /*
-   * See:
-   * https://github.com/aruld/jersey-streaming/blob/master/src/main/java/com/aruld/jersey/streaming/MediaResource.java
-   */
-  private String parseRange(String range, long length) {
-    val ranges = range.split("=")[1].split("-");
-    val chunk_size = 1024 * 1024;
-    val from = getFromByte(range);
-
-    /**
-     * Chunk media if the range upper bound is unspecified. Chrome sends "bytes=0-"
-     */
-    long to = chunk_size + from;
-    if (to >= length) {
-      to = (int) (length - 1);
-    }
-    if (ranges.length == 2) {
-      to = parseInt(ranges[1]);
-    }
-
-    return String.format("bytes %d-%d/%d", from, to, length);
-  }
-
-  private long getFromByte(String range) {
-    if (range == null) {
-      return 0;
-    }
-
-    val ranges = range.split("=")[1].split("-");
-    return parseLong(ranges[0]);
-  }
-
   @ApiOperation("Get archive based by type subject to the supplied filter condition(s)")
   @GET
   @Timed
@@ -725,6 +693,32 @@ public class DownloadResource {
   public static class JobInfo {
 
     private final String downloadId;
+  }
+
+  /*
+   * See:
+   * https://github.com/aruld/jersey-streaming/blob/master/src/main/java/com/aruld/jersey/streaming/MediaResource.java
+   */
+  private static String parseRange(String range, long length) {
+    val ranges = range.split("=")[1].split("-");
+    val from = getFromByte(range);
+  
+    long to = length - 1;
+  
+    if (ranges.length == 2) {
+      to = parseInt(ranges[1]);
+    }
+  
+    return String.format("bytes %d-%d/%d", from, to, length);
+  }
+
+  private static long getFromByte(String range) {
+    if (range == null) {
+      return 0;
+    }
+  
+    val ranges = range.split("=")[1].split("-");
+    return parseLong(ranges[0]);
   }
 
   private boolean isPermissionDenied(User user, boolean isControlled) {
