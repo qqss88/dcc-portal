@@ -215,6 +215,18 @@ describe('Testing PqlUtilService', function() {
     expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
   });
 
+  it('Testing includes(transcripts, occurrences) in pql: eq(donor.test,123)', function() {
+    var originalPql = 'eq(donor.test,123)';
+    setPqlInUrl (originalPql);
+
+    var expectedPql = 'select(*),select(transcripts,occurrences),' + originalPql;
+
+    PqlUtilService.includes ('transcripts');
+    PqlUtilService.includes ('occurrences');
+
+    expect(PqlUtilService.getRawPql()).toEqual (expectedPql);
+  });
+
   it('Testing setLimit() in pql: eq(donor.test,123)', function() {
     var originalPql = 'eq(donor.test,123)';
     setPqlInUrl (originalPql);
@@ -781,6 +793,18 @@ describe('Testing PqlUtilService', function() {
     builder.addTerm ("donor", "gender", "male")
       .includesConsequences()
       .addTerm ("donor", "gender", "female");
+
+    expect(builder.build()).toEqual(expected);
+  });
+
+  it('Testing Builder.includes(transcripts,occurrences)', function() {
+    var expected = 'select(*),select(transcripts,occurrences),in(donor.gender,"male","female")';
+    var builder = PqlUtilService.getBuilder ();
+
+    builder.addTerm ("donor", "gender", "male")
+      .includes('transcripts')
+      .addTerm ("donor", "gender", "female")
+      .includes('occurrences');
 
     expect(builder.build()).toEqual(expected);
   });

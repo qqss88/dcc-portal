@@ -29,7 +29,6 @@
   var module = angular.module(namespace, []);
 
   module.factory(serviceName, function (PqlTranslationService) {
-
     var defaultProjection = ['*'];
 
     function getEmptyQueryObject () {
@@ -308,11 +307,11 @@
     }
 
     function addProjection (pql, selectField) {
-      var paramName = 'customSelects';
       var star = defaultProjection[0];
       if (star === selectField) {return pql;}
 
       var query = convertPqlToQueryObject (pql);
+      var paramName = 'customSelects';
       var customSelects = query.params [paramName];
       customSelects.push (selectField);
 
@@ -323,6 +322,13 @@
 
     function includesConsequences (pql) {
       return addProjection (pql, 'consequences');
+    }
+
+    var validIncludeFields = ['transcripts', 'consequences', 'occurrences',
+      'specimen', 'observation', 'projects'];
+
+    function includes (pql, field) {
+      return _.contains (validIncludeFields, field) ? addProjection (pql, field) : pql;
     }
 
     function convertQueryObjectToPql (queryObject) {
@@ -413,7 +419,7 @@
           [removeFacetFromQueryFilter, _.isArray (term) ? addMultipleTermsToQueryFilter : addTermToQueryFilter]);
       },
       includesFacets: includesFacets,
-      includesConsequences: includesConsequences,
+      includes: includes,
       convertQueryToPql: convertQueryObjectToPql,
       convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,

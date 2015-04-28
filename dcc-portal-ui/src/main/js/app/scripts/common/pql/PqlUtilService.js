@@ -111,8 +111,12 @@
         return service.includesFacets (buffer);
       }
 
+      function includes (buffer, field) {
+        return service.includes (buffer, field);
+      }
+
       function includesConsequences (buffer) {
-        return service.includesConsequences (buffer);
+        return service.includes (buffer, 'consequences');
       }
 
       function setLimit (buffer, limit) {
@@ -157,6 +161,10 @@
         },
         includesConsequences: function () {
           addAction (includesConsequences, []);
+          return this;
+        },
+        includes: function (field) {
+          addAction (includes, field);
           return this;
         },
         setLimit: function (limit) {
@@ -218,7 +226,10 @@
         updatePql (service.includesFacets);
       },
       includesConsequences: function () {
-        updatePql (service.includesConsequences);
+        updatePql (service.includes, 'consequences');
+      },
+      includes: function (field) {
+        updatePql (service.includes, field);
       },
       setLimit: function (limit) {
         updatePql (service.setLimit, limit);
