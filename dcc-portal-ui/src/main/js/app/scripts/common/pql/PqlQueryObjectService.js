@@ -35,10 +35,9 @@
     function getEmptyQueryObject () {
       return {
         params: {
-          // For query object, we always enforce the 'select' function.
-          // In fact, this is translated to 'select(*)' in PQL as we don't support
-          // column projection from the UI.
-          select: defaultProjection,
+          // For UI, selectAll should always be true. This is translated to 'select(*)' in PQL.
+          selectAll: true,
+          customSelects: [],
           facets: false,
           sort: [],
           limit: {}
@@ -114,22 +113,29 @@
 
       // Currently we expect the input (treeArray) to be an array,
       // namely we don't support/expect 'count' yet.
+      if (! _.isArray (treeArray)) {return result;}
+
       var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
       // For our current need, there should always be one 'And' node.
-      var filterValues = andNode ? (andNode.values || []) : treeArray;
-
+      var filterValues = andNode ? (_.isArray (andNode.values) ? andNode.values : []) : treeArray;
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
 
-      var selectNode = getSpecialNodeFromTreeArray (treeArray, isSelectNode);
+      var customSelectsNode = getSpecialNodeFromTreeArray (treeArray, function (node) {
+        return isSelectNode (node) &&
+          _.isArray (node.values) &&
+          ! _.isEqual (node.values, defaultProjection);
+      });
 
-      result.params.select = selectNode ? (selectNode.values || defaultProjection) : defaultProjection;
+      if (customSelectsNode) {
+        result.params.customSelects = customSelectsNode.values;
+      }
 
       // Again, currently the UI doesn't care about projection on facets so we treat any 'facets' as 'facets(*)'
       result.params.facets = (null !== getSpecialNodeFromTreeArray (treeArray, isFacetsNode));
 
       var sortNode = getSpecialNodeFromTreeArray (treeArray, isSortNode);
       // The values field in a 'sort' node contains an array of sort fields.
-      result.params.sort = sortNode ? (sortNode.values || []) : [];
+      result.params.sort = (sortNode && _.isArray (sortNode.values)) ? sortNode.values : [];
 
       var limitNode = getSpecialNodeFromTreeArray (treeArray, isLimitNode);
       result.params.limit = limitNode ? removeOp (limitNode) : {};
@@ -143,19 +149,29 @@
       });
     }
 
+    function createSelectTreeNodeObject (values) {
+      return {
+          op: 'select',
+          values: values
+        };
+    }
+
     function convertQueryObjectToJsonTree (query) {
       // Result should be an array because, for now, the UI does not need/support 'count'
       var result = [];
       var queryParams = query.params || {};
 
-      var projection = _.isArray (queryParams.select) && (! _.isEmpty (queryParams.select)) ?
-        queryParams.select : defaultProjection;
+      // selects
+      if (queryParams.selectAll) {
+        result.push (createSelectTreeNodeObject (defaultProjection));
+      }
 
-      result.push ({
-        op: 'select',
-        values: projection
-      });
+      var customProjection = queryParams.customSelects;
+      if (_.isArray (customProjection) && ! _.isEmpty (customProjection)) {
+        result.push (createSelectTreeNodeObject (customProjection));
+      }
 
+      // facets
       if (queryParams.facets) {
         result.push ({
           op: 'facets',
@@ -163,8 +179,10 @@
         });
       }
 
+      // filters
       result = result.concat (convertQueryFilterToJsonTree (query.filters));
 
+      // sort
       var sort = queryParams.sort || [];
       if (! _.isEmpty (sort)) {
         result.push ({
@@ -173,6 +191,7 @@
         });
       }
 
+      // limit
       var limit = queryParams.limit || {};
       if (! _.isEmpty (limit)) {
         limit.op = 'limit';
@@ -289,14 +308,15 @@
     }
 
     function addProjection (pql, selectField) {
+      var paramName = 'customSelects';
       var star = defaultProjection[0];
       if (star === selectField) {return pql;}
 
       var query = convertPqlToQueryObject (pql);
-      var projection = query.params.select;
-      projection.push (selectField);
+      var customSelects = query.params [paramName];
+      customSelects.push (selectField);
 
-      return updateQueryParam (pql, 'select', _.remove (projection, function (s) {
+      return updateQueryParam (pql, paramName, _.remove (customSelects, function (s) {
         return s !== star;
       }));
     }

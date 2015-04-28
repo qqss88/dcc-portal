@@ -208,7 +208,7 @@ describe('Testing PqlUtilService', function() {
     var originalPql = 'eq(donor.test,123)';
     setPqlInUrl (originalPql);
 
-    var expectedPql = 'select(consequences),' + originalPql;
+    var expectedPql = 'select(*),select(consequences),' + originalPql;
 
     PqlUtilService.includesConsequences ();
 
@@ -620,7 +620,7 @@ describe('Testing PqlUtilService', function() {
   it('Testing convertQueryToPql() for pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var testQuery = {
       params: {
-        select: ['*'],
+        selectAll: true,
         limit: {},
         sort: []
       },
@@ -650,7 +650,8 @@ describe('Testing PqlUtilService', function() {
   it('Testing convertPqlToQuery() with pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var expectedQuery = {
       params: {
-        select: ['*'],
+        selectAll: true,
+        customSelects: [],
         facets: false,
         limit: {},
         sort: []
@@ -774,7 +775,7 @@ describe('Testing PqlUtilService', function() {
   });
 
   it('Testing Builder.includesConsequences()', function() {
-    var expected = 'select(consequences),in(donor.gender,"male","female")';
+    var expected = 'select(*),select(consequences),in(donor.gender,"male","female")';
     var builder = PqlUtilService.getBuilder ();
 
     builder.addTerm ("donor", "gender", "male")

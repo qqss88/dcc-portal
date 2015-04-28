@@ -53,7 +53,7 @@
         return sortUnitToPql (unit);
       }
 
-      var vals = unit.values || [];
+      var vals = _.isArray (unit.values) ? unit.values : [];
       var values = _.contains (noNestingOperators, op) ?
         vals.join() :
         vals.map(convertNodeToPqlString).join();
@@ -76,7 +76,6 @@
     }
 
     function limitUnitToPql (limit) {
-      if (! limit) {return '';}
       if (! _.isPlainObject (limit)) {return '';}
       if (_.isEqual ({op: 'limit'}, limit)) {return '';}
 
@@ -88,10 +87,9 @@
 
     function sortUnitToPql (sort) {
       if (! sort) {return '';}
-      if (! sort.values) {return '';}
+      if (! _.isArray (sort.values)) {return '';}
 
       var sortArray = sort.values;
-      if (! _.isArray (sortArray)) {return '';}
       if (sortArray.length < 1) {return '';}
 
       var values = sortArray.map (function (obj) {
