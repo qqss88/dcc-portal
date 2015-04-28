@@ -320,10 +320,6 @@
       }));
     }
 
-    function includesConsequences (pql) {
-      return addProjection (pql, 'consequences');
-    }
-
     var validIncludeFields = ['transcripts', 'consequences', 'occurrences',
       'specimen', 'observation', 'projects'];
 
