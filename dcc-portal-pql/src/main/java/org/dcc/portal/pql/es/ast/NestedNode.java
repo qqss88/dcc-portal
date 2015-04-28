@@ -64,7 +64,7 @@ public class NestedNode extends ExpressionNode {
   @NoArgsConstructor(access = PRIVATE)
   public static enum ScoreMode implements Identifiable {
     AVG,
-    TOTAL, // Is not present in the documentation but still supported
+    TOTAL,
     SUM,
     MAX,
     NONE;

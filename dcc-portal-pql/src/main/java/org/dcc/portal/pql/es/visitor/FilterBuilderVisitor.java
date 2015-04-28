@@ -79,19 +79,19 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   private final Stack<FilterBuilder> stack = new Stack<FilterBuilder>();
 
   @Override
-  public FilterBuilder visitFilter(@NonNull FilterNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitFilter(@NonNull FilterNode node, @NonNull Optional<QueryContext> context) {
     return node.getFirstChild().accept(this, context);
   }
 
   @Override
-  public FilterBuilder visitQuery(@NonNull QueryNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitQuery(@NonNull QueryNode node, @NonNull Optional<QueryContext> context) {
     val queryBuilder = node.accept(Visitors.createQueryBuilderVisitor(), context);
 
     return FilterBuilders.queryFilter(queryBuilder);
   }
 
   @Override
-  public FilterBuilder visitBool(@NonNull BoolNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitBool(@NonNull BoolNode node, @NonNull Optional<QueryContext> context) {
     BoolFilterBuilder resultBuilder = boolFilter();
     for (val child : node.getChildren()) {
       val childrenResult = visitChildren(child, context);
@@ -108,7 +108,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitGreaterEqual(@NonNull GreaterEqualNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitGreaterEqual(@NonNull GreaterEqualNode node, @NonNull Optional<QueryContext> context) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.gte(node.getValue());
@@ -117,7 +117,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitGreaterThan(@NonNull GreaterThanNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitGreaterThan(@NonNull GreaterThanNode node, @NonNull Optional<QueryContext> context) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.gt(node.getValue());
@@ -126,7 +126,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitLessEqual(@NonNull LessEqualNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitLessEqual(@NonNull LessEqualNode node, @NonNull Optional<QueryContext> context) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.lte(node.getValue());
@@ -135,7 +135,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitLessThan(@NonNull LessThanNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitLessThan(@NonNull LessThanNode node, @NonNull Optional<QueryContext> context) {
     val rangeFilter = (RangeFilterBuilder) stack.peek();
     checkNotNull(rangeFilter, "Could not find the RangeFilter on the stack");
     rangeFilter.lt(node.getValue());
@@ -144,14 +144,14 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitNested(NestedNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitNested(@NonNull NestedNode node, @NonNull Optional<QueryContext> context) {
     log.debug("Visiting Nested: {}", node);
 
     return nestedFilter(node.getPath(), node.getFirstChild().accept(this, context));
   }
 
   @Override
-  public FilterBuilder visitNot(@NonNull NotNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitNot(@NonNull NotNode node, @NonNull Optional<QueryContext> context) {
     val childrenCount = node.childrenCount();
     checkState(childrenCount == 1, "NotNode can have only one child. Found {}", childrenCount);
 
@@ -159,7 +159,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitRange(@NonNull RangeNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitRange(@NonNull RangeNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
     checkState(node.childrenCount() > 0, "RangeNode has no children");
 
@@ -172,7 +172,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitTerm(@NonNull TermNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitTerm(@NonNull TermNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
     val name = node.getNameNode().getValue().toString();
     val value = node.getValueNode().getValue();
@@ -183,7 +183,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitExists(@NonNull ExistsNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitExists(@NonNull ExistsNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
     val field = node.getField();
     log.debug("[visitExists] Field: {}", field);
@@ -193,7 +193,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitMissing(@NonNull MissingNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitMissing(@NonNull MissingNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
     val field = node.getField();
     log.debug("[visitMissing] Field: {}", field);
@@ -203,7 +203,7 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
   }
 
   @Override
-  public FilterBuilder visitTerms(@NonNull TermsNode node, Optional<QueryContext> context) {
+  public FilterBuilder visitTerms(@NonNull TermsNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
     val values = Lists.newArrayList();
     for (val child : node.getChildren()) {

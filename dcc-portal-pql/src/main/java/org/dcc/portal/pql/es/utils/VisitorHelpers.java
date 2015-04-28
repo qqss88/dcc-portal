@@ -23,6 +23,7 @@ import static lombok.AccessLevel.PRIVATE;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +40,7 @@ public class VisitorHelpers {
    * Checks if {@code optional} has a reference.
    * @throws IllegalArgumentException
    */
-  public static <T> void checkOptional(Optional<T> optional) {
+  public static <T> void checkOptional(@NonNull Optional<T> optional) {
     checkArgument(optional.isPresent(), "The optional does not contain any reference.");
   }
 
@@ -52,8 +53,8 @@ public class VisitorHelpers {
    * @param parent to be visited
    * @param context - query context
    */
-  public static <T> Optional<ExpressionNode> visitChildren(NodeVisitor<Optional<ExpressionNode>, T> visitor,
-      ExpressionNode parent, Optional<T> context) {
+  public static <T> Optional<ExpressionNode> visitChildren(@NonNull NodeVisitor<Optional<ExpressionNode>, T> visitor,
+      @NonNull ExpressionNode parent, @NonNull Optional<T> context) {
     log.debug("[visitChildren] Processing node - \n{}", parent);
     val childrenToBeReplaced = Maps.<Integer, ExpressionNode> newHashMap();
 

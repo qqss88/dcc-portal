@@ -22,6 +22,7 @@ import static java.lang.String.format;
 
 import java.util.Optional;
 
+import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -46,7 +47,7 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryContext> {
 
   @Override
-  public QueryBuilder visitQuery(QueryNode node, Optional<QueryContext> context) {
+  public QueryBuilder visitQuery(@NonNull QueryNode node, @NonNull Optional<QueryContext> context) {
     // There are no cases yet where a QueryNode has 2 children. But we should enforce the correct structure.
     verifyQueryChildren(node);
 
@@ -54,7 +55,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
   }
 
   @Override
-  public QueryBuilder visitNested(NestedNode node, Optional<QueryContext> context) {
+  public QueryBuilder visitNested(@NonNull NestedNode node, @NonNull Optional<QueryContext> context) {
     val scoreQuery = node.getFirstChild().accept(this, context);
 
     return QueryBuilders
@@ -63,7 +64,7 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
   }
 
   @Override
-  public QueryBuilder visitFunctionScore(FunctionScoreNode node, Optional<QueryContext> context) {
+  public QueryBuilder visitFunctionScore(@NonNull FunctionScoreNode node, @NonNull Optional<QueryContext> context) {
     FunctionScoreQueryBuilder result = null;
     val filterNode = Nodes.getOptionalChild(node, FilterNode.class);
 
@@ -78,14 +79,14 @@ public class CreateQueryBuilderVisitor extends NodeVisitor<QueryBuilder, QueryCo
   }
 
   @Override
-  public QueryBuilder visitFilter(FilterNode node, Optional<QueryContext> context) {
+  public QueryBuilder visitFilter(@NonNull FilterNode node, @NonNull Optional<QueryContext> context) {
     val filterBuilder = node.accept(Visitors.filterBuilderVisitor(), context);
 
     return QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
   }
 
   @Override
-  public QueryBuilder visitBool(BoolNode node, Optional<QueryContext> context) {
+  public QueryBuilder visitBool(@NonNull BoolNode node, @NonNull Optional<QueryContext> context) {
     val boolQueryBuilder = QueryBuilders.boolQuery();
     for (val child : node.getChildren()) {
       if (child instanceof MustBoolNode) {

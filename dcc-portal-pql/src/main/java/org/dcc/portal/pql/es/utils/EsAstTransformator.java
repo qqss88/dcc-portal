@@ -90,7 +90,7 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  public ExpressionNode score(ExpressionNode esAst, QueryContext context) {
+  public ExpressionNode score(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     val tag = "[score]";
     log.debug("{} Adding scores to the query...", tag);
     val result = esAst.accept(Visitors.createScoreQueryVisitor(context.getType()), Optional.of(context));
@@ -99,7 +99,7 @@ public class EsAstTransformator {
     return result;
   }
 
-  public ExpressionNode resolveSpecialCases(ExpressionNode esAst, QueryContext context) {
+  public ExpressionNode resolveSpecialCases(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     val tag = "[resoveSpecialCases]";
     log.debug("Resolving the special cases...");
 
@@ -122,7 +122,7 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  public ExpressionNode optimize(ExpressionNode esAst) {
+  public ExpressionNode optimize(@NonNull ExpressionNode esAst) {
     val tag = "[optimize]";
     log.debug("{} Cleaning empty nodes...", tag);
     esAst = esAst.accept(createEmptyNodesCleanerVisitor(), Optional.empty());
@@ -142,7 +142,7 @@ public class EsAstTransformator {
     return esAst;
   }
 
-  public ExpressionNode resolveFacets(ExpressionNode esAst, TypeModel typeModel) {
+  public ExpressionNode resolveFacets(@NonNull ExpressionNode esAst, @NonNull TypeModel typeModel) {
     val tag = "[resolveFacets]";
     log.debug("{} Resolving aggregations...", tag);
     esAst = esAst.accept(createAggregationsResolverVisitor(), createResolveFacetsContext(typeModel.getType())).get();

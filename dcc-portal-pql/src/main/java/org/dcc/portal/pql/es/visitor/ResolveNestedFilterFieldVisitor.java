@@ -22,6 +22,8 @@ import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 
 import java.util.Optional;
 
+import lombok.NonNull;
+
 import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
@@ -56,130 +58,135 @@ import org.dcc.portal.pql.meta.TypeModel;
 public class ResolveNestedFilterFieldVisitor extends NodeVisitor<Optional<ExpressionNode>, TypeModel> {
 
   @Override
-  public Optional<ExpressionNode> visitShouldBool(ShouldBoolNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitShouldBool(@NonNull ShouldBoolNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitCount(CountNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitCount(@NonNull CountNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitFilter(FilterNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitFilter(@NonNull FilterNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitNested(NestedNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitNested(@NonNull NestedNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitBool(BoolNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitBool(@NonNull BoolNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitMustBool(MustBoolNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitMustBool(@NonNull MustBoolNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitTerm(TermNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitTerm(@NonNull TermNode node, @NonNull Optional<TypeModel> context) {
     return encloseInNestedNode(node.getNameNode().getValueAsString(), node, context.get());
   }
 
   @Override
-  public Optional<ExpressionNode> visitTerms(TermsNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitTerms(@NonNull TermsNode node, @NonNull Optional<TypeModel> context) {
     return encloseInNestedNode(node.getField(), node, context.get());
   }
 
   @Override
-  public Optional<ExpressionNode> visitNot(NotNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitNot(@NonNull NotNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitRoot(RootNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<TypeModel> context) {
     visitChildren(this, node, context);
 
     return Optional.of(node);
   }
 
   @Override
-  public Optional<ExpressionNode> visitSort(SortNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitSort(@NonNull SortNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitRange(RangeNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitRange(@NonNull RangeNode node, @NonNull Optional<TypeModel> context) {
     return encloseInNestedNode(node.getFieldName(), node, context.get());
   }
 
   @Override
-  public Optional<ExpressionNode> visitLimit(LimitNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitLimit(@NonNull LimitNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitFields(FieldsNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitFields(@NonNull FieldsNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitSource(SourceNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitSource(@NonNull SourceNode node, @NonNull Optional<TypeModel> context) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionNode> visitQuery(QueryNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitQuery(@NonNull QueryNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitAggregations(AggregationsNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitAggregations(@NonNull AggregationsNode node, @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitNestedAggregation(NestedAggregationNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitNestedAggregation(@NonNull NestedAggregationNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitTermsAggregation(TermsAggregationNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitTermsAggregation(@NonNull TermsAggregationNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitMissingAggregation(MissingAggregationNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitMissingAggregation(@NonNull MissingAggregationNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitFilterAggregation(FilterAggregationNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitFilterAggregation(@NonNull FilterAggregationNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitReverseNestedAggregation(ReverseNestedAggregationNode node,
-      Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitReverseNestedAggregation(@NonNull ReverseNestedAggregationNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitFunctionScore(FunctionScoreNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitFunctionScore(@NonNull FunctionScoreNode node,
+      @NonNull Optional<TypeModel> context) {
     return visitChildren(this, node, context);
   }
 
   @Override
-  public Optional<ExpressionNode> visitExists(ExistsNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitExists(@NonNull ExistsNode node, @NonNull Optional<TypeModel> context) {
     return encloseInNestedNode(node.getField(), node, context.get());
   }
 
   @Override
-  public Optional<ExpressionNode> visitMissing(MissingNode node, Optional<TypeModel> context) {
+  public Optional<ExpressionNode> visitMissing(@NonNull MissingNode node, @NonNull Optional<TypeModel> context) {
     return encloseInNestedNode(node.getField(), node, context.get());
   }
 

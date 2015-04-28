@@ -42,7 +42,7 @@ public class NestedAggregationNode extends ExpressionNode {
   }
 
   @Override
-  public <T, A> T accept(NodeVisitor<T, A> visitor, Optional<A> context) {
+  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitNestedAggregation(this, context);
   }
 

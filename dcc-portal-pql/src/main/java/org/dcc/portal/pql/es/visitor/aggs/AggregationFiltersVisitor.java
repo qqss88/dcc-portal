@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import javax.annotation.concurrent.ThreadSafe;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,67 +51,67 @@ public class AggregationFiltersVisitor extends NodeVisitor<ExpressionNode, Strin
   private static final ExpressionNode REMOVE_CHILD = null;
 
   @Override
-  public ExpressionNode visitFilter(FilterNode node, Optional<String> context) {
+  public ExpressionNode visitFilter(FilterNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
   @Override
-  public ExpressionNode visitBool(BoolNode node, Optional<String> context) {
+  public ExpressionNode visitBool(BoolNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
   @Override
-  public ExpressionNode visitMustBool(MustBoolNode node, Optional<String> context) {
+  public ExpressionNode visitMustBool(MustBoolNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
   @Override
-  public ExpressionNode visitShouldBool(ShouldBoolNode node, Optional<String> context) {
+  public ExpressionNode visitShouldBool(ShouldBoolNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
   @Override
-  public ExpressionNode visitTerm(TermNode node, Optional<String> context) {
+  public ExpressionNode visitTerm(TermNode node, @NonNull Optional<String> context) {
     checkOptional(context);
 
     return node.getNameNode().getValue().equals(context.get()) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitNot(NotNode node, Optional<String> context) {
+  public ExpressionNode visitNot(NotNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
   @Override
-  public ExpressionNode visitRange(RangeNode node, Optional<String> context) {
+  public ExpressionNode visitRange(RangeNode node, @NonNull Optional<String> context) {
     checkOptional(context);
 
     return node.getFieldName().equals(context.get()) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitTerms(TermsNode node, Optional<String> context) {
+  public ExpressionNode visitTerms(TermsNode node, @NonNull Optional<String> context) {
     checkOptional(context);
 
     return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitExists(ExistsNode node, Optional<String> context) {
+  public ExpressionNode visitExists(ExistsNode node, @NonNull Optional<String> context) {
     checkOptional(context);
 
     return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitMissing(MissingNode node, Optional<String> context) {
+  public ExpressionNode visitMissing(MissingNode node, @NonNull Optional<String> context) {
     checkOptional(context);
 
     return node.getField().equals(context.get()) ? REMOVE_CHILD : node;
   }
 
   @Override
-  public ExpressionNode visitNested(NestedNode node, Optional<String> context) {
+  public ExpressionNode visitNested(NestedNode node, @NonNull Optional<String> context) {
     return processCommonCases(node, context);
   }
 
