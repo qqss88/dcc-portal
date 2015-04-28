@@ -1,3 +1,4 @@
+
 /** PATHWAY COLOR CUSTOMIZATION **/
 
 $primaryNodeColor:#b5f9a7;
@@ -74,6 +75,11 @@ $compartmentBorder:#ffc38b;
 
 .pathway-sub-reaction-line{
   stroke-width:1.5px;
+}
+
+// Special legend node has no background
+.RenderableMutated{
+  background: white;
 }
 
 /** ESSENTIALS **/

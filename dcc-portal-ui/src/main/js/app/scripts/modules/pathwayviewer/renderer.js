@@ -331,12 +331,12 @@
         var svgNode = svg.selectAll('.entity'+node.id);
         var renderedValue = highlight.value;
 
-        if(highlighted.indexOf(highlight.id) >= 0){
-          svg.select('.banner-text'+highlight.id).text('?');
+        if(highlighted.indexOf(node.id) >= 0){
+          svg.select('.banner-text'+highlight.id).text('*');
           svg.select('.value-banner'+highlight.id).attr('width',15);
           return;
         }
-        highlighted.push(highlight.id);
+        highlighted.push(node.id);
       
         if(svgNode[0].length <= 0){
           return;

@@ -32,12 +32,12 @@
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info">'+
-        '<i style="visibility:hidden" class="fa fa-times-circle pathway-info-controller"></i>'+
+        '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
         '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
           '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
                 '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header">Mutations</th>' +
+                '<th class="pathway-gene-header-label pathway-gene-header"># Mutations</th>' +
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
               '<th class="pathway-gene-label">{{gene.id}}</th>' +
@@ -53,7 +53,7 @@
         var openNewSideBar = function(isLegend,isInfo){
           if(showingLegend){
             $('.pathway-legend').animate({left: '100%'});
-            $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-times-circle');
+            $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-chevron-circle-right');
           }else if(showingInfo){
             $('.pathway-info').animate({left: '100%'});
             $('.pathway-info-controller').css('visibility','hidden');
@@ -65,7 +65,7 @@
           
           if(isLegend){
             $('.pathway-legend').animate({'left': '75%'});
-            $('.pathway-legend-controller').addClass('fa-times-circle').removeClass('fa-question-circle');
+            $('.pathway-legend-controller').addClass('fa-chevron-circle-right').removeClass('fa-question-circle');
             showingLegend = true;
           }else if(showingInfo){
             $('.pathway-info-controller').css('visibility','visible');
@@ -86,7 +86,7 @@
           height: 300,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
-            var padding = 7, displayedCount = '?';
+            var padding = 7, displayedCount = '*';
             var node = $.extend({}, d);
             var geneList = [];
             
@@ -98,8 +98,9 @@
             if(highlights && d.isPartOfPathway){
               highlights.forEach(function (highlight) {
                 if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
+                  var geneId = highlight.advQuery.gene.id.is[0];
                   geneList.push({
-                    id:'Uniprot:'+highlight.uniprotId,
+                    id:geneId,
                     value:highlight.value,
                     advQuery:highlight.advQuery
                   });

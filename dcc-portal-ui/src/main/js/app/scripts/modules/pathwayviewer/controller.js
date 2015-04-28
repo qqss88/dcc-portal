@@ -95,7 +95,7 @@
     // Render everything
     this.renderer = new dcc.Renderer(svg, {
       onClick: function (d) {
-        d.isPartOfPathway = nodesInPathway.indexOf(d.reactomeId) >= 0;
+        d.isPartOfPathway = (nodesInPathway.length<=0 || nodesInPathway.indexOf(d.reactomeId) >= 0);
         config.onClick(d);
       },
       urlPath: config.urlPath,
@@ -185,12 +185,16 @@
       });
       var nodes = rendererUtils.getLegendNodes(20,0);
       legendrenderer.renderNodes(nodes);
-      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.35,legendSvg));
+      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.32,legendSvg));
       legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.6,legendSvg),true);
       legendrenderer.highlightEntity(
         [{id:'Mutated',value:99}],
         {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
       });
+      legendSvg.selectAll('.reaction-sub-example')
+            .attr('stroke',config.subPathwayColor)
+            .classed('pathway-sub-reaction-line',true);
+      
     }else{
       d3.select('.pathway-legend-svg').attr('opacity','1');
     }
@@ -208,9 +212,9 @@
     var nodesInPathway = this.nodesInPathway;
     rawHighlights.forEach(function (rh) {
       rh.dbIds.forEach(function (dbId) {
-        
+
         // Only highlight it if it's part of the pathway we're zooming in on
-        if(nodesInPathway.indexOf(dbId) >= 0 && rh.value > 0){
+        if((nodesInPathway.length<=0 || nodesInPathway.indexOf(dbId) >= 0)&& rh.value > 0){
           highlights.push({id:dbId,value:rh.value});
         }
       });

@@ -183,7 +183,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Link'];
+    var markers = ['Output','Catalyst','Activator','Link','Sub-Pathway'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -193,7 +193,7 @@
         marked: true,
         marker: elem+'-legend',
         color: 'black',
-        id:'fake',
+        id: elem==='Sub-Pathway'?'-sub-example':'fake',
         type: elem==='Link'?'entitysetandmemberlink':'fake'
       });
       svg.append('foreignObject').attr({
