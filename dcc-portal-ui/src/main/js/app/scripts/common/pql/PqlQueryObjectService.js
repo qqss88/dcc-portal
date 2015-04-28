@@ -290,7 +290,7 @@
 
     function addProjection (pql, selectField) {
       var star = defaultProjection[0];
-      if (star === selectField) return pql;
+      if (star === selectField) {return pql;}
 
       var query = convertPqlToQueryObject (pql);
       var projection = query.params.select;
