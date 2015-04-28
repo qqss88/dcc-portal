@@ -244,8 +244,10 @@
         });
         
         // 4) if it's a reactome pathway, get diagram
-        if(_ctrl.geneSet.source === 'Reactome'){
+        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0]){
           _ctrl.pathway = {};
+          _ctrl.geneSet.showPathway = true;
+          
           var pathwayId = _ctrl.uiParentPathways[0].diagramId;
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
@@ -299,6 +301,8 @@
             
               _ctrl.pathway.highlights = pathwayHighlights;
             });
+        }else{
+          _ctrl.geneSet.showPathway = false;
         }
 
         // Assign projects to controller so it can be rendered in the view

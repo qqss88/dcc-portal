@@ -322,6 +322,8 @@
     // Remove old highlights if there are any
     svg.selectAll('.banner-text').remove();
     svg.selectAll('.value-banner').remove();
+    svg.selectAll('.RenderableRect').style('stroke','');
+    svg.selectAll('.RenderableRect').style('stroke-width','');
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);

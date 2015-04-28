@@ -178,7 +178,7 @@
         .attr('preserveAspectRatio', 'xMidYMid')
         .append('g');
       var legendrenderer = new dcc.Renderer(legendSvg, {
-        onClick: {},
+        onClick: function(){},
         urlPath: config.urlPath,
         strokeColor: config.strokeColor,
         highlightColor: config.highlightColor
@@ -210,7 +210,7 @@
       rh.dbIds.forEach(function (dbId) {
         
         // Only highlight it if it's part of the pathway we're zooming in on
-        if(nodesInPathway.indexOf(dbId) >= 0){
+        if(nodesInPathway.indexOf(dbId) >= 0 && rh.value > 0){
           highlights.push({id:dbId,value:rh.value});
         }
       });

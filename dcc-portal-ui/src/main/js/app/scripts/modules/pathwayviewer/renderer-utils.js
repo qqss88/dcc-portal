@@ -158,7 +158,7 @@
   */
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
     var nodes = [];
-    var mutatedNodeText = 'Mutated';
+    var mutatedNodeText = 'Mutated Gene(s)';
     var x = marginLeft, y= marginTop;
     var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',mutatedNodeText];
     for(var i=0;i<types.length;i++){

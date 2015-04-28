@@ -79,7 +79,7 @@
               .attr('viewBox', '0 0 ' +150+ ' ' +50)
               .attr('preserveAspectRatio', 'xMidYMid')
               .append('g');
-        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: {},highlightColor: '#9b315b'});
+        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b'});
 
         var controller = new dcc.ReactomePathway({
           width: 500,
@@ -122,7 +122,7 @@
                                            {getNodesByReactomeId:function (){return [node];}});
             }
           },
-          urlPath: $location.path(),
+          urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
           subPathwayColor: 'hotpink'

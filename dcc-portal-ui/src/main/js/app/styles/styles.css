@@ -3944,7 +3944,7 @@ td {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 /* line 143, _modules/_pathwayviewer.scss */
