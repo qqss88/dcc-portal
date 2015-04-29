@@ -57,6 +57,15 @@
    
     markers.forEach(function (elem) {
       var def = circular(elem)?circle:arrow;
+      var color = strokeColor
+      
+      // Special arrow for genes (see react_11118 for an example)
+      if(elem === 'GeneArrow'){
+        def.attr.markerWidth = 5;
+        def.attr.markerHeight = 5;
+        color = 'black';
+      }
+      
       svg.append('svg:defs').append('svg:marker')
         .attr({
           'id': elem,
@@ -67,8 +76,8 @@
           'orient':'auto'
         }).append(def.element)
         .attr(def.attr)
-        .attr('stroke',strokeColor)
-        .style('fill',filled(elem)?strokeColor:'white');
+        .attr('stroke',color)
+        .style('fill',filled(elem)?color:'white');
     });
   }
 
@@ -215,7 +224,7 @@
       'class':'RenderableGeneArrow',
       'x1':function(d){return (+d.position.x)+(+d.size.width) - 0.5;},
       'y1':function(d){return (+d.position.y) +1;},
-      'x2':function(d){return (+d.position.x)+(+d.size.width)  + 3.5;},
+      'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
       'y2':function(d){return (+d.position.y) + 1;},
     }).attr('stroke','black')
       .style('marker-end','url('+config.urlPath+'#GeneArrow)');
