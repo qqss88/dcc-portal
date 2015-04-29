@@ -100,16 +100,18 @@
       },
       urlPath: config.urlPath,
       strokeColor: config.strokeColor,
-      highlightColor: config.highlightColor
+      highlightColor: config.highlightColor,
+      subPathwayColor: config.subPathwayColor
     });
+    var renderer =  this.renderer;
     var rendererUtils = new dcc.RendererUtils();
     this.rendererUtils = rendererUtils;
-
-    this.renderer.renderCompartments(_.where(model.getNodes().slice(),{type:'RenderableCompartment'}));
-    this.renderer.renderEdges(rendererUtils.generateLines(model));
-    this.renderer.renderNodes(_.filter(model.getNodes().slice(),
+    
+    renderer.renderCompartments(_.where(model.getNodes().slice(),{type:'RenderableCompartment'}));
+    renderer.renderEdges(rendererUtils.generateLines(model));
+    renderer.renderNodes(_.filter(model.getNodes().slice(),
                                        function(n){return n.type!=='RenderableCompartment';}));
-    this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
+    renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
 
     // Zoom in on the elements of interest if there are any
     if(zoomedOnElements[0].length !== 0){
@@ -126,10 +128,7 @@
           // Add nodes in this pathway to list
           nodesInPathway = nodesInPathway.concat(model.getNodesInReaction(reaction.reactomeId));
         
-          // Highlight the lines of this reaction
-          svg.selectAll('.reaction'+reaction.reactomeId)
-            .attr('stroke',config.subPathwayColor)
-            .classed('pathway-sub-reaction-line',true);
+          renderer.outlineSubPathway(svg,reaction.reactomeId);
         
           // Update height/width calcuations accordingly
           reaction.nodes.forEach(function (node) {
@@ -167,37 +166,31 @@
   * of this div to 1.
   */
   ReactomePathway.prototype.renderLegend = function (w,h) {
-    var legendSvg = d3.select('.pathway-legend-svg')[0][0];
-    
-    if(!legendSvg){
-      var config =  this.config;
-      var rendererUtils = this.rendererUtils;
-      legendSvg = d3.select('.pathway-legend').append('svg')
-        .attr('class','pathway-legend-svg')
-        .attr('viewBox', '0 0 ' +w+ ' ' + h)
-        .attr('preserveAspectRatio', 'xMidYMid')
-        .append('g');
-      var legendRenderer = new dcc.Renderer(legendSvg, {
-        onClick: function(){},
-        urlPath: config.urlPath,
-        strokeColor: config.strokeColor,
-        highlightColor: config.highlightColor
-      });
-      var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
-      legendRenderer.renderNodes(nodes);
-      legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.34,legendSvg));
-      legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.64,legendSvg),true);
-      legendRenderer.highlightEntity(
-        [{id:'Mutated',value:99}],
-        {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
-      });
-      legendSvg.selectAll('.reaction-sub-example')
-            .attr('stroke',config.subPathwayColor)
-            .classed('pathway-sub-reaction-line',true);
-      
-    }else{
-      d3.select('.pathway-legend-svg').attr('opacity','1');
-    }
+    d3.select('.pathway-legend-svg').remove();
+    var config =  this.config;
+    var rendererUtils = this.rendererUtils;
+    var legendSvg = d3.select('.pathway-legend').append('svg')
+      .attr('class','pathway-legend-svg')
+      .attr('viewBox', '0 0 ' +w+ ' ' + h)
+      .attr('preserveAspectRatio', 'xMidYMid')
+      .append('g');
+    var legendRenderer = new dcc.Renderer(legendSvg, {
+      onClick: function(){},
+      urlPath: config.urlPath,
+      strokeColor: config.strokeColor,
+      highlightColor: config.highlightColor
+    });
+    var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
+    legendRenderer.renderNodes(nodes);
+    legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.34,legendSvg));
+    legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.64,legendSvg),true);
+    legendRenderer.highlightEntity(
+      [{id:'Mutated',value:99}],
+      {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
+    });
+    legendSvg.selectAll('.reaction-sub-example')
+          .attr('stroke',config.subPathwayColor)
+          .classed('pathway-sub-reaction-line',true);
   };
 
   /**

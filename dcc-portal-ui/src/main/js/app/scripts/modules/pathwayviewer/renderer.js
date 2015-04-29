@@ -7,7 +7,8 @@
     onClick:{},
     urlPath: '',
     strokeColor: '#696969',
-    highlightColor: 'red'
+    highlightColor: 'red',
+    subPathwayColor: 'hotpink'
   };
 
   var Renderer = function(svg, config) {
@@ -20,14 +21,17 @@
     var strokeColor =  config.strokeColor;
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
                   'Catalyst-legend','Activator-legend','Output-legend','Inhibitor','Inhibitor-legend'];
+    var isBaseMarker = function(type){
+      return ['Output','Activator','Catalyst','Inhibitor'].indexOf(type)>=0; // Part of subpathway reactions
+    };
     var filled = function(type){
       return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;
     };
     var isCircular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
     var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
-    var isArrowed = function(type){
-      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
-    };
+//    var isArrowed = function(type){
+//      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
+//    };
     var isLinear = function(type){return ['Inhibitor','Inhibitor-legend'].indexOf(type)>=0;};
     
     
@@ -79,7 +83,7 @@
         def = arrow;
       }
       
-      var color = strokeColor
+      var color = strokeColor;
       
       // Special arrow for genes (see react_11118 for an example)
       if(elem === 'GeneArrow'){
@@ -100,6 +104,25 @@
         .attr(def.attr)
         .attr('stroke',color)
         .style('fill',filled(elem)?color:'white');
+      
+      
+      
+      if(isBaseMarker(elem)){
+        color = config.subPathwayColor;
+        
+        svg.append('svg:defs').append('svg:marker')
+          .attr({
+            'id': elem+'-subpathway',
+            'viewBox': def.viewBox,
+            'refX': (+def.refX)*(shifted(elem)?1.5:1),
+            'markerHeight':def.attr.markerHeight,
+            'markerWidth':def.attr.markerWidth,
+            'orient':'auto'
+          }).append(def.element)
+          .attr(def.attr)
+          .attr('stroke',color)
+          .style('fill',filled(elem)?color:'white');
+      }
     });
   }
 
@@ -399,6 +422,15 @@
         }).text(renderedValue);
       });
     });
+  };
+  
+  Renderer.prototype.outlineSubPathway = function (svg, reactomeId) {
+    var config = this.config;
+    
+    // Highlight the lines of this reaction
+    svg.selectAll('.reaction'+reactomeId)
+      .attr('stroke',config.subPathwayColor)
+      .classed('pathway-sub-reaction-line',true);
   };
 
   dcc.Renderer = Renderer;
