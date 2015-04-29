@@ -33,8 +33,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
 import static org.icgc.dcc.downloader.core.DataType.CLINICAL;
-import static org.icgc.dcc.downloader.core.DataType.CLINICALSAMPLE;
 import static org.icgc.dcc.downloader.core.DataType.CNSM;
+import static org.icgc.dcc.downloader.core.DataType.DONOR;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_EXPOSURE;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_FAMILY;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_THERAPY;
 import static org.icgc.dcc.downloader.core.DataType.EXP_ARRAY;
 import static org.icgc.dcc.downloader.core.DataType.EXP_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.JCN;
@@ -42,7 +45,9 @@ import static org.icgc.dcc.downloader.core.DataType.METH_ARRAY;
 import static org.icgc.dcc.downloader.core.DataType.METH_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.MIRNA_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.PEXP;
+import static org.icgc.dcc.downloader.core.DataType.SAMPLE;
 import static org.icgc.dcc.downloader.core.DataType.SGV_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SPECIMEN;
 import static org.icgc.dcc.downloader.core.DataType.SSM_CONTROLLED;
 import static org.icgc.dcc.downloader.core.DataType.SSM_OPEN;
 import static org.icgc.dcc.downloader.core.DataType.STSM;
@@ -156,7 +161,7 @@ public class DownloadResource {
       .<DataType, List<DataType>> builder()
       .put(SSM_OPEN, ImmutableList.of(SSM_OPEN))
       .put(SSM_CONTROLLED, ImmutableList.of(SSM_CONTROLLED))
-      .put(CLINICAL, ImmutableList.of(CLINICAL, CLINICALSAMPLE))
+      .put(CLINICAL, ImmutableList.of(DONOR, DONOR_EXPOSURE, DONOR_FAMILY, DONOR_THERAPY, SPECIMEN, SAMPLE))
       .put(CNSM, ImmutableList.of(CNSM))
       .put(JCN, ImmutableList.of(JCN))
       .put(METH_ARRAY, ImmutableList.of(METH_ARRAY))
@@ -174,6 +179,14 @@ public class DownloadResource {
     private final static Map<String, DataType> PublicAccessibleMap = ImmutableMap.<String, DataType> builder()
         .put(SSM_OPEN.name, SSM_OPEN)
         .put(CLINICAL.name, CLINICAL)
+
+        .put(DONOR.name, DONOR)
+        .put(DONOR_EXPOSURE.name, DONOR_EXPOSURE)
+        .put(DONOR_FAMILY.name, DONOR_FAMILY)
+        .put(DONOR_THERAPY.name, DONOR_THERAPY)
+        .put(SPECIMEN.name, SPECIMEN)
+        .put(SAMPLE.name, SAMPLE)
+
         .put(CNSM.name, CNSM)
         .put(JCN.name, JCN)
         .put(METH_SEQ.name, METH_SEQ)
@@ -191,6 +204,14 @@ public class DownloadResource {
         .<String, DataType> builder()
         .put(SSM_CONTROLLED.name, SSM_CONTROLLED)
         .put(CLINICAL.name, CLINICAL)
+
+        .put(DONOR.name, DONOR)
+        .put(DONOR_EXPOSURE.name, DONOR_EXPOSURE)
+        .put(DONOR_FAMILY.name, DONOR_FAMILY)
+        .put(DONOR_THERAPY.name, DONOR_THERAPY)
+        .put(SPECIMEN.name, SPECIMEN)
+        .put(SAMPLE.name, SAMPLE)
+
         .put(CNSM.name, CNSM)
         .put(JCN.name, JCN)
         .put(METH_SEQ.name, METH_SEQ)
@@ -202,6 +223,7 @@ public class DownloadResource {
         .put(EXP_SEQ.name, EXP_SEQ)
         .put(SGV_CONTROLLED.name, SGV_CONTROLLED)
         .build();
+
     private final static Set<DataType> PrivateAccessibleDataTypes = ImmutableSet
         .copyOf(PrivateAccessibleMap.values());
 
