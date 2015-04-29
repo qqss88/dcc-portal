@@ -306,25 +306,38 @@
       return updateQueryParam (pql, 'facets', true);
     }
 
-    function addProjection (pql, selectField) {
-      var star = defaultProjection[0];
-      if (star === selectField) {return pql;}
+    var validIncludeFields = ['transcripts', 'consequences', 'occurrences',
+      'specimen', 'observation', 'projects'];
+
+    function addProjections (pql, fields) {
+      fields = _.isArray (fields) ? fields : [];
+      var selectFields = _.remove (fields, function (s) {
+        return _.isString (s) && _.contains (validIncludeFields, s);
+      });
+
+      if (_.isEmpty (selectFields)) {return pql;}
 
       var query = convertPqlToQueryObject (pql);
       var paramName = 'customSelects';
       var customSelects = query.params [paramName];
-      customSelects.push (selectField);
+      var updatedSelects = _.union (customSelects, selectFields);
 
-      return updateQueryParam (pql, paramName, _.remove (customSelects, function (s) {
+      var star = defaultProjection[0];
+      return updateQueryParam (pql, paramName, _.remove (updatedSelects, function (s) {
         return s !== star;
       }));
     }
 
-    var validIncludeFields = ['transcripts', 'consequences', 'occurrences',
-      'specimen', 'observation', 'projects'];
+    function addProjection (pql, selectField) {
+      var star = defaultProjection[0];
+      if (star === selectField) {return pql;}
+
+      return addProjections (pql, [selectField]);
+    }
+
 
     function includes (pql, field) {
-      return _.contains (validIncludeFields, field) ? addProjection (pql, field) : pql;
+      return (_.isArray (field) ? addProjections : addProjection) (pql, field);
     }
 
     function convertQueryObjectToPql (queryObject) {

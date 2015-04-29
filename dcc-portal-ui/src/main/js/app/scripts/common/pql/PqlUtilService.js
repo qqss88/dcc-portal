@@ -164,7 +164,7 @@
           return this;
         },
         includes: function (field) {
-          addAction (includes, field);
+          addAction (includes, [field]);
           return this;
         },
         setLimit: function (limit) {
