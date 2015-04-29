@@ -133,7 +133,7 @@
     // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
-        class: function(d){return 'RenderableOct RenderableComplex entity'+d.id;},
+        class: function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
         points: function (d) {
           return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
         },
@@ -148,7 +148,7 @@
 
     // Render all other normal rectangular nodes after octagons
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
-      'class': function (d) {return 'RenderableRect ' + d.type + ' entity'+d.id;},
+      'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
       'x': function (d) {return d.position.x;},
       'y': function (d) {return d.position.y;},
       'width': function (d) {return d.size.width;},
@@ -322,8 +322,8 @@
     // Remove old highlights if there are any
     svg.selectAll('.banner-text').remove();
     svg.selectAll('.value-banner').remove();
-    svg.selectAll('.RenderableRect').style('stroke','');
-    svg.selectAll('.RenderableRect').style('stroke-width','');
+    svg.selectAll('.pathway-node').style('stroke','');
+    svg.selectAll('.pathway-node').style('stroke-width','');
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);

@@ -89,23 +89,15 @@
   };
 
   PathwayModel.prototype.getNodeById = function (id) {
-    var node;
-    this.nodes.forEach(function (n) {
-      if (n.id === id){
-        node = n;
-      }
+    return _.find(this.nodes,function(n){
+      return n.id === id;
     });
-    return node;
   };
   
   PathwayModel.prototype.getNodesByReactomeId = function (reactomeId) {
-    var nodes = [];
-    this.nodes.forEach(function (n) {
-      if (n.reactomeId === reactomeId){
-        nodes.push(n);
-      }
+    return _.filter(this.nodes, function(n){
+      return n.reactomeId === reactomeId;
     });
-    return nodes;
   };
 
   PathwayModel.prototype.getNodes = function () {

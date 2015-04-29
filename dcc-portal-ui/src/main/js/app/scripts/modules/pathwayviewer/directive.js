@@ -97,7 +97,14 @@
             // Create list of uniprot ids if we have any
             if(highlights && d.isPartOfPathway){
               highlights.forEach(function (highlight) {
-                if(highlight.dbIds.indexOf(d.reactomeId) >= 0){
+                
+                if(_.contains(highlight.dbIds,d.reactomeId)){
+                  
+                  if(!highlight.advQuery){
+                    console.log('Ensembl id not found for: '+highlight.uniprotId+' ..skipping');
+                    return;
+                  }
+                  
                   var geneId = highlight.advQuery.gene.id.is[0];
                   geneList.push({
                     id:geneId,
@@ -134,11 +141,10 @@
             openNewSideBar(false,false);
           }else{
             openNewSideBar(true,false);
-            var width = $('.pathway-legend').css('width');
-            var height = $('.pathway-legend').css('height');
+            var rect = $('.pathway-legend')[0].getBoundingClientRect();
             
             // Create legend with width and height but with 'px' removed
-            controller.renderLegend(width.substring(0,width.length-2),height.substring(0,height.length-2));
+            controller.renderLegend(rect.width,rect.height);
           }
         });
 

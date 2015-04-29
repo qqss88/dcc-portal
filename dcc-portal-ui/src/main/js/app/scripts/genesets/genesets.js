@@ -252,7 +252,7 @@
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
           // get pathway xml
-          var reactomePromise = Restangular.one('ui').one('reactome').one('pathway-diagram')
+          Restangular.one('ui').one('reactome').one('pathway-diagram')
             .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
             .then(function(data){
               _ctrl.pathway.xml = data;
@@ -260,7 +260,7 @@
 
           // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
           if(pathwayId !== parentPathwayId){
-            reactomePromise = Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
+            Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
               .get({'pathwayId' : parentPathwayId},{'Accept':'application/json'})
               .then(function(data){
                 _ctrl.pathway.zooms = data;
@@ -269,7 +269,7 @@
             _ctrl.pathway.zooms = [''];
           }
           
-          reactomePromise = Restangular.one('ui').one('reactome').one('protein-map')
+          Restangular.one('ui').one('reactome').one('protein-map')
             .get({pathwayId:parentPathwayId,
                   impactFilter:_filter.mutation?_filter.mutation.functionalImpact.is.join(','):''})
             .then(function(map){
@@ -290,12 +290,18 @@
                             undefined, {'validationOnly':true})
                 .then(function(data){
                   _.forEach(pathwayHighlights,function(n){
-                    if(!data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId]){
+                    var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
+                    if(!uniprotObj){
                       return;
                     }
-                    var ensemblId = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId][0].id;
-                    n.advQuery =  LocationService.mergeIntoFilters({gene:{id:{is:[ensemblId]},
-                                                                          pathwayId:{is:[parentPathwayId]}}});
+                    var ensemblId = uniprotObj[0].id;
+                    n.advQuery =  LocationService.mergeIntoFilters(
+                      {
+                        gene:{
+                          id:{is:[ensemblId]},
+                          pathwayId:{is:[parentPathwayId]}
+                        }
+                      });
                   });
                 });
             

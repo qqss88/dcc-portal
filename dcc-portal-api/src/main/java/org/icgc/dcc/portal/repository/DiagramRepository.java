@@ -48,8 +48,8 @@ public class DiagramRepository {
   private final String indexName;
 
   @Autowired
-  public DiagramRepository(@NonNull Client client, @Value("#{indexName}") String index) {
-    this.indexName = index;
+  public DiagramRepository(@NonNull Client client, @Value("#{indexName}") String indexName) {
+    this.indexName = indexName;
     this.client = client;
   }
 

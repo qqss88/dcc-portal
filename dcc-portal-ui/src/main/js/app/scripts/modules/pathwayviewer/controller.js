@@ -103,15 +103,15 @@
       highlightColor: config.highlightColor
     });
     var rendererUtils = new dcc.RendererUtils();
+    this.rendererUtils = rendererUtils;
 
-    this.renderer.renderCompartments(_.filter(model.getNodes().slice(),
-                                              function(n){return n.type==='RenderableCompartment';}));
+    this.renderer.renderCompartments(_.where(model.getNodes().slice(),{type:'RenderableCompartment'}));
     this.renderer.renderEdges(rendererUtils.generateLines(model));
     this.renderer.renderNodes(_.filter(model.getNodes().slice(),
                                        function(n){return n.type!=='RenderableCompartment';}));
     this.renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
 
-    // Zoom in on the elements on interest if there are any
+    // Zoom in on the elements of interest if there are any
     if(zoomedOnElements[0].length !== 0){
       
       //Reset size calculations
@@ -171,23 +171,23 @@
     
     if(!legendSvg){
       var config =  this.config;
-      var rendererUtils = new dcc.RendererUtils();
+      var rendererUtils = this.rendererUtils;
       legendSvg = d3.select('.pathway-legend').append('svg')
         .attr('class','pathway-legend-svg')
         .attr('viewBox', '0 0 ' +w+ ' ' + h)
         .attr('preserveAspectRatio', 'xMidYMid')
         .append('g');
-      var legendrenderer = new dcc.Renderer(legendSvg, {
+      var legendRenderer = new dcc.Renderer(legendSvg, {
         onClick: function(){},
         urlPath: config.urlPath,
         strokeColor: config.strokeColor,
         highlightColor: config.highlightColor
       });
-      var nodes = rendererUtils.getLegendNodes(20,0);
-      legendrenderer.renderNodes(nodes);
-      legendrenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.32,legendSvg));
-      legendrenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.6,legendSvg),true);
-      legendrenderer.highlightEntity(
+      var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
+      legendRenderer.renderNodes(nodes);
+      legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.32,legendSvg));
+      legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.6,legendSvg),true);
+      legendRenderer.highlightEntity(
         [{id:'Mutated',value:99}],
         {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
       });
@@ -214,7 +214,8 @@
       rh.dbIds.forEach(function (dbId) {
 
         // Only highlight it if it's part of the pathway we're zooming in on
-        if((nodesInPathway.length<=0 || nodesInPathway.indexOf(dbId) >= 0)&& rh.value > 0){
+        // And only hide parts of it we are zooming in on a pathway
+        if((nodesInPathway.length === 0 || _.contains(nodesInPathway,dbId)) && rh.value > 0){
           highlights.push({id:dbId,value:rh.value});
         }
       });

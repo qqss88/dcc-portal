@@ -13,10 +13,10 @@
     var labels = [];
     
     reactions.forEach(function (reaction) {
-      var hasBase = false;
-      reaction.nodes.forEach(function (node) {
-        hasBase =  hasBase || (node.base && node.base.length > 0);
+      var hasBase = _.some(reaction.nodes,function(node){
+        return (node.base && node.base.length > 0);
       });
+      
       if(hasBase){
         labels.push({
           x:reaction.center.x,
@@ -156,7 +156,7 @@
   /*
   * Create a grid of all nodes for legend
   */
-  RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop){
+  RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop, svg){
     var nodes = [];
     var mutatedNodeText = 'Mutated Gene(s)';
     var x = marginLeft, y= marginTop;
@@ -173,6 +173,18 @@
         text:{content:types[i],position:{x:x,y:y}}
       });
     }
+    
+    // Add extra comment for mutated gene node to show what the value in the corner means
+    svg.append('foreignObject').attr({
+        x: marginLeft+90,
+        y: y - 15,
+        width:100,
+        height:30,
+        'fill':'none'
+      }).append('xhtml:body')
+      .attr('class','RenderableNodeText')
+      .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          '&larr; # mutations'+'</td></tr></table>');
     
     return nodes;
   };

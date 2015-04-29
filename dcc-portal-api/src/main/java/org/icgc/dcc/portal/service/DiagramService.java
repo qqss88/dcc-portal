@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
@@ -35,7 +36,6 @@ import lombok.val;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.model.DiagramProtein;
@@ -103,7 +103,9 @@ public class DiagramService {
   }
 
   public String getPathwayDiagramString(@NonNull String pathwayId) {
-    return unescape(getPathway(pathwayId).get(INDEX_MODEL.get("xml")).toString());
+    val pathwayXml = getPathway(pathwayId).get(INDEX_MODEL.get("xml"));
+
+    return unescape(pathwayXml.toString());
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
@@ -127,7 +129,7 @@ public class DiagramService {
   }
 
   /**
-   * Opposite of dcc.etl.db.importer.diagram.reader.DiagramXmlReader's escape
+   * Opposite of {@link dcc.etl.db.importer.diagram.reader.DiagramXmlReader}'s escape
    */
   private String unescape(String xml) {
     for (String[] replacement : replacements) {
@@ -151,9 +153,10 @@ public class DiagramService {
 
     val query = boolQuery().must(termQuery(uniprotIdsFieldName, id));
     if (impacts.length > 0) {
-      query.must(QueryBuilders.termsQuery(functionalImpactFieldName, impacts));
+      query.must(termsQuery(functionalImpactFieldName, impacts));
     }
 
     return query;
   }
+
 }
