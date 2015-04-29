@@ -23,6 +23,7 @@ import static com.google.common.net.HttpHeaders.ACCEPT_RANGES;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static com.google.common.net.HttpHeaders.CONTENT_RANGE;
+import static com.google.common.net.HttpHeaders.RANGE;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
@@ -504,7 +505,7 @@ public class DownloadResource {
       @QueryParam("fn")//
       @DefaultValue("") String filePath,
 
-      @HeaderParam("Range") String range
+      @HeaderParam(RANGE) String range
 
       ) throws IOException {
 
@@ -530,11 +531,10 @@ public class DownloadResource {
 
     long contentLength = fs.getSize(downloadFile);
 
-    log.info(range);
-
     if (range != null) {
       val rangeHeader = parseRange(range, contentLength);
-      log.info("Parsed range header: {}", rangeHeader);
+      log.debug("Parsed range header: {}", rangeHeader);
+
       rb.header(ACCEPT_RANGES, "bytes")
           .header(CONTENT_RANGE, rangeHeader);
     }
@@ -702,13 +702,13 @@ public class DownloadResource {
   private static String parseRange(String range, long length) {
     val ranges = range.split("=")[1].split("-");
     val from = getFromByte(range);
-  
+
     long to = length - 1;
-  
+
     if (ranges.length == 2) {
       to = parseInt(ranges[1]);
     }
-  
+
     return String.format("bytes %d-%d/%d", from, to, length);
   }
 
@@ -716,7 +716,7 @@ public class DownloadResource {
     if (range == null) {
       return 0;
     }
-  
+
     val ranges = range.split("=")[1].split("-");
     return parseLong(ranges[0]);
   }
