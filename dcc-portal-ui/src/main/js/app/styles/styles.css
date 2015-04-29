@@ -3878,7 +3878,7 @@ td {
 
 /* line 81, _modules/_pathwayviewer.scss */
 .RenderableMutated {
-  background: white;
+  fill: white;
 }
 
 /** ESSENTIALS **/

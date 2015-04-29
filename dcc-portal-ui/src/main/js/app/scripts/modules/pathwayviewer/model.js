@@ -15,11 +15,12 @@
     var collection = $($.parseXML(xml)).find('Nodes')[0].children;
 
     for (var i = 0; i < collection.length; i++) {
+      var attrs = collection[i].attributes;
 
-      var bounds = collection[i].attributes.bounds.nodeValue.split(' ');
-      var textPosition = collection[i].attributes.textPosition ?
-        collection[i].attributes.textPosition.nodeValue.split(' ') :
-        collection[i].attributes.bounds.nodeValue.split(' ');
+      var bounds = attrs.bounds.nodeValue.split(' ');
+      var textPosition = attrs.textPosition ?
+        attrs.textPosition.nodeValue.split(' ') :
+        attrs.bounds.nodeValue.split(' ');
 
       this.nodes.push({
         position: {
@@ -31,9 +32,9 @@
           height: bounds[3]
         },
         type: collection[i].tagName.substring(collection[i].tagName.lastIndexOf('.') + 1),
-        id: collection[i].attributes.id.nodeValue,
-        reactomeId: collection[i].attributes.reactomeId ?
-          collection[i].attributes.reactomeId.nodeValue : 'missing',
+        id: attrs.id.nodeValue,
+        reactomeId: attrs.reactomeId ?
+          attrs.reactomeId.nodeValue : 'missing',
         text: {
           content: collection[i].textContent.trim(),
           position: {
