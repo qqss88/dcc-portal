@@ -66,7 +66,7 @@
     $(collection).each(function(){
       var base = getPointsArray(this.attributes.points.nodeValue);
       var nodes=[];
-      var description = $(this).find('properties');
+      var description = $(this).children().find('properties').context;
 
       $(this).find('input,output,catalyst,activator,inhibitor').each(function(){
         nodes.push({
@@ -83,7 +83,7 @@
         reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
         id: this.attributes.id.nodeValue,
         type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',
-        description: description[0] ? description[0].innerText.trim() : 'no details',
+        description: description ? description.textContent.trim() : 'no details',
         class: this.localName.substring(this.localName.lastIndexOf('.') + 1),
         center: getPointsArray(this.attributes.position.nodeValue)[0]
       });
