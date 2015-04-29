@@ -44,14 +44,9 @@ public class MutationCentricTypeModel extends TypeModel {
   private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
       "type",
       "consequenceTypeNested",
-      "consequenceType",
-      "platform",
-      "verificationStatus",
       "platformNested",
       "verificationStatusNested",
-      "functionalImpact",
       "functionalImpactNested",
-      "sequencingStrategy",
       "sequencingStrategyNested");
 
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(

@@ -80,7 +80,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     // E.g. The described case is valid for the MUTATION-CENTRIC type which may have filters nested at 'transcript' and
     // 'ssm_occurrence' levels.
 
-    val filterNodeOpt = getFilterNodeOptional(rootNode);
+    val originalFilters = getFilterNodeOptional(rootNode);
     val aggsNode = getAggregationsNodeOptional(rootNode).get();
     val typeModel = context.get().getTypeModel();
 
@@ -90,17 +90,15 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
 
       Optional<NestedAggregationNode> nestedAggregation = Optional.empty();
       Optional<ExpressionNode> filtersAggregation = Optional.empty();
+      val resolvedFilters = resolveFilters(field, originalFilters, typeModel);
 
       if (typeModel.isNested(field)) {
-        nestedAggregation = Optional.of(createNestedNode(filterNodeOpt, typeModel,
+        nestedAggregation = Optional.of(createNestedNode(resolvedFilters, typeModel,
             (TermsAggregationNode) cloneNode(child)));
       }
 
-      if (filterNodeOpt.isPresent() && hasNonNestedFilters(filterNodeOpt.get(), nestedAggregation, typeModel)) {
-        val filters = resolveFilters(field, cloneNode(filterNodeOpt.get()), typeModel);
-        if (filters.isPresent()) {
-          filtersAggregation = Optional.of(createFilterAggregationNode(child.getAggregationName(), filters.get()));
-        }
+      if (resolvedFilters.isPresent() && hasNonNestedFilters(resolvedFilters.get(), nestedAggregation, typeModel)) {
+        filtersAggregation = Optional.of(createFilterAggregationNode(child.getAggregationName(), resolvedFilters.get()));
       }
 
       val resultOpt = createResultNode(filtersAggregation, nestedAggregation, cloneNode(child));
@@ -112,7 +110,7 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     return Optional.of(rootNode);
   }
 
-  private static boolean hasNonNestedFilters(FilterNode filters, Optional<NestedAggregationNode> nestedAggregation,
+  private static boolean hasNonNestedFilters(ExpressionNode filters, Optional<NestedAggregationNode> nestedAggregation,
       TypeModel typeModel) {
 
     if (!nestedAggregation.isPresent()) {
@@ -253,8 +251,15 @@ public class AggregationsResolverVisitor extends NodeVisitor<Optional<Expression
     return false;
   }
 
-  private static Optional<ExpressionNode> resolveFilters(String facetField, ExpressionNode filterNode,
+  private static Optional<ExpressionNode> resolveFilters(String facetField,
+      Optional<? extends ExpressionNode> filterNodeOpt,
       TypeModel typeModel) {
+    if (!filterNodeOpt.isPresent()) {
+      return Optional.empty();
+    }
+
+    val filterNode = cloneNode(filterNodeOpt.get());
+
     val resolvedFilters = filterNode.accept(createAggregationFiltersVisitor(), Optional.of(facetField));
     val result = resolvedFilters.accept(createEmptyNodesCleanerVisitor(), Optional.empty());
 

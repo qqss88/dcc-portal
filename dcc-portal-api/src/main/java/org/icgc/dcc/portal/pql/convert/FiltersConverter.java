@@ -70,6 +70,10 @@ public class FiltersConverter {
       "gene.location");
 
   public String convertFilters(JqlFilters filters, Type indexType) {
+    if (indexType == Type.PROJECT) {
+      filters = cleanProjectFilters(filters);
+    }
+
     // These fields are required to create the correct nesting order. E.g. nested(gene, nested(gene.ssm ...))
     val fieldsGrouppedByNestedPath = ArrayListMultimap.<String, JqlField> create();
 
@@ -105,6 +109,14 @@ public class FiltersConverter {
     }
 
     return result.toString();
+  }
+
+  private static JqlFilters cleanProjectFilters(JqlFilters filters) {
+    val typeValues = filters.getTypeValues().entrySet().stream()
+        .filter(k -> k.getKey().equals("donor"))
+        .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue()));
+
+    return new JqlFilters(typeValues);
   }
 
   private String encloseWithCommonParent(String commonPath, String filter) {

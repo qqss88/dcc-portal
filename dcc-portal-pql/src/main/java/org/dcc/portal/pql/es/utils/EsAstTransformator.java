@@ -70,18 +70,12 @@ public class EsAstTransformator {
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
-
-    // Locations should be resolved first, otherwise the ResolveNestedFieldVisitor will not be able to find location
-    // fields
-    log.debug("Resolving location filters...");
-    esAst = esAst.accept(createLocationFilterVisitor(), Optional.of(context)).get();
-    log.debug("Resolved location filters. Resulting AST: {}", esAst);
+    esAst = resolveSpecialCases(esAst, context);
 
     log.debug("Resolving filters on nested fields...");
     esAst = esAst.accept(createResolveNestedFieldVisitor(), Optional.of(context.getTypeModel())).get();
     log.debug("Resolved nested filters. Resulting AST: {}", esAst);
 
-    esAst = resolveSpecialCases(esAst, context);
     esAst = resolveFacets(esAst, context.getTypeModel());
     esAst = score(esAst, context);
     esAst = optimize(esAst);
@@ -118,6 +112,10 @@ public class EsAstTransformator {
     log.debug("{} Resolving GeneSets...", tag);
     esAst = esAst.accept(createGeneSetFilterVisitor(), Optional.of(context)).get();
     log.debug("{} Resolved GeneSets. Resulting AST: {}", tag, esAst);
+
+    log.debug("{} Resolving location filters...", tag);
+    esAst = esAst.accept(createLocationFilterVisitor(), Optional.of(context)).get();
+    log.debug("{} Resolved location filters. Resulting AST: {}", tag, esAst);
 
     return esAst;
   }

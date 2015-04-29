@@ -475,8 +475,10 @@ public class FiltersConverterTest {
   }
 
   @Test
-  public void tmp() {
-    getDonorCentricTypeModel().getParentNestedPath("gene.ssm");
+  public void mutationFiltersInProjectTypeModelTest() {
+    val filters = createFilters("{donor:{projectId:{is:['p']}},mutation:{consequenceType:{is:['sl']}}}");
+    val result = converter.convertFilters(filters, Type.PROJECT);
+    assertThat(result).isEqualTo("in(donor.projectId,'p')");
   }
 
   @SneakyThrows

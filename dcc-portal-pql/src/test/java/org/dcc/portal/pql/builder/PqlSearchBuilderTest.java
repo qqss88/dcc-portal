@@ -31,6 +31,7 @@ import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.es.model.Order;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class PqlSearchBuilderTest {
@@ -109,7 +110,9 @@ public class PqlSearchBuilderTest {
   }
 
   @Test
+  @Ignore
   public void multiActionsTest() {
+    // FIXME:
     fail("Implement");
   }
 

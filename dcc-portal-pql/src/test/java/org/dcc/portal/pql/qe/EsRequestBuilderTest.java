@@ -283,8 +283,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
     Global global = result.getAggregations().get("verificationStatusNested");
     Nested nested = global.getAggregations().get("verificationStatusNested");
-    Filter filter = nested.getAggregations().get("verificationStatusNested");
-    Terms terms = filter.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {
@@ -305,8 +304,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     Global globalAgg = result.getAggregations().get("verificationStatusNested");
     Filter filterAgg = globalAgg.getAggregations().get("verificationStatusNested");
     Nested nested = filterAgg.getAggregations().get("verificationStatusNested");
-    Filter nestedFilter = nested.getAggregations().get("verificationStatusNested");
-    Terms terms = nestedFilter.getAggregations().get("verificationStatusNested");
+    Terms terms = nested.getAggregations().get("verificationStatusNested");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {
