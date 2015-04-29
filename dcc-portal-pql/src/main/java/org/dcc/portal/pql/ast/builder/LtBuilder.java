@@ -15,21 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
+
+import lombok.NonNull;
+import lombok.Value;
 
 import org.dcc.portal.pql.ast.filter.FilterNode;
+import org.dcc.portal.pql.ast.filter.LtNode;
 
-public class GeBuilder implements FilterBuilder {
+@Value
+public class LtBuilder implements FilterBuilder {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.dcc.portal.pql.builder.FilterBuilder#build()
-   */
+  @NonNull
+  String field;
+  @NonNull
+  Object value;
+
   @Override
   public FilterNode build() {
-    // TODO Auto-generated method stub
-    return null;
+    return new LtNode(field, value);
   }
 
 }

@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
 import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
@@ -38,6 +38,42 @@ public class FilterBuilders {
 
   public static ExistsBuilder exists(@NonNull String field) {
     return new ExistsBuilder(field);
+  }
+
+  public static GeBuilder ge(@NonNull String field, @NonNull Object value) {
+    return new GeBuilder(field, value);
+  }
+
+  public static GtBuilder gt(@NonNull String field, @NonNull Object value) {
+    return new GtBuilder(field, value);
+  }
+
+  public static LeBuilder le(@NonNull String field, @NonNull Object value) {
+    return new LeBuilder(field, value);
+  }
+
+  public static LtBuilder lt(@NonNull String field, @NonNull Object value) {
+    return new LtBuilder(field, value);
+  }
+
+  public static InBuilder in(@NonNull String field, @NonNull Object... value) {
+    return new InBuilder(field, value);
+  }
+
+  public static MissingBuilder missing(@NonNull String field) {
+    return new MissingBuilder(field);
+  }
+
+  public static NestedBuilder nested(@NonNull String path, @NonNull FilterBuilder... filterBuilders) {
+    return new NestedBuilder(path, filterBuilders);
+  }
+
+  public static NotBuilder not(@NonNull FilterBuilder filterBuilder) {
+    return new NotBuilder(filterBuilder);
+  }
+
+  public static OrBuilder or(@NonNull FilterBuilder... filters) {
+    return new OrBuilder(filters);
   }
 
 }

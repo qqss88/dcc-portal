@@ -15,12 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
+import static java.util.Collections.addAll;
 
-/**
- * 
- */
-public class LtBuilder {
+import java.util.List;
+
+import lombok.NonNull;
+import lombok.val;
+
+import org.dcc.portal.pql.ast.filter.AndNode;
+import org.dcc.portal.pql.ast.filter.FilterNode;
+
+import com.google.common.collect.Lists;
+
+public class AndBuilder implements FilterBuilder {
+
+  private final List<FilterBuilder> filters = Lists.newArrayList();
+
+  public AndBuilder(@NonNull FilterBuilder... filters) {
+    addAll(this.filters, filters);
+  }
+
+  @Override
+  public FilterNode build() {
+    val result = new AndNode();
+    for (val filter : filters) {
+      result.addChild(filter.build());
+    }
+
+    return result;
+  }
 
 }

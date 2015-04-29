@@ -23,7 +23,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.val;
 
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;

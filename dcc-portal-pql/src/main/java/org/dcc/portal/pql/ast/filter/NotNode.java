@@ -22,7 +22,7 @@ import java.util.Optional;
 import lombok.NonNull;
 
 import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 public class NotNode extends FilterNode {
 

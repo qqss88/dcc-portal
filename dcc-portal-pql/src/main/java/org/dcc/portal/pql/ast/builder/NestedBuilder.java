@@ -15,12 +15,41 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
+import static java.util.Collections.addAll;
 
-/**
- * 
- */
-public class MissingBuilder {
+import java.util.List;
+
+import lombok.NonNull;
+import lombok.Value;
+import lombok.val;
+
+import org.dcc.portal.pql.ast.filter.FilterNode;
+import org.dcc.portal.pql.ast.filter.NestedNode;
+
+import com.google.common.collect.Lists;
+
+@Value
+public class NestedBuilder implements FilterBuilder {
+
+  @NonNull
+  String path;
+  List<FilterBuilder> builders = Lists.newArrayList();
+
+  public NestedBuilder(@NonNull String path, @NonNull FilterBuilder... builders) {
+    this.path = path;
+    addAll(this.builders, builders);
+  }
+
+  @Override
+  public FilterNode build() {
+    val result = new NestedNode(path);
+    for (val builder : builders) {
+      result.addChild(builder.build());
+    }
+
+    return result;
+  }
 
 }

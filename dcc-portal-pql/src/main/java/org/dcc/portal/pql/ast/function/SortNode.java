@@ -26,8 +26,8 @@ import lombok.Value;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.Type;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 import org.dcc.portal.pql.es.model.Order;
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
 
 import com.google.common.collect.Maps;
 

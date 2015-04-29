@@ -27,7 +27,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 import com.google.common.collect.Lists;
 

@@ -15,24 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
 import lombok.NonNull;
+import lombok.Value;
 
-import org.dcc.portal.pql.ast.filter.ExistsNode;
 import org.dcc.portal.pql.ast.filter.FilterNode;
+import org.dcc.portal.pql.ast.filter.NeNode;
 
-public class ExistsBuilder implements FilterBuilder {
+@Value
+public class NeBuilder implements FilterBuilder {
 
-  private final String field;
-
-  public ExistsBuilder(@NonNull String field) {
-    this.field = field;
-  }
+  @NonNull
+  String field;
+  @NonNull
+  Object value;
 
   @Override
   public FilterNode build() {
-    return new ExistsNode(field);
+    return new NeNode(field, value);
   }
 
 }

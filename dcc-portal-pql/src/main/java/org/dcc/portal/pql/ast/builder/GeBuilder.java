@@ -15,19 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
-import static lombok.AccessLevel.PRIVATE;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Value;
 
-@NoArgsConstructor(access = PRIVATE)
-public class PqlBuilders {
+import org.dcc.portal.pql.ast.filter.FilterNode;
+import org.dcc.portal.pql.ast.filter.GeNode;
 
-  public PqlSearchBuilder search() {
-    return PqlSearchBuilder.create();
-  }
+@Value
+public class GeBuilder implements FilterBuilder {
 
-  public void count() {
+  @NonNull
+  String field;
+  @NonNull
+  Object value;
+
+  @Override
+  public FilterNode build() {
+    return new GeNode(field, value);
   }
 
 }

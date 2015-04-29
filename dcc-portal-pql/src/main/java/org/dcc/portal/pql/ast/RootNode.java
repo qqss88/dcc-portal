@@ -29,7 +29,7 @@ import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -103,6 +103,11 @@ public class RootNode extends PqlNode {
   @Override
   public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitRoot(this, context);
+  }
+
+  @Override
+  public RootNode toRootNode() {
+    return this;
   }
 
   private void canUpdateField() {

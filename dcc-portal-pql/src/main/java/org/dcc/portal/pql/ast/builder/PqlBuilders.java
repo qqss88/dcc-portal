@@ -15,12 +15,19 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-/**
- * 
- */
-public class NestedBuilder {
+@NoArgsConstructor(access = PRIVATE)
+public class PqlBuilders {
+
+  public PqlSearchBuilder search() {
+    return PqlSearchBuilder.create();
+  }
+
+  public void count() {
+  }
 
 }

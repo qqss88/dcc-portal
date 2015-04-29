@@ -26,7 +26,7 @@ import lombok.Value;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 @Value
 @EqualsAndHashCode(callSuper = false)

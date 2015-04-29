@@ -25,6 +25,7 @@ import java.util.Map;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;

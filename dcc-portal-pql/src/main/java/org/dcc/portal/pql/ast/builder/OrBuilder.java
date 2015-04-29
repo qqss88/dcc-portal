@@ -15,12 +15,36 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
+import static java.util.Collections.addAll;
 
-/**
- * 
- */
-public class OrBuilder {
+import java.util.List;
+
+import lombok.NonNull;
+import lombok.val;
+
+import org.dcc.portal.pql.ast.filter.FilterNode;
+import org.dcc.portal.pql.ast.filter.OrNode;
+
+import com.google.common.collect.Lists;
+
+public class OrBuilder implements FilterBuilder {
+
+  private final List<FilterBuilder> filters = Lists.newArrayList();
+
+  public OrBuilder(@NonNull FilterBuilder... filters) {
+    addAll(this.filters, filters);
+  }
+
+  @Override
+  public FilterNode build() {
+    val result = new OrNode();
+    for (val filter : filters) {
+      result.addChild(filter.build());
+    }
+
+    return result;
+  }
 
 }
