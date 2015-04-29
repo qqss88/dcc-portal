@@ -164,7 +164,7 @@
           
           if(highlights){
             highlights.forEach(function (h) {
-              if(!(h.dbIds instanceof Array)){
+              if(!(_.isArray(h.dbIds))){
                 h.dbIds = h.dbIds.split(',');
               }
             });

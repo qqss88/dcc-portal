@@ -40,7 +40,7 @@
 
     // Make sure arrow heads aren't added to special dashed lines
     var isArrowHeadLine = function(type){
-      return ['entitysetandmemberlink','entitysetandentitysetlink','missing'].indexOf(type) < 0;
+      return !_.contains(['entitysetandmemberlink','entitysetandentitysetlink','missing'],type);
     };
 
     // Adds a line to the lines array gives an array of points and description of the line
@@ -74,13 +74,7 @@
     // Gets the first input node in a reaction (used when the reaction
     //  has no human-curated node lines)
     var getFirstInputNode =  function(nodes){
-      var node;
-      nodes.forEach(function (n) {
-        if(n.type === 'Input'){
-          node = n;
-        }
-      });
-      return node;
+      return _.find(nodes, {type:'Input'});
     };
 
     // Generate a line based on the type of reaction & node using human-curated points
@@ -131,7 +125,7 @@
       for(var i=0; i<reaction.nodes.length;i++){
         var type = getNodeLines(reaction,reaction.nodes[i],id,reaction.class);
         if(type === 'Input'){
-          inputs ++;
+          inputs++;
         }else if(type === 'Output'){
           outputs++;
         }

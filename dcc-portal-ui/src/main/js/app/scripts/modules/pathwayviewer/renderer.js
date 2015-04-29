@@ -22,17 +22,14 @@
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
                   'Catalyst-legend','Activator-legend','Output-legend','Inhibitor','Inhibitor-legend'];
     var isBaseMarker = function(type){
-      return ['Output','Activator','Catalyst','Inhibitor'].indexOf(type)>=0; // Part of subpathway reactions
+      return _.contains(['Output','Activator','Catalyst','Inhibitor'],type); // Part of subpathway reactions
     };
     var filled = function(type){
-      return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;
+      return _.contains(['Output','RenderableInteraction','Output-legend','GeneArrow'],type);
     };
-    var isCircular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
-    var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
-//    var isArrowed = function(type){
-//      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
-//    };
-    var isLinear = function(type){return ['Inhibitor','Inhibitor-legend'].indexOf(type)>=0;};
+    var isCircular = function(type){return _.contains(['Catalyst','Catalyst-legend'],type);};
+    var shifted = function(type){return _.contains(['Catalyst','Activator'],type);};
+    var isLinear = function(type){return _.contains(['Inhibitor','Inhibitor-legend'],type);};
     
     
     var circle = {
@@ -286,7 +283,7 @@
     // edges with markers (arrow heads, etc.) are on top.
     edges = _.sortBy(edges,function(n){return n.marked?1:0;});
 
-    var isStartMarker = function(type){return ['FlowLine','RenderableInteraction'].indexOf(type)>=0;};
+    var isStartMarker = function(type){return _.contains(['FlowLine','RenderableInteraction'],type);};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
       'class':function(d){return 'RenderableStroke reaction'+d.id+' '+d.type;},
@@ -332,12 +329,12 @@
       'class':function(d){return 'RenderableReactionLabel reaction'+d.id;},
       'x':function(d){return +d.x - (size/2);},
       'y':function(d){return +d.y - (size/2);},
-      'rx':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
-      'ry':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
+      'rx':function(d){return _.contains(circular,d.reactionType)?(size/2):'';},
+      'ry':function(d){return _.contains(circular,d.reactionType)?(size/2):'';},
       'width':size,
       'height':size,
       'stroke':config.strokeColor
-    }).style('fill',function(d){return filled.indexOf(d.reactionType)>=0?config.strokeColor:'white';})
+    }).style('fill',function(d){return _.contains(filled,d.reactionType)?config.strokeColor:'white';})
       .on('mouseover',function(d){
         console.log(d.description);
       });

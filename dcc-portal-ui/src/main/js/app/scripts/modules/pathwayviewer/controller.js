@@ -107,9 +107,9 @@
     var rendererUtils = new dcc.RendererUtils();
     this.rendererUtils = rendererUtils;
     
-    renderer.renderCompartments(_.where(model.getNodes().slice(),{type:'RenderableCompartment'}));
+    renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment'}));
     renderer.renderEdges(rendererUtils.generateLines(model));
-    renderer.renderNodes(_.filter(model.getNodes().slice(),
+    renderer.renderNodes(_.filter(model.getNodes(),
                                        function(n){return n.type!=='RenderableCompartment';}));
     renderer.renderReactionLabels(rendererUtils.generateReactionLabels(model.getReactions()));
 
@@ -123,7 +123,7 @@
       minWidth = 10000;
       
       // For all zoomed in elements, go through their positions/size and form the zoomed in size
-      _.filter(model.getReactions().slice(),function(n){return zoomedOnElements.indexOf(n.reactomeId)>=0;})
+      _.filter(model.getReactions(),function(n){return _.contains(zoomedOnElements,n.reactomeId);})
         .forEach(function (reaction) {
           // Add nodes in this pathway to list
           nodesInPathway = nodesInPathway.concat(model.getNodesInReaction(reaction.reactomeId));

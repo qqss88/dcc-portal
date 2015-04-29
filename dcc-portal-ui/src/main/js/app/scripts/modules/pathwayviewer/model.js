@@ -12,7 +12,8 @@
 
   PathwayModel.prototype.parse = function (xml) {
     // Parse all the nodes first
-    var collection = $($.parseXML(xml)).find('Nodes')[0].children;
+    var parsedXml =  $($.parseXML(xml));
+    var collection = parsedXml.find('Nodes')[0].children;
 
     for (var i = 0; i < collection.length; i++) {
       var attrs = collection[i].attributes;
@@ -46,7 +47,7 @@
       });
     }
     
-    collection = $(xml).find('Edges')[0].children;
+    collection = parsedXml.find('Edges')[0].children;
 
     var getPointsArray = function(pointString){
       var points = [];
@@ -90,15 +91,11 @@
   };
 
   PathwayModel.prototype.getNodeById = function (id) {
-    return _.find(this.nodes,function(n){
-      return n.id === id;
-    });
+    return _.where(this.nodes, {id: id})[0];
   };
   
   PathwayModel.prototype.getNodesByReactomeId = function (reactomeId) {
-    return _.filter(this.nodes, function(n){
-      return n.reactomeId === reactomeId;
-    });
+    return _.where(this.nodes, {reactomeId: reactomeId});
   };
 
   PathwayModel.prototype.getNodes = function () {
