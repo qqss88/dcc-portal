@@ -4,23 +4,28 @@
 <ul data-ng-show="AdvancedCtrl.Mutation.mutations" class="t_facets">
     <li data-tags-facet data-label="Mutation" data-facet-name="id" data-placeholder="eg. MU123"
         data-type="mutation"></li>
-    <terms data-type="mutation" data-facet-name="consequenceType" data-defined="true"
+    <terms data-type="mutation" data-facet-name="consequenceTypeNested" data-defined="true"
            data-hhide-count="AdvancedCtrl.hasGeneFilter"
            data-hide-text="N/A"
-           data-facet="AdvancedCtrl.Mutation.mutations.facets.consequenceType"></terms>
-    <terms data-type="mutation" data-facet-name="functionalImpact" data-capitalize="true"
+           data-facet="AdvancedCtrl.Mutation.mutations.facets.consequenceTypeNested"></terms>
+    <terms data-type="mutation" data-facet-name="functionalImpactNested" data-capitalize="true"
            data-hhide-count="AdvancedCtrl.hasGeneFilter"
            data-hide-text="N/A"
-           data-facet="AdvancedCtrl.Mutation.mutations.facets.functionalImpact"></terms>
+           data-facet="AdvancedCtrl.Mutation.mutations.facets.functionalImpactNested"></terms>
+
     <terms data-type="mutation" data-facet-name="type" data-defined="true"
            data-facet="AdvancedCtrl.Mutation.mutations.facets.type"></terms>
-    <terms data-type="mutation" data-facet-name="platform"  data-collapsed="true"
-           data-facet="AdvancedCtrl.Mutation.mutations.facets.platform"></terms>
-    <terms data-type="mutation" data-facet-name="sequencingStrategy"  data-collapsed="true"
-           data-facet="AdvancedCtrl.Mutation.mutations.facets.sequencingStrategy"></terms>
 
-    <terms data-type="mutation" data-facet-name="verificationStatus" data-capitalize="true" data-collapsed="true"
-           data-facet="AdvancedCtrl.Mutation.mutations.facets.verificationStatus"></terms>
+    <terms data-type="mutation" data-facet-name="platformNested"  data-collapsed="true"
+           data-facet="AdvancedCtrl.Mutation.mutations.facets.platformNested"></terms>
+
+    <terms data-type="mutation" data-facet-name="sequencingStrategyNested"  data-collapsed="true"
+           data-facet="AdvancedCtrl.Mutation.mutations.facets.sequencingStrategyNested"></terms>
+
+    <terms data-type="mutation" data-facet-name="verificationStatusNested" data-capitalize="true" data-collapsed="true"
+           data-facet="AdvancedCtrl.Mutation.mutations.facets.verificationStatusNested"></terms>
+
     <li data-location-facet data-type="mutation" data-facet-name="location" data-label="Location"
         data-placeholder="Enter mutation location" data-example="eg. chr12:43566-3457633"></li>
 </ul>
+
