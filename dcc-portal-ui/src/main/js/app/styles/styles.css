@@ -3872,7 +3872,7 @@ td {
 }
 
 /* line 76, _modules/_pathwayviewer.scss */
-.pathway-sub-reaction-line {
+.pathway-sub-reaction-line line {
   stroke-width: 1.5px;
 }
 

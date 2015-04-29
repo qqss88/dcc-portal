@@ -22,7 +22,8 @@
           x:reaction.center.x,
           y:reaction.center.y,
           reactionType:reaction.type,
-          description:reaction.description
+          description:reaction.description,
+          id:reaction.reactomeId
         });
       }
     });
@@ -195,7 +196,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Link','Sub-Pathway'];
+    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -219,7 +220,7 @@
       .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
           elem+'</td></tr></table>');
     
-      y+=30;
+      y+=25;
     });
 
     return lines;
@@ -249,7 +250,7 @@
       .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
           (elem==='Association'?'Association/Binding':elem)+'</td></tr></table>');
     
-      y+=30;
+      y+=25;
     });
 
     return labels;

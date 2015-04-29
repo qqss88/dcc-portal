@@ -19,15 +19,17 @@
   function defineDefs(svg, config){
     var strokeColor =  config.strokeColor;
     var markers = ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow','Catalyst',
-                  'Catalyst-legend','Activator-legend','Output-legend'];
+                  'Catalyst-legend','Activator-legend','Output-legend','Inhibitor','Inhibitor-legend'];
     var filled = function(type){
       return ['Output','RenderableInteraction','Output-legend','GeneArrow'].indexOf(type)>=0;
     };
-    var circular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
+    var isCircular = function(type){return ['Catalyst','Catalyst-legend'].indexOf(type)>=0;};
     var shifted = function(type){return ['Catalyst','Activator'].indexOf(type)>=0;};
-//    var arrowed = function(type){
-//      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
-//    };
+    var isArrowed = function(type){
+      return ['Output','Activator','ProcessNode','RenderableInteraction','GeneArrow'].indexOf(type)>=0;
+    };
+    var isLinear = function(type){return ['Inhibitor','Inhibitor-legend'].indexOf(type)>=0;};
+    
     
     var circle = {
       'element':'circle',
@@ -54,9 +56,29 @@
       refX: '10',
       viewBox:'0 -6 12 11'
     };
+    
+    var line = {
+      'element':'path',
+      'attr':{
+        d:'M0,-6L0,6',
+        'stroke-width':'2px',
+        markerWidth:'8',
+        markerHeight:'8'
+      },
+      refX: '0',
+      viewBox:'0 -6 2 11'
+    };
    
     markers.forEach(function (elem) {
-      var def = circular(elem)?circle:arrow;
+      var def;
+      if(isCircular(elem)){
+        def = circle;
+      }else if(isLinear(elem)){
+        def = line;
+      }else{
+        def = arrow;
+      }
+      
       var color = strokeColor
       
       // Special arrow for genes (see react_11118 for an example)
@@ -284,7 +306,7 @@
     
     svg.selectAll('.RenderableReactionLabel').data(labels).enter().append('rect')
     .attr({
-      'class':'RenderableReactionLabel',
+      'class':function(d){return 'RenderableReactionLabel reaction'+d.id;},
       'x':function(d){return +d.x - (size/2);},
       'y':function(d){return +d.y - (size/2);},
       'rx':function(d){return circular.indexOf(d.reactionType)>=0?(size/2):'';},
