@@ -19,9 +19,13 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.net.HttpHeaders.ACCEPT_RANGES;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static com.google.common.net.HttpHeaders.CONTENT_RANGE;
 import static com.sun.jersey.core.header.ContentDisposition.type;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -60,6 +64,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -497,7 +502,9 @@ public class DownloadResource {
 
       @ApiParam(value = "filename to download", required = true)//
       @QueryParam("fn")//
-      @DefaultValue("") String filePath
+      @DefaultValue("") String filePath,
+
+      @HeaderParam("Range") String range
 
       ) throws IOException {
 
@@ -521,9 +528,19 @@ public class DownloadResource {
       log.error("Permission Denied", e);
     }
 
+    long contentLength = fs.getSize(downloadFile);
+
+    log.info(range);
+
+    if (range != null) {
+      val rangeHeader = parseRange(range, contentLength);
+      log.info("Parsed range header: {}", rangeHeader);
+      rb.header(ACCEPT_RANGES, "bytes")
+          .header(CONTENT_RANGE, rangeHeader);
+    }
+
     if (hasValidPermission) {
-      long contentLength = fs.getSize(downloadFile);
-      archiveStream = archiveStream(downloadFile);
+      archiveStream = archiveStream(downloadFile, getFromByte(range));
       rb.header(CONTENT_LENGTH, contentLength);
       filename = downloadFile.getName();
     } else {
@@ -678,6 +695,32 @@ public class DownloadResource {
     private final String downloadId;
   }
 
+  /*
+   * See:
+   * https://github.com/aruld/jersey-streaming/blob/master/src/main/java/com/aruld/jersey/streaming/MediaResource.java
+   */
+  private static String parseRange(String range, long length) {
+    val ranges = range.split("=")[1].split("-");
+    val from = getFromByte(range);
+  
+    long to = length - 1;
+  
+    if (ranges.length == 2) {
+      to = parseInt(ranges[1]);
+    }
+  
+    return String.format("bytes %d-%d/%d", from, to, length);
+  }
+
+  private static long getFromByte(String range) {
+    if (range == null) {
+      return 0;
+    }
+  
+    val ranges = range.split("=")[1].split("-");
+    return parseLong(ranges[0]);
+  }
+
   private boolean isPermissionDenied(User user, boolean isControlled) {
     if (isControlled && !isLogin(user)) {
       return true;
@@ -770,14 +813,14 @@ public class DownloadResource {
     };
   }
 
-  private StreamingOutput archiveStream(final File relativePath) {
+  private StreamingOutput archiveStream(final File relativePath, long from) {
     return new StreamingOutput() {
 
       @Override
       public void write(final OutputStream out) throws IOException, WebApplicationException {
         try {
           @Cleanup
-          InputStream in = fs.createInputStream(relativePath, 0);
+          InputStream in = fs.createInputStream(relativePath, from);
           IOUtils.copy(in, out);
         } catch (Exception e) {
           log.warn("Exception thrown from Dynamic Download Resource.", e);
@@ -863,4 +906,5 @@ public class DownloadResource {
     }
     return type;
   }
+
 }
