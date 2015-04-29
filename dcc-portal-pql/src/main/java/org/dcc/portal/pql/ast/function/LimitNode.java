@@ -44,4 +44,9 @@ public class LimitNode extends PqlNode {
     return visitor.visitLimit(this, context);
   }
 
+  @Override
+  public LimitNode toLimitNode() {
+    return this;
+  }
+
 }

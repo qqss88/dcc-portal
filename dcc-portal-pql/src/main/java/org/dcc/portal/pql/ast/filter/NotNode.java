@@ -40,4 +40,9 @@ public class NotNode extends FilterNode {
     return visitor.visitNot(this, context);
   }
 
+  @Override
+  public NotNode toNotNode() {
+    return this;
+  }
+
 }

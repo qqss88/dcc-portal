@@ -40,4 +40,9 @@ public class LeNode extends EqualityFilterNode {
     return visitor.visitLe(this, context);
   }
 
+  @Override
+  public LeNode toLeNode() {
+    return this;
+  }
+
 }

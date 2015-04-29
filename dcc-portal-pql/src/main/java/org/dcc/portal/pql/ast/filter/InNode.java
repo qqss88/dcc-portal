@@ -59,4 +59,9 @@ public class InNode extends FilterNode {
     return visitor.visitIn(this, context);
   }
 
+  @Override
+  public InNode toInNode() {
+    return this;
+  }
+
 }

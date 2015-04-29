@@ -40,4 +40,9 @@ public class LtNode extends EqualityFilterNode {
     return visitor.visitLt(this, context);
   }
 
+  @Override
+  public LtNode toLtNode() {
+    return this;
+  }
+
 }

@@ -47,4 +47,9 @@ public class SelectNode extends PqlNode {
     return visitor.visitSelect(this, context);
   }
 
+  @Override
+  public SelectNode toSelectNode() {
+    return this;
+  }
+
 }

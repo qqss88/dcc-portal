@@ -40,4 +40,9 @@ public class GeNode extends EqualityFilterNode {
     return visitor.visitGe(this, context);
   }
 
+  @Override
+  public GeNode toGeNode() {
+    return this;
+  }
+
 }

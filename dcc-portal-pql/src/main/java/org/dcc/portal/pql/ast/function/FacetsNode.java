@@ -47,4 +47,9 @@ public class FacetsNode extends PqlNode {
     return visitor.visitFacets(this, context);
   }
 
+  @Override
+  public FacetsNode toFacetsNode() {
+    return this;
+  }
+
 }

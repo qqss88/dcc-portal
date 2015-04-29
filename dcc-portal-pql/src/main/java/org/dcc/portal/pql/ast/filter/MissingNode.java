@@ -40,4 +40,9 @@ public class MissingNode extends EqualityFilterNode {
     return visitor.visitMissing(this, context);
   }
 
+  @Override
+  public MissingNode toMissingNode() {
+    return this;
+  }
+
 }

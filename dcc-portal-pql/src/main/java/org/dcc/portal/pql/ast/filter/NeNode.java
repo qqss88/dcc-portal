@@ -39,4 +39,10 @@ public class NeNode extends EqualityFilterNode {
   public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitNe(this, context);
   }
+
+  @Override
+  public NeNode toNeNode() {
+    return this;
+  }
+
 }

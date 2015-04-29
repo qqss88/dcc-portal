@@ -40,4 +40,9 @@ public class ExistsNode extends EqualityFilterNode {
     return visitor.visitExists(this, context);
   }
 
+  @Override
+  public ExistsNode toExistsNode() {
+    return this;
+  }
+
 }

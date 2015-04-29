@@ -40,4 +40,9 @@ public class AndNode extends FilterNode {
     return visitor.visitAnd(this, context);
   }
 
+  @Override
+  public AndNode toAndNode() {
+    return this;
+  }
+
 }

@@ -40,4 +40,9 @@ public class OrNode extends FilterNode {
     return visitor.visitOr(this, context);
   }
 
+  @Override
+  public OrNode toOrNode() {
+    return this;
+  }
+
 }

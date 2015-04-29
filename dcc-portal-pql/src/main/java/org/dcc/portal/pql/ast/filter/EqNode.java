@@ -40,4 +40,9 @@ public class EqNode extends EqualityFilterNode {
     return visitor.visitEq(this, context);
   }
 
+  @Override
+  public EqNode toEqNode() {
+    return this;
+  }
+
 }

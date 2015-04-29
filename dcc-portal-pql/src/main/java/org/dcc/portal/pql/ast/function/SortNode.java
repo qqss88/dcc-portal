@@ -51,4 +51,9 @@ public class SortNode extends PqlNode {
     return visitor.visitSort(this, context);
   }
 
+  @Override
+  public SortNode toSortNode() {
+    return this;
+  }
+
 }

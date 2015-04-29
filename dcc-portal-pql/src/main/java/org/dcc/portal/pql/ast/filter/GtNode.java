@@ -40,4 +40,9 @@ public class GtNode extends EqualityFilterNode {
     return visitor.visitGt(this, context);
   }
 
+  @Override
+  public GtNode toGtNode() {
+    return this;
+  }
+
 }

@@ -48,4 +48,9 @@ public class NestedNode extends FilterNode {
     return visitor.visitNested(this, context);
   }
 
+  @Override
+  public NestedNode toNestedNode() {
+    return this;
+  }
+
 }

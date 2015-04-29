@@ -37,4 +37,9 @@ public class CountNode extends PqlNode {
     return visitor.visitCount(this, context);
   }
 
+  @Override
+  public CountNode toCountNode() {
+    return this;
+  }
+
 }
