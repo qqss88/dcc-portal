@@ -15,23 +15,22 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.builder;
+package org.dcc.portal.pql.ast.builder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Map;
 
 import lombok.val;
 
 import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.builder.FilterBuilders;
 import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.es.model.Order;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class PqlSearchBuilderTest {
@@ -110,10 +109,26 @@ public class PqlSearchBuilderTest {
   }
 
   @Test
-  @Ignore
   public void multiActionsTest() {
-    // FIXME:
-    fail("Implement");
+    val result = PqlSearchBuilder.create()
+        .select("id")
+        .facets("mu")
+        .filter(FilterBuilders.eq("gene", "G1"))
+        .limit(100)
+        .sort("id", Order.ASC)
+        .build();
+
+    assertThat(result.getSelect()
+        .getFields()).containsOnly("id");
+    assertThat(result.getFacets().getFacets()).containsOnly("mu");
+    assertThat(result.getLimit().getSize()).isEqualTo(100);
+
+    val sortFields = result.getSort().getFields();
+    assertThat(sortFields.size()).isEqualTo(1);
+    assertThat(sortFields.get("id")).isEqualTo(Order.ASC);
+
+    assertThat(result.getFilters().toEqNode().getField()).isEqualTo("gene");
+    assertThat(result.getFilters().toEqNode().getValue()).isEqualTo("G1");
   }
 
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import org.dcc.portal.pql.ast.filter.FilterNode;
@@ -32,6 +33,7 @@ import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
 @Getter
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class RootNode extends PqlNode {
 
@@ -42,6 +44,10 @@ public class RootNode extends PqlNode {
   private LimitNode limit;
   private FilterNode filters;
 
+  public RootNode(@NonNull CountNode count) {
+    this.count = count;
+  }
+
   public boolean hasSelect() {
     return select != null;
   }
@@ -50,6 +56,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.select = node;
     node.setParent(this);
+    addChild(node);
   }
 
   public boolean hasFacets() {
@@ -60,6 +67,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.facets = node;
     node.setParent(this);
+    addChild(node);
   }
 
   public boolean isCount() {
@@ -74,6 +82,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.sort = node;
     node.setParent(this);
+    addChild(node);
   }
 
   public boolean hasLimit() {
@@ -84,6 +93,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.limit = node;
     node.setParent(this);
+    addChild(node);
   }
 
   public boolean hasFilters() {
@@ -93,6 +103,7 @@ public class RootNode extends PqlNode {
   public void setFilters(@NonNull FilterNode node) {
     this.filters = node;
     node.setParent(this);
+    addChild(node);
   }
 
   @Override

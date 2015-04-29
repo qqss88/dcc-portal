@@ -17,18 +17,37 @@
  */
 package org.dcc.portal.pql.ast.builder;
 
-import static lombok.AccessLevel.PRIVATE;
-import lombok.NoArgsConstructor;
+import static org.assertj.core.api.Assertions.assertThat;
+import lombok.val;
 
-@NoArgsConstructor(access = PRIVATE)
-public class PqlBuilders {
+import org.junit.Test;
 
-  public PqlSearchBuilder search() {
-    return PqlSearchBuilder.create();
+public class PqlCountBuilderTest {
+
+  @Test
+  public void noFiltersTest() {
+    val result = PqlCountBuilder.create().build();
+    assertThat(result.isCount()).isTrue();
+    assertThat(result.hasFacets()).isFalse();
+    assertThat(result.hasFilters()).isFalse();
+    assertThat(result.hasLimit()).isFalse();
+    assertThat(result.hasSelect()).isFalse();
+    assertThat(result.hasSort()).isFalse();
   }
 
-  public PqlCountBuilder count() {
-    return PqlCountBuilder.create();
+  @Test
+  public void withFiltersTest() {
+    val result = PqlCountBuilder.create()
+        .filter(FilterBuilders.eq("id", -1))
+        .build();
+
+    assertThat(result.getFilters().toEqNode().getField()).isEqualTo("id");
+    assertThat(result.isCount()).isTrue();
+    assertThat(result.hasFacets()).isFalse();
+    assertThat(result.hasFilters()).isTrue();
+    assertThat(result.hasLimit()).isFalse();
+    assertThat(result.hasSelect()).isFalse();
+    assertThat(result.hasSort()).isFalse();
   }
 
 }

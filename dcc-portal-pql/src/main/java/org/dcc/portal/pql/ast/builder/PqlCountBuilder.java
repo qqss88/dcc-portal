@@ -19,16 +19,35 @@ package org.dcc.portal.pql.ast.builder;
 
 import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+
+import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.function.CountNode;
 
 @NoArgsConstructor(access = PRIVATE)
-public class PqlBuilders {
+public class PqlCountBuilder {
 
-  public PqlSearchBuilder search() {
-    return PqlSearchBuilder.create();
+  private FilterBuilder filterBuilder;
+
+  public static PqlCountBuilder create() {
+    return new PqlCountBuilder();
   }
 
-  public PqlCountBuilder count() {
-    return PqlCountBuilder.create();
+  public PqlCountBuilder filter(@NonNull FilterBuilder builder) {
+    this.filterBuilder = builder;
+
+    return this;
+  }
+
+  public RootNode build() {
+    val result = new RootNode(new CountNode());
+
+    if (filterBuilder != null) {
+      result.setFilters(filterBuilder.build());
+    }
+
+    return result;
   }
 
 }

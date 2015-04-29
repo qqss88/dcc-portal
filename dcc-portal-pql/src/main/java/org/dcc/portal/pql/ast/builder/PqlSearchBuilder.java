@@ -102,19 +102,19 @@ public class PqlSearchBuilder {
     val result = new RootNode();
 
     if (!select.isEmpty()) {
-      result.addChild(new SelectNode(select));
+      result.setSelect(new SelectNode(select));
     }
 
     if (limit != null) {
-      result.addChild(limit);
+      result.setLimit(limit);
     }
 
     if (!facets.isEmpty()) {
-      result.addChild(new FacetsNode(facets));
+      result.setFacets(new FacetsNode(facets));
     }
 
     if (filterBuilder != null) {
-      result.addChild(filterBuilder.build());
+      result.setFilters(filterBuilder.build());
     }
 
     if (!sort.isEmpty()) {
@@ -123,7 +123,7 @@ public class PqlSearchBuilder {
         sortNode.addField(entry.getKey(), entry.getValue());
       }
 
-      result.addChild(sortNode);
+      result.setSort(sortNode);
     }
 
     return result;
