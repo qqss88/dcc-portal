@@ -195,6 +195,9 @@
         build: function () {
           return build (actions, initialPql);
         },
+        // This buildCount() builds a PQL with count(). This means, governed by the PQL syntax,
+        // only filters are considered in the materialization process; all the params (i.e. 'select',
+        // 'facets', 'limit', 'sort') are omitted as they are not allowed along with 'count.'
         buildCount: function () {
           var countFriendlyActions = _.remove (actions, function (action) {
             return _.contains (countWhiteListedFunctions, action.func);
