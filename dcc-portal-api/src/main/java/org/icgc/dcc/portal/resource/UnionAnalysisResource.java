@@ -24,6 +24,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SET_ANALYSIS_DEFINITION_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.UnionAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,9 +72,8 @@ public class UnionAnalysisResource {
   public UnionAnalysisResult getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) final UUID analysisId
       ) {
-    if (null == analysisId) {
-      throw new BadRequestException(API_ANALYSIS_ID_PARAM + " is null.");
-    }
+
+    checkRequest(analysisId == null, API_ANALYSIS_ID_PARAM + " is null.");
     log.info("Received request with {} of '{}'", API_ANALYSIS_ID_PARAM, analysisId);
 
     return service.getAnalysis(analysisId);
@@ -86,9 +85,8 @@ public class UnionAnalysisResource {
   @ApiOperation(value = "Creates a set analysis asynchronously. Status can be retrieved by polling the /{id} GET endpoint.",
       response = UnionAnalysisResult.class)
   public Response sumbitAnalysis(@ApiParam(value = API_SET_ANALYSIS_DEFINITION_VALUE) final UnionAnalysisRequest request) {
-    if (null == request) {
-      throw new BadRequestException("The payload of /analysis/union is null.");
-    }
+
+    checkRequest(request == null, "The payload of /analysis/union is null.");
     log.info("Received union analysis request: '{}'", request);
 
     val newAnalysis = service.submitAnalysis(request);
@@ -106,9 +104,9 @@ public class UnionAnalysisResource {
   public List<String> previewSetUnion(
       @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition
       ) {
-    if (null == listDefinition) {
-      throw new BadRequestException("The payload of /analysis/union/preview is null.");
-    }
+
+    checkRequest(listDefinition == null, "The payload of /analysis/union/preview is null.");
+
     return service.previewSetUnion(listDefinition);
   }
 }

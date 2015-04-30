@@ -57,7 +57,7 @@ import com.google.common.collect.Multimap;
 public class DiagramService {
 
   @NonNull
-  private final DiagramRepository diagramRepo;
+  private final DiagramRepository diagramRepository;
   @NonNull
   private final MutationRepository mutationRepository;
 
@@ -117,7 +117,7 @@ public class DiagramService {
 
   private Map<String, Object> getPathway(String id) {
     val query = Query.builder().build();
-    return diagramRepo.findOne(id, query);
+    return diagramRepository.findOne(id, query);
   }
 
   private Multimap<Object, Object> getReverseMap(Map<String, String> map) {

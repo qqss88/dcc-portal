@@ -6,6 +6,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -169,9 +170,7 @@ public class BrowserResource {
   List<Object> getHistogram(AnnotationDataSource dataSource) {
     String segmentRegion = queryMap.get("segment");
     String interval = queryMap.get("interval");
-    if (nullToEmpty(interval).isEmpty()) {
-      throw new BadRequestException("Histogram request requires interval");
-    }
+    checkRequest(nullToEmpty(interval).isEmpty(), "Histogram request requires interval");
 
     String chromosome = segmentRegion.split(CHROMOSOME_LOCATION_SEPERATOR)[0];
     long start = Long.parseLong(segmentRegion.split(CHROMOSOME_LOCATION_SEPERATOR)[1].split(LOCATION_SEPERATOR)[0]);

@@ -67,7 +67,6 @@ import org.icgc.dcc.portal.model.EnrichmentAnalysis;
 import org.icgc.dcc.portal.model.EnrichmentParamsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.EnrichmentAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -166,9 +165,7 @@ public class EnrichmentAnalysisResource {
   }
 
   private static void validateAnalysisId(UUID analysisId) {
-    if (analysisId == null) {
-      throw new BadRequestException("'analysisId' is empty");
-    }
+    checkRequest(analysisId == null, "'analysisId' is empty");
   }
 
 }
