@@ -336,7 +336,7 @@ describe('Testing PqlUtilService', function() {
     var term1 = "male";
     var term2 = "female";
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         gender: {
           "in": ["male", "female"]
@@ -358,16 +358,16 @@ describe('Testing PqlUtilService', function() {
     PqlUtilService.addTerm (category, "age", 22);
     PqlUtilService.addTerm ("mutation", "foo", "bar");
 
-    var testQuery = PqlUtilService.getFilters();
+    var testFilters = PqlUtilService.getFilters();
 
-    expect(testQuery).toEqual(expectedQuery);
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing removeTerm() with "female" to be removed in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
     location.search (paramName, originalPql);
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         gender: {
           "in": ["male"]
@@ -385,16 +385,16 @@ describe('Testing PqlUtilService', function() {
 
     PqlUtilService.removeTerm ("donor", "gender", "female");
 
-    var testQuery = PqlUtilService.getFilters();
+    var testFilters = PqlUtilService.getFilters();
 
-    expect(testQuery).toEqual(expectedQuery);
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing removeTerm() with both "male" and "female" to be removed in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
     location.search (paramName, originalPql);
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         age: {
           "in": [22]
@@ -410,16 +410,16 @@ describe('Testing PqlUtilService', function() {
     PqlUtilService.removeTerm ("donor", "gender", "female");
     PqlUtilService.removeTerm ("donor", "gender", "male");
 
-    var testQuery = PqlUtilService.getFilters();
+    var testFilters = PqlUtilService.getFilters();
 
-    expect(testQuery).toEqual(expectedQuery);
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing removeFacet() with "donor.age" to be removed in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
     location.search (paramName, originalPql);
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         gender: {
           "in": ["male", "female"]
@@ -434,16 +434,16 @@ describe('Testing PqlUtilService', function() {
 
     PqlUtilService.removeFacet ("donor", "age");
 
-    var testQuery = PqlUtilService.getFilters();
+    var testFilters = PqlUtilService.getFilters();
 
-    expect(testQuery).toEqual(expectedQuery);
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing overwrite() with "donor.gender" set to "unknown" in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
     setPqlInUrl (originalPql);
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         gender: {
           "in": ["unknown"]
@@ -461,15 +461,15 @@ describe('Testing PqlUtilService', function() {
 
     PqlUtilService.overwrite ("donor", "gender", "unknown");
 
-    var testQuery = PqlUtilService.getFilters();
-    expect(testQuery).toEqual(expectedQuery);
+    var testFilters = PqlUtilService.getFilters();
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing overwrite() with "donor.gender" set to ["unknown", "male", "alien"] in pql: and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))', function() {
     var originalPql = 'and(in(donor.gender,"male","female"),eq(donor.age,22),eq(mutation.foo,"bar"))';
     setPqlInUrl (originalPql);
 
-    var expectedQuery = {
+    var expectedFilters = {
       donor: {
         gender: {
           "in": ["unknown", "male", "alien"]
@@ -487,8 +487,8 @@ describe('Testing PqlUtilService', function() {
 
     PqlUtilService.overwrite ("donor", "gender", ["unknown", "male", "alien"]);
 
-    var testQuery = PqlUtilService.getFilters();
-    expect(testQuery).toEqual(expectedQuery);
+    var testFilters = PqlUtilService.getFilters();
+    expect(testFilters).toEqual(expectedFilters);
   });
 
   it('Testing mergePqls() with eq(donor.age,123) and in(donor.gender, "male", "female")', function() {

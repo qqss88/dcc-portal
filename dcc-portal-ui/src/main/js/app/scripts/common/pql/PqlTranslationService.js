@@ -41,7 +41,7 @@
     }
 
     function convertNodeToPqlString (unit) {
-      if (! _.isObject(unit)) {
+      if (! _.isPlainObject (unit)) {
         return _.isString (unit) ? addQuotes (unit) : '' + unit;
       }
 
@@ -54,9 +54,7 @@
       }
 
       var vals = _.isArray (unit.values) ? unit.values : [];
-      var values = _.contains (noNestingOperators, op) ?
-        vals.join() :
-        vals.map(convertNodeToPqlString).join();
+      var values = (_.contains (noNestingOperators, op) ? vals : vals.map(convertNodeToPqlString)).join();
 
       var parameters = unit.field || '';
 
@@ -113,7 +111,7 @@
           _.filter (parseTree.map (convertNodeToPqlString), function (s) {
             return s.trim().length > 1;
           }).join() :
-          _.isObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
+          _.isPlainObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
 
         if (result === null) {
           LOGGER.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',

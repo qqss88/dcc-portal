@@ -76,12 +76,12 @@
       return (category && facet) ? {category: category, facet: facet} : null;
     }
 
+    // For our current need, we should only expect two operators, namely 'in' and 'eq'.
+    var supportedOps = ['in', 'eq'];
+
     function reduceFilterArrayToQueryFilters (result, node) {
       if (! node) {return result;}
-
-      // For our current need, we should only expect two operators, namely 'in' and 'eq'.
-      var op = node.op || '';
-      if (op !== 'in' && op !== 'eq') {return result;}
+      if (! _.contains (supportedOps, node.op)) {return result;}
 
       var values = node.values || [];
       if (values.length < 1) {return result;}
@@ -110,12 +110,12 @@
     function convertJsonTreeToQueryObject (treeArray) {
       var result = getEmptyQueryObject();
 
-      // Currently we expect the input (treeArray) to be an array,
-      // namely we don't support/expect 'count' yet.
+      // In this context, we expect the input (treeArray) to be an array,
+      // namely we don't expect 'count' in this case.
       if (! _.isArray (treeArray)) {return result;}
 
       var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
-      // For our current need, there should always be one 'And' node.
+      // For our current need, there should be only one 'And' node if one exists.
       var filterValues = andNode ? (_.isArray (andNode.values) ? andNode.values : []) : treeArray;
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
 
@@ -143,9 +143,7 @@
     }
 
     function removeEmptyObject (collection) {
-      return _.filter (collection, function (o) {
-        return (! _.isEqual (o, {}));
-      });
+      return _.without (collection, {});
     }
 
     function createSelectTreeNodeObject (values) {
@@ -155,16 +153,20 @@
         };
     }
 
+    function createCountTreeNodeObject (values) {
+      return {
+        op: 'count',
+        values: values
+      };
+    }
+
     function toCountStatement (pql) {
       var query = convertPqlToQueryObject (pql);
       var filters = query.filters;
 
-      if ((! _.isPlainObject (filters)) || _.isEmpty (filters)) {return '';}
+      if (! _.isPlainObject (filters) || _.isEmpty (filters)) {return '';}
 
-      var pqlJson = {
-        op: 'count',
-        values: convertQueryFilterToJsonTree (filters)
-      };
+      var pqlJson = createCountTreeNodeObject (convertQueryFilterToJsonTree (filters));
 
       return PqlTranslationService.toPql (pqlJson);
     }
@@ -286,11 +288,9 @@
 
         if (_.contains (facetKeys, facetName)) {
           var inValueArray = queryFilter [categoryName][facetName][inField] || [];
-          queryFilter [categoryName][facetName][inField] = _.remove (inValueArray, function (s) {
-            return s !== term;
-          });
+          queryFilter [categoryName][facetName][inField] = _.without (inValueArray, term);
 
-          if (queryFilter [categoryName][facetName][inField].length < 1) {
+          if ((queryFilter [categoryName][facetName][inField]).length < 1) {
             queryFilter = removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter);
           }
         }
@@ -342,8 +342,8 @@
     }
 
     function addProjection (pql, selectField) {
-      var star = defaultProjection[0];
-      if (star === selectField) {return pql;}
+      var asterisk = defaultProjection[0];
+      if (asterisk === selectField) {return pql;}
 
       return addProjections (pql, [selectField]);
     }
@@ -395,10 +395,7 @@
         return _.isString (s) ? s.trim() : emptyValue;
       });
 
-      var pqlArray = _.unique (_.filter (args, function (s) {
-        return s !== emptyValue;
-      }));
-
+      var pqlArray = _.unique (_.without (args, emptyValue));
       var numberOfPql = pqlArray.length;
 
       if (numberOfPql < 1) {return emptyValue;}

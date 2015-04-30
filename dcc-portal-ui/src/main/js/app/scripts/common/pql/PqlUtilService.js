@@ -74,7 +74,7 @@
     }
 
     function removeSort (field) {
-      if (! field) {return;}
+      if (! _.isString (field)) {return;}
 
       var sort = getSort();
       sort = _.isArray (sort) ? sort : [];
