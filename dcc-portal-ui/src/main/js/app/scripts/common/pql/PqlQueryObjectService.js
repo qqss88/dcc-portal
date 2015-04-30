@@ -155,6 +155,20 @@
         };
     }
 
+    function toCountStatement (pql) {
+      var query = convertPqlToQueryObject (pql);
+      var filters = query.filters;
+
+      if ((! _.isPlainObject (filters)) || _.isEmpty (filters)) {return '';}
+
+      var pqlJson = {
+        op: 'count',
+        values: convertQueryFilterToJsonTree (filters)
+      };
+
+      return PqlTranslationService.toPql (pqlJson);
+    }
+
     function convertQueryObjectToJsonTree (query) {
       // Result should be an array because, for now, the UI does not need/support 'count'
       var result = [];
@@ -335,7 +349,6 @@
       return addProjections (pql, [selectField]);
     }
 
-
     function includes (pql, field) {
       return (_.isArray (field) ? addProjections : addProjection) (pql, field);
     }
@@ -429,6 +442,7 @@
       },
       includesFacets: includesFacets,
       includes: includes,
+      toCountStatement: toCountStatement,
       convertQueryToPql: convertQueryObjectToPql,
       convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,

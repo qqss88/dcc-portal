@@ -127,11 +127,24 @@
         return service.setSort (buffer, sort);
       }
 
+      function buildCountPql (buffer) {
+        return service.toCountStatement (buffer);
+      }
+
+      // A white list for functions that are allowed along side with 'count()' in PQL.
+      var countWhiteListedFunctions = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
+
       var initialPql = pql || '';
       var actions = [];
 
       function addAction (func, args) {
         actions.push ({func: func, args: args});
+      }
+
+      function build (actions, startingPql) {
+        return _.reduce (actions, function (result, action) {
+            return action.func.apply (null, [result].concat (action.args));
+          }, startingPql);
       }
 
       return {
@@ -180,9 +193,16 @@
           return this;
         },
         build: function () {
-          return _.reduce (actions, function (result, action) {
-            return action.func.apply (null, [result].concat (action.args));
-          }, initialPql);
+          return build (actions, initialPql);
+        },
+        buildCount: function () {
+          var countFriendlyActions = _.remove (actions, function (action) {
+            return _.contains (countWhiteListedFunctions, action.func);
+          });
+
+          countFriendlyActions.push ({func: buildCountPql, args: []});
+
+          return build (countFriendlyActions, initialPql);
         }
       };
     };
