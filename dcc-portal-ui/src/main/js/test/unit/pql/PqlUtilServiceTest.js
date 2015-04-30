@@ -562,27 +562,33 @@ describe('Testing PqlUtilService', function() {
 
   it('Testing mergeQueries() with eq(donor.age,123) and in(donor.gender, "male", "female")', function() {
     var query1 = {
-      donor: {
-        age: {
-          "in": [123]
+      filters: {
+        donor: {
+          age: {
+            "in": [123]
+          }
         }
       }
     };
     var query2 = {
-      donor: {
-        gender: {
-          'in': ['male', 'female']
+      filters: {
+        donor: {
+          gender: {
+            'in': ['male', 'female']
+          }
         }
       }
     };
 
     var expectedQuery = {
-      donor: {
-        age: {
-          "in": [123]
-        },
-        gender: {
-          'in': ['male', 'female']
+      filters: {
+        donor: {
+          age: {
+            "in": [123]
+          },
+          gender: {
+            'in': ['male', 'female']
+          }
         }
       }
     };
@@ -594,24 +600,31 @@ describe('Testing PqlUtilService', function() {
 
   it('Testing mergeQueries() with eq(donor.gender,"female") and eq(donor.gender,"male")', function() {
     var query1 = {
-      donor: {
-        gender: {
-          'in': ['female']
+      filters: {
+        donor: {
+          gender: {
+            'in': ['female']
+          }
         }
       }
     };
+
     var query2 = {
-      donor: {
-        gender: {
-          'in': ['male']
+      filters: {
+        donor: {
+          gender: {
+            'in': ['male']
+          }
         }
       }
     };
 
     var expectedQuery = {
-      donor: {
-        gender: {
-          'in': ['male']
+      filters: {
+        donor: {
+          gender: {
+            'in': ['male']
+          }
         }
       }
     };
@@ -630,9 +643,11 @@ describe('Testing PqlUtilService', function() {
 
   it('Testing mergeQueries() with one argument', function() {
     var expectedQuery = {
-      donor: {
-        gender: {
-          'in': ['male']
+      filters: {
+        donor: {
+          gender: {
+            'in': ['male']
+          }
         }
       }
     };
