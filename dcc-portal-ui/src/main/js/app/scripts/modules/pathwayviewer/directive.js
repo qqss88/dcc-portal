@@ -47,61 +47,72 @@
         '</div></div>'+
         '</div>',
       link: function ($scope) {
-        var showingLegend = false, showingInfo = false, rendered = false;
+        var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
         
-        var openNewSideBar = function(isLegend,isInfo){
-          if(showingLegend){
-            $('.pathway-legend').animate({left: '100%'});
-            $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-chevron-circle-right');
-          }else if(showingInfo){
-            $('.pathway-info').animate({left: '100%'});
-            $('.pathway-info-controller').css('visibility','hidden');
-            $('.pathway-legend-controller').css('visibility','visible');
-          }
-          
-          showingLegend = isLegend;
-          showingInfo = isInfo;
-          
-          if(isLegend){
-            $('.pathway-legend').animate({'left': '75%'});
-            $('.pathway-legend-controller').addClass('fa-chevron-circle-right').removeClass('fa-question-circle');
-            showingLegend = true;
-          }else if(showingInfo){
-            $('.pathway-info-controller').css('visibility','visible');
-            $('.pathway-legend-controller').css('visibility','hidden');
-            $('.pathway-info').animate({left: '70%'});
-            showingInfo = true;
-          }
+        var showLegend = function(){
+          $('.pathway-legend').animate({'left': '75%'});
+          $('.pathway-legend-controller').addClass('fa-chevron-circle-right').removeClass('fa-question-circle');
+          showingLegend = true;
         };
         
-        var infoSvg = d3.select('.pathway-info-svg').append('svg')
+        var showInfo = function(){
+          $('.pathway-info-controller').css('visibility','visible');
+          $('.pathway-legend-controller').css('visibility','hidden');
+          $('.pathway-info').animate({left: '70%'});
+        };
+        
+        var hideLegend = function(){
+          $('.pathway-legend').animate({left: '100%'});
+          $('.pathway-legend-controller').addClass('fa-question-circle').removeClass('fa-chevron-circle-right');
+          showingLegend = false;
+        };
+        
+        var hideInfo = function(){
+          $('.pathway-info').animate({left: '100%'});
+          $('.pathway-info-controller').css('visibility','hidden');
+          $('.pathway-legend-controller').css('visibility','visible');
+        };
+        
+        var renderinfo = function(node,mutationCount,isMutated){
+          $('.pathway-info-svg').html('');
+          
+          var padding = 7;
+          var infoSvg = d3.select('.pathway-info-svg').append('svg')
               .attr('viewBox', '0 0 ' +150+ ' ' +50)
               .attr('preserveAspectRatio', 'xMidYMid')
               .append('g');
-        var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b'});
+          var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b'});
+          
+          node.size={width:100-padding*2,height:50-padding*2};
+          node.position={x:padding+25,y:padding};
+          infoRenderer.renderNodes([node]);
+          
+          if(isMutated){
+            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}],
+                                         {getNodesByReactomeId:function (){return [node];}});
+          }
+        };
 
         var controller = new dcc.ReactomePathway({
           width: 500,
           height: 300,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
-            var padding = 6, displayedCount = '*';
+            var mutationCount = '*';
             var node = $.extend({}, d);
             var geneList = [];
             
-            if(!showingInfo){
-              openNewSideBar(false,true);
-            }
+            hideLegend();
+            showInfo();
             
             // Create list of uniprot ids if we have any
-            if(highlights && d.isPartOfPathway){
+            if(highlights && node.isPartOfPathway){
               highlights.forEach(function (highlight) {
                 
                 if(_.contains(highlight.dbIds,d.reactomeId)){
                   
                   if(!highlight.advQuery){
-                    console.log('Ensembl id not found for: '+highlight.uniprotId+' ..skipping');
                     return;
                   }
                   
@@ -113,22 +124,15 @@
                   });
                 }
               });
+              
               if(geneList.length === 1){
-                displayedCount = geneList[0].value;
+                mutationCount = geneList[0].value;
               }
+              
               $scope.geneList = _.sortBy(geneList,function(n){return -n.value;});
-            }else{
-              $scope.geneList = [];
             }
-            $('.pathway-info-svg svg g').html('');
-            node.size={width:100-padding*2,height:50-padding*2};
-            node.position={x:padding+25,y:padding};
             
-            infoRenderer.renderNodes([node]);
-            if(geneList.length > 0){
-              infoRenderer.highlightEntity([{id:d.reactomeId,value:displayedCount}],
-                                           {getNodesByReactomeId:function (){return [node];}});
-            }
+            renderinfo(node,mutationCount,geneList.length>0);
           },
           urlPath: $location.url(),
           strokeColor: '#696969',
@@ -138,18 +142,16 @@
         
         $('.pathway-legend-controller').on('click',function(){
           if(showingLegend){
-            openNewSideBar(false,false);
+            hideLegend();
           }else{
-            openNewSideBar(true,false);
+            showLegend();
             var rect = $('.pathway-legend')[0].getBoundingClientRect();
-            
-            // Create legend with width and height but with 'px' removed
             controller.renderLegend(rect.width,rect.height);
           }
         });
 
         $('.pathway-info-controller').on('click',function(){
-          openNewSideBar(false,false);
+          hideInfo();
         });
         
         var handleRender = function(){
@@ -159,15 +161,11 @@
             controller.render(xml,zoomedOn);
             rendered = true;
           }else{
-            openNewSideBar(false,false);
+            hideInfo();
+            hideLegend();
           }
           
           if(highlights){
-            highlights.forEach(function (h) {
-              if(!(_.isArray(h.dbIds))){
-                h.dbIds = h.dbIds.split(',');
-              }
-            });
             controller.highlight(highlights);
           }
         };
@@ -175,17 +173,17 @@
         $scope.$watch('items', function (newValue) {
           xml = newValue;
           handleRender();
-        }, true);
+        });
         
         $scope.$watch('zooms', function (newValue) {
           zoomedOn = newValue;
           handleRender();
-        }, true);
+        });
 
         $scope.$watch('highlights', function (newValue) {
           highlights = newValue;
           handleRender();
-        },true);
+        });
       }
     };
   });

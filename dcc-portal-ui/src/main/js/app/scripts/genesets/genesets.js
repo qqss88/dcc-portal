@@ -278,7 +278,7 @@
                 if(value && value.dbIds){
                   pathwayHighlights.push({
                     uniprotId:id,
-                    dbIds:value.dbIds,
+                    dbIds:value.dbIds.split(','),
                     value:value.value
                   });
                 }

@@ -419,11 +419,8 @@
   };
   
   Renderer.prototype.outlineSubPathway = function (svg, reactomeId) {
-    var config = this.config;
-    
-    // Highlight the lines of this reaction
     svg.selectAll('.reaction'+reactomeId)
-      .attr('stroke',config.subPathwayColor)
+      .attr('stroke',this.config.subPathwayColor)
       .classed('pathway-sub-reaction-line',true);
   };
 

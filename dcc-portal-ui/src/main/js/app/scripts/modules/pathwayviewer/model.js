@@ -106,7 +106,7 @@
     return this.reactions;
   };
   
-  PathwayModel.prototype.getNodesInReaction = function (reactomeId){
+  PathwayModel.prototype.getNodeIdsInReaction = function (reactomeId){
     var nodes = [];
     var model = this;
     this.reactions.forEach(function (reaction) {
@@ -115,6 +115,15 @@
           nodes.push(model.getNodeById(elem.id).reactomeId);
         });
       }
+    });
+    return nodes;
+  };
+  
+  PathwayModel.prototype.getNodesInReaction = function (reaction){
+    var nodes = [];
+    var model = this;
+    reaction.nodes.forEach(function (n) {
+      nodes.push(model.getNodeById(n.id));
     });
     return nodes;
   };
