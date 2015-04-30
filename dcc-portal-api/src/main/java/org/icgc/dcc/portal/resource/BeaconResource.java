@@ -78,7 +78,8 @@ public class BeaconResource extends BaseResource {
     val parsedChromosome = Chromosome.byExpression(chromosome);
     val parsedPosition = parsedChromosome.parsePosition(position);
 
-    checkRequest(!isValidReference(reference), "'reference' is empty or invalid (must be GRCh\\d+)", reference);
+    checkRequest(!isValidReference(reference), "Reference param ('%s') is empty or invalid (must be GRCh\\d+)",
+        reference);
 
     if (isNullOrEmpty(dataset)) {
       dataset = ANY_DATASET;

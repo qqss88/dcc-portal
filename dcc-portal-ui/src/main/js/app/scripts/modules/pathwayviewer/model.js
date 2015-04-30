@@ -120,12 +120,7 @@
   };
   
   PathwayModel.prototype.getNodesInReaction = function (reaction){
-    var nodes = [];
-    var model = this;
-    reaction.nodes.forEach(function (n) {
-      nodes.push(model.getNodeById(n.id));
-    });
-    return nodes;
+    return _.map(reaction.nodes, function(node){ return this.getNodeById(node.id);}, this);
   };
 
   dcc.PathwayModel = PathwayModel;
