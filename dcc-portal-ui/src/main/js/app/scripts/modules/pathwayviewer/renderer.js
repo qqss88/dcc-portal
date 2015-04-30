@@ -24,7 +24,7 @@
     var isBaseMarker = function(type){
       return _.contains(['Output','Activator','Catalyst','Inhibitor'],type); // Part of subpathway reactions
     };
-    var filled = function(type){
+    var isFilled = function(type){
       return _.contains(['Output','RenderableInteraction','Output-legend','GeneArrow'],type);
     };
     var isCircular = function(type){return _.contains(['Catalyst','Catalyst-legend'],type);};
@@ -100,9 +100,7 @@
         }).append(def.element)
         .attr(def.attr)
         .attr('stroke',color)
-        .style('fill',filled(elem)?color:'white');
-      
-      
+        .style('fill',isFilled(elem)?color:'white');
       
       if(isBaseMarker(elem)){
         color = config.subPathwayColor;
@@ -118,7 +116,7 @@
           }).append(def.element)
           .attr(def.attr)
           .attr('stroke',color)
-          .style('fill',filled(elem)?color:'white');
+          .style('fill',isFilled(elem)?color:'white');
       }
     });
   }
@@ -260,7 +258,7 @@
       });
     
     // if it's a gene, we have to add a sepcial array in the top right corner
-    var genes =  _.filter(nodes,function(n){return n.type === 'RenderableGene';});
+    var genes =  _.where(nodes,{type : 'RenderableGene'});
 
     svg.selectAll('.RenderableGeneArrow').data(genes).enter().append('line').attr({
       'class':'RenderableGeneArrow',
@@ -373,8 +371,7 @@
     // Remove old highlights if there are any
     svg.selectAll('.banner-text').remove();
     svg.selectAll('.value-banner').remove();
-    svg.selectAll('.pathway-node').style('stroke','');
-    svg.selectAll('.pathway-node').style('stroke-width','');
+    svg.selectAll('.pathway-node').style('stroke','').style('stroke-width','');
     
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);

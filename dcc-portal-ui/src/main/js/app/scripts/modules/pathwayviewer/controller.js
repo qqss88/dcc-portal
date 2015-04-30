@@ -38,8 +38,8 @@
 
     // Find out the size of the actual contents of the pathway so we can center it
     model.getNodes().forEach(function (node) {
-      height = Math.max((+node.position.y) + (+node.size.height), height);
-      width = Math.max((+node.position.x) + (+node.size.width), width);
+      height = Math.max(node.position.y + node.size.height, height);
+      width = Math.max(node.position.x + node.size.width, width);
       minHeight = Math.min(node.position.y, minHeight);
       minWidth = Math.min(node.position.x, minWidth);
     });
@@ -133,8 +133,8 @@
           // Update height/width calcuations accordingly
           reaction.nodes.forEach(function (node) {
             var modelNode = model.getNodeById(node.id);
-            height = Math.max((+modelNode.position.y) + (+modelNode.size.height), height);
-            width = Math.max((+modelNode.position.x) + (+modelNode.size.width), width);
+            height = Math.max(modelNode.position.y + modelNode.size.height, height);
+            width = Math.max(modelNode.position.x + modelNode.size.width, width);
             minHeight = Math.min(modelNode.position.y, minHeight);
             minWidth = Math.min(modelNode.position.x, minWidth);
           });

@@ -13,41 +13,41 @@
   PathwayModel.prototype.parse = function (xml) {
     // Parse all the nodes first
     var parsedXml =  $($.parseXML(xml));
-    var collection = parsedXml.find('Nodes')[0].children;
+    var xmlNodes = parsedXml.find('Nodes')[0].children;
+    var nodes = this.nodes;
 
-    for (var i = 0; i < collection.length; i++) {
-      var attrs = collection[i].attributes;
+    $(xmlNodes).each(function(){
+      var attrs = this.attributes;
 
       var bounds = attrs.bounds.nodeValue.split(' ');
       var textPosition = attrs.textPosition ?
         attrs.textPosition.nodeValue.split(' ') :
         attrs.bounds.nodeValue.split(' ');
 
-      this.nodes.push({
+      nodes.push({
         position: {
-          x: bounds[0],
-          y: bounds[1]
+          x: +bounds[0],
+          y: +bounds[1]
         },
         size: {
-          width: bounds[2],
-          height: bounds[3]
+          width: +bounds[2],
+          height: +bounds[3]
         },
-        type: collection[i].tagName.substring(collection[i].tagName.lastIndexOf('.') + 1),
+        type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {
-          content: collection[i].textContent.trim(),
+          content: this.textContent.trim(),
           position: {
-            x: textPosition[0],
-            y: textPosition[1]
+            x: +textPosition[0],
+            y: +textPosition[1]
           }
-        },
-        reactions: []
+        }
       });
-    }
+    });
     
-    collection = parsedXml.find('Edges')[0].children;
+    var edges = parsedXml.find('Edges')[0].children;
 
     var getPointsArray = function(pointString){
       var points = [];
@@ -63,7 +63,7 @@
     
     // Parse all the reactions
     var reactions =  this.reactions;
-    $(collection).each(function(){
+    $(edges).each(function(){
       var base = getPointsArray(this.attributes.points.nodeValue);
       var nodes=[];
       var description = $(this).children().find('properties').context;
@@ -91,7 +91,7 @@
   };
 
   PathwayModel.prototype.getNodeById = function (id) {
-    return _.where(this.nodes, {id: id})[0];
+    return _.find(this.nodes, {id: id});
   };
   
   PathwayModel.prototype.getNodesByReactomeId = function (reactomeId) {

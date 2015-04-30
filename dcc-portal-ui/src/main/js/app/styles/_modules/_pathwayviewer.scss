@@ -19,14 +19,12 @@ $compartmentBorder:#ffc38b;
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
   fill:$primaryNodeColor;
   stroke:$primaryNodeBorder;
-//  opacity: 0.5;
 }
 
 .RenderableComplex, .RenderableEntitySet{
   fill:$secondaryNodeColor;
   stroke-width:$lineThicknessLight;
   stroke: $secondaryNodeBorder;
-//  opacity: 0.5;
 }
 
 .RenderableEntitySet{

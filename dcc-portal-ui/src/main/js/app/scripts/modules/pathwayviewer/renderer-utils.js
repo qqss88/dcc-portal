@@ -120,29 +120,28 @@
 
     reactions.forEach(function (reaction) {
       var id = reaction.reactomeId;
-      var inputs = 0, outputs = 0;
+      var addedTypes = [];
 
-      for(var i=0; i<reaction.nodes.length;i++){
-        var type = getNodeLines(reaction,reaction.nodes[i],id,reaction.class);
-        if(type === 'Input'){
-          inputs++;
-        }else if(type === 'Output'){
-          outputs++;
-        }
-      }
+      reaction.nodes.forEach(function (node) {
+        addedTypes.push(getNodeLines(reaction,node,id,reaction.class));
+      });;
+      
+      var hasInputs = _.contains(addedTypes,'Input');
+      var hasOutputs =  _.contains(addedTypes,'Output');
+
       // If it doesn't have human-curated input lines, "snap" line to first input node, if it has one
-      if(inputs === 0 && getFirstInputNode(reaction.nodes)){
+      if(!hasInputs && getFirstInputNode(reaction.nodes)){
         reaction.base[0] = getNodeCenter(getFirstInputNode(reaction.nodes).id);
       }
       var baseLine = reaction.base.slice();
-      if(outputs !== 0){
+      if(hasOutputs){
         baseLine.pop(); // It's duplicated
       }
       
       // This creates a base reaction line
       generateLine(baseLine,
-                   outputs === 0 ?'hotpink':'black',
-                   outputs === 0 ?'Output':reaction.type,id,reaction.class);
+                   hasOutputs ?'black':'hotpink',
+                   hasOutputs ?reaction.type:'Output',id,reaction.class);
     });
 
     return lines;
@@ -159,13 +158,15 @@
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
+      var type = types[i];
+      
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
-        type:types[i]==='ProcessNode'?types[i]:'Renderable'+types[i],
-        id:types[i]===mutatedNodeText?'mutated':'fake',
-        reactomeId:types[i]===mutatedNodeText?'mutated':'fake',
-        text:{content:types[i],position:{x:x,y:y}}
+        type:type==='ProcessNode'?type:'Renderable'+type,
+        id:type===mutatedNodeText?'mutated':'fake',
+        reactomeId:type===mutatedNodeText?'mutated':'fake',
+        text:{content:type,position:{x:x,y:y}}
       });
     }
     
