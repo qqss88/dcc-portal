@@ -123,7 +123,7 @@ public class DiagramService {
   private Multimap<Object, Object> getReverseMap(Map<String, String> map) {
     val reverse = ArrayListMultimap.create();
     map.forEach((dbId, uniprotsString) -> {
-      val uniprots = uniprotsString.split(",");
+      val uniprots = Splitters.COMMA.splitToList(uniprotsString);
       for (val uniprotId : uniprots) {
         reverse.put(parseUniprot(uniprotId), dbId);
       }

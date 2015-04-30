@@ -38,6 +38,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_FIELD;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SORT_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.ORDER_VALUES;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.resource.ResourceUtils.validate;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
@@ -111,24 +112,12 @@ public class EnrichmentAnalysisResource {
       ) {
 
     // Validate
-    if (paramsParam == null) {
-      throw new BadRequestException("'params' empty");
-    }
-    if (filtersParam == null) {
-      throw new BadRequestException("'filters' empty");
-    }
-    if (isNullOrEmpty(sort)) {
-      throw new BadRequestException("'sort' is missing or empty");
-    }
-    if (!GENES_SORT_FIELD_NAMES.contains(sort)) {
-      throw new BadRequestException("'sort' must be one of " + GENES_SORT_FIELD_NAMES);
-    }
-    if (isNullOrEmpty(order)) {
-      throw new BadRequestException("'order' is missing or empty");
-    }
-    if (!ORDER_VALUES.contains(order.toLowerCase())) {
-      throw new BadRequestException("'order' must be one of " + ORDER_VALUES);
-    }
+    checkRequest(paramsParam == null, "'params' empty");
+    checkRequest(filtersParam == null, "'filters' empty");
+    checkRequest(isNullOrEmpty(sort), "'sort' is missing or empty");
+    checkRequest(!GENES_SORT_FIELD_NAMES.contains(sort), "'sort' must be one of " + GENES_SORT_FIELD_NAMES);
+    checkRequest(isNullOrEmpty(order), "'order' is missing or empty");
+    checkRequest(!ORDER_VALUES.contains(order.toLowerCase()), "'order' must be one of " + ORDER_VALUES);
 
     // JSR 303 resource parameters are not supported in DW 1
     validate(paramsParam.get());

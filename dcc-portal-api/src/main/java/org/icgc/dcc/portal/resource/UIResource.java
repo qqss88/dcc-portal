@@ -23,6 +23,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,7 +52,6 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
@@ -144,9 +144,8 @@ public class UIResource {
   public Map<String, DiagramProtein> getReactomeProteinMap(
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId,
       @ApiParam(value = "The functional impact filter", required = true) @QueryParam("impactFilter") FieldsParam impactFilter) {
-    if (isValidPathwayId(pathwayId)) {
-      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
-    }
+
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return diagramService.mapProteinIds(pathwayId, impactFilter.get());
   }
@@ -156,9 +155,8 @@ public class UIResource {
   @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
-    if (isValidPathwayId(pathwayId)) {
-      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
-    }
+
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return Response.ok(diagramService.getPathwayDiagramString(pathwayId), APPLICATION_XML).build();
   }
@@ -167,14 +165,13 @@ public class UIResource {
   @GET
   public List<String> getShownPathwaySection(
       @ApiParam(value = "A non-diagrammed pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
-    if (isValidPathwayId(pathwayId)) {
-      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
-    }
+
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return diagramService.getShownPathwaySection(pathwayId);
   }
 
-  private Boolean isValidPathwayId(String id) {
+  private Boolean isInvalidPathwayId(String id, Object... args) {
     return isNullOrEmpty(id) || !(id.startsWith("REACT_") && tryParse(id.substring(6)) != null);
   }
 

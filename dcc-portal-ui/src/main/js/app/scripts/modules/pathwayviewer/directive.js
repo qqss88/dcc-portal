@@ -40,10 +40,10 @@
                 '<th class="pathway-gene-header-label pathway-gene-header"># Mutations</th>' +
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
-              '<th class="pathway-gene-label">{{gene.id}}</th>' +
+              '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
               '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
             '</tr></table>' +
-            '<div data-ng-if="geneList.length==0">No associated genes</div>'+
+            '<div data-ng-if="geneList.length==0">No associated mutated genes</div>'+
         '</div></div>'+
         '</div>',
       link: function ($scope) {
@@ -86,7 +86,7 @@
           height: 300,
           container: '#pathway-viewer-mini',
           onClick: function (d) {
-            var padding = 7, displayedCount = '*';
+            var padding = 6, displayedCount = '*';
             var node = $.extend({}, d);
             var geneList = [];
             
@@ -106,7 +106,8 @@
                   }
                   
                   geneList.push({
-                    id:highlight.geneSymbol,
+                    symbol:highlight.geneSymbol,
+                    id:highlight.geneId,
                     value:highlight.value,
                     advQuery:highlight.advQuery
                   });

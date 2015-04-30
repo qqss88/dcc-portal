@@ -303,6 +303,7 @@
                         }
                       });
                     n.geneSymbol = uniprotObj[0].symbol;
+                    n.geneId = ensemblId;
                   });
                 });
             

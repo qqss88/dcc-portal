@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,7 +33,6 @@ import org.icgc.dcc.portal.model.AlleleParam;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.BeaconInfo;
 import org.icgc.dcc.portal.model.Chromosome;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.BeaconService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -78,9 +78,9 @@ public class BeaconResource extends BaseResource {
     val parsedChromosome = Chromosome.byExpression(chromosome);
     val parsedPosition = parsedChromosome.parsePosition(position);
 
-    if (!isValidReference(reference)) {
-      throw new BadRequestException("'reference' is empty or invalid (must be GRCh\\d+)");
-    } else if (isNullOrEmpty(dataset)) {
+    checkRequest(!isValidReference(reference), "'reference' is empty or invalid (must be GRCh\\d+)", reference);
+
+    if (isNullOrEmpty(dataset)) {
       dataset = ANY_DATASET;
     }
 

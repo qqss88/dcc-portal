@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.resource;
 
+import static java.lang.String.format;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 
 import java.util.ArrayList;
@@ -161,6 +162,15 @@ public class ResourceUtils {
       throw new BadRequestException(COMMA.join(errorMessages));
     }
 
+  }
+
+  /**
+   * @param condition True to throw a bad request exception
+   */
+  static void checkRequest(boolean condition, String message, Object... args) {
+    if (condition) {
+      throw new BadRequestException(format(message, args));
+    }
   }
 
 }
