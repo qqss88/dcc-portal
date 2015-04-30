@@ -337,11 +337,8 @@
       var customSelects = query.params [paramName];
       var updatedSelects = _.union (customSelects, selectFields);
 
-      var star = defaultProjection[0];
-      return updateQueryParam (pql, paramName, _.reject (updatedSelects, function (s) {
-        // This is for extra reinforcement.
-        return s === star;
-      }));
+      var asterisk = defaultProjection[0];
+      return updateQueryParam (pql, paramName, _.without (updatedSelects, asterisk));
     }
 
     function addProjection (pql, selectField) {

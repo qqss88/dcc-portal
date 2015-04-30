@@ -188,7 +188,9 @@
           addAction (setSort, [sort]);
           return this;
         },
-        reset: function () {
+        reset: function (startingPql) {
+          if (! _.isEmpty (startingPql)) {initialPql = startingPql;}
+
           actions = [];
           return this;
         },

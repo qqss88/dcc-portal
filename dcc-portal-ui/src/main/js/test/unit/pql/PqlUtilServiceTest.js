@@ -770,6 +770,30 @@ describe('Testing PqlUtilService', function() {
     expect(builder.build()).toEqual(expected);
   });
 
+  it('Testing Builder.reset() with a new initial pql', function() {
+    var initialPql = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"))';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    var expected = 'select(*),facets(*),and(eq(donor.id,"uuid1"),eq(donor.age,23)),sort(-donor.id),limit(30)';
+
+    builder.removeTerm ('removing', 'something', 'non-existent')
+      .overwrite ('donor', 'id', ['uuid1', 'uuid2', 'uuid3'])
+      .setSort ([{field: 'donor.age', direction: '-'}])
+      .addTerm ('donor', 'gender', 'female')
+      .addTerm ('donor', 'foo', 123)
+      .addTerm ('remove', 'this', 'soon')
+      .setLimit ({from: 20, size:30})
+      .removeTerm ('donor', 'id', 'uuid2')
+      .removeFacet ('remove', 'this')
+      .addTerm ('donor', 'foo', 789)
+      .reset('facets(*),eq(donor.id,"uuid1"),sort(-donor.id)')
+      .setLimit ({size: 30})
+      .addTerm ('donor', 'age', 23)
+      ;
+
+    expect(builder.build()).toEqual(expected);
+  });
+
   it('Testing Builder.addTerms()', function() {
     var initialPql = 'select(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"))';
     var builder = PqlUtilService.getBuilder (initialPql);
