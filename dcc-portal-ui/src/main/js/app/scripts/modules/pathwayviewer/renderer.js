@@ -24,7 +24,7 @@
     var isBaseMarker = function(type){
       return _.contains(['Output','Activator','Catalyst','Inhibitor'],type); // Part of subpathway reactions
     };
-    var isFilled = function(type){
+    var filled = function(type){
       return _.contains(['Output','RenderableInteraction','Output-legend','GeneArrow'],type);
     };
     var isCircular = function(type){return _.contains(['Catalyst','Catalyst-legend'],type);};
@@ -100,7 +100,7 @@
         }).append(def.element)
         .attr(def.attr)
         .attr('stroke',color)
-        .style('fill',isFilled(elem)?color:'white');
+        .style('fill',filled(elem)?color:'white');
       
       if(isBaseMarker(elem)){
         color = config.subPathwayColor;
@@ -116,7 +116,7 @@
           }).append(def.element)
           .attr(def.attr)
           .attr('stroke',color)
-          .style('fill',isFilled(elem)?color:'white');
+          .style('fill',filled(elem)?color:'white');
       }
     });
   }
@@ -193,7 +193,7 @@
         d3.select(this).style('fill', d.oldColor.brighter(0.25));
       }).on('mouseout', function (d) {
         d3.select(this).style('fill', d.oldColor);
-      }).on('click',function(d){config.onClick(d);});
+      }).on('click',config.onClick);
 
     // Render all other normal rectangular nodes after octagons
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
@@ -239,7 +239,7 @@
       d3.select(this).style('fill', d.oldColor.brighter(0.25));
     }).on('mouseout', function (d) {
       d3.select(this).style('fill', d.oldColor);
-    }).on('click',function(d){config.onClick(d);});
+    }).on('click',config.onClick);
     
     // Add a foreignObject to contain all text so that warpping is done for us
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({

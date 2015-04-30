@@ -302,6 +302,7 @@
                           pathwayId:{is:[parentPathwayId]}
                         }
                       });
+                    n.geneSymbol = uniprotObj[0].symbol;
                   });
                 });
             

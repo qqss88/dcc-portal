@@ -50,6 +50,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
@@ -109,7 +110,9 @@ public class DiagramService {
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
-    return Splitters.COMMA.splitToList(((String) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"))));
+    val highlights = (String) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"));
+
+    return Splitters.COMMA.splitToList(highlights);
   }
 
   private Map<String, Object> getPathway(String id) {
@@ -117,11 +120,11 @@ public class DiagramService {
     return diagramRepo.findOne(id, query);
   }
 
-  private ArrayListMultimap<Object, Object> getReverseMap(Map<String, String> map) {
+  private Multimap<Object, Object> getReverseMap(Map<String, String> map) {
     val reverse = ArrayListMultimap.create();
     map.forEach((dbId, uniprotsString) -> {
-      String[] uniprots = uniprotsString.split(",");
-      for (String uniprotId : uniprots) {
+      val uniprots = uniprotsString.split(",");
+      for (val uniprotId : uniprots) {
         reverse.put(parseUniprot(uniprotId), dbId);
       }
     });

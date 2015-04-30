@@ -124,7 +124,7 @@
 
       reaction.nodes.forEach(function (node) {
         addedTypes.push(getNodeLines(reaction,node,id,reaction.class));
-      });;
+      });
       
       var hasInputs = _.contains(addedTypes,'Input');
       var hasOutputs =  _.contains(addedTypes,'Output');

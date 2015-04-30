@@ -105,9 +105,8 @@
                     return;
                   }
                   
-                  var geneId = highlight.advQuery.gene.id.is[0];
                   geneList.push({
-                    id:geneId,
+                    id:highlight.geneSymbol,
                     value:highlight.value,
                     advQuery:highlight.advQuery
                   });
