@@ -161,7 +161,9 @@
 
     // All else redirect to home
     $urlRouterProvider.otherwise(function($injector, $location) {
-      $injector.invoke(['Notify', function(Notify) {
+
+      $injector.invoke(['Notify', 'Page', function(Notify, Page) {
+        Page.setPage('error');
         Notify.setMessage('Cannot find: ' + $location.url());
         Notify.showErrors();
       }]);
@@ -201,6 +203,7 @@
           if (ignore === true) {
             return true;
           }
+
 
 
           if (response.data.message) {

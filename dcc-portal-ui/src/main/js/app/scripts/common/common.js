@@ -25,7 +25,10 @@
     'icgc.common.location',
     'icgc.common.display',
     'icgc.common.external',
-    'icgc.common.chromosome'
+    'icgc.common.chromosome',
+    'icgc.common.pql.translation',
+    'icgc.common.pql.queryobject',
+    'icgc.common.pql.utils'
   ]);
 
 

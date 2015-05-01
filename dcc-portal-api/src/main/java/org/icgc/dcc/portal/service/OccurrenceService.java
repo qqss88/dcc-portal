@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Throwables.propagate;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Collections;
 import java.util.Map;
@@ -28,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Occurrence;
 import org.icgc.dcc.portal.model.Occurrences;
 import org.icgc.dcc.portal.model.Pagination;
@@ -40,7 +41,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 
 @Slf4j
 @Service
@@ -80,10 +80,7 @@ public class OccurrenceService {
     val list = ImmutableList.<Occurrence> builder();
 
     for (SearchHit hit : hits) {
-      Map<String, Object> fieldMap = Maps.newHashMap();
-      for (Map.Entry<String, SearchHitField> field : hit.getFields().entrySet()) {
-        fieldMap.put(field.getKey(), field.getValue().getValue());
-      }
+      val fieldMap = createResponseMap(hit, query, Kind.OCCURRENCE);
       list.add(new Occurrence(fieldMap));
     }
 

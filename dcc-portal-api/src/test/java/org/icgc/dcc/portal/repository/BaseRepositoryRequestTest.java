@@ -33,7 +33,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.internal.InternalClient;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -89,7 +89,7 @@ public abstract class BaseRepositoryRequestTest {
   protected static String CONSEQUENCE_FILTER =
       "'mutation':{'consequenceType':{'is':['missense']},'functionalImpact':{'is':['High']}}";
 
-  protected static final String FILTER_BOOL_MUST = "/filter/bool/must";
+  protected static final String FILTER_BOOL_MUST = "/post_filter/bool/must";
 
   protected static final String BOOL_MUST_R = "{\"bool\":{\"must\":[";
 
@@ -144,11 +144,12 @@ public abstract class BaseRepositoryRequestTest {
   final IndexModel indexModel = new IndexModel("test-index");
 
   @Mock
-  InternalClient client;
+  Client client;
 
   @Before
   public void setUp() {
-    when(client.prepareSearch("test-index")).thenReturn(new SearchRequestBuilder(client));
+    val searchRequestBuilder = new SearchRequestBuilder(client);
+    when(client.prepareSearch("test-index")).thenReturn(searchRequestBuilder);
   }
 
   public String joinFilters(String... filters) {

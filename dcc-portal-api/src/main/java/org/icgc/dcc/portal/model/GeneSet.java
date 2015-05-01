@@ -18,6 +18,10 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.repository.GeneSetRepository.SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -74,22 +78,23 @@ public class GeneSet {
   @JsonCreator
   public GeneSet(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.GENE_SET);
-    id = (String) fieldMap.get(fields.get("id"));
-    name = (String) fieldMap.get(fields.get("name"));
-    source = (String) fieldMap.get(fields.get("source"));
-    type = (String) fieldMap.get(fields.get("type"));
-    description = (String) fieldMap.get(fields.get("description"));
+    id = getString(fieldMap.get(fields.get("id")));
+    name = getString(fieldMap.get(fields.get("name")));
+    source = getString(fieldMap.get(fields.get("source")));
+    type = getString(fieldMap.get(fields.get("type")));
+    description = getString(fieldMap.get(fields.get("description")));
     geneCount = getLong(fieldMap.get(fields.get("geneCount")));
 
     // Reactome pathway specific fields
-    hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(fields.get("hierarchy")));
-    diagrammed = String.valueOf(fieldMap.get(fields.get("diagrammed")));
+    hierarchy = buildPathwayHierarchy((List<List<Map<String, Object>>>) fieldMap.get(SOURCE_FIELDS.get("hierarchy")));
+    diagrammed = String.valueOf(getBoolean((fieldMap.get(fields.get("diagrammed")))));
 
     // Gene ontology specific fields
-    ontology = (String) fieldMap.get(fields.get("ontology"));
-    altIds = (List<String>) fieldMap.get(fields.get("altIds"));
-    synonyms = (List<String>) fieldMap.get(fields.get("synonyms"));
-    inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(fields.get("inferredTree")));
+    ontology = getString(fieldMap.get(fields.get("ontology")));
+    altIds = (List<String>) fieldMap.get(SOURCE_FIELDS.get("altIds"));
+    synonyms = (List<String>) fieldMap.get(SOURCE_FIELDS.get("synonyms"));
+    inferredTree = buildInferredTree((List<Map<String, Object>>) fieldMap.get(SOURCE_FIELDS.get("inferredTree")));
+
   }
 
   private List<List<Map<String, String>>> buildPathwayHierarchy(List<List<Map<String, Object>>> field) {
@@ -103,11 +108,12 @@ public class GeneSet {
       val path = Lists.<Map<String, String>> newArrayList();
       for (val pathwayNode : parentPath) {
         val node = Maps.<String, String> newHashMap();
-        node.put("id", (String) pathwayNode.get("id"));
-        node.put("name", (String) pathwayNode.get("name"));
-        node.put("diagrammed", String.valueOf(pathwayNode.get("diagrammed")));
+        for (val entry : pathwayNode.entrySet()) {
+          node.put(entry.getKey(), String.valueOf(entry.getValue()));
+        }
         path.add(node);
       }
+
       result.add(path);
     }
     return result;
@@ -129,13 +135,6 @@ public class GeneSet {
       result.add(treeNode);
     }
     return result;
-  }
-
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    if (field instanceof Integer) return (long) (Integer) field;
-    else
-      return null;
   }
 
 }

@@ -17,9 +17,11 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.UUID;
 
 import javax.ws.rs.core.NewCookie;
@@ -53,7 +55,7 @@ public final class AuthUtils {
         cookieName,
         FAILED_AUTH_COOKIE_VALUE,
         COOKIE_PATH,
-        (cookieName.equals(CrowdProperties.CUD_TOKEN_NAME)) ? ICGC_DOMAIN : DEFAULT_DOMAIN,
+        (cookieName.equals(CrowdProperties.SESSION_TOKEN_NAME)) ? DEFAULT_DOMAIN : ICGC_DOMAIN,
         COOKIE_COMMENT,
         FAILED_AUTH_COOKIE_AGE,
         SECURE);
@@ -88,7 +90,7 @@ public final class AuthUtils {
    * @param invalidateCookie indicates if <tt>crowd_cookie</tt> must be invalidated in the response
    * @throws AuthenticationException
    */
-  public static void throwAuthenticationException(@NonNull String userMessage, boolean invalidateCookie) {
+  public static void throwAuthenticationException(@NonNull String userMessage, Collection<String> invalidateCookie) {
     throwAuthenticationException(userMessage, userMessage, invalidateCookie);
   }
 
@@ -100,7 +102,7 @@ public final class AuthUtils {
    * @throws AuthenticationException
    */
   public static void throwAuthenticationException(@NonNull String userMessage, @NonNull String logMessage) {
-    throwAuthenticationException(userMessage, logMessage, false);
+    throwAuthenticationException(userMessage, logMessage, emptyList());
   }
 
   /**
@@ -112,10 +114,10 @@ public final class AuthUtils {
    * @throws AuthenticationException
    */
   public static void throwAuthenticationException(@NonNull String userMessage, @NonNull String logMessage,
-      boolean invalidateCookie) {
+      Collection<String> invalidateCookies) {
 
     log.info(logMessage);
-    throw new AuthenticationException(userMessage, invalidateCookie, null);
+    throw new AuthenticationException(userMessage, null, invalidateCookies);
   }
 
   /**
@@ -128,7 +130,7 @@ public final class AuthUtils {
    */
   public static void throwRedirectException(@NonNull String userMessage, @NonNull String logMessage, URI redirect) {
     log.info(logMessage);
-    throw new AuthenticationException(userMessage, false, redirect);
+    throw new AuthenticationException(userMessage, redirect, emptyList());
   }
 
   /**
