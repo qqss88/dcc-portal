@@ -11,6 +11,7 @@ import lombok.Value;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.icgc.dcc.portal.util.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -134,8 +135,8 @@ public class Donor {
     primarySite = getString(fieldMap.get(fields.get("primarySite")));
     tumourType = getString(fieldMap.get(fields.get("tumourType")));
     tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
-    ssmAffectedGenes = getLong(fieldMap.get(fields.get("ssmAffectedGenes")));
-    ssmCount = getLong(fieldMap.get(fields.get("ssmCount")));
+    ssmAffectedGenes = MapUtils.getLong(fieldMap.get(fields.get("ssmAffectedGenes")));
+    ssmCount = MapUtils.getLong(fieldMap.get(fields.get("ssmCount")));
     cnsmExists = getBoolean(fieldMap.get(fields.get("cnsmExists")));
     stsmExists = getBoolean(fieldMap.get(fields.get("stsmExists")));
     sgvExists = getBoolean(fieldMap.get(fields.get("sgvExists")));
@@ -146,13 +147,13 @@ public class Donor {
     pexpExists = getBoolean(fieldMap.get(fields.get("pexpExists")));
     mirnaSeqExists = getBoolean(fieldMap.get(fields.get("mirnaSeqExists")));
     jcnExists = getBoolean(fieldMap.get(fields.get("jcnExists")));
-    ageAtDiagnosis = getLong(fieldMap.get(fields.get("ageAtDiagnosis")));
+    ageAtDiagnosis = MapUtils.getLong(fieldMap.get(fields.get("ageAtDiagnosis")));
     ageAtDiagnosisGroup = getString(fieldMap.get(fields.get("ageAtDiagnosisGroup")));
-    ageAtEnrollment = getLong(fieldMap.get(fields.get("ageAtEnrollment")));
-    ageAtLastFollowup = getLong(fieldMap.get(fields.get("ageAtLastFollowup")));
-    intervalOfLastFollowup = getLong(fieldMap.get(fields.get("intervalOfLastFollowup")));
-    relapseInterval = getLong(fieldMap.get(fields.get("relapseInterval")));
-    survivalTime = getLong(fieldMap.get(fields.get("survivalTime")));
+    ageAtEnrollment = MapUtils.getLong(fieldMap.get(fields.get("ageAtEnrollment")));
+    ageAtLastFollowup = MapUtils.getLong(fieldMap.get(fields.get("ageAtLastFollowup")));
+    intervalOfLastFollowup = MapUtils.getLong(fieldMap.get(fields.get("intervalOfLastFollowup")));
+    relapseInterval = MapUtils.getLong(fieldMap.get(fields.get("relapseInterval")));
+    survivalTime = MapUtils.getLong(fieldMap.get(fields.get("survivalTime")));
     diagnosisIcd10 = getString(fieldMap.get(fields.get("diagnosisIcd10")));
     diseaseStatusLastFollowup = getString(fieldMap.get(fields.get("diseaseStatusLastFollowup")));
     gender = getString(fieldMap.get(fields.get("gender")));
@@ -173,14 +174,6 @@ public class Donor {
     therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy")); // FIXME
     family = buildFamily((List<Map<String, Object>>) fieldMap.get("family")); // FIXME
     exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure")); // FIXME
-  }
-
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    else if (field instanceof Integer) return (long) (Integer) field;
-    else if (field instanceof Float) return ((Float) field).longValue();
-    else
-      return null;
   }
 
   private List<Exposure> buildExposure(List<Map<String, Object>> field) {
