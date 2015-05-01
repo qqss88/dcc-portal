@@ -8,7 +8,7 @@ module.exports = function(config){
     files : [
       // include relevant Angular files and libs
       'app/bower_components/jquery/dist/jquery.js',
-      'app/bower_components/lodash/dist/lodash.js',
+      'app/bower_components/lodash/lodash.js',
       'app/bower_components/angularjs/angular.js',
       'app/bower_components/angular-sanitize/angular-sanitize.js',
       'app/bower_components/angular-animate/angular-animate.js',

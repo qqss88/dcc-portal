@@ -2,7 +2,7 @@
     <ul class="nav nav-pills nav-stacked" data-ng-repeat="s in DonorCtrl.donor.specimen">
         <li data-ng-class="{active:s.id==DonorSpecimenCtrl.specimen.id}">
             <a href="" data-ng-click="DonorSpecimenCtrl.setActive(s.id)"
-               data-ng-style="s.id===DonorSpecimenCtrl.specimen.id?{color:'#FFFFFF'}:{}">
+               data-ng-style="s.id===DonorSpecimenCtrl.specimen.id?{color:'#FFFFFF'}:{}" style="line-height:1.25rem">
                 {{ s.id }}<br>
                 <small>{{ s.type }}</small>
             </a></li>
