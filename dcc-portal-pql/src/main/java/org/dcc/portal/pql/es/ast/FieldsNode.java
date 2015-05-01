@@ -40,6 +40,12 @@ public class FieldsNode extends ExpressionNode {
     addChildren(children);
   }
 
+  public FieldsNode(@NonNull List<String> fields) {
+    for (val field : fields) {
+      addField(field);
+    }
+  }
+
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitFields(this, context);
@@ -52,6 +58,12 @@ public class FieldsNode extends ExpressionNode {
       val value = ((TerminalNode) child).getValue().toString();
       fields.add(value);
     }
+  }
+
+  public void addField(@NonNull String field) {
+    val child = new TerminalNode(field);
+    fields.add(field);
+    super.addChildren(child);
   }
 
   @Override

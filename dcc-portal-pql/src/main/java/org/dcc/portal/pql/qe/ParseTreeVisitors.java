@@ -18,16 +18,25 @@
 package org.dcc.portal.pql.qe;
 
 import static lombok.AccessLevel.PRIVATE;
+
+import java.util.List;
+
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.es.model.Order;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.OrderContext;
+
+import com.google.common.base.Splitter;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ParseTreeVisitors {
 
-  public static Order getOrderAt(OrderContext parent, int position) {
+  private static final Splitter FIELD_SPLITTER = Splitter.on(".");
+
+  public static Order getOrderAt(@NonNull OrderContext parent, int position) {
     for (val sign : parent.SIGN()) {
       if (sign.getSymbol().getCharPositionInLine() == position) {
         return Order.bySign(sign.getText());
@@ -35,6 +44,29 @@ public class ParseTreeVisitors {
     }
 
     return null;
+  }
+
+  public static String getField(@NonNull String alias, @NonNull TypeModel typeModel) {
+    return typeModel.getField(resolveAlias(alias, typeModel));
+  }
+
+  private static List<String> splitFields(String fullyQualifiedFieldName) {
+    val fields = ParseTreeVisitors.FIELD_SPLITTER.splitToList(fullyQualifiedFieldName);
+
+    return fields;
+  }
+
+  private static String resolveAlias(String alias, TypeModel typeModel) {
+    if (TypeModel.SPECIAL_CASES_FIELDS.contains(alias)) {
+      return alias;
+    }
+
+    val components = splitFields(alias);
+    if (components.size() == 1 || !typeModel.prefix().equals(components.get(0))) {
+      return alias;
+    }
+
+    return components.get(1);
   }
 
 }

@@ -41,6 +41,11 @@ public class LessThanNode extends ExpressionNode {
     addChildren(node);
   }
 
+  public LessThanNode(@NonNull Object value) {
+    this.value = value;
+    addChildren(new TerminalNode(value));
+  }
+
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitLessThan(this, context);

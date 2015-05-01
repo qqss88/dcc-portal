@@ -21,16 +21,22 @@ import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.ast.visitor.Visitors.createPqlAstVisitor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.val;
 
 import org.dcc.portal.pql.ast.RootNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.exception.SemanticException;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PqlParser {
 
   public static RootNode parse(@NonNull String pql) {
-    return ParseTrees.getParser(pql).statement()
-        .accept(createPqlAstVisitor())
+    val statement = ParseTrees.getParser(pql).statement();
+    if (statement.exception != null) {
+      throw new SemanticException("Check stderr for exception details");
+    }
+
+    return statement.accept(createPqlAstVisitor())
         .toRootNode();
   }
 

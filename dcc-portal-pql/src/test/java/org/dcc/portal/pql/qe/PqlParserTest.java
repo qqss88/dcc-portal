@@ -15,40 +15,23 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.ast.filter;
+package org.dcc.portal.pql.qe;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
-import lombok.val;
+import org.dcc.portal.pql.exception.SemanticException;
+import org.junit.Test;
 
-import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.ast.TerminalNode;
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
+public class PqlParserTest {
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class GreaterThanNode extends ExpressionNode {
-
-  @NonNull
-  Object value;
-
-  public GreaterThanNode(@NonNull ExpressionNode node) {
-    val terminalNode = (TerminalNode) node;
-    this.value = terminalNode.getValue();
-    addChildren(node);
+  @Test
+  public void successfulParseTest() {
+    assertThat(PqlParser.parse("select(*)").toString()).isEqualTo("select(*)");
   }
 
-  public GreaterThanNode(@NonNull Object value) {
-    this.value = value;
-    addChildren(new TerminalNode(value));
-  }
-
-  @Override
-  public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitGreaterThan(this, context);
+  @Test(expected = SemanticException.class)
+  public void malformedPqlTest() {
+    PqlParser.parse("select()");
   }
 
 }

@@ -74,6 +74,18 @@ public class PqlSearchBuilder {
     return this;
   }
 
+  public PqlSearchBuilder sortAsc(@NonNull String field) {
+    sort.put(field, Order.ASC);
+
+    return this;
+  }
+
+  public PqlSearchBuilder sortDesc(@NonNull String field) {
+    sort.put(field, Order.DESC);
+
+    return this;
+  }
+
   public PqlSearchBuilder limit(int size) {
     this.limit = new LimitNode(0, size);
 

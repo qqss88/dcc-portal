@@ -20,9 +20,19 @@ package org.dcc.portal.pql.ast.visitor;
 public class Visitors {
 
   private static final CreatePqlStringVisitor PQL_STRING_VISITOR = new CreatePqlStringVisitor();
+  private static final CreatePqlAstVisitor CRESTE_PQL_AST_VISITOR = new CreatePqlAstVisitor();
+  private static final CreateEsAstVisitor CREATE_ES_AST_VISITOR = new CreateEsAstVisitor();
 
   public static CreatePqlStringVisitor createPqlStringVisitor() {
     return PQL_STRING_VISITOR;
+  }
+
+  public static CreatePqlAstVisitor createPqlAstVisitor() {
+    return CRESTE_PQL_AST_VISITOR;
+  }
+
+  public static CreateEsAstVisitor createEsAstVisitor() {
+    return CREATE_ES_AST_VISITOR;
   }
 
 }
