@@ -124,7 +124,7 @@ public class DiagramService {
     val reverse = ArrayListMultimap.create();
     map.forEach((dbId, uniprotsString) -> {
       val uniprots = Splitters.COMMA.splitToList(uniprotsString);
-      for (val uniprotId : uniprots) {
+      for (String uniprotId : uniprots) {
         reverse.put(parseUniprot(uniprotId), dbId);
       }
     });
