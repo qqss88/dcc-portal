@@ -49,11 +49,9 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 public class PqlParseListener extends PqlBaseListener {
 
   ExpressionNode esAst = new RootNode();
-  QueryContext queryContext;
   PqlParseTreeVisitor pqlVisitor;
 
   public PqlParseListener(@NonNull QueryContext queryContext) {
-    this.queryContext = queryContext;
     this.pqlVisitor = new PqlParseTreeVisitor(queryContext.getTypeModel());
   }
 

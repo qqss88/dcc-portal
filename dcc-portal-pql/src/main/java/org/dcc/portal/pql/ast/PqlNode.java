@@ -17,6 +17,8 @@
  */
 package org.dcc.portal.pql.ast;
 
+import static org.dcc.portal.pql.ast.visitor.Visitors.createPqlStringVisitor;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -51,9 +53,9 @@ public abstract class PqlNode implements ConvertiblePqlNode {
 
   public abstract <T, A> T accept(PqlNodeVisitor<T, A> visitor, Optional<A> context);
 
-  public void addChild(@NonNull PqlNode... child) {
+  public void addChildren(@NonNull PqlNode... children) {
     val resultBuilder = ImmutableList.<PqlNode> builder();
-    resultBuilder.add(child);
+    resultBuilder.add(children);
     val result = resultBuilder.build();
 
     setParent(result);
@@ -93,6 +95,11 @@ public abstract class PqlNode implements ConvertiblePqlNode {
     for (val child : children) {
       child.parent = this;
     }
+  }
+
+  @Override
+  public String toString() {
+    return accept(createPqlStringVisitor(), Optional.empty());
   }
 
 }

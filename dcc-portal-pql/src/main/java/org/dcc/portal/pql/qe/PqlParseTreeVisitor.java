@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.qe;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.qe.ParseTreeVisitors.getOrderAt;
 
 import java.util.List;
 
@@ -270,16 +271,6 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
     log.debug("{}", sortNode);
 
     return sortNode;
-  }
-
-  private static Order getOrderAt(OrderContext parent, int position) {
-    for (val sign : parent.SIGN()) {
-      if (sign.getSymbol().getCharPositionInLine() == position) {
-        return Order.bySign(sign.getText());
-      }
-    }
-
-    return null;
   }
 
   @Override

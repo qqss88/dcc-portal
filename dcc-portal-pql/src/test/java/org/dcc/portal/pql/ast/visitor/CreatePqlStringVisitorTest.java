@@ -15,53 +15,72 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.ast.function;
+package org.dcc.portal.pql.ast.visitor;
 
-import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+import lombok.val;
 
 import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
+import org.dcc.portal.pql.ast.filter.AndNode;
+import org.dcc.portal.pql.ast.filter.EqNode;
+import org.dcc.portal.pql.ast.filter.GtNode;
+import org.dcc.portal.pql.ast.filter.InNode;
+import org.dcc.portal.pql.ast.filter.NestedNode;
+import org.dcc.portal.pql.ast.function.FacetsNode;
+import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.es.model.Order;
+import org.junit.Test;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
 
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class SortNode extends PqlNode {
+public class CreatePqlStringVisitorTest {
 
-  Map<String, Order> fields = Maps.newHashMap();
+  CreatePqlStringVisitor visitor = new CreatePqlStringVisitor();
 
-  public void addField(@NonNull String field, @NonNull Order order) {
-    fields.put(field, order);
+  @Test
+  public void visitEqTest() {
+    val node = new EqNode("id", 10);
+    assertThat(visit(node)).isEqualTo("eq(id,10)");
   }
 
-  public void addAscSort(@NonNull String field) {
-    fields.put(field, Order.ASC);
+  @Test
+  public void visitAndTest() {
+    val node = new AndNode(new EqNode("id", 10), new GtNode("age", 100));
+    assertThat(visit(node)).isEqualTo("and(eq(id,10),gt(age,100))");
   }
 
-  public void addDescSort(@NonNull String field) {
-    fields.put(field, Order.DESC);
+  @Test
+  public void visitNestedTest() {
+    val node = new NestedNode("gene", new AndNode(new EqNode("id", 10), new GtNode("age", 100)));
+    assertThat(visit(node)).isEqualTo("nested(gene,and(eq(id,10),gt(age,100)))");
   }
 
-  @Override
-  public Type type() {
-    return Type.SORT;
+  @Test
+  public void visitInTest() {
+    val node = new InNode("gene", ImmutableList.of(20, 30));
+    assertThat(visit(node)).isEqualTo("in(gene,20,30)");
   }
 
-  @Override
-  public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitSort(this, context);
+  @Test
+  public void visitFacetsTest() {
+    val node = new FacetsNode(ImmutableList.of("id"));
+    assertThat(visit(node)).isEqualTo("facets(id)");
   }
 
-  @Override
-  public SortNode toSortNode() {
-    return this;
+  @Test
+  public void visitSortTest() {
+    val node = new SortNode();
+    node.addField("id", Order.ASC);
+    node.addField("gene", Order.DESC);
+
+    assertThat(visit(node)).isEqualTo("sort(-gene,+id)");
+  }
+
+  private String visit(PqlNode node) {
+    return node.accept(visitor, Optional.empty());
   }
 
 }

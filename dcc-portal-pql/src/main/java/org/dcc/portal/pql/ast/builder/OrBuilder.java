@@ -41,7 +41,7 @@ public class OrBuilder implements FilterBuilder {
   public FilterNode build() {
     val result = new OrNode();
     for (val filter : filters) {
-      result.addChild(filter.build());
+      result.addChildren(filter.build());
     }
 
     return result;

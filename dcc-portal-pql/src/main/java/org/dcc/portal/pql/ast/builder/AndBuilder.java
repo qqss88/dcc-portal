@@ -41,7 +41,7 @@ public class AndBuilder implements FilterBuilder {
   public FilterNode build() {
     val result = new AndNode();
     for (val filter : filters) {
-      result.addChild(filter.build());
+      result.addChildren(filter.build());
     }
 
     return result;

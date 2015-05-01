@@ -19,12 +19,14 @@ package org.dcc.portal.pql.es.model;
 
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
 import org.icgc.dcc.common.core.model.Identifiable;
 
+@Getter
 @RequiredArgsConstructor(access = PRIVATE)
 public enum Order implements Identifiable {
 

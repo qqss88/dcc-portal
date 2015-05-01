@@ -15,53 +15,14 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.ast.function;
+package org.dcc.portal.pql.ast.visitor;
 
-import java.util.Map;
-import java.util.Optional;
+public class Visitors {
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+  private static final CreatePqlStringVisitor PQL_STRING_VISITOR = new CreatePqlStringVisitor();
 
-import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
-import org.dcc.portal.pql.es.model.Order;
-
-import com.google.common.collect.Maps;
-
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class SortNode extends PqlNode {
-
-  Map<String, Order> fields = Maps.newHashMap();
-
-  public void addField(@NonNull String field, @NonNull Order order) {
-    fields.put(field, order);
-  }
-
-  public void addAscSort(@NonNull String field) {
-    fields.put(field, Order.ASC);
-  }
-
-  public void addDescSort(@NonNull String field) {
-    fields.put(field, Order.DESC);
-  }
-
-  @Override
-  public Type type() {
-    return Type.SORT;
-  }
-
-  @Override
-  public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitSort(this, context);
-  }
-
-  @Override
-  public SortNode toSortNode() {
-    return this;
+  public static CreatePqlStringVisitor createPqlStringVisitor() {
+    return PQL_STRING_VISITOR;
   }
 
 }

@@ -23,6 +23,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.val;
 
 import org.dcc.portal.pql.ast.filter.FilterNode;
 import org.dcc.portal.pql.ast.function.CountNode;
@@ -56,7 +57,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.select = node;
     node.setParent(this);
-    addChild(node);
+    addChildren(node);
   }
 
   public boolean hasFacets() {
@@ -67,7 +68,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.facets = node;
     node.setParent(this);
-    addChild(node);
+    addChildren(node);
   }
 
   public boolean isCount() {
@@ -82,7 +83,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.sort = node;
     node.setParent(this);
-    addChild(node);
+    addChildren(node);
   }
 
   public boolean hasLimit() {
@@ -93,7 +94,7 @@ public class RootNode extends PqlNode {
     canUpdateField();
     this.limit = node;
     node.setParent(this);
-    addChild(node);
+    addChildren(node);
   }
 
   public boolean hasFilters() {
@@ -103,7 +104,7 @@ public class RootNode extends PqlNode {
   public void setFilters(@NonNull FilterNode node) {
     this.filters = node;
     node.setParent(this);
-    addChild(node);
+    addChildren(node);
   }
 
   @Override
@@ -119,6 +120,31 @@ public class RootNode extends PqlNode {
   @Override
   public RootNode toRootNode() {
     return this;
+  }
+
+  @Override
+  public void addChildren(@NonNull PqlNode... children) {
+    super.addChildren(children);
+
+    for (val child : children) {
+      switch (child.type()) {
+      case SELECT:
+        this.select = child.toSelectNode();
+        break;
+      case FACETS:
+        this.facets = child.toFacetsNode();
+        break;
+      case LIMIT:
+        this.limit = child.toLimitNode();
+        break;
+      case COUNT:
+        this.count = child.toCountNode();
+        break;
+      case SORT:
+        this.sort = child.toSortNode();
+        break;
+      }
+    }
   }
 
   private void canUpdateField() {

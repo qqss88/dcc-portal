@@ -46,7 +46,7 @@ public class NestedBuilder implements FilterBuilder {
   public FilterNode build() {
     val result = new NestedNode(path);
     for (val builder : builders) {
-      result.addChild(builder.build());
+      result.addChildren(builder.build());
     }
 
     return result;
