@@ -31,20 +31,20 @@ import javax.ws.rs.ext.Provider;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.icgc.dcc.portal.model.Error;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @Provider
-public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSearchException> {
+public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticsearchException> {
 
   private final static Status STATUS = BAD_REQUEST;
   private static final Random RANDOM = new Random();
 
   @Override
-  public Response toResponse(ElasticSearchException e) {
+  public Response toResponse(ElasticsearchException e) {
 
     val id = RANDOM.nextLong();
     log.error(formatLogMessage(id), e);
@@ -59,11 +59,11 @@ public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticSear
     return String.format("Error handling a request: %016x", id);
   }
 
-  private Error errorResponse(ElasticSearchException e, long id) {
+  private Error errorResponse(ElasticsearchException e, long id) {
     return new Error(STATUS, message(e, id));
   }
 
-  private String message(ElasticSearchException e, long id) {
+  private String message(ElasticsearchException e, long id) {
     return String.format("%s", formatLogMessage(id));
   }
 

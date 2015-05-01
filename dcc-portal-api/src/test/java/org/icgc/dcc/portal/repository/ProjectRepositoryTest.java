@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -135,7 +136,7 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
     String id = "PEME-CA";
     Query query = Query.builder().build();
     Map<String, Object> response = projectRepository.findOne(id, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
   }
 
   @Test
@@ -143,7 +144,7 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
     String id = "PEME-CA";
     Query query = Query.builder().fields(Lists.newArrayList("id", "name")).build();
     Map<String, Object> response = projectRepository.findOne(id, query);
-    assertThat(response.get(FIELDS.get("id"))).isEqualTo(id);
+    assertThat(getString(response.get(FIELDS.get("id")))).isEqualTo(id);
     assertThat(response.keySet()).isEqualTo(Sets.newHashSet(FIELDS.get("id"), FIELDS.get("name")));
   }
 

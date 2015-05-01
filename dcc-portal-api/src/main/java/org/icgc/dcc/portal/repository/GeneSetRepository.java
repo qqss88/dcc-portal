@@ -18,10 +18,15 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.isEmpty;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.common.collect.Iterables.size;
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -32,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -42,12 +46,13 @@ import org.icgc.dcc.portal.model.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.service.NotFoundException;
+import org.icgc.dcc.portal.model.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -60,6 +65,11 @@ public class GeneSetRepository {
    */
   private static final String INDEX_GENE_COUNT_FIELD_NAME = "_summary._gene_count";
   private static final String INDEX_GENE_SETS_NAME_FIELD_NAME = "name";
+  public static final Map<String, String> SOURCE_FIELDS = ImmutableMap.of(
+      "hierarchy", "pathway.hierarchy",
+      "inferredTree", "go_term.inferred_tree",
+      "altIds", "go_term.alt_ids",
+      "synonyms", "go_term.synonyms");
 
   private static final Type TYPE = Type.GENE_SET;
   private static final Kind KIND = Kind.GENE_SET;
@@ -76,7 +86,7 @@ public class GeneSetRepository {
   public int countGenes(@NonNull String id) {
     val geneSet = findOne(id, "geneCount");
 
-    return ((Long) geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue();
+    return (getLong(geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue());
   }
 
   public Map<String, Integer> countGenes(@NonNull Iterable<String> ids) {
@@ -136,7 +146,7 @@ public class GeneSetRepository {
     val map = Maps.<String, String> newLinkedHashMap();
     for (val hit : response.getHits()) {
       val id = hit.getId();
-      val count = (String) hit.getFields().get(fieldName).getValue();
+      val count = getString(hit.getFields().get(fieldName).getValue());
 
       map.put(id, count);
     }
@@ -149,57 +159,18 @@ public class GeneSetRepository {
   }
 
   public Map<String, Object> findOne(String id, Iterable<String> fieldNames) {
-    val fields = FIELDS_MAPPING.get(KIND);
-    val fs = Lists.<String> newArrayList();
-
-    // To be interpreted as explicit arrays
-    val arrayFields = ImmutableList.<String> of(
-        fields.get("hierarchy"),
-        fields.get("altIds"),
-        fields.get("synonyms"),
-        fields.get("inferredTree"),
-        fields.get("projects"));
-
-    // Old fields - To remove
-    /*
-     * fields.get("geneList"), fields.get("parentPathways"), fields.get("linkOut"));
-     */
-
+    val query = Query.builder().fields(Lists.newArrayList(fieldNames)).build();
     val search = client.prepareGet(index, TYPE.getId(), id);
-
-    if (!isEmpty(fieldNames)) {
-      for (val field : fieldNames) {
-        if (fields.containsKey(field)) {
-          fs.add(fields.get(field));
-        }
-      }
-    } else {
-      fs.addAll(fields.values().asList());
+    search.setFields(getFields(query, KIND));
+    String[] sourceFields = resolveSourceFields(query, KIND);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
     }
-
-    search.setFields(fs.toArray(new String[fs.size()]));
 
     GetResponse response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
 
-    if (!response.isExists()) {
-      String type = KIND.getId().substring(0, 1).toUpperCase() + KIND.getId().substring(1);
-      log.info("{} {} not found.", type, id);
-
-      throw new NotFoundException(id, type);
-    }
-
-    val map = Maps.<String, Object> newHashMap();
-    for (GetField f : response.getFields().values()) {
-      map.put(f.getName(), f.getValue());
-    }
-    for (val f : response.getFields().values()) {
-      if (arrayFields.contains(f.getName())) {
-        map.put(f.getName(), f.getValues());
-      } else {
-        map.put(f.getName(), f.getValue());
-      }
-    }
-
+    val map = createResponseMap(response, query, KIND);
     log.debug("{}", map);
 
     return map;
@@ -213,9 +184,10 @@ public class GeneSetRepository {
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(size(ids))
-        .setFilter(filters)
+        .setPostFilter(filters)
         .addField(fieldName);
 
     return search.execute().actionGet();
   }
+
 }

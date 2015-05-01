@@ -1,6 +1,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
 import java.util.Map;
@@ -77,9 +79,9 @@ public class Project {
   @JsonCreator
   public Project(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.PROJECT);
-    id = (String) fieldMap.get(fields.get("id"));
-    primarySite = (String) fieldMap.get(fields.get("primarySite"));
-    name = (String) fieldMap.get(fields.get("name"));
+    id = getString(fieldMap.get(fields.get("id")));
+    primarySite = getString(fieldMap.get(fields.get("primarySite")));
+    name = getString(fieldMap.get(fields.get("name")));
     pubmedIds = (List<String>) fieldMap.get(fields.get("pubmedIds"));
     primaryCountries = (List<String>) fieldMap.get(fields.get("primaryCountries"));
     ssmTestedDonorCount = getLong(fieldMap.get(fields.get("ssmTestedDonorCount")));
@@ -96,9 +98,9 @@ public class Project {
     totalDonorCount = getLong(fieldMap.get(fields.get("totalDonorCount")));
     affectedDonorCount = getLong(fieldMap.get(fields.get("affectedDonorCount")));
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
-    icgcId = (String) fieldMap.get(fields.get("icgcId"));
-    tumourType = (String) fieldMap.get(fields.get("tumourType"));
-    tumourSubtype = (String) fieldMap.get(fields.get("tumourSubtype"));
+    icgcId = getString(fieldMap.get(fields.get("icgcId")));
+    tumourType = getString(fieldMap.get(fields.get("tumourType")));
+    tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
     partnerCountries = (List<String>) fieldMap.get(fields.get("partnerCountries"));
     experimentalAnalysisPerformedDonorCounts =
         (Map<String, Integer>) fieldMap.get(fields.get("experimentalAnalysisPerformedDonorCounts"));
@@ -107,10 +109,4 @@ public class Project {
     repository = (List<String>) fieldMap.get(fields.get("repository"));
   }
 
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    if (field instanceof Integer) return (long) (Integer) field;
-    else
-      return null;
-  }
 }
