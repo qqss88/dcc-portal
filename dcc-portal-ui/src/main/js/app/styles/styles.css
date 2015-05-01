@@ -1939,27 +1939,23 @@ input.valid:focus {
   color: #dc502e;
 }
 
-/* line 1, _modules/_modals.scss */
+/*
 .modal-header {
   padding: 1rem 2rem;
-  border-bottom: 1px solid #cccccc;
+  border-bottom: 1px solid $greyLight
 }
-
-/* line 5, _modules/_modals.scss */
 .modal-body {
   padding: 0 2rem 1rem;
 }
-
-/* line 8, _modules/_modals.scss */
 .modal-footer {
   padding: 1rem;
   margin-bottom: 0;
   text-align: right;
-  background-color: #f2f2f2;
-  border-top: 1px solid #cccccc;
+  background-color: $greyLightest;
+  border-top: 1px solid $greyLight;
   border-radius: 0 0 6px 6px;
 }
-
+*/
 /* Suggest Input */
 /* line 2, _modules/_suggest.scss */
 .t_suggest {

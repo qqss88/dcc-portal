@@ -214,9 +214,8 @@
     }
 
     function addMultipleTermsToQueryFilter (categoryName, facetName, terms, queryFilter) {
-      if (! terms) {return queryFilter;}
       if (! _.isArray (terms)) {return queryFilter;}
-      if (terms.length < 1) {return queryFilter;}
+      if (_.isEmpty (terms)) {return queryFilter;}
 
       queryFilter = queryFilter || {};
       var category = queryFilter [categoryName] || {};
@@ -278,10 +277,7 @@
     }
 
     function includesFacets (pql) {
-      var query = convertPqlToQueryObject (pql);
-      query.params.facets = true;
-
-      return convertQueryObjectToPql (query);
+      return updateQueryParam (pql, 'facets', true);
     }
 
     function convertQueryObjectToPql (queryObject) {
@@ -291,13 +287,11 @@
     }
 
     function updateQueryFilter (pql, categoryName, facetName, term, updators) {
-      var query = convertPqlToQueryObject (pql);
-
-      query.filters = _.reduce (updators || [], function (result, f) {
-        return _.isFunction (f) ? f (categoryName, facetName, term, result) : result;
-      }, query.filters);
-
-      return convertQueryObjectToPql (query);
+      return updateQueryWithCustomAction (pql, function (query) {
+        query.filters = _.reduce (updators || [], function (result, f) {
+          return _.isFunction (f) ? f (categoryName, facetName, term, result) : result;
+        }, query.filters);
+      });
     }
 
     function cleanUpArguments (args, func) {
@@ -320,11 +314,7 @@
         return _.isPlainObject (o) ? o : emptyValue;
       });
 
-      var numberOfArgs = args.length;
-
-      if (numberOfArgs < 1) {return emptyValue;}
-
-      return mergeQueryObjects (args);
+      return _.isEmpty (args) ? emptyValue : mergeQueryObjects (args);
     }
 
     function mergePqlStatements () {
@@ -344,7 +334,7 @@
 
       var resultObject = mergeQueryObjects (_.map (pqlArray, convertPqlToQueryObject));
 
-      return resultObject === {} ? '' :
+      return _.isEmpty (resultObject) ? '' :
         PqlTranslationService.toPql (convertQueryObjectToJsonTree (resultObject));
     }
 
@@ -363,6 +353,9 @@
     return {
       addTerm: function (pql, categoryName, facetName, term) {
         return updateQueryFilter (pql, categoryName, facetName, term, [addTermToQueryFilter]);
+      },
+      addTerms: function (pql, categoryName, facetName, terms) {
+        return updateQueryFilter (pql, categoryName, facetName, terms, [addMultipleTermsToQueryFilter]);
       },
       removeTerm: function (pql, categoryName, facetName, term) {
         return updateQueryFilter (pql, categoryName, facetName, term, [removeTermFromQueryFilter]);

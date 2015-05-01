@@ -80,7 +80,7 @@
                                 <a data-tooltip-placement="left"
                                    data-tooltip="{{ p.term | define }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
-                            <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]}},"gene":{"id":{"is":["{{gene.id}}"]}}}'>
+                            <a href='/search?filters={{AdvancedCtrl.Gene.projectGeneQuery(p.term, gene.id)}}'>
                                 {{p.count | number}}
                             </a>/
                             <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]},"availableDataTypes":{"is":["ssm"]}}}'>

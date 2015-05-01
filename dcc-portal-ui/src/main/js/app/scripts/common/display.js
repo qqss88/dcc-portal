@@ -22,21 +22,6 @@
 
   module.service('FiltersUtil', function(Extensions) {
 
-    this.removeExtensions = function(filters) {
-      if (filters.hasOwnProperty('gene')) {
-
-        if (filters.gene.hasOwnProperty(Extensions.ENTITY)) {
-          delete filters.gene[Extensions.ENTITY];
-        }
-
-        // delete filters.gene.inputGeneListId;
-        if (_.isEmpty(filters.gene)) {
-          delete filters.gene;
-        }
-      }
-      return filters;
-    };
-
     this.hasGeneListExtension = function(filters) {
       if (filters.hasOwnProperty('gene')) {
         if (filters.gene.hasOwnProperty(Extensions.ENTITY)) {
@@ -45,7 +30,6 @@
       }
       return false;
     };
-
 
     this.getGeneSetQueryType = function(type) {
       if (type === 'go_term') {

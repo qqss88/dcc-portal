@@ -69,7 +69,7 @@
                                 <a data-tooltip-placement="left"
                                    data-tooltip="{{ p.term | define }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
-                            <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]}},"mutation":{"id":{"is":["{{mutation.id}}"]}}}'>
+                            <a href='/search?filters={{AdvancedCtrl.Mutation.projectMutationQuery(p.term, mutation.id)}}'>
                                 {{p.count | number}}
                             </a>/
                             <a href='/search?filters={"donor":{"projectId":{"is":["{{p.term}}"]},"availableDataTypes":{"is":["ssm"]}}}'>
