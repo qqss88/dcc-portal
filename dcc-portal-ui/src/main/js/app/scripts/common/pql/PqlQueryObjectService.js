@@ -103,8 +103,7 @@
     }
 
     function removeOp (jsonObject) {
-      delete (jsonObject || {}).op;
-      return jsonObject;
+      return _.omit (jsonObject, 'op');
     }
 
     function convertJsonTreeToQueryObject (treeArray) {
