@@ -900,8 +900,8 @@ describe('Testing PqlUtilService', function() {
     expect(builder.build()).toEqual(expected);
   });
 
-  it('Testing Builder.buildCount()', function() {
-    var expected = 'count(),in(donor.gender,"male","female")';
+  it('Testing Builder.buildFilters()', function() {
+    var expected = 'in(donor.gender,"male","female")';
     var limit = {from: 1, size: 99};
 
     var builder = PqlUtilService.getBuilder ();
@@ -910,19 +910,19 @@ describe('Testing PqlUtilService', function() {
       .setLimit (limit)
       .addTerm ("donor", "gender", "female");
 
-    expect(builder.buildCount()).toEqual(expected);
+    expect(builder.buildFilters()).toEqual(expected);
   });
 
-  it('Testing Builder.buildCount() with an initial pql', function() {
+  it('Testing Builder.buildFilters() with an initial pql', function() {
     var initialPql = 'select(*),facets(*),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid")),sort(+donor.age,-donor.foo),limit(1,99)';
     var builder = PqlUtilService.getBuilder (initialPql);
 
-    var expected = 'count(),and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"),in(donor.foo,789,333,1))';
+    var expected = 'and(eq(donor.gender,"male"),eq(donor.id,"some-uuid"),in(donor.foo,789,333,1))';
 
     builder.includesConsequences()
       .addTerms ('donor', 'foo', [789, 333, 1]);
 
-    expect(builder.buildCount()).toEqual(expected);
+    expect(builder.buildFilters()).toEqual(expected);
   });
 
 });

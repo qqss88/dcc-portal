@@ -159,15 +159,22 @@
       };
     }
 
-    function toCountStatement (pql) {
+    // Here the 'func' param is optional. It should be a function that further transforms or
+    // augments filter array.
+    function toFilterOnlyStatement (pql, func) {
       var query = convertPqlToQueryObject (pql);
       var filters = query.filters;
 
       if (! _.isPlainObject (filters) || _.isEmpty (filters)) {return '';}
 
-      var pqlJson = createCountTreeNodeObject (convertQueryFilterToJsonTree (filters));
+      var filterArray = convertQueryFilterToJsonTree (filters);
+      var pqlJson = _.isFunction (func) ? func (filterArray) : filterArray;
 
       return PqlTranslationService.toPql (pqlJson);
+    }
+
+    function toCountStatement (pql) {
+      return toFilterOnlyStatement (pql, createCountTreeNodeObject);
     }
 
     function convertQueryObjectToJsonTree (query) {
@@ -438,6 +445,7 @@
       includesFacets: includesFacets,
       includes: includes,
       toCountStatement: toCountStatement,
+      toFilterOnlyStatement: toFilterOnlyStatement,
       convertQueryToPql: convertQueryObjectToPql,
       convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,

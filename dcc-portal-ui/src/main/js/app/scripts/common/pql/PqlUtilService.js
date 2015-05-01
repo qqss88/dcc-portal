@@ -127,12 +127,12 @@
         return service.setSort (buffer, sort);
       }
 
-      function buildCountPql (buffer) {
-        return service.toCountStatement (buffer);
+      function buildFilterOnlyPql (buffer) {
+        return service.toFilterOnlyStatement (buffer);
       }
 
-      // A white list for functions that are allowed along side with 'count()' in PQL.
-      var countWhiteListedFunctions = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
+      // A list of functions that update filters in PQL.
+      var filterModifiers = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
 
       var initialPql = pql || '';
       var actions = [];
@@ -197,17 +197,16 @@
         build: function () {
           return build (actions, initialPql);
         },
-        // This buildCount() builds a PQL with count(). This means, governed by the PQL syntax,
-        // only filters are considered in the materialization process; all the params (i.e. 'select',
-        // 'facets', 'limit', 'sort') are omitted as they are not allowed along with 'count.'
-        buildCount: function () {
-          var countFriendlyActions = _.remove (actions, function (action) {
-            return _.contains (countWhiteListedFunctions, action.func);
+        // This buildFilters() builds a PQL with filter expression only by only considering filters
+        // during the materialization process; all the params (i.e. 'select', 'facets', 'limit', 'sort') are omitted.
+        buildFilters: function () {
+          var filterOnlyActions = _.remove (actions, function (action) {
+            return _.contains (filterModifiers, action.func);
           });
 
-          countFriendlyActions.push ({func: buildCountPql, args: []});
+          filterOnlyActions.push ({func: buildFilterOnlyPql, args: []});
 
-          return build (countFriendlyActions, initialPql);
+          return build (filterOnlyActions, initialPql);
         }
       };
     };
