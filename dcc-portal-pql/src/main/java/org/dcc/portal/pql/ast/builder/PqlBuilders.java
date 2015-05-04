@@ -21,10 +21,10 @@ import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = PRIVATE)
-public class PqlBuilders {
+public final class PqlBuilders {
 
   public static PqlSearchBuilder search() {
-    return PqlSearchBuilder.create();
+    return PqlSearchBuilder.statement();
   }
 
   public static PqlCountBuilder count() {

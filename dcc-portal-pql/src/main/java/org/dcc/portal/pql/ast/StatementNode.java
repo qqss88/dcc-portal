@@ -36,7 +36,7 @@ import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class RootNode extends PqlNode {
+public class StatementNode extends PqlNode {
 
   private SelectNode select;
   private FacetsNode facets;
@@ -45,7 +45,7 @@ public class RootNode extends PqlNode {
   private LimitNode limit;
   private FilterNode filters;
 
-  public RootNode(@NonNull CountNode count) {
+  public StatementNode(@NonNull CountNode count) {
     this.count = count;
   }
 
@@ -114,11 +114,11 @@ public class RootNode extends PqlNode {
 
   @Override
   public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitRoot(this, context);
+    return visitor.visitStatement(this, context);
   }
 
   @Override
-  public RootNode toRootNode() {
+  public StatementNode toStatementNode() {
     return this;
   }
 

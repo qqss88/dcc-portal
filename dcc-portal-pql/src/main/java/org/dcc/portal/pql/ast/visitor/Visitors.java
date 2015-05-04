@@ -17,7 +17,11 @@
  */
 package org.dcc.portal.pql.ast.visitor;
 
-public class Visitors {
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = PRIVATE)
+public final class Visitors {
 
   private static final CreatePqlStringVisitor PQL_STRING_VISITOR = new CreatePqlStringVisitor();
   private static final CreatePqlAstVisitor CRESTE_PQL_AST_VISITOR = new CreatePqlAstVisitor();

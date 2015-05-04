@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.ast.visitor;
 
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.getField;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.getField;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.EqualityFilterNode;
@@ -70,7 +70,7 @@ import com.google.common.collect.Lists;
 public class CreateEsAstVisitor extends PqlNodeVisitor<ExpressionNode, TypeModel> {
 
   @Override
-  public ExpressionNode visitRoot(@NonNull RootNode node, @NonNull Optional<TypeModel> context) {
+  public ExpressionNode visitStatement(@NonNull StatementNode node, @NonNull Optional<TypeModel> context) {
     val result = new org.dcc.portal.pql.es.ast.RootNode();
     for (val child : node.getChildren()) {
       val childVisitResult = child.accept(this, context);

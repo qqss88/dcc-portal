@@ -18,7 +18,7 @@
 package org.dcc.portal.pql.es.visitor.aggs;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 

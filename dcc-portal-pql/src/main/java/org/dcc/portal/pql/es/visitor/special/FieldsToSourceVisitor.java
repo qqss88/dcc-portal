@@ -32,7 +32,7 @@ import org.dcc.portal.pql.es.ast.SourceNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 
 /**
  * Visits {@link FieldsNode} subtree. It if has fields that are objects (e.g. transcripts) moves them to a sourceNode

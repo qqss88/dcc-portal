@@ -48,14 +48,14 @@ import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.visitor.aggs.Context;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 
 /**
  * Performs series of transformations to resolve different processing rules and to optimize the AST
  */
 @Slf4j
 @NoArgsConstructor
-public class EsAstTransformator {
+public class EsAstTransformer {
 
   private static final Optional<Context> DONOR_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
       getDonorCentricTypeModel()));

@@ -15,23 +15,15 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import lombok.Value;
 
-import org.dcc.portal.pql.exception.SemanticException;
-import org.junit.Test;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 
-public class PqlParserTest {
+@Value
+public class QueryRequest {
 
-  @Test
-  public void successfulParseTest() {
-    assertThat(PqlParser.parse("select(*)").toString()).isEqualTo("select(*)");
-  }
-
-  @Test(expected = SemanticException.class)
-  public void malformedPqlTest() {
-    PqlParser.parse("select()");
-  }
+  SearchRequestBuilder requestBuilder;
 
 }

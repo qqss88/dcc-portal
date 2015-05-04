@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.CountNode;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -40,8 +40,8 @@ public class PqlCountBuilder {
     return this;
   }
 
-  public RootNode build() {
-    val result = new RootNode(new CountNode());
+  public StatementNode build() {
+    val result = new StatementNode(new CountNode());
 
     if (filterBuilder != null) {
       result.setFilters(filterBuilder.build());

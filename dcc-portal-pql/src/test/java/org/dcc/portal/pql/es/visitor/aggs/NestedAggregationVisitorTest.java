@@ -22,7 +22,7 @@ import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
@@ -115,7 +115,7 @@ public class NestedAggregationVisitorTest extends BaseElasticsearchTest {
   private SearchResponse executeQuery(String query) {
     val request = queryEngine.execute(query, MUTATION_CENTRIC);
     log.debug("Request - {}", request);
-    val result = request.execute().actionGet();
+    val result = request.getRequestBuilder().execute().actionGet();
     log.debug("Result - {}", result);
 
     return result;

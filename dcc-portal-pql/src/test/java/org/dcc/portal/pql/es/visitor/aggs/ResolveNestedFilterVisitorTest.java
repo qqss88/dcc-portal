@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.es.visitor.aggs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
 
 import java.util.Optional;
 
@@ -31,7 +32,6 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 @Slf4j
@@ -69,7 +69,7 @@ public class ResolveNestedFilterVisitorTest {
     assertThat(result).isInstanceOf(FilterNode.class);
     assertThat(result.childrenCount()).isEqualTo(1);
 
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result.getFirstChild());
+    val mustNode = assertBoolAndGetMustNode(result.getFirstChild());
     assertThat(mustNode.childrenCount()).isEqualTo(1);
 
     assertThat(mustNode.getFirstChild()).isEqualTo(termNodeClone);

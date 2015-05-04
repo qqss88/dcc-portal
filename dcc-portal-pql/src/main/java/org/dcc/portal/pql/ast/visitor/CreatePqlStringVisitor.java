@@ -26,7 +26,7 @@ import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.EqualityFilterNode;
@@ -52,7 +52,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
   private static final String SEPARATOR = ",";
 
   @Override
-  public String visitRoot(@NonNull RootNode node, Optional<Void> context) {
+  public String visitStatement(@NonNull StatementNode node, Optional<Void> context) {
     val result = new StringBuilder();
     result.append(visitChildren(node));
 

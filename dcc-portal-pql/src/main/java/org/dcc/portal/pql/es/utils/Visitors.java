@@ -53,7 +53,7 @@ import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
 import org.dcc.portal.pql.meta.Type;
 
 @NoArgsConstructor(access = PRIVATE)
-public class Visitors {
+public final class Visitors {
 
   private static final NodeVisitor<String, Void> TO_STRING_VISITOR = new ToStringVisitor();
   private static final NodeVisitor<ExpressionNode, Void> CLONE_VISITOR = new CloneNodeVisitor();
@@ -99,7 +99,8 @@ public class Visitors {
   private static final SearchNonNestedFieldsVisitor SEARCH_NON_NESTED_FILTERS_VISITOR =
       new SearchNonNestedFieldsVisitor();
   private static final ResolveNestedFilterVisitor RESOLVE_NESTED_FILTER_VISITOR = new ResolveNestedFilterVisitor();
-  private static final ResolveNestedFilterFieldVisitor RESOLVE_NESTED_FIELD_VISITOR = new ResolveNestedFilterFieldVisitor();
+  private static final ResolveNestedFilterFieldVisitor RESOLVE_NESTED_FIELD_VISITOR =
+      new ResolveNestedFilterFieldVisitor();
   private static final VerifyNestedFilterVisitor VERIFY_NESTED_FILTER_VISITOR = new VerifyNestedFilterVisitor();
 
   public static final VerifyNestedFilterVisitor createVerifyNestedFilterVisitor() {

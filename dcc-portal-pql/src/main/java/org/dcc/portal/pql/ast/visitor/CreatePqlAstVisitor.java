@@ -21,8 +21,8 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
 import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
 import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.cleanString;
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.getOrderAt;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.cleanString;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.getOrderAt;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.ExistsNode;
@@ -91,7 +91,7 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
   public PqlNode visitStatement(@NonNull StatementContext context) {
     log.debug("Visiting statement context: {}", context.toStringTree());
 
-    val result = new RootNode();
+    val result = new StatementNode();
     val filters = Lists.<PqlNode> newArrayList();
     for (val child : context.children) {
       val visitResult = child.accept(this);

@@ -7,17 +7,14 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponse
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
-import org.elasticsearch.search.facet.Facets;
-import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
@@ -32,7 +29,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 @Slf4j
 @Service
@@ -51,8 +47,7 @@ public class MutationService {
     val request = queryEngine.execute(pql, Type.MUTATION_CENTRIC);
     log.debug("Request: {}", request);
 
-    // val response = mutationRepository.findAllCentric(query);
-    val response = request.execute().actionGet();
+    val response = request.getRequestBuilder().execute().actionGet();
     log.debug("Response: {}", response);
 
     val hits = response.getHits();
@@ -68,14 +63,7 @@ public class MutationService {
       list.add(new Mutation(map));
     }
 
-    Mutations mutations = new Mutations(list.build());
-    // Facets mergedFacets = mergeFacets(response.getFacets(), "consequenceTypeNested", "consequenceType");
-    // mergedFacets = mergeFacets(mergedFacets, "platformNested", "platform");
-    // mergedFacets = mergeFacets(mergedFacets, "verificationStatusNested", "verificationStatus");
-    // mergedFacets = mergeFacets(mergedFacets, "functionalImpactNested", "functionalImpact");
-    // mergedFacets = mergeFacets(mergedFacets, "sequencingStrategyNested", "sequencingStrategy");
-    //
-    // mutations.setFacets(mergedFacets);
+    val mutations = new Mutations(list.build());
     mutations.addFacets(aggregationsConverter.convert(response.getAggregations()));
     mutations.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
@@ -149,36 +137,4 @@ public class MutationService {
     return mutations;
   }
 
-  private Facets mergeFacets(Facets facets, String nested, String top) {
-    if (facets != null) {
-      TermsFacet nestedFacet = facets.facet(nested);
-      TermsFacet topFacet = facets.facet(top);
-
-      val topEntries = topFacet.getEntries();
-
-      Set<String> topTerms = Sets.newHashSet();
-      for (val entry : topEntries) {
-        topTerms.add(String.valueOf(entry.getTerm()));
-      }
-
-      Set<String> nestedTerms = Sets.newHashSet();
-      for (val entry : nestedFacet.getEntries()) {
-        nestedTerms.add(String.valueOf(entry.getTerm()));
-      }
-
-      val removableTerms = Sets.difference(topTerms, nestedTerms).immutableCopy();
-
-      val removableEntries = Lists.<TermsFacet.Entry> newArrayList();
-
-      for (val entry : topEntries) {
-        if (removableTerms.contains(String.valueOf(entry.getTerm()))) {
-          removableEntries.add(entry);
-        }
-      }
-
-      topEntries.removeAll(removableEntries);
-    }
-
-    return facets;
-  }
 }

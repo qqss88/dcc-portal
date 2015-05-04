@@ -22,6 +22,8 @@ import static org.dcc.portal.pql.es.visitor.score.MutationScoreQueryVisitor.PATH
 import static org.dcc.portal.pql.es.visitor.score.MutationScoreQueryVisitor.SCRIPT;
 import static org.dcc.portal.pql.es.visitor.score.ScoreVisitorHelpers.assertFunctionScoreNode;
 import static org.dcc.portal.pql.es.visitor.score.ScoreVisitorHelpers.assertNestedNode;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
+import static org.dcc.portal.pql.utils.Tests.assertTermNode;
 
 import java.util.Optional;
 
@@ -38,7 +40,6 @@ import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.query.FunctionScoreNode;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -97,8 +98,8 @@ public class NestedFieldsVisitorTest {
     assertThat(level2NesteNode.getPath()).isEqualTo("ssm_occurrence.observation");
     assertThat(level2NesteNode.getScoreMode()).isEqualTo(ScoreMode.AVG);
 
-    TestingHelpers.assertTermNode(level2NesteNode.getFirstChild(), "platformNested", "1");
-    TestingHelpers.assertTermNode(mustNode.getChild(1), "donor.id", "2");
+    assertTermNode(level2NesteNode.getFirstChild(), "platformNested", "1");
+    assertTermNode(mustNode.getChild(1), "donor.id", "2");
   }
 
   @Test
@@ -117,8 +118,8 @@ public class NestedFieldsVisitorTest {
     val mustNode = (MustBoolNode) scoreNode.getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(2);
 
-    TestingHelpers.assertTermNode(mustNode.getFirstChild(), "donor.id", "1");
-    TestingHelpers.assertTermNode(mustNode.getChild(1), "donor.gender", "male");
+    assertTermNode(mustNode.getFirstChild(), "donor.id", "1");
+    assertTermNode(mustNode.getChild(1), "donor.gender", "male");
   }
 
   @Test
@@ -140,7 +141,7 @@ public class NestedFieldsVisitorTest {
     assertThat(ssmNestedNode.getPath()).isEqualTo("ssm_occurrence.observation");
     assertThat(ssmNestedNode.getScoreMode()).isEqualTo(NestedNode.ScoreMode.AVG);
 
-    TestingHelpers.assertTermNode(ssmNestedNode.getFirstChild(), "platformNested", "1");
+    assertTermNode(ssmNestedNode.getFirstChild(), "platformNested", "1");
   }
 
   @Test
@@ -158,7 +159,7 @@ public class NestedFieldsVisitorTest {
     val result = esAst.accept(visitor, Optional.of(requestContext)).get();
     log.debug("{}", result);
 
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    val mustNode = assertBoolAndGetMustNode(result);
     assertThat(mustNode.hasChildren()).isTrue();
   }
 

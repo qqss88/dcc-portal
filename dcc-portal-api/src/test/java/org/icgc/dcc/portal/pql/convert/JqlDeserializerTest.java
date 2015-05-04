@@ -45,9 +45,9 @@ public class JqlDeserializerTest {
   public void multiTypeTest() {
     val result = convert("{donor:{age:{not:100}}, gene:{id:{is:'GE1'}}}");
 
-    assertThat(result.getTypeValues().size()).isEqualTo(2);
+    assertThat(result.getKindValues().size()).isEqualTo(2);
 
-    val donorType = result.getTypeValues().get("donor");
+    val donorType = result.getKindValues().get("donor");
     assertThat(donorType.size()).isEqualTo(1);
     val age = Iterables.get(donorType, 0);
     assertThat(age.getName()).isEqualTo("age");
@@ -55,7 +55,7 @@ public class JqlDeserializerTest {
     assertThat(age.getValue().isArray()).isFalse();
     assertThat(age.getValue().get()).isEqualTo(100);
 
-    val geneType = result.getTypeValues().get("gene");
+    val geneType = result.getKindValues().get("gene");
     assertThat(geneType.size()).isEqualTo(1);
     val id = Iterables.get(geneType, 0);
     assertThat(id.getName()).isEqualTo("id");
@@ -67,9 +67,9 @@ public class JqlDeserializerTest {
   @Test
   public void convertTest() {
     val result = convert("{donor:{id:{is:'DO1'}, age:{not:100}}}");
-    assertThat(result.getTypeValues().size()).isEqualTo(1);
+    assertThat(result.getKindValues().size()).isEqualTo(1);
 
-    val donorValues = result.getTypeValues().get("donor");
+    val donorValues = result.getKindValues().get("donor");
     assertThat(donorValues.size()).isEqualTo(2);
 
     val idValue = Iterables.get(donorValues, 0);
@@ -88,9 +88,9 @@ public class JqlDeserializerTest {
   @Test
   public void arrayValueTest() {
     val result = convert("{donor:{id:{is:['DO1','DO2']}}}");
-    assertThat(result.getTypeValues().size()).isEqualTo(1);
+    assertThat(result.getKindValues().size()).isEqualTo(1);
 
-    val donorValues = result.getTypeValues().get("donor");
+    val donorValues = result.getKindValues().get("donor");
     assertThat(donorValues.size()).isEqualTo(1);
     val idValue = Iterables.get(donorValues, 0).getValue();
 
@@ -114,7 +114,7 @@ public class JqlDeserializerTest {
 
   @Test
   public void hasTest() {
-    val result = convert("{donor:{hasPathway:true}}").getTypeValues().get("donor");
+    val result = convert("{donor:{hasPathway:true}}").getKindValues().get("donor");
     assertThat(result.size()).isEqualTo(1);
 
     val pathway = Iterables.get(result, 0);

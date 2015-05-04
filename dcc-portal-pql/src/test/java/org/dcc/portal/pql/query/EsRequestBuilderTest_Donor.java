@@ -15,60 +15,57 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.es.visitor;
+package org.dcc.portal.pql.query;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.Tests.createEsAst;
-
-import java.util.Optional;
-
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.es.ast.SortNode;
-import org.dcc.portal.pql.es.model.Order;
-import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.es.visitor.special.ScoreSortVisitor;
+import org.dcc.portal.pql.utils.BaseElasticsearchTest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.junit.Before;
 import org.junit.Test;
 
 @Slf4j
-public class ScoreSortVisitorTest {
+public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
 
-  ScoreSortVisitor visitor = new ScoreSortVisitor();
+  QueryEngine queryEngine;
 
-  @Test
-  public void containsScore() {
-    val root = createEsAst("select(id), sort(id, +_score)");
-    val result = root.accept(visitor, Optional.empty());
-    log.debug("After visitor: {}", result);
-
-    val sortNode = Nodes.getOptionalChild(result, SortNode.class).get();
-    assertThat(sortNode.getFields().size()).isEqualTo(2);
-    assertThat(sortNode.getFields().get("_score")).isEqualTo(Order.ASC);
-    assertThat(sortNode.getFields().get("_donor_id")).isEqualTo(Order.ASC);
+  @Before
+  public void setUp() {
+    es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
+    queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
+    listener = new PqlParseListener(queryContext);
+    queryEngine = new QueryEngine(es.client(), INDEX_NAME);
   }
 
   @Test
-  public void noScore() {
-    val root = createEsAst("select(id), sort(id)");
-    val result = root.accept(visitor, Optional.empty());
-    log.debug("After visitor: {}", result);
-
-    val sortNode = Nodes.getOptionalChild(result, SortNode.class).get();
-    assertThat(sortNode.getFields().size()).isEqualTo(2);
-    assertThat(sortNode.getFields().get("_score")).isEqualTo(Order.DESC);
-    assertThat(sortNode.getFields().get("_donor_id")).isEqualTo(Order.ASC);
+  public void geneLocationTest() {
+    val result = executeQuery("in(gene.location,'chr20:31446730-31549006')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "DO9");
   }
 
   @Test
-  public void noSorting() {
-    val root = createEsAst("select(id)");
-    val result = root.accept(visitor, Optional.empty());
-    log.debug("After visitor: {}", result);
+  public void mutationLocationTest() {
+    val result = executeQuery("in(mutation.location,'chrY:13463924-13463924')");
+    assertTotalHitsCount(result, 1);
+    containsOnlyIds(result, "DO2");
+  }
 
-    val sortNode = Nodes.getOptionalChild(result, SortNode.class).get();
-    assertThat(sortNode.getFields().size()).isEqualTo(1);
-    assertThat(sortNode.getFields().get("_score")).isEqualTo(Order.DESC);
+  @Test
+  public void nonNestedTest() {
+    val result = executeQuery("select(id),facets(gender),eq(gene.chromosome, '2')");
+    containsOnlyIds(result, "DO2", "DO4", "DO8");
+  }
+
+  private SearchResponse executeQuery(String query) {
+    val request = queryEngine.execute(query, DONOR_CENTRIC);
+    log.debug("Request - {}", request);
+    val result = request.getRequestBuilder().execute().actionGet();
+    log.debug("Result - {}", result);
+
+    return result;
   }
 
 }

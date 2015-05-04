@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -85,7 +85,7 @@ public class DonorService {
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     log.debug("Request: {}", request);
 
-    val response = request.execute().actionGet();
+    val response = request.getRequestBuilder().execute().actionGet();
     log.debug("Response: {}", response);
 
     return buildDonors(response, query);

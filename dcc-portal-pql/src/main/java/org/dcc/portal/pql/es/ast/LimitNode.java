@@ -24,7 +24,7 @@ import lombok.NonNull;
 import lombok.Value;
 
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.qe.PqlParseTreeVisitor;
+import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 
 /**
  * Encapsulates {@code from} and {@code size}, because of the requirement that {@link PqlParseTreeVisitor} returns an

@@ -15,14 +15,15 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
+import static org.dcc.portal.pql.utils.Tests.createParseTree;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.meta.GeneCentricTypeModel;
+import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.junit.Test;
 

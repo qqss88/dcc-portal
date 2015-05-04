@@ -23,7 +23,7 @@ import java.util.Map;
 
 import lombok.val;
 
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.builder.FilterBuilders;
 import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.function.FacetsNode;
@@ -37,7 +37,7 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void selectTest_oneField() {
-    val result = PqlSearchBuilder.create().select("id").build();
+    val result = PqlSearchBuilder.statement().select("id").build();
     assertThat(result.childrenCount()).isEqualTo(1);
     val selectNode = (SelectNode) result.getFirstChild();
     assertThat(selectNode.getFields()).containsOnly("id");
@@ -45,7 +45,7 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void selectTest_multiFields() {
-    val result = PqlSearchBuilder.create().select("id", "mutation").build();
+    val result = PqlSearchBuilder.statement().select("id", "mutation").build();
     assertThat(result.childrenCount()).isEqualTo(1);
     val selectNode = (SelectNode) result.getFirstChild();
     assertThat(selectNode.getFields()).containsOnly("id", "mutation");
@@ -53,7 +53,7 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void selectAllTest() {
-    val result = PqlSearchBuilder.create().selectAll().build();
+    val result = PqlSearchBuilder.statement().selectAll().build();
     assertThat(result.childrenCount()).isEqualTo(1);
     val selectNode = (SelectNode) result.getFirstChild();
     assertThat(selectNode.getFields()).containsOnly(SelectNode.ALL_FIELDS);
@@ -61,13 +61,13 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void limitTest() {
-    RootNode result = PqlSearchBuilder.create().limit(5).build();
+    StatementNode result = PqlSearchBuilder.statement().limit(5).build();
     assertThat(result.childrenCount()).isEqualTo(1);
     LimitNode limitNode = (LimitNode) result.getFirstChild();
     assertThat(limitNode.getFrom()).isEqualTo(0);
     assertThat(limitNode.getSize()).isEqualTo(5);
 
-    result = PqlSearchBuilder.create().limit(1, 15).build();
+    result = PqlSearchBuilder.statement().limit(1, 15).build();
     assertThat(result.childrenCount()).isEqualTo(1);
     limitNode = (LimitNode) result.getFirstChild();
     assertThat(limitNode.getFrom()).isEqualTo(1);
@@ -76,12 +76,12 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void facetsTest() {
-    RootNode result = PqlSearchBuilder.create().facets("id").build();
+    StatementNode result = PqlSearchBuilder.statement().facets("id").build();
     assertThat(result.childrenCount()).isEqualTo(1);
     FacetsNode facetsNode = (FacetsNode) result.getFirstChild();
     assertThat(facetsNode.getFacets()).containsOnly("id");
 
-    result = PqlSearchBuilder.create().facets("id", "mutation").build();
+    result = PqlSearchBuilder.statement().facets("id", "mutation").build();
     assertThat(result.childrenCount()).isEqualTo(1);
     facetsNode = (FacetsNode) result.getFirstChild();
     assertThat(facetsNode.getFacets()).containsOnly("id", "mutation");
@@ -89,14 +89,14 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void sortTest() {
-    RootNode result = PqlSearchBuilder.create().sort("id", Order.ASC).build();
+    StatementNode result = PqlSearchBuilder.statement().sort("id", Order.ASC).build();
     assertThat(result.childrenCount()).isEqualTo(1);
     SortNode sortNode = (SortNode) result.getFirstChild();
     Map<String, Order> fields = sortNode.getFields();
     assertThat(fields.size()).isEqualTo(1);
     assertThat(fields.get("id")).isEqualTo(Order.ASC);
 
-    result = PqlSearchBuilder.create()
+    result = PqlSearchBuilder.statement()
         .sort("id", Order.ASC)
         .sort("mutation", Order.DESC)
         .build();
@@ -110,7 +110,7 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void multiActionsTest() {
-    val result = PqlSearchBuilder.create()
+    val result = PqlSearchBuilder.statement()
         .select("id")
         .facets("mu")
         .filter(FilterBuilders.eq("gene", "G1"))

@@ -56,7 +56,7 @@ public class Jql2PqlConverter {
   private final static String ASC_SORT = "+";
   private final static String DESC_SORT = "-";
 
-  public String convert(@NonNull Query query, Type type) {
+  public String convert(@NonNull Query query, @NonNull Type type) {
     val result = new StringBuilder();
     result.append(parseFields(query.getFields()));
 
@@ -100,7 +100,7 @@ public class Jql2PqlConverter {
     return result.toString();
   }
 
-  private ObjectNode remapFilters(ObjectNode filters, Type type) {
+  private static ObjectNode remapFilters(ObjectNode filters, Type type) {
     if (type != Type.MUTATION_CENTRIC) {
       return filters;
     }
@@ -131,7 +131,7 @@ public class Jql2PqlConverter {
     return filters;
   }
 
-  private String parseIncludes(List<String> queryIncludes) {
+  private static String parseIncludes(List<String> queryIncludes) {
     val includes = Lists.newArrayList(queryIncludes);
     val result = new StringBuilder();
     if (includes.contains("facets")) {
@@ -155,7 +155,7 @@ public class Jql2PqlConverter {
     return INSTANCE;
   }
 
-  private String parseFacets() {
+  private static String parseFacets() {
     return "facets(*)";
   }
 

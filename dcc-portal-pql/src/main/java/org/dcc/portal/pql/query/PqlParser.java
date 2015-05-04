@@ -15,57 +15,29 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
-import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.ast.visitor.Visitors.createPqlAstVisitor;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.utils.BaseElasticsearchTest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.dcc.portal.pql.ast.StatementNode;
+import org.dcc.portal.pql.es.utils.ParseTrees;
+import org.dcc.portal.pql.exception.SemanticException;
 
-@Slf4j
-public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
+@NoArgsConstructor(access = PRIVATE)
+public final class PqlParser {
 
-  QueryEngine queryEngine;
+  public static StatementNode parse(@NonNull String pql) {
+    val statement = ParseTrees.getParser(pql).statement();
+    if (statement.exception != null) {
+      throw new SemanticException("Check stderr for exception details");
+    }
 
-  @Before
-  public void setUp() {
-    es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
-    listener = new PqlParseListener(queryContext);
-    queryEngine = new QueryEngine(es.client(), INDEX_NAME);
-  }
-
-  @Test
-  public void geneLocationTest() {
-    val result = executeQuery("in(gene.location,'chr20:31446730-31549006')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO9");
-  }
-
-  @Test
-  public void mutationLocationTest() {
-    val result = executeQuery("in(mutation.location,'chrY:13463924-13463924')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO2");
-  }
-
-  @Test
-  public void nonNestedTest() {
-    val result = executeQuery("select(id),facets(gender),eq(gene.chromosome, '2')");
-    containsOnlyIds(result, "DO2", "DO4", "DO8");
-  }
-
-  private SearchResponse executeQuery(String query) {
-    val request = queryEngine.execute(query, DONOR_CENTRIC);
-    log.debug("Request - {}", request);
-    val result = request.execute().actionGet();
-    log.debug("Result - {}", result);
-
-    return result;
+    return statement.accept(createPqlAstVisitor())
+        .toStatementNode();
   }
 
 }

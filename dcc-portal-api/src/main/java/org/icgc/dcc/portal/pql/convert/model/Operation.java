@@ -35,10 +35,12 @@ public enum Operation implements Identifiable {
 
   IS,
   NOT,
-  // Represent filters hasCuratedSet, hasPathway, hasGoTerm
+  /**
+   * Represent filters hasCuratedSet, hasPathway, hasGoTerm
+   */
   HAS;
 
-  private static final Collection<String> OPERATION_IDS = initOperationIds();
+  private static final Collection<String> OPERATION_IDS = defineOperationIds();
 
   @Override
   public String getId() {
@@ -59,7 +61,7 @@ public enum Operation implements Identifiable {
     return OPERATION_IDS;
   }
 
-  private static Collection<String> initOperationIds() {
+  private static Collection<String> defineOperationIds() {
     val result = new ImmutableList.Builder<String>();
     for (val name : values()) {
       if (name == HAS) {

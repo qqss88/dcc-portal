@@ -15,25 +15,24 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import lombok.Value;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.dcc.portal.pql.meta.TypeModel;
-import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.exception.SemanticException;
+import org.dcc.portal.pql.query.PqlParser;
+import org.junit.Test;
 
-@Value
-public class QueryContext {
+public class PqlParserTest {
 
-  private String index;
-  private Type type;
+  @Test
+  public void successfulParseTest() {
+    assertThat(PqlParser.parse("select(*)").toString()).isEqualTo("select(*)");
+  }
 
-  public TypeModel getTypeModel() {
-    checkNotNull(type);
-
-    return IndexModel.getTypeModel(type);
+  @Test(expected = SemanticException.class)
+  public void malformedPqlTest() {
+    PqlParser.parse("select()");
   }
 
 }

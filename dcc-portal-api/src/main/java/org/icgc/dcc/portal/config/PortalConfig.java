@@ -27,10 +27,11 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
@@ -315,7 +316,7 @@ public class PortalConfig {
   }
 
   @Bean
-  public QueryEngine queryEngine(Client client) {
+  public QueryEngine queryEngine(@NonNull Client client) {
     return new QueryEngine(client, properties.getElastic().getIndexName());
   }
 

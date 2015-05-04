@@ -3,6 +3,7 @@ package org.icgc.dcc.portal.model;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.NonNull;
 
 import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.Facets;
@@ -30,7 +31,7 @@ public class Paginated {
     }
   }
 
-  public void addFacets(Map<String, TermFacet> facets) {
+  public void addFacets(@NonNull Map<String, TermFacet> facets) {
     this.facets = facets;
   }
 

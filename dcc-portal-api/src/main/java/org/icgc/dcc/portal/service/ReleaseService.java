@@ -43,7 +43,6 @@ public class ReleaseService {
     val hits = response.getHits();
 
     val releases = new Releases(hits);
-    releases.setFacets(response.getFacets());
     releases.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return releases;

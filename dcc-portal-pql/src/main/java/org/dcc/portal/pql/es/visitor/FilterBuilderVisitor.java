@@ -61,7 +61,7 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
 import org.dcc.portal.pql.meta.TypeModel;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;

@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
@@ -347,7 +347,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   private SearchResponse executeQuery(String query) {
     val request = queryEngine.execute(query, MUTATION_CENTRIC);
     log.debug("Request - {}", request);
-    val result = request.execute().actionGet();
+    val result = request.getRequestBuilder().execute().actionGet();
     log.debug("Result - {}", result);
 
     return result;

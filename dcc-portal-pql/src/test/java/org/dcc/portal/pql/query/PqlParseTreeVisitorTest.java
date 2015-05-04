@@ -15,10 +15,10 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.utils.TestingHelpers.createParseTree;
+import static org.dcc.portal.pql.utils.Tests.createParseTree;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +44,8 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.DonorCentricTypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.utils.TestingHelpers;
+import org.dcc.portal.pql.query.PqlParseTreeVisitor;
+import org.dcc.portal.pql.utils.Tests;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ExistsContext;
@@ -75,7 +76,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val result = VISITOR.visitOr(orContext);
-    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result);
+    val shouldNode = Tests.assertBoolAndGetShouldNode(result);
     assertThat(shouldNode.childrenCount()).isEqualTo(3);
 
     // gt(ageAtDiagnosis, 10)
@@ -105,7 +106,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val orContext = (OrContext) parseTree.getChild(0);
     val result = VISITOR.visitOr(orContext);
-    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result);
+    val shouldNode = Tests.assertBoolAndGetShouldNode(result);
     assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // eq(gender, 'male')
@@ -114,7 +115,7 @@ public class PqlParseTreeVisitorTest {
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
 
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(shouldNode.getChild(1));
+    val mustNode = Tests.assertBoolAndGetMustNode(shouldNode.getChild(1));
     assertThat(mustNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)
@@ -178,7 +179,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
     val result = VISITOR.visitAnd(andContext);
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    val mustNode = Tests.assertBoolAndGetMustNode(result);
     assertThat(mustNode.getChildren().size()).isEqualTo(3);
 
     // gt(ageAtDiagnosis, 10)
@@ -208,7 +209,7 @@ public class PqlParseTreeVisitorTest {
     val parseTree = createParseTree(query);
     val andContext = (AndContext) parseTree.getChild(0);
     val result = VISITOR.visitAnd(andContext);
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    val mustNode = Tests.assertBoolAndGetMustNode(result);
     assertThat(mustNode.getChildren().size()).isEqualTo(2);
 
     // eq(gender, 'male')
@@ -217,7 +218,7 @@ public class PqlParseTreeVisitorTest {
     assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_sex");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("male");
 
-    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(mustNode.getChild(1));
+    val shouldNode = Tests.assertBoolAndGetShouldNode(mustNode.getChild(1));
     assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)

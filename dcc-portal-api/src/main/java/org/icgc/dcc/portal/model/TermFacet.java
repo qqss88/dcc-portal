@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 
+import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
@@ -45,7 +46,7 @@ public class TermFacet {
     return new TermFacet(facet);
   }
 
-  public static TermFacet of(long total, long missing, ImmutableList<Term> terms) {
+  public static TermFacet of(long total, long missing, @NonNull ImmutableList<Term> terms) {
     return new TermFacet(total, missing, terms);
   }
 

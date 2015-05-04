@@ -30,6 +30,8 @@ import static org.dcc.portal.pql.ast.builder.FilterBuilders.missing;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.nested;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.not;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.or;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetShouldNode;
 
 import java.util.Optional;
 
@@ -67,7 +69,6 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -116,7 +117,7 @@ public class CreateEsAstVisitorTest {
 
   @Test
   public void visitSortTest() {
-    val node = PqlSearchBuilder.create().sortAsc("id").sortDesc("end").build().getSort();
+    val node = PqlSearchBuilder.statement().sortAsc("id").sortDesc("end").build().getSort();
     val fields = ((SortNode) visit(node)).getFields();
 
     assertThat(fields.size()).isEqualTo(2);
@@ -202,7 +203,7 @@ public class CreateEsAstVisitorTest {
   @Test
   public void visitAndTest() {
     val result = visit(and(eq("id", 1), ge("end", 5)).build());
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result);
+    val mustNode = assertBoolAndGetMustNode(result);
     assertThat(mustNode.childrenCount()).isEqualTo(2);
     assertThat(mustNode.getFirstChild()).isInstanceOf(TermNode.class);
     assertThat(mustNode.getChild(1)).isInstanceOf(RangeNode.class);
@@ -211,7 +212,7 @@ public class CreateEsAstVisitorTest {
   @Test
   public void visitOrTest() {
     val result = visit(or(eq("id", 1), ge("end", 5)).build());
-    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(result);
+    val shouldNode = assertBoolAndGetShouldNode(result);
     assertThat(shouldNode.childrenCount()).isEqualTo(2);
     assertThat(shouldNode.getFirstChild()).isInstanceOf(TermNode.class);
     assertThat(shouldNode.getChild(1)).isInstanceOf(RangeNode.class);
@@ -221,7 +222,7 @@ public class CreateEsAstVisitorTest {
   public void visitNestedTest() {
     val result = (NestedNode) visit(nested("gene", eq("id", 1)).build());
     assertThat(result.getPath()).isEqualTo("gene");
-    val mustNode = TestingHelpers.assertBoolAndGetMustNode(result.getFirstChild());
+    val mustNode = assertBoolAndGetMustNode(result.getFirstChild());
     assertThat(mustNode.childrenCount()).isEqualTo(1);
     assertThat(mustNode.getFirstChild()).isInstanceOf(TermNode.class);
   }

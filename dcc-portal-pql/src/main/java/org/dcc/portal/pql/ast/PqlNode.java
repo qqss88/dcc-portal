@@ -49,6 +49,9 @@ public abstract class PqlNode implements ConvertiblePqlNode {
     this.children.addAll(result);
   }
 
+  /**
+   * By implementing this method each subclass indicates what type of node it is.
+   */
   public abstract Type type();
 
   public abstract <T, A> T accept(PqlNodeVisitor<T, A> visitor, Optional<A> context);

@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static java.lang.String.format;
 import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
@@ -32,17 +32,16 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.utils.EsAstTransformator;
+import org.dcc.portal.pql.es.utils.EsAstTransformer;
 import org.dcc.portal.pql.meta.Type;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
 @Slf4j
 public class QueryEngine {
 
-  private static final EsAstTransformator esAstTransformator = new EsAstTransformator();
+  private static final EsAstTransformer esAstTransformator = new EsAstTransformer();
   private final EsRequestBuilder requestBuilder;
 
   private final QueryContext donorContext;
@@ -61,7 +60,7 @@ public class QueryEngine {
     this.projectContext = new QueryContext(index, PROJECT);
   }
 
-  public SearchRequestBuilder execute(@NonNull String pql, @NonNull Type type) {
+  public QueryRequest execute(@NonNull String pql, @NonNull Type type) {
     val pqlAst = PqlParser.parse(pql);
     ExpressionNode esAst = resolvePqlAst(pqlAst, type);
     log.debug("Resolved PQL AST into ES AST: {}", esAst);
@@ -69,10 +68,12 @@ public class QueryEngine {
     val context = createQueryContext(type);
     esAst = esAstTransformator.process(esAst, context);
 
-    return requestBuilder.buildSearchRequest(esAst, context);
+    val result = new QueryRequest(requestBuilder.buildSearchRequest(esAst, context));
+
+    return result;
   }
 
-  private static ExpressionNode resolvePqlAst(RootNode pqlAst, Type type) {
+  private static ExpressionNode resolvePqlAst(StatementNode pqlAst, Type type) {
     return pqlAst.accept(createEsAstVisitor(), Optional.of(getTypeModel(type)));
   }
 

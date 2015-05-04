@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -81,7 +81,7 @@ public class OccurrenceService {
     val request = queryEngine.execute(pql, OBSERVATION_CENTRIC);
     log.debug("Request: {}", request);
 
-    val response = request.execute().actionGet();
+    val response = request.getRequestBuilder().execute().actionGet();
     log.debug("Response: {}", response);
 
     SearchHits hits = response.getHits();

@@ -15,13 +15,13 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
-import static org.dcc.portal.pql.utils.TestingHelpers.initQueryContext;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
+import static org.dcc.portal.pql.utils.Tests.initQueryContext;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +43,8 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
-import org.dcc.portal.pql.utils.TestingHelpers;
+import org.dcc.portal.pql.query.PqlParseListener;
+import org.dcc.portal.pql.utils.Tests;
 import org.junit.Test;
 
 @Slf4j
@@ -62,7 +63,7 @@ public class PqlParseListenerTest {
     val mustNode = (MustBoolNode) esAst.getFirstChild().getFirstChild().getFirstChild().getFirstChild();
     assertThat(mustNode.childrenCount()).isEqualTo(5);
 
-    val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(mustNode.getFirstChild());
+    val shouldNode = Tests.assertBoolAndGetShouldNode(mustNode.getFirstChild());
     assertThat(shouldNode.childrenCount()).isEqualTo(2);
 
     // gt(ageAtDiagnosis, 10)
@@ -93,7 +94,7 @@ public class PqlParseListenerTest {
     childrenContainValue(notNode, "donor_relapse_interval");
     childrenContainValue(notNode, 200);
 
-    val mustBoolNode = TestingHelpers.assertBoolAndGetMustNode(mustNode.getChild(3));
+    val mustBoolNode = Tests.assertBoolAndGetMustNode(mustNode.getChild(3));
     assertThat(mustBoolNode.childrenCount()).isEqualTo(2);
 
     // lt(ageAtLastFollowup, 30)

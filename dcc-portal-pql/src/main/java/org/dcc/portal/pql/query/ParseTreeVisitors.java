@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
 import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
@@ -74,7 +74,8 @@ public class ParseTreeVisitors {
     }
 
     val components = splitFields(alias);
-    if (components.size() == 1 || !typeModel.prefix().equals(components.get(0))) {
+    val noPrefixAndPrefixFromTypeModel = components.size() == 1 || !typeModel.prefix().equals(components.get(0));
+    if (noPrefixAndPrefixFromTypeModel) {
       return alias;
     }
 

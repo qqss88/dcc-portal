@@ -15,29 +15,25 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
-import static lombok.AccessLevel.PRIVATE;
-import static org.dcc.portal.pql.ast.visitor.Visitors.createPqlAstVisitor;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
+import static com.google.common.base.Preconditions.checkNotNull;
+import lombok.Value;
 
-import org.dcc.portal.pql.ast.RootNode;
-import org.dcc.portal.pql.es.utils.ParseTrees;
-import org.dcc.portal.pql.exception.SemanticException;
+import org.dcc.portal.pql.meta.TypeModel;
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.Type;
 
-@NoArgsConstructor(access = PRIVATE)
-public class PqlParser {
+@Value
+public class QueryContext {
 
-  public static RootNode parse(@NonNull String pql) {
-    val statement = ParseTrees.getParser(pql).statement();
-    if (statement.exception != null) {
-      throw new SemanticException("Check stderr for exception details");
-    }
+  private String index;
+  private Type type;
 
-    return statement.accept(createPqlAstVisitor())
-        .toRootNode();
+  public TypeModel getTypeModel() {
+    checkNotNull(type);
+
+    return IndexModel.getTypeModel(type);
   }
 
 }

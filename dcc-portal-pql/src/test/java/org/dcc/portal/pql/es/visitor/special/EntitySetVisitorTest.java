@@ -24,7 +24,7 @@ import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 import org.junit.Test;
 
 @Slf4j

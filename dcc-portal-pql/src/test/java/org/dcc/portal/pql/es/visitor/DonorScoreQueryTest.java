@@ -23,9 +23,9 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.qe.EsRequestBuilder;
-import org.dcc.portal.pql.qe.PqlParseListener;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.EsRequestBuilder;
+import org.dcc.portal.pql.query.PqlParseListener;
+import org.dcc.portal.pql.query.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Before;

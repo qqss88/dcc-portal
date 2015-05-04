@@ -34,7 +34,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
-public class VisitorHelpers {
+public final class VisitorHelpers {
 
   /**
    * Checks if {@code optional} has a reference.

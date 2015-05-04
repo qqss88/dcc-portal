@@ -36,12 +36,12 @@ import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.qe.PqlParseListener;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.PqlParseListener;
+import org.dcc.portal.pql.query.QueryContext;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
-public class TestingHelpers {
+public class Tests {
 
   public static ParseTree createParseTree(String query) {
     val parser = getParser(query);
@@ -72,7 +72,6 @@ public class TestingHelpers {
   }
 
   public static QueryContext initQueryContext(Type type) {
-
     switch (type) {
     case DONOR_CENTRIC:
       return new QueryContext("", Type.DONOR_CENTRIC);

@@ -38,7 +38,7 @@ import org.dcc.portal.pql.ast.function.SortNode;
 
 public interface ConvertiblePqlNode {
 
-  default RootNode toRootNode() {
+  default StatementNode toStatementNode() {
     return defaultImplementation();
   }
 

@@ -34,7 +34,7 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import com.google.common.collect.Lists;
 
 @NoArgsConstructor(access = PRIVATE)
-public class Nodes {
+public final class Nodes {
 
   private static final NodeVisitor<ExpressionNode, Void> CLONE_VISITOR = Visitors.createCloneNodeVisitor();
 

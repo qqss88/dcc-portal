@@ -15,11 +15,11 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.qe;
+package org.dcc.portal.pql.query;
 
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.cleanString;
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.getField;
-import static org.dcc.portal.pql.qe.ParseTreeVisitors.getOrderAt;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.cleanString;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.getField;
+import static org.dcc.portal.pql.query.ParseTreeVisitors.getOrderAt;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.val;

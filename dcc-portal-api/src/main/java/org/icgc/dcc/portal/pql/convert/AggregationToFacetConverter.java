@@ -88,16 +88,20 @@ public class AggregationToFacetConverter {
 
   private static long resolveMissingDocCount(String missingAggName, Missing missingAgg) {
     val aggregations = missingAgg.getAggregations();
-    if (aggregations != null && !aggregations.asList().isEmpty()) {
+    if (hasAggregations(aggregations)) {
       return 0L;
     }
 
     return missingAgg.getDocCount();
   }
 
+  private static boolean hasAggregations(Aggregations aggregations) {
+    return aggregations != null && !aggregations.asList().isEmpty();
+  }
+
   private static long resolveDocCount(String aggName, Bucket bucket) {
     val aggregations = bucket.getAggregations();
-    if (aggregations != null && !aggregations.asList().isEmpty()) {
+    if (hasAggregations(aggregations)) {
       ReverseNested reverseNestedAggregation = aggregations.get(aggName);
 
       return reverseNestedAggregation.getDocCount();
@@ -116,15 +120,15 @@ public class AggregationToFacetConverter {
 
   private static Aggregation resolveCommonAggregations(Aggregation aggregation) {
     if (aggregation instanceof Global) {
-      Global agg = (Global) aggregation;
+      val agg = (Global) aggregation;
 
       return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
     } else if (aggregation instanceof Filter) {
-      Filter agg = (Filter) aggregation;
+      val agg = (Filter) aggregation;
 
       return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
     } else if (aggregation instanceof Nested) {
-      Nested agg = (Nested) aggregation;
+      val agg = (Nested) aggregation;
 
       return resolveCommonAggregations(getSubaggregation(agg.getAggregations()));
     } else if (aggregation instanceof Missing || aggregation instanceof Terms) {

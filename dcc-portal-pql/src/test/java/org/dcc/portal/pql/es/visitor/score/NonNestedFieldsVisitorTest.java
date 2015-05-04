@@ -20,6 +20,7 @@ package org.dcc.portal.pql.es.visitor.score;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.es.visitor.score.MutationScoreQueryVisitor.PATH;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
+import static org.dcc.portal.pql.utils.Tests.assertTermNode;
 
 import java.util.Optional;
 
@@ -31,7 +32,6 @@ import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
 import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
-import org.dcc.portal.pql.utils.TestingHelpers;
 import org.junit.Test;
 
 @Slf4j
@@ -44,7 +44,7 @@ public class NonNestedFieldsVisitorTest {
     val esAst = new FilterNode(new TermNode("id", "1"));
     val result = visit(esAst);
     assertThat(result.childrenCount()).isEqualTo(1);
-    TestingHelpers.assertTermNode(result.getFirstChild(), "id", "1");
+    assertTermNode(result.getFirstChild(), "id", "1");
   }
 
   @Test
@@ -72,7 +72,7 @@ public class NonNestedFieldsVisitorTest {
     assertThat(nestedNode.getPath()).isEqualTo("transcript");
     assertThat(nestedNode.getScoreMode()).isEqualTo(ScoreMode.AVG);
 
-    TestingHelpers.assertTermNode(nestedNode.getFirstChild(), "platformNested", "1");
+    assertTermNode(nestedNode.getFirstChild(), "platformNested", "1");
   }
 
   private FilterNode visit(ExpressionNode nodeToVisit) {

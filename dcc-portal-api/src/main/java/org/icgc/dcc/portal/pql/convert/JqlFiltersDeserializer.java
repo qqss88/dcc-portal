@@ -58,7 +58,8 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
       PROJECT.getId());
 
   @Override
-  public JqlFilters deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public JqlFilters deserialize(@NonNull JsonParser jp, @NonNull DeserializationContext ctxt) throws IOException,
+      JsonProcessingException {
     configureJsonParser(jp);
 
     JsonNode node = jp.getCodec().readTree(jp);

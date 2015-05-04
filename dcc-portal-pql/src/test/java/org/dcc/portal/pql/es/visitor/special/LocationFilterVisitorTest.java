@@ -19,12 +19,15 @@ package org.dcc.portal.pql.es.visitor.special;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.meta.TypeModel.GENE_LOCATION;
-import static org.dcc.portal.pql.meta.TypeModel.MUTATION_LOCATION;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_LOCATION;
+import static org.dcc.portal.pql.meta.TypeModel.MUTATION_LOCATION;
+import static org.dcc.portal.pql.utils.Tests.assertAndGetNestedNode;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
+import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetShouldNode;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 
@@ -40,11 +43,10 @@ import org.dcc.portal.pql.es.ast.filter.MustBoolNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
-import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.qe.QueryContext;
-import org.dcc.portal.pql.utils.TestingHelpers;
+import org.dcc.portal.pql.meta.TypeModel;
+import org.dcc.portal.pql.query.QueryContext;
 import org.junit.Test;
 
 @Slf4j
@@ -213,17 +215,17 @@ public class LocationFilterVisitorTest {
     // no NestedNode
     if (hasNested(filterType, type)) {
       val nestedPath = typeModel.getNestedPath(resolveStart(filterType, typeModel));
-      val nestedNode = TestingHelpers.assertAndGetNestedNode(node, nestedPath);
+      val nestedNode = assertAndGetNestedNode(node, nestedPath);
       root = nestedNode.getFirstChild();
     } else {
       root = node;
     }
 
     if (isArray) {
-      val shouldNode = TestingHelpers.assertBoolAndGetShouldNode(root);
-      mustNode = TestingHelpers.assertBoolAndGetMustNode(shouldNode.getFirstChild());
+      val shouldNode = assertBoolAndGetShouldNode(root);
+      mustNode = assertBoolAndGetMustNode(shouldNode.getFirstChild());
     } else {
-      mustNode = TestingHelpers.assertBoolAndGetMustNode(root);
+      mustNode = assertBoolAndGetMustNode(root);
     }
 
     assertThat(mustNode.childrenCount()).isEqualTo(3);

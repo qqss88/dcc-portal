@@ -19,7 +19,7 @@ package org.dcc.portal.pql.ast.visitor;
 
 import java.util.Optional;
 
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.ExistsNode;
@@ -41,7 +41,7 @@ import org.dcc.portal.pql.ast.function.SortNode;
 
 public abstract class PqlNodeVisitor<T, A> {
 
-  public T visitRoot(RootNode node, Optional<A> context) {
+  public T visitStatement(StatementNode node, Optional<A> context) {
     return defaultImplementation();
   }
 

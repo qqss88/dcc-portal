@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
-import org.dcc.portal.pql.ast.RootNode;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
@@ -46,7 +46,7 @@ public class PqlSearchBuilder {
   private LimitNode limit;
   private FilterBuilder filterBuilder;
 
-  public static PqlSearchBuilder create() {
+  public static PqlSearchBuilder statement() {
     return new PqlSearchBuilder();
   }
 
@@ -110,8 +110,8 @@ public class PqlSearchBuilder {
     return this;
   }
 
-  public RootNode build() {
-    val result = new RootNode();
+  public StatementNode build() {
+    val result = new StatementNode();
 
     if (!select.isEmpty()) {
       result.setSelect(new SelectNode(select));

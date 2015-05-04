@@ -25,7 +25,7 @@ import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.meta.IndexModel;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 
 public class DefaultScoreQueryVisitor extends ScoreQueryVisitor {
 

@@ -38,7 +38,7 @@ public class JqlArrayValue extends JqlValue {
     return values;
   }
 
-  public String valuesToString() {
+  public String textValue() {
     val result = new StringBuilder();
     for (int i = 0; i < values.size(); i++) {
       val value = values.get(i);

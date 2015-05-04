@@ -28,7 +28,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlLexer;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser;
 
 @NoArgsConstructor(access = PRIVATE)
-public class ParseTrees {
+public final class ParseTrees {
 
   public static PqlParser getParser(@NonNull String query) {
     val inputStream = new ANTLRInputStream(query);

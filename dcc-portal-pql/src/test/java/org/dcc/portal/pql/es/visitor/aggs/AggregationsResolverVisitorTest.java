@@ -23,7 +23,7 @@ import static org.dcc.portal.pql.es.utils.Visitors.createQuerySimplifierVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createResolveNestedFieldVisitor;
 import static org.dcc.portal.pql.es.visitor.aggs.AggregationsResolverVisitor.createNestedAggregaionNode;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
-import static org.dcc.portal.pql.utils.TestingHelpers.createEsAst;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
 

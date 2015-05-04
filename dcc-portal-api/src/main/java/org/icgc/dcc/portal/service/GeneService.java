@@ -16,7 +16,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.qe.QueryEngine;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
@@ -109,7 +109,7 @@ public class GeneService {
     log.debug("Request: {}", request);
 
     // val response = geneRepository.findAllCentric(query);
-    val response = request.execute().actionGet();
+    val response = request.getRequestBuilder().execute().actionGet();
     log.debug("Response: {}", response);
     val hits = response.getHits();
 

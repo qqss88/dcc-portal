@@ -30,11 +30,11 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
-import org.dcc.portal.pql.es.utils.EsAstTransformator;
+import org.dcc.portal.pql.es.utils.EsAstTransformer;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.qe.PqlParseListener;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.PqlParseListener;
+import org.dcc.portal.pql.query.QueryContext;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.junit.After;
@@ -83,7 +83,7 @@ public class BaseElasticsearchTest {
    */
   protected PqlParseListener listener;
   protected QueryContext queryContext;
-  protected EsAstTransformator esAstTransformator = new EsAstTransformator();
+  protected EsAstTransformer esAstTransformator = new EsAstTransformer();
 
   @Before
   public void before() {

@@ -39,7 +39,7 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.TypeModel;
-import org.dcc.portal.pql.qe.QueryContext;
+import org.dcc.portal.pql.query.QueryContext;
 
 /**
  * Adds score queries. When initialized accepts an initialized {@link NestedNode} which is different for MutationCentic
