@@ -369,7 +369,7 @@
 
         var config = {
           // Because SVG urls are based on <base> tag, we need absolute path
-          urlPath: $location.path(),
+          urlPath: $location.url(),
 
           mouseoverFunc: function(d) {
             $scope.$apply(function() {
@@ -414,7 +414,7 @@
             });
 
              // Because SVG urls are based on <base> tag, we need absolute path
-            config.urlPath = $location.path();
+            config.urlPath = $location.url();
 
             vennDiagram = new dcc.Venn23($scope.vennData, config);
             vennDiagram.render( $element.find('.canvas')[0]);

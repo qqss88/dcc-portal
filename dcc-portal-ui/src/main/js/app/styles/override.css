@@ -11,25 +11,9 @@
     text-align: center;
 }
 
-/* Slightly wider modal for better fitting of our text */
-.modal {
-   width: 42%;
-   margin-left: -21%;
-   max-height: 95%;
+.modal h3 {
+   margin: 0
 }
-
-.modal-body {
-   max-height: 650px;
-}
-
-.modal.fade.in {
-  top: 2%;
-}
-
-.modal-header {
-  // padding: 0.5rem 1.0rem; !important
-}
-
 
 
 /* For file dialogs */
@@ -122,15 +106,24 @@ textarea {
     line-height: 20px;
 }
 
-.pagination ul>li>a {
+.pagination >li>a {
     padding: 0px 12px;
 }
 
-.pagination ul>li>a {
+.pagination >li>a {
     cursor: pointer;
 }
 
 /*** SUGGEST MATCH ***/
 .match {
     font-weight: bold;
+}
+
+
+/**
+ * Fix modal jumps when opening dialog
+ * See: http://stackoverflow.com/questions/21604674/bootstrap-modal-background-jumps-to-top-on-toggle
+ */
+body.modal-open {
+   overflow: visible;
 }
