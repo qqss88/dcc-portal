@@ -70,6 +70,7 @@ import org.openid4java.discovery.DiscoveryInformation;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -316,8 +317,8 @@ public class PortalConfig {
   }
 
   @Bean
-  public QueryEngine queryEngine(@NonNull Client client) {
-    return new QueryEngine(client, properties.getElastic().getIndexName());
+  public QueryEngine queryEngine(@NonNull Client client, @Value("#{indexName}") String index) {
+    return new QueryEngine(client, index);
   }
 
   private boolean isDistributed() {

@@ -30,13 +30,13 @@ import static org.dcc.portal.pql.ast.builder.FilterBuilders.missing;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.nested;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.not;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.or;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
 import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetShouldNode;
 
 import java.util.Optional;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.builder.FilterBuilders;
@@ -73,7 +73,6 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
-@Slf4j
 public class CreateEsAstVisitorTest {
 
   CreatePqlAstVisitor createPqlvisitor = new CreatePqlAstVisitor();
@@ -228,10 +227,9 @@ public class CreateEsAstVisitorTest {
   }
 
   @Test
-  public void visitRootTest_withFilters() {
+  public void visitStatementTest_withFilters() {
     val root = PqlBuilders.search().filter(FilterBuilders.eq("id", 1)).build();
     val result = visit(root);
-    log.info("{}", result);
 
     assertThat(result.childrenCount()).isEqualTo(1);
     val queryNode = (QueryNode) result.getFirstChild();
@@ -243,6 +241,14 @@ public class CreateEsAstVisitorTest {
     val termNode = (TermNode) filterNode.getFirstChild();
     assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(1);
+  }
+
+  @Test
+  public void visitStatementTest_multiSelect() {
+    val result = visit(parse("select(id),select(transcripts)"));
+    assertThat(result.childrenCount()).isEqualTo(1);
+    val fieldsNode = (FieldsNode) result.getFirstChild();
+    assertThat(fieldsNode.getFields()).containsOnly("_mutation_id", "transcript");
   }
 
   private ExpressionNode visit(PqlNode pqlAst) {

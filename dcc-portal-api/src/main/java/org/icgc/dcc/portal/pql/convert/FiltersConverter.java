@@ -19,6 +19,8 @@ package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.collect.Iterables.getLast;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
@@ -64,6 +66,11 @@ public class FiltersConverter {
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";
+
+  private static final List<String> VALID_PROJECT_FILTERS = ImmutableList.of(
+      "projectId",
+      "primarySite",
+      "projectName");
 
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",
@@ -115,11 +122,17 @@ public class FiltersConverter {
   }
 
   private static JqlFilters cleanProjectFilters(JqlFilters filters) {
-    val typeValues = filters.getKindValues().entrySet().stream()
+    val kindValues = filters.getKindValues().entrySet().stream()
         .filter(k -> k.getKey().equals("donor"))
-        .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue()));
+        .collect(toMap(k -> k.getKey(), v -> filterValidProjectFilters(v.getValue())));
 
-    return new JqlFilters(typeValues);
+    return new JqlFilters(kindValues);
+  }
+
+  private static List<JqlField> filterValidProjectFilters(List<JqlField> source) {
+    return source.stream()
+        .filter(f -> VALID_PROJECT_FILTERS.contains(f.getName()))
+        .collect(toList());
   }
 
   private String encloseWithCommonParent(String commonPath, String filter) {

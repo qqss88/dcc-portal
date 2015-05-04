@@ -49,6 +49,7 @@ import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
+import org.dcc.portal.pql.es.ast.RootNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
@@ -71,10 +72,20 @@ public class CreateEsAstVisitor extends PqlNodeVisitor<ExpressionNode, TypeModel
 
   @Override
   public ExpressionNode visitStatement(@NonNull StatementNode node, @NonNull Optional<TypeModel> context) {
-    val result = new org.dcc.portal.pql.es.ast.RootNode();
+    val result = new RootNode();
+    val fields = Lists.<ExpressionNode> newArrayList();
+
     for (val child : node.getChildren()) {
       val childVisitResult = child.accept(this, context);
-      result.addChildren(encloseFilters(child, childVisitResult));
+      if (child instanceof SelectNode) {
+        fields.add(childVisitResult);
+      } else {
+        result.addChildren(encloseFilters(child, childVisitResult));
+      }
+    }
+
+    if (!fields.isEmpty()) {
+      result.addChildren(resolveFields(fields));
     }
 
     return result;
@@ -235,6 +246,19 @@ public class CreateEsAstVisitor extends PqlNodeVisitor<ExpressionNode, TypeModel
 
   private boolean isSelectAll(List<String> fields) {
     return fields.size() == 1 && fields.contains(SelectNode.ALL_FIELDS);
+  }
+
+  private static ExpressionNode resolveFields(List<ExpressionNode> fields) {
+    val result = fields.get(0);
+    if (fields.size() == 1) {
+      return result;
+    }
+
+    for (int i = 1; i < fields.size(); i++) {
+      result.addChildren(fields.get(i).getChildrenArray());
+    }
+
+    return result;
   }
 
 }

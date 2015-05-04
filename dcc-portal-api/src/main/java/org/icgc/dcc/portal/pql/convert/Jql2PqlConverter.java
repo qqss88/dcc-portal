@@ -66,9 +66,14 @@ public class Jql2PqlConverter {
     }
 
     if (query.hasFilters()) {
-      result.append(SEPARATOR);
       val filters = remapFilters(query.getFilters(), type);
-      result.append(convertFilters(filters.toString(), type));
+      val convertedFilters = convertFilters(filters.toString(), type);
+
+      // After the cleaning project filters may get empty
+      if (!convertedFilters.isEmpty()) {
+        result.append(SEPARATOR);
+        result.append(convertedFilters);
+      }
     }
 
     if (query.hasScoreFilters()) {
