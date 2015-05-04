@@ -25,11 +25,13 @@ import java.util.Optional;
 import lombok.NonNull;
 import lombok.val;
 
+import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.RootNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.EqualityFilterNode;
 import org.dcc.portal.pql.ast.filter.ExistsNode;
+import org.dcc.portal.pql.ast.filter.FilterNode;
 import org.dcc.portal.pql.ast.filter.GeNode;
 import org.dcc.portal.pql.ast.filter.GtNode;
 import org.dcc.portal.pql.ast.filter.InNode;
@@ -60,6 +62,7 @@ import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.meta.TypeModel;
 
 import com.google.common.collect.Lists;
@@ -70,7 +73,8 @@ public class CreateEsAstVisitor extends PqlNodeVisitor<ExpressionNode, TypeModel
   public ExpressionNode visitRoot(@NonNull RootNode node, @NonNull Optional<TypeModel> context) {
     val result = new org.dcc.portal.pql.es.ast.RootNode();
     for (val child : node.getChildren()) {
-      result.addChildren(child.accept(this, context));
+      val childVisitResult = child.accept(this, context);
+      result.addChildren(encloseFilters(child, childVisitResult));
     }
 
     return result;
@@ -215,6 +219,14 @@ public class CreateEsAstVisitor extends PqlNodeVisitor<ExpressionNode, TypeModel
     }
 
     return result;
+  }
+
+  private static ExpressionNode encloseFilters(PqlNode child, ExpressionNode childVisitResult) {
+    if (child instanceof FilterNode) {
+      return new QueryNode(new org.dcc.portal.pql.es.ast.filter.FilterNode(childVisitResult));
+    }
+
+    return childVisitResult;
   }
 
   private static String _getField(EqualityFilterNode node, Optional<TypeModel> context) {

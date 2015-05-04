@@ -34,8 +34,11 @@ import static org.dcc.portal.pql.ast.builder.FilterBuilders.or;
 import java.util.Optional;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.PqlNode;
+import org.dcc.portal.pql.ast.builder.FilterBuilders;
+import org.dcc.portal.pql.ast.builder.PqlBuilders;
 import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.NeNode;
@@ -51,6 +54,7 @@ import org.dcc.portal.pql.es.ast.TerminalNode;
 import org.dcc.portal.pql.es.ast.aggs.AggregationsNode;
 import org.dcc.portal.pql.es.ast.aggs.TermsAggregationNode;
 import org.dcc.portal.pql.es.ast.filter.ExistsNode;
+import org.dcc.portal.pql.es.ast.filter.FilterNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterEqualNode;
 import org.dcc.portal.pql.es.ast.filter.GreaterThanNode;
 import org.dcc.portal.pql.es.ast.filter.LessEqualNode;
@@ -60,6 +64,7 @@ import org.dcc.portal.pql.es.ast.filter.NotNode;
 import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
+import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.utils.TestingHelpers;
@@ -67,6 +72,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
+@Slf4j
 public class CreateEsAstVisitorTest {
 
   CreatePqlAstVisitor createPqlvisitor = new CreatePqlAstVisitor();
@@ -218,6 +224,24 @@ public class CreateEsAstVisitorTest {
     val mustNode = TestingHelpers.assertBoolAndGetMustNode(result.getFirstChild());
     assertThat(mustNode.childrenCount()).isEqualTo(1);
     assertThat(mustNode.getFirstChild()).isInstanceOf(TermNode.class);
+  }
+
+  @Test
+  public void visitRootTest_withFilters() {
+    val root = PqlBuilders.search().filter(FilterBuilders.eq("id", 1)).build();
+    val result = visit(root);
+    log.info("{}", result);
+
+    assertThat(result.childrenCount()).isEqualTo(1);
+    val queryNode = (QueryNode) result.getFirstChild();
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+
+    val filterNode = (FilterNode) queryNode.getFirstChild();
+    assertThat(queryNode.childrenCount()).isEqualTo(1);
+
+    val termNode = (TermNode) filterNode.getFirstChild();
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_mutation_id");
+    assertThat(termNode.getValueNode().getValue()).isEqualTo(1);
   }
 
   private ExpressionNode visit(PqlNode pqlAst) {

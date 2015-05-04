@@ -43,6 +43,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.FilterContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.FunctionContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 
+@Deprecated
 @Slf4j
 @Value
 @EqualsAndHashCode(callSuper = false)

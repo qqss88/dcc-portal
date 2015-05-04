@@ -109,6 +109,7 @@ public class CreatePqlAstVisitorTest {
   @Test
   public void visitAndTest() {
     assertThat(visit("and(eq(id,10),missing(gene))")).isEqualTo("and(eq(id,10),missing(gene))");
+    assertThat(visit("eq(id,10),missing(gene)")).isEqualTo("and(eq(id,10),missing(gene))");
   }
 
   @Test

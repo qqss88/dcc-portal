@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.qe;
 
+import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
 
 import java.util.List;
@@ -35,6 +36,17 @@ import com.google.common.base.Splitter;
 public class ParseTreeVisitors {
 
   private static final Splitter FIELD_SPLITTER = Splitter.on(".");
+  private static final String DOUBLE_QUOTE = "\"";
+  private static final String SINGLE_QUOTE = "'";
+
+  public static String cleanString(@NonNull String original) {
+    checkState(
+        original.startsWith(ParseTreeVisitors.SINGLE_QUOTE) && original.endsWith(ParseTreeVisitors.SINGLE_QUOTE) ||
+            original.startsWith(ParseTreeVisitors.DOUBLE_QUOTE) && original.endsWith(ParseTreeVisitors.DOUBLE_QUOTE),
+        "Incorrectly quoted string: %s", original);
+
+    return original.substring(1, original.length() - 1);
+  }
 
   public static Order getOrderAt(@NonNull OrderContext parent, int position) {
     for (val sign : parent.SIGN()) {

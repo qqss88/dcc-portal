@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.qe;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.dcc.portal.pql.qe.ParseTreeVisitors.cleanString;
 import static org.dcc.portal.pql.qe.ParseTreeVisitors.getField;
 import static org.dcc.portal.pql.qe.ParseTreeVisitors.getOrderAt;
 import lombok.AllArgsConstructor;
@@ -75,12 +75,11 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.RangeContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.SelectContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
 
+@Deprecated
 @Slf4j
 @AllArgsConstructor
 public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
 
-  private static final String SINGLE_QUOTE = "'";
-  private static final String DOUBLE_QUOTE = "\"";
   @NonNull
   private final TypeModel typeModel;
 
@@ -134,16 +133,6 @@ public class PqlParseTreeVisitor extends PqlBaseVisitor<ExpressionNode> {
       val value = Integer.parseInt(context.INT().getText());
       return new TerminalNode(value);
     }
-  }
-
-  private static String cleanString(@NonNull String original) {
-    checkState(
-        original.startsWith(SINGLE_QUOTE) && original.endsWith(SINGLE_QUOTE) ||
-            original.startsWith(DOUBLE_QUOTE) && original.endsWith(DOUBLE_QUOTE),
-        "Incorrectly quoted string: %s", original);
-
-    return original.substring(1, original.length() - 1);
-
   }
 
   @Override

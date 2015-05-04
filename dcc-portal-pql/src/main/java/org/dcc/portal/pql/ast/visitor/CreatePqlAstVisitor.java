@@ -21,6 +21,7 @@ import static java.lang.Integer.parseInt;
 import static java.util.Collections.singletonList;
 import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
 import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
+import static org.dcc.portal.pql.qe.ParseTreeVisitors.cleanString;
 import static org.dcc.portal.pql.qe.ParseTreeVisitors.getOrderAt;
 
 import java.util.List;
@@ -81,6 +82,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.StatementContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.ValueContext;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 @Slf4j
 public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
@@ -90,11 +92,21 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
     log.debug("Visiting statement context: {}", context.toStringTree());
 
     val result = new RootNode();
+    val filters = Lists.<PqlNode> newArrayList();
     for (val child : context.children) {
       val visitResult = child.accept(this);
       if (visitResult != null) {
-        result.addChildren(visitResult);
+        // Explicit is better than Implicit. Explicitly enclose all top level filters in an AndNode
+        if (visitResult instanceof FilterNode) {
+          filters.add(visitResult);
+        } else {
+          result.addChildren(visitResult);
+        }
       }
+    }
+
+    if (!filters.isEmpty()) {
+      result.addChildren(resolveFilters(filters));
     }
 
     return result;
@@ -272,7 +284,7 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
 
   private static Object getValue(ValueContext context) {
     if (context.STRING() != null) {
-      return context.STRING().getText();
+      return cleanString(context.STRING().getText());
     } else if (context.FLOAT() != null) {
       return Double.parseDouble(context.FLOAT().getText());
     } else {
@@ -287,6 +299,14 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
     }
 
     return result.build();
+  }
+
+  private static PqlNode resolveFilters(List<PqlNode> filters) {
+    if (filters.size() == 1) {
+      return filters.get(0);
+    }
+
+    return new AndNode(filters.toArray(new FilterNode[filters.size()]));
   }
 
 }

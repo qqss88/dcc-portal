@@ -18,21 +18,28 @@
 package org.dcc.portal.pql.qe;
 
 import static java.lang.String.format;
+import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
+import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
+
+import java.util.Optional;
+
 import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.ast.RootNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformator;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 
+@Slf4j
 public class QueryEngine {
 
   private static final EsAstTransformator esAstTransformator = new EsAstTransformator();
@@ -55,20 +62,18 @@ public class QueryEngine {
   }
 
   public SearchRequestBuilder execute(@NonNull String pql, @NonNull Type type) {
+    val pqlAst = PqlParser.parse(pql);
+    ExpressionNode esAst = resolvePqlAst(pqlAst, type);
+    log.debug("Resolved PQL AST into ES AST: {}", esAst);
+
     val context = createQueryContext(type);
-    ExpressionNode esAst = resolvePql(pql, context);
     esAst = esAstTransformator.process(esAst, context);
 
     return requestBuilder.buildSearchRequest(esAst, context);
   }
 
-  private static ExpressionNode resolvePql(String query, QueryContext context) {
-    val parser = ParseTrees.getParser(query);
-    val pqlListener = new PqlParseListener(context);
-    parser.addParseListener(pqlListener);
-    parser.statement();
-
-    return pqlListener.getEsAst();
+  private static ExpressionNode resolvePqlAst(RootNode pqlAst, Type type) {
+    return pqlAst.accept(createEsAstVisitor(), Optional.of(getTypeModel(type)));
   }
 
   private QueryContext createQueryContext(Type type) {

@@ -23,11 +23,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = PRIVATE)
 public class PqlBuilders {
 
-  public PqlSearchBuilder search() {
+  public static PqlSearchBuilder search() {
     return PqlSearchBuilder.create();
   }
 
-  public PqlCountBuilder count() {
+  public static PqlCountBuilder count() {
     return PqlCountBuilder.create();
   }
 
