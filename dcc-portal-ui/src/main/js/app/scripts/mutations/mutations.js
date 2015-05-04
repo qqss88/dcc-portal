@@ -103,7 +103,7 @@
 
             if (hasProteinCoding && hasAaMutation) {
               // Need to use gene transcripts here to get domains
-              _ctrl.mutation.uiProteinTranscript.push(_.findWhere(mergedTranscripts, function (t) {
+              _ctrl.mutation.uiProteinTranscript.push(_.find(mergedTranscripts, function (t) {
                 return t.id === transcript.id;
               }));
             }
