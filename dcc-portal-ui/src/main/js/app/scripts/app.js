@@ -69,11 +69,11 @@
     'icgc.phenotype',
     'icgc.beacon',
     'icgc.downloader',
+    'icgc.repository',
 
     // old
     'app.ui',
     'app.common',
-    'app.download',
     'app.downloader'
   ]);
 

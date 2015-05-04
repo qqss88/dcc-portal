@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -15,27 +15,86 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-'use strict';
+(function() {
 
-angular.module('app.download.services', ['app.download.model']);
+  'use strict';
 
-angular.module('app.download.services').service('DownloadService', function (Download) {
-  this.getSizes = function (filters) {
-    return Download.size(filters);
-  };
+  var module = angular.module('icgc.repository.services', []);
 
-  this.getFiles = function (filters, actives) {
-    return Download.files(filters, actives);
-  };
+  module.service('DownloadService', function ($filter, Restangular) {
+    this.getSizes = function (filters) {
+      return Restangular.one('download', 'size').get({
+        filters: filters
+      });
+    };
 
-  this.folder = function (path) {
-    return Download.folder(path);
-  };
+    this.getFiles = function (filters, actives) {
+      return Restangular.one('download', '').get({
+        filters: filters,
+        info: actives
+      });
+    };
 
-  this.getStatus = function () {
-    return Download.getStatus();
-  };
+    this.folder = function (path) {
+      return Restangular.one('download', 'info' + path).get();
+    };
 
-});
+    this.getStatus = function () {
+      return Restangular.one('download', 'status').get();
+    };
 
 
+    /**
+     *  Order the files and folders, see DCC-1648, basically
+     * readme > current > others releases > legacy releases
+     */
+    this.sortFiles = function( files, dirLevel ) {
+      var firstSort;
+
+      function logicalSort(file) {
+        var pattern, name;
+        name = file.name.split('/').pop();
+
+        pattern = /notice\.(txt|md)$/i;
+        if (pattern.test(name)) {
+          return -4;
+        }
+
+        pattern = /readme\.(txt|md)$/i;
+        if (pattern.test(name)) {
+          return -3;
+        }
+
+        pattern = /^current/i;
+        if (pattern.test(name)) {
+          return -2;
+        }
+
+        pattern = /^summary/i;
+        if (pattern.test(name)) {
+          return -1;
+        }
+
+        pattern = /^legacy_data_releases/i;
+        if (pattern.test(name)) {
+          return files.length + 1;
+        }
+        return firstSort.indexOf(file.name);
+      }
+
+      if (dirLevel > 0) {
+        files = $filter('orderBy')(files, 'name');
+        firstSort = _.pluck(files, 'name');
+        files = $filter('orderBy')(files, logicalSort);
+      } else {
+        files = $filter('orderBy')(files, 'date', 'reverse');
+        firstSort = _.pluck(files, 'name');
+        files = $filter('orderBy')(files, logicalSort);
+      }
+
+      return files;
+    };
+
+  });
+
+})();
