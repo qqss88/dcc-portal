@@ -74,7 +74,7 @@
     }
 
     function removeSort (field) {
-      if (! field) {return;}
+      if (! _.isString (field)) {return;}
 
       var sort = getSort();
       sort = _.isArray (sort) ? sort : [];
@@ -111,6 +111,14 @@
         return service.includesFacets (buffer);
       }
 
+      function includes (buffer, field) {
+        return service.includes (buffer, field);
+      }
+
+      function includesConsequences (buffer) {
+        return service.includes (buffer, 'consequences');
+      }
+
       function setLimit (buffer, limit) {
         return service.setLimit (buffer, limit);
       }
@@ -119,11 +127,24 @@
         return service.setSort (buffer, sort);
       }
 
+      function buildFilterOnlyPql (buffer) {
+        return service.toFilterOnlyStatement (buffer);
+      }
+
+      // A list of functions that update filters in PQL.
+      var filterModifiers = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
+
       var initialPql = pql || '';
       var actions = [];
 
       function addAction (func, args) {
         actions.push ({func: func, args: args});
+      }
+
+      function build (actions, startingPql) {
+        return _.reduce (actions, function (result, action) {
+            return action.func.apply (null, [result].concat (action.args));
+          }, startingPql);
       }
 
       return {
@@ -151,6 +172,14 @@
           addAction (includesFacets, []);
           return this;
         },
+        includesConsequences: function () {
+          addAction (includesConsequences, []);
+          return this;
+        },
+        includes: function (field) {
+          addAction (includes, [field]);
+          return this;
+        },
         setLimit: function (limit) {
           addAction (setLimit, [limit]);
           return this;
@@ -159,14 +188,25 @@
           addAction (setSort, [sort]);
           return this;
         },
-        reset: function () {
+        reset: function (startingPql) {
+          if (! _.isEmpty (startingPql)) {initialPql = startingPql;}
+
           actions = [];
           return this;
         },
         build: function () {
-          return _.reduce (actions, function (result, action) {
-            return action.func.apply (null, [result].concat (action.args));
-          }, initialPql);
+          return build (actions, initialPql);
+        },
+        // This buildFilters() builds a PQL with filter expression only by only considering filters
+        // during the materialization process; all the params (i.e. 'select', 'facets', 'limit', 'sort') are omitted.
+        buildFilters: function () {
+          var filterOnlyActions = _.remove (actions, function (action) {
+            return _.contains (filterModifiers, action.func);
+          });
+
+          filterOnlyActions.push ({func: buildFilterOnlyPql, args: []});
+
+          return build (filterOnlyActions, initialPql);
         }
       };
     };
@@ -208,6 +248,12 @@
       convertPqlToQuery: service.convertPqlToQueryObject,
       includesFacets: function () {
         updatePql (service.includesFacets);
+      },
+      includesConsequences: function () {
+        updatePql (service.includes, 'consequences');
+      },
+      includes: function (field) {
+        updatePql (service.includes, field);
       },
       setLimit: function (limit) {
         updatePql (service.setLimit, limit);
