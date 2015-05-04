@@ -257,6 +257,7 @@
   module.constant('DataTypes', {
     'mapping': {
       'clinical': 'Clinical data',
+      'donor': 'Clinical data',
       'ssm': 'Simple somatic mutations',
       'sgv': 'Simple Germline Variation',
       'cnsm': 'Copy number somatic mutations',
@@ -270,6 +271,7 @@
       'meth_seq': 'Sequencing-based DNA Methylation'
     },
     'order': [
+      'donor',
       'clinical',
       'ssm',
       'sgv',
