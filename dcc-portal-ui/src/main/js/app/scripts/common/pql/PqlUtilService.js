@@ -231,6 +231,18 @@
       overwrite: function (categoryName, facetName, term) {
         updatePql (service.overwrite, categoryName, facetName, term);
       },
+      has: function (categoryName, hasField) {
+        updatePql (service.has, categoryName, hasField);
+      },
+      hasNo: function (categoryName, hasField) {
+        updatePql (service.hasNo, categoryName, hasField);
+      },
+      withMissing: function (categoryName, missingField) {
+        updatePql (service.withMissing, categoryName, missingField);
+      },
+      withoutMissing: function (categoryName, missingField) {
+        updatePql (service.withoutMissing, categoryName, missingField);
+      },
       mergeQueries: function (query1, query2) {
         return service.mergeQueries (query1, query2);
       },

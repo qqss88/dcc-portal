@@ -60,11 +60,15 @@
       return (node.op || '') === nodeName;
     }
 
-    var isAndNode = _.partial (isNode, 'and');
-    var isSortNode = _.partial (isNode, 'sort');
-    var isLimitNode = _.partial (isNode, 'limit');
-    var isSelectNode = _.partial (isNode, 'select');
-    var isFacetsNode = _.partial (isNode, 'facets');
+    function createNodeDetector (nodeName) {
+      return _.partial (isNode, nodeName);
+    }
+
+    var isAndNode = createNodeDetector ('and');
+    var isSortNode = createNodeDetector ('sort');
+    var isLimitNode = createNodeDetector ('limit');
+    var isSelectNode = createNodeDetector ('select');
+    var isFacetsNode = createNodeDetector ('facets');
 
     function parseIdentifier (id) {
       var splits = (id || '').split ('.');
@@ -76,25 +80,86 @@
       return (category && facet) ? {category: category, facet: facet} : null;
     }
 
-    // For our current need, we should only expect two operators, namely 'in' and 'eq'.
-    var supportedOps = ['in', 'eq'];
+    /*
+     * A bunch of processors specific to certain operators in converting the parse tree to QueryObject.
+     */
+    function inOperatorProcessor (node, emptyValue) {
+      var permittedOps = ['in', 'eq'];
+      if (! _.contains (permittedOps, node.op)) {return emptyValue;}
+
+      var identifier = parseIdentifier (node.field);
+      if (! identifier) {return emptyValue;}
+
+      var values = _.isArray (node.values) ? node.values : [];
+      if (values.length < 1) {return emptyValue;}
+
+      // Currently this service treats both 'in' and 'eq' nodes as terminal/leaf nodes.
+      // No child node detection nor recursive processing here.
+      var propertyPath = [identifier.category, identifier.facet, 'in'];
+      return _.set ({}, propertyPath, values);
+    }
+
+    function unaryOperatorProcessor (op, node, emptyValue) {
+      var permittedOps = [op];
+      if (! _.contains (permittedOps, node.op)) {return emptyValue;}
+
+      /*
+       * For unary operators such as 'exists' and 'missing' (supported here), the identifier is
+       * stored in a single-element array in 'values' attribute, as opposed to the 'field' attribute.
+       * The reason for that was this way a solution could be generalized for 'exists', 'missing' as well as
+       * 'select' and 'facets' when converting the parse tree back to PQL. That's really an implementation detail for
+       * PqlTranslationService.
+       */
+      var identifier = parseIdentifier (node.values[0]);
+      if (! identifier) {return emptyValue;}
+
+      var propertyPath = [identifier.category, identifier.facet, op];
+      return _.set ({}, propertyPath, true);
+    }
+
+    function orOperatorProcessor (node, emptyValue, accumulator) {
+      var permittedOps = ['or'];
+      if (! _.contains (permittedOps, node.op)) {return emptyValue;}
+
+      return _.reduce (node.values, reduceFilterArrayToQueryFilters, accumulator);
+    }
+
+    function mapWithMultipleFuncs (collection, funcs, emptyValue, f) {
+      return _.without (_.map (collection, function (element) {
+        return _.reduce (funcs, function (result, func) {
+          /* We use this check, along with reduce(), to 'short-circuit' (kind of) this anonymous function here, because mapWithMultipleFuncs() is
+           * meant to have each element processed exactly once by one processor only. The functions in 'funcs' list should
+           * follow this rule: process the element, if matched, and return a value other than the emptyValue; return the emptyValue
+           * to pass. It's like a map() with an internal switch/case construct for calling the corresponding function.
+           */
+          if (! _.isEqual (result, emptyValue)) return result;
+
+          return f (func, element, emptyValue);
+        }, emptyValue);
+      }), emptyValue);
+    }
+
+    var supportedOps = ['in', 'eq', 'or', 'exists', 'missing'];
+
+    var parseTreeOperatorProcessors = [inOperatorProcessor, orOperatorProcessor,
+      _.partial (unaryOperatorProcessor, 'exists'),
+      _.partial (unaryOperatorProcessor, 'missing')
+    ];
 
     function reduceFilterArrayToQueryFilters (result, node) {
       if (! node) {return result;}
       if (! _.contains (supportedOps, node.op)) {return result;}
 
-      var values = node.values || [];
+      var values = _.isArray (node.values) ? node.values : [];
       if (values.length < 1) {return result;}
 
-      var identifier = parseIdentifier (node.field);
-      if (! identifier) {return result;}
+      var emptyValue = {};
 
-      var categoryName = identifier.category;
-      var category = result [categoryName] || {};
-      category [identifier.facet] = {in: values};
-      result [categoryName] = category;
+      var filters = mapWithMultipleFuncs ([node], parseTreeOperatorProcessors, emptyValue, function (processor, valueNode, empty) {
+        return processor (valueNode, empty, result);
+      });
 
-      return result;
+      return _.isEmpty (filters) ? result : _.reduce (filters, _.merge, result);
     }
 
     function getSpecialNodeFromTreeArray (treeArray, filterFunc) {
@@ -114,7 +179,7 @@
       if (! _.isArray (treeArray)) {return result;}
 
       var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
-      // For our current need, there should be only one 'And' node if one exists.
+      // For our current need, there should be only one 'And' node at the top level if one exists.
       var filterValues = andNode ? (_.isArray (andNode.values) ? andNode.values : []) : treeArray;
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
 
@@ -223,29 +288,73 @@
       return result;
     }
 
+    /*
+     * A list of processors (functions) that process a list of attributes under each 'facet' node
+     * in the QueryObject model, converting the filters ('in', 'exists', 'missing') in QueryObject to parse tree nodes.
+     */
+    function inFacetPropertyProcessor (property, value, defaultValue, identifier) {
+      if ('in' !== property) {return defaultValue;}
+
+      var inArray = _.isArray (value) ? value : [];
+      var inArrayLength = inArray.length;
+
+      if (inArrayLength > 0) {
+        var op = (inArrayLength > 1) ? 'in' : 'eq';
+
+        return {
+          op: op,
+          field: identifier,
+          values: inArray
+        };
+      } else {
+        return defaultValue;
+      }
+    }
+
+    function booleanFacetPropertyProcessor (op, property, value, defaultValue, identifier) {
+      op = _.isString (op) ? op.trim() : '';
+      if (op !== property) {return defaultValue;}
+
+      return (_.isBoolean (value) && value) ? {op: op, values: [identifier]} : defaultValue;
+    }
+
+    var facetPropertyProcessors = [inFacetPropertyProcessor,
+      _.partial (booleanFacetPropertyProcessor, 'exists'),
+      _.partial (booleanFacetPropertyProcessor, 'missing')
+    ];
+
+    function getObjectProperties (o) {
+      return _.keys (_.isPlainObject (o) ? o : {});
+    }
+
+    function convertFacetInQueryFilterToJsonTree (facet, identifier) {
+      var properties = getObjectProperties (facet);
+      var emptyValue = {};
+
+      if (_.isEmpty (properties)) {return emptyValue;}
+
+      var result = mapWithMultipleFuncs (properties, facetPropertyProcessors, emptyValue, function (processor, property, empty) {
+        return processor (property, facet [property], empty, identifier);
+      });
+
+      if (_.isEmpty (result)) {return emptyValue;}
+
+      return (result.length > 1) ? {op: 'or', values: result} : result[0];
+    }
+
     function convertQueryFilterToJsonTree (queryFilter) {
-      var categoryKeys = Object.keys (queryFilter || {});
+      var categoryKeys = getObjectProperties (queryFilter);
 
       if (categoryKeys.length < 1) {return [];}
 
       var termArray = _.map (categoryKeys, function (categoryKey) {
         var category = queryFilter [categoryKey];
-        var facetKeys = Object.keys (category || {});
+        var facetKeys = getObjectProperties (category);
 
         var termFilters = _.map (facetKeys, function (facetKey) {
-          var facet = category [facetKey] || {};
-          var inArray = facet.in || [];
-          var inArrayLength = inArray.length;
+          var identifier = '' + categoryKey + '.' + facetKey;
 
-          if (inArrayLength > 0) {
-            var op = (inArrayLength > 1) ? 'in' : 'eq';
-            var field = '' + categoryKey + '.' + facetKey;
-
-            return {op: op, field: field, values: inArray};
-          } else {
-            return {};
-          }
-
+          return convertFacetInQueryFilterToJsonTree (category [facetKey], identifier);
         });
 
         return termFilters;
@@ -266,10 +375,8 @@
       if (! _.isArray (terms)) {return queryFilter;}
       if (_.isEmpty (terms)) {return queryFilter;}
 
-      queryFilter = queryFilter || {};
-      var category = queryFilter [categoryName] || {};
-      var facet = category [facetName] || {};
-      var inValueArray = facet.in || [];
+      var propertyPath = [categoryName, facetName, 'in'];
+      var inValueArray = _.get (queryFilter, propertyPath, []);
 
       _.each (terms, function (term) {
         if (term && ! _.contains (inValueArray, term)) {
@@ -278,11 +385,12 @@
       });
 
       // update the original filter.
-      facet.in = inValueArray;
-      category [facetName] = facet;
-      queryFilter [categoryName] = category;
+      return _.set (queryFilter, propertyPath, inValueArray);
+    }
 
-      return queryFilter;
+    function addBooleanPropertyToQueryFilter (propertyName, categoryName, facetName, notUsed, queryFilter) {
+      var propertyPath = [categoryName, facetName, propertyName];
+      return _.set (queryFilter, propertyPath, true);
     }
 
     function removeTermFromQueryFilter (categoryName, facetName, term, queryFilter) {
@@ -297,7 +405,7 @@
           queryFilter [categoryName][facetName][inField] = _.without (inValueArray, term);
 
           if ((queryFilter [categoryName][facetName][inField]).length < 1) {
-            queryFilter = removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter);
+            queryFilter = removePropertyFromQueryFilterFacet (inField, categoryName, facetName, null, queryFilter);
           }
         }
       }
@@ -305,7 +413,16 @@
       return queryFilter;
     }
 
-    function removeFacetFromQueryFilter (categoryName, facetName, term, queryFilter) {
+    function removePropertyFromQueryFilterFacet (propertyName, categoryName, facetName, notUsed, queryFilter) {
+      var propertyPath = [categoryName, facetName];
+      var facetProperty = _.omit (_.get (queryFilter, propertyPath, {}), propertyName);
+
+      return _.isEmpty (facetProperty) ?
+        removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter) :
+        _.set (queryFilter, propertyPath, facetProperty);
+    }
+
+    function removeFacetFromQueryFilter (categoryName, facetName, notUsed, queryFilter) {
       var categoryKeys = Object.keys (queryFilter || {});
 
       if (_.contains (categoryKeys, categoryName)) {
@@ -437,6 +554,26 @@
       },
       removeFacet: function (pql, categoryName, facetName) {
         return updateQueryFilter (pql, categoryName, facetName, null, [removeFacetFromQueryFilter]);
+      },
+      has: function (pql, categoryName, existsField) {
+        var propertyName = 'exists';
+        var updator = _.partial (addBooleanPropertyToQueryFilter, propertyName);
+        return updateQueryFilter (pql, categoryName, existsField, null, [updator]);
+      },
+      hasNo: function (pql, categoryName, existsField) {
+        var propertyName = 'exists';
+        var updator = _.partial (removePropertyFromQueryFilterFacet, propertyName);
+        return updateQueryFilter (pql, categoryName, existsField, null, [updator]);
+      },
+      withMissing: function (pql, categoryName, missingField) {
+        var propertyName = 'missing';
+        var updator = _.partial (addBooleanPropertyToQueryFilter, propertyName);
+        return updateQueryFilter (pql, categoryName, missingField, null, [updator]);
+      },
+      withoutMissing: function (pql, categoryName, missingField) {
+        var propertyName = 'missing';
+        var updator = _.partial (removePropertyFromQueryFilterFacet, propertyName);
+        return updateQueryFilter (pql, categoryName, missingField, null, [updator]);
       },
       overwrite: function (pql, categoryName, facetName, term) {
         return updateQueryFilter (pql, categoryName, facetName, term,

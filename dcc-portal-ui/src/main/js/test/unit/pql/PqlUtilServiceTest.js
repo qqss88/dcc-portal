@@ -37,6 +37,44 @@ describe('Testing PqlUtilService', function() {
     expect(testPql).toEqual(expectedPql);
   });
 
+  it('Testing withMissing() and has() with pql: select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))', function() {
+    var expectedPql = 'select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))';
+    setPqlInUrl ('eq(donor.age,123)');
+
+    PqlUtilService.withMissing ('donor', 'gender');
+    PqlUtilService.has ('donor', 'age');
+    PqlUtilService.addTerms ('donor', 'gender', ['male', 'female']);
+    PqlUtilService.has ('donor', 'gender');
+    PqlUtilService.withMissing ('donor', 'age');
+
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
+  it('Testing withoutMissing() and hasNo() with pql: select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))', function() {
+    var expectedPql = 'select(*),and(or(in(donor.age,123,2,1,3),missing(donor.age)),or(in(donor.gender,"male","female","unknown","tbd"),exists(donor.gender)))';
+    var originalPql = 'and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))';
+    setPqlInUrl (originalPql);
+
+    var s = PqlUtilService;
+
+    s.hasNo ('donor', 'age');
+    s.withoutMissing ('donor', 'gender');
+    s.hasNo ('donor', 'age');
+    s.addTerms ('donor', 'gender', ['unknown', 'tbd']);
+    s.withoutMissing ('donor', 'gender');
+    s.addTerms ('donor', 'age', [2, 1, 3]);
+    s.has ('foo', 'bar');
+    s.withMissing ('foo', 'bar');
+    s.hasNo ('foo', 'bar');
+    s.withoutMissing ('foo', 'bar');
+
+    var testPql = s.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
   it('Testing reset() with pql: eq(test,123)', function() {
     var originalPql = "eq(test,123)";
     setPqlInUrl (originalPql);
@@ -75,6 +113,26 @@ describe('Testing PqlUtilService', function() {
 
     expect(testPql).toEqual(expectedPql);
   });
+
+  it('Testing has("gene", "pathwayId") and withMissing("donor", "gender") with pql: in(donor.gender,"male", "female")', function() {
+    var category = "donor";
+    var facet = "gender";
+    var term1 = "male";
+    var term2 = "female";
+
+    var expectedPql = 'select(*),and(or(in(' + category + '.' + facet + ',' + '"' + term1 + '"'
+      + ',' + '"' + term2 + '"' + '),missing(donor.gender)),exists(gene.pathwayId))';
+
+    PqlUtilService.addTerm (category, facet, term1);
+    PqlUtilService.addTerm (category, facet, term2);
+    PqlUtilService.has ('gene', 'pathwayId');
+    PqlUtilService.withMissing ('donor', 'gender');
+
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
 
   it('Testing addTerms() with pql: in(donor.gender,"male", "female", "unknown")', function() {
     var expectedPql = 'select(*),in(donor.gender,"male","female","unknown")';

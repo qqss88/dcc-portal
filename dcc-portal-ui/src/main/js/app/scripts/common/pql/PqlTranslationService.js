@@ -97,6 +97,16 @@
       return opValuesToString (sort.op, values);
     }
 
+    function parseResult (result) {
+      return _.isError (result) ? {
+        isValid: false,
+        errorMessage: result.message
+      } : {
+        isValid: true,
+        result: result
+      };
+    }
+
     return {
       fromPql: function (pql) {
         try {
@@ -105,6 +115,10 @@
           LOGGER.error ('Error parsing PQL [%s] with error message: [%s]', pql, e.message);
           throw e;
         }
+      },
+      // Exception-free version
+      tryParse: function (pql) {
+        return parseResult (_.attempt (PqlPegParser.parse, pql));
       },
       toPql: function (parseTree) {
         var result = _.isArray (parseTree) ?
@@ -141,6 +155,7 @@
 
     return {
       fromPql: translator.fromPql,
+      tryParse: translator.tryParse,
       toPql: translator.toPql
     };
   });
