@@ -18,10 +18,10 @@
 
 
   /**
-   * Static download
+   * ICGC static repository controller
    */
   module.controller('ICGCRepoController',
-    function($scope, $stateParams, Restangular, DownloadService, ProjectCache, API, Settings) {
+    function($scope, $stateParams, Restangular, RepositoryService, ProjectCache, API, Settings) {
     console.log('ICGCRepoController', $stateParams);
     var _ctrl = this;
 
@@ -44,38 +44,45 @@
       }
     }
 
-    function getFiles() {
-      DownloadService.folder(_ctrl.path).then(function (response) {
-        var files = response;
 
-        files.forEach(function (file) {
-          var name, tName, extension;
+    /**
+     * Additional information for rendering
+     */
+    function annotate(file) {
+      var name, tName, extension;
 
-          // For convienence
-          file.baseName = file.name.split('/').pop();
+      // For convienence
+      file.baseName = file.name.split('/').pop();
 
-          // Check if there is a translation code for directories (projects)
-          if (file.type === 'd') {
-            name = (file.name).split('/').pop();
+      // Check if there is a translation code for directories (projects)
+      if (file.type === 'd') {
+        name = (file.name).split('/').pop();
 
-            ProjectCache.getData().then(function(cache) {
-              tName = cache[name];
-              if (tName) {
-                file.translation = tName;
-              }
-            });
-          }
-
-          // Check file extension
-          extension = file.name.split('.').pop();
-          if (_.contains(['txt', 'md'], extension.toLowerCase())) {
-            file.isText = true;
-          } else {
-            file.isText = false;
+        ProjectCache.getData().then(function(cache) {
+          tName = cache[name];
+          if (tName) {
+            file.translation = tName;
           }
         });
+      }
 
-        _ctrl.files = DownloadService.sortFiles(files, _ctrl.slugs.length);
+      // Check file extension
+      extension = file.name.split('.').pop();
+      if (_.contains(['txt', 'md'], extension.toLowerCase())) {
+        file.isText = true;
+      } else {
+        file.isText = false;
+      }
+    };
+
+
+    function getFiles() {
+      RepositoryService.folder(_ctrl.path).then(function (response) {
+        var files = response;
+
+        files.forEach(annotate);
+
+        _ctrl.files = RepositoryService.sortFiles(files, _ctrl.slugs.length);
 
 
         // Grab text file (markdown)
@@ -105,7 +112,7 @@
       });
     }
 
-    // Init
+    // Initialize
     $scope.$watch(function() {
       return $stateParams.path;
     }, function() {
@@ -114,12 +121,29 @@
       refresh();
     });
 
-
   });
 
 
-  module.controller('ExternalRepoController', function() {
+  /**
+   * External repository controller
+   */
+  module.controller('ExternalRepoController', function($scope, RepositoryService, LocationService) {
     console.log('ExternalRepoController');
+    var _ctrl = this;
+
+    function refresh() {
+      var filters = LocationService.filters();
+
+
+    }
+
+
+    $scope.$on('$locationChangeSuccess', function (event, next) {
+      if (next.indexOf('repository') !== -1) {
+        refresh();
+      }
+    });
+
   });
 
 

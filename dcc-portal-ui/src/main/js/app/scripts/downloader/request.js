@@ -7,9 +7,8 @@
   /**
    * Requesting dynamic download
    */
-  module.controller('DownloadRequestController',
-    function($scope, $location, $modalInstance, $filter, Donors, LocationService,
-    DownloadService, DownloaderService, DataTypes, filters) {
+  module.controller('DownloadRequestController', function($scope, $location, $modalInstance, $filter,
+    Donors, LocationService, DownloaderService, DataTypes, filters) {
 
     var emailRegex = /.+@.+\..+/i;
 
@@ -113,7 +112,7 @@
         $scope.totalDonor = data;
       });
 
-      DownloadService.getSizes(filters).then(function (response) {
+      DownloaderService.getSizes(filters).then(function (response) {
         $scope.params.dataTypes = response.fileSize;
         $scope.params.dataTypes.forEach(function (dataType) {
           dataType.active = false;

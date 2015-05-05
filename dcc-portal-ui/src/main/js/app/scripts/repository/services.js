@@ -21,12 +21,7 @@
 
   var module = angular.module('icgc.repository.services', []);
 
-  module.service('DownloadService', function ($filter, Restangular) {
-    this.getSizes = function (filters) {
-      return Restangular.one('download', 'size').get({
-        filters: filters
-      });
-    };
+  module.service('RepositoryService', function ($filter, Restangular) {
 
     this.getFiles = function (filters, actives) {
       return Restangular.one('download', '').get({

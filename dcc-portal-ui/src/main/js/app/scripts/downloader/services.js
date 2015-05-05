@@ -38,6 +38,12 @@ angular.module('app.downloader.services').service('DownloaderService', function(
   };
 
 
+  this.getSizes = function (filters) {
+    return Downloader.getSizes(filters);
+  };
+
+
+
 
   // Dealing with cache
   this.getCurrentJobIds = function() {
