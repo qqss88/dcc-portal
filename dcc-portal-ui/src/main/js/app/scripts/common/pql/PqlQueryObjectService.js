@@ -161,7 +161,8 @@
       var filters = mapWithMultipleFuncs ([node], parseTreeOperatorProcessors, emptyValue,
         function (processor, valueNode, empty) {
           return processor (valueNode, empty, result);
-      });
+        }
+      );
 
       return _.isEmpty (filters) ? result : _.reduce (filters, _.merge, result);
     }
@@ -340,7 +341,8 @@
       var result = mapWithMultipleFuncs (properties, facetPropertyProcessors, emptyValue,
         function (processor, property, empty) {
           return processor (property, facet [property], empty, identifier);
-      });
+        }
+      );
 
       if (_.isEmpty (result)) {return emptyValue;}
 

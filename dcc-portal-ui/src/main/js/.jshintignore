@@ -1,3 +1,4 @@
 app/vendor/*
 app/scripts/common/pql/pqlparser.js
+app/scripts/ui/table2CSV.js
 
