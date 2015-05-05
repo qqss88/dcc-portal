@@ -983,4 +983,40 @@ describe('Testing PqlUtilService', function() {
     expect(builder.buildFilters()).toEqual(expected);
   });
 
+  it('Testing Builder\'s withMissing() and has() with pql: select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))', function() {
+    var expectedPql = 'select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))';
+    var initialPql = 'eq(donor.age,123)';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    builder.withMissing ('donor', 'gender')
+      .has ('donor', 'age')
+      .addTerms ('donor', 'gender', ['male', 'female'])
+      .has ('donor', 'gender')
+      .withMissing ('donor', 'age');
+
+    expect(builder.build()).toEqual(expectedPql);
+  });
+
+  it('Testing Builde\'s withoutMissing() and hasNo() with pql: select(*),and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))', function() {
+    var expectedPql = 'select(*),and(or(in(donor.age,123,2,1,3),missing(donor.age)),or(in(donor.gender,"male","female","unknown","tbd"),exists(donor.gender)))';
+    var initialPql = 'and(or(eq(donor.age,123),exists(donor.age),missing(donor.age)),or(missing(donor.gender),in(donor.gender,"male","female"),exists(donor.gender)))';
+    var builder = PqlUtilService.getBuilder (initialPql);
+
+    builder.hasNo ('donor', 'age')
+      .withoutMissing ('donor', 'gender')
+      .hasNo ('donor', 'age')
+      .addTerms ('donor', 'gender', ['unknown', 'tbd'])
+      .withoutMissing ('donor', 'gender')
+      .addTerms ('donor', 'age', [2, 1, 3])
+      .has ('foo', 'bar')
+      .withMissing ('foo', 'bar')
+      .hasNo ('foo', 'bar')
+      .withoutMissing ('foo', 'bar');
+
+    expect(builder.build()).toEqual(expectedPql);
+  });
+
+
+
+
 });

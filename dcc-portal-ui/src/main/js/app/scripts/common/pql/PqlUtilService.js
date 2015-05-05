@@ -87,44 +87,8 @@
 
     // A builder to allow the UI to build a PQL programmatically.
     var Builder = function (pql) {
-      function addTerm (buffer, categoryName, facetName, term) {
-        return service.addTerm (buffer, categoryName, facetName, term);
-      }
-
-      function addTerms (buffer, categoryName, facetName, terms) {
-        return service.addTerms (buffer, categoryName, facetName, terms);
-      }
-
-      function removeTerm (buffer, categoryName, facetName, term) {
-        return service.removeTerm (buffer, categoryName, facetName, term);
-      }
-
-      function removeFacet (buffer, categoryName, facetName) {
-        return service.removeFacet (buffer, categoryName, facetName);
-      }
-
-      function overwrite (buffer, categoryName, facetName, term) {
-        return service.overwrite (buffer, categoryName, facetName, term);
-      }
-
-      function includesFacets (buffer) {
-        return service.includesFacets (buffer);
-      }
-
-      function includes (buffer, field) {
-        return service.includes (buffer, field);
-      }
-
       function includesConsequences (buffer) {
         return service.includes (buffer, 'consequences');
-      }
-
-      function setLimit (buffer, limit) {
-        return service.setLimit (buffer, limit);
-      }
-
-      function setSort (buffer, sort) {
-        return service.setSort (buffer, sort);
       }
 
       function buildFilterOnlyPql (buffer) {
@@ -132,7 +96,12 @@
       }
 
       // A list of functions that update filters in PQL.
-      var filterModifiers = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
+      var filterModifiers = [
+        service.addTerm,
+        service.addTerms,
+        service.removeTerm,
+        service.removeFacet,
+        service.overwrite];
 
       var initialPql = pql || '';
       var actions = [];
@@ -149,27 +118,27 @@
 
       return {
         addTerm: function (categoryName, facetName, term) {
-          addAction (addTerm, [categoryName, facetName, term]);
+          addAction (service.addTerm, [categoryName, facetName, term]);
           return this;
         },
         addTerms: function (categoryName, facetName, terms) {
-          addAction (addTerms, [categoryName, facetName, terms]);
+          addAction (service.addTerms, [categoryName, facetName, terms]);
           return this;
         },
         removeTerm: function (categoryName, facetName, term) {
-          addAction (removeTerm, [categoryName, facetName, term]);
+          addAction (service.removeTerm, [categoryName, facetName, term]);
           return this;
         },
         removeFacet: function (categoryName, facetName) {
-          addAction (removeFacet, [categoryName, facetName]);
+          addAction (service.removeFacet, [categoryName, facetName]);
           return this;
         },
         overwrite: function (categoryName, facetName, term) {
-          addAction (overwrite, [categoryName, facetName, term]);
+          addAction (service.overwrite, [categoryName, facetName, term]);
           return this;
         },
         includesFacets: function () {
-          addAction (includesFacets, []);
+          addAction (service.includesFacets, []);
           return this;
         },
         includesConsequences: function () {
@@ -177,15 +146,31 @@
           return this;
         },
         includes: function (field) {
-          addAction (includes, [field]);
+          addAction (service.includes, [field]);
+          return this;
+        },
+        has: function (categoryName, existsName) {
+          addAction (service.has, [categoryName, existsName]);
+          return this;
+        },
+        hasNo: function (categoryName, existsName) {
+          addAction (service.hasNo, [categoryName, existsName]);
+          return this;
+        },
+        withMissing: function (categoryName, missingName) {
+          addAction (service.withMissing, [categoryName, missingName]);
+          return this;
+        },
+        withoutMissing: function (categoryName, missingName) {
+          addAction (service.withoutMissing, [categoryName, missingName]);
           return this;
         },
         setLimit: function (limit) {
-          addAction (setLimit, [limit]);
+          addAction (service.setLimit, [limit]);
           return this;
         },
         setSort: function (sort) {
-          addAction (setSort, [sort]);
+          addAction (service.setSort, [sort]);
           return this;
         },
         reset: function (startingPql) {
