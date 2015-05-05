@@ -23,11 +23,22 @@
 
   module.service('RepositoryService', function ($filter, Restangular) {
 
+    /*
     this.getFiles = function (filters, actives) {
       return Restangular.one('download', '').get({
         filters: filters,
         info: actives
       });
+    };
+    */
+
+
+    // TODO
+    this.getExternalFiles = function(filters) {
+    };
+
+    // TODO
+    this.getExternalFilesIndexedDate = function() {
     };
 
     this.folder = function (path) {

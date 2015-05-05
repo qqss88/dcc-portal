@@ -70,6 +70,7 @@
     'icgc.beacon',
     'icgc.downloader',
     'icgc.repository',
+    'icgc.auth',
 
     // old
     'app.ui',
