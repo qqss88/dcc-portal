@@ -125,18 +125,21 @@
     }
 
     function mapWithMultipleFuncs (collection, funcs, emptyValue, f) {
-      return _.without (_.map (collection, function (element) {
+      var result =  _.map (collection, function (element) {
         return _.reduce (funcs, function (result, func) {
-          /* We use this check, along with reduce(), to 'short-circuit' (kind of) this anonymous function here, because mapWithMultipleFuncs() is
-           * meant to have each element processed exactly once by one processor only. The functions in 'funcs' list should
-           * follow this rule: process the element, if matched, and return a value other than the emptyValue; return the emptyValue
-           * to pass. It's like a map() with an internal switch/case construct for calling the corresponding function.
+          /* We use this check, along with reduce(), to 'short-circuit' (kind of) this anonymous function here,
+           * because mapWithMultipleFuncs() is meant to have each element processed exactly once by one processor only.
+           * The functions in 'funcs' list should follow this rule: process the element, if matched, and
+           * return a value other than the emptyValue; return the emptyValue to pass. It's like a map()
+           * with an internal switch/case construct for calling the corresponding function.
            */
-          if (! _.isEqual (result, emptyValue)) return result;
+          if (! _.isEqual (result, emptyValue)) {return result;}
 
           return f (func, element, emptyValue);
         }, emptyValue);
-      }), emptyValue);
+      });
+
+      return _.without (result, emptyValue);
     }
 
     var supportedOps = ['in', 'eq', 'or', 'exists', 'missing'];
@@ -155,8 +158,9 @@
 
       var emptyValue = {};
 
-      var filters = mapWithMultipleFuncs ([node], parseTreeOperatorProcessors, emptyValue, function (processor, valueNode, empty) {
-        return processor (valueNode, empty, result);
+      var filters = mapWithMultipleFuncs ([node], parseTreeOperatorProcessors, emptyValue,
+        function (processor, valueNode, empty) {
+          return processor (valueNode, empty, result);
       });
 
       return _.isEmpty (filters) ? result : _.reduce (filters, _.merge, result);
@@ -333,8 +337,9 @@
 
       if (_.isEmpty (properties)) {return emptyValue;}
 
-      var result = mapWithMultipleFuncs (properties, facetPropertyProcessors, emptyValue, function (processor, property, empty) {
-        return processor (property, facet [property], empty, identifier);
+      var result = mapWithMultipleFuncs (properties, facetPropertyProcessors, emptyValue,
+        function (processor, property, empty) {
+          return processor (property, facet [property], empty, identifier);
       });
 
       if (_.isEmpty (result)) {return emptyValue;}
