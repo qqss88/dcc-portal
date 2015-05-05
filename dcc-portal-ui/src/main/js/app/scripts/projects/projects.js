@@ -166,7 +166,7 @@
                 var uiFIProjects = [];
 
                 geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.findWhere( data.hits, function(p) {
+                  var proj = _.find( data.hits, function(p) {
                     return p.id === t.term;
                   });
 
@@ -556,7 +556,7 @@
       var pub = {}, json = X2JS.xml_str2json(xml).eSummaryResult.DocSum;
 
       function get(field) {
-        return _.findWhere(json.Item, function (o) {
+        return _.find(json.Item, function (o) {
           return o._Name === field;
         }).__text;
       }
@@ -566,7 +566,7 @@
       pub.journal = get('FullJournalName');
       pub.issue = get('Issue');
       pub.pubdate = get('PubDate');
-      pub.authors = _.pluck(_.findWhere(json.Item, function (o) {
+      pub.authors = _.pluck(_.find(json.Item, function (o) {
         return o._Name === 'AuthorList';
       }).Item, '__text');
       pub.refCount = parseInt(get('PmcRefCount'), 10);

@@ -31,10 +31,10 @@ module.exports = function (grunt) {
   grunt.initConfig({
     peg: {
       pql: {
-        src: "./app/scripts/pegjs/pql.pegjs",
-        dest: "./app/scripts/common/pql/pqlparser.js",
+        src: './app/scripts/pegjs/pql.pegjs',
+        dest: './app/scripts/common/pql/pqlparser.js',
         options: {
-          exportVar: "PqlPegParser"
+          exportVar: 'PqlPegParser'
         }
       }
     },
