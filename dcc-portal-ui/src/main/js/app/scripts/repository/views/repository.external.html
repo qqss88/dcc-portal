@@ -31,7 +31,7 @@
             </p>
         </div>
         <div style="margin-bottom:0.5rem">
-            <button class="t_button">
+            <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
                 <i class="icon-download"></i>Download {{ ExternalRepoController.selectedFiles.length === 0? 'all' : ExternalRepoController.selectedFiles.length + ' files'}}
             </button>
             <button class="t_button" data-ng-click="ExternalRepoController.undo()"
@@ -41,7 +41,7 @@
 
             <span class="t_tools">
                 <span class="t_tools__tool">
-                    <i class="icon-file pull-right"></i>
+                    <i class="icon-file pull-right" data-ng-click="ExternalRepoController.export()"></i>
                 </span>
             </span>
         </div>

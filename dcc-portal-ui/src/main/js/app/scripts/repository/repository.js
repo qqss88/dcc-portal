@@ -134,6 +134,22 @@
     _ctrl.selectedFiles = [];
 
 
+    /**
+     * Export table
+     */
+    _ctrl.export = function() {
+      console.log('export');
+    };
+
+
+    /**
+     * Download manifest
+     */
+    _ctrl.downloadManifest = function() {
+      console.log('downloading manifest');
+    };
+
+
     _ctrl.toggleRow = function(row) {
       row.checked = !row.checked;
       if (row.checked) {
@@ -142,6 +158,7 @@
         _ctrl.selectedFiles.pop();
       }
     };
+
 
     /**
      * Undo user selected files
