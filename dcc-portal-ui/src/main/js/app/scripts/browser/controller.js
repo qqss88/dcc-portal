@@ -65,7 +65,7 @@
       }
 
       $scope.setGeneActive = function (id, region) {
-        var gene = _.findWhere($scope.genes.data.hits, function (g) {
+        var gene = _.find($scope.genes.data.hits, function (g) {
           return g.id === id;
         });
         if (gene.active) {
@@ -81,7 +81,7 @@
       };
 
       $scope.setMutationActive = function (id, region) {
-        var mutation = _.findWhere($scope.mutations.data.hits, function (m) {
+        var mutation = _.find($scope.mutations.data.hits, function (m) {
           return m.id === id;
         });
         if (mutation.active) {
