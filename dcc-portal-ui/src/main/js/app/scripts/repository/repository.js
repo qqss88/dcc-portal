@@ -131,11 +131,74 @@
     console.log('ExternalRepoController');
     var _ctrl = this;
 
+    _ctrl.selectedFiles = [];
+
+
+    _ctrl.toggleRow = function(row) {
+      row.checked = !row.checked;
+      if (row.checked) {
+        _ctrl.selectedFiles.push({});
+      } else {
+        _ctrl.selectedFiles.pop();
+      }
+    };
+
+    /**
+     * Undo user selected files
+     */
+    _ctrl.undo = function() {
+      _ctrl.selectedFiles = [];
+      _ctrl.files.hits.forEach(function(f) {
+        delete f.checked;
+      });
+    };
+
     function refresh() {
       var filters = LocationService.filters();
 
+      // FIXME: Test data
+      _ctrl.files = {
+        facets: {
+          repository: {
+            terms: [
+              { term: 'CGHub', count: 10},
+              { term: 'PCAWG', count: 11}
+            ]
+          },
+          study: {
+            terms: [
+              { term: 'PCAWG', count: 20},
+              { term: '_missing', count: 1}
+            ]
+          },
+          dataType: {
+            terms: [
+              { term: 'ssm', count: 7},
+              { term: 'sgv', count: 7},
+              { term: 'cnsm', count: 7}
+            ]
+          },
+          fileFormat: {
+            terms: [
+              { term: 'BAM', count: 21}
+            ]
+          },
+          access: {
+            terms: [
+              { term: 'open', count: 10},
+              { term: 'controlled', count: 11}
+            ]
+          }
+        },
+        hits: [
+          {},
+          {}
+        ]
+      };
 
     }
+
+    refresh();
 
 
     $scope.$on('$locationChangeSuccess', function (event, next) {

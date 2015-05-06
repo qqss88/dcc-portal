@@ -1,27 +1,24 @@
 <aside class="t_sidebar">
     <div style="position: relative; margin-right: -2rem">
         <ul class="t_facets">
-            <li data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder="eg. DO1" data-type="donor"></li>
-            <terms data-type="donor" data-facet-name="primarySite"
-                   data-facet="ExternalRepositoryController.files.facets.primarySite"></terms>
-            <terms data-type="donor" data-facet-name="projectId" data-defined="true"
-                   data-facet="ExternalRepositoryController.files.facets.projectId"></terms>
-            <terms data-type="donor" data-facet-name="gender" data-capitalize="true"
-                   data-facet="ExternalRepositoryController.files.facets.gender"></terms>
-            <terms data-type="donor" data-facet-name="tumourStageAtDiagnosis"
-                   data-facet="ExternalRepositoryController.files.facets.tumourStageAtDiagnosis" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="vitalStatus" data-capitalize="true"
-                   data-facet="ExternalRepositoryController.files.facets.vitalStatus" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="diseaseStatusLastFollowup" data-capitalize="true"
-                   data-facet="ExternalRepositoryController.files.facets.diseaseStatusLastFollowup" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="relapseType" data-capitalize="true"
-                   data-facet="ExternalRepositoryController.files.facets.relapseType" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="ageAtDiagnosisGroup"
-                   data-facet="ExternalRepositoryController.files.facets.ageAtDiagnosisGroup" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="availableDataTypes" data-defined="true"
-                   data-facet="ExternalRepositoryController.files.facets.availableDataTypes" data-collapsed="true"></terms>
-            <terms data-type="donor" data-facet-name="analysisTypes" data-defined="true"
-                   data-facet="ExternalRepositoryController.files.facets.analysisTypes" data-collapsed="true"></terms>
+
+            <li data-type="mutation" data-tags-facet data-label="File" data-facet-name="id" data-placeholder=""></li>
+
+            <terms data-type="file" data-facet-name="repository" 
+                   data-facet="ExternalRepoController.files.facets.repository"
+                   data-label="Repository"></terms>
+            <terms data-type="file" data-facet-name="study" 
+                   data-label="Study"
+                   data-facet="ExternalRepoController.files.facets.study"></terms>
+            <terms data-type="file" data-facet-name="dataType" 
+                   data-label="Data Type"
+                   data-facet="ExternalRepoController.files.facets.dataType"></terms>
+            <terms data-type="file" data-facet-name="fileFormat" 
+                   data-label="File Format"
+                   data-facet="ExternalRepoController.files.facets.fileFormat"></terms>
+            <terms data-type="file" data-facet-name="access" 
+                   data-label="Access"
+                   data-facet="ExternalRepoController.files.facets.access"></terms>
         </ul>
     </div>
 </aside>
@@ -33,9 +30,25 @@
                 <a href="https://docs.icgc.org/access-controlled-data"><i class="icon-external-link"></i>https://docs.icgc.org/access-controlled-data</a>
             </p>
         </div>
-        <table class="table table-info">
+        <div style="margin-bottom:0.5rem">
+            <button class="t_button">
+                <i class="icon-download"></i>Download {{ ExternalRepoController.selectedFiles.length === 0? 'all' : ExternalRepoController.selectedFiles.length + ' files'}}
+            </button>
+            <button class="t_button" data-ng-click="ExternalRepoController.undo()"
+                data-ng-disabled="ExternalRepoController.selectedFiles.length === 0">
+                <i class="icon-undo"></i>
+            </button>
+
+            <span class="t_tools">
+                <span class="t_tools__tool">
+                    <i class="icon-file pull-right"></i>
+                </span>
+            </span>
+        </div>
+        <table class="table table-selectable">
             <thead>
-                <th></th>
+                <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
+                <th>&nbsp;</th> 
                 <th>File Name</th>
                 <th># Donors</th>
                 <th>Repository</th>
@@ -47,13 +60,15 @@
                 <th>Access</th>
             </thead>
             <tbody>
-                <tr>
+                <tr data-ng-repeat="row in ExternalRepoController.files.hits">
+                    <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
+                       <i class="{{ row.checked? 'icon-check':'icon-check-empty' }}"></i>
+                    </td>
                     <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
-                    <td></td>
+                    <td><span class="badge"><small>PCAWG</small></span></td>
                     <td></td>
                     <td></td>
                     <td></td>
