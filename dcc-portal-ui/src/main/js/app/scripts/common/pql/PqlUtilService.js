@@ -107,7 +107,8 @@
         service.has,
         service.hasNo,
         service.withMissing,
-        service.withoutMissing];
+        service.withoutMissing
+      ];
 
       var initialPql = pql || '';
       var actions = [];
