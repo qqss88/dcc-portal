@@ -99,6 +99,28 @@
       return _.set ({}, propertyPath, values);
     }
 
+    function notOperatorProcessor (node, emptyValue) {
+      var permittedOps = ['not'];
+      if (! _.contains (permittedOps, node.op)) {return emptyValue;}
+
+      var values = _.isArray (node.values) ? node.values : [];
+      if (values.length < 1) {return emptyValue;}
+
+      // For the time being, we expect only one 'in' node in the values of an 'not' node.
+      var inNode = values[0];
+
+      if (! (isNode ('in', inNode) || isNode ('eq', inNode))) {return emptyValue;}
+
+      var identifier = parseIdentifier (inNode.field);
+      if (! identifier) {return emptyValue;}
+
+      values = _.isArray (inNode.values) ? inNode.values : [];
+      if (values.length < 1) {return emptyValue;}
+
+      var propertyPath = [identifier.category, identifier.facet, 'not'];
+      return _.set ({}, propertyPath, values);
+    }
+
     function unaryOperatorProcessor (op, node, emptyValue) {
       var permittedOps = [op];
       if (! _.contains (permittedOps, node.op)) {return emptyValue;}
@@ -142,9 +164,12 @@
       return _.without (result, emptyValue);
     }
 
-    var supportedOps = ['in', 'eq', 'or', 'exists', 'missing'];
+    var supportedOps = ['in', 'eq', 'or', 'exists', 'missing', 'not'];
 
-    var parseTreeOperatorProcessors = [inOperatorProcessor, orOperatorProcessor,
+    var parseTreeOperatorProcessors = [
+      inOperatorProcessor,
+      orOperatorProcessor,
+      notOperatorProcessor,
       _.partial (unaryOperatorProcessor, 'exists'),
       _.partial (unaryOperatorProcessor, 'missing')
     ];
@@ -316,6 +341,25 @@
       }
     }
 
+    function notFacetPropertyProcessor (property, value, defaultValue, identifier) {
+      if ('not' !== property) {return defaultValue;}
+
+      var notArray = _.isArray (value) ? value : [];
+
+      if (notArray.length > 0) {
+        var inNode = inFacetPropertyProcessor ('in', notArray, defaultValue, identifier);
+
+        if (_.isEqual (defaultValue, inNode)) {return defaultValue;}
+
+        return {
+          op: 'not',
+          values: [inNode]
+        };
+      } else {
+        return defaultValue;
+      }
+    }
+
     function booleanFacetPropertyProcessor (op, property, value, defaultValue, identifier) {
       op = _.isString (op) ? op.trim() : '';
       if (op !== property) {return defaultValue;}
@@ -323,7 +367,9 @@
       return (_.isBoolean (value) && value) ? {op: op, values: [identifier]} : defaultValue;
     }
 
-    var facetPropertyProcessors = [inFacetPropertyProcessor,
+    var facetPropertyProcessors = [
+      inFacetPropertyProcessor,
+      notFacetPropertyProcessor,
       _.partial (booleanFacetPropertyProcessor, 'exists'),
       _.partial (booleanFacetPropertyProcessor, 'missing')
     ];
@@ -393,6 +439,28 @@
 
       // update the original filter.
       return _.set (queryFilter, propertyPath, inValueArray);
+    }
+
+    function excludeTerm (categoryName, facetName, term, queryFilter) {
+      if (! term) {return queryFilter;}
+
+      return excludeMultipleTerms (categoryName, facetName, [term], queryFilter);
+    }
+
+    function excludeMultipleTerms (categoryName, facetName, terms, queryFilter) {
+      if (! _.isArray (terms)) {return queryFilter;}
+      if (_.isEmpty (terms)) {return queryFilter;}
+
+      var propertyPath = [categoryName, facetName, 'not'];
+      var notArray = _.get (queryFilter, propertyPath, []);
+
+      _.each (terms, function (term) {
+        if (term && ! _.contains (notArray, term)) {
+          notArray.push (term);
+        }
+      });
+
+      return _.set (queryFilter, propertyPath, notArray);
     }
 
     function addBooleanPropertyToQueryFilter (propertyName, categoryName, facetName, notUsed, queryFilter) {
@@ -529,11 +597,24 @@
       var numberOfPql = pqlArray.length;
 
       if (numberOfPql < 1) {return emptyValue;}
-      if (numberOfPql < 2) {return pqlArray [0];}
+
+      var parse = PqlTranslationService.tryParse;
+
+      if (numberOfPql < 2) {
+        var pql = pqlArray [0];
+        return parse(pql).isValid ? pql : emptyValue;
+      }
+
+      // Making sure both PQL statements are valid.
+      if (! _.every (_.pluck (_.map (pqlArray, parse), 'isValid'), function (v) {
+        return v === true;
+      })) {
+        return emptyValue;
+      }
 
       var resultObject = mergeQueryObjects (_.map (pqlArray, convertPqlToQueryObject));
 
-      return _.isEmpty (resultObject) ? '' :
+      return _.isEmpty (resultObject) ? emptyValue :
         PqlTranslationService.toPql (convertQueryObjectToJsonTree (resultObject));
     }
 
@@ -555,6 +636,12 @@
       },
       addTerms: function (pql, categoryName, facetName, terms) {
         return updateQueryFilter (pql, categoryName, facetName, terms, [addMultipleTermsToQueryFilter]);
+      },
+      excludeTerm: function (pql, categoryName, facetName, term) {
+        return updateQueryFilter (pql, categoryName, facetName, term, [excludeTerm]);
+      },
+      excludeTerms: function (pql, categoryName, facetName, terms) {
+        return updateQueryFilter (pql, categoryName, facetName, terms, [excludeMultipleTerms]);
       },
       removeTerm: function (pql, categoryName, facetName, term) {
         return updateQueryFilter (pql, categoryName, facetName, term, [removeTermFromQueryFilter]);
@@ -613,5 +700,6 @@
         return queryObject.filters;
       }
     };
+
   });
 })();

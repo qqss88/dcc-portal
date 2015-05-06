@@ -133,11 +133,32 @@ describe('Testing PqlUtilService', function() {
     expect(testPql).toEqual(expectedPql);
   });
 
-
   it('Testing addTerms() with pql: in(donor.gender,"male", "female", "unknown")', function() {
     var expectedPql = 'select(*),in(donor.gender,"male","female","unknown")';
 
     PqlUtilService.addTerms ('donor', 'gender', ['male', 'female', 'unknown']);
+
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
+  it('Testing excludeTerm() with pql: or(in(donor.age,21, 23),not(eq(donor.age,22)))', function() {
+    var expectedPql = 'select(*),or(in(donor.age,21,23),not(eq(donor.age,22)))';
+
+    PqlUtilService.addTerms ('donor', 'age', [21, 23]);
+    PqlUtilService.excludeTerm ('donor', 'age', 22);
+
+    var testPql = PqlUtilService.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
+  it('Testing excludeTerms() with pql: or(in(donor.age,21, 23),not(eq(donor.age,22)))', function() {
+    var expectedPql = 'select(*),or(in(donor.age,21,23),not(in(donor.age,22,20)))';
+
+    PqlUtilService.addTerms ('donor', 'age', [21, 23]);
+    PqlUtilService.excludeTerms ('donor', 'age', [22, 20]);
 
     var testPql = PqlUtilService.getRawPql();
 
@@ -616,6 +637,12 @@ describe('Testing PqlUtilService', function() {
     var mergedPql = PqlUtilService.mergePqls (pql1);
 
     expect(mergedPql).toEqual(pql1);
+  });
+
+  it('Testing mergePqls() with invalid Pqls', function() {
+    var mergedPql = PqlUtilService.mergePqls ('whatever', 'eq(foo,)');
+
+    expect(mergedPql).toEqual('');
   });
 
   it('Testing mergeQueries() with eq(donor.age,123) and in(donor.gender, "male", "female")', function() {

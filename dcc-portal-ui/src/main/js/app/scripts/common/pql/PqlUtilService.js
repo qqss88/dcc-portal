@@ -99,9 +99,15 @@
       var filterModifiers = [
         service.addTerm,
         service.addTerms,
+        service.excludeTerm,
+        service.excludeTerms,
         service.removeTerm,
         service.removeFacet,
-        service.overwrite];
+        service.overwrite,
+        service.has,
+        service.hasNo,
+        service.withMissing,
+        service.withoutMissing];
 
       var initialPql = pql || '';
       var actions = [];
@@ -123,6 +129,14 @@
         },
         addTerms: function (categoryName, facetName, terms) {
           addAction (service.addTerms, [categoryName, facetName, terms]);
+          return this;
+        },
+        excludeTerm: function (categoryName, facetName, term) {
+          addAction (service.excludeTerm, [categoryName, facetName, term]);
+          return this;
+        },
+        excludeTerms: function (categoryName, facetName, terms) {
+          addAction (service.excludeTerms, [categoryName, facetName, terms]);
           return this;
         },
         removeTerm: function (categoryName, facetName, term) {
@@ -206,6 +220,12 @@
       },
       addTerms: function (categoryName, facetName, terms) {
         updatePql (service.addTerms, categoryName, facetName, terms);
+      },
+      excludeTerm: function (categoryName, facetName, term) {
+        updatePql (service.excludeTerm, categoryName, facetName, term);
+      },
+      excludeTerms: function (categoryName, facetName, terms) {
+        updatePql (service.excludeTerms, categoryName, facetName, terms);
       },
       removeTerm: function (categoryName, facetName, term) {
         updatePql (service.removeTerm, categoryName, facetName, term);
