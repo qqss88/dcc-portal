@@ -33,6 +33,10 @@
     var pqlParameterName = 'query';
     var service = PqlQueryObjectService;
 
+    function ensureArray (array) {
+      return _.isArray (array) ? array : [];
+    }
+
     // Here Pql is persisted in a query param in the URL.
     function getPql() {
       var search = $location.search();
@@ -66,8 +70,7 @@
     function addSort (field, direction) {
       if (! (field && direction)) {return;}
 
-      var sort = getSort();
-      sort = _.isArray (sort) ? sort : [];
+      var sort = ensureArray (getSort());
       sort.push ({field: field, direction: direction});
 
       setSort (sort);
@@ -76,8 +79,7 @@
     function removeSort (field) {
       if (! _.isString (field)) {return;}
 
-      var sort = getSort();
-      sort = _.isArray (sort) ? sort : [];
+      var sort = ensureArray (getSort());
       var updatedSort = _.remove (sort, function (o) {
         return o.field !== field;
       });

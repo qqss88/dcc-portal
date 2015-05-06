@@ -45,13 +45,20 @@
       };
     }
 
+    function ensureArray (array) {
+      return _.isArray (array) ? array : [];
+    }
+
+    function ensureString (string) {
+      return _.isString (string) ? string.trim() : '';
+    }
+
     function convertPqlToQueryObject (pql) {
-      pql = (pql || '').trim();
+      pql = ensureString (pql);
 
       if (pql.length < 1) {return getEmptyQueryObject();}
 
       var jsonTree = PqlTranslationService.fromPql (pql);
-
       return convertJsonTreeToQueryObject (jsonTree);
     }
 
@@ -70,8 +77,16 @@
     var isSelectNode = createNodeDetector ('select');
     var isFacetsNode = createNodeDetector ('facets');
 
+    function allAre (truthy, collection, predicate) {
+      return _.every (collection, truthy ? predicate : _.negate (predicate));
+    }
+
+    function atLeastOneIs (truthy, collection, predicate) {
+      return _.some (collection, truthy ? predicate : _.negate (predicate));
+    }
+
     function parseIdentifier (id) {
-      var splits = (id || '').split ('.');
+      var splits = ensureString(id).split ('.');
       var count = splits.length;
 
       var category = (count > 0) ? splits[0] : null;
@@ -90,7 +105,7 @@
       var identifier = parseIdentifier (node.field);
       if (! identifier) {return emptyValue;}
 
-      var values = _.isArray (node.values) ? node.values : [];
+      var values = ensureArray (node.values);
       if (values.length < 1) {return emptyValue;}
 
       // Currently this service treats both 'in' and 'eq' nodes as terminal/leaf nodes.
@@ -103,18 +118,21 @@
       var permittedOps = ['not'];
       if (! _.contains (permittedOps, node.op)) {return emptyValue;}
 
-      var values = _.isArray (node.values) ? node.values : [];
+      var values = ensureArray (node.values);
       if (values.length < 1) {return emptyValue;}
 
       // For the time being, we expect only one 'in' node in the values of an 'not' node.
       var inNode = values[0];
+      var predicate = function (op) {return isNode (op, inNode);};
 
-      if (! (isNode ('in', inNode) || isNode ('eq', inNode))) {return emptyValue;}
+      if (allAre (false, ['in', 'eq'], predicate)) {
+        return emptyValue;
+      }
 
       var identifier = parseIdentifier (inNode.field);
       if (! identifier) {return emptyValue;}
 
-      values = _.isArray (inNode.values) ? inNode.values : [];
+      values = ensureArray (inNode.values);
       if (values.length < 1) {return emptyValue;}
 
       var propertyPath = [identifier.category, identifier.facet, 'not'];
@@ -132,7 +150,8 @@
        * 'select' and 'facets' when converting the parse tree back to PQL. That's really an implementation detail for
        * PqlTranslationService.
        */
-      var identifier = parseIdentifier (node.values[0]);
+      var identifier = node.values[0];
+      identifier = parseIdentifier (identifier);
       if (! identifier) {return emptyValue;}
 
       var propertyPath = [identifier.category, identifier.facet, op];
@@ -143,7 +162,7 @@
       var permittedOps = ['or'];
       if (! _.contains (permittedOps, node.op)) {return emptyValue;}
 
-      return _.reduce (node.values, reduceFilterArrayToQueryFilters, accumulator);
+      return _.reduce (ensureArray (node.values), reduceFilterArrayToQueryFilters, accumulator);
     }
 
     function mapWithMultipleFuncs (collection, funcs, emptyValue, f) {
@@ -178,7 +197,7 @@
       if (! node) {return result;}
       if (! _.contains (supportedOps, node.op)) {return result;}
 
-      var values = _.isArray (node.values) ? node.values : [];
+      var values = ensureArray (node.values);
       if (values.length < 1) {return result;}
 
       var emptyValue = {};
@@ -210,7 +229,7 @@
 
       var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
       // For our current need, there should be only one 'And' node at the top level if one exists.
-      var filterValues = andNode ? (_.isArray (andNode.values) ? andNode.values : []) : treeArray;
+      var filterValues = andNode ? ensureArray (andNode.values) : treeArray;
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
 
       var customSelectsNode = getSpecialNodeFromTreeArray (treeArray, function (node) {
@@ -325,7 +344,7 @@
     function inFacetPropertyProcessor (property, value, defaultValue, identifier) {
       if ('in' !== property) {return defaultValue;}
 
-      var inArray = _.isArray (value) ? value : [];
+      var inArray = ensureArray (value);
       var inArrayLength = inArray.length;
 
       if (inArrayLength > 0) {
@@ -344,7 +363,7 @@
     function notFacetPropertyProcessor (property, value, defaultValue, identifier) {
       if ('not' !== property) {return defaultValue;}
 
-      var notArray = _.isArray (value) ? value : [];
+      var notArray = ensureArray (value);
 
       if (notArray.length > 0) {
         var inNode = inFacetPropertyProcessor ('in', notArray, defaultValue, identifier);
@@ -361,7 +380,7 @@
     }
 
     function booleanFacetPropertyProcessor (op, property, value, defaultValue, identifier) {
-      op = _.isString (op) ? op.trim() : '';
+      op = ensureString (op);
       if (op !== property) {return defaultValue;}
 
       return (_.isBoolean (value) && value) ? {op: op, values: [identifier]} : defaultValue;
@@ -523,7 +542,7 @@
       'specimen', 'observation', 'projects'];
 
     function addProjections (pql, fields) {
-      fields = _.isArray (fields) ? fields : [];
+      fields = ensureArray (fields);
       var selectFields = _.remove (fields, function (s) {
         return _.isString (s) && _.contains (validIncludeFields, s);
       });
@@ -590,7 +609,7 @@
     function mergePqlStatements () {
       var emptyValue = '';
       var args = cleanUpArguments (arguments, function (s) {
-        return _.isString (s) ? s.trim() : emptyValue;
+        return ensureString (s);
       });
 
       var pqlArray = _.unique (_.without (args, emptyValue));
@@ -598,17 +617,15 @@
 
       if (numberOfPql < 1) {return emptyValue;}
 
-      var parse = PqlTranslationService.tryParse;
+      var isValid = _.flow (PqlTranslationService.tryParse, _.property ('isValid'));
 
       if (numberOfPql < 2) {
         var pql = pqlArray [0];
-        return parse(pql).isValid ? pql : emptyValue;
+        return isValid (pql) ? pql : emptyValue;
       }
 
       // Making sure both PQL statements are valid.
-      if (! _.every (_.pluck (_.map (pqlArray, parse), 'isValid'), function (v) {
-        return v === true;
-      })) {
+      if (atLeastOneIs (false, pqlArray, isValid)) {
         return emptyValue;
       }
 

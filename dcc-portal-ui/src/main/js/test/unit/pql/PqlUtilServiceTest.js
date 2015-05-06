@@ -154,6 +154,21 @@ describe('Testing PqlUtilService', function() {
     expect(testPql).toEqual(expectedPql);
   });
 
+  it('Testing excludeTerm() with pql: and(or(in(donor.age,21,23),not(eq(donor.age,22))),not(in(donor.gender,"male","female","unknown")))', function() {
+    var expectedPql = 'select(*),and(or(in(donor.age,21,23),not(eq(donor.age,22))),not(in(donor.gender,"male","female","unknown")))';
+    var s = PqlUtilService;
+
+    s.addTerms ('donor', 'age', [21, 23]);
+    s.excludeTerm ('donor', 'age', 22);
+    s.excludeTerm ('donor', 'gender', 'male');
+    s.excludeTerm ('donor', 'gender', 'female');
+    s.excludeTerm ('donor', 'gender', 'unknown');
+
+    var testPql = s.getRawPql();
+
+    expect(testPql).toEqual(expectedPql);
+  });
+
   it('Testing excludeTerms() with pql: or(in(donor.age,21, 23),not(eq(donor.age,22)))', function() {
     var expectedPql = 'select(*),or(in(donor.age,21,23),not(in(donor.age,22,20)))';
 
