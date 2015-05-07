@@ -47,7 +47,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
-    EXTERNAL_FILE("externalFile"),
+    EXTERNAL_FILE("file"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -80,6 +80,8 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
+    EXTERNAL_FILE("file"),
+
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
