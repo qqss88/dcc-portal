@@ -80,9 +80,8 @@ public class ExternalFile {
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
     access = getBoolean(fieldMap.get(fields.get("access")));
 
-    // FIXME
+    // FIXME: What field is this?
     repository = null;
-
   }
 
 }

@@ -92,13 +92,16 @@ public class IndexModel {
 
   private static final ImmutableMap<String, String> EXTERNAL_FILE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
-          .put("fileName", "file_name")
+          .put("fileName", "repository.file_name")
+          .put("fileSize", "repository.file_size")
           .put("projectCode", "donor.project_code")
+          .put("primarySite", "donor.primary_site")
           .put("study", "study")
+          .put("donorStudy", "donor.study")
           .put("dataType", "data_type")
           .put("fileFormat", "data_format")
-          .put("fileSize", "file_size")
           .put("access", "access")
+          .put("donorId", "donor.donor_id")
           .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
