@@ -19,7 +19,10 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.service.QueryService.getFacets;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +34,8 @@ import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
+
 @Slf4j
 @Component
 public class ExternalFileRepository {
@@ -39,6 +44,8 @@ public class ExternalFileRepository {
 
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.EXTERNAL_FILE;
+
+  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "fileFormat", "access");
 
   private final Client client;
   private final String index;
@@ -59,9 +66,18 @@ public class ExternalFileRepository {
 
     val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
     search.setPostFilter(filters);
-    search.addFields(getFields(query, KIND));
 
-    log.debug("{}", search);
+    search.addFields(getFields(query, KIND));
+    String[] sourceFields = resolveSourceFields(query, KIND.EXTERNAL_FILE);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND.EXTERNAL_FILE), EMPTY_SOURCE_FIELDS);
+    }
+    val facets = getFacets(query, KIND.EXTERNAL_FILE, FACETS, query.getFilters(), null, null);
+    for (val facet : facets) {
+      search.addFacet(facet);
+    }
+
+    log.info("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 

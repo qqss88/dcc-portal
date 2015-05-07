@@ -58,8 +58,8 @@ public class ExternalFileService {
     }
 
     val externalFiles = new ExternalFiles(list.build());
+    externalFiles.setFacets(response.getFacets());
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
-
     return externalFiles;
   }
 

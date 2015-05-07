@@ -24,6 +24,8 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_INCLUDE_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_INCLUDE_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_ALLOW;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_VALUE;
@@ -82,6 +84,7 @@ public class ExternalFileResource {
   public ExternalFiles findAll(
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
+      @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue("fileName") String sort,
@@ -90,7 +93,11 @@ public class ExternalFileResource {
     ObjectNode filters = filtersParam.get();
 
     return externalFileService.findAll(query().fields(fields).filters(filters)
-        .from(from.get()).size(size.get()).sort(sort).order(order)
+        .from(from.get())
+        .size(size.get())
+        .sort(sort)
+        .order(order)
+        .includes(include)
         .build());
   }
 
