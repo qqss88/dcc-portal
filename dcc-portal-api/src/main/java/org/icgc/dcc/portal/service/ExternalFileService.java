@@ -17,16 +17,50 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.portal.model.ExternalFile;
+import org.icgc.dcc.portal.model.ExternalFiles;
+import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.icgc.dcc.portal.model.Pagination;
+import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.repository.ExternalFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableList;
+
+@Service
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ExternalFileService {
 
   private final ExternalFileRepository externalFileRepository;
 
-  @Autowired
-  public ExternalFileService(ExternalFileRepository externalFileRepository) {
-    this.externalFileRepository = externalFileRepository;
+  /*
+   * @Autowired public ExternalFileService(ExternalFileRepository externalFileRepository) { this.externalFileRepository
+   * = externalFileRepository; }
+   */
+
+  public ExternalFiles findAll(Query query) {
+    SearchResponse response = externalFileRepository.findAll(query);
+    SearchHits hits = response.getHits();
+
+    val list = ImmutableList.<ExternalFile> builder();
+
+    for (SearchHit hit : hits) {
+      val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
+      list.add(new ExternalFile(fieldMap));
+    }
+
+    val externalFiles = new ExternalFiles(list.build());
+    externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
+
+    return externalFiles;
   }
 
 }

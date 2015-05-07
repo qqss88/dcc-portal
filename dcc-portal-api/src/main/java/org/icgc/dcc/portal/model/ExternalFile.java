@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
@@ -66,7 +65,7 @@ public class ExternalFile {
   Long fileSize;
 
   @ApiModelProperty(value = "File access", required = true)
-  Boolean access;
+  String access;
 
   @JsonCreator
   public ExternalFile(Map<String, Object> fieldMap) {
@@ -78,7 +77,7 @@ public class ExternalFile {
     dataType = getString(fieldMap.get(fields.get("dataType")));
     fileFormat = getString(fieldMap.get(fields.get("fileFormat")));
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
-    access = getBoolean(fieldMap.get(fields.get("access")));
+    access = getString(fieldMap.get(fields.get("access")));
 
     // FIXME: What field is this?
     repository = null;

@@ -19,24 +19,26 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class ExternalFileRepository {
 
   private final String INDEX_NAME = "icgc-repository";
 
-  private static final Type TYPE = Type.RELEASE;
-  private static final Kind KIND = Kind.RELEASE;
+  // private static final Type TYPE = Type.RELEASE;
+  private static final Kind KIND = Kind.EXTERNAL_FILE;
 
   private final Client client;
   private final String index;
@@ -57,6 +59,7 @@ public class ExternalFileRepository {
 
     val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
     search.setPostFilter(filters);
+    search.addFields(getFields(query, KIND));
 
     log.debug("{}", search);
     SearchResponse response = search.execute().actionGet();

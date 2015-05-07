@@ -34,7 +34,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "Files")
-public class ExternalFiles {
+public class ExternalFiles extends Paginated {
 
   @ApiModelProperty(value = "List of external files", required = true)
   List<ExternalFile> hits;
