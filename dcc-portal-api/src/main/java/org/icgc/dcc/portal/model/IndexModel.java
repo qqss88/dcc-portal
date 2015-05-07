@@ -47,6 +47,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
+    EXTERNAL_FILE("externalFile"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -88,6 +89,17 @@ public class IndexModel {
 
     private final String id;
   }
+
+  private static final ImmutableMap<String, String> EXTERNAL_FILE_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("fileName", "file_name")
+          .put("projectCode", "donor.project_code")
+          .put("study", "study")
+          .put("dataType", "data_type")
+          .put("fileFormat", "data_format")
+          .put("fileSize", "file_size")
+          .put("access", "access")
+          .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -589,6 +601,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.EXTERNAL_FILE, EXTERNAL_FILE_FIELDS_MAPPING);
   }
 
   /**
