@@ -127,7 +127,7 @@
   /**
    * External repository controller
    */
-  module.controller('ExternalRepoController', function($scope, RepositoryService, LocationService) {
+  module.controller('ExternalRepoController', function($scope, Restangular, RepositoryService, LocationService) {
     console.log('ExternalRepoController');
     var _ctrl = this;
 
@@ -171,47 +171,27 @@
     };
 
     function refresh() {
-      var filters = LocationService.filters();
+      var promise, query;
 
-      // FIXME: Test data
-      _ctrl.files = {
-        facets: {
-          repository: {
-            terms: [
-              { term: 'CGHub', count: 10},
-              { term: 'PCAWG', count: 11}
-            ]
-          },
-          study: {
-            terms: [
-              { term: 'PCAWG', count: 20},
-              { term: '_missing', count: 1}
-            ]
-          },
-          dataType: {
-            terms: [
-              { term: 'ssm', count: 7},
-              { term: 'sgv', count: 7},
-              { term: 'cnsm', count: 7}
-            ]
-          },
-          fileFormat: {
-            terms: [
-              { term: 'BAM', count: 21}
-            ]
-          },
-          access: {
-            terms: [
-              { term: 'open', count: 10},
-              { term: 'controlled', count: 11}
-            ]
-          }
-        },
-        hits: [
-          {},
-          {}
-        ]
+      query = {
+        filters : LocationService.filters(),
+        include: 'facets'
       };
+
+      var filesParam = LocationService.getJsonParam('files');
+
+      if (filesParam) {
+        query.from = filesParam.from;
+        query.size = filesParam.size || 10;
+      }
+
+      promise = Restangular.one('files').get(query);
+
+      promise.then(function(data) {
+        console.log('data', data);
+        _ctrl.files = data;
+      });
+
 
     }
 

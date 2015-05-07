@@ -32,19 +32,24 @@
         </div>
         <div style="margin-bottom:0.5rem">
             <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                <i class="icon-download"></i>Download {{ ExternalRepoController.selectedFiles.length === 0? 'all' : ExternalRepoController.selectedFiles.length + ' files'}}
+                <i class="icon-download"></i>Download manifests {{ ExternalRepoController.selectedFiles.length === 0? '( All )' : '( ' + ExternalRepoController.selectedFiles.length + ' files )'}}
             </button>
             <button class="t_button" data-ng-click="ExternalRepoController.undo()"
                 data-ng-disabled="ExternalRepoController.selectedFiles.length === 0">
                 <i class="icon-undo"></i>
             </button>
+        </div>
 
+        <div class="t_table_top">
+            <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
             <span class="t_tools">
                 <span class="t_tools__tool">
                     <i class="icon-file pull-right" data-ng-click="ExternalRepoController.export()"></i>
                 </span>
             </span>
+
         </div>
+
         <table class="table table-selectable">
             <thead>
                 <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
@@ -64,17 +69,18 @@
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                        <i class="{{ row.checked? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>{{row.fileName}}</td>
+                    <td>???</td>
+                    <td>???</td>
+                    <td>{{row.projectCode}}</td>
                     <td><span class="badge"><small>PCAWG</small></span></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td>{{row.dataType}}</td>
+                    <td>{{row.fileFormat}}</td>
+                    <td>{{row.fileSize | bytes }}</td>
+                    <td>{{row.access}}</td>
                 </tr>
             </tbody>
         </table>
+        <pagination-controls data-type="files" data-data="ExternalRepoController.files"></pagination-controls>
     </section>
 </article>
