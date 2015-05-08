@@ -46,7 +46,7 @@ public class ExternalFileRepository {
   private static final Kind KIND = Kind.EXTERNAL_FILE;
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "fileFormat", "access",
-      "projectCode", "primarySite", "donorStudy");
+      "projectCode", "primarySite", "donorStudy", "repositoryNames");
 
   private final Client client;
   private final String index;

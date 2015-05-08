@@ -48,6 +48,9 @@ public class ExternalFile {
   @ApiModelProperty(value = "Repo entity id", required = true)
   String repositoryEntityId; // Used as file identifier
 
+  @ApiModelProperty(value = "Repo name", required = true)
+  List<String> repositoryNames;
+
   @ApiModelProperty(value = "File name", required = true)
   String fileName;
 
@@ -72,11 +75,16 @@ public class ExternalFile {
   @ApiModelProperty(value = "File access", required = true)
   String access;
 
+  @ApiModelProperty(value = "Donor associated with file", required = true)
+  String donorId;
+
   @JsonCreator
   public ExternalFile(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
 
     repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));
+    repositoryNames = (List<String>) (fieldMap.get(fields.get("repositoryNames")));
+
     fileName = getString(fieldMap.get(fields.get("fileName")));
     projectCode = getString(fieldMap.get(fields.get("projectCode")));
     study = getString(fieldMap.get(fields.get("study")));
@@ -84,6 +92,7 @@ public class ExternalFile {
     fileFormat = getString(fieldMap.get(fields.get("fileFormat")));
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
     access = getString(fieldMap.get(fields.get("access")));
+    donorId = getString(fieldMap.get(fields.get("donorId")));
 
     // FIXME: What field is this?
     repository = null;
