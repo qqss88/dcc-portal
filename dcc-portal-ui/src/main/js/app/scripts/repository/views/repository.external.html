@@ -3,8 +3,8 @@
         <ul class="t_facets">
 
             <li data-type="mutation" data-tags-facet data-label="File" data-facet-name="id" data-placeholder=""></li>
-            <terms data-type="file" data-facet-name="repository" 
-                   data-facet="ExternalRepoController.files.facets.repository"
+            <terms data-type="file" data-facet-name="repositoryNames" 
+                   data-facet="ExternalRepoController.files.facets.repositoryNames"
                    data-label="Repository"></terms>
             <terms data-type="file" data-facet-name="study" 
                    data-label="Study"
@@ -67,7 +67,7 @@
                 <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
                 <th>&nbsp;</th> 
                 <th data-sortable data-type="files" data-field="fileName">File Name</th>
-                <th># Donors</th>
+                <th>ICGC Donor</th>
                 <th>Repository</th>
                 <th data-sortable data-type="files" data-field="projectCode">Project</th>
                 <th>Study</th>
@@ -84,10 +84,13 @@
                        <i class="{{row.access==='open'? 'icon-lock-open-alt':'icon-lock'}}"></i>
                        {{row.fileName}}
                     </td>
-                    <td>???</td>
-                    <td>???</td>
+                    <td>{{row.donorId}}</td>
+                    <td>{{row.repositoryNames.join(',') }}</td>
                     <td>{{row.projectCode}}</td>
-                    <td><span class="badge"><small>PCAWG</small></span></td>
+                    <td>
+                        <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
+                        <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
+                    </td>
                     <td>{{row.dataType}}</td>
                     <td>{{row.fileFormat}}</td>
                     <td>{{row.fileSize | bytes }}</td>
