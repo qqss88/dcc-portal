@@ -17,13 +17,13 @@
 }
 
 .t_facets__facet__title_active {
-  border-left-color: $yellow;
+  border-left-color: $orangeLight;
 }
 
 .t_facets__facet__title__label {
   &:hover {
     cursor: pointer;
-    color: $yellow;
+    color: $orangeLight;
   }
 }
 
