@@ -54,7 +54,7 @@
             <thead>
                 <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
                 <th>&nbsp;</th> 
-                <th>File Name</th>
+                <th  data-sortable data-type="files" data-field="fileName">File Name</th>
                 <th># Donors</th>
                 <th>Repository</th>
                 <th>Project</th>
@@ -69,7 +69,7 @@
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                        <i class="{{ row.checked? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
-                    <td>{{row.fileName}}</td>
+                    <td style="max-width:30rem">{{row.fileName}}</td>
                     <td>???</td>
                     <td>???</td>
                     <td>{{row.projectCode}}</td>

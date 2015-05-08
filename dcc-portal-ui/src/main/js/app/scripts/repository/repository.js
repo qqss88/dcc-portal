@@ -180,9 +180,13 @@
 
       var filesParam = LocationService.getJsonParam('files');
 
-      if (filesParam) {
+      if (filesParam.from || filesParam.size) {
         query.from = filesParam.from;
         query.size = filesParam.size || 10;
+      }
+      if (filesParam.sort) {
+        query.sort = filesParam.sort;
+        query.order = filesParam.order;
       }
 
       promise = Restangular.one('files').get(query);
