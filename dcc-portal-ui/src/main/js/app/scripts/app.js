@@ -69,7 +69,6 @@
     'icgc.phenotype',
     'icgc.beacon',
     'icgc.downloader',
-    'icgc.dictionary',
 
     // old
     'app.ui',
