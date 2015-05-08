@@ -19,6 +19,10 @@
             <terms data-type="file" data-facet-name="access" 
                    data-label="Access"
                    data-facet="ExternalRepoController.files.facets.access"></terms>
+            <terms data-type="file" data-facet-name="projectCode" 
+                   data-label="Project"
+                   data-facet="ExternalRepoController.files.facets.projectCode"></terms>
+
         </ul>
     </div>
 </aside>
@@ -54,22 +58,24 @@
             <thead>
                 <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
                 <th>&nbsp;</th> 
-                <th  data-sortable data-type="files" data-field="fileName">File Name</th>
+                <th data-sortable data-type="files" data-field="fileName">File Name</th>
                 <th># Donors</th>
                 <th>Repository</th>
-                <th>Project</th>
+                <th data-sortable data-type="files" data-field="projectCode">Project</th>
                 <th>Study</th>
-                <th>Data type</th>
-                <th>Format</th>
-                <th>Size</th>
-                <th>Access</th>
+                <th data-sortable data-type="files" data-field="dataType">Data type</th>
+                <th data-sortable data-type="files" data-field="fileFormat">Format</th>
+                <th data-sortable data-type="files" data-field="fileSize">Size</th>
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in ExternalRepoController.files.hits">
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                        <i class="{{ row.checked? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
-                    <td style="max-width:30rem">{{row.fileName}}</td>
+                    <td style="max-width:30rem">
+                       <i class="{{row.access==='open'? 'icon-lock-open-alt':'icon-lock'}}"></i>
+                       {{row.fileName}}
+                    </td>
                     <td>???</td>
                     <td>???</td>
                     <td>{{row.projectCode}}</td>
@@ -77,7 +83,6 @@
                     <td>{{row.dataType}}</td>
                     <td>{{row.fileFormat}}</td>
                     <td>{{row.fileSize | bytes }}</td>
-                    <td>{{row.access}}</td>
                 </tr>
             </tbody>
         </table>
