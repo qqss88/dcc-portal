@@ -222,7 +222,9 @@
     refresh();
   });
 
-  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API, ExternalLinks) {
+  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project,
+    Donors, Mutations, API, ExternalLinks) {
+
     var _ctrl = this;
     Page.setTitle(project.id);
     Page.setPage('entity');
@@ -257,8 +259,31 @@
         size: 0,
         include: ['facets']
       };
+
+      // Get mutation impact for side panel
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
+      });
+
+      // Get study facets for summay section
+      Donors.getList(params).then(function(d) {
+        _ctrl.studies = d.facets.studies.terms || [];
+
+        // Remove no-data term
+        _.remove(_ctrl.studies, function(t) {
+          return t.term === '_missing';
+        });
+
+        // Link back to adv page
+        _ctrl.studies.forEach(function(t) {
+          t.advQuery = {
+            donor: {
+              projectId: {is: [project.id]},
+              studies: {is: [t.term]}
+            }
+          };
+
+        });
       });
     }
 

@@ -36,11 +36,4 @@ public final class MapUtils {
     return (Map<String, Object>) obj;
   }
 
-  public static Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    else if (field instanceof Integer) return (long) (Integer) field;
-    else if (field instanceof Float) return ((Float) field).longValue();
-    else
-      return null;
-  }
 }

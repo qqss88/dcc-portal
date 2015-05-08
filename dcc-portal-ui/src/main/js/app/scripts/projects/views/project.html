@@ -77,7 +77,13 @@
         <tr>
             <th>Number of Donors involved in Study</th>
             <td>
-                <a href="">???</a>&nbsp;<span class="badge">PCAWG</span>
+                <ul>
+                    <li data-ng-repeat="study in ProjectCtrl.studies">
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | numer }}</a> 
+                        <span data-ng-if="study.term !== 'PCAWG Study'"> {{study.term}} </span>
+                        <span data-ng-if="study.term === 'PCAWG Study'"><span class="badge" style="font-size:0.5rem">PCAWG</span></span>
+                    </li>
+                </ul>
             </td>
         </tr>
 
