@@ -3,7 +3,6 @@
         <ul class="t_facets">
 
             <li data-type="mutation" data-tags-facet data-label="File" data-facet-name="id" data-placeholder=""></li>
-
             <terms data-type="file" data-facet-name="repository" 
                    data-facet="ExternalRepoController.files.facets.repository"
                    data-label="Repository"></terms>
@@ -19,9 +18,18 @@
             <terms data-type="file" data-facet-name="access" 
                    data-label="Access"
                    data-facet="ExternalRepoController.files.facets.access"></terms>
+
+            <li data-type="mutation" data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder=""></li>
             <terms data-type="file" data-facet-name="projectCode" 
                    data-label="Project"
                    data-facet="ExternalRepoController.files.facets.projectCode"></terms>
+            <terms data-type="file" data-facet-name="primarySite" 
+                   data-label="Primary Site"
+                   data-facet="ExternalRepoController.files.facets.primarySite"></terms>
+            <terms data-type="file" data-facet-name="donorStudy" 
+                   data-label="Donor Study"
+                   data-facet="ExternalRepoController.files.facets.donorStudy"></terms>
+
 
         </ul>
     </div>
@@ -31,7 +39,7 @@
         <div>
             <p>External repositories content indexed on ??? <br>
                For more information on controlled-access data, please refer to 
-                <a href="https://docs.icgc.org/access-controlled-data"><i class="icon-external-link"></i>https://docs.icgc.org/access-controlled-data</a>
+                <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>https://docs.icgc.org/access-controlled-data</a>
             </p>
         </div>
         <div style="margin-bottom:0.5rem">
@@ -70,7 +78,7 @@
             <tbody>
                 <tr data-ng-repeat="row in ExternalRepoController.files.hits">
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
-                       <i class="{{ row.checked? 'icon-check':'icon-check-empty' }}"></i>
+                       <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
                     <td style="max-width:30rem">
                        <i class="{{row.access==='open'? 'icon-lock-open-alt':'icon-lock'}}"></i>

@@ -127,11 +127,12 @@
   /**
    * External repository controller
    */
-  module.controller('ExternalRepoController', function($scope, Restangular, RepositoryService, LocationService) {
+  module.controller('ExternalRepoController', function($scope, Restangular, RepositoryService, LocationService, Page) {
     console.log('ExternalRepoController');
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
+
 
 
     /**
@@ -139,6 +140,7 @@
      */
     _ctrl.export = function() {
       console.log('export');
+      Page.startWork();
     };
 
 
@@ -147,16 +149,28 @@
      */
     _ctrl.downloadManifest = function() {
       console.log('downloading manifest');
+      Page.startWork();
+
+      if (_ctrl.selectedFiles.length > 0) {
+      } else {
+      }
+    };
+
+    _ctrl.isSelected = function(row) {
+      return _.contains(_ctrl.selectedFiles, row.fileName);
     };
 
 
     _ctrl.toggleRow = function(row) {
-      row.checked = !row.checked;
-      if (row.checked) {
-        _ctrl.selectedFiles.push({});
+      if (_ctrl.isSelected(row) === true) {
+        _.remove(_ctrl.selectedFiles, function(r) {
+          return r === row.fileName;
+        });
       } else {
-        _ctrl.selectedFiles.pop();
+        _ctrl.selectedFiles.push(row.fileName);
       }
+
+      console.log('selected', _ctrl.selectedFiles);
     };
 
 

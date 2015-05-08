@@ -110,9 +110,9 @@
 .icon-flow-branch:before { content: '\e839'; } /* '' */
 .icon-circle-empty:before { content: '\e83a'; } /* '' */
 .icon-dot-circled:before { content: '\e83b'; } /* '' */
-.icon-lock:before { content: '\e83c'; } /* '' */
-.icon-lock-open:before { content: '\e83d'; } /* '' */
-.icon-lock-open-alt:before { content: '\e83e'; } /* '' */%
+.icon-lock:before { content: '\e83c'; }
+.icon-lock-open:before { content: '\e83d'; }
+.icon-lock-open-alt:before { content: '\e83e'; }
 
 /*
    Animation example, for spinners
