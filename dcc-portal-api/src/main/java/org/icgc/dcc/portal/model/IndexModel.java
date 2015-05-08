@@ -166,7 +166,6 @@ public class IndexModel {
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
-  // FIXME:
   private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("donorHasRelativeWithCancerHistory", "donor_has_relative_with_cancer_history")
@@ -178,7 +177,6 @@ public class IndexModel {
           .put("relationshipDisease", "relationship_disease")
           .build();
 
-  // FIXME:
   private static final ImmutableMap<String, String> EXPOSURE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("exposureType", "exposure_type")
@@ -189,7 +187,6 @@ public class IndexModel {
           .put("alcoholHistoryIntensity", "alcolhol_history_intensity")
           .build();
 
-  // FIXME:
   private static final ImmutableMap<String, String> THERAPY_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("firstTherapyType", "first_therapy_type")
@@ -231,9 +228,8 @@ public class IndexModel {
           .put("tumourStage", "tumour_stage")
           .put("tumourStageSupplemental", "tumour_stage_supplemental")
           .put("tumourStageSystem", "tumour_stage_system")
-          .put("studySpecimenInvolvedIn", "study_specimen_involved_in") // FIXME
-          .put("percentCellularity", "percent_cellularity") // FIXME
-          .put("levelOfCellularity", "level_of_cellularity") // FIXME
+          .put("percentCellularity", "percent_cellularity")
+          .put("levelOfCellularity", "level_of_cellularity")
           .build();
 
   private static final ImmutableMap<String, String> SAMPLE_FIELDS_MAPPING =

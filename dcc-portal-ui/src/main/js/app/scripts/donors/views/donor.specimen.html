@@ -102,6 +102,18 @@
                     <th>Tumour Stage Supplemental</th>
                     <td>{{ DonorSpecimenCtrl.specimen.tumourStageSupplemental }}</td>
                 </tr>
+                <tr>
+                    <th>Tumour Histological Type</th>
+                    <td>{{ DonorSpecimenCtrl.specimen.tumourHistologicalType }}</td>
+                </tr>
+                <tr>
+                    <th>Percentage Cellularity</th>
+                    <td>{{ DonorSpecimenCtrl.specimen.percentCellularity }}</td>
+                </tr>
+                <tr>
+                    <th>Level of Cellularity</th>
+                    <td>{{ DonorSpecimenCtrl.specimen.levelOfCellularity }}</td>
+                </tr>
             </table>
             <p><a data-ng-if="DonorSpecimenCtrl.specimen.digitalImageOfStainedSection | startsWith:'http'"
                   data-ng-href="{{ DonorSpecimenCtrl.specimen.digitalImageOfStainedSection }}"
