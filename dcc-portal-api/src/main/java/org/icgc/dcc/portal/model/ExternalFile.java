@@ -26,6 +26,7 @@ import java.util.Map;
 
 import lombok.Value;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 
@@ -40,9 +41,13 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "ExternalFile")
+@Slf4j
 public class ExternalFile {
 
   /* File fields */
+  @ApiModelProperty(value = "Repo entity id", required = true)
+  String repositoryEntityId; // Used as file identifier
+
   @ApiModelProperty(value = "File name", required = true)
   String fileName;
 
@@ -71,6 +76,7 @@ public class ExternalFile {
   public ExternalFile(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
 
+    repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));
     fileName = getString(fieldMap.get(fields.get("fileName")));
     projectCode = getString(fieldMap.get(fields.get("projectCode")));
     study = getString(fieldMap.get(fields.get("study")));
@@ -82,5 +88,4 @@ public class ExternalFile {
     // FIXME: What field is this?
     repository = null;
   }
-
 }
