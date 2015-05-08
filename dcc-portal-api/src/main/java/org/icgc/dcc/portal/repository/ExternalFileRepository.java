@@ -45,7 +45,8 @@ public class ExternalFileRepository {
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.EXTERNAL_FILE;
 
-  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "fileFormat", "access");
+  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "fileFormat", "access",
+      "projectCode");
 
   private final Client client;
   private final String index;
@@ -57,6 +58,8 @@ public class ExternalFileRepository {
   }
 
   public SearchResponse findAll(Query query) {
+    val kind = Kind.EXTERNAL_FILE;
+    val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
@@ -64,21 +67,20 @@ public class ExternalFileRepository {
         .setSize(query.getSize())
         .addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
 
-    val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
     search.setPostFilter(filters);
 
     search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND.EXTERNAL_FILE);
+    String[] sourceFields = resolveSourceFields(query, kind);
     if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND.EXTERNAL_FILE), EMPTY_SOURCE_FIELDS);
+      search.setFetchSource(resolveSourceFields(query, kind), EMPTY_SOURCE_FIELDS);
     }
-    val facets = getFacets(query, KIND.EXTERNAL_FILE, FACETS, query.getFilters(), null, null);
+    val facets = getFacets(query, kind, FACETS, query.getFilters(), null, null);
     for (val facet : facets) {
       search.addFacet(facet);
     }
 
-    log.info("{}", search);
-    SearchResponse response = search.execute().actionGet();
+    log.debug("{}", search);
+    val response = search.execute().actionGet();
     log.debug("{}", response);
 
     return response;
