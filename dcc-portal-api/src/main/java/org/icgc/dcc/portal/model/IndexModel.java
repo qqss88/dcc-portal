@@ -163,7 +163,6 @@ public class IndexModel {
           .put("priorMalignancy", "prior_malignancy")
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
-          .put("studyDonorInvolvedIn", "study_donor_involved_in") // FIXME
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 

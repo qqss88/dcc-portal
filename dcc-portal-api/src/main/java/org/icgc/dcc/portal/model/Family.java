@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -25,7 +27,6 @@ import lombok.Value;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.util.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -58,18 +59,17 @@ public class Family {
   @ApiModelProperty(value = "Relationship disease", required = true)
   String relationshipDisease;
 
-  @SuppressWarnings("unchecked")
   @JsonCreator
   public Family(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.FAMILY);
 
-    donorHasRelativeWithCancerHistory = (String) fieldMap.get(fields.get("donorHasRelativeWithCancerHistory"));
-    relationshipType = (String) fieldMap.get(fields.get("relationshipType"));
-    relationshipTypeOther = (String) fieldMap.get(fields.get("relationshipTypeOther"));
-    relationshipSex = (String) fieldMap.get(fields.get("relationshipSex"));
-    relationshipAge = MapUtils.getLong(fieldMap.get(fields.get("relationshipAge")));
-    relationshipDiseaseICD10 = (String) fieldMap.get(fields.get("relationshipDiseaseICD10"));
-    relationshipDisease = (String) fieldMap.get(fields.get("relationshipDisease"));
+    donorHasRelativeWithCancerHistory = getString(fieldMap.get(fields.get("donorHasRelativeWithCancerHistory")));
+    relationshipType = getString(fieldMap.get(fields.get("relationshipType")));
+    relationshipTypeOther = getString(fieldMap.get(fields.get("relationshipTypeOther")));
+    relationshipSex = getString(fieldMap.get(fields.get("relationshipSex")));
+    relationshipAge = getLong(fieldMap.get(fields.get("relationshipAge")));
+    relationshipDiseaseICD10 = getString(fieldMap.get(fields.get("relationshipDiseaseICD10")));
+    relationshipDisease = getString(fieldMap.get(fields.get("relationshipDisease")));
   }
 
 }

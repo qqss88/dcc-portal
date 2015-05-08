@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -25,7 +27,6 @@ import lombok.Value;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.util.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -78,21 +79,20 @@ public class Therapy {
   public Therapy(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.THERAPY);
 
-    firstTherapyType = (String) fieldMap.get(fields.get("firstTherapyType"));
-    firstTherapyTherapeuticIntent = (String) fieldMap.get(fields.get("firstTherapyTherapeuticIntent"));
-    firstTherapyStartInterval = MapUtils.getLong(fieldMap.get(fields.get("firstTherapyStartInterval")));
-    firstTherapyDuration = MapUtils.getLong(fieldMap.get(fields.get("firstTherapyDuration")));
-    firstTherapyResponse = (String) fieldMap.get(fields.get("firstTherapyResponse"));
+    firstTherapyType = getString(fieldMap.get(fields.get("firstTherapyType")));
+    firstTherapyTherapeuticIntent = getString(fieldMap.get(fields.get("firstTherapyTherapeuticIntent")));
+    firstTherapyStartInterval = getLong(fieldMap.get(fields.get("firstTherapyStartInterval")));
+    firstTherapyDuration = getLong(fieldMap.get(fields.get("firstTherapyDuration")));
+    firstTherapyResponse = getString(fieldMap.get(fields.get("firstTherapyResponse")));
 
-    secondTherapyType = (String) fieldMap.get(fields.get("secondTherapyType"));
-    secondTherapyTherapeuticIntent = (String) fieldMap.get(fields.get("secondTherapyTherapeuticIntent"));
-    secondTherapyStartInterval = MapUtils.getLong(fieldMap.get(fields.get("secondTherapyStartInterval")));
-    secondTherapyDuration = MapUtils.getLong(fieldMap.get(fields.get("secondTherapyDuration")));
-    secondTherapyResponse = (String) fieldMap.get(fields.get("secondTherapyResponse"));
+    secondTherapyType = getString(fieldMap.get(fields.get("secondTherapyType")));
+    secondTherapyTherapeuticIntent = getString(fieldMap.get(fields.get("secondTherapyTherapeuticIntent")));
+    secondTherapyStartInterval = getLong(fieldMap.get(fields.get("secondTherapyStartInterval")));
+    secondTherapyDuration = getLong(fieldMap.get(fields.get("secondTherapyDuration")));
+    secondTherapyResponse = getString(fieldMap.get(fields.get("secondTherapyResponse")));
 
-    otherTherapy = (String) fieldMap.get(fields.get("otherTherapy"));
-    otherTherapyResponse = (String) fieldMap.get(fields.get("otherTherapyResponse"));
-
+    otherTherapy = getString(fieldMap.get(fields.get("otherTherapy")));
+    otherTherapyResponse = getString(fieldMap.get(fields.get("otherTherapyResponse")));
   }
 
 }

@@ -18,6 +18,8 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
 
@@ -25,7 +27,6 @@ import lombok.Value;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.util.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -55,16 +56,15 @@ public class Exposure {
   @ApiModelProperty(value = "Alcohol history intensity", required = true)
   Long alcoholHistoryIntensity;
 
-  @SuppressWarnings("unchecked")
   @JsonCreator
   public Exposure(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXPOSURE);
-    exposureType = (String) fieldMap.get(fields.get("exposureType"));
-    exposureIntesity = MapUtils.getLong(fieldMap.get(fields.get("exposureIntesity")));
-    tabaccoSmokingHistoryIndicator = (String) fieldMap.get(fields.get("tabaccoSmokingHistoryIndicator"));
-    tabaccoSmokingIntensity = MapUtils.getLong(fieldMap.get(fields.get("tabaccoSmokingIntensity")));
-    alcoholHistory = (String) fieldMap.get(fields.get("alcoholHistory"));
-    alcoholHistoryIntensity = MapUtils.getLong(fieldMap.get(fields.get("alcoholHistoryIntensity")));
+    exposureType = getString(fieldMap.get(fields.get("exposureType")));
+    exposureIntesity = getLong(fieldMap.get(fields.get("exposureIntesity")));
+    tabaccoSmokingHistoryIndicator = getString(fieldMap.get(fields.get("tabaccoSmokingHistoryIndicator")));
+    tabaccoSmokingIntensity = getLong(fieldMap.get(fields.get("tabaccoSmokingIntensity")));
+    alcoholHistory = getString(fieldMap.get(fields.get("alcoholHistory")));
+    alcoholHistoryIntensity = getLong(fieldMap.get(fields.get("alcoholHistoryIntensity")));
   }
 
 }

@@ -2,6 +2,7 @@ package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.List;
@@ -11,7 +12,6 @@ import lombok.Value;
 import lombok.val;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.util.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -110,7 +110,7 @@ public class Donor {
   String cancerHistoryFirstDegreeRelative;
 
   @ApiModelProperty(value = "Study donor involved in", required = true)
-  List<String> studyDonorInvolvedIn;
+  List<String> studies;
 
   @ApiModelProperty(value = "Specimen")
   List<Specimen> specimen;
@@ -135,8 +135,8 @@ public class Donor {
     primarySite = getString(fieldMap.get(fields.get("primarySite")));
     tumourType = getString(fieldMap.get(fields.get("tumourType")));
     tumourSubtype = getString(fieldMap.get(fields.get("tumourSubtype")));
-    ssmAffectedGenes = MapUtils.getLong(fieldMap.get(fields.get("ssmAffectedGenes")));
-    ssmCount = MapUtils.getLong(fieldMap.get(fields.get("ssmCount")));
+    ssmAffectedGenes = getLong(fieldMap.get(fields.get("ssmAffectedGenes")));
+    ssmCount = getLong(fieldMap.get(fields.get("ssmCount")));
     cnsmExists = getBoolean(fieldMap.get(fields.get("cnsmExists")));
     stsmExists = getBoolean(fieldMap.get(fields.get("stsmExists")));
     sgvExists = getBoolean(fieldMap.get(fields.get("sgvExists")));
@@ -147,13 +147,13 @@ public class Donor {
     pexpExists = getBoolean(fieldMap.get(fields.get("pexpExists")));
     mirnaSeqExists = getBoolean(fieldMap.get(fields.get("mirnaSeqExists")));
     jcnExists = getBoolean(fieldMap.get(fields.get("jcnExists")));
-    ageAtDiagnosis = MapUtils.getLong(fieldMap.get(fields.get("ageAtDiagnosis")));
+    ageAtDiagnosis = getLong(fieldMap.get(fields.get("ageAtDiagnosis")));
     ageAtDiagnosisGroup = getString(fieldMap.get(fields.get("ageAtDiagnosisGroup")));
-    ageAtEnrollment = MapUtils.getLong(fieldMap.get(fields.get("ageAtEnrollment")));
-    ageAtLastFollowup = MapUtils.getLong(fieldMap.get(fields.get("ageAtLastFollowup")));
-    intervalOfLastFollowup = MapUtils.getLong(fieldMap.get(fields.get("intervalOfLastFollowup")));
-    relapseInterval = MapUtils.getLong(fieldMap.get(fields.get("relapseInterval")));
-    survivalTime = MapUtils.getLong(fieldMap.get(fields.get("survivalTime")));
+    ageAtEnrollment = getLong(fieldMap.get(fields.get("ageAtEnrollment")));
+    ageAtLastFollowup = getLong(fieldMap.get(fields.get("ageAtLastFollowup")));
+    intervalOfLastFollowup = getLong(fieldMap.get(fields.get("intervalOfLastFollowup")));
+    relapseInterval = getLong(fieldMap.get(fields.get("relapseInterval")));
+    survivalTime = getLong(fieldMap.get(fields.get("survivalTime")));
     diagnosisIcd10 = getString(fieldMap.get(fields.get("diagnosisIcd10")));
     diseaseStatusLastFollowup = getString(fieldMap.get(fields.get("diseaseStatusLastFollowup")));
     gender = getString(fieldMap.get(fields.get("gender")));
@@ -165,10 +165,10 @@ public class Donor {
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
     analysisTypes = (List<String>) fieldMap.get(fields.get("analysisTypes"));
 
-    priorMalignancy = (String) fieldMap.get(fields.get("priorMalignancy"));
-    cancerTypePriorMalignancy = (String) fieldMap.get(fields.get("cancerTypePriorMalignancy"));
-    cancerHistoryFirstDegreeRelative = (String) fieldMap.get(fields.get("cancerHistoryFirstDegreeRelative"));
-    studyDonorInvolvedIn = (List<String>) fieldMap.get(fields.get("studyDonorInvolvedIn"));
+    priorMalignancy = getString(fieldMap.get(fields.get("priorMalignancy")));
+    cancerTypePriorMalignancy = getString(fieldMap.get(fields.get("cancerTypePriorMalignancy")));
+    cancerHistoryFirstDegreeRelative = getString(fieldMap.get(fields.get("cancerHistoryFirstDegreeRelative")));
+    studies = (List<String>) fieldMap.get(fields.get("studies"));
 
     specimen = buildSpecimen((List<Map<String, Object>>) fieldMap.get("specimen"));
     therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy")); // FIXME
