@@ -46,6 +46,11 @@
     Page.setTitle(donor.id);
     Page.setPage('entity');
 
+
+    _ctrl.isPCAWG = function(donor) {
+      return _.contains(donor.studies, 'PCAWG Study');
+    };
+
     _ctrl.donor = donor;
 
     _ctrl.downloadDonorData = function() {
@@ -179,6 +184,10 @@
 
   module.controller('DonorSpecimenCtrl', function (Donors) {
     var _ctrl = this;
+
+    _ctrl.isPCAWG = function(specimen) {
+      return _.contains( _.pluck(specimen.samples, 'study'), 'PCAWG Study');
+    };
 
     _ctrl.setActive = function (id) {
       Donors.one().get({include: 'specimen'}).then(function (donor) {

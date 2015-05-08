@@ -12,7 +12,8 @@
     <div class="clearfix">
         <h3>
             {{ DonorSpecimenCtrl.specimen.id }}
-            <span style="font-size: 0.5rem" class="badge">PCAWG</span>
+            <span data-ng-if="DonorSpecimenCtrl.isPCAWG(DonorSpecimenCtrl.specimen)"
+                  style="font-size: 0.5rem" class="badge">PCAWG</span>
         </h3>
 
         <div class="half">
@@ -134,7 +135,7 @@
                 <tr data-ng-repeat="sample in DonorSpecimenCtrl.specimen.samples">
                     <td>{{ sample.id }}</td>
                     <td>{{ sample.analyzedId }}</td>
-                    <td>???</td>
+                    <td>{{ sample.study }}</td>
                     <td>{{ sample.analyzedInterval | numberPT }}</td>
                     <td>
                         <ul>
@@ -184,7 +185,7 @@
                 <tr data-ng-repeat="sample in DonorSpecimenCtrl.specimen.samples">
                     <td>{{sample.id}}</td>
                     <td>{{sample.analyzedId}}</td>
-                    <td>???</td>
+                    <td>{{sample.study}}</td>
                     <td>{{sample.analyzedInterval}}</td>
                     <td>{{ (sample.availableRawSequenceData | unique | pluck:'libraryStrategy').join(', ') }}</td>
                     <td>{{ (sample.availableRawSequenceData | unique | pluck:'repository').join(', ') }}</td>
