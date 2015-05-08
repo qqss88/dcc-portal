@@ -219,8 +219,8 @@
     <div class="clearfix"></div>
 
 
-    <h3>Donor Family</h3>
-    <div>
+    <div data-ng-if="DonorCtrl.donor.family">
+        <h3>Donor Family</h3>
         <table class="table table-info">
             <thead>
                 <tr>
@@ -234,14 +234,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
-                    <td>???</td>
+                <tr data-ng-repeat="f in DonorCtrl.donor.family">
+                    <td>{{f.donorHasRelativeWithCancerHistory}}</td>
+                    <td>{{f.relationshipType}}</td>
+                    <td>{{f.relationshipTypeOther}}</td>
+                    <td>{{f.relaltionshipSex}}</td>
+                    <td>{{f.relationshipAge}}</td>
+                    <td>{{f.relationshipDiseaseICD10}}</td>
+                    <td>{{f.relationshipDisease}}</td>
                 </tr>
             </tbody>
         </table>
@@ -249,88 +249,88 @@
     <div class="clearfix"></div>
 
 
-    <h3>Donor Exposure</h3>
-    <div class="half">
-        <table class="table table-info">
+    <div class="half" data-ng-if="DonorCtrl.donor.exposure">
+        <h3>Donor Exposure</h3>
+        <table class="table table-info" data-ng-init="exposure = DonorCtrl.donor.exposure[0]">
             <tr>
                 <th>Exposure type</th>
-                <td>???</td>
+                <td>{{exposure.exposureType}}</td>
             </tr>
             <tr>
                 <th>Exposure intensity</th>
-                <td>???</td>
+                <td>{{exposure.exposureIntesity}}</td>
             </tr>
             <tr>
                 <th>Tobacco smoking history indicator</th>
-                <td>???</td>
+                <td>{{exposure.tabaccoSmokingHistoryIndicator}}</td>
             </tr>
             <tr>
                 <th>Tobacco smoking intensity</th>
-                <td>???</td>
+                <td>{{exposure.tabaccoSmokingIntensity}}</td>
             </tr>
             <tr>
                 <th>Alcohol history</th>
-                <td>???</td>
+                <td>{{exposure.alcoholHistory}}</td>
             </tr>
             <tr>
                 <th>Alcohol history intensity</th>
-                <td>???</td>
+                <td>{{exposure.alcoholHistoryIntensity}}</td>
             </tr>
         </table>
     </div>
     <div class="clearfix"></div>
 
 
-    <h3>Donor Postresection Therapy</h3>
-    <div class="half">
-        <table class="table table-info">
+    <div class="half" data-ng-if="DonorCtrl.donor.therapy">
+        <h3>Donor Postresection Therapy</h3>
+        <table class="table table-info" data-ng-init="therapy = DonorCtrl.donor.therapy[0]">
             <tr>
                 <th>First therapy type</th>
-                <td>???</td>
+                <td>{{therapy.firstTherapyType}}</td>
             </tr>
             <tr>
                 <th>First therapy therapeutic intent</th>
-                <td>???</td>
+                <td>{{therapy.firstTherapyTherapeuticIntent}}</td>
             </tr>
             <tr>
                 <th>First therapy start interval</th>
-                <td>???</td>
+                <td>{{therapy.firstTherapyStartInterval}}</td>
             </tr>
             <tr>
                 <th>First therapy duration</th>
-                <td>???</td>
+                <td>{{therapy.firstTherapyDuration}}</td>
             </tr>
             <tr>
                 <th>First therapy response</th>
-                <td>???</td>
+                <td>{{therapy.firstTherapyResponse}}</td>
             </tr>
             <tr>
                 <th>Second therapy type</th>
-                <td>???</td>
+                <td>{{therapy.secondTherapyType}}</td>
             </tr>
             <tr>
                 <th>Second therapy therapeutic intent</th>
-                <td>???</td>
+                <td>{{therapy.secondTherapyTherapeuticIntent}}</td>
             </tr>
             <tr>
                 <th>Second therapy start interval</th>
-                <td>???</td>
+                <td>{{therapy.secondTherapyStartInterval}}</td>
             </tr>
             <tr>
                 <th>Second therapy duration</th>
-                <td>???</td>
+                <td>{{therapy.secondTherapyDuration}}</td>
             </tr>
             <tr>
                 <th>Second therapy response</th>
-                <td>???</td>
+                <td>{{therapy.secondTherapyResponse}}</td>
             </tr>
             <tr>
                 <th>Other therapy</th>
-                <td>???</td>
+                <td>{{therapy.otherTherapy}}</td>
             </tr>
             <tr>
                 <th>Other therapy response</th>
-                <td>???</td>
+                <td>{{t.otherTherapyResponse}}</td>
             </tr>
         </table>
     </div>
