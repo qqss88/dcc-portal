@@ -120,6 +120,11 @@
       tryParse: function (pql) {
         return parseResult (_.attempt (PqlPegParser.parse, pql));
       },
+      // Exception-free and function-chaining friendly
+      parseOrDefault: function (pql, defaultValue) {
+        var result = this.tryParse (pql);
+        return result.isValid ? result : defaultValue;
+      },
       toPql: function (parseTree) {
         var result = _.isArray (parseTree) ?
           _.filter (parseTree.map (convertNodeToPqlString), function (s) {

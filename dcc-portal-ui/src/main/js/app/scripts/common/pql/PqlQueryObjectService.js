@@ -85,7 +85,7 @@
       return _.every (collection, truthy ? predicate : _.negate (predicate));
     }
 
-    function atLeastOneIs (truthy, collection, predicate) {
+    function anyIs (truthy, collection, predicate) {
       return _.some (collection, truthy ? predicate : _.negate (predicate));
     }
 
@@ -627,7 +627,7 @@
       }
 
       // Making sure both PQL statements are valid.
-      if (atLeastOneIs (false, pqlArray, isValid)) {
+      if (anyIs (false, pqlArray, isValid)) {
         return emptyValue;
       }
 
