@@ -324,24 +324,6 @@
       'PREP': 'In Preparation',
       'FINISHING': 'Cleaning Up', // This is an artificial state
 
-      // Facet Titles
-      'id': 'Project',
-      'projectId': 'Project',
-      'primarySite': 'Primary Site',
-      'primaryCountries': 'Country',
-      'tumourStageAtDiagnosis': 'Tumour Stage',
-      'vitalStatus': 'Vital Status',
-      'diseaseStatusLastFollowup': 'Disease Status',
-      'relapseType': 'Relapse Type',
-      'ageAtDiagnosisGroup': 'Age at Diagnosis',
-      'availableDataTypes': 'Available Data Type',
-      'analysisTypes': 'Donor Analysis Type',
-      'list': 'Gene sets',
-      'verificationStatus': 'Verification Status',
-      'consequenceType': 'Consequence Type',
-      'functionalImpact': 'Functional Impact',
-      'sequencingStrategy': 'Analysis Type',
-
       // Data Types
       'clinical': 'Clinical',
       'ssm': 'SSM',
