@@ -96,7 +96,7 @@
 
   var module = angular.module('icgc.phenotype.services', ['icgc.donors.models']);
 
-  module.service('PhenotypeService', function($filter, Extensions) {
+  module.service('PhenotypeService', function(Extensions, ValueTranslator) {
 
     function getTermCount(analysis, term, donorSetId) {
       var data, termObj;
@@ -193,7 +193,7 @@
       return {
         uiTable: uiTable,
         uiGraph: {
-          categories: terms.map(function(term) { return $filter('trans')(term, true); }),
+          categories: terms.map(function(term) { console.log('term', term); return ValueTranslator.translate(term); }),
           series: uiSeries
         }
       };

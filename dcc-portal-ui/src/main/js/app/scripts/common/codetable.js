@@ -86,11 +86,11 @@
 
     
     this.translate = function(id) {
-      return translateLookup[id] || id;
+      return translateLookup[id]; 
     };
 
     this.tooltip = function(id) {
-      return tooltipLookup[id] || id;
+      return tooltipLookup[id]; 
     };
 
   });

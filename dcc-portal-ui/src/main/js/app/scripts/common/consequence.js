@@ -3,8 +3,11 @@
 
   var module = angular.module('icgc.common.consequence', []);
 
+  /**
+   * Binds mutation consequence mappings from SnpEff
+   */
   module.service('Consequence', function() {
-    var dataOrdered = [ 
+    var dataOrdered = [
       {id: 'frameshift_variant', label: 'Frameshift'},
       {id: 'missense_variant', label: 'Missense'},
       {id: 'start_lost', label: 'Start Lost'},
@@ -44,7 +47,7 @@
       {id: 'chromosome', label: 'Chromosome'},
       {id: '_missing', label: 'Missing'}
     ];
-    
+
     var map = {};
     dataOrdered.forEach(function(consequence) {
       map[consequence.id] = consequence.label;
@@ -52,11 +55,11 @@
 
 
     this.precedence = function() {
-      return _.pluck(dataOrdered, 'id'); 
+      return _.pluck(dataOrdered, 'id');
     };
 
     this.translate = function(id) {
-      return map[id];
+      return map[id]; 
     };
 
     this.tooltip = function(id) {

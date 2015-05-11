@@ -37,11 +37,11 @@
     };
 
     this.translate = function(id) {
-      return shortLabelMap[id] || id;
+      return shortLabelMap[id]; 
     };
 
     this.tooltip = function(id) {
-      return labelMap[id] || id;
+      return labelMap[id];
     };
 
   });

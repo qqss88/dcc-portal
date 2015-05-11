@@ -91,7 +91,6 @@ angular.module('icgc.modules.genomeviewer.service').service('GMService', functio
 
     // Dump into html format
     for (i = 0; i < consequenceList.length; i++) {
-      // consequencesTxt += $filter('trans')(consequenceList[i].consequence);
       consequencesTxt += Consequence.translate(consequenceList[i].consequence);
       geneList = [];
       for (geneSymbol in consequenceList[i].data) {

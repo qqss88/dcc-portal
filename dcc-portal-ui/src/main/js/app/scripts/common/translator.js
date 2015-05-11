@@ -9,6 +9,7 @@
   module.service('ValueTranslator', function(Consequence, DataType, CodeTable) {
      
      function getTranslatorModule(type) {
+
        if (type === 'consequenceType') {
          return Consequence;
        } else if (type === 'availableDataTypes') {
@@ -16,23 +17,33 @@
        } else {
          return CodeTable;
        }
-       return null;
-     };
+     }
+
+     function humanReadable(str) {
+       var res = str;
+       res = res.replace(/_/g, ' ').replace(/^\s+|\s+$/g, '');
+       res = res.charAt(0).toUpperCase() + res.slice(1);
+       return res;
+     }
 
      this.translate = function(id, type) {
        if (id === '_missing') { return 'No Data'; }
-       var t = getTranslatorModule(type);
-       if (t) { return t.translate(id); }
 
-       return id;
+       if (angular.isDefined(type)) {
+         return getTranslatorModule(type).translate(id) || humanReadable(id);
+       } else {
+         return humanReadable(id);
+       }
      };
 
      this.tooltip = function(id, type) {
        if (id === '_missing') { return 'No Data'; }
-       var t = getTranslatorModule(type);
-       if (t) { return t.tooltip(id); }
 
-       return id;
+       if (angular.isDefined(type)) {
+         return getTranslatorModule(type).tooltip(id);
+       } else {
+         return id;
+       }
      };
 
   });

@@ -21,7 +21,7 @@ angular.module('highcharts', ['highcharts.directives', 'highcharts.services']);
 
 angular.module('highcharts.directives', []);
 
-angular.module('highcharts.directives').directive('pie', function (Facets, $filter) {
+angular.module('highcharts.directives').directive('pie', function (Facets, $filter, ValueTranslator) {
   return {
     restrict: 'E',
     replace: true,
@@ -147,7 +147,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
               point: {
                 events: {
                   mouseOver: function (event) {
-                    var name = event.target.term ? $filter('trans')(event.target.name, true) : 'No Data';
+                    var name = event.target.term ? ValueTranslator.translate(event.target.name, event.target.facet) : 'No Data';
                     $scope.$emit('tooltip::show', {
                       element: angular.element(this),
                       text: '<div>' +
