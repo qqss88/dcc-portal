@@ -194,7 +194,7 @@ angular.module('highcharts.directives').directive('pie', function (Facets, $filt
   };
 });
 
-angular.module('highcharts.directives').directive('donut', function ($rootScope, $filter, $state, Facets) {
+angular.module('highcharts.directives').directive('donut', function ($rootScope, ProjectCache, $state, Facets) {
   return {
     restrict: 'E',
     replace: true,
@@ -205,6 +205,7 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
     template: '<div id="container" style="margin: 0 auto">not working</div>',
     link: function ($scope, $element, $attrs) {
       var c, renderChart, chartsDefaults, filter;
+      var projectLookup = {};
 
       renderChart = function (settings) {
         if (c) {
@@ -273,10 +274,12 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
             point: {
               events: {
                 mouseOver: function (event) {
+                  var name = projectLookup[event.target.name] || event.target.name;
+
                   $scope.$emit('tooltip::show', {
                     element: angular.element(this),
                     text: '<div>' +
-                   '<strong>' + $filter('define')(event.target.name) + '</strong><br>' +
+                   '<strong>' + name + '</strong><br>' +
                    Highcharts.numberFormat(event.target.y, 0) + ' ' + event.target.series.name +
                    '</div>',
                     placement: 'right',
@@ -327,10 +330,12 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
       };
 
       $scope.$watch('items', function (newValue) {
-        var deepCopy, newSettings;
+        var deepCopy, newSettings, promise;
         if (!newValue) {
           return;
         }
+
+        promise = ProjectCache.getData();
 
         // We need deep copy in order to NOT override original chart object.
         // This allows us to override chart data member and still the keep
@@ -342,7 +347,10 @@ angular.module('highcharts.directives').directive('donut', function ($rootScope,
         newSettings.series[1].data = newValue.outer;
 
         newSettings.subtitle.text = $scope.subTitle;
-        renderChart(newSettings);
+        promise.then(function(data) {
+          projectLookup = data;
+          renderChart(newSettings);
+        });
       });
 
       renderChart(chartsDefaults);
