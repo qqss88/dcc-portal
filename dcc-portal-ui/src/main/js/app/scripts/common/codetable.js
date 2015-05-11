@@ -42,6 +42,7 @@
       'Mt_rRNA': 'Mt rRNA',
     };
 
+
     var tooltipLookup = {
       // Sequencing analysis types (Sequencing strategy)
       'WGS': 'Whole Genome Sequencing - random sequencing of the whole genome.',

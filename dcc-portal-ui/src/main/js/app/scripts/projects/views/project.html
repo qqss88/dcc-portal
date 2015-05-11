@@ -304,7 +304,7 @@
                 <td><a data-ui-sref="gene({id:gene.id})">{{gene.symbol}}</a></td>
                 <td>{{gene.name}}</td>
                 <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
-                <td>{{gene.type}}</td>
+                <td>{{gene.type | trans}}</td>
                 <td class="text-right" style="display:block; position: relative; white-space: nowrap">
 
                         <span
@@ -572,17 +572,17 @@
                 </th>
             </tr>
             <tr>
-                <th data-tooltip="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
-                <th data-tooltip="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
-                <th data-tooltip="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
-                <th data-tooltip="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
-                <th data-tooltip="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
-                <th data-tooltip="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
-                <th data-tooltip="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
-                <th data-tooltip="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
-                <th data-tooltip="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
-                <th data-tooltip="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
-                <th data-tooltip="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
+                <th data-tooltip="{{ 'ssm' | datatype }}"><abbr class="tiny-header">SSM</abbr></th>
+                <th data-tooltip="{{ 'cnsm' | datatype }}"><abbr class="tiny-header">CNSM</abbr></th>
+                <th data-tooltip="{{ 'stsm' | datatype }}"><abbr class="tiny-header">StSM</abbr></th>
+                <th data-tooltip="{{ 'sgv' | datatype }}"><abbr class="tiny-header">SGV</abbr></th>
+                <th data-tooltip="{{ 'meth_array' | datatype }}"><abbr class="tiny-header">METH-A</abbr></th>
+                <th data-tooltip="{{ 'meth_seq' | datatype }}"><abbr class="tiny-header">METH-S</abbr></th>
+                <th data-tooltip="{{ 'exp_array' | datatype }}"><abbr class="tiny-header">EXP-A</abbr></th>
+                <th data-tooltip="{{ 'exp_seq' | datatype }}"><abbr class="tiny-header">EXP-S</abbr></th>
+                <th data-tooltip="{{ 'pexp' | datatype }}"><abbr class="tiny-header">PEXP</abbr></th>
+                <th data-tooltip="{{ 'mirna_seq' | datatype }}"><abbr class="tiny-header">miRNA-S</abbr></th>
+                <th data-tooltip="{{ 'jcn' | datatype }}"><abbr class="tiny-header">JCN</abbr></th>
             </tr>
             </thead>
             <tbody>

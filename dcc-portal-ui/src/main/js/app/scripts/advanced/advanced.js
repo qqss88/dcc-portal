@@ -452,6 +452,7 @@
     Occurrences, Projects, Donors, State, Extensions, ProjectCache) {
 
       var _this = this;
+      var projectCachePromise = ProjectCache.getData();
 
       _this.projectMutationQuery = function(projectId, mutationId) {
         var f = LocationService.filters();
@@ -478,7 +479,6 @@
       _this.ajax = function () {
         if (State.isTab('mutation') && _this.mutations && _this.mutations.hits && _this.mutations.hits.length) {
 
-          var projectCachePromise = ProjectCache.getData();
 
 
           // Need to get SSM Test Donor counts from projects
@@ -592,6 +592,11 @@
       };
 
       _this.oSuccess = function (occurrences) {
+        occurrences.hits.forEach(function(occurrence) {
+          projectCachePromise.then(function(lookup) {
+            occurrence.projectName = lookup[occurrence.projectId] || occurrence.projectId;
+          });
+        });
         _this.occurrences = occurrences;
       };
 

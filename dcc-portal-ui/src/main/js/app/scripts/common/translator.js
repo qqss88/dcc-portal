@@ -6,7 +6,7 @@
   /**
    * Translating value/code to human readable text, this bascially acts as a 
    */
-  module.service('ValueTranslator', function(Consequence, DataType, CodeTable) {
+  module.service('ValueTranslator', function(Consequence, DataType, CodeTable, Extensions) {
      
      function getTranslatorModule(type) {
 
@@ -14,9 +14,8 @@
          return Consequence;
        } else if (type === 'availableDataTypes') {
          return DataType;
-       } else {
-         return CodeTable;
-       }
+       } 
+       return CodeTable;
      }
 
      function humanReadable(str) {
@@ -30,22 +29,19 @@
        if (!id) return '';
        if (id === '_missing') { return 'No Data'; }
 
-       if (angular.isDefined(type)) {
-         return getTranslatorModule(type).translate(id) || humanReadable(id);
-       } else {
-         return humanReadable(id);
-       }
+       return getTranslatorModule(type).translate(id) || humanReadable(id);
+       //if (angular.isDefined(type)) {
+       //  return getTranslatorModule(type).translate(id) || humanReadable(id);
+       //} else {
+       //  return humanReadable(id);
+       //}
      };
 
      this.tooltip = function(id, type) {
        if (!id) return '';
        if (id === '_missing') { return 'No Data'; }
 
-       if (angular.isDefined(type)) {
-         return getTranslatorModule(type).tooltip(id);
-       } else {
-         return id;
-       }
+       return getTranslatorModule(type).tooltip(id) || id;
      };
 
      this.readable = humanReadable;
@@ -64,6 +60,21 @@
       return ValueTranslator.translate(id, type);
     };
   });
+
+  module.filter('datatype', function (ValueTranslator) {
+    return function (id) {
+      return ValueTranslator.tooltip(id, 'availableDataTypes');
+    };
+  });
+
+  module.filter('universe', function (Extensions) {
+    return function (id) {
+      return _.find(Extensions.GENE_SET_ROOTS, function(u) {
+        return u.universe === id;
+      }).name;
+    };
+  });
+
 
   module.filter('define', function (ValueTranslator) {
     return function (id, type) {
