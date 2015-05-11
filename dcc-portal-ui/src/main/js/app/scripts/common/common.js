@@ -26,9 +26,10 @@
     'icgc.common.display',
     'icgc.common.external',
 
-    // Common biological modules
+    // Biological modules
     'icgc.common.chromosome',
     'icgc.common.consequence',
+    'icgc.common.datatype',
 
     // Query langauge
     'icgc.common.pql.translation',
