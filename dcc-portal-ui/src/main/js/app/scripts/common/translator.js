@@ -46,6 +46,31 @@
        }
      };
 
+     this.readable = humanReadable;
+
   });
+
+  module.filter('readable', function(ValueTranslator) {
+    return function (id) {
+      return ValueTranslator.readable(id);
+    };
+  });
+
+
+  module.filter('trans', function (ValueTranslator) {
+    return function (id, type) {
+      return ValueTranslator.translate(id, type);
+    };
+  });
+
+  module.filter('define', function (ValueTranslator) {
+    return function (id, type) {
+      return ValueTranslator.tooltip(id, type);
+    };
+  });
+
+
+
+
 
 })();

@@ -32,7 +32,7 @@
       'colocalizes_with': 'Colocalizes With',
       'contributes_to': 'Contributes To',
 
-      // Biotype - FIXME: Are these being used at all?
+      // Biotype
       'lincRNA': 'lincRNA',
       'miRNA': 'miRNA',
       'snRNA': 'snRNA',

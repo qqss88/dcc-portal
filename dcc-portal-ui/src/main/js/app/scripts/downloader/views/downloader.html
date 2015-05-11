@@ -118,11 +118,11 @@
                         </td>
                         <td>
                            <span data-ng-if="file.completed === 'false'">
-                               <i class="icon-spinner icon-spin"></i> {{file.dataType | trans | define}}
+                               <i class="icon-spinner icon-spin"></i> {{file.dataType | define:'availableDataTypes'}}
                            </span>
                            <span data-ng-if="file.completed === 'true'">
                                <a href="" data-ng-click="downloadType(job.downloadId, file.dataType)"><i
-                                       class="icon-download"></i> {{file.dataType | trans | define}}</a>
+                                       class="icon-download"></i> {{file.dataType | define:'availableDataTypes' }}</a>
                            </span>
                         </td>
                     </tr>

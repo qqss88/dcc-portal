@@ -26,7 +26,7 @@
                        {{item.universe | define}} - {{item.maxGeneCount | number}} {{item.maxGeneCount !== 1? "genes": "gene" }}
                    </small>
                    <small data-ng-if="item.type === 'set'" class="t_suggest_detail">
-                       {{item.dataType | trans:true}} - {{item.inputSetCount}} sets
+                       {{item.dataType | readable}} - {{item.inputSetCount}} sets
                    </small>
                    <small data-ng-if="item.type === 'phenotype'" class="t_suggest_detail">
                    Donor - {{item.inputSetCount}} sets

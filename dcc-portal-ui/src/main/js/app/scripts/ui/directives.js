@@ -247,7 +247,7 @@ angular.module('app.ui.param', []).directive('param', function (LocationService)
       defaultSelect: '@'
     },
     template: '<span data-ng-class="{\'t_labels__label_inactive\': !active}" data-ng-click="update()">' +
-              '<i data-ng-class="{\'icon-ok\': active}"></i> {{value | trans:true}}</span>',
+              '<i data-ng-class="{\'icon-ok\': active}"></i> {{value | readable}}</span>',
     link: function (scope) {
       var type = LocationService.search()[scope.key];
 
