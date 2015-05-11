@@ -129,7 +129,7 @@
             });
           });
           _ctrl.bar = HighchartsService.bar({
-            hits: _.first(_.sortBy(projects.hits, function (p) {
+            hits: _.take(_.sortBy(projects.hits, function (p) {
               return -p.uiAffectedDonorPercentage;
             }),10),
             xAxis: 'id',
