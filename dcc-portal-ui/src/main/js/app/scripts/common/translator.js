@@ -6,7 +6,7 @@
   /**
    * Translating value/code to human readable text, this bascially acts as a 
    */
-  module.service('ValueTranslator', function(Consequence, DataType, CodeTable, Extensions) {
+  module.service('ValueTranslator', function(Consequence, DataType, CodeTable) {
      
      function getTranslatorModule(type) {
 
@@ -26,7 +26,7 @@
      }
 
      this.translate = function(id, type) {
-       if (!id) return '';
+       if (!id) { return ''; }
        if (id === '_missing') { return 'No Data'; }
 
        return getTranslatorModule(type).translate(id) || humanReadable(id);
@@ -38,7 +38,7 @@
      };
 
      this.tooltip = function(id, type) {
-       if (!id) return '';
+       if (!id) { return ''; }
        if (id === '_missing') { return 'No Data'; }
 
        return getTranslatorModule(type).tooltip(id) || id;
