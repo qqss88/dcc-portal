@@ -26,6 +26,10 @@
     'icgc.common.display',
     'icgc.common.external',
 
+    // UI
+    'icgc.common.codetable',
+    'icgc.common.translator',
+
     // Biological modules
     'icgc.common.chromosome',
     'icgc.common.consequence',
