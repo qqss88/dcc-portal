@@ -98,11 +98,13 @@
 
   });
 
-  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService) {
+  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService, ProjectCache) {
     var _ctrl = this, donor;
 
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
+        var projectCachePromise = ProjectCache.getData();
+
         _ctrl.mutations = mutations;
 
         _ctrl.mutations.advQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]}}});
@@ -128,6 +130,10 @@
               mutation.uiDonors.forEach(function (facet) {
                 var p = _.find(projects.hits, function (item) {
                   return item.id === facet.term;
+                });
+
+                projectCachePromise.then(function(lookup) {
+                  facet.projectName = lookup[facet.term] || facet.term;
                 });
 
                 facet.advQuery = LocationService.mergeIntoFilters(

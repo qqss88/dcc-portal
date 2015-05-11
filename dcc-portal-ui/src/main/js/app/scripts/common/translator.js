@@ -27,6 +27,7 @@
      }
 
      this.translate = function(id, type) {
+       if (!id) return '';
        if (id === '_missing') { return 'No Data'; }
 
        if (angular.isDefined(type)) {
@@ -37,6 +38,7 @@
      };
 
      this.tooltip = function(id, type) {
+       if (!id) return '';
        if (id === '_missing') { return 'No Data'; }
 
        if (angular.isDefined(type)) {

@@ -78,7 +78,7 @@
                         style="position: relative">
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
                             <a href='/search?filters={{AdvancedCtrl.Gene.projectGeneQuery(p.term, gene.id)}}'>
                                 {{p.count | number}}

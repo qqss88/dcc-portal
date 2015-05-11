@@ -272,11 +272,14 @@
 
   });
 
-  module.controller('ProjectGeneCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
+  module.controller('ProjectGeneCtrl', 
+    function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
+
     var _ctrl = this;
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
+        var projectCachePromise = ProjectCache.getData();
         var geneIds = _.pluck(genes.hits, 'id').join(',');
         _ctrl.genes = genes;
 
@@ -320,6 +323,10 @@
                     }
                   );
 
+                  projectCachePromise.then(function(lookup) {
+                    facet.projectName = lookup[facet.term] || facet.term;
+                  });
+
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
@@ -349,12 +356,16 @@
     refresh();
   });
 
-  module.controller('ProjectMutationsCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
+  module.controller('ProjectMutationsCtrl',
+    function ($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
+
     var _ctrl = this, project = Projects.one();
 
 
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
+        var projectCachePromise = ProjectCache.getData();
+
         _ctrl.mutations = mutations;
 
         if ( _.isEmpty(_ctrl.mutations.hits)) {
@@ -389,6 +400,10 @@
                 facet.advQuery = LocationService.mergeIntoFilters({
                   donor: {projectId: {is: [facet.term]}},
                   mutation: {id: {is: [mutation.id]}}
+                });
+
+                projectCachePromise.then(function(lookup) {
+                  facet.projectName = lookup[facet.term] || facet.term;
                 });
 
                 facet.countTotal = p.ssmTestedDonorCount;

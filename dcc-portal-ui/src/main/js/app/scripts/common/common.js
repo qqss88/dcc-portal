@@ -84,6 +84,7 @@
     };
   });
 
+/*
   module.filter('trans', function (TranslationService) {
     return function (text, capitalize) {
       var translations;
@@ -115,7 +116,9 @@
       return translations.hasOwnProperty(text) ? translations[text] : human(text);
     };
   });
+  */
 
+  /*
   module.filter('define', function (DefinitionService) {
     return function (text, nullable) {
       var definitions;
@@ -132,6 +135,7 @@
       return definitions.hasOwnProperty(text) ? definitions[text] : nullable ? null : text;
     };
   });
+  */
 
   // a filter used to provide a tooltip (descriptive name) for a gene-set
   module.filter ( 'geneSetNameLookup', function (GeneSetNameLookupService) {

@@ -308,7 +308,7 @@
   });
 
   module.service('AdvancedGeneService',
-    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions) {
+    function(Page, LocationService, Genes, Projects, Donors, State, FiltersUtil, Extensions, ProjectCache) {
 
     var _this = this;
 
@@ -339,8 +339,7 @@
       if (State.isTab('gene') && _this.genes && _this.genes.hits && _this.genes.hits.length) {
         _this.mutationCounts = null;
         var geneIds = _.pluck(_this.genes.hits, 'id').join(',');
-
-
+        var projectCachePromise = ProjectCache.getData();
 
 
         // Get Mutations counts
@@ -399,6 +398,10 @@
                     return item.id === facet.term;
                   });
 
+                  projectCachePromise.then(function(lookup) {
+                    facet.projectName = lookup[facet.term] || facet.term;
+                  });
+
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
@@ -445,8 +448,9 @@
     };
   });
 
-  module.service('AdvancedMutationService',
-    function (Page, LocationService, HighchartsService, Mutations, Occurrences, Projects, Donors, State, Extensions) {
+  module.service('AdvancedMutationService', function (Page, LocationService, HighchartsService, Mutations,
+    Occurrences, Projects, Donors, State, Extensions, ProjectCache) {
+
       var _this = this;
 
       _this.projectMutationQuery = function(projectId, mutationId) {
@@ -473,6 +477,8 @@
 
       _this.ajax = function () {
         if (State.isTab('mutation') && _this.mutations && _this.mutations.hits && _this.mutations.hits.length) {
+
+          var projectCachePromise = ProjectCache.getData();
 
 
           // Need to get SSM Test Donor counts from projects
@@ -520,6 +526,10 @@
                   mutation.uiDonors.forEach(function (facet) {
                     var p = _.find(projects.hits, function (item) {
                       return item.id === facet.term;
+                    });
+
+                    projectCachePromise.then(function(lookup) {
+                      facet.projectName = lookup[facet.term] || facet.term;
                     });
 
                     facet.countTotal = p.ssmTestedDonorCount;

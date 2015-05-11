@@ -330,7 +330,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -473,7 +473,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
