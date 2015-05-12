@@ -79,9 +79,9 @@
             <td>
                 <ul>
                     <li data-ng-repeat="study in ProjectCtrl.studies">
-                        <a href="/search?filters={{study.advQuery}}">{{study.count | numer }}</a> 
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a> 
                         <span data-ng-if="study.term !== 'PCAWG Study'"> {{study.term}} </span>
-                        <span data-ng-if="study.term === 'PCAWG Study'"><span class="badge" style="font-size:0.5rem">PCAWG</span></span>
+                        <span data-ng-if="study.term === 'PCAWG Study'"><pcawg-badge></pcawg-badge></span>
                     </li>
                 </ul>
             </td>

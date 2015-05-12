@@ -171,9 +171,9 @@ public class Donor {
     studies = (List<String>) fieldMap.get(fields.get("studies"));
 
     specimen = buildSpecimen((List<Map<String, Object>>) fieldMap.get("specimen"));
-    therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy")); // FIXME
-    family = buildFamily((List<Map<String, Object>>) fieldMap.get("family")); // FIXME
-    exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure")); // FIXME
+    therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy"));
+    family = buildFamily((List<Map<String, Object>>) fieldMap.get("family"));
+    exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure"));
   }
 
   private List<Exposure> buildExposure(List<Map<String, Object>> field) {

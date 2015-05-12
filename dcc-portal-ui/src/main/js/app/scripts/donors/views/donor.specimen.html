@@ -11,9 +11,8 @@
 <div class="specimen-wrap">
     <div class="clearfix">
         <h3>
-            {{ DonorSpecimenCtrl.specimen.id }}
-            <span data-ng-if="DonorSpecimenCtrl.isPCAWG(DonorSpecimenCtrl.specimen)"
-                  style="font-size: 0.5rem" class="badge">PCAWG</span>
+            {{ DonorSpecimenCtrl.specimen.id }} 
+            <pcawg-badge data-ng-if="DonorSpecimenCtrl.isPCAWG(DonorSpecimenCtrl.specimen)"></pcawg-badge>
         </h3>
 
         <div class="half">
