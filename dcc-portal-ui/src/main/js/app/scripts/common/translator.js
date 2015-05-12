@@ -20,6 +20,7 @@
 
      function humanReadable(str) {
        var res = str;
+       if (_.isEmpty(res) === true) { return res; }
        res = res.replace(/_/g, ' ').replace(/^\s+|\s+$/g, '');
        res = res.charAt(0).toUpperCase() + res.slice(1);
        return res;
