@@ -19,7 +19,9 @@
                    data-label="Access"
                    data-facet="ExternalRepoController.files.facets.access"></terms>
 
-            <li data-type="mutation" data-tags-facet data-label="Donor" data-facet-name="id" data-placeholder=""></li>
+            <li data-type="donor" data-tags-facet data-label="Donor" 
+                data-facet-name="id" data-placeholder="" data-proxy-type="file" data-proxy-facet-name="donorId"></li>
+
             <terms data-type="file" data-facet-name="projectCode" 
                    data-label="Project"
                    data-facet="ExternalRepoController.files.facets.projectCode"></terms>
@@ -84,7 +86,7 @@
                        <i class="{{row.access==='open'? 'icon-lock-open-alt':'icon-lock'}}"></i>
                        {{row.fileName}}
                     </td>
-                    <td>{{row.donorId}}</td>
+                    <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
                     <td>{{row.repositoryNames.join(',') }}</td>
                     <td>{{row.projectCode}}</td>
                     <td>
