@@ -44,6 +44,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -99,6 +100,13 @@ public class ExternalFileResource {
         .order(order)
         .includes(include)
         .build());
+  }
+
+  @GET
+  @Path("/metadata")
+  @Timed
+  public Map<String, String> getIndexMetaData() {
+    return externalFileService.getIndexMetadata();
   }
 
 }

@@ -23,6 +23,9 @@ import static org.icgc.dcc.portal.service.QueryService.getFacets;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+
+import java.util.Map;
+
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,6 +58,10 @@ public class ExternalFileRepository {
   ExternalFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
+  }
+
+  public Map<String, String> getIndexMetadata() {
+    return null;
   }
 
   public SearchResponse findAll(Query query) {

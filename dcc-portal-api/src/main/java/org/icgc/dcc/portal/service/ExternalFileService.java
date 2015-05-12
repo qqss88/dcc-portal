@@ -30,7 +30,10 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
+
+import javax.annotation.Resource;
 
 import lombok.Cleanup;
 import lombok.NonNull;
@@ -66,10 +69,12 @@ public class ExternalFileService {
 
   private final ExternalFileRepository externalFileRepository;
 
-  /*
-   * @Autowired public ExternalFileService(ExternalFileRepository externalFileRepository) { this.externalFileRepository
-   * = externalFileRepository; }
-   */
+  @Resource
+  private Map<String, String> repoIndexMetadata;
+
+  public Map<String, String> getIndexMetadata() {
+    return repoIndexMetadata;
+  }
 
   public ExternalFiles findAll(Query query) {
     SearchResponse response = externalFileRepository.findAll(query);
