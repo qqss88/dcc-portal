@@ -78,6 +78,10 @@ public class ExternalFile {
   @ApiModelProperty(value = "Donor associated with file", required = true)
   String donorId;
 
+  String md5;
+
+  String url;
+
   @JsonCreator
   public ExternalFile(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
@@ -93,6 +97,8 @@ public class ExternalFile {
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
     access = getString(fieldMap.get(fields.get("access")));
     donorId = getString(fieldMap.get(fields.get("donorId")));
+    md5 = getString(fieldMap.get("md5"));
+    url = getString(fieldMap.get("url"));
 
     // FIXME: What field is this?
     repository = null;
