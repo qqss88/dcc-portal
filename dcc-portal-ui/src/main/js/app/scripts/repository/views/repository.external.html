@@ -1,8 +1,10 @@
 <aside class="t_sidebar">
     <div style="position: relative; margin-right: -2rem">
         <ul class="t_facets">
-
-            <li data-type="mutation" data-tags-facet data-label="File" data-facet-name="id" data-placeholder=""></li>
+            <li data-tags-facet 
+                data-type="file" 
+                data-facet-name="id"
+                data-label="File"></li>
             <terms data-type="file" data-facet-name="repositoryNames" 
                    data-facet="ExternalRepoController.files.facets.repositoryNames"
                    data-label="Repository"></terms>
@@ -18,21 +20,24 @@
             <terms data-type="file" data-facet-name="access" 
                    data-label="Access"
                    data-facet="ExternalRepoController.files.facets.access"></terms>
-
-            <li data-type="donor" data-tags-facet data-label="Donor" 
-                data-facet-name="id" data-placeholder="" data-proxy-type="file" data-proxy-facet-name="donorId"></li>
-
+            <li data-tags-facet 
+                data-type="donor" 
+                data-facet-name="id" 
+                data-label="Donor" 
+                data-proxy-type="file" 
+                data-proxy-facet-name="donorId"></li>
             <terms data-type="file" data-facet-name="projectCode" 
                    data-label="Project"
+                   data-collapsed="true"
                    data-facet="ExternalRepoController.files.facets.projectCode"></terms>
             <terms data-type="file" data-facet-name="primarySite" 
                    data-label="Primary Site"
+                   data-collapsed="true"
                    data-facet="ExternalRepoController.files.facets.primarySite"></terms>
             <terms data-type="file" data-facet-name="donorStudy" 
                    data-label="Donor Study"
+                   data-collapsed="true"
                    data-facet="ExternalRepoController.files.facets.donorStudy"></terms>
-
-
         </ul>
     </div>
 </aside>
@@ -58,7 +63,9 @@
             <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
             <span class="t_tools">
                 <span class="t_tools__tool">
-                    <i class="icon-file pull-right" data-ng-click="ExternalRepoController.export()"></i>
+                    <i class="icon-file pull-right" 
+                       data-tooltip="Export table as TSV" data-tooltip-placement="left"
+                       data-ng-click="ExternalRepoController.export()"></i>
                 </span>
             </span>
 
@@ -66,7 +73,6 @@
 
         <table class="table table-selectable">
             <thead>
-                <!--<th class="text-center"><i class="icon-check-empty"></i></th>-->
                 <th>&nbsp;</th> 
                 <th data-sortable data-type="files" data-field="fileName">File Name</th>
                 <th>ICGC Donor</th>
@@ -83,7 +89,7 @@
                        <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
                     <td style="max-width:30rem">
-                       <i class="{{row.access==='open'? 'icon-lock-open-alt':'icon-lock'}}"></i>
+                       <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
                        {{row.fileName}}
                     </td>
                     <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
