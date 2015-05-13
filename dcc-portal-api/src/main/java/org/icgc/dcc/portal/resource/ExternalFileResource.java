@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.resource;
 
+import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
+import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
@@ -43,6 +45,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.RETURNS_LIST;
 import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +54,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -100,6 +105,18 @@ public class ExternalFileResource {
         .order(order)
         .includes(include)
         .build());
+  }
+
+  @GET
+  @Timed
+  @Path("/export")
+  public Response exportFiles(
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
+
+    StreamingOutput stream = externalFileService.exportTableData(query().filters(filtersParam.get()).build());
+
+    return Response.ok(stream).header(CONTENT_DISPOSITION,
+        type("attachment").fileName("export.tsv").creationDate(new Date()).build()).build();
   }
 
   @GET

@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
+import javax.ws.rs.core.StreamingOutput;
 
 import lombok.Cleanup;
 import lombok.NonNull;
@@ -74,6 +75,10 @@ public class ExternalFileService {
 
   public Map<String, String> getIndexMetadata() {
     return repoIndexMetadata;
+  }
+
+  public StreamingOutput exportTableData(Query query) {
+    return externalFileRepository.exportData(query);
   }
 
   public ExternalFiles findAll(Query query) {
