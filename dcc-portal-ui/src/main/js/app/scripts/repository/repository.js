@@ -127,7 +127,7 @@
   /**
    * External repository controller
    */
-  module.controller('ExternalRepoController', function($scope, Restangular, RepositoryService, LocationService, Page) {
+  module.controller('ExternalRepoController', function($scope, $window, Restangular, LocationService, Page, API) {
     console.log('ExternalRepoController');
     var _ctrl = this;
 
@@ -140,7 +140,10 @@
      */
     _ctrl.export = function() {
       console.log('export');
-      Page.startWork();
+      var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
+      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
+      $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
+      // Restangular.one('files').one('export').get({});
     };
 
 
@@ -203,13 +206,17 @@
         query.order = filesParam.order;
       }
 
+      // Get files that match query
       promise = Restangular.one('files').get(query);
-
       promise.then(function(data) {
         console.log('data', data);
         _ctrl.files = data;
       });
 
+      // Get index creation time
+      Restangular.one('files').one('metadata').get({}).then(function(metadata) {
+        _ctrl.repoCreationTime = metadata.creation_date || '';
+      });
 
     }
 
