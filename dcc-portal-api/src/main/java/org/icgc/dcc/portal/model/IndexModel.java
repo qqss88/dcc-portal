@@ -47,6 +47,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
+    EXTERNAL_FILE("file"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -79,6 +80,8 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
+    EXTERNAL_FILE("file"),
+
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
@@ -88,6 +91,25 @@ public class IndexModel {
 
     private final String id;
   }
+
+  private static final ImmutableMap<String, String> EXTERNAL_FILE_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("repositoryEntityId", "repository.repo_entity_id")
+          .put("repositoryType", "repository.repo_type")
+          .put("repositoryCountries", "repository.repo_server.repo_country")
+          .put("repositoryNames", "repository.repo_server.repo_name")
+          .put("fileName", "repository.file_name")
+          .put("fileSize", "repository.file_size")
+          .put("projectCode", "donor.project_code")
+          .put("primarySite", "donor.primary_site")
+          .put("study", "study")
+          .put("donorStudy", "donor.study")
+          .put("dataType", "data_type")
+          .put("fileFormat", "data_format")
+          .put("access", "access")
+          .put("donorId", "donor.donor_id")
+          .put("program", "donor.program") // For search
+          .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -589,6 +611,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.EXTERNAL_FILE, EXTERNAL_FILE_FIELDS_MAPPING);
   }
 
   /**
