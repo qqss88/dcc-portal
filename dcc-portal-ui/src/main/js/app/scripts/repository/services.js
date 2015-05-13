@@ -34,12 +34,14 @@
 
 
     // TODO
+    /*
     this.getExternalFiles = function(filters) {
     };
 
     // TODO
     this.getExternalFilesIndexedDate = function() {
     };
+    */
 
     this.folder = function (path) {
       return Restangular.one('download', 'info' + path).get();

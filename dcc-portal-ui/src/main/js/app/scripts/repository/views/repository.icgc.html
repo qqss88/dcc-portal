@@ -47,7 +47,7 @@
                 <tr data-ng-repeat="file in ICGCRepoController.files">
                     <td data-ng-if="file.type=='f'">
                         <i class="icon-file"></i>
-                        <a target="_self" href="{{API.BASE_URL}}/download?fn={{file.name}}">{{ file.baseName }}</a>
+                        <a target="_self" href="{{ICGCRepoController.API.BASE_URL}}/download?fn={{file.name}}">{{ file.baseName }}</a>
                     </td>
                     <td data-ng-if="file.type=='d'"
                         data-ng-style="deprecatedReleases.indexOf(file.baseName) >= 0?{'text-decoration':'line-through'}:{}">
@@ -67,7 +67,7 @@
            <br>
            <div data-ng-repeat="file in ICGCRepoController.textFiles | filter:{name : '!notice.txt'}"> 
                <div class="well well-small">
-                   <div><a target="_self" href="{{API.BASE_URL}}/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
+                   <div><a target="_self" href="{{ICGCRepoController.API.BASE_URL}}/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
                    <hr>
                    <div class="markdown_container">
                        <div btf-markdown="file.textContent"></div>

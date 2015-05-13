@@ -73,30 +73,22 @@
     $scope.sendRequest = function() {
       var i, item, actives, linkURL;
 
-      // FIXME: We don't really need to check status anymore
-      DownloadService.getStatus().then(function (serverStatus) {
-
-        if (serverStatus.status === false) {
-          return;
+      actives = [];
+      for (i = 0; i < $scope.params.dataTypes.length; ++i) {
+        item = $scope.params.dataTypes[i];
+        if (item.active) {
+          actives.push({key: item.label, value: 'TSV'});
         }
+      }
+      linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/download';
 
-        actives = [];
-        for (i = 0; i < $scope.params.dataTypes.length; ++i) {
-          item = $scope.params.dataTypes[i];
-          if (item.active) {
-            actives.push({key: item.label, value: 'TSV'});
-          }
-        }
-        linkURL = $location.protocol() + '://' + $location.host() + ':' + $location.port() + '/download';
+      DownloaderService
+        .requestDownloadJob(filters, actives, $scope.params.emailAddress,
+          linkURL, JSON.stringify(filters)).then(function (job) {
+          $modalInstance.dismiss('cancel');
+          $location.path('/download/' + job.downloadId).search('');
+        });
 
-        DownloaderService
-          .requestDownloadJob(filters, actives, $scope.params.emailAddress,
-            linkURL, JSON.stringify(filters)).then(function (job) {
-            $modalInstance.dismiss('cancel');
-            $location.path('/download/' + job.downloadId).search('');
-          });
-
-      });
     };
 
 

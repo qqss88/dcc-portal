@@ -6,13 +6,22 @@
   /**
    * This just controllers overall state
    */
-  module.controller('RepositoryController', function($state, Page) {
+  module.controller('RepositoryController', function($scope, $state, Page) {
     var _ctrl = this;
 
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
-    _ctrl.currentTab = $state.current.data.tab || 'icgc';
+    // _ctrl.currentTab = $state.current.data.tab || 'icgc';
+
+
+    $scope.$watch(function () {
+      return $state.current.data.tab;
+    }, function () {
+      _ctrl.currentTab = $state.current.data.tab || 'icgc';
+    });
+
+
     console.log('RepoisitoryController init');
   });
 
@@ -73,7 +82,7 @@
       } else {
         file.isText = false;
       }
-    };
+    }
 
 
     function getFiles() {
@@ -154,9 +163,9 @@
       console.log('downloading manifest');
       Page.startWork();
 
-      if (_ctrl.selectedFiles.length > 0) {
+      /*if (_ctrl.selectedFiles.length > 0) {
       } else {
-      }
+      }*/
     };
 
     _ctrl.isSelected = function(row) {
