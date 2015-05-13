@@ -23,12 +23,33 @@ module.exports = function (grunt) {
     dist: '../../../target/app'
   };
 
+
+  /**
+   * Bower configuration
+   * See: https://www.npmjs.com/package/grunt-bower-install-simple
+   */
+  var bowerConfig = {
+    options: {
+      color: true
+    },
+    prod: {
+      options: { production: true }
+    },
+    dev: {
+      options: { production: false}
+    }
+  };
+
+
   try {
     yeomanConfig.app = require('./bower.json').appPath || yeomanConfig.app;
   } catch (e) {
   }
 
+
+
   grunt.initConfig({
+    'bower-install-simple': bowerConfig,
     peg: {
       pql: {
         src: './app/scripts/pegjs/pql.pegjs',
@@ -321,6 +342,8 @@ module.exports = function (grunt) {
     }
   });
 
+  grunt.registerTask('bower-install', ['bower-install-simple']);
+
   grunt.registerTask('server', function (target) {
     if (target === 'dist') {
       return grunt.task.run(['build',
@@ -345,6 +368,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'bower-install',
+    'jshint',
     'peg',
     'karma',
     'useminPrepare',
@@ -360,7 +385,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('default', [
-    'jshint',
+    //'jshint',
     'test',
     'build'
   ]);

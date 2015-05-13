@@ -16,10 +16,10 @@
    }
 
   &:hover {
-      border-bottom-color: $yellow;
+      border-bottom-color: $orangeLight;
   }
   &.active {
     border-bottom-style: solid;
-    border-bottom-color: $yellow;
+    border-bottom-color: $orangeLight;
   }
 }
