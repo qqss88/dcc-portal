@@ -159,6 +159,7 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
 
               if (job.status === 'SUCCEEDED') {
                 job.archiveSize = jobInfo.fileSize;  // Total archive size
+                job.overallProgress = 1;
               }
 
               // Filter is the expanded query, uiFilter is what user sees
