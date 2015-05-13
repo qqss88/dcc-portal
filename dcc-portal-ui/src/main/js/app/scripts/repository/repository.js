@@ -136,12 +136,13 @@
   /**
    * External repository controller
    */
-  module.controller('ExternalRepoController', function($scope, $window, Restangular, LocationService, Page, API) {
+  module.controller('ExternalRepoController',
+    function($scope, $window, LocationService, Page, ExternalRepoService, API) {
+
     console.log('ExternalRepoController');
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
-
 
 
     /**
@@ -150,8 +151,8 @@
     _ctrl.export = function() {
       console.log('export');
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
-      $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
+      $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
+      // $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
       // Restangular.one('files').one('export').get({});
     };
 
@@ -197,33 +198,30 @@
     };
 
     function refresh() {
-      var promise, query;
-
-      query = {
-        filters : LocationService.filters(),
-        include: 'facets'
-      };
-
+      var promise, params = {};
       var filesParam = LocationService.getJsonParam('files');
 
       if (filesParam.from || filesParam.size) {
-        query.from = filesParam.from;
-        query.size = filesParam.size || 10;
+        params.from = filesParam.from;
+        params.size = filesParam.size || 10;
       }
       if (filesParam.sort) {
-        query.sort = filesParam.sort;
-        query.order = filesParam.order;
+        params.sort = filesParam.sort;
+        params.order = filesParam.order;
       }
 
+      params.include = 'facets';
+      params.filters = LocationService.filters();
+
       // Get files that match query
-      promise = Restangular.one('files').get(query);
+      promise = ExternalRepoService.getList( params );
       promise.then(function(data) {
         console.log('data', data);
         _ctrl.files = data;
       });
 
       // Get index creation time
-      Restangular.one('files').one('metadata').get({}).then(function(metadata) {
+      ExternalRepoService.getMetaData().then(function(metadata) {
         _ctrl.repoCreationTime = metadata.creation_date || '';
       });
 

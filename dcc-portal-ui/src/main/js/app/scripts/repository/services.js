@@ -21,6 +21,23 @@
 
   var module = angular.module('icgc.repository.services', []);
 
+  module.service('ExternalRepoService', function(Restangular, LocationService) {
+
+    this.getList = function(params) {
+      var defaults = {
+        size: 10,
+        from:1
+      };
+      return Restangular.one('files').get(angular.extend(defaults, params));
+    };
+
+    this.getMetaData = function() {
+      return Restangular.one('files').one('metadata').get({});
+    };
+
+  });
+
+
   module.service('RepositoryService', function ($filter, Restangular) {
 
     /*
