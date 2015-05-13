@@ -64,10 +64,10 @@ public class ExternalFile {
   String study;
 
   @ApiModelProperty(value = "Data type", required = true)
-  String dataType;
+  List<String> dataType;
 
   @ApiModelProperty(value = "File format", required = true)
-  String fileFormat;
+  List<String> fileFormat;
 
   @ApiModelProperty(value = "File size", required = true)
   Long fileSize;
@@ -92,8 +92,9 @@ public class ExternalFile {
     fileName = getString(fieldMap.get(fields.get("fileName")));
     projectCode = getString(fieldMap.get(fields.get("projectCode")));
     study = getString(fieldMap.get(fields.get("study")));
-    dataType = getString(fieldMap.get(fields.get("dataType")));
-    fileFormat = getString(fieldMap.get(fields.get("fileFormat")));
+    dataType = (List<String>) (fieldMap.get(fields.get("dataType")));
+    fileFormat = (List<String>) (fieldMap.get(fields.get("fileFormat")));
+
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
     access = getString(fieldMap.get(fields.get("access")));
     donorId = getString(fieldMap.get(fields.get("donorId")));

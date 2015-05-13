@@ -46,7 +46,6 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.util.StringUtils;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.ImmutableMap;
@@ -83,9 +82,13 @@ public class ExternalFileRepository {
       .put("repository.repo_server.repo_name", "Repository")
       .put("donor.project_code", "Project")
       .put("study", "Study")
-      .put("data_format", "Format")
+      .put("data_types.data_type", "Data type")
+      .put("data_types.data_format", "Format")
       .put("repository.file_size", "Size")
       .build();
+
+  private final ImmutableList<String> ARRAY_FIELDS = ImmutableList.of("data_types.data_type", "data_types.data_format",
+      "repository.repo_server.repo_name");
 
   private final Client client;
   private final String index;
@@ -109,7 +112,7 @@ public class ExternalFileRepository {
         val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
         writer.writeHeader(headers);
 
-        SearchRequestBuilder search = client
+        val search = client
             .prepareSearch(index)
             .setTypes(KIND.getId())
             .setSearchType(SCAN)
@@ -118,7 +121,6 @@ public class ExternalFileRepository {
             .setPostFilter(filters)
             .setQuery(matchAllQuery())
             .addFields(EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]));
-        // .addFields("access", "repository.file_name", "donor.donor_id");
 
         SearchResponse response = search.execute().actionGet();
         while (true) {
@@ -143,12 +145,13 @@ public class ExternalFileRepository {
   }
 
   /**
-   * Untangle array/list objects
+   * Untangle array/list objects, numeric objects
    */
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
     for (val key : map.keySet()) {
-      if (key.equals("repository.repo_server.repo_name")) {
+      // if (key.equals("repository.repo_server.repo_name")) {
+      if (ARRAY_FIELDS.contains(key)) {
         result.put(key, Joiner.on(StringUtils.COMMA).join((List<String>) map.get(key)));
       } else if (key.equals("repository.file_size")) {
         result.put(key, getLong(map.get(key)).toString());

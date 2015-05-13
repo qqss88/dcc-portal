@@ -104,8 +104,8 @@ public class IndexModel {
           .put("primarySite", "donor.primary_site")
           .put("study", "study")
           .put("donorStudy", "donor.study")
-          .put("dataType", "data_type")
-          .put("fileFormat", "data_format")
+          .put("dataType", "data_types.data_type")
+          .put("fileFormat", "data_types.data_format")
           .put("access", "access")
           .put("donorId", "donor.donor_id")
           .put("program", "donor.program") // For search
