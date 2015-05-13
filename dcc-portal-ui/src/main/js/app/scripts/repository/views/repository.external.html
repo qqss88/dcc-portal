@@ -99,8 +99,16 @@
                         <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
                         <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
                     </td>
-                    <td>{{row.dataType}}</td>
-                    <td>{{row.fileFormat}}</td>
+                    <td>
+                        <ul>
+                            <li data-ng-repeat="item in row.dataType track by $index">{{item}}</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li data-ng-repeat="item in row.fileFormat track by $index">{{item}}</li>
+                        </ul>
+                    </td>
                     <td>{{row.fileSize | bytes }}</td>
                 </tr>
             </tbody>
