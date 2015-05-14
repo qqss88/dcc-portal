@@ -51,6 +51,12 @@ public class ExternalFile {
   @ApiModelProperty(value = "Repo name", required = true)
   List<String> repositoryNames;
 
+  @ApiModelProperty(value = "Base URLs", required = true)
+  List<String> repositoryBaseURLs;
+
+  @ApiModelProperty(value = "Repository data path", required = true)
+  String repositoryDataPath;
+
   @ApiModelProperty(value = "File name", required = true)
   String fileName;
 
@@ -67,7 +73,7 @@ public class ExternalFile {
   List<String> dataType;
 
   @ApiModelProperty(value = "File format", required = true)
-  List<String> fileFormat;
+  List<String> dataFormat;
 
   @ApiModelProperty(value = "File size", required = true)
   Long fileSize;
@@ -82,19 +88,23 @@ public class ExternalFile {
 
   String url;
 
+  @SuppressWarnings("unchecked")
   @JsonCreator
   public ExternalFile(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
 
     repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));
+    repositoryDataPath = getString(fieldMap.get(fields.get("repositoryDataPath")));
+
+    // Array fields
     repositoryNames = (List<String>) (fieldMap.get(fields.get("repositoryNames")));
+    repositoryBaseURLs = (List<String>) (fieldMap.get(fields.get("repositoryBaseURLs")));
+    dataType = (List<String>) (fieldMap.get(fields.get("dataType")));
+    dataFormat = (List<String>) (fieldMap.get(fields.get("dataFormat")));
 
     fileName = getString(fieldMap.get(fields.get("fileName")));
     projectCode = getString(fieldMap.get(fields.get("projectCode")));
     study = getString(fieldMap.get(fields.get("study")));
-    dataType = (List<String>) (fieldMap.get(fields.get("dataType")));
-    fileFormat = (List<String>) (fieldMap.get(fields.get("fileFormat")));
-
     fileSize = getLong(fieldMap.get(fields.get("fileSize")));
     access = getString(fieldMap.get(fields.get("access")));
     donorId = getString(fieldMap.get(fields.get("donorId")));

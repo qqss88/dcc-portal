@@ -19,8 +19,11 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
+import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
+import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.getFacets;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
@@ -50,7 +53,11 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.QueryService;
@@ -58,8 +65,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @Slf4j
@@ -72,7 +83,7 @@ public class ExternalFileRepository {
   private static final Kind KIND = Kind.EXTERNAL_FILE;
   private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
 
-  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "fileFormat", "access",
+  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
       "projectCode", "primarySite", "donorStudy", "repositoryNames");
 
   private final ImmutableMap<String, String> EXPORT_FIELDS = ImmutableMap.<String, String> builder()
@@ -97,6 +108,74 @@ public class ExternalFileRepository {
   ExternalFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
+  }
+
+  public static void main(String[] args) throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+
+    // ObjectNode actualObj = (ObjectNode) mapper
+    // .readTree("{\"file\":{ \"dataType\":{ \"is\": [\"SSM\" ]}, \"dataFormat\": {\"is\": [\"XML\"]}, \"projectCode\":{ \"is\": [\"abc\", \"def\"]} }}");
+    ObjectNode actualObj = (ObjectNode) mapper
+        .readTree("{\"file\":{ \"dataFormat\": {\"is\": [\"XML\"]} }}");
+
+    log.info("   ==> {}", buildRepoFilters(actualObj));
+
+  }
+
+  /**
+   * FIXME: This is a temporary solution. We really should use the PQL infrastructure to build. Negation is not
+   * supported!
+   */
+  public static FilterBuilder buildRepoFilters(ObjectNode filters) {
+    val termFilters = FilterBuilders.boolFilter();
+    val fields = filters.path(KIND.getId()).fields();
+    val typeMapping = FIELDS_MAPPING.get(KIND);
+
+    Map<String, List<String>> nestedTerms = Maps.<String, List<String>> newHashMap();
+
+    if (fields.hasNext() == false) return FilterBuilders.matchAllFilter();
+    while (fields.hasNext()) {
+      val facetField = fields.next();
+
+      if (!typeMapping.containsKey(facetField.getKey())) continue;
+      String fieldName = typeMapping.get(facetField.getKey());
+
+      // Assume "IS"
+      JsonNode boolNode = facetField.getValue();
+      FilterBuilder fb;
+      val items = Lists.<String> newArrayList();
+      for (val item : boolNode.get("is")) {
+        items.add(item.textValue());
+      }
+      if (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format")) {
+        nestedTerms.put(fieldName, items);
+        continue;
+      } else {
+        fb = termsFilter(fieldName, items);
+      }
+      termFilters.must(fb);
+    }
+
+    // Handle special casej
+    if (!nestedTerms.isEmpty()) {
+      val nestedBoolFilter = FilterBuilders.boolFilter();
+      for (String fieldName : nestedTerms.keySet()) {
+        nestedBoolFilter.must(termsFilter(fieldName, nestedTerms.get(fieldName)));
+      }
+      termFilters.must(nestedFilter("data_types", nestedBoolFilter));
+    }
+
+    return termFilters;
+  }
+
+  /**
+   * FIXME: This is just temporary
+   */
+  private List<TermsFacetBuilder> getRepoFacets(ObjectNode filters) {
+    for (String facet : FACETS) {
+      val tf = FacetBuilders.termsFacet(facet).field(FIELDS_MAPPING.get(KIND).get(facet)).size(MAX_FACET_TERM_COUNT);
+    }
+    return null;
   }
 
   public StreamingOutput exportData(Query query) {
@@ -164,7 +243,8 @@ public class ExternalFileRepository {
 
   public SearchResponse findAll(Query query) {
     val kind = Kind.EXTERNAL_FILE;
-    val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
+    // val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
+    val filters = buildRepoFilters(query.getFilters());
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
@@ -184,7 +264,7 @@ public class ExternalFileRepository {
       search.addFacet(facet);
     }
 
-    log.debug("{}", search);
+    log.info(" !!! {}", search);
     val response = search.execute().actionGet();
     log.debug("{}", response);
 
