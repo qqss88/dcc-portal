@@ -24,7 +24,6 @@ import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
-import static org.icgc.dcc.portal.service.QueryService.getFacets;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
@@ -118,7 +117,7 @@ public class ExternalFileRepository {
     ObjectNode actualObj = (ObjectNode) mapper
         .readTree("{\"file\":{ \"dataFormat\": {\"is\": [\"XML\"]} }}");
 
-    log.info("   ==> {}", buildRepoFilters(actualObj));
+    log.info("   ==> {}", buildRepoFilters(actualObj, true));
 
   }
 
@@ -126,7 +125,7 @@ public class ExternalFileRepository {
    * FIXME: This is a temporary solution. We really should use the PQL infrastructure to build. Negation is not
    * supported!
    */
-  public static FilterBuilder buildRepoFilters(ObjectNode filters) {
+  public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
     val termFilters = FilterBuilders.boolFilter();
     val fields = filters.path(KIND.getId()).fields();
     val typeMapping = FIELDS_MAPPING.get(KIND);
@@ -147,7 +146,7 @@ public class ExternalFileRepository {
       for (val item : boolNode.get("is")) {
         items.add(item.textValue());
       }
-      if (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format")) {
+      if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
         continue;
       } else {
@@ -156,7 +155,7 @@ public class ExternalFileRepository {
       termFilters.must(fb);
     }
 
-    // Handle special casej
+    // Handle special case
     if (!nestedTerms.isEmpty()) {
       val nestedBoolFilter = FilterBuilders.boolFilter();
       for (String fieldName : nestedTerms.keySet()) {
@@ -172,10 +171,31 @@ public class ExternalFileRepository {
    * FIXME: This is just temporary
    */
   private List<TermsFacetBuilder> getRepoFacets(ObjectNode filters) {
+    val fs = Lists.<TermsFacetBuilder> newArrayList();
     for (String facet : FACETS) {
       val tf = FacetBuilders.termsFacet(facet).field(FIELDS_MAPPING.get(KIND).get(facet)).size(MAX_FACET_TERM_COUNT);
+
+      if (filters.fieldNames().hasNext()) {
+        val facetFilters = filters.deepCopy();
+
+        // Remove one self
+        if (facetFilters.has(KIND.getId())) {
+          facetFilters.with(KIND.getId()).remove(facet);
+        }
+
+        if (facet.equals("dataType") || facet.equals("dataFormat")) {
+          tf.facetFilter(buildRepoFilters(facetFilters, false));
+        } else {
+          tf.facetFilter(buildRepoFilters(facetFilters, true));
+        }
+      }
+
+      if (facet.equals("dataType") || facet.equals("dataFormat")) {
+        tf.nested("data_types");
+      }
+      fs.add(tf);
     }
-    return null;
+    return fs;
   }
 
   public StreamingOutput exportData(Query query) {
@@ -244,7 +264,7 @@ public class ExternalFileRepository {
   public SearchResponse findAll(Query query) {
     val kind = Kind.EXTERNAL_FILE;
     // val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
-    val filters = buildRepoFilters(query.getFilters());
+    val filters = buildRepoFilters(query.getFilters(), true);
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
@@ -259,7 +279,8 @@ public class ExternalFileRepository {
     if (sourceFields != EMPTY_SOURCE_FIELDS) {
       search.setFetchSource(resolveSourceFields(query, kind), EMPTY_SOURCE_FIELDS);
     }
-    val facets = getFacets(query, kind, FACETS, query.getFilters(), null, null);
+    // val facets = getFacets(query, kind, FACETS, query.getFilters(), null, null);
+    val facets = this.getRepoFacets(query.getFilters());
     for (val facet : facets) {
       search.addFacet(facet);
     }
