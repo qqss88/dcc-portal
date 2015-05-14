@@ -55,6 +55,8 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -165,6 +167,57 @@ public class ExternalFileRepository {
     }
 
     return termFilters;
+  }
+
+  public List<AggregationBuilder> aggs(ObjectNode filters) {
+    val aggs = Lists.<AggregationBuilder> newArrayList();
+    val typeMapping = FIELDS_MAPPING.get(KIND);
+
+    // General case
+    for (String facet : FACETS) {
+      val facetAgg = AggregationBuilders.filter(facet);
+      log.info(">>>>>>>>>>>>>>>>> {}", facet);
+      if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
+      String fieldName = typeMapping.get(facet);
+
+      if (filters.fieldNames().hasNext()) {
+        val facetFilters = filters.deepCopy();
+
+        // Remove one self
+        if (facetFilters.has(KIND.getId())) {
+          facetFilters.with(KIND.getId()).remove(facet);
+        }
+        log.info("Processing {}", fieldName);
+        facetAgg.filter(buildRepoFilters(facetFilters, true));
+        facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
+      } else {
+        facetAgg.filter(FilterBuilders.matchAllFilter());
+        facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
+      }
+      aggs.add(facetAgg);
+    }
+
+    // Special nested case
+    for (String facet : FACETS) {
+      String fieldName = typeMapping.get(facet);
+      if (facet.equals("dataType") || facet.equals("dataFormat")) {
+        // Remove one self
+        val facetFilters = filters.deepCopy();
+        if (facetFilters.has(KIND.getId())) {
+          facetFilters.with(KIND.getId()).remove(facet);
+        }
+        val nestedAgg = AggregationBuilders.filter(facet);
+        nestedAgg.filter(buildRepoFilters(facetFilters, true));
+        val t = AggregationBuilders.nested(facet).path("data_types");
+
+        t.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
+        nestedAgg.subAggregation(t);
+        aggs.add(nestedAgg);
+
+      }
+    }
+
+    return aggs;
   }
 
   /**
@@ -279,11 +332,16 @@ public class ExternalFileRepository {
     if (sourceFields != EMPTY_SOURCE_FIELDS) {
       search.setFetchSource(resolveSourceFields(query, kind), EMPTY_SOURCE_FIELDS);
     }
-    // val facets = getFacets(query, kind, FACETS, query.getFilters(), null, null);
-    val facets = this.getRepoFacets(query.getFilters());
-    for (val facet : facets) {
-      search.addFacet(facet);
+
+    val aggs = this.aggs(query.getFilters());
+    for (val agg : aggs) {
+      search.addAggregation(agg);
     }
+
+    // val facets = this.getRepoFacets(query.getFilters());
+    // for (val facet : facets) {
+    // search.addFacet(facet);
+    // }
 
     log.info(" !!! {}", search);
     val response = search.execute().actionGet();
