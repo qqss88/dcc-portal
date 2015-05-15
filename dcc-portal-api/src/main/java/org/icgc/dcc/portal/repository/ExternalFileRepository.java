@@ -210,9 +210,9 @@ public class ExternalFileRepository {
         val reverseAgg = AggregationBuilders.reverseNested(facet);
 
         termAgg.subAggregation(reverseAgg);
+
         nestedAgg.subAggregation(termAgg);
 
-        filterAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
         filterAgg.subAggregation(nestedAgg);
 
         globalAgg.subAggregation(filterAgg);
@@ -247,7 +247,6 @@ public class ExternalFileRepository {
     Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
     Nested nestedAgg = (Nested) filterAgg.getAggregations().get(name);
     Terms termAgg = (Terms) nestedAgg.getAggregations().get(name);
-    Missing missingAgg = (Missing) filterAgg.getAggregations().get("_missing");
 
     val termsBuilder = new ImmutableList.Builder<Term>();
 
@@ -259,11 +258,9 @@ public class ExternalFileRepository {
       int count = (int) reverseNestedAgg.getDocCount();
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
-    log.info("{} {}", "Missng", missingAgg.getDocCount());
-    termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
     log.info("");
 
-    return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
+    return TermFacet.repoTermFacet(0, termsBuilder.build());
   }
 
   // FIXME: Temporary code
