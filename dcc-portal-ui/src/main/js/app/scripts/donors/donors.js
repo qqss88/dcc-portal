@@ -39,14 +39,35 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings) {
+  module.controller('DonorCtrl',
+    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService) {
 
-    var _ctrl = this;
+    var _ctrl = this, promise;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
 
     _ctrl.donor = donor;
+
+
+    _ctrl.donor.clinicalXML = null;
+    promise = ExternalRepoService.getList({
+      filters: {
+        file: {
+          donorId: {is: [_ctrl.donor.id]},
+          dataFormat: { is: ['XML']}
+        }
+      }
+    });
+    promise.then(function(results) {
+      if (results.hits && results.hits[0]) {
+        var file = results.hits[0];
+        _ctrl.donor.clinicalXML = file.repositoryBaseURLs[0].replace(/\/$/, '') +
+          file.repositoryDataPath + file.repositoryEntityId;
+        console.log('repo xml is', _ctrl.donor.clinicalXML);
+      }
+    });
+
 
     _ctrl.downloadDonorData = function() {
       $modal.open({

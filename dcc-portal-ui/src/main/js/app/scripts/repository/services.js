@@ -21,7 +21,7 @@
 
   var module = angular.module('icgc.repository.services', []);
 
-  module.service('ExternalRepoService', function(Restangular, LocationService) {
+  module.service('ExternalRepoService', function(Restangular) {
 
     this.getList = function(params) {
       var defaults = {
@@ -49,16 +49,6 @@
     };
     */
 
-
-    // TODO
-    /*
-    this.getExternalFiles = function(filters) {
-    };
-
-    // TODO
-    this.getExternalFilesIndexedDate = function() {
-    };
-    */
 
     this.folder = function (path) {
       return Restangular.one('download', 'info' + path).get();

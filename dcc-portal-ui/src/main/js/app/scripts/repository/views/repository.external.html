@@ -6,20 +6,20 @@
                 data-facet-name="id"
                 data-label="File"></li>
             <terms data-type="file" data-facet-name="repositoryNames" 
-                   data-facet="ExternalRepoController.files.facets.repositoryNames"
+                   data-facet="ExternalRepoController.files.termFacets.repositoryNames"
                    data-label="Repository"></terms>
             <terms data-type="file" data-facet-name="study" 
                    data-label="Study"
-                   data-facet="ExternalRepoController.files.facets.study"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.study"></terms>
             <terms data-type="file" data-facet-name="dataType" 
                    data-label="Data Type"
-                   data-facet="ExternalRepoController.files.facets.dataType"></terms>
-            <terms data-type="file" data-facet-name="fileFormat" 
+                   data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
+            <terms data-type="file" data-facet-name="dataFormat" 
                    data-label="File Format"
-                   data-facet="ExternalRepoController.files.facets.fileFormat"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.dataFormat"></terms>
             <terms data-type="file" data-facet-name="access" 
                    data-label="Access"
-                   data-facet="ExternalRepoController.files.facets.access"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.access"></terms>
             <li data-tags-facet 
                 data-type="donor" 
                 data-facet-name="id" 
@@ -29,15 +29,15 @@
             <terms data-type="file" data-facet-name="projectCode" 
                    data-label="Project"
                    data-collapsed="true"
-                   data-facet="ExternalRepoController.files.facets.projectCode"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.projectCode"></terms>
             <terms data-type="file" data-facet-name="primarySite" 
                    data-label="Primary Site"
                    data-collapsed="true"
-                   data-facet="ExternalRepoController.files.facets.primarySite"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
             <terms data-type="file" data-facet-name="donorStudy" 
                    data-label="Donor Study"
                    data-collapsed="true"
-                   data-facet="ExternalRepoController.files.facets.donorStudy"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
         </ul>
     </div>
 </aside>
@@ -79,8 +79,8 @@
                 <th>Repository</th>
                 <th data-sortable data-type="files" data-field="projectCode">Project</th>
                 <th>Study</th>
-                <th data-sortable data-type="files" data-field="dataType">Data type</th>
-                <th data-sortable data-type="files" data-field="fileFormat">Format</th>
+                <th>Data type</th>
+                <th>Format</th>
                 <th data-sortable data-type="files" data-field="fileSize">Size</th>
             </thead>
             <tbody>
@@ -94,7 +94,7 @@
                     </td>
                     <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
                     <td>{{row.repositoryNames.join(',') }}</td>
-                    <td>{{row.projectCode}}</td>
+                    <td><a href="/projects/{{row.projectCode}}">{{row.projectCode}}</a></td>
                     <td>
                         <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
                         <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
@@ -106,7 +106,7 @@
                     </td>
                     <td>
                         <ul>
-                            <li data-ng-repeat="item in row.fileFormat track by $index">{{item}}</li>
+                            <li data-ng-repeat="item in row.dataFormat track by $index">{{item}}</li>
                         </ul>
                     </td>
                     <td>{{row.fileSize | bytes }}</td>

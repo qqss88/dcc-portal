@@ -137,7 +137,11 @@
     </div>
 </section>
 <section id="clinical">
-    <h3>Clinical Data</h3>
+    <h3>Clinical Data
+        <small class="pull-right" style="font-size: 1.0rem" data-ng-if="DonorCtrl.donor.clinicalXML">
+            <a href="{{DonorCtrl.donor.clinicalXML}}" target="_blank"><i class="icon-external-link"></i>TCGA Clinical XML</a>
+        </small>
+    </h3>
 
     <div class="half">
         <table class="table table-info">
