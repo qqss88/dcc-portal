@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.model;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,6 +43,13 @@ public class ExternalFiles extends Paginated {
   @JsonCreator
   public ExternalFiles(@JsonProperty("hits") List<ExternalFile> hits) {
     this.hits = hits;
+  }
+
+  // FIXME: Hack "facets"
+  Map<String, TermFacet> termFacets;
+
+  public void setTermFacets(Map<String, TermFacet> t) {
+    termFacets = t;
   }
 
 }
