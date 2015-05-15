@@ -23,7 +23,6 @@ import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
@@ -55,12 +54,20 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.filter.Filter;
+import org.elasticsearch.search.aggregations.bucket.global.Global;
+import org.elasticsearch.search.aggregations.bucket.missing.Missing;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
+import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.TermFacet;
+import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -161,6 +168,7 @@ public class ExternalFileRepository {
 
     // General case
     for (String facet : FACETS) {
+      val globalAgg = AggregationBuilders.global(facet);
       val facetAgg = AggregationBuilders.filter(facet);
       if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
       String fieldName = typeMapping.get(facet);
@@ -175,11 +183,14 @@ public class ExternalFileRepository {
         log.info("Processing {}", fieldName);
         facetAgg.filter(buildRepoFilters(facetFilters, true));
         facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
+        facetAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
       } else {
         facetAgg.filter(FilterBuilders.matchAllFilter());
         facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
+        facetAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
       }
-      aggs.add(facetAgg);
+      globalAgg.subAggregation(facetAgg);
+      aggs.add(globalAgg);
     }
 
     // Special nested case
@@ -191,14 +202,21 @@ public class ExternalFileRepository {
         if (facetFilters.has(KIND.getId())) {
           facetFilters.with(KIND.getId()).remove(facet);
         }
-        val nestedAgg = AggregationBuilders.filter(facet);
-        nestedAgg.filter(buildRepoFilters(facetFilters, true));
-        val t = AggregationBuilders.nested(facet).path("data_types");
+        val globalAgg = AggregationBuilders.global(facet);
+        val filterAgg = AggregationBuilders.filter(facet);
+        filterAgg.filter(buildRepoFilters(facetFilters, true));
+        val nestedAgg = AggregationBuilders.nested(facet).path("data_types");
+        val termAgg = AggregationBuilders.terms(facet).size(1024).field(fieldName);
+        val reverseAgg = AggregationBuilders.reverseNested(facet);
 
-        t.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
-        nestedAgg.subAggregation(t);
-        aggs.add(nestedAgg);
+        termAgg.subAggregation(reverseAgg);
+        nestedAgg.subAggregation(termAgg);
 
+        filterAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
+        filterAgg.subAggregation(nestedAgg);
+
+        globalAgg.subAggregation(filterAgg);
+        aggs.add(globalAgg);
       }
     }
 
@@ -206,34 +224,70 @@ public class ExternalFileRepository {
   }
 
   /**
-   * FIXME: This is just temporary
+   * FIXME: This is just temporary until PQL is in place, it does just enough to work.
    */
-  private List<TermsFacetBuilder> getRepoFacets(ObjectNode filters) {
-    val fs = Lists.<TermsFacetBuilder> newArrayList();
-    for (String facet : FACETS) {
-      val tf = FacetBuilders.termsFacet(facet).field(FIELDS_MAPPING.get(KIND).get(facet)).size(MAX_FACET_TERM_COUNT);
+  public Map<String, TermFacet> convertAggregations2Facets(Aggregations aggs) {
+    Map<String, TermFacet> result = Maps.<String, TermFacet> newHashMap();
+    for (Aggregation agg : aggs) {
+      val name = agg.getName();
 
-      if (filters.fieldNames().hasNext()) {
-        val facetFilters = filters.deepCopy();
-
-        // Remove one self
-        if (facetFilters.has(KIND.getId())) {
-          facetFilters.with(KIND.getId()).remove(facet);
-        }
-
-        if (facet.equals("dataType") || facet.equals("dataFormat")) {
-          tf.facetFilter(buildRepoFilters(facetFilters, false));
-        } else {
-          tf.facetFilter(buildRepoFilters(facetFilters, true));
-        }
+      if (name.equals("dataFormat") || name.equals("dataType")) {
+        result.put(name, convertNestedAggregation(agg));
+      } else {
+        result.put(name, convertNormalAggregation(agg));
       }
-
-      if (facet.equals("dataType") || facet.equals("dataFormat")) {
-        tf.nested("data_types");
-      }
-      fs.add(tf);
     }
-    return fs;
+    return result;
+  }
+
+  // FIXME: Temporary code
+  private TermFacet convertNestedAggregation(Aggregation agg) {
+    val name = agg.getName();
+    Global globalAgg = (Global) agg;
+    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
+    Nested nestedAgg = (Nested) filterAgg.getAggregations().get(name);
+    Terms termAgg = (Terms) nestedAgg.getAggregations().get(name);
+    Missing missingAgg = (Missing) filterAgg.getAggregations().get("_missing");
+
+    val termsBuilder = new ImmutableList.Builder<Term>();
+
+    log.info("Nested Facet {}", name);
+    for (val bucket : termAgg.getBuckets()) {
+      ReverseNested reverseNestedAgg = (ReverseNested) bucket.getAggregations().get(name);
+      log.info("{} {}", bucket.getKey(), reverseNestedAgg.getDocCount());
+
+      int count = (int) reverseNestedAgg.getDocCount();
+      termsBuilder.add(new Term(bucket.getKey(), count));
+    }
+    log.info("{} {}", "Missng", missingAgg.getDocCount());
+    termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
+    log.info("");
+
+    return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
+  }
+
+  // FIXME: Temporary code
+  private TermFacet convertNormalAggregation(Aggregation agg) {
+    val name = agg.getName();
+    Global globalAgg = (Global) agg;
+    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
+    Terms termAgg = (Terms) filterAgg.getAggregations().get(name);
+    Missing missingAgg = (Missing) filterAgg.getAggregations().get("_missing");
+
+    val termsBuilder = new ImmutableList.Builder<Term>();
+
+    log.info("Normal Facet {}", name);
+    for (val bucket : termAgg.getBuckets()) {
+      log.info("{} {}", bucket.getKey(), bucket.getDocCount());
+
+      int count = (int) bucket.getDocCount(); // FIXME: this is long to int
+      termsBuilder.add(new Term(bucket.getKey(), count));
+    }
+    log.info("{} {}", "Missng", missingAgg.getDocCount());
+    termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
+    log.info("");
+
+    return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
   }
 
   public StreamingOutput exportData(Query query) {

@@ -38,6 +38,20 @@ public class TermFacet {
   Long other;
   ImmutableList<Term> terms;
 
+  // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
+  public static TermFacet repoTermFacet(long missing, ImmutableList<Term> terms) {
+    return new TermFacet(missing, terms);
+  }
+
+  // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
+  private TermFacet(long missing, ImmutableList<Term> terms) {
+    this.type = "terms";
+    this.other = -1L;
+    this.total = -1L;
+    this.missing = missing;
+    this.terms = terms;
+  }
+
   public static TermFacet of(TermsFacet facet) {
     return new TermFacet(facet);
   }
