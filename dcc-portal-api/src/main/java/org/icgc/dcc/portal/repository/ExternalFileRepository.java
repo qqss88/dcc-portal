@@ -61,13 +61,11 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -109,18 +107,6 @@ public class ExternalFileRepository {
   ExternalFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
-  }
-
-  public static void main(String[] args) throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
-
-    // ObjectNode actualObj = (ObjectNode) mapper
-    // .readTree("{\"file\":{ \"dataType\":{ \"is\": [\"SSM\" ]}, \"dataFormat\": {\"is\": [\"XML\"]}, \"projectCode\":{ \"is\": [\"abc\", \"def\"]} }}");
-    ObjectNode actualObj = (ObjectNode) mapper
-        .readTree("{\"file\":{ \"dataFormat\": {\"is\": [\"XML\"]} }}");
-
-    log.info("   ==> {}", buildRepoFilters(actualObj, true));
-
   }
 
   /**
@@ -176,7 +162,6 @@ public class ExternalFileRepository {
     // General case
     for (String facet : FACETS) {
       val facetAgg = AggregationBuilders.filter(facet);
-      log.info(">>>>>>>>>>>>>>>>> {}", facet);
       if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
       String fieldName = typeMapping.get(facet);
 
@@ -256,7 +241,7 @@ public class ExternalFileRepository {
 
       @Override
       public void write(OutputStream os) throws IOException, WebApplicationException {
-        val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
+        val filters = buildRepoFilters(query.getFilters(), true);
         String headers[] = EXPORT_FIELDS.values().toArray(new String[EXPORT_FIELDS.values().size()]);
         String keys[] = EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]);
 
@@ -302,7 +287,6 @@ public class ExternalFileRepository {
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
     for (val key : map.keySet()) {
-      // if (key.equals("repository.repo_server.repo_name")) {
       if (ARRAY_FIELDS.contains(key)) {
         result.put(key, Joiner.on(StringUtils.COMMA).join((List<String>) map.get(key)));
       } else if (key.equals("repository.file_size")) {
