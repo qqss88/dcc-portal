@@ -218,122 +218,21 @@
     </div>
     <div class="clearfix"></div>
 
-
-    <div data-ng-if="DonorCtrl.donor.family">
-        <h3>Donor Family</h3>
-        <table class="table table-info">
-            <thead>
-                <tr>
-                    <th>Relative with cancer history</th>
-                    <th>Type</th>
-                    <th>Type other</th>
-                    <th>Sex</th>
-                    <th>Age</th>
-                    <th>Disease ICD10</th>
-                    <th>Disease</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-ng-repeat="f in DonorCtrl.donor.family">
-                    <td>{{f.donorHasRelativeWithCancerHistory}}</td>
-                    <td>{{f.relationshipType}}</td>
-                    <td>{{f.relationshipTypeOther}}</td>
-                    <td>{{f.relaltionshipSex}}</td>
-                    <td>{{f.relationshipAge}}</td>
-                    <td>{{f.relationshipDiseaseICD10}}</td>
-                    <td>{{f.relationshipDisease}}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div data-ng-init="supplementalCollapsed=true">
+       <span data-ng-show="DonorCtrl.hasSupplementalFiles(DonorCtrl.donor)">
+           <a href="" data-ng-click="supplementalCollapsed=!supplementalCollapsed">
+               Supplemental files: 
+               {{ DonorCtrl.donor.family? " " + DonorCtrl.donor.family.length + " Family, " : "" }}
+               {{ DonorCtrl.donor.exposure? " " + DonorCtrl.donor.exposure.length + " Exposure, " : "" }}
+               {{ DonorCtrl.donor.therapy? " " + DonorCtrl.donor.therapy.length + " Therapy" : "" }}
+               <i class="icon-caret-left" data-ng-if="supplementalCollapsed===true"></i>
+               <i class="icon-caret-down" data-ng-if="supplementalCollapsed===false"></i>
+           </a>
+       </span>
+       <div data-ng-include="'scripts/donors/views/donor.supplemental.html'"
+            data-ng-show="supplementalCollapsed === false"></div>
     </div>
-    <div class="clearfix"></div>
 
-
-    <div class="half" data-ng-if="DonorCtrl.donor.exposure">
-        <h3>Donor Exposure</h3>
-        <table class="table table-info" data-ng-init="exposure = DonorCtrl.donor.exposure[0]">
-            <tr>
-                <th>Exposure type</th>
-                <td>{{exposure.exposureType}}</td>
-            </tr>
-            <tr>
-                <th>Exposure intensity</th>
-                <td>{{exposure.exposureIntesity}}</td>
-            </tr>
-            <tr>
-                <th>Tobacco smoking history indicator</th>
-                <td>{{exposure.tabaccoSmokingHistoryIndicator}}</td>
-            </tr>
-            <tr>
-                <th>Tobacco smoking intensity</th>
-                <td>{{exposure.tabaccoSmokingIntensity}}</td>
-            </tr>
-            <tr>
-                <th>Alcohol history</th>
-                <td>{{exposure.alcoholHistory}}</td>
-            </tr>
-            <tr>
-                <th>Alcohol history intensity</th>
-                <td>{{exposure.alcoholHistoryIntensity}}</td>
-            </tr>
-        </table>
-    </div>
-    <div class="clearfix"></div>
-
-
-    <div class="half" data-ng-if="DonorCtrl.donor.therapy">
-        <h3>Donor Postresection Therapy</h3>
-        <table class="table table-info" data-ng-init="therapy = DonorCtrl.donor.therapy[0]">
-            <tr>
-                <th>First therapy type</th>
-                <td>{{therapy.firstTherapyType}}</td>
-            </tr>
-            <tr>
-                <th>First therapy therapeutic intent</th>
-                <td>{{therapy.firstTherapyTherapeuticIntent}}</td>
-            </tr>
-            <tr>
-                <th>First therapy start interval</th>
-                <td>{{therapy.firstTherapyStartInterval}}</td>
-            </tr>
-            <tr>
-                <th>First therapy duration</th>
-                <td>{{therapy.firstTherapyDuration}}</td>
-            </tr>
-            <tr>
-                <th>First therapy response</th>
-                <td>{{therapy.firstTherapyResponse}}</td>
-            </tr>
-            <tr>
-                <th>Second therapy type</th>
-                <td>{{therapy.secondTherapyType}}</td>
-            </tr>
-            <tr>
-                <th>Second therapy therapeutic intent</th>
-                <td>{{therapy.secondTherapyTherapeuticIntent}}</td>
-            </tr>
-            <tr>
-                <th>Second therapy start interval</th>
-                <td>{{therapy.secondTherapyStartInterval}}</td>
-            </tr>
-            <tr>
-                <th>Second therapy duration</th>
-                <td>{{therapy.secondTherapyDuration}}</td>
-            </tr>
-            <tr>
-                <th>Second therapy response</th>
-                <td>{{therapy.secondTherapyResponse}}</td>
-            </tr>
-            <tr>
-                <th>Other therapy</th>
-                <td>{{therapy.otherTherapy}}</td>
-            </tr>
-            <tr>
-                <th>Other therapy response</th>
-                <td>{{t.otherTherapyResponse}}</td>
-            </tr>
-        </table>
-    </div>
 </section>
 
 <section id="mutations"

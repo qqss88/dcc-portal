@@ -47,6 +47,10 @@
     Page.setPage('entity');
 
 
+    _ctrl.hasSupplementalFiles = function(donor) {
+      return donor.family || donor.exposure || donor.therapy;
+    };
+
     _ctrl.isPCAWG = function(donor) {
       return _.contains(donor.studies, 'PCAWG Study');
     };
