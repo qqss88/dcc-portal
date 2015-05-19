@@ -95,7 +95,6 @@ public class Keyword {
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
     ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.KEYWORD);
-    id = getString(fieldMap.get(fields.get("id")));
     type = getString(fieldMap.get(fields.get("type")));
     name = getString(fieldMap.get(fields.get("name")));
 
@@ -125,5 +124,13 @@ public class Keyword {
 
     url = getString(fieldMap.get(fields.get("url")));
     source = getString(fieldMap.get(fields.get("source")));
+
+    // Over write
+    if (type.equals("file")) {
+      id = getString(fieldMap.get(fields.get("file_name")));
+    } else {
+      id = getString(fieldMap.get(fields.get("id")));
+    }
+
   }
 }
