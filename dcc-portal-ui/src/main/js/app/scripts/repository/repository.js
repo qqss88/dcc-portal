@@ -126,7 +126,6 @@
 
     // Check if download is disabled or not
     function refresh() {
-      console.log('state', $stateParams);
       Settings.get().then(function(settings) {
         if (settings.downloadEnabled && settings.downloadEnabled === true) {
           buildBreadcrumbs();
@@ -168,8 +167,8 @@
     _ctrl.export = function() {
       console.log('export');
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
-      // $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
+      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
+      $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
       // Restangular.one('files').one('export').get({});
     };
 
@@ -246,19 +245,20 @@
 
     refresh();
 
+    $scope.$watch(function() { return LocationService.filters(); }, function(n) {
+      if ( n && _ctrl.selectedFiles.length > 0) {
+        _ctrl.undo();
+      }
+    }, true);
 
     $scope.$on('$locationChangeSuccess', function (event, next) {
       if (next.indexOf('repository') !== -1) {
+        // Undo existing selection if filters change
         refresh();
       }
     });
 
   });
-
-
-
-
-
 
 
 })();

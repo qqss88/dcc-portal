@@ -90,7 +90,7 @@
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                        <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
-                    <td style="max-width:30rem">
+                    <td style="max-width:30rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
                        {{row.fileName}}
                     </td>
