@@ -75,7 +75,7 @@ public class IndexModel {
     MUTATION("mutation"),
     RELEASE("release"),
     PATHWAY("pathway"),
-    GENE_SET("gene-set"), // FIXME: Double check name with Bob
+    GENE_SET("gene-set"),
     DONOR_CENTRIC("donor-centric"),
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
@@ -86,7 +86,8 @@ public class IndexModel {
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
-    GENESET_TEXT("gene-set-text"), // FIXME: Double check name with Bob
+    GENESET_TEXT("gene-set-text"),
+    EXTERNAL_FILE_TEXT("file-text"),
     PROJECT_TEXT("project-text");
 
     private final String id;
@@ -538,6 +539,9 @@ public class IndexModel {
 
           // GO Term
           .put("altIds", "altIds")
+
+          // File Repo
+          .put("file_name", "file_name")
 
           // Pathway
           // .put("url", "url")

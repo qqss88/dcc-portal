@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
+import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
@@ -64,6 +65,7 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
@@ -117,8 +119,9 @@ public class ExternalFileRepository {
   }
 
   /**
-   * FIXME: This is a temporary solution. We really should use the PQL infrastructure to build. Negation is not
-   * supported!
+   * FIXME: This is a temporary solution. We really should use the PQL infrastructure to build. <br>
+   * Negation is not supported <br>
+   * _missing is not supported for data_types.datatype and data_type.dataformat <br>
    */
   public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
     val termFilters = FilterBuilders.boolFilter();
@@ -145,12 +148,21 @@ public class ExternalFileRepository {
         nestedTerms.put(fieldName, items);
         continue;
       } else {
-        fb = termsFilter(fieldName, items);
+        val terms = termsFilter(fieldName, items);
+
+        // Special processing for "no data" terms
+        if (items.remove(IndexModel.MISSING)) {
+          val missing = missingFilter(fieldName).existence(true).nullValue(true);
+          fb = FilterBuilders.boolFilter().should(missing).should(terms);
+        } else {
+          fb = FilterBuilders.boolFilter().must(terms);
+        }
+
       }
       termFilters.must(fb);
     }
 
-    // Handle special case
+    // Handle special case. Datatype and Dataformat, note these should never have missing values
     if (!nestedTerms.isEmpty()) {
       val nestedBoolFilter = FilterBuilders.boolFilter();
       for (String fieldName : nestedTerms.keySet()) {
@@ -210,9 +222,9 @@ public class ExternalFileRepository {
         val reverseAgg = AggregationBuilders.reverseNested(facet);
 
         termAgg.subAggregation(reverseAgg);
+
         nestedAgg.subAggregation(termAgg);
 
-        filterAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
         filterAgg.subAggregation(nestedAgg);
 
         globalAgg.subAggregation(filterAgg);
@@ -247,7 +259,6 @@ public class ExternalFileRepository {
     Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
     Nested nestedAgg = (Nested) filterAgg.getAggregations().get(name);
     Terms termAgg = (Terms) nestedAgg.getAggregations().get(name);
-    Missing missingAgg = (Missing) filterAgg.getAggregations().get("_missing");
 
     val termsBuilder = new ImmutableList.Builder<Term>();
 
@@ -259,11 +270,9 @@ public class ExternalFileRepository {
       int count = (int) reverseNestedAgg.getDocCount();
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
-    log.info("{} {}", "Missng", missingAgg.getDocCount());
-    termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
     log.info("");
 
-    return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
+    return TermFacet.repoTermFacet(0, termsBuilder.build());
   }
 
   // FIXME: Temporary code
@@ -284,7 +293,9 @@ public class ExternalFileRepository {
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
     log.info("{} {}", "Missng", missingAgg.getDocCount());
-    termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
+    if (missingAgg.getDocCount() > 0) {
+      termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
+    }
     log.info("");
 
     return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
@@ -354,7 +365,7 @@ public class ExternalFileRepository {
 
   public SearchResponse findAll(Query query) {
     val kind = Kind.EXTERNAL_FILE;
-    // val filters = QueryService.buildFilters(query.getFilters(), Kind.EXTERNAL_FILE);
+
     val filters = buildRepoFilters(query.getFilters(), true);
     val search = client.prepareSearch(index)
         .setTypes("file")
@@ -375,11 +386,6 @@ public class ExternalFileRepository {
     for (val agg : aggs) {
       search.addAggregation(agg);
     }
-
-    // val facets = this.getRepoFacets(query.getFilters());
-    // for (val facet : facets) {
-    // search.addFacet(facet);
-    // }
 
     log.info(" !!! {}", search);
     val response = search.execute().actionGet();
