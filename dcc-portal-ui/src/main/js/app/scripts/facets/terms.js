@@ -32,6 +32,10 @@
       // Transltion on UI is slow, do in here
       $scope.actives.forEach(function(term) {
         term.label = $filter('trans')(term.term, true);
+        if (term.term === '_missing' && $scope.missingText) {
+          term.label = $scope.missingText;
+        }
+
         if ($scope.facetName === 'projectId') {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
@@ -52,6 +56,10 @@
       // Transltion on UI is slow, do in here
       $scope.inactives.forEach(function(term) {
         term.label = $filter('trans')(term.term, true);
+        if (term.term === '_missing' && $scope.missingText) {
+          term.label = $scope.missingText;
+        }
+
         if ($scope.facetName === 'projectId') {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
@@ -121,13 +129,18 @@
     return {
       restrict: 'E',
       scope: {
+        // Routing
+        type: '@',
         facetName: '@',
+
+        // Label
         label: '@',
         hideCount: '=',
         hideText: '@',
-        defined: '@',
-        type: '@',
+        missingText: '@',
+
         facet: '=',
+        defined: '@',
         collapsed: '@'
       },
       transclude: true,
