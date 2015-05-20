@@ -83,7 +83,7 @@ angular.module('template/sortable.html', []).run(function ($templateCache) {
 
 angular.module('template/pagination.html', []).run(function ($templateCache) {
   $templateCache.put('template/pagination.html',
-    '<div style="margin-top: 1rem"><div ng-if="data.hits.length"><span data-table-size data-type="{{ type }}"></span>' +
+    '<div style="margin-top: 1rem"><div ng-if="data.hits.length"><span data-table-size data-type="{{ type }}" data-current-size="{{data.pagination.size}}"></span>' +
     '<span ng-if="data.pagination.pages > 1" class="pull-right">' +
     '<div><ul class="pagination">' +
     '<li ng-repeat="page in pages" ng-class="{active: page.active, disabled: page.disabled}">' +

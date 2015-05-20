@@ -35,12 +35,6 @@
       return $state.current.data.tab;
     }, function () {
       _ctrl.currentTab = $state.current.data.tab || 'icgc';
-
-      // Default to 25 result rows if size is not specified
-      if ($state.current.data.tab === 'external' && _.isEmpty(LocationService.getJsonParam('files'))) {
-        console.log('setting default', LocationService.getJsonParam('files'));
-        LocationService.setParam('files', angular.toJson({size: 25}));
-      }
     });
 
     console.log('RepoisitoryController init');
@@ -220,6 +214,9 @@
     function refresh() {
       var promise, params = {};
       var filesParam = LocationService.getJsonParam('files');
+
+      // Default
+      params.size = 25;
 
       if (filesParam.from || filesParam.size) {
         params.from = filesParam.from;
