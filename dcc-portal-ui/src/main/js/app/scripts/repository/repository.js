@@ -23,7 +23,7 @@
   /**
    * This just controllers overall state
    */
-  module.controller('RepositoryController', function($scope, $location, $state, Page, LocationService) {
+  module.controller('RepositoryController', function($scope, $location, $state, Page) {
     var _ctrl = this;
 
     Page.setTitle('Data Repository');
