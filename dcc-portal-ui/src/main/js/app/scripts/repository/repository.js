@@ -23,21 +23,25 @@
   /**
    * This just controllers overall state
    */
-  module.controller('RepositoryController', function($scope, $state, Page) {
+  module.controller('RepositoryController', function($scope, $location, $state, Page, LocationService) {
     var _ctrl = this;
 
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
-    // _ctrl.currentTab = $state.current.data.tab || 'icgc';
 
 
     $scope.$watch(function () {
       return $state.current.data.tab;
     }, function () {
       _ctrl.currentTab = $state.current.data.tab || 'icgc';
-    });
 
+      // Default to 25 result rows if size is not specified
+      if ($state.current.data.tab === 'external' && _.isEmpty(LocationService.getJsonParam('files'))) {
+        console.log('setting default', LocationService.getJsonParam('files'));
+        LocationService.setParam('files', angular.toJson({size: 25}));
+      }
+    });
 
     console.log('RepoisitoryController init');
   });
@@ -219,7 +223,7 @@
 
       if (filesParam.from || filesParam.size) {
         params.from = filesParam.from;
-        params.size = filesParam.size || 10;
+        params.size = filesParam.size || 25;
       }
       if (filesParam.sort) {
         params.sort = filesParam.sort;
@@ -232,7 +236,6 @@
       // Get files that match query
       promise = ExternalRepoService.getList( params );
       promise.then(function(data) {
-        console.log('data', data);
         _ctrl.files = data;
       });
 

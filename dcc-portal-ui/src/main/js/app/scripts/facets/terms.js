@@ -123,7 +123,6 @@
       scope: {
         facetName: '@',
         label: '@',
-        capitalize: '@',
         hideCount: '=',
         hideText: '@',
         defined: '@',
