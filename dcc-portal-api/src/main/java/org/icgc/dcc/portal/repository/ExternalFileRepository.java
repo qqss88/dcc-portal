@@ -263,16 +263,18 @@ public class ExternalFileRepository {
     val termsBuilder = new ImmutableList.Builder<Term>();
 
     log.info("Nested Facet {}", name);
+    long total = 0;
     for (val bucket : termAgg.getBuckets()) {
       ReverseNested reverseNestedAgg = (ReverseNested) bucket.getAggregations().get(name);
       log.info("{} {}", bucket.getKey(), reverseNestedAgg.getDocCount());
 
       int count = (int) reverseNestedAgg.getDocCount();
+      total += count;
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
     log.info("");
 
-    return TermFacet.repoTermFacet(0, termsBuilder.build());
+    return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
   }
 
   // FIXME: Temporary code
@@ -286,10 +288,12 @@ public class ExternalFileRepository {
     val termsBuilder = new ImmutableList.Builder<Term>();
 
     log.info("Normal Facet {}", name);
+    long total = 0;
     for (val bucket : termAgg.getBuckets()) {
       log.info("{} {}", bucket.getKey(), bucket.getDocCount());
 
       int count = (int) bucket.getDocCount(); // FIXME: this is long to int
+      total += count;
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
     log.info("{} {}", "Missng", missingAgg.getDocCount());
@@ -298,7 +302,7 @@ public class ExternalFileRepository {
     }
     log.info("");
 
-    return TermFacet.repoTermFacet(missingAgg.getDocCount(), termsBuilder.build());
+    return TermFacet.repoTermFacet(total, missingAgg.getDocCount(), termsBuilder.build());
   }
 
   public StreamingOutput exportData(Query query) {

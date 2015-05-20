@@ -39,15 +39,15 @@ public class TermFacet {
   ImmutableList<Term> terms;
 
   // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
-  public static TermFacet repoTermFacet(long missing, ImmutableList<Term> terms) {
-    return new TermFacet(missing, terms);
+  public static TermFacet repoTermFacet(long total, long missing, ImmutableList<Term> terms) {
+    return new TermFacet(total, missing, terms);
   }
 
   // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
-  private TermFacet(long missing, ImmutableList<Term> terms) {
+  private TermFacet(long total, long missing, ImmutableList<Term> terms) {
     this.type = "terms";
     this.other = -1L;
-    this.total = -1L;
+    this.total = total;
     this.missing = missing;
     this.terms = terms;
   }
