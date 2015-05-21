@@ -81,6 +81,13 @@ public class Specimen {
   String tumourStageSupplemental;
   @ApiModelProperty(value = "Tumour Stage System", required = true)
   String tumourStageSystem;
+
+  @ApiModelProperty(value = "Percent cellularity", required = true)
+  String percentCellularity;
+
+  @ApiModelProperty(value = "Level of cellularity", required = true)
+  String levelOfCellularity;
+
   @ApiModelProperty(value = "Samples", required = true)
   List<Sample> samples;
 
@@ -109,6 +116,9 @@ public class Specimen {
     tumourStage = (String) fieldMap.get(fields.get("tumourStage"));
     tumourStageSupplemental = (String) fieldMap.get(fields.get("tumourStageSupplemental"));
     tumourStageSystem = (String) fieldMap.get(fields.get("tumourStageSystem"));
+    percentCellularity = (String) fieldMap.get(fields.get("percentCellularity"));
+    levelOfCellularity = (String) fieldMap.get(fields.get("levelOfCellularity"));
+
     samples = buildSamples((List<Object>) fieldMap.get("sample"));
   }
 

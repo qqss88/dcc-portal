@@ -1238,6 +1238,60 @@ input[type="button"].btn-block {
   border-top-right-radius: 3px;
 }
 
+/* line 7, bootstrap/_badges.scss */
+.badge {
+  display: inline-block;
+  min-width: 10px;
+  padding: 3px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  line-height: 1;
+  vertical-align: baseline;
+  white-space: nowrap;
+  text-align: center;
+  background-color: #777777;
+  border-radius: 10px;
+}
+/* line 22, bootstrap/_badges.scss */
+.badge:empty {
+  display: none;
+}
+/* line 27, bootstrap/_badges.scss */
+.btn .badge {
+  position: relative;
+  top: -1px;
+}
+/* line 33, bootstrap/_badges.scss */
+.btn-xs .badge, .btn-group-xs > .btn .badge, .btn-group-xs > .btn .badge {
+  top: 0;
+  padding: 1px 5px;
+}
+/* line 42, bootstrap/_badges.scss */
+.list-group-item.active > .badge, .nav-pills > .active > a > .badge {
+  color: #337ab7;
+  background-color: white;
+}
+/* line 47, bootstrap/_badges.scss */
+.list-group-item > .badge {
+  float: right;
+}
+/* line 51, bootstrap/_badges.scss */
+.list-group-item > .badge + .badge {
+  margin-right: 5px;
+}
+/* line 55, bootstrap/_badges.scss */
+.nav-pills > li > a > .badge {
+  margin-left: 3px;
+}
+
+/* line 63, bootstrap/_badges.scss */
+a.badge:hover, a.badge:focus {
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 @-webkit-keyframes progress-bar-stripes {
   /* line 11, bootstrap/_progress-bars.scss */
   from {

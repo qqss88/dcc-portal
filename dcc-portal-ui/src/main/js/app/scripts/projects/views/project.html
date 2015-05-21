@@ -74,6 +74,19 @@
                 </a>
             </td>
         </tr>
+        <tr>
+            <th>Number of Donors involved in Study</th>
+            <td>
+                <ul>
+                    <li data-ng-repeat="study in ProjectCtrl.studies">
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a> 
+                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
+                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+
     </table>
     <div data-ng-if="ProjectCtrl.hasExp"><h3>Experimental Analyses</h3>
         <table class="table table-info">
