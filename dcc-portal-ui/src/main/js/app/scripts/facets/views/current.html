@@ -4,7 +4,7 @@
             <button type="button" class="t_button t_current__remove_all" data-ng-click="Facets.removeAll()">
                 <i class="icon-undo"></i>
             </button>
-            <share-button></share-button>
+            <share-button data-ng-if="Page.page() !== 'repository'"></share-button>
         </li>
         <li data-ng-repeat="(typeName, type) in filters">
             <ul>

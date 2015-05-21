@@ -1,10 +1,4 @@
 <section style="padding-top:0">
-    <!--
-    <div class="alert alert-info" data-ng-if="slugs.length===0">
-        <p>Data Repository provides access to all ICGC cancer project data, including uniformly
-            processed/annotated data files.</p>
-    </div>
-    -->
 
     <div data-ng-repeat="file in ICGCRepoController.textFiles | filter:{name:'notice.txt'}" class="alert alert-error">
        <div btf-markdown="file.textContent" class="release_notice"></div>

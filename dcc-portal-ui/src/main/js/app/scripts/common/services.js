@@ -342,6 +342,13 @@
       'functionalImpact': 'Functional Impact',
       'sequencingStrategy': 'Analysis Type',
 
+      'repositoryNames': 'Repository',
+      'fileName': 'File',
+      'study': 'Study',
+      'dataFormat': 'File Format',
+      'dataType': 'Data Type',
+      'donorStudy': 'Donor Study',
+
       // Data Types
       'clinical': 'Clinical',
       'ssm': 'SSM',

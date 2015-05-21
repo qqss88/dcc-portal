@@ -44,6 +44,7 @@
     </div>
 </aside>
 <article style="position: relative;">
+        <current></current>
     <section style="padding-top:0">
         <div>
             <p>External repositories content indexed on {{ExternalRepoController.repoCreationTime | date}} <br>
@@ -83,7 +84,7 @@
             <thead>
                 <th>&nbsp;</th>
                 <th data-sortable data-type="files" data-field="fileName" data-active="true" data-reversed="true">File Name</th>
-                <th data-sortable data-type="files" data-field="donorId">ICGC Donor</th>
+                <th data-sortable data-type="files" data-field="donorId">Donor</th>
                 <th>Repository</th>
                 <th data-sortable data-type="files" data-field="projectCode">Project</th>
                 <th>Study</th>
@@ -101,7 +102,7 @@
                        {{row.fileName}}
                     </td>
                     <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
-                    <td>{{row.repositoryNames.join(',') }}</td>
+                    <td>{{row.repositoryNames.join(', ') }}</td>
                     <td><a href="/projects/{{row.projectCode}}">{{row.projectCode}}</a></td>
                     <td>
                         <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
