@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.model;
 
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -15,7 +16,6 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -103,13 +103,13 @@ public class Donor {
   @ApiModelProperty(value = "Prior Malignancy", required = true)
   String priorMalignancy;
 
-  @ApiModelProperty(value = "Cancer type prior Malignancy", required = true)
+  @ApiModelProperty(value = "Cancer Type Prior Malignancy", required = true)
   String cancerTypePriorMalignancy;
 
-  @ApiModelProperty(value = "Caner history first degree relative", required = true)
+  @ApiModelProperty(value = "Caner History First Degree Relative", required = true)
   String cancerHistoryFirstDegreeRelative;
 
-  @ApiModelProperty(value = "Study donor involved in", required = true)
+  @ApiModelProperty(value = "Study Donor Involved In", required = true)
   List<String> studies;
 
   @ApiModelProperty(value = "Specimen")
@@ -178,37 +178,21 @@ public class Donor {
 
   private List<Exposure> buildExposure(List<Map<String, Object>> field) {
     if (field == null) return null;
-    val lst = Lists.<Exposure> newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Exposure(item));
-    }
-    return lst;
+    return field.stream().map(Exposure::new).collect(toImmutableList());
   }
 
   private List<Family> buildFamily(List<Map<String, Object>> field) {
     if (field == null) return null;
-    val lst = Lists.<Family> newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Family(item));
-    }
-    return lst;
+    return field.stream().map(Family::new).collect(toImmutableList());
   }
 
   private List<Therapy> buildTherapy(List<Map<String, Object>> field) {
     if (field == null) return null;
-    val lst = Lists.<Therapy> newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Therapy(item));
-    }
-    return lst;
+    return field.stream().map(Therapy::new).collect(toImmutableList());
   }
 
   private List<Specimen> buildSpecimen(List<Map<String, Object>> field) {
     if (field == null) return null;
-    val lst = Lists.<Specimen> newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Specimen(item));
-    }
-    return lst;
+    return field.stream().map(Specimen::new).collect(toImmutableList());
   }
 }

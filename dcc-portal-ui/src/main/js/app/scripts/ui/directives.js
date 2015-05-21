@@ -273,6 +273,6 @@ angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
   return {
     restrict: 'E',
     replace: true,
-    template: '<span style="font-size: 0.5rem" class="badge">PCAWG</span>'
+    template: '<span class="badge pcawg-badge">PCAWG</span>'
   };
 });
