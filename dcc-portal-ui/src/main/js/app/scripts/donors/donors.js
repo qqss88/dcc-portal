@@ -40,12 +40,21 @@
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
   module.controller('DonorCtrl',
-    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService) {
+    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG) {
 
     var _ctrl = this, promise;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
+
+
+    _ctrl.hasSupplementalFiles = function(donor) {
+      return donor.family || donor.exposure || donor.therapy;
+    };
+
+    _ctrl.isPCAWG = function(donor) {
+      return _.any(donor.studies, PCAWG.isPCAWGStudy);
+    };
 
     _ctrl.donor = donor;
 
@@ -185,8 +194,12 @@
     refresh();
   });
 
-  module.controller('DonorSpecimenCtrl', function (Donors) {
+  module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
     var _ctrl = this;
+
+    _ctrl.isPCAWG = function(specimen) {
+      return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);
+    };
 
     _ctrl.setActive = function (id) {
       Donors.one().get({include: 'specimen'}).then(function (donor) {
