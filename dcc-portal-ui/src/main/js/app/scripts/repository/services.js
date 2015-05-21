@@ -35,6 +35,13 @@
       return Restangular.one('files').one('metadata').get({});
     };
 
+    this.shortenFileName = function(txt) {
+      if (txt.length > 40) {
+         return txt.substring(0, 25) + '...' + txt.substring(txt.length, txt.length-4);
+      }
+      return txt;
+    };
+
   });
 
 

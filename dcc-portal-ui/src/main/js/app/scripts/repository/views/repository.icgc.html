@@ -19,7 +19,7 @@
 
         <div data-ng-if="ICGCRepoController.files">
             <ul class="breadcrumb" style="background:#fff;font-size:1.25rem; margin-bottom:0">
-                <li><a href="/repository/icgc">ICGC</a></li>
+                <li><a href="/repository/icgc"><i class="icon-database"></i>DCC</a></li>
                 <li data-ng-repeat="p in ICGCRepoController.slugs">
                     <a data-ng-if="!$last"
                        data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}"

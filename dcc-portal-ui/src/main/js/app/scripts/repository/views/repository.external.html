@@ -54,19 +54,11 @@
         </div>
         <div style="margin-bottom:0.5rem">
             <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                <i class="icon-download"></i>Download manifests {{ ExternalRepoController.selectedFiles.length === 0? '( All )' : '( ' + ExternalRepoController.selectedFiles.length + ' files )'}}
+                <i class="icon-download"></i>Download manifests (
+                  {{ ExternalRepoController.selectedFiles.length === 0?  ExternalRepoController.files.pagination.total : ExternalRepoController.selectedFiles.length | number}}
+
+                  files )
             </button>
-            <button class="t_button" 
-               data-ng-disabled="ExternalRepoController.selectedFiles.length === 0"
-               data-ng-click="ExternalRepoController.undo()">
-               Undo selection
-            </button>
-            <!--
-            <button class="t_button" data-ng-click="ExternalRepoController.undo()"
-                data-ng-disabled="ExternalRepoController.selectedFiles.length === 0">
-                <i class="icon-undo"></i>
-            </button>
-            -->
         </div>
 
         <div class="t_table_top">
@@ -97,7 +89,7 @@
                     <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                        <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
                     </td>
-                    <td style="max-width:30rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
+                    <td style="max-width:28rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
                        {{row.fileName}}
                     </td>
