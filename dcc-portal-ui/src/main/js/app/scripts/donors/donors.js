@@ -39,7 +39,7 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings) {
+  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings, PCAWG) {
 
     var _ctrl = this;
 
@@ -52,7 +52,7 @@
     };
 
     _ctrl.isPCAWG = function(donor) {
-      return _.contains(donor.studies, 'PCAWG Study');
+      return _.any(donor.studies, PCAWG.isPCAWGStudy);
     };
 
     _ctrl.donor = donor;
@@ -173,11 +173,11 @@
     refresh();
   });
 
-  module.controller('DonorSpecimenCtrl', function (Donors) {
+  module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
     var _ctrl = this;
 
     _ctrl.isPCAWG = function(specimen) {
-      return _.contains( _.pluck(specimen.samples, 'study'), 'PCAWG Study');
+      return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);
     };
 
     _ctrl.setActive = function (id) {
