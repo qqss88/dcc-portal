@@ -95,6 +95,10 @@ public class ElasticsearchRequestUtils {
       sourceFields.add("specimen");
     }
 
+    sourceFields.add("family");
+    sourceFields.add("exposure");
+    sourceFields.add("therapy");
+
     return sourceFields;
   }
 
