@@ -23,6 +23,10 @@ import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
@@ -204,6 +208,15 @@ public class ExternalFileRepository {
       globalAgg.subAggregation(facetAgg);
       aggs.add(globalAgg);
     }
+
+    // Special filtered case - reponames, do not exclude self filtering
+    val repoFiltered = "repositoryNamesFiltered";
+    val field = typeMapping.get("repositoryNames");
+    aggs.add(global(repoFiltered)
+        .subAggregation(filter(repoFiltered)
+            .filter(buildRepoFilters(filters.deepCopy(), true))
+            .subAggregation(terms(repoFiltered).size(1024).field(field))
+            .subAggregation(missing("_missing").field(field))));
 
     // Special nested case
     for (String facet : FACETS) {
