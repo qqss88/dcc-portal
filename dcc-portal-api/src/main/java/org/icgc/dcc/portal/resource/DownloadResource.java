@@ -529,7 +529,11 @@ public class DownloadResource {
       log.error("Permission Denied", e);
     }
 
-    long contentLength = fs.getSize(downloadFile);
+    if (!hasValidPermission) {
+      throw new NotFoundException(filePath, "download");
+    }
+
+    val contentLength = fs.getSize(downloadFile);
 
     if (range != null) {
       val rangeHeader = parseRange(range, contentLength);
@@ -539,13 +543,9 @@ public class DownloadResource {
           .header(CONTENT_RANGE, rangeHeader);
     }
 
-    if (hasValidPermission) {
-      archiveStream = archiveStream(downloadFile, getFromByte(range));
-      rb.header(CONTENT_LENGTH, contentLength);
-      filename = downloadFile.getName();
-    } else {
-      throw new NotFoundException(filePath, "download");
-    }
+    archiveStream = archiveStream(downloadFile, getFromByte(range));
+    rb.header(CONTENT_LENGTH, contentLength);
+    filename = downloadFile.getName();
 
     return rb.entity(archiveStream).type(getFileMimeType(filename))
         .header(CONTENT_DISPOSITION,

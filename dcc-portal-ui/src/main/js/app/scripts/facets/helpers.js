@@ -175,7 +175,7 @@
       filters = LocationService.filters();
 
       function filterFn(active) {
-        return _.findWhere(params.terms, function (term) {
+        return _.find(params.terms, function (term) {
           return term.term === active;
         }) || { term: active, count: 0};
       }

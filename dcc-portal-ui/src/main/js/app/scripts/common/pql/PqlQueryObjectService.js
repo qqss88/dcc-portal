@@ -29,14 +29,14 @@
   var module = angular.module(namespace, []);
 
   module.factory(serviceName, function (PqlTranslationService) {
+    var defaultProjection = ['*'];
 
     function getEmptyQueryObject () {
       return {
         params: {
-          // For query object, we always enforce the 'select' function.
-          // In fact, this is translated to 'select(*)' in PQL as we don't support
-          // column projection from the UI.
-          select: true,
+          // For UI, selectAll should always be true. This is translated to 'select(*)' in PQL.
+          selectAll: true,
+          customSelects: [],
           facets: false,
           sort: [],
           limit: {}
@@ -63,6 +63,7 @@
     var isAndNode = _.partial (isNode, 'and');
     var isSortNode = _.partial (isNode, 'sort');
     var isLimitNode = _.partial (isNode, 'limit');
+    var isSelectNode = _.partial (isNode, 'select');
     var isFacetsNode = _.partial (isNode, 'facets');
 
     function parseIdentifier (id) {
@@ -75,12 +76,12 @@
       return (category && facet) ? {category: category, facet: facet} : null;
     }
 
+    // For our current need, we should only expect two operators, namely 'in' and 'eq'.
+    var supportedOps = ['in', 'eq'];
+
     function reduceFilterArrayToQueryFilters (result, node) {
       if (! node) {return result;}
-
-      // For our current need, we should only expect two operators, namely 'in' and 'eq'.
-      var op = node.op || '';
-      if (op !== 'in' && op !== 'eq') {return result;}
+      if (! _.contains (supportedOps, node.op)) {return result;}
 
       var values = node.values || [];
       if (values.length < 1) {return result;}
@@ -102,27 +103,37 @@
     }
 
     function removeOp (jsonObject) {
-      delete (jsonObject || {}).op;
-      return jsonObject;
+      return _.omit (jsonObject, 'op');
     }
 
     function convertJsonTreeToQueryObject (treeArray) {
       var result = getEmptyQueryObject();
 
-      // Currently we expect the input (treeArray) to be an array,
-      // namely we don't support/expect 'count' yet.
-      var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
-      // For our current need, there should always be one 'And' node.
-      var filterValues = andNode ? (andNode.values || []) : treeArray;
+      // In this context, we expect the input (treeArray) to be an array,
+      // namely we don't expect 'count' in this case.
+      if (! _.isArray (treeArray)) {return result;}
 
+      var andNode = getSpecialNodeFromTreeArray (treeArray, isAndNode);
+      // For our current need, there should be only one 'And' node if one exists.
+      var filterValues = andNode ? (_.isArray (andNode.values) ? andNode.values : []) : treeArray;
       result.filters = _.reduce (filterValues, reduceFilterArrayToQueryFilters, {});
+
+      var customSelectsNode = getSpecialNodeFromTreeArray (treeArray, function (node) {
+        return isSelectNode (node) &&
+          _.isArray (node.values) &&
+          ! _.isEqual (node.values, defaultProjection);
+      });
+
+      if (customSelectsNode) {
+        result.params.customSelects = customSelectsNode.values;
+      }
 
       // Again, currently the UI doesn't care about projection on facets so we treat any 'facets' as 'facets(*)'
       result.params.facets = (null !== getSpecialNodeFromTreeArray (treeArray, isFacetsNode));
 
       var sortNode = getSpecialNodeFromTreeArray (treeArray, isSortNode);
       // The values field in a 'sort' node contains an array of sort fields.
-      result.params.sort = sortNode ? (sortNode.values || []) : [];
+      result.params.sort = (sortNode && _.isArray (sortNode.values)) ? sortNode.values : [];
 
       var limitNode = getSpecialNodeFromTreeArray (treeArray, isLimitNode);
       result.params.limit = limitNode ? removeOp (limitNode) : {};
@@ -131,23 +142,58 @@
     }
 
     function removeEmptyObject (collection) {
-      return _.filter (collection, function (o) {
-        return (! _.isEqual (o, {}));
-      });
+      return _.without (collection, {});
+    }
+
+    function createSelectTreeNodeObject (values) {
+      return {
+          op: 'select',
+          values: values
+        };
+    }
+
+    function createCountTreeNodeObject (values) {
+      return {
+        op: 'count',
+        values: values
+      };
+    }
+
+    // Here the 'func' param is optional. It should be a function that further transforms or
+    // augments filter array.
+    function toFilterOnlyStatement (pql, func) {
+      var query = convertPqlToQueryObject (pql);
+      var filters = query.filters;
+
+      if (! _.isPlainObject (filters) || _.isEmpty (filters)) {return '';}
+
+      var filterArray = convertQueryFilterToJsonTree (filters);
+      var pqlJson = _.isFunction (func) ? func (filterArray) : filterArray;
+
+      return PqlTranslationService.toPql (pqlJson);
+    }
+
+    function toCountStatement (pql) {
+      return toFilterOnlyStatement (pql, createCountTreeNodeObject);
     }
 
     function convertQueryObjectToJsonTree (query) {
-      // Result should be an array because, for now, the UI does not need/support 'count'
+      // Result, in this context, should be an array. Count statement (which is represented as an object)
+      // is handled/generated by toCountStatement().
       var result = [];
       var queryParams = query.params || {};
 
-      if (queryParams.select) {
-        result.push ({
-          op: 'select',
-          values: ['*']
-        });
+      // Selects
+      if (queryParams.selectAll) {
+        result.push (createSelectTreeNodeObject (defaultProjection));
       }
 
+      var customProjection = queryParams.customSelects;
+      if (_.isArray (customProjection) && ! _.isEmpty (customProjection)) {
+        result.push (createSelectTreeNodeObject (customProjection));
+      }
+
+      // Facets
       if (queryParams.facets) {
         result.push ({
           op: 'facets',
@@ -155,8 +201,10 @@
         });
       }
 
+      // Filters
       result = result.concat (convertQueryFilterToJsonTree (query.filters));
 
+      // Sort
       var sort = queryParams.sort || [];
       if (! _.isEmpty (sort)) {
         result.push ({
@@ -165,6 +213,7 @@
         });
       }
 
+      // Limit
       var limit = queryParams.limit || {};
       if (! _.isEmpty (limit)) {
         limit.op = 'limit';
@@ -245,11 +294,9 @@
 
         if (_.contains (facetKeys, facetName)) {
           var inValueArray = queryFilter [categoryName][facetName][inField] || [];
-          queryFilter [categoryName][facetName][inField] = _.remove (inValueArray, function (s) {
-            return s !== term;
-          });
+          queryFilter [categoryName][facetName][inField] = _.without (inValueArray, term);
 
-          if (queryFilter [categoryName][facetName][inField].length < 1) {
+          if ((queryFilter [categoryName][facetName][inField]).length < 1) {
             queryFilter = removeFacetFromQueryFilter (categoryName, facetName, null, queryFilter);
           }
         }
@@ -278,6 +325,37 @@
 
     function includesFacets (pql) {
       return updateQueryParam (pql, 'facets', true);
+    }
+
+    var validIncludeFields = ['transcripts', 'consequences', 'occurrences',
+      'specimen', 'observation', 'projects'];
+
+    function addProjections (pql, fields) {
+      fields = _.isArray (fields) ? fields : [];
+      var selectFields = _.remove (fields, function (s) {
+        return _.isString (s) && _.contains (validIncludeFields, s);
+      });
+
+      if (_.isEmpty (selectFields)) {return pql;}
+
+      var query = convertPqlToQueryObject (pql);
+      var paramName = 'customSelects';
+      var customSelects = query.params [paramName];
+      var updatedSelects = _.union (customSelects, selectFields);
+
+      var asterisk = defaultProjection[0];
+      return updateQueryParam (pql, paramName, _.without (updatedSelects, asterisk));
+    }
+
+    function addProjection (pql, selectField) {
+      var asterisk = defaultProjection[0];
+      if (asterisk === selectField) {return pql;}
+
+      return addProjections (pql, [selectField]);
+    }
+
+    function includes (pql, field) {
+      return (_.isArray (field) ? addProjections : addProjection) (pql, field);
     }
 
     function convertQueryObjectToPql (queryObject) {
@@ -323,10 +401,7 @@
         return _.isString (s) ? s.trim() : emptyValue;
       });
 
-      var pqlArray = _.unique (_.filter (args, function (s) {
-        return s !== emptyValue;
-      }));
-
+      var pqlArray = _.unique (_.without (args, emptyValue));
       var numberOfPql = pqlArray.length;
 
       if (numberOfPql < 1) {return emptyValue;}
@@ -368,6 +443,9 @@
           [removeFacetFromQueryFilter, _.isArray (term) ? addMultipleTermsToQueryFilter : addTermToQueryFilter]);
       },
       includesFacets: includesFacets,
+      includes: includes,
+      toCountStatement: toCountStatement,
+      toFilterOnlyStatement: toFilterOnlyStatement,
       convertQueryToPql: convertQueryObjectToPql,
       convertPqlToQueryObject: convertPqlToQueryObject,
       mergePqls: mergePqlStatements,

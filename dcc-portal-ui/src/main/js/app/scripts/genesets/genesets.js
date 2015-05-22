@@ -218,7 +218,7 @@
             });
 
             _ctrl.donorBar = HighchartsService.bar({
-              hits: _.first(_.sortBy(projects.hits, function (p) {
+              hits: _.take(_.sortBy(projects.hits, function (p) {
                 return -p.uiAffectedDonorPercentage;
               }), 10),
               xAxis: 'id',
@@ -233,7 +233,7 @@
             });
 
             _ctrl.geneBar = HighchartsService.bar({
-              hits: _.first(_.sortBy(projects.hits, function (p) {
+              hits: _.take(_.sortBy(projects.hits, function (p) {
                 return -p.uiAffectedGenePercentage;
               }),10),
               xAxis: 'id',

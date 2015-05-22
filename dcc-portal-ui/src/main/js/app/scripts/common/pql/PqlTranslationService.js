@@ -41,7 +41,7 @@
     }
 
     function convertNodeToPqlString (unit) {
-      if (! _.isObject(unit)) {
+      if (! _.isPlainObject (unit)) {
         return _.isString (unit) ? addQuotes (unit) : '' + unit;
       }
 
@@ -53,10 +53,8 @@
         return sortUnitToPql (unit);
       }
 
-      var vals = unit.values || [];
-      var values = _.contains (noNestingOperators, op) ?
-        vals.join() :
-        vals.map(convertNodeToPqlString).join();
+      var vals = _.isArray (unit.values) ? unit.values : [];
+      var values = (_.contains (noNestingOperators, op) ? vals : vals.map(convertNodeToPqlString)).join();
 
       var parameters = unit.field || '';
 
@@ -76,7 +74,6 @@
     }
 
     function limitUnitToPql (limit) {
-      if (! limit) {return '';}
       if (! _.isPlainObject (limit)) {return '';}
       if (_.isEqual ({op: 'limit'}, limit)) {return '';}
 
@@ -88,10 +85,9 @@
 
     function sortUnitToPql (sort) {
       if (! sort) {return '';}
-      if (! sort.values) {return '';}
+      if (! _.isArray (sort.values)) {return '';}
 
       var sortArray = sort.values;
-      if (! _.isArray (sortArray)) {return '';}
       if (sortArray.length < 1) {return '';}
 
       var values = sortArray.map (function (obj) {
@@ -115,7 +111,7 @@
           _.filter (parseTree.map (convertNodeToPqlString), function (s) {
             return s.trim().length > 1;
           }).join() :
-          _.isObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
+          _.isPlainObject (parseTree) ? convertNodeToPqlString (parseTree) : null;
 
         if (result === null) {
           LOGGER.warn ('The input is neither an array nor an object: [%s]. toPql() is returning an empty string.',

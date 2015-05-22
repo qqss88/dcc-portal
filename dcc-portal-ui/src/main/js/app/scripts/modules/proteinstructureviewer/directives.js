@@ -103,7 +103,7 @@
 
       if (mutations.hits) {
         mutations.hits.forEach(function (mutation) {
-          var transcript = _.findWhere(mutation.transcripts, function (t) {
+          var transcript = _.find(mutation.transcripts, function (t) {
             return t.id === transcriptId;
           });
           var start = transcript.consequence.aaMutation.replace(/[^\d]/g, '');

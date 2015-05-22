@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -166,7 +166,7 @@
                 var uiFIProjects = [];
 
                 geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.findWhere( data.hits, function(p) {
+                  var proj = _.find( data.hits, function(p) {
                     return p.id === t.term;
                   });
 
@@ -222,12 +222,16 @@
     refresh();
   });
 
-  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API, ExternalLinks) {
+  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project,
+    Donors, Mutations, API, ExternalLinks, PCAWG) {
+
     var _ctrl = this;
     Page.setTitle(project.id);
     Page.setPage('entity');
 
     _ctrl.hasExp = !_.isEmpty(project.experimentalAnalysisPerformedSampleCounts);
+    _ctrl.isPCAWG = PCAWG.isPCAWGStudy;
+
 
     _ctrl.project = project;
     _ctrl.ExternalLinks = ExternalLinks;
@@ -257,8 +261,31 @@
         size: 0,
         include: ['facets']
       };
+
+      // Get mutation impact for side panel
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
+      });
+
+      // Get study facets for summay section
+      Donors.getList(params).then(function(d) {
+        _ctrl.studies = d.facets.studies.terms || [];
+
+        // Remove no-data term
+        _.remove(_ctrl.studies, function(t) {
+          return t.term === '_missing';
+        });
+
+        // Link back to adv page
+        _ctrl.studies.forEach(function(t) {
+          t.advQuery = {
+            donor: {
+              projectId: {is: [project.id]},
+              studies: {is: [t.term]}
+            }
+          };
+
+        });
       });
     }
 
@@ -556,7 +583,7 @@
       var pub = {}, json = X2JS.xml_str2json(xml).eSummaryResult.DocSum;
 
       function get(field) {
-        return _.findWhere(json.Item, function (o) {
+        return _.find(json.Item, function (o) {
           return o._Name === field;
         }).__text;
       }
@@ -566,7 +593,7 @@
       pub.journal = get('FullJournalName');
       pub.issue = get('Issue');
       pub.pubdate = get('PubDate');
-      pub.authors = _.pluck(_.findWhere(json.Item, function (o) {
+      pub.authors = _.pluck(_.find(json.Item, function (o) {
         return o._Name === 'AuthorList';
       }).Item, '__text');
       pub.refCount = parseInt(get('PmcRefCount'), 10);

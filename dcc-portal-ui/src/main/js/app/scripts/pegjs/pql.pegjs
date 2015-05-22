@@ -66,12 +66,12 @@
 
 start = core
 
-core 
+core
   = statementArray
   / orderedStatementArray
   / countStatement
 
-statementArray 
+statementArray
   = first:(s: statement COMMA {return s;})* last: statement {return first.concat (last);}
   / first:(s: statement COMMA {return s;})* last: limitFilter {return first.concat (last);}
   / first:(s: statement COMMA {return s;})* last: orderAndLimitFilter {return first.concat(last);}
@@ -80,21 +80,22 @@ orderedStatementArray
   = first:(s: statement COMMA {return s;})* last: orderFilter {return first.concat (last);}
 
 countStatement
-  = count: COUNT COMMA first:(s: statement COMMA {return s;})* last: statement 
+  = count: COUNT COMMA first:(s: filters COMMA {return s;})* last: filters
     {return toBasicUnit (first.concat (last), "count");}
 
-
-statement
+filters
   = uniFunc
   / binFuncSyntax1
   / binFuncSyntax2
   / inFilter
   / naryFuncSyntax1
   / naryFuncSyntax2
-  / functions
   / not
   / nested
 
+statement
+  = filters
+  / functions
 
 
 stringArgArray
@@ -188,7 +189,7 @@ naryFuncSyntax2
 
 
 orderArray
-  = first:(s:SIGNED_ID COMMA {return s;})* last:SIGNED_ID {return first.concat(last);} 
+  = first:(s:SIGNED_ID COMMA {return s;})* last:SIGNED_ID {return first.concat(last);}
 
 orderFilter
   = _ o:"sort" OPAR list: orderArray CPAR
@@ -227,14 +228,14 @@ DECIMAL_POINT = "."
 OPAR = _ "(" _
 CPAR = _ ")" _
 
-ID 
+ID
   = first: [a-zA-Z_] rest: [a-zA-Z_0-9.]*
     {return headJoinsTail (first, rest);}
 
 
 CHAR = [ a-zA-Z.0-9_:!()@#$%^&=+{}|\-,.<>?/~`]
 
-STRING 
+STRING
   = _ DOUBLE_QUOTE first: CHAR rest: CHAR* DOUBLE_QUOTE _
     {return headJoinsTail (first, rest);}
   / _ SINGLE_QUOTE first: CHAR rest: CHAR* SINGLE_QUOTE _
@@ -258,9 +259,9 @@ return (sign === "-") ? (num * -1) : num;
 
 
 INT
-  = digits: [0-9]+ 
+  = digits: [0-9]+
     { var num = parseInt (digits.join(""), 10); return num;}
- 
+
 // Whitespaces
 _ = [ \r\n\t]*
 
