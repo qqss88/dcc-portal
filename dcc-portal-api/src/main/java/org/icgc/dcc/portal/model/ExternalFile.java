@@ -44,9 +44,12 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Slf4j
 public class ExternalFile {
 
+  @ApiModelProperty(value = "Id", required = true)
+  String id;
+
   /* File fields */
   @ApiModelProperty(value = "Repo entity id", required = true)
-  String repositoryEntityId; // Used as file identifier
+  String repositoryEntityId;
 
   @ApiModelProperty(value = "Repo name", required = true)
   List<String> repositoryNames;
@@ -92,6 +95,8 @@ public class ExternalFile {
   @JsonCreator
   public ExternalFile(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
+
+    id = getString(fieldMap.get(fields.get("id")));
 
     repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));
     repositoryDataPath = getString(fieldMap.get(fields.get("repositoryDataPath")));
