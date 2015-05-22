@@ -18,8 +18,10 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
-import static org.icgc.dcc.common.core.util.FormatUtils.formatBytes;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+import static org.icgc.dcc.common.core.util.Joiners.SLASH;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -28,21 +30,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
 import javax.ws.rs.core.StreamingOutput;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -56,17 +64,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ExternalFileService {
 
-  // This constant is only used as a "magic number" when allocating initial size for ByteArrayOutputStream.
-  private static final int ESTIMATED_ROW_BYTE_COUNT = 256;
-  private static final String MANIFEST_FILE_NAME_SUFFIX = ".tsv";
+  private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
+  private static final String GNOS_REPO = "GNOS";
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final ObjectReader READER = MAPPER.reader();
+  private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
+      .constructMapType(Map.class, String.class, String.class);
 
   private final ExternalFileRepository externalFileRepository;
 
@@ -87,7 +108,7 @@ public class ExternalFileService {
 
     val list = ImmutableList.<ExternalFile> builder();
 
-    for (SearchHit hit : hits) {
+    for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
       fieldMap.put("_id", hit.getId());
       list.add(new ExternalFile(fieldMap));
@@ -102,23 +123,195 @@ public class ExternalFileService {
   }
 
   @NonNull
-  private static void writeRowsToStream(Iterable<SimpleImmutableEntry<String, List<String>>> rows,
-      OutputStream outputStream)
-      throws IOException {
-    @Cleanup
-    val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
+  public void generateManifestArchive(OutputStream output, Date timestamp, Query query)
+      throws JsonProcessingException, IOException {
+    // FIXME - find the appropriate value or another way to set the proper size.
+    val maxRecordCount = 1000000;
+    query.setLimit(maxRecordCount);
 
-    for (val row : rows) {
-      writer.write(row.getValue());
+    final String[] fields = new String[] {
+        FieldNames.REPO_TYPE,
+        FieldNames.REPO_ID,
+        FieldNames.DATA_PATH,
+        FieldNames.FILE_NAME,
+        FieldNames.FILE_SIZE,
+        FieldNames.CHECK_SUM
+    };
+
+    val esResponse = externalFileRepository.findDownloadInfo(query, fields, FieldNames.REPO_TYPE,
+        FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*");
+    val hits = newArrayList(esResponse.getHits().hits());
+    val all = FluentIterable.from(hits)
+        .transformAndConcat(hit -> expandByFlatteningRepoServers(hit));
+
+    @Cleanup
+    val tar = new TarArchiveOutputStream(new GZIPOutputStream(new BufferedOutputStream(output)));
+    tar.setLongFileMode(LONGFILE_GNU);
+
+    val repoCodeGroups = Multimaps.index(all, entry -> entry.get(FieldNames.REPO_CODE));
+
+    for (val repoCode : repoCodeGroups.keySet()) {
+      val entries = repoCodeGroups.get(repoCode);
+
+      if (entries.isEmpty()) {
+        continue;
+      }
+
+      // Entries with the same repoCode should & must have the same repoType.
+      val repoType = entries.get(0).get(FieldNames.REPO_TYPE);
+
+      generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
 
-    writer.flush();
+  }
+
+  @SneakyThrows
+  private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
+    val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
+    val serverArray = READER.readTree(hit.sourceAsString())
+        .path(FieldNames.REPOSITORY)
+        .path(FieldNames.REPO_SERVER);
+    val servers = Lists.<Map<String, String>> newArrayList();
+
+    // Converts the arrayNode to a typed iterable just so Guava's transform() can be used.
+    for (val server : serverArray) {
+      servers.add(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE));
+    }
+
+    return transform(servers,
+        server -> ImmutableMap.<String, String> builder()
+            // Merges these two maps - there shouldn't be collision on the keys.
+            .putAll(fields)
+            .putAll(server)
+            .build());
+  }
+
+  @SneakyThrows
+  @NonNull
+  private static void generateTarEntry(TarArchiveOutputStream tar, List<Map<String, String>> allFileInfoOfOneRepo,
+      String repoCode, String repoType, Date timestamp) {
+    // FIXME - magic number
+    val bufferSize = 1024 * 100;
+
+    // A buffer to hold all the file content before writing it to the tar archive
+    @Cleanup
+    val buffer = new ByteArrayOutputStream(bufferSize);
+
+    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo,
+        entry -> buildDownloadUrl(
+            entry.get(FieldNames.BASE_URL),
+            entry.get(FieldNames.DATA_PATH),
+            entry.get(FieldNames.REPO_ID)));
+
+    if (isGnosRepo(repoType)) {
+      generateXmlFile(buffer, downloadUrlGroups, timestamp);
+    } else {
+      generateTextFile(buffer, downloadUrlGroups);
+    }
+
+    addFileToTar(buildFileName(repoCode, repoType, timestamp), buffer, tar);
+  }
+
+  @SneakyThrows
+  @NonNull
+  private static void generateXmlFile(OutputStream buffer, ListMultimap<String, Map<String, String>> downloadUrlGroups,
+      Date timestamp) {
+    int rowCount = 0;
+    // Perhaps make this static???
+    val factory = XMLOutputFactory.newInstance();
+    @Cleanup
+    val writer = factory.createXMLStreamWriter(buffer);
+
+    startXmlDocument(writer, timestamp);
+
+    for (val url : downloadUrlGroups.keySet()) {
+      val rowInfo = downloadUrlGroups.get(url);
+
+      if (rowInfo.isEmpty()) {
+        continue;
+      }
+
+      val repoId = rowInfo.get(0).get(FieldNames.REPO_ID);
+
+      writeXmlEntry(writer, repoId, url, rowInfo, ++rowCount);
+    }
+
+    endXmlDocument(writer);
+  }
+
+  @SneakyThrows
+  @NonNull
+  private static void generateTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+    @Cleanup
+    val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
+
+    for (val url : downloadUrlGroups.keySet()) {
+      val fileInfo = downloadUrlGroups.get(url);
+      val fileNames = transform(fileInfo, r -> r.get(FieldNames.FILE_NAME));
+      val fileSizes = transform(fileInfo, r -> r.get(FieldNames.FILE_SIZE));
+      val checksums = transform(fileInfo, r -> r.get(FieldNames.CHECK_SUM));
+      val row = ImmutableList.of(
+          url,
+          COMMA.join(fileNames),
+          COMMA.join(fileSizes),
+          COMMA.join(checksums));
+
+      tsv.write(row);
+    }
+
+    tsv.flush();
+  }
+
+  private final static class FieldNames {
+
+    final static String REPOSITORY = "repository";
+    final static String REPO_SERVER = "repo_server";
+    final static String REPO_CODE = "repo_code";
+    final static String BASE_URL = "repo_base_url";
+
+    final static String REPO_TYPE = REPOSITORY + ".repo_type";
+    final static String DATA_PATH = REPOSITORY + ".repo_data_path";
+    final static String REPO_ID = REPOSITORY + ".repo_entity_id";
+
+    final static String FILE_NAME = REPOSITORY + ".file_name";
+    final static String FILE_SIZE = REPOSITORY + ".file_size";
+    final static String CHECK_SUM = REPOSITORY + ".file_md5sum";
+
+  }
+
+  private final static class XmlTags {
+
+    final static String ROOT = "ResultSet";
+    final static String RECORD = "Result";
+    final static String RECORD_ID = "analysis_id";
+    final static String RECORD_URI = "analysis_data_uri";
+    final static String FILES = "files";
+    final static String FILE = "file";
+    final static String FILE_SIZE = "filename";
+    final static String FILE_NAME = "filesize";
+    final static String CHECK_SUM = "checksum";
+
+  }
+
+  private static boolean isGnosRepo(String repoType) {
+    return GNOS_REPO.equals(repoType);
+  }
+
+  private static String getFileExtensionOf(String repoType) {
+    return isGnosRepo(repoType) ? ".xml" : ".txt";
   }
 
   @NonNull
-  private static void addFileToTar(String fileKey, ByteArrayOutputStream content, TarArchiveOutputStream tar)
+  private static String buildFileName(String repoCode, String repoType, Date timestamp) {
+    return "manifest." +
+        repoCode + "." +
+        timestamp.getTime() +
+        getFileExtensionOf(repoType);
+  }
+
+  @NonNull
+  private static void addFileToTar(String fileName, ByteArrayOutputStream content, TarArchiveOutputStream tar)
       throws IOException {
-    val fileName = "./" + fileKey + MANIFEST_FILE_NAME_SUFFIX;
     val tarEntry = new TarArchiveEntry(fileName);
 
     tarEntry.setSize(content.size());
@@ -128,58 +321,85 @@ public class ExternalFileService {
     tar.closeArchiveEntry();
   }
 
-  /**
-   * This method takes an ExternalFile and expands it (on the Repository field) into a collection of key-value pairs
-   * with the value being a list of columns required in the Manifest file. This collection will then be joined (via
-   * flatMap) and used in a group-by operation.
-   */
   @NonNull
-  // Right now it's set to package-private for unit test.
-  static Iterable<SimpleImmutableEntry<String, List<String>>> expandRows(ExternalFile file) {
-    return transform(file.getRepositoryNames(),
-        rowKey -> new SimpleImmutableEntry<>(rowKey, buildManifestColumns(file)));
+  private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
+    return SLASH.join(baseUrl, dataPath, id)
+        .replace("///", "/");
   }
 
   @NonNull
-  private static List<String> buildManifestColumns(ExternalFile fileInfo) {
-    // Right now this is simple. Once the spec has been finalized, we'd probably need to consider another column
-    // format for GNOS types.
-    return ImmutableList.of(
-        fileInfo.getFileName(),
-        fileInfo.getMd5(),
-        formatBytes(fileInfo.getFileSize()),
-        fileInfo.getUrl()
-        );
+  private static String formatToUtc(Date timestamp) {
+    return DateFormatUtils.formatUTC(timestamp, DATE_FORMAT_PATTERN);
   }
 
   @NonNull
-  // Right now it's set to package-private for unit test.
-  static void generateManifestArchive(Iterable<ExternalFile> files, OutputStream outputStream)
-      throws IOException {
-    // Guava's transformAndConcat() is like flatMap.
-    val allRows = FluentIterable.from(files)
-        .transformAndConcat(file -> expandRows(file));
-    // Here we are doing a group-by on the Repository name as the key, which is used later to represent a file in the
-    // tarball.
-    val groupedRows = Multimaps.index(allRows, row -> row.getKey());
+  private static void startXmlDocument(XMLStreamWriter writer, Date timestamp) throws XMLStreamException {
+    writer.writeStartDocument("utf-8", "1.0");
+    writer.writeStartElement(XmlTags.ROOT);
+    writer.writeAttribute("date", formatToUtc(timestamp));
+  }
 
-    @Cleanup
-    val tar = new TarArchiveOutputStream(new GZIPOutputStream(new BufferedOutputStream(outputStream)));
+  @NonNull
+  private static void endXmlDocument(XMLStreamWriter writer) throws XMLStreamException {
+    // Closes the root element - XmlTags.ROOT
+    writer.writeEndElement();
+    writer.writeEndDocument();
+  }
 
-    tar.setLongFileMode(LONGFILE_GNU);
+  @NonNull
+  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl, final int rowCount)
+      throws XMLStreamException {
+    writer.writeStartElement(XmlTags.RECORD);
+    writer.writeAttribute("id", String.valueOf(rowCount));
 
-    val fileKeys = groupedRows.keySet().asList();
+    writer.writeStartElement(XmlTags.RECORD_ID);
+    writer.writeCharacters(id);
+    writer.writeEndElement();
 
-    for (val fileKey : fileKeys) {
-      val rows = groupedRows.get(fileKey);
+    writer.writeStartElement(XmlTags.RECORD_URI);
+    writer.writeCharacters(downloadUrl);
+    writer.writeEndElement();
 
-      @Cleanup
-      val content = new ByteArrayOutputStream(ESTIMATED_ROW_BYTE_COUNT * rows.size());
+    writer.writeStartElement(XmlTags.FILES);
+  }
 
-      writeRowsToStream(rows, content);
-      addFileToTar(fileKey, content, tar);
+  @NonNull
+  private static void closeDownloadUrlElement(XMLStreamWriter writer) throws XMLStreamException {
+    // Close off XmlTags.FILES ("files") element.
+    writer.writeEndElement();
+    // Close off XmlTags.RECORD ("Result") element.
+    writer.writeEndElement();
+  }
+
+  @NonNull
+  private static void addFileInfoEntriesToXml(XMLStreamWriter writer, Iterable<Map<String, String>> info)
+      throws XMLStreamException {
+    for (val fileInfo : info) {
+      writer.writeStartElement(XmlTags.FILE);
+
+      writer.writeStartElement(XmlTags.FILE_NAME);
+      writer.writeCharacters(fileInfo.get(FieldNames.FILE_NAME));
+      writer.writeEndElement();
+
+      writer.writeStartElement(XmlTags.FILE_SIZE);
+      writer.writeCharacters(fileInfo.get(FieldNames.FILE_SIZE));
+      writer.writeEndElement();
+
+      writer.writeStartElement(XmlTags.CHECK_SUM);
+      writer.writeAttribute("type", "md5");
+      writer.writeCharacters(fileInfo.get(FieldNames.CHECK_SUM));
+      writer.writeEndElement();
+
+      writer.writeEndElement();
     }
+  }
 
+  @NonNull
+  private static void writeXmlEntry(XMLStreamWriter writer, String id, String downloadUrl,
+      Iterable<Map<String, String>> fileInfo, final int rowCount) throws XMLStreamException {
+    addDownloadUrlEntryToXml(writer, id, downloadUrl, rowCount);
+    addFileInfoEntriesToXml(writer, fileInfo);
+    closeDownloadUrlElement(writer);
   }
 
 }

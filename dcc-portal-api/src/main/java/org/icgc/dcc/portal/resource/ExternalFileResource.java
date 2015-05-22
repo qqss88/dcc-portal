@@ -44,7 +44,10 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.GENE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.RETURNS_LIST;
 import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
+import static org.icgc.dcc.portal.util.MediaTypes.GZIP;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,16 +60,20 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.ExternalFile;
 import org.icgc.dcc.portal.model.ExternalFiles;
 import org.icgc.dcc.portal.model.FiltersParam;
+import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.ExternalFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -81,6 +88,8 @@ import com.yammer.metrics.annotation.Timed;
 @Api(value = "/files", description = "Resources relating to external files")
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class ExternalFileResource {
+
+  private final static String TYPE_ATTACHMENT = "attachment";
 
   private final ExternalFileService externalFileService;
 
@@ -113,10 +122,10 @@ public class ExternalFileResource {
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
-    StreamingOutput stream = externalFileService.exportTableData(query().filters(filtersParam.get()).build());
+    StreamingOutput stream = externalFileService.exportTableData(toQuery(filtersParam));
 
     return Response.ok(stream).header(CONTENT_DISPOSITION,
-        type("attachment").fileName("export.tsv").creationDate(new Date()).build()).build();
+        type(TYPE_ATTACHMENT).fileName("export.tsv").creationDate(new Date()).build()).build();
   }
 
   @GET
@@ -126,4 +135,42 @@ public class ExternalFileResource {
     return externalFileService.getIndexMetadata();
   }
 
+  @GET
+  @Path("/manifest")
+  @Produces(GZIP)
+  @Timed
+  public Response generateManifestArchiveByFilters(
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
+    val timestamp = new Date();
+    val output = new StreamingOutput() {
+
+      @Override
+      public void write(OutputStream outputStream) throws JsonProcessingException, IOException {
+        externalFileService.generateManifestArchive(outputStream, timestamp, toQuery(filtersParam));
+      }
+    };
+
+    val attechmentType = type(TYPE_ATTACHMENT)
+        .fileName(buildManifestFileName(timestamp))
+        .creationDate(timestamp)
+        .modificationDate(timestamp)
+        .build();
+
+    return Response
+        .ok(output)
+        .header(CONTENT_DISPOSITION, attechmentType)
+        .build();
+  }
+
+  @NonNull
+  private static Query toQuery(FiltersParam filters) {
+    return query()
+        .filters(filters.get())
+        .build();
+  }
+
+  @NonNull
+  private static String buildManifestFileName(Date timestamp) {
+    return "manifest." + timestamp.getTime() + ".tar.gz";
+  }
 }
