@@ -76,6 +76,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
 @Service
 @Slf4j
@@ -84,6 +85,12 @@ public class ExternalFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
+  private static final String[] TSV_HEADERS = new String[] {
+      "url",
+      "file_name",
+      "file_size",
+      "md5_sum"
+  };
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final ObjectReader READER = MAPPER.reader();
   private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
@@ -220,7 +227,7 @@ public class ExternalFileService {
     // Perhaps make this static???
     val factory = XMLOutputFactory.newInstance();
     @Cleanup
-    val writer = factory.createXMLStreamWriter(buffer);
+    val writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(buffer));
 
     startXmlDocument(writer, timestamp);
 
@@ -244,6 +251,7 @@ public class ExternalFileService {
   private static void generateTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
+    tsv.writeHeader(TSV_HEADERS);
 
     for (val url : downloadUrlGroups.keySet()) {
       val fileInfo = downloadUrlGroups.get(url);
@@ -287,8 +295,8 @@ public class ExternalFileService {
     final static String RECORD_URI = "analysis_data_uri";
     final static String FILES = "files";
     final static String FILE = "file";
-    final static String FILE_SIZE = "filename";
-    final static String FILE_NAME = "filesize";
+    final static String FILE_NAME = "filename";
+    final static String FILE_SIZE = "filesize";
     final static String CHECK_SUM = "checksum";
 
   }
