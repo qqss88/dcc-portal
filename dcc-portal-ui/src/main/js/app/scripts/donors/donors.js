@@ -197,6 +197,8 @@
   module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
     var _ctrl = this;
 
+    _ctrl.PCAWG = PCAWG;
+
     _ctrl.isPCAWG = function(specimen) {
       return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);
     };

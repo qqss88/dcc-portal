@@ -146,8 +146,14 @@
                 <tr data-ng-repeat="sample in DonorSpecimenCtrl.specimen.samples">
                     <td>{{ sample.id }}</td>
                     <td>{{ sample.analyzedId }}</td>
-                    <td>{{ sample.study }}</td>
-                    <td>{{ sample.analyzedInterval | numberPT }}</td>
+                    <td>
+                        <pcawg-badge data-ng-if="DonorSpecimenCtrl.PCAWG.isPCAWGStudy(sample.study)"></pcawg-badge>
+                        <span data-ng-if="!DonorSpecimenCtrl.PCAWG.isPCAWGStudy(sample.study)">{{sample.study? sample.study: '--'}}</td>
+                    </td>
+                    <td>
+                        <span data-ng-if="sample.analyzedInterval">{{ sample.analyzedInterval | numberPT }}</span>
+                        <span data-ng-if="!sample.analyzedInterval">--</span>
+                    </td>
                     <td>
                         <ul>
                             <li data-ng-repeat="item in sample.availableRawSequenceData | unique">

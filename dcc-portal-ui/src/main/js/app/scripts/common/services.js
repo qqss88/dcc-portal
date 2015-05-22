@@ -350,12 +350,13 @@
       'functionalImpact': 'Functional Impact',
       'sequencingStrategy': 'Analysis Type',
 
+      'studies': 'Study',
       'repositoryNames': 'Repository',
       'fileName': 'File',
-      'study': 'Study',
+      'study': 'Only Files in Study',
       'dataFormat': 'File Format',
       'dataType': 'Data Type',
-      'donorStudy': 'Donor Study',
+      'donorStudy': 'Only Donors in Study',
 
       // Data Types
       'clinical': 'Clinical',
