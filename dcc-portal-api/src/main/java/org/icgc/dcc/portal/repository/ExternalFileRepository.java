@@ -48,6 +48,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
 import lombok.Cleanup;
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,6 +70,7 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
@@ -411,4 +413,24 @@ public class ExternalFileRepository {
     return response;
   }
 
+  @NonNull
+  public SearchResponse findDownloadInfo(Query query, final String[] fields, String sortField, String sourceField) {
+    val filters = buildRepoFilters(query.getFilters(), true);
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getLimit())
+        .addSort(sortField, SortOrder.ASC)
+        .setPostFilter(filters)
+        .addFields(fields)
+        // Need to use _source because 'repository.repo_server' is an array.
+        .setFetchSource(sourceField, null);
+
+    log.info("ES request is: {}", search);
+    val response = search.execute().actionGet();
+    log.debug("ES response is: {}", response);
+
+    return response;
+  }
 }
