@@ -141,7 +141,7 @@ public class DonorRepository implements Repository {
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("projectId", "primarySite", "gender",
       "tumourStageAtDiagnosis", "vitalStatus", "diseaseStatusLastFollowup", "relapseType", "ageAtDiagnosisGroup",
-      "availableDataTypes", "analysisTypes", "projectName");
+      "availableDataTypes", "analysisTypes", "projectName", "studies");
 
   private static final class PhenotypeFacetNames {
 

@@ -2347,6 +2347,11 @@ h1 .t_badge_icon {
   background: #d33682;
 }
 
+/* line 109, _modules/_badges.scss */
+.pcawg-badge {
+  font-size: 0.5rem;
+}
+
 /* line 1, _modules/_current.scss */
 .t_current {
   /* for IE 6/7 */

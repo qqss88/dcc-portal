@@ -1,6 +1,7 @@
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge__donor"></span>
         {{ DonorCtrl.donor.id }}
+        <pcawg-badge data-ng-if="DonorCtrl.isPCAWG(DonorCtrl.donor)"></pcawg-badge>
     </h1>
 </div>
 <div data-scroll-spy="">
@@ -15,7 +16,7 @@
             <li class="t_subnav__items__item" data-ng-if="DonorCtrl.mutationFacets.functionalImpact.total > 0">
                 <span>Page Filters</span>
             </li>
-            <li class="t_subnav__items__box">
+            <li class="t_subnav__items__box" data-ng-if="DonorCtrl.mutationFacets.functionalImpact.total > 0">
                 <ul class="t_facets">
                     <terms data-type="mutation"
                            data-facet-name="functionalImpact"
@@ -136,9 +137,9 @@
 
     </div>
 </section>
+
 <section id="clinical">
     <h3>Clinical Data</h3>
-
     <div class="half">
         <table class="table table-info">
             <tr>
@@ -201,9 +202,39 @@
                 <th>Survival time (days)</th>
                 <td>{{ DonorCtrl.donor.survivalTime | numberPT }}</td>
             </tr>
+            <tr>
+                <th>Prior Malignancy</th>
+                <td>{{ DonorCtrl.donor.priorMalignancy }}</td>
+            </tr>
+            <tr>
+                <th>Cancer Type Prior Malignancy</th>
+                <td>{{ DonorCtrl.donor.cancerTypePriorMalignancy }}</td>
+            </tr>
+            <tr>
+                <th>Cancer history first degree relative</th>
+                <td>{{ DonorCtrl.donor.cancerHistoryFirstDegreeRelative }}</td>
+            </tr>
         </table>
     </div>
+    <div class="clearfix"></div>
+
+    <div data-ng-init="supplementalCollapsed=true">
+       <span data-ng-show="DonorCtrl.hasSupplementalFiles(DonorCtrl.donor)">
+           <a href="" data-ng-click="supplementalCollapsed=!supplementalCollapsed">
+               Supplemental files: 
+               {{ DonorCtrl.donor.family? " " + DonorCtrl.donor.family.length + " Family, " : "" }}
+               {{ DonorCtrl.donor.exposure? " " + DonorCtrl.donor.exposure.length + " Exposure, " : "" }}
+               {{ DonorCtrl.donor.therapy? " " + DonorCtrl.donor.therapy.length + " Therapy" : "" }}
+               <i class="icon-caret-left" data-ng-if="supplementalCollapsed===true"></i>
+               <i class="icon-caret-down" data-ng-if="supplementalCollapsed===false"></i>
+           </a>
+       </span>
+       <div data-ng-include="'scripts/donors/views/donor.supplemental.html'"
+            data-ng-show="supplementalCollapsed === false"></div>
+    </div>
+
 </section>
+
 <section id="mutations"
          data-ng-controller="DonorMutationsCtrl as DonorMutationsCtrl"
          data-ng-class="{'loading': !DonorMutationsCtrl.mutations.hits, 'empty': DonorMutationsCtrl.mutations.hits.length == 0}">

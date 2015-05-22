@@ -29,7 +29,8 @@ angular.module('icgc.ui', [
   'icgc.ui.validators',
   'icgc.ui.tooltip',
   'icgc.ui.scroll',
-  'icgc.ui.fileUpload'
+  'icgc.ui.fileUpload',
+  'icgc.ui.badges'
 ]);
 
 
@@ -274,3 +275,10 @@ angular.module('app.ui.param', []).directive('param', function (LocationService)
   };
 });
 
+angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    template: '<span class="badge pcawg-badge">PCAWG</span>'
+  };
+});

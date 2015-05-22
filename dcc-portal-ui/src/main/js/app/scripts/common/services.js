@@ -20,6 +20,14 @@
 
   var module = angular.module('app.common.services', []);
 
+  module.factory('PCAWG', function() {
+    return {
+      isPCAWGStudy: function(term) {
+        return term === 'PCAWG Study';
+      }
+    };
+  });
+
 
   module.factory('RestangularNoCache', function(Restangular) {
     return Restangular.withConfig(function(RestangularConfigurer) {
