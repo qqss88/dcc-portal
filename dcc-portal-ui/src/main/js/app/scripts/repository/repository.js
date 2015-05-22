@@ -147,16 +147,28 @@
   });
 
 
+  module.controller('ExternalFileDownloadController', function($scope, $modalInstance, selectedFiles, selectedRepos) {
+    console.log('ExternalFileDownloadController', selectedFiles);
+    $scope.selectedRepos = selectedRepos;
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss('cancel');
+    };
+
+  });
+
+
   /**
    * External repository controller
    */
   module.controller('ExternalRepoController',
-    function($scope, $window, LocationService, Page, ExternalRepoService, API) {
+    function($scope, $window, $modal, LocationService, Page, ExternalRepoService, API) {
 
     console.log('ExternalRepoController');
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
+    _ctrl.selectedRepos = {}; // Used to track file repositories
 
 
     /**
@@ -176,11 +188,14 @@
      */
     _ctrl.downloadManifest = function() {
       console.log('downloading manifest');
-      Page.startWork();
-
-      /*if (_ctrl.selectedFiles.length > 0) {
-      } else {
-      }*/
+      $modal.open({
+        templateUrl: '/scripts/repository/views/repository.external.submit.html',
+        controller: 'ExternalFileDownloadController',
+        resolve: {
+          selectedFiles: function() { return _ctrl.selectedFiles; },
+          selectedRepos: function() { return _ctrl.selectedRepos; }
+        }
+      });
     };
 
     _ctrl.isSelected = function(row) {
@@ -189,15 +204,37 @@
 
 
     _ctrl.toggleRow = function(row) {
+      var repos = _ctrl.selectedRepos;
+
       if (_ctrl.isSelected(row) === true) {
         _.remove(_ctrl.selectedFiles, function(r) {
           return r === row.fileName;
         });
-      } else {
-        _ctrl.selectedFiles.push(row.fileName);
-      }
 
-      console.log('selected', _ctrl.selectedFiles);
+        row.repositoryNames.forEach(function(repo) {
+          repos[repo] -= 1;
+          if (repos[repo] === 0) {
+             delete repos[repo];
+          }
+        });
+      } else {
+
+        // Init
+        if (_ctrl.selectedFiles.length === 0) {
+          _ctrl.selectedRepos = {};
+          repos = _ctrl.selectedRepos;
+        }
+        _ctrl.selectedFiles.push(row.fileName);
+
+        row.repositoryNames.forEach(function(repo) {
+          if (repos.hasOwnProperty(repo)) {
+             repos[repo] += 1;
+          } else {
+             repos[repo] = 1;
+          }
+        });
+      }
+      console.log('selected', _ctrl.selectedFiles, _ctrl.selectedRepos);
     };
 
 
@@ -206,8 +243,14 @@
      */
     _ctrl.undo = function() {
       _ctrl.selectedFiles = [];
+      _ctrl.selectedRepos = {};
+
       _ctrl.files.hits.forEach(function(f) {
         delete f.checked;
+      });
+
+      _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
+         _ctrl.selectedRepos[term.term] = term.count;
       });
     };
 
@@ -234,6 +277,9 @@
       promise = ExternalRepoService.getList( params );
       promise.then(function(data) {
         _ctrl.files = data;
+
+        // Sanity check, just reset everything
+        _ctrl.undo();
       });
 
       // Get index creation time

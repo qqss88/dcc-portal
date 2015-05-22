@@ -7,22 +7,6 @@
                 data-proxy-type="file"
                 data-proxy-facet-name="fileName"
                 data-label="File"></li>
-            <terms data-type="file" data-facet-name="repositoryNames"
-                   data-facet="ExternalRepoController.files.termFacets.repositoryNames"
-                   data-label="Repository"></terms>
-            <terms data-type="file" data-facet-name="study"
-                   data-label="Study"
-                   data-missing-text="None"
-                   data-facet="ExternalRepoController.files.termFacets.study"></terms>
-            <terms data-type="file" data-facet-name="dataType"
-                   data-label="Data Type"
-                   data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
-            <terms data-type="file" data-facet-name="dataFormat"
-                   data-label="File Format"
-                   data-facet="ExternalRepoController.files.termFacets.dataFormat"></terms>
-            <terms data-type="file" data-facet-name="access"
-                   data-label="Access"
-                   data-facet="ExternalRepoController.files.termFacets.access"></terms>
             <li data-tags-facet
                 data-type="donor"
                 data-facet-name="id"
@@ -35,10 +19,25 @@
             <terms data-type="file" data-facet-name="primarySite"
                    data-label="Primary Site"
                    data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
-            <terms data-type="file" data-facet-name="donorStudy"
-                   data-label="Donor Study"
+            <terms data-type="file" data-facet-name="repositoryNames"
+                   data-facet="ExternalRepoController.files.termFacets.repositoryNames"
+                   data-label="Repository"></terms>
+            <terms data-type="file" data-facet-name="dataType"
+                   data-label="Data Type"
+                   data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
+            <terms data-type="file" data-facet-name="study"
+                   data-label="Only Files in Study"
                    data-missing-text="None"
-                   data-collapsed="true"
+                   data-facet="ExternalRepoController.files.termFacets.study"></terms>
+            <terms data-type="file" data-facet-name="dataFormat"
+                   data-label="File Format"
+                   data-facet="ExternalRepoController.files.termFacets.dataFormat"></terms>
+            <terms data-type="file" data-facet-name="access"
+                   data-label="Access"
+                   data-facet="ExternalRepoController.files.termFacets.access"></terms>
+            <terms data-type="file" data-facet-name="donorStudy"
+                   data-label="Only Donors in Study"
+                   data-missing-text="None"
                    data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
         </ul>
     </div>
@@ -48,8 +47,12 @@
     <section style="padding-top:0">
         <div>
             <p>External repositories content indexed on {{ExternalRepoController.repoCreationTime | date}} <br>
-               For more information on controlled-access data, please refer to
-                <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>https://docs.icgc.org/access-controlled-data</a>
+
+
+               ICGC raw data and other data are available in other repositories. You can use this tool to search for 
+               files of your interest and create a manifest used by <a href="https://docs.icgc.org/access-controlled-data" target="_blank">
+               <i class="icon-external-link"></i>authorized users</a> 
+               for repository-specific download software.
             </p>
         </div>
         <div style="margin-bottom:0.5rem">
