@@ -177,7 +177,7 @@
   });
 
   module.run(function ($http, $state, $timeout, $interval, $rootScope, $modalStack,
-    Restangular, Angularytics, Compatibility, Notify) {
+    Restangular, Angularytics, Compatibility, Notify, Page) {
 
     var ignoreNotFound = [
       '/analysis/',
@@ -207,6 +207,7 @@
 
 
           if (response.data.message) {
+            Page.setPage('error');
             Notify.setMessage(response.data.message);
             Notify.showErrors();
           }

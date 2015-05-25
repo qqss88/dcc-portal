@@ -357,6 +357,7 @@
       'dataFormat': 'File Format',
       'dataType': 'Data Type',
       'donorStudy': 'Only Donors in Study',
+      'projectCode': 'Project',
 
       // Data Types
       'clinical': 'Clinical',

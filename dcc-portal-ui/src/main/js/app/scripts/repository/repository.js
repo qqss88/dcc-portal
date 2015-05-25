@@ -147,12 +147,19 @@
   });
 
 
-  module.controller('ExternalFileDownloadController', function($scope, $modalInstance, selectedFiles, selectedRepos) {
-    console.log('ExternalFileDownloadController', selectedFiles);
-    $scope.selectedRepos = selectedRepos;
+  module.controller('ExternalFileDownloadController',
+    function($scope, $window, $modalInstance, LocationService, API, params) {
 
+    $scope.filters = LocationService.filters();
+    $scope.selectedRepos = params.selectedRepos;
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
+    };
+
+    $scope.download = function() {
+      var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
+      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/manifest?filters=' + filtersStr;
+      $window.location.href = API.BASE_URL + '/files/manifest?filters=' + filtersStr;
     };
 
   });
@@ -179,7 +186,6 @@
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
       // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
       $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
-      // Restangular.one('files').one('export').get({});
     };
 
 
@@ -188,14 +194,21 @@
      */
     _ctrl.downloadManifest = function() {
       console.log('downloading manifest');
+
       $modal.open({
         templateUrl: '/scripts/repository/views/repository.external.submit.html',
         controller: 'ExternalFileDownloadController',
         resolve: {
-          selectedFiles: function() { return _ctrl.selectedFiles; },
-          selectedRepos: function() { return _ctrl.selectedRepos; }
+          params: function() {
+            return {
+              selectedFiles: _ctrl.selectedFiles,
+              selectedRepos: _ctrl.selectedRepos,
+              filters: LocationService.filters()
+            }
+          }
         }
       });
+
     };
 
     _ctrl.isSelected = function(row) {
