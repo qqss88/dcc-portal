@@ -198,6 +198,7 @@
 
       // Data Types
       'Clinical': 'Clinical Data',
+      'Donor': 'Clinical Data',
       'SSM': 'Simple Somatic Mutation',
       'CNSM': 'Copy Number Somatic Mutation',
       'StSM': 'Structural Somatic Mutation',
@@ -352,6 +353,7 @@
 
       // Data Types
       'clinical': 'Clinical',
+      'donor': 'Donor',
       'ssm': 'SSM',
       'cnsm': 'CNSM',
       'stsm': 'StSM',
