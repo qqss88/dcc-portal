@@ -28,7 +28,6 @@
             <ul class="breadcrumb" style="background:#fff;font-size:1.25rem">
                 <li><a href="/repository">~</a></li>
                 <li data-ng-repeat="p in slugs">
-                    <span class="divider">/</span>
                     <a data-ng-if="!$last"
                        data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}"
                        href="/repository/{{ p.url }}">{{ p.name }}</a>
