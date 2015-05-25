@@ -23,6 +23,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.common.core.util.Splitters.COMMA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_IDS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
@@ -55,8 +56,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -72,11 +75,14 @@ import org.icgc.dcc.portal.model.ExternalFile;
 import org.icgc.dcc.portal.model.ExternalFiles;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.ExternalFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -171,6 +177,25 @@ public class ExternalFileResource {
         .build();
   }
 
+  @POST
+  @Path("/manifest")
+  @Consumes(APPLICATION_JSON)
+  @Timed
+  public Response generateManifestArchiveByIdList(JsonNode payload) {
+    verifyIdListPayload(payload);
+
+    // An array of file IDs is expected for 'fileIds'.
+    val jsonNode = payload.get(API_FILE_IDS_PARAM);
+    verifyIdListJsonNode(jsonNode);
+    val filter = buildFileIdListFilterParam(jsonNode);
+
+    // A comma-separated list is expected for 'repositories'.
+    val repos = payload.get(API_FILE_REPOS_PARAM);
+
+    return generateManifestArchiveByFilters(new FiltersParam(filter),
+        null == repos ? "" : repos.asText());
+  }
+
   @NonNull
   private static Query toQuery(FiltersParam filters) {
     return query()
@@ -181,6 +206,49 @@ public class ExternalFileResource {
   @NonNull
   private static String buildManifestFileName(Date timestamp) {
     return "manifest." + timestamp.getTime() + ".tar.gz";
+  }
+
+  private static void verifyIdListPayload(JsonNode payload) {
+    if (null == payload) {
+      val errorMessage = "No payload found in this POST request. " +
+          "A JSON object of {" +
+          API_FILE_IDS_PARAM +
+          ": [fileId1,fileId2,...], " +
+          API_FILE_REPOS_PARAM +
+          ": 'repo1,repo2,...'} is expected.";
+      throw new BadRequestException(errorMessage);
+    }
+  }
+
+  private static void verifyIdListJsonNode(JsonNode jsonNode) {
+    if (null == jsonNode) {
+      val errorMessage = "JSON field, '" +
+          API_FILE_IDS_PARAM +
+          "', is missing in the payload object.";
+      throw new BadRequestException(errorMessage);
+    }
+
+    if (!jsonNode.isArray()) {
+      val errorMessage = "JSON field, '" +
+          API_FILE_IDS_PARAM +
+          "', must be an array.";
+      throw new BadRequestException(errorMessage);
+    }
+  }
+
+  private static String buildFileIdListFilterParam(@NonNull JsonNode jsonNode) {
+    val nodeFactory = new JsonNodeFactory(false);
+    val root = nodeFactory.objectNode();
+
+    // Build an ObjectNode to represent this filter: {"file": "id": {"is": ["id1", "id2", ...]}
+    val file = nodeFactory.objectNode();
+    root.put("file", file);
+
+    val id = nodeFactory.objectNode();
+    file.put("id", id);
+    id.put("is", jsonNode);
+
+    return root.toString();
   }
 
 }
