@@ -204,7 +204,7 @@
               selectedFiles: _ctrl.selectedFiles,
               selectedRepos: _ctrl.selectedRepos,
               filters: LocationService.filters()
-            }
+            };
           }
         }
       });
@@ -230,6 +230,14 @@
              delete repos[repo];
           }
         });
+
+        if (_ctrl.selectedFiles.length === 0) {
+          _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
+             _ctrl.selectedRepos[term.term] = term.count;
+          });
+        }
+
+
       } else {
 
         // Init
