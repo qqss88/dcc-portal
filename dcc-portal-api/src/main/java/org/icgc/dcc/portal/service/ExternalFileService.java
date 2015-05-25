@@ -17,9 +17,11 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.SLASH;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -85,6 +87,16 @@ public class ExternalFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
+  private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
+      FieldNames.REPO_TYPE,
+      FieldNames.REPO_ID,
+      FieldNames.DATA_PATH,
+      FieldNames.FILE_NAME,
+      FieldNames.FILE_SIZE,
+      FieldNames.CHECK_SUM
+  };
+  private static final String DOWNLOAD_INFO_QUERY_SOURCE_FIELD =
+      FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*";
   private static final String[] TSV_HEADERS = new String[] {
       "url",
       "file_name",
@@ -130,23 +142,16 @@ public class ExternalFileService {
   }
 
   @NonNull
-  public void generateManifestArchive(OutputStream output, Date timestamp, Query query)
+  public void generateManifestArchive(OutputStream output, Date timestamp, Query query, List<String> repoList)
       throws JsonProcessingException, IOException {
     // FIXME - find the appropriate value or another way to set the proper size.
     val maxRecordCount = 1000000;
     query.setLimit(maxRecordCount);
 
-    final String[] fields = new String[] {
+    val esResponse = externalFileRepository.findDownloadInfo(query,
+        DOWNLOAD_INFO_QUERY_FIELDS,
         FieldNames.REPO_TYPE,
-        FieldNames.REPO_ID,
-        FieldNames.DATA_PATH,
-        FieldNames.FILE_NAME,
-        FieldNames.FILE_SIZE,
-        FieldNames.CHECK_SUM
-    };
-
-    val esResponse = externalFileRepository.findDownloadInfo(query, fields, FieldNames.REPO_TYPE,
-        FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*");
+        DOWNLOAD_INFO_QUERY_SOURCE_FIELD);
     val hits = newArrayList(esResponse.getHits().hits());
     val all = FluentIterable.from(hits)
         .transformAndConcat(hit -> expandByFlatteningRepoServers(hit));
@@ -156,8 +161,13 @@ public class ExternalFileService {
     tar.setLongFileMode(LONGFILE_GNU);
 
     val repoCodeGroups = Multimaps.index(all, entry -> entry.get(FieldNames.REPO_CODE));
+    val repoIncludes = newArrayList(filter(repoList, repoCode -> !isBlank(repoCode)));
 
     for (val repoCode : repoCodeGroups.keySet()) {
+      if (shouldRepositoryBeExcluded(repoIncludes, repoCode)) {
+        continue;
+      }
+
       val entries = repoCodeGroups.get(repoCode);
 
       if (entries.isEmpty()) {
@@ -170,6 +180,11 @@ public class ExternalFileService {
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
 
+  }
+
+  @NonNull
+  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoCode) {
+    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoCode));
   }
 
   @SneakyThrows
@@ -360,13 +375,8 @@ public class ExternalFileService {
     writer.writeStartElement(XmlTags.RECORD);
     writer.writeAttribute("id", String.valueOf(rowCount));
 
-    writer.writeStartElement(XmlTags.RECORD_ID);
-    writer.writeCharacters(id);
-    writer.writeEndElement();
-
-    writer.writeStartElement(XmlTags.RECORD_URI);
-    writer.writeCharacters(downloadUrl);
-    writer.writeEndElement();
+    addXmlElement(writer, XmlTags.RECORD_ID, id);
+    addXmlElement(writer, XmlTags.RECORD_URI, downloadUrl);
 
     writer.writeStartElement(XmlTags.FILES);
   }
@@ -385,13 +395,8 @@ public class ExternalFileService {
     for (val fileInfo : info) {
       writer.writeStartElement(XmlTags.FILE);
 
-      writer.writeStartElement(XmlTags.FILE_NAME);
-      writer.writeCharacters(fileInfo.get(FieldNames.FILE_NAME));
-      writer.writeEndElement();
-
-      writer.writeStartElement(XmlTags.FILE_SIZE);
-      writer.writeCharacters(fileInfo.get(FieldNames.FILE_SIZE));
-      writer.writeEndElement();
+      addXmlElement(writer, XmlTags.FILE_NAME, fileInfo.get(FieldNames.FILE_NAME));
+      addXmlElement(writer, XmlTags.FILE_SIZE, fileInfo.get(FieldNames.FILE_SIZE));
 
       writer.writeStartElement(XmlTags.CHECK_SUM);
       writer.writeAttribute("type", "md5");
@@ -400,6 +405,14 @@ public class ExternalFileService {
 
       writer.writeEndElement();
     }
+  }
+
+  @NonNull
+  private static void addXmlElement(XMLStreamWriter writer, String elementName, String elementValue)
+      throws XMLStreamException {
+    writer.writeStartElement(elementName);
+    writer.writeCharacters(elementValue);
+    writer.writeEndElement();
   }
 
   @NonNull

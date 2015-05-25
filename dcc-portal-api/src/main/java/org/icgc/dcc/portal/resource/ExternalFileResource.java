@@ -20,8 +20,11 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.icgc.dcc.common.core.util.Splitters.COMMA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_PARAM;
@@ -140,15 +143,21 @@ public class ExternalFileResource {
   @Produces(GZIP)
   @Timed
   public Response generateManifestArchiveByFilters(
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
+      @ApiParam(value = API_FILE_REPOS_VALUE) @QueryParam(API_FILE_REPOS_PARAM) @DefaultValue("") String repoList) {
     val timestamp = new Date();
     val output = new StreamingOutput() {
 
       @Override
       public void write(OutputStream outputStream) throws JsonProcessingException, IOException {
-        externalFileService.generateManifestArchive(outputStream, timestamp, toQuery(filtersParam));
+        externalFileService.generateManifestArchive(outputStream,
+            timestamp,
+            toQuery(filtersParam),
+            COMMA.splitToList(repoList));
       }
     };
+
+    log.info("filtersParam is: '{}' AND repoList is: '{}'.", filtersParam, repoList);
 
     val attechmentType = type(TYPE_ATTACHMENT)
         .fileName(buildManifestFileName(timestamp))
@@ -173,4 +182,5 @@ public class ExternalFileResource {
   private static String buildManifestFileName(Date timestamp) {
     return "manifest." + timestamp.getTime() + ".tar.gz";
   }
+
 }
