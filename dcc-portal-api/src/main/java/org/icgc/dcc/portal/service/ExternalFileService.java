@@ -128,7 +128,6 @@ public class ExternalFileService {
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
-      fieldMap.put("_id", hit.getId());
       list.add(new ExternalFile(fieldMap));
     }
 
