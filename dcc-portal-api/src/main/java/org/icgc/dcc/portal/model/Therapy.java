@@ -74,7 +74,6 @@ public class Therapy {
   @ApiModelProperty(value = "Other therapy response", required = true)
   String otherTherapyResponse;
 
-  @SuppressWarnings("unchecked")
   @JsonCreator
   public Therapy(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.THERAPY);
