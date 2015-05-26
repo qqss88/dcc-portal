@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.TermsFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.ChromosomeLocation;
@@ -348,11 +349,20 @@ public class QueryService {
 
     val termFilters = FilterBuilders.boolFilter();
     val fields = filters.path(kind.getId()).fields();
-    while (fields.hasNext()) {
-      val facetField = fields.next();
+    val typeMapping = FIELDS_MAPPING.get(kind);
 
+    boolean hasUserSuppliedCompletenessFilter = false;
+    String completenessField = typeMapping.get("completeness");
+    if (prefixMapping != null && prefixMapping.containsKey(kind)) {
+      completenessField = String.format("%s.%s", prefixMapping.get(kind), completenessField);
+    }
+    TermsFilterBuilder defaultCompletenessFilter =
+        termsFilter(completenessField, ImmutableList.<String> of("has molecular"));
+
+    while (fields.hasNext()) {
+
+      val facetField = fields.next();
       // Check that facet field is in Field Mapping
-      val typeMapping = FIELDS_MAPPING.get(kind);
       if (typeMapping.containsKey(facetField.getKey())) {
         String fieldName = typeMapping.get(facetField.getKey());
 
@@ -386,6 +396,9 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
+              } else if (facetField.getKey().equals("completeness") && kind.getId().equals("donor")) {
+                hasUserSuppliedCompletenessFilter = true;
+                fb = termsFilter(fieldName, items);
               } else if (fieldName.endsWith(API_ENTITY_LIST_ID_FIELD_NAME) || facetField.getKey().equals("id")) {
                 // This will get generated twice if both upload-gene-list and gene-id are present,
                 // but that may be ok, it will be like saying: (a or b) and (a or b)
@@ -461,6 +474,12 @@ public class QueryService {
 
       }
     }
+
+    // If completeness is not supplied, default it to be "has molecular"
+    if (hasUserSuppliedCompletenessFilter == false && kind.getId().equals("donor")) {
+      termFilters.must(defaultCompletenessFilter);
+    }
+
     return termFilters;
   }
 

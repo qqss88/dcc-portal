@@ -195,6 +195,11 @@ public class DonorRepository implements Repository {
     this.client = client;
   }
 
+  // Default to donors with molecular information
+  private FilterBuilder defaultDonorFilter() {
+    return FilterBuilders.termFilter("_summary._completeness", ImmutableList.<String> of("has molecular"));
+  }
+
   private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
     val fs = Lists.<TermsFacetBuilder> newArrayList();
 
@@ -218,7 +223,7 @@ public class DonorRepository implements Repository {
 
   private FilterBuilder getFilters(ObjectNode filters) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return matchAllFilter();
+    return this.defaultDonorFilter();
   }
 
   private FilterBuilder buildFilters(ObjectNode filters) {
@@ -281,7 +286,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
     search.setQuery(buildQuery(query));
 
-    log.debug("{}", search);
+    log.info("{}", search);
     val response = search.execute().actionGet();
     log.debug("{}", response);
 
@@ -548,7 +553,7 @@ public class DonorRepository implements Repository {
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
 
-    log.debug("{}", search);
+    log.info("{}", search);
 
     return search.execute().actionGet().getHits().getTotalHits();
   }
@@ -609,6 +614,8 @@ public class DonorRepository implements Repository {
       ObjectNode filters = remapFilters(query.getFilters());
       search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
+    } else {
+      search.setPostFilter(this.defaultDonorFilter());
     }
 
     return search;
