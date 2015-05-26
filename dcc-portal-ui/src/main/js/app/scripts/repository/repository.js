@@ -158,8 +158,8 @@
 
     $scope.download = function() {
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/manifest?filters=' + filtersStr;
       $window.location.href = API.BASE_URL + '/files/manifest?filters=' + filtersStr;
+      $scope.cancel();
     };
 
   });
@@ -184,7 +184,6 @@
     _ctrl.export = function() {
       console.log('export');
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      // $window.location.href = 'http://localhost:8080' + API.BASE_URL + '/files/export?filters=' + filtersStr;
       $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
     };
 
@@ -212,7 +211,7 @@
     };
 
     _ctrl.isSelected = function(row) {
-      return _.contains(_ctrl.selectedFiles, row.fileName);
+      return _.contains(_ctrl.selectedFiles, row.id);
     };
 
 
@@ -221,7 +220,7 @@
 
       if (_ctrl.isSelected(row) === true) {
         _.remove(_ctrl.selectedFiles, function(r) {
-          return r === row.fileName;
+          return r === row.id;
         });
 
         row.repositoryNames.forEach(function(repo) {
@@ -245,7 +244,7 @@
           _ctrl.selectedRepos = {};
           repos = _ctrl.selectedRepos;
         }
-        _ctrl.selectedFiles.push(row.fileName);
+        _ctrl.selectedFiles.push(row.id);
 
         row.repositoryNames.forEach(function(repo) {
           if (repos.hasOwnProperty(repo)) {
