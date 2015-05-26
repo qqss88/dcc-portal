@@ -142,10 +142,7 @@ public class ExternalFileService {
   @NonNull
   public void generateManifestArchive(OutputStream output, Date timestamp, Query query, List<String> repoList)
       throws JsonProcessingException, IOException {
-    // FIXME - find the appropriate value or another way to set the proper size.
-    val maxRecordCount = 1000000;
-    query.setLimit(maxRecordCount);
-
+    // Run elasticsearch query to get matching files
     val esResponse = externalFileRepository.findDownloadInfo(query,
         DOWNLOAD_INFO_QUERY_FIELDS,
         FieldNames.REPO_TYPE,
@@ -164,8 +161,6 @@ public class ExternalFileService {
         .filter(repoName -> !isBlank(repoName))
         .toList();
 
-    log.debug("repoIncludes are: '{}'.", repoIncludes);
-
     for (val repoCode : repoCodeGroups.keySet()) {
       val entries = repoCodeGroups.get(repoCode);
 
@@ -174,14 +169,14 @@ public class ExternalFileService {
       }
 
       val firstEntry = entries.get(0);
-      // Entries with the same repoCode should & must have the same repoType.
-      val repoType = firstEntry.get(FieldNames.REPO_TYPE);
       val repoName = firstEntry.get(FieldNames.REPO_NAME);
 
       if (shouldRepositoryBeExcluded(repoIncludes, repoName)) {
         continue;
       }
 
+      // Entries with the same repoCode should & must have the same repoType.
+      val repoType = firstEntry.get(FieldNames.REPO_TYPE);
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
 
