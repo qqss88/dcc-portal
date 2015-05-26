@@ -174,6 +174,7 @@ public class GeneParser {
   /**
    * EnrichmentQueries elasticsearch with a histogram facet.
    */
+  @SuppressWarnings("deprecation")
   private SearchResponse getHistogramResponse(Long interval, String segmentId, Long start, Long stop,
       List<String> biotypes) {
     val filter = getFilter(segmentId, start, stop, biotypes);

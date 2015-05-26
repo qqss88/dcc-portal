@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class ProjectRepository {
 
   private static final Type TYPE = Type.PROJECT;

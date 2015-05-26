@@ -118,6 +118,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class DonorRepository implements Repository {
 
   private static final String SCORE =

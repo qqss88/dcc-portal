@@ -32,9 +32,11 @@ import static java.lang.System.currentTimeMillis;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.ok;
-import static org.icgc.dcc.downloader.core.DataType.CLINICAL;
-import static org.icgc.dcc.downloader.core.DataType.CLINICALSAMPLE;
 import static org.icgc.dcc.downloader.core.DataType.CNSM;
+import static org.icgc.dcc.downloader.core.DataType.DONOR;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_EXPOSURE;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_FAMILY;
+import static org.icgc.dcc.downloader.core.DataType.DONOR_THERAPY;
 import static org.icgc.dcc.downloader.core.DataType.EXP_ARRAY;
 import static org.icgc.dcc.downloader.core.DataType.EXP_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.JCN;
@@ -42,7 +44,9 @@ import static org.icgc.dcc.downloader.core.DataType.METH_ARRAY;
 import static org.icgc.dcc.downloader.core.DataType.METH_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.MIRNA_SEQ;
 import static org.icgc.dcc.downloader.core.DataType.PEXP;
+import static org.icgc.dcc.downloader.core.DataType.SAMPLE;
 import static org.icgc.dcc.downloader.core.DataType.SGV_CONTROLLED;
+import static org.icgc.dcc.downloader.core.DataType.SPECIMEN;
 import static org.icgc.dcc.downloader.core.DataType.SSM_CONTROLLED;
 import static org.icgc.dcc.downloader.core.DataType.SSM_OPEN;
 import static org.icgc.dcc.downloader.core.DataType.STSM;
@@ -156,7 +160,7 @@ public class DownloadResource {
       .<DataType, List<DataType>> builder()
       .put(SSM_OPEN, ImmutableList.of(SSM_OPEN))
       .put(SSM_CONTROLLED, ImmutableList.of(SSM_CONTROLLED))
-      .put(CLINICAL, ImmutableList.of(CLINICAL, CLINICALSAMPLE))
+      .put(DONOR, ImmutableList.of(DONOR, DONOR_EXPOSURE, DONOR_FAMILY, DONOR_THERAPY, SPECIMEN, SAMPLE))
       .put(CNSM, ImmutableList.of(CNSM))
       .put(JCN, ImmutableList.of(JCN))
       .put(METH_ARRAY, ImmutableList.of(METH_ARRAY))
@@ -173,7 +177,7 @@ public class DownloadResource {
 
     private final static Map<String, DataType> PublicAccessibleMap = ImmutableMap.<String, DataType> builder()
         .put(SSM_OPEN.name, SSM_OPEN)
-        .put(CLINICAL.name, CLINICAL)
+        .put(DONOR.name, DONOR)
         .put(CNSM.name, CNSM)
         .put(JCN.name, JCN)
         .put(METH_SEQ.name, METH_SEQ)
@@ -190,7 +194,7 @@ public class DownloadResource {
     private final static Map<String, DataType> PrivateAccessibleMap = ImmutableMap
         .<String, DataType> builder()
         .put(SSM_CONTROLLED.name, SSM_CONTROLLED)
-        .put(CLINICAL.name, CLINICAL)
+        .put(DONOR.name, DONOR)
         .put(CNSM.name, CNSM)
         .put(JCN.name, JCN)
         .put(METH_SEQ.name, METH_SEQ)
@@ -202,6 +206,7 @@ public class DownloadResource {
         .put(EXP_SEQ.name, EXP_SEQ)
         .put(SGV_CONTROLLED.name, SGV_CONTROLLED)
         .build();
+
     private final static Set<DataType> PrivateAccessibleDataTypes = ImmutableSet
         .copyOf(PrivateAccessibleMap.values());
 
@@ -267,16 +272,6 @@ public class DownloadResource {
     final Map<String, DataType> allowedDataTypeMap =
         isLogin ? AccessControl.PrivateAccessibleMap : AccessControl.PublicAccessibleMap;
 
-    List<SelectionEntry<DataType, String>> filterTypeInfo = newArrayList();
-    for (SelectionEntry<String, String> selection : typeInfo) {
-      DataType dataType = allowedDataTypeMap.get(selection.getKey().toLowerCase());
-      if (dataType == null) throw new NotFoundException(selection.getKey(), "download");
-
-      for (DataType type : DataTypeGroupMap.get(dataType)) {
-        filterTypeInfo.add(new SelectionEntry<DataType, String>(type, selection.getValue()));
-      }
-    }
-
     ImmutableMap.Builder<String, String> jobInfoBuilder = ImmutableMap.builder();
     jobInfoBuilder.put("filter", filters.toString());
     jobInfoBuilder.put("uiQueryStr", uiQueryStr);
@@ -285,6 +280,21 @@ public class DownloadResource {
     jobInfoBuilder.put(IS_CONTROLLED, String.valueOf(isLogin));
 
     try {
+      List<SelectionEntry<DataType, String>> filterTypeInfo = newArrayList();
+      for (SelectionEntry<String, String> selection : typeInfo) {
+        DataType dataType = allowedDataTypeMap.get(selection.getKey().toLowerCase());
+        if (dataType == null) throw new NotFoundException(selection.getKey(), "download");
+
+        Map<DataType, Future<Long>> result = downloader.getSizes(donorIds);
+
+        for (DataType type : DataTypeGroupMap.get(dataType)) {
+          if (result.get(type).get() > 0) {
+            filterTypeInfo.add(new SelectionEntry<DataType, String>(type, selection
+                .getValue()));
+          }
+        }
+      }
+
       if (!EmailValidator.getInstance().isValid(email)) {
         return new JobInfo(downloader.submitJob(donorIds,
             filterTypeInfo, jobInfoBuilder.build(), downloadUrl));
@@ -657,18 +667,25 @@ public class DownloadResource {
       throw new NotFoundException(downloadId, "download");
     }
 
-    List<DataType> actualDownloadTypes = DataTypeGroupMap.get(selectedType.iterator().next());
-    for (DataType type : actualDownloadTypes) {
-      if (!typeProgressMap.get(type).isCompleted()) {
-        log.error("Data type is not ready for download yet. Data Type: " + type + ", Dowload ID: " + downloadId);
-        throw new NotFoundException(downloadId, "download");
+    List<DataType> downloadTypes = DataTypeGroupMap.get(selectedType.iterator().next());
+    ImmutableList.Builder<DataType> actualDownloadTypes = ImmutableList.builder();
+    for (DataType type : downloadTypes) {
+      // to handle optional sub-type
+      if (typeProgressMap.get(type) != null) {
+        if (!typeProgressMap.get(type).isCompleted()) {
+          log.error("Data type is not ready for download yet. Data Type: " + type + ", Dowload ID: " + downloadId);
+          throw new NotFoundException(downloadId, "download");
+        } else {
+          actualDownloadTypes.add(type);
+        }
       }
     }
     String extension = INDIVIDUAL_TYPE_ARCHIVE_EXTENSION;
-    if (actualDownloadTypes.size() == 1) {
-      archiveStream = archiveStream(downloadId, actualDownloadTypes.get(0));
+    downloadTypes = actualDownloadTypes.build();
+    if (downloadTypes.size() == 1) {
+      archiveStream = archiveStream(downloadId, downloadTypes.get(0));
     } else {
-      archiveStream = archiveStream(downloadId, actualDownloadTypes);
+      archiveStream = archiveStream(downloadId, downloadTypes);
       extension = FULL_ARCHIVE_EXTENSION;
     }
 
@@ -742,9 +759,11 @@ public class DownloadResource {
       ImmutableMap.Builder<String, String> uiBuilder = ImmutableMap.builder();
       JobProgress groupProgress = new JobProgress(0, 0);
       for (DataType dataType : DataTypeGroupMap.get(selectedGroup)) {
-        groupProgress
-            .setDenominator(jobProgressMap.get(dataType).getDenominator() + groupProgress.getDenominator());
-        groupProgress.setNumerator(jobProgressMap.get(dataType).getNumerator() + groupProgress.getNumerator());
+        if (jobProgressMap.get(dataType) != null) {
+          groupProgress
+              .setDenominator(jobProgressMap.get(dataType).getDenominator() + groupProgress.getDenominator());
+          groupProgress.setNumerator(jobProgressMap.get(dataType).getNumerator() + groupProgress.getNumerator());
+        }
       }
       uiBuilder.put("dataType", selectedGroup.name);
       uiBuilder.put("completed", String.valueOf(groupProgress.isCompleted()));

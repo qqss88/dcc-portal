@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("deprecation")
 public class MutationParser {
 
   /**

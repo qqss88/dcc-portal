@@ -193,7 +193,6 @@
   });
 
 
-
   // a function that returns an Angular 'structure' that represents a resuable
   // service which provides a simple hash/lookup function as well as fetching data via ajax.
   var KeyValueLookupServiceFactory = function ( fetch ) {

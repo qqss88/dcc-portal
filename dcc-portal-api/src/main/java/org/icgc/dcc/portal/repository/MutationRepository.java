@@ -89,6 +89,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class MutationRepository implements Repository {
 
   private static final Type CENTRIC_TYPE = Type.MUTATION_CENTRIC;
