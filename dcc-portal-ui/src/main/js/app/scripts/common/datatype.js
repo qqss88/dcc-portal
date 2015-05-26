@@ -8,6 +8,7 @@
    */
   module.service('DataType', function() {
     var data = [
+      {id: 'donor', shortLabel: 'Clinical', label: 'Clinical data'},
       {id: 'clinical', shortLabel: 'Clinical', label: 'Clinical data'},
       {id: 'ssm', shortLabel: 'SSM', label: 'Simple somatic mutation'},
       {id: 'sgv', shortLabel: 'SGV', label: 'Simple Germline variation'},
