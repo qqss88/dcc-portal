@@ -52,6 +52,7 @@ import static org.icgc.dcc.portal.util.MediaTypes.GZIP;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -131,10 +132,12 @@ public class ExternalFileResource {
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
-    StreamingOutput stream = externalFileService.exportTableData(toQuery(filtersParam));
+    val stream = externalFileService.exportTableData(toQuery(filtersParam));
+    // Make this similar to client-side export naming format
+    val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
 
     return Response.ok(stream).header(CONTENT_DISPOSITION,
-        type(TYPE_ATTACHMENT).fileName("export.tsv").creationDate(new Date()).build()).build();
+        type(TYPE_ATTACHMENT).fileName(fileName).creationDate(new Date()).build()).build();
   }
 
   @GET
