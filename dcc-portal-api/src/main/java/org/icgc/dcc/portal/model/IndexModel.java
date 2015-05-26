@@ -98,7 +98,7 @@ public class IndexModel {
 
   private static final ImmutableMap<String, String> EXTERNAL_FILE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
-          .put("id", "_id")
+          .put("id", "id")
           .put("repositoryEntityId", "repository.repo_entity_id")
           .put("repositoryDataPath", "repository.repo_data_path")
           .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list

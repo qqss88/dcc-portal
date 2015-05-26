@@ -17,7 +17,6 @@
  */
 package org.icgc.dcc.portal.service;
 
-import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
@@ -129,7 +128,6 @@ public class ExternalFileService {
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
-      fieldMap.put("_id", hit.getId());
       list.add(new ExternalFile(fieldMap));
     }
 
@@ -161,21 +159,28 @@ public class ExternalFileService {
     tar.setLongFileMode(LONGFILE_GNU);
 
     val repoCodeGroups = Multimaps.index(all, entry -> entry.get(FieldNames.REPO_CODE));
-    val repoIncludes = newArrayList(filter(repoList, repoCode -> !isBlank(repoCode)));
+    val repoIncludes = FluentIterable.from(repoList)
+        .transform(repoName -> repoName.replace("\"", ""))
+        .filter(repoName -> !isBlank(repoName))
+        .toList();
+
+    log.debug("repoIncludes are: '{}'.", repoIncludes);
 
     for (val repoCode : repoCodeGroups.keySet()) {
-      if (shouldRepositoryBeExcluded(repoIncludes, repoCode)) {
-        continue;
-      }
-
       val entries = repoCodeGroups.get(repoCode);
 
       if (entries.isEmpty()) {
         continue;
       }
 
+      val firstEntry = entries.get(0);
       // Entries with the same repoCode should & must have the same repoType.
-      val repoType = entries.get(0).get(FieldNames.REPO_TYPE);
+      val repoType = firstEntry.get(FieldNames.REPO_TYPE);
+      val repoName = firstEntry.get(FieldNames.REPO_NAME);
+
+      if (shouldRepositoryBeExcluded(repoIncludes, repoName)) {
+        continue;
+      }
 
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
@@ -183,8 +188,8 @@ public class ExternalFileService {
   }
 
   @NonNull
-  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoCode) {
-    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoCode));
+  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoName) {
+    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoName));
   }
 
   @SneakyThrows
@@ -290,6 +295,7 @@ public class ExternalFileService {
     final static String REPOSITORY = "repository";
     final static String REPO_SERVER = "repo_server";
     final static String REPO_CODE = "repo_code";
+    final static String REPO_NAME = "repo_name";
     final static String BASE_URL = "repo_base_url";
 
     final static String REPO_TYPE = REPOSITORY + ".repo_type";
