@@ -148,39 +148,24 @@
 
 
   module.controller('ExternalFileDownloadController',
-    function($scope, $window, $modalInstance, LocationService, API, params) {
+    function($scope, $window, $modalInstance, ExternalRepoService, LocationService, params) {
 
     $scope.filters = LocationService.filters();
     $scope.selectedRepos = params.selectedRepos;
+    $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
-    };
-
-    // FIXME: Move this out
-    var repoMap = {
-       'CGHub - Santa Cruz': 'cghub',
-       'TCGA DCC - Washington': 'tcga',
-       'PCAWG - Barcelona': 'pcawg-barcelona',
-       'PCAWG - Santa Cruz': 'pcawg-cghub',
-       'PCAWG - Tokyo': 'pcawg-tokyo',
-       'PCAWG - Seoul': 'pcawg-seoul',
-       'PCAWG - London': 'pcawg-london',
-       'PCAWG - Heidelberg': 'pcawg-heidelberg',
-       'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
-       'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
     };
 
     console.log('selected repos', $scope.selectedRepos);
 
 
     $scope.download = function() {
-      var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      var repoStr = _.map(Object.keys($scope.selectedRepos),
-        function(repo) { return repoMap[repo] || repo; }).join(',');
-
-      // console.log(repoStr);
-
-      $window.location.href = API.BASE_URL + '/files/manifest?filters=' + filtersStr + '&repositories=' + repoStr;
+      if (_.isEmpty($scope.selectedFiles)) {
+        ExternalRepoService.download(LocationService.filters(), $scope.selectedRepos);
+      } else {
+        ExternalRepoService.downloadSelected();
+      }
       $scope.cancel();
     };
 
@@ -220,8 +205,7 @@
      */
     _ctrl.export = function() {
       console.log('export');
-      var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      $window.location.href = API.BASE_URL + '/files/export?filters=' + filtersStr;
+      ExternalRepoService.export( LocationService.filters() );
     };
 
 

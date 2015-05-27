@@ -21,18 +21,51 @@
 
   var module = angular.module('icgc.repository.services', []);
 
-  module.service('ExternalRepoService', function(Restangular) {
+  module.service('ExternalRepoService', function($window, Restangular, API) {
+
+    // FIXME: Move this out
+    var repoMap = {
+       'CGHub - Santa Cruz': 'cghub',
+       'TCGA DCC - Washington': 'tcga',
+       'PCAWG - Barcelona': 'pcawg-barcelona',
+       'PCAWG - Santa Cruz': 'pcawg-cghub',
+       'PCAWG - Tokyo': 'pcawg-tokyo',
+       'PCAWG - Seoul': 'pcawg-seoul',
+       'PCAWG - London': 'pcawg-london',
+       'PCAWG - Heidelberg': 'pcawg-heidelberg',
+       'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
+       'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
+    };
+
 
     this.getList = function(params) {
       var defaults = {
         size: 10,
         from:1
       };
-      return Restangular.one('files').get(angular.extend(defaults, params));
+      return Restangular.one('repository/files').get(angular.extend(defaults, params));
+    };
+
+    this.download = function(filters, repos) {
+      var filtersStr = encodeURIComponent(JSON.stringify(filters));
+      var repoStr = _.map(Object.keys(repos), function(repo) {
+        return repoMap[repo] || repo;
+      }).join(',');
+
+      $window.location.href = API.BASE_URL + '/repository/files/manifest?filters=' +
+        filtersStr + '&repositories=' + repoStr;
+    };
+
+    this.downloadSelected = function(ids, repos) {
+    };
+
+    this.export = function(filters) {
+      var filtersStr = encodeURIComponent(JSON.stringify(filters));
+      $window.location.href = API.BASE_URL + '/repository/files/export?filters=' + filtersStr;
     };
 
     this.getMetaData = function() {
-      return Restangular.one('files').one('metadata').get({});
+      return Restangular.one('repository/files').one('metadata').get({});
     };
 
     this.shortenFileName = function(txt) {
