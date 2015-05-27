@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
@@ -66,6 +67,7 @@ import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -110,7 +112,7 @@ public class RepositoryFileService {
   private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
       .constructMapType(Map.class, String.class, String.class);
   private static final BiFunction<Collection<Map<String, String>>, String, String> CONCAT_WITH_COMMA =
-      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, r -> r.get(fieldName)));
+      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, info -> info.get(fieldName)));
 
   private final RepositoryFileRepository repositoryFileRepository;
 
@@ -133,6 +135,7 @@ public class RepositoryFileService {
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
+      fieldMap.put("_id", hit.getId());
       list.add(new RepositoryFile(fieldMap));
     }
 
@@ -187,23 +190,24 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoName) {
-    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoName));
+  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoCode) {
+    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoCode));
   }
 
   @SneakyThrows
   private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
     val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
+    final Function<JsonNode, Map<String, String>> combineMaps = (server) ->
+        ImmutableMap.<String, String> builder()
+            // There shouldn't be collision on the keys.
+            .putAll(fields)
+            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
+            .build();
     val serverArray = READER.readTree(hit.sourceAsString())
         .path(FieldNames.REPOSITORY)
         .path(FieldNames.REPO_SERVER);
 
-    return transform(serverArray,
-        server -> ImmutableMap.<String, String> builder()
-            // Merges these two maps - there shouldn't be collision on the keys.
-            .putAll(fields)
-            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
-            .build());
+    return transform(serverArray, server -> combineMaps.apply(server));
   }
 
   @SneakyThrows
