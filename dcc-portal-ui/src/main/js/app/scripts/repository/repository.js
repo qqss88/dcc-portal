@@ -175,7 +175,8 @@
 
     $scope.download = function() {
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      var repoStr = _.map(Object.keys($scope.selectedRepos), function(repo) { return repoMap[repo] || repo; }).join(',');
+      var repoStr = _.map(Object.keys($scope.selectedRepos),
+        function(repo) { return repoMap[repo] || repo; }).join(',');
 
       // console.log(repoStr);
 
@@ -207,7 +208,7 @@
       }
 
       _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
-         if (_.contains(filterRepos, term.term)) {
+         if (_.contains(filterRepos, term.term) || _.isEmpty(filterRepos)) {
            _ctrl.selectedRepos[term.term] = term.count;
          }
       });
