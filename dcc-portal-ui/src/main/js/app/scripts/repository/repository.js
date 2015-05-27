@@ -156,9 +156,30 @@
       $modalInstance.dismiss('cancel');
     };
 
+    // FIXME: Move this out
+    var repoMap = {
+       'CGHub - Santa Cruz': 'cghub',
+       'TCGA DCC - Washington': 'tcga',
+       'PCAWG - Barcelona': 'pcawg-barcelona',
+       'PCAWG - Santa Cruz': 'pcawg-cghub',
+       'PCAWG - Tokyo': 'pcawg-tokyo',
+       'PCAWG - Seoul': 'pcawg-seoul',
+       'PCAWG - London': 'pcawg-london',
+       'PCAWG - Heidelberg': 'pcawg-heidelberg',
+       'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
+       'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
+    };
+
+    console.log('selected repos', $scope.selectedRepos);
+
+
     $scope.download = function() {
       var filtersStr = encodeURIComponent(JSON.stringify(LocationService.filters()));
-      $window.location.href = API.BASE_URL + '/files/manifest?filters=' + filtersStr;
+      var repoStr = _.map(Object.keys($scope.selectedRepos), function(repo) { return repoMap[repo] || repo; }).join(',');
+
+      // console.log(repoStr);
+
+      $window.location.href = API.BASE_URL + '/files/manifest?filters=' + filtersStr + '&repositories=' + repoStr;
       $scope.cancel();
     };
 
@@ -176,6 +197,21 @@
 
     _ctrl.selectedFiles = [];
     _ctrl.selectedRepos = {}; // Used to track file repositories
+
+
+    // FIXME: Need to convert to PQL
+    function resetSelectedRepos() {
+      var filterRepos = [], filters = LocationService.filters();
+      if (filters.file && filters.file.repositoryNames) {
+        filterRepos = filters.file.repositoryNames.is;
+      }
+
+      _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
+         if (_.contains(filterRepos, term.term)) {
+           _ctrl.selectedRepos[term.term] = term.count;
+         }
+      });
+    }
 
 
     /**
@@ -231,11 +267,8 @@
         });
 
         if (_ctrl.selectedFiles.length === 0) {
-          _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
-             _ctrl.selectedRepos[term.term] = term.count;
-          });
+          resetSelectedRepos();
         }
-
 
       } else {
 
@@ -258,6 +291,7 @@
     };
 
 
+
     /**
      * Undo user selected files
      */
@@ -268,11 +302,9 @@
       _ctrl.files.hits.forEach(function(f) {
         delete f.checked;
       });
-
-      _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
-         _ctrl.selectedRepos[term.term] = term.count;
-      });
+      resetSelectedRepos();
     };
+
 
     function refresh() {
       var promise, params = {};
