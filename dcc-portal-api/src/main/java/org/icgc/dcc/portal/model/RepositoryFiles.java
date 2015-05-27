@@ -35,13 +35,13 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "Files")
-public class ExternalFiles extends Paginated {
+public class RepositoryFiles extends Paginated {
 
   @ApiModelProperty(value = "List of external files", required = true)
-  List<ExternalFile> hits;
+  List<RepositoryFile> hits;
 
   @JsonCreator
-  public ExternalFiles(@JsonProperty("hits") List<ExternalFile> hits) {
+  public RepositoryFiles(@JsonProperty("hits") List<RepositoryFile> hits) {
     this.hits = hits;
   }
 

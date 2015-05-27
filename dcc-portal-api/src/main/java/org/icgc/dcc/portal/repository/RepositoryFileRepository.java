@@ -93,7 +93,7 @@ import com.google.common.primitives.Ints;
 
 @Slf4j
 @Component
-public class ExternalFileRepository {
+public class RepositoryFileRepository {
 
   private final String INDEX_NAME = "icgc-repository";
 
@@ -123,7 +123,7 @@ public class ExternalFileRepository {
   private final String index;
 
   @Autowired
-  ExternalFileRepository(Client client) {
+  RepositoryFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
   }

@@ -72,12 +72,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.ExternalFile;
-import org.icgc.dcc.portal.model.ExternalFiles;
+import org.icgc.dcc.portal.model.RepositoryFile;
+import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.service.BadRequestException;
-import org.icgc.dcc.portal.service.ExternalFileService;
+import org.icgc.dcc.portal.service.RepositoryFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -93,20 +93,20 @@ import com.yammer.metrics.annotation.Timed;
 
 @Component
 @Slf4j
-@Path("/v1/files")
+@Path("/v1/repository/files")
 @Produces(APPLICATION_JSON)
-@Api(value = "/files", description = "Resources relating to external files")
+@Api(value = "/repository/files", description = "Resources relating to external files")
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
-public class ExternalFileResource {
+public class RepositoryFileResource {
 
   private final static String TYPE_ATTACHMENT = "attachment";
 
-  private final ExternalFileService externalFileService;
+  private final RepositoryFileService repositoryFileService;
 
   @GET
   @Timed
-  @ApiOperation(value = RETURNS_LIST + GENE + S, response = ExternalFile.class)
-  public ExternalFiles findAll(
+  @ApiOperation(value = RETURNS_LIST + GENE + S, response = RepositoryFile.class)
+  public RepositoryFiles findAll(
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
@@ -117,7 +117,7 @@ public class ExternalFileResource {
 
     ObjectNode filters = filtersParam.get();
 
-    return externalFileService.findAll(query().fields(fields).filters(filters)
+    return repositoryFileService.findAll(query().fields(fields).filters(filters)
         .from(from.get())
         .size(size.get())
         .sort(sort)
@@ -132,7 +132,7 @@ public class ExternalFileResource {
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
-    val stream = externalFileService.exportTableData(toQuery(filtersParam));
+    val stream = repositoryFileService.exportTableData(toQuery(filtersParam));
     // Make this similar to client-side export naming format
     val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
 
@@ -144,7 +144,7 @@ public class ExternalFileResource {
   @Path("/metadata")
   @Timed
   public Map<String, String> getIndexMetaData() {
-    return externalFileService.getIndexMetadata();
+    return repositoryFileService.getIndexMetadata();
   }
 
   @GET
@@ -159,7 +159,7 @@ public class ExternalFileResource {
 
       @Override
       public void write(OutputStream outputStream) throws JsonProcessingException, IOException {
-        externalFileService.generateManifestArchive(outputStream,
+        repositoryFileService.generateManifestArchive(outputStream,
             timestamp,
             toQuery(filtersParam),
             COMMA.splitToList(repoList));
