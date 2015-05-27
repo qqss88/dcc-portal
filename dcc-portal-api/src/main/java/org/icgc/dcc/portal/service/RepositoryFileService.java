@@ -31,9 +31,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
@@ -53,11 +55,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
-import org.icgc.dcc.portal.model.RepositoryFile;
-import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.RepositoryFile;
+import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.repository.RepositoryFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,7 +73,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -190,18 +191,12 @@ public class RepositoryFileService {
     val serverArray = READER.readTree(hit.sourceAsString())
         .path(FieldNames.REPOSITORY)
         .path(FieldNames.REPO_SERVER);
-    val servers = Lists.<Map<String, String>> newArrayList();
 
-    // Converts the arrayNode to a typed iterable
-    for (val server : serverArray) {
-      servers.add(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE));
-    }
-
-    return transform(servers,
+    return transform(serverArray,
         server -> ImmutableMap.<String, String> builder()
             // Merges these two maps - there shouldn't be collision on the keys.
             .putAll(fields)
-            .putAll(server)
+            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
             .build());
   }
 
@@ -265,16 +260,16 @@ public class RepositoryFileService {
     val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
     tsv.writeHeader(TSV_HEADERS);
 
+    final BiFunction<Collection<Map<String, String>>, String, String> concatWithComma =
+        (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, r -> r.get(fieldName)));
+
     for (val url : downloadUrlGroups.keySet()) {
       val fileInfo = downloadUrlGroups.get(url);
-      val fileNames = transform(fileInfo, r -> r.get(FieldNames.FILE_NAME));
-      val fileSizes = transform(fileInfo, r -> r.get(FieldNames.FILE_SIZE));
-      val checksums = transform(fileInfo, r -> r.get(FieldNames.CHECK_SUM));
       val row = ImmutableList.of(
           url,
-          COMMA.join(fileNames),
-          COMMA.join(fileSizes),
-          COMMA.join(checksums));
+          concatWithComma.apply(fileInfo, FieldNames.FILE_NAME),
+          concatWithComma.apply(fileInfo, FieldNames.FILE_SIZE),
+          concatWithComma.apply(fileInfo, FieldNames.CHECK_SUM));
 
       tsv.write(row);
     }
