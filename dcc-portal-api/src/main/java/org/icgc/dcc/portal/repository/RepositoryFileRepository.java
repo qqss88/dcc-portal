@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
 import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
@@ -34,6 +35,7 @@ import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFi
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -54,6 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.util.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
@@ -86,16 +89,17 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Ints;
 
 @Slf4j
 @Component
-public class ExternalFileRepository {
+public class RepositoryFileRepository {
 
   private final String INDEX_NAME = "icgc-repository";
 
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.EXTERNAL_FILE;
-  private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
+  private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
       "projectCode", "primarySite", "donorStudy", "repositoryNames");
@@ -119,7 +123,7 @@ public class ExternalFileRepository {
   private final String index;
 
   @Autowired
-  ExternalFileRepository(Client client) {
+  RepositoryFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
   }
@@ -415,10 +419,24 @@ public class ExternalFileRepository {
 
   @NonNull
   public SearchResponse findDownloadInfo(Query query, final String[] fields, String sortField, String sourceField) {
+    // Get the total count first.
+    query.setLimit(0);
+    val response = findDownloadInfo(COUNT, query, fields, sortField, sourceField);
+    val count = getTotalHitCount(response);
+    log.info("A total of {} files for this query.", count);
+
+    // Run the query to retrieve.
+    query.setLimit(Ints.saturatedCast(count));
+    return findDownloadInfo(QUERY_THEN_FETCH, query, fields, sortField, sourceField);
+  }
+
+  @NonNull
+  private SearchResponse findDownloadInfo(SearchType searchType, Query query, final String[] fields, String sortField,
+      String sourceField) {
     val filters = buildRepoFilters(query.getFilters(), true);
     val search = client.prepareSearch(index)
         .setTypes("file")
-        .setSearchType(QUERY_THEN_FETCH)
+        .setSearchType(searchType)
         .setFrom(query.getFrom())
         .setSize(query.getLimit())
         .addSort(sortField, SortOrder.ASC)

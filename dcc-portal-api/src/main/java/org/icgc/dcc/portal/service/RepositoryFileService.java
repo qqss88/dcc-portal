@@ -52,15 +52,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.icgc.dcc.portal.model.ExternalFile;
-import org.icgc.dcc.portal.model.ExternalFiles;
+import org.icgc.dcc.portal.model.RepositoryFile;
+import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.repository.ExternalFileRepository;
+import org.icgc.dcc.portal.repository.RepositoryFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
@@ -82,7 +80,7 @@ import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
-public class ExternalFileService {
+public class RepositoryFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
@@ -107,7 +105,7 @@ public class ExternalFileService {
   private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
       .constructMapType(Map.class, String.class, String.class);
 
-  private final ExternalFileRepository externalFileRepository;
+  private final RepositoryFileRepository repositoryFileRepository;
 
   @Resource
   private Map<String, String> repoIndexMetadata;
@@ -117,22 +115,22 @@ public class ExternalFileService {
   }
 
   public StreamingOutput exportTableData(Query query) {
-    return externalFileRepository.exportData(query);
+    return repositoryFileRepository.exportData(query);
   }
 
-  public ExternalFiles findAll(Query query) {
-    SearchResponse response = externalFileRepository.findAll(query);
-    SearchHits hits = response.getHits();
+  public RepositoryFiles findAll(Query query) {
+    val response = repositoryFileRepository.findAll(query);
+    val hits = response.getHits();
 
-    val list = ImmutableList.<ExternalFile> builder();
+    val list = ImmutableList.<RepositoryFile> builder();
 
     for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
-      list.add(new ExternalFile(fieldMap));
+      list.add(new RepositoryFile(fieldMap));
     }
 
-    val externalFiles = new ExternalFiles(list.build());
-    externalFiles.setTermFacets(externalFileRepository.convertAggregations2Facets(response.getAggregations()));
+    val externalFiles = new RepositoryFiles(list.build());
+    externalFiles.setTermFacets(repositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
     // externalFiles.setFacets(response.getFacets());
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
@@ -142,11 +140,8 @@ public class ExternalFileService {
   @NonNull
   public void generateManifestArchive(OutputStream output, Date timestamp, Query query, List<String> repoList)
       throws JsonProcessingException, IOException {
-    // FIXME - find the appropriate value or another way to set the proper size.
-    val maxRecordCount = 1000000;
-    query.setLimit(maxRecordCount);
-
-    val esResponse = externalFileRepository.findDownloadInfo(query,
+    // Runs our elasticsearch query to get matching files
+    val esResponse = repositoryFileRepository.findDownloadInfo(query,
         DOWNLOAD_INFO_QUERY_FIELDS,
         FieldNames.REPO_TYPE,
         DOWNLOAD_INFO_QUERY_SOURCE_FIELD);
@@ -160,13 +155,15 @@ public class ExternalFileService {
 
     val repoCodeGroups = Multimaps.index(all, entry -> entry.get(FieldNames.REPO_CODE));
     val repoIncludes = FluentIterable.from(repoList)
-        .transform(repoName -> repoName.replace("\"", ""))
-        .filter(repoName -> !isBlank(repoName))
+        .filter(repoCode -> !isBlank(repoCode))
         .toList();
 
-    log.debug("repoIncludes are: '{}'.", repoIncludes);
-
+    // This writes out the results to the tar archive.
     for (val repoCode : repoCodeGroups.keySet()) {
+      if (shouldRepositoryBeExcluded(repoIncludes, repoCode)) {
+        continue;
+      }
+
       val entries = repoCodeGroups.get(repoCode);
 
       if (entries.isEmpty()) {
@@ -176,11 +173,6 @@ public class ExternalFileService {
       val firstEntry = entries.get(0);
       // Entries with the same repoCode should & must have the same repoType.
       val repoType = firstEntry.get(FieldNames.REPO_TYPE);
-      val repoName = firstEntry.get(FieldNames.REPO_NAME);
-
-      if (shouldRepositoryBeExcluded(repoIncludes, repoName)) {
-        continue;
-      }
 
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
@@ -200,7 +192,7 @@ public class ExternalFileService {
         .path(FieldNames.REPO_SERVER);
     val servers = Lists.<Map<String, String>> newArrayList();
 
-    // Converts the arrayNode to a typed iterable just so Guava's transform() can be used.
+    // Converts the arrayNode to a typed iterable
     for (val server : serverArray) {
       servers.add(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE));
     }
@@ -244,7 +236,7 @@ public class ExternalFileService {
   private static void generateXmlFile(OutputStream buffer, ListMultimap<String, Map<String, String>> downloadUrlGroups,
       Date timestamp) {
     int rowCount = 0;
-    // Perhaps make this static???
+    // If this is thread-safe, perhaps we can make this static???
     val factory = XMLOutputFactory.newInstance();
     @Cleanup
     val writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(buffer));
@@ -295,7 +287,6 @@ public class ExternalFileService {
     final static String REPOSITORY = "repository";
     final static String REPO_SERVER = "repo_server";
     final static String REPO_CODE = "repo_code";
-    final static String REPO_NAME = "repo_name";
     final static String BASE_URL = "repo_base_url";
 
     final static String REPO_TYPE = REPOSITORY + ".repo_type";
