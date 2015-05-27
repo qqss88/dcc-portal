@@ -164,7 +164,7 @@
       if (_.isEmpty($scope.selectedFiles)) {
         ExternalRepoService.download(LocationService.filters(), $scope.selectedRepos);
       } else {
-        ExternalRepoService.downloadSelected();
+        ExternalRepoService.downloadSelected($scope.selectedFiles, $scope.selectedRepos);
       }
       $scope.cancel();
     };
@@ -264,11 +264,18 @@
         }
         _ctrl.selectedFiles.push(row.id);
 
+        var activeRepos = [], filters = LocationService.filters();
+        if (filters.file && filters.file.repositoryNames) {
+          activeRepos = filters.file.repositoryNames.is;
+        }
+
         row.repositoryNames.forEach(function(repo) {
-          if (repos.hasOwnProperty(repo)) {
-             repos[repo] += 1;
-          } else {
-             repos[repo] = 1;
+          if (_.contains(activeRepos, repo) || _.isEmpty(activeRepos)) {
+            if (repos.hasOwnProperty(repo)) {
+               repos[repo] += 1;
+            } else {
+               repos[repo] = 1;
+            }
           }
         });
       }
