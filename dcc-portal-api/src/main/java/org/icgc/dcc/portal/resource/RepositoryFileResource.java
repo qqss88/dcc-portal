@@ -19,11 +19,13 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
+import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.common.core.util.Splitters.COMMA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_IDS_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_IDS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
@@ -59,6 +61,7 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -72,17 +75,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.RepositoryFile;
-import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.RepositoryFile;
+import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.RepositoryFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
@@ -182,21 +184,16 @@ public class RepositoryFileResource {
 
   @POST
   @Path("/manifest")
-  @Consumes(APPLICATION_JSON)
+  @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
-  public Response generateManifestArchiveByIdList(JsonNode payload) {
-    verifyIdListPayload(payload);
-
-    // An array of file IDs is expected for 'fileIds'.
-    val jsonNode = payload.get(API_FILE_IDS_PARAM);
-    verifyIdListJsonNode(jsonNode);
-    val filter = buildFileIdListFilterParam(jsonNode);
-
-    // A comma-separated list is expected for 'repositories'.
-    val repos = payload.get(API_FILE_REPOS_PARAM);
+  public Response generateManifestArchiveByIdList(
+      @ApiParam(value = API_FILE_IDS_VALUE) @FormParam(API_FILE_IDS_PARAM) List<String> fileIds,
+      @ApiParam(value = API_FILE_REPOS_VALUE) @FormParam(API_FILE_REPOS_PARAM) String repoList) {
+    verifyFileIdList(fileIds);
+    val filter = buildFileIdListFilterParam(fileIds);
 
     return generateManifestArchiveByFilters(new FiltersParam(filter),
-        null == repos ? "" : repos.asText());
+        null == repoList ? "" : repoList);
   }
 
   @NonNull
@@ -211,35 +208,23 @@ public class RepositoryFileResource {
     return "manifest." + timestamp.getTime() + ".tar.gz";
   }
 
-  private static void verifyIdListPayload(JsonNode payload) {
-    if (null == payload) {
-      val errorMessage = "No payload found in this POST request. " +
-          "A JSON object of {" +
+  private static void verifyFileIdList(List<String> fileIds) {
+    if (null == fileIds) {
+      val errorMessage = "Form field, '" +
           API_FILE_IDS_PARAM +
-          ": [fileId1,fileId2,...], " +
-          API_FILE_REPOS_PARAM +
-          ": 'repo1,repo2,...'} is expected.";
+          "', is missing in the POST payload.";
+      throw new BadRequestException(errorMessage);
+    }
+
+    if (fileIds.isEmpty()) {
+      val errorMessage = "Form field, '" +
+          API_FILE_IDS_PARAM +
+          "', must contain a list of repository file IDs.";
       throw new BadRequestException(errorMessage);
     }
   }
 
-  private static void verifyIdListJsonNode(JsonNode jsonNode) {
-    if (null == jsonNode) {
-      val errorMessage = "JSON field, '" +
-          API_FILE_IDS_PARAM +
-          "', is missing in the payload object.";
-      throw new BadRequestException(errorMessage);
-    }
-
-    if (!jsonNode.isArray()) {
-      val errorMessage = "JSON field, '" +
-          API_FILE_IDS_PARAM +
-          "', must be an array.";
-      throw new BadRequestException(errorMessage);
-    }
-  }
-
-  private static String buildFileIdListFilterParam(@NonNull JsonNode jsonNode) {
+  private static String buildFileIdListFilterParam(@NonNull List<String> fileIds) {
     val nodeFactory = new JsonNodeFactory(false);
     val root = nodeFactory.objectNode();
 
@@ -249,7 +234,10 @@ public class RepositoryFileResource {
 
     val id = nodeFactory.objectNode();
     file.put("id", id);
-    id.put("is", jsonNode);
+
+    val idArray = nodeFactory.arrayNode();
+    fileIds.stream().forEach(fileId -> idArray.add(fileId));
+    id.put("is", idArray);
 
     return root.toString();
   }
