@@ -192,6 +192,11 @@
         filterRepos = filters.file.repositoryNames.is;
       }
 
+      if (! _ctrl.files.termFacets.repositoryNamesFiltered.terms) {
+        _ctrl.selectedRepos = {};
+        return;
+      }
+
       _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
          if (_.contains(filterRepos, term.term) || _.isEmpty(filterRepos)) {
            _ctrl.selectedRepos[term.term] = term.count;

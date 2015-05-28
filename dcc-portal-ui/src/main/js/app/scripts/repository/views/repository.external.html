@@ -55,68 +55,74 @@
                for repository-specific download software.
             </p>
         </div>
-        <div style="margin-bottom:0.5rem">
-            <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                <i class="icon-download"></i>Download manifests (
-                  {{ ExternalRepoController.selectedFiles.length === 0?  ExternalRepoController.files.pagination.total : ExternalRepoController.selectedFiles.length | number}}
 
-                  files )
-            </button>
+        <div class="empty loading-text" data-ng-if="ExternalRepoController.files.hits.length === 0">
+            <h3>No Files Found</h3>
         </div>
+        <div data-ng-if="ExternalRepoController.files.hits.length">
+            <div style="margin-bottom:0.5rem">
+                <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
+                    <i class="icon-download"></i>Generate manifests (
+                      {{ ExternalRepoController.selectedFiles.length === 0?  ExternalRepoController.files.pagination.total : ExternalRepoController.selectedFiles.length | number}}
 
-        <div class="t_table_top">
-            <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
-            <span class="t_tools">
-                <span class="t_tools__tool">
-                    <i class="icon-file pull-right"
-                       data-tooltip="Export table as TSV" data-tooltip-placement="left"
-                       data-ng-click="ExternalRepoController.export()"></i>
+                      files )
+                </button>
+            </div>
+
+            <div class="t_table_top">
+                <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
+                <span class="t_tools">
+                    <span class="t_tools__tool">
+                        <i class="icon-file pull-right"
+                           data-tooltip="Export table as TSV" data-tooltip-placement="left"
+                           data-ng-click="ExternalRepoController.export()"></i>
+                    </span>
                 </span>
-            </span>
-        </div>
+            </div>
 
-        <table class="table table-selectable">
-            <thead>
-                <th>&nbsp;</th>
-                <th data-sortable data-type="files" data-field="fileName" data-active="true" data-reversed="true">File Name</th>
-                <th data-sortable data-type="files" data-field="donorId">Donor</th>
-                <th>Repository</th>
-                <th data-sortable data-type="files" data-field="projectCode">Project</th>
-                <th>Study</th>
-                <th>Data type</th>
-                <th>Format</th>
-                <th data-sortable data-type="files" data-field="fileSize">Size</th>
-            </thead>
-            <tbody>
-                <tr data-ng-repeat="row in ExternalRepoController.files.hits">
-                    <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
-                       <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
-                    </td>
-                    <td style="max-width:28rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
-                       <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
-                       {{row.fileName}}
-                    </td>
-                    <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
-                    <td>{{row.repositoryNames.join(', ') }}</td>
-                    <td><a href="/projects/{{row.projectCode}}">{{row.projectCode}}</a></td>
-                    <td>
-                        <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
-                        <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
-                    </td>
-                    <td>
-                        <ul>
-                            <li data-ng-repeat="item in row.dataType track by $index">{{item}}</li>
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                            <li data-ng-repeat="item in row.dataFormat track by $index">{{item}}</li>
-                        </ul>
-                    </td>
-                    <td>{{row.fileSize | bytes }}</td>
-                </tr>
-            </tbody>
-        </table>
-        <pagination-controls data-type="files" data-data="ExternalRepoController.files"></pagination-controls>
+            <table class="table table-selectable">
+                <thead>
+                    <th>&nbsp;</th>
+                    <th data-sortable data-type="files" data-field="fileName" data-active="true" data-reversed="true">File Name</th>
+                    <th data-sortable data-type="files" data-field="donorId">Donor</th>
+                    <th>Repository</th>
+                    <th data-sortable data-type="files" data-field="projectCode">Project</th>
+                    <th>Study</th>
+                    <th>Data type</th>
+                    <th>Format</th>
+                    <th data-sortable data-type="files" data-field="fileSize">Size</th>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="row in ExternalRepoController.files.hits">
+                        <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
+                           <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
+                        </td>
+                        <td style="max-width:28rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
+                           <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
+                           {{row.fileName}}
+                        </td>
+                        <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
+                        <td>{{row.repositoryNames.join(', ') }}</td>
+                        <td><a href="/projects/{{row.projectCode}}">{{row.projectCode}}</a></td>
+                        <td>
+                            <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
+                            <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
+                        </td>
+                        <td>
+                            <ul>
+                                <li data-ng-repeat="item in row.dataType track by $index">{{item}}</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul>
+                                <li data-ng-repeat="item in row.dataFormat track by $index">{{item}}</li>
+                            </ul>
+                        </td>
+                        <td>{{row.fileSize | bytes }}</td>
+                    </tr>
+                </tbody>
+            </table>
+           <pagination-controls data-type="files" data-data="ExternalRepoController.files"></pagination-controls>
+        </div>
     </section>
 </article>
