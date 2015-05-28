@@ -25,7 +25,17 @@
     'icgc.common.location',
     'icgc.common.display',
     'icgc.common.external',
+
+    // UI
+    'icgc.common.codetable',
+    'icgc.common.translator',
+
+    // Biological modules
     'icgc.common.chromosome',
+    'icgc.common.consequence',
+    'icgc.common.datatype',
+
+    // Query langauge
     'icgc.common.pql.translation',
     'icgc.common.pql.queryobject',
     'icgc.common.pql.utils'
@@ -74,54 +84,6 @@
     };
   });
 
-  module.filter('trans', function (TranslationService) {
-    return function (text, capitalize) {
-      var translations;
-
-      capitalize = capitalize || false;
-
-      function human(text) {
-        var t, words, cWords = [];
-        if (!angular.isDefined(text) || (angular.isString(text) && !text.length)) {
-          return '--';
-        }
-        if (!angular.isString(text)) {
-          return text;
-        }
-
-        t = text.replace(/_/g, ' ').replace(/^\s+|\s+$/g, '');
-        if (capitalize) {
-          words = t.split(' ');
-          words.forEach(function (word) {
-//            word = word.toLowerCase();
-            cWords.push(word.charAt(0).toUpperCase() + word.slice(1));
-          });
-          t = cWords.join(' ');
-        }
-        return t;
-      }
-
-      translations = TranslationService.getTranslations();
-      return translations.hasOwnProperty(text) ? translations[text] : human(text);
-    };
-  });
-
-  module.filter('define', function (DefinitionService) {
-    return function (text, nullable) {
-      var definitions;
-
-      nullable = nullable || false;
-
-      // var debugStartTime = window.performance.now();
-      definitions = DefinitionService.getDefinitions();
-      // window.rootDebugTimer_define += (window.performance.now() - debugStartTime);
-
-      // If translation found return that
-      // else if nullable return null
-      // else pass through original text
-      return definitions.hasOwnProperty(text) ? definitions[text] : nullable ? null : text;
-    };
-  });
 
   // a filter used to provide a tooltip (descriptive name) for a gene-set
   module.filter ( 'geneSetNameLookup', function (GeneSetNameLookupService) {

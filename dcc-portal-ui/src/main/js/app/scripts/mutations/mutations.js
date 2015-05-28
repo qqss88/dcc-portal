@@ -138,46 +138,6 @@
     '_missing'
   ]);
 
-  module.constant('ConsequenceOrder', [
-    'frameshift_variant',
-    'missense_variant',
-    'start_lost',
-    'initiator_codon_variant',
-    'stop_gained',
-    'stop_lost',
-    'exon_loss_variant',
-    'splice_acceptor_variant',
-    'splice_donor_variant',
-    'splice_region_variant',
-    'rare_amino_acid_variant',
-    '5_prime_UTR_premature_start_codon_gain_variant',
-    'coding_sequence_variant',
-    '5_prime_UTR_truncation',
-    '3_prime_UTR_truncation',
-    'non_canonical_start_codon',
-    'disruptive_inframe_deletion',
-    'inframe_deletion',
-    'disruptive_inframe_insertion',
-    'inframe_insertion',
-    'regulatory_region_variant',
-    'miRNA',
-    'conserved_intron_variant',
-    'conserved_intergenic_variant',
-    '5_prime_UTR_variant',
-    'upstream_gene_variant',
-    'synonymous_variant',
-    'stop_retained_variant',
-    '3_prime_UTR_variant',
-    'exon_variant',
-    'downstream_gene_variant',
-    'intron_variant',
-    'transcript_variant',
-    'gene_variant',
-    'intragenic_variant',
-    'intergenic_region',
-    'chromosome',
-    '_missing'
-  ]);
 })();
 
 (function () {
@@ -185,7 +145,7 @@
 
   var module = angular.module('icgc.mutations.models', []);
 
-  module.service('Mutations', function (Restangular, LocationService, Mutation, ConsequenceOrder, ImpactOrder) {
+  module.service('Mutations', function (Restangular, LocationService, Mutation, Consequence, ImpactOrder) {
     this.handler = Restangular.all('mutations');
 
     this.getList = function (params) {
@@ -197,10 +157,12 @@
 
       return this.handler.get('', angular.extend(defaults, params)).then(function (data) {
         if (data.hasOwnProperty('facets')) {
+          var precedence = Consequence.precedence();
+
           if (data.facets.hasOwnProperty('consequenceType') &&
               data.facets.consequenceType.hasOwnProperty('terms')) {
             data.facets.consequenceType.terms = data.facets.consequenceType.terms.sort(function (a, b) {
-              return ConsequenceOrder.indexOf(a.term) - ConsequenceOrder.indexOf(b.term);
+              return precedence.indexOf(a.term) - precedence.indexOf(b.term);
             });
           }
           if (data.facets.hasOwnProperty('functionalImpact') &&

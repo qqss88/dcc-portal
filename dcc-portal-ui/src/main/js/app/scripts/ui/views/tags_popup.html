@@ -34,7 +34,7 @@
                     <li data-ng-bind-html="r.id | highlight:activeQuery:true"></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="donor">
-                    <li><span data-ng-bind-html="r.projectId | define | highlight:activeQuery:true"></span>
+                    <li><span data-ng-bind-html="r.projectId | highlight:activeQuery:true"></span>
                     </li>
                     <li><span data-ng-bind-html="r.submittedId | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.specimenIds | highlight:activeQuery:true"></span></li>

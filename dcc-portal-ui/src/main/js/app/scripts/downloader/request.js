@@ -9,7 +9,7 @@
    */
   module.controller('DownloadRequestController',
     function($scope, $location, $modalInstance, $filter, Donors, LocationService,
-    DownloadService, DownloaderService, DataTypes, filters) {
+    DownloadService, DownloaderService, DataType, filters) {
 
     var emailRegex = /.+@.+\..+/i;
 
@@ -43,9 +43,9 @@
     }
 
     function sortFunc(dataType) {
-      var index = DataTypes.order.indexOf(dataType.label);
+      var index = DataType.precedence().indexOf(dataType.label);
       if (index === -1) {
-        return DataTypes.order.length + 1;
+        return DataType.precedence().length + 1;
       }
       return index;
     }
@@ -118,7 +118,7 @@
         $scope.params.dataTypes.forEach(function (dataType) {
           dataType.active = false;
           dataType.uiLabel = dataType.label;
-          dataType.uiLabel = DataTypes.mapping[dataType.label] || dataType.label;
+          dataType.uiLabel = DataType.tooltip(dataType.label);
           $scope.overallSize += dataType.sizes;
         });
 
