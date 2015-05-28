@@ -134,7 +134,7 @@ public class RepositoryFileService {
     val list = ImmutableList.<RepositoryFile> builder();
 
     for (val hit : hits) {
-      val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
+      val fieldMap = createResponseMap(hit, query, Kind.REPOSITORY_FILE);
       fieldMap.put("_id", hit.getId());
       list.add(new RepositoryFile(fieldMap));
     }

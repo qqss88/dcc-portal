@@ -44,6 +44,9 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Slf4j
 public class RepositoryFile {
 
+  @ApiModelProperty(value = "_id", required = true)
+  String _id; // This is the internal ES document id
+
   @ApiModelProperty(value = "Id", required = true)
   String id;
 
@@ -90,8 +93,9 @@ public class RepositoryFile {
   @SuppressWarnings("unchecked")
   @JsonCreator
   public RepositoryFile(Map<String, Object> fieldMap) {
-    val fields = FIELDS_MAPPING.get(Kind.EXTERNAL_FILE);
+    val fields = FIELDS_MAPPING.get(Kind.REPOSITORY_FILE);
 
+    _id = getString(fieldMap.get(fields.get("_id")));
     id = getString(fieldMap.get(fields.get("id")));
 
     repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));

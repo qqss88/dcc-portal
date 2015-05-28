@@ -47,7 +47,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
-    EXTERNAL_FILE("file"),
+    REPOSITORY_FILE("file"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -83,23 +83,22 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
-    EXTERNAL_FILE("file"),
+    REPOSITORY_FILE("file"),
 
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"),
-    EXTERNAL_FILE_TEXT("file-text"),
+    REPOSITORY_FILE_TEXT("file-text"),
     PROJECT_TEXT("project-text");
 
     private final String id;
   }
 
-  private static final ImmutableMap<String, String> EXTERNAL_FILE_FIELDS_MAPPING =
+  private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("id", "id")
-          .put("_id", "_id")
           .put("repositoryEntityId", "repository.repo_entity_id")
           .put("repositoryDataPath", "repository.repo_data_path")
           .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
@@ -667,7 +666,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.EXTERNAL_FILE, EXTERNAL_FILE_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
 
   /**
