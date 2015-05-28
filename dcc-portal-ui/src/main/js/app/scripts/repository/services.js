@@ -61,7 +61,8 @@
         return repoMap[repo] || repo;
       }).join(',');
 
-      jQuery('<form method="POST" id="fileDownload" action="' + API.BASE_URL + '/repository/files/manifest" style="display:none">' +
+      jQuery('<form method="POST" id="fileDownload" action="' + API.BASE_URL +
+             '/repository/files/manifest" style="display:none">' +
              _.map(ids, function(id) {
                 return '<input type="hidden" name="fileIds" value="' + id + '"/>';
               }) +

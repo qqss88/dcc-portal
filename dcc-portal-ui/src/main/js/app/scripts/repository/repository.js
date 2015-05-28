@@ -176,7 +176,7 @@
    * External repository controller
    */
   module.controller('ExternalRepoController',
-    function($scope, $window, $modal, LocationService, Page, ExternalRepoService, API) {
+    function($scope, $window, $modal, LocationService, Page, ExternalRepoService) {
 
     console.log('ExternalRepoController');
     var _ctrl = this;
