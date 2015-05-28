@@ -98,7 +98,7 @@ public class RepositoryFileRepository {
   private final String INDEX_NAME = "icgc-repository";
 
   // private static final Type TYPE = Type.RELEASE;
-  private static final Kind KIND = Kind.EXTERNAL_FILE;
+  private static final Kind KIND = Kind.REPOSITORY_FILE;
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
@@ -360,7 +360,7 @@ public class RepositoryFileRepository {
           } else {
 
             for (SearchHit hit : response.getHits()) {
-              val map = normalize(createResponseMap(hit, query, Kind.EXTERNAL_FILE));
+              val map = normalize(createResponseMap(hit, query, Kind.REPOSITORY_FILE));
               writer.write(map, keys);
             }
           }
@@ -387,7 +387,7 @@ public class RepositoryFileRepository {
   }
 
   public SearchResponse findAll(Query query) {
-    val kind = Kind.EXTERNAL_FILE;
+    val kind = Kind.REPOSITORY_FILE;
 
     val filters = buildRepoFilters(query.getFilters(), true);
     val search = client.prepareSearch(index)

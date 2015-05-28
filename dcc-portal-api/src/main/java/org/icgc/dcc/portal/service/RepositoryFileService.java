@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
@@ -66,6 +67,7 @@ import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -101,10 +103,16 @@ public class RepositoryFileService {
       "file_size",
       "md5_sum"
   };
+  private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
+      FieldNames.FILE_NAME,
+      FieldNames.FILE_SIZE,
+      FieldNames.CHECK_SUM);
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final ObjectReader READER = MAPPER.reader();
   private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
       .constructMapType(Map.class, String.class, String.class);
+  private static final BiFunction<Collection<Map<String, String>>, String, String> CONCAT_WITH_COMMA =
+      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, info -> info.get(fieldName)));
 
   private final RepositoryFileRepository repositoryFileRepository;
 
@@ -126,7 +134,8 @@ public class RepositoryFileService {
     val list = ImmutableList.<RepositoryFile> builder();
 
     for (val hit : hits) {
-      val fieldMap = createResponseMap(hit, query, Kind.EXTERNAL_FILE);
+      val fieldMap = createResponseMap(hit, query, Kind.REPOSITORY_FILE);
+      fieldMap.put("_id", hit.getId());
       list.add(new RepositoryFile(fieldMap));
     }
 
@@ -181,23 +190,24 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoName) {
-    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoName));
+  private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoCode) {
+    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoCode));
   }
 
   @SneakyThrows
   private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
     val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
+    final Function<JsonNode, Map<String, String>> combineMaps = (server) ->
+        ImmutableMap.<String, String> builder()
+            // There shouldn't be collision on the keys.
+            .putAll(fields)
+            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
+            .build();
     val serverArray = READER.readTree(hit.sourceAsString())
         .path(FieldNames.REPOSITORY)
         .path(FieldNames.REPO_SERVER);
 
-    return transform(serverArray,
-        server -> ImmutableMap.<String, String> builder()
-            // Merges these two maps - there shouldn't be collision on the keys.
-            .putAll(fields)
-            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
-            .build());
+    return transform(serverArray, server -> combineMaps.apply(server));
   }
 
   @SneakyThrows
@@ -260,16 +270,14 @@ public class RepositoryFileService {
     val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
     tsv.writeHeader(TSV_HEADERS);
 
-    final BiFunction<Collection<Map<String, String>>, String, String> concatWithComma =
-        (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, r -> r.get(fieldName)));
-
     for (val url : downloadUrlGroups.keySet()) {
       val fileInfo = downloadUrlGroups.get(url);
-      val row = ImmutableList.of(
-          url,
-          concatWithComma.apply(fileInfo, FieldNames.FILE_NAME),
-          concatWithComma.apply(fileInfo, FieldNames.FILE_SIZE),
-          concatWithComma.apply(fileInfo, FieldNames.CHECK_SUM));
+      val otherColumns = transform(TSV_COLUMN_FIELD_NAMES,
+          fieldName -> CONCAT_WITH_COMMA.apply(fileInfo, fieldName));
+      val row = ImmutableList.<String> builder()
+          .add(url)
+          .addAll(otherColumns)
+          .build();
 
       tsv.write(row);
     }

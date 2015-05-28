@@ -46,7 +46,7 @@ public class SearchRepository {
   private static final Type PROJECT_TEXT = Type.PROJECT_TEXT;
   private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
   private static final Type GENESET_TEXT = Type.GENESET_TEXT;
-  private static final Type EXTERNAL_FILE_TEXT = Type.EXTERNAL_FILE_TEXT;
+  private static final Type REPOSITORY_FILE_TEXT = Type.REPOSITORY_FILE_TEXT;
 
   private final Client client;
 
@@ -85,7 +85,7 @@ public class SearchRepository {
     else if (type.equals("geneSet")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
-    else if (type.equals("file")) search.setTypes(EXTERNAL_FILE_TEXT.getId());
+    else if (type.equals("file")) search.setTypes(REPOSITORY_FILE_TEXT.getId());
     else {
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
           GENESET_TEXT.getId());

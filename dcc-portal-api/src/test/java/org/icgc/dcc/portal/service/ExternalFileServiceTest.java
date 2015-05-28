@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.service;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 
-import org.icgc.dcc.portal.model.ExternalFile;
+import org.icgc.dcc.portal.model.RepositoryFile;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -34,7 +34,7 @@ public class ExternalFileServiceTest {
   private static final String MANIFEST_FILE_DIRECTORY = "./";
   private static final String MANIFEST_FILE_NAME_SUFFIX = ".tsv";
 
-  private List<ExternalFile> testFiles;
+  private List<RepositoryFile> testFiles;
   private Multimap<String, SimpleImmutableEntry<String, List<String>>> expectedFileContents;
 
   @Rule
