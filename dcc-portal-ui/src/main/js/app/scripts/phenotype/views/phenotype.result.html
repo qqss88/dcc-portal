@@ -66,7 +66,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in gender.uiTable">
-                    <td>{{row.term | trans:true}}</td>
+                    <td>{{row.term | readable}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
@@ -120,7 +120,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in vital.uiTable">
-                    <td>{{row.term | trans:true}}</td>
+                    <td>{{row.term | readable}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
@@ -174,7 +174,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in age.uiTable">
-                    <td>{{row.term | trans:true}}</td>
+                    <td>{{row.term | readable}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
                     <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
@@ -213,7 +213,7 @@
             <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in gender.uiTable">
-            <td>{{row.term | trans:true}}</td>
+            <td>{{row.term | readable}}</td>
             <td>{{row[setIds[0]].count}}</td>
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>
@@ -243,7 +243,7 @@
             <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in vital.uiTable">
-            <td>{{row.term | trans:true}}</td>
+            <td>{{row.term | readable}}</td>
             <td>{{row[setIds[0]].count}}</td>
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>
@@ -273,7 +273,7 @@
             <td data-ng-if="setIds[2]">%</td>
         </tr>
         <tr data-ng-repeat="row in vital.uiTable">
-            <td>{{row.term | trans:true}}</td>
+            <td>{{row.term | readable}}</td>
             <td>{{row[setIds[0]].count}}</td>
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
             <td>{{row[setIds[1]].count}}</td>

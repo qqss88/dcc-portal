@@ -2,7 +2,7 @@
     <li class="t_facets__facet__title" data-ng-class="{t_facets__facet__title_active:actives.length}">
         <span data-ng-click="collapsed=!collapsed" class="t_facets__facet__title__label">
             <i data-ng-class="{'icon-caret-down':!collapsed, 'icon-caret-right':collapsed}"></i>
-            {{ label ? label : (facetName | trans:true) }}
+            {{ label  }}
         </span>
         <span data-ng-if="actives.length" class="t_facets__facet__terms__inactive__reset t_tools">
             <span data-ng-click="removeFacet()" class="t_tools__tool"><i class="icon-undo"></i></span>

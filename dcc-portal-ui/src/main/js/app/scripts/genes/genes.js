@@ -185,11 +185,13 @@
   });
 
   module.controller('GeneMutationsCtrl',
-    function ($scope, HighchartsService, LocationService, Genes, Projects, Donors) {
+    function ($scope, HighchartsService, LocationService, Genes, Projects, Donors, ProjectCache) {
       var _ctrl = this;
 
       function success(mutations) {
         if (mutations.hasOwnProperty('hits')) {
+          var projectCachePromise = ProjectCache.getData();
+
           _ctrl.mutations = mutations;
 
           // Need to get SSM Test Donor counts from projects
@@ -213,6 +215,10 @@
                     facet.advQuery = LocationService.mergeIntoFilters({
                       mutation: {id: {is: [mutation.id]}},
                       donor: {projectId: {is: [facet.term]}}
+                    });
+
+                    projectCachePromise.then(function(lookup) {
+                      facet.projectName = lookup[facet.term] || facet.term;
                     });
 
                     facet.countTotal = p.ssmTestedDonorCount;

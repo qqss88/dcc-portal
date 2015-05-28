@@ -19,7 +19,7 @@
 
 angular.module('icgc.modules.genomeviewer.service', []);
 
-angular.module('icgc.modules.genomeviewer.service').service('GMService', function ($filter, ConsequenceOrder) {
+angular.module('icgc.modules.genomeviewer.service').service('GMService', function ($filter, Consequence) {
 
   // FIXME: might want to move this else where to centralize all configs
   var config = {
@@ -82,16 +82,16 @@ angular.module('icgc.modules.genomeviewer.service').service('GMService', functio
       }
     }
     consequenceList = $filter('orderBy')(consequenceList, function (t) {
-      var index = ConsequenceOrder.indexOf(t.consequence);
+      var index = Consequence.precedence().indexOf(t.consequence);
       if (index === -1) {
-        return ConsequenceOrder.length + 1;
+        return Consequence.precedence().length + 1;
       }
       return index;
     });
 
     // Dump into html format
     for (i = 0; i < consequenceList.length; i++) {
-      consequencesTxt += $filter('trans')(consequenceList[i].consequence);
+      consequencesTxt += Consequence.translate(consequenceList[i].consequence);
       geneList = [];
       for (geneSymbol in consequenceList[i].data) {
         if (consequenceList[i].data.hasOwnProperty(geneSymbol)) {

@@ -21,7 +21,7 @@
 
   var module = angular.module('icgc.facets.terms', ['icgc.facets.helpers']);
 
-  module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache) {
+  module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator) {
     function setActiveTerms() {
       $scope.actives = Facets.getActiveTerms({
         type: $scope.type,
@@ -31,7 +31,7 @@
 
       // Transltion on UI is slow, do in here
       $scope.actives.forEach(function(term) {
-        term.label = $filter('trans')(term.term, true);
+        term.label = ValueTranslator.translate(term.term, $scope.facetName);
         if (term.term === '_missing' && $scope.missingText) {
           term.label = $scope.missingText;
         }
@@ -40,9 +40,10 @@
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
-        } else {
-          term.tooltip = $scope.defined? $filter('define')(term.label) : term.label;
+        } else  {
+          term.tooltip = ValueTranslator.tooltip(term.term, $scope.facetName);
         }
+
       });
 
     }
@@ -55,7 +56,7 @@
 
       // Transltion on UI is slow, do in here
       $scope.inactives.forEach(function(term) {
-        term.label = $filter('trans')(term.term, true);
+        term.label = ValueTranslator.translate(term.term, $scope.facetName);
         if (term.term === '_missing' && $scope.missingText) {
           term.label = $scope.missingText;
         }
@@ -64,8 +65,8 @@
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
-        } else {
-          term.tooltip = $scope.defined? $filter('define')(term.label) : term.label;
+        } else  {
+          term.tooltip = ValueTranslator.tooltip(term.term, $scope.facetName);
         }
       });
     }

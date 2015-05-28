@@ -58,6 +58,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+@SuppressWarnings("deprecation")
 @Slf4j
 public class QueryService {
 
@@ -238,33 +239,45 @@ public class QueryService {
           // 2) Special cases pending on type
           if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_GO)) {
             if (bool.equals(IS)) {
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             } else {
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             }
           } else if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
             if (bool.equals(IS)) {
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"),
+                  termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"),
+                  termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"),
+                  termList));
             } else {
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"),
+                  termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"),
+                  termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"),
+                  termList));
             }
           } else {
             val idFilter = termsFilter(prefix + geneSetType.getType(), termList);
