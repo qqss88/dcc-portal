@@ -45,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
+import org.icgc.dcc.portal.model.AccessToken;
+import org.icgc.dcc.portal.model.Tokens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -128,7 +130,7 @@ public class OAuthClient {
   }
 
   private static void validateResponse(ClientResponse response) {
-    checkState(response.getClientResponseStatus() == OK, response.getEntity(String.class));
+    checkState(response.getClientResponseStatus() == OK);
   }
 
   private static ClientConfig getClientConfig(OAuthProperties config) {

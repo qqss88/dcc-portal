@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.service;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static org.icgc.dcc.portal.util.AuthUtils.throwForbiddenException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,8 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
-import org.icgc.dcc.portal.auth.oauth.Tokens;
+import org.icgc.dcc.portal.model.AccessTokenScopes;
+import org.icgc.dcc.portal.model.Tokens;
 import org.icgc.dcc.portal.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,9 +67,8 @@ public class TokenService {
     client.revokeToken(tokenId);
   }
 
-  public String userScopes(User user) {
-    // FIXME: return JSON and correctly resolve scopes
-    return "s3.download";
+  public AccessTokenScopes userScopes(User user) {
+    return new AccessTokenScopes(singleton("s3.download"));
   }
 
   private void validateScope(User user, String scope) {

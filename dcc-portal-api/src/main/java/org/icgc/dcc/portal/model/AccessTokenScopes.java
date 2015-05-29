@@ -15,23 +15,15 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.auth.oauth;
+package org.icgc.dcc.portal.model;
 
-import java.util.List;
+import java.util.Set;
 
 import lombok.Value;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 @Value
-public class Tokens {
+public class AccessTokenScopes {
 
-  List<AccessToken> tokens;
-
-  @JsonCreator
-  public Tokens(@JsonProperty("tokens") List<AccessToken> tokens) {
-    this.tokens = tokens;
-  }
+  Set<String> scopes;
 
 }

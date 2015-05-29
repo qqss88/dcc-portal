@@ -25,8 +25,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import lombok.val;
 
-import org.icgc.dcc.portal.auth.oauth.AccessToken;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
+import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +83,7 @@ public class TokenServiceTest {
   @Test
   public void userScopesTest() {
     val result = tokenService.userScopes(createUser(USER_ID, TRUE));
-    assertThat(result).isEqualTo(SCOPE);
+    assertThat(result.getScopes()).containsOnly(SCOPE);
   }
 
   private static User createUser(String userId, Boolean hasDaco) {

@@ -33,7 +33,8 @@ import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import org.icgc.dcc.portal.auth.oauth.Tokens;
+import org.icgc.dcc.portal.model.AccessTokenScopes;
+import org.icgc.dcc.portal.model.Tokens;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,9 @@ public class AccessTokenResource {
   }
 
   @GET
-  public String scopes(@Auth(required = true) User user) {
+  @Path("/scopes")
+  @Produces(APPLICATION_JSON)
+  public AccessTokenScopes scopes(@Auth(required = true) User user) {
     return tokenService.userScopes(user);
   }
 

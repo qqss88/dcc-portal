@@ -26,6 +26,7 @@ import lombok.val;
 
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
+import org.icgc.dcc.portal.model.AccessToken;
 import org.junit.Before;
 import org.junit.Test;
 
