@@ -96,6 +96,10 @@ public class PortalProperties extends Configuration {
   @JsonProperty
   DatabaseConfiguration database = new DatabaseConfiguration();
 
+  @Valid
+  @JsonProperty
+  OAuthProperties oauth = new OAuthProperties();
+
   @Data
   public static class BrowserProperties {
 
@@ -332,6 +336,29 @@ public class PortalProperties extends Configuration {
     @NotEmpty
     @URL
     String baseUrl;
+
+  }
+
+  @Data
+  public static class OAuthProperties {
+
+    @URL
+    @NotEmpty
+    @JsonProperty
+    String serviceUrl;
+
+    @NotEmpty
+    @JsonProperty
+    String clientId;
+
+    @JsonProperty
+    String clientSecret;
+
+    @JsonProperty
+    boolean enableStrictSSL;
+
+    @JsonProperty
+    boolean enableHttpLogging;
 
   }
 

@@ -77,6 +77,13 @@ cache:
 # Authentication
 crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
+  
+oauth:
+  serviceUrl: "https://localhost:8443"
+  clientId: "mgmt"
+  clientSecret: "pass"
+  enableHttpLogging: true
+  enableStrictSSL: false
 
 hazelcast:
   # NB: Below hazelcast settings do not have default values. The portal won't start if they're unset

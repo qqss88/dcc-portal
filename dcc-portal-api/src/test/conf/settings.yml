@@ -53,6 +53,14 @@ cache:
 crowd:
   ssoUrl: "https://***REMOVED***/user?continue="
   ssoUrlGoogle: "https://***REMOVED***/gooapi/redirect?continue="
+  
+oauth:
+  serviceUrl: "http://localhost:8443"
+  clientId: "mgmt"
+  clientSecret: "pass"
+  enableStrictSSL: false
+  enableHttpLogging: true
+    
 
 hazelcast:
   enabled: false

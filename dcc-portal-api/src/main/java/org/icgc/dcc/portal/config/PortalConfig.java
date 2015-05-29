@@ -49,6 +49,7 @@ import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
 import org.icgc.dcc.portal.config.PortalProperties.HazelcastProperties;
 import org.icgc.dcc.portal.config.PortalProperties.ICGCProperties;
 import org.icgc.dcc.portal.config.PortalProperties.MailProperties;
+import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
 import org.icgc.dcc.portal.config.PortalProperties.WebProperties;
 import org.icgc.dcc.portal.model.Settings;
 import org.icgc.dcc.portal.model.User;
@@ -310,6 +311,11 @@ public class PortalConfig {
   @Bean
   public WebProperties webProperties() {
     return properties.getWeb();
+  }
+
+  @Bean
+  public OAuthProperties oauthProperties() {
+    return properties.getOauth();
   }
 
   private boolean isDistributed() {
