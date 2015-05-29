@@ -1,3 +1,4 @@
+/*
 describe('Test LocationService', function() {
   var LocationService;
   beforeEach(module('icgc'));
@@ -37,3 +38,4 @@ describe('Test DefinitionService', function() {
   });
 
 });
+*/

@@ -254,40 +254,6 @@
   });
 
 
-  module.constant('DataTypes', {
-    'mapping': {
-      'clinical': 'Clinical data',
-      'donor': 'Clinical data',
-      'ssm': 'Simple somatic mutations',
-      'sgv': 'Simple Germline Variation',
-      'cnsm': 'Copy number somatic mutations',
-      'stsm': 'Structural somatic mutations',
-      'exp_array': 'Array-based Gene Expression',
-      'exp_seq': 'Sequencing-based Gene Expression',
-      'pexp': 'Protein expression',
-      'mirna_seq': 'Sequencing-based miRNA Expression',
-      'jcn': 'Exon junctions',
-      'meth_array': 'Array-based DNA Methylation',
-      'meth_seq': 'Sequencing-based DNA Methylation'
-    },
-    'order': [
-      'donor',
-      'clinical',
-      'ssm',
-      'sgv',
-      'cnsm',
-      'stsm',
-      'exp_seq',
-      'exp_array',
-      'pexp',
-      'mirna_seq',
-      'jcn',
-      'meth_array',
-      'meth_seq'
-    ]
-  });
-
-
   module.controller('AppCtrl', function ($scope, Page) {
     var _ctrl = this;
     _ctrl.appLoaded = true;
