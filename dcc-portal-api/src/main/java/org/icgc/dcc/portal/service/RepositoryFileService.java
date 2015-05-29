@@ -127,6 +127,11 @@ public class RepositoryFileService {
     return repositoryFileRepository.exportData(query);
   }
 
+  public RepositoryFile findOne(String fileId, Query query) {
+    log.info("File id {}", fileId);
+    return new RepositoryFile(repositoryFileRepository.findOne(fileId, query));
+  }
+
   public RepositoryFiles findAll(Query query) {
     val response = repositoryFileRepository.findAll(query);
     val hits = response.getHits();

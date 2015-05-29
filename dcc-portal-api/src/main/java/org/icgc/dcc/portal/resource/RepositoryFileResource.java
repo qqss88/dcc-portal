@@ -46,9 +46,6 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_FILTERS;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_FROM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
-import static org.icgc.dcc.portal.resource.ResourceUtils.GENE;
-import static org.icgc.dcc.portal.resource.ResourceUtils.RETURNS_LIST;
-import static org.icgc.dcc.portal.resource.ResourceUtils.S;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 import static org.icgc.dcc.portal.util.MediaTypes.GZIP;
 
@@ -65,6 +62,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -105,9 +103,19 @@ public class RepositoryFileResource {
 
   private final RepositoryFileService repositoryFileService;
 
+  @Path("/{fileId}")
   @GET
   @Timed
-  @ApiOperation(value = RETURNS_LIST + GENE + S, response = RepositoryFile.class)
+  @ApiOperation(value = "Find by fileId", response = RepositoryFile.class)
+  public RepositoryFile find(
+      @ApiParam(value = "File Id", required = true) @PathParam("fileId") String donorId
+      ) {
+    return repositoryFileService.findOne(donorId, query().build());
+  }
+
+  @GET
+  @Timed
+  @ApiOperation(value = "Returns a list of RepositoryFiles", response = RepositoryFile.class)
   public RepositoryFiles findAll(
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
