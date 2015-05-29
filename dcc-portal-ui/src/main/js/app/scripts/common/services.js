@@ -352,8 +352,8 @@
       'sequencingStrategy': 'Analysis Type',
 
       // Data Types
-      'clinical': 'Clinical',
-      'donor': 'Donor',
+      //'clinical': 'Clinical',
+      //'donor': 'Donor',
       'ssm': 'SSM',
       'cnsm': 'CNSM',
       'stsm': 'StSM',
