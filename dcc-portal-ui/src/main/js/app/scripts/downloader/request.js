@@ -7,9 +7,8 @@
   /**
    * Requesting dynamic download
    */
-  module.controller('DownloadRequestController',
-    function($scope, $location, $modalInstance, $filter, Donors, LocationService,
-    DownloadService, DownloaderService, DataType, filters) {
+  module.controller('DownloadRequestController', function($scope, $location, $modalInstance,
+    $filter, Donors, LocationService, DownloaderService, DataType, filters) {
 
     var emailRegex = /.+@.+\..+/i;
 
