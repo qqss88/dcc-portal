@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class GeneRepositoryTest extends BaseRepositoryTest {
+public class GeneRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "affectedDonorCountFiltered";
   private static final String DEFAULT_ORDER = "desc";

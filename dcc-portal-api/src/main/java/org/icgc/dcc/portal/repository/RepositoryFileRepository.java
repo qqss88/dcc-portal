@@ -123,7 +123,7 @@ public class RepositoryFileRepository {
   private final String index;
 
   @Autowired
-  RepositoryFileRepository(Client client) {
+  public RepositoryFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
   }
