@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -35,6 +37,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -42,6 +45,7 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Longs;
 
 /**
  * Provides methods to retrieve values from SearchHit
@@ -53,29 +57,62 @@ public final class ElasticsearchResponseUtils {
   /**
    * Returns first value of the list as a String
    */
-  @SuppressWarnings("unchecked")
   public static String getString(Object values) {
-    if (values == null) return null;
+    if (values == null) {
+      return null;
+    }
 
-    if (values instanceof List<?>) {
-      return ((List<String>) values).get(0);
+    if (values instanceof Iterable<?>) {
+      val iterable = (Iterable<?>) values;
+      return Iterables.size(iterable) > 0 ? Iterables.get(iterable, 0).toString() : null;
     }
 
     if (values instanceof String) {
-      return (String) values;
+      return values.toString();
     }
 
     return null;
   }
 
-  @SuppressWarnings("unchecked")
-  public static Long getLong(Object value) {
-    if (value instanceof List) value = ((List<Object>) value).get(0);
-    if (value instanceof Long) return (Long) value;
-    if (value instanceof Float) return ((Float) value).longValue();
-    if (value instanceof Integer) return (long) (Integer) value;
+  public static List<String> toStringList(Object value) {
+    if (null == value) {
+      return null;
+    }
 
-    return null;
+    if (value instanceof List<?>) {
+      return newArrayList(transform((List<?>) value, v -> v.toString()));
+    }
+
+    if (value instanceof Iterable<?>) {
+      return newArrayList(transform((Iterable<?>) value, v -> v.toString()));
+    }
+
+    return newArrayList(value.toString());
+  }
+
+  public static Long getLong(Object value) {
+    if (null == value) {
+      return null;
+    }
+
+    if (value instanceof Long) {
+      return (Long) value;
+    }
+
+    if (value instanceof Float) {
+      return ((Float) value).longValue();
+    }
+
+    if (value instanceof Integer) {
+      return new Long((Integer) value);
+    }
+
+    if (value instanceof Iterable<?>) {
+      val iterable = (Iterable<?>) value;
+      return Iterables.size(iterable) > 0 ? Longs.tryParse(Iterables.get(iterable, 0).toString()) : null;
+    }
+
+    return Longs.tryParse(value.toString());
   }
 
   public static Boolean getBoolean(Object values) {

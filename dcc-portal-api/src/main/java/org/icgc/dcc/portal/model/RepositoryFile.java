@@ -20,12 +20,12 @@ package org.icgc.dcc.portal.model;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.toStringList;
 
 import java.util.List;
 import java.util.Map;
 
 import lombok.Value;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -43,6 +43,8 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "RepositoryFile")
 @Slf4j
 public class RepositoryFile {
+
+  private static final Map<String, String> FIELDS = FIELDS_MAPPING.get(Kind.REPOSITORY_FILE);
 
   @ApiModelProperty(value = "_id", required = true)
   String _id; // This is the internal ES document id
@@ -90,31 +92,55 @@ public class RepositoryFile {
   @ApiModelProperty(value = "Donor associated with file", required = true)
   String donorId;
 
-  @SuppressWarnings("unchecked")
+  String donorSubmitterId;
+
+  String specimenId;
+
+  String specimenSubmitterId;
+
+  String sampleId;
+
+  String sampleSubmitterId;
+
+  String checksum;
+
+  String lastUpdate;
+
   @JsonCreator
   public RepositoryFile(Map<String, Object> fieldMap) {
-    val fields = FIELDS_MAPPING.get(Kind.REPOSITORY_FILE);
+    _id = getString(getFromMap(fieldMap, "_id"));
+    id = getString(getFromMap(fieldMap, "id"));
 
-    _id = getString(fieldMap.get(fields.get("_id")));
-    id = getString(fieldMap.get(fields.get("id")));
-
-    repositoryEntityId = getString(fieldMap.get(fields.get("repositoryEntityId")));
-    repositoryDataPath = getString(fieldMap.get(fields.get("repositoryDataPath")));
+    repositoryEntityId = getString(getFromMap(fieldMap, "repositoryEntityId"));
+    repositoryDataPath = getString(getFromMap(fieldMap, "repositoryDataPath"));
 
     // Array fields
-    repositoryNames = (List<String>) (fieldMap.get(fields.get("repositoryNames")));
-    repositoryBaseURLs = (List<String>) (fieldMap.get(fields.get("repositoryBaseURLs")));
-    dataType = (List<String>) (fieldMap.get(fields.get("dataType")));
-    dataFormat = (List<String>) (fieldMap.get(fields.get("dataFormat")));
+    repositoryNames = toStringList(getFromMap(fieldMap, "repositoryNames"));
+    repositoryBaseURLs = toStringList(getFromMap(fieldMap, "repositoryBaseURLs"));
+    dataType = toStringList(getFromMap(fieldMap, "dataType"));
+    dataFormat = toStringList(getFromMap(fieldMap, "dataFormat"));
 
-    fileName = getString(fieldMap.get(fields.get("fileName")));
-    projectCode = getString(fieldMap.get(fields.get("projectCode")));
-    study = getString(fieldMap.get(fields.get("study")));
-    fileSize = getLong(fieldMap.get(fields.get("fileSize")));
-    access = getString(fieldMap.get(fields.get("access")));
-    donorId = getString(fieldMap.get(fields.get("donorId")));
+    fileName = getString(getFromMap(fieldMap, "fileName"));
+    projectCode = getString(getFromMap(fieldMap, "projectCode"));
+    study = getString(getFromMap(fieldMap, "study"));
+    fileSize = getLong(getFromMap(fieldMap, "fileSize"));
+    access = getString(getFromMap(fieldMap, "access"));
+    donorId = getString(getFromMap(fieldMap, "donorId"));
+
+    donorSubmitterId = getString(getFromMap(fieldMap, "donorSubmitterId"));
+    specimenId = getString(getFromMap(fieldMap, "specimenId"));
+    specimenSubmitterId = getString(getFromMap(fieldMap, "specimenSubmitterId"));
+    sampleId = getString(getFromMap(fieldMap, "sampleId"));
+    sampleSubmitterId = getString(getFromMap(fieldMap, "sampleSubmitterId"));
+
+    checksum = getString(getFromMap(fieldMap, "checksum"));
+    lastUpdate = getString(getFromMap(fieldMap, "lastUpdate"));
 
     // FIXME: What field is this?
     repository = null;
+  }
+
+  private static Object getFromMap(Map<String, Object> fieldMap, String fieldId) {
+    return fieldMap.get(FIELDS.get(fieldId));
   }
 }
