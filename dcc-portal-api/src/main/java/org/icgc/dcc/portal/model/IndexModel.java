@@ -47,6 +47,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
+    REPOSITORY_FILE("file"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -82,15 +83,41 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
+    REPOSITORY_FILE("file"),
+
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"),
+    REPOSITORY_FILE_TEXT("file-text"),
     PROJECT_TEXT("project-text");
 
     private final String id;
   }
+
+  private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "id")
+          .put("repositoryEntityId", "repository.repo_entity_id")
+          .put("repositoryDataPath", "repository.repo_data_path")
+          .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
+
+          .put("repositoryType", "repository.repo_type")
+          .put("repositoryCountries", "repository.repo_server.repo_country")
+          .put("repositoryNames", "repository.repo_server.repo_name")
+          .put("fileName", "repository.file_name")
+          .put("fileSize", "repository.file_size")
+          .put("projectCode", "donor.project_code")
+          .put("primarySite", "donor.primary_site")
+          .put("study", "study")
+          .put("donorStudy", "donor.study")
+          .put("dataType", "data_types.data_type")
+          .put("dataFormat", "data_types.data_format")
+          .put("access", "access")
+          .put("donorId", "donor.donor_id")
+          .put("program", "donor.program") // For search
+          .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -559,6 +586,9 @@ public class IndexModel {
           // GO Term
           .put("altIds", "altIds")
 
+          // File Repo
+          .put("file_name", "file_name")
+
           // Pathway
           // .put("url", "url")
           // .put("source", "source")
@@ -637,6 +667,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
 
   /**

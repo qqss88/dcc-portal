@@ -97,6 +97,10 @@ public class ResourceUtils {
   static final String API_ANALYSIS_ID_PARAM = "analysisId";
   static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
+  static final String API_FILE_IDS_PARAM = "fileIds";
+  static final String API_FILE_IDS_VALUE = "Limits the file manifest archive to this list of file IDs";
+  static final String API_FILE_REPOS_PARAM = "repositories";
+  static final String API_FILE_REPOS_VALUE = "Limits the file manifest archive to this list of file repositories";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";

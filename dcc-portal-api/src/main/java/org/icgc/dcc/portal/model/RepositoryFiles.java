@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,23 +15,41 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.util;
+package org.icgc.dcc.portal.model;
 
-import static lombok.AccessLevel.PRIVATE;
+import java.util.List;
+import java.util.Map;
 
-import javax.ws.rs.core.MediaType;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.ApiModel;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
-@NoArgsConstructor(access = PRIVATE)
-public final class MediaTypes {
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@ApiModel(value = "Files")
+public class RepositoryFiles extends Paginated {
 
-  public static final String TEXT_CSV = "text/csv";
-  public static final MediaType TEXT_CSV_TYPE = new MediaType("text", "csv");
+  @ApiModelProperty(value = "List of external files", required = true)
+  List<RepositoryFile> hits;
 
-  public static final String TEXT_TSV = "text/tsv";
-  public static final MediaType TEXT_TSV_TYPE = new MediaType("text", "tsv");
+  @JsonCreator
+  public RepositoryFiles(@JsonProperty("hits") List<RepositoryFile> hits) {
+    this.hits = hits;
+  }
 
-  public static final String GZIP = "application/x-gzip";
+  // FIXME: Hack "facets"
+  Map<String, TermFacet> termFacets;
+
+  public void setTermFacets(Map<String, TermFacet> t) {
+    termFacets = t;
+  }
 
 }
