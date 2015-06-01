@@ -44,7 +44,7 @@
             <tr>
                 <th>Project Name</th>
                 <td>
-                   <a href="/projects/{{DonorCtrl.donor.projectId}}">{{ DonorCtrl.donor.projectId | define }}</a>
+                   <a href="/projects/{{DonorCtrl.donor.projectId}}">{{ DonorCtrl.donor.projectName }}</a>
                 </td>
             </tr>
             <tr>
@@ -311,7 +311,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}

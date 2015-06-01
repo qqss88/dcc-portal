@@ -60,7 +60,6 @@ angular.module('app.download.controllers').controller('DownloadController',
           if (file.type === 'd') {
             name = (file.name).split('/').pop();
 
-            //tName = $filter('define')(name);
             ProjectCache.getData().then(function(cache) {
               tName = cache[name];
               if (tName) {
