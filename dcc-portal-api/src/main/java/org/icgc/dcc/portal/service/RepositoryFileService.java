@@ -87,6 +87,7 @@ public class RepositoryFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
+  private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
   private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
       FieldNames.REPO_TYPE,
       FieldNames.REPO_ID,
@@ -125,6 +126,11 @@ public class RepositoryFileService {
 
   public StreamingOutput exportTableData(Query query) {
     return repositoryFileRepository.exportData(query);
+  }
+
+  public RepositoryFile findOne(String fileId, Query query) {
+    log.info("File id {}", fileId);
+    return new RepositoryFile(repositoryFileRepository.findOne(fileId, query));
   }
 
   public RepositoryFiles findAll(Query query) {
@@ -244,7 +250,7 @@ public class RepositoryFileService {
     // If this is thread-safe, perhaps we can make this static???
     val factory = XMLOutputFactory.newInstance();
     @Cleanup
-    val writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(buffer));
+    val writer = new IndentingXMLStreamWriter(factory.createXMLStreamWriter(buffer, UTF_8));
 
     startXmlDocument(writer, timestamp);
 
@@ -357,7 +363,7 @@ public class RepositoryFileService {
 
   @NonNull
   private static void startXmlDocument(XMLStreamWriter writer, Date timestamp) throws XMLStreamException {
-    writer.writeStartDocument("utf-8", "1.0");
+    writer.writeStartDocument(UTF_8, "1.0");
     writer.writeStartElement(XmlTags.ROOT);
     writer.writeAttribute("date", formatToUtc(timestamp));
   }

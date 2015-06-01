@@ -47,7 +47,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class DonorRepositoryTest extends BaseRepositoryTest {
+public class DonorRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "ssmAffectedGenes";
   private static final String DEFAULT_ORDER = "desc";
@@ -294,6 +294,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
   }
 
+  @Override
   protected Object cast(Object object) {
     return object;
   }

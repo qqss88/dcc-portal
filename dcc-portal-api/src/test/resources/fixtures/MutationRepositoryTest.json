@@ -1,6 +1,6 @@
 {
   "index": {
-    "_index": "dcc-release-etl-cli",
+    "_index": "test_index",
     "_type": "mutation-centric",
     "_id": "MU498"
   }

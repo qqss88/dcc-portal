@@ -32,6 +32,7 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -131,6 +132,18 @@ public class SearchRepository {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
     } else if (type.equals("go_term")) {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
+    } else {
+      // Search in the wild, need to apply both default filters to only donor and project
+      // search.setPostFilter(FilterBuilders.boolFilter().must(QueryService.defaultDonorFilter()));
+      val donor =
+          FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "donor"))
+              .must(QueryService.defaultDonorFilter());
+      val project =
+          FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "project"))
+              .must(QueryService.defaultProjectFilter());
+      val others = FilterBuilders.boolFilter().mustNot(FilterBuilders.termsFilter("type", "donor", "project"));
+      search.setPostFilter(FilterBuilders.boolFilter().should(donor).should(project).should(others));
+
     }
 
     log.info("{}", search);

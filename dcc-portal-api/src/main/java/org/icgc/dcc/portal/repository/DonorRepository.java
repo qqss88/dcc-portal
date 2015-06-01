@@ -105,6 +105,7 @@ import org.icgc.dcc.portal.model.PhenotypeResult;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.service.QueryService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -209,6 +210,8 @@ public class DonorRepository implements Repository {
           }
 
           tf.facetFilter(getFilters(facetFilters));
+        } else {
+          tf.facetFilter(QueryService.defaultDonorFilter());
         }
         fs.add(tf);
       }
@@ -218,7 +221,7 @@ public class DonorRepository implements Repository {
 
   private FilterBuilder getFilters(ObjectNode filters) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return matchAllFilter();
+    return QueryService.defaultDonorFilter();
   }
 
   private FilterBuilder buildFilters(ObjectNode filters) {
@@ -281,7 +284,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
     search.setQuery(buildQuery(query));
 
-    log.debug("{}", search);
+    log.info("{}", search);
     val response = search.execute().actionGet();
     log.debug("{}", response);
 
@@ -548,7 +551,7 @@ public class DonorRepository implements Repository {
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
 
-    log.debug("{}", search);
+    log.info("{}", search);
 
     return search.execute().actionGet().getHits().getTotalHits();
   }
@@ -609,6 +612,8 @@ public class DonorRepository implements Repository {
       ObjectNode filters = remapFilters(query.getFilters());
       search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
+    } else {
+      search.setPostFilter(QueryService.defaultDonorFilter());
     }
 
     return search;

@@ -123,7 +123,7 @@ public class RepositoryFileRepository {
   private final String index;
 
   @Autowired
-  RepositoryFileRepository(Client client) {
+  public RepositoryFileRepository(Client client) {
     this.index = INDEX_NAME;
     this.client = client;
   }
@@ -384,6 +384,21 @@ public class RepositoryFileRepository {
       }
     }
     return result;
+  }
+
+  public Map<String, Object> findOne(String id, Query query) {
+    val kind = Kind.REPOSITORY_FILE;
+    val search = client.prepareGet(index, "file", id);
+
+    search.setFields(getFields(query, kind));
+    String[] sourceFields = resolveSourceFields(query, KIND);
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
+    }
+
+    val response = search.execute().actionGet();
+    val map = createResponseMap(response, query, KIND);
+    return map;
   }
 
   public SearchResponse findAll(Query query) {

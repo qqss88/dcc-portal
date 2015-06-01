@@ -141,7 +141,8 @@ public class IndexModel {
           .put("pexpTestedDonorCount", "_summary._pexp_tested_donor_count")
           .put("mirnaSeqTestedDonorCount", "_summary._mirna_seq_tested_donor_count")
           .put("jcnTestedDonorCount", "_summary._jcn_tested_donor_count")
-          .put("totalDonorCount", "_summary._total_donor_count")
+          // .put("totalDonorCount", "_summary._total_donor_count")
+          .put("totalDonorCount", "_summary._total_complete_donor_count")
           .put("affectedDonorCount", "_summary._affected_donor_count")
           .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
           .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
@@ -190,6 +191,7 @@ public class IndexModel {
           .put("priorMalignancy", "prior_malignancy")
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
+          .put("complete", "_summary._complete")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
