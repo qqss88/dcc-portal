@@ -102,7 +102,7 @@
 
             chartData.push({
               id: projectKey,
-              name: $filter('define')(projectKey),
+              name: projectKey,
               mean: mean,
               medium: medium,
               points: points

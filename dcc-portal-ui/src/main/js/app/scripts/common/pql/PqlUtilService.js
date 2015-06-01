@@ -33,6 +33,10 @@
     var pqlParameterName = 'query';
     var service = PqlQueryObjectService;
 
+    function ensureArray (array) {
+      return _.isArray (array) ? array : [];
+    }
+
     // Here Pql is persisted in a query param in the URL.
     function getPql() {
       var search = $location.search();
@@ -66,8 +70,7 @@
     function addSort (field, direction) {
       if (! (field && direction)) {return;}
 
-      var sort = getSort();
-      sort = _.isArray (sort) ? sort : [];
+      var sort = ensureArray (getSort());
       sort.push ({field: field, direction: direction});
 
       setSort (sort);
@@ -76,8 +79,7 @@
     function removeSort (field) {
       if (! _.isString (field)) {return;}
 
-      var sort = getSort();
-      sort = _.isArray (sort) ? sort : [];
+      var sort = ensureArray (getSort());
       var updatedSort = _.remove (sort, function (o) {
         return o.field !== field;
       });
@@ -87,44 +89,8 @@
 
     // A builder to allow the UI to build a PQL programmatically.
     var Builder = function (pql) {
-      function addTerm (buffer, categoryName, facetName, term) {
-        return service.addTerm (buffer, categoryName, facetName, term);
-      }
-
-      function addTerms (buffer, categoryName, facetName, terms) {
-        return service.addTerms (buffer, categoryName, facetName, terms);
-      }
-
-      function removeTerm (buffer, categoryName, facetName, term) {
-        return service.removeTerm (buffer, categoryName, facetName, term);
-      }
-
-      function removeFacet (buffer, categoryName, facetName) {
-        return service.removeFacet (buffer, categoryName, facetName);
-      }
-
-      function overwrite (buffer, categoryName, facetName, term) {
-        return service.overwrite (buffer, categoryName, facetName, term);
-      }
-
-      function includesFacets (buffer) {
-        return service.includesFacets (buffer);
-      }
-
-      function includes (buffer, field) {
-        return service.includes (buffer, field);
-      }
-
       function includesConsequences (buffer) {
         return service.includes (buffer, 'consequences');
-      }
-
-      function setLimit (buffer, limit) {
-        return service.setLimit (buffer, limit);
-      }
-
-      function setSort (buffer, sort) {
-        return service.setSort (buffer, sort);
       }
 
       function buildFilterOnlyPql (buffer) {
@@ -132,7 +98,19 @@
       }
 
       // A list of functions that update filters in PQL.
-      var filterModifiers = [addTerm, addTerms, removeTerm, removeFacet, overwrite];
+      var filterModifiers = [
+        service.addTerm,
+        service.addTerms,
+        service.excludeTerm,
+        service.excludeTerms,
+        service.removeTerm,
+        service.removeFacet,
+        service.overwrite,
+        service.has,
+        service.hasNo,
+        service.withMissing,
+        service.withoutMissing
+      ];
 
       var initialPql = pql || '';
       var actions = [];
@@ -149,27 +127,35 @@
 
       return {
         addTerm: function (categoryName, facetName, term) {
-          addAction (addTerm, [categoryName, facetName, term]);
+          addAction (service.addTerm, [categoryName, facetName, term]);
           return this;
         },
         addTerms: function (categoryName, facetName, terms) {
-          addAction (addTerms, [categoryName, facetName, terms]);
+          addAction (service.addTerms, [categoryName, facetName, terms]);
+          return this;
+        },
+        excludeTerm: function (categoryName, facetName, term) {
+          addAction (service.excludeTerm, [categoryName, facetName, term]);
+          return this;
+        },
+        excludeTerms: function (categoryName, facetName, terms) {
+          addAction (service.excludeTerms, [categoryName, facetName, terms]);
           return this;
         },
         removeTerm: function (categoryName, facetName, term) {
-          addAction (removeTerm, [categoryName, facetName, term]);
+          addAction (service.removeTerm, [categoryName, facetName, term]);
           return this;
         },
         removeFacet: function (categoryName, facetName) {
-          addAction (removeFacet, [categoryName, facetName]);
+          addAction (service.removeFacet, [categoryName, facetName]);
           return this;
         },
         overwrite: function (categoryName, facetName, term) {
-          addAction (overwrite, [categoryName, facetName, term]);
+          addAction (service.overwrite, [categoryName, facetName, term]);
           return this;
         },
         includesFacets: function () {
-          addAction (includesFacets, []);
+          addAction (service.includesFacets, []);
           return this;
         },
         includesConsequences: function () {
@@ -177,15 +163,31 @@
           return this;
         },
         includes: function (field) {
-          addAction (includes, [field]);
+          addAction (service.includes, [field]);
+          return this;
+        },
+        has: function (categoryName, existsName) {
+          addAction (service.has, [categoryName, existsName]);
+          return this;
+        },
+        hasNo: function (categoryName, existsName) {
+          addAction (service.hasNo, [categoryName, existsName]);
+          return this;
+        },
+        withMissing: function (categoryName, missingName) {
+          addAction (service.withMissing, [categoryName, missingName]);
+          return this;
+        },
+        withoutMissing: function (categoryName, missingName) {
+          addAction (service.withoutMissing, [categoryName, missingName]);
           return this;
         },
         setLimit: function (limit) {
-          addAction (setLimit, [limit]);
+          addAction (service.setLimit, [limit]);
           return this;
         },
         setSort: function (sort) {
-          addAction (setSort, [sort]);
+          addAction (service.setSort, [sort]);
           return this;
         },
         reset: function (startingPql) {
@@ -222,6 +224,12 @@
       addTerms: function (categoryName, facetName, terms) {
         updatePql (service.addTerms, categoryName, facetName, terms);
       },
+      excludeTerm: function (categoryName, facetName, term) {
+        updatePql (service.excludeTerm, categoryName, facetName, term);
+      },
+      excludeTerms: function (categoryName, facetName, terms) {
+        updatePql (service.excludeTerms, categoryName, facetName, terms);
+      },
       removeTerm: function (categoryName, facetName, term) {
         updatePql (service.removeTerm, categoryName, facetName, term);
       },
@@ -230,6 +238,18 @@
       },
       overwrite: function (categoryName, facetName, term) {
         updatePql (service.overwrite, categoryName, facetName, term);
+      },
+      has: function (categoryName, hasField) {
+        updatePql (service.has, categoryName, hasField);
+      },
+      hasNo: function (categoryName, hasField) {
+        updatePql (service.hasNo, categoryName, hasField);
+      },
+      withMissing: function (categoryName, missingField) {
+        updatePql (service.withMissing, categoryName, missingField);
+      },
+      withoutMissing: function (categoryName, missingField) {
+        updatePql (service.withoutMissing, categoryName, missingField);
       },
       mergeQueries: function (query1, query2) {
         return service.mergeQueries (query1, query2);
