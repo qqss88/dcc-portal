@@ -62,11 +62,14 @@
         <div data-ng-if="ExternalRepoController.files.hits.length">
             <div style="margin-bottom:0.5rem">
                 <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                    <i class="icon-download"></i>Generate manifests (
+                    <i class="icon-download"></i>Download manifests (
                       {{ ExternalRepoController.selectedFiles.length === 0?  ExternalRepoController.files.pagination.total : ExternalRepoController.selectedFiles.length | number}}
 
                       files )
                 </button>
+                <span>
+                    <a href="" target="_blank"><i class="icon-external-link"></i>How to download data in external repository</a>
+                </span>
             </div>
 
             <div class="t_table_top">

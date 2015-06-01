@@ -223,6 +223,7 @@
       $modal.open({
         templateUrl: '/scripts/repository/views/repository.external.submit.html',
         controller: 'ExternalFileDownloadController',
+        size: 'lg',
         resolve: {
           params: function() {
             return {

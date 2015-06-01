@@ -8,21 +8,19 @@
 
     <div class="modal-body">
        A manifest if a text file passed to download clients in order to download files. 
-       For more information, see <a href="" target="_blank">Download data in external repositories</a>
-       <br>
-       You will get a single manifest file per repository.<br>
+       You will get a single manifest file per repository.<br><br>
+
        Please note that some files may be stored in different repositories</br>
        The list below is restricted by your repository filter.
-       <!--<div><strong>Query:</strong><query-display filters="filters"></query-display></div>-->
        <br>
        <table class="table table-info">
            <thead>
-               <th>Repository</th><th># Files</th>
+               <th>Repository</th><th class="text-right"># Files</th>
            </thead>
            <tbody>
                <tr data-ng-repeat="(k, v) in selectedRepos">
                    <td>{{k}}</td>
-                   <td>{{v | number}}</td>
+                   <td class="text-right">{{v | number}}</td>
                </tr>
            </tbody>
        </table>
