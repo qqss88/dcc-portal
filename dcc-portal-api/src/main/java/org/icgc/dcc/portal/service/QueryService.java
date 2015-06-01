@@ -698,7 +698,7 @@ public class QueryService {
 
   // Defaults to projects with at least 1 donor with molecular information
   public static FilterBuilder defaultProjectFilter() {
-    return FilterBuilders.rangeFilter("_summary._total_complete_donor_count").gt(0);
+    return FilterBuilders.termFilter("_summary._complete", true);
   }
 
 }
