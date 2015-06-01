@@ -39,6 +39,8 @@
                           class="t_labels__label t_labels__label__projects"></span>
                     <span data-param data-key='type' data-value="geneSet"
                           class="t_labels__label t_labels__label__pathways"></span>
+                    <span data-param data-key='type' data-value="file"
+                          class="t_labels__label t_labels__label__files"></span>
                 </div>
             </form>
         </div>
@@ -49,6 +51,19 @@
                 <td class="t_quick__hit__type">
                     <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
                     <!--<span data-ng-class="'t_badge t_badge__'+r.type"></span>-->
+                </td>
+                <td class="t_quick__hit__text" data-ng-switch-when="file">
+                    <a href="/files/???" data-ng-bind-html="r.id | highlight:activeQuery"></a>
+                    <ul class="t_quick__hit__text__details">
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Name</span>
+                            <span class="t_quick__hit__text__details__value">???</span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Donor</span>
+                            <span class="t_quick__hit__text__details__value">???</span>
+                        </li>
+                    </ul>
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="gene">
                     <a href="/genes/{{r.id}}" data-ng-bind-html="r.symbol | highlight:activeQuery "></a>

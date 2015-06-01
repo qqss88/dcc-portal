@@ -28,6 +28,9 @@
                      <span data-ng-bind-html="r.id | highlight:activeQuery"
                            data-ng-switch-when="curated_set"></span>
                 </span>
+                <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="file">
+                    <li data-ng-bind-html="r.id | highlight:activeQuery:true"></li>
+                </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="gene">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
                     <li data-ng-bind-html="r.synonyms | highlight:activeQuery:true"></li>
