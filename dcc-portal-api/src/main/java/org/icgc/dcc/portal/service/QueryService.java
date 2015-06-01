@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.TermsFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.ChromosomeLocation;
@@ -70,6 +70,11 @@ public class QueryService {
 
   public static FilterBuilder getFilters(ObjectNode filters, Kind kind) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters, kind);
+    if (kind.getId().equals("project")) {
+      return defaultProjectFilter();
+    } else if (kind.getId().equals("donor")) {
+      return defaultDonorFilter();
+    }
     return matchAllFilter();
   }
 
@@ -77,6 +82,11 @@ public class QueryService {
       ImmutableMap<Kind, String> prefixMapping) {
     if (filters.fieldNames().hasNext()) {
       return buildFilters(filters, kind, nestedMapping, prefixMapping);
+    }
+    if (kind.getId().equals("projects")) {
+      return defaultProjectFilter();
+    } else if (kind.getId().equals("donor")) {
+      return defaultDonorFilter();
     }
     return matchAllFilter();
   }
@@ -143,6 +153,12 @@ public class QueryService {
             tf.facetFilter(getFilters(facetFilters, kind, nestedMapping, prefixMapping));
           } else {
             tf.facetFilter(getFilters(facetFilters, kind));
+          }
+        } else {
+          if (kind.getId().equals("project")) {
+            tf.facetFilter(defaultProjectFilter());
+          } else if (kind.getId().equals("donor")) {
+            tf.facetFilter(defaultDonorFilter());
           }
         }
         fs.add(tf);
@@ -352,12 +368,11 @@ public class QueryService {
     val typeMapping = FIELDS_MAPPING.get(kind);
 
     boolean hasUserSuppliedCompletenessFilter = false;
-    String completenessField = typeMapping.get("completeness");
+    String completenessField = typeMapping.get("complete");
     if (prefixMapping != null && prefixMapping.containsKey(kind)) {
       completenessField = String.format("%s.%s", prefixMapping.get(kind), completenessField);
     }
-    TermsFilterBuilder defaultCompletenessFilter =
-        termsFilter(completenessField, ImmutableList.<String> of("has molecular"));
+    TermFilterBuilder defaultCompletenessFilter = termFilter(completenessField, true);
 
     while (fields.hasNext()) {
 
@@ -396,9 +411,6 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
-              } else if (facetField.getKey().equals("completeness") && kind.getId().equals("donor")) {
-                hasUserSuppliedCompletenessFilter = true;
-                fb = termsFilter(fieldName, items);
               } else if (fieldName.endsWith(API_ENTITY_LIST_ID_FIELD_NAME) || facetField.getKey().equals("id")) {
                 // This will get generated twice if both upload-gene-list and gene-id are present,
                 // but that may be ok, it will be like saying: (a or b) and (a or b)
@@ -475,9 +487,13 @@ public class QueryService {
       }
     }
 
-    // If completeness is not supplied, default it to be "has molecular"
-    if (hasUserSuppliedCompletenessFilter == false && kind.getId().equals("donor")) {
+    // Inject hidden filters
+    if (kind.getId().equals("donor")) {
       termFilters.must(defaultCompletenessFilter);
+    }
+
+    if (kind.getId().equals("project")) {
+      termFilters.must(defaultProjectFilter());
     }
 
     return termFilters;
@@ -674,4 +690,15 @@ public class QueryService {
   static public final Boolean hasTranscript(ObjectNode filters) {
     return hasFilter(filters, Kind.TRANSCRIPT);
   }
+
+  // Default to donors with molecular information for donor-centric type
+  public static FilterBuilder defaultDonorFilter() {
+    return FilterBuilders.termFilter("_summary._complete", true);
+  }
+
+  // Defaults to projects with at least 1 donor with molecular information
+  public static FilterBuilder defaultProjectFilter() {
+    return FilterBuilders.rangeFilter("_summary._total_complete_donor_count").gt(0);
+  }
+
 }

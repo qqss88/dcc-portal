@@ -163,7 +163,7 @@ public class IndexModel {
           .put("priorMalignancy", "prior_malignancy")
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
-          .put("completeness", "_summary._completeness")
+          .put("complete", "_summary._complete")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 

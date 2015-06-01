@@ -105,6 +105,7 @@ import org.icgc.dcc.portal.model.PhenotypeResult;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.service.QueryService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -142,7 +143,7 @@ public class DonorRepository implements Repository {
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("projectId", "primarySite", "gender",
       "tumourStageAtDiagnosis", "vitalStatus", "diseaseStatusLastFollowup", "relapseType", "ageAtDiagnosisGroup",
-      "availableDataTypes", "analysisTypes", "projectName", "studies", "completeness");
+      "availableDataTypes", "analysisTypes", "projectName", "studies");
 
   private static final class PhenotypeFacetNames {
 
@@ -195,11 +196,6 @@ public class DonorRepository implements Repository {
     this.client = client;
   }
 
-  // Default to donors with molecular information
-  private FilterBuilder defaultDonorFilter() {
-    return FilterBuilders.termFilter("_summary._completeness", ImmutableList.<String> of("has molecular"));
-  }
-
   private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
     val fs = Lists.<TermsFacetBuilder> newArrayList();
 
@@ -214,6 +210,8 @@ public class DonorRepository implements Repository {
           }
 
           tf.facetFilter(getFilters(facetFilters));
+        } else {
+          tf.facetFilter(QueryService.defaultDonorFilter());
         }
         fs.add(tf);
       }
@@ -223,7 +221,7 @@ public class DonorRepository implements Repository {
 
   private FilterBuilder getFilters(ObjectNode filters) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return this.defaultDonorFilter();
+    return QueryService.defaultDonorFilter();
   }
 
   private FilterBuilder buildFilters(ObjectNode filters) {
@@ -615,7 +613,7 @@ public class DonorRepository implements Repository {
       search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
     } else {
-      search.setPostFilter(this.defaultDonorFilter());
+      search.setPostFilter(QueryService.defaultDonorFilter());
     }
 
     return search;
