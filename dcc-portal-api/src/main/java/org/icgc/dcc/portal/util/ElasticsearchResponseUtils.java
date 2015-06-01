@@ -104,7 +104,7 @@ public final class ElasticsearchResponseUtils {
     }
 
     if (value instanceof Integer) {
-      return new Long((Integer) value);
+      return Long.valueOf((Integer) value);
     }
 
     if (value instanceof Iterable<?>) {
