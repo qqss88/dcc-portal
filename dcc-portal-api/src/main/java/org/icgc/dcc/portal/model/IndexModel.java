@@ -91,6 +91,7 @@ public class IndexModel {
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"),
     REPOSITORY_FILE_TEXT("file-text"),
+    REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
     PROJECT_TEXT("project-text");
 
     private final String id;
@@ -155,6 +156,7 @@ public class IndexModel {
           .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
           .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
           .put("repository", "_summary.repository")
+          .put("complete", "_summary._complete")
           .build();
 
   private static final ImmutableMap<String, String> DONORS_FIELDS_MAPPING =
