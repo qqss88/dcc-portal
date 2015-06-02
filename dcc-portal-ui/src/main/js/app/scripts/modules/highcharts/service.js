@@ -143,7 +143,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
           y: count,
           type: type,
           facet: outerFacet,
-          color: _this.primarySiteColours[iName]
+          color: Highcharts.Color(_this.primarySiteColours[iName]).brighten(0.2).get()
         });
       }
     }
