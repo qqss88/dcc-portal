@@ -27,9 +27,11 @@
                            data-ng-switch-when="go_term"></span>
                      <span data-ng-bind-html="r.id | highlight:activeQuery"
                            data-ng-switch-when="curated_set"></span>
+                     <span data-ng-bind-html="r.id| highlight:activeQuery"
+                           data-ng-switch-when="file"></span>
                 </span>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="file">
-                    <li data-ng-bind-html="r.id | highlight:activeQuery:true"></li>
+                    <li data-ng-bind-html="r.fileName| highlight:activeQuery:true"></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="gene">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
