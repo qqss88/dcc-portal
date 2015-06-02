@@ -113,7 +113,7 @@
     };
 
 
-    $scope.projects = HighchartsService.projectColours;
+    // $scope.projects = HighchartsService.projectColours;
     $scope.sites = HighchartsService.primarySiteColours;
 
     refresh();
