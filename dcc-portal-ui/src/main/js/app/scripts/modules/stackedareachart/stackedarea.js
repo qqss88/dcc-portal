@@ -109,6 +109,10 @@
       .y1(function(d) { return y(d.y0 + d.y); });
 
     var input = ['Area','Line'];
+
+    // FIXME: Need to move append so it doesn't pollute DOM
+    d3.select(element).selectAll('*').remove();
+
     var form = d3.select(element).append('form');
 
     var svg = d3.select(element).append('svg')
@@ -167,7 +171,9 @@
     var xReverser = this.xReverser;
     project.append('path')
       .attr('d', function(d) { return area(d.values); })
-      .style('fill', function(d) {return colour(d.key); })
+      .attr('stroke', '#FFF')
+      .attr('stroke-width', '0.5px')
+      .style('fill', function(d) { return colour(d.values[0].colourKey); })
       .style('sharp-rengering','crispEdges')
       .on('mousemove', function(d) {
             var coords = d3.mouse(this);
@@ -237,7 +243,7 @@
         project.selectAll('path').transition().duration(500)
           .attr('d', function(d){return line(d.values);})
           .style('fill','none')
-          .attr('stroke', function(d) {return colour(d.key); })
+          .attr('stroke', function(d) {return colour(d.values[0].colourKey); })
           .attr('class','line')
           .attr('stroke-width','3px');
 
@@ -247,10 +253,10 @@
         svg.select('.stackedarea.y.axis').transition().duration(500).call(yAxis);
         project.selectAll('path').transition().duration(500)
           .attr('d', function(d) { return area(d.values); }).transition()
-          .style('fill', function(d) {return colour(d.key); })
-          .attr('stroke','none')
+          .style('fill', function(d) {return colour(d.values[0].colourKey); })
+          .attr('stroke', '#FFF')
           .attr('class','')
-          .attr('stroke-width','0px');
+          .attr('stroke-width','0.5px');
       }
     };
 

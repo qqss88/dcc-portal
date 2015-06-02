@@ -101,7 +101,8 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     'Skin': this.colours[0],
     'Cervix': this.colours[2],
     'Bone': this.colours[4],
-    'Bladder': this.colours[6]
+    'Bladder': this.colours[6],
+    'Mesenchymal': this.colours[8]
   };
 
 
