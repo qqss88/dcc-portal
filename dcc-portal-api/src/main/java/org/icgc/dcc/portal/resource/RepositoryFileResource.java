@@ -108,9 +108,11 @@ public class RepositoryFileResource {
   @Timed
   @ApiOperation(value = "Find by fileId", response = RepositoryFile.class)
   public RepositoryFile find(
-      @ApiParam(value = "File Id", required = true) @PathParam("fileId") String donorId
+      @ApiParam(value = "File Id", required = true) @PathParam("fileId") String id
       ) {
-    return repositoryFileService.findOne(donorId, query().build());
+    val result = repositoryFileService.findOne(id, query().build());
+
+    return result;
   }
 
   @GET

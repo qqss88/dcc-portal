@@ -69,9 +69,10 @@ public class SearchRepository {
     // Determine which index to use, external file repository are in a daily generated index separated from the main
     // icgc-index
     if (type.equals("file")) {
+      log.info("Setting index to icgc-repository");
       search = client.prepareSearch(repoIndexName);
     } else {
-      search = client.prepareSearch(indexName);
+      search = client.prepareSearch(indexName, repoIndexName);
     }
 
     search.setSearchType(DFS_QUERY_THEN_FETCH)
@@ -89,7 +90,7 @@ public class SearchRepository {
     else if (type.equals("file")) search.setTypes(REPOSITORY_FILE_TEXT.getId());
     else {
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
-          GENESET_TEXT.getId());
+          GENESET_TEXT.getId(), REPOSITORY_FILE_TEXT.getId());
     }
 
     search.addFields(getFields(query, KIND));
@@ -134,7 +135,6 @@ public class SearchRepository {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
     } else {
       // Search in the wild, need to apply both default filters to only donor and project
-      // search.setPostFilter(FilterBuilders.boolFilter().must(QueryService.defaultDonorFilter()));
       val donor =
           FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "donor"))
               .must(QueryService.defaultDonorFilter());

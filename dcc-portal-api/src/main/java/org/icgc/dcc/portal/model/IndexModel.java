@@ -108,6 +108,8 @@ public class IndexModel {
           .put("repositoryNames", "repository.repo_server.repo_name")
           .put("fileName", "repository.file_name")
           .put("fileSize", "repository.file_size")
+          .put("checksum", "repository.file_md5sum")
+          .put("lastUpdate", "repository.last_modified")
           .put("projectCode", "donor.project_code")
           .put("primarySite", "donor.primary_site")
           .put("study", "study")
@@ -116,6 +118,12 @@ public class IndexModel {
           .put("dataFormat", "data_types.data_format")
           .put("access", "access")
           .put("donorId", "donor.donor_id")
+          .put("donorSubmitterId", "donor.submitted_donor_id")
+          .put("specimenId", "donor.specimen_id")
+          .put("specimenSubmitterId", "donor.submitted_specimen_id")
+          .put("sampleId", "donor.sample_id")
+          .put("sampleSubmitterId", "donor.submitted_sample_id")
+
           .put("program", "donor.program") // For search
           .build();
 
@@ -546,6 +554,8 @@ public class IndexModel {
           .put("primarySiteCount", "primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
+          .put("completeDonorCount", "complete_donor_count")
+          .put("completeProjectCount", "complete_project_count")
           .build();
 
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
@@ -589,6 +599,7 @@ public class IndexModel {
 
           // File Repo
           .put("file_name", "file_name")
+          .put("donor_id", "donor_id")
 
           // Pathway
           // .put("url", "url")
