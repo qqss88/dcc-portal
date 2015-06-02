@@ -8,10 +8,10 @@
     <section>
         <ul class="t_subnav__items">
             <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
-            <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Mutated Genes</a></li>
-            <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
-            <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
-            <li data-spy="publications" class="t_subnav__items__item"><a data-scrollto
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Mutated Genes</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="publications" class="t_subnav__items__item"><a data-scrollto
                                                                          href="#publications">Publications</a>
             </li>
             <li><br></li>
@@ -66,7 +66,7 @@
                 </ul>
             </td>
         </tr>
-        <tr>
+        <tr data-ng-if="ProjectCtrl.project.complete">
             <th>Total number of donors</th>
             <td>
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
@@ -74,7 +74,7 @@
                 </a>
             </td>
         </tr>
-        <tr>
+        <tr data-ng-if="ProjectCtrl.project.complete">
             <th>Number of Donors involved in Study</th>
             <td>
                 <ul>
@@ -138,7 +138,10 @@
 </div>
 <div class="half omega">
     <h3>Available Data Types</h3>
-    <table class="table table-info">
+    <div data-ng-if="!ProjectCtrl.project.complete">
+    Only Clinical Data have been submitted to DCC ({{ProjectCtrl.project.totalDonorCount | number}} donors)
+    </div>
+    <table class="table table-info" data-ng-if="ProjectCtrl.project.complete">
         <tr>
             <th>Clinical Data</th>
             <td>
@@ -263,6 +266,7 @@
 </div>
 </section>
 <section id="genes"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectGeneCtrl as ProjectGeneCtrl"
          data-ng-class="{'loading': !ProjectGeneCtrl.genes.hits, 'empty': ProjectGeneCtrl.genes.hits.length == 0}">
     <h3 data-ng-if="!ProjectGeneCtrl.genes.hits">
@@ -404,6 +408,7 @@
     </div>
 </section>
 <section id="mutations"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectMutationsCtrl as ProjectMutationsCtrl"
          data-ng-class="{'loading': !ProjectMutationsCtrl.mutations.hits, 'empty': ProjectMutationsCtrl.mutations.hits.length == 0}">
     <h3 data-ng-if="!ProjectMutationsCtrl.mutations.hits">
@@ -540,6 +545,7 @@
 </section>
 
 <section id="donors"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectDonorsCtrl as ProjectDonorsCtrl"
          data-ng-class="{'loading': !ProjectDonorsCtrl.donors.hits, 'empty': ProjectDonorsCtrl.donors.hits.length == 0 || ProjectCtrl.project.ssmTestedDonorCount == 0}">
     <h3 data-ng-if="!ProjectDonorsCtrl.donors.hits && ProjectCtrl.project.ssmTestedDonorCount > 0">
@@ -688,7 +694,9 @@
         </table>
     </div>
 </section>
-<section id="publications" data-ng-class="{'empty': ProjectCtrl.project.uiPublicationList.length == 0}">
+<section id="publications" 
+    data-ng-if="ProjectCtrl.project.complete"
+    data-ng-class="{'empty': ProjectCtrl.project.uiPublicationList.length == 0}">
     <h3 data-ng-if="ProjectCtrl.project.uiPublicationList.length == 0">No Publications.</h3>
 
     <div data-ng-if="ProjectCtrl.project.uiPublicationList.length > 0">

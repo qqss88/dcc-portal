@@ -10,7 +10,7 @@
         <ul class="t_subnav__items">
             <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
             <li data-spy="clinical" class="t_subnav__items__item"><a data-scrollto href="#clinical">Clinical Data</a></li>
-            <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-spy="mutations" class="t_subnav__items__item" data-ng-if="DonorCtrl.donor.complete"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="specimen" class="t_subnav__items__item"><a data-scrollto href="#specimen">Specimen</a></li>
             <li><br></li>
             <li class="t_subnav__items__item" data-ng-if="DonorCtrl.mutationFacets.functionalImpact.total > 0">
@@ -75,7 +75,10 @@
     </div>
     <div class="half omega">
         <h3>Available Data Types</h3>
-        <table class="table table-info">
+        <div data-ng-if="!DonorCtrl.donor.complete">
+            Only Clinical Data have been submitted to DCC
+        </div>
+        <table class="table table-info" data-ng-if="DonorCtrl.donor.complete">
             <tr>
                 <th>Clinical Data</th>
                 <td class="text-center"><i class="icon-ok"></i></td>
@@ -240,6 +243,7 @@
 </section>
 
 <section id="mutations"
+         data-ng-if="DonorCtrl.donor.complete"
          data-ng-controller="DonorMutationsCtrl as DonorMutationsCtrl"
          data-ng-class="{'loading': !DonorMutationsCtrl.mutations.hits, 'empty': DonorMutationsCtrl.mutations.hits.length == 0}">
     <h3 data-ng-if="!DonorMutationsCtrl.mutations.hits"><i class="icon-spinner icon-spin"></i> Fetching Mutations...
