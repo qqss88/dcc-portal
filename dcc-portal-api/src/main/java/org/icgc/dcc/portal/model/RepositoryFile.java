@@ -102,6 +102,8 @@ public class RepositoryFile {
 
   String sampleSubmitterId;
 
+  String repositoryType;
+
   String checksum;
 
   String lastUpdate;
@@ -133,6 +135,7 @@ public class RepositoryFile {
     sampleId = getString(getFromMap(fieldMap, "sampleId"));
     sampleSubmitterId = getString(getFromMap(fieldMap, "sampleSubmitterId"));
 
+    repositoryType = getString(getFromMap(fieldMap, "repositoryType"));
     checksum = getString(getFromMap(fieldMap, "checksum"));
     lastUpdate = getString(getFromMap(fieldMap, "lastUpdate"));
 

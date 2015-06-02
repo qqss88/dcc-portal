@@ -64,7 +64,7 @@ public final class ElasticsearchResponseUtils {
 
     if (values instanceof Iterable<?>) {
       val iterable = (Iterable<?>) values;
-      return Iterables.size(iterable) > 0 ? Iterables.get(iterable, 0).toString() : null;
+      return Iterables.isEmpty(iterable) ? null : Iterables.get(iterable, 0).toString();
     }
 
     if (values instanceof String) {
@@ -80,6 +80,9 @@ public final class ElasticsearchResponseUtils {
     }
 
     if (value instanceof List<?>) {
+      // There might be a performance issue here. In the event that we already know 'value' is a List<String>, maybe we
+      // should just cast it to List<String> directly. Alternatively, we could check the size of the list then,
+      // depending on the size, either directly cast it for a big collection or transform it for a small collection.
       return newArrayList(transform((List<?>) value, v -> v.toString()));
     }
 
@@ -109,14 +112,16 @@ public final class ElasticsearchResponseUtils {
 
     if (value instanceof Iterable<?>) {
       val iterable = (Iterable<?>) value;
-      return Iterables.size(iterable) > 0 ? Longs.tryParse(Iterables.get(iterable, 0).toString()) : null;
+      return Iterables.isEmpty(iterable) ? null : Longs.tryParse(Iterables.get(iterable, 0).toString());
     }
 
     return Longs.tryParse(value.toString());
   }
 
   public static Boolean getBoolean(Object values) {
-    if (values == null) return null;
+    if (values == null) {
+      return null;
+    }
 
     if (values instanceof Boolean) {
       return (Boolean) values;
