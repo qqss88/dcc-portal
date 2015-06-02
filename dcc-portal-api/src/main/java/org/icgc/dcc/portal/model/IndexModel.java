@@ -554,6 +554,8 @@ public class IndexModel {
           .put("primarySiteCount", "primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
+          .put("completeDonorCount", "complete_donor_count")
+          .put("completeProjectCount", "complete_project_count")
           .build();
 
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
