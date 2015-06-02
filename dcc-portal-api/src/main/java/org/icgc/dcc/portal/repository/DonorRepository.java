@@ -208,7 +208,6 @@ public class DonorRepository implements Repository {
           if (facetFilters.has(KIND.getId())) {
             facetFilters.with(KIND.getId()).remove(facet);
           }
-
           tf.facetFilter(getFilters(facetFilters));
         } else {
           tf.facetFilter(QueryService.defaultDonorFilter());
@@ -249,7 +248,7 @@ public class DonorRepository implements Repository {
       }
       qb.must(musts.toArray(new FilterBuilder[musts.size()]));
     }
-    return matchAll ? matchAllFilter() : qb;
+    return matchAll ? QueryService.defaultDonorFilter() : qb;
   }
 
   private List<FilterBuilder> buildGeneNestedFilters(ObjectNode filters, boolean hasGene, boolean hasGeneSet,
