@@ -597,6 +597,7 @@ public class IndexModel {
 
           // File Repo
           .put("file_name", "file_name")
+          .put("donor_id", "donor_id")
 
           // Pathway
           // .put("url", "url")

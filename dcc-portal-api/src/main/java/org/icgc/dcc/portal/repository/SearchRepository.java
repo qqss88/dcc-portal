@@ -135,7 +135,6 @@ public class SearchRepository {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
     } else {
       // Search in the wild, need to apply both default filters to only donor and project
-      // search.setPostFilter(FilterBuilders.boolFilter().must(QueryService.defaultDonorFilter()));
       val donor =
           FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "donor"))
               .must(QueryService.defaultDonorFilter());
