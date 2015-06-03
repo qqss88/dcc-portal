@@ -187,6 +187,8 @@ angular.module('icgc.ui.suggest').directive('suggestPopup', function ($location)
           var resourceType = item.type;
           if (_.contains(['curated_set', 'go_term', 'pathway'], item.type)) {
             resourceType = 'geneset';
+          } else if (item.type === 'file') {
+            resourceType = 'repository/file';
           }
 
           $location.path('/' + resourceType + 's/' + item.id).search({});

@@ -32,6 +32,7 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
@@ -154,6 +155,7 @@ public class RepositoryFileRepository {
       for (val item : boolNode.get("is")) {
         items.add(item.textValue());
       }
+
       if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
         continue;
@@ -192,7 +194,7 @@ public class RepositoryFileRepository {
     for (String facet : FACETS) {
       val globalAgg = AggregationBuilders.global(facet);
       val facetAgg = AggregationBuilders.filter(facet);
-      if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
+      // if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
       String fieldName = typeMapping.get(facet);
 
       if (filters.fieldNames().hasNext()) {
@@ -203,7 +205,7 @@ public class RepositoryFileRepository {
           facetFilters.with(KIND.getId()).remove(facet);
         }
         log.info("Processing {}", fieldName);
-        facetAgg.filter(buildRepoFilters(facetFilters, true));
+        facetAgg.filter(buildRepoFilters(facetFilters, false));
         facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
         facetAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
       } else {
@@ -220,36 +222,36 @@ public class RepositoryFileRepository {
     val field = typeMapping.get("repositoryNames");
     aggs.add(global(repoFiltered)
         .subAggregation(filter(repoFiltered)
-            .filter(buildRepoFilters(filters.deepCopy(), true))
+            .filter(buildRepoFilters(filters.deepCopy(), false))
             .subAggregation(terms(repoFiltered).size(1024).field(field))
             .subAggregation(missing("_missing").field(field))));
 
-    // Special nested case
-    for (String facet : FACETS) {
-      String fieldName = typeMapping.get(facet);
-      if (facet.equals("dataType") || facet.equals("dataFormat")) {
-        // Remove one self
-        val facetFilters = filters.deepCopy();
-        if (facetFilters.has(KIND.getId())) {
-          facetFilters.with(KIND.getId()).remove(facet);
-        }
-        val globalAgg = AggregationBuilders.global(facet);
-        val filterAgg = AggregationBuilders.filter(facet);
-        filterAgg.filter(buildRepoFilters(facetFilters, true));
-        val nestedAgg = AggregationBuilders.nested(facet).path("data_types");
-        val termAgg = AggregationBuilders.terms(facet).size(1024).field(fieldName);
-        val reverseAgg = AggregationBuilders.reverseNested(facet);
-
-        termAgg.subAggregation(reverseAgg);
-
-        nestedAgg.subAggregation(termAgg);
-
-        filterAgg.subAggregation(nestedAgg);
-
-        globalAgg.subAggregation(filterAgg);
-        aggs.add(globalAgg);
-      }
-    }
+    // Special nested case - Disabled as currently there are no nested fields
+    // for (String facet : FACETS) {
+    // String fieldName = typeMapping.get(facet);
+    // if (facet.equals("dataType") || facet.equals("dataFormat")) {
+    // // Remove one self
+    // val facetFilters = filters.deepCopy();
+    // if (facetFilters.has(KIND.getId())) {
+    // facetFilters.with(KIND.getId()).remove(facet);
+    // }
+    // val globalAgg = AggregationBuilders.global(facet);
+    // val filterAgg = AggregationBuilders.filter(facet);
+    // filterAgg.filter(buildRepoFilters(facetFilters, false));
+    // val nestedAgg = AggregationBuilders.nested(facet).path("data_types");
+    // val termAgg = AggregationBuilders.terms(facet).size(1024).field(fieldName);
+    // val reverseAgg = AggregationBuilders.reverseNested(facet);
+    //
+    // termAgg.subAggregation(reverseAgg);
+    //
+    // nestedAgg.subAggregation(termAgg);
+    //
+    // filterAgg.subAggregation(nestedAgg);
+    //
+    // globalAgg.subAggregation(filterAgg);
+    // aggs.add(globalAgg);
+    // }
+    // }
 
     return aggs;
   }
@@ -262,11 +264,13 @@ public class RepositoryFileRepository {
     for (Aggregation agg : aggs) {
       val name = agg.getName();
 
-      if (name.equals("dataFormat") || name.equals("dataType")) {
-        result.put(name, convertNestedAggregation(agg));
-      } else {
-        result.put(name, convertNormalAggregation(agg));
-      }
+      // Disabled as there are no nested fields at the moment
+      // if (name.equals("dataFormat") || name.equals("dataType")) {
+      // result.put(name, convertNestedAggregation(agg));
+      // } else {
+      // result.put(name, convertNormalAggregation(agg));
+      // }
+      result.put(name, convertNormalAggregation(agg));
     }
     return result;
   }
@@ -329,7 +333,7 @@ public class RepositoryFileRepository {
 
       @Override
       public void write(OutputStream os) throws IOException, WebApplicationException {
-        val filters = buildRepoFilters(query.getFilters(), true);
+        val filters = buildRepoFilters(query.getFilters(), false);
         String headers[] = EXPORT_FIELDS.values().toArray(new String[EXPORT_FIELDS.values().size()]);
         String keys[] = EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]);
 
@@ -397,6 +401,8 @@ public class RepositoryFileRepository {
     }
 
     val response = search.execute().actionGet();
+    checkResponseState(id, response, KIND);
+
     val map = createResponseMap(response, query, KIND);
     return map;
   }
@@ -404,7 +410,7 @@ public class RepositoryFileRepository {
   public SearchResponse findAll(Query query) {
     val kind = Kind.REPOSITORY_FILE;
 
-    val filters = buildRepoFilters(query.getFilters(), true);
+    val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
@@ -448,7 +454,7 @@ public class RepositoryFileRepository {
   @NonNull
   private SearchResponse findDownloadInfo(SearchType searchType, Query query, final String[] fields, String sortField,
       String sourceField) {
-    val filters = buildRepoFilters(query.getFilters(), true);
+    val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(searchType)
@@ -465,5 +471,23 @@ public class RepositoryFileRepository {
     log.debug("ES response is: {}", response);
 
     return response;
+  }
+
+  /**
+   * @param queryStr - either matching donor
+   * @return
+   */
+  public SearchResponse findRepoDonor(String queryStr) {
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(1);
+    val donorIdFilter = FilterBuilders.termFilter("donor.donor_id", queryStr);
+    val specimenIdFilter = FilterBuilders.termFilter("donor.specimen_id", queryStr);
+    val sampleIdFilter = FilterBuilders.termFilter("donor.sample_id", queryStr);
+    val postFilter = FilterBuilders.boolFilter().should(donorIdFilter).should(specimenIdFilter).should(sampleIdFilter);
+    search.setPostFilter(postFilter);
+    return search.execute().actionGet();
   }
 }

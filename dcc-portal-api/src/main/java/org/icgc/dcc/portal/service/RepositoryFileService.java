@@ -57,6 +57,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.icgc.dcc.portal.model.Keyword;
+import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
@@ -126,6 +128,36 @@ public class RepositoryFileService {
 
   public StreamingOutput exportTableData(Query query) {
     return repositoryFileRepository.exportData(query);
+  }
+
+  /**
+   * Emulating keyword search, but without prefix/ngram analyzers..ie: exact match
+   */
+  public Keywords findRepoDonor(Query query) {
+    val response = repositoryFileRepository.findRepoDonor(query.getQuery());
+    val hits = response.getHits();
+    val list = ImmutableList.<RepositoryFile> builder();
+
+    // Get repository files
+    for (val hit : hits) {
+      val fieldMap = createResponseMap(hit, query, Kind.REPOSITORY_FILE);
+      list.add(new RepositoryFile(fieldMap));
+    }
+    val files = new RepositoryFiles(list.build());
+
+    // Transform t keyword
+    val keywordlist = ImmutableList.<Keyword> builder();
+    for (val file : files.getHits()) {
+      val map = Maps.<String, Object> newHashMap();
+      map.put("id", file.getDonorId());
+      map.put("specimenIds", ImmutableList.<String> of(file.getSpecimenId()));
+      map.put("sampleIds", ImmutableList.<String> of(file.getSampleId()));
+      map.put("type", "donor");
+      keywordlist.add(new Keyword(map));
+    }
+
+    Keywords keywords = new Keywords(keywordlist.build());
+    return keywords;
   }
 
   public RepositoryFile findOne(String fileId, Query query) {

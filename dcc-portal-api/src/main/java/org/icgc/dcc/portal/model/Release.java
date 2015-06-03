@@ -18,6 +18,7 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 
 import java.util.Map;
 
@@ -59,6 +60,10 @@ public class Release {
   Long mutatedGeneCount;
   @ApiModelProperty(value = "Release Number", required = true)
   Integer releaseNumber;
+  @ApiModelProperty(value = "Donors with molecular data", required = true)
+  Long completeDonorCount;
+  @ApiModelProperty(value = "Projects with molecular data", required = true)
+  Long completeProjectCount;
 
   public Release(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.RELEASE);
@@ -74,12 +79,8 @@ public class Release {
     primarySiteCount = getLong(fieldMap.get(fields.get("primarySiteCount")));
     mutatedGeneCount = getLong(fieldMap.get(fields.get("mutatedGeneCount")));
     releaseNumber = (Integer) (fieldMap.get(fields.get("releaseNumber")));
+    completeDonorCount = getLong(fieldMap.get(fields.get("completeDonorCount")));
+    completeProjectCount = getLong(fieldMap.get(fields.get("completeProjectCount")));
   }
 
-  private Long getLong(Object field) {
-    if (field instanceof Long) return (Long) field;
-    if (field instanceof Integer) return (long) (Integer) field;
-    else
-      return null;
-  }
 }

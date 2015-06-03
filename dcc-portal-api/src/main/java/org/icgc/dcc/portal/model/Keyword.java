@@ -89,8 +89,15 @@ public class Keyword {
 
   @ApiModelProperty(required = false)
   String url;
+
   @ApiModelProperty(required = false)
   String source;
+
+  @ApiModelProperty(required = false)
+  String donorId;
+
+  @ApiModelProperty(required = false)
+  String fileName;
 
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
@@ -125,12 +132,12 @@ public class Keyword {
     url = getString(fieldMap.get(fields.get("url")));
     source = getString(fieldMap.get(fields.get("source")));
 
-    // Over write
-    if (type.equals("file")) {
-      id = getString(fieldMap.get(fields.get("file_name")));
-    } else {
-      id = getString(fieldMap.get(fields.get("id")));
-    }
+    // File
+    fileName = getString(fieldMap.get(fields.get("file_name")));
+    donorId = getString(fieldMap.get(fields.get("donor_id")));
+
+    // Generic id
+    id = getString(fieldMap.get(fields.get("id")));
 
   }
 }

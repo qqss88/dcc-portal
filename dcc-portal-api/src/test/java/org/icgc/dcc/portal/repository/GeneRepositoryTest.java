@@ -135,7 +135,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
     SearchResponse responseNot = geneRepository.findAllCentric(queryNot);
     SearchHits hitsNot = responseNot.getHits();
 
-    assertThat(hitsNot.getTotalHits()).isEqualTo(3);
+    assertThat(hitsNot.getTotalHits()).isEqualTo(2);
   }
 
   @Test
@@ -229,6 +229,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
     geneRepository.findOne(MISSING_ID, query);
   }
 
+  @Override
   protected Object cast(Object object) {
     return object;
   }

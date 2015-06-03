@@ -80,15 +80,13 @@ public class QueryService {
 
   public static FilterBuilder getFilters(ObjectNode filters, Kind kind, ImmutableMap<Kind, String> nestedMapping,
       ImmutableMap<Kind, String> prefixMapping) {
-    if (filters.fieldNames().hasNext()) {
-      return buildFilters(filters, kind, nestedMapping, prefixMapping);
-    }
-    if (kind.getId().equals("projects")) {
-      return defaultProjectFilter();
-    } else if (kind.getId().equals("donor")) {
-      return defaultDonorFilter();
-    }
-    return matchAllFilter();
+
+    return buildFilters(filters, kind, nestedMapping, prefixMapping);
+    /*
+     * if (filters.fieldNames().hasNext()) { return buildFilters(filters, kind, nestedMapping, prefixMapping); } if
+     * (kind.getId().equals("projects")) { return defaultProjectFilter(); } else if (kind.getId().equals("donor")) {
+     * return defaultDonorFilter(); } return matchAllFilter();
+     */
   }
 
   public static String[] getFields(Query query, Kind kind) {
@@ -492,7 +490,7 @@ public class QueryService {
       termFilters.must(defaultCompletenessFilter);
     }
 
-    if (kind.getId().equals("project")) {
+    if (kind.getId().equals("project") && prefixMapping == null) {
       termFilters.must(defaultProjectFilter());
     }
 
