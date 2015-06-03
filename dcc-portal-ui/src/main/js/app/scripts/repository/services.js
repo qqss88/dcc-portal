@@ -85,6 +85,10 @@
       return Restangular.one('repository/files').one('metadata').get({});
     };
 
+    this.getFileInfo = function (id) {
+      return Restangular.one('repository/files', id).get();
+    };
+
     this.shortenFileName = function(txt) {
       if (txt.length > 40) {
          return txt.substring(0, 25) + '...' + txt.substring(txt.length, txt.length-4);

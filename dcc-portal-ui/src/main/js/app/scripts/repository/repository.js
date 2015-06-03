@@ -29,8 +29,6 @@
     Page.setTitle('Data Repository');
     Page.setPage('repository');
 
-
-
     $scope.$watch(function () {
       return $state.current.data.tab;
     }, function () {
@@ -171,6 +169,10 @@
 
   });
 
+  module.controller('ExternalFileInfoController',
+    function ($log, fileInfo) {
+    this.fileInfo = fileInfo;
+  });
 
   /**
    * External repository controller

@@ -281,4 +281,20 @@ angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
     replace: true,
     template: '<span class="badge pcawg-badge">PCAWG</span>'
   };
+})
+.directive('studyBadge', function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      study: '@',
+      text: '@'
+    },
+    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div> <div> <span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
+    link: function (scope) {
+      scope.isPcawg = scope.study === 'PCAWG';
+      // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
+      scope.text = scope.text || scope.study;
+    }
+  };
 });
