@@ -152,7 +152,7 @@ public class RepositoryFileService {
       map.put("id", file.getDonorId());
       map.put("specimenIds", ImmutableList.<String> of(file.getSpecimenId()));
       map.put("sampleIds", ImmutableList.<String> of(file.getSampleId()));
-      map.put("type", "file-donor");
+      map.put("type", "donor");
       keywordlist.add(new Keyword(map));
     }
 
