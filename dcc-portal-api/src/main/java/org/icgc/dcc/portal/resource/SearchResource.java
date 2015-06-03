@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.RepositoryFileService;
 import org.icgc.dcc.portal.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,6 +59,7 @@ public class SearchResource {
   protected static final String DEFAULT_ORDER = "desc";
 
   private final SearchService searchService;
+  private final RepositoryFileService repositoryService;
 
   @GET
   @Timed
@@ -72,9 +74,14 @@ public class SearchResource {
       ) {
     log.info("Request for keyword search: {}", q);
 
-    Keywords keywords = searchService.findAll(Query.builder().query(q).fields(fields).from(from.get()).filters(filters
-        .get())
-        .size(size.get()).sort(DEFAULT_SORT).order(DEFAULT_ORDER).build(), type);
+    Keywords keywords;
+
+    if (type.equals("file-donor")) {
+      keywords = repositoryService.findRepoDonor(Query.builder().query(q).build());
+    } else {
+      keywords = searchService.findAll(Query.builder().query(q).fields(fields).from(from.get()).filters(filters
+          .get()).size(size.get()).sort(DEFAULT_SORT).order(DEFAULT_ORDER).build(), type);
+    }
 
     log.info("Returning {}", keywords);
 

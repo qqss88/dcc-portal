@@ -48,6 +48,7 @@ public class SearchRepository {
   private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
   private static final Type GENESET_TEXT = Type.GENESET_TEXT;
   private static final Type REPOSITORY_FILE_TEXT = Type.REPOSITORY_FILE_TEXT;
+  private static final Type REPOSITORY_FILE_DONOR_TEXT = Type.REPOSITORY_FILE_DONOR_TEXT;
 
   private final Client client;
 
@@ -68,7 +69,7 @@ public class SearchRepository {
 
     // Determine which index to use, external file repository are in a daily generated index separated from the main
     // icgc-index
-    if (type.equals("file")) {
+    if (type.equals("file") || type.equals("file-donor")) {
       log.info("Setting index to icgc-repository");
       search = client.prepareSearch(repoIndexName);
     } else {
@@ -88,6 +89,7 @@ public class SearchRepository {
     else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("file")) search.setTypes(REPOSITORY_FILE_TEXT.getId());
+    else if (type.equals("file-donor")) search.setTypes(REPOSITORY_FILE_DONOR_TEXT.getId());
     else {
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
           GENESET_TEXT.getId(), REPOSITORY_FILE_TEXT.getId());
