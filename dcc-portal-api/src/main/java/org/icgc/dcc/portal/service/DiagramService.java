@@ -112,6 +112,7 @@ public class DiagramService {
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
     val highlights = (String) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"));
 
+    // TODO: Reactome: Change to array in index
     return Splitters.COMMA.splitToList(highlights);
   }
 
@@ -147,7 +148,14 @@ public class DiagramService {
 
   @SuppressWarnings("unchecked")
   private Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
-    return (Map<String, String>) getPathway(pathwayId).get(INDEX_MODEL.get("proteinMap"));
+    val fieldName = INDEX_MODEL.get("proteinMap");
+    // TODO: Reactome: Need to fix this because it is stored pathwayId -> uniprotIds in
+    // org.icgc.dcc.etl.db.importer.diagram.model.DiagramNodeConverter. It should be a List<Map<String, Object>> of the
+    // form [{pathway_id: 72584, uniprot_ids: ["UniProt:Q04637"]}]
+    val pathway = getPathway(pathwayId);
+    val map = (Map<String, String>) pathway.get(fieldName);
+
+    return map;
   }
 
   private BoolQueryBuilder getQuery(String id, String[] impacts) {
