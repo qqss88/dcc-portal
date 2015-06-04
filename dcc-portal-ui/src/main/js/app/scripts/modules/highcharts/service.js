@@ -106,11 +106,6 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
   };
 
 
-  this.projectColours = function(idx) {
-    return this.colours[ idx % 10 ];
-  };
-
-
   // new
   this.donut = function (params) {
     var innerPie = {}, innerHits = [], outerHits = [];
