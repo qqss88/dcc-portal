@@ -58,6 +58,9 @@
     var config = this.config;
     var margin = this.margin, width = this.width, height = this.height, colour = this.colour;
 
+    // FIXME: Need to move append so it doesn't pollute DOM
+    d3.select(element).selectAll('*').remove();
+
     var xAxis = d3.svg.axis()
       .scale(this.x)
       .orient('bottom')
@@ -109,9 +112,6 @@
       .y1(function(d) { return y(d.y0 + d.y); });
 
     var input = ['Area','Line'];
-
-    // FIXME: Need to move append so it doesn't pollute DOM
-    d3.select(element).selectAll('*').remove();
 
     var form = d3.select(element).append('form');
 
