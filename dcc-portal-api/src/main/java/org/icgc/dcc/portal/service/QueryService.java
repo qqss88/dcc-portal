@@ -70,6 +70,7 @@ public class QueryService {
 
   public static FilterBuilder getFilters(ObjectNode filters, Kind kind) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters, kind);
+
     if (kind.getId().equals("project")) {
       return defaultProjectFilter();
     } else if (kind.getId().equals("donor")) {
@@ -179,13 +180,28 @@ public class QueryService {
         }
       }
     }
-    return matchAll ? matchAllFilter() : qb;
+
+    if (matchAll == true) {
+      if (kind.getId().equals("project")) {
+        return defaultProjectFilter();
+      } else if (kind.getId().equals("donor")) {
+        return defaultDonorFilter();
+      }
+      return matchAllFilter();
+    }
+    return qb;
+
   }
 
   public static FilterBuilder buildFilters(ObjectNode filters, Kind kind) {
     if (hasFilter(filters, kind)) {
       return buildTypeFilters(filters, kind, null);
     } else {
+      if (kind.getId().equals("project")) {
+        return defaultProjectFilter();
+      } else if (kind.getId().equals("donor")) {
+        return defaultDonorFilter();
+      }
       return matchAllFilter();
     }
   }
