@@ -89,27 +89,10 @@
       return Restangular.one('repository/files', id).get();
     };
 
-    this.shortenFileName = function(txt) {
-      if (txt.length > 40) {
-         return txt.substring(0, 25) + '...' + txt.substring(txt.length, txt.length-4);
-      }
-      return txt;
-    };
-
   });
 
 
   module.service('RepositoryService', function ($filter, Restangular) {
-
-    /*
-    this.getFiles = function (filters, actives) {
-      return Restangular.one('download', '').get({
-        filters: filters,
-        info: actives
-      });
-    };
-    */
-
 
     this.folder = function (path) {
       return Restangular.one('download', 'info' + path).get();
