@@ -169,8 +169,10 @@
 
   });
 
-  module.controller('ExternalFileInfoController',
-    function ($log, fileInfo) {
+  module.controller('ExternalFileInfoController', function (Page, fileInfo) {
+    Page.setTitle('External File Entity');
+    Page.setPage('externalFileEntity');
+
     this.fileInfo = fileInfo;
   });
 
