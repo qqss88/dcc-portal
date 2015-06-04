@@ -1,0 +1,132 @@
+<div class="h1-wrap" ng-init="info = myController.fileInfo">
+    <h1 data-ui-scrollfix=79>
+        <span class="t_badge t_badge__file"></span>
+        {{ info.id }}
+    </h1>
+</div>
+
+<div data-scroll-spy="">
+
+<aside data-ui-scrollfix=79 class="t_sidenav">
+    <section>
+        <ul class="t_subnav__items">
+            <li data-spy="summary" class="t_subnav__items__item current">
+                <a data-scrollto href="#summary">Summary</a>
+            </li>
+            <li data-spy="repository" class="t_subnav__items__item">
+                <a data-scrollto href="#repository">Repository</a>
+            </li>
+            <li data-spy="donor" class="t_subnav__items__item">
+                <a data-scrollto href="#donor">Donor</a>
+            </li>
+        </ul>
+    </section>
+</aside>
+
+<article>
+<section id="summary" ng-init="id = info.id">
+    <div class="wide">
+        <h3>Summary</h3>
+        <table class="table table-info">
+            <tr>
+                <th>File ID</th>
+                <td>{{ id }}</td>
+            </tr>
+            <tr>
+                <th>File name</th>
+                <td>{{ info.fileName }}</td>
+            </tr>
+            <tr>
+                <th>Checksum</th>
+                <td>{{ info.checksum }}</td>
+            </tr>
+            <tr>
+                <th>Access</th>
+                <td>{{ info.access }}</td>
+            </tr>
+            <tr>
+                <th>File size</th>
+                <td>{{ info.fileSize | bytes }}</td>
+            </tr>
+            <tr>
+                <th>File involved in Study</th>
+                <td>
+                    <study-badge study="{{ info.study }}">
+                </td>
+            </tr>
+            <tr>
+                <th>Last update</th>
+                <td>{{ info.lastUpdate | date: 'medium' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="narrow omega">
+        <h3>Data Type</h3>
+        <table class="table table-info">
+            <tr>
+                <th>Data Type</th>
+                <td>{{ info.fileSize }}</td>
+            </tr>
+            <tr>
+                <th>Data Format</th>
+                <td>{{ info.study }}</td>
+            </tr>
+            <tr>
+                <th>Experimental Strategy</th>
+                <td>{{ info.lastUpdate }}</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<section id="repository">
+</section>
+
+<section id="donor">
+    <div class="wide">
+        <h3>Donor</h3>
+        <table class="table table-info">
+            <tr>
+                <th>Project ID</th>
+                <td ng-init="projCode = info.projectCode">
+                    <a href="/projects/{{ projCode }}">{{ projCode }}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Primary site</th>
+                <td>{{ info.id }}</td>
+            </tr>
+            <tr>
+                <th>Donor ID</th>
+                <td ng-init="donorId = info.donorId">
+                    <a href="/donors/{{ donorId }}">{{ donorId }}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Donor Submitter ID</th>
+                <td>{{ info.donorSubmitterId }}</td>
+            </tr>
+            <tr>
+                <th>Specimen ID</th>
+                <td>{{ info.specimenId }}</td>
+            </tr>
+            <tr>
+                <th>Specimen Submitter ID</th>
+                <td>{{ info.specimenSubmitterId }}</td>
+            </tr>
+            <tr>
+                <th>Sample ID</th>
+                <td>{{ info.sampleId }}</td>
+            </tr>
+            <tr>
+                <th>Sample Submitter ID</th>
+                <td>{{ info.sampleSubmitterId }}</td>
+            </tr>
+        </table>
+    </div>
+
+</section>
+
+</article>
+</div>
