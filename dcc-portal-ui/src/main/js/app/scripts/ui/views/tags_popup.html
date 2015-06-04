@@ -36,11 +36,12 @@
                     <li data-ng-bind-html="r.id | highlight:activeQuery:true"></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="donor">
-                    <li><span data-ng-bind-html="r.projectId | highlight:activeQuery:true"></span>
-                    </li>
+                    <li><span data-ng-bind-html="r.projectId | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.submittedId | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.specimenIds | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.sampleIds | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.tcgaAliquotBarcode | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.tcgaSampleBarcode | highlight:activeQuery:true"></span></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="mutation">
                     <li>
