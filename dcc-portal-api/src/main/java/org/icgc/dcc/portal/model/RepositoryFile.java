@@ -68,9 +68,6 @@ public class RepositoryFile {
   @ApiModelProperty(value = "File name", required = true)
   String fileName;
 
-  @ApiModelProperty(value = "Repository", required = true)
-  List<String> repository;
-
   @ApiModelProperty(value = "Project Code", required = true)
   String projectCode;
 
@@ -108,6 +105,10 @@ public class RepositoryFile {
 
   String lastUpdate;
 
+  String TCGASampleBarcode;
+
+  String TCGAAliquotBarcode;
+
   @JsonCreator
   public RepositoryFile(Map<String, Object> fieldMap) {
     _id = getString(getFromMap(fieldMap, "_id"));
@@ -139,8 +140,8 @@ public class RepositoryFile {
     checksum = getString(getFromMap(fieldMap, "checksum"));
     lastUpdate = getString(getFromMap(fieldMap, "lastUpdate"));
 
-    // FIXME: What field is this?
-    repository = null;
+    TCGASampleBarcode = getString(getFromMap(fieldMap, "TCGASampleBarcode"));
+    TCGAAliquotBarcode = getString(getFromMap(fieldMap, "TCGAAliquotBarcode"));
   }
 
   private static Object getFromMap(Map<String, Object> fieldMap, String fieldId) {

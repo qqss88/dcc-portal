@@ -152,6 +152,10 @@ public class RepositoryFileService {
       map.put("id", file.getDonorId());
       map.put("specimenIds", ImmutableList.<String> of(file.getSpecimenId()));
       map.put("sampleIds", ImmutableList.<String> of(file.getSampleId()));
+      map.put("submittedSampleIds", ImmutableList.<String> of(file.getSampleSubmitterId()));
+      map.put("submittedSpecimenIds", ImmutableList.<String> of(file.getSpecimenSubmitterId()));
+      map.put("TCGASampleBarcode", file.getTCGASampleBarcode());
+      map.put("TCGAAliquotBarcode", file.getTCGAAliquotBarcode());
       map.put("type", "donor");
       keywordlist.add(new Keyword(map));
     }

@@ -99,6 +99,12 @@ public class Keyword {
   @ApiModelProperty(required = false)
   String fileName;
 
+  @ApiModelProperty(required = false)
+  String tcgaSampleBarcode;
+
+  @ApiModelProperty(required = false)
+  String tcgaAliquotBarcode;
+
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
     ImmutableMap<String, String> fields = FIELDS_MAPPING.get(Kind.KEYWORD);
@@ -135,6 +141,8 @@ public class Keyword {
     // File
     fileName = getString(fieldMap.get(fields.get("file_name")));
     donorId = getString(fieldMap.get(fields.get("donor_id")));
+    tcgaAliquotBarcode = getString(fieldMap.get(fields.get("TCGAAliquotBarcode")));
+    tcgaSampleBarcode = getString(fieldMap.get(fields.get("TCGASampleBarcode")));
 
     // Generic id
     id = getString(fieldMap.get(fields.get("id")));

@@ -103,7 +103,6 @@ public class IndexModel {
           .put("repositoryEntityId", "repository.repo_entity_id")
           .put("repositoryDataPath", "repository.repo_data_path")
           .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
-
           .put("repositoryType", "repository.repo_type")
           .put("repositoryCountries", "repository.repo_server.repo_country")
           .put("repositoryNames", "repository.repo_server.repo_name")
@@ -124,8 +123,9 @@ public class IndexModel {
           .put("specimenSubmitterId", "donor.submitted_specimen_id")
           .put("sampleId", "donor.sample_id")
           .put("sampleSubmitterId", "donor.submitted_sample_id")
-
-          .put("program", "donor.program") // For search
+          .put("program", "donor.program")
+          .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
+          .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
           .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
@@ -596,6 +596,10 @@ public class IndexModel {
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
+          // Donor-file, these are derived from file
+          .put("TCGASampleBarcode", "TCGASampleBarcode")
+          .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
+
           // GO Term
           .put("altIds", "altIds")
 
@@ -604,8 +608,6 @@ public class IndexModel {
           .put("donor_id", "donor_id")
 
           // Pathway
-          // .put("url", "url")
-          // .put("source", "source")
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
