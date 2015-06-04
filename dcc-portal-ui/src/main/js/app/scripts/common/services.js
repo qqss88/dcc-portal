@@ -23,7 +23,7 @@
   module.factory('PCAWG', function() {
     return {
       isPCAWGStudy: function(term) {
-        return term === 'PCAWG Study';
+        return term === 'PCAWG';
       }
     };
   });
