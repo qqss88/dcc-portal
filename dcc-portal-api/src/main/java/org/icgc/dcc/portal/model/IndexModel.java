@@ -220,10 +220,10 @@ public class IndexModel {
       new ImmutableMap.Builder<String, String>()
           .put("exposureType", "exposure_type")
           .put("exposureIntensity", "exposure_intensity")
-          .put("tabaccoSmokingHistoryIndicator", "tabacco_smoking_history_indicator")
-          .put("tabaccoSmokingIntensity", "tabacco_smoking_intensity")
+          .put("tobaccoSmokingHistoryIndicator", "tobacco_smoking_history_indicator")
+          .put("tobaccoSmokingIntensity", "tobacco_smoking_intensity")
           .put("alcoholHistory", "alcohol_history")
-          .put("alcoholHistoryIntensity", "alcolhol_history_intensity")
+          .put("alcoholHistoryIntensity", "alcohol_history_intensity")
           .build();
 
   private static final ImmutableMap<String, String> THERAPY_FIELDS_MAPPING =
