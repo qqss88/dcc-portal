@@ -210,8 +210,6 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
 
       if (term.facet === 'primarySite') {
         term.color = _this.primarySiteColours[term.name];
-      } else if (term.facet === 'projectId') {
-        term.color = _this.projectColours(idx);
       }
 
       // Only shows active terms if facet active
@@ -277,55 +275,4 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     };
   };
 
-  this.stacked = function (params) {
-    // Check for required parameters
-    [ 'genes'].forEach(function (rp) {
-      if (!params.hasOwnProperty(rp)) {
-        throw new Error('Missing required parameter: ' + rp);
-      }
-    });
-
-    if (!params.genes) {
-      return {};
-    }
-
-    var r, data = [], xAxis = [], genes = params.genes;
-
-    function sort(a, b) {
-      return a.id > b.id;
-    }
-
-    function sortGenes(a, b) {
-      return b.affectedDonorCountFiltered - a.affectedDonorCountFiltered;
-    }
-
-    function add(item, idx) {
-      data.push({name: item.name, data: [
-        {
-          x: i,
-          y: item.count,
-          color: _this.projectColours(idx),
-          gene_id: gene.id
-        }
-      ]});
-    }
-
-    genes.sort(sortGenes);
-
-    for (var i = 0; i < genes.length; ++i) {
-      var gene = genes[i];
-      xAxis.push(gene.symbol);
-      gene.uiFIProjects.sort(sort);
-      gene.uiFIProjects.forEach(add);
-    }
-
-
-    r = {
-      x: xAxis,
-      s: data,
-      hasData: data.length
-    };
-
-    return r;
-  };
 });
