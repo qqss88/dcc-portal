@@ -29,9 +29,6 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -56,6 +53,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.hadoop.util.StringUtils;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -390,26 +388,15 @@ public class RepositoryFileRepository {
     return result;
   }
 
-  public Map<String, Object> findOne(String id, Query query) {
-    val kind = Kind.REPOSITORY_FILE;
+  public GetResponse findOne(String id) {
     val search = client.prepareGet(index, "file", id);
-
-    search.setFields(getFields(query, kind));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
-
     val response = search.execute().actionGet();
     checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query, KIND);
-    return map;
+    return response;
   }
 
   public SearchResponse findAll(Query query) {
-    val kind = Kind.REPOSITORY_FILE;
-
     val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
         .setTypes("file")
@@ -420,20 +407,14 @@ public class RepositoryFileRepository {
 
     search.setPostFilter(filters);
 
-    search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, kind);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, kind), EMPTY_SOURCE_FIELDS);
-    }
-
     val aggs = this.aggs(query.getFilters());
     for (val agg : aggs) {
       search.addAggregation(agg);
     }
 
-    log.info(" !!! {}", search);
+    log.info("ES search query is: '{}'.", search);
     val response = search.execute().actionGet();
-    log.debug("{}", response);
+    log.debug("ES search response is: '{}'.", response);
 
     return response;
   }
@@ -478,14 +459,12 @@ public class RepositoryFileRepository {
    * @return
    */
   public SearchResponse findRepoDonor(String queryStr) {
-
     val typeMapping = FIELDS_MAPPING.get(KIND);
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(1);
-
     val donorIdFilter = FilterBuilders.termFilter(typeMapping.get("donorId"), queryStr);
     val specimenIdFilter = FilterBuilders.termFilter(typeMapping.get("specimenId"), queryStr);
     val sampleIdFilter = FilterBuilders.termFilter(typeMapping.get("sampleId"), queryStr);
@@ -505,7 +484,8 @@ public class RepositoryFileRepository {
             .should(TCGAAliquotBarcode);
 
     search.setPostFilter(postFilter);
-    log.info(">>> {}", search);
+    log.info(">>> ES Search is: {}", search);
+
     return search.execute().actionGet();
   }
 }
