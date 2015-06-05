@@ -100,28 +100,24 @@
                         <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
                            <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
                         </td>
-                        <td style="max-width:28rem; font-size: {{ row.fileName.length > 100? '0.75rem' : ' inherit' }}">
+                        <td style="max-width:28rem; font-size: {{ row.repository.fileName.length > 100? '0.75rem' : ' inherit' }}">
                            <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
-                           <a href="/repository/external/files/{{row.id}}">{{row.fileName}}</a>
+                           <a href="/repository/external/files/{{row.id}}">{{row.repository.fileName}}</a>
                         </td>
-                        <td><a href="/donors/{{row.donorId}}">{{row.donorId}}</a></td>
-                        <td>{{row.repositoryNames.join(', ') }}</td>
-                        <td><a href="/projects/{{row.projectCode}}">{{row.projectCode}}</a></td>
+                        <td><a href="/donors/{{row.donor.donorId}}">{{row.donor.donorId}}</a></td>
+                        <td>{{ ExternalRepoController.concatRepoNames (row) }}</td>
+                        <td><a href="/projects/{{row.donor.projectCode}}">{{row.donor.projectCode}}</a></td>
                         <td>
                             <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
                             <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
                         </td>
                         <td>
-                            <ul>
-                                <li data-ng-repeat="item in row.dataType track by $index">{{item}}</li>
-                            </ul>
+                          {{ row.dataType.dataType }}
                         </td>
                         <td>
-                            <ul>
-                                <li data-ng-repeat="item in row.dataFormat track by $index">{{item}}</li>
-                            </ul>
+                          {{ row.dataType.dataFormat }}
                         </td>
-                        <td>{{row.fileSize | bytes }}</td>
+                        <td>{{ row.repository.fileSize | bytes }}</td>
                     </tr>
                 </tbody>
             </table>

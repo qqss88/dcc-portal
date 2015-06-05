@@ -290,9 +290,10 @@ angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
       study: '@',
       text: '@'
     },
-    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div> <div> <span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
+    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
+      '<div><span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
     link: function (scope) {
-      scope.isPcawg = scope.study === 'PCAWG';
+      scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
       // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
       scope.text = scope.text || scope.study;
     }

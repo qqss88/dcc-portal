@@ -24,21 +24,21 @@
 </aside>
 
 <article>
-<section id="summary" ng-init="id = info.id">
+<section id="summary">
     <div class="wide">
         <h3>Summary</h3>
-        <table class="table table-info">
+        <table class="table table-info" ng-init="repoInfo = info.repository">
             <tr>
                 <th>File ID</th>
-                <td>{{ id }}</td>
+                <td>{{ info.id }}</td>
             </tr>
             <tr>
                 <th>File name</th>
-                <td>{{ info.fileName }}</td>
+                <td>{{ repoInfo.fileName }}</td>
             </tr>
             <tr>
                 <th>Checksum</th>
-                <td>{{ info.checksum }}</td>
+                <td>{{ repoInfo.fileMd5sum }}</td>
             </tr>
             <tr>
                 <th>Access</th>
@@ -46,7 +46,7 @@
             </tr>
             <tr>
                 <th>File size</th>
-                <td>{{ info.fileSize | bytes }}</td>
+                <td>{{ repoInfo.fileSize | bytes }}</td>
             </tr>
             <tr>
                 <th>File involved in Study</th>
@@ -56,76 +56,107 @@
             </tr>
             <tr>
                 <th>Last update</th>
-                <td>{{ info.lastUpdate | date: 'medium' }}</td>
+                <td>{{ repoInfo.lastModified | date: 'medium' }}</td>
             </tr>
         </table>
     </div>
 
     <div class="narrow omega">
         <h3>Data Type</h3>
-        <table class="table table-info">
+        <table class="table table-info" ng-init="dataTypeInfo = info.dataType">
             <tr>
                 <th>Data Type</th>
-                <td>{{ info.fileSize }}</td>
+                <td>{{ dataTypeInfo.dataType }}</td>
             </tr>
             <tr>
                 <th>Data Format</th>
-                <td>{{ info.study }}</td>
+                <td>{{ dataTypeInfo.dataFormat }}</td>
             </tr>
             <tr>
                 <th>Experimental Strategy</th>
-                <td>{{ info.lastUpdate }}</td>
+                <td>{{ dataTypeInfo.experimentalStrategy }}</td>
             </tr>
         </table>
     </div>
 </section>
 
 <section id="repository">
+    <div class="wide">
+        <h3>Repository</h3>
+        <table class="table table-info" ng-init="repoInfo = info.repository">
+            <thead>
+                <th>Repository Name</th>
+                <th>Country</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </thead>
+
+            <tbody>
+                <tr data-ng-repeat="serverInfo in repoInfo.repoServer">
+                    <td>{{ serverInfo.repoName }}</td>
+                    <td>{{ serverInfo.repoCountry }}</td>
+                    <td>{{ serverInfo.repoCode | uppercase }}</td>
+                    <td>
+                        <a href="#" data-ng-click="myController.downloadManifest (info.id, serverInfo.repoName)">
+                          Download Manifest
+                        </a>
+
+                        <span data-ng-if="myController.equalsIgnoringCase(repoInfo.repoType, 'GNOS')"> |
+                          <a target="_blank" href=
+    "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoDataPath, repoInfo.repoEntityId) }}">
+                            Show Metadata
+                          </a>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
 </section>
 
-<section id="donor">
+<section id="donor" ng-init="donorInfo = info.donor">
     <div class="wide">
         <h3>Donor</h3>
         <table class="table table-info">
             <tr>
                 <th>Project ID</th>
-                <td ng-init="projCode = info.projectCode">
+                <td ng-init="projCode = donorInfo.projectCode">
                     <a href="/projects/{{ projCode }}">{{ projCode }}</a>
                 </td>
             </tr>
             <tr>
                 <th>Primary site</th>
-                <td>{{ info.id }}</td>
+                <td>{{ donorInfo.primarySite }}</td>
             </tr>
             <tr>
                 <th>Donor ID</th>
-                <td ng-init="donorId = info.donorId">
+                <td ng-init="donorId = donorInfo.donorId">
                     <a href="/donors/{{ donorId }}">{{ donorId }}</a>
                 </td>
             </tr>
             <tr>
                 <th>Donor Submitter ID</th>
-                <td>{{ info.donorSubmitterId }}</td>
+                <td>{{ donorInfo.submittedDonorId }}</td>
             </tr>
             <tr>
                 <th>Specimen ID</th>
-                <td>{{ info.specimenId }}</td>
+                <td>{{ donorInfo.specimenId }}</td>
             </tr>
             <tr>
                 <th>Specimen Submitter ID</th>
-                <td>{{ info.specimenSubmitterId }}</td>
+                <td>{{ donorInfo.submittedSpecimenId }}</td>
             </tr>
             <tr>
                 <th>Sample ID</th>
-                <td>{{ info.sampleId }}</td>
+                <td>{{ donorInfo.sampleId }}</td>
             </tr>
             <tr>
                 <th>Sample Submitter ID</th>
-                <td>{{ info.sampleSubmitterId }}</td>
+                <td>{{ donorInfo.submittedSampleId }}</td>
             </tr>
         </table>
     </div>
-
 </section>
 
 </article>
