@@ -27,6 +27,7 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
+import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
@@ -74,6 +75,7 @@ import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -218,13 +220,20 @@ public class RepositoryFileRepository {
     }
 
     // Special filtered case - reponames, do not exclude self filtering
-    val repoFiltered = "repositoryNamesFiltered";
     val field = typeMapping.get("repositoryNames");
+    val repoFiltered = "repositoryNamesFiltered";
     aggs.add(global(repoFiltered)
         .subAggregation(filter(repoFiltered)
             .filter(buildRepoFilters(filters.deepCopy(), false))
             .subAggregation(terms(repoFiltered).size(1024).field(field))
             .subAggregation(missing("_missing").field(field))));
+
+    // Special filtered case - reposizes
+    val repoSizeFitered = "repositorySizes";
+    aggs.add(global(repoSizeFitered)
+        .subAggregation(filter(repoSizeFitered).filter(buildRepoFilters(filters.deepCopy(), false))
+            .subAggregation(terms(repoSizeFitered).size(1024).field(field)
+                .subAggregation(sum(repoSizeFitered).field("repository.file_size")))));
 
     // Special nested case - Disabled as currently there are no nested fields
     // for (String facet : FACETS) {
@@ -270,7 +279,11 @@ public class RepositoryFileRepository {
       // } else {
       // result.put(name, convertNormalAggregation(agg));
       // }
-      result.put(name, convertNormalAggregation(agg));
+      if (name.equals("repositorySizes")) {
+        result.put(name, convertSumAggregation(agg));
+      } else {
+        result.put(name, convertNormalAggregation(agg));
+      }
     }
     return result;
   }
@@ -291,11 +304,32 @@ public class RepositoryFileRepository {
       ReverseNested reverseNestedAgg = (ReverseNested) bucket.getAggregations().get(name);
       log.info("{} {}", bucket.getKey(), reverseNestedAgg.getDocCount());
 
-      int count = (int) reverseNestedAgg.getDocCount();
+      long count = (int) reverseNestedAgg.getDocCount();
       total += count;
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
     log.info("");
+
+    return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
+  }
+
+  // FIXME: Temporary code
+  private TermFacet convertSumAggregation(Aggregation agg) {
+    val name = agg.getName();
+    Global globalAgg = (Global) agg;
+    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
+    Terms termAgg = (Terms) filterAgg.getAggregations().get(name);
+
+    val termsBuilder = new ImmutableList.Builder<Term>();
+    long total = 0;
+    for (val bucket : termAgg.getBuckets()) {
+      val key = bucket.getKey();
+      val child = (Sum) bucket.getAggregations().get(name);
+      log.info("children {} {}", key, child.getValue());
+
+      termsBuilder.add(new Term(bucket.getKey(), (long) child.getValue()));
+      total += (long) child.getValue();
+    }
 
     return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
   }
@@ -315,13 +349,13 @@ public class RepositoryFileRepository {
     for (val bucket : termAgg.getBuckets()) {
       log.info("{} {}", bucket.getKey(), bucket.getDocCount());
 
-      int count = (int) bucket.getDocCount(); // FIXME: this is long to int
+      long count = bucket.getDocCount(); // FIXME: this is long to int
       total += count;
       termsBuilder.add(new Term(bucket.getKey(), count));
     }
     log.info("{} {}", "Missng", missingAgg.getDocCount());
     if (missingAgg.getDocCount() > 0) {
-      termsBuilder.add(new Term("_missing", (int) missingAgg.getDocCount()));
+      termsBuilder.add(new Term("_missing", missingAgg.getDocCount()));
     }
     log.info("");
 

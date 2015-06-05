@@ -68,7 +68,7 @@ public class TermFacet {
     val lst = ImmutableList.<Term> builder();
     for (val entry : entries) {
       Text name = entry.getTerm();
-      int value = entry.getCount();
+      long value = entry.getCount();
       Term term = new Term(name.string(), value);
       lst.add(term);
     }
@@ -79,6 +79,6 @@ public class TermFacet {
   public static class Term {
 
     String term;
-    Integer count;
+    Long count;
   }
 }
