@@ -17,134 +17,150 @@
  */
 package org.icgc.dcc.portal.model;
 
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.toStringList;
-
 import java.util.List;
-import java.util.Map;
 
-import lombok.Value;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.IndexModel.Kind;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
  * Models a file from external repositories such as CGHub
  */
-@Value
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@ApiModel(value = "RepositoryFile")
+@Data
 @Slf4j
+@JsonIgnoreProperties(ignoreUnknown = true)
+@ApiModel(value = "RepositoryFile")
 public class RepositoryFile {
 
-  private static final Map<String, String> FIELDS = FIELDS_MAPPING.get(Kind.REPOSITORY_FILE);
+  private static final Class<RepositoryFile> MY_CLASS = RepositoryFile.class;
+  private static final ObjectMapper MAPPER = createJacksonMapper();
 
-  @ApiModelProperty(value = "_id", required = true)
-  String _id; // This is the internal ES document id
+  @SneakyThrows
+  @NonNull
+  public static RepositoryFile of(String json) {
+    return MAPPER.readValue(json, MY_CLASS);
+  }
 
-  @ApiModelProperty(value = "Id", required = true)
+  /*
+   * Fields
+   */
+  @ApiModelProperty(value = "id")
   String id;
 
-  /* File fields */
-  @ApiModelProperty(value = "Repo entity id", required = true)
-  String repositoryEntityId;
-
-  @ApiModelProperty(value = "Repo name", required = true)
-  List<String> repositoryNames;
-
-  @ApiModelProperty(value = "Base URLs", required = true)
-  List<String> repositoryBaseURLs;
-
-  @ApiModelProperty(value = "Repository data path", required = true)
-  String repositoryDataPath;
-
-  @ApiModelProperty(value = "File name", required = true)
-  String fileName;
-
-  @ApiModelProperty(value = "Project Code", required = true)
-  String projectCode;
-
-  @ApiModelProperty(value = "Study", required = true)
   String study;
 
-  @ApiModelProperty(value = "Data type", required = true)
-  List<String> dataType;
-
-  @ApiModelProperty(value = "File format", required = true)
-  List<String> dataFormat;
-
-  @ApiModelProperty(value = "File size", required = true)
-  Long fileSize;
-
-  @ApiModelProperty(value = "File access", required = true)
   String access;
 
-  @ApiModelProperty(value = "Donor associated with file", required = true)
-  String donorId;
+  DataType dataType;
 
-  String donorSubmitterId;
+  Repository repository;
 
-  String specimenId;
+  Donor donor;
 
-  String specimenSubmitterId;
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private static final class DataType {
 
-  String sampleId;
+    String dataType;
 
-  String sampleSubmitterId;
+    String dataFormat;
 
-  String repositoryType;
+    String experimentalStrategy;
 
-  String checksum;
-
-  String lastUpdate;
-
-  String TCGASampleBarcode;
-
-  String TCGAAliquotBarcode;
-
-  @JsonCreator
-  public RepositoryFile(Map<String, Object> fieldMap) {
-    _id = getString(getFromMap(fieldMap, "_id"));
-    id = getString(getFromMap(fieldMap, "id"));
-
-    repositoryEntityId = getString(getFromMap(fieldMap, "repositoryEntityId"));
-    repositoryDataPath = getString(getFromMap(fieldMap, "repositoryDataPath"));
-
-    // Array fields
-    repositoryNames = toStringList(getFromMap(fieldMap, "repositoryNames"));
-    repositoryBaseURLs = toStringList(getFromMap(fieldMap, "repositoryBaseURLs"));
-    dataType = toStringList(getFromMap(fieldMap, "dataType"));
-    dataFormat = toStringList(getFromMap(fieldMap, "dataFormat"));
-
-    fileName = getString(getFromMap(fieldMap, "fileName"));
-    projectCode = getString(getFromMap(fieldMap, "projectCode"));
-    study = getString(getFromMap(fieldMap, "study"));
-    fileSize = getLong(getFromMap(fieldMap, "fileSize"));
-    access = getString(getFromMap(fieldMap, "access"));
-    donorId = getString(getFromMap(fieldMap, "donorId"));
-
-    donorSubmitterId = getString(getFromMap(fieldMap, "donorSubmitterId"));
-    specimenId = getString(getFromMap(fieldMap, "specimenId"));
-    specimenSubmitterId = getString(getFromMap(fieldMap, "specimenSubmitterId"));
-    sampleId = getString(getFromMap(fieldMap, "sampleId"));
-    sampleSubmitterId = getString(getFromMap(fieldMap, "sampleSubmitterId"));
-
-    repositoryType = getString(getFromMap(fieldMap, "repositoryType"));
-    checksum = getString(getFromMap(fieldMap, "checksum"));
-    lastUpdate = getString(getFromMap(fieldMap, "lastUpdate"));
-
-    TCGASampleBarcode = getString(getFromMap(fieldMap, "TCGASampleBarcode"));
-    TCGAAliquotBarcode = getString(getFromMap(fieldMap, "TCGAAliquotBarcode"));
   }
 
-  private static Object getFromMap(Map<String, Object> fieldMap, String fieldId) {
-    return fieldMap.get(FIELDS.get(fieldId));
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private static final class Repository {
+
+    String repoType;
+
+    String repoOrg;
+
+    String repoEntityId;
+
+    List<RepoServer> repoServer;
+
+    String repoMetadataPath;
+
+    String repoDataPath;
+
+    String fileName;
+
+    Long fileSize;
+
+    String fileMd5sum;
+
+    String lastModified;
+
   }
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  private static final class RepoServer {
+
+    String repoName;
+
+    String repoCode;
+
+    String repoCountry;
+
+    String repoBaseUrl;
+
+  }
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class Donor {
+
+    String projectCode;
+
+    String program;
+
+    String study;
+
+    String primarySite;
+
+    String donorId;
+
+    String submittedDonorId;
+
+    String specimenId;
+
+    String submittedSpecimenId;
+
+    String sampleId;
+
+    String submittedSampleId;
+
+    String tcgaSampleBarcode;
+
+    String tcgaAliquotBarcode;
+
+  }
+
+  /*
+   * Here the visibility is package-private because the unit test for this class calls this method.
+   */
+  static final ObjectMapper createJacksonMapper() {
+    /*
+     * We read fields in snake case from an ES response into fields in camel case in Java. Note: Due to this, the serde
+     * process is one-way only (deserializing from snake case but serializing in camel case). Don't expect a serialized
+     * JSON to be deserialized back into an instance. However, for our current use case, this is okay as we don't expect
+     * to consume (JSON with field names in camel case) but produce only.
+     */
+    val strategy = PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES;
+    val result = new ObjectMapper();
+    result.setPropertyNamingStrategy(strategy);
+    return result;
+  }
+
 }

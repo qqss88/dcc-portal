@@ -17,13 +17,15 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.filterValues;
+import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.SLASH;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedOutputStream;
@@ -33,6 +35,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -56,7 +59,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
-import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
@@ -73,11 +76,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
@@ -136,52 +141,31 @@ public class RepositoryFileService {
   public Keywords findRepoDonor(Query query) {
     val response = repositoryFileRepository.findRepoDonor(query.getQuery());
     val hits = response.getHits();
-    val list = ImmutableList.<RepositoryFile> builder();
-
-    // Get repository files
-    for (val hit : hits) {
-      val fieldMap = createResponseMap(hit, query, Kind.REPOSITORY_FILE);
-      list.add(new RepositoryFile(fieldMap));
-    }
-    val files = new RepositoryFiles(list.build());
+    val files = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
     // Transform t keyword
     val keywordlist = ImmutableList.<Keyword> builder();
     for (val file : files.getHits()) {
-      val map = Maps.<String, Object> newHashMap();
-      map.put("id", file.getDonorId());
-      map.put("specimenIds", ImmutableList.<String> of(file.getSpecimenId()));
-      map.put("sampleIds", ImmutableList.<String> of(file.getSampleId()));
-      map.put("submittedSampleIds", ImmutableList.<String> of(file.getSampleSubmitterId()));
-      map.put("submittedSpecimenIds", ImmutableList.<String> of(file.getSpecimenSubmitterId()));
-      map.put("TCGASampleBarcode", file.getTCGASampleBarcode());
-      map.put("TCGAAliquotBarcode", file.getTCGAAliquotBarcode());
-      map.put("type", "donor");
-      keywordlist.add(new Keyword(map));
+      val fieldMap = buildKeywordFieldMap(file.getDonor());
+      keywordlist.add(new Keyword(fieldMap));
     }
 
-    Keywords keywords = new Keywords(keywordlist.build());
+    val keywords = new Keywords(keywordlist.build());
     return keywords;
   }
 
-  public RepositoryFile findOne(String fileId, Query query) {
-    log.info("File id {}", fileId);
-    return new RepositoryFile(repositoryFileRepository.findOne(fileId, query));
+  public RepositoryFile findOne(String fileId) {
+    log.info("External repository file id is: '{}'.", fileId);
+
+    val response = repositoryFileRepository.findOne(fileId);
+    return RepositoryFile.of(response.getSourceAsString());
   }
 
   public RepositoryFiles findAll(Query query) {
     val response = repositoryFileRepository.findAll(query);
     val hits = response.getHits();
+    val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    val list = ImmutableList.<RepositoryFile> builder();
-
-    for (val hit : hits) {
-      val fieldMap = createResponseMap(hit, query, Kind.REPOSITORY_FILE);
-      fieldMap.put("_id", hit.getId());
-      list.add(new RepositoryFile(fieldMap));
-    }
-
-    val externalFiles = new RepositoryFiles(list.build());
     externalFiles.setTermFacets(repositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
     // externalFiles.setFacets(response.getFacets());
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
@@ -229,6 +213,51 @@ public class RepositoryFileService {
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
 
+  }
+
+  @NonNull
+  private static Map<String, Object> buildKeywordFieldMap(RepositoryFile.Donor donor) {
+    val donorId = donor.getDonorId();
+    checkState(!isBlank(donorId), "Donor ID in a file document cannot be empty or null.");
+
+    val listKeys = ImmutableList.of(
+        "specimenIds", "sampleIds", "submittedSpecimenIds", "submittedSampleIds");
+    val mapWithPossibleNullValues = new HashMap<String, Object>() {
+
+      {
+        put("specimenIds", donor.getSpecimenId());
+        put("sampleIds", donor.getSampleId());
+        put("submittedSpecimenIds", donor.getSubmittedSpecimenId());
+        put("submittedSampleIds", donor.getSubmittedSampleId());
+        put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
+        put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
+      }
+
+    };
+
+    val mapWithoutNullValues = filterValues(mapWithPossibleNullValues, Predicates.notNull());
+    val transformValueToList = new EntryTransformer<String, Object, Object>() {
+
+      @Override
+      public Object transformEntry(String key, Object value) {
+        return listKeys.contains(key) ? ImmutableList.of(value) : value;
+      }
+
+    };
+
+    val fieldMap = transformEntries(mapWithoutNullValues, transformValueToList);
+    val result = Maps.<String, Object> newHashMap(fieldMap);
+    result.put("id", donorId);
+    result.put("type", "donor");
+    log.debug("Transformed map is: '{}'", result);
+
+    return result;
+  }
+
+  private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
+    return FluentIterable.from(hits)
+        .transform(hit -> RepositoryFile.of(hit.getSourceAsString()))
+        .toList();
   }
 
   @NonNull
