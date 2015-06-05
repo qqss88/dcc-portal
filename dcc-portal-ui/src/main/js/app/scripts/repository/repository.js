@@ -226,7 +226,7 @@
 
     _ctrl.concatRepoNames = function (row) {
       return getRepositoryNames(row).join(', ');
-    }
+    };
 
     /**
      * Export table
