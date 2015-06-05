@@ -101,65 +101,10 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     'Skin': this.colours[0],
     'Cervix': this.colours[2],
     'Bone': this.colours[4],
-    'Bladder': this.colours[6]
+    'Bladder': this.colours[6],
+    'Mesenchymal': this.colours[8]
   };
-  this.projectColours = {
-    'LIRI-JP': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.1).get(),
-    'LINC-JP': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.2).get(),
-    'LIHC-US': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.3).get(),
-    'LICA-FR': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.4).get(),
-    'LIAD-FR': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.5).get(),
-    'LIHM-FR': Highcharts.Color(this.primarySiteColours.Liver).brighten(0.6).get(),
-    'PAEN-AU': Highcharts.Color(this.primarySiteColours.Pancreas).brighten(0.1).get(),
-    'PACA-CA': Highcharts.Color(this.primarySiteColours.Pancreas).brighten(0.2).get(),
-    'PACA-AU': Highcharts.Color(this.primarySiteColours.Pancreas).brighten(0.3).get(),
-    'PAAD-US': Highcharts.Color(this.primarySiteColours.Pancreas).brighten(0.4).get(),
-    'PACA-IT': Highcharts.Color(this.primarySiteColours.Pancreas).brighten(0.5).get(),
-    'RECA-EU': Highcharts.Color(this.primarySiteColours.Kidney).brighten(0.1).get(),
-    'RECA-CN': Highcharts.Color(this.primarySiteColours.Kidney).brighten(0.2).get(),
-    'KIRP-US': Highcharts.Color(this.primarySiteColours.Kidney).brighten(0.3).get(),
-    'KIRC-US': Highcharts.Color(this.primarySiteColours.Kidney).brighten(0.4).get(),
-    'THCA-US': Highcharts.Color(this.primarySiteColours['Head and neck']).brighten(0.1).get(),
-    'THCA-SA': Highcharts.Color(this.primarySiteColours['Head and neck']).brighten(0.2).get(),
-    'ORCA-IN': Highcharts.Color(this.primarySiteColours['Head and neck']).brighten(0.3).get(),
-    'HNSC-US': Highcharts.Color(this.primarySiteColours['Head and neck']).brighten(0.4).get(),
-    'PBCA-DE': Highcharts.Color(this.primarySiteColours.Brain).brighten(0.1).get(),
-    'NBL-US': Highcharts.Color(this.primarySiteColours.Brain).brighten(0.2).get(),
-    'LGG-US': Highcharts.Color(this.primarySiteColours.Brain).brighten(0.3).get(),
-    'GBM-US': Highcharts.Color(this.primarySiteColours.Brain).brighten(0.4).get(),
-    'MALY-DE': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.1).get(),
-    'LAML-US': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.2).get(),
-    'CMDI-UK': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.3).get(),
-    'CLLE-ES': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.4).get(),
-    'ALL-US': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.5).get(),
-    'LAML-KR': Highcharts.Color(this.primarySiteColours.Blood).brighten(0.6).get(),
-    'PRAD-US': Highcharts.Color(this.primarySiteColours.Prostate).brighten(0.1).get(),
-    'PRAD-CA': Highcharts.Color(this.primarySiteColours.Prostate).brighten(0.2).get(),
-    'EOPC-DE': Highcharts.Color(this.primarySiteColours.Prostate).brighten(0.3).get(),
-    'PRAD-UK': Highcharts.Color(this.primarySiteColours.Prostate).brighten(0.4).get(),
-    'OV-US': Highcharts.Color(this.primarySiteColours.Ovary).brighten(0.1).get(),
-    'OV-AU': Highcharts.Color(this.primarySiteColours.Ovary).brighten(0.2).get(),
-    'LUSC-US': Highcharts.Color(this.primarySiteColours.Lung).brighten(0.1).get(),
-    'LUAD-US': Highcharts.Color(this.primarySiteColours.Lung).brighten(0.2).get(),
-    'LUSC-KR': Highcharts.Color(this.primarySiteColours.Lung).brighten(0.3).get(),
-    'LUSC-CN': Highcharts.Color(this.primarySiteColours.Lung).brighten(0.4).get(),
-    'READ-US': Highcharts.Color(this.primarySiteColours.Colorectal).brighten(0.1).get(),
-    'COAD-US': Highcharts.Color(this.primarySiteColours.Colorectal).brighten(0.2).get(),
-    'COCA-CN': Highcharts.Color(this.primarySiteColours.Colorectal).brighten(0.3).get(),
-    'BRCA-US': Highcharts.Color(this.primarySiteColours.Breast).brighten(0.1).get(),
-    'BRCA-UK': Highcharts.Color(this.primarySiteColours.Breast).brighten(0.2).get(),
-    'UCEC-US': Highcharts.Color(this.primarySiteColours.Uterus).brighten(0.1).get(),
-    'STAD-US': Highcharts.Color(this.primarySiteColours.Stomach).brighten(0.1).get(),
-    'GACA-CN': Highcharts.Color(this.primarySiteColours.Stomach).brighten(0.2).get(),
-    'SKCM-US': Highcharts.Color(this.primarySiteColours.Skin).brighten(0.1).get(),
-    'ESAD-UK': Highcharts.Color(this.primarySiteColours.Esophagus).brighten(-0.1).get(),
-    'ESCA-CN': Highcharts.Color(this.primarySiteColours.Esophagus).brighten(-0.2).get(),
-    'CESC-US': Highcharts.Color(this.primarySiteColours.Cervix).brighten(-0.1).get(),
-    'BOCA-UK': Highcharts.Color(this.primarySiteColours.Bone).brighten(-0.1).get(),
-    'BOCA-FR': Highcharts.Color(this.primarySiteColours.Bone).brighten(-0.2).get(),
-    'BLCA-US': Highcharts.Color(this.primarySiteColours.Bladder).brighten(-0.1).get(),
-    'BLCA-CN': Highcharts.Color(this.primarySiteColours.Bladder).brighten(-0.2).get()
-  };
+
 
   // new
   this.donut = function (params) {
@@ -181,7 +126,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       data = params.data;
 
     // Creates outer ring
-    function buildOuterRing(hit) {
+    function buildOuterRing(hit, idx) {
       var inner = hit[innerFacet],
         name = hit[outerFacet],
         count = hit[countBy] ? hit[countBy] : 0,
@@ -194,7 +139,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
           y: count,
           type: type,
           facet: outerFacet,
-          color: _this.projectColours[name]
+          color: Highcharts.Color(_this.primarySiteColours[iName]).brighten(0.2).get()
         });
       }
     }
@@ -255,7 +200,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       return r;
     }
 
-    terms.forEach(function (item) {
+    terms.forEach(function (item, idx) {
       term = {
         name: item.term,
         y: item.count,
@@ -266,7 +211,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       if (term.facet === 'primarySite') {
         term.color = _this.primarySiteColours[term.name];
       } else if (term.facet === 'projectId') {
-        term.color = _this.projectColours[term.name];
+        term.color = _this.projectColours(idx);
       }
 
       // Only shows active terms if facet active
@@ -354,12 +299,12 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       return b.affectedDonorCountFiltered - a.affectedDonorCountFiltered;
     }
 
-    function add(item) {
+    function add(item, idx) {
       data.push({name: item.name, data: [
         {
           x: i,
           y: item.count,
-          color: _this.projectColours[item.id],
+          color: _this.projectColours(idx),
           gene_id: gene.id
         }
       ]});
