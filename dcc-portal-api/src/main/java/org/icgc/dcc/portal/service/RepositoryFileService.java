@@ -17,8 +17,11 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.filterValues;
+import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
@@ -73,11 +76,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
@@ -141,22 +146,8 @@ public class RepositoryFileService {
     // Transform t keyword
     val keywordlist = ImmutableList.<Keyword> builder();
     for (val file : files.getHits()) {
-      val donor = file.getDonor();
-      val map = new HashMap<String, Object>() {
-
-        {
-          put("id", donor.getDonorId());
-          put("specimenIds", ImmutableList.<String> of(donor.getSpecimenId()));
-          put("sampleIds", ImmutableList.<String> of(donor.getSampleId()));
-          put("submittedSpecimenIds", ImmutableList.<String> of(donor.getSubmittedSpecimenId()));
-          put("submittedSampleIds", ImmutableList.<String> of(donor.getSubmittedSampleId()));
-          put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
-          put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
-          put("type", "donor");
-        }
-
-      };
-      keywordlist.add(new Keyword(map));
+      val fieldMap = buildKeywordFieldMap(file.getDonor());
+      keywordlist.add(new Keyword(fieldMap));
     }
 
     val keywords = new Keywords(keywordlist.build());
@@ -173,7 +164,6 @@ public class RepositoryFileService {
   public RepositoryFiles findAll(Query query) {
     val response = repositoryFileRepository.findAll(query);
     val hits = response.getHits();
-    log.info("response from findAll is: '{}'.", response);
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
     externalFiles.setTermFacets(repositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
@@ -223,6 +213,45 @@ public class RepositoryFileService {
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
 
+  }
+
+  @NonNull
+  private static Map<String, Object> buildKeywordFieldMap(RepositoryFile.Donor donor) {
+    val donorId = donor.getDonorId();
+    checkState(!isBlank(donorId), "Donor ID in a file document cannot be empty or null.");
+
+    val listKeys = ImmutableList.of(
+        "specimenIds", "sampleIds", "submittedSpecimenIds", "submittedSampleIds");
+    val mapWithPossibleNullValues = new HashMap<String, Object>() {
+
+      {
+        put("specimenIds", donor.getSpecimenId());
+        put("sampleIds", donor.getSampleId());
+        put("submittedSpecimenIds", donor.getSubmittedSpecimenId());
+        put("submittedSampleIds", donor.getSubmittedSampleId());
+        put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
+        put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
+      }
+
+    };
+
+    val mapWithoutNullValues = filterValues(mapWithPossibleNullValues, Predicates.notNull());
+    val transformValueToList = new EntryTransformer<String, Object, Object>() {
+
+      @Override
+      public Object transformEntry(String key, Object value) {
+        return listKeys.contains(key) ? ImmutableList.of(value) : value;
+      }
+
+    };
+
+    val fieldMap = transformEntries(mapWithoutNullValues, transformValueToList);
+    val result = Maps.<String, Object> newHashMap(fieldMap);
+    result.put("id", donorId);
+    result.put("type", "donor");
+    log.debug("Transformed map is: '{}'", result);
+
+    return result;
   }
 
   private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
