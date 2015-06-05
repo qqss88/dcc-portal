@@ -114,85 +114,85 @@
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
     <td style="white-space: nowrap"><a data-ui-sref="project({id:project.id})">{{project.id}}</a></td>
-    <td>{{project.name}}</td>
-    <td>{{project.primarySite}}</td>
-    <td>{{project.primaryCountries.join(', ')}}</td>
+    <td>{{::project.name}}</td>
+    <td>{{::project.primarySite}}</td>
+    <td>{{::project.primaryCountries.join(', ')}}</td>
     <td class="text-right">
             <span data-ng-if="project.totalDonorCount > 0">
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]}}}"})'>
-                    {{project.totalDonorCount | number}}</a>
+                    {{::project.totalDonorCount | number}}</a>
             </span>
         <span data-ng-if="project.totalDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.ssmTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"ssm\"]}}}"})'>
-            {{project.ssmTestedDonorCount | number}}</a>
+            {{::project.ssmTestedDonorCount | number}}</a>
         <span data-ng-if="project.ssmTestedDonorCount== 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.cnsmTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"cnsm\"]}}}"})'>
-            {{project.cnsmTestedDonorCount | number}}</a>
+            {{::project.cnsmTestedDonorCount | number}}</a>
         <span data-ng-if="project.cnsmTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.stsmTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"stsm\"]}}}"})'>
-            {{project.stsmTestedDonorCount | number}}</a>
+            {{::project.stsmTestedDonorCount | number}}</a>
         <span data-ng-if="project.stsmTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.sgvTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"sgv\"]}}}"})'>
-            {{project.sgvTestedDonorCount | number}}</a>
+            {{::project.sgvTestedDonorCount | number}}</a>
         <span data-ng-if="project.sgvTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.methArrayTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_array\"]}}}"})'>
-            {{project.methArrayTestedDonorCount | number}}
+            {{::project.methArrayTestedDonorCount | number}}
         </a>
         <span data-ng-if="project.methArrayTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.methSeqTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_seq\"]}}}"})'>
-            {{project.methSeqTestedDonorCount | number}}
+            {{::project.methSeqTestedDonorCount | number}}
         </a>
         <span data-ng-if="project.methSeqTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.expArrayTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_array\"]}}}"})'>
-            {{project.expArrayTestedDonorCount | number}}
+            {{::project.expArrayTestedDonorCount | number}}
         </a>
         <span data-ng-if="project.expArrayTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.expSeqTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_seq\"]}}}"})'>
-            {{project.expSeqTestedDonorCount | number}}
+            {{::project.expSeqTestedDonorCount | number}}
         </a>
         <span data-ng-if="project.expSeqTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.pexpTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"pexp\"]}}}"})'>
-            {{project.pexpTestedDonorCount | number}}
+            {{::project.pexpTestedDonorCount | number}}
         </a>
         <span data-ng-if="project.pexpTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.mirnaSeqTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"mirna_seq\"]}}}"})'>
-            {{project.mirnaSeqTestedDonorCount | number}}</a>
+            {{::project.mirnaSeqTestedDonorCount | number}}</a>
         <span data-ng-if="project.mirnaSeqTestedDonorCount === 0">--</span>
     </td>
     <td class="text-right">
         <a data-ng-if="project.jcnTestedDonorCount > 0"
            data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"jcn\"]}}}"})'>
-            {{project.jcnTestedDonorCount | number}}</a>
+            {{::project.jcnTestedDonorCount | number}}</a>
         <span data-ng-if="project.jcnTestedDonorCount === 0">--</span>
     </td>
 </tr>

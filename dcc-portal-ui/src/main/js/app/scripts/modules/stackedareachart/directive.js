@@ -65,7 +65,7 @@
           margin:{top: 10, right: 40, bottom: 60, left: 40},
           height: 600,
           width: 1000,
-          colours: HighchartsService.projectColours,
+          colours: HighchartsService.primarySiteColours,
           yaxis:{label:'# of Donors',ticks:8},
           xaxis: {
             label:'Release',

@@ -118,8 +118,6 @@
       }
     };
 
-
-    $scope.projects = HighchartsService.projectColours;
     $scope.sites = HighchartsService.primarySiteColours;
 
     refresh();

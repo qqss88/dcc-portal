@@ -24,7 +24,6 @@
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
-    $scope.projects = HighchartsService.projectColours;
 
     $scope.Extensions = Extensions;
 

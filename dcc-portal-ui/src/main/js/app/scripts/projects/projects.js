@@ -174,6 +174,7 @@
                     uiFIProjects.push({
                       id: t.term,
                       name: proj.name,
+                      primarySite: proj.primarySite,
                       count: t.count
                     });
                   }
@@ -186,11 +187,22 @@
             });
           });
 
+        // Id to primary site
+        var id2site = {};
+        _ctrl.projects.hits.forEach(function(h) {
+           id2site[h.id] = h.primarySite;
+        });
+
         Restangular.one('projects/history', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
+          data.forEach(function(dataPoint) {
+            dataPoint.colourKey = id2site[dataPoint.group];
+          });
+
           _ctrl.donorData = data;
         });
+
       }
     }
 
@@ -299,7 +311,7 @@
 
   });
 
-  module.controller('ProjectGeneCtrl', 
+  module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
 
     var _ctrl = this;
