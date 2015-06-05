@@ -169,10 +169,22 @@
 
   });
 
-  module.controller('ExternalFileInfoController', function (Page, fileInfo) {
+  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, fileInfo) {
     Page.setTitle('External File Entity');
     Page.setPage('externalFileEntity');
 
+    this.buildUrl = function (baseUrl, dataPath, entityId) {
+      return [baseUrl, dataPath, entityId].join('/')
+        .replace('///', '/');
+    };
+    this.equalsIgnoringCase = function (test, expected) {
+      return (test || '').toString().toUpperCase() === expected;
+    };
+    this.downloadManifest = function (fileId, repo) {
+      var repoParam = {};
+      repoParam [repo] = 1;
+      ExternalRepoService.downloadSelected([fileId], repoParam);
+    };
     this.fileInfo = fileInfo;
   });
 
@@ -208,6 +220,13 @@
       });
     }
 
+    function getRepositoryNames (row) {
+      return _.map(row.repository.repoServer, 'repoName');
+    }
+
+    _ctrl.concatRepoNames = function (row) {
+      return getRepositoryNames(row).join(', ');
+    }
 
     /**
      * Export table
@@ -247,6 +266,7 @@
 
 
     _ctrl.toggleRow = function(row) {
+      var repositoryNames = getRepositoryNames(row);
       var repos = _ctrl.selectedRepos;
 
       if (_ctrl.isSelected(row) === true) {
@@ -254,7 +274,7 @@
           return r === row.id;
         });
 
-        row.repositoryNames.forEach(function(repo) {
+        repositoryNames.forEach(function(repo) {
           repos[repo] -= 1;
           if (repos[repo] === 0) {
              delete repos[repo];
@@ -279,7 +299,7 @@
           activeRepos = filters.file.repositoryNames.is;
         }
 
-        row.repositoryNames.forEach(function(repo) {
+        repositoryNames.forEach(function(repo) {
           if (_.contains(activeRepos, repo) || _.isEmpty(activeRepos)) {
             if (repos.hasOwnProperty(repo)) {
                repos[repo] += 1;
