@@ -236,7 +236,7 @@
 
   module.filter('bytes', function () {
     return function (input) {
-      var sizes = ['B', 'KB', 'MB', 'GB', 'TB'],
+      var sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'],
         postTxt = 0,
         bytes = input,
         precision = 2;

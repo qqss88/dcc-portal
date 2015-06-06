@@ -214,8 +214,14 @@
       }
 
       _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
-         if (_.contains(filterRepos, term.term) || _.isEmpty(filterRepos)) {
-           _ctrl.selectedRepos[term.term] = term.count;
+         var termStr = term.term;
+         if (_.contains(filterRepos, termStr) || _.isEmpty(filterRepos)) {
+           _ctrl.selectedRepos[termStr] = {};
+           _ctrl.selectedRepos[termStr].count = term.count;
+           _ctrl.selectedRepos[termStr].fileSize =
+             _.find(_ctrl.files.termFacets.repositorySizes.terms, function(t) {
+               return t.term === termStr;
+             }).count;
          }
       });
     }
@@ -252,6 +258,7 @@
             return {
               selectedFiles: _ctrl.selectedFiles,
               selectedRepos: _ctrl.selectedRepos,
+              repoSizes: _ctrl.files.termFacets.repositorySizes,
               filters: LocationService.filters()
             };
           }
@@ -269,13 +276,16 @@
       var repositoryNames = getRepositoryNames(row);
       var repos = _ctrl.selectedRepos;
 
+      console.log('row is', row);
+
       if (_ctrl.isSelected(row) === true) {
         _.remove(_ctrl.selectedFiles, function(r) {
           return r === row.id;
         });
 
         repositoryNames.forEach(function(repo) {
-          repos[repo] -= 1;
+          repos[repo].count -= 1;
+          repos[repo].fileSize -= row.repository.fileSize;
           if (repos[repo] === 0) {
              delete repos[repo];
           }
@@ -302,9 +312,12 @@
         repositoryNames.forEach(function(repo) {
           if (_.contains(activeRepos, repo) || _.isEmpty(activeRepos)) {
             if (repos.hasOwnProperty(repo)) {
-               repos[repo] += 1;
+               repos[repo].count += 1;
+               repos[repo].fileSize += row.repository.fileSize;
             } else {
-               repos[repo] = 1;
+               repos[repo] = {};
+               repos[repo].count = 1;
+               repos[repo].fileSize = row.repository.fileSize;
             }
           }
         });
