@@ -71,9 +71,9 @@
     promise.then(function(results) {
       if (results.hits && results.hits[0]) {
         var file = results.hits[0];
-        _ctrl.donor.clinicalXML = file.repositoryBaseURLs[0].replace(/\/$/, '') +
-          file.repositoryDataPath + file.repositoryEntityId;
-        console.log('repo xml is', _ctrl.donor.clinicalXML);
+        var repo = file.repository;
+        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
+          repo.repoDataPath + repo.repoEntityId;
       }
     });
 
