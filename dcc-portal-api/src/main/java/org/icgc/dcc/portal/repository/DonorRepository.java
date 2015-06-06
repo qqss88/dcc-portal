@@ -394,7 +394,7 @@ public class DonorRepository implements Repository {
     }
 
     val termFacetList = transform(results.build().entrySet(),
-        entry -> new Term(entry.getKey(), entry.getValue()));
+        entry -> new Term(entry.getKey(), (long) entry.getValue()));
 
     return ImmutableList.copyOf(termFacetList);
   }
