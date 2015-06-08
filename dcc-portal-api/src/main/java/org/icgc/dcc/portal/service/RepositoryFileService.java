@@ -223,7 +223,10 @@ public class RepositoryFileService {
     checkState(!isBlank(donorId), "Donor ID in a file document cannot be empty or null.");
 
     val listKeys = ImmutableList.of(
-        "specimenIds", "sampleIds", "submittedSpecimenIds", "submittedSampleIds");
+        "specimenIds",
+        "sampleIds",
+        "submittedSpecimenIds",
+        "submittedSampleIds");
     val mapWithPossibleNullValues = new HashMap<String, Object>() {
 
       {
@@ -231,6 +234,8 @@ public class RepositoryFileService {
         put("sampleIds", donor.getSampleId());
         put("submittedSpecimenIds", donor.getSubmittedSpecimenId());
         put("submittedSampleIds", donor.getSubmittedSampleId());
+        put("submittedId", donor.getSubmittedDonorId());
+        put("TCGAParticipantBarcode", donor.getTcgaParticipantBarcode());
         put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
         put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
       }
