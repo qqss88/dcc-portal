@@ -28,7 +28,6 @@ import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.right;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
-import static org.icgc.dcc.common.core.util.Joiners.SLASH;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedOutputStream;
@@ -64,6 +63,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
@@ -81,6 +81,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -100,6 +101,7 @@ public class RepositoryFileService {
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
   private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
+  private static final Joiner SLASH_JOINER = Joiners.SLASH.skipNulls();
   private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
       FieldNames.REPO_TYPE,
       FieldNames.REPO_ID,
@@ -429,6 +431,11 @@ public class RepositoryFileService {
   @NonNull
   private static String removeBookendingCharacter(String input, String characterToRemove) {
     val result = input.startsWith(characterToRemove) ? right(input, input.length() - 1) : input;
+
+    if (null == result) {
+      return null;
+    }
+
     return result.endsWith(characterToRemove) ? left(result, result.length() - 1) : result;
   }
 
@@ -436,7 +443,7 @@ public class RepositoryFileService {
   private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
     val cleaned = transform(Arrays.asList(baseUrl, dataPath, id),
         s -> removeBookendingCharacter(s, Separators.SLASH));
-    return SLASH.join(cleaned);
+    return SLASH_JOINER.join(cleaned);
   }
 
   @NonNull
