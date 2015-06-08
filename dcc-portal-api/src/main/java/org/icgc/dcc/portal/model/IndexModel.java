@@ -124,6 +124,7 @@ public class IndexModel {
           .put("sampleId", "donor.sample_id")
           .put("sampleSubmitterId", "donor.submitted_sample_id")
           .put("program", "donor.program")
+          .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
           .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
           .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
           .build();
