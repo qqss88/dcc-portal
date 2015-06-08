@@ -381,7 +381,9 @@ public class QueryService {
     val fields = filters.path(kind.getId()).fields();
     val typeMapping = FIELDS_MAPPING.get(kind);
 
-    boolean hasUserSuppliedCompletenessFilter = false;
+    boolean hasDonorStateFilter = false;
+    boolean hasProjectStateFilter = false;
+
     String completenessField = typeMapping.get("complete");
     if (prefixMapping != null && prefixMapping.containsKey(kind)) {
       completenessField = String.format("%s.%s", prefixMapping.get(kind), completenessField);
@@ -425,6 +427,14 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
+              } else if (facetField.getKey().equals("state") && kind.getId().equals("donor")) {
+                hasDonorStateFilter = true;
+                val completenessValues = convertEntityState(items);
+                fb = FilterBuilders.termsFilter(fieldName, completenessValues);
+              } else if (facetField.getKey().equals("state") && kind.getId().equals("project")) {
+                hasProjectStateFilter = true;
+                val completenessValues = convertEntityState(items);
+                fb = FilterBuilders.termsFilter(fieldName, completenessValues);
               } else if (fieldName.endsWith(API_ENTITY_LIST_ID_FIELD_NAME) || facetField.getKey().equals("id")) {
                 // This will get generated twice if both upload-gene-list and gene-id are present,
                 // but that may be ok, it will be like saying: (a or b) and (a or b)
@@ -501,12 +511,13 @@ public class QueryService {
       }
     }
 
-    // Inject hidden filters
-    if (kind.getId().equals("donor")) {
+    // Inject hidden filters if none where passed in
+    if (kind.getId().equals("donor") && hasDonorStateFilter == false) {
+      log.info("injecting hidden donor completeness filter");
       termFilters.must(defaultCompletenessFilter);
     }
 
-    if (kind.getId().equals("project") && prefixMapping == null) {
+    if (kind.getId().equals("project") && prefixMapping == null && hasProjectStateFilter == false) {
       termFilters.must(defaultProjectFilter());
     }
 
@@ -713,6 +724,22 @@ public class QueryService {
   // Defaults to projects with at least 1 donor with molecular information
   public static FilterBuilder defaultProjectFilter() {
     return FilterBuilders.termFilter("_summary._complete", true);
+  }
+
+  // Convert user specified state to elastic search complete field values
+  private static List<Boolean> convertEntityState(List<String> uiStates) {
+    val list = Lists.<Boolean> newArrayList();
+    for (val state : uiStates) {
+      if (state.equalsIgnoreCase("pending")) {
+        list.add(false);
+      } else if (state.equalsIgnoreCase("live")) {
+        list.add(true);
+      } else if (state.equalsIgnoreCase("*")) {
+        list.add(false);
+        list.add(true);
+      }
+    }
+    return list;
   }
 
 }

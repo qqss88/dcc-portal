@@ -494,29 +494,26 @@ public class RepositoryFileRepository {
    */
   public SearchResponse findRepoDonor(String queryStr) {
     val typeMapping = FIELDS_MAPPING.get(KIND);
+    val postFilter = FilterBuilders.boolFilter();
+    val fields = ImmutableList.of(
+        "donorId",
+        "specimenId",
+        "sampleId",
+        "donorSubmitterId",
+        "sampleSubmitterId",
+        "specimenSubmitterId",
+        "TCGAParticipantBarcode",
+        "TCGAAliquotBarcode",
+        "TCGASampleBarcode"
+        );
+    fields.stream().forEach(
+        field -> postFilter.should(FilterBuilders.termFilter(typeMapping.get(field), queryStr)));
+
     val search = client.prepareSearch(index)
         .setTypes("file")
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(1);
-    val donorIdFilter = FilterBuilders.termFilter(typeMapping.get("donorId"), queryStr);
-    val specimenIdFilter = FilterBuilders.termFilter(typeMapping.get("specimenId"), queryStr);
-    val sampleIdFilter = FilterBuilders.termFilter(typeMapping.get("sampleId"), queryStr);
-    val sampleSubmitterIdFilter = FilterBuilders.termFilter(typeMapping.get("sampleSubmitterId"), queryStr);
-    val specimenSubmitterIdFilter = FilterBuilders.termFilter(typeMapping.get("specimenSubmitterId"), queryStr);
-    val TCGAAliquotBarcode = FilterBuilders.termFilter(typeMapping.get("TCGAAliquotBarcode"), queryStr);
-    val TCGASampleBarcode = FilterBuilders.termFilter(typeMapping.get("TCGASampleBarcode"), queryStr);
-
-    val postFilter =
-        FilterBuilders.boolFilter()
-            .should(donorIdFilter)
-            .should(specimenIdFilter)
-            .should(sampleIdFilter)
-            .should(sampleSubmitterIdFilter)
-            .should(specimenSubmitterIdFilter)
-            .should(TCGASampleBarcode)
-            .should(TCGAAliquotBarcode);
-
     search.setPostFilter(postFilter);
     log.info(">>> ES Search is: {}", search);
 

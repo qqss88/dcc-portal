@@ -124,6 +124,7 @@ public class IndexModel {
           .put("sampleId", "donor.sample_id")
           .put("sampleSubmitterId", "donor.submitted_sample_id")
           .put("program", "donor.program")
+          .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
           .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
           .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
           .build();
@@ -157,6 +158,7 @@ public class IndexModel {
           .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
           .put("repository", "_summary.repository")
           .put("complete", "_summary._complete")
+          .put("state", "_summary._complete")
           .build();
 
   private static final ImmutableMap<String, String> DONORS_FIELDS_MAPPING =
@@ -202,6 +204,7 @@ public class IndexModel {
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
           .put("complete", "_summary._complete")
+          .put("state", "_summary._complete")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
@@ -597,6 +600,8 @@ public class IndexModel {
           .put("projectId", "projectId")
 
           // Donor-file, these are derived from file
+          .put("submittedId", "submittedId")
+          .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
           .put("TCGASampleBarcode", "TCGASampleBarcode")
           .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 

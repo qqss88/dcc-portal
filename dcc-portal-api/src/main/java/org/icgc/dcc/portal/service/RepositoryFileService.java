@@ -24,9 +24,10 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.left;
+import static org.apache.commons.lang.StringUtils.right;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
-import static org.icgc.dcc.common.core.util.Joiners.SLASH;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedOutputStream;
@@ -62,6 +63,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.common.core.util.Joiners;
+import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
@@ -78,6 +81,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -97,6 +101,7 @@ public class RepositoryFileService {
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
   private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
+  private static final Joiner SLASH_JOINER = Joiners.SLASH.skipNulls();
   private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
       FieldNames.REPO_TYPE,
       FieldNames.REPO_ID,
@@ -223,7 +228,10 @@ public class RepositoryFileService {
     checkState(!isBlank(donorId), "Donor ID in a file document cannot be empty or null.");
 
     val listKeys = ImmutableList.of(
-        "specimenIds", "sampleIds", "submittedSpecimenIds", "submittedSampleIds");
+        "specimenIds",
+        "sampleIds",
+        "submittedSpecimenIds",
+        "submittedSampleIds");
     val mapWithPossibleNullValues = new HashMap<String, Object>() {
 
       {
@@ -231,6 +239,8 @@ public class RepositoryFileService {
         put("sampleIds", donor.getSampleId());
         put("submittedSpecimenIds", donor.getSubmittedSpecimenId());
         put("submittedSampleIds", donor.getSubmittedSampleId());
+        put("submittedId", donor.getSubmittedDonorId());
+        put("TCGAParticipantBarcode", donor.getTcgaParticipantBarcode());
         put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
         put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
       }
@@ -419,9 +429,21 @@ public class RepositoryFileService {
   }
 
   @NonNull
+  private static String removeBookendingCharacter(String input, String characterToRemove) {
+    val result = input.startsWith(characterToRemove) ? right(input, input.length() - 1) : input;
+
+    if (null == result) {
+      return null;
+    }
+
+    return result.endsWith(characterToRemove) ? left(result, result.length() - 1) : result;
+  }
+
+  @NonNull
   private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
-    return SLASH.join(baseUrl, dataPath, id)
-        .replace("///", "/");
+    val cleaned = transform(Arrays.asList(baseUrl, dataPath, id),
+        s -> removeBookendingCharacter(s, Separators.SLASH));
+    return SLASH_JOINER.join(cleaned);
   }
 
   @NonNull

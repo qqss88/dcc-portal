@@ -100,6 +100,9 @@ public class Keyword {
   String fileName;
 
   @ApiModelProperty(required = false)
+  String tcgaParticipantBarcode;
+
+  @ApiModelProperty(required = false)
   String tcgaSampleBarcode;
 
   @ApiModelProperty(required = false)
@@ -141,6 +144,7 @@ public class Keyword {
     // File
     fileName = getString(fieldMap.get(fields.get("file_name")));
     donorId = getString(fieldMap.get(fields.get("donor_id")));
+    tcgaParticipantBarcode = getString(fieldMap.get(fields.get("TCGAParticipantBarcode")));
     tcgaAliquotBarcode = getString(fieldMap.get(fields.get("TCGAAliquotBarcode")));
     tcgaSampleBarcode = getString(fieldMap.get(fields.get("TCGASampleBarcode")));
 
