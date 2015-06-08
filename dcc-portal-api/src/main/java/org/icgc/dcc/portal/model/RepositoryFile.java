@@ -141,6 +141,8 @@ public class RepositoryFile {
 
     String submittedSampleId;
 
+    String tcgaParticipantBarcode;
+
     String tcgaSampleBarcode;
 
     String tcgaAliquotBarcode;

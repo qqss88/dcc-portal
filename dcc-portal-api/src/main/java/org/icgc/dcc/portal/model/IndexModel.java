@@ -600,6 +600,8 @@ public class IndexModel {
           .put("projectId", "projectId")
 
           // Donor-file, these are derived from file
+          .put("submittedId", "submittedId")
+          .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
           .put("TCGASampleBarcode", "TCGASampleBarcode")
           .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 
