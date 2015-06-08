@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.io.Files.getFileExtension;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.common.core.util.Splitters.WHITESPACE;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -29,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +42,6 @@ import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -65,14 +66,14 @@ import com.google.common.collect.Lists;
 /**
  * Test suite for RepositoryFileService
  */
-@Slf4j
 public class RepositoryFileServiceTest extends BaseElasticSearchTest {
 
   private static final SMInputFactory XML_READER_FACTORY = new SMInputFactory(XMLInputFactory.newInstance());
   private static final List<String> EMPTY_STRING_LIST = Collections.emptyList();
   private static final ObjectNode EMPTY_FILTER = new FiltersParam("{}").get();
 
-  private static final String XML_EXTENSION = "XML";
+  private static final String XML_FILE_EXTENSION = "xml";
+  private static final String TXT_FILE_EXTENSION = "txt";
   private static final String GNOS_REPO = "GNOS";
 
   /*
@@ -109,6 +110,7 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() {
+    // This creates and populates the test index with fixture data.
     es.execute(createIndexMapping(Type.REPOSITORY_FILE)
         .withData(bulkFile(getClass())));
     service = new RepositoryFileService(new RepositoryFileRepository(es.client()));
@@ -161,23 +163,24 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
   }
 
   private static boolean isXmlFile(String fileName) {
-    return XML_EXTENSION.equalsIgnoreCase(getFileExtension(fileName));
+    return XML_FILE_EXTENSION.equalsIgnoreCase(getFileExtension(fileName));
   }
 
   private static boolean isGnosRepo(String repoType) {
-    return GNOS_REPO.equals(repoType);
+    return GNOS_REPO.equalsIgnoreCase(repoType);
   }
 
   private static String getFileExtensionOf(String repoType) {
-    return isGnosRepo(repoType) ? ".xml" : ".txt";
+    return isGnosRepo(repoType) ? XML_FILE_EXTENSION : TXT_FILE_EXTENSION;
   }
 
   @NonNull
   private static String buildFileName(String repoCode, String repoType, Date timestamp) {
-    return "manifest." +
-        repoCode + "." +
-        timestamp.getTime() +
-        getFileExtensionOf(repoType);
+    return DOT.join(Arrays.asList(
+        "manifest",
+        repoCode,
+        timestamp.getTime(),
+        getFileExtensionOf(repoType)));
   }
 
   private static void validateFileName(String testFileName, boolean isXml, Date timestamp) {
