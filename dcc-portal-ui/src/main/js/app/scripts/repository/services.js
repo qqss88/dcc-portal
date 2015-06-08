@@ -26,7 +26,8 @@
     // FIXME: Move this out
     var repoMap = {
        'CGHub - Santa Cruz': 'cghub',
-       'TCGA DCC - Washington': 'tcga',
+       // 'TCGA DCC - Washington': 'tcga',
+       'TCGA DCC - Bethesda': 'tcga',
        'PCAWG - Barcelona': 'pcawg-barcelona',
        'PCAWG - Santa Cruz': 'pcawg-cghub',
        'PCAWG - Tokyo': 'pcawg-tokyo',
