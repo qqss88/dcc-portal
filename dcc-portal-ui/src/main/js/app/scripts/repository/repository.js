@@ -169,16 +169,28 @@
 
   });
 
+
+  /**
+   * Controller for File Entity page
+   */
   module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, fileInfo) {
     Page.setTitle('External File Entity');
     Page.setPage('externalFileEntity');
 
+    var slash = '/';
+    var _3Slashes = _.repeat (slash, 3);
+
+    function toUppercaseString (input) {
+      var inputString = _.isString (input) ? input : (input || '').toString();
+      return inputString.toUpperCase();
+    }
+
     this.buildUrl = function (baseUrl, dataPath, entityId) {
-      return [baseUrl, dataPath, entityId].join('/')
-        .replace('///', '/');
+      return [baseUrl, dataPath, entityId].join(slash)
+        .replace (_3Slashes, slash);
     };
     this.equalsIgnoringCase = function (test, expected) {
-      return (test || '').toString().toUpperCase() === expected;
+      return toUppercaseString (test) === toUppercaseString (expected);
     };
     this.downloadManifest = function (fileId, repo) {
       var repoParam = {};

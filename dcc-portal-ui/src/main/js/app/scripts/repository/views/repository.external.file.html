@@ -40,9 +40,14 @@
                 <th>Checksum</th>
                 <td>{{ repoInfo.fileMd5sum }}</td>
             </tr>
-            <tr>
+            <tr ng-init="accessType = info.access">
                 <th>Access</th>
-                <td>{{ info.access }}</td>
+                <td>
+                  <i class=
+        "{{ myController.equalsIgnoringCase (accessType, 'open') ? 'icon-lock-open' : 'icon-lock' }}">
+                  </i>
+                  {{ accessType }}
+                </td>
             </tr>
             <tr>
                 <th>File size</th>
