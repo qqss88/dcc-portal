@@ -527,6 +527,26 @@
       return Restangular.several('projects', list);
     };
 
+
+    // Get ALL projects metadata
+    this.getMetadata = function() {
+      var params = {
+        filters: {
+          project: {
+            state: {
+              is: ['*'] // Make sure we include both pending and live projects
+            }
+          }
+        },
+        size: 100
+      };
+
+      return this.all().get('', params).then(function(data) {
+        return data;
+      });
+    };
+
+
     this.getList = function (params) {
       var defaults = {
         size: 100,

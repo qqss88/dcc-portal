@@ -159,7 +159,7 @@
       if (promise !== null)  {
         return promise;
       }
-      promise = Projects.getList().then(function(data) {
+      promise = Projects.getMetadata().then(function(data) {
         data.hits.forEach(function(project) {
           cache[project.id] = project.name;
         });
