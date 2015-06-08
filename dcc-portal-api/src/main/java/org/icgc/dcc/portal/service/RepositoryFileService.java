@@ -24,6 +24,8 @@ import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.left;
+import static org.apache.commons.lang.StringUtils.right;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.common.core.util.Joiners.SLASH;
@@ -62,6 +64,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
@@ -424,9 +427,16 @@ public class RepositoryFileService {
   }
 
   @NonNull
+  private static String removeBookendingCharacter(String input, String characterToRemove) {
+    val result = input.startsWith(characterToRemove) ? right(input, input.length() - 1) : input;
+    return result.endsWith(characterToRemove) ? left(result, result.length() - 1) : result;
+  }
+
+  @NonNull
   private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
-    return SLASH.join(baseUrl, dataPath, id)
-        .replace("///", "/");
+    val cleaned = transform(Arrays.asList(baseUrl, dataPath, id),
+        s -> removeBookendingCharacter(s, Separators.SLASH));
+    return SLASH.join(cleaned);
   }
 
   @NonNull
