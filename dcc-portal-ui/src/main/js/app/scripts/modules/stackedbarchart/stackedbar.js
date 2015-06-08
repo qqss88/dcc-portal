@@ -6,13 +6,14 @@
 
 	/* Create the stacked bar chart using d3 */
 
-	var StackedBarChart = function(data, config){
-		this.data = data;
+	var StackedBarChart = function(config){
 		this.config = config;
 	};
 
-	StackedBarChart.prototype.render = function(element){
+	StackedBarChart.prototype.render = function(element, data){
 		this.element = element;
+		this.data = data;
+
 		var config = this.config;
 
 		// the scale for the x axis

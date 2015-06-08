@@ -33,45 +33,49 @@
                     '<div class="stackedsubtitle text-center">{{subtitle | number}} ' +
                     'Unique SSM-Tested Donors</div></div>',
 		    link: function ($scope, $element) {
-                var chart;
+                var chart, config;
+
+                config = {
+                  margin:{top: 5, right: 20, bottom: 50, left: 50},
+                  height: 250,
+                  width: 500,
+                  colours: HighchartsService.primarySiteColours,
+                  yaxis:{label:'Donors Affected',ticks:4},
+                  onClick: function(geneid){
+                    $scope.$emit('tooltip::hide');
+                    $location.path('/genes/' + geneid).search({});
+                    $scope.$apply();
+                  },
+                  tooltipShowFunc: function(elem, d) {
+                    function getLabel() {
+                      return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
+                    }
+
+                    var position = {
+                      left:elem.getBoundingClientRect().left,
+                      top:elem.getBoundingClientRect().top + $window.pageYOffset,
+                      width: elem.getBoundingClientRect().width,
+                      height: elem.getBoundingClientRect().height
+                    };
+
+                    $scope.$emit('tooltip::show', {
+                      element: angular.element(elem),
+                      text: getLabel(),
+                      placement: 'right',
+                      elementPosition: position
+                    });
+                  },
+                  tooltipHideFunc: function() {
+                    $scope.$emit('tooltip::hide');
+                  }
+                };
+
                 $scope.$watch('items', function (newValue) {
-                  if (newValue && !chart && typeof $scope.items[0] !== 'undefined') {
-                    var config = {
-                        margin:{top: 5, right: 20, bottom: 50, left: 50},
-                        height: 250,
-                        width: 500,
-                        colours: HighchartsService.primarySiteColours,
-                        yaxis:{label:'Donors Affected',ticks:4},
-                        onClick: function(geneid){
-                          $scope.$emit('tooltip::hide');
-                          $location.path('/genes/' + geneid).search({});
-                          $scope.$apply();
-                        },
-                        tooltipShowFunc: function(elem, d) {
-                          function getLabel() {
-                            return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
-                          }
-
-                          var position = {
-                            left:elem.getBoundingClientRect().left,
-                            top:elem.getBoundingClientRect().top + $window.pageYOffset,
-                            width: elem.getBoundingClientRect().width,
-                            height: elem.getBoundingClientRect().height
-                          };
-
-                          $scope.$emit('tooltip::show', {
-                            element: angular.element(elem),
-                            text: getLabel(),
-                            placement: 'right',
-                            elementPosition: position
-                          });
-                        },
-                        tooltipHideFunc: function() {
-                          $scope.$emit('tooltip::hide');
-                        }
-                      };
-                    chart = new dcc.StackedBarChart($scope.items,config);
-                    chart.render($element[0]);
+                  if (newValue && typeof $scope.items[0] !== 'undefined') {
+                    if (!chart) {
+                      chart = new dcc.StackedBarChart(config);
+                    }
+                    chart.render($element[0], _.cloneDeep($scope.items));
                   }
                 }, true);
 	
