@@ -25,6 +25,7 @@ import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.common.core.util.Joiners.SLASH;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -33,6 +34,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -388,19 +390,20 @@ public class RepositoryFileService {
   }
 
   private static boolean isGnosRepo(String repoType) {
-    return GNOS_REPO.equals(repoType);
+    return GNOS_REPO.equalsIgnoreCase(repoType);
   }
 
   private static String getFileExtensionOf(String repoType) {
-    return isGnosRepo(repoType) ? ".xml" : ".txt";
+    return isGnosRepo(repoType) ? "xml" : "txt";
   }
 
   @NonNull
   private static String buildFileName(String repoCode, String repoType, Date timestamp) {
-    return "manifest." +
-        repoCode + "." +
-        timestamp.getTime() +
-        getFileExtensionOf(repoType);
+    return DOT.join(Arrays.asList(
+        "manifest",
+        repoCode,
+        timestamp.getTime(),
+        getFileExtensionOf(repoType)));
   }
 
   @NonNull
