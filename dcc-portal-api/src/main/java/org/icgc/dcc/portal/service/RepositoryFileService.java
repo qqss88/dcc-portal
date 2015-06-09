@@ -430,13 +430,19 @@ public class RepositoryFileService {
 
   @NonNull
   private static String removeBookendingCharacter(String input, String characterToRemove) {
-    val result = input.startsWith(characterToRemove) ? right(input, input.length() - 1) : input;
+    val lengthToRemove = characterToRemove.length();
+
+    if (lengthToRemove < 1) {
+      return input;
+    }
+
+    val result = input.startsWith(characterToRemove) ? right(input, input.length() - lengthToRemove) : input;
 
     if (null == result) {
       return null;
     }
 
-    return result.endsWith(characterToRemove) ? left(result, result.length() - 1) : result;
+    return result.endsWith(characterToRemove) ? left(result, result.length() - lengthToRemove) : result;
   }
 
   @NonNull
