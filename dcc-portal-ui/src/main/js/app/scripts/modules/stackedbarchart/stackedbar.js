@@ -38,7 +38,7 @@
 		    .orient('left').ticks(config.yaxis.ticks);
 
 		// create the svg
-      d3.select(element).selectAll('*').remove();
+      d3.select(element).select('#svgstackedbar').remove();
 		var svg = d3.select(element).append('svg')
 		    .attr('id','svgstackedbar')
 		    .attr('viewBox','0 0 '+(config.width+config.margin.left+config.margin.right)+
@@ -156,8 +156,8 @@
   };
 
 	StackedBarChart.prototype.destroy = function(){
-		this.data = null;
-    d3.select(this.element).selectAll('*').remove();
+	  this.data = null;
+     d3.select(this.element).selectAll('*').remove();
 	};
 
 	dcc.StackedBarChart = StackedBarChart;
