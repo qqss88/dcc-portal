@@ -85,7 +85,7 @@
         resolve: {
           filters: function() {
             return {
-              donor: { id: { is: [_ctrl.donor.id] } }
+              donor: { id: { is: [_ctrl.donor.id] }, state:{is: ['*']} }
             };
           }
         }

@@ -64,9 +64,12 @@
             <div>
                 <strong>Query: </strong>
                 <a href="/search" data-ng-if="!job.filter">All </a>
-                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter">
+                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter && job.hasAdvLink">
                     <query-display data-filters="job.uiQueryFilter"></query-display>
                 </a>
+                <span data-ng-if="job.filter && !job.hasAdvLink">
+                    <query-display data-filters="job.uiQueryFilter"></query-display>
+                </span>
             </div>
 
             <div data-ng-show="job.status === 'FAILED'" class="alert-error">
