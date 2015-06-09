@@ -115,6 +115,7 @@ public class IndexModel {
           .put("study", "study")
           .put("donorStudy", "donor.study")
           .put("dataType", "data_type.data_type")
+          .put("experimentalStrategy", "data_type.experimental_strategy")
           .put("dataFormat", "data_type.data_format")
           .put("access", "access")
           .put("donorId", "donor.donor_id")
