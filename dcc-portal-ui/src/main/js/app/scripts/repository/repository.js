@@ -174,30 +174,61 @@
    * Controller for File Entity page
    */
   module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, fileInfo) {
+
     Page.setTitle('External File Entity');
     Page.setPage('externalFileEntity');
 
     var slash = '/';
-    var _3Slashes = _.repeat (slash, 3);
 
-    function toUppercaseString (input) {
-      var inputString = _.isString (input) ? input : (input || '').toString();
-      return inputString.toUpperCase();
+    this.fileInfo = fileInfo;
+
+    // Private helpers
+    function convertToString (input) {
+      return _.isString (input) ? input : (input || '').toString();
     }
 
+    function toUppercaseString (input) {
+      return convertToString (input).toUpperCase();
+    }
+
+    function removeBookendingCharacter (input, characterToRemove) {
+      var stringToRemove = convertToString (characterToRemove);
+      var lengthToRemove = stringToRemove.length;
+
+      if (lengthToRemove < 1) {
+        return input;
+      }
+
+      var inputString = convertToString (input);
+
+      if (inputString.length < 1) {
+        return input;
+      }
+
+      var result = _.startsWith (inputString, stringToRemove) ?
+        _.drop (inputString, lengthToRemove).join('') : inputString;
+
+      return _.endsWith (result, stringToRemove) ?
+        _.dropRight (result, lengthToRemove).join('') : result;
+    }
+
+    // Public functions
     this.buildUrl = function (baseUrl, dataPath, entityId) {
-      return [baseUrl, dataPath, entityId].join(slash)
-        .replace (_3Slashes, slash);
+      // Removes any opening and closing backslash in all parts then concatenates.
+      return _.map ([baseUrl, dataPath, entityId],
+        _.partial (removeBookendingCharacter, _, slash)).join (slash);
     };
+
     this.equalsIgnoringCase = function (test, expected) {
       return toUppercaseString (test) === toUppercaseString (expected);
     };
+
     this.downloadManifest = function (fileId, repo) {
       var repoParam = {};
       repoParam [repo] = 1;
       ExternalRepoService.downloadSelected([fileId], repoParam);
     };
-    this.fileInfo = fileInfo;
+
   });
 
   /**
