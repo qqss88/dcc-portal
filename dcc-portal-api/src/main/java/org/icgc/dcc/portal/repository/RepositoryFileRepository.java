@@ -103,7 +103,7 @@ public class RepositoryFileRepository {
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
-      "projectCode", "primarySite", "donorStudy", "repositoryNames");
+      "projectCode", "primarySite", "donorStudy", "repositoryNames", "experimentalStrategy");
 
   private final ImmutableMap<String, String> EXPORT_FIELDS = ImmutableMap.<String, String> builder()
       .put("access", "Access")
