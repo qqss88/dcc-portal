@@ -37,7 +37,6 @@ import lombok.val;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.common.core.util.Joiners;
-import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -110,10 +109,10 @@ public class DiagramService {
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
-    val highlights = (String) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"));
+    @SuppressWarnings("unchecked")
+    val highlights = (List<String>) getPathway(pathwayId).get(INDEX_MODEL.get("highlights"));
 
-    // TODO: Reactome: Change to array in index
-    return Splitters.COMMA.splitToList(highlights);
+    return highlights;
   }
 
   private Map<String, Object> getPathway(String id) {
@@ -121,10 +120,9 @@ public class DiagramService {
     return diagramRepository.findOne(id, query);
   }
 
-  private Multimap<Object, Object> getReverseMap(Map<String, String> map) {
+  private Multimap<Object, Object> getReverseMap(Map<String, List<String>> map) {
     val reverse = ArrayListMultimap.create();
-    map.forEach((dbId, uniprotsString) -> {
-      List<String> uniprotIds = Splitters.COMMA.splitToList(uniprotsString);
+    map.forEach((dbId, uniprotIds) -> {
       for (String uniprotId : uniprotIds) {
         reverse.put(parseUniprot(uniprotId), dbId);
       }
@@ -147,13 +145,19 @@ public class DiagramService {
   }
 
   @SuppressWarnings("unchecked")
-  private Map<String, String> getProteinIdMap(@NonNull String pathwayId) {
+  private Map<String, List<String>> getProteinIdMap(@NonNull String pathwayId) {
     val fieldName = INDEX_MODEL.get("proteinMap");
-    // TODO: Reactome: Need to fix this because it is stored pathwayId -> uniprotIds in
-    // org.icgc.dcc.etl.db.importer.diagram.model.DiagramNodeConverter. It should be a List<Map<String, Object>> of the
-    // form [{pathway_id: 72584, uniprot_ids: ["UniProt:Q04637"]}]
+
     val pathway = getPathway(pathwayId);
-    val map = (Map<String, String>) pathway.get(fieldName);
+    val list = (List<Map<String, Object>>) pathway.get(fieldName);
+
+    val map = Maps.<String, List<String>> newHashMap();
+    for (val element : list) {
+      val dbId = (String) element.get("pathway_id");
+      val uniprotIds = (List<String>) element.get("uniprot_ids");
+
+      map.put(dbId, uniprotIds);
+    }
 
     return map;
   }
