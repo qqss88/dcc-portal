@@ -20,6 +20,8 @@ package org.icgc.dcc.portal.service;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
+import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_DB_ID;
+import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
@@ -153,8 +155,8 @@ public class DiagramService {
 
     val map = Maps.<String, List<String>> newHashMap();
     for (val element : list) {
-      val dbId = (String) element.get("pathway_id");
-      val uniprotIds = (List<String>) element.get("uniprot_ids");
+      val dbId = (String) element.get(DIAGRAM_PROTEIN_MAP_DB_ID);
+      val uniprotIds = (List<String>) element.get(DIAGRAM_PROTEIN_MAP_UNIPROT_IDS);
 
       map.put(dbId, uniprotIds);
     }
