@@ -31,6 +31,7 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -56,7 +57,6 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.hadoop.util.StringUtils;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -89,7 +89,6 @@ import org.supercsv.io.CsvMapWriter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -448,7 +447,7 @@ public class RepositoryFileRepository {
     val result = Maps.<String, String> newHashMap();
     for (val key : map.keySet()) {
       if (ARRAY_FIELDS.contains(key)) {
-        result.put(key, Joiner.on(StringUtils.COMMA).join((List<String>) map.get(key)));
+        result.put(key, COMMA.join((List<String>) map.get(key)));
       } else if (key.equals("repository.file_size")) {
         result.put(key, getLong(map.get(key)).toString());
       } else {

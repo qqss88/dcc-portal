@@ -269,11 +269,12 @@ public class RepositoryFileService {
             .putAll(fields)
             .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
             .build();
-    val serverArray = READER.readTree(hit.sourceAsString())
+    val fileNode = READER.readTree(hit.sourceAsString());
+    val serverArray = fileNode
         .path(FieldNames.REPOSITORY)
         .path(FieldNames.REPO_SERVER);
 
-    return transform(serverArray, server -> combineMaps.apply(server));
+    return transform(serverArray, combineMaps::apply);
   }
 
   @SneakyThrows

@@ -222,8 +222,8 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
   private static List<List<String>> readLinesFromTsvFile(File file) {
     @Cleanup
     val reader = new CsvListReader(new FileReader(file), TAB_PREFERENCE);
-    // Skips the header
-    reader.getHeader(true);
+    val skipHeader = true;
+    reader.getHeader(skipHeader);
 
     val result = Lists.<List<String>> newArrayList();
     List<String> line;
