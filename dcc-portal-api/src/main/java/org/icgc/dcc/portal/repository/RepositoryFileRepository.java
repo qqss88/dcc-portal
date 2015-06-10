@@ -232,35 +232,7 @@ public class RepositoryFileRepository {
         .subAggregation(filter(repoSizeFitered).filter(buildRepoFilters(filters.deepCopy(), false))
             .subAggregation(terms(repoSizeFitered).size(1024).field(field)
                 .subAggregation(terms("donor").size(100000).field("donor.donor_id"))
-                // .subAggregation(cardinality("donor").precisionThreshold(40000).field("donor.donor_id"))
                 .subAggregation(sum("fileSize").field("repository.file_size")))));
-
-    // Special nested case - Disabled as currently there are no nested fields
-    // for (String facet : FACETS) {
-    // String fieldName = typeMapping.get(facet);
-    // if (facet.equals("dataType") || facet.equals("dataFormat")) {
-    // // Remove one self
-    // val facetFilters = filters.deepCopy();
-    // if (facetFilters.has(KIND.getId())) {
-    // facetFilters.with(KIND.getId()).remove(facet);
-    // }
-    // val globalAgg = AggregationBuilders.global(facet);
-    // val filterAgg = AggregationBuilders.filter(facet);
-    // filterAgg.filter(buildRepoFilters(facetFilters, false));
-    // val nestedAgg = AggregationBuilders.nested(facet).path("data_types");
-    // val termAgg = AggregationBuilders.terms(facet).size(1024).field(fieldName);
-    // val reverseAgg = AggregationBuilders.reverseNested(facet);
-    //
-    // termAgg.subAggregation(reverseAgg);
-    //
-    // nestedAgg.subAggregation(termAgg);
-    //
-    // filterAgg.subAggregation(nestedAgg);
-    //
-    // globalAgg.subAggregation(filterAgg);
-    // aggs.add(globalAgg);
-    // }
-    // }
 
     return aggs;
   }
@@ -273,12 +245,6 @@ public class RepositoryFileRepository {
     for (Aggregation agg : aggs) {
       val name = agg.getName();
 
-      // Disabled as there are no nested fields at the moment
-      // if (name.equals("dataFormat") || name.equals("dataType")) {
-      // result.put(name, convertNestedAggregation(agg));
-      // } else {
-      // result.put(name, convertNormalAggregation(agg));
-      // }
       if (name.equals("repositorySizes")) {
         result.put("repositorySizes", convertRepoSizeAggregation(agg));
         result.put("repositoryDonors", convertRepoDonorAggregation(agg));
@@ -554,8 +520,6 @@ public class RepositoryFileRepository {
     val donorCountAgg = global(name)
         .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
             .subAggregation(terms(name).size(100000).field("donor.donor_id")));
-
-    // .subAggregation(cardinality(name).precisionThreshold(90000).field("donor.donor_id")));
 
     search.addAggregation(donorCountAgg);
 
