@@ -40,7 +40,7 @@
                         margin:{top: 5, right: 20, bottom: 50, left: 50},
                         height: 250,
                         width: 500,
-                        colours: HighchartsService.projectColours,
+                        colours: HighchartsService.primarySiteColours,
                         yaxis:{label:'Donors Affected',ticks:4},
                         onClick: function(geneid){
                           $scope.$emit('tooltip::hide');

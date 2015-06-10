@@ -59,6 +59,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.TOTAL;
 import static org.icgc.dcc.portal.resource.ResourceUtils.generateQueries;
 import static org.icgc.dcc.portal.resource.ResourceUtils.mergeFilters;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
+import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
 import java.util.Date;
@@ -690,11 +691,12 @@ public class ProjectResource {
   @ApiOperation(value = "Returns history of donor count of all projects at every release")
   public JsonNode getHistory() {
     try {
-      return JsonUtils.MAPPER.readTree(Resources.getResource(RELEASE_HISTORY_FILE_PATH));
+      return MAPPER.readTree(Resources.getResource(RELEASE_HISTORY_FILE_PATH));
     } catch (Exception e) {
       throw new IllegalStateException("Couldn't read or parse release histroy data - file '"
           + RELEASE_HISTORY_FILE_PATH
           + "' might be corrupt or missing.", e);
     }
   }
+
 }
