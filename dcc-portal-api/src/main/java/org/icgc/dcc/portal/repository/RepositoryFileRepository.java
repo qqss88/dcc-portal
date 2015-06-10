@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Iterables.transform;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -24,6 +25,7 @@ import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
@@ -44,6 +46,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
@@ -97,9 +100,23 @@ import com.google.common.primitives.Ints;
 public class RepositoryFileRepository {
 
   private final String INDEX_NAME = "icgc-repository";
+  private final String FILE_INDEX_TYPE_NAME = "file";
+  private final String FILE_DONOR_TEXT_INDEX_TYPE_NAME = "file-donor-text";
+  private final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
+  private final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
+      "specimen_id",
+      "sample_id",
+      "submitted_specimen_id",
+      "submitted_sample_id");
+  private final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
+  private final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
+      "tcga_participant_barcode",
+      "tcga_sample_barcode",
+      "tcga_aliquot_barcode");
 
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.REPOSITORY_FILE;
+  private static final Map<String, String> TYPE_MAPPING = FIELDS_MAPPING.get(KIND);
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
@@ -137,16 +154,18 @@ public class RepositoryFileRepository {
   public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
     val termFilters = FilterBuilders.boolFilter();
     val fields = filters.path(KIND.getId()).fields();
-    val typeMapping = FIELDS_MAPPING.get(KIND);
 
-    Map<String, List<String>> nestedTerms = Maps.<String, List<String>> newHashMap();
+    val nestedTerms = Maps.<String, List<String>> newHashMap();
 
     if (fields.hasNext() == false) return FilterBuilders.matchAllFilter();
     while (fields.hasNext()) {
       val facetField = fields.next();
 
-      if (!typeMapping.containsKey(facetField.getKey())) continue;
-      String fieldName = typeMapping.get(facetField.getKey());
+      if (!TYPE_MAPPING.containsKey(facetField.getKey())) {
+        continue;
+      }
+
+      val fieldName = TYPE_MAPPING.get(facetField.getKey());
 
       // Assume "IS"
       JsonNode boolNode = facetField.getValue();
@@ -188,14 +207,13 @@ public class RepositoryFileRepository {
 
   public List<AggregationBuilder> aggs(ObjectNode filters) {
     val aggs = Lists.<AggregationBuilder> newArrayList();
-    val typeMapping = FIELDS_MAPPING.get(KIND);
 
     // General case
     for (String facet : FACETS) {
       val globalAgg = AggregationBuilders.global(facet);
       val facetAgg = AggregationBuilders.filter(facet);
       // if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
-      String fieldName = typeMapping.get(facet);
+      val fieldName = TYPE_MAPPING.get(facet);
 
       if (filters.fieldNames().hasNext()) {
         val facetFilters = filters.deepCopy();
@@ -218,7 +236,7 @@ public class RepositoryFileRepository {
     }
 
     // Special filtered case - reponames, do not exclude self filtering
-    val field = typeMapping.get("repositoryNames");
+    val field = TYPE_MAPPING.get("repositoryNames");
     val repoFiltered = "repositoryNamesFiltered";
     aggs.add(global(repoFiltered)
         .subAggregation(filter(repoFiltered)
@@ -346,6 +364,7 @@ public class RepositoryFileRepository {
       termsBuilder.add(new Term(bucket.getKey(), (long) child.getValue()));
       total += (long) child.getValue();
     }
+
     return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
   }
 
@@ -440,8 +459,9 @@ public class RepositoryFileRepository {
   }
 
   public GetResponse findOne(String id) {
-    val search = client.prepareGet(index, "file", id);
+    val search = client.prepareGet(index, FILE_INDEX_TYPE_NAME, id);
     val response = search.execute().actionGet();
+    // This check is important as it validates if there is any document at all in the GET response.
     checkResponseState(id, response, KIND);
 
     return response;
@@ -450,13 +470,12 @@ public class RepositoryFileRepository {
   public SearchResponse findAll(Query query) {
     val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
-        .setTypes("file")
+        .setTypes(FILE_INDEX_TYPE_NAME)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize())
-        .addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
-
-    search.setPostFilter(filters);
+        .addSort(TYPE_MAPPING.get(query.getSort()), query.getOrder())
+        .setPostFilter(filters);
 
     val aggs = this.aggs(query.getFilters());
     for (val agg : aggs) {
@@ -488,7 +507,7 @@ public class RepositoryFileRepository {
       String sourceField) {
     val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
-        .setTypes("file")
+        .setTypes(FILE_INDEX_TYPE_NAME)
         .setSearchType(searchType)
         .setFrom(query.getFrom())
         .setSize(query.getLimit())
@@ -505,33 +524,37 @@ public class RepositoryFileRepository {
     return response;
   }
 
+  @NonNull
+  private static String[] toStringArray(Iterable<String> strings) {
+    return StreamSupport.stream(strings.spliterator(), false)
+        .toArray(String[]::new);
+  }
+
   /**
-   * @param queryStr - either matching donor
+   * @param fields - A list of field names that form the search query.
+   * @param queryString - User input - could be any value out of one of the fields.
    * @return
    */
-  public SearchResponse findRepoDonor(String queryStr) {
-    val typeMapping = FIELDS_MAPPING.get(KIND);
-    val postFilter = FilterBuilders.boolFilter();
-    val fields = ImmutableList.of(
-        "donorId",
-        "specimenId",
-        "sampleId",
-        "donorSubmitterId",
-        "sampleSubmitterId",
-        "specimenSubmitterId",
-        "TCGAParticipantBarcode",
-        "TCGAAliquotBarcode",
-        "TCGASampleBarcode"
-        );
-    fields.stream().forEach(
-        field -> postFilter.should(FilterBuilders.termFilter(typeMapping.get(field), queryStr)));
+  @NonNull
+  public SearchResponse findRepoDonor(Iterable<String> fields, String queryString) {
+    val maxNumberOfDocs = 5;
+
+    // Due to the mapping of the file-donor-text type, we need to add certain suffixes to field names.
+    // Adds '.raw' to field names for fields that need exact match.
+    val fieldNames = transform(fields, fieldName ->
+        DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ?
+            fieldName + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
+    // Adds '.analyzed' to field names for fields that need partial match.
+    val names = transform(fieldNames, fieldName ->
+        DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ?
+            fieldName + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
 
     val search = client.prepareSearch(index)
-        .setTypes("file")
+        .setTypes(FILE_DONOR_TEXT_INDEX_TYPE_NAME)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
-        .setSize(1);
-    search.setPostFilter(postFilter);
+        .setSize(maxNumberOfDocs)
+        .setQuery(multiMatchQuery(queryString, toStringArray(names)));
     log.info(">>> ES Search is: {}", search);
 
     return search.execute().actionGet();

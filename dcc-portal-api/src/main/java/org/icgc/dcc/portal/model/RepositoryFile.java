@@ -119,7 +119,7 @@ public class RepositoryFile {
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
-  public static final class Donor {
+  private static final class Donor {
 
     String projectCode;
 

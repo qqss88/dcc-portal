@@ -100,13 +100,13 @@ public class Keyword {
   String fileName;
 
   @ApiModelProperty(required = false)
-  String tcgaParticipantBarcode;
+  List<String> tcgaParticipantBarcode;
 
   @ApiModelProperty(required = false)
-  String tcgaSampleBarcode;
+  List<String> tcgaSampleBarcode;
 
   @ApiModelProperty(required = false)
-  String tcgaAliquotBarcode;
+  List<String> tcgaAliquotBarcode;
 
   @SuppressWarnings("unchecked")
   public Keyword(Map<String, Object> fieldMap) {
@@ -144,12 +144,11 @@ public class Keyword {
     // File
     fileName = getString(fieldMap.get(fields.get("file_name")));
     donorId = getString(fieldMap.get(fields.get("donor_id")));
-    tcgaParticipantBarcode = getString(fieldMap.get(fields.get("TCGAParticipantBarcode")));
-    tcgaAliquotBarcode = getString(fieldMap.get(fields.get("TCGAAliquotBarcode")));
-    tcgaSampleBarcode = getString(fieldMap.get(fields.get("TCGASampleBarcode")));
+    tcgaParticipantBarcode = (List<String>) fieldMap.get(fields.get("TCGAParticipantBarcode"));
+    tcgaAliquotBarcode = (List<String>) fieldMap.get(fields.get("TCGAAliquotBarcode"));
+    tcgaSampleBarcode = (List<String>) fieldMap.get(fields.get("TCGASampleBarcode"));
 
     // Generic id
     id = getString(fieldMap.get(fields.get("id")));
-
   }
 }
