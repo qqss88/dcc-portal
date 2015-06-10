@@ -125,6 +125,9 @@ public class SearchRepository {
       keys.add("geneMutations.analyzed");
     }
 
+    // Exact-match search on "id".
+    keys.add("id");
+
     String[] aKeys = keys.toArray(new String[keys.size()]);
 
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
