@@ -168,6 +168,10 @@ public class RepositoryFileService {
     return RepositoryFile.of(response.getSourceAsString());
   }
 
+  public long getDonorCount(Query query) {
+    return repositoryFileRepository.getDonorCount(query);
+  }
+
   public RepositoryFiles findAll(Query query) {
     val response = repositoryFileRepository.findAll(query);
     val hits = response.getHits();

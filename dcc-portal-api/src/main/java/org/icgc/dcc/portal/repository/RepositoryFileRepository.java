@@ -226,12 +226,14 @@ public class RepositoryFileRepository {
             .subAggregation(terms(repoFiltered).size(1024).field(field))
             .subAggregation(missing("_missing").field(field))));
 
-    // Special filtered case - reposizes
+    // Special filtered case - repo sizes and repo donors
     val repoSizeFitered = "repositorySizes";
     aggs.add(global(repoSizeFitered)
         .subAggregation(filter(repoSizeFitered).filter(buildRepoFilters(filters.deepCopy(), false))
             .subAggregation(terms(repoSizeFitered).size(1024).field(field)
-                .subAggregation(sum(repoSizeFitered).field("repository.file_size")))));
+                .subAggregation(terms("donor").size(100000).field("donor.donor_id"))
+                // .subAggregation(cardinality("donor").precisionThreshold(40000).field("donor.donor_id"))
+                .subAggregation(sum("fileSize").field("repository.file_size")))));
 
     // Special nested case - Disabled as currently there are no nested fields
     // for (String facet : FACETS) {
@@ -278,7 +280,8 @@ public class RepositoryFileRepository {
       // result.put(name, convertNormalAggregation(agg));
       // }
       if (name.equals("repositorySizes")) {
-        result.put(name, convertSumAggregation(agg));
+        result.put("repositorySizes", convertRepoSizeAggregation(agg));
+        result.put("repositoryDonors", convertRepoDonorAggregation(agg));
       } else {
         result.put(name, convertNormalAggregation(agg));
       }
@@ -312,7 +315,25 @@ public class RepositoryFileRepository {
   }
 
   // FIXME: Temporary code
-  private TermFacet convertSumAggregation(Aggregation agg) {
+  // Special aggregation to get unique donor count for each repository
+  private TermFacet convertRepoDonorAggregation(Aggregation agg) {
+    val name = agg.getName();
+    Global globalAgg = (Global) agg;
+    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
+    Terms termAgg = (Terms) filterAgg.getAggregations().get(name);
+
+    val termsBuilder = new ImmutableList.Builder<Term>();
+    long total = -1; // Total does not have any meaning in this context because a donor an cross repositories
+    for (val bucket : termAgg.getBuckets()) {
+      val child = (Terms) bucket.getAggregations().get("donor");
+      termsBuilder.add(new Term(bucket.getKey(), (long) child.getBuckets().size()));
+    }
+    return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
+  }
+
+  // FIXME: Temporary code
+  // Special aggregation to get file size for each repository
+  private TermFacet convertRepoSizeAggregation(Aggregation agg) {
     val name = agg.getName();
     Global globalAgg = (Global) agg;
     Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
@@ -321,14 +342,10 @@ public class RepositoryFileRepository {
     val termsBuilder = new ImmutableList.Builder<Term>();
     long total = 0;
     for (val bucket : termAgg.getBuckets()) {
-      val key = bucket.getKey();
-      val child = (Sum) bucket.getAggregations().get(name);
-      log.info("children {} {}", key, child.getValue());
-
+      val child = (Sum) bucket.getAggregations().get("fileSize");
       termsBuilder.add(new Term(bucket.getKey(), (long) child.getValue()));
       total += (long) child.getValue();
     }
-
     return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
   }
 
@@ -518,5 +535,34 @@ public class RepositoryFileRepository {
     log.info(">>> ES Search is: {}", search);
 
     return search.execute().actionGet();
+  }
+
+  /**
+   * Returns the unique donor count across repositories Note we are counting the bucket size of a term aggregation. It
+   * appears that using cardinality aggregation yields imprecise result.
+   */
+  public long getDonorCount(Query query) {
+    val filters = buildRepoFilters(query.getFilters(), false);
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(0)
+        .setPostFilter(filters);
+
+    val name = "donorCount";
+    val donorCountAgg = global(name)
+        .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
+            .subAggregation(terms(name).size(100000).field("donor.donor_id")));
+
+    // .subAggregation(cardinality(name).precisionThreshold(90000).field("donor.donor_id")));
+
+    search.addAggregation(donorCountAgg);
+
+    log.info(">>> {}", search);
+    val response = search.execute().actionGet();
+    val global = (Global) response.getAggregations().get(name);
+    val filter = (Filter) global.getAggregations().get(name);
+    return ((Terms) filter.getAggregations().get(name)).getBuckets().size();
   }
 }
