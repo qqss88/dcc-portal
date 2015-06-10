@@ -272,7 +272,7 @@
             <td data-ng-if="setIds[2]"># Donors</td>
             <td data-ng-if="setIds[2]">%</td>
         </tr>
-        <tr data-ng-repeat="row in vital.uiTable">
+        <tr data-ng-repeat="row in age.uiTable">
             <td>{{row.term | readable}}</td>
             <td>{{row[setIds[0]].count}}</td>
             <td>{{row[setIds[0]].percentage*100 | number:2}}</td>
