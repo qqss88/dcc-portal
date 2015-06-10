@@ -214,7 +214,7 @@
 
     // Public functions
     this.buildUrl = function (baseUrl, dataPath, entityId) {
-      // Removes any opening and closing backslash in all parts then concatenates.
+      // Removes any opening and closing slash in all parts then concatenates.
       return _.map ([baseUrl, dataPath, entityId],
         _.partial (removeBookendingCharacter, _, slash)).join (slash);
     };
