@@ -1997,10 +1997,17 @@
    },
    {
       "group":"PACA-CA",
-      "index":"17",
+      "index":"18",
+      "value":248
+   },
+
+   {
+      "group":"PACA-CA",
+      "index":"19",
       "value":252
    },
    
+   /**************************************************************************/
    
    {
       "group":"STAD-US",
@@ -3239,7 +3246,16 @@
       "index":"18",
       "value":67
    },
+   {
+      "group":"LAML-KR",
+      "index":"19",
+      "value":0
+   },
+
+
    
+
+   /**************************************************************************/
    {
       "group":"PAAD-US",
       "index":"4",
@@ -4567,10 +4583,86 @@
    },
    
    /**************************************************************************/
-   
+
+   {
+      "group":"SKCA-BR",
+      "index":"4",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"5",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"6",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"7",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"8",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"9",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"10",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"11",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"12",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"13",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"14",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"15",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"16",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"17",
+      "value": 0
+   },   
+   {
+      "group":"SKCA-BR",
+      "index":"18",
+      "value": 0
+   },   
    {
       "group":"SKCA-BR",
       "index":"19",
       "value":66
    }   
+
 ]
