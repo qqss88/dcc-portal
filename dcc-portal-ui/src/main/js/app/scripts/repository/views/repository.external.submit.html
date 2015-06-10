@@ -15,11 +15,15 @@
        <br>
        <table class="table table-info">
            <thead>
-               <th>Repository</th><th class="text-right"># Files</th><th class="text-right">Total file size</th>
+               <th>Repository</th>
+               <th class="text-right"># Donors</th>
+               <th class="text-right"># Files</th>
+               <th class="text-right">Total file size</th>
            </thead>
            <tbody>
                <tr data-ng-repeat="(k, v) in selectedRepos">
                    <td>{{k}}</td>
+                   <td class="text-right">{{v.donorCount| number}}</td>
                    <td class="text-right">{{v.count | number}}</td>
                    <td class="text-right">{{v.fileSize | bytes }}</td>
                </tr>

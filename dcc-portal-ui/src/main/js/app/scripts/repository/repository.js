@@ -265,6 +265,11 @@
              _.find(_ctrl.files.termFacets.repositorySizes.terms, function(t) {
                return t.term === termStr;
              }).count;
+           _ctrl.selectedRepos[termStr].donorCount =
+             _.find(_ctrl.files.termFacets.repositoryDonors.terms, function(t) {
+               return t.term === termStr;
+             }).count;
+
          }
       });
     }
@@ -302,6 +307,7 @@
               selectedFiles: _ctrl.selectedFiles,
               selectedRepos: _ctrl.selectedRepos,
               repoSizes: _ctrl.files.termFacets.repositorySizes,
+              donorSizes: _ctrl.files.termFacets.repositoryDonors,
               filters: LocationService.filters()
             };
           }
