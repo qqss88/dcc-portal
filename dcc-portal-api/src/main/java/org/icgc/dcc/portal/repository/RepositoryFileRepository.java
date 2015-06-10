@@ -537,4 +537,33 @@ public class RepositoryFileRepository {
 
     return search.execute().actionGet();
   }
+
+  /**
+   * Returns the unique donor count across repositories Note we are counting the bucket size of a term aggregation. It
+   * appears that using cardinality aggregation yields imprecise result.
+   */
+  public long getDonorCount(Query query) {
+    val filters = buildRepoFilters(query.getFilters(), false);
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(0)
+        .setPostFilter(filters);
+
+    val name = "donorCount";
+    val donorCountAgg = global(name)
+        .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
+            .subAggregation(terms(name).size(100000).field("donor.donor_id")));
+
+    // .subAggregation(cardinality(name).precisionThreshold(90000).field("donor.donor_id")));
+
+    search.addAggregation(donorCountAgg);
+
+    log.info(">>> {}", search);
+    val response = search.execute().actionGet();
+    val global = (Global) response.getAggregations().get(name);
+    val filter = (Filter) global.getAggregations().get(name);
+    return ((Terms) filter.getAggregations().get(name)).getBuckets().size();
+  }
 }

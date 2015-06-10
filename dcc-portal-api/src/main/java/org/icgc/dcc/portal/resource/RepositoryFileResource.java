@@ -138,6 +138,14 @@ public class RepositoryFileResource {
 
   @GET
   @Timed
+  @Path("/donors/count")
+  public Long getUniqueDonorCount(
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
+    return repositoryFileService.getDonorCount(query().filters(filtersParam.get()).build());
+  }
+
+  @GET
+  @Timed
   @Path("/export")
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
