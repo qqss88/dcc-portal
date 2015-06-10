@@ -734,6 +734,12 @@ public class QueryService {
         list.add(true);
       }
     }
+
+    // Default if no value or only invalid values
+    if (list.isEmpty()) {
+      list.add(true);
+    }
+
     return list;
   }
 
