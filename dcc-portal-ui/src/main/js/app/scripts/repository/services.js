@@ -73,8 +73,6 @@
 
       jQuery('#fileDownload').submit();
       jQuery('#fileDownload').remove();
-
-
     };
 
     this.export = function(filters) {

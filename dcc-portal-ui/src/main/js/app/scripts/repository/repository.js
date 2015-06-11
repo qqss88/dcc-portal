@@ -149,13 +149,45 @@
     function($scope, $window, $modalInstance, ExternalRepoService, LocationService, params) {
 
     $scope.filters = LocationService.filters();
-    $scope.selectedRepos = params.selectedRepos;
     $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
     };
 
-    console.log('selected repos', $scope.selectedRepos);
+    var p = {};
+    p.size = 0;
+    p.filters = params.filters;
+    if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
+      if (! p.filters.file) {
+        p.filters.file = {};
+      }
+      p.filters.file.id = {is: $scope.selectedFiles};
+    }
+
+    function findRepoData(list, term) {
+      return _.find(list, function(t) { return t.term === term; }).count || 0;
+    }
+
+
+    ExternalRepoService.getList(p).then(function(data) {
+      var facets = data.termFacets;
+
+      // Build the repo table
+      var repos = {};
+
+      facets.repositoryNamesFiltered.terms.forEach(function(term) {
+        var repoName = term.term;
+
+        if (! repos[repoName]) {
+          repos[repoName] = {};
+        }
+        repos[repoName].fileSize = findRepoData(facets.repositorySizes.terms, repoName);
+        repos[repoName].donorCount = findRepoData(facets.repositoryDonors.terms, repoName);
+        repos[repoName].fileCount = term.count;
+      });
+      $scope.repos = repos;
+      $scope.selectedRepos = _.pluck(facets.repositoryNamesFiltered.terms, 'term');
+    });
 
 
     $scope.download = function() {
@@ -241,38 +273,7 @@
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
-    _ctrl.selectedRepos = {}; // Used to track file repositories
 
-
-    // FIXME: Need to convert to PQL
-    function resetSelectedRepos() {
-      var filterRepos = [], filters = LocationService.filters();
-      if (filters.file && filters.file.repositoryNames) {
-        filterRepos = filters.file.repositoryNames.is;
-      }
-
-      if (! _ctrl.files.termFacets.repositoryNamesFiltered.terms) {
-        _ctrl.selectedRepos = {};
-        return;
-      }
-
-      _ctrl.files.termFacets.repositoryNamesFiltered.terms.forEach(function(term) {
-         var termStr = term.term;
-         if (_.contains(filterRepos, termStr) || _.isEmpty(filterRepos)) {
-           _ctrl.selectedRepos[termStr] = {};
-           _ctrl.selectedRepos[termStr].count = term.count;
-           _ctrl.selectedRepos[termStr].fileSize =
-             _.find(_ctrl.files.termFacets.repositorySizes.terms, function(t) {
-               return t.term === termStr;
-             }).count;
-           _ctrl.selectedRepos[termStr].donorCount =
-             _.find(_ctrl.files.termFacets.repositoryDonors.terms, function(t) {
-               return t.term === termStr;
-             }).count;
-
-         }
-      });
-    }
 
     function getRepositoryNames (row) {
       return _.map(row.repository.repoServer, 'repoName');
@@ -286,7 +287,6 @@
      * Export table
      */
     _ctrl.export = function() {
-      console.log('export');
       ExternalRepoService.export( LocationService.filters() );
     };
 
@@ -295,7 +295,6 @@
      * Download manifest
      */
     _ctrl.downloadManifest = function() {
-      console.log('downloading manifest');
 
       $modal.open({
         templateUrl: '/scripts/repository/views/repository.external.submit.html',
@@ -304,16 +303,11 @@
         resolve: {
           params: function() {
             return {
-              selectedFiles: _ctrl.selectedFiles,
-              selectedRepos: _ctrl.selectedRepos,
-              repoSizes: _ctrl.files.termFacets.repositorySizes,
-              donorSizes: _ctrl.files.termFacets.repositoryDonors,
-              filters: LocationService.filters()
+              selectedFiles: _ctrl.selectedFiles
             };
           }
         }
       });
-
     };
 
     _ctrl.isSelected = function(row) {
@@ -322,71 +316,24 @@
 
 
     _ctrl.toggleRow = function(row) {
-      var repositoryNames = getRepositoryNames(row);
-      var repos = _ctrl.selectedRepos;
-
-      console.log('row is', row);
-
       if (_ctrl.isSelected(row) === true) {
         _.remove(_ctrl.selectedFiles, function(r) {
           return r === row.id;
         });
-
-        repositoryNames.forEach(function(repo) {
-          repos[repo].count -= 1;
-          repos[repo].fileSize -= row.repository.fileSize;
-          if (repos[repo] === 0) {
-             delete repos[repo];
-          }
-        });
-
-        if (_ctrl.selectedFiles.length === 0) {
-          resetSelectedRepos();
-        }
-
       } else {
-
-        // Init
-        if (_ctrl.selectedFiles.length === 0) {
-          _ctrl.selectedRepos = {};
-          repos = _ctrl.selectedRepos;
-        }
         _ctrl.selectedFiles.push(row.id);
-
-        var activeRepos = [], filters = LocationService.filters();
-        if (filters.file && filters.file.repositoryNames) {
-          activeRepos = filters.file.repositoryNames.is;
-        }
-
-        repositoryNames.forEach(function(repo) {
-          if (_.contains(activeRepos, repo) || _.isEmpty(activeRepos)) {
-            if (repos.hasOwnProperty(repo)) {
-               repos[repo].count += 1;
-               repos[repo].fileSize += row.repository.fileSize;
-            } else {
-               repos[repo] = {};
-               repos[repo].count = 1;
-               repos[repo].fileSize = row.repository.fileSize;
-            }
-          }
-        });
       }
-      console.log('selected', _ctrl.selectedFiles, _ctrl.selectedRepos);
     };
-
-
 
     /**
      * Undo user selected files
      */
     _ctrl.undo = function() {
       _ctrl.selectedFiles = [];
-      _ctrl.selectedRepos = {};
 
       _ctrl.files.hits.forEach(function(f) {
         delete f.checked;
       });
-      resetSelectedRepos();
     };
 
 
