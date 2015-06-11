@@ -45,7 +45,7 @@ public class RepositoryFile {
 
   @SneakyThrows
   @NonNull
-  public static RepositoryFile of(String json) {
+  public static RepositoryFile parse(String json) {
     return MAPPER.readValue(json, MY_CLASS);
   }
 

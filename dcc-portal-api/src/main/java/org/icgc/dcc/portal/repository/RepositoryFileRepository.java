@@ -128,12 +128,13 @@ public class RepositoryFileRepository {
       .put("repository.repo_server.repo_name", "Repository")
       .put("donor.project_code", "Project")
       .put("study", "Study")
-      .put("data_types.data_type", "Data type")
-      .put("data_types.data_format", "Format")
+      .put("data_type.data_type", "Data type")
+      .put("data_type.data_format", "Format")
       .put("repository.file_size", "Size")
       .build();
-
-  private final ImmutableList<String> ARRAY_FIELDS = ImmutableList.of("data_types.data_type", "data_types.data_format",
+  private final ImmutableList<String> ARRAY_FIELDS = ImmutableList.of(
+      "data_type.data_type",
+      "data_type.data_format",
       "repository.repo_server.repo_name");
 
   private final Client client;
