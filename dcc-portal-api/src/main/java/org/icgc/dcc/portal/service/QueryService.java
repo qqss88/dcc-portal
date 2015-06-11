@@ -83,11 +83,6 @@ public class QueryService {
       ImmutableMap<Kind, String> prefixMapping) {
 
     return buildFilters(filters, kind, nestedMapping, prefixMapping);
-    /*
-     * if (filters.fieldNames().hasNext()) { return buildFilters(filters, kind, nestedMapping, prefixMapping); } if
-     * (kind.getId().equals("projects")) { return defaultProjectFilter(); } else if (kind.getId().equals("donor")) {
-     * return defaultDonorFilter(); } return matchAllFilter();
-     */
   }
 
   public static String[] getFields(Query query, Kind kind) {
@@ -739,6 +734,12 @@ public class QueryService {
         list.add(true);
       }
     }
+
+    // Default if no value or only invalid values
+    if (list.isEmpty()) {
+      list.add(true);
+    }
+
     return list;
   }
 

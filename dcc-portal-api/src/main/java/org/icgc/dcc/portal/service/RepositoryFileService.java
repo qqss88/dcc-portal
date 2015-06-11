@@ -1,27 +1,24 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
- *                                                                                                               
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.
+ *
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
- * You should have received a copy of the GNU General Public License along with                                  
- * this program. If not, see <http://www.gnu.org/licenses/>.                                                     
- *                                                                                                               
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY                           
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES                          
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT                           
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,                                
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED                          
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;                               
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER                              
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.icgc.dcc.portal.service;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.filterValues;
-import static com.google.common.collect.Maps.transformEntries;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.left;
@@ -37,8 +34,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -82,15 +79,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
 @Service
@@ -101,6 +97,7 @@ public class RepositoryFileService {
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
   private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
+  private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(Collections.emptyList());
   private static final Joiner SLASH_JOINER = Joiners.SLASH.skipNulls();
   private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
       FieldNames.REPO_TYPE,
@@ -110,6 +107,18 @@ public class RepositoryFileService {
       FieldNames.FILE_SIZE,
       FieldNames.CHECK_SUM
   };
+  private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "id")
+          .put("specimen_id", "specimenIds")
+          .put("sample_id", "sampleIds")
+          .put("submitted_donor_id", "submittedId")
+          .put("submitted_specimen_id", "submittedSpecimenIds")
+          .put("submitted_sample_id", "submittedSampleIds")
+          .put("tcga_participant_barcode", "TCGAParticipantBarcode")
+          .put("tcga_sample_barcode", "TCGASampleBarcode")
+          .put("tcga_aliquot_barcode", "TCGAAliquotBarcode")
+          .build();
   private static final String DOWNLOAD_INFO_QUERY_SOURCE_FIELD =
       FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*";
   private static final String[] TSV_HEADERS = new String[] {
@@ -146,26 +155,25 @@ public class RepositoryFileService {
    * Emulating keyword search, but without prefix/ngram analyzers..ie: exact match
    */
   public Keywords findRepoDonor(Query query) {
-    val response = repositoryFileRepository.findRepoDonor(query.getQuery());
+    val response = repositoryFileRepository.findRepoDonor(
+        FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), query.getQuery());
     val hits = response.getHits();
-    val files = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    // Transform t keyword
-    val keywordlist = ImmutableList.<Keyword> builder();
-    for (val file : files.getHits()) {
-      val fieldMap = buildKeywordFieldMap(file.getDonor());
-      keywordlist.add(new Keyword(fieldMap));
+    if (hits.totalHits() < 1) {
+      return NO_MATCH_KEYWORD_SEARCH_RESULT;
     }
 
-    val keywords = new Keywords(keywordlist.build());
-    return keywords;
+    val keywords = transform(hits,
+        hit -> new Keyword(toKeywordFieldMap(hit)));
+
+    return new Keywords(newArrayList(keywords));
   }
 
   public RepositoryFile findOne(String fileId) {
     log.info("External repository file id is: '{}'.", fileId);
 
     val response = repositoryFileRepository.findOne(fileId);
-    return RepositoryFile.of(response.getSourceAsString());
+    return RepositoryFile.parse(response.getSourceAsString());
   }
 
   public long getDonorCount(Query query) {
@@ -227,52 +235,23 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static Map<String, Object> buildKeywordFieldMap(RepositoryFile.Donor donor) {
-    val donorId = donor.getDonorId();
-    checkState(!isBlank(donorId), "Donor ID in a file document cannot be empty or null.");
+  private static Map<String, Object> toKeywordFieldMap(SearchHit hit) {
+    val valueMap = hit.getSource();
+    val commonKeys = Sets.intersection(
+        FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), valueMap.keySet());
+    val mapBuilder = ImmutableMap.<String, Object> builder();
 
-    val listKeys = ImmutableList.of(
-        "specimenIds",
-        "sampleIds",
-        "submittedSpecimenIds",
-        "submittedSampleIds");
-    val mapWithPossibleNullValues = new HashMap<String, Object>() {
+    for (val key : commonKeys) {
+      mapBuilder.put(FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.get(key), valueMap.get(key));
+    }
 
-      {
-        put("specimenIds", donor.getSpecimenId());
-        put("sampleIds", donor.getSampleId());
-        put("submittedSpecimenIds", donor.getSubmittedSpecimenId());
-        put("submittedSampleIds", donor.getSubmittedSampleId());
-        put("submittedId", donor.getSubmittedDonorId());
-        put("TCGAParticipantBarcode", donor.getTcgaParticipantBarcode());
-        put("TCGASampleBarcode", donor.getTcgaSampleBarcode());
-        put("TCGAAliquotBarcode", donor.getTcgaAliquotBarcode());
-      }
-
-    };
-
-    val mapWithoutNullValues = filterValues(mapWithPossibleNullValues, Predicates.notNull());
-    val transformValueToList = new EntryTransformer<String, Object, Object>() {
-
-      @Override
-      public Object transformEntry(String key, Object value) {
-        return listKeys.contains(key) ? ImmutableList.of(value) : value;
-      }
-
-    };
-
-    val fieldMap = transformEntries(mapWithoutNullValues, transformValueToList);
-    val result = Maps.<String, Object> newHashMap(fieldMap);
-    result.put("id", donorId);
-    result.put("type", "donor");
-    log.debug("Transformed map is: '{}'", result);
-
-    return result;
+    return mapBuilder.put("type", "donor")
+        .build();
   }
 
   private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
     return FluentIterable.from(hits)
-        .transform(hit -> RepositoryFile.of(hit.getSourceAsString()))
+        .transform(hit -> RepositoryFile.parse(hit.getSourceAsString()))
         .toList();
   }
 
@@ -290,11 +269,12 @@ public class RepositoryFileService {
             .putAll(fields)
             .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
             .build();
-    val serverArray = READER.readTree(hit.sourceAsString())
+    val fileNode = READER.readTree(hit.sourceAsString());
+    val serverArray = fileNode
         .path(FieldNames.REPOSITORY)
         .path(FieldNames.REPO_SERVER);
 
-    return transform(serverArray, server -> combineMaps.apply(server));
+    return transform(serverArray, combineMaps::apply);
   }
 
   @SneakyThrows

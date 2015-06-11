@@ -46,11 +46,11 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_FILTERS;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_FROM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
 import static org.icgc.dcc.portal.util.MediaTypes.GZIP;
+import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -77,12 +77,10 @@ import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
 import org.icgc.dcc.portal.model.RepositoryFiles;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.RepositoryFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
@@ -141,12 +139,13 @@ public class RepositoryFileResource {
   @Path("/donors/count")
   public Long getUniqueDonorCount(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
-    return repositoryFileService.getDonorCount(query().filters(filtersParam.get()).build());
+    return repositoryFileService.getDonorCount(toQuery(filtersParam));
   }
 
   @GET
   @Timed
   @Path("/export")
+  @Produces(TEXT_TSV)
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
@@ -172,20 +171,14 @@ public class RepositoryFileResource {
   public Response generateManifestArchiveByFilters(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_FILE_REPOS_VALUE) @QueryParam(API_FILE_REPOS_PARAM) @DefaultValue("") String repoList) {
-    val timestamp = new Date();
-    val output = new StreamingOutput() {
+    log.info("filtersParam is: '{}' AND repoList is: '{}'.", filtersParam, repoList);
 
-      @Override
-      public void write(OutputStream outputStream) throws JsonProcessingException, IOException {
+    val timestamp = new Date();
+    final StreamingOutput outputGenerator = (outputStream) ->
         repositoryFileService.generateManifestArchive(outputStream,
             timestamp,
             toQuery(filtersParam),
             COMMA.splitToList(repoList));
-      }
-    };
-
-    log.info("filtersParam is: '{}' AND repoList is: '{}'.", filtersParam, repoList);
-
     val attechmentType = type(TYPE_ATTACHMENT)
         .fileName(buildManifestFileName(timestamp))
         .creationDate(timestamp)
@@ -193,7 +186,7 @@ public class RepositoryFileResource {
         .build();
 
     return Response
-        .ok(output)
+        .ok(outputGenerator)
         .header(CONTENT_DISPOSITION, attechmentType)
         .build();
   }
@@ -205,9 +198,12 @@ public class RepositoryFileResource {
   public Response generateManifestArchiveByIdList(
       @ApiParam(value = API_FILE_IDS_VALUE) @FormParam(API_FILE_IDS_PARAM) List<String> fileIds,
       @ApiParam(value = API_FILE_REPOS_VALUE) @FormParam(API_FILE_REPOS_PARAM) String repoList) {
-    verifyFileIdList(fileIds);
-    val filter = buildFileIdListFilterParam(fileIds);
+    checkRequest(null == fileIds,
+        "Form field, '%s', is missing in the POST payload.", API_FILE_IDS_PARAM);
+    checkRequest(fileIds.isEmpty(),
+        "Form field, '%s', must contain a list of repository file IDs.", API_FILE_IDS_PARAM);
 
+    val filter = buildFileIdListFilterParam(fileIds);
     return generateManifestArchiveByFilters(new FiltersParam(filter),
         null == repoList ? "" : repoList);
   }
@@ -222,22 +218,6 @@ public class RepositoryFileResource {
   @NonNull
   private static String buildManifestFileName(Date timestamp) {
     return "manifest." + timestamp.getTime() + ".tar.gz";
-  }
-
-  private static void verifyFileIdList(List<String> fileIds) {
-    if (null == fileIds) {
-      val errorMessage = "Form field, '" +
-          API_FILE_IDS_PARAM +
-          "', is missing in the POST payload.";
-      throw new BadRequestException(errorMessage);
-    }
-
-    if (fileIds.isEmpty()) {
-      val errorMessage = "Form field, '" +
-          API_FILE_IDS_PARAM +
-          "', must contain a list of repository file IDs.";
-      throw new BadRequestException(errorMessage);
-    }
   }
 
   private static String buildFileIdListFilterParam(@NonNull List<String> fileIds) {
