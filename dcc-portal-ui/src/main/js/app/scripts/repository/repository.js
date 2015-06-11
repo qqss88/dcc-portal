@@ -273,6 +273,7 @@
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
+    _ctrl.summary = {};
 
 
     function getRepositoryNames (row) {
@@ -363,6 +364,11 @@
 
         // Sanity check, just reset everything
         _ctrl.undo();
+      });
+
+      // Get summary
+      ExternalRepoService.getSummary(params).then(function(summary) {
+        _ctrl.summary = summary;
       });
 
       // Get index creation time

@@ -46,32 +46,38 @@
     </div>
 </aside>
 <article style="position: relative;">
-        <current></current>
+    <current></current>
     <section style="padding-top:0">
         <div>
-            <p>External repositories content was indexed on {{ExternalRepoController.repoCreationTime | date}} <br>
-
+            <p>External repositories content was indexed on {{ExternalRepoController.repoCreationTime | date}}
+               <br>
                ICGC raw data and other data are available in other repositories. You can use this search tool to find
-               files of your interest and create repository-specific manifests. Some manifests may require 
+               files of your interest and create repository-specific manifests. Some manifests may require
                <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>authorized</a> access.
             </p>
         </div>
-
         <div class="empty loading-text" data-ng-if="ExternalRepoController.files.hits.length === 0">
             <h3>No Files Found</h3>
         </div>
         <div data-ng-if="ExternalRepoController.files.hits.length">
-            <div style="margin-bottom:0.5rem">
-                <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                    <i class="icon-download"></i>Download manifests (
-                      {{ ExternalRepoController.selectedFiles.length === 0?  ExternalRepoController.files.pagination.total : ExternalRepoController.selectedFiles.length | number}}
 
-                      files )
-                </button>
-                <span>
-                    <a href="" target="_blank"><i class="icon-external-link"></i>How to download data in external repository</a>
-                </span>
-            </div>
+            <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
+                <div class="quarter">
+                    <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
+                        <i class="icon-download"></i>Download manifests
+                    </button>
+                </div>
+                <div class="quarter">
+                    <i class="icon-file"></i><strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
+                </div>
+                <div class="quarter">
+                    <i class="icon-team"></i><strong>{{ExternalRepoController.summary.donorCount | number}}</strong> Donors
+                </div>
+                <div class="quarter omega">
+                    <i class="icon-database"></i><strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
+                </div>
+            </section>
+            <div class="clearfix"></div>
 
             <div class="t_table_top">
                 <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
