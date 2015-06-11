@@ -185,7 +185,7 @@ public class ResourceUtils {
         try {
           return format(formatTemplate, args);
         } catch (Exception e) {
-          val errorDetails = "message: '" + formatTemplate +
+          final String errorDetails = "message: '" + formatTemplate +
               "', parameters: '" + COMMA_JOINER.join(args) + "'";
           log.error("Error while formatting message - " + errorDetails, e);
 
