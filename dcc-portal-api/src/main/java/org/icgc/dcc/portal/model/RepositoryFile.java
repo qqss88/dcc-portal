@@ -52,27 +52,35 @@ public class RepositoryFile {
   /*
    * Fields
    */
-  @ApiModelProperty(value = "id")
+  @ApiModelProperty(value = "ID of a repository file")
   String id;
 
+  @ApiModelProperty(value = "Study type of a repository file")
   String study;
 
+  @ApiModelProperty(value = "Access type of a repository file")
   String access;
 
+  @ApiModelProperty(value = "Data type details of a repository file")
   DataType dataType;
 
+  @ApiModelProperty(value = "Repository details of a repository file")
   Repository repository;
 
+  @ApiModelProperty(value = "Donor details of a repository file")
   Donor donor;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static final class DataType {
 
+    @ApiModelProperty(value = "Data type of a repository file")
     String dataType;
 
+    @ApiModelProperty(value = "Data format of a repository file")
     String dataFormat;
 
+    @ApiModelProperty(value = "Experimental strategy of a repository file")
     String experimentalStrategy;
 
   }
@@ -81,24 +89,34 @@ public class RepositoryFile {
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static final class Repository {
 
+    @ApiModelProperty(value = "Repository type")
     String repoType;
 
+    @ApiModelProperty(value = "Repository organization")
     String repoOrg;
 
+    @ApiModelProperty(value = "Repository entity ID")
     String repoEntityId;
 
+    @ApiModelProperty(value = "List of repository details")
     List<RepoServer> repoServer;
 
+    @ApiModelProperty(value = "Path to repository's meta-data")
     String repoMetadataPath;
 
+    @ApiModelProperty(value = "Path to Repository data file")
     String repoDataPath;
 
+    @ApiModelProperty(value = "Repository file name")
     String fileName;
 
+    @ApiModelProperty(value = "Repository file size")
     Long fileSize;
 
+    @ApiModelProperty(value = "MD5 checksum of a repository file")
     String fileMd5sum;
 
+    @ApiModelProperty(value = "Last modified timestamp of a repository file")
     String lastModified;
 
   }
@@ -107,12 +125,16 @@ public class RepositoryFile {
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static final class RepoServer {
 
+    @ApiModelProperty(value = "Repository name")
     String repoName;
 
+    @ApiModelProperty(value = "Repository code")
     String repoCode;
 
+    @ApiModelProperty(value = "Country where the repository resides")
     String repoCountry;
 
+    @ApiModelProperty(value = "Base URL of a repository")
     String repoBaseUrl;
 
   }
@@ -121,30 +143,43 @@ public class RepositoryFile {
   @JsonIgnoreProperties(ignoreUnknown = true)
   private static final class Donor {
 
+    @ApiModelProperty(value = "Project code")
     String projectCode;
 
+    @ApiModelProperty(value = "Program")
     String program;
 
+    @ApiModelProperty(value = "Study")
     String study;
 
+    @ApiModelProperty(value = "Primary Site")
     String primarySite;
 
+    @ApiModelProperty(value = "Donor ID")
     String donorId;
 
+    @ApiModelProperty(value = "Donor submitter ID")
     String submittedDonorId;
 
+    @ApiModelProperty(value = "Specimen ID")
     String specimenId;
 
+    @ApiModelProperty(value = "Specimen submitter ID")
     String submittedSpecimenId;
 
+    @ApiModelProperty(value = "Sample ID")
     String sampleId;
 
+    @ApiModelProperty(value = "Sample submitter ID")
     String submittedSampleId;
 
+    @ApiModelProperty(value = "TCGA participant barcode")
     String tcgaParticipantBarcode;
 
+    @ApiModelProperty(value = "TCGA sample barcode")
     String tcgaSampleBarcode;
 
+    @ApiModelProperty(value = "TCGA aliquot barcode")
     String tcgaAliquotBarcode;
 
   }
