@@ -101,17 +101,28 @@
                     <td>{{ serverInfo.repoName }}</td>
                     <td>{{ serverInfo.repoCountry }}</td>
                     <td>{{ repoInfo.repoType }}</td>
-                    <td>
-                        <a href="#" data-ng-click="myController.downloadManifest (info.id, serverInfo.repoName)">
-                          Download Manifest
-                        </a>
 
-                        <span data-ng-if="myController.equalsIgnoringCase(repoInfo.repoType, 'GNOS')"> |
-                          <a target="_blank" href=
-    "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoMetadataPath, repoInfo.repoEntityId) }}">
-                            Show Metadata
-                          </a>
-                        </span>
+                    <td ng-init="isGnos = myController.equalsIgnoringCase(repoInfo.repoType, 'GNOS')">
+                      <i class="icon-download"></i>
+                      <a href="#" data-ng-click="myController.downloadManifest (info.id, serverInfo.repoName)">
+                        Download Manifest
+                      </a>
+
+                      <span data-ng-if="isGnos"> |
+                        <i class="icon-external-link"></i>
+                        <a target="_blank" href=
+  "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoMetadataPath, repoInfo.repoEntityId) }}">
+                          Show Metadata
+                        </a>
+                      </span>
+                      <span data-ng-if="!isGnos"> |
+                        <i class="icon-download"></i>
+                        <a target="_blank" href=
+  "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoDataPath, repoInfo.repoEntityId) }}">
+                          Download Data
+                        </a>
+                      </span>
+
                     </td>
                 </tr>
             </tbody>
