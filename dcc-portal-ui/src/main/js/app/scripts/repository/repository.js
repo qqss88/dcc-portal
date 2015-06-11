@@ -148,7 +148,6 @@
   module.controller('ExternalFileDownloadController',
     function($scope, $window, $modalInstance, ExternalRepoService, LocationService, params) {
 
-    $scope.filters = LocationService.filters();
     $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
@@ -156,7 +155,7 @@
 
     var p = {};
     p.size = 0;
-    p.filters = params.filters;
+    p.filters = LocationService.filters();
     if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
       if (! p.filters.file) {
         p.filters.file = {};
