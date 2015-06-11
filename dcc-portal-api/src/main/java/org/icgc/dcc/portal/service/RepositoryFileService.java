@@ -173,7 +173,7 @@ public class RepositoryFileService {
     log.info("External repository file id is: '{}'.", fileId);
 
     val response = repositoryFileRepository.findOne(fileId);
-    return RepositoryFile.of(response.getSourceAsString());
+    return RepositoryFile.parse(response.getSourceAsString());
   }
 
   public long getDonorCount(Query query) {
@@ -251,7 +251,7 @@ public class RepositoryFileService {
 
   private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
     return FluentIterable.from(hits)
-        .transform(hit -> RepositoryFile.of(hit.getSourceAsString()))
+        .transform(hit -> RepositoryFile.parse(hit.getSourceAsString()))
         .toList();
   }
 

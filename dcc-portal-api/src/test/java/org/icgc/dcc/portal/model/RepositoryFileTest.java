@@ -47,7 +47,7 @@ public class RepositoryFileTest {
   @SneakyThrows
   public void test() {
     val jsonFixture = jsonFixture(TEST_JSON_FILE);
-    val testPojo = RepositoryFile.of(jsonFixture);
+    val testPojo = RepositoryFile.parse(jsonFixture);
 
     log.info("JSON read from fixture file: '{}'", jsonFixture);
     log.info("JSON serialized from Pojo: '{}'", asJson(testPojo));
