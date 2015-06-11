@@ -144,6 +144,14 @@ public class RepositoryFileResource {
 
   @GET
   @Timed
+  @Path("/summary")
+  public Map<String, Long> getSummary(
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
+    return repositoryFileService.getSummary(query().filters(filtersParam.get()).build());
+  }
+
+  @GET
+  @Timed
   @Path("/export")
   @Produces(TEXT_TSV)
   public Response exportFiles(
