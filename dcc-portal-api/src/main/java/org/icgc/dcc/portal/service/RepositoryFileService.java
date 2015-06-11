@@ -509,4 +509,12 @@ public class RepositoryFileService {
     closeDownloadUrlElement(writer);
   }
 
+  /**
+   * @param build
+   * @return
+   */
+  public Map<String, Long> getSummary(Query query) {
+    return repositoryFileRepository.getSummary(query);
+  }
+
 }

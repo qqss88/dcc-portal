@@ -526,6 +526,39 @@ public class RepositoryFileRepository {
   }
 
   /**
+   * Get total file size, total donor count and total number of files based on query
+   */
+  public Map<String, Long> getSummary(Query query) {
+    val filters = buildRepoFilters(query.getFilters(), false);
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(0)
+        .setPostFilter(filters);
+
+    val name = "summary";
+    val summaryAgg = global(name)
+        .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
+            .subAggregation(sum("file").field("repository.file_size"))
+            .subAggregation(terms("donor").size(100000).field("donor.donor_id")));
+
+    search.addAggregation(summaryAgg);
+    val response = search.execute().actionGet();
+
+    val result = Maps.<String, Long> newHashMap();
+
+    val global = (Global) response.getAggregations().get(name);
+    val filter = (Filter) global.getAggregations().get(name);
+
+    result.put("fileCount", response.getHits().getTotalHits());
+    result.put("donorCount", (long) ((Terms) filter.getAggregations().get("donor")).getBuckets().size());
+    result.put("totalFileSize", (long) ((Sum) filter.getAggregations().get("file")).getValue());
+
+    return result;
+  }
+
+  /**
    * Returns the unique donor count across repositories Note we are counting the bucket size of a term aggregation. It
    * appears that using cardinality aggregation yields imprecise result.
    */
