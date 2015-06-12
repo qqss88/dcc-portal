@@ -33,6 +33,7 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -80,6 +81,7 @@ import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
@@ -98,9 +100,6 @@ import com.google.common.primitives.Ints;
 @Component
 public class RepositoryFileRepository {
 
-  private final String INDEX_NAME = "icgc-repository";
-  private final String FILE_INDEX_TYPE_NAME = "file";
-  private final String FILE_DONOR_TEXT_INDEX_TYPE_NAME = "file-donor-text";
   private final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
   private final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
       "specimen_id",
@@ -116,6 +115,8 @@ public class RepositoryFileRepository {
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.REPOSITORY_FILE;
   private static final Map<String, String> TYPE_MAPPING = FIELDS_MAPPING.get(KIND);
+  private static final String FILE_INDEX_TYPE = Type.REPOSITORY_FILE.getId();
+  private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
   private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
@@ -142,7 +143,7 @@ public class RepositoryFileRepository {
 
   @Autowired
   public RepositoryFileRepository(Client client) {
-    this.index = INDEX_NAME;
+    this.index = REPOSITORY_INDEX_NAME;
     this.client = client;
   }
 
@@ -425,7 +426,7 @@ public class RepositoryFileRepository {
   }
 
   public GetResponse findOne(String id) {
-    val search = client.prepareGet(index, FILE_INDEX_TYPE_NAME, id);
+    val search = client.prepareGet(index, FILE_INDEX_TYPE, id);
     val response = search.execute().actionGet();
     // This check is important as it validates if there is any document at all in the GET response.
     checkResponseState(id, response, KIND);
@@ -436,7 +437,7 @@ public class RepositoryFileRepository {
   public SearchResponse findAll(Query query) {
     val filters = buildRepoFilters(query.getFilters(), false);
     val search = client.prepareSearch(index)
-        .setTypes(FILE_INDEX_TYPE_NAME)
+        .setTypes(FILE_INDEX_TYPE)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize())
@@ -472,8 +473,9 @@ public class RepositoryFileRepository {
   private SearchResponse findDownloadInfo(SearchType searchType, Query query, final String[] fields, String sortField,
       String sourceField) {
     val filters = buildRepoFilters(query.getFilters(), false);
+    final String noExcludes = null;
     val search = client.prepareSearch(index)
-        .setTypes(FILE_INDEX_TYPE_NAME)
+        .setTypes(FILE_INDEX_TYPE)
         .setSearchType(searchType)
         .setFrom(query.getFrom())
         .setSize(query.getLimit())
@@ -481,7 +483,7 @@ public class RepositoryFileRepository {
         .setPostFilter(filters)
         .addFields(fields)
         // Need to use _source because 'repository.repo_server' is an array.
-        .setFetchSource(sourceField, null);
+        .setFetchSource(sourceField, noExcludes);
 
     log.info("ES request is: {}", search);
     val response = search.execute().actionGet();
@@ -516,7 +518,7 @@ public class RepositoryFileRepository {
             fieldName + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
 
     val search = client.prepareSearch(index)
-        .setTypes(FILE_DONOR_TEXT_INDEX_TYPE_NAME)
+        .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(maxNumberOfDocs)

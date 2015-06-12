@@ -37,6 +37,9 @@ public class IndexModel {
    */
   public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entitySetId";
 
+  // Index name for the icgc-repository index.
+  public static final String REPOSITORY_INDEX_NAME = "icgc-repository";
+
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {

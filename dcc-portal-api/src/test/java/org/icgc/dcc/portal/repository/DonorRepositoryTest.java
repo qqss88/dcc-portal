@@ -64,7 +64,10 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {
-    es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC).withData(bulkFile(getClass())));
+    es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC)
+        .withData(bulkFile(getClass()))
+        // This is needed because the DonorRepository now does a 'secondary' search on icgc-repository index.
+        .withData(bulkFile("RepositoryFileServiceTest.json")));
     donorRepository = new DonorRepository(es.client(), INDEX);
   }
 

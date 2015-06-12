@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.elasticsearch.action.search.SearchType.COUNT;
@@ -57,7 +58,9 @@ import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRelatedToDoublePendingDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
@@ -632,20 +635,25 @@ public class DonorRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val search = client.prepareGet(index, TYPE.getId(), id);
-    search.setFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
+    val search = client.prepareGet(index, TYPE.getId(), id)
+        .setFields(getFields(query, KIND));
+    setFetchSourceOfGetRequest(search, query, KIND);
 
     val response = search.execute().actionGet();
-    checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query, KIND);
-    log.debug("{}", map);
+    if (response.isExists()) {
+      val result = createResponseMap(response, query, KIND);
+      log.debug("Found donor: '{}'.", result);
 
-    return map;
+      return result;
+    }
+
+    if (!isRelatedToDoublePendingDonor(client, "donor_id", id)) {
+      // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
+      checkResponseState(id, response, KIND);
+    }
+
+    return singletonMap(FIELDS_MAPPING.get(KIND).get("id"), id);
   }
 
   public Set<String> findIds(Query query) {
