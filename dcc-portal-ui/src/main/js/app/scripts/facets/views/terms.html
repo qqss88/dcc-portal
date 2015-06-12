@@ -55,7 +55,7 @@
                 <span data-ng-if="hideCount" class="t_facets__facet__terms__inactive__term__count t_facets__facet__term__na">{{hideText}}</span>
 
             </li>
-            <li data-ng-show="inactives.length > (displayLimit - 1)" class="t_sh__toggle">
+            <li data-ng-show="inactives.length > displayLimit || expanded" class="t_sh__toggle">
                 <a data-ng-click="toggle()" href="" class="t_tools__tool">
                   <span>
                      <i class="{{ expanded? 'icon-caret-up': 'icon-caret-down' }}"></i>

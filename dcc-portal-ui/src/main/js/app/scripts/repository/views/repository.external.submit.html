@@ -10,7 +10,7 @@
        A manifest is a text file passed to download clients in order to download files. 
        You will get a single manifest file per repository.<br><br>
 
-       Please note that some files may be stored in different repositories</br>
+       Please note that some files may be stored in multiple repositories.</br>
        The list below is restricted by your repository filter.
        <br>
        <table class="table table-info">
@@ -21,10 +21,10 @@
                <th class="text-right">Total file size</th>
            </thead>
            <tbody>
-               <tr data-ng-repeat="(k, v) in selectedRepos">
+               <tr data-ng-repeat="(k, v) in repos">
                    <td>{{k}}</td>
                    <td class="text-right">{{v.donorCount| number}}</td>
-                   <td class="text-right">{{v.count | number}}</td>
+                   <td class="text-right">{{v.fileCount| number}}</td>
                    <td class="text-right">{{v.fileSize | bytes }}</td>
                </tr>
            </tbody>

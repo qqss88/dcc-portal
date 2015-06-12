@@ -96,6 +96,12 @@ section {
   }
 }
 
+.quarter {
+  @include breakpoint($break-landscape) {
+    @include float-span(3);
+  }
+}
+
 .narrow {
   @include breakpoint($break-landscape) {
     @include float-span(4);

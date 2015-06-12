@@ -821,6 +821,17 @@ section:after {
 
 @media (min-width: 769px) {
   /* line 99, _layout.scss */
+  .quarter {
+    width: 23.4042553191%;
+    clear: right;
+    float: left;
+    margin-left: 0;
+    margin-right: 2.1276595745%;
+  }
+}
+
+@media (min-width: 769px) {
+  /* line 105, _layout.scss */
   .narrow {
     width: 31.914893617%;
     clear: right;
@@ -831,7 +842,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 105, _layout.scss */
+  /* line 111, _layout.scss */
   .half {
     width: 48.9361702128%;
     clear: right;
@@ -842,7 +853,7 @@ section:after {
 }
 
 @media (min-width: 769px) {
-  /* line 111, _layout.scss */
+  /* line 117, _layout.scss */
   .third {
     width: 31.914893617%;
     clear: right;
@@ -852,12 +863,12 @@ section:after {
   }
 }
 
-/* line 117, _layout.scss */
+/* line 123, _layout.scss */
 .relative {
   position: relative;
 }
 
-/* line 121, _layout.scss */
+/* line 127, _layout.scss */
 .clearfix {
   /* for IE 6/7 */
   *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
@@ -876,13 +887,13 @@ section:after {
   clear: both;
 }
 
-/* line 125, _layout.scss */
+/* line 131, _layout.scss */
 .hidden {
   display: none;
   visibility: hidden;
 }
 
-/* line 130, _layout.scss */
+/* line 136, _layout.scss */
 .omega {
   margin-right: 0 !important;
 }

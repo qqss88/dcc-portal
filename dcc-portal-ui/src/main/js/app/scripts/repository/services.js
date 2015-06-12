@@ -47,6 +47,15 @@
       return Restangular.one('repository/files').get(angular.extend(defaults, params));
     };
 
+
+    /**
+     * Get total donor, file and file size statistics
+     */
+    this.getSummary = function(params) {
+      return Restangular.one('repository/files/summary').get(params);
+    };
+
+
     this.download = function(filters, repos) {
       var filtersStr = encodeURIComponent(JSON.stringify(filters));
       var repoStr = _.map(Object.keys(repos), function(repo) {
@@ -73,8 +82,6 @@
 
       jQuery('#fileDownload').submit();
       jQuery('#fileDownload').remove();
-
-
     };
 
     this.export = function(filters) {
