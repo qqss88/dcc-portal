@@ -35,7 +35,6 @@
       _ctrl.currentTab = $state.current.data.tab || 'icgc';
     });
 
-    console.log('RepoisitoryController init');
   });
 
 
@@ -44,7 +43,6 @@
    */
   module.controller('ICGCRepoController',
     function($scope, $stateParams, Restangular, RepositoryService, ProjectCache, API, Settings) {
-    console.log('ICGCRepoController', $stateParams);
     var _ctrl = this;
 
     _ctrl.path = $stateParams.path || '';
@@ -278,7 +276,6 @@
   module.controller('ExternalRepoController',
     function($scope, $window, $modal, LocationService, Page, ExternalRepoService) {
 
-    console.log('ExternalRepoController');
     var _ctrl = this;
 
     _ctrl.selectedFiles = [];
