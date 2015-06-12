@@ -1,3 +1,22 @@
+
+<span data-ng-if="ProjectCtrl.isPendingDonor">
+  <div class="h1-wrap">
+      <h1 data-ui-scrollfix=79><span class="t_badge t_badge__project"></span>
+          {{ProjectCtrl.project.id}}
+      </h1>
+  </div>
+
+  <section>
+    <i class="icon-attention or icon-attention-1"></i>
+    No data for this project has been submitted directly to ICGC DDC yet. However, go to the
+    <a href="{{ ProjectCtrl.urlToExternalRepository }}">
+      external repository browser
+    </a>
+     to see the list of data files hosted in external repositories for this project.
+  </section>
+</span>
+
+<span data-ng-if="!ProjectCtrl.isPendingDonor">
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge__project"></span>
         {{ProjectCtrl.project.name}}
@@ -79,7 +98,7 @@
             <td>
                 <ul>
                     <li data-ng-repeat="study in ProjectCtrl.studies">
-                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a> 
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
                         <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
                         <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
                     </li>
@@ -694,7 +713,7 @@
         </table>
     </div>
 </section>
-<section id="publications" 
+<section id="publications"
     data-ng-if="ProjectCtrl.project.complete"
     data-ng-class="{'empty': ProjectCtrl.project.uiPublicationList.length == 0}">
     <h3 data-ng-if="ProjectCtrl.project.uiPublicationList.length == 0">No Publications.</h3>

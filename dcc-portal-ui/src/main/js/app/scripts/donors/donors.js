@@ -58,6 +58,16 @@
 
     _ctrl.donor = donor;
 
+    _ctrl.isPendingDonor = _.isUndefined (_.get(donor, 'primarySite'));
+
+    var donorFilter = {
+      file: {
+        donorId: {
+          is: [donor.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (donorFilter);
 
     _ctrl.donor.clinicalXML = null;
     promise = ExternalRepoService.getList({

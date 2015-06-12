@@ -248,6 +248,17 @@
     _ctrl.project = project;
     _ctrl.ExternalLinks = ExternalLinks;
 
+    _ctrl.isPendingDonor = _.isUndefined (_.get(project, 'primarySite'));
+
+    var projectFilter = {
+      file: {
+        projectCode: {
+          is: [project.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (projectFilter);
+
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
       _ctrl.project.uiPublicationList = [];

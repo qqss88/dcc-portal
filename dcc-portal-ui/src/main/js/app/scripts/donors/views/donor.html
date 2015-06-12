@@ -4,6 +4,19 @@
         <pcawg-badge data-ng-if="DonorCtrl.isPCAWG(DonorCtrl.donor)"></pcawg-badge>
     </h1>
 </div>
+
+<span data-ng-if="DonorCtrl.isPendingDonor">
+  <section>
+    <i class="icon-attention or icon-attention-1"></i>
+    No data for this donor has been submitted directly to ICGC DDC yet. However, go to the
+    <a href="{{ DonorCtrl.urlToExternalRepository }}">
+      external repository browser
+    </a>
+     to see the list of data files hosted in external repositories for this donor.
+  </section>
+</span>
+
+<span data-ng-if="!DonorCtrl.isPendingDonor">
 <div data-scroll-spy="">
 <aside data-ui-scrollfix=79 class="t_sidenav">
     <section>
@@ -130,7 +143,7 @@
         </table>
 
         <div>
-            <button class="t_button" type="button" data-ng-click="DonorCtrl.downloadDonorData()" data-ng-disabled="!DonorCtrl.downloadEnabled"> 
+            <button class="t_button" type="button" data-ng-click="DonorCtrl.downloadDonorData()" data-ng-disabled="!DonorCtrl.downloadEnabled">
                 <i class="icon-download"></i>
                 <span> Download Donor Data</span>
             </button>
@@ -228,7 +241,7 @@
     <div data-ng-init="supplementalCollapsed=true">
        <span data-ng-show="DonorCtrl.hasSupplementalFiles(DonorCtrl.donor)">
            <a href="" data-ng-click="supplementalCollapsed=!supplementalCollapsed">
-               Supplemental files: 
+               Supplemental files:
                {{ DonorCtrl.donor.family? " " + DonorCtrl.donor.family.length + " Family, " : "" }}
                {{ DonorCtrl.donor.exposure? " " + DonorCtrl.donor.exposure.length + " Exposure, " : "" }}
                {{ DonorCtrl.donor.therapy? " " + DonorCtrl.donor.therapy.length + " Therapy" : "" }}
@@ -307,7 +320,7 @@
                         <em>({{mutation.affectedDonorCountFiltered / DonorCtrl.donor.ssmTestedDonorCount * 100 |
                             number:2}}%)</em>
                     </span>
-                    
+
 
                 </td>
                 <td class="text-right" style="white-space: nowrap">
@@ -384,3 +397,4 @@
 </section>
 </article>
 </div>
+</span>
