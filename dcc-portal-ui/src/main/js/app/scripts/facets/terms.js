@@ -80,6 +80,7 @@
       if ($scope.facet) {
         splitTerms();
       }
+      $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
     }
 
     $scope.displayLimit = 5;

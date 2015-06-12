@@ -170,12 +170,22 @@
 
     ExternalRepoService.getList(p).then(function(data) {
       var facets = data.termFacets;
+      var activeRepos = [];
+
+      if (p.filters.file && p.filters.file.repositoryNames) {
+        activeRepos = p.filters.file.repositoryNames.is;
+      }
+
 
       // Build the repo table
       var repos = {};
-
       facets.repositoryNamesFiltered.terms.forEach(function(term) {
         var repoName = term.term;
+
+        // Restrict to active repos if it is available
+        if (!_.isEmpty(activeRepos) && !_.contains(activeRepos, repoName)) {
+          return;
+        }
 
         if (! repos[repoName]) {
           repos[repoName] = {};
@@ -394,7 +404,6 @@
         refresh();
       }
     });
-
   });
 
 
