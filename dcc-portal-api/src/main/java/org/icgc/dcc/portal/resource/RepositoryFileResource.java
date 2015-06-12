@@ -137,6 +137,7 @@ public class RepositoryFileResource {
   @GET
   @Timed
   @Path("/donors/count")
+  @ApiOperation(value = "Counts the number of donors matching the filter.", response = Long.class)
   public Long getUniqueDonorCount(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     return repositoryFileService.getDonorCount(toQuery(filtersParam));
@@ -154,6 +155,7 @@ public class RepositoryFileResource {
   @Timed
   @Path("/export")
   @Produces(TEXT_TSV)
+  @ApiOperation(value = "Exports repository file listings to a TSV file.", response = RepositoryFile.class)
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
@@ -176,6 +178,7 @@ public class RepositoryFileResource {
   @Path("/manifest")
   @Produces(GZIP)
   @Timed
+  @ApiOperation(value = "Generate a tar.gz archive containing the manifests of matching repository files.")
   public Response generateManifestArchiveByFilters(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_FILE_REPOS_VALUE) @QueryParam(API_FILE_REPOS_PARAM) @DefaultValue("") String repoList) {
@@ -203,6 +206,7 @@ public class RepositoryFileResource {
   @Path("/manifest")
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
+  @ApiOperation(value = "Generate a tar.gz archive containing the manifests of selected repository files.")
   public Response generateManifestArchiveByIdList(
       @ApiParam(value = API_FILE_IDS_VALUE) @FormParam(API_FILE_IDS_PARAM) List<String> fileIds,
       @ApiParam(value = API_FILE_REPOS_VALUE) @FormParam(API_FILE_REPOS_PARAM) String repoList) {
