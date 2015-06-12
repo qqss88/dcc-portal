@@ -6,16 +6,19 @@
                 data-facet-name="id"
                 data-proxy-type="file"
                 data-proxy-facet-name="id"
-                data-label="File"></li>
+                data-label="File"
+                data-placeholder="file name" ></li>
             <li data-tags-facet
                 data-type="file-donor"
                 data-facet-name="id"
                 data-label="Donor"
+                data-placeholder="eg. DO46416"
                 data-proxy-type="file"
                 data-proxy-facet-name="donorId"></li>
             <terms data-type="file" data-facet-name="projectCode"
                    data-label="Project"
-                   data-facet="ExternalRepoController.files.termFacets.projectCode"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.projectCode"
+                   data-defined="true"></terms>
             <terms data-type="file" data-facet-name="primarySite"
                    data-label="Primary Site"
                    data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
@@ -27,7 +30,8 @@
                    data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
             <terms data-type="file" data-facet-name="experimentalStrategy"
                    data-label="Experimental Strategy"
-                   data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"></terms>
+                   data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
+                   data-defined="true"></terms>
             <terms data-type="file" data-facet-name="study"
                    data-label="Only Files in Study"
                    data-missing-text="None"

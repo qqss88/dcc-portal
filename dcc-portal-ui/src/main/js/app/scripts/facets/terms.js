@@ -36,7 +36,7 @@
           term.label = $scope.missingText;
         }
 
-        if ($scope.facetName === 'projectId') {
+        if (_.contains(['projectId', 'projectCode'], $scope.facetName)) {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
@@ -61,7 +61,7 @@
           term.label = $scope.missingText;
         }
 
-        if ($scope.facetName === 'projectId') {
+        if (_.contains(['projectId', 'projectCode'], $scope.facetName) ) {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
