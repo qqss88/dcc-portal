@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.annotation.Resource;
@@ -61,7 +63,6 @@ import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.common.core.util.Joiners;
-import org.icgc.dcc.common.core.util.Separators;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
@@ -431,9 +432,9 @@ public class RepositoryFileService {
 
   @NonNull
   private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
-    val cleaned = transform(Arrays.asList(baseUrl, dataPath, id),
-        s -> removeBookendingCharacter(s, Separators.SLASH));
-    return SLASH_JOINER.join(cleaned);
+    return Stream.of(baseUrl, dataPath, id)
+        .map(part -> part.replaceAll("^/+|/+$", ""))
+        .collect(Collectors.joining("/"));
   }
 
   @NonNull
