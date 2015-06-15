@@ -281,12 +281,14 @@
     _ctrl.selectedFiles = [];
     _ctrl.summary = {};
 
+    /**
+     * Tablular display, remove PCAWG prefixes - DCC-3568
+     */
+    _ctrl.displayRepoNames = function (row) {
+      return _.map(row.repository.repoServer, function(server) {
+        return server.repoName.replace(/^PCAWG - /, '');
+      }).join(', ');
 
-    function getRepositoryNames (row) {
-      return _.map(row.repository.repoServer, 'repoName');
-    }
-
-    _ctrl.concatRepoNames = function (row) {
       return getRepositoryNames(row).join(', ');
     };
 

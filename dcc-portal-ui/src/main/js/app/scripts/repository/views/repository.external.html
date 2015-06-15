@@ -118,7 +118,7 @@
                            <a href="/repository/external/files/{{row.id}}">{{row.repository.fileName}}</a>
                         </td>
                         <td><a href="/donors/{{row.donor.donorId}}">{{row.donor.donorId}}</a></td>
-                        <td>{{ ExternalRepoController.concatRepoNames (row) }}</td>
+                        <td>{{ ExternalRepoController.displayRepoNames (row) }}</td>
                         <td><a href="/projects/{{row.donor.projectCode}}">{{row.donor.projectCode}}</a></td>
                         <td>
                             <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
