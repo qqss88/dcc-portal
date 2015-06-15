@@ -24,9 +24,20 @@ import java.net.URLDecoder;
 import lombok.SneakyThrows;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wordnik.swagger.annotations.ApiModel;
 import com.yammer.dropwizard.jersey.params.AbstractParam;
 
+@ApiModel(value = FiltersParam.EXTRA_DETAIL_FOR_DONOR_COUNT_FILTER_PARAM)
 public class FiltersParam extends AbstractParam<ObjectNode> {
+
+  public static final String EXTRA_DETAIL_FOR_DONOR_COUNT_FILTER_PARAM =
+      "When counting donors, a 'state' attribute can be specified to filter the types of " +
+          "donors to be included. There are two types of donors, 'live' and 'pending'. " +
+          "If the 'state' is not specified, 'live' is the default. " +
+          "To count both types, use '*'. Here are some examples: " +
+          "{\"donor\":{\"studies\":{\"is\":[\"PCAWG\"]},\"state\":{\"is\":[\"*\"]}}}, " +
+          "{\"donor\":{\"studies\":{\"is\":[\"PCAWG\"]},\"state\":{\"is\":[\"live\"]}}}, " +
+          "{\"donor\":{\"studies\":{\"is\":[\"PCAWG\"]},\"state\":{\"is\":[\"pending\"]}}}.";
 
   public FiltersParam(String input) {
     super(input);

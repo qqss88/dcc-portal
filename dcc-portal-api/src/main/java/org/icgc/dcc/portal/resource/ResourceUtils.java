@@ -61,7 +61,7 @@ public class ResourceUtils {
   static final String AFFECTED_BY_THE = " affected by the ";
   static final String FOR_THE = " for the ";
   static final String FIND_BY_ID_ERROR =
-      "If it does not exist with the specified Identifiable an error will be returned";
+      "Returns information of a mutation by ID. If the mutation ID is not found, this returns a 404 error.";
   static final String FIND_BY_ID = "Find by Identifiable";
   static final String NOT_FOUND = " not found";
   static final String MULTIPLE_IDS = ". Multiple IDs can be separated by a comma";
