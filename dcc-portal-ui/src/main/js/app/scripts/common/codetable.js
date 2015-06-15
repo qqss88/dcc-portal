@@ -76,6 +76,7 @@
       'WGS': 'Whole Genome Sequencing - random sequencing of the whole genome.',
       'WGA': 'Whole Genome Amplification followed by random sequencing.',
       'WXS': 'Random sequencing of exonic regions selected from the genome.',
+      'DNA-Seq': 'DNA sequencing using next-generation sequencing (NGS)',
       'RNA-Seq': 'Random sequencing of whole transcriptome, also known as Whole Transcriptome Shotgun Sequencing, ' +
                  'or WTSS',
       'miRNA-Seq': 'Micro RNA sequencing strategy designed to capture post-transcriptional RNA elements and ' +

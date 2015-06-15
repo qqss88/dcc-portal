@@ -53,8 +53,7 @@
     <current></current>
     <section style="padding-top:0">
         <div>
-            <p>External repositories content was indexed on {{ExternalRepoController.repoCreationTime | date}}
-               <br>
+           <p>
                ICGC raw data and other data are available in other repositories. You can use this search tool to find
                files of your interest and create repository-specific manifests. Some manifests may require
                <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>authorized</a> access. 
@@ -75,13 +74,13 @@
                     </button>
                 </div>
                 <div class="quarter">
-                    <i class="icon-file"></i><strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
+                    <i class="icon-file" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
                 </div>
                 <div class="quarter">
-                    <i class="icon-team"></i><strong>{{ExternalRepoController.summary.donorCount | number}}</strong> Donors
+                    <i class="icon-team" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.donorCount | number}}</strong> Donors
                 </div>
                 <div class="quarter omega">
-                    <i class="icon-database"></i><strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
+                    <i class="icon-database" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
                 </div>
             </section>
             <div class="clearfix"></div>
@@ -136,6 +135,10 @@
                 </tbody>
             </table>
            <pagination-controls data-type="files" data-data="ExternalRepoController.files"></pagination-controls>
+        </div>
+        <div>
+            <br>
+            <small class="pull-right">Index update: {{ExternalRepoController.repoCreationTime | date}}</small>
         </div>
     </section>
 </article>
