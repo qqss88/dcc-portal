@@ -1,4 +1,4 @@
-<div class="h1-wrap" ng-init="info = myController.fileInfo">
+<div class="h1-wrap" ng-init="info = fileCtrlr.fileInfo">
     <h1 data-ui-scrollfix=79 style="text-transform:none">
         <span class="t_badge t_badge__file"></span>
         {{ info.id }}
@@ -44,7 +44,7 @@
                 <th>Access</th>
                 <td>
                   <i class=
-        "{{ myController.equalsIgnoringCase (accessType, 'open') ? 'icon-lock-open' : 'icon-lock' }}">
+        "{{ fileCtrlr.equalsIgnoringCase (accessType, 'open') ? 'icon-lock-open' : 'icon-lock' }}">
                   </i>
                   {{ accessType }}
                 </td>
@@ -54,9 +54,9 @@
                 <td>{{ repoInfo.fileSize | bytes }}</td>
             </tr>
             <tr>
-                <th>File involved in Study</th>
+                <th>File in Study</th>
                 <td>
-                    <study-badge study="{{ info.study }}">
+                    <study-badge study="{{ info.study }}" text="None">
                 </td>
             </tr>
             <tr>
@@ -102,23 +102,23 @@
                     <td>{{ serverInfo.repoCountry }}</td>
                     <td>{{ repoInfo.repoType }}</td>
 
-                    <td ng-init="isGnos = myController.equalsIgnoringCase(repoInfo.repoType, 'GNOS')">
+                    <td ng-init="isGnos = fileCtrlr.equalsIgnoringCase(repoInfo.repoType, 'GNOS')">
                       <i class="icon-download"></i>
-                      <a href="#" data-ng-click="myController.downloadManifest (info.id, serverInfo.repoName)">
+                      <a href="#" data-ng-click="fileCtrlr.downloadManifest (info.id, serverInfo.repoName)">
                         Download Manifest
                       </a>
 
                       <span data-ng-if="isGnos"> |
                         <i class="icon-external-link"></i>
                         <a target="_blank" href=
-  "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoMetadataPath, repoInfo.repoEntityId) }}">
+  "{{ fileCtrlr.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoMetadataPath, repoInfo.repoEntityId) }}">
                           Show Metadata
                         </a>
                       </span>
                       <span data-ng-if="!isGnos"> |
                         <i class="icon-download"></i>
                         <a target="_blank" href=
-  "{{ myController.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoDataPath, repoInfo.repoEntityId) }}">
+  "{{ fileCtrlr.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoDataPath, repoInfo.repoEntityId) }}">
                           Download Data
                         </a>
                       </span>
