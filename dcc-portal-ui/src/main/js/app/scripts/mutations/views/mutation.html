@@ -95,7 +95,7 @@
                     <span data-ng-if="!consequence.geneStrand">N/A</span>
                 </td>
                 <td>
-                    <hide-list data-items="consequence.transcriptsAffected" data-limit="1" 
+                    <hide-list data-ng-if="consequence.geneAffectedId" data-items="consequence.transcriptsAffected" data-limit="1"
                         data-template-name="template/mutationTranscriptList.html">
                     </hide-list>
                 </td>
