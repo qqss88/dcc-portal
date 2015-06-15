@@ -15,14 +15,51 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-'use strict';
+(function() {
 
-angular.module('app.download', ['app.download.services', 'app.download.controllers']);
+  'use strict';
 
-angular.module('app.download').config(function ($stateProvider) {
-  $stateProvider.state('repository', {
-    url: '/repository*path',
-    templateUrl: '/scripts/repository/views/repository.html',
-    controller: 'DownloadController'
+  var module = angular.module('icgc.repository', ['icgc.repository.services', 'icgc.repository.controllers']);
+
+  module.config(function ($stateProvider) {
+    $stateProvider.state('repository', {
+      url: '/repository',
+      templateUrl: '/scripts/repository/views/repository.html',
+      controller: 'RepositoryController as RepositoryController',
+      data: {
+        tab: 'icgc' // Default
+      }
+    });
+
+    $stateProvider.state('repository.external', {
+      url: '/external',
+      reloadOnSearch: false,
+      data : {
+        tab: 'external'
+      }
+    });
+
+    $stateProvider.state('file', {
+      url: '/repository/external/files/:id',
+      templateUrl: '/scripts/repository/views/repository.external.file.html',
+      controller: 'ExternalFileInfoController as myController',
+      resolve: {
+        fileInfo: ['$stateParams', 'ExternalRepoService', function ($stateParams, ExternalRepoService) {
+          return ExternalRepoService.getFileInfo ($stateParams.id);
+        }]
+      }
+    });
+
+    $stateProvider.state('repository.icgc', {
+      url: '/icgc*path',
+      reloadOnSearch: true,
+      data : {
+        tab: 'icgc'
+      }
+    });
+
   });
-});
+
+})();
+
+

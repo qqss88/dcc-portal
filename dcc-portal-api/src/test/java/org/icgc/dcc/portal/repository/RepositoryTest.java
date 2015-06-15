@@ -27,7 +27,7 @@ import org.junit.Test;
 
 @Ignore
 @Slf4j
-public class RepositoryTest extends BaseRepositoryTest {
+public class RepositoryTest extends BaseElasticSearchTest {
 
   @Before
   public void setUp() throws Exception {

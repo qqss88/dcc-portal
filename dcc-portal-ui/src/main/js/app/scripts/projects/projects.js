@@ -248,6 +248,17 @@
     _ctrl.project = project;
     _ctrl.ExternalLinks = ExternalLinks;
 
+    _ctrl.isPendingDonor = _.isUndefined (_.get(project, 'primarySite'));
+
+    var projectFilter = {
+      file: {
+        projectCode: {
+          is: [project.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (projectFilter);
+
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
       _ctrl.project.uiPublicationList = [];
@@ -526,6 +537,26 @@
     this.several = function(list) {
       return Restangular.several('projects', list);
     };
+
+
+    // Get ALL projects metadata
+    this.getMetadata = function() {
+      var params = {
+        filters: {
+          project: {
+            state: {
+              is: ['*'] // Make sure we include both pending and live projects
+            }
+          }
+        },
+        size: 100
+      };
+
+      return this.all().get('', params).then(function(data) {
+        return data;
+      });
+    };
+
 
     this.getList = function (params) {
       var defaults = {

@@ -37,6 +37,9 @@ public class IndexModel {
    */
   public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entitySetId";
 
+  // Index name for the icgc-repository index.
+  public static final String REPOSITORY_INDEX_NAME = "icgc-repository";
+
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {
@@ -47,6 +50,7 @@ public class IndexModel {
     PATHWAY("pathway"),
 
     GENE_SET("geneSet"),
+    REPOSITORY_FILE("file"),
 
     CONSEQUENCE("consequence"),
     TRANSCRIPT("transcript"),
@@ -82,15 +86,52 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
+    REPOSITORY_FILE("file"),
+
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"),
+    REPOSITORY_FILE_TEXT("file-text"),
+    REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
     PROJECT_TEXT("project-text");
 
     private final String id;
   }
+
+  private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "id")
+          .put("repositoryEntityId", "repository.repo_entity_id")
+          .put("repositoryDataPath", "repository.repo_data_path")
+          .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
+          .put("repositoryType", "repository.repo_type")
+          .put("repositoryCountries", "repository.repo_server.repo_country")
+          .put("repositoryNames", "repository.repo_server.repo_name")
+          .put("fileName", "repository.file_name")
+          .put("fileSize", "repository.file_size")
+          .put("checksum", "repository.file_md5sum")
+          .put("lastUpdate", "repository.last_modified")
+          .put("projectCode", "donor.project_code")
+          .put("primarySite", "donor.primary_site")
+          .put("study", "study")
+          .put("donorStudy", "donor.study")
+          .put("dataType", "data_type.data_type")
+          .put("experimentalStrategy", "data_type.experimental_strategy")
+          .put("dataFormat", "data_type.data_format")
+          .put("access", "access")
+          .put("donorId", "donor.donor_id")
+          .put("donorSubmitterId", "donor.submitted_donor_id")
+          .put("specimenId", "donor.specimen_id")
+          .put("specimenSubmitterId", "donor.submitted_specimen_id")
+          .put("sampleId", "donor.sample_id")
+          .put("sampleSubmitterId", "donor.submitted_sample_id")
+          .put("program", "donor.program")
+          .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
+          .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
+          .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
+          .build();
 
   private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -114,11 +155,14 @@ public class IndexModel {
           .put("pexpTestedDonorCount", "_summary._pexp_tested_donor_count")
           .put("mirnaSeqTestedDonorCount", "_summary._mirna_seq_tested_donor_count")
           .put("jcnTestedDonorCount", "_summary._jcn_tested_donor_count")
-          .put("totalDonorCount", "_summary._total_donor_count")
+          // .put("totalDonorCount", "_summary._total_donor_count")
+          .put("totalDonorCount", "_summary._total_complete_donor_count")
           .put("affectedDonorCount", "_summary._affected_donor_count")
           .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
           .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
           .put("repository", "_summary.repository")
+          .put("complete", "_summary._complete")
+          .put("state", "_summary._complete")
           .build();
 
   private static final ImmutableMap<String, String> DONORS_FIELDS_MAPPING =
@@ -163,6 +207,8 @@ public class IndexModel {
           .put("priorMalignancy", "prior_malignancy")
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
+          .put("complete", "_summary._complete")
+          .put("state", "_summary._complete")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
@@ -181,10 +227,10 @@ public class IndexModel {
       new ImmutableMap.Builder<String, String>()
           .put("exposureType", "exposure_type")
           .put("exposureIntensity", "exposure_intensity")
-          .put("tabaccoSmokingHistoryIndicator", "tabacco_smoking_history_indicator")
-          .put("tabaccoSmokingIntensity", "tabacco_smoking_intensity")
+          .put("tobaccoSmokingHistoryIndicator", "tobacco_smoking_history_indicator")
+          .put("tobaccoSmokingIntensity", "tobacco_smoking_intensity")
           .put("alcoholHistory", "alcohol_history")
-          .put("alcoholHistoryIntensity", "alcolhol_history_intensity")
+          .put("alcoholHistoryIntensity", "alcohol_history_intensity")
           .build();
 
   private static final ImmutableMap<String, String> THERAPY_FIELDS_MAPPING =
@@ -517,6 +563,8 @@ public class IndexModel {
           .put("primarySiteCount", "primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
+          .put("completeDonorCount", "complete_donor_count")
+          .put("completeProjectCount", "complete_project_count")
           .build();
 
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
@@ -555,12 +603,20 @@ public class IndexModel {
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
+          // Donor-file, these are derived from file
+          .put("submittedId", "submittedId")
+          .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
+          .put("TCGASampleBarcode", "TCGASampleBarcode")
+          .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
+
           // GO Term
           .put("altIds", "altIds")
 
+          // File Repo
+          .put("file_name", "file_name")
+          .put("donor_id", "donor_id")
+
           // Pathway
-          // .put("url", "url")
-          // .put("source", "source")
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
@@ -636,6 +692,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
 
   /**

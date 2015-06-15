@@ -19,11 +19,11 @@ package org.icgc.dcc.portal.repository;
 
 import static org.elasticsearch.action.search.SearchType.DFS_QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
-
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Sets;
@@ -32,7 +32,9 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -45,21 +47,36 @@ public class SearchRepository {
   private static final Type PROJECT_TEXT = Type.PROJECT_TEXT;
   private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
   private static final Type GENESET_TEXT = Type.GENESET_TEXT;
+  private static final Type REPOSITORY_FILE_TEXT = Type.REPOSITORY_FILE_TEXT;
+  private static final Type REPOSITORY_FILE_DONOR_TEXT = Type.REPOSITORY_FILE_DONOR_TEXT;
 
   private final Client client;
 
-  private final String index;
+  @Value("#{repoIndexName}")
+  private String repoIndexName;
+
+  @Value("#{indexName}")
+  private String indexName;
 
   @Autowired
   SearchRepository(Client client, IndexModel indexModel) {
-    this.index = indexModel.getIndex();
     this.client = client;
   }
 
   public SearchResponse findAll(Query query, String type) {
-    val search = client
-        .prepareSearch(index)
-        .setSearchType(DFS_QUERY_THEN_FETCH)
+
+    SearchRequestBuilder search;
+
+    // Determine which index to use, external file repository are in a daily generated index separated from the main
+    // icgc-index
+    if (type.equals("file") || type.equals("file-donor")) {
+      log.info("Setting index to icgc-repository");
+      search = client.prepareSearch(repoIndexName);
+    } else {
+      search = client.prepareSearch(indexName, repoIndexName);
+    }
+
+    search.setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize());
 
@@ -71,9 +88,12 @@ public class SearchRepository {
     else if (type.equals("geneSet")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
     else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
-    else
+    else if (type.equals("file")) search.setTypes(REPOSITORY_FILE_TEXT.getId());
+    else if (type.equals("file-donor")) search.setTypes(REPOSITORY_FILE_DONOR_TEXT.getId());
+    else {
       search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
-          GENESET_TEXT.getId());
+          GENESET_TEXT.getId(), REPOSITORY_FILE_TEXT.getId());
+    }
 
     search.addFields(getFields(query, KIND));
 
@@ -105,6 +125,9 @@ public class SearchRepository {
       keys.add("geneMutations.analyzed");
     }
 
+    // Exact-match search on "id".
+    keys.add("id");
+
     String[] aKeys = keys.toArray(new String[keys.size()]);
 
     search.setQuery(multiMatchQuery(query.getQuery(), aKeys).tieBreaker(0.7F));
@@ -115,9 +138,20 @@ public class SearchRepository {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "curated_set")));
     } else if (type.equals("go_term")) {
       search.setPostFilter(FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "go_term")));
+    } else {
+      // Search in the wild, need to apply both default filters to only donor and project
+      val donor =
+          FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "donor"))
+              .must(QueryService.defaultDonorFilter());
+      val project =
+          FilterBuilders.boolFilter().must(FilterBuilders.termFilter("type", "project"))
+              .must(QueryService.defaultProjectFilter());
+      val others = FilterBuilders.boolFilter().mustNot(FilterBuilders.termsFilter("type", "donor", "project"));
+      search.setPostFilter(FilterBuilders.boolFilter().should(donor).should(project).should(others));
+
     }
 
-    log.debug("{}", search);
+    log.info("{}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 

@@ -39,9 +39,10 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings, PCAWG) {
+  module.controller('DonorCtrl',
+    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG) {
 
-    var _ctrl = this;
+    var _ctrl = this, promise;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
@@ -57,6 +58,36 @@
 
     _ctrl.donor = donor;
 
+    _ctrl.isPendingDonor = _.isUndefined (_.get(donor, 'primarySite'));
+
+    var donorFilter = {
+      file: {
+        donorId: {
+          is: [donor.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (donorFilter);
+
+    _ctrl.donor.clinicalXML = null;
+    promise = ExternalRepoService.getList({
+      filters: {
+        file: {
+          donorId: {is: [_ctrl.donor.id]},
+          dataFormat: { is: ['XML']}
+        }
+      }
+    });
+    promise.then(function(results) {
+      if (results.hits && results.hits[0]) {
+        var file = results.hits[0];
+        var repo = file.repository;
+        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
+          repo.repoDataPath + repo.repoEntityId;
+      }
+    });
+
+
     _ctrl.downloadDonorData = function() {
       $modal.open({
         templateUrl: '/scripts/downloader/views/request.html',
@@ -64,7 +95,7 @@
         resolve: {
           filters: function() {
             return {
-              donor: { id: { is: [_ctrl.donor.id] } }
+              donor: { id: { is: [_ctrl.donor.id] }, state:{is: ['*']} }
             };
           }
         }
@@ -181,6 +212,8 @@
 
   module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
     var _ctrl = this;
+
+    _ctrl.PCAWG = PCAWG;
 
     _ctrl.isPCAWG = function(specimen) {
       return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);

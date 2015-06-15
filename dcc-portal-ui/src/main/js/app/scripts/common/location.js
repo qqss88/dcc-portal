@@ -41,7 +41,7 @@
 
         // Clear all 'from' params. Pagination should be reset if filters change
         delete search.from;
-        ['donors', 'genes', 'mutations', 'occurrences'].forEach(function (type) {
+        ['donors', 'genes', 'mutations', 'occurrences', 'files'].forEach(function (type) {
           var soType = search[type];
           if (soType) {
             var so = angular.fromJson(soType);

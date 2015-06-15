@@ -30,11 +30,9 @@ angular.module('icgc.ui.table', [
 angular.module('icgc.ui.table.size', []);
 
 angular.module('icgc.ui.table.size').controller('tableSizeController', function ($scope, LocationService) {
-  var sog = LocationService.getJsonParam($scope.type);
 
   $scope.sizes = [10, 25, 50];
-
-  $scope.selectedSize = sog.size ? sog.size : $scope.sizes[0];
+  $scope.selectedSize = $scope.currentSize? +$scope.currentSize : $scope.sizes[0];
 
   $scope.changeSize = function () {
     var so = LocationService.getJsonParam($scope.type);
@@ -50,11 +48,12 @@ angular.module('icgc.ui.table.size').directive('tableSize', function () {
   return {
     restrict: 'A',
     scope: {
-      type: '@'
+      type: '@',
+      currentSize: '@'
     },
     replace: true,
     template: '<span>Showing <select data-ng-options="size for size in sizes"' +
-              ' data-ng-model="selectedSize" data-ng-change="changeSize(size)"></select> rows</span>',
+              ' data-ng-model="selectedSize" data-ng-change="changeSize()"></select> rows</span>',
     controller: 'tableSizeController'
   };
 });
@@ -141,6 +140,7 @@ angular.module('icgc.ui.table.pagination', [])
           if (!scope.data) {
             return;
           }
+
 
           scope.pages = [];
 

@@ -1,16 +1,19 @@
 package org.icgc.dcc.portal.resource;
 
+import static java.lang.String.format;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.validation.Validation;
 
 import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
@@ -19,9 +22,11 @@ import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.util.JsonUtils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+@Slf4j
 public class ResourceUtils {
 
   static final Set<String> ORDER_VALUES = ImmutableSet.of("asc", "desc");
@@ -97,6 +102,10 @@ public class ResourceUtils {
   static final String API_ANALYSIS_ID_PARAM = "analysisId";
   static final String API_PARAMS_VALUE = "EnrichmentParams";
   static final String API_PARAMS_PARAM = "params";
+  static final String API_FILE_IDS_PARAM = "fileIds";
+  static final String API_FILE_IDS_VALUE = "Limits the file manifest archive to this list of file IDs";
+  static final String API_FILE_REPOS_PARAM = "repositories";
+  static final String API_FILE_REPOS_VALUE = "Limits the file manifest archive to this list of file repositories";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";
@@ -104,6 +113,8 @@ public class ResourceUtils {
   static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity Set Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
   static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
+
+  private static final Joiner COMMA_JOINER = COMMA.skipNulls();
 
   static LinkedHashMap<String, Query> generateQueries(ObjectNode filters, String filterTemplate, List<String> ids) {
     val queries = Maps.<String, Query> newLinkedHashMap();
@@ -158,9 +169,32 @@ public class ResourceUtils {
         errorMessages.add("'" + violation.getPropertyPath() + "' " + violation.getMessage());
       }
 
-      throw new BadRequestException(COMMA.join(errorMessages));
+      throw new BadRequestException(COMMA_JOINER.join(errorMessages));
     }
 
   }
 
+  /**
+   * @param errorCondition True to throw a bad request exception
+   */
+  static void checkRequest(boolean errorCondition, String formatTemplate, Object... args) {
+
+    if (errorCondition) {
+      // We don't want exception within an exception-handling routine.
+      final Supplier<String> errorMessageProvider = () -> {
+        try {
+          return format(formatTemplate, args);
+        } catch (Exception e) {
+          final String errorDetails = "message: '" + formatTemplate +
+              "', parameters: '" + COMMA_JOINER.join(args) + "'";
+          log.error("Error while formatting message - " + errorDetails, e);
+
+          return "Invalid web request - " + errorDetails;
+        }
+      };
+
+      throw new BadRequestException(errorMessageProvider.get());
+    }
+
+  }
 }

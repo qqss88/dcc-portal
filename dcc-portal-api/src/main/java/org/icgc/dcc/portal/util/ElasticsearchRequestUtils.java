@@ -19,14 +19,23 @@ package org.icgc.dcc.portal.util;
 
 import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
+import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.List;
 
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.val;
 
+import org.elasticsearch.action.get.GetRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
+import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
@@ -34,6 +43,7 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class ElasticsearchRequestUtils {
 
+  private static final String FILE_INDEX_TYPE = Type.REPOSITORY_FILE.getId();
   public static final String[] EMPTY_SOURCE_FIELDS = null;
 
   public static String[] resolveSourceFields(Query query, Kind kind) {
@@ -43,6 +53,40 @@ public class ElasticsearchRequestUtils {
     }
 
     return sourceFields.toArray(new String[sourceFields.size()]);
+  }
+
+  @NonNull
+  public static GetRequestBuilder setFetchSourceOfGetRequest(GetRequestBuilder builder, Query query, Kind kind) {
+    String[] sourceFields = resolveSourceFields(query, kind);
+
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      builder.setFetchSource(sourceFields, EMPTY_SOURCE_FIELDS);
+    }
+
+    return builder;
+  }
+
+  @NonNull
+  public static SearchRequestBuilder setFetchSourceOfSearchRequest(SearchRequestBuilder builder, Query query, Kind kind) {
+    String[] sourceFields = resolveSourceFields(query, kind);
+
+    if (sourceFields != EMPTY_SOURCE_FIELDS) {
+      builder.setFetchSource(sourceFields, EMPTY_SOURCE_FIELDS);
+    }
+
+    return builder;
+  }
+
+  @NonNull
+  public static boolean isRelatedToDoublePendingDonor(Client client, String fieldName, String value) {
+    val search = client.prepareSearch(REPOSITORY_INDEX_NAME)
+        .setTypes(FILE_INDEX_TYPE)
+        .setSearchType(COUNT)
+        .setQuery(QueryBuilders.termQuery("donor." + fieldName, value));
+
+    val response = search.execute().actionGet();
+    val hitCount = getTotalHitCount(response);
+    return hitCount > 0;
   }
 
   private static List<String> getSource(Query query, Kind kind) {

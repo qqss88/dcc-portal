@@ -68,8 +68,18 @@ public class SearchConfig {
   }
 
   @Bean
+  public String repoIndexName() {
+    String indexName = properties.getElastic().getRepoIndexName();
+    return resolveIndexName(indexName);
+  }
+
+  @Bean
   public String indexName() {
     String indexName = properties.getElastic().getIndexName();
+    return resolveIndexName(indexName);
+  }
+
+  private String resolveIndexName(String indexName) {
 
     // Get cluster state
     ClusterState clusterState = client().admin().cluster()
@@ -93,19 +103,30 @@ public class SearchConfig {
   }
 
   @Bean
+  public Map<String, String> releaseIndexMetadata() {
+    String indexStr = resolveIndexName(properties.getElastic().getIndexName());
+    return indexMetadata(indexStr);
+  }
+
+  @Bean
+  public Map<String, String> repoIndexMetadata() {
+    String indexStr = resolveIndexName(properties.getElastic().getRepoIndexName());
+    return indexMetadata(indexStr);
+  }
+
   @SneakyThrows
   @SuppressWarnings("unchecked")
-  public Map<String, String> indexMetadata() {
+  private Map<String, String> indexMetadata(String indexName) {
     // Get cluster state
     ClusterState clusterState = client().admin().cluster()
         .prepareState()
-        .setIndices(indexName())
+        .setIndices(indexName)
         .execute()
         .actionGet()
         .getState();
 
-    IndexMetaData indexMetaData = clusterState.getMetaData().index(indexName());
-    checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName());
+    IndexMetaData indexMetaData = clusterState.getMetaData().index(indexName);
+    checkState(indexMetaData != null, "Index meta data is null. Ensure that index '%s' exists.", indexName);
 
     // Get the first mappings. This is arbitrary since they all contain the same metadata
     MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
@@ -125,7 +146,7 @@ public class SearchConfig {
         getApiVersion(),
         getApplicationVersion(),
         getCommitId(),
-        firstNonNull(indexMetadata().get("git.commit.id.abbrev"), "unknown"),
+        firstNonNull(releaseIndexMetadata().get("git.commit.id.abbrev"), "unknown"),
         indexName());
   }
 

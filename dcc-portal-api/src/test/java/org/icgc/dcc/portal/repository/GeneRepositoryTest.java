@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class GeneRepositoryTest extends BaseRepositoryTest {
+public class GeneRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "affectedDonorCountFiltered";
   private static final String DEFAULT_ORDER = "desc";
@@ -135,7 +135,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     SearchResponse responseNot = geneRepository.findAllCentric(queryNot);
     SearchHits hitsNot = responseNot.getHits();
 
-    assertThat(hitsNot.getTotalHits()).isEqualTo(3);
+    assertThat(hitsNot.getTotalHits()).isEqualTo(2);
   }
 
   @Test
@@ -229,6 +229,7 @@ public class GeneRepositoryTest extends BaseRepositoryTest {
     geneRepository.findOne(MISSING_ID, query);
   }
 
+  @Override
   protected Object cast(Object object) {
     return object;
   }

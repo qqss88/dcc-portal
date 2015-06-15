@@ -40,6 +40,34 @@
       'rRNA': 'rRNA',
       '3prime_overlapping_ncrna': '3\' Overlapping ncRNA',
       'Mt_rRNA': 'Mt rRNA',
+
+      // Facet Titles
+      'id': 'Project',
+      'projectId': 'Project',
+      'primarySite': 'Primary Site',
+      'primaryCountries': 'Country',
+      'tumourStageAtDiagnosis': 'Tumour Stage',
+      'vitalStatus': 'Vital Status',
+      'diseaseStatusLastFollowup': 'Disease Status',
+      'relapseType': 'Relapse Type',
+      'ageAtDiagnosisGroup': 'Age at Diagnosis',
+      'availableDataTypes': 'Available Data Type',
+      'analysisTypes': 'Donor Analysis Type',
+      'list': 'Gene sets',
+      'verificationStatus': 'Verification Status',
+      'consequenceType': 'Consequence Type',
+      'functionalImpact': 'Functional Impact',
+      'sequencingStrategy': 'Analysis Type',
+
+      'studies': 'Study',
+      'repositoryNames': 'Repository',
+      'fileName': 'File',
+      'study': 'Only Files in Study',
+      'dataFormat': 'File Format',
+      'dataType': 'Data Type',
+      'donorStudy': 'Only Donors in Study',
+      'projectCode': 'Project',
+
     };
 
 
@@ -48,6 +76,7 @@
       'WGS': 'Whole Genome Sequencing - random sequencing of the whole genome.',
       'WGA': 'Whole Genome Amplification followed by random sequencing.',
       'WXS': 'Random sequencing of exonic regions selected from the genome.',
+      'DNA-Seq': 'DNA sequencing using next-generation sequencing (NGS)',
       'RNA-Seq': 'Random sequencing of whole transcriptome, also known as Whole Transcriptome Shotgun Sequencing, ' +
                  'or WTSS',
       'miRNA-Seq': 'Micro RNA sequencing strategy designed to capture post-transcriptional RNA elements and ' +

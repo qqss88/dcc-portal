@@ -4,7 +4,7 @@
             <button type="button" class="t_button t_current__remove_all" data-ng-click="Facets.removeAll()">
                 <i class="icon-undo"></i>
             </button>
-            <share-button></share-button>
+            <share-button data-ng-if="Page.page() !== 'repository'"></share-button>
         </li>
         <li data-ng-repeat="(typeName, type) in filters">
             <ul>
@@ -20,7 +20,7 @@
                         <span data-ng-switch-when="goTermId">GO</span>
                         <span data-ng-switch-when="curatedSetId">Curated Gene Set</span>
                         <span data-ng-switch-when="location">{{typeName | readable }} Location</span>
-                        <span data-ng-switch-default="">{{facet | readable}}</span>
+                        <span data-ng-switch-default="">{{facet | trans}}</span>
                     </span>
 
                     <span class="t_current__or">

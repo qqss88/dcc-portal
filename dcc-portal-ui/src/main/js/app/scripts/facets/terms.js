@@ -32,8 +32,11 @@
       // Transltion on UI is slow, do in here
       $scope.actives.forEach(function(term) {
         term.label = ValueTranslator.translate(term.term, $scope.facetName);
+        if (term.term === '_missing' && $scope.missingText) {
+          term.label = $scope.missingText;
+        }
 
-        if ($scope.facetName === 'projectId') {
+        if (_.contains(['projectId', 'projectCode'], $scope.facetName)) {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
@@ -54,8 +57,11 @@
       // Transltion on UI is slow, do in here
       $scope.inactives.forEach(function(term) {
         term.label = ValueTranslator.translate(term.term, $scope.facetName);
+        if (term.term === '_missing' && $scope.missingText) {
+          term.label = $scope.missingText;
+        }
 
-        if ($scope.facetName === 'projectId') {
+        if (_.contains(['projectId', 'projectCode'], $scope.facetName) ) {
           ProjectCache.getData().then(function(cache) {
             term.tooltip = cache[term.term];
           });
@@ -74,6 +80,7 @@
       if ($scope.facet) {
         splitTerms();
       }
+      $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
     }
 
     $scope.displayLimit = 5;
@@ -122,14 +129,18 @@
     return {
       restrict: 'E',
       scope: {
+        // Routing
+        type: '@',
         facetName: '@',
+
+        // Label
         label: '@',
-        capitalize: '@',
         hideCount: '=',
         hideText: '@',
-        defined: '@',
-        type: '@',
+        missingText: '@',
+
         facet: '=',
+        defined: '@',
         collapsed: '@'
       },
       transclude: true,

@@ -6,13 +6,14 @@
 
 	/* Create the stacked bar chart using d3 */
 
-	var StackedBarChart = function(data, config){
-		this.data = data;
+	var StackedBarChart = function(config){
 		this.config = config;
 	};
 
-	StackedBarChart.prototype.render = function(element){
+	StackedBarChart.prototype.render = function(element, data){
 		this.element = element;
+		this.data = data;
+
 		var config = this.config;
 
 		// the scale for the x axis
@@ -37,6 +38,7 @@
 		    .orient('left').ticks(config.yaxis.ticks);
 
 		// create the svg
+      d3.select(element).select('#svgstackedbar').remove();
 		var svg = d3.select(element).append('svg')
 		    .attr('id','svgstackedbar')
 		    .attr('viewBox','0 0 '+(config.width+config.margin.left+config.margin.right)+
@@ -154,8 +156,8 @@
   };
 
 	StackedBarChart.prototype.destroy = function(){
-		this.data = null;
-    d3.select(this.element).selectAll('*').remove();
+	  this.data = null;
+     d3.select(this.element).selectAll('*').remove();
 	};
 
 	dcc.StackedBarChart = StackedBarChart;

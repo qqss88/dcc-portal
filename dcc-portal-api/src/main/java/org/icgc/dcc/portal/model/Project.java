@@ -1,6 +1,7 @@
 package org.icgc.dcc.portal.model;
 
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
@@ -74,6 +75,8 @@ public class Project {
   Map<String, Integer> experimentalAnalysisPerformedSampleCounts;
   @ApiModelProperty(value = "Repository", required = true)
   List<String> repository;
+  @ApiModelProperty(value = "Complete", required = true)
+  Boolean complete;
 
   @SuppressWarnings("unchecked")
   @JsonCreator
@@ -107,6 +110,8 @@ public class Project {
     experimentalAnalysisPerformedSampleCounts =
         (Map<String, Integer>) fieldMap.get(fields.get("experimentalAnalysisPerformedSampleCounts"));
     repository = (List<String>) fieldMap.get(fields.get("repository"));
+
+    complete = getBoolean(fieldMap.get(fields.get("complete")));
   }
 
 }
