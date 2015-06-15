@@ -58,7 +58,7 @@
 
     this.download = function(filters, repos) {
       var filtersStr = encodeURIComponent(JSON.stringify(filters));
-      var repoStr = _.map(Object.keys(repos), function(repo) {
+      var repoStr = _.map(repos, function(repo) {
         return repoMap[repo] || repo;
       }).join(',');
 
@@ -67,7 +67,7 @@
     };
 
     this.downloadSelected = function(ids, repos) {
-      var repoStr = _.map(Object.keys(repos), function(repo) {
+      var repoStr = _.map(repos, function(repo) {
         return repoMap[repo] || repo;
       }).join(',');
 

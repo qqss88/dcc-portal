@@ -281,13 +281,13 @@
     _ctrl.selectedFiles = [];
     _ctrl.summary = {};
 
-
-    function getRepositoryNames (row) {
-      return _.map(row.repository.repoServer, 'repoName');
-    }
-
-    _ctrl.concatRepoNames = function (row) {
-      return getRepositoryNames(row).join(', ');
+    /**
+     * Tablular display
+     */
+    _ctrl.displayRepoNames = function (row) {
+      return _.map(row.repository.repoServer, function(server) {
+        return server.repoName;
+      }).join(', ');
     };
 
     /**
