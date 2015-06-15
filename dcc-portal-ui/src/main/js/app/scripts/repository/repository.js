@@ -263,9 +263,7 @@
     };
 
     this.downloadManifest = function (fileId, repo) {
-      var repoParam = {};
-      repoParam [repo] = 1;
-      ExternalRepoService.downloadSelected([fileId], repoParam);
+      ExternalRepoService.downloadSelected([fileId], [repo]);
     };
 
   });
