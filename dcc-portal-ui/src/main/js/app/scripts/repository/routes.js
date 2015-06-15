@@ -42,7 +42,7 @@
     $stateProvider.state('file', {
       url: '/repository/external/files/:id',
       templateUrl: '/scripts/repository/views/repository.external.file.html',
-      controller: 'ExternalFileInfoController as myController',
+      controller: 'ExternalFileInfoController as fileCtrlr',
       resolve: {
         fileInfo: ['$stateParams', 'ExternalRepoService', function ($stateParams, ExternalRepoService) {
           return ExternalRepoService.getFileInfo ($stateParams.id);
