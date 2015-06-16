@@ -42,8 +42,8 @@
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models', 'icgc.genesets.services']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy,
-      Genes, Projects, Mutations, Donors, FiltersUtil, ExternalLinks, geneSet, Restangular) {
+    function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
+      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -82,17 +82,8 @@
 
         // Find out which projects are affected by this gene set, this data is used to generate cancer distribution
         // 1) Find the impacted projects: genesetId -> {projectIds} -> {projects}
-        var geneSetProjectPromise = Donors.getList({
-          size: 0,
-          from: 1,
-          include: ['facets'],
-          filters: _filter
-        }).then(function(data) {
-          var ids = _.pluck(data.facets.projectId.terms, 'term');
-          return Projects.getList({
-            filters: {'project': {'id': { 'is': ids}}}
-          });
-        });
+        var geneSetProjectPromise = GeneSetService.getProjects(_filter);
+
 
         // 2) Add mutation counts
         geneSetProjectPromise.then(function(projects) {
@@ -102,7 +93,7 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          mutationPromise = Projects.one(ids).handler.one('mutations', 'counts').get({filters: _filter});
+          mutationPromise = GeneSetService.getProjectMutations(ids, _filter);
 
           mutationPromise.then(function(projectMutations) {
             projects.hits.forEach(function(proj) {
@@ -124,8 +115,10 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          donorPromise = Projects.one(ids).handler.one('donors', 'counts').get({filters: _filter});
-          genePromise = Projects.one(ids).handler.one('genes', 'counts').get({filters: _filter});
+
+          donorPromise = GeneSetService.getProjectDonors(ids, _filter);
+          genePromise = GeneSetService.getProjectGenes(ids, _filter);
+
           _ctrl.totalDonors = 0;
 
           donorPromise.then(function(projectDonors) {
@@ -481,6 +474,43 @@
   'use strict';
 
   var module = angular.module('icgc.genesets.services', []);
+
+  module.service('GeneSetService', function(Donors, Mutations, Genes, Projects) {
+
+
+    /**
+     * Find out which projects are affected by this gene set, this data is used to generate cancer distribution
+     */
+    this.getProjects = function(filters) {
+      var promise = Donors.getList({
+        size: 0,
+        from: 1,
+        include: ['facets'],
+        filters: filters
+      });
+
+      return promise.then(function(data) {
+        var ids = _.pluck(data.facets.projectId.terms, 'term');
+        return Projects.getList({
+          filters: {'project': {'id': { 'is': ids}}}
+        });
+      });
+    };
+
+    this.getProjectMutations = function(ids, filters) {
+      return Projects.one(ids).handler.one('mutations', 'counts').get({filters: filters});
+    };
+
+    this.getProjectDonors = function(ids, filters) {
+      return Projects.one(ids).handler.one('donors', 'counts').get({filters: filters});
+    };
+
+    this.getProjectGenes = function(ids, filters) {
+      return Projects.one(ids).handler.one('genes', 'counts').get({filters: filters});
+    };
+
+  });
+
 
   /**
    * Generate hierarchical structure for gene-ontology
