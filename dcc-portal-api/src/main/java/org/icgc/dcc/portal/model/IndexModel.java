@@ -64,6 +64,7 @@ public class IndexModel {
     SEQ_DATA(""),
     DOMAIN(""),
     EXON(""),
+    DIAGRAM("diagram"),
     FAMILY(""),
     EXPOSURE(""),
     THERAPY("");
@@ -93,6 +94,7 @@ public class IndexModel {
     MUTATION_TEXT("mutation-text"),
     PATHWAY_TEXT("pathway-text"),
     GENESET_TEXT("gene-set-text"),
+    DIAGRAM("diagram"),
     REPOSITORY_FILE_TEXT("file-text"),
     REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
     PROJECT_TEXT("project-text");
@@ -567,6 +569,14 @@ public class IndexModel {
           .put("completeProjectCount", "complete_project_count")
           .build();
 
+  private static final ImmutableMap<String, String> DIAGRAM_FIELDS_MAPPING =
+      new ImmutableMap.Builder<String, String>()
+          .put("id", "diagram_id")
+          .put("xml", "xml")
+          .put("proteinMap", "protein_map")
+          .put("highlights", "highlights")
+          .build();
+
   private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           // Common
@@ -692,6 +702,7 @@ public class IndexModel {
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.DIAGRAM, DIAGRAM_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
 

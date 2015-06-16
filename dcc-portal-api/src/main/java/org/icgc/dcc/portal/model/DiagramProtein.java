@@ -15,38 +15,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.model;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.IOException;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.val;
+@Data
+@NoArgsConstructor
+public class DiagramProtein {
 
-import org.junit.Test;
-
-import com.google.common.collect.Lists;
-
-/**
- * Test the ability to get a list of dbIds and matching Uniprot ids from Reactome's restAPI
- */
-public class ReactomeServiceTest {
-
-  private ReactomeService service = new ReactomeService();
-
-  @Test
-  public void testSuccessMapping() {
-    val result = service.mapProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
-    assertThat(result).isNotNull();
-    assertThat(result.size()).isEqualTo(3);
-    assertThat(result.get("49127")).isEqualTo("P30154");
-  }
-
-  @Test
-  public void testSuccessPathway() throws IOException {
-    val result = service.getPathwayDiagramStream("REACT_578.8");
-    assertThat(result).isNotNull();
-    assertThat(result.read()).isEqualTo("<".charAt(0));
-  }
+  @JsonProperty
+  String dbIds;
+  @JsonProperty
+  Long value;
 
 }

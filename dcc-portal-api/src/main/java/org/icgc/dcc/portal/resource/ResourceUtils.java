@@ -174,9 +174,6 @@ public class ResourceUtils {
 
   }
 
-  /**
-   * @param errorCondition True to throw a bad request exception
-   */
   static void checkRequest(boolean errorCondition, String formatTemplate, Object... args) {
 
     if (errorCondition) {
@@ -195,6 +192,5 @@ public class ResourceUtils {
 
       throw new BadRequestException(errorMessageProvider.get());
     }
-
   }
 }

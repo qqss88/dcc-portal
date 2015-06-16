@@ -69,6 +69,7 @@
     'icgc.phenotype',
     'icgc.beacon',
     'icgc.downloader',
+    'icgc.pathwayviewer',
     'icgc.repository',
     'icgc.auth',
 

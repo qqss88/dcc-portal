@@ -23,10 +23,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -43,15 +45,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.Donors;
+import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
-import org.icgc.dcc.portal.service.BadRequestException;
+import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.OccurrenceService;
-import org.icgc.dcc.portal.service.ReactomeService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -76,7 +79,7 @@ public class UIResource {
   protected static final String DEFAULT_FILTERS = "{}";
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
-  private final ReactomeService reactomeService;
+  private final DiagramService diagramService;
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
@@ -138,24 +141,37 @@ public class UIResource {
 
   @Path("/reactome/protein-map")
   @GET
-  public Map<String, String> getReactomeProteinMap(
-      @ApiParam(value = "Protein dbID. Multipe IDs can be entered as a comma-separated list", required = true) @QueryParam("proteinIds") IdsParam proteinDbIds) {
-    return reactomeService.mapProteinIds(proteinDbIds.get());
+  public Map<String, DiagramProtein> getReactomeProteinMap(
+      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId,
+      @ApiParam(value = "The functional impact filter", required = true) @QueryParam("impactFilter") FieldsParam impactFilter) {
+
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
+
+    return diagramService.mapProteinIds(pathwayId, impactFilter.get());
   }
 
   @Path("/reactome/pathway-diagram")
   @GET
   @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
-      @ApiParam(value = "A pathway  Reactome Id", required = true) @QueryParam("pathwayId") String pathwayId) {
-    if (isValidPathwayId(pathwayId)) {
-      throw new BadRequestException("Pathway id '" + pathwayId + "' is empty or not valid");
-    }
+      @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
 
-    return Response.ok(reactomeService.getPathwayDiagramStream(pathwayId), APPLICATION_XML).build();
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
+
+    return Response.ok(diagramService.getPathwayDiagramString(pathwayId), APPLICATION_XML).build();
   }
 
-  private Boolean isValidPathwayId(String id) {
+  @Path("/reactome/pathway-sub-diagram")
+  @GET
+  public List<String> getShownPathwaySection(
+      @ApiParam(value = "A non-diagrammed pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
+
+    checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
+
+    return diagramService.getShownPathwaySection(pathwayId);
+  }
+
+  private Boolean isInvalidPathwayId(String id, Object... args) {
     return isNullOrEmpty(id) || !(id.startsWith("REACT_") && tryParse(id.substring(6)) != null);
   }
 
