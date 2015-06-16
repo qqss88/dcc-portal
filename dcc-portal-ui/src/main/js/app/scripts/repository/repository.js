@@ -165,7 +165,6 @@
       return _.find(list, function(t) { return t.term === term; }).count || 0;
     }
 
-
     ExternalRepoService.getList(p).then(function(data) {
       var facets = data.termFacets;
       var activeRepos = [];
@@ -193,7 +192,7 @@
         repos[repoName].fileCount = term.count;
       });
       $scope.repos = repos;
-      $scope.selectedRepos = _.pluck(facets.repositoryNamesFiltered.terms, 'term');
+      $scope.selectedRepos = Object.keys(repos);
     });
 
 
