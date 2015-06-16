@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-public class DiagramRepositoryTest extends BaseRepositoryTest {
+public class DiagramRepositoryTest extends BaseElasticSearchTest {
 
   DiagramRepository diagramRepository;
 
