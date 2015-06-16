@@ -40,7 +40,6 @@ import com.yammer.dropwizard.auth.Authenticator;
  * 
  * @param <T> the principal type.
  */
-@Component
 public class OpenIDAuthProvider implements InjectableProvider<Auth, Parameter> {
 
   @NonNull

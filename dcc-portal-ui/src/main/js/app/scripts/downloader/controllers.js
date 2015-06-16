@@ -166,6 +166,13 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
               job.uiQueryFilter = cleanFilter(JSON.parse(decodeURIComponent(jobInfo.uiQueryStr)));
 
+              // Do not display a link if there is state and state != live, this is to prevent pending donors
+              // from showing up on the advanced search page
+              job.hasAdvLink = true;
+              if (job.uiQueryFilter.donor && job.uiQueryFilter.donor.state) {
+                job.hasAdvLink = false;
+              }
+
               if (_.isEmpty(job.filter)) {
                 delete job.filter;
                 delete job.uiQueryFilter;

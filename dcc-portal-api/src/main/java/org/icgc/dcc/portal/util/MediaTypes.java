@@ -32,4 +32,6 @@ public final class MediaTypes {
   public static final String TEXT_TSV = "text/tsv";
   public static final MediaType TEXT_TSV_TYPE = new MediaType("text", "tsv");
 
+  public static final String GZIP = "application/x-gzip";
+
 }

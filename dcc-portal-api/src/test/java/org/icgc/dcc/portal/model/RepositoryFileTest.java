@@ -15,38 +15,57 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.service;
+package org.icgc.dcc.portal.model;
 
+import static com.yammer.dropwizard.testing.JsonHelpers.asJson;
+import static com.yammer.dropwizard.testing.JsonHelpers.jsonFixture;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-
+import lombok.SneakyThrows;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Test the ability to get a list of dbIds and matching Uniprot ids from Reactome's restAPI
+ * Test suite for RepositoryFile class
  */
-public class ReactomeServiceTest {
+@Slf4j
+public class RepositoryFileTest {
 
-  private ReactomeService service = new ReactomeService();
+  private static final Class<RepositoryFile> TEST_TARGET_CLASS = RepositoryFile.class;
+  private static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
+  private static final ObjectMapper CLASS_MAPPER = RepositoryFile.createJacksonMapper(); // configured with strategy
+
+  private static final String TEST_JSON_DIRECTORY = "fixtures/model/";
+  private static final String TEST_JSON_FILE =
+      TEST_JSON_DIRECTORY + RepositoryFileTest.class.getSimpleName() + ".json";
 
   @Test
-  public void testSuccessMapping() {
-    val result = service.mapProteinIds(Lists.newArrayList("49127", "6020621", "5998147"));
-    assertThat(result).isNotNull();
-    assertThat(result.size()).isEqualTo(3);
-    assertThat(result.get("49127")).isEqualTo("P30154");
+  @SneakyThrows
+  public void test() {
+    val jsonFixture = jsonFixture(TEST_JSON_FILE);
+    val testPojo = RepositoryFile.parse(jsonFixture);
+
+    log.info("JSON read from fixture file: '{}'", jsonFixture);
+    log.info("JSON serialized from Pojo: '{}'", asJson(testPojo));
+
+    runTestWith(testPojo, TEST_JSON_FILE);
   }
 
-  @Test
-  public void testSuccessPathway() throws IOException {
-    val result = service.getPathwayDiagramStream("REACT_578.8");
-    assertThat(result).isNotNull();
-    assertThat(result.read()).isEqualTo("<".charAt(0));
+  @SneakyThrows
+  private static void runTestWith(RepositoryFile testPojo, String jsonFixtureFilePath) {
+    val jsonNode = DEFAULT_MAPPER.readTree(jsonFixture(jsonFixtureFilePath));
+    val expectedPojo = CLASS_MAPPER.readValue(asJson(jsonNode), TEST_TARGET_CLASS);
+
+    assertThat(toJsonNode(testPojo))
+        .isEqualTo(toJsonNode(expectedPojo));
   }
 
+  @SneakyThrows
+  private static JsonNode toJsonNode(RepositoryFile pojo) {
+    return DEFAULT_MAPPER.readTree(asJson(pojo));
+  }
 }

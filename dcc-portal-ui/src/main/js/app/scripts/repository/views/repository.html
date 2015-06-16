@@ -1,80 +1,37 @@
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge_icon t_badge__download"><span class="icon-database"></span></span>Data Repository</h1>
 </div>
-<section style="padding-top:0">
-    <div class="alert alert-info" data-ng-if="slugs.length===0">
-        <p>Data Repository provides access to all ICGC cancer project data, including uniformly
-            processed/annotated data files.</p>
+<div class="t_tabs">
+    <div class="t_tabs__tab t_tabs__tab__charts"
+         data-nested
+         data-ng-click="RepositoryController.currentTab = 'icgc'"
+         data-ng-class="{active: RepositoryController.currentTab === 'icgc'}"
+         data-href="repository">
+        DCC Repository
     </div>
 
-    <div data-ng-repeat="file in textFiles | filter:{name:'notice.txt'}" class="alert alert-error">
-       <div btf-markdown="file.textContent" class="release_notice"></div>
+    <div class="t_tabs__tab t_tabs__tab__table"
+         data-nested
+         data-ng-click="RepositoryController.currentTab = 'external'"
+         data-ng-class="{active: RepositoryController.currentTab === 'external'}"
+         data-href="repository/external">
+        External Repositories
+    </div>
+</div>
+
+<div>
+    <div class='t_tab_pane'
+         data-ng-if="RepositoryController.currentTab === 'icgc'"
+         data-ng-class="{active: RepositoryController.currentTab === 'icgc'}">
+
+         <div data-ng-controller="ICGCRepoController as ICGCRepoController" data-ng-include="'scripts/repository/views/repository.icgc.html'"></div>
     </div>
 
-    <section class="alert alert-warning" data-ng-if="downloadEnabled === false">
-    Data Repository is currently disabled due to maintenance.<br>
-    Please contact <a href="mailto:dcc-support@icgc.org">support</a> if you require assistance.
-    </section>
+    <div class='t_tab_pane'
+         data-ng-if="RepositoryController.currentTab === 'external'"
+         data-ng-class="{active: RepositoryController.currentTab === 'external'}">
 
-    <div class="wide" data-ng-if="downloadEnabled === true">
-        <span data-ng-init="predicate='name'"></span>
-        <span data-ng-init="reverse=false"></span>
-
-        <section class="loading" data-ng-if="!files">
-            <h3><i class="icon-spin icon-spinner"></i>Loading data repository</h3>
-        </section>
-
-        <div data-ng-if="files">
-            <ul class="breadcrumb" style="background:#fff;font-size:1.25rem">
-                <li><a href="/repository">~</a></li>
-                <li data-ng-repeat="p in slugs">
-                    <a data-ng-if="!$last"
-                       data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}"
-                       href="/repository/{{ p.url }}">{{ p.name }}</a>
-                    <span data-ng-if="$last"
-                          data-ng-style="deprecatedReleases.indexOf(p.name) >= 0?{'text-decoration':'line-through'}:{}">{{ p.name }}</span>
-                </li>
-            </ul>
-
-            <table class="table" style="font-size: 1.1rem">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th class="text-right">File Size</th>
-                    <th class="text-right">Date</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr data-ng-repeat="file in files">
-                    <td data-ng-if="file.type=='f'">
-                        <i class="icon-file"></i>
-                        <a target="_self" href="{{API.BASE_URL}}/download?fn={{file.name}}">{{ file.baseName }}</a>
-                    </td>
-                    <td data-ng-if="file.type=='d'"
-                        data-ng-style="deprecatedReleases.indexOf(file.baseName) >= 0?{'text-decoration':'line-through'}:{}">
-                        <i class="icon-folder-open"></i>
-                        <a data-ng-if="file.translation" href="/repository{{ file.name }}">[{{ file.baseName }}] {{ file.translation }}</a>
-                        <a data-ng-if="!file.translation" href="/repository{{ file.name }}">{{ file.baseName }}</a>
-                    </td>
-                    <td data-ng-if="file.type=='f'" class="text-right">{{ file.size | bytes }}</td>
-                    <td data-ng-if="file.type=='d'" class="text-right">--</td>
-                    <td class="text-right">{{ file.date | date }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div>
-           <br>
-           <div data-ng-repeat="file in textFiles | filter:{name : '!notice.txt'}"> 
-               <div class="well well-small">
-                   <div><a target="_self" href="{{API.BASE_URL}}/download?fn={{file.name}}"><i class="icon-file"></i>{{file.baseName}}</a></div>
-                   <hr>
-                   <div class="markdown_container">
-                       <div btf-markdown="file.textContent"></div>
-                   </div>
-               </div>
-           </div>
-        </div>
+         <div data-ng-controller="ExternalRepoController as ExternalRepoController" data-ng-include="'scripts/repository/views/repository.external.html'"></div>
     </div>
-</section>
+</div>
+

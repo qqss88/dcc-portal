@@ -50,12 +50,12 @@ import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
-public class BaseRepositoryTest {
+public abstract class BaseElasticSearchTest {
 
   /**
    * Test configuration.
    */
-  protected static final String INDEX_NAME = "dcc-release-etl-cli";
+  protected static final String INDEX_NAME = "test_index";
   protected static final String SETTINGS_FILE_NAME = "index.settings.json";
   protected static final String JSON_DIR = "mappings";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";

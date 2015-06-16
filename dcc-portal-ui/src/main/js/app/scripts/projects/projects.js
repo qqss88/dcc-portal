@@ -174,6 +174,7 @@
                     uiFIProjects.push({
                       id: t.term,
                       name: proj.name,
+                      primarySite: proj.primarySite,
                       count: t.count
                     });
                   }
@@ -186,11 +187,22 @@
             });
           });
 
+        // Id to primary site
+        var id2site = {};
+        _ctrl.projects.hits.forEach(function(h) {
+           id2site[h.id] = h.primarySite;
+        });
+
         Restangular.one('projects/history', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
+          data.forEach(function(dataPoint) {
+            dataPoint.colourKey = id2site[dataPoint.group];
+          });
+
           _ctrl.donorData = data;
         });
+
       }
     }
 
@@ -235,6 +247,17 @@
 
     _ctrl.project = project;
     _ctrl.ExternalLinks = ExternalLinks;
+
+    _ctrl.isPendingDonor = _.isUndefined (_.get(project, 'primarySite'));
+
+    var projectFilter = {
+      file: {
+        projectCode: {
+          is: [project.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (projectFilter);
 
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
@@ -299,7 +322,7 @@
 
   });
 
-  module.controller('ProjectGeneCtrl', 
+  module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
 
     var _ctrl = this;
@@ -514,6 +537,26 @@
     this.several = function(list) {
       return Restangular.several('projects', list);
     };
+
+
+    // Get ALL projects metadata
+    this.getMetadata = function() {
+      var params = {
+        filters: {
+          project: {
+            state: {
+              is: ['*'] // Make sure we include both pending and live projects
+            }
+          }
+        },
+        size: 100
+      };
+
+      return this.all().get('', params).then(function(data) {
+        return data;
+      });
+    };
+
 
     this.getList = function (params) {
       var defaults = {

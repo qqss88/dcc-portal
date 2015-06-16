@@ -46,6 +46,7 @@
     /* Create new gene set based on text input - assumes input is already correct */
     this.create = function(text) {
       var data = 'geneIds=' + encodeURI(text);
+
       return Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
         .customPOST(data);
     };

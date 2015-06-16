@@ -4,13 +4,26 @@
         <pcawg-badge data-ng-if="DonorCtrl.isPCAWG(DonorCtrl.donor)"></pcawg-badge>
     </h1>
 </div>
+
+<span data-ng-if="DonorCtrl.isPendingDonor">
+  <section>
+    <i class="icon-attention or icon-attention-1"></i>
+    No data for this donor has been submitted directly to ICGC DDC yet. However, go to the
+    <a href="{{ DonorCtrl.urlToExternalRepository }}">
+      external repository browser
+    </a>
+     to see the list of data files hosted in external repositories for this donor.
+  </section>
+</span>
+
+<span data-ng-if="!DonorCtrl.isPendingDonor">
 <div data-scroll-spy="">
 <aside data-ui-scrollfix=79 class="t_sidenav">
     <section>
         <ul class="t_subnav__items">
             <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
             <li data-spy="clinical" class="t_subnav__items__item"><a data-scrollto href="#clinical">Clinical Data</a></li>
-            <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-spy="mutations" class="t_subnav__items__item" data-ng-if="DonorCtrl.donor.complete"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="specimen" class="t_subnav__items__item"><a data-scrollto href="#specimen">Specimen</a></li>
             <li><br></li>
             <li class="t_subnav__items__item" data-ng-if="DonorCtrl.mutationFacets.functionalImpact.total > 0">
@@ -75,7 +88,10 @@
     </div>
     <div class="half omega">
         <h3>Available Data Types</h3>
-        <table class="table table-info">
+        <div data-ng-if="!DonorCtrl.donor.complete" class="well">
+            Only clinical data has been submitted to ICGC DCC.
+        </div>
+        <table class="table table-info" data-ng-if="DonorCtrl.donor.complete">
             <tr>
                 <th>Clinical Data</th>
                 <td class="text-center"><i class="icon-ok"></i></td>
@@ -127,7 +143,7 @@
         </table>
 
         <div>
-            <button class="t_button" type="button" data-ng-click="DonorCtrl.downloadDonorData()" data-ng-disabled="!DonorCtrl.downloadEnabled"> 
+            <button class="t_button" type="button" data-ng-click="DonorCtrl.downloadDonorData()" data-ng-disabled="!DonorCtrl.downloadEnabled">
                 <i class="icon-download"></i>
                 <span> Download Donor Data</span>
             </button>
@@ -139,7 +155,11 @@
 </section>
 
 <section id="clinical">
-    <h3>Clinical Data</h3>
+    <h3>Clinical Data
+        <small class="pull-right" style="font-size: 1.0rem" data-ng-if="DonorCtrl.donor.clinicalXML">
+            <a href="{{DonorCtrl.donor.clinicalXML}}" target="_blank"><i class="icon-external-link"></i>TCGA Clinical XML</a>
+        </small>
+    </h3>
     <div class="half">
         <table class="table table-info">
             <tr>
@@ -221,7 +241,7 @@
     <div data-ng-init="supplementalCollapsed=true">
        <span data-ng-show="DonorCtrl.hasSupplementalFiles(DonorCtrl.donor)">
            <a href="" data-ng-click="supplementalCollapsed=!supplementalCollapsed">
-               Supplemental files: 
+               Supplemental files:
                {{ DonorCtrl.donor.family? " " + DonorCtrl.donor.family.length + " Family, " : "" }}
                {{ DonorCtrl.donor.exposure? " " + DonorCtrl.donor.exposure.length + " Exposure, " : "" }}
                {{ DonorCtrl.donor.therapy? " " + DonorCtrl.donor.therapy.length + " Therapy" : "" }}
@@ -236,12 +256,13 @@
 </section>
 
 <section id="mutations"
+         data-ng-if="DonorCtrl.donor.complete"
          data-ng-controller="DonorMutationsCtrl as DonorMutationsCtrl"
          data-ng-class="{'loading': !DonorMutationsCtrl.mutations.hits, 'empty': DonorMutationsCtrl.mutations.hits.length == 0}">
     <h3 data-ng-if="!DonorMutationsCtrl.mutations.hits"><i class="icon-spinner icon-spin"></i> Fetching Mutations...
     </h3>
 
-    <h3 data-ng-if="DonorMutationsCtrl.mutations.hits.length == 0">No Mutations Found.</h3>
+    <h3 data-ng-if="DonorMutationsCtrl.mutations.hits.length == 0">No Mutations Reported.</h3>
 
     <div data-ng-if="DonorMutationsCtrl.mutations.hits.length > 0">
         <h3>Most Frequent Mutations
@@ -299,7 +320,7 @@
                         <em>({{mutation.affectedDonorCountFiltered / DonorCtrl.donor.ssmTestedDonorCount * 100 |
                             number:2}}%)</em>
                     </span>
-                    
+
 
                 </td>
                 <td class="text-right" style="white-space: nowrap">
@@ -376,3 +397,4 @@
 </section>
 </article>
 </div>
+</span>

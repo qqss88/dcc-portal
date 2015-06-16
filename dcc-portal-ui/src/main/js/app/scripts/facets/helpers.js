@@ -116,6 +116,11 @@
       });
 
       filters = LocationService.filters();
+
+      if (! filters.hasOwnProperty(params.type)) {
+        return;
+      }
+
       delete filters[params.type][params.facet];
 
       if (_.isEmpty(filters[params.type])) {

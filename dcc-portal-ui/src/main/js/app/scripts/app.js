@@ -69,11 +69,13 @@
     'icgc.phenotype',
     'icgc.beacon',
     'icgc.downloader',
+    'icgc.pathwayviewer',
+    'icgc.repository',
+    'icgc.auth',
 
     // old
     'app.ui',
     'app.common',
-    'app.download',
     'app.downloader'
   ]);
 
@@ -176,7 +178,7 @@
   });
 
   module.run(function ($http, $state, $timeout, $interval, $rootScope, $modalStack,
-    Restangular, Angularytics, Compatibility, Notify) {
+    Restangular, Angularytics, Compatibility, Notify, Page) {
 
     var ignoreNotFound = [
       '/analysis/',
@@ -206,6 +208,7 @@
 
 
           if (response.data.message) {
+            Page.setPage('error');
             Notify.setMessage(response.data.message);
             Notify.showErrors();
           }

@@ -45,26 +45,26 @@ public class Exposure {
   Long exposureIntesity;
 
   @ApiModelProperty(value = "Tabacco smoking history indicator", required = true)
-  String tabaccoSmokingHistoryIndicator;
+  String tobaccoSmokingHistoryIndicator;
 
   @ApiModelProperty(value = "Tabacco smoking intensity", required = true)
-  Long tabaccoSmokingIntensity;
+  Long tobaccoSmokingIntensity;
 
   @ApiModelProperty(value = "Alcohol history", required = true)
   String alcoholHistory;
 
   @ApiModelProperty(value = "Alcohol history intensity", required = true)
-  Long alcoholHistoryIntensity;
+  String alcoholHistoryIntensity;
 
   @JsonCreator
   public Exposure(Map<String, Object> fieldMap) {
     val fields = FIELDS_MAPPING.get(Kind.EXPOSURE);
     exposureType = getString(fieldMap.get(fields.get("exposureType")));
     exposureIntesity = getLong(fieldMap.get(fields.get("exposureIntesity")));
-    tabaccoSmokingHistoryIndicator = getString(fieldMap.get(fields.get("tabaccoSmokingHistoryIndicator")));
-    tabaccoSmokingIntensity = getLong(fieldMap.get(fields.get("tabaccoSmokingIntensity")));
+    tobaccoSmokingHistoryIndicator = getString(fieldMap.get(fields.get("tobaccoSmokingHistoryIndicator")));
+    tobaccoSmokingIntensity = getLong(fieldMap.get(fields.get("tobaccoSmokingIntensity")));
     alcoholHistory = getString(fieldMap.get(fields.get("alcoholHistory")));
-    alcoholHistoryIntensity = getLong(fieldMap.get(fields.get("alcoholHistoryIntensity")));
+    alcoholHistoryIntensity = getString(fieldMap.get(fields.get("alcoholHistoryIntensity")));
   }
 
 }

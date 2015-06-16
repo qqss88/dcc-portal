@@ -39,11 +39,11 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models']);
+  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models', 'icgc.genesets.services']);
 
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page,
-      Genes, Projects, Mutations, Donors, FiltersUtil, ExternalLinks, geneSet) {
+    function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
+      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -58,87 +58,6 @@
       geneSetFilter = {};
       geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
 
-      // Builds an UI friendly inferred tree
-      // A -> [B, C] -> D -> [E, F, G]
-      function uiInferredTree(inferredTree) {
-        var root = {}, node = root, current = null;
-
-        if (! angular.isDefined(inferredTree) || _.isEmpty(inferredTree) ) {
-          return {};
-        }
-
-        current = inferredTree[0].level;
-
-        node.goTerms = [];
-        inferredTree.forEach(function(goTerm) {
-          // if (goTerm.level !== current) {
-          // FIXME: Temporary fix to get around the issue where root level can be 0 and self is also 0
-          if ( (goTerm.level !== current || goTerm.relation === 'self') && !_.isEmpty(node.goTerms)) {
-            current = goTerm.level;
-            node.child = {};
-            node.child .goTerms = [];
-            node = node.child;
-          }
-          node.goTerms.push({
-            name: goTerm.name,
-            id: goTerm.id,
-            relation: goTerm.relation,
-            level: parseInt(goTerm.level, 10)
-          });
-        });
-        return root;
-      }
-
-
-      // Builds an UI friendly list of parent pathway hierarchies
-      // [ [A->B], [C-D->E->F] ]
-      function uiPathwayHierarchy(parentPathways) {
-        var hierarchyList = [];
-        if (! angular.isDefined(parentPathways) || _.isEmpty(parentPathways) ) {
-          return hierarchyList;
-        }
-
-        parentPathways.forEach(function(path) {
-          var root = {}, node = root, diagramId = '';
-
-          // Add all ancestors
-          var geneSetId = _ctrl.geneSet.id;
-
-          path.forEach(function(n, idx) {
-            node.id = n.id;
-            node.name = n.name;
-
-            // FIXME: just make it bool in api?
-            if (n.diagrammed === 'true') {
-              diagramId = node.id;
-            }
-
-            // Has children, swap
-            if (idx < path.length) {
-              node.children = [];
-              node.children.push({});
-              node = node.children[0];
-            }
-          });
-
-          // Lastly, add self
-          node.id = _ctrl.geneSet.id;
-          node.name = _ctrl.geneSet.name;
-
-          // FIXME: check self-diagram logic with junjun
-          if (_ctrl.geneSet.diagrammed === 'true') {
-            diagramId = node.id;
-          }
-
-
-          hierarchyList.push({
-            'root': root,
-            'diagramId': diagramId,
-            'geneSetId': geneSetId
-          });
-        });
-        return hierarchyList;
-      }
 
 
       // Builds the project-donor distribution based on thie gene set
@@ -149,9 +68,8 @@
         var _filter = LocationService.mergeIntoFilters({gene:geneSetFilter});
         _ctrl.baseAdvQuery = _filter;
 
-
-        _ctrl.uiParentPathways = uiPathwayHierarchy(geneSet.hierarchy);
-        _ctrl.uiInferredTree = uiInferredTree(geneSet.inferredTree);
+        _ctrl.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(geneSet.hierarchy, _ctrl.geneSet);
+        _ctrl.uiInferredTree = GeneSetHierarchy.uiInferredTree(geneSet.inferredTree);
 
         Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
           _ctrl.totalMutations = count;
@@ -164,17 +82,8 @@
 
         // Find out which projects are affected by this gene set, this data is used to generate cancer distribution
         // 1) Find the impacted projects: genesetId -> {projectIds} -> {projects}
-        var geneSetProjectPromise = Donors.getList({
-          size: 0,
-          from: 1,
-          include: ['facets'],
-          filters: _filter
-        }).then(function(data) {
-          var ids = _.pluck(data.facets.projectId.terms, 'term');
-          return Projects.getList({
-            filters: {'project': {'id': { 'is': ids}}}
-          });
-        });
+        var geneSetProjectPromise = GeneSetService.getProjects(_filter);
+
 
         // 2) Add mutation counts
         geneSetProjectPromise.then(function(projects) {
@@ -184,7 +93,7 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          mutationPromise = Projects.one(ids).handler.one('mutations', 'counts').get({filters: _filter});
+          mutationPromise = GeneSetService.getProjectMutations(ids, _filter);
 
           mutationPromise.then(function(projectMutations) {
             projects.hits.forEach(function(proj) {
@@ -206,8 +115,10 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          donorPromise = Projects.one(ids).handler.one('donors', 'counts').get({filters: _filter});
-          genePromise = Projects.one(ids).handler.one('genes', 'counts').get({filters: _filter});
+
+          donorPromise = GeneSetService.getProjectDonors(ids, _filter);
+          genePromise = GeneSetService.getProjectGenes(ids, _filter);
+
           _ctrl.totalDonors = 0;
 
           donorPromise.then(function(projectDonors) {
@@ -243,12 +154,81 @@
 
         });
 
+        // 4) if it's a reactome pathway, get diagram
+        _ctrl.geneSet.showPathway = false;
+
+        // FIXME: Disabled until reactome is ready
+        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && 1 === 2 /* FIXME: Temporary !!! */) {
+          _ctrl.pathway = {};
+          _ctrl.geneSet.showPathway = true;
+
+          var pathwayId = _ctrl.uiParentPathways[0].diagramId;
+          var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
+
+          // get pathway xml
+          Restangular.one('ui').one('reactome').one('pathway-diagram')
+            .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
+            .then(function(data){
+              _ctrl.pathway.xml = data;
+            });
+
+          // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
+          if(pathwayId !== parentPathwayId) {
+            Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
+              .get({'pathwayId' : parentPathwayId},{'Accept':'application/json'})
+              .then(function(data){
+                _ctrl.pathway.zooms = data;
+              });
+          } else {
+            _ctrl.pathway.zooms = [''];
+          }
+
+          Restangular.one('ui').one('reactome').one('protein-map')
+            .get({pathwayId:parentPathwayId,
+                  impactFilter:_filter.mutation?_filter.mutation.functionalImpact.is.join(','):''})
+            .then(function(map){
+              var pathwayHighlights = [];
+              _.forEach(map,function(value,id) {
+                if(value && value.dbIds) {
+                  pathwayHighlights.push({
+                    uniprotId:id,
+                    dbIds:value.dbIds.split(','),
+                    value:value.value
+                  });
+                }
+              });
+
+              // Get ensembl ids for all the genes so we can link to advSearch page
+              Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
+                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','),
+                            undefined, {'validationOnly':true})
+                .then(function(data){
+                  _.forEach(pathwayHighlights,function(n){
+                    var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
+                    if(!uniprotObj){
+                      return;
+                    }
+                    var ensemblId = uniprotObj[0].id;
+                    n.advQuery =  LocationService.mergeIntoFilters(
+                      {
+                        gene: {
+                          id:  {is: [ensemblId]},
+                          pathwayId: {is: [parentPathwayId]}
+                        }
+                      });
+                    n.geneSymbol = uniprotObj[0].symbol;
+                    n.geneId = ensemblId;
+                  });
+                });
+
+              _ctrl.pathway.highlights = pathwayHighlights;
+            });
+        }
 
         // Assign projects to controller so it can be rendered in the view
         geneSetProjectPromise.then(function(projects) {
           _ctrl.geneSet.projects = projects.hits;
         });
-
 
         var params = {
           filters: _filter,
@@ -280,7 +260,6 @@
         if (_.isEmpty(_ctrl.genes.hits)) {
           return;
         }
-
 
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
           'counts').get({filters: _filter}).then(function (data) {
@@ -488,4 +467,141 @@
       return this.handler.get(angular.extend(defaults, params));
     };
   });
+})();
+
+
+(function() {
+  'use strict';
+
+  var module = angular.module('icgc.genesets.services', []);
+
+  module.service('GeneSetService', function(Donors, Mutations, Genes, Projects) {
+
+
+    /**
+     * Find out which projects are affected by this gene set, this data is used to generate cancer distribution
+     */
+    this.getProjects = function(filters) {
+      var promise = Donors.getList({
+        size: 0,
+        from: 1,
+        include: ['facets'],
+        filters: filters
+      });
+
+      return promise.then(function(data) {
+        var ids = _.pluck(data.facets.projectId.terms, 'term');
+        return Projects.getList({
+          filters: {'project': {'id': { 'is': ids}}}
+        });
+      });
+    };
+
+    this.getProjectMutations = function(ids, filters) {
+      return Projects.one(ids).handler.one('mutations', 'counts').get({filters: filters});
+    };
+
+    this.getProjectDonors = function(ids, filters) {
+      return Projects.one(ids).handler.one('donors', 'counts').get({filters: filters});
+    };
+
+    this.getProjectGenes = function(ids, filters) {
+      return Projects.one(ids).handler.one('genes', 'counts').get({filters: filters});
+    };
+
+  });
+
+
+  /**
+   * Generate hierarchical structure for gene-ontology
+   * and reactome pathways.
+   */
+  module.service('GeneSetHierarchy', function() {
+
+    /**
+     * Builds an UI friendly inferred tree
+     * A -> [B, C] -> D -> [E, F, G]
+     */
+    function uiInferredTree(inferredTree) {
+      var root = {}, node = root, current = null;
+
+      if (! angular.isDefined(inferredTree) || _.isEmpty(inferredTree) ) {
+        return {};
+      }
+      current = inferredTree[0].level;
+
+      node.goTerms = [];
+      inferredTree.forEach(function(goTerm) {
+        // FIXME: Temporary fix to get around the issue where root level can be 0 and self is also 0
+        if ( (goTerm.level !== current || goTerm.relation === 'self') && !_.isEmpty(node.goTerms)) {
+          current = goTerm.level;
+          node.child = {};
+          node.child .goTerms = [];
+          node = node.child;
+        }
+        node.goTerms.push({
+          name: goTerm.name,
+          id: goTerm.id,
+          relation: goTerm.relation,
+          level: parseInt(goTerm.level, 10)
+        });
+      });
+      return root;
+    }
+
+    // Builds an UI friendly list of parent pathway hierarchies
+    // [ [A->B], [C-D->E->F] ]
+    function uiPathwayHierarchy(parentPathways, geneSet) {
+      var hierarchyList = [];
+      if (! angular.isDefined(parentPathways) || _.isEmpty(parentPathways) ) {
+        return hierarchyList;
+      }
+
+      parentPathways.forEach(function(path) {
+        var root = {}, node = root, diagramId = '';
+
+        // Add all ancestors
+        var geneSetId = geneSet.id;
+
+        path.forEach(function(n, idx) {
+          node.id = n.id;
+          node.name = n.name;
+
+          // FIXME: just make it bool in api?
+          if (n.diagrammed === 'true') {
+            diagramId = node.id;
+          }
+
+          // Has children, swap
+          if (idx < path.length) {
+            node.children = [];
+            node.children.push({});
+            node = node.children[0];
+          }
+        });
+
+        // Lastly, add self
+        node.id = geneSet.id;
+        node.name = geneSet.name;
+
+        if (geneSet.diagrammed === 'true') {
+          diagramId = node.id;
+        }
+
+
+        hierarchyList.push({
+          'root': root,
+          'diagramId': diagramId,
+          'geneSetId': geneSetId
+        });
+      });
+      return hierarchyList;
+    }
+
+
+    this.uiInferredTree = uiInferredTree;
+    this.uiPathwayHierarchy = uiPathwayHierarchy;
+  });
+
+
 })();

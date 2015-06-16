@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class ProjectRepositoryTest extends BaseRepositoryTest {
+public class ProjectRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "totalDonorCount";
   private static final String DEFAULT_ORDER = "desc";
@@ -52,9 +52,11 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
 
   @Before
   public void setUp() throws Exception {
-    es.execute(
-        createIndexMapping(Type.PROJECT)
-            .withData(bulkFile(getClass())));
+    es.execute(createIndexMapping(Type.PROJECT)
+        .withData(bulkFile(getClass()))
+        // This is needed because the ProjectRepository now does a 'secondary' search on icgc-repository index.
+        .withData(bulkFile("RepositoryFileServiceTest.json")));
+
     projectRepository = new ProjectRepository(es.client(), INDEX);
   }
 
@@ -154,6 +156,7 @@ public class ProjectRepositoryTest extends BaseRepositoryTest {
     projectRepository.findOne(MISSING_ID, query);
   }
 
+  @Override
   protected Object cast(Object object) {
     return object;
   }

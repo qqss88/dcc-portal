@@ -200,6 +200,9 @@ public class PortalProperties extends Configuration {
     String indexName = "dcc-release-release5";
 
     @JsonProperty
+    String repoIndexName = "icgc-repository";
+
+    @JsonProperty
     List<ElasticSearchNodeAddress> nodeAddresses = newArrayList();
 
     @Getter

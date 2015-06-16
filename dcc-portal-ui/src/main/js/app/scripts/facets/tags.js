@@ -24,7 +24,6 @@
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
-    $scope.projects = HighchartsService.projectColours;
 
     $scope.Extensions = Extensions;
 
@@ -40,18 +39,13 @@
     };
 
     function setup() {
-      var type = $scope.type, filters = LocationService.filters(), activeIds = [];
+      var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
 
       _fetchNameForSelections ( filters.gene );
 
-      // Remap logical types to index type
-      if (_.contains(['go_term', 'pathway', 'curated_set'], type)) {
-        type = 'gene';
-      }
-
       $scope.actives = Facets.getActiveTags({
         type: type,
-        facet: $scope.facetName
+        facet: $scope.proxyFacetName || $scope.facetName
       });
 
       // There are only 'active' entity ids
@@ -167,32 +161,24 @@
 
       _captureTermInfo ( term );
 
-      var type, name;
-      if (_.contains(['go_term', 'pathway', 'curated_set'], $scope.type)) {
-        type = 'gene';
-        name = 'id';
-      } else {
-        type = $scope.type;
-        name = $scope.facetName;
-      }
+      var type = $scope.proxyType? $scope.proxyType : $scope.type;
+      var facet = $scope.proxyFacetName? $scope.proxyFacetName: $scope.facetName;
 
       Facets.addTerm({
         type: type,
-        facet: $scope.facetName,
-        term: term[name]
+        facet: facet,
+        term: term.id
       });
     };
 
     $scope.removeTerm = function (term) {
-      var type = $scope.type;
-      if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
-        type = 'gene';
-      }
+      var type = $scope.proxyType? $scope.proxyType : $scope.type;
+      var facet = $scope.proxyFacetName? $scope.proxyFacetName: $scope.facetName;
 
       Facets.removeTerm({
         type: type,
-        facet: $scope.facetName,
-        term: term
+        facet: facet,
+        term: term.id
       });
     };
 
@@ -208,14 +194,12 @@
 
 
     $scope.removeFacet = function () {
-      var type = $scope.type;
-      if (_.contains(['pathway', 'go_term', 'curated_set'], type)) {
-        type = 'gene';
-      }
+      var type = $scope.proxyType? $scope.proxyType : $scope.type;
+      var facet = $scope.proxyFacetName? $scope.proxyFacetName: $scope.facetName;
 
       Facets.removeFacet({
         type: type,
-        facet: $scope.facetName
+        facet: facet
       });
 
       // Remove secondary facet - entity
@@ -265,7 +249,10 @@
         label: '@',
         type: '@',
         example: '@',
-        placeholder: '@'
+        placeholder: '@',
+
+        proxyType: '@',
+        proxyFacetName: '@'
       },
       templateUrl: function(elem, attr) {
         if (attr.type === 'gene') {
