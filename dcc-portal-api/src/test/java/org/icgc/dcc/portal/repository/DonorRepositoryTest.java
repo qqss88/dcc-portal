@@ -47,7 +47,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class DonorRepositoryTest extends BaseRepositoryTest {
+public class DonorRepositoryTest extends BaseElasticSearchTest {
 
   private static final String DEFAULT_SORT = "ssmAffectedGenes";
   private static final String DEFAULT_ORDER = "desc";
@@ -64,7 +64,10 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
   @Before
   public void setUp() throws Exception {
-    es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC).withData(bulkFile(getClass())));
+    es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC)
+        .withData(bulkFile(getClass()))
+        // This is needed because the DonorRepository now does a 'secondary' search on icgc-repository index.
+        .withData(bulkFile("RepositoryFileServiceTest.json")));
     donorRepository = new DonorRepository(es.client(), INDEX);
   }
 
@@ -294,6 +297,7 @@ public class DonorRepositoryTest extends BaseRepositoryTest {
 
   }
 
+  @Override
   protected Object cast(Object object) {
     return object;
   }

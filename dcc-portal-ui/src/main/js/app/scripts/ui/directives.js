@@ -154,7 +154,7 @@ angular.module('app.ui.nested', []).directive('nested', function ($location) {
 });
 
 
-angular.module('app.ui.mutation', []).directive('mutationConsequences', function ($filter, ConsequenceOrder) {
+angular.module('app.ui.mutation', []).directive('mutationConsequences', function ($filter, Consequence) {
   return {
     restrict: 'E',
     scope: {
@@ -162,7 +162,7 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
     },
     template: '<ul class="unstyled">' +
               '<li data-ng-repeat="c in consequences">' +
-                '<abbr data-tooltip="SO term: {{ c.consequence }}">{{c.consequence | trans}}</abbr>' +
+                '<abbr data-tooltip="SO term: {{ c.consequence }}">{{ translate(c.consequence) }}</abbr>' +
                 '<span data-ng-repeat="(gk, gv) in c.data">' +
                   '<span>{{ $first==true? ": " : ""}}</span>' +
                   '<a href="/genes/{{gk}}"><em>{{gv.symbol}}</em></a> ' +
@@ -177,6 +177,10 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
               '</ul>',
     link: function (scope) {
       var consequenceMap;
+
+      scope.translate = function(consequence) {
+        return Consequence.translate( consequence );
+      };
 
       // Massage the tabular data into the following format:
       // Consequence1: gene1 [aa1 aa2] - gene2 [aa1 aa2] - gene3 [aa3 aa4]
@@ -205,8 +209,8 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
             'FI': consequence.functionalImpact
           });
         }
-
       });
+
 
       // Dump into a list, easier to format/sort
       scope.consequences = [];
@@ -219,10 +223,12 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
         }
       }
 
+      var precedence = Consequence.precedence();
+
       scope.consequences = $filter('orderBy')(scope.consequences, function (t) {
-        var index = ConsequenceOrder.indexOf(t.consequence);
+        var index = precedence.indexOf(t.consequence);
         if (index === -1) {
-          return ConsequenceOrder.length + 1;
+          return precedence.length + 1;
         }
         return index;
       });
@@ -242,7 +248,7 @@ angular.module('app.ui.param', []).directive('param', function (LocationService)
       defaultSelect: '@'
     },
     template: '<span data-ng-class="{\'t_labels__label_inactive\': !active}" data-ng-click="update()">' +
-              '<i data-ng-class="{\'icon-ok\': active}"></i> {{value | trans:true}}</span>',
+              '<i data-ng-class="{\'icon-ok\': active}"></i> {{value | readable}}</span>',
     link: function (scope) {
       var type = LocationService.search()[scope.key];
 
@@ -274,5 +280,22 @@ angular.module('icgc.ui.badges', []).directive('pcawgBadge', function() {
     restrict: 'E',
     replace: true,
     template: '<span class="badge pcawg-badge">PCAWG</span>'
+  };
+})
+.directive('studyBadge', function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: {
+      study: '@',
+      text: '@'
+    },
+    template: '<div><div><pcawg-badge data-ng-if="isPcawg"></div>' +
+      '<div><span data-ng-if="!isPcawg">{{ text }}</span></div></div>',
+    link: function (scope) {
+      scope.isPcawg = (scope.study || '').toUpperCase() === 'PCAWG';
+      // Displays the value of the 'study' if the 'text' attribute is not provided (i.e. no override supplied).
+      scope.text = scope.text || scope.study;
+    }
   };
 });

@@ -64,9 +64,12 @@
             <div>
                 <strong>Query: </strong>
                 <a href="/search" data-ng-if="!job.filter">All </a>
-                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter">
+                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter && job.hasAdvLink">
                     <query-display data-filters="job.uiQueryFilter"></query-display>
                 </a>
+                <span data-ng-if="job.filter && !job.hasAdvLink">
+                    <query-display data-filters="job.uiQueryFilter"></query-display>
+                </span>
             </div>
 
             <div data-ng-show="job.status === 'FAILED'" class="alert-error">
@@ -115,11 +118,11 @@
                         </td>
                         <td>
                            <span data-ng-if="file.completed === 'false'">
-                               <i class="icon-spinner icon-spin"></i> {{file.dataType | trans | define}}
+                               <i class="icon-spinner icon-spin"></i> {{file.dataType | datatype}}
                            </span>
                            <span data-ng-if="file.completed === 'true'">
                                <a href="" data-ng-click="downloadType(job.downloadId, file.dataType)"><i
-                                       class="icon-download"></i> {{file.dataType | trans | define}}</a>
+                                       class="icon-download"></i> {{file.dataType | datatype }}</a>
                            </span>
                         </td>
                     </tr>

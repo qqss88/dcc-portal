@@ -385,7 +385,7 @@
   });
 
   module.controller('GeneSetMutationsCtrl',
-    function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil) {
+    function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil, ProjectCache) {
 
     var _ctrl = this, geneSet;
 
@@ -395,6 +395,8 @@
       geneFilter[geneSetQueryType] = {is:[geneSet.id]};
 
       if (mutations.hasOwnProperty('hits')) {
+        var projectCachePromise = ProjectCache.getData();
+
         _ctrl.mutations = mutations;
 
         // Need to get SSM Test Donor counts from projects
@@ -425,6 +427,10 @@
                     mutation: {id: {is: [mutation.id]}},
                     donor: {projectId: {is: [facet.term]}},
                     gene: geneFilter
+                  });
+
+                  projectCachePromise.then(function(lookup) {
+                    facet.projectName = lookup[facet.term] || facet.term;
                   });
 
                   facet.countTotal = p.ssmTestedDonorCount;

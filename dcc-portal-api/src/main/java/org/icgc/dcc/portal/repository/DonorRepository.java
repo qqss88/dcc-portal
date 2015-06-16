@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
+import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.elasticsearch.action.search.SearchType.COUNT;
@@ -57,7 +58,9 @@ import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRelatedToDoublePendingDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
@@ -105,6 +108,7 @@ import org.icgc.dcc.portal.model.PhenotypeResult;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.service.QueryService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -118,6 +122,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class DonorRepository implements Repository {
 
   private static final String SCORE =
@@ -206,8 +211,9 @@ public class DonorRepository implements Repository {
           if (facetFilters.has(KIND.getId())) {
             facetFilters.with(KIND.getId()).remove(facet);
           }
-
           tf.facetFilter(getFilters(facetFilters));
+        } else {
+          tf.facetFilter(QueryService.defaultDonorFilter());
         }
         fs.add(tf);
       }
@@ -217,7 +223,7 @@ public class DonorRepository implements Repository {
 
   private FilterBuilder getFilters(ObjectNode filters) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return matchAllFilter();
+    return QueryService.defaultDonorFilter();
   }
 
   private FilterBuilder buildFilters(ObjectNode filters) {
@@ -245,7 +251,7 @@ public class DonorRepository implements Repository {
       }
       qb.must(musts.toArray(new FilterBuilder[musts.size()]));
     }
-    return matchAll ? matchAllFilter() : qb;
+    return matchAll ? QueryService.defaultDonorFilter() : qb;
   }
 
   private List<FilterBuilder> buildGeneNestedFilters(ObjectNode filters, boolean hasGene, boolean hasGeneSet,
@@ -280,7 +286,7 @@ public class DonorRepository implements Repository {
     val search = buildFindAllRequest(query, CENTRIC_TYPE);
     search.setQuery(buildQuery(query));
 
-    log.debug("{}", search);
+    log.info("{}", search);
     val response = search.execute().actionGet();
     log.debug("{}", response);
 
@@ -391,7 +397,7 @@ public class DonorRepository implements Repository {
     }
 
     val termFacetList = transform(results.build().entrySet(),
-        entry -> new Term(entry.getKey(), entry.getValue()));
+        entry -> new Term(entry.getKey(), (long) entry.getValue()));
 
     return ImmutableList.copyOf(termFacetList);
   }
@@ -547,7 +553,7 @@ public class DonorRepository implements Repository {
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
 
-    log.debug("{}", search);
+    log.info("{}", search);
 
     return search.execute().actionGet().getHits().getTotalHits();
   }
@@ -608,6 +614,8 @@ public class DonorRepository implements Repository {
       ObjectNode filters = remapFilters(query.getFilters());
       search.setPostFilter(getFilters(filters));
       search.setQuery(buildQuery(query));
+    } else {
+      search.setPostFilter(QueryService.defaultDonorFilter());
     }
 
     return search;
@@ -627,20 +635,25 @@ public class DonorRepository implements Repository {
   }
 
   public Map<String, Object> findOne(String id, Query query) {
-    val search = client.prepareGet(index, TYPE.getId(), id);
-    search.setFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
+    val search = client.prepareGet(index, TYPE.getId(), id)
+        .setFields(getFields(query, KIND));
+    setFetchSourceOfGetRequest(search, query, KIND);
 
     val response = search.execute().actionGet();
-    checkResponseState(id, response, KIND);
 
-    val map = createResponseMap(response, query, KIND);
-    log.debug("{}", map);
+    if (response.isExists()) {
+      val result = createResponseMap(response, query, KIND);
+      log.debug("Found donor: '{}'.", result);
 
-    return map;
+      return result;
+    }
+
+    if (!isRelatedToDoublePendingDonor(client, "donor_id", id)) {
+      // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
+      checkResponseState(id, response, KIND);
+    }
+
+    return singletonMap(FIELDS_MAPPING.get(KIND).get("id"), id);
   }
 
   public Set<String> findIds(Query query) {

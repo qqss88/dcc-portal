@@ -23,10 +23,10 @@ angular.module('app.downloader.controllers', ['app.downloader.services']);
 // Note: We try to preemptitively determine status as a way improve UX and reduce polls
 angular.module('app.downloader.controllers').controller('DownloaderController',
   function ($window, $filter, $timeout, $scope, Page, DownloaderService,
-    DataTypes, API, Restangular, RestangularNoCache, Settings, ids) {
+    DataType, API, Restangular, RestangularNoCache, Settings, ids) {
 
     var cancelTimeout;
-    var dataTypeOrder = DataTypes.order;
+    var dataTypeOrder = DataType.precedence();
 
     Page.setTitle('Downloader');
     Page.setPage('downloader');
@@ -165,6 +165,13 @@ angular.module('app.downloader.controllers').controller('DownloaderController',
               // Filter is the expanded query, uiFilter is what user sees
               job.filter = cleanFilter(JSON.parse(jobInfo.filter));
               job.uiQueryFilter = cleanFilter(JSON.parse(decodeURIComponent(jobInfo.uiQueryStr)));
+
+              // Do not display a link if there is state and state != live, this is to prevent pending donors
+              // from showing up on the advanced search page
+              job.hasAdvLink = true;
+              if (job.uiQueryFilter.donor && job.uiQueryFilter.donor.state) {
+                job.hasAdvLink = false;
+              }
 
               if (_.isEmpty(job.filter)) {
                 delete job.filter;

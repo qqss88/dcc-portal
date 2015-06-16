@@ -70,11 +70,12 @@
     'icgc.beacon',
     'icgc.downloader',
     'icgc.pathwayviewer',
+    'icgc.repository',
+    'icgc.auth',
 
     // old
     'app.ui',
     'app.common',
-    'app.download',
     'app.downloader'
   ]);
 
@@ -177,7 +178,7 @@
   });
 
   module.run(function ($http, $state, $timeout, $interval, $rootScope, $modalStack,
-    Restangular, Angularytics, Compatibility, Notify) {
+    Restangular, Angularytics, Compatibility, Notify, Page) {
 
     var ignoreNotFound = [
       '/analysis/',
@@ -207,6 +208,7 @@
 
 
           if (response.data.message) {
+            Page.setPage('error');
             Notify.setMessage(response.data.message);
             Notify.showErrors();
           }
@@ -251,38 +253,6 @@
       {type: 'go_term', id: 'GO:0008150', name: 'GO Biological Process', universe: 'GO_BIOLOGICAL_PROCESS'},
       {type: 'go_term', id: 'GO:0005575', name: 'GO Cellular Component', universe: 'GO_CELLULAR_COMPONENT'},
       {type: 'curated_set', id: 'GS1', name: 'Cancer Gene Census', universe: null}
-    ]
-  });
-
-
-  module.constant('DataTypes', {
-    'mapping': {
-      'clinical': 'Clinical data',
-      'ssm': 'Simple somatic mutations',
-      'sgv': 'Simple Germline Variation',
-      'cnsm': 'Copy number somatic mutations',
-      'stsm': 'Structural somatic mutations',
-      'exp_array': 'Array-based Gene Expression',
-      'exp_seq': 'Sequencing-based Gene Expression',
-      'pexp': 'Protein expression',
-      'mirna_seq': 'Sequencing-based miRNA Expression',
-      'jcn': 'Exon junctions',
-      'meth_array': 'Array-based DNA Methylation',
-      'meth_seq': 'Sequencing-based DNA Methylation'
-    },
-    'order': [
-      'clinical',
-      'ssm',
-      'sgv',
-      'cnsm',
-      'stsm',
-      'exp_seq',
-      'exp_array',
-      'pexp',
-      'mirna_seq',
-      'jcn',
-      'meth_array',
-      'meth_seq'
     ]
   });
 

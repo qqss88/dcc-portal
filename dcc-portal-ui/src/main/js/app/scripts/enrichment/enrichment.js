@@ -367,6 +367,9 @@
       if (filters.gene && filters.gene.pathwayId && universe.type === 'pathway') {
         return null;
       }
+      if (filters.gene && filters.gene.hasPathway && universe.type === 'pathway') {
+        return null;
+      }
 
       // Replace list with input limit
       filters = mergeInputGeneList(filters, enrichment.id);

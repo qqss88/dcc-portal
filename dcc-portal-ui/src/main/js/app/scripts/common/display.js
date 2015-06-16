@@ -122,6 +122,10 @@
                 uiTerm = predefinedCurated.name;
                 isPredefined = true;
               }
+            } else if (_.contains(['study', 'donorStudy', 'studies'], facetKey)) {
+              if (term === '_missing') {
+                uiTerm = 'None';
+              }
             }
 
             // Extension terms goes first

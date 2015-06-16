@@ -19,9 +19,8 @@
                 data-ng-mouseleave="mouseLeave($event)">
 
                 <span class="t_facets__facet__terms__active__term__label__text">
-                <i class="icon-ok"></i>
-                <span data-tooltip="{{ item | trans:capitalize | define }}"
-                      data-tooltip-placement="top">{{ entityIdMap[item]}}</span>
+                    <i class="icon-ok"></i>
+                    <span>{{ entityIdMap[item]}}</span>
                 </span>
             </li>
 
@@ -34,9 +33,8 @@
                 data-ng-mouseleave="mouseLeave($event)">
 
                 <span class="t_facets__facet__terms__active__term__label__text">
-                <i style='color:{{projects[item]}}' class="icon-ok"></i>
-                <span data-tooltip="{{ item | trans:capitalize | define }}"
-                      data-tooltip-placement="top">{{item}}</span>
+                    <i class="icon-ok"></i>
+                    <span>{{item}}</span>
                 </span>
             </li>
         </ul>

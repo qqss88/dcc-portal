@@ -96,6 +96,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class GeneRepository implements Repository {
 
   private static final String SCORE = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";

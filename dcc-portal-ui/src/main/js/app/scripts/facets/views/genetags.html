@@ -20,8 +20,8 @@
 
                 <span class="t_facets__facet__terms__active__term__label__text">
                 <i class="icon-ok"></i>
-                <span data-tooltip="{{ item | trans:true }}"
-                      data-tooltip-placement="top">{{ (entityIdMap[item] || item) | trans:true}}</span>
+                <span data-tooltip="{{ item }}"
+                      data-tooltip-placement="top">{{ (entityIdMap[item] || item) }}</span>
                 </span>
             </li>
 
@@ -35,8 +35,8 @@
                 data-ng-mouseleave="mouseLeave($event)">
 
                 <span class="t_facets__facet__terms__active__term__label__text">
-                <i style='color:{{projects[item]}}' class="icon-ok"></i>
-                <span data-tooltip="{{ item | trans:capitalize | define }}"
+                <i class="icon-ok"></i>
+                <span data-tooltip="{{ item }}"
                       data-tooltip-placement="top">{{item}}</span>
                 </span>
             </li>

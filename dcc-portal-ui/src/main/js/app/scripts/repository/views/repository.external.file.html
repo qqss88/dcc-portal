@@ -1,0 +1,179 @@
+<div class="h1-wrap" ng-init="info = fileCtrlr.fileInfo">
+    <h1 data-ui-scrollfix=79 style="text-transform:none">
+        <span class="t_badge t_badge__file"></span>
+        {{ info.id }}
+    </h1>
+</div>
+
+<div data-scroll-spy="">
+
+<aside data-ui-scrollfix=79 class="t_sidenav">
+    <section>
+        <ul class="t_subnav__items">
+            <li data-spy="summary" class="t_subnav__items__item current">
+                <a data-scrollto href="#summary">Summary</a>
+            </li>
+            <li data-spy="repository" class="t_subnav__items__item">
+                <a data-scrollto href="#repository">Repository</a>
+            </li>
+            <li data-spy="donor" class="t_subnav__items__item">
+                <a data-scrollto href="#donor">Donor</a>
+            </li>
+        </ul>
+    </section>
+</aside>
+
+<article>
+<section id="summary">
+    <div class="wide">
+        <h3>Summary</h3>
+        <table class="table table-info" ng-init="repoInfo = info.repository">
+            <tr>
+                <th>File ID</th>
+                <td>{{ info.id }}</td>
+            </tr>
+            <tr>
+                <th>File name</th>
+                <td>{{ repoInfo.fileName }}</td>
+            </tr>
+            <tr>
+                <th>Checksum</th>
+                <td>{{ repoInfo.fileMd5sum }}</td>
+            </tr>
+            <tr ng-init="accessType = info.access">
+                <th>Access</th>
+                <td>
+                  <i class=
+        "{{ fileCtrlr.equalsIgnoringCase (accessType, 'open') ? 'icon-lock-open' : 'icon-lock' }}">
+                  </i>
+                  {{ accessType }}
+                </td>
+            </tr>
+            <tr>
+                <th>File size</th>
+                <td>{{ repoInfo.fileSize | bytes }}</td>
+            </tr>
+            <tr>
+                <th>File in Study</th>
+                <td>
+                    <study-badge study="{{ info.study }}" text="None">
+                </td>
+            </tr>
+            <tr>
+                <th>Last update</th>
+                <td>{{ repoInfo.lastModified | date: 'medium' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="narrow omega">
+        <h3>Data Type</h3>
+        <table class="table table-info" ng-init="dataTypeInfo = info.dataType">
+            <tr>
+                <th>Data Type</th>
+                <td>{{ dataTypeInfo.dataType }}</td>
+            </tr>
+            <tr>
+                <th>Data Format</th>
+                <td>{{ dataTypeInfo.dataFormat }}</td>
+            </tr>
+            <tr>
+                <th>Experimental Strategy</th>
+                <td>{{ dataTypeInfo.experimentalStrategy }}</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<section id="repository">
+    <div class="wide">
+        <h3>Repository</h3>
+        <table class="table table-info" ng-init="repoInfo = info.repository">
+            <thead>
+                <th>Repository Name</th>
+                <th>Country</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </thead>
+
+            <tbody>
+                <tr data-ng-repeat="serverInfo in repoInfo.repoServer">
+                    <td>{{ serverInfo.repoName }}</td>
+                    <td>{{ serverInfo.repoCountry }}</td>
+                    <td>{{ repoInfo.repoType }}</td>
+
+                    <td ng-init="isGnos = fileCtrlr.equalsIgnoringCase(repoInfo.repoType, 'GNOS')">
+                      <i class="icon-download"></i>
+                      <a href="#" data-ng-click="fileCtrlr.downloadManifest (info.id, serverInfo.repoName)">
+                        Download Manifest
+                      </a>
+
+                      <span data-ng-if="isGnos"> |
+                        <i class="icon-external-link"></i>
+                        <a target="_blank" href=
+  "{{ fileCtrlr.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoMetadataPath, repoInfo.repoEntityId) }}">
+                          Show Metadata
+                        </a>
+                      </span>
+                      <span data-ng-if="!isGnos"> |
+                        <i class="icon-download"></i>
+                        <a target="_blank" href=
+  "{{ fileCtrlr.buildUrl (serverInfo.repoBaseUrl, repoInfo.repoDataPath, repoInfo.repoEntityId) }}">
+                          Download Data
+                        </a>
+                      </span>
+
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</section>
+
+<section id="donor" ng-init="donorInfo = info.donor">
+    <div class="wide">
+        <h3>Donor</h3>
+        <table class="table table-info">
+            <tr>
+                <th>Project ID</th>
+                <td ng-init="projCode = donorInfo.projectCode">
+                    <a href="/projects/{{ projCode }}">{{ projCode }}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Primary site</th>
+                <td>{{ donorInfo.primarySite }}</td>
+            </tr>
+            <tr>
+                <th>Donor ID</th>
+                <td ng-init="donorId = donorInfo.donorId">
+                    <a href="/donors/{{ donorId }}">{{ donorId }}</a>
+                </td>
+            </tr>
+            <tr>
+                <th>Donor Submitter ID</th>
+                <td>{{ donorInfo.submittedDonorId }}</td>
+            </tr>
+            <tr>
+                <th>Specimen ID</th>
+                <td>{{ donorInfo.specimenId }}</td>
+            </tr>
+            <tr>
+                <th>Specimen Submitter ID</th>
+                <td>{{ donorInfo.submittedSpecimenId }}</td>
+            </tr>
+            <tr>
+                <th>Sample ID</th>
+                <td>{{ donorInfo.sampleId }}</td>
+            </tr>
+            <tr>
+                <th>Sample Submitter ID</th>
+                <td>{{ donorInfo.submittedSampleId }}</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+</article>
+</div>

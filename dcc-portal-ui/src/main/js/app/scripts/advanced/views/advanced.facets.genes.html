@@ -7,20 +7,32 @@
     </li>
 
     <terms data-type="gene" data-facet-name="type" data-facet="AdvancedCtrl.Gene.genes.facets.type"
-           data-capitalize="true"></terms>
+           data-capitalize="true" data-label="Type"></terms>
 
-    <li data-tags-facet data-label="Pathway"
+    <li data-tags-facet 
+        data-type="pathway"
         data-facet-name="pathwayId"
-        data-placeholder="eg. REACT_75842, TNF Signaling" data-type="pathway">
+        data-proxy-type="gene"
+        data-proxy-facet-name="pathwayId"
+        data-label="Pathway"
+        data-placeholder="eg. REACT_75842, TNF Signaling">
     </li>
 
-    <li data-tags-facet data-label="Gene Ontology (GO)"
+    <li data-tags-facet 
+        data-type="go_term"
         data-facet-name="goTermId"
-        data-placeholder="eg. GO:0016049, cell growth" data-type="go_term">
+        data-proxy-type="gene"
+        data-proxy-facet-name="goTermId"
+        data-label="Gene Ontology (GO)"
+        data-placeholder="eg. GO:0016049, cell growth"> 
     </li>
 
-    <li data-tags-facet data-label="Curated Gene Set"
-        data-facet-name="curatedSetId" data-type="curated_set">
+    <li data-tags-facet 
+        data-type="curated_set"
+        data-facet-name="curatedSetId" 
+        data-proxy-type="gene"
+        data-proxy-facet-name="curatedSetId"
+        data-label="Curated Gene Set">
     </li>
 
     <li data-location-facet data-type="gene" data-facet-name="location" data-label="Location"
