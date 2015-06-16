@@ -229,32 +229,21 @@
       return convertToString (input).toUpperCase();
     }
 
-    function removeBookendingCharacter (input, characterToRemove) {
-      var stringToRemove = convertToString (characterToRemove);
-      var lengthToRemove = stringToRemove.length;
-
-      if (lengthToRemove < 1) {
-        return input;
-      }
-
+    function removeBookendingSlash (input) {
       var inputString = convertToString (input);
 
       if (inputString.length < 1) {
         return input;
       }
 
-      var result = _.startsWith (inputString, stringToRemove) ?
-        _.drop (inputString, lengthToRemove).join('') : inputString;
-
-      return _.endsWith (result, stringToRemove) ?
-        _.dropRight (result, lengthToRemove).join('') : result;
+      return inputString.replace (/^\/+|\/+$/g, '');
     }
 
     // Public functions
     this.buildUrl = function (baseUrl, dataPath, entityId) {
       // Removes any opening and closing slash in all parts then concatenates.
-      return _.map ([baseUrl, dataPath, entityId],
-        _.partial (removeBookendingCharacter, _, slash)).join (slash);
+      return _.map ([baseUrl, dataPath, entityId], removeBookendingSlash)
+        .join (slash);
     };
 
     this.equalsIgnoringCase = function (test, expected) {
