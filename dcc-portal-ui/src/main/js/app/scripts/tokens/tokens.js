@@ -78,14 +78,14 @@
 
     $scope.deleteToken = function(token) {
       $scope.processing = true;
-      TokenService.deleteToken(token).then(function(data) {
+      TokenService.deleteToken(token).then(function() {
         refresh();
       });
     };
 
     $scope.createToken = function() {
       $scope.processing = true;
-      TokenService.createToken($scope.selected).then(function(data) {
+      TokenService.createToken($scope.selected).then(function() {
         refresh();
       });
     };

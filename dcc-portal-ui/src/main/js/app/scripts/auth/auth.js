@@ -188,7 +188,7 @@
         }
       }
 
-      var loginInstance, logoutInstance, authInstance, tokenInstance;
+      var loginInstance, logoutInstance, authInstance;
 
       $scope.openTokenManagerPopup = function() {
         $modal.open({
