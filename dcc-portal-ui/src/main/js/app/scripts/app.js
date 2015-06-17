@@ -72,6 +72,7 @@
     'icgc.pathwayviewer',
     'icgc.repository',
     'icgc.auth',
+    'icgc.tokens',
 
     // old
     'app.ui',
@@ -186,40 +187,42 @@
     ];
 
     Restangular.setErrorInterceptor(function (response) {
+
+      if (response.status !== 401) {
         console.error('Response Error: ', response);
+      }
 
-        if (response.status >= 500) {
-          Notify.setMessage('' + response.data.message);
-          Notify.showErrors();
-        } else if (response.status === 404) {
+      if (response.status >= 500) {
+        Notify.setMessage('' + response.data.message);
+        Notify.showErrors();
+      } else if (response.status === 404) {
 
-          // Ignore 404's from specific end-points, they are handled locally
-          // FIXME: Is there a better way to handle this within restangular framework?
-          var ignore = false;
-          ignoreNotFound.forEach(function(endpoint) {
-            if (response.config && response.config.url.indexOf(endpoint) >= 0) {
-              ignore = true;
-            }
-          });
-          if (ignore === true) {
-            return true;
+        // Ignore 404's from specific end-points, they are handled locally
+        // FIXME: Is there a better way to handle this within restangular framework?
+        var ignore = false;
+        ignoreNotFound.forEach(function(endpoint) {
+          if (response.config && response.config.url.indexOf(endpoint) >= 0) {
+            ignore = true;
           }
+        });
+        if (ignore === true) {
+          return true;
+        }
 
 
 
-          if (response.data.message) {
-            Page.setPage('error');
-            Notify.setMessage(response.data.message);
-            Notify.showErrors();
-          }
-        } else if (response.status === 400) {
-          if (response.data.message) {
-            Notify.setMessage('' + response.data.message);
-          }
+        if (response.data.message) {
+          Page.setPage('error');
+          Notify.setMessage(response.data.message);
           Notify.showErrors();
         }
+      } else if (response.status === 400) {
+        if (response.data.message) {
+          Notify.setMessage('' + response.data.message);
+        }
+        Notify.showErrors();
       }
-    );
+    });
 
     Angularytics.init();
     // Browser compatibility tests

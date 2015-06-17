@@ -20,6 +20,7 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -55,6 +56,7 @@ public class AccessTokenResource {
   private final TokenService tokenService;
 
   @POST
+  @Produces(TEXT_PLAIN)
   public String create(@Auth(required = true) User user, @FormParam("scope") String scope) {
     checkArgument(!isNullOrEmpty(scope), "scope is null or empty");
 

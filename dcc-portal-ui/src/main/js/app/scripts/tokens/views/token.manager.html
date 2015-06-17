@@ -1,0 +1,62 @@
+<div class="modal-content">
+    <div class="modal-header clearfix">
+        <h3 class="pull-left">Token manager</h3>
+    </div>
+    <div class="modal-body"> 
+        <strong>Generate new token</strong><br>
+        <span>
+            You can create your own personal API tokens for use in scripts and on the command line. Select the applicable scopes below and
+            click Generate. Your new token will be shown in the table below.
+        </span>
+        <br>
+        <div>
+            <ul>
+                <li data-ng-repeat="scope in availableScopes">
+                    <span data-ng-click="toggleScope(scope)">
+                        <i class="{{ isActive(scope) ===true? 'icon-check':'icon-check-empty'}}"></i> {{scope}}
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <br>
+        <div>
+            <button class="t_button" data-ng-click="createToken()" data-ng-disabled="selected.length === 0">Generate</button>
+        </div>
+        <br>
+
+        <strong>Manage active tokens</strong>
+        <div>
+            <table class="table table-info">
+                <thead>
+                    <th>Token Id</th>
+                    <th>Scopes</th>
+                    <th>Expires in</th>
+                    <th>&nbsp;</th>
+                </thead>
+                <tbody>
+                    <tr data-ng-if="processing">
+                       <td colspan="4" class="text-center"><i class="icon-spin icon-spinner" style="font-size:3rem"></i></td>
+                    </tr>
+                    <tr data-ng-if="activeTokens.length === 0 && processing===false">
+                       <td colspan="4">No active tokens</td>
+                    </tr>
+                    <tr data-ng-repeat="token in activeTokens | orderBy:'expiresIn':true" data-ng-if="processing===false">
+                        <td>{{token.id}}</td>
+                        <td>{{token.scope.join(', ')}}</td>
+                        <td>{{ (token.expiresIn / (60*60*24)) | number:2 }} days</td> 
+                        <td>
+                            <span style="float:left; font-size:1.25rem"> 
+                                <span class="t_tools__tool">
+                                    <i class="icon-trash" data-ng-click="deleteToken(token.id)"></i>
+                                </span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="t_button" data-ng-click="cancel()">Ok</button>
+    </div>
+</div>

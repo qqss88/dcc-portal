@@ -188,7 +188,15 @@
         }
       }
 
-      var loginInstance, logoutInstance, authInstance;
+      var loginInstance, logoutInstance, authInstance, tokenInstance;
+
+      $scope.openTokenManagerPopup = function() {
+        $modal.open({
+          templateUrl: '/scripts/tokens/views/token.manager.html',
+          controller: 'TokenController',
+          size: 'lg'
+        });
+      };
 
       $scope.openLoginPopup = function() {
         loginInstance = $modal.open({
