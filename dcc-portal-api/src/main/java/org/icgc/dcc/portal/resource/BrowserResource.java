@@ -48,8 +48,6 @@ public class BrowserResource {
    * Constants.
    */
   private static final ObjectMapper MAPPER = new ObjectMapper().setSerializationInclusion(NON_NULL);
-  private static final String CHROMOSOME_LOCATION_SEPERATOR = ":";
-  private static final String LOCATION_SEPERATOR = "-";
   private static final long WITH_TRANSCRIPT_SEGMENT_RANGE_MAX = 10 * 1000 * 1000;
   private static final long EXCLUDE_TRANSCRIPT_SEGMENT_RANGE_MAX = 20 * 1000 * 1000;
 
@@ -166,9 +164,12 @@ public class BrowserResource {
    * Retrieves histogram.
    */
   List<Object> getHistogram(AnnotationDataSource dataSource) {
-    val segmentParameter = ParameterNames.SEGMENT;
     val errorMessage = "Histogram request requires '%s' parameter.";
 
+    val interval = queryMap.get(ParameterNames.INTERVAL);
+    checkRequest(isBlank(interval), errorMessage, ParameterNames.INTERVAL);
+
+    val segmentParameter = ParameterNames.SEGMENT;
     val segmentRegion = queryMap.get(segmentParameter);
     checkRequest(isBlank(segmentRegion), errorMessage, segmentParameter);
 
