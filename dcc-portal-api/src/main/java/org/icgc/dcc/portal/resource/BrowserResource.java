@@ -6,6 +6,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import lombok.val;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.browser.ds.AnnotationDataSource;
 import org.icgc.dcc.portal.browser.model.DataSource;
+import org.icgc.dcc.portal.model.ChromosomeLocation;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +52,18 @@ public class BrowserResource {
   private static final String LOCATION_SEPERATOR = "-";
   private static final long WITH_TRANSCRIPT_SEGMENT_RANGE_MAX = 10 * 1000 * 1000;
   private static final long EXCLUDE_TRANSCRIPT_SEGMENT_RANGE_MAX = 20 * 1000 * 1000;
+
+  private static final class ParameterNames {
+
+    private static final String SEGMENT = "segment";
+    private static final String HISTOGRAM = "histogram";
+    private static final String DATATYPE = "dataType";
+    private static final String INTERVAL = "interval";
+    private static final String RESOURCE = "resource";
+    private static final String BIOTYPE = "biotype";
+    private static final String CONSEQUENCE_TYPE = "consequence_type";
+
+  }
 
   /**
    * Configuration
@@ -78,20 +92,13 @@ public class BrowserResource {
   @Timed
   @ApiOperation(value = "Retrieves a list of genes")
   public String getGene(
-
-      @QueryParam("segment") String segment,
-
-      @QueryParam("histogram") String histogram,
-
-      @QueryParam("dataType") String dataType,
-
-      @QueryParam("interval") String interval,
-
-      @QueryParam("resource") String resource,
-
-      @QueryParam("biotype") String bioType,
-
-      @QueryParam("consequence_type") String consequenceType) {
+      @QueryParam(ParameterNames.SEGMENT) String segment,
+      @QueryParam(ParameterNames.HISTOGRAM) String histogram,
+      @QueryParam(ParameterNames.DATATYPE) String dataType,
+      @QueryParam(ParameterNames.INTERVAL) String interval,
+      @QueryParam(ParameterNames.RESOURCE) String resource,
+      @QueryParam(ParameterNames.BIOTYPE) String bioType,
+      @QueryParam(ParameterNames.CONSEQUENCE_TYPE) String consequenceType) {
     return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType);
   }
 
@@ -103,20 +110,13 @@ public class BrowserResource {
   @Timed
   @ApiOperation(value = "Retrieves a list of mutations")
   public String getMutation(
-
-      @QueryParam("segment") String segment,
-
-      @QueryParam("histogram") String histogram,
-
-      @QueryParam("dataType") String dataType,
-
-      @QueryParam("interval") String interval,
-
-      @QueryParam("resource") String resource,
-
-      @QueryParam("biotype") String bioType,
-
-      @QueryParam("consequence_type") String consequenceType) {
+      @QueryParam(ParameterNames.SEGMENT) String segment,
+      @QueryParam(ParameterNames.HISTOGRAM) String histogram,
+      @QueryParam(ParameterNames.DATATYPE) String dataType,
+      @QueryParam(ParameterNames.INTERVAL) String interval,
+      @QueryParam(ParameterNames.RESOURCE) String resource,
+      @QueryParam(ParameterNames.BIOTYPE) String bioType,
+      @QueryParam(ParameterNames.CONSEQUENCE_TYPE) String consequenceType) {
     return getData(segment, histogram, dataType, interval, resource, bioType, consequenceType);
   }
 
@@ -126,24 +126,22 @@ public class BrowserResource {
   @SneakyThrows
   String getData(String segment, String histogram, String dataType,
       String interval, String resource, String bioType, String consequenceType) {
-    queryMap.put("segment", segment);
-    queryMap.put("histogram", histogram);
-    queryMap.put("dataType", dataType);
-    queryMap.put("interval", interval);
-    queryMap.put("resource", resource);
-    queryMap.put("biotype", bioType);
-    queryMap.put("consequence_type", consequenceType);
+    checkRequest(isBlank(resource), "'resource' parameter is required but missing.");
 
-    AnnotationDataSource dataSource = newInstance(queryMap.get("resource"));
+    queryMap.put(ParameterNames.SEGMENT, segment);
+    queryMap.put(ParameterNames.HISTOGRAM, histogram);
+    queryMap.put(ParameterNames.DATATYPE, dataType);
+    queryMap.put(ParameterNames.INTERVAL, interval);
+    queryMap.put(ParameterNames.RESOURCE, resource);
+    queryMap.put(ParameterNames.BIOTYPE, bioType);
+    queryMap.put(ParameterNames.CONSEQUENCE_TYPE, consequenceType);
 
-    boolean hist = histogram != null && "true".equals(histogram);
-    if (hist) {
-      List<Object> result = getHistogram(dataSource);
-      return MAPPER.writeValueAsString(result);
-    } else {
-      List<List<Object>> result = getRecords(dataSource);
-      return MAPPER.writeValueAsString(result);
-    }
+    val dataSource = newInstance(resource);
+    val isHistogram = histogram != null && "true".equals(histogram);
+
+    return MAPPER.writeValueAsString(isHistogram ?
+        getHistogram(dataSource) :
+        getRecords(dataSource));
   }
 
   /**
@@ -168,15 +166,25 @@ public class BrowserResource {
    * Retrieves histogram.
    */
   List<Object> getHistogram(AnnotationDataSource dataSource) {
-    String segmentRegion = queryMap.get("segment");
-    String interval = queryMap.get("interval");
-    checkRequest(nullToEmpty(interval).isEmpty(), "Histogram request requires interval");
+    val segmentParameter = ParameterNames.SEGMENT;
+    val errorMessage = "Histogram request requires '%s' parameter.";
 
-    String chromosome = segmentRegion.split(CHROMOSOME_LOCATION_SEPERATOR)[0];
-    long start = Long.parseLong(segmentRegion.split(CHROMOSOME_LOCATION_SEPERATOR)[1].split(LOCATION_SEPERATOR)[0]);
-    long stop = Long.parseLong(segmentRegion.split(CHROMOSOME_LOCATION_SEPERATOR)[1].split(LOCATION_SEPERATOR)[1]);
+    val segmentRegion = queryMap.get(segmentParameter);
+    checkRequest(isBlank(segmentRegion), errorMessage, segmentParameter);
 
-    return dataSource.getHistogramSegment(chromosome, start, stop, queryMap);
+    ChromosomeLocation chromosome = null;
+    try {
+      chromosome = ChromosomeLocation.parse(segmentRegion);
+    } catch (Exception e) {
+      val message = "Value of the '" + segmentParameter +
+          "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
+      throw new BadRequestException(message);
+    }
+
+    return dataSource.getHistogramSegment(chromosome.getChromosome().getName(),
+        Long.valueOf(chromosome.getStart()),
+        Long.valueOf(chromosome.getEnd()),
+        queryMap);
   }
 
   /**
@@ -184,22 +192,29 @@ public class BrowserResource {
    */
   @SneakyThrows
   List<List<Object>> getRecords(AnnotationDataSource dataSource) {
-    String[] segmentRegions = queryMap.get("segment").split(",");
+    val segmentParameter = ParameterNames.SEGMENT;
+    val errorMessage = "'%s' parameter is required but missing.";
+
+    val segmentRegion = queryMap.get(segmentParameter);
+    checkRequest(isBlank(segmentRegion), errorMessage, segmentParameter);
 
     List<List<Object>> result = newArrayList();
-    for (int i = 0; i < segmentRegions.length; i++) {
-      String chromosome = segmentRegions[i].split(CHROMOSOME_LOCATION_SEPERATOR)[0];
 
-      long start =
-          Long.parseLong(segmentRegions[i].split(CHROMOSOME_LOCATION_SEPERATOR)[1].split(LOCATION_SEPERATOR)[0]);
-      long stop =
-          Long.parseLong(segmentRegions[i].split(CHROMOSOME_LOCATION_SEPERATOR)[1].split(LOCATION_SEPERATOR)[1]);
+    for (val chromosomeString : segmentRegion.split(",")) {
+      ChromosomeLocation chromosome = null;
 
-      // validateSegmentRange(start, stop);
+      try {
+        chromosome = ChromosomeLocation.parse(chromosomeString);
+      } catch (Exception e) {
+        val message = "Value of the '" + segmentParameter +
+            "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
+        throw new BadRequestException(message);
+      }
 
-      List<Object> segment = dataSource.getSegment(chromosome, start, stop, queryMap);
-
-      result.add(segment);
+      result.add(dataSource.getSegment(chromosome.getChromosome().getName(),
+          Long.valueOf(chromosome.getStart()),
+          Long.valueOf(chromosome.getEnd()),
+          queryMap));
     }
 
     return result;
