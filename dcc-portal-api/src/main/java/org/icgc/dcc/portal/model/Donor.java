@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.model;
 
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getBoolean;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -15,7 +16,6 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
@@ -99,8 +99,33 @@ public class Donor {
   List<String> availableDataTypes;
   @ApiModelProperty(value = "Analysis Types", required = true)
   List<String> analysisTypes;
+
+  @ApiModelProperty(value = "Prior Malignancy", required = true)
+  String priorMalignancy;
+
+  @ApiModelProperty(value = "Cancer Type Prior Malignancy", required = true)
+  String cancerTypePriorMalignancy;
+
+  @ApiModelProperty(value = "Caner History First Degree Relative", required = true)
+  String cancerHistoryFirstDegreeRelative;
+
+  @ApiModelProperty(value = "Study Donor Involved In", required = true)
+  List<String> studies;
+
   @ApiModelProperty(value = "Specimen")
   List<Specimen> specimen;
+
+  @ApiModelProperty(value = "Family")
+  List<Family> family;
+
+  @ApiModelProperty(value = "Therapy")
+  List<Therapy> therapy;
+
+  @ApiModelProperty(value = "Exposure")
+  List<Exposure> exposure;
+
+  @ApiModelProperty(value = "Complete")
+  Boolean complete;
 
   @SuppressWarnings("unchecked")
   @JsonCreator
@@ -142,15 +167,37 @@ public class Donor {
     relapseType = getString(fieldMap.get(fields.get("relapseType")));
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
     analysisTypes = (List<String>) fieldMap.get(fields.get("analysisTypes"));
+
+    priorMalignancy = getString(fieldMap.get(fields.get("priorMalignancy")));
+    cancerTypePriorMalignancy = getString(fieldMap.get(fields.get("cancerTypePriorMalignancy")));
+    cancerHistoryFirstDegreeRelative = getString(fieldMap.get(fields.get("cancerHistoryFirstDegreeRelative")));
+    studies = (List<String>) fieldMap.get(fields.get("studies"));
+
     specimen = buildSpecimen((List<Map<String, Object>>) fieldMap.get("specimen"));
+    therapy = buildTherapy((List<Map<String, Object>>) fieldMap.get("therapy"));
+    family = buildFamily((List<Map<String, Object>>) fieldMap.get("family"));
+    exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure"));
+
+    complete = getBoolean(fieldMap.get(fields.get("complete")));
+  }
+
+  private List<Exposure> buildExposure(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    return field.stream().map(Exposure::new).collect(toImmutableList());
+  }
+
+  private List<Family> buildFamily(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    return field.stream().map(Family::new).collect(toImmutableList());
+  }
+
+  private List<Therapy> buildTherapy(List<Map<String, Object>> field) {
+    if (field == null) return null;
+    return field.stream().map(Therapy::new).collect(toImmutableList());
   }
 
   private List<Specimen> buildSpecimen(List<Map<String, Object>> field) {
     if (field == null) return null;
-    val lst = Lists.<Specimen> newArrayList();
-    for (Map<String, Object> item : field) {
-      lst.add(new Specimen(item));
-    }
-    return lst;
+    return field.stream().map(Specimen::new).collect(toImmutableList());
   }
 }

@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.icgc.dcc.portal.model.ChromosomeLocation;
@@ -58,6 +59,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+@SuppressWarnings("deprecation")
 @Slf4j
 public class QueryService {
 
@@ -68,15 +70,19 @@ public class QueryService {
 
   public static FilterBuilder getFilters(ObjectNode filters, Kind kind) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters, kind);
+
+    if (kind.getId().equals("project")) {
+      return defaultProjectFilter();
+    } else if (kind.getId().equals("donor")) {
+      return defaultDonorFilter();
+    }
     return matchAllFilter();
   }
 
   public static FilterBuilder getFilters(ObjectNode filters, Kind kind, ImmutableMap<Kind, String> nestedMapping,
       ImmutableMap<Kind, String> prefixMapping) {
-    if (filters.fieldNames().hasNext()) {
-      return buildFilters(filters, kind, nestedMapping, prefixMapping);
-    }
-    return matchAllFilter();
+
+    return buildFilters(filters, kind, nestedMapping, prefixMapping);
   }
 
   public static String[] getFields(Query query, Kind kind) {
@@ -142,6 +148,12 @@ public class QueryService {
           } else {
             tf.facetFilter(getFilters(facetFilters, kind));
           }
+        } else {
+          if (kind.getId().equals("project")) {
+            tf.facetFilter(defaultProjectFilter());
+          } else if (kind.getId().equals("donor")) {
+            tf.facetFilter(defaultDonorFilter());
+          }
         }
         fs.add(tf);
       }
@@ -163,13 +175,28 @@ public class QueryService {
         }
       }
     }
-    return matchAll ? matchAllFilter() : qb;
+
+    if (matchAll == true) {
+      if (kind.getId().equals("project")) {
+        return defaultProjectFilter();
+      } else if (kind.getId().equals("donor")) {
+        return defaultDonorFilter();
+      }
+      return matchAllFilter();
+    }
+    return qb;
+
   }
 
   public static FilterBuilder buildFilters(ObjectNode filters, Kind kind) {
     if (hasFilter(filters, kind)) {
       return buildTypeFilters(filters, kind, null);
     } else {
+      if (kind.getId().equals("project")) {
+        return defaultProjectFilter();
+      } else if (kind.getId().equals("donor")) {
+        return defaultDonorFilter();
+      }
       return matchAllFilter();
     }
   }
@@ -238,33 +265,45 @@ public class QueryService {
           // 2) Special cases pending on type
           if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_GO)) {
             if (bool.equals(IS)) {
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.should(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             } else {
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "cellular_component"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "biological_process"),
                   termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
+              geneSetIdFilter.mustNot(termsFilter(
+                  prefix + String.format("%s.%s", geneSetType.getType(), "molecular_function"),
                   termList));
             }
           } else if (geneSetType.equals(GeneSetType.GENE_SET_TYPE_ALL)) {
             if (bool.equals(IS)) {
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.should(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"),
+                  termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"),
+                  termList));
+              geneSetIdFilter.should(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"),
+                  termList));
             } else {
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), termList));
               geneSetIdFilter.mustNot(termsFilter(prefix + GeneSetType.GENE_SET_TYPE_CURATED.getType(), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"), termList));
-              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"), termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "cellular_component"),
+                  termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "biological_process"),
+                  termList));
+              geneSetIdFilter.mustNot(termsFilter(prefix + String.format("%s.%s", "go_term", "molecular_function"),
+                  termList));
             }
           } else {
             val idFilter = termsFilter(prefix + geneSetType.getType(), termList);
@@ -335,11 +374,21 @@ public class QueryService {
 
     val termFilters = FilterBuilders.boolFilter();
     val fields = filters.path(kind.getId()).fields();
-    while (fields.hasNext()) {
-      val facetField = fields.next();
+    val typeMapping = FIELDS_MAPPING.get(kind);
 
+    boolean hasDonorStateFilter = false;
+    boolean hasProjectStateFilter = false;
+
+    String completenessField = typeMapping.get("complete");
+    if (prefixMapping != null && prefixMapping.containsKey(kind)) {
+      completenessField = String.format("%s.%s", prefixMapping.get(kind), completenessField);
+    }
+    TermFilterBuilder defaultCompletenessFilter = termFilter(completenessField, true);
+
+    while (fields.hasNext()) {
+
+      val facetField = fields.next();
       // Check that facet field is in Field Mapping
-      val typeMapping = FIELDS_MAPPING.get(kind);
       if (typeMapping.containsKey(facetField.getKey())) {
         String fieldName = typeMapping.get(facetField.getKey());
 
@@ -373,6 +422,14 @@ public class QueryService {
                   bf.should(termsFilter(fieldName, items));
                 }
                 fb = bf;
+              } else if (facetField.getKey().equals("state") && kind.getId().equals("donor")) {
+                hasDonorStateFilter = true;
+                val completenessValues = convertEntityState(items);
+                fb = FilterBuilders.termsFilter(fieldName, completenessValues);
+              } else if (facetField.getKey().equals("state") && kind.getId().equals("project")) {
+                hasProjectStateFilter = true;
+                val completenessValues = convertEntityState(items);
+                fb = FilterBuilders.termsFilter(fieldName, completenessValues);
               } else if (fieldName.endsWith(API_ENTITY_LIST_ID_FIELD_NAME) || facetField.getKey().equals("id")) {
                 // This will get generated twice if both upload-gene-list and gene-id are present,
                 // but that may be ok, it will be like saying: (a or b) and (a or b)
@@ -448,6 +505,17 @@ public class QueryService {
 
       }
     }
+
+    // Inject hidden filters if none where passed in
+    if (kind.getId().equals("donor") && hasDonorStateFilter == false) {
+      log.info("injecting hidden donor completeness filter");
+      termFilters.must(defaultCompletenessFilter);
+    }
+
+    if (kind.getId().equals("project") && prefixMapping == null && hasProjectStateFilter == false) {
+      termFilters.must(defaultProjectFilter());
+    }
+
     return termFilters;
   }
 
@@ -642,4 +710,37 @@ public class QueryService {
   static public final Boolean hasTranscript(ObjectNode filters) {
     return hasFilter(filters, Kind.TRANSCRIPT);
   }
+
+  // Default to donors with molecular information for donor-centric type
+  public static FilterBuilder defaultDonorFilter() {
+    return FilterBuilders.termFilter("_summary._complete", true);
+  }
+
+  // Defaults to projects with at least 1 donor with molecular information
+  public static FilterBuilder defaultProjectFilter() {
+    return FilterBuilders.termFilter("_summary._complete", true);
+  }
+
+  // Convert user specified state to elastic search complete field values
+  private static List<Boolean> convertEntityState(List<String> uiStates) {
+    val list = Lists.<Boolean> newArrayList();
+    for (val state : uiStates) {
+      if (state.equalsIgnoreCase("pending")) {
+        list.add(false);
+      } else if (state.equalsIgnoreCase("live")) {
+        list.add(true);
+      } else if (state.equalsIgnoreCase("*")) {
+        list.add(false);
+        list.add(true);
+      }
+    }
+
+    // Default if no value or only invalid values
+    if (list.isEmpty()) {
+      list.add(true);
+    }
+
+    return list;
+  }
+
 }

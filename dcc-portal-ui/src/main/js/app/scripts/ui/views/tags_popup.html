@@ -1,4 +1,5 @@
-<div class="t_suggest_flyout" data-ng-show="showResults()">
+<div class="t_suggest_flyout" data-ng-show="showResults()"
+    style="width:{{ ['file', 'donor'].indexOf (results.hits[0].type) > -1 ? '180%' : '100%' }}">
     <table class="t_suggest_flyout__hits">
         <tbody>
         <tr data-ng-repeat="r in results.hits"
@@ -27,18 +28,27 @@
                            data-ng-switch-when="go_term"></span>
                      <span data-ng-bind-html="r.id | highlight:activeQuery"
                            data-ng-switch-when="curated_set"></span>
+                     <span data-ng-bind-html="r.id | highlight:activeQuery"
+                           data-ng-switch-when="file"></span>
                 </span>
+                <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="file">
+                    <li data-ng-bind-html="r.fileName | highlight:activeQuery:true"></li>
+                </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="gene">
                     <li data-ng-bind-html="r.name | highlight:activeQuery:true"></li>
                     <li data-ng-bind-html="r.synonyms | highlight:activeQuery:true"></li>
                     <li data-ng-bind-html="r.id | highlight:activeQuery:true"></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="donor">
-                    <li><span data-ng-bind-html="r.projectId | define | highlight:activeQuery:true"></span>
-                    </li>
+                    <li><span data-ng-bind-html="r.projectId | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.submittedId | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.specimenIds | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.submittedSpecimenIds | highlight:activeQuery:true"></span></li>
                     <li><span data-ng-bind-html="r.sampleIds | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.submittedSampleIds | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.tcgaParticipantBarcode | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.tcgaAliquotBarcode | highlight:activeQuery:true"></span></li>
+                    <li><span data-ng-bind-html="r.tcgaSampleBarcode | highlight:activeQuery:true"></span></li>
                 </ul>
                 <ul class="t_suggest_flyout__hits__hit__text__details" data-ng-switch-when="mutation">
                     <li>

@@ -654,14 +654,14 @@ body {
   max-width: 1200px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -692,14 +692,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -717,14 +717,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -752,14 +752,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -777,14 +777,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -796,14 +796,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -864,14 +864,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -933,14 +933,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -1970,14 +1970,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2081,14 +2081,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2347,6 +2347,11 @@ h1 .t_badge_icon {
   background: #d33682;
 }
 
+/* line 109, _modules/_badges.scss */
+.pcawg-badge {
+  font-size: 0.5rem;
+}
+
 /* line 1, _modules/_current.scss */
 .t_current {
   /* for IE 6/7 */
@@ -2360,14 +2365,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2523,14 +2528,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.2/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -3798,6 +3803,208 @@ td {
 /* line 34, _modules/_list.scss */
 .select-list-item .select-list-cancel:hover {
   background: #dc502e;
+}
+
+/** PATHWAY COLOR CUSTOMIZATION **/
+/* line 19, _modules/_pathwayviewer.scss */
+.RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode {
+  fill: #b5f9a7;
+  stroke: #1a9900;
+}
+
+/* line 24, _modules/_pathwayviewer.scss */
+.RenderableComplex, .RenderableEntitySet {
+  fill: #b6e2ff;
+  stroke-width: 0.5px;
+  stroke: #166aa2;
+}
+
+/* line 30, _modules/_pathwayviewer.scss */
+.RenderableEntitySet {
+  stroke-width: 1.5px;
+}
+
+/* line 34, _modules/_pathwayviewer.scss */
+.ProcessNode {
+  stroke: #1a9900;
+  stroke-width: 2px;
+  fill: #ebffe7;
+}
+
+/* line 40, _modules/_pathwayviewer.scss */
+.RenderableGene {
+  stroke: #333;
+  fill: none;
+}
+
+/* line 45, _modules/_pathwayviewer.scss */
+.RenderableText {
+  font-size: 7px;
+}
+
+/* line 49, _modules/_pathwayviewer.scss */
+.RenderableCompartment {
+  fill: #fbf7f4;
+  stroke: #ffc38b;
+  stroke-width: 1px;
+  fill-opacity: 0.25;
+}
+
+/* line 56, _modules/_pathwayviewer.scss */
+.RenderableStroke {
+  stroke-width: 1px;
+}
+
+/* line 60, _modules/_pathwayviewer.scss */
+.renderableinteraction {
+  stroke-width: 1.5px;
+}
+
+/* line 64, _modules/_pathwayviewer.scss */
+.entitysetandmemberlink, .entitysetandentitysetlink {
+  stroke-dasharray: 5 7;
+  stroke-width: 0.5px;
+}
+
+/* line 69, _modules/_pathwayviewer.scss */
+.Note {
+  stroke: gray;
+  fill: #ebffe7;
+}
+
+/* line 74, _modules/_pathwayviewer.scss */
+.pathway-sub-reaction-line line {
+  stroke-width: 1.5px;
+}
+
+/* line 79, _modules/_pathwayviewer.scss */
+.RenderableMutated {
+  fill: white;
+}
+
+/** ESSENTIALS **/
+/* line 85, _modules/_pathwayviewer.scss */
+.RenderableNodeText .RenderableNodeTextCell {
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  color: #444;
+}
+
+/* line 92, _modules/_pathwayviewer.scss */
+.RenderableCompartmentText {
+  font-size: 9px;
+  line-height: 1.1em;
+}
+
+/* line 98, _modules/_pathwayviewer.scss */
+.RenderableNodeText td {
+  padding: none;
+}
+
+/* line 102, _modules/_pathwayviewer.scss */
+.RenderableNodeText tbody {
+  line-height: normal;
+}
+
+/* line 106, _modules/_pathwayviewer.scss */
+.RenderableBorder {
+  fill: none;
+}
+
+/** CONTAINER AND INFO BAR STYLES **/
+/* line 112, _modules/_pathwayviewer.scss */
+.pathwayviewercontainer body {
+  margin: 0;
+  background: none;
+}
+
+/* line 117, _modules/_pathwayviewer.scss */
+#pathway-viewer-mini {
+  border: 1px solid #b3b3b3;
+  position: relative;
+  line-height: 0px;
+  overflow: hidden;
+}
+
+/* line 124, _modules/_pathwayviewer.scss */
+.pathway-legend, .pathway-info {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 25%;
+  height: 100%;
+  opacity: 0.9;
+  border-left: 1px solid #b3b3b3;
+  background: white;
+}
+
+/* line 135, _modules/_pathwayviewer.scss */
+.pathway-info {
+  width: 30%;
+  opacity: 0.95;
+}
+
+/* line 140, _modules/_pathwayviewer.scss */
+.pathway-info-content {
+  line-height: 1.4rem;
+  padding: 5%;
+  height: 70%;
+  overflow-y: auto;
+}
+
+/* line 147, _modules/_pathwayviewer.scss */
+.pathway-gene-table {
+  margin: 0 auto;
+}
+
+/* line 151, _modules/_pathwayviewer.scss */
+.pathway-gene-label, .pathway-gene-header-label {
+  font-weight: lighter;
+  padding-bottom: 0.5em !important;
+  padding-top: 0.5em !important;
+  text-align: center !important;
+}
+
+/* line 158, _modules/_pathwayviewer.scss */
+.pathway-gene-header-label {
+  font-weight: normal !important;
+}
+
+/* line 162, _modules/_pathwayviewer.scss */
+.pathway-legend .RenderableNodeText .RenderableNodeTextCell {
+  font-size: 10px;
+}
+
+/* line 166, _modules/_pathwayviewer.scss */
+.pathway-legend-controller, .pathway-info-controller {
+  margin-top: 0.7em;
+}
+
+/* line 170, _modules/_pathwayviewer.scss */
+.pathway-info h4, .pathway-legend h4 {
+  margin-left: 1em;
+  margin-right: 1em;
+  color: #666666;
+  border-bottom: 1px solid #b3b3b3;
+  padding-bottom: 0.5em;
+  font-size: 1.3em;
+  font-weight: normal;
+  padding-top: 0.5em;
+}
+
+/* line 181, _modules/_pathwayviewer.scss */
+.pathway-legend-controller, .pathway-info-controller {
+  float: left;
+  margin-left: -1.6em;
+  font-size: 1.5em;
+}
+
+/* line 187, _modules/_pathwayviewer.scss */
+.pathway-info-svg {
+  padding-left: 15%;
+  padding-right: 15%;
+  max-height: 150px;
 }
 
 /* line 25, styles.scss */

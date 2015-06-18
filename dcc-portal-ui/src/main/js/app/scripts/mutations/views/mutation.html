@@ -73,7 +73,7 @@
             <tr>
                 <th>Gene</th>
                 <th>AA Change</th>
-                <th><abbr data-tooltip="{{ 'Consequence' | define }}">Consequence</abbr></th>
+                <th><abbr data-tooltip="SO term: consequence_type">Consequence</abbr></th>
                 <th>Coding DNA Change</th>
                 <th>Strand</th>
                 <th>Transcript(s)</th>
@@ -95,7 +95,7 @@
                     <span data-ng-if="!consequence.geneStrand">N/A</span>
                 </td>
                 <td>
-                    <hide-list data-items="consequence.transcriptsAffected" data-limit="1" 
+                    <hide-list data-ng-if="consequence.geneAffectedId" data-items="consequence.transcriptsAffected" data-limit="1"
                         data-template-name="template/mutationTranscriptList.html">
                     </hide-list>
                 </td>
@@ -177,7 +177,7 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="project in MutationCtrl.projects | orderBy:'-percentAffected'">
-                <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{project.id}}">
+                <td><a data-tooltip="{{ project.name }}" data-ng-href="/projects/{{project.id}}">
                     {{project.id}}
                 </a></td>
                 <td>{{project.primarySite}}</td>

@@ -31,12 +31,12 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.repository.BaseRepositoryTest;
+import org.icgc.dcc.portal.repository.BaseElasticSearchTest;
 import org.junit.Before;
 import org.junit.Test;
 
 @Slf4j
-public class AggregationToFacetConverterTest extends BaseRepositoryTest {
+public class AggregationToFacetConverterTest extends BaseElasticSearchTest {
 
   private static final String AGG_NAME = "consequenceTypeNested";
   private static final String MISSING_AGG_NAME = AGG_NAME + "_missing";

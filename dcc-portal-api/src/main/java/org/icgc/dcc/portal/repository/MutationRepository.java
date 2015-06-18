@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,6 +70,7 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -89,6 +91,7 @@ import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class MutationRepository implements Repository {
 
   private static final Type CENTRIC_TYPE = Type.MUTATION_CENTRIC;
@@ -385,7 +388,7 @@ public class MutationRepository implements Repository {
   }
 
   @Override
-  public MultiSearchResponse counts(LinkedHashMap<String, Query> queries) {
+  public MultiSearchResponse counts(@NonNull LinkedHashMap<String, Query> queries) {
     MultiSearchRequestBuilder search = client.prepareMultiSearch();
     for (val id : queries.keySet()) {
       search.add(buildCountRequest(queries.get(id), CENTRIC_TYPE));
@@ -393,6 +396,23 @@ public class MutationRepository implements Repository {
 
     log.debug("{}", search);
     return search.execute().actionGet();
+  }
+
+  public MultiSearchResponse countSearches(@NonNull List<QueryBuilder> searches) {
+    val search = client.prepareMultiSearch();
+    for (val s : searches) {
+      search.add(buildCountSearchFromQuery(s, CENTRIC_TYPE));
+    }
+
+    log.info("{}", search);
+    return search.execute().actionGet();
+  }
+
+  public SearchRequestBuilder buildCountSearchFromQuery(QueryBuilder query, Type type) {
+    val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
+    search.setQuery(query);
+
+    return search;
   }
 
   @Override

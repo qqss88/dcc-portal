@@ -21,6 +21,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ANALYSIS_ID_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.PhenotypeAnalysis;
-import org.icgc.dcc.portal.service.BadRequestException;
 import org.icgc.dcc.portal.service.PhenotypeAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,9 +62,7 @@ public class PhenotypeAnalysisResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates a new Phenotype analysis by providing IDs of Donor entity sets.", response = PhenotypeAnalysis.class)
   public PhenotypeAnalysis createAnalysis(final List<UUID> entitySetIds) {
-    if (isEmpty(entitySetIds)) {
-      throw new BadRequestException("The POST payload is null or empty. It should be a list of UUIDs.");
-    }
+    checkRequest(isEmpty(entitySetIds), "The POST payload is null or empty. It should be a list of UUIDs.");
 
     return service.createAnalysis(entitySetIds);
   }
@@ -76,9 +74,7 @@ public class PhenotypeAnalysisResource {
   public PhenotypeAnalysis getAnalysis(
       @ApiParam(value = API_ANALYSIS_ID_VALUE, required = true) @PathParam(API_ANALYSIS_ID_PARAM) final UUID analysisId
       ) {
-    if (null == analysisId) {
-      throw new BadRequestException(API_ANALYSIS_ID_PARAM + " is null.");
-    }
+    checkRequest(analysisId == null, API_ANALYSIS_ID_PARAM + " is null.");
 
     log.info("Received request with {} of '{}'", API_ANALYSIS_ID_PARAM, analysisId);
 

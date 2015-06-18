@@ -1,3 +1,22 @@
+
+<span data-ng-if="ProjectCtrl.isPendingDonor">
+  <div class="h1-wrap">
+      <h1 data-ui-scrollfix=79><span class="t_badge t_badge__project"></span>
+          {{ProjectCtrl.project.id}}
+      </h1>
+  </div>
+
+  <section>
+    <i class="icon-attention or icon-attention-1"></i>
+    No data for this project has been submitted directly to ICGC DDC yet. However, go to the
+    <a href="{{ ProjectCtrl.urlToExternalRepository }}">
+      external repository browser
+    </a>
+     to see the list of data files hosted in external repositories for this project.
+  </section>
+</span>
+
+<span data-ng-if="!ProjectCtrl.isPendingDonor">
 <div class="h1-wrap">
     <h1 data-ui-scrollfix=79><span class="t_badge t_badge__project"></span>
         {{ProjectCtrl.project.name}}
@@ -8,10 +27,10 @@
     <section>
         <ul class="t_subnav__items">
             <li data-spy="summary" class="t_subnav__items__item current"><a data-scrollto href="#summary">Summary</a></li>
-            <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Mutated Genes</a></li>
-            <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
-            <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
-            <li data-spy="publications" class="t_subnav__items__item"><a data-scrollto
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Mutated Genes</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
+            <li data-ng-if="ProjectCtrl.project.complete" data-spy="publications" class="t_subnav__items__item"><a data-scrollto
                                                                          href="#publications">Publications</a>
             </li>
             <li><br></li>
@@ -42,7 +61,7 @@
         <tr>
             <th>Name</th>
             <td>
-                <a href="http://icgc.org/node/{{ProjectCtrl.project.icgcId}}">
+                <a href="http://icgc.org/node/{{ProjectCtrl.project.icgcId}}" target="_blank">
                     <i class="icon-external-link"></i>{{ProjectCtrl.project.name}}</a>
             </td>
         </tr>
@@ -66,7 +85,7 @@
                 </ul>
             </td>
         </tr>
-        <tr>
+        <tr data-ng-if="ProjectCtrl.project.complete">
             <th>Total number of donors</th>
             <td>
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
@@ -74,6 +93,19 @@
                 </a>
             </td>
         </tr>
+        <tr data-ng-if="ProjectCtrl.project.complete">
+            <th>Number of Donors involved in Study</th>
+            <td>
+                <ul>
+                    <li data-ng-repeat="study in ProjectCtrl.studies">
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
+                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
+                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
+                    </li>
+                </ul>
+            </td>
+        </tr>
+
     </table>
     <div data-ng-if="ProjectCtrl.hasExp"><h3>Experimental Analyses</h3>
         <table class="table table-info">
@@ -125,7 +157,10 @@
 </div>
 <div class="half omega">
     <h3>Available Data Types</h3>
-    <table class="table table-info">
+    <div data-ng-if="!ProjectCtrl.project.complete" class="well">
+    Only clinical data has been submitted to ICGC DCC.
+    </div>
+    <table class="table table-info" data-ng-if="ProjectCtrl.project.complete">
         <tr>
             <th>Clinical Data</th>
             <td>
@@ -245,11 +280,12 @@
             </td>
         </tr>
     </table>
-    <span class="open-in">Open in</span> <a href="/repository/current/Projects/{{ProjectCtrl.project.id}}"><i
+    <span class="open-in">Open in</span> <a href="/repository/icgc/current/Projects/{{ProjectCtrl.project.id}}"><i
         class="icon-database"></i>Data Repository</a>
 </div>
 </section>
 <section id="genes"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectGeneCtrl as ProjectGeneCtrl"
          data-ng-class="{'loading': !ProjectGeneCtrl.genes.hits, 'empty': ProjectGeneCtrl.genes.hits.length == 0}">
     <h3 data-ng-if="!ProjectGeneCtrl.genes.hits">
@@ -304,7 +340,7 @@
                 <td><a data-ui-sref="gene({id:gene.id})">{{gene.symbol}}</a></td>
                 <td>{{gene.name}}</td>
                 <td>chr{{gene.chromosome}}:{{gene.start}}-{{gene.end}}</td>
-                <td>{{gene.type}}</td>
+                <td>{{gene.type | trans}}</td>
                 <td class="text-right" style="display:block; position: relative; white-space: nowrap">
 
                         <span
@@ -330,7 +366,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -391,6 +427,7 @@
     </div>
 </section>
 <section id="mutations"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectMutationsCtrl as ProjectMutationsCtrl"
          data-ng-class="{'loading': !ProjectMutationsCtrl.mutations.hits, 'empty': ProjectMutationsCtrl.mutations.hits.length == 0}">
     <h3 data-ng-if="!ProjectMutationsCtrl.mutations.hits">
@@ -473,7 +510,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    data-ui-sref="project({id:p.term})">{{p.term}}</a>:
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -527,6 +564,7 @@
 </section>
 
 <section id="donors"
+         data-ng-if="ProjectCtrl.project.complete"
          data-ng-controller="ProjectDonorsCtrl as ProjectDonorsCtrl"
          data-ng-class="{'loading': !ProjectDonorsCtrl.donors.hits, 'empty': ProjectDonorsCtrl.donors.hits.length == 0 || ProjectCtrl.project.ssmTestedDonorCount == 0}">
     <h3 data-ng-if="!ProjectDonorsCtrl.donors.hits && ProjectCtrl.project.ssmTestedDonorCount > 0">
@@ -572,17 +610,17 @@
                 </th>
             </tr>
             <tr>
-                <th data-tooltip="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
-                <th data-tooltip="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
-                <th data-tooltip="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
-                <th data-tooltip="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
-                <th data-tooltip="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
-                <th data-tooltip="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
-                <th data-tooltip="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
-                <th data-tooltip="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
-                <th data-tooltip="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
-                <th data-tooltip="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
-                <th data-tooltip="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
+                <th data-tooltip="{{ 'ssm' | datatype }}"><abbr class="tiny-header">SSM</abbr></th>
+                <th data-tooltip="{{ 'cnsm' | datatype }}"><abbr class="tiny-header">CNSM</abbr></th>
+                <th data-tooltip="{{ 'stsm' | datatype }}"><abbr class="tiny-header">StSM</abbr></th>
+                <th data-tooltip="{{ 'sgv' | datatype }}"><abbr class="tiny-header">SGV</abbr></th>
+                <th data-tooltip="{{ 'meth_array' | datatype }}"><abbr class="tiny-header">METH-A</abbr></th>
+                <th data-tooltip="{{ 'meth_seq' | datatype }}"><abbr class="tiny-header">METH-S</abbr></th>
+                <th data-tooltip="{{ 'exp_array' | datatype }}"><abbr class="tiny-header">EXP-A</abbr></th>
+                <th data-tooltip="{{ 'exp_seq' | datatype }}"><abbr class="tiny-header">EXP-S</abbr></th>
+                <th data-tooltip="{{ 'pexp' | datatype }}"><abbr class="tiny-header">PEXP</abbr></th>
+                <th data-tooltip="{{ 'mirna_seq' | datatype }}"><abbr class="tiny-header">miRNA-S</abbr></th>
+                <th data-tooltip="{{ 'jcn' | datatype }}"><abbr class="tiny-header">JCN</abbr></th>
             </tr>
             </thead>
             <tbody>
@@ -675,7 +713,9 @@
         </table>
     </div>
 </section>
-<section id="publications" data-ng-class="{'empty': ProjectCtrl.project.uiPublicationList.length == 0}">
+<section id="publications"
+    data-ng-if="ProjectCtrl.project.complete"
+    data-ng-class="{'empty': ProjectCtrl.project.uiPublicationList.length == 0}">
     <h3 data-ng-if="ProjectCtrl.project.uiPublicationList.length == 0">No Publications.</h3>
 
     <div data-ng-if="ProjectCtrl.project.uiPublicationList.length > 0">

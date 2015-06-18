@@ -20,45 +20,45 @@ $green:     #859900;
 /* $red: #dc322f; */
 /* $redDarker: #BB3200; */
 /* $red: hsl(1, 71%, 52%); */
-/* line 88, _base/_colours.scss */
+/* line 89, _base/_colours.scss */
 .light {
   background-color: white;
   color: #333333;
 }
-/* line 76, _base/_colours.scss */
+/* line 77, _base/_colours.scss */
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
   color: black;
 }
-/* line 79, _base/_colours.scss */
+/* line 80, _base/_colours.scss */
 .light a, .light a:active, .light a:visited, .light code.url {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 83, _base/_colours.scss */
+/* line 84, _base/_colours.scss */
 .light a:hover {
   background: rgba(230, 230, 230, 0.7);
 }
 
-/* line 92, _base/_colours.scss */
+/* line 93, _base/_colours.scss */
 .dark {
   background-color: #3f5973;
   color: white;
 }
-/* line 76, _base/_colours.scss */
+/* line 77, _base/_colours.scss */
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
   color: white;
 }
-/* line 79, _base/_colours.scss */
+/* line 80, _base/_colours.scss */
 .dark a, .dark a:active, .dark a:visited, .dark code.url {
   text-decoration: none;
   color: #ce6503;
 }
-/* line 83, _base/_colours.scss */
+/* line 84, _base/_colours.scss */
 .dark a:hover {
   background: rgba(72, 102, 132, 0.7);
 }
 
-/* line 96, _base/_colours.scss */
+/* line 97, _base/_colours.scss */
 html * {
   color-profile: sRGB;
   rendering-intent: auto;
@@ -1236,6 +1236,60 @@ input[type="button"].btn-block {
 .pagination-sm > li:last-child > span {
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
+}
+
+/* line 7, bootstrap/_badges.scss */
+.badge {
+  display: inline-block;
+  min-width: 10px;
+  padding: 3px 7px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  line-height: 1;
+  vertical-align: baseline;
+  white-space: nowrap;
+  text-align: center;
+  background-color: #777777;
+  border-radius: 10px;
+}
+/* line 22, bootstrap/_badges.scss */
+.badge:empty {
+  display: none;
+}
+/* line 27, bootstrap/_badges.scss */
+.btn .badge {
+  position: relative;
+  top: -1px;
+}
+/* line 33, bootstrap/_badges.scss */
+.btn-xs .badge, .btn-group-xs > .btn .badge, .btn-group-xs > .btn .badge {
+  top: 0;
+  padding: 1px 5px;
+}
+/* line 42, bootstrap/_badges.scss */
+.list-group-item.active > .badge, .nav-pills > .active > a > .badge {
+  color: #337ab7;
+  background-color: white;
+}
+/* line 47, bootstrap/_badges.scss */
+.list-group-item > .badge {
+  float: right;
+}
+/* line 51, bootstrap/_badges.scss */
+.list-group-item > .badge + .badge {
+  margin-right: 5px;
+}
+/* line 55, bootstrap/_badges.scss */
+.nav-pills > li > a > .badge {
+  margin-left: 3px;
+}
+
+/* line 63, bootstrap/_badges.scss */
+a.badge:hover, a.badge:focus {
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 @-webkit-keyframes progress-bar-stripes {

@@ -74,6 +74,15 @@ h1 {
   content: "S";
 }
 
+.t_badge__file {
+  background: $file;
+}
+
+.t_badge__file:after {
+  content: "F";
+}
+
+
 /*
 .t_badge__geneset::first-letter {
   vertical-align: super;
@@ -103,4 +112,9 @@ h1 {
 
 .t_badge__q {
   background: $magenta;
+}
+
+
+.pcawg-badge {
+  font-size: 0.5rem;
 }

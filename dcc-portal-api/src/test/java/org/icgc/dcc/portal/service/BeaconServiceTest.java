@@ -22,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.icgc.dcc.portal.model.AlleleMutation;
 import org.icgc.dcc.portal.model.Beacon;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.repository.BaseRepositoryTest;
+import org.icgc.dcc.portal.repository.BaseElasticSearchTest;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BeaconServiceTest extends BaseRepositoryTest {
+public class BeaconServiceTest extends BaseElasticSearchTest {
 
   private BeaconService service;
 

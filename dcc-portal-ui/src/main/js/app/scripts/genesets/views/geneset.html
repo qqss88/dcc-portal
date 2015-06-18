@@ -27,6 +27,9 @@
             <li data-spy="projects" class="t_subnav__items__item"><a data-scrollto href="#projects">Cancer
                 Distribution</a></li>
             <li data-spy="genes" class="t_subnav__items__item"><a data-scrollto href="#genes">Genes</a></li>
+          
+            <li data-spy="pathway" class="t_subnav__items__item" data-ng-if="GeneSetCtrl.geneSet.showPathway">
+              <a data-scrollto href="#pathway">Pathway Viewer</a></li>
             <li data-spy="mutations" class="t_subnav__items__item"><a data-scrollto href="#mutations">Mutations</a></li>
             <li data-spy="donors" class="t_subnav__items__item"><a data-scrollto href="#donors">Donors</a></li>
             <li><br></li>
@@ -227,7 +230,7 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="project in GeneSetCtrl.geneSet.projects | orderBy:'uiAffectedDonorPercentage':true">
-                <td><a data-tooltip="{{ project.id | define }}" data-ng-href="/projects/{{ project.id }}">
+                <td><a data-tooltip="{{ project.name }}" data-ng-href="/projects/{{ project.id }}">
                     {{ project.id }}
                 </a></td>
                 <td>{{ project.primarySite }}</td>
@@ -404,6 +407,13 @@
         </table>
     </div>
 </section>
+<section id="pathway" data-ng-if="GeneSetCtrl.geneSet.showPathway"
+         data-ng-class="{'loading': !GeneSetCtrl.geneSet.projects, 'empty': GeneSetCtrl.geneSet.projects.length == 0}">
+    <h3><i class="icon-flame"></i>Pathway Viewer</h3>
+      <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+    <pathway-viewer data-items="GeneSetCtrl.pathway.xml" data-zooms="GeneSetCtrl.pathway.zooms" data-highlights="GeneSetCtrl.pathway.highlights">
+    </pathway-viewer>
+</section>
 <section id="mutations"
          data-ng-controller="GeneSetMutationsCtrl as GeneSetMutationsCtrl"
          data-ng-class="{'loading': !GeneSetMutationsCtrl.mutations.hits, 'empty': GeneSetMutationsCtrl.mutations.hits.length == 0}">
@@ -466,7 +476,7 @@
                                   class="t_facets__facet__terms__active__term__bar"></span>
                             <span style="position: relative">
                                 <a data-tooltip-placement="left"
-                                   data-tooltip="{{ p.term | define }}"
+                                   data-tooltip="{{ p.projectName }}"
                                    href="/projects/{{p.term}}">{{p.term}}</a>
                             <a href='/search?filters={{p.advQuery}}'>
                                 {{p.count | number}}
@@ -512,7 +522,6 @@
         </table>
     </div>
 </section>
-
 <section id="donors"
          data-ng-controller="GeneSetDonorsCtrl as GeneSetDonorsCtrl"
          data-ng-class="{'loading': !GeneSetDonorsCtrl.donors.hits, 'empty': GeneSetDonorsCtrl.donors.hits.length == 0}">
@@ -560,17 +569,17 @@
                 </th>
             </tr>
             <tr>
-                <th data-tooltip="{{ 'SSM' | define }}"><abbr class="tiny-header">SSM</abbr></th>
-                <th data-tooltip="{{ 'CNSM' | define }}"><abbr class="tiny-header">CNSM</abbr></th>
-                <th data-tooltip="{{ 'StSM' | define }}"><abbr class="tiny-header">StSM</abbr></th>
-                <th data-tooltip="{{ 'SGV' | define }}"><abbr class="tiny-header">SGV</abbr></th>
-                <th data-tooltip="{{ 'METH-A' | define }}"><abbr class="tiny-header">METH-A</abbr></th>
-                <th data-tooltip="{{ 'METH-S' | define }}"><abbr class="tiny-header">METH-S</abbr></th>
-                <th data-tooltip="{{ 'EXP-A' | define }}"><abbr class="tiny-header">EXP-A</abbr></th>
-                <th data-tooltip="{{ 'EXP-S' | define }}"><abbr class="tiny-header">EXP-S</abbr></th>
-                <th data-tooltip="{{ 'PEXP' | define }}"><abbr class="tiny-header">PEXP</abbr></th>
-                <th data-tooltip="{{ 'miRNA-S' | define }}"><abbr class="tiny-header">miRNA-S</abbr></th>
-                <th data-tooltip="{{ 'JCN' | define }}"><abbr class="tiny-header">JCN</abbr></th>
+                <th data-tooltip="{{ 'ssm' | datatype }}"><abbr class="tiny-header">SSM</abbr></th>
+                <th data-tooltip="{{ 'cnsm' | datatype }}"><abbr class="tiny-header">CNSM</abbr></th>
+                <th data-tooltip="{{ 'stsm' | datatype }}"><abbr class="tiny-header">StSM</abbr></th>
+                <th data-tooltip="{{ 'sgv' | datatype }}"><abbr class="tiny-header">SGV</abbr></th>
+                <th data-tooltip="{{ 'meth_array' | datatype }}"><abbr class="tiny-header">METH-A</abbr></th>
+                <th data-tooltip="{{ 'meth_seq' | datatype }}"><abbr class="tiny-header">METH-S</abbr></th>
+                <th data-tooltip="{{ 'exp_array' | datatype }}"><abbr class="tiny-header">EXP-A</abbr></th>
+                <th data-tooltip="{{ 'exp_seq' | datatype }}"><abbr class="tiny-header">EXP-S</abbr></th>
+                <th data-tooltip="{{ 'pexp' | datatype }}"><abbr class="tiny-header">PEXP</abbr></th>
+                <th data-tooltip="{{ 'mirna_seq' | datatype }}"><abbr class="tiny-header">miRNA-S</abbr></th>
+                <th data-tooltip="{{ 'jcn' | datatype }}"><abbr class="tiny-header">JCN</abbr></th>
             </tr>
             </thead>
             <tbody>

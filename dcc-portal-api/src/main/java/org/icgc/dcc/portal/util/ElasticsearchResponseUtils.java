@@ -17,6 +17,8 @@
  */
 package org.icgc.dcc.portal.util;
 
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
@@ -41,7 +43,9 @@ import org.elasticsearch.search.SearchHitField;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Longs;
 
 /**
  * Provides methods to retrieve values from SearchHit
@@ -53,33 +57,71 @@ public final class ElasticsearchResponseUtils {
   /**
    * Returns first value of the list as a String
    */
-  @SuppressWarnings("unchecked")
   public static String getString(Object values) {
-    if (values == null) return null;
+    if (values == null) {
+      return null;
+    }
 
-    if (values instanceof List<?>) {
-      return ((List<String>) values).get(0);
+    if (values instanceof Iterable<?>) {
+      val iterable = (Iterable<?>) values;
+      return Iterables.isEmpty(iterable) ? null : Iterables.get(iterable, 0).toString();
     }
 
     if (values instanceof String) {
-      return (String) values;
+      return values.toString();
     }
 
     return null;
   }
 
-  @SuppressWarnings("unchecked")
-  public static Long getLong(Object value) {
-    if (value instanceof List) value = ((List<Object>) value).get(0);
-    if (value instanceof Long) return (Long) value;
-    if (value instanceof Float) return ((Float) value).longValue();
-    if (value instanceof Integer) return (long) (Integer) value;
+  public static List<String> toStringList(Object value) {
+    if (null == value) {
+      return null;
+    }
 
-    return null;
+    if (value instanceof List<?>) {
+      // There might be a performance issue here. In the event that we already know 'value' is a List<String>, maybe we
+      // should just cast it to List<String> directly. Alternatively, we could check the size of the list then,
+      // depending on the size, either directly cast it for a big collection or transform it for a small collection.
+      return newArrayList(transform((List<?>) value, v -> v.toString()));
+    }
+
+    if (value instanceof Iterable<?>) {
+      return newArrayList(transform((Iterable<?>) value, v -> v.toString()));
+    }
+
+    return newArrayList(value.toString());
+  }
+
+  public static Long getLong(Object value) {
+    if (null == value) {
+      return null;
+    }
+
+    if (value instanceof Long) {
+      return (Long) value;
+    }
+
+    if (value instanceof Float) {
+      return ((Float) value).longValue();
+    }
+
+    if (value instanceof Integer) {
+      return Long.valueOf((Integer) value);
+    }
+
+    if (value instanceof Iterable<?>) {
+      val iterable = (Iterable<?>) value;
+      return Iterables.isEmpty(iterable) ? null : Longs.tryParse(Iterables.get(iterable, 0).toString());
+    }
+
+    return Longs.tryParse(value.toString());
   }
 
   public static Boolean getBoolean(Object values) {
-    if (values == null) return null;
+    if (values == null) {
+      return null;
+    }
 
     if (values instanceof Boolean) {
       return (Boolean) values;

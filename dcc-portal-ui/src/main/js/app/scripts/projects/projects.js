@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -174,6 +174,7 @@
                     uiFIProjects.push({
                       id: t.term,
                       name: proj.name,
+                      primarySite: proj.primarySite,
                       count: t.count
                     });
                   }
@@ -186,11 +187,22 @@
             });
           });
 
+        // Id to primary site
+        var id2site = {};
+        _ctrl.projects.hits.forEach(function(h) {
+           id2site[h.id] = h.primarySite;
+        });
+
         Restangular.one('projects/history', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
+          data.forEach(function(dataPoint) {
+            dataPoint.colourKey = id2site[dataPoint.group];
+          });
+
           _ctrl.donorData = data;
         });
+
       }
     }
 
@@ -222,15 +234,30 @@
     refresh();
   });
 
-  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project, Mutations, API, ExternalLinks) {
+  module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project,
+    Donors, Mutations, API, ExternalLinks, PCAWG) {
+
     var _ctrl = this;
     Page.setTitle(project.id);
     Page.setPage('entity');
 
     _ctrl.hasExp = !_.isEmpty(project.experimentalAnalysisPerformedSampleCounts);
+    _ctrl.isPCAWG = PCAWG.isPCAWGStudy;
+
 
     _ctrl.project = project;
     _ctrl.ExternalLinks = ExternalLinks;
+
+    _ctrl.isPendingDonor = _.isUndefined (_.get(project, 'primarySite'));
+
+    var projectFilter = {
+      file: {
+        projectCode: {
+          is: [project.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (projectFilter);
 
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
@@ -257,8 +284,31 @@
         size: 0,
         include: ['facets']
       };
+
+      // Get mutation impact for side panel
       Mutations.getList(params).then(function (d) {
         _ctrl.mutationFacets = d.facets;
+      });
+
+      // Get study facets for summay section
+      Donors.getList(params).then(function(d) {
+        _ctrl.studies = d.facets.studies.terms || [];
+
+        // Remove no-data term
+        _.remove(_ctrl.studies, function(t) {
+          return t.term === '_missing';
+        });
+
+        // Link back to adv page
+        _ctrl.studies.forEach(function(t) {
+          t.advQuery = {
+            donor: {
+              projectId: {is: [project.id]},
+              studies: {is: [t.term]}
+            }
+          };
+
+        });
       });
     }
 
@@ -272,11 +322,14 @@
 
   });
 
-  module.controller('ProjectGeneCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
+  module.controller('ProjectGeneCtrl',
+    function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
+
     var _ctrl = this;
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
+        var projectCachePromise = ProjectCache.getData();
         var geneIds = _.pluck(genes.hits, 'id').join(',');
         _ctrl.genes = genes;
 
@@ -320,6 +373,10 @@
                     }
                   );
 
+                  projectCachePromise.then(function(lookup) {
+                    facet.projectName = lookup[facet.term] || facet.term;
+                  });
+
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
@@ -349,12 +406,16 @@
     refresh();
   });
 
-  module.controller('ProjectMutationsCtrl', function ($scope, HighchartsService, Projects, Donors, LocationService) {
+  module.controller('ProjectMutationsCtrl',
+    function ($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
+
     var _ctrl = this, project = Projects.one();
 
 
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
+        var projectCachePromise = ProjectCache.getData();
+
         _ctrl.mutations = mutations;
 
         if ( _.isEmpty(_ctrl.mutations.hits)) {
@@ -389,6 +450,10 @@
                 facet.advQuery = LocationService.mergeIntoFilters({
                   donor: {projectId: {is: [facet.term]}},
                   mutation: {id: {is: [mutation.id]}}
+                });
+
+                projectCachePromise.then(function(lookup) {
+                  facet.projectName = lookup[facet.term] || facet.term;
                 });
 
                 facet.countTotal = p.ssmTestedDonorCount;
@@ -472,6 +537,26 @@
     this.several = function(list) {
       return Restangular.several('projects', list);
     };
+
+
+    // Get ALL projects metadata
+    this.getMetadata = function() {
+      var params = {
+        filters: {
+          project: {
+            state: {
+              is: ['*'] // Make sure we include both pending and live projects
+            }
+          }
+        },
+        size: 100
+      };
+
+      return this.all().get('', params).then(function(data) {
+        return data;
+      });
+    };
+
 
     this.getList = function (params) {
       var defaults = {

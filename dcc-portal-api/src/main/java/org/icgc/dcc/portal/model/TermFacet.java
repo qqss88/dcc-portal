@@ -42,6 +42,20 @@ public class TermFacet {
   Long other;
   ImmutableList<Term> terms;
 
+  // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
+  public static TermFacet repoTermFacet(long total, long missing, ImmutableList<Term> terms) {
+    return new TermFacet(total, missing, terms);
+  }
+
+  // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
+  // private TermFacet(long total, long missing, ImmutableList<Term> terms) {
+  // this.type = "terms";
+  // this.other = -1L;
+  // this.total = total;
+  // this.missing = missing;
+  // this.terms = terms;
+  // }
+
   public static TermFacet of(TermsFacet facet) {
     return new TermFacet(facet);
   }
@@ -70,7 +84,7 @@ public class TermFacet {
     val lst = ImmutableList.<Term> builder();
     for (val entry : entries) {
       Text name = entry.getTerm();
-      int value = entry.getCount();
+      long value = entry.getCount();
       Term term = new Term(name.string(), value);
       lst.add(term);
     }
@@ -81,8 +95,7 @@ public class TermFacet {
   public static class Term {
 
     String term;
-    long count;
-
+    Long count;
   }
 
 }

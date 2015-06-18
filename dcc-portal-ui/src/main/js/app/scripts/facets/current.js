@@ -22,7 +22,10 @@
 
   var module = angular.module('icgc.facets.current', []);
 
-  module.controller('currentCtrl', function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService) {
+  module.controller('currentCtrl',
+    function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
+
+    $scope.Page = Page;
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
 
@@ -97,7 +100,7 @@
     refresh();
     $scope.$on('$locationChangeSuccess', function (evt, next) {
       // FIXME: Only applicable on search page. Should have a cleaner solution
-      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1) {
+      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repository/external') ) {
         refresh();
       }
     });

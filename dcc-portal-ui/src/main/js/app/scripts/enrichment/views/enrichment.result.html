@@ -13,7 +13,7 @@
            <i class="icon-attention"></i>This analysis is deprecated. This analysis was created against an old version of the data and may no longer be valid. Please remove or recreate it again.
         </div>
         <span>
-            <small>Please see the <a href="https://docs.icgc.org/methods#enrichmentanalysis">Enrichment Analysis</a> documentation resource for a general overview of this feature.</small>
+            <small>Please see the <a href="https://docs.icgc.org/methods#enrichmentanalysis" target="_blank"><i class="icon-external-link"></i>Enrichment Analysis</a> documentation resource for a general overview of this feature.</small>
         </span>
     </div>
     <br>
@@ -32,7 +32,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{item.params.universe | define}}</td>
+                    <td>{{ item.params.universe | universe }}</td>
                     <td class="text-right">{{item.overview.universeGeneSetCount | number}}</td>
                     <td class="text-right">{{item.overview.overlapGeneSetCount | number}}</td>
                     <td class="text-right">

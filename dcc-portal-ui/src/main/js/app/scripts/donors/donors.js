@@ -39,14 +39,54 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations, Settings) {
+  module.controller('DonorCtrl',
+    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG) {
 
-    var _ctrl = this;
+    var _ctrl = this, promise;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
 
+
+    _ctrl.hasSupplementalFiles = function(donor) {
+      return donor.family || donor.exposure || donor.therapy;
+    };
+
+    _ctrl.isPCAWG = function(donor) {
+      return _.any(donor.studies, PCAWG.isPCAWGStudy);
+    };
+
     _ctrl.donor = donor;
+
+    _ctrl.isPendingDonor = _.isUndefined (_.get(donor, 'primarySite'));
+
+    var donorFilter = {
+      file: {
+        donorId: {
+          is: [donor.id]
+        }
+      }
+    };
+    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (donorFilter);
+
+    _ctrl.donor.clinicalXML = null;
+    promise = ExternalRepoService.getList({
+      filters: {
+        file: {
+          donorId: {is: [_ctrl.donor.id]},
+          dataFormat: { is: ['XML']}
+        }
+      }
+    });
+    promise.then(function(results) {
+      if (results.hits && results.hits[0]) {
+        var file = results.hits[0];
+        var repo = file.repository;
+        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
+          repo.repoDataPath + repo.repoEntityId;
+      }
+    });
+
 
     _ctrl.downloadDonorData = function() {
       $modal.open({
@@ -55,7 +95,7 @@
         resolve: {
           filters: function() {
             return {
-              donor: { id: { is: [_ctrl.donor.id] } }
+              donor: { id: { is: [_ctrl.donor.id] }, state:{is: ['*']} }
             };
           }
         }
@@ -98,11 +138,13 @@
 
   });
 
-  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService) {
+  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService, ProjectCache) {
     var _ctrl = this, donor;
 
     function success(mutations) {
       if (mutations.hasOwnProperty('hits')) {
+        var projectCachePromise = ProjectCache.getData();
+
         _ctrl.mutations = mutations;
 
         _ctrl.mutations.advQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]}}});
@@ -128,6 +170,10 @@
               mutation.uiDonors.forEach(function (facet) {
                 var p = _.find(projects.hits, function (item) {
                   return item.id === facet.term;
+                });
+
+                projectCachePromise.then(function(lookup) {
+                  facet.projectName = lookup[facet.term] || facet.term;
                 });
 
                 facet.advQuery = LocationService.mergeIntoFilters(
@@ -164,8 +210,14 @@
     refresh();
   });
 
-  module.controller('DonorSpecimenCtrl', function (Donors) {
+  module.controller('DonorSpecimenCtrl', function (Donors, PCAWG) {
     var _ctrl = this;
+
+    _ctrl.PCAWG = PCAWG;
+
+    _ctrl.isPCAWG = function(specimen) {
+      return _.any(_.pluck(specimen.samples, 'study'), PCAWG.isPCAWGStudy);
+    };
 
     _ctrl.setActive = function (id) {
       Donors.one().get({include: 'specimen'}).then(function (donor) {
