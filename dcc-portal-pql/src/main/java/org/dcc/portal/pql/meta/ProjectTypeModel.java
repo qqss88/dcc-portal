@@ -120,7 +120,7 @@ public class ProjectTypeModel extends TypeModel {
         long_("_pexp_tested_donor_count", "pexpTestedDonorCount"),
         long_("_mirna_seq_tested_donor_count", "mirnaSeqTestedDonorCount"),
         long_("_jcn_tested_donor_count", "jcnTestedDonorCount"),
-        long_("_total_donor_count", "totalDonorCount"),
+        long_("_total_complete_donor_count", "totalDonorCount"),
         long_("_affected_donor_count", "affectedDonorCount"),
         object("experimental_analysis_performed_donor_count", "experimentalAnalysisPerformedDonorCounts"),
         object("experimental_analysis_performed_sample_count", "experimentalAnalysisPerformedSampleCounts"),
