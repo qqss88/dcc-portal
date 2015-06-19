@@ -94,6 +94,7 @@ public class GeneCentricTypeModel extends TypeModel {
         .add(arrayOfStrings("synonyms", "synonyms"))
         .add(defineExternalDbIds())
         .add(defineSummary())
+        .add(arrayOfObjects("project", "projects", object()))
         .add(arrayOfStrings("pathway", ImmutableSet.of("pathways", "pathwayId", "gene.pathwayId")))
         .add(arrayOfStrings("curated_set", ImmutableSet.of("curatedSetId", "gene.curatedSetId")))
         .add(arrayOfObjects("transcripts", "transcripts", object()))
@@ -141,7 +142,7 @@ public class GeneCentricTypeModel extends TypeModel {
         // FIXME: This field has different spelling in different types
         string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
-        object("project", "projects",
+        object("project",
             string("_project_id", "donor.projectId"),
             string("primary_site", "donor.primarySite"),
             string("project_name", "donor.projectName")),
