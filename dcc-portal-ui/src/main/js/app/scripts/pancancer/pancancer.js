@@ -19,8 +19,9 @@
 
   var module = angular.module('icgc.pancancer.controllers', []);
 
-  module.controller('PancancerController', function() {
-    // TODO
+  module.controller('PancancerController', function(Page) {
+    Page.stopWork();
+    Page.setPage('entity');
   });
 
 })();
