@@ -56,7 +56,8 @@ public class DonorCentricTypeModel extends TypeModel {
       "ageAtDiagnosisGroup",
       "availableDataTypes",
       "analysisTypes",
-      "projectName");
+      "projectName",
+      "studies");
 
   private final static List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",

@@ -96,7 +96,12 @@ public class DonorService {
   }
 
   public long count(Query query) {
-    return donorRepository.count(query);
+    val pql = "count()," + converter.convert(query, DONOR_CENTRIC);
+    val request = queryEngine.execute(pql, DONOR_CENTRIC);
+    log.debug("Count query {}", pql);
+
+    val response = request.getRequestBuilder().execute().actionGet();
+    return response.getHits().getTotalHits();
   }
 
   public LinkedHashMap<String, Long> counts(LinkedHashMap<String, Query> queries) {

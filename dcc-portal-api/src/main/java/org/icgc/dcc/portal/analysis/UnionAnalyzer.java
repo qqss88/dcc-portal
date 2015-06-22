@@ -38,6 +38,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -55,11 +57,9 @@ import org.icgc.dcc.portal.model.UnionAnalysisRequest;
 import org.icgc.dcc.portal.model.UnionAnalysisResult;
 import org.icgc.dcc.portal.model.UnionUnit;
 import org.icgc.dcc.portal.model.UnionUnitWithCount;
-import org.icgc.dcc.portal.repository.DonorRepository;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
-import org.icgc.dcc.portal.repository.MutationRepository;
-import org.icgc.dcc.portal.repository.Repository;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
@@ -84,6 +84,9 @@ public class UnionAnalyzer {
   @NonNull
   private final PortalProperties properties;
 
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
+
   @NonNull
   private final UnionAnalysisRepository unionAnalysisRepository;
   @NonNull
@@ -92,10 +95,6 @@ public class UnionAnalyzer {
   private final TermsLookupService termLookupService;
   @NonNull
   private final GeneRepository geneRepository;
-  @NonNull
-  private final DonorRepository donorRepository;
-  @NonNull
-  private final MutationRepository mutationRepository;
 
   @Min(1)
   private int maxNumberOfHits;
@@ -296,13 +295,13 @@ public class UnionAnalyzer {
     return response;
   }
 
-  private Repository getRepositoryByEntityType(final BaseEntitySet.Type entityType) {
+  private Type getRepositoryByEntityType(final BaseEntitySet.Type entityType) {
     if (entityType == BaseEntitySet.Type.DONOR) {
-      return donorRepository;
+      return Type.DONOR_CENTRIC;
     } else if (entityType == BaseEntitySet.Type.GENE) {
-      return geneRepository;
+      return Type.GENE_CENTRIC;
     } else if (entityType == BaseEntitySet.Type.MUTATION) {
-      return mutationRepository;
+      return Type.MUTATION_CENTRIC;
     }
 
     log.error("No mapping for enum value '{}' of BaseEntityList.Type.", entityType);
@@ -313,7 +312,7 @@ public class UnionAnalyzer {
 
     log.debug("List def is: " + definition);
 
-    val limitedGeneQuery = Query.builder()
+    val query = Query.builder()
         .fields(NO_FIELDS)
         .filters(definition.getFilters())
         .sort(definition.getSortBy())
@@ -322,16 +321,11 @@ public class UnionAnalyzer {
         .limit(max)
         .build();
 
-    val repo = getRepositoryByEntityType(definition.getType());
+    val type = getRepositoryByEntityType(definition.getType());
+    val pql = converter.convert(query, type);
+    val request = queryEngine.execute(pql, type);
+    return request.getRequestBuilder().execute().actionGet();
 
-    // val watch = Stopwatch.createStarted();
-
-    val result = repo.findAllCentric(limitedGeneQuery);
-
-    // watch.stop();
-    // log.info("executeFilterQuery took {} nanoseconds.", watch.elapsed(TimeUnit.NANOSECONDS));
-
-    return result;
   }
 
   @Async
