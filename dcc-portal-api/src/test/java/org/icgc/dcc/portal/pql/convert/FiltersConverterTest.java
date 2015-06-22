@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.createFilterByNestedPath;
@@ -132,6 +133,26 @@ public class FiltersConverterTest {
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
     assertThat(result)
         .isEqualTo("nested(ssm_occurrence,in(donor.primarySite,'Brain'),in(donor.ageAtDiagnosisGroup,'60 - 69'))");
+  }
+
+  @Test
+  public void fileFiltersTest() {
+    val testJql = "{file: {id: {is: 'test1'}}}";
+    val expectedPql = "eq(file.id,'test1')";
+
+    val testPql = converter.convertFilters(createFilters(testJql), REPOSITORY_FILE);
+    assertThat(testPql)
+        .isEqualTo(expectedPql);
+  }
+
+  @Test
+  public void fileFiltersTest2() {
+    val testJql = "{file: {study: {is: 'test1'}}}";
+    val expectedPql = "eq(file.study,'test1')";
+
+    val testPql = converter.convertFilters(createFilters(testJql), REPOSITORY_FILE);
+    assertThat(testPql)
+        .isEqualTo(expectedPql);
   }
 
   @Test

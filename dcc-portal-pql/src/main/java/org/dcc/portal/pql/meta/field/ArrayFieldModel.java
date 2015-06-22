@@ -85,9 +85,14 @@ public class ArrayFieldModel extends FieldModel {
     return new ArrayFieldModel(name, alias, NESTED, element);
   }
 
-  public static ArrayFieldModel arrayOfObjects(@NonNull String name, @NonNull String alias,
-      @NonNull ObjectFieldModel element) {
+  @NonNull
+  public static ArrayFieldModel arrayOfObjects(String name, String alias, ObjectFieldModel element) {
     return new ArrayFieldModel(name, alias, NOT_NESTED, element);
+  }
+
+  @NonNull
+  public static ArrayFieldModel arrayOfObjects(String name, ObjectFieldModel element) {
+    return new ArrayFieldModel(name, NOT_NESTED, element);
   }
 
   @Override

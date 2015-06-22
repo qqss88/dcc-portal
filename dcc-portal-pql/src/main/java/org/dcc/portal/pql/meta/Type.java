@@ -29,7 +29,8 @@ public enum Type {
   GENE_CENTRIC("gene-centric"),
   MUTATION_CENTRIC("mutation-centric"),
   OBSERVATION_CENTRIC("observation-centric"),
-  PROJECT("project");
+  PROJECT("project"),
+  REPOSITORY_FILE("file");
 
   private final String id;
 
