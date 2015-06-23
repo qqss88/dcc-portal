@@ -502,6 +502,13 @@ public class FiltersConverterTest {
     assertThat(result).isEqualTo("in(donor.projectId,'p')");
   }
 
+  @Test
+  public void allTest() {
+    val filters = createFilters("{gene:{id:{all:['G1','G2','G3']}}}");
+    val result = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(result).isEqualTo("and(eq(gene.id,'G1'),eq(gene.id,'G2'),eq(gene.id,'G3'))");
+  }
+
   @SneakyThrows
   public static JqlFilters createFilters(String filters) {
     return mapper.readValue(new FiltersParam(filters).get().toString(), JqlFilters.class);
