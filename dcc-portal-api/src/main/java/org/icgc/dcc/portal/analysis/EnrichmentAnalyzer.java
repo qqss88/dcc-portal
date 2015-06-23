@@ -44,7 +44,6 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Overview;
 import org.icgc.dcc.portal.model.EnrichmentAnalysis.Result;
 import org.icgc.dcc.portal.model.Query;
@@ -355,16 +354,16 @@ public class EnrichmentAnalyzer {
     return geneSetRepository.findName(geneSetIds);
   }
 
-  private int countGenes(AndQuery query) {
-    return (int) geneRepository.countIntersection(query);
+  private int countGenes(Query query) {
+    return (int) geneRepository.count(query);
   }
 
-  private int countDonors(AndQuery query) {
-    return (int) donorRepository.countIntersection(query);
+  private int countDonors(Query query) {
+    return (int) donorRepository.count(query);
   }
 
-  private int countMutations(AndQuery query) {
-    return (int) mutationRepository.countIntersection(query);
+  private int countMutations(Query query) {
+    return (int) mutationRepository.count(query);
   }
 
   private int countGeneSetGenes(String geneSetId) {

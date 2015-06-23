@@ -345,7 +345,7 @@ public class ProjectResource {
     log.info(NESTED_FIND_TEMPLATE, "Samples", projectId);
 
     FiltersParam filter = new FiltersParam(String.format(PROJECT_FILTER_TEMPLATE, projectId));
-    Donors donors = donorService.findAll(
+    Donors donors = donorService.findAllCentric(
         query()
             .filters(filter.get())
             .limit(5000)

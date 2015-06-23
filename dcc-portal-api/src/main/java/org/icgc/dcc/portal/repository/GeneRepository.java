@@ -69,7 +69,6 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
@@ -79,7 +78,6 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
 import org.elasticsearch.search.sort.SortOrder;
-import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -236,17 +234,17 @@ public class GeneRepository implements Repository {
     return findGeneSymbolsByFilters(filters);
   }
 
-  public SearchResponse findGeneSetCounts(AndQuery query) {
+  public SearchResponse findGeneSetCounts(Query query) {
     val search = client.prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(COUNT);
 
-    val boolFilter = new BoolFilterBuilder();
-    for (val filters : query.getAndFilters()) {
-      val remappedFilters = remapFilters(filters);
+    // val boolFilter = new BoolFilterBuilder();
+    // for (val filters : query.getAndFilters()) {
+    // val remappedFilters = remapFilters(filters);
 
-      boolFilter.must(getFilters(remappedFilters));
-    }
+    // boolFilter.must(getFilters(remappedFilters));
+    // }
 
     for (val universe : Universe.values()) {
       val universeFacetName = universe.getGeneSetFacetName();
@@ -255,7 +253,7 @@ public class GeneRepository implements Repository {
           termsFacet(universeFacetName)
               .field(universeFacetName)
               .size(50000) // This has to be as big as the largest universe
-              .facetFilter(boolFilter));
+              .facetFilter(getFilters(query.getFilters())));
     }
 
     log.debug("{}", search);
@@ -350,26 +348,6 @@ public class GeneRepository implements Repository {
   @Override
   public long count(Query query) {
     val search = buildCountRequest(query, CENTRIC_TYPE);
-
-    log.debug("{}", search);
-
-    return search.execute().actionGet().getHits().getTotalHits();
-  }
-
-  public long countIntersection(AndQuery query) {
-    val search = client.prepareSearch(index).setTypes(CENTRIC_TYPE.getId()).setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      // Require all filter components to be true
-      val boolFilter = new BoolFilterBuilder();
-      for (val filters : query.getAndFilters()) {
-        val remappedFilters = remapFilters(filters);
-
-        boolFilter.must(getFilters(remappedFilters));
-      }
-
-      search.setPostFilter(boolFilter);
-    }
 
     log.debug("{}", search);
 
