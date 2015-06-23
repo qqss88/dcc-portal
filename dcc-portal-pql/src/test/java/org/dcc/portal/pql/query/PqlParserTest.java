@@ -20,7 +20,6 @@ package org.dcc.portal.pql.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.dcc.portal.pql.exception.SemanticException;
-import org.dcc.portal.pql.query.PqlParser;
 import org.junit.Test;
 
 public class PqlParserTest {

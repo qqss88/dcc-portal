@@ -17,8 +17,6 @@
  */
 package org.icgc.dcc.portal.pql.convert.model;
 
-import static java.lang.String.format;
-
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -37,14 +35,6 @@ public abstract class JqlValue {
   public abstract boolean isArray();
 
   public abstract Object get();
-
-  public static boolean isString(Object value) {
-    return value instanceof String;
-  }
-
-  public static String asString(Object value) {
-    return format("'%s'", value);
-  }
 
   public boolean contains(@NonNull Object value) {
     return values.contains(value);

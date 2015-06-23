@@ -18,20 +18,40 @@
 package org.dcc.portal.pql.ast.function;
 
 import static com.google.common.collect.ImmutableList.copyOf;
+import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
+import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import org.dcc.portal.pql.ast.function.SortNode.SortNodeBuilder;
 
+import com.google.common.collect.ImmutableList;
+
 @UtilityClass
 public class FunctionBuilders {
+
+  public SelectNode select(@NonNull ImmutableList<String> fields) {
+    return new SelectNode(fields);
+  }
 
   public SelectNode select(@NonNull String... fields) {
     return new SelectNode(copyOf(fields));
   }
 
+  public SelectNode selectAll() {
+    return select(ALL_FIELDS);
+  }
+
+  public FacetsNode facets(@NonNull ImmutableList<String> facets) {
+    return new FacetsNode(facets);
+  }
+
   public FacetsNode facets(@NonNull String... facets) {
     return new FacetsNode(copyOf(facets));
+  }
+
+  public FacetsNode facetsAll() {
+    return facets(ALL_FACETS);
   }
 
   public LimitNode limit(int size) {
@@ -44,6 +64,10 @@ public class FunctionBuilders {
 
   public SortNodeBuilder sortBuilder() {
     return SortNode.builder();
+  }
+
+  public CountNode count() {
+    return new CountNode();
   }
 
 }

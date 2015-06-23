@@ -17,6 +17,9 @@
  */
 package org.icgc.dcc.portal.pql.convert.model;
 
+import static org.dcc.portal.pql.util.Converters.asString;
+import static org.dcc.portal.pql.util.Converters.isString;
+
 import java.util.List;
 
 import lombok.NonNull;

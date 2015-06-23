@@ -18,6 +18,8 @@
 package org.dcc.portal.pql.ast.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 
 import java.util.Optional;
 
@@ -29,9 +31,7 @@ import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.GtNode;
 import org.dcc.portal.pql.ast.filter.InNode;
 import org.dcc.portal.pql.ast.filter.NestedNode;
-import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.SortNode;
-import org.dcc.portal.pql.es.model.Order;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -44,6 +44,7 @@ public class CreatePqlStringVisitorTest {
   public void visitEqTest() {
     val node = new EqNode("id", 10);
     assertThat(visit(node)).isEqualTo("eq(id,10)");
+    assertThat(visit(new EqNode("id", "ID1"))).isEqualTo("eq(id,'ID1')");
   }
 
   @Test
@@ -62,21 +63,27 @@ public class CreatePqlStringVisitorTest {
   public void visitInTest() {
     val node = new InNode("gene", ImmutableList.of(20, 30));
     assertThat(visit(node)).isEqualTo("in(gene,20,30)");
+    assertThat(visit(new InNode("gene", ImmutableList.of("G1", "G2")))).isEqualTo("in(gene,'G1','G2')");
   }
 
   @Test
   public void visitFacetsTest() {
-    val node = new FacetsNode(ImmutableList.of("id"));
+    val node = facets("id");
     assertThat(visit(node)).isEqualTo("facets(id)");
   }
 
   @Test
   public void visitSortTest() {
-    val node = new SortNode();
-    node.addField("id", Order.ASC);
-    node.addField("gene", Order.DESC);
+    val node = SortNode.builder();
+    node.sortAsc("id");
+    node.sortDesc("gene");
 
-    assertThat(visit(node)).isEqualTo("sort(-gene,+id)");
+    assertThat(visit(node.build())).isEqualTo("sort(-gene,+id)");
+  }
+
+  @Test
+  public void visitSelectTest() {
+    assertThat(visit(select("id"))).isEqualTo("select(id)");
   }
 
   private String visit(PqlNode node) {

@@ -20,6 +20,7 @@ package org.dcc.portal.pql.ast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.ast.builder.PqlSearchBuilder.statement;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.SortNode.builder;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,7 +71,7 @@ public class StatementNodeTest {
 
   @Test
   public void setSortTest() {
-    val statement = statement().sortAsc("id").build();
+    val statement = statement().sort(builder().sortAsc("id")).build();
     val newSort = FunctionBuilders.sortBuilder().sortAsc("gender").build();
     statement.setSort(newSort);
     assertThat(statement.getSort()).isEqualTo(newSort);

@@ -17,14 +17,18 @@
  */
 package org.dcc.portal.pql.ast.function;
 
+import static lombok.AccessLevel.PACKAGE;
+
 import java.util.Optional;
 
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.Type;
 import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
+@NoArgsConstructor(access = PACKAGE)
 public class CountNode extends PqlNode {
 
   @Override

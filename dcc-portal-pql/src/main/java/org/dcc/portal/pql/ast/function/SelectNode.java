@@ -37,6 +37,10 @@ public class SelectNode extends PqlNode {
   @NonNull
   List<String> fields;
 
+  SelectNode(@NonNull List<String> fields) {
+    this.fields = fields;
+  }
+
   @Override
   public Type type() {
     return Type.SELECT;

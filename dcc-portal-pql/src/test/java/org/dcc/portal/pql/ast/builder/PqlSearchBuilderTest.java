@@ -24,8 +24,6 @@ import java.util.Map;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.StatementNode;
-import org.dcc.portal.pql.ast.builder.FilterBuilders;
-import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
@@ -89,7 +87,7 @@ public class PqlSearchBuilderTest {
 
   @Test
   public void sortTest() {
-    StatementNode result = PqlSearchBuilder.statement().sort("id", Order.ASC).build();
+    StatementNode result = PqlSearchBuilder.statement().sort(SortNode.builder().sortAsc("id")).build();
     assertThat(result.childrenCount()).isEqualTo(1);
     SortNode sortNode = (SortNode) result.getFirstChild();
     Map<String, Order> fields = sortNode.getFields();
@@ -97,8 +95,7 @@ public class PqlSearchBuilderTest {
     assertThat(fields.get("id")).isEqualTo(Order.ASC);
 
     result = PqlSearchBuilder.statement()
-        .sort("id", Order.ASC)
-        .sort("mutation", Order.DESC)
+        .sort(SortNode.builder().sortAsc("id").sortDesc("mutation"))
         .build();
     assertThat(result.childrenCount()).isEqualTo(1);
     sortNode = (SortNode) result.getFirstChild();
@@ -115,7 +112,7 @@ public class PqlSearchBuilderTest {
         .facets("mu")
         .filter(FilterBuilders.eq("gene", "G1"))
         .limit(100)
-        .sort("id", Order.ASC)
+        .sort(SortNode.builder().sortAsc("id"))
         .build();
 
     assertThat(result.getSelect()
