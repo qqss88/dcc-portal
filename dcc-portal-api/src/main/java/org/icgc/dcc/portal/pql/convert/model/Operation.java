@@ -35,10 +35,16 @@ public enum Operation implements Identifiable {
 
   IS,
   NOT,
+
   /**
    * Represent filters hasCuratedSet, hasPathway, hasGoTerm
    */
-  HAS;
+  HAS,
+
+  /**
+   * All values are combined with 'and'
+   */
+  ALL;
 
   private static final Collection<String> OPERATION_IDS = defineOperationIds();
 

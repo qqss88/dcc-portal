@@ -22,8 +22,10 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
+import static org.icgc.dcc.portal.pql.convert.model.Operation.ALL;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
@@ -394,6 +396,10 @@ public class FiltersConverter {
       return resolveMissingFilter(fieldName, jqlField);
     }
 
+    if (jqlField.getOperation() == ALL) {
+      return resolveAllFilter(jqlField);
+    }
+
     if (jqlField.getValue().contains(MISSING_VALUE)) {
       return createMissingFilter(jqlField, indexType);
     }
@@ -404,6 +410,25 @@ public class FiltersConverter {
     }
 
     return filterType;
+  }
+
+  private static String resolveAllFilter(JqlField jqlField) {
+    val values = createAllFilters(jqlField);
+
+    return format("and(%s)", COMMA.join(values));
+  }
+
+  private static List<String> createAllFilters(JqlField jqlField) {
+    val fieldName = parseFieldName(jqlField);
+    val values = (JqlArrayValue) jqlField.getValue();
+    val result = ImmutableList.<String> builder();
+
+    for (val rawValue : values.get()) {
+      val value = isString(rawValue) ? asString(rawValue) : rawValue;
+      result.add(format(EQ_TEMPLATE, fieldName, value));
+    }
+
+    return result.build();
   }
 
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
