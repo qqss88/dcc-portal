@@ -497,9 +497,9 @@ public class FiltersConverterTest {
 
   @Test
   public void mutationFiltersInProjectTypeModelTest() {
-    val filters = createFilters("{project:{projectId:{is:['p']}},mutation:{consequenceType:{is:['sl']}}}");
+    val filters = createFilters("{project:{id:{is:['p']}},mutation:{consequenceType:{is:['sl']}}}");
     val result = converter.convertFilters(filters, Type.PROJECT);
-    assertThat(result).isEqualTo("in(project.projectId,'p')");
+    assertThat(result).isEqualTo("in(project.id,'p')");
   }
 
   @Test
