@@ -71,6 +71,7 @@
     'icgc.downloader',
     'icgc.pathwayviewer',
     'icgc.repository',
+    'icgc.pancancer',
     'icgc.auth',
 
     // old

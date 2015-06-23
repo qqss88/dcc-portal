@@ -60,11 +60,10 @@ public class SearchRepository {
 
   private final Client client;
 
-  @Value("#{repoIndexName}")
-  private String repoIndexName;
-
   @Value("#{indexName}")
   private String indexName;
+
+  private final String repoIndexName = IndexModel.REPOSITORY_INDEX_NAME;
 
   @Autowired
   SearchRepository(Client client, IndexModel indexModel) {
