@@ -23,6 +23,7 @@ import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.val;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.Type;
@@ -49,6 +50,10 @@ public class SortNode extends PqlNode {
     fields.put(field, Order.DESC);
   }
 
+  public static SortNodeBuilder builder() {
+    return new SortNodeBuilder();
+  }
+
   @Override
   public Type type() {
     return Type.SORT;
@@ -62,6 +67,41 @@ public class SortNode extends PqlNode {
   @Override
   public SortNode toSortNode() {
     return this;
+  }
+
+  public static class SortNodeBuilder {
+
+    private final Map<String, Order> sort = Maps.newHashMap();
+
+    public SortNodeBuilder sort(@NonNull String field, @NonNull Order order) {
+      sort.put(field, order);
+
+      return this;
+    }
+
+    public SortNodeBuilder sortAsc(@NonNull String field) {
+      sort.put(field, Order.ASC);
+
+      return this;
+    }
+
+    public SortNodeBuilder sortDesc(@NonNull String field) {
+      sort.put(field, Order.DESC);
+
+      return this;
+    }
+
+    public SortNode build() {
+      val sortNode = new SortNode();
+      if (!sort.isEmpty()) {
+        for (val entry : sort.entrySet()) {
+          sortNode.addField(entry.getKey(), entry.getValue());
+        }
+      }
+
+      return sortNode;
+    }
+
   }
 
 }
