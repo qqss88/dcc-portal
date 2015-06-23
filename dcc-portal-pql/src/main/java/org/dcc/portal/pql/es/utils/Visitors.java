@@ -17,8 +17,20 @@
  */
 package org.dcc.portal.pql.es.utils;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+
+import java.util.Map;
+
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.visitor.CreateQueryBuilderVisitor;
@@ -51,6 +63,8 @@ import org.dcc.portal.pql.es.visitor.util.EmptyNodesCleanerVisitor;
 import org.dcc.portal.pql.es.visitor.util.QuerySimplifierVisitor;
 import org.dcc.portal.pql.es.visitor.util.ToStringVisitor;
 import org.dcc.portal.pql.meta.Type;
+
+import com.google.common.collect.ImmutableMap;
 
 @NoArgsConstructor(access = PRIVATE)
 public final class Visitors {
@@ -102,6 +116,16 @@ public final class Visitors {
   private static final ResolveNestedFilterFieldVisitor RESOLVE_NESTED_FIELD_VISITOR =
       new ResolveNestedFilterFieldVisitor();
   private static final VerifyNestedFilterVisitor VERIFY_NESTED_FILTER_VISITOR = new VerifyNestedFilterVisitor();
+
+  private static final Map<Type, ScoreQueryVisitor> META_TYPE_SCORE_VISITOR_MAPPING =
+      ImmutableMap.<Type, ScoreQueryVisitor> builder()
+          .put(DONOR_CENTRIC, DONOR_SCORE_QUERY_VISITOR)
+          .put(GENE_CENTRIC, GENE_SCORE_QUERY_VISITOR)
+          .put(MUTATION_CENTRIC, MUTATION_SCORE_QUERY_VISITOR)
+          .put(OBSERVATION_CENTRIC, DEFAULT_SCORE_QUERY_VISITOR)
+          .put(PROJECT, DEFAULT_SCORE_QUERY_VISITOR)
+          .put(REPOSITORY_FILE, DEFAULT_SCORE_QUERY_VISITOR)
+          .build();
 
   public static final VerifyNestedFilterVisitor createVerifyNestedFilterVisitor() {
     return VERIFY_NESTED_FILTER_VISITOR;
@@ -199,21 +223,12 @@ public final class Visitors {
     return REMOVE_AGGS_FILTER_VISITOR;
   }
 
+  @NonNull
   public static ScoreQueryVisitor createScoreQueryVisitor(Type type) {
-    switch (type) {
-    case DONOR_CENTRIC:
-      return DONOR_SCORE_QUERY_VISITOR;
-    case GENE_CENTRIC:
-      return GENE_SCORE_QUERY_VISITOR;
-    case MUTATION_CENTRIC:
-      return MUTATION_SCORE_QUERY_VISITOR;
-    case OBSERVATION_CENTRIC:
-      return DEFAULT_SCORE_QUERY_VISITOR;
-    case PROJECT:
-      return DEFAULT_SCORE_QUERY_VISITOR;
-    default:
-      throw new IllegalArgumentException();
-    }
+    val scoreVisitor = META_TYPE_SCORE_VISITOR_MAPPING.get(type);
+    checkArgument(null != scoreVisitor, "Unknown index type '%s'", type.getId());
+
+    return scoreVisitor;
   }
 
 }

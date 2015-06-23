@@ -17,7 +17,7 @@
  */
 package org.dcc.portal.pql.es.utils;
 
-import static java.lang.String.format;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.dcc.portal.pql.es.utils.Visitors.createAggregationsResolverVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createEmptyNodesCleanerVisitor;
 import static org.dcc.portal.pql.es.utils.Visitors.createEntitySetVisitor;
@@ -35,7 +35,15 @@ import static org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel;
+import static org.dcc.portal.pql.meta.IndexModel.getRepositoryFileTypeModel;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 
+import java.util.Map;
 import java.util.Optional;
 
 import lombok.NoArgsConstructor;
@@ -50,6 +58,8 @@ import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * Performs series of transformations to resolve different processing rules and to optimize the AST
  */
@@ -57,16 +67,15 @@ import org.dcc.portal.pql.query.QueryContext;
 @NoArgsConstructor
 public class EsAstTransformer {
 
-  private static final Optional<Context> DONOR_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
-      getDonorCentricTypeModel()));
-  private static final Optional<Context> GENE_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
-      getGeneCentricTypeModel()));
-  private static final Optional<Context> MUTATION_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
-      getMutationCentricTypeModel()));
-  private static final Optional<Context> OBSERVATION_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
-      getObservationCentricTypeModel()));
-  private static final Optional<Context> PROJECT_RESOLVE_FACETS_CONTEXT = Optional.of(new Context(null,
-      getProjectTypeModel()));
+  private static final Map<Type, Optional<Context>> RESOLVE_FACETS_CONTEXT_MAPPING =
+      ImmutableMap.<Type, Optional<Context>> builder()
+          .put(DONOR_CENTRIC, createFacetContext(getDonorCentricTypeModel()))
+          .put(GENE_CENTRIC, createFacetContext(getGeneCentricTypeModel()))
+          .put(MUTATION_CENTRIC, createFacetContext(getMutationCentricTypeModel()))
+          .put(OBSERVATION_CENTRIC, createFacetContext(getObservationCentricTypeModel()))
+          .put(PROJECT, createFacetContext(getProjectTypeModel()))
+          .put(REPOSITORY_FILE, createFacetContext(getRepositoryFileTypeModel()))
+          .build();
 
   public ExpressionNode process(@NonNull ExpressionNode esAst, @NonNull QueryContext context) {
     log.debug("Running all ES AST Transformators. Original ES AST: {}", esAst);
@@ -143,7 +152,7 @@ public class EsAstTransformer {
   public ExpressionNode resolveFacets(@NonNull ExpressionNode esAst, @NonNull TypeModel typeModel) {
     val tag = "[resolveFacets]";
     log.debug("{} Resolving aggregations...", tag);
-    esAst = esAst.accept(createAggregationsResolverVisitor(), createResolveFacetsContext(typeModel.getType())).get();
+    esAst = esAst.accept(createAggregationsResolverVisitor(), getResolveFacetsContext(typeModel.getType())).get();
     log.debug("{} Resolved aggregations. Resulting AST: {}", tag, esAst);
 
     log.debug("{} Adding missing aggregations...", tag);
@@ -157,21 +166,17 @@ public class EsAstTransformer {
     return esAst;
   }
 
-  private Optional<Context> createResolveFacetsContext(Type indexType) {
-    switch (indexType) {
-    case DONOR_CENTRIC:
-      return DONOR_RESOLVE_FACETS_CONTEXT;
-    case GENE_CENTRIC:
-      return GENE_RESOLVE_FACETS_CONTEXT;
-    case MUTATION_CENTRIC:
-      return MUTATION_RESOLVE_FACETS_CONTEXT;
-    case OBSERVATION_CENTRIC:
-      return OBSERVATION_RESOLVE_FACETS_CONTEXT;
-    case PROJECT:
-      return PROJECT_RESOLVE_FACETS_CONTEXT;
-    default:
-      throw new IllegalArgumentException(format("Unknown index type '%s'", indexType.getId()));
-    }
+  @NonNull
+  private static Optional<Context> createFacetContext(TypeModel typeModel) {
+    return Optional.of(new Context(null, typeModel));
+  }
+
+  @NonNull
+  private static Optional<Context> getResolveFacetsContext(Type indexType) {
+    val context = RESOLVE_FACETS_CONTEXT_MAPPING.get(indexType);
+    checkArgument(null != context, "Unknown index type '%s'", indexType.getId());
+
+    return context;
   }
 
 }
