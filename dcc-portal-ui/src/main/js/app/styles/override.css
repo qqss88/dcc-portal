@@ -11,7 +11,15 @@
     text-align: center;
 }
 
-.modal h3 {
+.modal-header {
+   padding: 10px;
+}
+
+.modal-footer {
+   padding: 10px;
+}
+
+.modal-header h3 {
    margin: 0
 }
 
