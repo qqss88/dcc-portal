@@ -34,16 +34,16 @@
                                                                          href="#publications">Publications</a>
             </li>
             <li><br></li>
-            <li class="t_subnav__items__item" data-ng-if="ProjectCtrl.mutationFacets.functionalImpact.total > 0">
+            <li class="t_subnav__items__item" data-ng-if="ProjectCtrl.mutationFacets.functionalImpactNested.total > 0">
                 <span>Page Filters</span>
             </li>
-            <li class="t_subnav__items__box" data-ng-if="ProjectCtrl.mutationFacets.functionalImpact.total > 0">
+            <li class="t_subnav__items__box" data-ng-if="ProjectCtrl.mutationFacets.functionalImpactNested.total > 0">
                 <ul class="t_facets">
                     <terms data-type="mutation"
                            data-facet-name="functionalImpact"
                            data-hide-count="true"
                            data-label="Mutation Impact"
-                           data-facet="ProjectCtrl.mutationFacets.functionalImpact"></terms>
+                           data-facet="ProjectCtrl.mutationFacets.functionalImpactNested"></terms>
                 </ul>
             </li>
         </ul>

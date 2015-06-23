@@ -3,7 +3,6 @@ package org.icgc.dcc.portal.service;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
-import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
 import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -79,29 +78,11 @@ public class DonorService {
   }
 
   public Donors findAllCentric(Query query) {
-    val pql = converter.convert(query, DONOR_CENTRIC);
-    log.debug("Query: {}. PQL: {}", query, pql);
-
-    val request = queryEngine.execute(pql, DONOR_CENTRIC);
-    log.debug("Request: {}", request);
-
-    val response = request.getRequestBuilder().execute().actionGet();
-    log.debug("Response: {}", response);
-
-    return buildDonors(response, query);
-  }
-
-  public Donors findAll(Query query) {
     return buildDonors(donorRepository.findAll(query), query);
   }
 
   public long count(Query query) {
-    val pql = "count()," + converter.convert(query, DONOR_CENTRIC);
-    val request = queryEngine.execute(pql, DONOR_CENTRIC);
-    log.debug("Count query {}", pql);
-
-    val response = request.getRequestBuilder().execute().actionGet();
-    return response.getHits().getTotalHits();
+    return donorRepository.count(query);
   }
 
   public LinkedHashMap<String, Long> counts(LinkedHashMap<String, Query> queries) {

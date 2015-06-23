@@ -61,6 +61,7 @@ import com.google.common.collect.Lists;
 
 @SuppressWarnings("deprecation")
 @Slf4j
+@Deprecated
 public class QueryService {
 
   private final static ObjectMapper MAPPER = new ObjectMapper();
