@@ -22,6 +22,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.asString;
 import static org.icgc.dcc.portal.pql.convert.model.JqlValue.isString;
@@ -70,9 +71,10 @@ public class FiltersConverter {
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";
 
   private static final List<String> VALID_PROJECT_FILTERS = ImmutableList.of(
-      "projectId",
+      "id",
       "primarySite",
-      "projectName");
+      "primaryCountries",
+      "availableDataTypes");
 
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",
@@ -125,7 +127,7 @@ public class FiltersConverter {
 
   private static JqlFilters cleanProjectFilters(JqlFilters filters) {
     val kindValues = filters.getKindValues().entrySet().stream()
-        .filter(k -> k.getKey().equals("donor"))
+        .filter(k -> k.getKey().equals(PROJECT.getId()))
         .collect(toMap(k -> k.getKey(), v -> filterValidProjectFilters(v.getValue())));
 
     return new JqlFilters(kindValues);

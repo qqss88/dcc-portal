@@ -22,9 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel;
 import static org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
-import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.createFilterByNestedPath;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupFieldsByNestedPath;
 import static org.icgc.dcc.portal.pql.convert.FiltersConverter.groupNestedPaths;
@@ -497,9 +497,18 @@ public class FiltersConverterTest {
 
   @Test
   public void mutationFiltersInProjectTypeModelTest() {
-    val filters = createFilters("{donor:{projectId:{is:['p']}},mutation:{consequenceType:{is:['sl']}}}");
+    val filters = createFilters("{project:{id:{is:['p']}},mutation:{consequenceType:{is:['sl']}}}");
     val result = converter.convertFilters(filters, Type.PROJECT);
-    assertThat(result).isEqualTo("in(donor.projectId,'p')");
+    assertThat(result).isEqualTo("in(project.id,'p')");
+  }
+
+  @Test
+  public void projectTest() {
+    val filters = createFilters("{project:{primaryCountries:{is:['US']},id:{is:'P1'},primarySite:{is:'Blood'},"
+        + "availableDataTypes:{is:'SSM'}}}");
+    val result = converter.convertFilters(filters, Type.PROJECT);
+    assertThat(result).isEqualTo("in(project.primaryCountries,'US'),eq(project.id,'P1'),"
+        + "eq(project.primarySite,'Blood'),eq(project.availableDataTypes,'SSM')");
   }
 
   @Test
