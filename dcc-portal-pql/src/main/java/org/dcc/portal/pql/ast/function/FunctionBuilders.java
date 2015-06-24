@@ -18,55 +18,56 @@
 package org.dcc.portal.pql.ast.function;
 
 import static com.google.common.collect.ImmutableList.copyOf;
+import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
 import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.experimental.UtilityClass;
 
 import org.dcc.portal.pql.ast.function.SortNode.SortNodeBuilder;
 
 import com.google.common.collect.ImmutableList;
 
-@UtilityClass
-public class FunctionBuilders {
+@NoArgsConstructor(access = PRIVATE)
+public final class FunctionBuilders {
 
-  public SelectNode select(@NonNull ImmutableList<String> fields) {
+  public static SelectNode select(@NonNull ImmutableList<String> fields) {
     return new SelectNode(fields);
   }
 
-  public SelectNode select(@NonNull String... fields) {
+  public static SelectNode select(@NonNull String... fields) {
     return new SelectNode(copyOf(fields));
   }
 
-  public SelectNode selectAll() {
+  public static SelectNode selectAll() {
     return select(ALL_FIELDS);
   }
 
-  public FacetsNode facets(@NonNull ImmutableList<String> facets) {
+  public static FacetsNode facets(@NonNull ImmutableList<String> facets) {
     return new FacetsNode(facets);
   }
 
-  public FacetsNode facets(@NonNull String... facets) {
+  public static FacetsNode facets(@NonNull String... facets) {
     return new FacetsNode(copyOf(facets));
   }
 
-  public FacetsNode facetsAll() {
+  public static FacetsNode facetsAll() {
     return facets(ALL_FACETS);
   }
 
-  public LimitNode limit(int size) {
+  public static LimitNode limit(int size) {
     return limit(0, size);
   }
 
-  public LimitNode limit(int from, int size) {
+  public static LimitNode limit(int from, int size) {
     return new LimitNode(from, size);
   }
 
-  public SortNodeBuilder sortBuilder() {
+  public static SortNodeBuilder sortBuilder() {
     return SortNode.builder();
   }
 
-  public CountNode count() {
+  public static CountNode count() {
     return new CountNode();
   }
 

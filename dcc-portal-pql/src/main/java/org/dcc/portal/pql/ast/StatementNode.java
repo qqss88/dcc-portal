@@ -46,6 +46,7 @@ public class StatementNode extends PqlNode {
   private FilterNode filters;
 
   public StatementNode(@NonNull CountNode count) {
+    super(count);
     this.count = count;
   }
 
