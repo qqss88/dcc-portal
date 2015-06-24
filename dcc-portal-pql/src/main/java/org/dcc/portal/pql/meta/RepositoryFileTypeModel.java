@@ -17,8 +17,8 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 import static java.util.Collections.emptyMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
@@ -61,13 +61,23 @@ public class RepositoryFileTypeModel extends TypeModel {
     return TYPE_PREFIX;
   }
 
+  /*
+   * We enforce ImmutableList here (instead of List).
+   */
+  public static ImmutableList<String> toAliasList(Fields... fields) {
+    return ImmutableList.copyOf(transform(newArrayList(fields),
+        field -> field.alias));
+  }
+
+  /**
+   * Aliases for Es fields
+   */
   @RequiredArgsConstructor(access = PRIVATE)
   public static enum Fields {
 
     ID("id"),
     STUDY("study"),
     ACCESS("access"),
-    DATA_TYPE_OBJECT("dataTypeObject"),
     DATA_FORMAT("dataFormat"),
     DATA_TYPE("dataType"),
     EXPERIMENTAL_STRATEGY("experimentalStrategy"),
@@ -95,78 +105,85 @@ public class RepositoryFileTypeModel extends TypeModel {
     FILE_NAME("fileName"),
     FILE_MD5SUM("fileMd5sum"),
     FILE_SIZE("fileSize"),
+    REPO_SERVER_OBJECT("repoServer"),
     REPO_NAME("repoName"),
     REPO_CODE("repoCode"),
     REPO_COUNTRY("repoCountry"),
     REPO_BASE_URL("repoBaseUrl");
 
     @NonNull
-    private final String name;
+    private final String alias;
 
   }
 
-  public static final List<String> PUBLIC_FIELDS = newArrayList(transform(newArrayList(Fields.values()),
-      field -> field.name));
+  private static final class EsFieldNames {
+
+    private static final String REPOSITORY = "repository";
+    private static final String REPO_SERVER = "repo_server";
+
+  }
+
+  public static final List<String> PUBLIC_FIELDS = toAliasList(Fields.values());
 
   private static final String TYPE_PREFIX = "file";
-  private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
-      Fields.STUDY.name,
-      Fields.DATA_TYPE.name,
-      Fields.DATA_FORMAT.name,
-      Fields.ACCESS.name,
-      Fields.PROJECT_CODE.name,
-      Fields.PRIMARY_SITE.name,
-      Fields.DONOR_STUDY.name,
+  private static final List<String> AVAILABLE_FACETS = toAliasList(
+      Fields.STUDY,
+      Fields.DATA_TYPE,
+      Fields.DATA_FORMAT,
+      Fields.ACCESS,
+      Fields.PROJECT_CODE,
+      Fields.PRIMARY_SITE,
+      Fields.DONOR_STUDY,
       // "repositoryNames",
-      Fields.EXPERIMENTAL_STRATEGY.name);
-  // TODO: is it really that we have no include fields??
-  private static final List<String> INCLUDE_FIELDS = ImmutableList.of();
+      Fields.EXPERIMENTAL_STRATEGY);
+  private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
+      EsFieldNames.REPOSITORY + "." + EsFieldNames.REPO_SERVER);
   // TODO: should this really be empty??
   private static final Map<String, String> INTERNAL_ALIASES = emptyMap();
 
   // This represents the mapping of file index type in ElasticSearch.
   private static final List<FieldModel> MAPPINGS = new ImmutableList.Builder<FieldModel>()
-      .add(string("id", Fields.ID.name))
-      .add(string("study", Fields.STUDY.name))
-      .add(string("access", Fields.ACCESS.name))
-      // TODO: do we need an alias for the object
-      .add(object("data_type", Fields.DATA_TYPE_OBJECT.name,
-          string("data_format", Fields.DATA_FORMAT.name),
-          string("data_type", Fields.DATA_TYPE.name),
-          string("experimental_strategy", Fields.EXPERIMENTAL_STRATEGY.name)))
-      // TODO: do we need an alias for the object
+      .add(string("id", Fields.ID.alias))
+      .add(string("study", Fields.STUDY.alias))
+      .add(string("access", Fields.ACCESS.alias))
+
+      .add(object("data_type",
+          string("data_format", Fields.DATA_FORMAT.alias),
+          string("data_type", Fields.DATA_TYPE.alias),
+          string("experimental_strategy", Fields.EXPERIMENTAL_STRATEGY.alias)))
+
       .add(object("donor",
-          string("project_code", Fields.PROJECT_CODE.name),
-          string("program", Fields.PROGRAM.name),
-          string("study", Fields.DONOR_STUDY.name),
-          string("primary_site", Fields.PRIMARY_SITE.name),
-          string("donor_id", Fields.DONOR_ID.name),
-          string("specimen_id", Fields.SPECIFMEN_ID.name),
-          string("specimen_type", Fields.SPECIMEN_TYPE.name),
-          string("sample_id", Fields.SAMPLE_ID.name),
-          string("submitted_donor_id", Fields.DONOR_SUBMITTER_ID.name),
-          string("submitted_specimen_id", Fields.SPECIMEN_SUBMITTER_ID.name),
-          string("submitted_sample_id", Fields.SAMPLE_SUBMITTER_ID.name),
-          string("tcga_participant_barcode", Fields.TCGA_PARTICIPANT_BARCODE.name),
-          string("tcga_sample_barcode", Fields.TCGA_SAMPLE_BARCODE.name),
-          string("tcga_aliquot_barcode", Fields.TCGA_ALIQUOT_BARCODE.name)))
-      // TODO: do we need an alias for the object
-      .add(object("repository",
-          string("repo_type", Fields.REPO_TYPE.name),
-          string("repo_org", Fields.REPO_ORG.name),
-          string("repo_entity_id", Fields.REPO_ENTITY_ID.name),
-          string("repo_metadata_path", Fields.REPO_METADATA_PATH.name),
-          string("repo_data_path", Fields.REPO_DATA_PATH.name),
-          string("file_name", Fields.FILE_NAME.name),
-          string("file_md5sum", Fields.FILE_MD5SUM.name),
-          string("last_modified", ImmutableSet.of(Fields.LAST_MODIFIED.name, Fields.LAST_UPDATE.name)),
-          long_("file_size", Fields.FILE_SIZE.name),
-          // TODO: fix the alias?
-          arrayOfObjects("repo_server", "repoServer", object(
-              string("repo_name", Fields.REPO_NAME.name),
-              string("repo_code", Fields.REPO_CODE.name),
-              string("repo_country", Fields.REPO_COUNTRY.name),
-              string("repo_base_url", Fields.REPO_BASE_URL.name)))))
+          string("project_code", Fields.PROJECT_CODE.alias),
+          string("program", Fields.PROGRAM.alias),
+          string("study", Fields.DONOR_STUDY.alias),
+          string("primary_site", Fields.PRIMARY_SITE.alias),
+          string("donor_id", Fields.DONOR_ID.alias),
+          string("specimen_id", Fields.SPECIFMEN_ID.alias),
+          string("specimen_type", Fields.SPECIMEN_TYPE.alias),
+          string("sample_id", Fields.SAMPLE_ID.alias),
+          string("submitted_donor_id", Fields.DONOR_SUBMITTER_ID.alias),
+          string("submitted_specimen_id", Fields.SPECIMEN_SUBMITTER_ID.alias),
+          string("submitted_sample_id", Fields.SAMPLE_SUBMITTER_ID.alias),
+          string("tcga_participant_barcode", Fields.TCGA_PARTICIPANT_BARCODE.alias),
+          string("tcga_sample_barcode", Fields.TCGA_SAMPLE_BARCODE.alias),
+          string("tcga_aliquot_barcode", Fields.TCGA_ALIQUOT_BARCODE.alias)))
+
+      .add(object(EsFieldNames.REPOSITORY,
+          string("repo_type", Fields.REPO_TYPE.alias),
+          string("repo_org", Fields.REPO_ORG.alias),
+          string("repo_entity_id", Fields.REPO_ENTITY_ID.alias),
+          string("repo_metadata_path", Fields.REPO_METADATA_PATH.alias),
+          string("repo_data_path", Fields.REPO_DATA_PATH.alias),
+          string("file_name", Fields.FILE_NAME.alias),
+          string("file_md5sum", Fields.FILE_MD5SUM.alias),
+          string("last_modified", ImmutableSet.of(Fields.LAST_MODIFIED.alias, Fields.LAST_UPDATE.alias)),
+          long_("file_size", Fields.FILE_SIZE.alias),
+
+          arrayOfObjects(EsFieldNames.REPO_SERVER, Fields.REPO_SERVER_OBJECT.alias, object(
+              string("repo_name", Fields.REPO_NAME.alias),
+              string("repo_code", Fields.REPO_CODE.alias),
+              string("repo_country", Fields.REPO_COUNTRY.alias),
+              string("repo_base_url", Fields.REPO_BASE_URL.alias)))))
       .build();
 
 }
