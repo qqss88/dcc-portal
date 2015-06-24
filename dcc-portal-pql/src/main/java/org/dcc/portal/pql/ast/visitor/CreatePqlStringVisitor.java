@@ -19,9 +19,10 @@ package org.dcc.portal.pql.ast.visitor;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.joining;
 import static org.dcc.portal.pql.util.Converters.asString;
 import static org.dcc.portal.pql.util.Converters.isString;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
+import static org.icgc.dcc.common.core.util.Separators.COMMA;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,10 +51,13 @@ import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
+import org.icgc.dcc.common.core.util.Joiners;
+
+import com.google.common.base.Joiner;
 
 public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
-  private static final String SEPARATOR = ",";
+  private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
 
   @Override
   public String visitStatement(@NonNull StatementNode node, Optional<Void> context) {
@@ -135,7 +139,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   @Override
   public String visitFacets(@NonNull FacetsNode node, Optional<Void> context) {
-    return format("facets(%s)", COMMA.join(node.getFacets()));
+    return format("facets(%s)", COMMA_JOINER.join(node.getFacets()));
   }
 
   @Override
@@ -145,7 +149,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   @Override
   public String visitSelect(@NonNull SelectNode node, Optional<Void> context) {
-    return format("select(%s)", COMMA.join(node.getFields()));
+    return format("select(%s)", COMMA_JOINER.join(node.getFields()));
   }
 
   @Override
@@ -157,24 +161,17 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
       fields.append(entry.getKey());
 
       if (!isLastIndex(index++, node.getFields().size())) {
-        fields.append(SEPARATOR);
+        fields.append(COMMA);
       }
     }
 
     return format("sort(%s)", fields.toString());
   }
 
-  private static String resolveValues(List<? extends Object> values) {
-    val result = new StringBuilder();
-    for (int i = 0; i < values.size(); i++) {
-      val value = values.get(i);
-      result.append(isString(value) ? asString(value) : value);
-      if (!isLastIndex(i, values.size())) {
-        result.append(SEPARATOR);
-      }
-    }
-
-    return result.toString();
+  private static String resolveValues(@NonNull List<? extends Object> values) {
+    return values.stream()
+        .map(value -> isString(value) ? asString(value) : valueOf(value))
+        .collect(joining(COMMA));
   }
 
   private static String visitEqualityNode(String template, EqualityFilterNode node) {
@@ -190,7 +187,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
       val child = node.getChild(i);
       result.append(child.accept(this, Optional.empty()));
       if (!isLastIndex(i, node.childrenCount())) {
-        result.append(SEPARATOR);
+        result.append(COMMA);
       }
     }
 
