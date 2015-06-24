@@ -18,16 +18,17 @@
 package org.dcc.portal.pql.util;
 
 import static java.lang.String.format;
-import lombok.experimental.UtilityClass;
+import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
 
-@UtilityClass
-public class Converters {
+@NoArgsConstructor(access = PRIVATE)
+public final class Converters {
 
-  public boolean isString(Object value) {
+  public static boolean isString(Object value) {
     return value instanceof String;
   }
 
-  public String asString(Object value) {
+  public static String asString(Object value) {
     return format("'%s'", value);
   }
 

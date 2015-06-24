@@ -17,7 +17,11 @@
  */
 package org.dcc.portal.pql.ast.visitor;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.filter;
 import static java.lang.Integer.parseInt;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.count;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.facetsAll;
@@ -28,6 +32,7 @@ import static org.dcc.portal.pql.query.ParseTreeVisitors.cleanString;
 import static org.dcc.portal.pql.query.ParseTreeVisitors.getOrderAt;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.val;
@@ -50,6 +55,10 @@ import org.dcc.portal.pql.ast.filter.NeNode;
 import org.dcc.portal.pql.ast.filter.NestedNode;
 import org.dcc.portal.pql.ast.filter.NotNode;
 import org.dcc.portal.pql.ast.filter.OrNode;
+import org.dcc.portal.pql.ast.function.CountNode;
+import org.dcc.portal.pql.ast.function.FacetsNode;
+import org.dcc.portal.pql.ast.function.LimitNode;
+import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
@@ -108,7 +117,7 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
       result.addChildren(resolveFilters(filters));
     }
 
-    return result;
+    return resolveStatementNodeFields(result);
   }
 
   @Override
@@ -306,6 +315,99 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
     }
 
     return new AndNode(filters.toArray(new FilterNode[filters.size()]));
+  }
+
+  private static PqlNode resolveStatementNodeFields(StatementNode originalNode) {
+
+    val result = isCountStatement(originalNode) ? new StatementNode(count()) : new StatementNode();
+
+    val filtersNode = resolveCommonNode(originalNode, FilterNode.class);
+    if (filtersNode.isPresent()) {
+      result.setFilters(filtersNode.get());
+    }
+
+    // No need to continue. Count can have filters only
+    if (originalNode.isCount()) {
+      return result;
+    }
+
+    val selectNode = resolveSelectNode(originalNode);
+    if (selectNode.isPresent()) {
+      result.setSelect(selectNode.get());
+    }
+
+    val facetsNode = resolveFacetNode(originalNode);
+    if (facetsNode.isPresent()) {
+      result.setFacets(facetsNode.get());
+    }
+
+    val limitNode = resolveCommonNode(originalNode, LimitNode.class);
+    if (limitNode.isPresent()) {
+      result.setLimit(limitNode.get());
+    }
+
+    val sortNode = resolveCommonNode(originalNode, SortNode.class);
+    if (sortNode.isPresent()) {
+      result.setSort(sortNode.get());
+    }
+
+    return result;
+  }
+
+  private static boolean isCountStatement(StatementNode originalNode) {
+    val countNodes = filterChildren(originalNode, CountNode.class);
+
+    return !countNodes.isEmpty();
+  }
+
+  private static <T> Optional<T> resolveCommonNode(StatementNode originalNode, Class<T> clazz) {
+    val filteredNodes = filterChildren(originalNode, clazz);
+    checkState(filteredNodes.isEmpty() || filteredNodes.size() == 1, "Malformed PQL AST. Expected 1 {}: {}", clazz,
+        originalNode);
+
+    return filteredNodes.isEmpty() ? empty() : of(filteredNodes.get(0));
+  }
+
+  private static Optional<FacetsNode> resolveFacetNode(StatementNode originalNode) {
+    val facetsNodes = filterChildren(originalNode, FacetsNode.class);
+    if (facetsNodes.isEmpty()) {
+      return empty();
+    }
+
+    if (facetsNodes.size() == 1) {
+      return of(facetsNodes.get(0));
+    }
+
+    val allFacets = ImmutableList.<String> builder();
+    for (val facetsNode : facetsNodes) {
+      allFacets.addAll(facetsNode.getFacets());
+    }
+
+    return of(facets(allFacets.build()));
+  }
+
+  private static Optional<SelectNode> resolveSelectNode(StatementNode originalNode) {
+    val selectNodes = filterChildren(originalNode, SelectNode.class);
+    if (selectNodes.isEmpty()) {
+      return empty();
+    }
+
+    if (selectNodes.size() == 1) {
+      return of(selectNodes.get(0));
+    }
+
+    val allFields = ImmutableList.<String> builder();
+    for (val selectNode : selectNodes) {
+      allFields.addAll(selectNode.getFields());
+    }
+
+    return of(select(allFields.build()));
+  }
+
+  private static <T> List<T> filterChildren(@NonNull PqlNode node, @NonNull Class<T> childType) {
+    val children = filter(node.getChildren(), childType);
+
+    return Lists.<T> newArrayList(children);
   }
 
 }
