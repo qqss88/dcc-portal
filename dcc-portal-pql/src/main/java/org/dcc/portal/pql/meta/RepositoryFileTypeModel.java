@@ -17,8 +17,8 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 import static java.util.Collections.emptyMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
@@ -29,7 +29,6 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -62,11 +61,18 @@ public class RepositoryFileTypeModel extends TypeModel {
     return TYPE_PREFIX;
   }
 
+  /*
+   * We enforce ImmutableList here (instead of List).
+   */
+  public static ImmutableList<String> toAliasList(Fields... fields) {
+    return ImmutableList.copyOf(transform(newArrayList(fields),
+        field -> field.alias));
+  }
+
   /**
    * Aliases for Es fields
    */
   @RequiredArgsConstructor(access = PRIVATE)
-  @Getter
   public static enum Fields {
 
     ID("id"),
@@ -117,20 +123,19 @@ public class RepositoryFileTypeModel extends TypeModel {
 
   }
 
-  public static final List<String> PUBLIC_FIELDS = newArrayList(transform(newArrayList(Fields.values()),
-      field -> field.alias));
+  public static final List<String> PUBLIC_FIELDS = toAliasList(Fields.values());
 
   private static final String TYPE_PREFIX = "file";
-  private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
-      Fields.STUDY.alias,
-      Fields.DATA_TYPE.alias,
-      Fields.DATA_FORMAT.alias,
-      Fields.ACCESS.alias,
-      Fields.PROJECT_CODE.alias,
-      Fields.PRIMARY_SITE.alias,
-      Fields.DONOR_STUDY.alias,
+  private static final List<String> AVAILABLE_FACETS = toAliasList(
+      Fields.STUDY,
+      Fields.DATA_TYPE,
+      Fields.DATA_FORMAT,
+      Fields.ACCESS,
+      Fields.PROJECT_CODE,
+      Fields.PRIMARY_SITE,
+      Fields.DONOR_STUDY,
       // "repositoryNames",
-      Fields.EXPERIMENTAL_STRATEGY.alias);
+      Fields.EXPERIMENTAL_STRATEGY);
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
       EsFieldNames.REPOSITORY + "." + EsFieldNames.REPO_SERVER);
   // TODO: should this really be empty??
