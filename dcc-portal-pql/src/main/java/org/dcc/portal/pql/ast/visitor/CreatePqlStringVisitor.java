@@ -61,10 +61,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   @Override
   public String visitStatement(@NonNull StatementNode node, Optional<Void> context) {
-    val result = new StringBuilder();
-    result.append(visitChildren(node));
-
-    return result.toString();
+    return visitChildren(fixNodeOrder(node));
   }
 
   @Override

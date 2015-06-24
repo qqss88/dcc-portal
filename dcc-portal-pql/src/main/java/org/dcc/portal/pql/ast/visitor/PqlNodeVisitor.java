@@ -19,6 +19,9 @@ package org.dcc.portal.pql.ast.visitor;
 
 import java.util.Optional;
 
+import lombok.NonNull;
+import lombok.val;
+
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
@@ -115,6 +118,52 @@ public abstract class PqlNodeVisitor<T, A> {
 
   public T visitSort(SortNode node, Optional<A> context) {
     return defaultImplementation();
+  }
+
+  /**
+   * This method makes sure the top-level nodes comply the ordering imposed by the PQL syntax. Specifically, all other
+   * nodes must appear before 'sort' and 'limit', and 'sort' must appear before 'limit'. Usually this is called before
+   * we turn a StatementNode into a PQL string (otherwise the generated PQL statement wouldn't be correct).
+   *
+   * @param node
+   * @return
+   */
+  protected StatementNode fixNodeOrder(@NonNull StatementNode node) {
+    val children = node.getChildren();
+    val size = children.size();
+
+    if (size < 1) {
+      return node;
+    }
+
+    SortNode sort = null;
+    LimitNode limit = null;
+    val result = new StatementNode();
+
+    for (val child : children) {
+
+      if (child instanceof SortNode) {
+        sort = child.toSortNode();
+        continue;
+      }
+
+      if (child instanceof LimitNode) {
+        limit = child.toLimitNode();
+        continue;
+      }
+
+      result.addChildren(child);
+    }
+
+    if (null != sort) {
+      result.addChildren(sort);
+    }
+
+    if (null != limit) {
+      result.addChildren(limit);
+    }
+
+    return result;
   }
 
   private static <T> T defaultImplementation() {
