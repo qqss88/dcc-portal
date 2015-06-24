@@ -39,13 +39,19 @@ public class PqlParserTest {
   @Test
   public void selectTest() {
     val statement = PqlParser.parse("select(a),select(b)");
-    assertThat(statement.getSelect().getFields()).containsOnly("a", "b");
+    val select = statement.getSelect();
+    assertThat(select.size()).isEqualTo(2);
+    assertThat(select.get(0).getFields()).containsOnly("a");
+    assertThat(select.get(1).getFields()).containsOnly("b");
   }
 
   @Test
   public void facetsTest() {
-    val statement = PqlParser.parse("facets(a),facets(b)");
-    assertThat(statement.getFacets().getFacets()).containsOnly("a", "b");
+    val statement = PqlParser.parse("facets(*),facets(b)");
+    val facets = statement.getFacets();
+    assertThat(facets.size()).isEqualTo(2);
+    assertThat(facets.get(0).getFacets()).containsOnly("*");
+    assertThat(facets.get(1).getFacets()).containsOnly("b");
   }
 
   @Test
@@ -93,6 +99,12 @@ public class PqlParserTest {
   public void countTest() {
     val statement = PqlParser.parse("count()");
     assertThat(statement.isCount()).isTrue();
+  }
+
+  @Test
+  public void selectFacetsTest() {
+    assertThat(PqlParser.parse("select(*),select(a),facets(*),facets(b)").toString())
+        .isEqualTo("select(*),select(a),facets(*),facets(b)");
   }
 
 }

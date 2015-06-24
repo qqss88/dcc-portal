@@ -17,6 +17,9 @@
  */
 package org.dcc.portal.pql.ast;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import java.util.List;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
@@ -33,13 +36,15 @@ import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
 
+import com.google.common.collect.Lists;
+
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class StatementNode extends PqlNode {
 
-  private SelectNode select;
-  private FacetsNode facets;
+  private List<SelectNode> select = Lists.<SelectNode> newArrayList();
+  private List<FacetsNode> facets = Lists.<FacetsNode> newArrayList();
   private CountNode count;
   private SortNode sort;
   private LimitNode limit;
@@ -51,30 +56,20 @@ public class StatementNode extends PqlNode {
   }
 
   public boolean hasSelect() {
-    return select != null;
+    return !select.isEmpty();
   }
 
-  public void setSelect(@NonNull SelectNode node) {
+  public void addSelect(@NonNull SelectNode node) {
     canUpdateField();
-
-    if (select != null) {
-      select.removeParent();
-      removeChild(select);
-    }
     addChildren(node);
   }
 
   public boolean hasFacets() {
-    return facets != null;
+    return !facets.isEmpty();
   }
 
   public void setFacets(@NonNull FacetsNode node) {
     canUpdateField();
-    if (facets != null) {
-      facets.removeParent();
-      removeChild(facets);
-    }
-
     addChildren(node);
   }
 
@@ -147,10 +142,10 @@ public class StatementNode extends PqlNode {
     for (val child : children) {
       switch (child.type()) {
       case SELECT:
-        this.select = child.toSelectNode();
+        this.select.add(child.toSelectNode());
         break;
       case FACETS:
-        this.facets = child.toFacetsNode();
+        this.facets.add(child.toFacetsNode());
         break;
       case LIMIT:
         this.limit = child.toLimitNode();
@@ -160,6 +155,10 @@ public class StatementNode extends PqlNode {
         break;
       case SORT:
         this.sort = child.toSortNode();
+        break;
+      default:
+        checkState(child instanceof FilterNode);
+        this.filters = (FilterNode) child;
         break;
       }
     }

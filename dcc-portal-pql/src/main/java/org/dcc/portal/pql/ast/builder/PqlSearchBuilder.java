@@ -94,7 +94,7 @@ public class PqlSearchBuilder {
     val result = new StatementNode();
 
     if (selectNode != null) {
-      result.setSelect(selectNode);
+      result.addSelect(selectNode);
     }
 
     if (limit != null) {

@@ -115,9 +115,13 @@ public class PqlSearchBuilderTest {
         .sort(SortNode.builder().sortAsc("id"))
         .build();
 
-    assertThat(result.getSelect()
-        .getFields()).containsOnly("id");
-    assertThat(result.getFacets().getFacets()).containsOnly("mu");
+    val select = result.getSelect();
+    assertThat(select.size()).isEqualTo(1);
+    assertThat(select.get(0).getFields()).containsOnly("id");
+
+    val facets = result.getFacets();
+    assertThat(facets.size()).isEqualTo(1);
+    assertThat(facets.get(0).getFacets()).containsOnly("mu");
     assertThat(result.getLimit().getSize()).isEqualTo(100);
 
     val sortFields = result.getSort().getFields();

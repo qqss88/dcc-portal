@@ -19,6 +19,7 @@ package org.dcc.portal.pql.ast;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.ast.builder.PqlSearchBuilder.statement;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 import static org.dcc.portal.pql.ast.function.SortNode.builder;
 import lombok.val;
@@ -32,12 +33,14 @@ import org.junit.Test;
 public class StatementNodeTest {
 
   @Test
-  public void setFacetsTest() {
+  public void addFacetsTest() {
     val statement = statement().facets("id").build();
-    val newFacets = FunctionBuilders.facets("gender");
-    statement.setFacets(newFacets);
-    assertThat(statement.getFacets()).isEqualTo(newFacets);
-    assertThat(statement.getChildren()).containsOnly(newFacets);
+    statement.setFacets(facets("gender"));
+
+    val facets = statement.getFacets();
+    assertThat(facets.size()).isEqualTo(2);
+    assertThat(facets.get(0).getFacets()).containsOnly("id");
+    assertThat(facets.get(1).getFacets()).containsOnly("gender");
   }
 
   @Test
@@ -61,12 +64,14 @@ public class StatementNodeTest {
   }
 
   @Test
-  public void setSelectTest() {
+  public void addSelectTest() {
     val statement = statement().select("id").build();
-    val newSelect = select("gender");
-    statement.setSelect(newSelect);
-    assertThat(statement.getSelect()).isEqualTo(newSelect);
-    assertThat(statement.getChildren()).containsOnly(newSelect);
+    statement.addSelect(select("gender"));
+
+    val select = statement.getSelect();
+    assertThat(select.size()).isEqualTo(2);
+    assertThat(select.get(0).getFields()).containsOnly("id");
+    assertThat(select.get(1).getFields()).containsOnly("gender");
   }
 
   @Test
