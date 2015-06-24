@@ -97,7 +97,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -344,18 +343,7 @@ public class ProjectResource {
   public Response findSamples(@ApiParam(value = API_PROJECT_VALUE) @PathParam(API_PROJECT_PARAM) String projectId) {
     log.info(NESTED_FIND_TEMPLATE, "Samples", projectId);
 
-    FiltersParam filter = new FiltersParam(String.format(PROJECT_FILTER_TEMPLATE, projectId));
-    Donors donors = donorService.findAllCentric(
-        query()
-            .filters(filter.get())
-            .limit(5000)
-            .size(5000)
-            .fields(Lists.newArrayList("id", "projectId", "submittedDonorId"))
-            .includes(Lists.newArrayList("specimen"))
-            .from(1)
-            .sort(DEFAULT_DONOR_SORT)
-            .order(DEFAULT_ORDER)
-            .build());
+    Donors donors = donorService.getDonorAndSampleByProject(projectId);
 
     List<Map<String, Object>> samples = donorService.getSamples(donors.getHits());
 

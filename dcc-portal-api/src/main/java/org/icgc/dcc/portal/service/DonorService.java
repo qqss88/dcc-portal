@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -35,7 +34,6 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
-import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,8 +51,6 @@ import com.google.common.collect.Ordering;
 public class DonorService {
 
   private final DonorRepository donorRepository;
-  private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
   private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   private Donors buildDonors(SearchResponse response, Query query) {
@@ -78,7 +74,7 @@ public class DonorService {
   }
 
   public Donors findAllCentric(Query query) {
-    return buildDonors(donorRepository.findAll(query), query);
+    return buildDonors(donorRepository.findAllCentric(query), query);
   }
 
   public long count(Query query) {
@@ -104,6 +100,13 @@ public class DonorService {
 
   public Set<String> findIds(Query query) {
     return donorRepository.findIds(query);
+  }
+
+  public Donors getDonorAndSampleByProject(String projectId) {
+    Query query = new Query();
+    query.setSort("_id");
+    query.setOrder("desc");
+    return buildDonors(donorRepository.getDonorSamplesByProject(projectId), query);
   }
 
   public List<Map<String, Object>> getSamples(List<Donor> donors) {

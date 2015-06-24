@@ -60,6 +60,8 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.ast.builder.PqlBuilders;
+import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -68,6 +70,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.Facet;
@@ -98,7 +101,6 @@ import com.google.common.collect.Maps;
 @SuppressWarnings("deprecation")
 public class DonorRepository implements Repository {
 
-  private static final Type CENTRIC_TYPE = Type.DONOR_CENTRIC;
   private static final Type TYPE = Type.DONOR;
   private static final Kind KIND = Kind.DONOR;
 
@@ -372,9 +374,23 @@ public class DonorRepository implements Repository {
     throw new UnsupportedOperationException("No longer applicable");
   }
 
+  public String select2count(String pqlSelectQuery) {
+    val pqlNode = PqlParser.parse(pqlSelectQuery);
+
+    log.info("Input pql {}", pqlSelectQuery);
+    log.info("PQL Node {}", pqlNode);
+    log.info("PQL Node filters {}", pqlNode.getFilters());
+
+    val root = PqlBuilders.count().build();
+    root.setFilters(pqlNode.getFilters());
+    return root.toString();
+  }
+
   @Override
   public long count(Query query) {
-    val pql = "count()," + converter.convert(query, DONOR_CENTRIC);
+    log.info("Converting {}", query.getFilters());
+    val pql = select2count(converter.convert(query, DONOR_CENTRIC));
+
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     return request.getRequestBuilder().setSearchType(COUNT).execute().actionGet().getHits().getTotalHits();
   }
@@ -384,7 +400,8 @@ public class DonorRepository implements Repository {
     MultiSearchRequestBuilder search = client.prepareMultiSearch();
 
     for (val query : queries.values()) {
-      val pql = "count()," + converter.convert(query, DONOR_CENTRIC);
+      log.info("Converting {}", query.getFilters());
+      val pql = select2count(converter.convert(query, DONOR_CENTRIC));
       val request = queryEngine.execute(pql, DONOR_CENTRIC);
       search.add(request.getRequestBuilder());
     }
@@ -398,7 +415,8 @@ public class DonorRepository implements Repository {
     for (val id1 : queries.keySet()) {
       val nestedQuery = queries.get(id1);
       for (val id2 : nestedQuery.keySet()) {
-        val pql = "count()," + converter.convert(nestedQuery.get(id2), DONOR_CENTRIC);
+        log.info("Nested converting {}", nestedQuery.get(id2));
+        val pql = select2count(converter.convert(nestedQuery.get(id2), DONOR_CENTRIC));
         val request = queryEngine.execute(pql, DONOR_CENTRIC);
         search.add(request.getRequestBuilder());
       }
@@ -432,6 +450,27 @@ public class DonorRepository implements Repository {
     }
 
     return singletonMap(FIELDS_MAPPING.get(KIND).get("id"), id);
+  }
+
+  /**
+   * Retrieves donor-specimen-sample information. Note this searches donor and not donor-centric as centric does not
+   * have sample information
+   */
+  public SearchResponse getDonorSamplesByProject(String projectId) {
+
+    // Only download donor with complete (has submitted molecular data)
+    val donorFilters = FilterBuilders.boolFilter()
+        .must(FilterBuilders.termFilter("_project_id", projectId))
+        .must(FilterBuilders.termFilter("_summary._complete", true));
+
+    val search = client.prepareSearch(index)
+        .setTypes(TYPE.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setSize(6000)
+        .setFetchSource("specimen", null)
+        .addFields("_donor_id", "donor_id", "project._project_id")
+        .setPostFilter(donorFilters);
+    return search.execute().actionGet();
   }
 
   public Set<String> findIds(Query query) {
