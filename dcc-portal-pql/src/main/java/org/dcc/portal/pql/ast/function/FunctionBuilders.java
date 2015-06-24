@@ -17,76 +17,57 @@
  */
 package org.dcc.portal.pql.ast.function;
 
-import java.util.Map;
-import java.util.Optional;
-
-import lombok.EqualsAndHashCode;
+import static com.google.common.collect.ImmutableList.copyOf;
+import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
+import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
 import lombok.NonNull;
-import lombok.Value;
+import lombok.experimental.UtilityClass;
 
-import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
-import org.dcc.portal.pql.es.model.Order;
+import org.dcc.portal.pql.ast.function.SortNode.SortNodeBuilder;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
 
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class SortNode extends PqlNode {
+@UtilityClass
+public class FunctionBuilders {
 
-  ImmutableMap<String, Order> fields;
-
-  SortNode(ImmutableMap<String, Order> fields) {
-    this.fields = fields;
+  public SelectNode select(@NonNull ImmutableList<String> fields) {
+    return new SelectNode(fields);
   }
 
-  public static SortNodeBuilder builder() {
-    return new SortNodeBuilder();
+  public SelectNode select(@NonNull String... fields) {
+    return new SelectNode(copyOf(fields));
   }
 
-  @Override
-  public Type type() {
-    return Type.SORT;
+  public SelectNode selectAll() {
+    return select(ALL_FIELDS);
   }
 
-  @Override
-  public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitSort(this, context);
+  public FacetsNode facets(@NonNull ImmutableList<String> facets) {
+    return new FacetsNode(facets);
   }
 
-  @Override
-  public SortNode toSortNode() {
-    return this;
+  public FacetsNode facets(@NonNull String... facets) {
+    return new FacetsNode(copyOf(facets));
   }
 
-  public static class SortNodeBuilder {
+  public FacetsNode facetsAll() {
+    return facets(ALL_FACETS);
+  }
 
-    private final Map<String, Order> sort = Maps.newHashMap();
+  public LimitNode limit(int size) {
+    return limit(0, size);
+  }
 
-    public SortNodeBuilder sort(@NonNull String field, @NonNull Order order) {
-      sort.put(field, order);
+  public LimitNode limit(int from, int size) {
+    return new LimitNode(from, size);
+  }
 
-      return this;
-    }
+  public SortNodeBuilder sortBuilder() {
+    return SortNode.builder();
+  }
 
-    public SortNodeBuilder sortAsc(@NonNull String field) {
-      sort.put(field, Order.ASC);
-
-      return this;
-    }
-
-    public SortNodeBuilder sortDesc(@NonNull String field) {
-      sort.put(field, Order.DESC);
-
-      return this;
-    }
-
-    public SortNode build() {
-      return new SortNode(ImmutableMap.copyOf(sort));
-    }
-
+  public CountNode count() {
+    return new CountNode();
   }
 
 }

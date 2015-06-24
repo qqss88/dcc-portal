@@ -55,8 +55,11 @@ public class StatementNode extends PqlNode {
 
   public void setSelect(@NonNull SelectNode node) {
     canUpdateField();
-    this.select = node;
-    node.setParent(this);
+
+    if (select != null) {
+      select.removeParent();
+      removeChild(select);
+    }
     addChildren(node);
   }
 
@@ -66,8 +69,11 @@ public class StatementNode extends PqlNode {
 
   public void setFacets(@NonNull FacetsNode node) {
     canUpdateField();
-    this.facets = node;
-    node.setParent(this);
+    if (facets != null) {
+      facets.removeParent();
+      removeChild(facets);
+    }
+
     addChildren(node);
   }
 
@@ -81,8 +87,11 @@ public class StatementNode extends PqlNode {
 
   public void setSort(@NonNull SortNode node) {
     canUpdateField();
-    this.sort = node;
-    node.setParent(this);
+
+    if (sort != null) {
+      sort.removeParent();
+      removeChild(sort);
+    }
     addChildren(node);
   }
 
@@ -92,8 +101,11 @@ public class StatementNode extends PqlNode {
 
   public void setLimit(@NonNull LimitNode node) {
     canUpdateField();
-    this.limit = node;
-    node.setParent(this);
+
+    if (limit != null) {
+      limit.removeParent();
+      removeChild(limit);
+    }
     addChildren(node);
   }
 
@@ -102,7 +114,12 @@ public class StatementNode extends PqlNode {
   }
 
   public void setFilters(@NonNull FilterNode node) {
-    this.filters = node;
+    if (filters != null) {
+      filters.removeParent();
+      removeChild(filters);
+    }
+
+    filters = node;
     node.setParent(this);
     addChildren(node);
   }

@@ -18,12 +18,12 @@
 package org.dcc.portal.pql.ast.builder;
 
 import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.count;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.StatementNode;
-import org.dcc.portal.pql.ast.function.CountNode;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PqlCountBuilder {
@@ -41,7 +41,7 @@ public class PqlCountBuilder {
   }
 
   public StatementNode build() {
-    val result = new StatementNode(new CountNode());
+    val result = new StatementNode(count());
 
     if (filterBuilder != null) {
       result.setFilters(filterBuilder.build());

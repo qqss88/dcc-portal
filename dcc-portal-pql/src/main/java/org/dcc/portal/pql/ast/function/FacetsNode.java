@@ -34,6 +34,10 @@ public class FacetsNode extends PqlNode {
 
   public static final String ALL_FACETS = "*";
 
+  FacetsNode(@NonNull List<String> facets) {
+    this.facets = facets;
+  }
+
   @NonNull
   List<String> facets;
 

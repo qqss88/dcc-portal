@@ -18,9 +18,12 @@
 package org.dcc.portal.pql.ast.visitor;
 
 import static java.lang.Integer.parseInt;
-import static java.util.Collections.singletonList;
-import static org.dcc.portal.pql.ast.function.FacetsNode.ALL_FACETS;
-import static org.dcc.portal.pql.ast.function.SelectNode.ALL_FIELDS;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.count;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facetsAll;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.selectAll;
 import static org.dcc.portal.pql.query.ParseTreeVisitors.cleanString;
 import static org.dcc.portal.pql.query.ParseTreeVisitors.getOrderAt;
 
@@ -47,10 +50,6 @@ import org.dcc.portal.pql.ast.filter.NeNode;
 import org.dcc.portal.pql.ast.filter.NestedNode;
 import org.dcc.portal.pql.ast.filter.NotNode;
 import org.dcc.portal.pql.ast.filter.OrNode;
-import org.dcc.portal.pql.ast.function.CountNode;
-import org.dcc.portal.pql.ast.function.FacetsNode;
-import org.dcc.portal.pql.ast.function.LimitNode;
-import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
 import org.icgc.dcc.portal.pql.antlr4.PqlBaseVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.AndContext;
@@ -115,49 +114,49 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
   @Override
   public PqlNode visitSelect(@NonNull SelectContext context) {
     if (context.ASTERISK() != null) {
-      return new SelectNode(singletonList(ALL_FIELDS));
+      return selectAll();
     }
 
-    return new SelectNode(resolveValues(context.ID()));
+    return select(resolveValues(context.ID()));
   }
 
   @Override
   public PqlNode visitFacets(@NonNull FacetsContext context) {
     if (context.ASTERISK() != null) {
-      return new FacetsNode(singletonList(ALL_FACETS));
+      return facetsAll();
     }
 
-    return new FacetsNode(resolveValues(context.ID()));
+    return facets(resolveValues(context.ID()));
   }
 
   @Override
   public PqlNode visitRange(@NonNull RangeContext context) {
     val values = context.INT();
     if (values.size() == 2) {
-      return new LimitNode(parseInt(values.get(0).getText()), parseInt(values.get(1).getText()));
+      return limit(parseInt(values.get(0).getText()), parseInt(values.get(1).getText()));
     } else {
-      return new LimitNode(0, parseInt(values.get(0).getText()));
+      return limit(parseInt(values.get(0).getText()));
     }
   }
 
   @Override
   public PqlNode visitOrder(@NonNull OrderContext context) {
-    val result = new SortNode();
+    val result = SortNode.builder();
     for (val id : context.ID()) {
       val order = getOrderAt(context, id.getSymbol().getCharPositionInLine() - 1);
       if (order != null) {
-        result.addField(id.getText(), order);
+        result.sort(id.getText(), order);
       } else {
-        result.addAscSort(id.getText());
+        result.sortAsc(id.getText());
       }
     }
 
-    return result;
+    return result.build();
   }
 
   @Override
   public PqlNode visitCount(@NonNull CountContext context) {
-    return new CountNode();
+    return count();
   }
 
   @Override
@@ -292,7 +291,7 @@ public class CreatePqlAstVisitor extends PqlBaseVisitor<PqlNode> {
     }
   }
 
-  private static List<String> resolveValues(List<TerminalNode> values) {
+  private static ImmutableList<String> resolveValues(List<TerminalNode> values) {
     val result = ImmutableList.<String> builder();
     for (val value : values) {
       result.add(value.getText());

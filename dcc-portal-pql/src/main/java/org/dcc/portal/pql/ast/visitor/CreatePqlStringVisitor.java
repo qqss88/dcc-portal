@@ -18,6 +18,10 @@
 package org.dcc.portal.pql.ast.visitor;
 
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
+import static org.dcc.portal.pql.util.Converters.asString;
+import static org.dcc.portal.pql.util.Converters.isString;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 
 import java.util.List;
 import java.util.Optional;
@@ -131,7 +135,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   @Override
   public String visitFacets(@NonNull FacetsNode node, Optional<Void> context) {
-    return format("facets(%s)", resolveValues(node.getFacets()));
+    return format("facets(%s)", COMMA.join(node.getFacets()));
   }
 
   @Override
@@ -141,7 +145,7 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   @Override
   public String visitSelect(@NonNull SelectNode node, Optional<Void> context) {
-    return format("select(%s)", resolveValues(node.getFields()));
+    return format("select(%s)", COMMA.join(node.getFields()));
   }
 
   @Override
@@ -163,7 +167,8 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
   private static String resolveValues(List<? extends Object> values) {
     val result = new StringBuilder();
     for (int i = 0; i < values.size(); i++) {
-      result.append(values.get(i));
+      val value = values.get(i);
+      result.append(isString(value) ? asString(value) : value);
       if (!isLastIndex(i, values.size())) {
         result.append(SEPARATOR);
       }
@@ -173,7 +178,10 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
   }
 
   private static String visitEqualityNode(String template, EqualityFilterNode node) {
-    return format(template, node.getField(), String.valueOf(node.getValue()));
+    val rawValue = node.getValue();
+    val value = isString(rawValue) ? asString(rawValue) : valueOf(rawValue);
+
+    return format(template, node.getField(), value);
   }
 
   private String visitChildren(PqlNode node) {

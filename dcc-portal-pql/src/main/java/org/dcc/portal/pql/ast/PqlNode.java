@@ -70,6 +70,10 @@ public abstract class PqlNode implements ConvertiblePqlNode {
     this.children.addAll(children);
   }
 
+  public void removeChild(@NonNull PqlNode child) {
+    this.children.remove(child);
+  }
+
   public List<PqlNode> getChildren() {
     return children;
   }
@@ -92,6 +96,10 @@ public abstract class PqlNode implements ConvertiblePqlNode {
 
   public void setParent(@NonNull PqlNode parent) {
     this.parent = parent;
+  }
+
+  public void removeParent() {
+    this.parent = null;
   }
 
   private void setParent(List<PqlNode> children) {

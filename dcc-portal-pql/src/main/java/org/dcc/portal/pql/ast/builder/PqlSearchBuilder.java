@@ -17,32 +17,24 @@
  */
 package org.dcc.portal.pql.ast.builder;
 
-import static java.util.Collections.addAll;
 import static lombok.AccessLevel.PRIVATE;
-
-import java.util.List;
-import java.util.Map;
-
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.FacetsNode;
+import org.dcc.portal.pql.ast.function.FunctionBuilders;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
-import org.dcc.portal.pql.ast.function.SortNode;
-import org.dcc.portal.pql.es.model.Order;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import org.dcc.portal.pql.ast.function.SortNode.SortNodeBuilder;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PqlSearchBuilder {
 
-  private final Map<String, Order> sort = Maps.newHashMap();
-  private final List<String> select = Lists.newArrayList();
-  private final List<String> facets = Lists.newArrayList();
+  private SortNodeBuilder sortNodeBuilder;
+  private SelectNode selectNode;
+  private FacetsNode facetsNode;
   private LimitNode limit;
   private FilterBuilder filterBuilder;
 
@@ -51,13 +43,13 @@ public class PqlSearchBuilder {
   }
 
   public PqlSearchBuilder select(@NonNull String... field) {
-    addAll(select, field);
+    selectNode = FunctionBuilders.select(field);
 
     return this;
   }
 
   public PqlSearchBuilder selectAll() {
-    select.add(SelectNode.ALL_FIELDS);
+    selectNode = FunctionBuilders.selectAll();
 
     return this;
   }
@@ -68,44 +60,32 @@ public class PqlSearchBuilder {
     return this;
   }
 
-  public PqlSearchBuilder sort(@NonNull String field, @NonNull Order order) {
-    sort.put(field, order);
-
-    return this;
-  }
-
-  public PqlSearchBuilder sortAsc(@NonNull String field) {
-    sort.put(field, Order.ASC);
-
-    return this;
-  }
-
-  public PqlSearchBuilder sortDesc(@NonNull String field) {
-    sort.put(field, Order.DESC);
+  public PqlSearchBuilder sort(@NonNull SortNodeBuilder builder) {
+    this.sortNodeBuilder = builder;
 
     return this;
   }
 
   public PqlSearchBuilder limit(int size) {
-    this.limit = new LimitNode(0, size);
+    this.limit = FunctionBuilders.limit(size);
 
     return this;
   }
 
   public PqlSearchBuilder limit(int from, int size) {
-    this.limit = new LimitNode(from, size);
+    this.limit = FunctionBuilders.limit(from, size);
 
     return this;
   }
 
-  public PqlSearchBuilder facets(@NonNull String... facet) {
-    addAll(facets, facet);
+  public PqlSearchBuilder facets(@NonNull String... facets) {
+    facetsNode = FunctionBuilders.facets(facets);
 
     return this;
   }
 
   public PqlSearchBuilder facetsAll() {
-    facets.add(FacetsNode.ALL_FACETS);
+    facetsNode = FunctionBuilders.facetsAll();
 
     return this;
   }
@@ -113,29 +93,24 @@ public class PqlSearchBuilder {
   public StatementNode build() {
     val result = new StatementNode();
 
-    if (!select.isEmpty()) {
-      result.setSelect(new SelectNode(select));
+    if (selectNode != null) {
+      result.setSelect(selectNode);
     }
 
     if (limit != null) {
       result.setLimit(limit);
     }
 
-    if (!facets.isEmpty()) {
-      result.setFacets(new FacetsNode(facets));
+    if (facetsNode != null) {
+      result.setFacets(facetsNode);
     }
 
     if (filterBuilder != null) {
       result.setFilters(filterBuilder.build());
     }
 
-    if (!sort.isEmpty()) {
-      val sortNode = new SortNode();
-      for (val entry : sort.entrySet()) {
-        sortNode.addField(entry.getKey(), entry.getValue());
-      }
-
-      result.setSort(sortNode);
+    if (sortNodeBuilder != null) {
+      result.setSort(sortNodeBuilder.build());
     }
 
     return result;

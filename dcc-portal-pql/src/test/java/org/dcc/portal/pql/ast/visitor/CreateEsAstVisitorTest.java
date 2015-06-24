@@ -30,6 +30,13 @@ import static org.dcc.portal.pql.ast.builder.FilterBuilders.missing;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.nested;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.not;
 import static org.dcc.portal.pql.ast.builder.FilterBuilders.or;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.count;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facetsAll;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.selectAll;
+import static org.dcc.portal.pql.ast.function.SortNode.builder;
 import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetMustNode;
 import static org.dcc.portal.pql.utils.Tests.assertBoolAndGetShouldNode;
@@ -44,10 +51,6 @@ import org.dcc.portal.pql.ast.builder.PqlBuilders;
 import org.dcc.portal.pql.ast.builder.PqlSearchBuilder;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.NeNode;
-import org.dcc.portal.pql.ast.function.CountNode;
-import org.dcc.portal.pql.ast.function.FacetsNode;
-import org.dcc.portal.pql.ast.function.LimitNode;
-import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.FieldsNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
@@ -71,8 +74,6 @@ import org.dcc.portal.pql.es.model.Order;
 import org.dcc.portal.pql.meta.IndexModel;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-
 public class CreateEsAstVisitorTest {
 
   CreatePqlAstVisitor createPqlvisitor = new CreatePqlAstVisitor();
@@ -88,35 +89,41 @@ public class CreateEsAstVisitorTest {
 
   @Test
   public void visitSelectTest() {
-    FieldsNode result = (FieldsNode) visit(new SelectNode(ImmutableList.of("id", "end")));
+
+    FieldsNode result = (FieldsNode) visit(select("id", "end"));
     assertThat(result.childrenCount()).isEqualTo(2);
     assertThat(result.getFields()).containsOnly("_mutation_id", "chromosome_end");
 
-    result = (FieldsNode) visit(new SelectNode(ImmutableList.of("*")));
+    result = (FieldsNode) visit(selectAll());
     assertThat(result.getFields()).containsOnlyElementsOf(IndexModel.getMutationCentricTypeModel().getFields());
   }
 
   @Test
   public void visitFacetsTest() {
-    AggregationsNode result = (AggregationsNode) visit(new FacetsNode(ImmutableList.of("id", "end")));
+    AggregationsNode result = (AggregationsNode) visit(facets("id", "end"));
     assertThat(result.childrenCount()).isEqualTo(2);
     assertThat(((TermsAggregationNode) result.getChild(0)).getFieldName()).isEqualTo("_mutation_id");
     assertThat(((TermsAggregationNode) result.getChild(1)).getFieldName()).isEqualTo("chromosome_end");
 
-    result = (AggregationsNode) visit(new FacetsNode(ImmutableList.of("*")));
+    result = (AggregationsNode) visit(facetsAll());
     assertThat(result.childrenCount()).isEqualTo(6);
   }
 
   @Test
   public void visitLimitTest() {
-    val result = (org.dcc.portal.pql.es.ast.LimitNode) visit(new LimitNode(20, 5));
+    val result = (org.dcc.portal.pql.es.ast.LimitNode) visit(limit(20, 5));
     assertThat(result.getFrom()).isEqualTo(20);
     assertThat(result.getSize()).isEqualTo(5);
   }
 
   @Test
   public void visitSortTest() {
-    val node = PqlSearchBuilder.statement().sortAsc("id").sortDesc("end").build().getSort();
+    val node = PqlSearchBuilder.statement()
+        .sort(builder()
+            .sortAsc("id")
+            .sortDesc("end"))
+        .build()
+        .getSort();
     val fields = ((SortNode) visit(node)).getFields();
 
     assertThat(fields.size()).isEqualTo(2);
@@ -126,7 +133,7 @@ public class CreateEsAstVisitorTest {
 
   @Test
   public void visitCountTest() {
-    assertThat(visit(new CountNode())).isInstanceOf(org.dcc.portal.pql.es.ast.CountNode.class);
+    assertThat(visit(count())).isInstanceOf(org.dcc.portal.pql.es.ast.CountNode.class);
   }
 
   @Test

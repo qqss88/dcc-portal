@@ -15,78 +15,20 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.ast.function;
+package org.dcc.portal.pql.util;
 
-import java.util.Map;
-import java.util.Optional;
+import static java.lang.String.format;
+import lombok.experimental.UtilityClass;
 
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
-import lombok.Value;
+@UtilityClass
+public class Converters {
 
-import org.dcc.portal.pql.ast.PqlNode;
-import org.dcc.portal.pql.ast.Type;
-import org.dcc.portal.pql.ast.visitor.PqlNodeVisitor;
-import org.dcc.portal.pql.es.model.Order;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
-@Value
-@EqualsAndHashCode(callSuper = false)
-public class SortNode extends PqlNode {
-
-  ImmutableMap<String, Order> fields;
-
-  SortNode(ImmutableMap<String, Order> fields) {
-    this.fields = fields;
+  public boolean isString(Object value) {
+    return value instanceof String;
   }
 
-  public static SortNodeBuilder builder() {
-    return new SortNodeBuilder();
-  }
-
-  @Override
-  public Type type() {
-    return Type.SORT;
-  }
-
-  @Override
-  public <T, A> T accept(@NonNull PqlNodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
-    return visitor.visitSort(this, context);
-  }
-
-  @Override
-  public SortNode toSortNode() {
-    return this;
-  }
-
-  public static class SortNodeBuilder {
-
-    private final Map<String, Order> sort = Maps.newHashMap();
-
-    public SortNodeBuilder sort(@NonNull String field, @NonNull Order order) {
-      sort.put(field, order);
-
-      return this;
-    }
-
-    public SortNodeBuilder sortAsc(@NonNull String field) {
-      sort.put(field, Order.ASC);
-
-      return this;
-    }
-
-    public SortNodeBuilder sortDesc(@NonNull String field) {
-      sort.put(field, Order.DESC);
-
-      return this;
-    }
-
-    public SortNode build() {
-      return new SortNode(ImmutableMap.copyOf(sort));
-    }
-
+  public String asString(Object value) {
+    return format("'%s'", value);
   }
 
 }

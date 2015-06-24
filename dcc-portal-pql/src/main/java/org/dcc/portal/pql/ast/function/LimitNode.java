@@ -34,6 +34,11 @@ public class LimitNode extends PqlNode {
   int from;
   int size;
 
+  LimitNode(int from, int size) {
+    this.from = from;
+    this.size = size;
+  }
+
   @Override
   public Type type() {
     return Type.LIMIT;
