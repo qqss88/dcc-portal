@@ -544,9 +544,12 @@ public class RepositoryFileRepository {
     val summaryAgg = global(name)
         .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
             .subAggregation(sum("file").field("repository.file_size"))
-            .subAggregation(terms("donor").size(100000).field("donor.donor_id")));
+            .subAggregation(terms("donor").size(100000).field("donor.donor_id")) // Get unique donors
+            .subAggregation(terms("project").size(1000).field("donor.project_code")) // Get unique projects
+            .subAggregation(terms("primarySite").size(1000).field("donor.primary_site")));
 
     search.addAggregation(summaryAgg);
+    log.info("Summary {}", search);
     val response = search.execute().actionGet();
 
     val result = Maps.<String, Long> newHashMap();
@@ -556,6 +559,8 @@ public class RepositoryFileRepository {
 
     result.put("fileCount", response.getHits().getTotalHits());
     result.put("donorCount", (long) ((Terms) filter.getAggregations().get("donor")).getBuckets().size());
+    result.put("projectCount", (long) ((Terms) filter.getAggregations().get("project")).getBuckets().size());
+    result.put("primarySiteCount", (long) ((Terms) filter.getAggregations().get("primarySite")).getBuckets().size());
     result.put("totalFileSize", (long) ((Sum) filter.getAggregations().get("file")).getValue());
 
     return result;
@@ -586,5 +591,61 @@ public class RepositoryFileRepository {
     val global = (Global) response.getAggregations().get(name);
     val filter = (Filter) global.getAggregations().get(name);
     return ((Terms) filter.getAggregations().get(name)).getBuckets().size();
+  }
+
+  private final String PCAWG = "PCAWG";
+
+  public Map<String, Map<String, Object>> getPancancerStats() {
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(0);
+
+    val stats = AggregationBuilders.filter(PCAWG).filter(FilterBuilders.termFilter("study", PCAWG));
+    val datatypeAgg = AggregationBuilders.terms(PCAWG).field("data_type.data_type");
+
+    // Cardinality doesn't work, set size to large number to get accurate bucket (donor) count
+    val donorCountAgg = AggregationBuilders.terms("donor").field("donor.donor_id").size(30000);
+    val fileSizeAgg = AggregationBuilders.sum("size").field("repository.file_size");
+    val dataFormatAgg = AggregationBuilders.terms("format").field("data_type.data_format");
+
+    stats.subAggregation(datatypeAgg.subAggregation(donorCountAgg).subAggregation(fileSizeAgg)
+        .subAggregation(dataFormatAgg));
+    search.addAggregation(stats);
+
+    log.info("PCAWG {}", search);
+    val response = search.execute().actionGet();
+    return extractPancancerStats(response.getAggregations());
+  }
+
+  private Map<String, Map<String, Object>> extractPancancerStats(Aggregations aggs) {
+    val stats = (Filter) aggs.get(PCAWG);
+    val datatypes = (Terms) stats.getAggregations().get(PCAWG);
+    val result = Maps.<String, Map<String, Object>> newHashMap();
+
+    for (val bucket : datatypes.getBuckets()) {
+      val name = bucket.getKey();
+      val donorCount = ((Terms) bucket.getAggregations().get("donor")).getBuckets().size();
+      val fileSize = ((Sum) bucket.getAggregations().get("size")).getValue();
+      val dataFormat = (Terms) bucket.getAggregations().get("format");
+      val fileCount = bucket.getDocCount();
+
+      val formats = Lists.<String> newArrayList();
+      for (val f : dataFormat.getBuckets()) {
+        formats.add(f.getKey());
+      }
+
+      val map = ImmutableMap.<String, Object> of(
+          "fileCount", fileCount,
+          "donorCount", (long) donorCount,
+          "fileSize", (long) fileSize,
+          "dataFormat", formats);
+      log.info("finished {} -> {}", name, map);
+      result.put(name, map);
+    }
+
+    log.info("Result {}", result);
+    return result;
   }
 }

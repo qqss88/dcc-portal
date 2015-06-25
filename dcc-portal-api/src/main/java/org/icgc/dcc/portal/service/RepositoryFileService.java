@@ -518,4 +518,8 @@ public class RepositoryFileService {
     return repositoryFileRepository.getSummary(query);
   }
 
+  public Map<String, Map<String, Object>> getPancancerStats() {
+    return repositoryFileRepository.getPancancerStats();
+  }
+
 }
