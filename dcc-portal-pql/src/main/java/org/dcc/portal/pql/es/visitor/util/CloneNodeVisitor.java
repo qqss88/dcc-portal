@@ -103,7 +103,7 @@ public class CloneNodeVisitor extends NodeVisitor<ExpressionNode, Void> {
 
   @Override
   public ExpressionNode visitTerms(TermsNode node, Optional<Void> context) {
-    val result = new TermsNode(node.getField());
+    val result = new TermsNode(node.getField(), node.getLookup());
     result.addChildren(visitChildren(node));
 
     return result;

@@ -518,6 +518,13 @@ public class FiltersConverterTest {
     assertThat(result).isEqualTo("and(eq(gene.id,'G1'),eq(gene.id,'G2'),eq(gene.id,'G3'))");
   }
 
+  @Test
+  public void entitySetTest_donor() {
+    val filters = createFilters("{donor:{entitySetId:{is:['abc']}}}");
+    val result = converter.convertFilters(filters, MUTATION_CENTRIC);
+    assertThat(result).isEqualTo("in(donor.entitySetId,'abc')");
+  }
+
   @SneakyThrows
   public static JqlFilters createFilters(String filters) {
     return mapper.readValue(new FiltersParam(filters).get().toString(), JqlFilters.class);

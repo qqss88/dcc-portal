@@ -82,6 +82,8 @@ public class FiltersConverter {
       "mutation.location",
       "gene.location");
 
+  private static final List<String> NON_NESTED_FIELDS = ImmutableList.of("entitySetId");
+
   public String convertFilters(@NonNull JqlFilters filters, @NonNull Type indexType) {
     if (indexType == Type.PROJECT) {
       filters = cleanProjectFilters(filters);
@@ -338,11 +340,21 @@ public class FiltersConverter {
       return resolveSpecialCasesNestedPath(fieldName, indexModel.getType());
     }
 
+    if (isNonNestedField(fieldName)) {
+      return EMPTY_NESTED_PATH;
+    }
+
     if (indexModel.isNested(fieldName)) {
       return indexModel.getNestedPath(fieldName);
     }
 
     return EMPTY_NESTED_PATH;
+  }
+
+  private static boolean isNonNestedField(String fieldName) {
+    val noPrefixField = fieldName.substring(fieldName.indexOf(".") + 1);
+
+    return NON_NESTED_FIELDS.contains(noPrefixField) || NON_NESTED_FIELDS.contains(fieldName);
   }
 
   private static String resolveSpecialCasesNestedPath(String fieldName, Type type) {
