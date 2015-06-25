@@ -18,16 +18,15 @@
 package org.dcc.portal.pql.ast.visitor;
 
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
+import static java.util.Collections.sort;
 import static java.util.stream.Collectors.joining;
-import static org.dcc.portal.pql.ast.Type.LIMIT;
-import static org.dcc.portal.pql.ast.Type.SORT;
-import static org.dcc.portal.pql.util.Converters.asString;
-import static org.dcc.portal.pql.util.Converters.isString;
+import static org.dcc.portal.pql.util.Converters.stringValue;
 import static org.icgc.dcc.common.core.util.Separators.COMMA;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import lombok.NonNull;
 import lombok.val;
@@ -53,6 +52,7 @@ import org.dcc.portal.pql.ast.function.FacetsNode;
 import org.dcc.portal.pql.ast.function.LimitNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
+import org.dcc.portal.pql.util.PqlNodeComparator;
 import org.icgc.dcc.common.core.util.Joiners;
 
 import com.google.common.base.Joiner;
@@ -60,10 +60,11 @@ import com.google.common.base.Joiner;
 public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
+  private static final Comparator<PqlNode> ORDER_COMPARATOR = new PqlNodeComparator();
 
   @Override
   public String visitStatement(@NonNull StatementNode node, Optional<Void> context) {
-    return visitChildren(fixNodeOrder(node));
+    return visitChildren(node);
   }
 
   @Override
@@ -152,94 +153,32 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
   }
 
   @Override
-  public String visitSort(@NonNull SortNode node, Optional<Void> context) {
-    val fields = new StringBuilder();
-    int index = 0;
-    for (val entry : node.getFields().entrySet()) {
-      fields.append(entry.getValue().getSign());
-      fields.append(entry.getKey());
+  public String visitSort(@NonNull SortNode sort, Optional<Void> context) {
+    val result = toCommaSeparatedString(sort.getFields().entrySet().stream()
+        .map(entry -> SortNode.entryAsString(entry)));
 
-      if (!isLastIndex(index++, node.getFields().size())) {
-        fields.append(COMMA);
-      }
-    }
-
-    return format("sort(%s)", fields.toString());
+    return format("sort(%s)", result);
   }
 
   private static String resolveValues(@NonNull List<? extends Object> values) {
-    return values.stream()
-        .map(value -> isString(value) ? asString(value) : valueOf(value))
-        .collect(joining(COMMA));
+    return toCommaSeparatedString(values.stream()
+        .map(value -> stringValue(value)));
   }
 
   private static String visitEqualityNode(String template, EqualityFilterNode node) {
-    val rawValue = node.getValue();
-    val value = isString(rawValue) ? asString(rawValue) : valueOf(rawValue);
-
-    return format(template, node.getField(), value);
+    return format(template, node.getField(), stringValue(node.getValue()));
   }
 
-  private String visitChildren(PqlNode node) {
-    val result = new StringBuilder();
-    for (int i = 0; i < node.childrenCount(); i++) {
-      val child = node.getChild(i);
-      result.append(child.accept(this, Optional.empty()));
-      if (!isLastIndex(i, node.childrenCount())) {
-        result.append(COMMA);
-      }
-    }
+  private String visitChildren(@NonNull PqlNode parentNode) {
+    val nodes = parentNode.getChildren();
+    sort(nodes, ORDER_COMPARATOR);
 
-    return result.toString();
+    return toCommaSeparatedString(nodes.stream()
+        .map(node -> node.accept(this, Optional.empty())));
   }
 
-  /**
-   * This method makes sure the top-level nodes comply the ordering imposed by the PQL syntax. Specifically, all other
-   * nodes must appear before 'sort' and 'limit', and 'sort' must appear before 'limit'. Usually this is called before
-   * we turn a StatementNode into a PQL string (otherwise the generated PQL statement wouldn't be correct).
-   *
-   * @param node
-   * @return
-   */
-  private static StatementNode fixNodeOrder(@NonNull StatementNode node) {
-
-    if (node.childrenCount() < 1) {
-      return node;
-    }
-
-    SortNode sort = null;
-    LimitNode limit = null;
-    val result = new StatementNode();
-
-    for (val child : node.getChildren()) {
-      val nodeType = child.type();
-
-      if (nodeType == SORT) {
-        sort = child.toSortNode();
-        continue;
-      }
-
-      if (nodeType == LIMIT) {
-        limit = child.toLimitNode();
-        continue;
-      }
-
-      result.addChildren(child);
-    }
-
-    if (null != sort) {
-      result.addChildren(sort);
-    }
-
-    if (null != limit) {
-      result.addChildren(limit);
-    }
-
-    return result;
-  }
-
-  private static boolean isLastIndex(int i, int size) {
-    return i == size - 1;
+  private static String toCommaSeparatedString(@NonNull Stream<String> stream) {
+    return stream.collect(joining(COMMA));
   }
 
 }

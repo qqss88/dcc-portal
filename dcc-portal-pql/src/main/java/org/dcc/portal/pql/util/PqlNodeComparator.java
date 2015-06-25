@@ -17,24 +17,42 @@
  */
 package org.dcc.portal.pql.util;
 
-import static java.lang.String.format;
-import static java.lang.String.valueOf;
-import static lombok.AccessLevel.PRIVATE;
-import lombok.NoArgsConstructor;
+import static org.dcc.portal.pql.ast.Type.LIMIT;
+import static org.dcc.portal.pql.ast.Type.SORT;
 
-@NoArgsConstructor(access = PRIVATE)
-public final class Converters {
+import java.util.Comparator;
 
-  public static boolean isString(Object value) {
-    return value instanceof String;
-  }
+import lombok.val;
 
-  public static String asString(Object value) {
-    return format("'%s'", value);
-  }
+import org.dcc.portal.pql.ast.PqlNode;
 
-  public static String stringValue(Object value) {
-    return isString(value) ? asString(value) : valueOf(value);
+/**
+ * This comparator makes sure the top-level nodes comply the ordering imposed by the PQL syntax. Specifically, all other
+ * nodes must appear before 'sort' and 'limit', and 'sort' must appear before 'limit'. Usually this is used before
+ * turning a StatementNode into a PQL string (otherwise the generated PQL statement wouldn't be correct).
+ */
+public class PqlNodeComparator implements Comparator<PqlNode> {
+
+  private static final int DONT_CARE = 0;
+  private static final int SWAP = 1;
+  private static final int NO_SWAP = -1;
+
+  @Override
+  public int compare(PqlNode node1, PqlNode node2) {
+    val left = node1.type();
+    val right = node2.type();
+
+    if (left == SORT && right == LIMIT) {
+      return NO_SWAP;
+    } else if (left == LIMIT && right == SORT) {
+      return SWAP;
+    } else if (left == LIMIT || left == SORT) {
+      return SWAP;
+    } else if (right == LIMIT || right == SORT) {
+      return NO_SWAP;
+    }
+
+    return DONT_CARE;
   }
 
 }
