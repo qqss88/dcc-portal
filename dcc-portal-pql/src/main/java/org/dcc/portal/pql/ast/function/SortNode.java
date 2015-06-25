@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.ast.function;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
@@ -59,6 +60,10 @@ public class SortNode extends PqlNode {
   @Override
   public SortNode toSortNode() {
     return this;
+  }
+
+  public static String entryAsString(Entry<String, Order> entry) {
+    return entry.getValue().getSign() + entry.getKey();
   }
 
   public static class SortNodeBuilder {

@@ -64,6 +64,18 @@ public class StatementNode extends PqlNode {
     addChildren(node);
   }
 
+  public void setSelect(@NonNull SelectNode node) {
+    canUpdateField();
+
+    for (val selectNode : select) {
+      selectNode.removeParent();
+      removeChild(selectNode);
+    }
+
+    select.clear();
+    addChildren(node);
+  }
+
   public boolean hasFacets() {
     return !facets.isEmpty();
   }

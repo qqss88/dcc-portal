@@ -29,6 +29,7 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -70,9 +71,10 @@ public class RepositoryFileTypeModel extends TypeModel {
   }
 
   /**
-   * Aliases for Es fields
+   * Aliases for ES fields
    */
   @RequiredArgsConstructor(access = PRIVATE)
+  @Getter
   public static enum Fields {
 
     ID("id"),
