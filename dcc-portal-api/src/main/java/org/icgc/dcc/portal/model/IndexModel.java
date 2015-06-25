@@ -2,12 +2,6 @@ package org.icgc.dcc.portal.model;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toMap;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.DONOR;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE_SET;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.MUTATION;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.OCCURRENCE;
-import static org.icgc.dcc.portal.model.IndexModel.Kind.PROJECT;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -475,12 +469,12 @@ public class IndexModel {
           .build();
 
   private static final ImmutableMap<Kind, TypeModel> TYPE_MODEL_BY_KIND = ImmutableMap.<Kind, TypeModel> builder()
-      .put(DONOR, org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel())
-      .put(MUTATION, org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel())
-      .put(OCCURRENCE, org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel())
-      .put(GENE, org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel())
-      .put(GENE_SET, org.dcc.portal.pql.meta.IndexModel.getGeneSetTypeModel())
-      .put(PROJECT, org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel())
+      .put(Kind.DONOR, org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel())
+      .put(Kind.MUTATION, org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel())
+      .put(Kind.OCCURRENCE, org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel())
+      .put(Kind.GENE, org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel())
+      .put(Kind.GENE_SET, org.dcc.portal.pql.meta.IndexModel.getGeneSetTypeModel())
+      .put(Kind.PROJECT, org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel())
       .build();
 
   /*
@@ -495,27 +489,27 @@ public class IndexModel {
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
   static {
-    FIELDS_MAPPING.put(Kind.PROJECT, createFieldsMapping(PROJECT));
-    FIELDS_MAPPING.put(Kind.DONOR, createFieldsMapping(DONOR));
+    FIELDS_MAPPING.put(Kind.PROJECT, createFieldsMapping(Kind.PROJECT));
+    FIELDS_MAPPING.put(Kind.DONOR, createFieldsMapping(Kind.DONOR));
     FIELDS_MAPPING.put(Kind.SPECIMEN, SPECIMEN_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.FAMILY, FAMILY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EXPOSURE, EXPOSURE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.THERAPY, THERAPY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SAMPLE, SAMPLE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SEQ_DATA, RAWSEQDATA_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.GENE, createFieldsMapping(GENE));
-    FIELDS_MAPPING.put(Kind.MUTATION, createFieldsMapping(MUTATION));
+    FIELDS_MAPPING.put(Kind.GENE, createFieldsMapping(Kind.GENE));
+    FIELDS_MAPPING.put(Kind.MUTATION, createFieldsMapping(Kind.MUTATION));
     FIELDS_MAPPING.put(Kind.TRANSCRIPT, TRANSCRIPT_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.CONSEQUENCE, CONSEQUENCE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.DOMAIN, DOMAIN_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EXON, EXON_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EMB_OCCURRENCE, EMB_OCCURRENCE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.OBSERVATION, OBSERVATION_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.OCCURRENCE, createFieldsMapping(OCCURRENCE));
+    FIELDS_MAPPING.put(Kind.OCCURRENCE, createFieldsMapping(Kind.OCCURRENCE));
     FIELDS_MAPPING.put(Kind.RELEASE, RELEASE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.GENE_SET, createFieldsMapping(GENE_SET));
+    FIELDS_MAPPING.put(Kind.GENE_SET, createFieldsMapping(Kind.GENE_SET));
     FIELDS_MAPPING.put(Kind.DIAGRAM, DIAGRAM_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
