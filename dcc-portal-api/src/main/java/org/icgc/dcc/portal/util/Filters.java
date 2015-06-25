@@ -128,7 +128,17 @@ public final class Filters {
     val result = current.deepCopy();
     if (universe.path("gene").path("goTermId").isMissingNode() == false) {
       val universeId = universe.get("gene").get("goTermId").withArray("is").get(0).asText();
-      result.with("gene").with("goTermId").withArray(ALL).add(universeId);
+
+      if (result.path("gene").path("goTermId").path("is").isMissingNode()) {
+
+        for (val t : result.with("gene").with("goTermId").withArray("is")) {
+          result.with("gene").with("goTermId").withArray(ALL).add(t);
+        }
+        result.with("gene").with("goTermId").withArray(ALL).add(universe);
+
+      } else {
+        result.with("gene").with("goTermId").withArray(IS).add(universeId);
+      }
     } else if (universe.path("gene").path("hasPathway").isMissingNode() == false) {
       result.with("gene").put("hasPathway", "true");
     }
@@ -152,7 +162,16 @@ public final class Filters {
     val result = current.deepCopy();
     if (geneSet.path("gene").path("geneSetId").isMissingNode() == false) {
       val geneSetId = geneSet.get("gene").get("geneSetId").withArray("is").get(0).asText();
-      result.with("gene").with("geneSetId").withArray(ALL).add(geneSetId);
+
+      if (result.path("gene").path("geneSetId").path("is").isMissingNode() == false) {
+        for (val t : result.with("gene").with("geneSetId").withArray("is")) {
+          result.with("gene").with("geneSetId").withArray(ALL).add(t);
+        }
+        result.with("gene").with("geneSetId").withArray(ALL).add(geneSetId);
+        result.with("gene").with("geneSetId").remove("is");
+      } else {
+        result.with("gene").with("geneSetId").withArray(IS).add(geneSetId);
+      }
     }
     return result;
   }

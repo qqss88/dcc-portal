@@ -265,13 +265,14 @@ public class GeneRepository implements Repository {
 
   @Override
   public SearchResponse findAll(Query query) {
-    val search = buildFindAllRequest(query, TYPE);
+    throw new UnsupportedOperationException("Not applicable");
+    // val search = buildFindAllRequest(query, TYPE);
 
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
+    // log.debug("{}", search);
+    // SearchResponse response = search.execute().actionGet();
+    // log.debug("{}", response);
 
-    return response;
+    // return response;
   }
 
   @Override

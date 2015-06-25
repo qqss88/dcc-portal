@@ -104,7 +104,7 @@ public class PqlParserTest {
   @Test
   public void selectFacetsTest() {
     assertThat(PqlParser.parse("select(*),select(a),facets(*),facets(b)").toString())
-        .isEqualTo("select(*),select(a),facets(*),facets(b)");
+        .isEqualTo("facets(*),facets(b),select(*),select(a)");
   }
 
 }

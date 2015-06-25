@@ -241,8 +241,10 @@ IcgcGeneAdapter.prototype.getData = function (args) {
     }
     //		console.log(querys);
     console.time(_this.resource + ' get and save ' + rnd);
-    for (query in queries) {
-      this._callWebService(queries[query], webServiceCallBack, params);
+
+    var queryCount = queries.length;
+    for (var i = 0; i < queryCount; i++) {
+      this._callWebService (queries [i], webServiceCallBack, params);
     }
   } else {
     if (itemList.length > 0) {

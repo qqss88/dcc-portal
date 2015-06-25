@@ -282,13 +282,15 @@ public class MutationRepository implements Repository {
 
   @Override
   public SearchResponse findAll(Query query) {
-    val search = buildFindAllRequest(query, TYPE);
+    throw new UnsupportedOperationException("Not applicable");
 
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
+    // val search = buildFindAllRequest(query, TYPE);
 
-    return response;
+    // log.debug("{}", search);
+    // SearchResponse response = search.execute().actionGet();
+    // log.debug("{}", response);
+
+    // return response;
   }
 
   @Override
