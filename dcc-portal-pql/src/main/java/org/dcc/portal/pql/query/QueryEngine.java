@@ -62,6 +62,10 @@ public class QueryEngine {
 
   public QueryRequest execute(@NonNull String pql, @NonNull Type type) {
     val pqlAst = PqlParser.parse(pql);
+    return execute(pqlAst, type);
+  }
+
+  public QueryRequest execute(@NonNull StatementNode pqlAst, @NonNull Type type) {
     ExpressionNode esAst = resolvePqlAst(pqlAst, type);
     log.debug("Resolved PQL AST into ES AST: {}", esAst);
 
