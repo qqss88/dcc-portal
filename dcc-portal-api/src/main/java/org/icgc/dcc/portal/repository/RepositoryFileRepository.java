@@ -18,6 +18,10 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -58,6 +62,9 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -66,7 +73,6 @@ import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -78,7 +84,6 @@ import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
-import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -100,17 +105,26 @@ import com.google.common.primitives.Ints;
 @Component
 public class RepositoryFileRepository {
 
-  private final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
-  private final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
+  private static final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
+  private static final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
       "specimen_id",
       "sample_id",
       "submitted_specimen_id",
       "submitted_sample_id");
-  private final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
-  private final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
+  private static final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
+  private static final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
       "tcga_participant_barcode",
       "tcga_sample_barcode",
       "tcga_aliquot_barcode");
+  private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
+      Fields.REPO_TYPE,
+      Fields.REPO_ENTITY_ID,
+      Fields.REPO_DATA_PATH,
+      Fields.REPO_SERVER_OBJECT,
+      Fields.FILE_NAME,
+      Fields.FILE_SIZE,
+      Fields.FILE_MD5SUM);
+  private static final String MANIFEST_DOWNLOAD_INFO_SORT_FIELD = Fields.REPO_TYPE.getAlias();
 
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.REPOSITORY_FILE;
@@ -140,11 +154,13 @@ public class RepositoryFileRepository {
 
   private final Client client;
   private final String index;
+  private final QueryEngine queryEngine;
 
   @Autowired
   public RepositoryFileRepository(Client client) {
     this.index = REPOSITORY_INDEX_NAME;
     this.client = client;
+    this.queryEngine = new QueryEngine(client, index);
   }
 
   /**
@@ -369,8 +385,8 @@ public class RepositoryFileRepository {
       @Override
       public void write(OutputStream os) throws IOException, WebApplicationException {
         val filters = buildRepoFilters(query.getFilters(), false);
-        String headers[] = EXPORT_FIELDS.values().toArray(new String[EXPORT_FIELDS.values().size()]);
-        String keys[] = EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]);
+        final String headers[] = toStringArray(EXPORT_FIELDS.values());
+        final String keys[] = toStringArray(EXPORT_FIELDS.keySet());
 
         @Cleanup
         val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
@@ -384,7 +400,7 @@ public class RepositoryFileRepository {
             .setScroll(KEEP_ALIVE)
             .setPostFilter(filters)
             .setQuery(matchAllQuery())
-            .addFields(EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]));
+            .addFields(keys);
 
         SearchResponse response = search.execute().actionGet();
         while (true) {
@@ -397,14 +413,16 @@ public class RepositoryFileRepository {
           if (finished) {
             break;
           } else {
-
-            for (SearchHit hit : response.getHits()) {
+            for (val hit : response.getHits()) {
               val map = normalize(createResponseMap(hit, query, Kind.REPOSITORY_FILE));
               writer.write(map, keys);
             }
           }
+
         }
+
       }
+
     };
   }
 
@@ -457,33 +475,27 @@ public class RepositoryFileRepository {
   }
 
   @NonNull
-  public SearchResponse findDownloadInfo(Query query, final String[] fields, String sortField, String sourceField) {
+  public SearchResponse findDownloadInfo(String pql) {
+    val pqlAst = parse(pql);
+    pqlAst.setSelect(select(MANIFEST_DOWNLOAD_INFO_FIELDS));
+    pqlAst.setSort(sortBuilder()
+        .sortAsc(MANIFEST_DOWNLOAD_INFO_SORT_FIELD).build());
+
+    val newPql = pqlAst.toString();
+    log.info("Updated PQL is: '{}'.", newPql);
+
     // Get the total count first.
-    query.setLimit(0);
-    val response = findDownloadInfo(COUNT, query, fields, sortField, sourceField);
-    val count = getTotalHitCount(response);
+    val count = getTotalHitCount(findDownloadInfo(newPql, COUNT, 0));
     log.info("A total of {} files for this query.", count);
 
-    // Run the query to retrieve.
-    query.setLimit(Ints.saturatedCast(count));
-    return findDownloadInfo(QUERY_THEN_FETCH, query, fields, sortField, sourceField);
+    return findDownloadInfo(newPql, QUERY_THEN_FETCH, Ints.saturatedCast(count));
   }
 
   @NonNull
-  private SearchResponse findDownloadInfo(SearchType searchType, Query query, final String[] fields, String sortField,
-      String sourceField) {
-    val filters = buildRepoFilters(query.getFilters(), false);
-    final String noExcludes = null;
-    val search = client.prepareSearch(index)
-        .setTypes(FILE_INDEX_TYPE)
+  private SearchResponse findDownloadInfo(String pql, SearchType searchType, int size) {
+    val search = queryEngine.execute(pql, REPOSITORY_FILE).getRequestBuilder()
         .setSearchType(searchType)
-        .setFrom(query.getFrom())
-        .setSize(query.getLimit())
-        .addSort(sortField, SortOrder.ASC)
-        .setPostFilter(filters)
-        .addFields(fields)
-        // Need to use _source because 'repository.repo_server' is an array.
-        .setFetchSource(sourceField, noExcludes);
+        .setSize(size);
 
     log.info("ES request is: {}", search);
     val response = search.execute().actionGet();

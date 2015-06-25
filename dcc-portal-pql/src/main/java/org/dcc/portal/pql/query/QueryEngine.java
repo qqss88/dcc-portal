@@ -25,6 +25,7 @@ import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 
 import java.util.Optional;
 
@@ -49,6 +50,7 @@ public class QueryEngine {
   private final QueryContext mutationContext;
   private final QueryContext observationContext;
   private final QueryContext projectContext;
+  private final QueryContext repositoryFileContext;
 
   public QueryEngine(@NonNull Client client, @NonNull String index) {
     this.requestBuilder = new EsRequestBuilder(client);
@@ -58,6 +60,7 @@ public class QueryEngine {
     this.mutationContext = new QueryContext(index, MUTATION_CENTRIC);
     this.observationContext = new QueryContext(index, OBSERVATION_CENTRIC);
     this.projectContext = new QueryContext(index, PROJECT);
+    this.repositoryFileContext = new QueryContext(index, REPOSITORY_FILE);
   }
 
   public QueryRequest execute(@NonNull String pql, @NonNull Type type) {
@@ -93,9 +96,10 @@ public class QueryEngine {
       return observationContext;
     case PROJECT:
       return projectContext;
+    case REPOSITORY_FILE:
+      return repositoryFileContext;
     default:
       throw new IllegalArgumentException(format("Type %s is not supported", type.getId()));
     }
   }
-
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +100,7 @@ public class IndexModel {
     REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
     PROJECT_TEXT("project-text");
 
+    @NonNull
     private final String id;
   }
 
