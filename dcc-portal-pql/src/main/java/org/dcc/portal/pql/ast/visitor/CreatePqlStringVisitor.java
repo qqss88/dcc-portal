@@ -20,6 +20,8 @@ package org.dcc.portal.pql.ast.visitor;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.joining;
+import static org.dcc.portal.pql.ast.Type.LIMIT;
+import static org.dcc.portal.pql.ast.Type.SORT;
 import static org.dcc.portal.pql.util.Converters.asString;
 import static org.dcc.portal.pql.util.Converters.isString;
 import static org.icgc.dcc.common.core.util.Separators.COMMA;
@@ -189,6 +191,51 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
     }
 
     return result.toString();
+  }
+
+  /**
+   * This method makes sure the top-level nodes comply the ordering imposed by the PQL syntax. Specifically, all other
+   * nodes must appear before 'sort' and 'limit', and 'sort' must appear before 'limit'. Usually this is called before
+   * we turn a StatementNode into a PQL string (otherwise the generated PQL statement wouldn't be correct).
+   *
+   * @param node
+   * @return
+   */
+  private static StatementNode fixNodeOrder(@NonNull StatementNode node) {
+
+    if (node.childrenCount() < 1) {
+      return node;
+    }
+
+    SortNode sort = null;
+    LimitNode limit = null;
+    val result = new StatementNode();
+
+    for (val child : node.getChildren()) {
+      val nodeType = child.type();
+
+      if (nodeType == SORT) {
+        sort = child.toSortNode();
+        continue;
+      }
+
+      if (nodeType == LIMIT) {
+        limit = child.toLimitNode();
+        continue;
+      }
+
+      result.addChildren(child);
+    }
+
+    if (null != sort) {
+      result.addChildren(sort);
+    }
+
+    if (null != limit) {
+      result.addChildren(limit);
+    }
+
+    return result;
   }
 
   private static boolean isLastIndex(int i, int size) {
