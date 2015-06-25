@@ -1,19 +1,28 @@
 package org.icgc.dcc.portal.model;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toMap;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.DONOR;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.GENE_SET;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.MUTATION;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.OCCURRENCE;
+import static org.icgc.dcc.portal.model.IndexModel.Kind.PROJECT;
+
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 
+import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -135,85 +144,6 @@ public class IndexModel {
           .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
           .build();
 
-  private static final ImmutableMap<String, String> PROJECTS_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "_project_id")
-          .put("icgcId", "icgc_id")
-          .put("primarySite", "primary_site")
-          .put("name", "project_name")
-          .put("tumourType", "tumour_type")
-          .put("tumourSubtype", "tumour_subtype")
-          .put("pubmedIds", "pubmed_ids")
-          .put("primaryCountries", "primary_countries").put("partnerCountries", "partner_countries")
-          .put("availableDataTypes", "_summary._available_data_type")
-          .put("ssmTestedDonorCount", "_summary._ssm_tested_donor_count")
-          .put("cnsmTestedDonorCount", "_summary._cnsm_tested_donor_count")
-          .put("stsmTestedDonorCount", "_summary._stsm_tested_donor_count")
-          .put("sgvTestedDonorCount", "_summary._sgv_tested_donor_count")
-          .put("methSeqTestedDonorCount", "_summary._meth_seq_tested_donor_count")
-          .put("methArrayTestedDonorCount", "_summary._meth_array_tested_donor_count")
-          .put("expSeqTestedDonorCount", "_summary._exp_seq_tested_donor_count")
-          .put("expArrayTestedDonorCount", "_summary._exp_array_tested_donor_count")
-          .put("pexpTestedDonorCount", "_summary._pexp_tested_donor_count")
-          .put("mirnaSeqTestedDonorCount", "_summary._mirna_seq_tested_donor_count")
-          .put("jcnTestedDonorCount", "_summary._jcn_tested_donor_count")
-          // .put("totalDonorCount", "_summary._total_donor_count")
-          .put("totalDonorCount", "_summary._total_complete_donor_count")
-          .put("affectedDonorCount", "_summary._affected_donor_count")
-          .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
-          .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
-          .put("repository", "_summary.repository")
-          .put("complete", "_summary._complete")
-          .put("state", "_summary._complete")
-          .build();
-
-  private static final ImmutableMap<String, String> DONORS_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "_donor_id")
-          .put("submittedDonorId", "donor_id")
-          .put("projectId", "project._project_id")
-          .put("primarySite", "project.primary_site")
-          .put("projectName", "project.project_name")
-          .put("tumourType", "project.tumour_type")
-          .put("tumourSubtype", "project.tumour_subtype")
-          .put("ssmCount", "_summary._ssm_count")
-          .put("cnsmExists", "_summary._cnsm_exists")
-          .put("stsmExists", "_summary._stsm_exists")
-          .put("sgvExists", "_summary._sgv_exists")
-          .put("pexpExists", "_summary._pexp_exists")
-          .put("mirnaSeqExists", "_summary._mirna_seq_exists")
-          .put("methSeqExists", "_summary._meth_seq_exists")
-          .put("methArrayExists", "_summary._meth_array_exists")
-          .put("expSeqExists", "_summary._exp_seq_exists")
-          .put("expArrayExists", "_summary._exp_array_exists")
-          .put("jcnExists", "_summary._jcn_exists")
-          .put("ageAtDiagnosis", "donor_age_at_diagnosis")
-          .put("ageAtDiagnosisGroup", "_summary._age_at_diagnosis_group")
-          .put("ageAtEnrollment", "donor_age_at_enrollment")
-          .put("ageAtLastFollowup", "donor_age_at_last_followup")
-          .put("diagnosisIcd10", "donor_diagnosis_icd10")
-          .put("diseaseStatusLastFollowup", "disease_status_last_followup")
-          .put("intervalOfLastFollowup", "donor_interval_of_last_followup")
-          .put("gender", "donor_sex")
-          .put("vitalStatus", "donor_vital_status")
-          .put("tumourStageAtDiagnosis", "donor_tumour_stage_at_diagnosis")
-          .put("tumourStagingSystemAtDiagnosis", "donor_tumour_staging_system_at_diagnosis")
-          .put("tumourStageAtDiagnosisSupplemental", "donor_tumour_stage_at_diagnosis_supplemental")
-          .put("relapseType", "donor_relapse_type")
-          .put("relapseInterval", "donor_relapse_interval")
-          .put("survivalTime", "donor_survival_time")
-          .put("availableDataTypes", "_summary._available_data_type")
-          .put("analysisTypes", "_summary.experimental_analysis_performed")
-          .put("studies", "_summary._studies")
-          .put("ssmAffectedGenes", "_score")
-          .put("priorMalignancy", "prior_malignancy")
-          .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
-          .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
-          .put("complete", "_summary._complete")
-          .put("state", "_summary._complete")
-          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-          .build();
-
   private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("donorHasRelativeWithCancerHistory", "donor_has_relative_with_cancer_history")
@@ -301,62 +231,6 @@ public class IndexModel {
           .put("repository", "repository")
           .put("filename", "filename")
           .put("rawDataAccession", "raw_data_accession")
-          .build();
-
-  private static final ImmutableMap<String, String> GENES_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "_gene_id")
-          .put("symbol", "symbol")
-          .put("name", "name")
-          .put("type", "biotype")
-          .put("chromosome", "chromosome")
-          .put("start", "start")
-          .put("end", "end")
-          .put("strand", "strand")
-          .put("description", "description")
-          .put("synonyms", "synonyms") // Is a multi field
-          .put("externalDbIds", "external_db_ids")
-          .put("affectedDonorCountTotal", "_summary._affected_donor_count")
-          .put("affectedDonorCountFiltered", "_score")
-          .put("affectedTranscriptIds", "_summary._affected_transcript_id")
-          .put("location", "location")
-          .put("pathwayId", "pathways.pathway_id")
-          .put("pathwayName", "pathways.pathway_name")
-          .put("pathways", "pathways")
-          .put("sets", "sets")
-          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-
-          .build();
-
-  private static final ImmutableMap<String, String> MUTATIONS_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "_mutation_id")
-          .put("mutation", "mutation")
-          .put("type", "mutation_type")
-          .put("chromosome", "chromosome")
-          .put("start", "chromosome_start")
-          .put("end", "chromosome_end")
-          .put("affectedDonorCountTotal", "_summary._affected_donor_count")
-          .put("testedDonorCount", "_summary._tested_donor_count")
-          .put("consequenceType", "consequence_type")
-          .put("consequenceTypeNested", "transcript.consequence.consequence_type")
-          .put("platform", "platform")
-          .put("platformNested", "ssm_occurrence.observation.platform")
-          .put("verificationStatus", "verification_status")
-          .put("verificationStatusNested", "ssm_occurrence.observation.verification_status")
-          .put("assemblyVersion", "assembly_version")
-          .put("referenceGenomeAllele", "reference_genome_allele")
-          .put("affectedProjectCount", "_summary._affected_project_count")
-          .put("affectedProjectIds", "_summary._affected_project_ids")
-          .put("affectedDonorCountFiltered", "_score")
-          .put("transcriptId", "transcript.id")
-          .put("functionalImpact", "functional_impact_prediction_summary")
-          .put("functionalImpactNested", "transcript.functional_impact_prediction_summary")
-          .put("location", "location")
-          .put("sequencingStrategy", "sequencing_strategy")
-          .put("sequencingStrategyNested", "ssm_occurrence.observation.sequencing_strategy")
-          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-
           .build();
 
   private static final ImmutableMap<String, String> TRANSCRIPT_FIELDS_MAPPING =
@@ -461,53 +335,6 @@ public class IndexModel {
           .put("verificationPlatform", "verification_platform")
           .put("verificationStatus", "verification_status")
           .put("xrefEnsemblVarId", "xref_ensembl_var_id")
-          .build();
-
-  // FIXME: remove extra fields that are now in observations
-  private static final ImmutableMap<String, String> OCCURRENCE_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("donorId", "ssm._donor_id")
-          .put("submittedMutationId", "ssm.mutation_id")
-          .put("mutationId", "ssm._mutation_id")
-          .put("matchedSampleId", "ssm._matched_sample_id")
-          .put("submittedMatchedSampleId", "ssm.matched_sample_id")
-          .put("projectId", "ssm._project_id")
-          .put("primarySite", "ssm.project.primary_site")
-          .put("tumourType", "ssm.project.tumour_type")
-          .put("tumourSubtype", "ssm.project.tumour_subtype")
-          .put("sampleId", "ssm._sample_id")
-          .put("specimenId", "ssm._specimen_id")
-          .put("analysisId", "ssm.analysis_id")
-          .put("analyzedSampleId", "ssm.analyzed_sample_id")
-          .put("baseCallingAlgorithm", "ssm.base_calling_algorithm")
-          .put("strand", "ssm.chromosome_strand")
-          .put("chromosome", "ssm.chromosome")
-          .put("start", "ssm.chromosome_start")
-          .put("end", "ssm.chromosome_end")
-          .put("controlGenotype", "ssm.control_genotype")
-          .put("experimentalProtocol", "ssm.experimental_protocol")
-          .put("expressedAllele", "ssm.expressed_allele")
-          .put("platform", "ssm.platform")
-          .put("probability", "ssm.probability")
-          .put("qualityScore", "ssm.quality_score")
-          .put("rawDataAccession", "ssm.raw_data_accession")
-          .put("rawDataRepository", "ssm.raw_data_repository")
-          .put("readCount", "ssm.read_count")
-          .put("refsnpAllele", "ssm.refsnp_allele")
-          .put("seqCoverage", "ssm.seq_coverage")
-          .put("sequencingStrategy", "ssm.sequencing_strategy")
-          .put("ssmMDbXref", "ssm.ssm_m_db_xref")
-          .put("ssmMUri", "ssm.ssm_m_uri")
-          .put("ssmPUri", "ssm.ssm_p_uri")
-          .put("tumourGenotype", "ssm.tumour_genotype")
-          .put("variationCallingAlgorithm", "ssm.variation_calling_algorithm")
-          .put("verificationPlatform", "ssm.verification_platform")
-          .put("verificationStatus", "ssm.verification_status")
-          .put("xrefEnsemblVarId", "ssm.xref_ensembl_var_id")
-          .put("mutation", "ssm.mutation")
-          .put("observation", "ssm.observation")
-          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-
           .build();
 
   private static final ImmutableMap<String, String> OBSERVATION_FIELDS_MAPPING =
@@ -645,29 +472,14 @@ public class IndexModel {
           .put("geneCount", "gene_count")
           .build();
 
-  private static final ImmutableMap<String, String> GENESET_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "id")
-          .put("name", "name")
-          .put("type", "type")
-          .put("source", "source")
-          .put("description", "description")
-          .put("geneCount", "_summary._gene_count")
-          .put("projects", "projects")
-
-          // Pathway
-          .put("hierarchy", "pathway.hierarchy")
-          .put("diagrammed", "pathway.diagrammed")
-
-          // Gene Ontology
-          .put("ontology", "go_term.ontology")
-          .put("altIds", "go_term.alt_ids")
-          .put("synonyms", "go_term.synonyms")
-          .put("inferredTree", "go_term.inferred_tree")
-
-          // Curated gene set
-          // ???
-          .build();
+  private static final ImmutableMap<Kind, TypeModel> TYPE_MODEL_BY_KIND = ImmutableMap.<Kind, TypeModel> builder()
+      .put(DONOR, org.dcc.portal.pql.meta.IndexModel.getDonorCentricTypeModel())
+      .put(MUTATION, org.dcc.portal.pql.meta.IndexModel.getMutationCentricTypeModel())
+      .put(OCCURRENCE, org.dcc.portal.pql.meta.IndexModel.getObservationCentricTypeModel())
+      .put(GENE, org.dcc.portal.pql.meta.IndexModel.getGeneCentricTypeModel())
+      .put(GENE_SET, org.dcc.portal.pql.meta.IndexModel.getGeneSetTypeModel())
+      .put(PROJECT, org.dcc.portal.pql.meta.IndexModel.getProjectTypeModel())
+      .build();
 
   /*
    * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
@@ -681,27 +493,27 @@ public class IndexModel {
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
   static {
-    FIELDS_MAPPING.put(Kind.PROJECT, PROJECTS_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.DONOR, DONORS_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.PROJECT, createFieldsMapping(PROJECT));
+    FIELDS_MAPPING.put(Kind.DONOR, createFieldsMapping(DONOR));
     FIELDS_MAPPING.put(Kind.SPECIMEN, SPECIMEN_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.FAMILY, FAMILY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EXPOSURE, EXPOSURE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.THERAPY, THERAPY_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SAMPLE, SAMPLE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.SEQ_DATA, RAWSEQDATA_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.GENE, GENES_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.MUTATION, MUTATIONS_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.GENE, createFieldsMapping(GENE));
+    FIELDS_MAPPING.put(Kind.MUTATION, createFieldsMapping(MUTATION));
     FIELDS_MAPPING.put(Kind.TRANSCRIPT, TRANSCRIPT_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.CONSEQUENCE, CONSEQUENCE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.DOMAIN, DOMAIN_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EXON, EXON_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.EMB_OCCURRENCE, EMB_OCCURRENCE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.OBSERVATION, OBSERVATION_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.OCCURRENCE, OCCURRENCE_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.OCCURRENCE, createFieldsMapping(OCCURRENCE));
     FIELDS_MAPPING.put(Kind.RELEASE, RELEASE_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.KEYWORD, KEYWORD_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.PATHWAY, PATHWAY_FIELDS_MAPPING);
-    FIELDS_MAPPING.put(Kind.GENE_SET, GENESET_FIELDS_MAPPING);
+    FIELDS_MAPPING.put(Kind.GENE_SET, createFieldsMapping(GENE_SET));
     FIELDS_MAPPING.put(Kind.DIAGRAM, DIAGRAM_FIELDS_MAPPING);
     FIELDS_MAPPING.put(Kind.REPOSITORY_FILE, REPOSITORY_FILE_FIELDS_MAPPING);
   }
@@ -737,29 +549,6 @@ public class IndexModel {
       GeneSetType.GENE_SET_TYPE_PATHWAY.getType(), "hasPathway",
       GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
 
-  /**
-   * Mapping of gene set types to actual ES fields
-   */
-  public static final Map<String, List<String>> GENE_SET_INDEX_FIELDS = ImmutableMap
-      .<String, List<String>> builder()
-      .put(GeneSetType.GENE_SET_TYPE_CURATED.getType(),
-          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_CURATED.getType()))
-      .put(GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
-          ImmutableList.<String> of(GeneSetType.GENE_SET_TYPE_PATHWAY.getType()))
-      .put(GeneSetType.GENE_SET_TYPE_GO.getType(),
-          ImmutableList.<String> of(
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
-      .put(GeneSetType.GENE_SET_TYPE_ALL.getType(),
-          ImmutableList.<String> of(
-              GeneSetType.GENE_SET_TYPE_CURATED.getType(),
-              GeneSetType.GENE_SET_TYPE_PATHWAY.getType(),
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "molecular_function"),
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "biological_process"),
-              String.format("%s.%s", GeneSetType.GENE_SET_TYPE_GO.getType(), "cellular_component")))
-      .build();
-
   private String index;
 
   @Autowired
@@ -771,4 +560,14 @@ public class IndexModel {
   public String getIndex() {
     return this.index;
   }
+
+  private static ImmutableMap<String, String> createFieldsMapping(Kind kind) {
+    val typeModel = TYPE_MODEL_BY_KIND.get(kind);
+    checkState(typeModel != null, "TypeModel is not defined for kind '%s'", kind);
+    val result = typeModel.getAliases().stream()
+        .collect(toMap(k -> k, v -> typeModel.getField(v)));
+
+    return ImmutableMap.copyOf(result);
+  }
+
 }

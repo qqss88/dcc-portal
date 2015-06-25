@@ -96,6 +96,7 @@ public abstract class TypeModel {
   protected final Map<String, String> fieldsByAlias;
   protected final Map<String, String> fieldsByInternalAlias;
   protected final List<String> allowedFields;
+  protected final List<String> aliases;
 
   /**
    * Represents fields added as includes to the Query.<br>
@@ -123,6 +124,7 @@ public abstract class TypeModel {
     this.fieldsByInternalAlias = defineInternalAliases(internalAliases);
     this.allowedFields = defineAllowedFields(allowedAliases);
     this.includeFields = includeFields;
+    this.aliases = allowedAliases;
   }
 
   /**
@@ -145,9 +147,17 @@ public abstract class TypeModel {
 
   /**
    * Returns a list of available fields for select(*)
+   * @return fully-qualified fields
    */
   public final List<String> getFields() {
     return allowedFields;
+  }
+
+  /**
+   * @return field aliases
+   */
+  public final List<String> getAliases() {
+    return aliases;
   }
 
   /**
