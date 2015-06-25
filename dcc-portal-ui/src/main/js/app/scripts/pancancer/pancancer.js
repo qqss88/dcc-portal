@@ -25,6 +25,7 @@
   module.controller('PancancerController', function($scope, Page, PancancerService, ExternalRepoService) {
     Page.stopWork();
     Page.setPage('entity');
+    Page.setTitle('PCAWG');
 
     function refresh() {
       // Get stats
