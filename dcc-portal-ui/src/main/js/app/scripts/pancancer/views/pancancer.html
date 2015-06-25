@@ -2,35 +2,34 @@
     <i class="t_badge t_badge_icon t_badge__search"><i class="icon-chart-bar"></i></i>The Pan-Cancer Analysis of Whole Genome Study
 </h1>
 <section> 
-   <div class="half pull-right" style="margin:1.5rem 2.5rem">
+   <div class="half pull-right" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
+      <span>
+          <strong>Aavailable data as of <a href="/repository/external?filters={{filters}}">{{indexDate | date}}</a></strong>
+      </span> 
 
-            <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
-                <a href="/repository/external?filters={{filters}}">
-                <div> 
-                    <i class="icon-team" style="font-size:1.25rem"></i>
-                    <strong> {{summary.donorCount | number}}</strong> Donors
-                    across
-                    <strong> {{summary.projectCount | number}}</strong> projects
-                    and
-                    <strong> {{summary.primarySiteCount | number}}</strong> primary sites 
-                </div>
-
-                <div class="third">
-                    <i class="icon-file" style="font-size:1.25rem"></i><strong>{{summary.fileCount | number}}</strong> Files
-                </div>
-                <div class="third omega">
-                    <i class="icon-database" style="font-size:1.25rem"></i><strong>{{summary.totalFileSize | bytes}}</strong>
-                </div>
-                </a>
-            </section>
+      <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
+          <div class="third">
+              <i class="icon-team" style="font-size:1.25rem"></i>
+              <strong> {{summary.donorCount | number}}</strong> Donors
+          </div>
+          <div class="third">
+              <i class="icon-file" style="font-size:1.25rem"></i><strong>{{summary.fileCount | number}}</strong> Files
+          </div>
+          <div class="third omega">
+              <i class="icon-database" style="font-size:1.25rem"></i><strong>{{summary.totalFileSize | bytes}}</strong>
+          </div>
+          <div class="wide">
+              Across {{summary.projectCount | number}} projects and {{summary.primarySiteCount | number}} primary sites 
+          </div>
+      </section>
 
       <table class="table table-info">
           <thead>
-              <th>Data type</th>
+              <th>Data Type</th>
               <th># Donors</th>
               <th># Files</th>
               <th>Format</th>
-              <th>File size</th>
+              <th>Size</th>
           </thead>
           <tbody>
               <tr data-ng-repeat="type in pcawgDatatypes">
@@ -50,6 +49,7 @@
       Please see <a href="http://pancancer.info/" target="_blank"><i class="icon-external-link"></i>pancancer.info</a> for more information.
    </div>
 
+   <!-- replace with real text -->
    {{tcgaIpsum}}
 
 </section>

@@ -22,7 +22,7 @@
 
   var module = angular.module('icgc.pancancer.controllers', []);
 
-  module.controller('PancancerController', function($scope, Page, PancancerService) {
+  module.controller('PancancerController', function($scope, Page, PancancerService, ExternalRepoService) {
     Page.stopWork();
     Page.setPage('entity');
 
@@ -35,6 +35,11 @@
       // Get overall summary
       PancancerService.getPancancerSummary().then(function(data) {
         $scope.summary = data;
+      });
+
+      // Get index creation time
+      ExternalRepoService.getMetaData().then(function(data) {
+        $scope.indexDate = data.creation_date || '';
       });
     }
 
