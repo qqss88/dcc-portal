@@ -17,11 +17,9 @@
  */
 package org.dcc.portal.pql.ast.visitor;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static org.dcc.portal.pql.ast.Type.LIMIT;
-import static org.dcc.portal.pql.ast.Type.SORT;
+import static org.dcc.portal.pql.ast.Type.PARSE_ORDER;
 import static org.dcc.portal.pql.util.Converters.stringValue;
 import static org.icgc.dcc.common.core.util.Separators.COMMA;
 
@@ -35,7 +33,6 @@ import lombok.val;
 
 import org.dcc.portal.pql.ast.PqlNode;
 import org.dcc.portal.pql.ast.StatementNode;
-import org.dcc.portal.pql.ast.Type;
 import org.dcc.portal.pql.ast.filter.AndNode;
 import org.dcc.portal.pql.ast.filter.EqNode;
 import org.dcc.portal.pql.ast.filter.EqualityFilterNode;
@@ -58,14 +55,10 @@ import org.dcc.portal.pql.ast.function.SortNode;
 import org.icgc.dcc.common.core.util.Joiners;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Ordering;
 
 public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
   private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
-  private static final Ordering<Type> PARSE_ORDER = buildPqlNodeParseOrder();
 
   @Override
   public String visitStatement(@NonNull StatementNode node, Optional<Void> context) {
@@ -180,25 +173,6 @@ public class CreatePqlStringVisitor extends PqlNodeVisitor<String, Void> {
 
     return toCommaSeparatedString(nodes,
         node -> node.accept(this, Optional.empty()));
-  }
-
-  /*
-   * Warning: The original intent of this method is to re-order the child nodes in a StatementNode so that all other
-   * nodes must appear before 'sort' and 'limit', and 'sort' must appear before 'limit'. However, because
-   * Ordering.explicit() and Enum.values() are used, inadvertently this imposes a strict ordering in how other nodes
-   * appear in a generated PQL string. This behavior must be taken into account when a PQL literal is used for
-   * comparison, for example, when running unit tests and asserting test results.
-   */
-  private static Ordering<Type> buildPqlNodeParseOrder() {
-    val otherNodeTypes = FluentIterable.from(newArrayList(Type.values()))
-        .filter(type -> type != SORT && type != LIMIT)
-        .toList();
-
-    return Ordering.<Type> explicit(ImmutableList.<Type> builder()
-        .addAll(otherNodeTypes)
-        .add(SORT)
-        .add(LIMIT)
-        .build());
   }
 
   @NonNull

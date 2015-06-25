@@ -17,6 +17,9 @@
  */
 package org.dcc.portal.pql.ast;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
+
 public enum Type {
 
   ROOT,
@@ -37,6 +40,32 @@ public enum Type {
   FACETS,
   LIMIT,
   SELECT,
-  SORT
+  SORT;
 
+  /**
+   * This defines the order in which the top-level child nodes of a StatementNode are turned into a PQL string. This
+   * reflects the ordering imposed by PQL syntax. A good example of this enforcement is all other nodes must appear
+   * before 'sort' and 'limit'; another example being that 'sort' must appear before 'limit'. *WARNING* When a new enum
+   * value is added, it should also be added to this list (in the appropriate position that reflects the PQL syntax).
+   */
+  public static final Ordering<Type> PARSE_ORDER = Ordering.<Type> explicit(ImmutableList.of(
+      ROOT,
+      COUNT,
+      SELECT,
+      FACETS,
+      AND,
+      EQ,
+      EXISTS,
+      GE,
+      GT,
+      IN,
+      LE,
+      LT,
+      MISSING,
+      NE,
+      NESTED,
+      NOT,
+      OR,
+      SORT,
+      LIMIT));
 }
