@@ -34,7 +34,10 @@
           </thead>
           <tbody>
               <tr data-ng-repeat="type in pcawgDatatypes">
-                  <td>{{type.name}}</td>
+                  <td>
+                      {{type.name}}
+                      {{type.name === 'DNA-Seq'? '(Whole Genome)' : ''}}
+                  </td>
                   <td class="text-right">{{type.donorCount | number}}</td>
                   <td class="text-right">
                       <a href="/repository/external?filters={{type.filters}}">{{type.fileCount | number}}</a>
