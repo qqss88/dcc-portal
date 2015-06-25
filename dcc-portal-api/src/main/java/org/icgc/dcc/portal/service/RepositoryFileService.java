@@ -23,6 +23,7 @@ import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.L
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.right;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
@@ -62,13 +63,13 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
 import org.icgc.dcc.portal.model.RepositoryFiles;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.RepositoryFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
-import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -95,19 +95,12 @@ import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileService {
 
+  private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
+
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
   private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(Collections.emptyList());
-  private static final Joiner SLASH_JOINER = Joiners.SLASH.skipNulls();
-  private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
-      FieldNames.REPO_TYPE,
-      FieldNames.REPO_ID,
-      FieldNames.DATA_PATH,
-      FieldNames.FILE_NAME,
-      FieldNames.FILE_SIZE,
-      FieldNames.CHECK_SUM
-  };
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("id", "id")
@@ -120,8 +113,6 @@ public class RepositoryFileService {
           .put("tcga_sample_barcode", "TCGASampleBarcode")
           .put("tcga_aliquot_barcode", "TCGAAliquotBarcode")
           .build();
-  private static final String DOWNLOAD_INFO_QUERY_SOURCE_FIELD =
-      FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*";
   private static final String[] TSV_HEADERS = new String[] {
       "url",
       "file_name",
@@ -196,12 +187,11 @@ public class RepositoryFileService {
   @NonNull
   public void generateManifestArchive(OutputStream output, Date timestamp, Query query, List<String> repoList)
       throws JsonProcessingException, IOException {
-    // Runs our elasticsearch query to get matching files
-    val esResponse = repositoryFileRepository.findDownloadInfo(query,
-        DOWNLOAD_INFO_QUERY_FIELDS,
-        FieldNames.REPO_TYPE,
-        DOWNLOAD_INFO_QUERY_SOURCE_FIELD);
-    val hits = newArrayList(esResponse.getHits().hits());
+    val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
+    log.info("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
+
+    val searchResult = repositoryFileRepository.findDownloadInfo(pql);
+    val hits = newArrayList(searchResult.getHits().hits());
     val all = FluentIterable.from(hits)
         .transformAndConcat(hit -> expandByFlatteningRepoServers(hit));
 

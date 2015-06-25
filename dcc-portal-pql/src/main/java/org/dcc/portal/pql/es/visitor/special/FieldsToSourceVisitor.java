@@ -67,7 +67,7 @@ public class FieldsToSourceVisitor extends NodeVisitor<Optional<ExpressionNode>,
     for (int i = node.childrenCount() - 1; i >= 0; i--) {
       val terminalNode = (TerminalNode) node.getChild(i);
       if (includeFields.contains(terminalNode.getValue())) {
-        log.debug("Moving {} to the SourceNode");
+        log.debug("Moving {} to the SourceNode", terminalNode);
         result.addChildren(terminalNode);
         node.removeChild(i);
       }
