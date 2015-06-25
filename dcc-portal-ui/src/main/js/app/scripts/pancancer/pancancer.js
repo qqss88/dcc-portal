@@ -56,7 +56,7 @@
         result += '. ';
       }
       return result;
-    };
+    }
 
     $scope.tcgaIpsum = filler(3);
     $scope.filters = PancancerService.buildRepoFilterStr();
@@ -78,7 +78,7 @@
         file: {
           study: {is: ['PCAWG']}
         }
-      }
+      };
 
       if (angular.isDefined(datatype)) {
         filters.file.dataType = {
