@@ -29,6 +29,7 @@ public class IndexModel {
   private static final ObservationCentricTypeModel OBSERVATION_CENTRIC_TYPE_MODEL = new ObservationCentricTypeModel();
   private static final ProjectTypeModel PROJECT_TYPE_MODEL = new ProjectTypeModel();
   private static final RepositoryFileTypeModel REPO_FILE_TYPE_MODEL = new RepositoryFileTypeModel();
+  private static final GeneSetTypeModel GENE_SET_TYPE_MODEL = new GeneSetTypeModel();
 
   public static TypeModel getTypeModel(Type type) {
     switch (type) {
@@ -44,6 +45,8 @@ public class IndexModel {
       return PROJECT_TYPE_MODEL;
     case REPOSITORY_FILE:
       return REPO_FILE_TYPE_MODEL;
+    case GENE_SET:
+      return GENE_SET_TYPE_MODEL;
     }
 
     throw new IllegalArgumentException(format("Type %s was not found", type.getId()));
@@ -71,6 +74,10 @@ public class IndexModel {
 
   public static TypeModel getRepositoryFileTypeModel() {
     return REPO_FILE_TYPE_MODEL;
+  }
+
+  public static TypeModel getGeneSetTypeModel() {
+    return GENE_SET_TYPE_MODEL;
   }
 
 }

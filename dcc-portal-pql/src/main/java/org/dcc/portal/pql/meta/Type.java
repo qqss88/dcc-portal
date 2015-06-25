@@ -30,7 +30,8 @@ public enum Type {
   MUTATION_CENTRIC("mutation-centric"),
   OBSERVATION_CENTRIC("observation-centric"),
   PROJECT("project"),
-  REPOSITORY_FILE("file");
+  REPOSITORY_FILE("file"),
+  GENE_SET("gene-set");
 
   private final String id;
 
