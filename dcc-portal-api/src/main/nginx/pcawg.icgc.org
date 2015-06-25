@@ -1,0 +1,21 @@
+# Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
+
+# HTTPS
+server {
+  listen                    443 ssl;
+  server_name               pcawg.icgc.org;
+
+  ssl_certificate           /etc/ssl/dcc/icgc.org-wildcard.chained.crt;
+  ssl_certificate_key       /etc/ssl/dcc/icgc.org-wildcard.key;
+  ssl_ciphers               AES:HIGH:!RC4:!aNULL:!MD5;
+  ssl_prefer_server_ciphers on;
+
+  rewrite ^ https://dcc.icgc.org/pcawg permanent;
+}
+
+# HTTP
+server {
+  listen 80;
+  server_name pcawg.icgc.org;
+  rewrite ^ https://$server_name permanent;
+}

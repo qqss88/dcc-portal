@@ -29,11 +29,23 @@
         function normalize() {
           // Normalize results: Sort by id, then sort by terms
           $scope.item.results.forEach(function(subAnalysis) {
-            subAnalysis.data.forEach(function(d) {
-              d.terms = _.sortBy(d.terms, function(term) {
-                return term.term;
+
+            if (subAnalysis.name === 'ageAtDiagnosisGroup') {
+
+              // Age group need to be sorted as numerics
+              subAnalysis.data.forEach(function(d) {
+                d.terms = _.sortBy(d.terms, function(term) {
+                  return +term.term.split('-')[0];
+                });
               });
-            });
+            } else {
+              subAnalysis.data.forEach(function(d) {
+                d.terms = _.sortBy(d.terms, function(term) {
+                  return term.term;
+                });
+              });
+            }
+
             subAnalysis.data = _.sortBy(subAnalysis.data, function(d) {
               return d.id;
             });
@@ -193,7 +205,7 @@
       return {
         uiTable: uiTable,
         uiGraph: {
-          categories: terms.map(function(term) { console.log('term', term); return ValueTranslator.translate(term); }),
+          categories: terms.map(function(term) { return ValueTranslator.translate(term); }),
           series: uiSeries
         }
       };
