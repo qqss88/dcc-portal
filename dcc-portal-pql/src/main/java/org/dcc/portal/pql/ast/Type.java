@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.ast;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
 
 public enum Type {
@@ -48,7 +47,7 @@ public enum Type {
    * before 'sort' and 'limit'; another example being that 'sort' must appear before 'limit'. *WARNING* When a new enum
    * value is added, it should also be added to this list (in the appropriate position that reflects the PQL syntax).
    */
-  public static final Ordering<Type> PARSE_ORDER = Ordering.<Type> explicit(ImmutableList.of(
+  public static final Ordering<Type> PARSE_ORDER = Ordering.<Type> explicit(
       ROOT,
       COUNT,
       SELECT,
@@ -67,5 +66,5 @@ public enum Type {
       NOT,
       OR,
       SORT,
-      LIMIT));
+      LIMIT);
 }
