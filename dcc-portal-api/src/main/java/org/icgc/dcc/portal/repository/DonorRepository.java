@@ -60,8 +60,6 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.ast.builder.PqlBuilders;
-import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -374,22 +372,11 @@ public class DonorRepository implements Repository {
     throw new UnsupportedOperationException("No longer applicable");
   }
 
-  public String select2count(String pqlSelectQuery) {
-    val pqlNode = PqlParser.parse(pqlSelectQuery);
-
-    log.info("Input pql {}", pqlSelectQuery);
-    log.info("PQL Node {}", pqlNode);
-    log.info("PQL Node filters {}", pqlNode.getFilters());
-
-    val root = PqlBuilders.count().build();
-    root.setFilters(pqlNode.getFilters());
-    return root.toString();
-  }
-
   @Override
   public long count(Query query) {
     log.info("Converting {}", query.getFilters());
-    val pql = select2count(converter.convert(query, DONOR_CENTRIC));
+
+    val pql = converter.convertCount(query, DONOR_CENTRIC);
 
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     return request.getRequestBuilder().setSearchType(COUNT).execute().actionGet().getHits().getTotalHits();
@@ -401,7 +388,7 @@ public class DonorRepository implements Repository {
 
     for (val query : queries.values()) {
       log.info("Converting {}", query.getFilters());
-      val pql = select2count(converter.convert(query, DONOR_CENTRIC));
+      val pql = converter.convertCount(query, DONOR_CENTRIC);
       val request = queryEngine.execute(pql, DONOR_CENTRIC);
       search.add(request.getRequestBuilder());
     }
@@ -416,7 +403,7 @@ public class DonorRepository implements Repository {
       val nestedQuery = queries.get(id1);
       for (val id2 : nestedQuery.keySet()) {
         log.info("Nested converting {}", nestedQuery.get(id2));
-        val pql = select2count(converter.convert(nestedQuery.get(id2), DONOR_CENTRIC));
+        val pql = converter.convertCount(nestedQuery.get(id2), DONOR_CENTRIC);
         val request = queryEngine.execute(pql, DONOR_CENTRIC);
         search.add(request.getRequestBuilder());
       }
