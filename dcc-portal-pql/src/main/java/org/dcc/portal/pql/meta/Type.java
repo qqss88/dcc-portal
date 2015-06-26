@@ -25,14 +25,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = PRIVATE)
 public enum Type {
 
-  DONOR_CENTRIC("donor-centric"),
-  GENE_CENTRIC("gene-centric"),
-  MUTATION_CENTRIC("mutation-centric"),
-  OBSERVATION_CENTRIC("observation-centric"),
-  PROJECT("project"),
-  REPOSITORY_FILE("file"),
-  GENE_SET("gene-set");
+  DONOR_CENTRIC("donor-centric", "donor"),
+  GENE_CENTRIC("gene-centric", "gene"),
+  MUTATION_CENTRIC("mutation-centric", "mutation"),
+  OBSERVATION_CENTRIC("observation-centric", "observation"),
+  PROJECT("project", "project"),
+  REPOSITORY_FILE("file", "file"),
+  GENE_SET("gene-set", "gene-set");
 
   private final String id;
+  private final String prefix;
 
 }

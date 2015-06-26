@@ -17,13 +17,14 @@
  */
 package org.dcc.portal.pql.es.visitor.special;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_INDEX;
-import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_PATH;
-import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_INDEX;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_PATH;
+import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.util.Optional;
@@ -34,6 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.utils.Nodes;
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
 import org.junit.Test;
 
@@ -129,11 +132,27 @@ public class EntitySetVisitorTest {
     assertThat(termsNode.getField()).isEqualTo(expectedField);
 
     val lookup = termsNode.getLookup();
-    val typeModel = queryContext.getTypeModel();
+    val typeModel = getTypeModelBySearchField(expectedField);
     assertThat(lookup.getIndex()).isEqualTo(typeModel.getInternalField(LOOKUP_INDEX));
     assertThat(lookup.getType()).isEqualTo(typeModel.getInternalField(LOOKUP_TYPE));
     assertThat(lookup.getPath()).isEqualTo(typeModel.getInternalField(LOOKUP_PATH));
     assertThat(lookup.getId()).isEqualTo("ID1");
+  }
+
+  private static TypeModel getTypeModelBySearchField(String searchField) {
+    if (searchField.contains("_donor_id")) {
+      return IndexModel.getDonorCentricTypeModel();
+    }
+
+    if (searchField.contains("_gene_id")) {
+      return IndexModel.getGeneCentricTypeModel();
+    }
+
+    if (searchField.contains("_mutation_id")) {
+      return IndexModel.getMutationCentricTypeModel();
+    }
+
+    throw new IllegalArgumentException(format("Failed to resolve type model for '%s'", searchField));
   }
 
 }

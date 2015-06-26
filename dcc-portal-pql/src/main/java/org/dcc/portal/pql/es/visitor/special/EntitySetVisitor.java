@@ -18,13 +18,19 @@
 package org.dcc.portal.pql.es.visitor.special;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
+import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_INDEX;
 import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_PATH;
 import static org.dcc.portal.pql.meta.TypeModel.LOOKUP_TYPE;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.NonNull;
@@ -48,8 +54,11 @@ import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.model.LookupInfo;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.visitor.NodeVisitor;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Resolves querying by {@code entitySetId}.<br>
@@ -57,6 +66,8 @@ import org.dcc.portal.pql.query.QueryContext;
  * parameters.
  */
 public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, QueryContext> {
+
+  private static final List<Type> LOOKUP_TYPES = ImmutableList.of(DONOR_CENTRIC, GENE_CENTRIC, MUTATION_CENTRIC);
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, Optional<QueryContext> context) {
@@ -88,7 +99,7 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
     }
 
     val field = resolveField(node, context.get().getTypeModel());
-    val lookupInfo = resolveLookup(getValue(node), context.get().getTypeModel());
+    val lookupInfo = resolveLookup(getValue(node), resolveTypeModelByField(node.getField()));
 
     return Optional.of(new TermsNode(field, lookupInfo, node.getChildrenArray()));
   }
@@ -159,6 +170,16 @@ public class EntitySetVisitor extends NodeVisitor<Optional<ExpressionNode>, Quer
 
   private static boolean isProcess(String field) {
     return field.endsWith(ENTITY_SET_ID);
+  }
+
+  private static TypeModel resolveTypeModelByField(String field) {
+    for (val type : LOOKUP_TYPES) {
+      if (field.startsWith(type.getPrefix())) {
+        return getTypeModel(type);
+      }
+    }
+
+    throw new IllegalArgumentException(format("Failed to resolve TypeModel by field '%s'", field));
   }
 
 }
