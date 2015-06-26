@@ -27,7 +27,9 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.ast.builder.PqlBuilders;
 import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.query.PqlParser;
 import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -103,6 +105,25 @@ public class Jql2PqlConverter {
     checkState(query.getScore() == null && query.getQuery() == null, "Not implemented");
 
     return result.toString();
+  }
+
+  public String convertCount(@NonNull Query query, @NonNull Type type) {
+    val pql = this.convert(query, type);
+    val pqlNode = PqlParser.parse(pql);
+
+    log.info("Input pql {}", pql);
+    log.info("PQL Node {}", pqlNode);
+    log.info("PQL Node filters {}", pqlNode.getFilters());
+
+    val root = PqlBuilders.count().build();
+    if (query.getFilters().elements().hasNext()) {
+      log.info(" +++ {}", query.getFilters());
+      root.setFilters(pqlNode.getFilters());
+    }
+
+    log.info("Converted count PQL query: {}", root.toString());
+
+    return root.toString();
   }
 
   private static ObjectNode remapFilters(ObjectNode filters, Type type) {

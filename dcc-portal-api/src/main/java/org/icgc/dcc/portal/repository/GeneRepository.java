@@ -17,6 +17,7 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
@@ -26,7 +27,6 @@ import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
-import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
@@ -48,8 +48,6 @@ import static org.icgc.dcc.portal.service.QueryService.hasObservation;
 import static org.icgc.dcc.portal.service.QueryService.remapG2P;
 import static org.icgc.dcc.portal.service.QueryService.remapM2C;
 import static org.icgc.dcc.portal.service.QueryService.remapM2O;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
@@ -64,6 +62,7 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -77,12 +76,12 @@ import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
-import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Universe;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -118,10 +117,14 @@ public class GeneRepository implements Repository {
   private final Client client;
   private final String index;
 
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
+
   @Autowired
-  GeneRepository(Client client, IndexModel indexModel) {
+  GeneRepository(Client client, IndexModel indexModel, QueryEngine queryEngine) {
     this.index = indexModel.getIndex();
     this.client = client;
+    this.queryEngine = queryEngine;
   }
 
   private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
@@ -187,30 +190,33 @@ public class GeneRepository implements Repository {
 
   @Override
   public SearchResponse findAllCentric(Query query) {
-    val search = buildFindAllRequest(query, CENTRIC_TYPE);
 
-    search.setQuery(buildQuery(query));
+    val pql = converter.convert(query, GENE_CENTRIC);
+    log.info(" find all centric {}", pql);
+    val search = queryEngine.execute(pql, GENE_CENTRIC);
+    log.info(" find all centric {}", search);
 
-    log.debug("{}", search);
-    val response = search.execute().actionGet();
-    log.debug("{}", response);
-
-    return response;
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   private Map<String, String> findGeneSymbolsByFilters(@NonNull ObjectNode filters) {
     val maxGenes = 70000;
     val symbolFieldName = "symbol";
 
-    val search = client.prepareSearch(index)
-        .setTypes(CENTRIC_TYPE.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(0)
-        .setSize(maxGenes)
-        .setPostFilter(getFilters(filters))
-        .addField(symbolFieldName);
+    // val search = client.prepareSearch(index)
+    // .setTypes(CENTRIC_TYPE.getId())
+    // .setSearchType(QUERY_THEN_FETCH)
+    // .setFrom(0)
+    // .setSize(maxGenes)
+    // .setPostFilter(getFilters(filters))
+    // .addField(symbolFieldName);
+    // val response = search.execute().actionGet();
 
-    val response = search.execute().actionGet();
+    val query = Query.builder().filters(filters).build();
+    val pql = converter.convert(query, GENE_CENTRIC);
+    val response =
+        queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder().setSize(maxGenes).addField(symbolFieldName)
+            .execute().actionGet();
 
     val map = Maps.<String, String> newLinkedHashMap();
     for (val hit : response.getHits()) {
@@ -266,44 +272,11 @@ public class GeneRepository implements Repository {
   @Override
   public SearchResponse findAll(Query query) {
     throw new UnsupportedOperationException("Not applicable");
-    // val search = buildFindAllRequest(query, TYPE);
-
-    // log.debug("{}", search);
-    // SearchResponse response = search.execute().actionGet();
-    // log.debug("{}", response);
-
-    // return response;
   }
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search = client
-        .prepareSearch(index)
-        .setTypes(type.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize());
-
-    val filters = remapFilters(query.getFilters());
-    search.setPostFilter(getFilters(filters));
-    search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
-
-    val facets = getFacets(query, filters);
-    for (val facet : facets) {
-      search.addFacet(facet);
-    }
-
-    if (query.getSort() != null) {
-      String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
-      search.addSort(fieldSort(sort).order(query.getOrder()));
-      if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
-    }
-
-    return search;
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   public FilterBuilder buildScoreFilters(ObjectNode filters) {
@@ -348,10 +321,10 @@ public class GeneRepository implements Repository {
 
   @Override
   public long count(Query query) {
-    val search = buildCountRequest(query, CENTRIC_TYPE);
+    val pql = converter.convertCount(query, GENE_CENTRIC);
+    val search = queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder();
 
     log.debug("{}", search);
-
     return search.execute().actionGet().getHits().getTotalHits();
   }
 
@@ -360,7 +333,8 @@ public class GeneRepository implements Repository {
     MultiSearchRequestBuilder search = client.prepareMultiSearch();
 
     for (val id : queries.keySet()) {
-      search.add(buildCountRequest(queries.get(id), CENTRIC_TYPE));
+      val pql = converter.convertCount(queries.get(id), GENE_CENTRIC);
+      search.add(queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder());
     }
 
     log.debug("{}", search);
@@ -375,7 +349,8 @@ public class GeneRepository implements Repository {
     for (val id1 : queries.keySet()) {
       val nestedQuery = queries.get(id1);
       for (val id2 : nestedQuery.keySet()) {
-        search.add(buildCountRequest(nestedQuery.get(id2), CENTRIC_TYPE));
+        val pql = converter.convertCount(nestedQuery.get(id2), GENE_CENTRIC);
+        search.add(queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder());
       }
     }
 
@@ -384,23 +359,23 @@ public class GeneRepository implements Repository {
     return search.execute().actionGet();
   }
 
-  public SearchRequestBuilder buildCountRequest(Query query, Type type) {
-    val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      val filters = remapFilters(query.getFilters());
-      search.setPostFilter(getFilters(filters));
-
-      // Remove score from below to significantly speed up results
-      val countQuery = nestedQuery(
-          "donor",
-          filteredQuery(matchAllQuery(), buildScoreFilters(query.getFilters())));
-
-      search.setQuery(countQuery);
-    }
-
-    return search;
-  }
+  // public SearchRequestBuilder buildCountRequest(Query query, Type type) {
+  // val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
+  //
+  // if (query.hasFilters()) {
+  // val filters = remapFilters(query.getFilters());
+  // search.setPostFilter(getFilters(filters));
+  //
+  // // Remove score from below to significantly speed up results
+  // val countQuery = nestedQuery(
+  // "donor",
+  // filteredQuery(matchAllQuery(), buildScoreFilters(query.getFilters())));
+  //
+  // search.setQuery(countQuery);
+  // }
+  //
+  // return search;
+  // }
 
   @Override
   public NestedQueryBuilder buildQuery(Query query) {

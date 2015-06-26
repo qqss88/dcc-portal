@@ -15,8 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
 import org.icgc.dcc.portal.model.Genes;
@@ -24,7 +22,6 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
-import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,8 +40,6 @@ import com.google.common.collect.Multimap;
 public class GeneService {
 
   private final GeneRepository geneRepository;
-  private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
   private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
@@ -102,14 +97,7 @@ public class GeneService {
       projectIds.add(String.valueOf(path.get("is")).replaceAll("\"", ""));
     }
 
-    val pql = converter.convert(query, Type.GENE_CENTRIC);
-    log.debug("Query: {}. PQL: {}", query, pql);
-
-    val request = queryEngine.execute(pql, Type.GENE_CENTRIC);
-    log.debug("Request: {}", request);
-
-    // val response = geneRepository.findAllCentric(query);
-    val response = request.getRequestBuilder().execute().actionGet();
+    val response = geneRepository.findAllCentric(query);
     log.debug("Response: {}", response);
     val hits = response.getHits();
 

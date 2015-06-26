@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.analysis;
 
 import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
-import static org.icgc.dcc.portal.model.Query.NO_FIELDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
@@ -68,6 +67,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Provides various set operations.
@@ -313,19 +314,20 @@ public class UnionAnalyzer {
     log.debug("List def is: " + definition);
 
     val query = Query.builder()
-        .fields(NO_FIELDS)
+        .fields(ImmutableList.of("id"))
         .filters(definition.getFilters())
         .sort(definition.getSortBy())
         .order(definition.getSortOrder().getName())
-        .size(max)
-        .limit(max)
+        // .size(max)
+        // .limit(max)
         .build();
 
     val type = getRepositoryByEntityType(definition.getType());
     val pql = converter.convert(query, type);
     val request = queryEngine.execute(pql, type);
-    return request.getRequestBuilder().execute().actionGet();
-
+    return request.getRequestBuilder()
+        .setSize(max)
+        .execute().actionGet();
   }
 
   @Async
