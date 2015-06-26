@@ -70,6 +70,7 @@ public class ProjectTypeModel extends TypeModel {
       "affectedDonorCount",
       "experimentalAnalysisPerformedDonorCounts",
       "experimentalAnalysisPerformedSampleCounts",
+      "pubmedIds",
       "repository");
 
   public ProjectTypeModel() {
@@ -101,6 +102,7 @@ public class ProjectTypeModel extends TypeModel {
     fields.add(string("tumour_subtype", "tumourSubtype"));
     fields.add(arrayOfStrings("primary_countries", "primaryCountries"));
     fields.add(arrayOfStrings("partner_countries", "partnerCountries"));
+    fields.add(arrayOfStrings("pubmed_ids", "pubmedIds"));
     fields.add(defineSummary());
 
     return fields.build();
