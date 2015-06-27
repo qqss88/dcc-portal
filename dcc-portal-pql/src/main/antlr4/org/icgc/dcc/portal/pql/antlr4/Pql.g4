@@ -8,7 +8,6 @@ grammar Pql;
 statement
   : (filter | function) (COMMA (filter | function))*
   | count (COMMA filter)*
-  | filter (COMMA filter)* COMMA count
   | (filter | function) (COMMA (filter | function))* COMMA order
   | (filter | function) (COMMA (filter | function))* COMMA range
   | (filter | function) (COMMA (filter | function))* COMMA order COMMA range

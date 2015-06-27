@@ -79,10 +79,9 @@ public class FiltersConverter {
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",
       "gene.hasPathway",
+      "entitySetId",
       "mutation.location",
       "gene.location");
-
-  private static final List<String> NON_NESTED_FIELDS = ImmutableList.of("entitySetId");
 
   public String convertFilters(@NonNull JqlFilters filters, @NonNull Type indexType) {
     if (indexType == Type.PROJECT) {
@@ -326,22 +325,18 @@ public class FiltersConverter {
           .collect(Collectors.toList());
     }
 
-    val indexModel = IndexModel.getTypeModel(indexType);
+    val typeModel = IndexModel.getTypeModel(indexType);
     for (val field : fields) {
-      val fieldName = parseFieldName(field);
-      result.put(resolveNestedPath(fieldName, indexModel), field);
+      result.put(resolveNestedPath(field, typeModel), field);
     }
 
     return result;
   }
 
-  private static String resolveNestedPath(String fieldName, TypeModel indexModel) {
-    if (SPECIAL_FIELDS_NESTING.contains(fieldName)) {
+  private static String resolveNestedPath(JqlField field, TypeModel indexModel) {
+    val fieldName = parseFieldName(field);
+    if (SPECIAL_FIELDS_NESTING.contains(fieldName) || SPECIAL_FIELDS_NESTING.contains(field.getName())) {
       return resolveSpecialCasesNestedPath(fieldName, indexModel.getType());
-    }
-
-    if (isNonNestedField(fieldName)) {
-      return EMPTY_NESTED_PATH;
     }
 
     if (indexModel.isNested(fieldName)) {
@@ -351,17 +346,15 @@ public class FiltersConverter {
     return EMPTY_NESTED_PATH;
   }
 
-  private static boolean isNonNestedField(String fieldName) {
-    val noPrefixField = fieldName.substring(fieldName.indexOf(".") + 1);
-
-    return NON_NESTED_FIELDS.contains(noPrefixField) || NON_NESTED_FIELDS.contains(fieldName);
-  }
-
   private static String resolveSpecialCasesNestedPath(String fieldName, Type type) {
     switch (type) {
     case DONOR_CENTRIC:
       if (fieldName.startsWith("gene")) {
         return "gene";
+      }
+
+      if (fieldName.equals("donor.entitySetId")) {
+        return EMPTY_NESTED_PATH;
       }
 
       return "gene.ssm";
@@ -371,11 +364,19 @@ public class FiltersConverter {
         return EMPTY_NESTED_PATH;
       }
 
+      if (fieldName.equals("donor.entitySetId")) {
+        return "donor";
+      }
+
       return "donor.ssm";
 
     case MUTATION_CENTRIC:
       if (fieldName.startsWith("gene")) {
         return "transcript";
+      }
+
+      if (fieldName.equals("donor.entitySetId")) {
+        return "ssm_occurrence";
       }
 
       return EMPTY_NESTED_PATH;
