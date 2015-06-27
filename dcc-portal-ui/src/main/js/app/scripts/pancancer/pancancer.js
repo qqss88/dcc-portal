@@ -22,7 +22,9 @@
 
   var module = angular.module('icgc.pancancer.controllers', []);
 
-  module.controller('PancancerController', function($scope, Page, PancancerService, ExternalRepoService) {
+  module.controller('PancancerController',
+    function($scope, Page, PancancerService, ExternalRepoService, HighchartsService) {
+
     Page.stopWork();
     Page.setPage('entity');
     Page.setTitle('PCAWG');
@@ -42,6 +44,45 @@
       ExternalRepoService.getMetaData().then(function(data) {
         $scope.indexDate = data.creation_date || '';
       });
+
+      // Get the primary site distribution
+      ExternalRepoService.getList({filters: $scope.filters}).then(function(data) {
+        var facets = data.termFacets;
+
+        if (facets.primarySite) {
+          var sites = facets.primarySite;
+          _.remove(sites.terms, function(d) { return d.term === '_missing'; });
+
+          $scope.primarySites = HighchartsService.bar({
+            hits: sites.terms,
+            xAxis: 'term',
+            yValue: 'count'
+          });
+        }
+      });
+
+
+
+      // Test
+      var test = [
+        { id: 'a', val: 100},
+        { id: 'b', val: 200},
+        { id: 'c', val: 150},
+        { id: 'd', val: 200},
+        { id: 'e', val: 100},
+        { id: 'f', val: 10},
+        { id: 'g', val: 120}
+      ];
+
+      /*
+      $scope.primarySites = HighchartsService.bar({
+        hits: test,
+        xAxis: 'id',
+        yValue: 'val'
+      });
+      */
+
+
     }
 
 
