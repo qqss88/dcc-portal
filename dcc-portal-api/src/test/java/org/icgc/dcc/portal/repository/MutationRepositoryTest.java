@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
@@ -62,7 +63,7 @@ public class MutationRepositoryTest extends BaseElasticSearchTest {
     es.execute(
         createIndexMappings(Type.MUTATION_CENTRIC)
             .withData(bulkFile(getClass())));
-    mutationRepository = new MutationRepository(es.client(), INDEX);
+    mutationRepository = new MutationRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
   }
 
   @Test

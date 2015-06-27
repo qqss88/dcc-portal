@@ -44,6 +44,8 @@ public class Query {
    */
   public static final List<String> NO_FIELDS = ImmutableList.of("_id");
 
+  public static final List<String> ID_FIELD = ImmutableList.of("id");
+
   private static final List<String> INCLUDE_FACETS = ImmutableList.of("facets");
 
   private Integer defaultLimit;
@@ -105,7 +107,7 @@ public class Query {
   }
 
   public static List<String> idField() {
-    return NO_FIELDS;
+    return ID_FIELD;
   }
 
   public static List<String> includeFacets() {

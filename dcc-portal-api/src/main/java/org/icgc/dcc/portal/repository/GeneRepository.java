@@ -31,7 +31,6 @@ import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
 import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
@@ -68,13 +67,13 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 import org.elasticsearch.search.facet.terms.strings.InternalStringTermsFacet;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -127,29 +126,6 @@ public class GeneRepository implements Repository {
     this.queryEngine = queryEngine;
   }
 
-  private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
-    val fs = Lists.<TermsFacetBuilder> newArrayList();
-
-    if (query.hasInclude("facets")) {
-      for (String facet : FACETS) {
-        val tf =
-            FacetBuilders.termsFacet(facet).field(FIELDS_MAPPING.get(KIND).get(facet))
-                .size(MAX_FACET_TERM_COUNT);
-
-        if (filters.fieldNames().hasNext()) {
-          val facetFilters = filters.deepCopy();
-          if (facetFilters.has(KIND.getId())) {
-            facetFilters.with(KIND.getId()).remove(facet);
-          }
-
-          tf.facetFilter(getFilters(facetFilters));
-        }
-        fs.add(tf);
-      }
-    }
-    return fs;
-  }
-
   private FilterBuilder getFilters(ObjectNode filters) {
     if (filters.fieldNames().hasNext()) return buildFilters(filters);
     return matchAllFilter();
@@ -191,9 +167,17 @@ public class GeneRepository implements Repository {
   @Override
   public SearchResponse findAllCentric(Query query) {
 
+    // Converter does not handle limits
+    Integer limit = query.getLimit();
+    query.setLimit(null);
+
     val pql = converter.convert(query, GENE_CENTRIC);
     log.info(" find all centric {}", pql);
     val search = queryEngine.execute(pql, GENE_CENTRIC);
+    if (limit != null) {
+      search.getRequestBuilder().setSize(limit.intValue());
+    }
+
     log.info(" find all centric {}", search);
 
     return search.getRequestBuilder().execute().actionGet();
@@ -214,9 +198,10 @@ public class GeneRepository implements Repository {
 
     val query = Query.builder().filters(filters).build();
     val pql = converter.convert(query, GENE_CENTRIC);
-    val response =
-        queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder().setSize(maxGenes).addField(symbolFieldName)
-            .execute().actionGet();
+    val response = queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder()
+        .setSize(maxGenes)
+        .addField(symbolFieldName)
+        .execute().actionGet();
 
     val map = Maps.<String, String> newLinkedHashMap();
     for (val hit : response.getHits()) {
@@ -245,6 +230,13 @@ public class GeneRepository implements Repository {
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(COUNT);
 
+    log.info("Find gene set count filters {}", query.getFilters());
+
+    val boolFilter = new BoolFilterBuilder();
+    val remappedFilters = remapFilters(query.getFilters());
+    log.info("Find gene set count filters {}", remappedFilters);
+    boolFilter.must(getFilters(remappedFilters));
+
     // val boolFilter = new BoolFilterBuilder();
     // for (val filters : query.getAndFilters()) {
     // val remappedFilters = remapFilters(filters);
@@ -259,10 +251,10 @@ public class GeneRepository implements Repository {
           termsFacet(universeFacetName)
               .field(universeFacetName)
               .size(50000) // This has to be as big as the largest universe
-              .facetFilter(getFilters(query.getFilters())));
+              .facetFilter(boolFilter));
     }
 
-    log.debug("{}", search);
+    log.info("Find gene set count {}", search);
     SearchResponse response = search.execute().actionGet();
     log.debug("{}", response);
 
