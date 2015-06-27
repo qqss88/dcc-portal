@@ -17,15 +17,11 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
-import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
-import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
@@ -61,6 +57,7 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -72,11 +69,11 @@ import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -95,6 +92,9 @@ public class MutationRepository implements Repository {
   private static final Type CENTRIC_TYPE = Type.MUTATION_CENTRIC;
   private static final Type TYPE = Type.MUTATION;
   private static final Kind KIND = Kind.MUTATION;
+
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap
       .<Kind, String> builder()
@@ -126,9 +126,10 @@ public class MutationRepository implements Repository {
   private final String index;
 
   @Autowired
-  MutationRepository(Client client, IndexModel indexModel) {
+  MutationRepository(Client client, IndexModel indexModel, QueryEngine queryEngine) {
     this.index = indexModel.getIndex();
     this.client = client;
+    this.queryEngine = queryEngine;
   }
 
   private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
@@ -269,57 +270,23 @@ public class MutationRepository implements Repository {
 
   @Override
   public SearchResponse findAllCentric(Query query) {
-    val search = buildFindAllRequest(query, CENTRIC_TYPE);
+    val pql = converter.convert(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
 
-    search.setQuery(buildQuery(query));
+    log.info("Mutation : {}", search.getRequestBuilder());
 
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
+    SearchResponse response = search.getRequestBuilder().execute().actionGet();
     return response;
   }
 
   @Override
   public SearchResponse findAll(Query query) {
     throw new UnsupportedOperationException("Not applicable");
-
-    // val search = buildFindAllRequest(query, TYPE);
-
-    // log.debug("{}", search);
-    // SearchResponse response = search.execute().actionGet();
-    // log.debug("{}", response);
-
-    // return response;
   }
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search = client
-        .prepareSearch(index)
-        .setTypes(type.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize());
-
-    val filters = remapFilters(query.getFilters());
-    search.setPostFilter(getFilters(filters, ""));
-    search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
-
-    val facets = getFacets(query, filters);
-    for (val facet : facets) {
-      search.addFacet(facet);
-    }
-
-    String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
-    search.addSort(fieldSort(sort).order(query.getOrder()));
-    if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
-
-    return search;
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   public ObjectNode remapFilters(ObjectNode filters) {
@@ -361,17 +328,17 @@ public class MutationRepository implements Repository {
 
   @Override
   public long count(Query query) {
-    val search = buildCountRequest(query, CENTRIC_TYPE);
-
-    log.debug("{}", search);
-    return search.execute().actionGet().getHits().getTotalHits();
+    val pql = converter.convertCount(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
+    return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
   @Override
   public MultiSearchResponse counts(@NonNull LinkedHashMap<String, Query> queries) {
     MultiSearchRequestBuilder search = client.prepareMultiSearch();
     for (val id : queries.keySet()) {
-      search.add(buildCountRequest(queries.get(id), CENTRIC_TYPE));
+      val pql = converter.convertCount(queries.get(id), MUTATION_CENTRIC);
+      search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
     }
 
     log.debug("{}", search);
@@ -401,7 +368,8 @@ public class MutationRepository implements Repository {
     for (val id1 : queries.keySet()) {
       val nestedQuery = queries.get(id1);
       for (val id2 : nestedQuery.keySet()) {
-        search.add(buildCountRequest(nestedQuery.get(id2), CENTRIC_TYPE));
+        val pql = converter.convertCount(nestedQuery.get(id2), MUTATION_CENTRIC);
+        search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
       }
     }
 
@@ -409,24 +377,9 @@ public class MutationRepository implements Repository {
     return search.execute().actionGet();
   }
 
-  public SearchRequestBuilder buildCountRequest(Query query, Type type) {
-    val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      ObjectNode filters = query.hasScoreFilters() ? query.getScoreFilters() : query.getFilters();
-      filters = remapFilters(filters);
-      search.setPostFilter(buildFilters(filters, ""));
-
-      search.setQuery(buildQuery(query));
-    }
-    return search;
-  }
-
   @Override
   public NestedQueryBuilder buildQuery(Query query) {
-    return nestedQuery("ssm_occurrence",
-        constantScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query))).boost(1.0f))
-        .scoreMode("total");
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   public Map<String, Object> findOne(String id, Query query) {
