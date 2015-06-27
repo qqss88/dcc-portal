@@ -33,6 +33,22 @@
       // Get stats
       PancancerService.getPancancerStats().then(function(data) {
         $scope.pcawgDatatypes = PancancerService.orderPancancerDatatypes(data);
+
+        var list = [];
+        Object.keys(data.donorPrimarySite).forEach(function(d) {
+          list.push({
+            id: d,
+            count: data.donorPrimarySite[d]
+          });
+        });
+
+        list = _.sortBy(list, function(d) { return -d.count });
+
+        $scope.primarySites = HighchartsService.bar({
+          hits: list,
+          xAxis: 'id',
+          yValue: 'count'
+        });
       });
 
       // Get overall summary
@@ -46,6 +62,7 @@
       });
 
       // Get the primary site distribution
+      /*
       ExternalRepoService.getList({filters: $scope.filters}).then(function(data) {
         var facets = data.termFacets;
 
@@ -59,26 +76,6 @@
             yValue: 'count'
           });
         }
-      });
-
-
-
-      // Test
-      var test = [
-        { id: 'a', val: 100},
-        { id: 'b', val: 200},
-        { id: 'c', val: 150},
-        { id: 'd', val: 200},
-        { id: 'e', val: 100},
-        { id: 'f', val: 10},
-        { id: 'g', val: 120}
-      ];
-
-      /*
-      $scope.primarySites = HighchartsService.bar({
-        hits: test,
-        xAxis: 'id',
-        yValue: 'val'
       });
       */
 
@@ -113,7 +110,7 @@
 
   var module = angular.module('icgc.pancancer.services', []);
 
-  module.service('PancancerService', function(Restangular) {
+  module.service('PancancerService', function(Restangular, PCAWG) {
 
     function buildRepoFilterStr(datatype) {
       var filters = {
@@ -138,8 +135,10 @@
      * on a first-come-first-serve basis.
      */
     this.orderPancancerDatatypes = function(data) {
-      var precedence = ['DNA-Seq', 'RNA-Seq', 'SSM', 'CNSM', 'STSM'];
+      var precedence = PCAWG.precedence();
       var list = [];
+
+      console.log('pre', precedence);
 
       // Scrub
       data = Restangular.stripRestangular(data);
@@ -148,6 +147,7 @@
       Object.keys(data).forEach(function(key) {
         list.push({
           name: key,
+          uiName: PCAWG.translate(key),
           donorCount: +data[key].donorCount,
           fileCount: +data[key].fileCount,
           fileSize: +data[key].fileSize,
@@ -158,8 +158,8 @@
 
       // Sort
       return _.sortBy(list, function(d) {
-        return precedence.indexOf(d.name) || 999;
-      }).reverse();
+        return precedence.indexOf(d.name);
+      });
 
     };
 

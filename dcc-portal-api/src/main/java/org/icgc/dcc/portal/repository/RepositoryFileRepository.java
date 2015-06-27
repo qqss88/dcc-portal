@@ -610,8 +610,13 @@ public class RepositoryFileRepository {
     val fileSizeAgg = AggregationBuilders.sum("size").field("repository.file_size");
     val dataFormatAgg = AggregationBuilders.terms("format").field("data_type.data_format");
 
-    stats.subAggregation(datatypeAgg.subAggregation(donorCountAgg).subAggregation(fileSizeAgg)
-        .subAggregation(dataFormatAgg));
+    stats.subAggregation(datatypeAgg
+        .subAggregation(donorCountAgg)
+        .subAggregation(fileSizeAgg)
+        .subAggregation(dataFormatAgg))
+        .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.primary_site").size(100)
+            .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.donor_id").size(30000)));
+
     search.addAggregation(stats);
 
     log.info("PCAWG {}", search);
@@ -622,8 +627,17 @@ public class RepositoryFileRepository {
   private Map<String, Map<String, Object>> extractPancancerStats(Aggregations aggs) {
     val stats = (Filter) aggs.get(PCAWG);
     val datatypes = (Terms) stats.getAggregations().get(PCAWG);
-    val result = Maps.<String, Map<String, Object>> newHashMap();
+    val donorFacets = (Terms) stats.getAggregations().get("donorPrimarySite");
 
+    Map<String, Object> donorPrimarySite = Maps.<String, Object> newHashMap();
+    for (val bucket : donorFacets.getBuckets()) {
+      val name = bucket.getKey();
+      val donorCount = ((Terms) bucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
+      donorPrimarySite.put(name, (long) donorCount);
+    }
+    log.info("donorPrimarySite {}", donorPrimarySite);
+
+    val result = Maps.<String, Map<String, Object>> newHashMap();
     for (val bucket : datatypes.getBuckets()) {
       val name = bucket.getKey();
       val donorCount = ((Terms) bucket.getAggregations().get("donor")).getBuckets().size();
@@ -635,17 +649,16 @@ public class RepositoryFileRepository {
       for (val f : dataFormat.getBuckets()) {
         formats.add(f.getKey());
       }
-
       val map = ImmutableMap.<String, Object> of(
           "fileCount", fileCount,
           "donorCount", (long) donorCount,
           "fileSize", (long) fileSize,
           "dataFormat", formats);
-      log.info("finished {} -> {}", name, map);
       result.put(name, map);
     }
-
+    result.put("donorPrimarySite", donorPrimarySite);
     log.info("Result {}", result);
+
     return result;
   }
 }

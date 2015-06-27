@@ -8,7 +8,7 @@
       </span> 
 
 
-      <bar data-items="primarySites" ylabel="Donors" height="180"></bar>
+      <bar data-items="primarySites" ylabel="# Donors" height="200"></bar>
 
       <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
           <div class="third">
@@ -36,10 +36,7 @@
           </thead>
           <tbody>
               <tr data-ng-repeat="type in pcawgDatatypes">
-                  <td>
-                      {{type.name}}
-                      {{type.name === 'DNA-Seq'? '(Whole Genome)' : ''}}
-                  </td>
+                  <td> {{type.uiName}}</td>
                   <td class="text-right">{{type.donorCount | number}}</td>
                   <td class="text-right">
                       <a href="/repository/external?filters={{type.filters}}">{{type.fileCount | number}}</a>
