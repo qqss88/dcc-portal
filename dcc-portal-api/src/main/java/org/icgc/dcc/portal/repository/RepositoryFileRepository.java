@@ -628,6 +628,7 @@ public class RepositoryFileRepository {
     val stats = (Filter) aggs.get(PCAWG);
     val datatypes = (Terms) stats.getAggregations().get(PCAWG);
     val donorFacets = (Terms) stats.getAggregations().get("donorPrimarySite");
+    val result = Maps.<String, Map<String, Object>> newHashMap();
 
     Map<String, Object> donorPrimarySite = Maps.<String, Object> newHashMap();
     for (val bucket : donorFacets.getBuckets()) {
@@ -635,9 +636,8 @@ public class RepositoryFileRepository {
       val donorCount = ((Terms) bucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
       donorPrimarySite.put(name, (long) donorCount);
     }
-    log.info("donorPrimarySite {}", donorPrimarySite);
 
-    val result = Maps.<String, Map<String, Object>> newHashMap();
+    Map<String, Object> statistics = Maps.<String, Object> newHashMap();
     for (val bucket : datatypes.getBuckets()) {
       val name = bucket.getKey();
       val donorCount = ((Terms) bucket.getAggregations().get("donor")).getBuckets().size();
@@ -654,10 +654,11 @@ public class RepositoryFileRepository {
           "donorCount", (long) donorCount,
           "fileSize", (long) fileSize,
           "dataFormat", formats);
-      result.put(name, map);
+      statistics.put(name, map);
     }
     result.put("donorPrimarySite", donorPrimarySite);
-    log.info("Result {}", result);
+    result.put("stats", statistics);
+    log.debug("Result {}", result);
 
     return result;
   }

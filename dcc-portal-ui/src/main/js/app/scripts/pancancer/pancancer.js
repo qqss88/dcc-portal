@@ -32,7 +32,7 @@
     function refresh() {
       // Get stats
       PancancerService.getPancancerStats().then(function(data) {
-        $scope.pcawgDatatypes = PancancerService.orderPancancerDatatypes(data);
+        $scope.pcawgDatatypes = PancancerService.orderPancancerDatatypes(data.stats);
 
         var list = [];
         Object.keys(data.donorPrimarySite).forEach(function(d) {
