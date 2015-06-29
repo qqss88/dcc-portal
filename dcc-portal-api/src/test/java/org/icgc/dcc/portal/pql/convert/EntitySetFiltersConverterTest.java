@@ -25,7 +25,7 @@ import lombok.val;
 
 import org.junit.Test;
 
-public class EntitySetFiltersConverter {
+public class EntitySetFiltersConverterTest {
 
   FiltersConverter converter = new FiltersConverter();
 
