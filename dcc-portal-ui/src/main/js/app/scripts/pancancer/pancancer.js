@@ -23,7 +23,7 @@
   var module = angular.module('icgc.pancancer.controllers', []);
 
   module.controller('PancancerController',
-    function($scope, Page, PancancerService, ExternalRepoService, HighchartsService) {
+    function($scope, Page, PancancerService, ExternalRepoService) {
 
     Page.stopWork();
     Page.setPage('entity');
