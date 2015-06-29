@@ -32,23 +32,8 @@
     function refresh() {
       // Get stats
       PancancerService.getPancancerStats().then(function(data) {
-        $scope.pcawgDatatypes = PancancerService.orderPancancerDatatypes(data.stats);
-
-        var list = [];
-        Object.keys(data.donorPrimarySite).forEach(function(d) {
-          list.push({
-            id: d,
-            count: data.donorPrimarySite[d]
-          });
-        });
-
-        list = _.sortBy(list, function(d) { return -d.count; });
-
-        $scope.primarySites = HighchartsService.bar({
-          hits: list,
-          xAxis: 'id',
-          yValue: 'count'
-        });
+        $scope.pcawgDatatypes = PancancerService.orderDatatypes(data.stats);
+        $scope.primarySites = PancancerService.getPrimarySiteDonorChart(data.donorPrimarySite);
       });
 
       // Get overall summary
@@ -60,26 +45,6 @@
       ExternalRepoService.getMetaData().then(function(data) {
         $scope.indexDate = data.creation_date || '';
       });
-
-      // Get the primary site distribution
-      /*
-      ExternalRepoService.getList({filters: $scope.filters}).then(function(data) {
-        var facets = data.termFacets;
-
-        if (facets.primarySite) {
-          var sites = facets.primarySite;
-          _.remove(sites.terms, function(d) { return d.term === '_missing'; });
-
-          $scope.primarySites = HighchartsService.bar({
-            hits: sites.terms,
-            xAxis: 'term',
-            yValue: 'count'
-          });
-        }
-      });
-      */
-
-
     }
 
 
@@ -110,7 +75,7 @@
 
   var module = angular.module('icgc.pancancer.services', []);
 
-  module.service('PancancerService', function(Restangular, PCAWG) {
+  module.service('PancancerService', function(Restangular, PCAWG, HighchartsService) {
 
     function buildRepoFilterStr(datatype) {
       var filters = {
@@ -130,15 +95,35 @@
 
     this.buildRepoFilterStr = buildRepoFilterStr;
 
+
+    this.getPrimarySiteDonorChart = function(data) {
+      var list = [];
+
+      Object.keys(data).forEach(function(d) {
+        list.push({
+          id: d,
+          count: data[d],
+          colour: HighchartsService.primarySiteColours[d]
+        });
+      });
+      list = _.sortBy(list, function(d) { return -d.count; });
+
+      return HighchartsService.bar({
+        hits: list,
+        xAxis: 'id',
+        yValue: 'count'
+      });
+    };
+
+
     /**
      * Reorder for UI, the top 5 items are fixed, the remining are appended to the end
      * on a first-come-first-serve basis.
      */
-    this.orderPancancerDatatypes = function(data) {
+    this.orderDatatypes = function(data) {
       var precedence = PCAWG.precedence();
       var list = [];
 
-      console.log('pre', precedence);
 
       // Scrub
       data = Restangular.stripRestangular(data);
