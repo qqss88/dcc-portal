@@ -42,7 +42,7 @@
           });
         });
 
-        list = _.sortBy(list, function(d) { return -d.count });
+        list = _.sortBy(list, function(d) { return -d.count; });
 
         $scope.primarySites = HighchartsService.bar({
           hits: list,
