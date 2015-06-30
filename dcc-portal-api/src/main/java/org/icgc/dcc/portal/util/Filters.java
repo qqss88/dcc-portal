@@ -140,7 +140,7 @@ public final class Filters {
         result.with("gene").with("goTermId").withArray(IS).add(universeId);
       }
     } else if (universe.path("gene").path("hasPathway").isMissingNode() == false) {
-      result.with("gene").put("hasPathway", "true");
+      result.with("gene").put("hasPathway", true);
     }
     // } else if (universe.path("gene").path(Universe.REACTOME_PATHWAYS.getGeneSetFacetName()).isMissingNode() == false)
     // {
