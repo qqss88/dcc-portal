@@ -78,7 +78,7 @@ public class MutationRepositoryTest extends BaseElasticSearchTest {
     Query query = Query.builder()
         .from(1)
         .size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER)
-        .fields(Lists.newArrayList("id", "mutation", "notarealfield"))
+        .fields(Lists.newArrayList("id", "mutation"))
         .build();
     SearchResponse response = mutationRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
