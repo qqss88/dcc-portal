@@ -144,6 +144,7 @@ public class MutationCentricTypeModel extends TypeModel {
                 string("chromosome", "gene.chromosome"),
                 long_("end", "gene.end"),
                 long_("start", "gene.start"),
+                string("symbol", "gene.symbol"),
                 arrayOfStrings("pathway", "gene.pathwayId"),
                 arrayOfStrings("curated_set", "gene.curatedSetId"),
                 object("go_term", "gene.GoTerm",
