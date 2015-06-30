@@ -129,12 +129,13 @@ public final class Filters {
     if (universe.path("gene").path("goTermId").isMissingNode() == false) {
       val universeId = universe.get("gene").get("goTermId").withArray("is").get(0).asText();
 
-      if (result.path("gene").path("goTermId").path("is").isMissingNode()) {
+      if (result.path("gene").path("goTermId").path("is").isMissingNode() == false) {
 
         for (val t : result.with("gene").with("goTermId").withArray("is")) {
           result.with("gene").with("goTermId").withArray(ALL).add(t);
         }
-        result.with("gene").with("goTermId").withArray(ALL).add(universe);
+        result.with("gene").with("goTermId").withArray(ALL).add(universeId);
+        result.with("gene").with("goTermId").remove(IS);
 
       } else {
         result.with("gene").with("goTermId").withArray(IS).add(universeId);

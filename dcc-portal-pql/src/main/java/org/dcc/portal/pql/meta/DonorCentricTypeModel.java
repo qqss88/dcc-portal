@@ -93,7 +93,8 @@ public class DonorCentricTypeModel extends TypeModel {
       "survivalTime",
       "availableDataTypes",
       "analysisTypes",
-      "studies");
+      "studies",
+      "ssmAffectedGenes");
 
   public DonorCentricTypeModel() {
     super(initFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
