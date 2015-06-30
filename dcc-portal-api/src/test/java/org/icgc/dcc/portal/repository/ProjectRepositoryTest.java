@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
@@ -57,7 +58,7 @@ public class ProjectRepositoryTest extends BaseElasticSearchTest {
         // This is needed because the ProjectRepository now does a 'secondary' search on icgc-repository index.
         .withData(bulkFile("RepositoryFileServiceTest.json")));
 
-    projectRepository = new ProjectRepository(es.client(), INDEX);
+    projectRepository = new ProjectRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
   }
 
   @Test
@@ -72,7 +73,7 @@ public class ProjectRepositoryTest extends BaseElasticSearchTest {
     Query query = Query.builder()
         .from(1)
         .size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER)
-        .fields(Lists.newArrayList("name", "primarySite", "notarealfield"))
+        .fields(Lists.newArrayList("name", "primarySite"))
         .build();
     SearchResponse response = projectRepository.findAll(query);
     SearchHits hits = response.getHits();

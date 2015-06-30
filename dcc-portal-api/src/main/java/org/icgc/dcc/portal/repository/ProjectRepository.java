@@ -1,16 +1,11 @@
 package org.icgc.dcc.portal.repository;
 
 import static java.util.Collections.singletonMap;
-import static org.elasticsearch.action.search.SearchType.COUNT;
-import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.buildFilters;
-import static org.icgc.dcc.portal.service.QueryService.getFacets;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.QueryService.getFilters;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRelatedToDoublePendingDonor;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfSearchRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
@@ -19,12 +14,14 @@ import java.util.Map;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,49 +42,27 @@ public class ProjectRepository {
   private final Client client;
   private final String index;
 
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
+  private final QueryEngine queryEngine;
+
   @Autowired
-  ProjectRepository(Client client, IndexModel indexModel) {
+  ProjectRepository(Client client, IndexModel indexModel, QueryEngine engine) {
     this.index = indexModel.getIndex();
     this.client = client;
+    this.queryEngine = engine;
   }
 
   public SearchResponse findAll(Query query) {
-    val search = client
-        .prepareSearch(index)
-        .setTypes(TYPE_ID)
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize())
-        .addSort(FIELD_MAP.get(query.getSort()), query.getOrder());
 
-    val filters = query.getFilters();
-    search.setPostFilter(getFilters(filters, KIND));
-    search.addFields(getFields(query, KIND));
-    setFetchSourceOfSearchRequest(search, query, KIND);
-
-    val facets = getFacets(query, KIND, FACETS, filters, null, null);
-    for (val facet : facets) {
-      search.addFacet(facet);
-    }
-
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
-    return response;
+    val pql = converter.convert(query, PROJECT);
+    val search = queryEngine.execute(pql, PROJECT);
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   public long count(Query query) {
-    val search = client.prepareSearch(index)
-        .setTypes(TYPE_ID)
-        .setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      search.setPostFilter(buildFilters(query.getFilters(), KIND));
-    }
-
-    log.debug("{}", search);
-    return search.execute().actionGet().getHits().getTotalHits();
+    val pql = converter.convertCount(query, PROJECT);
+    val search = queryEngine.execute(pql, PROJECT);
+    return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
   public Map<String, Object> findOne(String id, Query query) {
@@ -104,7 +79,7 @@ public class ProjectRepository {
       return result;
     }
 
-    if (!isRelatedToDoublePendingDonor(client, "project_code", id)) {
+    if (!isRepositoryDonor(client, "project_code", id)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }

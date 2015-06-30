@@ -39,7 +39,7 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRelatedToDoublePendingDonor;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -431,7 +431,7 @@ public class DonorRepository implements Repository {
       return result;
     }
 
-    if (!isRelatedToDoublePendingDonor(client, "donor_id", id)) {
+    if (!isRepositoryDonor(client, "donor_id", id)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }
