@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
+import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
 import static org.dcc.portal.pql.util.Converters.asString;
 import static org.dcc.portal.pql.util.Converters.isString;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
@@ -79,6 +80,7 @@ public class FiltersConverter {
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",
       "gene.hasPathway",
+      GENE_SET_ID,
       "entitySetId",
       "mutation.location",
       "gene.location");

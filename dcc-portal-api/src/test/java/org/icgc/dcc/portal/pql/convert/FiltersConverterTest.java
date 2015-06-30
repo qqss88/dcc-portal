@@ -518,6 +518,20 @@ public class FiltersConverterTest {
     assertThat(result).isEqualTo("and(eq(gene.id,'G1'),eq(gene.id,'G2'),eq(gene.id,'G3'))");
   }
 
+  @Test
+  public void geneSetIdTest_donor() {
+    val filters = createFilters("{gene:{geneSetId:{is:['REACT_111155']}}}");
+    val result = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(result).isEqualTo("nested(gene,in(gene.geneSetId,'REACT_111155'))");
+  }
+
+  @Test
+  public void geneSetIdTest_mutation() {
+    val filters = createFilters("{gene:{geneSetId:{is:['REACT_111155']}}}");
+    val result = converter.convertFilters(filters, MUTATION_CENTRIC);
+    assertThat(result).isEqualTo("nested(transcript,in(gene.geneSetId,'REACT_111155'))");
+  }
+
   @SneakyThrows
   public static JqlFilters createFilters(String filters) {
     return mapper.readValue(new FiltersParam(filters).get().toString(), JqlFilters.class);
