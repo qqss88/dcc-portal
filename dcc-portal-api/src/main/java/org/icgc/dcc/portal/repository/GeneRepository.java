@@ -20,29 +20,12 @@ package org.icgc.dcc.portal.repository;
 import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
-import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
-import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
-import static org.icgc.dcc.portal.service.QueryService.hasDonor;
-import static org.icgc.dcc.portal.service.QueryService.hasGene;
-import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
-import static org.icgc.dcc.portal.service.QueryService.hasMutation;
-import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.remapG2P;
-import static org.icgc.dcc.portal.service.QueryService.remapM2C;
-import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.Filters.andFilter;
 import static org.icgc.dcc.portal.util.Filters.geneSetFilter;
@@ -63,8 +46,6 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -81,7 +62,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -97,13 +77,6 @@ public class GeneRepository implements Repository {
   private static final Type TYPE = Type.GENE;
   private static final Kind KIND = Kind.GENE;
 
-  private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
-      Kind.DONOR, "donor",
-      Kind.MUTATION, "donor.ssm",
-      Kind.CONSEQUENCE, "donor.ssm.consequence",
-      Kind.OBSERVATION, "donor.ssm.observation"));
-  protected static final ImmutableMap<Kind, String> PREFIX_MAPPING = NESTED_MAPPING;
-
   private final Client client;
   private final String index;
 
@@ -115,44 +88,6 @@ public class GeneRepository implements Repository {
     this.index = indexModel.getIndex();
     this.client = client;
     this.queryEngine = queryEngine;
-  }
-
-  private FilterBuilder getFilters(ObjectNode filters) {
-    if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return matchAllFilter();
-  }
-
-  private FilterBuilder buildFilters(ObjectNode filters) {
-    val qb = FilterBuilders.boolFilter();
-    val musts = Lists.<FilterBuilder> newArrayList();
-    boolean matchAll = true;
-
-    boolean hasDonor = hasDonor(filters);
-    boolean hasGene = hasGene(filters);
-    boolean hasMutation = hasMutation(filters);
-    boolean hasConsequence = hasConsequence(filters);
-    boolean hasObservation = hasObservation(filters);
-    boolean hasGeneSet = hasGeneSet(filters);
-
-    if (hasGene || hasGeneSet || hasDonor || hasMutation || hasConsequence || hasObservation) {
-      matchAll = false;
-      if (hasGene) {
-        musts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-      }
-      if (hasGeneSet) {
-        musts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
-      }
-
-      if (hasDonor || hasMutation || hasConsequence || hasObservation) {
-        val db = FilterBuilders.boolFilter();
-        val dMusts = buildDonorNestedFilters(filters, hasDonor, hasMutation, hasConsequence, hasObservation);
-        db.must(dMusts.toArray(new FilterBuilder[dMusts.size()]));
-        musts.add(nestedFilter(NESTED_MAPPING.get(Kind.DONOR), db));
-      }
-      qb.must(musts.toArray(new FilterBuilder[musts.size()]));
-    }
-
-    return matchAll ? matchAllFilter() : qb;
   }
 
   @Override
@@ -178,15 +113,6 @@ public class GeneRepository implements Repository {
     val maxGenes = 70000;
     val symbolFieldName = "symbol";
 
-    // val search = client.prepareSearch(index)
-    // .setTypes(CENTRIC_TYPE.getId())
-    // .setSearchType(QUERY_THEN_FETCH)
-    // .setFrom(0)
-    // .setSize(maxGenes)
-    // .setPostFilter(getFilters(filters))
-    // .addField(symbolFieldName);
-    // val response = search.execute().actionGet();
-
     val query = Query.builder().filters(filters).build();
     val pql = converter.convert(query, GENE_CENTRIC);
     val response = queryEngine.execute(pql, GENE_CENTRIC).getRequestBuilder()
@@ -207,16 +133,18 @@ public class GeneRepository implements Repository {
 
   public Map<String, String> findGeneSymbolsByGeneListIdAndGeneSetId(@NonNull UUID inputGeneListId,
       @NonNull String geneSetId) {
-    val filters = remapFilters(andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId)));
+    val filters = andFilter(geneSetFilter(geneSetId), inputGeneListFilter(inputGeneListId));
     return findGeneSymbolsByFilters(filters);
   }
 
   public Map<String, String> findGeneSymbolsByGeneListId(@NonNull UUID inputGeneListId) {
-    val filters = remapFilters(inputGeneListFilter(inputGeneListId));
+    val filters = inputGeneListFilter(inputGeneListId);
     return findGeneSymbolsByFilters(filters);
   }
 
   public SearchResponse findGeneSetCounts(Query query) {
+    log.info(" My Query {} ", query.getFilters());
+
     val pql = converter.convert(query, GENE_CENTRIC);
     val search = queryEngine.execute(pql, GENE_CENTRIC);
 
@@ -229,46 +157,7 @@ public class GeneRepository implements Repository {
 
     }
     search.getRequestBuilder().setSearchType(COUNT);
-    log.info("Query {}", query.getFilters());
-    log.info("PQL {}", pql);
-    log.info("{}", search.getRequestBuilder());
     return search.getRequestBuilder().execute().actionGet();
-  }
-
-  public SearchResponse _findGeneSetCounts(Query query) {
-    val search = client.prepareSearch(index)
-        .setTypes(CENTRIC_TYPE.getId())
-        .setSearchType(COUNT);
-
-    log.info("Find gene set count filters {}", query.getFilters());
-
-    val boolFilter = new BoolFilterBuilder();
-    val remappedFilters = remapFilters(query.getFilters());
-    log.info("Find gene set count filters {}", remappedFilters);
-    boolFilter.must(getFilters(remappedFilters));
-
-    // val boolFilter = new BoolFilterBuilder();
-    // for (val filters : query.getAndFilters()) {
-    // val remappedFilters = remapFilters(filters);
-
-    // boolFilter.must(getFilters(remappedFilters));
-    // }
-
-    for (val universe : Universe.values()) {
-      val universeFacetName = universe.getGeneSetFacetName();
-
-      search.addFacet(
-          termsFacet(universeFacetName)
-              .field(universeFacetName)
-              .size(50000) // This has to be as big as the largest universe
-              .facetFilter(boolFilter));
-    }
-
-    log.info("Find gene set count {}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
-    return response;
   }
 
   @Override
@@ -279,26 +168,6 @@ public class GeneRepository implements Repository {
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
     throw new UnsupportedOperationException("Not applicable");
-  }
-
-  private List<FilterBuilder> buildDonorNestedFilters(ObjectNode filters,
-      boolean hasDonor, boolean hasMutation, boolean hasConsequence, boolean hasObservation) {
-    val dMusts = Lists.<FilterBuilder> newArrayList();
-    if (hasDonor) dMusts.add(buildDonorFilters(filters, PREFIX_MAPPING));
-    if (hasMutation || hasConsequence || hasObservation) {
-      val nb = FilterBuilders.boolFilter();
-      val nMusts = Lists.<FilterBuilder> newArrayList();
-      if (hasMutation) nMusts.add(buildMutationFilters(filters, PREFIX_MAPPING));
-      if (hasConsequence) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.CONSEQUENCE),
-          buildConsequenceFilters(filters, PREFIX_MAPPING)));
-
-      if (hasObservation) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.OBSERVATION),
-          buildObservationFilters(filters, PREFIX_MAPPING)));
-
-      nb.must(nMusts.toArray(new FilterBuilder[nMusts.size()]));
-      dMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.MUTATION), nb));
-    }
-    return dMusts;
   }
 
   @Override
@@ -344,10 +213,6 @@ public class GeneRepository implements Repository {
   @Override
   public NestedQueryBuilder buildQuery(Query query) {
     throw new UnsupportedOperationException("Not applicable");
-  }
-
-  public ObjectNode remapFilters(ObjectNode filters) {
-    return remapG2P(remapM2O(remapM2C(filters)));
   }
 
   public Map<String, Object> findOne(String id, Query query) {
