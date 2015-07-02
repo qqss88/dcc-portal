@@ -24,8 +24,8 @@
 		var y = d3.scale.linear()
 		    .rangeRound([config.height, 0]);
 
-		// creates a color scale to turn the project id into its project color
-		var color = d3.scale.ordinal()
+		// creates a colour scale to turn the project id into its project colour
+		var colour = d3.scale.ordinal()
 		    .domain(d3.keys(config.colours))
 		    .range(d3.values(config.colours));
 
@@ -141,7 +141,7 @@
     bar.selectAll('rect')
         .data(function(d) { return d.stack; }) //goes through each of the projects of each gene
         .enter().append('rect')
-        .style('fill', function(d) { return color(d.primarySite); })
+        .style('fill', function(d) { return colour(d.colourKey); })
         .attr('width', x.rangeBand())
         .attr('x',function(d){return x(d.key);})
         .attr('y', function(d) { return y(d.y1); })

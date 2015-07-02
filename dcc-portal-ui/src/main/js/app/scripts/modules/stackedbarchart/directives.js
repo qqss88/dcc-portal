@@ -80,7 +80,7 @@
                   key: d.symbol,
                   link: d.id,
                   label: p.name,
-                  primarySite: p.primarySite
+                  colourKey: p.primarySite
                 };
               });
 	           d.total = d.stack[d.stack.length - 1].y1;
