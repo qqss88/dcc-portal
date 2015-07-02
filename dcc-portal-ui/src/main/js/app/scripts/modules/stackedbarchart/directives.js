@@ -16,75 +16,95 @@
  */
 (function() {
   'use strict';
+  var module = angular.module('icgc.visualization.stackedbar', []);
 
-	var module = angular.module('icgc.visualization.stackedbar', []);
-	
-	module.directive('stacked', function ($location, HighchartsService, $window) {
-	    return {
-		    restrict: 'E',
-		    replace: true,
-		    scope: {
-		      items: '=',
-          subtitle: '='
-		    },
-        template:'<div><div class="text-center graph_title">' +
-                    'Top 20 Mutated Genes with High Functional Impact SSMs' +
-                    '</div>'+
-                    '<div class="stackedsubtitle text-center">{{subtitle | number}} ' +
-                    'Unique SSM-Tested Donors</div></div>',
-		    link: function ($scope, $element) {
-                var chart, config;
+  module.directive('stacked', function ($location, HighchartsService, $window) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        items: '=',
+        title: '@',
+        subtitle: '@'
+      },
+      template:'<div><div class="text-center graph_title">{{title}}</div>'+
+        '<div class="stackedsubtitle text-center">{{subtitle}} </div></div>',
+      link: function ($scope, $element) {
+        var chart, config;
 
-                config = {
-                  margin:{top: 5, right: 20, bottom: 50, left: 50},
-                  height: 250,
-                  width: 500,
-                  colours: HighchartsService.primarySiteColours,
-                  yaxis:{label:'Donors Affected',ticks:4},
-                  onClick: function(geneid){
-                    $scope.$emit('tooltip::hide');
-                    $location.path('/genes/' + geneid).search({});
-                    $scope.$apply();
-                  },
-                  tooltipShowFunc: function(elem, d) {
-                    function getLabel() {
-                      return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
-                    }
+        config = {
+          margin:{top: 5, right: 20, bottom: 50, left: 50},
+          height: 250,
+          width: 500,
+          colours: HighchartsService.primarySiteColours,
+          yaxis:{label:'Donors Affected',ticks:4},
+          onClick: function(geneid){
+            $scope.$emit('tooltip::hide');
+            $location.path('/genes/' + geneid).search({});
+            $scope.$apply();
+          },
+          tooltipShowFunc: function(elem, d) {
+            function getLabel() {
+              return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
+            }
 
-                    var position = {
-                      left:elem.getBoundingClientRect().left,
-                      top:elem.getBoundingClientRect().top + $window.pageYOffset,
-                      width: elem.getBoundingClientRect().width,
-                      height: elem.getBoundingClientRect().height
-                    };
+            var position = {
+              left:elem.getBoundingClientRect().left,
+              top:elem.getBoundingClientRect().top + $window.pageYOffset,
+              width: elem.getBoundingClientRect().width,
+              height: elem.getBoundingClientRect().height
+            };
 
-                    $scope.$emit('tooltip::show', {
-                      element: angular.element(elem),
-                      text: getLabel(),
-                      placement: 'right',
-                      elementPosition: position
-                    });
-                  },
-                  tooltipHideFunc: function() {
-                    $scope.$emit('tooltip::hide');
-                  }
+            $scope.$emit('tooltip::show', {
+              element: angular.element(elem),
+              text: getLabel(),
+              placement: 'right',
+              elementPosition: position
+            });
+          },
+          tooltipHideFunc: function() {
+            $scope.$emit('tooltip::hide');
+          },
+          transform: function(data) {
+	         // For each gene, create an array of donors and get the total affected donors count
+            var copy = _.cloneDeep(data);
+	         copy.forEach(function(d) {
+	           var y0 = 0;
+	           d.stack = d.uiFIProjects
+	           .sort(function(a,b){return a.count-b.count;}) //sort so biggest is on top
+	           .map(function(p) {
+                return {
+                  name: p.id,
+                  y0: y0,
+                  y1: y0 += p.count,
+                  key: d.symbol,
+                  link: d.id,
+                  label: p.name,
+                  primarySite: p.primarySite
                 };
+              });
+	           d.total = d.stack[d.stack.length - 1].y1;
+	         });
+            return copy;
+          }
+        };
 
-                $scope.$watch('items', function (newValue) {
-                  if (newValue && typeof $scope.items[0] !== 'undefined') {
-                    if (!chart) {
-                      chart = new dcc.StackedBarChart(config);
-                    }
-                    chart.render($element[0], _.cloneDeep($scope.items));
-                  }
-                }, true);
-	
-                $scope.$on('$destroy', function () {
-                  if (chart) {
-                    chart.destroy();
-                  }
-                });
-              }
-      };
-    });
+        $scope.$watch('items', function (newValue) {
+          if (newValue && typeof $scope.items[0] !== 'undefined') {
+            if (!chart) {
+              chart = new dcc.StackedBarChart(config);
+            }
+            chart.render($element[0], config.transform($scope.items));
+          }
+        }, true);
+
+        $scope.$on('$destroy', function () {
+          if (chart) {
+            chart.destroy();
+          }
+        });
+
+      }
+    };
+  });
 })();
