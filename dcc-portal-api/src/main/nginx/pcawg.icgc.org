@@ -10,6 +10,11 @@ server {
   ssl_ciphers               AES:HIGH:!RC4:!aNULL:!MD5;
   ssl_prefer_server_ciphers on;
 
+  if ($uri ~ "nature_commentary/acknowledgements.html") {
+    rewrite ^ https://dcc.icgc.org/pcawg/nature/commentary/acknowledgements permanent;
+    break;
+  } 
+
   rewrite ^ https://dcc.icgc.org/pcawg permanent;
 }
 
