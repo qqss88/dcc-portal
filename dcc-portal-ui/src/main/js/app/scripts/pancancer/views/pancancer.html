@@ -6,7 +6,10 @@
    <div class="half pull-right" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
 
 
-      <bar data-items="primarySites" ylabel="# Donors" height="300" heading="Donors Distribution by Primary Site"></bar>
+      <bar data-items="primarySites" ylabel="# Donors" height="300" 
+          heading="Donors Distribution by Primary Site"
+          subheading="{{summary.projectCount}} projects and {{summary.primartySiteCount}} primary sites">
+      </bar>
 
       <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
           <div class="third text-center">
@@ -60,7 +63,7 @@
        this project is exploring the nature and consequences of somatic and germline variations in both coding and non-coding regions, with specific emphasis on cis-regulatory sites, 
        non-coding RNAs, and large-scale structural alterations.
    </p>
-   <p style="text-align:justtify; text-indent:1rem">
+   <p style="text-align:justify; text-indent:1rem">
        In order to facilitate the comparison among diverse tumor types, all tumor and matched normal genomes have been subjected to a uniform set of alignment and variant calling algorithms, and must pass a rigorous set of qualilty control tests. The research activities are coordinated by a series of working groups comprising more than 700 scientists and covering the following themes:
    </p>
    <p>
@@ -82,10 +85,9 @@
            <li>Mitochondrial</li>
            <li>Pathogens</li>
        </ol>
-   </p>
-   <p style="text-align:justtify; text-indent:1rem">
-       All data resulting from this project will be released to the public under the terms of the 
-       <a href="http://www.icgc.org/" target="_blank"><i class="icon-external-link"></i>ICGC</a> and 
+
+       All data resulting from this project will be released to the public under the terms of the
+       <a href="http://www.icgc.org/" target="_blank"><i class="icon-external-link"></i>ICGC</a> and
        <a href="http://cancergenome.nih.gov/" target="_blank"><i class="icon-external-link"></i>TCGA</a> 
        data release policies. Please contact the <a href="mailto:dcc-support@icgc.org"><i class="icon-mail"></i>ICGC helpdesk</a> for more information.
    </p>

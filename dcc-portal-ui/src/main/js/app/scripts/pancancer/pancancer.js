@@ -29,6 +29,12 @@
       templateUrl: 'scripts/pancancer/views/pancancer.html',
       controller: 'PancancerController as PancancerController'
     });
+
+    $stateProvider.state('pancancer_ack', {
+      url: '/pcawg/nature/commentary/acknowledgements',
+      templateUrl: 'scripts/pancancer/views/pancancer.ack.html',
+      controller: 'PancancerAcknowledgementController'
+    });
   });
 
 })();
@@ -38,6 +44,13 @@
   'use strict';
 
   var module = angular.module('icgc.pancancer.controllers', []);
+
+  module.controller('PancancerAcknowledgementController', function($scope, Page) {
+    Page.stopWork();
+    Page.setPage('entity');
+    Page.setTitle('PCAWG');
+  });
+
 
   module.controller('PancancerController',
     function($scope, Page, PancancerService, ExternalRepoService) {
