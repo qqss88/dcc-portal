@@ -25,24 +25,13 @@
         <p>New features will be regularly added by the <a href="/team">DCC development team</a>.
             <a href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback"><i class="icon-mail"></i>Feedback is welcome.</a>
         </p>
-
-        <p>Subscribe to our Twitter <a target="_blank" href="https://twitter.com/icgc_dcc"><i class="icon-twitter"></i>feed</a> to get updates.</p>
-        <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/icgc_dcc"
-           data-widget-id="380699364819091456"
-           data-chrome="nofooter noborders transparent"
-           data-theme="light"
-           data-tweet-limit="2"><i class="icon-spin icon-spinner"></i>Loading Tweets...</a>
-        <script>!function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0], p = /^http:/.test(d.location) ? 'http' : 'https';
-            if (!d.getElementById(id)) {
-                js = d.createElement(s);
-                js.id = id;
-                js.src = p + "://platform.twitter.com/widgets.js";
-                fjs.parentNode.insertBefore(js, fjs);
-            }
-        }(document, "script", "twitter-wjs");</script>
-        <a target="_blank" style="margin-left: 4rem" href="https://twitter.com/icgc_dcc"><i class="icon-twitter"></i>See more news.</a>
-
+        
+        <div style="border-top: 1px solid #eee; margin-top: 2rem; margin-bottom: 2.5rem"></div>
+        
+        <p>
+         <div class="text-left"><img src="styles/images/PCAWG-final.png" width="300" style="margin-left: 1rem; margin-bottom: 1rem"></div>
+         The <a href="/pcawg">Pancancer Analysis of Whole Genomes</a> (PCAWG) study is an international collaboration to identify common patterns of mutation in more than 2,400 cancer whole genomes from the International Cancer Genome Consortium.
+        </p>
     </section>
     <section class="text-center" data-ng-controller="ReleaseCtrl as ReleaseCtrl">
         <h3>Data Release {{ ReleaseCtrl.release.releaseNumber }}</h3>
@@ -98,8 +87,7 @@
         <h4>Example Queries</h4>
         <ol>
             <li>
-                <a
-                        href='/search/m?filters={"gene":{"id":{"is":["ENSG00000157764"]}},"mutation":{"consequenceType":{"is":["missense_variant"]}},"donor":{"primarySite":{"is":["Colorectal"]}}}'>BRAF
+                <a href='/search/m?filters={"gene":{"id":{"is":["ENSG00000157764"]}},"mutation":{"consequenceType":{"is":["missense_variant"]}},"donor":{"primarySite":{"is":["Colorectal"]}}}'>BRAF
                     missense mutations in colorectal cancer</a></li>
             <li>
                 <a href='/search/g?filters={"mutation":{"functionalImpact":{"is":["High"]}}, "donor":{"projectId":{"is":["MALY-DE"]}, "tumourStageAtDiagnosis":{"is":["III"]}}}'>
@@ -108,5 +96,8 @@
                 <a href='/search?filters={"donor":{"primarySite":{"is":["Brain"]}, "availableDataTypes":{"is":["meth_array", "meth_seq"]}},"mutation":{"consequenceType":{"is":["frameshift_variant"]}}}'>Brain
                     cancer donors with frameshift mutations and having methylation data available</a></li>
         </ol>
+        <!-- 
+        <div data-ng-include src="'views/common/twitter.html'"></div>
+         -->
     </section>
 </article>

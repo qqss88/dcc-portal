@@ -118,7 +118,7 @@
 
 
   module.constant('API', {
-    BASE_URL: '/api/v1'
+    BASE_URL: 'https://hproxy-dcc.res.oicr.on.ca:54321/api/v1'
   });
 
 

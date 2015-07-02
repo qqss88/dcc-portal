@@ -974,7 +974,9 @@ header #brand {
 }
 /* line 23, _sections/_header.scss */
 header #brand #icgc {
-  color: #999999;
+  color: #283E5D;
+  font-weight: bold;
+  margin-right: 0.5rem;
 }
 /* line 26, _sections/_header.scss */
 header #brand a {
