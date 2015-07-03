@@ -50,19 +50,11 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
@@ -79,7 +71,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.MapType;
-import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -90,24 +81,25 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class RepositoryFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String GNOS_REPO = "GNOS";
   private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(Collections.emptyList());
-  private static final Joiner SLASH_JOINER = Joiners.SLASH.skipNulls();
-  private static final String[] DOWNLOAD_INFO_QUERY_FIELDS = new String[] {
-      FieldNames.REPO_TYPE,
-      FieldNames.REPO_ID,
-      FieldNames.DATA_PATH,
-      FieldNames.FILE_NAME,
-      FieldNames.FILE_SIZE,
-      FieldNames.CHECK_SUM
-  };
+  private static final String[] DOWNLOAD_INFO_QUERY_FIELDS =
+      new String[] { FieldNames.REPO_TYPE, FieldNames.REPO_ID, FieldNames.DATA_PATH, FieldNames.FILE_NAME, FieldNames.FILE_SIZE, FieldNames.CHECK_SUM
+      };
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("id", "id")
@@ -122,11 +114,7 @@ public class RepositoryFileService {
           .build();
   private static final String DOWNLOAD_INFO_QUERY_SOURCE_FIELD =
       FieldNames.REPOSITORY + "." + FieldNames.REPO_SERVER + ".*";
-  private static final String[] TSV_HEADERS = new String[] {
-      "url",
-      "file_name",
-      "file_size",
-      "md5_sum"
+  private static final String[] TSV_HEADERS = new String[] { "url", "file_name", "file_size", "md5_sum"
   };
   private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       FieldNames.FILE_NAME,
@@ -264,12 +252,11 @@ public class RepositoryFileService {
   @SneakyThrows
   private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
     val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
-    final Function<JsonNode, Map<String, String>> combineMaps = (server) ->
-        ImmutableMap.<String, String> builder()
-            // There shouldn't be collision on the keys.
-            .putAll(fields)
-            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
-            .build();
+    final Function<JsonNode, Map<String, String>> combineMaps = (server) -> ImmutableMap.<String, String> builder()
+        // There shouldn't be collision on the keys.
+        .putAll(fields)
+        .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
+        .build();
     val fileNode = READER.readTree(hit.sourceAsString());
     val serverArray = fileNode
         .path(FieldNames.REPOSITORY)
@@ -457,8 +444,9 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl, final int rowCount)
-      throws XMLStreamException {
+  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl,
+      final int rowCount)
+          throws XMLStreamException {
     writer.writeStartElement(XmlTags.RECORD);
     writer.writeAttribute("id", String.valueOf(rowCount));
 

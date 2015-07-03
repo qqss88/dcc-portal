@@ -53,11 +53,6 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -74,8 +69,6 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
-import org.elasticsearch.search.aggregations.bucket.nested.Nested;
-import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.elasticsearch.search.sort.SortOrder;
@@ -95,6 +88,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -206,8 +204,8 @@ public class RepositoryFileRepository {
     return termFilters;
   }
 
-  public List<AggregationBuilder> aggs(ObjectNode filters) {
-    val aggs = Lists.<AggregationBuilder> newArrayList();
+  public List<AggregationBuilder<?>> aggs(ObjectNode filters) {
+    val aggs = Lists.<AggregationBuilder<?>> newArrayList();
 
     // General case
     for (String facet : FACETS) {
@@ -272,31 +270,6 @@ public class RepositoryFileRepository {
       }
     }
     return result;
-  }
-
-  // FIXME: Temporary code
-  private TermFacet convertNestedAggregation(Aggregation agg) {
-    val name = agg.getName();
-    Global globalAgg = (Global) agg;
-    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
-    Nested nestedAgg = (Nested) filterAgg.getAggregations().get(name);
-    Terms termAgg = (Terms) nestedAgg.getAggregations().get(name);
-
-    val termsBuilder = new ImmutableList.Builder<Term>();
-
-    log.info("Nested Facet {}", name);
-    long total = 0;
-    for (val bucket : termAgg.getBuckets()) {
-      ReverseNested reverseNestedAgg = (ReverseNested) bucket.getAggregations().get(name);
-      log.info("{} {}", bucket.getKey(), reverseNestedAgg.getDocCount());
-
-      long count = (int) reverseNestedAgg.getDocCount();
-      total += count;
-      termsBuilder.add(new Term(bucket.getKey(), count));
-    }
-    log.info("");
-
-    return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
   }
 
   // FIXME: Temporary code
@@ -411,6 +384,7 @@ public class RepositoryFileRepository {
   /**
    * Untangle array/list objects, numeric objects
    */
+  @SuppressWarnings("unchecked")
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
     for (val key : map.keySet()) {
@@ -509,13 +483,11 @@ public class RepositoryFileRepository {
 
     // Due to the mapping of the file-donor-text type, we need to add certain suffixes to field names.
     // Adds '.raw' to field names for fields that need exact match.
-    val fieldNames = transform(fields, fieldName ->
-        DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ?
-            fieldName + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
+    val fieldNames = transform(fields, fieldName -> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ? fieldName
+        + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
     // Adds '.analyzed' to field names for fields that need partial match.
-    val names = transform(fieldNames, fieldName ->
-        DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ?
-            fieldName + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
+    val names = transform(fieldNames, fieldName -> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ? fieldName
+        + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
 
     val search = client.prepareSearch(index)
         .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
@@ -641,6 +613,7 @@ public class RepositoryFileRepository {
       }
 
       val projectFacets = (Terms) bucket.getAggregations().get("donorPrimarySite");
+      @SuppressWarnings("unchecked")
       val map = (Map<String, Object>) donorPrimarySite.get(name);
       for (val projectBucket : projectFacets.getBuckets()) {
         val donorCount = ((Terms) projectBucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
