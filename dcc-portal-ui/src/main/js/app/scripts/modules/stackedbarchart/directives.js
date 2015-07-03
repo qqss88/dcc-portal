@@ -16,75 +16,88 @@
  */
 (function() {
   'use strict';
+  var module = angular.module('icgc.visualization.stackedbar', []);
 
-	var module = angular.module('icgc.visualization.stackedbar', []);
-	
-	module.directive('stacked', function ($location, HighchartsService, $window) {
-	    return {
-		    restrict: 'E',
-		    replace: true,
-		    scope: {
-		      items: '=',
-          subtitle: '='
-		    },
-        template:'<div><div class="text-center graph_title">' +
-                    'Top 20 Mutated Genes with High Functional Impact SSMs' +
-                    '</div>'+
-                    '<div class="stackedsubtitle text-center">{{subtitle | number}} ' +
-                    'Unique SSM-Tested Donors</div></div>',
-		    link: function ($scope, $element) {
-                var chart, config;
+  module.directive('stacked', function ($location, HighchartsService, $window) {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        items: '=',
+        alternateBrightness: '=',
+        title: '@',
+        subtitle: '@',
+        yLabel: '@'
+      },
+      template:'<div><div class="text-center graph_title">{{title}}</div>'+
+        '<div class="stackedsubtitle text-center">{{subtitle}} </div></div>',
+      link: function ($scope, $element) {
+        var chart, config;
 
-                config = {
-                  margin:{top: 5, right: 20, bottom: 50, left: 50},
-                  height: 250,
-                  width: 500,
-                  colours: HighchartsService.primarySiteColours,
-                  yaxis:{label:'Donors Affected',ticks:4},
-                  onClick: function(geneid){
-                    $scope.$emit('tooltip::hide');
-                    $location.path('/genes/' + geneid).search({});
-                    $scope.$apply();
-                  },
-                  tooltipShowFunc: function(elem, d) {
-                    function getLabel() {
-                      return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
-                    }
+        config = {
+          margin: {
+             top: 5, right: 20, bottom: 50, left: 50
+          },
+          height: 250,
+          width: 500,
+          colours: HighchartsService.primarySiteColours,
+          alternateBrightness: $scope.alternateBrightness === true? true : false,
+          yaxis: {
+            label: $scope.yLabel,
+            ticks: 4
+          },
+          onClick: function(geneid){
+            $scope.$emit('tooltip::hide');
+            $location.path('/genes/' + geneid).search({});
+            $scope.$apply();
+          },
+          tooltipShowFunc: function(elem, d) {
+            function getLabel() {
+              return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0) + ' ' + $scope.yLabel;
+            }
 
-                    var position = {
-                      left:elem.getBoundingClientRect().left,
-                      top:elem.getBoundingClientRect().top + $window.pageYOffset,
-                      width: elem.getBoundingClientRect().width,
-                      height: elem.getBoundingClientRect().height
-                    };
+            var position = {
+              left:elem.getBoundingClientRect().left,
+              top:elem.getBoundingClientRect().top + $window.pageYOffset,
+              width: elem.getBoundingClientRect().width,
+              height: elem.getBoundingClientRect().height
+            };
 
-                    $scope.$emit('tooltip::show', {
-                      element: angular.element(elem),
-                      text: getLabel(),
-                      placement: 'right',
-                      elementPosition: position
-                    });
-                  },
-                  tooltipHideFunc: function() {
-                    $scope.$emit('tooltip::hide');
-                  }
-                };
+            $scope.$emit('tooltip::show', {
+              element: angular.element(elem),
+              text: getLabel(),
+              placement: 'right',
+              elementPosition: position
+            });
+          },
+          tooltipHideFunc: function() {
+            $scope.$emit('tooltip::hide');
+          }
+        };
 
-                $scope.$watch('items', function (newValue) {
-                  if (newValue && typeof $scope.items[0] !== 'undefined') {
-                    if (!chart) {
-                      chart = new dcc.StackedBarChart(config);
-                    }
-                    chart.render($element[0], _.cloneDeep($scope.items));
-                  }
-                }, true);
-	
-                $scope.$on('$destroy', function () {
-                  if (chart) {
-                    chart.destroy();
-                  }
-                });
-              }
-      };
-    });
+        $scope.$watch('items', function (newValue) {
+          if (newValue && typeof $scope.items[0] !== 'undefined') {
+            if (!chart) {
+              chart = new dcc.StackedBarChart(config);
+            }
+
+            // Adaptive margin based on char length of labels
+            var max = _.max(_.pluck( $scope.items, 'key').map(function(d) { return d.length; }));
+            if (max >= 10) {
+              config.margin.bottom += 25;
+            }
+
+            chart.render($element[0], $scope.items);
+          }
+        }, true);
+
+        $scope.$on('$destroy', function () {
+          if (chart) {
+            chart.destroy();
+          }
+        });
+
+      }
+    };
+  });
 })();
