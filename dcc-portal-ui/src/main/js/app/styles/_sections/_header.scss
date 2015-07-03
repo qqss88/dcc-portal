@@ -21,7 +21,9 @@ header {
     }
 
     #icgc {
-      color: $grey;
+      color: $blueDark;
+		  font-weight: bold;
+		  margin-right: 0.5rem;
     }
     a {
       color: $greyDarker;
