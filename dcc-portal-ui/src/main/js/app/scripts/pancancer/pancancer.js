@@ -125,6 +125,7 @@
             name: projKey,
             label: projKey,
             count: data[siteKey][projKey],
+            key: siteKey, // parent key
             colourKey: siteKey
           });
         });
@@ -138,7 +139,7 @@
       });
 
       // Sorted
-      return list.sort(function(a, b) { return a.total - b.total; });
+      return list.sort(function(a, b) { return b.total - a.total; });
     };
 
 
