@@ -120,15 +120,26 @@
       // Interactions
       projectControl.on('mouseover', function(d) {
 
-        d3.select(this).select('rect').style('stroke', '#228');
+        chart.append('rect')
+          .classed('chart-focus', true)
+          .attr('x', function() { return idx*config.projectWidth; })
+          .attr('y', 0)
+          .attr('width', config.projectWidth)
+          .attr('height', config.chartHeight)
+          .attr('fill', 'none')
+          .attr('stroke', '#283e5d')
+          .attr('stroke-width', 2);
+
         svg.selectAll('.axis_label').filter(function(node) {
           return node && node.id === d.id;
         }).style('font-weight', 600);
 
         config.tooltipShowFunc(this, d);
       });
+
       projectControl.on('mouseout', function(d) {
-        d3.select(this).select('rect').style('stroke', '#DDD');
+        chart.selectAll('.chart-focus').remove();
+
         svg.selectAll('.axis_label').filter(function(node) {
           return node && node.id === d.id;
         }).style('font-weight', 400);

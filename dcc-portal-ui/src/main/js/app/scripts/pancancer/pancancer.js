@@ -126,7 +126,8 @@
             label: projKey,
             count: data[siteKey][projKey],
             key: siteKey, // parent key
-            colourKey: siteKey
+            colourKey: siteKey,
+            link: '/projects/' + projKey
           });
         });
 
