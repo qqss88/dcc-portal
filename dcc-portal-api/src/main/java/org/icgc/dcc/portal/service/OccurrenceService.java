@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.service;
 
 import static com.google.common.base.Throwables.propagate;
-import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Collections;
@@ -29,15 +28,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.query.QueryEngine;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Occurrence;
 import org.icgc.dcc.portal.model.Occurrences;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.OccurrenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -51,9 +46,6 @@ import com.google.common.collect.ImmutableList;
 public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
-  private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
-
   private final AtomicReference<Map<String, Map<String, Integer>>> projectMutationCache =
       new AtomicReference<Map<String, Map<String, Integer>>>();
 
@@ -75,20 +67,11 @@ public class OccurrenceService {
   }
 
   public Occurrences findAll(Query query) {
-    val pql = converter.convert(query, OBSERVATION_CENTRIC);
-    log.debug("Query: {}. PQL: {}", query, pql);
-
-    val request = queryEngine.execute(pql, OBSERVATION_CENTRIC);
-    log.debug("Request: {}", request);
-
-    val response = request.getRequestBuilder().execute().actionGet();
-    log.debug("Response: {}", response);
-
-    SearchHits hits = response.getHits();
-
+    val response = occurrenceRepository.findAll(query);
+    val hits = response.getHits();
     val list = ImmutableList.<Occurrence> builder();
 
-    for (SearchHit hit : hits) {
+    for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.OCCURRENCE);
       list.add(new Occurrence(fieldMap));
     }
@@ -109,9 +92,11 @@ public class OccurrenceService {
 
   public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
     val result = projectMutationCache.get();
+
     if (null == result) {
       throw new NotAvailableException("The donor mutation cache is currently not available. Please retry later.");
     }
+
     return result;
   }
 }

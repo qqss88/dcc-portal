@@ -17,12 +17,11 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Maps.toMap;
+import static java.lang.String.format;
+import static org.dcc.portal.pql.meta.Type.OBSERVATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
-import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
-import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
-import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.common.core.model.ConsequenceType.CODING_SEQUENCE_VARIANT;
 import static org.icgc.dcc.common.core.model.ConsequenceType.DISRUPTIVE_INFRAME_DELETION;
 import static org.icgc.dcc.common.core.model.ConsequenceType.DISRUPTIVE_INFRAME_INSERTION;
@@ -48,55 +47,38 @@ import static org.icgc.dcc.common.core.model.ConsequenceType._3_PRIME_UTR_VARIAN
 import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT;
 import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_TRUNCATION;
 import static org.icgc.dcc.common.core.model.ConsequenceType._5_PRIME_UTR_VARIANT;
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildProjectFilters;
+import static org.icgc.dcc.common.core.util.Separators.COMMA;
+import static org.icgc.dcc.common.core.util.Strings2.DOUBLE_QUOTE;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
-import static org.icgc.dcc.portal.service.QueryService.hasDonor;
-import static org.icgc.dcc.portal.service.QueryService.hasGene;
-import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
-import static org.icgc.dcc.portal.service.QueryService.hasMutation;
-import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.hasProject;
-import static org.icgc.dcc.portal.service.QueryService.remapD2P;
-import static org.icgc.dcc.portal.service.QueryService.remapG2P;
-import static org.icgc.dcc.portal.service.QueryService.remapM2C;
-import static org.icgc.dcc.portal.service.QueryService.remapM2O;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
+import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.icgc.dcc.portal.model.FiltersParam;
+import org.elasticsearch.search.SearchHitField;
+import org.icgc.dcc.common.core.model.ConsequenceType;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -109,16 +91,7 @@ public class OccurrenceRepository {
   private static final Kind KIND = Kind.OCCURRENCE;
   private final static TimeValue KEEP_ALIVE = new TimeValue(10000);
 
-  // Type -> ES nested doc
-  private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap
-      .<Kind, String> builder()
-      .put(Kind.PROJECT, "project")
-      .put(Kind.DONOR, "donor")
-      .put(Kind.MUTATION, "ssm")
-      .put(Kind.CONSEQUENCE, "ssm.consequence")
-      .put(Kind.GENE, "ssm.consequence")
-      .put(Kind.OBSERVATION, "ssm.observation")
-      .build());
+  private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
 
   static final ImmutableMap<Kind, String> PREFIX_MAPPING = Maps.immutableEnumMap(ImmutableMap
       .<Kind, String> builder()
@@ -131,122 +104,59 @@ public class OccurrenceRepository {
       .put(Kind.OBSERVATION, "ssm.observation")
       .build());
 
+  private static final Joiner COMMA_JOINER = Joiner.on(COMMA).skipNulls();
+  private static final String PQL_ALIAS_CONSEQUENCE_DONOR_ID = "donor.id";
+  private static final String PQL_ALIAS_CONSEQUENCE_PROJECT_ID = "donor.projectId";
+  /*
+   * This is a mapping from a PQL field alias to a raw fully-qualified ElasticSearch field name.
+   */
+  private static final Map<String, String> FIELD_MAP = ImmutableMap.of(
+      PQL_ALIAS_CONSEQUENCE_DONOR_ID, "donor._donor_id",
+      PQL_ALIAS_CONSEQUENCE_PROJECT_ID, "project._project_id");
+
   private final Client client;
   private final String index;
+  private final QueryEngine queryEngine;
 
   @Autowired
   public OccurrenceRepository(Client client, IndexModel indexModel) {
     this.index = indexModel.getIndex();
     this.client = client;
+    this.queryEngine = new QueryEngine(client, index);
   }
 
-  private FilterBuilder getFilters(ObjectNode filters) {
-    if (filters.fieldNames().hasNext()) return buildFilters(filters);
-    return matchAllFilter();
+  SearchRequestBuilder buildFindAllRequest(Query query) {
+    val pql = PQL_CONVERTER.convert(query, OBSERVATION_CENTRIC);
+    log.debug("JQL filter is: '{}'; PQL is: '{}'.", query.getFilters(), pql);
+
+    val request = queryEngine.execute(pql, OBSERVATION_CENTRIC)
+        .getRequestBuilder();
+    log.debug("Request: {}", request);
+
+    return request;
   }
 
-  private FilterBuilder buildFilters(ObjectNode filters) {
-    val qb = FilterBuilders.boolFilter();
-    val musts = Lists.<FilterBuilder> newArrayList();
-
-    boolean matchAll = true;
-    boolean hasDonor = hasDonor(filters);
-    boolean hasProject = hasProject(filters);
-    boolean hasGene = hasGene(filters);
-    boolean hasGeneSet = hasGeneSet(filters);
-    boolean hasMutation = hasMutation(filters);
-    boolean hasConsequence = hasConsequence(filters);
-    boolean hasObservation = hasObservation(filters);
-
-    if (hasProject || hasGeneSet || hasDonor || hasGene || hasMutation || hasConsequence || hasObservation) {
-      matchAll = false;
-      if (hasDonor) {
-        musts.add(nestedFilter(NESTED_MAPPING.get(Kind.DONOR), buildDonorFilters(filters, PREFIX_MAPPING)));
-      }
-      if (hasProject) {
-        musts.add(nestedFilter(NESTED_MAPPING.get(Kind.PROJECT), buildProjectFilters(filters, PREFIX_MAPPING)));
-      }
-
-      if (hasGene || hasGeneSet || hasMutation || hasConsequence || hasObservation) {
-        val mb = FilterBuilders.boolFilter();
-        val mMusts = Lists.<FilterBuilder> newArrayList();
-        if (hasMutation) mMusts.add(buildMutationFilters(filters, PREFIX_MAPPING));
-
-        if (hasObservation) {
-          mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.OBSERVATION),
-              buildObservationFilters(filters, PREFIX_MAPPING)));
-        }
-
-        if (hasGene || hasGeneSet || hasConsequence) {
-          val nb = FilterBuilders.boolFilter();
-          val nMusts = Lists.<FilterBuilder> newArrayList();
-          if (hasConsequence) nMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
-          if (hasGene) nMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-
-          if (hasGeneSet) nMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
-          // if (hasGeneSet) nMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
-          // buildGeneSetFilters(filters, PREFIX_MAPPING)));
-
-          nb.must(nMusts.toArray(new FilterBuilder[nMusts.size()]));
-          mMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.CONSEQUENCE), nb));
-        }
-        mb.must(mMusts.toArray(new FilterBuilder[mMusts.size()]));
-        musts.add(nestedFilter(NESTED_MAPPING.get(Kind.MUTATION), mb));
-      }
-      qb.must(musts.toArray(new FilterBuilder[musts.size()]));
-    }
-    return matchAll ? matchAllFilter() : qb;
-  }
-
-  public SearchResponse findAllCentric(Query query) {
-    val search = buildFindAllRequest(query, CENTRIC_TYPE);
-
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
+  public SearchResponse findAll(Query query) {
+    val request = buildFindAllRequest(query);
+    val response = request.execute().actionGet();
+    log.debug("Response: {}", response);
 
     return response;
   }
 
-  public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    SearchRequestBuilder search = client
-        .prepareSearch(index)
-        .setTypes(type.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize())
-        .addSort(FIELDS_MAPPING.get(KIND).get(query.getSort()), query.getOrder());
-
-    val filters = remapFilters(query.getFilters());
-    search.setPostFilter(getFilters(filters));
-    search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
-
-    return search;
-  }
-
   public long count(Query query) {
-    SearchRequestBuilder search = buildCountRequest(query, CENTRIC_TYPE);
+    val pql = PQL_CONVERTER.convertCount(query, OBSERVATION_CENTRIC);
+    log.debug("JQL filter is: '{}'; PQL is: '{}'.", query.getFilters(), pql);
 
-    log.debug("{}", search);
-    return search.execute().actionGet().getHits().getTotalHits();
-  }
+    val request = queryEngine.execute(pql, OBSERVATION_CENTRIC)
+        .getRequestBuilder()
+        .setSearchType(COUNT);
+    log.debug("Count query is: '{}'.", request);
 
-  public SearchRequestBuilder buildCountRequest(Query query, Type type) {
-    SearchRequestBuilder search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
+    val response = request.execute().actionGet();
+    log.debug("Count response is: '{}'.", response);
 
-    if (query.hasFilters()) {
-      ObjectNode filters = remapFilters(query.getFilters());
-      search.setPostFilter(getFilters(filters));
-    }
-    return search;
-  }
-
-  public ObjectNode remapFilters(ObjectNode filters) {
-    return remapM2O(remapM2C(remapD2P(remapG2P(filters))));
+    return getTotalHitCount(response);
   }
 
   public Map<String, Object> findOne(String id, Query query) {
@@ -263,84 +173,96 @@ public class OccurrenceRepository {
   }
 
   public Map<String, Map<String, Integer>> getProjectDonorMutationDistribution() {
-
     // See DCC-2612
-    val consequenceList = ImmutableList.<String> of(
-        _3_PRIME_UTR_TRUNCATION.toString(),
-        _3_PRIME_UTR_VARIANT.toString(),
-        _5_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT.toString(),
-        _5_PRIME_UTR_TRUNCATION.toString(),
-        _5_PRIME_UTR_VARIANT.toString(),
-        CODING_SEQUENCE_VARIANT.toString(),
-        DISRUPTIVE_INFRAME_DELETION.toString(),
-        DISRUPTIVE_INFRAME_INSERTION.toString(),
-        EXON_LOSS_VARIANT.toString(),
-        EXON_VARIANT.toString(),
-        FRAMESHIFT_VARIANT.toString(),
-        INFRAME_DELETION.toString(),
-        INFRAME_INSERTION.toString(),
-        INITIATOR_CODON_VARIANT.toString(),
-        MISSENSE_VARIANT.toString(),
-        RARE_AMINO_ACID_VARIANT.toString(),
-        SPLICE_ACCEPTOR_VARIANT.toString(),
-        SPLICE_DONOR_VARIANT.toString(),
-        SPLICE_REGION_VARIANT.toString(),
-        START_LOST.toString(),
-        STOP_GAINED.toString(),
-        STOP_LOST.toString(),
-        STOP_RETAINED_VARIANT.toString(),
-        SYNONYMOUS_VARIANT.toString(),
-        NON_CANONICAL_START_CODON.toString()
-        );
+    val consequenceList = Lists.transform(Lists.<ConsequenceType> newArrayList(
+        _3_PRIME_UTR_TRUNCATION,
+        _3_PRIME_UTR_VARIANT,
+        _5_PRIME_UTR_PREMATURE_START_CODON_GAIN_VARIANT,
+        _5_PRIME_UTR_TRUNCATION,
+        _5_PRIME_UTR_VARIANT,
+        CODING_SEQUENCE_VARIANT,
+        DISRUPTIVE_INFRAME_DELETION,
+        DISRUPTIVE_INFRAME_INSERTION,
+        EXON_LOSS_VARIANT,
+        EXON_VARIANT,
+        FRAMESHIFT_VARIANT,
+        INFRAME_DELETION,
+        INFRAME_INSERTION,
+        INITIATOR_CODON_VARIANT,
+        MISSENSE_VARIANT,
+        RARE_AMINO_ACID_VARIANT,
+        SPLICE_ACCEPTOR_VARIANT,
+        SPLICE_DONOR_VARIANT,
+        SPLICE_REGION_VARIANT,
+        START_LOST,
+        STOP_GAINED,
+        STOP_LOST,
+        STOP_RETAINED_VARIANT,
+        SYNONYMOUS_VARIANT,
+        NON_CANONICAL_START_CODON), type -> DOUBLE_QUOTE + type.toString() + DOUBLE_QUOTE);
 
-    String list = Joiner.on("\",\"").skipNulls().join(consequenceList);
+    val searchSize = 5000;
+    val selects = FIELD_MAP.keySet();
+    val pql = format("select (%s), in (mutation.consequenceType, %s)",
+        COMMA_JOINER.join(selects),
+        COMMA_JOINER.join(consequenceList));
 
-    val exonFilter = new FiltersParam("{mutation:{consequenceType:{is:[\"" + list + "\"]}}}");
-    val filters = remapFilters(exonFilter.get());
-
-    val result = Maps.<String, Map<String, Integer>> newHashMap();
-
-    SearchRequestBuilder search = client
-        .prepareSearch(index)
-        .setTypes(CENTRIC_TYPE.getId())
+    val search = queryEngine.execute(pql, OBSERVATION_CENTRIC).getRequestBuilder()
         .setSearchType(SCAN)
-        .setSize(5000)
-        .setScroll(new TimeValue(10000))
-        .setPostFilter(getFilters(filters))
-        .setQuery(matchAllQuery())
-        .addFields("donor._donor_id", "project._project_id");
+        .setSize(searchSize)
+        .setScroll(KEEP_ALIVE)
+    //
+    ;
+
+    log.info("ES search is: '{}'.", search);
 
     SearchResponse response = search.execute().actionGet();
+    val result = Maps.<String, Map<String, Integer>> newHashMap();
+
     while (true) {
       response = client.prepareSearchScroll(response.getScrollId())
           .setScroll(KEEP_ALIVE)
           .execute().actionGet();
 
-      for (SearchHit hit : response.getHits()) {
-        val projectId = (String) hit.getFields().get("project._project_id").value();
-        val donorId = (String) hit.getFields().get("donor._donor_id").value();
-        if (result.get(projectId) == null) {
-          result.put(projectId, Maps.<String, Integer> newHashMap());
-        }
-        if (result.get(projectId).get(donorId) == null) {
-          result.get(projectId).put(donorId, 0);
-        }
-        result.get(projectId).put(donorId, result.get(projectId).get(donorId) + 1);
+      for (val hit : response.getHits()) {
+        val fields = hit.getFields();
+        val projectId = getStringByAlias(fields, PQL_ALIAS_CONSEQUENCE_PROJECT_ID);
+        val donorId = getStringByAlias(fields, PQL_ALIAS_CONSEQUENCE_DONOR_ID);
+        val project = result.getOrDefault(projectId, Maps.<String, Integer> newHashMap());
+        val donorCount = project.getOrDefault(donorId, 0);
+
+        project.put(donorId, donorCount + 1);
+        result.put(projectId, project);
       }
 
       val finished = !hasHits(response);
+
       if (finished) {
         break;
       }
     }
 
     // Print out some useful info now
-    int totalDonors = 0;
-    for (String key : result.keySet()) {
-      log.debug("{} => {}", key, result.get(key).size());
-      totalDonors += result.get(key).size();
+    if (log.isDebugEnabled()) {
+      val counts = toMap(result.keySet(), projectId ->
+          result.get(projectId).size())
+          .entrySet();
+
+      counts.stream().forEach(entry ->
+          log.debug("Project: {} => Donor Count: {}", entry.getKey(), entry.getValue()));
+
+      val totalDonors = counts.stream()
+          .mapToLong(Entry::getValue)
+          .sum();
+      log.debug("Total donor count: {} ", totalDonors);
     }
-    log.debug("total {} ", totalDonors);
+
     return result;
   }
+
+  @NonNull
+  private static String getStringByAlias(Map<String, SearchHitField> fields, String fieldAlias) {
+    return getString(fields.get(FIELD_MAP.get(fieldAlias)));
+  }
+
 }
