@@ -24,8 +24,10 @@
       replace: true,
       scope: {
         items: '=',
+        alternateBrightness: '=',
         title: '@',
-        subtitle: '@'
+        subtitle: '@',
+        yLabel: '@'
       },
       template:'<div><div class="text-center graph_title">{{title}}</div>'+
         '<div class="stackedsubtitle text-center">{{subtitle}} </div></div>',
@@ -37,7 +39,11 @@
           height: 250,
           width: 500,
           colours: HighchartsService.primarySiteColours,
-          yaxis:{label:'Donors Affected',ticks:4},
+          alternateBrightness: $scope.alternateBrightness === true? true : false,
+          yaxis: {
+            label: $scope.yLabel,
+            ticks: 4
+          },
           onClick: function(geneid){
             $scope.$emit('tooltip::hide');
             $location.path('/genes/' + geneid).search({});
@@ -45,7 +51,7 @@
           },
           tooltipShowFunc: function(elem, d) {
             function getLabel() {
-              return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0)+' Donors Affected';
+              return '<strong>'+d.label+'</strong><br>'+(d.y1-d.y0) + ' ' + $scope.yLabel;
             }
 
             var position = {
@@ -64,28 +70,6 @@
           },
           tooltipHideFunc: function() {
             $scope.$emit('tooltip::hide');
-          },
-          transform: function(data) {
-	         // For each gene, create an array of donors and get the total affected donors count
-            var copy = _.cloneDeep(data);
-	         copy.forEach(function(d) {
-	           var y0 = 0;
-	           d.stack = d.uiFIProjects
-	           .sort(function(a,b){return a.count-b.count;}) //sort so biggest is on top
-	           .map(function(p) {
-                return {
-                  name: p.id,
-                  y0: y0,
-                  y1: y0 += p.count,
-                  key: d.symbol,
-                  link: d.id,
-                  label: p.name,
-                  colourKey: p.primarySite
-                };
-              });
-	           d.total = d.stack[d.stack.length - 1].y1;
-	         });
-            return copy;
           }
         };
 
@@ -94,7 +78,7 @@
             if (!chart) {
               chart = new dcc.StackedBarChart(config);
             }
-            chart.render($element[0], config.transform($scope.items));
+            chart.render($element[0], $scope.items);
           }
         }, true);
 

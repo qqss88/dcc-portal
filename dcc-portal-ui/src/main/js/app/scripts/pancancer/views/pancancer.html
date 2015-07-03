@@ -5,11 +5,13 @@
 <section style="padding-top:0"> 
    <div class="half pull-right" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
 
-
-      <bar data-items="primarySites" ylabel="# Donors" height="300" 
-          heading="Donors Distribution by Primary Site"
-          subheading="{{summary.projectCount}} projects and {{summary.primartySiteCount}} primary sites">
-      </bar>
+      <stacked height="250"
+         data-title="Donors Distribution by Primary Site"
+         data-subtitle="{{summary.projectCount}} projects and {{summary.primarySiteCount}} primary sites"
+         data-y-label="Donors"
+         data-alternate-brightness="true"
+         data-items="primarySites">
+      </stacked>
 
       <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
           <div class="third text-center">

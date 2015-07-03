@@ -63,7 +63,7 @@
       // Get stats
       PancancerService.getPancancerStats().then(function(data) {
         $scope.pcawgDatatypes = PancancerService.orderDatatypes(data.stats);
-        $scope.primarySites = PancancerService.getPrimarySiteDonorChart(data.donorPrimarySite);
+        $scope.primarySites = PancancerService.getSiteProjectDonorChart(data.donorPrimarySite);
       });
 
       // Get overall summary
@@ -108,6 +108,38 @@
     }
 
     this.buildRepoFilterStr = buildRepoFilterStr;
+
+
+    this.getSiteProjectDonorChart = function(data) {
+      var list = [];
+
+      // Stack friendly format
+      Object.keys(data).forEach(function(siteKey) {
+        var bar = {};
+        bar.total = 0;
+        bar.stack = [];
+        bar.key = siteKey;
+
+        Object.keys(data[siteKey]).forEach(function(projKey) {
+          bar.stack.push({
+            name: projKey,
+            label: projKey,
+            count: data[siteKey][projKey],
+            colourKey: siteKey
+          });
+        });
+
+        bar.stack.sort(function(a, b) { return b.count - a.count; }).forEach(function(p) {
+          p.y0 = bar.total,
+          p.y1 = bar.total + p.count;
+          bar.total += p.count;
+        });
+        list.push(bar);
+      });
+
+      // Sorted
+      return list.sort(function(a, b) { return a.total - b.total; });
+    };
 
 
     this.getPrimarySiteDonorChart = function(data) {
@@ -180,8 +212,8 @@
       };
       return Restangular.one('repository/files/summary').get(param);
     };
-
   });
-
-
 })();
+
+
+

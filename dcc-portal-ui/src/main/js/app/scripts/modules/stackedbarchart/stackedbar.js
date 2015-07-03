@@ -4,12 +4,33 @@
 
 	window.dcc = window.dcc || {};
 
-	/* Create the stacked bar chart using d3 */
+   /* Dfault configulration */
 
+
+	/* Create the stacked bar chart using d3 */
 	var StackedBarChart = function(config){
 		this.config = config;
 	};
 
+   /**
+    * Main renderer
+    * data is an array, where each of the array of object:
+    *
+    * [
+    *    {
+    *       total:
+    *       stack: [
+    *         name
+    *         y0
+    *         y1
+    *         label
+    *         colourKey
+    *         link
+    *       ]
+    *    }
+    *    ...
+    * ]
+    */
 	StackedBarChart.prototype.render = function(element, data){
 		this.element = element;
 		this.data = data;
@@ -48,32 +69,12 @@
 		    .attr('transform', 'translate(' + config.margin.left + ',' + config.margin.top + ')');
 
 
-	  // For each gene, create an array of donors and get the total affected donors count
-     /*
-	  this.data.forEach(function(d) {
-	    var y0 = 0;
-	    d.stack = d.uiFIProjects
-	    .sort(function(a,b){return a.count-b.count;}) //sort so biggest is on top
-	    .map(function(p) {
-         return {
-           name: p.id,
-           y0: y0,
-           y1: y0 += p.count,
-           key: d.symbol,
-           link: d.id,
-           label: p.name,
-           primarySite: p.primarySite
-         };
-       });
-	    d.total = d.stack[d.stack.length - 1].y1;
-	  });
-     */
 
 	  // Sort so in descending order
 	  this.data.sort(function(a, b) { return b.total - a.total; });
 
 	  // Create domain of x scale based off data
-	  x.domain(this.data.map(function(d) { return d.symbol; }));
+	  x.domain(this.data.map(function(d) { console.log(d.key); return d.key ; }));
 	  y.domain([0, d3.max(this.data, function(d) { return d.total; })]);
 
 	  // Add the x axis with tilted labels
@@ -121,14 +122,13 @@
       'y2' : function(d){ return y(d);},
       'fill' : 'none',
       'shape-rendering' : 'crispEdges',
-      'stroke' : 'lightgray',
-      'stroke-width' :
-       function(d){
-          if(y(d) === max || y(d) ===0){
-            return '0px';
-          }
-          return '1px';
+      'stroke' : '#DDD',
+      'stroke-width' : function(d) {
+        if(y(d) === max || y(d) ===0){
+          return '0px';
         }
+        return '1px';
+      }
     });
 
     // create the empty column group that we will add projects to
@@ -139,21 +139,34 @@
 
      // create the columns
     bar.selectAll('rect')
-        .data(function(d) { return d.stack; }) //goes through each of the projects of each gene
-        .enter().append('rect')
-        .style('fill', function(d) { return colour(d.colourKey); })
+        .data(function(d) {
+          d.stack.forEach(function(s) { s.key = d.key; });
+          return d.stack;
+        })
+        .enter()
+        .append('rect')
+        .style('fill', function(d, i) {
+          if (config.alternateBrightness) {
+            return d3.rgb( colour(d.colourKey) ).brighter( i%2 * 0.3);
+          }
+          return colour(d.colourKey);
+        })
         .attr('width', x.rangeBand())
         .attr('x',function(d){return x(d.key);})
         .attr('y', function(d) { return y(d.y1); })
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
         .on('mouseover', function(d) {
+          d3.select(this).style('stroke', '#000').style('stroke-width', 2);
           config.tooltipShowFunc(this,d);
         })
         .on('mouseout', function() {
+          d3.select(this).style('stroke', 'none');
           config.tooltipHideFunc();
         })
-        .on('click',function(d){   
-          config.onClick(d.link);
+        .on('click',function(d){
+          if (d.link) {
+            config.onClick(d.link);
+          }
         });
   };
 
