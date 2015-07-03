@@ -113,6 +113,7 @@
     // Helper to do the stacked chart
     function transform(data) {
       var list = [];
+
       data.forEach(function(gene) {
         var bar = {};
         bar.key = gene.symbol;
@@ -126,13 +127,14 @@
             y1: bar.total + p.count,
             link: gene.id,
             label: p.name,
+            key: gene.symbol, // Parent key
             colourKey: p.primarySite
           });
           bar.total += p.count;
         });
         list.push(bar);
       });
-      return list;
+	   return list.sort(function(a, b) { return b.total - a.total; });
     }
 
 
@@ -211,7 +213,6 @@
 
                 gene.uiFIProjects = uiFIProjects;
               });
-
               _ctrl.stacked = transform(genes.hits);
             });
           });

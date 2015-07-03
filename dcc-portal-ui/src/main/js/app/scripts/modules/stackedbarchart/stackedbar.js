@@ -69,12 +69,8 @@
 		    .attr('transform', 'translate(' + config.margin.left + ',' + config.margin.top + ')');
 
 
-
-	  // Sort so in descending order
-	  this.data.sort(function(a, b) { return b.total - a.total; });
-
 	  // Create domain of x scale based off data
-	  x.domain(this.data.map(function(d) { console.log(d.key); return d.key ; }));
+	  x.domain(this.data.map(function(d) { return d.key ; }));
 	  y.domain([0, d3.max(this.data, function(d) { return d.total; })]);
 
 	  // Add the x axis with tilted labels
@@ -140,7 +136,6 @@
      // create the columns
     bar.selectAll('rect')
         .data(function(d) {
-          d.stack.forEach(function(s) { s.key = d.key; });
           return d.stack;
         })
         .enter()
