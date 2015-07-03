@@ -134,12 +134,13 @@
         .attr('class', 'stacked g');
 
      // create the columns
-    bar.selectAll('rect')
+    bar.selectAll('.stack')
         .data(function(d) {
           return d.stack;
         })
         .enter()
         .append('rect')
+        .classed('stack', true)
         .style('fill', function(d, i) {
           if (config.alternateBrightness) {
             return d3.rgb( colour(d.colourKey) ).brighter( i%2 * 0.3);
@@ -151,11 +152,22 @@
         .attr('y', function(d) { return y(d.y1); })
         .attr('height', function(d) { return y(d.y0) - y(d.y1); })
         .on('mouseover', function(d) {
-          d3.select(this).style('stroke', '#000').style('stroke-width', 2);
+
+          svg.append('rect')
+            .classed('chart-focus', true)
+            .attr('x', x(d.key))
+            .attr('y', y(d.y1))
+            .attr('width', x.rangeBand())
+            .attr('height', function() { return y(d.y0) - y(d.y1); })
+            .attr('fill', 'none')
+            .attr('stroke', '#283e5d')
+            .attr('stroke-width', 2);
+
           config.tooltipShowFunc(this,d);
         })
         .on('mouseout', function() {
-          d3.select(this).style('stroke', 'none');
+          svg.selectAll('.chart-focus').remove();
+
           config.tooltipHideFunc();
         })
         .on('click',function(d){
