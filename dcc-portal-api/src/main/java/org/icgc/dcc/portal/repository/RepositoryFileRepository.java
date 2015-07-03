@@ -610,12 +610,14 @@ public class RepositoryFileRepository {
     val fileSizeAgg = AggregationBuilders.sum("size").field("repository.file_size");
     val dataFormatAgg = AggregationBuilders.terms("format").field("data_type.data_format");
 
+    // Primary Site => Project Code => Donor #
     stats.subAggregation(datatypeAgg
         .subAggregation(donorCountAgg)
         .subAggregation(fileSizeAgg)
         .subAggregation(dataFormatAgg))
         .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.primary_site").size(100)
-            .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.donor_id").size(30000)));
+            .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.project_code").size(100)
+                .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.donor_id").size(30000))));
 
     search.addAggregation(stats);
 
@@ -633,8 +635,18 @@ public class RepositoryFileRepository {
     Map<String, Object> donorPrimarySite = Maps.<String, Object> newHashMap();
     for (val bucket : donorFacets.getBuckets()) {
       val name = bucket.getKey();
-      val donorCount = ((Terms) bucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
-      donorPrimarySite.put(name, (long) donorCount);
+
+      if (donorPrimarySite.get(name) == null) {
+        donorPrimarySite.put(name, Maps.<String, Object> newHashMap());
+      }
+
+      val projectFacets = (Terms) bucket.getAggregations().get("donorPrimarySite");
+      val map = (Map<String, Object>) donorPrimarySite.get(name);
+      for (val projectBucket : projectFacets.getBuckets()) {
+        val donorCount = ((Terms) projectBucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
+        map.put(projectBucket.getKey(), (long) donorCount);
+      }
+
     }
 
     Map<String, Object> statistics = Maps.<String, Object> newHashMap();
