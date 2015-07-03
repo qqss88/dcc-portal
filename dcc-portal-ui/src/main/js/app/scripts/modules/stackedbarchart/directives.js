@@ -35,7 +35,9 @@
         var chart, config;
 
         config = {
-          margin:{top: 5, right: 20, bottom: 50, left: 50},
+          margin: {
+             top: 5, right: 20, bottom: 50, left: 50
+          },
           height: 250,
           width: 500,
           colours: HighchartsService.primarySiteColours,
@@ -78,6 +80,13 @@
             if (!chart) {
               chart = new dcc.StackedBarChart(config);
             }
+
+            // Adaptive margin based on char length of labels
+            var max = _.max(_.pluck( $scope.items, 'key').map(function(d) { return d.length; }));
+            if (max >= 10) {
+              config.margin.bottom += 25;
+            }
+
             chart.render($element[0], $scope.items);
           }
         }, true);

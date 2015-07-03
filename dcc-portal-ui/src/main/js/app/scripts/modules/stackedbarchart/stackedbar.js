@@ -80,7 +80,7 @@
 	      .call(xAxis)
 	      .selectAll('text')
 	        .style('text-anchor', 'end')
-	        .style('font-size','8px')
+	        .style('font-size','9px')
 	        .style('font-family','Lucida Grande')
 	        .style('fill','gray')
 	        .attr('dx', '-.8em')
