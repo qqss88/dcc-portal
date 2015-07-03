@@ -110,6 +110,32 @@
     };
 
 
+    // Helper to do the stacked chart
+    function transform(data) {
+      var list = [];
+      data.forEach(function(gene) {
+        var bar = {};
+        bar.key = gene.symbol;
+        bar.total = 0;
+        bar.stack = [];
+
+	     gene.uiFIProjects.sort(function(a, b) { return a.count - b.count; }).forEach(function(p) {
+          bar.stack.push({
+            name: p.id,
+            y0: bar.total,
+            y1: bar.total + p.count,
+            link: gene.id,
+            label: p.name,
+            colourKey: p.primarySite
+          });
+          bar.total += p.count;
+        });
+        list.push(bar);
+      });
+      return list;
+    }
+
+
     function success(data) {
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
@@ -144,30 +170,6 @@
         });
 
 
-        // Helper to do the stacked chart
-        function transform(data) {
-          var list = [];
-          data.forEach(function(gene) {
-            var bar = {}
-            bar.key = gene.symbol;
-            bar.total = 0;
-            bar.stack = [];
-
-	         gene.uiFIProjects.sort(function(a, b) { return a.count - b.count; }).forEach(function(p) {
-              bar.stack.push({
-                name: p.id,
-                y0: bar.total,
-                y1: bar.total + p.count,
-                link: gene.id,
-                label: p.name,
-                colourKey: p.primarySite
-              });
-              bar.total += p.count;
-            });
-            list.push(bar);
-          });
-          return list;
-        }
 
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
