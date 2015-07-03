@@ -257,6 +257,10 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
 
       data.y = hit[params.yValue];
 
+      if (hit.colour) {
+        data.color = hit.colour;
+      }
+
       // Additional options
       if (params.options) {
         if (params.options.linkBase) {
@@ -268,6 +272,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
         r.push(data);
       }
     });
+
 
     return {
       x: xAxis,

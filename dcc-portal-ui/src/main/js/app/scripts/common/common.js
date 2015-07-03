@@ -34,6 +34,7 @@
     'icgc.common.chromosome',
     'icgc.common.consequence',
     'icgc.common.datatype',
+    'icgc.common.pcawg',
 
     // Query langauge
     'icgc.common.pql.translation',

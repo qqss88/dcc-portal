@@ -77,15 +77,15 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
-import org.elasticsearch.search.aggregations.bucket.nested.Nested;
-import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -308,31 +308,6 @@ public class RepositoryFileRepository {
   }
 
   // FIXME: Temporary code
-  private TermFacet convertNestedAggregation(Aggregation agg) {
-    val name = agg.getName();
-    Global globalAgg = (Global) agg;
-    Filter filterAgg = (Filter) globalAgg.getAggregations().get(name);
-    Nested nestedAgg = (Nested) filterAgg.getAggregations().get(name);
-    Terms termAgg = (Terms) nestedAgg.getAggregations().get(name);
-
-    val termsBuilder = new ImmutableList.Builder<Term>();
-
-    log.info("Nested Facet {}", name);
-    long total = 0;
-    for (val bucket : termAgg.getBuckets()) {
-      ReverseNested reverseNestedAgg = (ReverseNested) bucket.getAggregations().get(name);
-      log.info("{} {}", bucket.getKey(), reverseNestedAgg.getDocCount());
-
-      long count = (int) reverseNestedAgg.getDocCount();
-      total += count;
-      termsBuilder.add(new Term(bucket.getKey(), count));
-    }
-    log.info("");
-
-    return TermFacet.repoTermFacet(total, 0, termsBuilder.build());
-  }
-
-  // FIXME: Temporary code
   // Special aggregation to get unique donor count for each repository
   private TermFacet convertRepoDonorAggregation(Aggregation agg) {
     val name = agg.getName();
@@ -446,6 +421,7 @@ public class RepositoryFileRepository {
   /**
    * Untangle array/list objects, numeric objects
    */
+  @SuppressWarnings("unchecked")
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
     for (val key : map.keySet()) {
@@ -538,13 +514,11 @@ public class RepositoryFileRepository {
 
     // Due to the mapping of the file-donor-text type, we need to add certain suffixes to field names.
     // Adds '.raw' to field names for fields that need exact match.
-    val fieldNames = transform(fields, fieldName ->
-        DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ?
-            fieldName + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
+    val fieldNames = transform(fields, fieldName -> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ? fieldName
+        + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
     // Adds '.analyzed' to field names for fields that need partial match.
-    val names = transform(fieldNames, fieldName ->
-        DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ?
-            fieldName + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
+    val names = transform(fieldNames, fieldName -> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ? fieldName
+        + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
 
     val search = client.prepareSearch(index)
         .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
@@ -573,9 +547,12 @@ public class RepositoryFileRepository {
     val summaryAgg = global(name)
         .subAggregation(filter(name).filter(buildRepoFilters(query.getFilters(), false))
             .subAggregation(sum("file").field("repository.file_size"))
-            .subAggregation(terms("donor").size(100000).field("donor.donor_id")));
+            .subAggregation(terms("donor").size(100000).field("donor.donor_id")) // Get unique donors
+            .subAggregation(terms("project").size(1000).field("donor.project_code")) // Get unique projects
+            .subAggregation(terms("primarySite").size(1000).field("donor.primary_site")));
 
     search.addAggregation(summaryAgg);
+    log.info("Summary {}", search);
     val response = search.execute().actionGet();
 
     val result = Maps.<String, Long> newHashMap();
@@ -585,6 +562,8 @@ public class RepositoryFileRepository {
 
     result.put("fileCount", response.getHits().getTotalHits());
     result.put("donorCount", (long) ((Terms) filter.getAggregations().get("donor")).getBuckets().size());
+    result.put("projectCount", (long) ((Terms) filter.getAggregations().get("project")).getBuckets().size());
+    result.put("primarySiteCount", (long) ((Terms) filter.getAggregations().get("primarySite")).getBuckets().size());
     result.put("totalFileSize", (long) ((Sum) filter.getAggregations().get("file")).getValue());
 
     return result;
@@ -615,5 +594,88 @@ public class RepositoryFileRepository {
     val global = (Global) response.getAggregations().get(name);
     val filter = (Filter) global.getAggregations().get(name);
     return ((Terms) filter.getAggregations().get(name)).getBuckets().size();
+  }
+
+  private final String PCAWG = "PCAWG";
+
+  public Map<String, Map<String, Object>> getPancancerStats() {
+    val search = client.prepareSearch(index)
+        .setTypes("file")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(0)
+        .setSize(0);
+
+    val stats = AggregationBuilders.filter(PCAWG).filter(FilterBuilders.termFilter("study", PCAWG));
+    val datatypeAgg = AggregationBuilders.terms(PCAWG).field("data_type.data_type");
+
+    // Cardinality doesn't work, set size to large number to get accurate bucket (donor) count
+    val donorCountAgg = AggregationBuilders.terms("donor").field("donor.donor_id").size(30000);
+    val fileSizeAgg = AggregationBuilders.sum("size").field("repository.file_size");
+    val dataFormatAgg = AggregationBuilders.terms("format").field("data_type.data_format");
+
+    // Primary Site => Project Code => Donor #
+    stats.subAggregation(datatypeAgg
+        .subAggregation(donorCountAgg)
+        .subAggregation(fileSizeAgg)
+        .subAggregation(dataFormatAgg))
+        .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.primary_site").size(100)
+            .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.project_code").size(100)
+                .subAggregation(AggregationBuilders.terms("donorPrimarySite").field("donor.donor_id").size(30000))));
+
+    search.addAggregation(stats);
+
+    log.info("PCAWG {}", search);
+    val response = search.execute().actionGet();
+    return extractPancancerStats(response.getAggregations());
+  }
+
+  private Map<String, Map<String, Object>> extractPancancerStats(Aggregations aggs) {
+    val stats = (Filter) aggs.get(PCAWG);
+    val datatypes = (Terms) stats.getAggregations().get(PCAWG);
+    val donorFacets = (Terms) stats.getAggregations().get("donorPrimarySite");
+    val result = Maps.<String, Map<String, Object>> newHashMap();
+
+    Map<String, Object> donorPrimarySite = Maps.<String, Object> newHashMap();
+    for (val bucket : donorFacets.getBuckets()) {
+      val name = bucket.getKey();
+
+      if (donorPrimarySite.get(name) == null) {
+        donorPrimarySite.put(name, Maps.<String, Object> newHashMap());
+      }
+
+      val projectFacets = (Terms) bucket.getAggregations().get("donorPrimarySite");
+      @SuppressWarnings("unchecked")
+      val map = (Map<String, Object>) donorPrimarySite.get(name);
+      for (val projectBucket : projectFacets.getBuckets()) {
+        val donorCount = ((Terms) projectBucket.getAggregations().get("donorPrimarySite")).getBuckets().size();
+        map.put(projectBucket.getKey(), (long) donorCount);
+      }
+
+    }
+
+    Map<String, Object> statistics = Maps.<String, Object> newHashMap();
+    for (val bucket : datatypes.getBuckets()) {
+      val name = bucket.getKey();
+      val donorCount = ((Terms) bucket.getAggregations().get("donor")).getBuckets().size();
+      val fileSize = ((Sum) bucket.getAggregations().get("size")).getValue();
+      val dataFormat = (Terms) bucket.getAggregations().get("format");
+      val fileCount = bucket.getDocCount();
+
+      val formats = Lists.<String> newArrayList();
+      for (val f : dataFormat.getBuckets()) {
+        formats.add(f.getKey());
+      }
+      val map = ImmutableMap.<String, Object> of(
+          "fileCount", fileCount,
+          "donorCount", (long) donorCount,
+          "fileSize", (long) fileSize,
+          "dataFormat", formats);
+      statistics.put(name, map);
+    }
+    result.put("donorPrimarySite", donorPrimarySite);
+    result.put("stats", statistics);
+    log.debug("Result {}", result);
+
+    return result;
   }
 }

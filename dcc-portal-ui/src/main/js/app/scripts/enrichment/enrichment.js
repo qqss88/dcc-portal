@@ -60,6 +60,10 @@
 
     function buildEnrichmentRequest() {
       var data, geneSortParam;
+      var defaultOrder = 'DESC';
+      var defaultSort = 'affectedDonorCountFiltered';
+
+
       // Check if we should use a provided filter or the default (LocationService)
       if (angular.isDefined(filters)) {
         data = 'params=' + JSON.stringify($scope.params) + '&' +
@@ -73,11 +77,11 @@
 
       if (!_.isEmpty(geneSortParam)) {
         var sort, order;
-        sort = geneSortParam.sort;
+        sort = geneSortParam.sort || defaultSort;
         order = geneSortParam.order === 'asc'? 'ASC' : 'DESC';
         data += 'sort=' + sort + '&order=' + order;
       } else {
-        data += 'sort=affectedDonorCountFiltered&order=DESC';
+        data += 'sort=' + defaultSort + '&order=' + defaultOrder;
       }
       return data;
     }

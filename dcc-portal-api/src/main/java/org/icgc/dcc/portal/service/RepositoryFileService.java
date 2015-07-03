@@ -254,12 +254,11 @@ public class RepositoryFileService {
   @SneakyThrows
   private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
     val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
-    final Function<JsonNode, Map<String, String>> combineMaps = (server) ->
-        ImmutableMap.<String, String> builder()
-            // There shouldn't be collision on the keys.
-            .putAll(fields)
-            .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
-            .build();
+    final Function<JsonNode, Map<String, String>> combineMaps = (server) -> ImmutableMap.<String, String> builder()
+        // There shouldn't be collision on the keys.
+        .putAll(fields)
+        .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
+        .build();
     val fileNode = READER.readTree(hit.sourceAsString());
     val serverArray = fileNode
         .path(FieldNames.REPOSITORY)
@@ -447,7 +446,8 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl, final int rowCount)
+  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl,
+      final int rowCount)
       throws XMLStreamException {
     writer.writeStartElement(XmlTags.RECORD);
     writer.writeAttribute("id", String.valueOf(rowCount));
@@ -506,6 +506,10 @@ public class RepositoryFileService {
    */
   public Map<String, Long> getSummary(Query query) {
     return repositoryFileRepository.getSummary(query);
+  }
+
+  public Map<String, Map<String, Object>> getPancancerStats() {
+    return repositoryFileRepository.getPancancerStats();
   }
 
 }

@@ -220,6 +220,14 @@ public class RepositoryFileResource {
         null == repoList ? "" : repoList);
   }
 
+  @GET
+  @Path("/pcawg/stats")
+  @Timed
+  @ApiOperation(value = "Get pancancer repositories statistics")
+  public Map<String, Map<String, Object>> getPancancerStats() {
+    return repositoryFileService.getPancancerStats();
+  }
+
   @NonNull
   private static Query toQuery(FiltersParam filters) {
     return query()

@@ -168,7 +168,6 @@ public class MutationRepository implements Repository {
   }
 
   public SearchResponse protein(Query query) {
-
     // Customize fields, we need to add more fields once we
     // have the search request, as not all the fields are publicly addressable through the PQL interface
     query.setFields(Lists.<String> newArrayList(
@@ -179,18 +178,19 @@ public class MutationRepository implements Repository {
         "transcriptId"));
 
     val pql = converter.convert(query, MUTATION_CENTRIC);
-    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC)
+        .getRequestBuilder();
 
-    search.getRequestBuilder().setFrom(0).setSize(10000);
-    search.getRequestBuilder().addFields(new String[] {
-        "transcript.consequence.aa_mutation",
-        "transcript.functional_impact_prediction_summary"
-    });
+    search.setFrom(0)
+        .setSize(10000)
+        .addFields(new String[] {
+            "transcript.consequence.aa_mutation",
+            "transcript.functional_impact_prediction_summary"
+        });
 
-    log.info("!!! {}", search.getRequestBuilder());
+    log.info("!!! {}", search);
 
-    SearchResponse response = search.getRequestBuilder().execute().actionGet();
+    val response = search.execute().actionGet();
     return response;
   }
-
 }
