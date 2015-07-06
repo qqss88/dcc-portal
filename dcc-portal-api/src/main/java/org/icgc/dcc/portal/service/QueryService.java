@@ -38,16 +38,13 @@ import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.MUTA
 import java.util.List;
 import java.util.UUID;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.TermFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
-import org.icgc.dcc.portal.model.ChromosomeLocation;
+import org.icgc.dcc.common.core.model.ChromosomeLocation;
 import org.icgc.dcc.portal.model.IndexModel.GeneSetType;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
@@ -58,6 +55,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @SuppressWarnings("deprecation")
 @Slf4j
@@ -217,7 +217,8 @@ public class QueryService {
     return buildTypeFilters(filters, Kind.MUTATION, prefixMapping);
   }
 
-  public static BoolFilterBuilder buildConsequenceFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
+  public static BoolFilterBuilder buildConsequenceFilters(ObjectNode filters,
+      ImmutableMap<Kind, String> prefixMapping) {
     return buildTypeFilters(filters, Kind.CONSEQUENCE, prefixMapping);
   }
 
@@ -361,11 +362,13 @@ public class QueryService {
     return resultFilter;
   }
 
-  public static BoolFilterBuilder buildEmbOccurrenceFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
+  public static BoolFilterBuilder buildEmbOccurrenceFilters(ObjectNode filters,
+      ImmutableMap<Kind, String> prefixMapping) {
     return buildTypeFilters(filters, Kind.EMB_OCCURRENCE, prefixMapping);
   }
 
-  public static BoolFilterBuilder buildObservationFilters(ObjectNode filters, ImmutableMap<Kind, String> prefixMapping) {
+  public static BoolFilterBuilder buildObservationFilters(ObjectNode filters,
+      ImmutableMap<Kind, String> prefixMapping) {
     return buildTypeFilters(filters, Kind.OBSERVATION, prefixMapping);
   }
 
@@ -455,7 +458,8 @@ public class QueryService {
                   listFilters.should(termsFilter(idFieldName, ids));
                 }
 
-                if (filters.path(kind.getId()).path(API_ENTITY_LIST_ID_FIELD_NAME).path(bool).isMissingNode() == false) {
+                if (filters.path(kind.getId()).path(API_ENTITY_LIST_ID_FIELD_NAME).path(bool)
+                    .isMissingNode() == false) {
                   val listNode = filters.get(kind.getId()).get(API_ENTITY_LIST_ID_FIELD_NAME).get(bool);
                   val listId = UUID.fromString(listNode.get(0).asText());
 
