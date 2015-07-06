@@ -167,6 +167,7 @@ public class DonorCentricTypeModel extends TypeModel {
         bool("_ssm_count", "ssmCount"),
         bool("_stgv_exists"),
         bool("_stsm_exists", "stsmExists"),
+        string("_complete", "state"),
         arrayOfStrings("_studies", "studies"),
         arrayOfStrings("experimental_analysis_performed", "analysisTypes"),
         initExperimentalAnalysisPerformedSampleCount(),

@@ -210,10 +210,7 @@ public class OccurrenceRepository {
     val search = queryEngine.execute(pql, OBSERVATION_CENTRIC).getRequestBuilder()
         .setSearchType(SCAN)
         .setSize(searchSize)
-        .setScroll(KEEP_ALIVE)
-    //
-    ;
-
+        .setScroll(KEEP_ALIVE);
     log.info("ES search is: '{}'.", search);
 
     SearchResponse response = search.execute().actionGet();
