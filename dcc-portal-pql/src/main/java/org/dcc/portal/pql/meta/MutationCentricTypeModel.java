@@ -43,11 +43,11 @@ public class MutationCentricTypeModel extends TypeModel {
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of("transcript", "ssm_occurrence");
   private static final List<String> AVAILABLE_FACETS = ImmutableList.of(
       "type",
-      "consequenceTypeNested",
-      "platformNested",
-      "verificationStatusNested",
-      "functionalImpactNested",
-      "sequencingStrategyNested");
+      "consequenceType",
+      "platform",
+      "verificationStatus",
+      "functionalImpact",
+      "sequencingStrategy");
 
   private static final List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",
@@ -59,11 +59,11 @@ public class MutationCentricTypeModel extends TypeModel {
       "affectedDonorCountTotal",
       "testedDonorCount",
       "consequenceType",
-      "consequenceTypeNested",
+      // "consequenceTypeNested",
       "platform",
-      "platformNested",
+      // "platformNested",
       "verificationStatus",
-      "verificationStatusNested",
+      // "verificationStatusNested",
       "assemblyVersion",
       "referenceGenomeAllele",
       "affectedProjectCount",
@@ -71,10 +71,11 @@ public class MutationCentricTypeModel extends TypeModel {
       "affectedDonorCountFiltered",
       "transcriptId",
       "functionalImpact",
-      "functionalImpactNested",
+      // "functionalImpactNested",
       "mutation.location",
-      "sequencingStrategy",
-      "sequencingStrategyNested");
+      "sequencingStrategy"
+      // "sequencingStrategyNested"
+      );
 
   public MutationCentricTypeModel() {
     super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
@@ -102,11 +103,11 @@ public class MutationCentricTypeModel extends TypeModel {
         .add(string("reference_genome_allele", "referenceGenomeAllele"))
         .add(defineSsmOccurrence())
         .add(defineTranscript())
-        .add(string("platform", "platform"))
-        .add(arrayOfStrings("verification_status", "verificationStatus"))
-        .add(arrayOfStrings("sequencing_strategy", "sequencingStrategy"))
-        .add(arrayOfStrings("consequence_type", "consequenceType"))
-        .add(arrayOfStrings("functional_impact_prediction_summary", "functionalImpact"))
+        // .add(string("platform", "platform"))
+        // .add(arrayOfStrings("verification_status", "verificationStatus"))
+        // .add(arrayOfStrings("sequencing_strategy", "sequencingStrategy"))
+        // .add(arrayOfStrings("consequence_type", "consequenceType"))
+        // .add(arrayOfStrings("functional_impact_prediction_summary", "functionalImpact"))
         .add(defineSummary())
 
         // Fake fields for GeneSetFilterVisitor
@@ -136,8 +137,8 @@ public class MutationCentricTypeModel extends TypeModel {
     return nestedArrayOfObjects("transcript", ImmutableSet.of("transcripts", "consequences"),
         object(
             string("id", "transcriptId"),
-            string("functional_impact_prediction_summary", "functionalImpactNested"),
-            object("consequence", string("consequence_type", "consequenceTypeNested")),
+            string("functional_impact_prediction_summary", "functionalImpact"),
+            object("consequence", string("consequence_type", "consequenceType")),
             object("gene",
                 string("_gene_id", "gene.id"),
                 string("biotype", "gene.type"),
@@ -160,9 +161,9 @@ public class MutationCentricTypeModel extends TypeModel {
             defineDonor(),
             defineProject(),
             nestedArrayOfObjects("observation", object(
-                string("platform", "platformNested"),
-                string("verification_status", "verificationStatusNested"),
-                string("sequencing_strategy", "sequencingStrategyNested")))
+                string("platform", "platform"),
+                string("verification_status", "verificationStatus"),
+                string("sequencing_strategy", "sequencingStrategy")))
         ));
   }
 

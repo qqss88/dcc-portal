@@ -131,28 +131,21 @@ public class Jql2PqlConverter {
       return filters;
     }
 
-    if (filters.has("mutation")) {
-      val mutation = (ObjectNode) filters.get("mutation");
-      if (mutation.has("consequenceType")) {
-        mutation.put("consequenceTypeNested", mutation.remove("consequenceType"));
-      }
-
-      if (mutation.has("platform")) {
-        mutation.put("platformNested", mutation.remove("platform"));
-      }
-
-      if (mutation.has("sequencingStrategy")) {
-        mutation.put("sequencingStrategyNested", mutation.remove("sequencingStrategy"));
-      }
-
-      if (mutation.has("verificationStatus")) {
-        mutation.put("verificationStatusNested", mutation.remove("verificationStatus"));
-      }
-
-      if (mutation.has("functionalImpact")) {
-        mutation.put("functionalImpactNested", mutation.remove("functionalImpact"));
-      }
-    }
+    /*
+     * if (filters.has("mutation")) { val mutation = (ObjectNode) filters.get("mutation"); if
+     * (mutation.has("consequenceType")) { mutation.put("consequenceTypeNested", mutation.remove("consequenceType")); }
+     * 
+     * if (mutation.has("platform")) { mutation.put("platformNested", mutation.remove("platform")); }
+     * 
+     * if (mutation.has("sequencingStrategy")) { mutation.put("sequencingStrategyNested",
+     * mutation.remove("sequencingStrategy")); }
+     * 
+     * if (mutation.has("verificationStatus")) { mutation.put("verificationStatusNested",
+     * mutation.remove("verificationStatus")); }
+     * 
+     * if (mutation.has("functionalImpact")) { mutation.put("functionalImpactNested",
+     * mutation.remove("functionalImpact")); } }
+     */
 
     return filters;
   }

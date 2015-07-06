@@ -548,17 +548,17 @@
           var facets = _this.mutations.facets;
           _this.pieConsequences = HighchartsService.pie({
             type: 'mutation',
-            facet: 'consequenceTypeNested',
+            facet: 'consequenceType',
             facets: facets
           });
           _this.piePlatform = HighchartsService.pie({
             type: 'mutation',
-            facet: 'platformNested',
+            facet: 'platform',
             facets: facets
           });
           _this.pieVerificationStatus = HighchartsService.pie({
             type: 'mutation',
-            facet: 'verificationStatusNested',
+            facet: 'verificationStatus',
             facets: facets
           });
           _this.pieType = HighchartsService.pie({
