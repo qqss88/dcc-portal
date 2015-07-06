@@ -106,8 +106,10 @@ public class MutationService {
       map.put("_mutation_id", hit.getFields().get("_mutation_id").getValue());
       map.put("mutation", hit.getFields().get("mutation").getValue());
       map.put("_summary._affected_donor_count", hit.getFields().get("_summary._affected_donor_count").getValue());
-      map.put("functional_impact_prediction_summary", hit.getFields().get("functional_impact_prediction_summary")
-          .getValues());
+      /*
+       * map.put("functional_impact_prediction_summary", hit.getFields().get("functional_impact_prediction_summary")
+       * .getValues());
+       */
 
       List<Object> transcriptIds = hit.getFields().get("transcript.id").getValues();
       val predictionSummary = hit.getFields().get("transcript.functional_impact_prediction_summary").getValues();
