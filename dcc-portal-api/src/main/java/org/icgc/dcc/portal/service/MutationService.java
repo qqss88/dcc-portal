@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
@@ -21,7 +19,6 @@ import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
-import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.MutationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,19 +33,11 @@ import com.google.common.collect.Maps;
 public class MutationService {
 
   private final MutationRepository mutationRepository;
-  private final QueryEngine queryEngine;
-  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
   private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   public Mutations findAllCentric(Query query) {
-    val pql = converter.convert(query, Type.MUTATION_CENTRIC);
-    log.debug("Query: {}. PQL: {}", query, pql);
 
-    val request = queryEngine.execute(pql, Type.MUTATION_CENTRIC);
-    log.debug("Request: {}", request);
-
-    val response = request.getRequestBuilder().execute().actionGet();
-    log.debug("Response: {}", response);
+    val response = mutationRepository.findAllCentric(query);
 
     val hits = response.getHits();
 
