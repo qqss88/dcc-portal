@@ -46,9 +46,9 @@
             label: $scope.yLabel,
             ticks: 4
           },
-          onClick: function(geneid){
+          onClick: function(link){
             $scope.$emit('tooltip::hide');
-            $location.path('/genes/' + geneid).search({});
+            $location.path(link).search({});
             $scope.$apply();
           },
           tooltipShowFunc: function(elem, d) {

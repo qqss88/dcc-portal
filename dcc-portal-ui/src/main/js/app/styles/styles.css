@@ -977,7 +977,7 @@ header #brand {
 header #brand #icgc {
   color: #283e5d;
   font-weight: bold;
-  margin-right: 0.5rem;
+  letter-spacing: -2px;
 }
 /* line 28, _sections/_header.scss */
 header #brand a {
