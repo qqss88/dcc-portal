@@ -174,7 +174,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     val location = ChromosomeLocation.parse(locationString);
 
     val mustBoolNodes = ImmutableList.<ExpressionNode> builder()
-        .add(createTermNode(field, typeModel, location.getChromosome().getName()));
+        .add(createChromosomeNameTermNode(field, typeModel, location.getChromosome().getName()));
 
     if (location.hasStart()) {
       mustBoolNodes.add(createGreaterEqualNode(resolveStartField(field, typeModel), location.getStart()));
@@ -186,7 +186,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
 
     val result = new BoolNode(new MustBoolNode(mustBoolNodes.build()));
 
-    return Optional.of(nest(field, result, context.get().getTypeModel(), node));
+    return Optional.of(nest(field, result, typeModel, node));
   }
 
   private static ExpressionNode createTermNode(String field, ExpressionNode child) {
@@ -294,7 +294,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new RangeNode(field, leNode);
   }
 
-  private static ExpressionNode createTermNode(String field, TypeModel typeModel, String chromosomeName) {
+  private static ExpressionNode createChromosomeNameTermNode(String field, TypeModel typeModel, String chromosomeName) {
     return new TermNode(resolveChromosomeField(field, typeModel), chromosomeName);
   }
 
