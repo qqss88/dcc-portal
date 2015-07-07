@@ -37,7 +37,7 @@ public class SearchNonNestedFieldsVisitorTest {
 
   @Test
   public void nonNestedTest() {
-    val filter = new FilterNode(new BoolNode(new MustBoolNode(new TermNode("platformNested", "pl"))));
+    val filter = new FilterNode(new BoolNode(new MustBoolNode(new TermNode("platform", "pl"))));
     val result = filter.accept(visitor, createContext("transcript"));
     assertThat(result).isTrue();
   }
@@ -52,7 +52,7 @@ public class SearchNonNestedFieldsVisitorTest {
   @Test
   public void nonNestedWithNestedTest() {
     val filter = new FilterNode(new BoolNode(new MustBoolNode(
-        new TermNode("platformNested", ""),
+        new TermNode("platform", ""),
         new TermNode("transcriptId", ""))));
     val result = filter.accept(visitor, createContext("transcript"));
     assertThat(result).isTrue();
@@ -60,7 +60,7 @@ public class SearchNonNestedFieldsVisitorTest {
 
   @Test
   public void nestedWithNestedNodeTest() {
-    val filter = new FilterNode(new NestedNode("ssm_occurrence.observation", new TermNode("platformNested", "")));
+    val filter = new FilterNode(new NestedNode("ssm_occurrence.observation", new TermNode("platform", "")));
     val result = filter.accept(visitor, createContext("ssm_occurrence"));
     assertThat(result).isFalse();
   }

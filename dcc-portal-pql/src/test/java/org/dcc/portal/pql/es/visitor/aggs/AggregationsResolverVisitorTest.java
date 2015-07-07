@@ -153,7 +153,7 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void nestedAggregationWithNestedFilterTest() {
-    val result = visit("facets(consequenceTypeNested),eq(transcriptId, 'T1')");
+    val result = visit("facets(consequenceType),eq(transcriptId, 'T1')");
 
     val nestedNode = (NestedAggregationNode) result.getFirstChild();
     assertThat(nestedNode.getPath()).isEqualTo("transcript");
@@ -170,9 +170,9 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void doubleNestedFieldTest() {
-    val result = visit("facets(platformNested)");
+    val result = visit("facets(platform)");
     val nestedAggr = (NestedAggregationNode) result.getFirstChild();
-    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platform");
     assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
 
     val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
@@ -181,7 +181,7 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void doubleNestedFieldTest_nonNestedFilter() {
-    val result = visit("facets(platformNested), eq(chromosome, '12')");
+    val result = visit("facets(platform), eq(chromosome, '12')");
 
     // FilterAgg - NestedAgg - TermsAgg
     val filterAggr = (FilterAggregationNode) result.getFirstChild();
@@ -190,7 +190,7 @@ public class AggregationsResolverVisitorTest {
     assertThat(termNode.getValueNode().getValue()).isEqualTo("12");
 
     val nestedAggr = (NestedAggregationNode) filterAggr.getFirstChild();
-    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platform");
     assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
 
     val termsAggr = (TermsAggregationNode) nestedAggr.getFirstChild();
@@ -199,9 +199,9 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void doubleNestedFieldTest_nestedFilter() {
-    val result = visit("facets(platformNested), eq(donor.projectId, 'ALL-US')");
+    val result = visit("facets(platform), eq(donor.projectId, 'ALL-US')");
     val nestedAggr = (NestedAggregationNode) result.getFirstChild();
-    assertThat(nestedAggr.getAggregationName()).isEqualTo("platformNested");
+    assertThat(nestedAggr.getAggregationName()).isEqualTo("platform");
     assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence");
 
     val ssmFilterAggr = (FilterAggregationNode) nestedAggr.getFirstChild();
@@ -218,7 +218,7 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void doubleNestedFieldTest_doubleNestedFilter() {
-    val result = visit("facets(platformNested), eq(verificationStatusNested, 'tested')");
+    val result = visit("facets(platform), eq(verificationStatus, 'tested')");
     val nestedAggr = (NestedAggregationNode) result.getFirstChild();
     assertThat(nestedAggr.getPath()).isEqualTo("ssm_occurrence.observation");
 
@@ -231,10 +231,10 @@ public class AggregationsResolverVisitorTest {
 
   @Test
   public void doubleNestedFieldTest_allFilters() {
-    val result = visit("facets(platformNested), "
+    val result = visit("facets(platform), "
         + "eq(chromosome, '12'), "
         + "nested(ssm_occurrence, eq(donor.projectId, 'ALL-US'), "
-        + "nested(ssm_occurrence.observation, eq(verificationStatusNested, 'tested')))");
+        + "nested(ssm_occurrence.observation, eq(verificationStatus, 'tested')))");
 
     val globalFistersAggr = (FilterAggregationNode) result.getFirstChild();
     assertThat(globalFistersAggr.getFilters()).isNotNull();

@@ -47,68 +47,68 @@ public class NestedAggregationVisitorTest extends BaseElasticsearchTest {
 
   @Test
   public void nestedAggregationTest() {
-    val result = executeQuery("facets(consequenceTypeNested)");
+    val result = executeQuery("facets(consequenceType)");
 
-    Global global = result.getAggregations().get("consequenceTypeNested");
-    Nested nested = global.getAggregations().get("consequenceTypeNested");
-    Terms terms = nested.getAggregations().get("consequenceTypeNested");
+    Global global = result.getAggregations().get("consequenceType");
+    Nested nested = global.getAggregations().get("consequenceType");
+    Terms terms = nested.getAggregations().get("consequenceType");
 
     val missenseAll = terms.getBucketByKey("missense_variant");
     assertThat(missenseAll.getDocCount()).isEqualTo(5L);
-    ReverseNested missenseNested = missenseAll.getAggregations().get("consequenceTypeNested");
+    ReverseNested missenseNested = missenseAll.getAggregations().get("consequenceType");
     assertThat(missenseNested.getDocCount()).isEqualTo(3L);
 
     val frameshiftAll = terms.getBucketByKey("frameshift_variant");
     assertThat(frameshiftAll.getDocCount()).isEqualTo(2L);
-    ReverseNested frameshiftNested = frameshiftAll.getAggregations().get("consequenceTypeNested");
+    ReverseNested frameshiftNested = frameshiftAll.getAggregations().get("consequenceType");
     assertThat(frameshiftNested.getDocCount()).isEqualTo(2L);
 
     val intergenicAll = terms.getBucketByKey("intergenic_region");
     assertThat(intergenicAll.getDocCount()).isEqualTo(2L);
-    ReverseNested intergenicNested = intergenicAll.getAggregations().get("consequenceTypeNested");
+    ReverseNested intergenicNested = intergenicAll.getAggregations().get("consequenceType");
     assertThat(intergenicNested.getDocCount()).isEqualTo(1L);
 
     // Missing
-    Global globalMissing = result.getAggregations().get("consequenceTypeNested_missing");
-    Nested nestedMissing = globalMissing.getAggregations().get("consequenceTypeNested_missing");
-    Missing termsMissing = nestedMissing.getAggregations().get("consequenceTypeNested_missing");
-    ReverseNested reverseMissing = termsMissing.getAggregations().get("consequenceTypeNested_missing");
+    Global globalMissing = result.getAggregations().get("consequenceType_missing");
+    Nested nestedMissing = globalMissing.getAggregations().get("consequenceType_missing");
+    Missing termsMissing = nestedMissing.getAggregations().get("consequenceType_missing");
+    ReverseNested reverseMissing = termsMissing.getAggregations().get("consequenceType_missing");
     assertThat(reverseMissing.getDocCount()).isEqualTo(1L);
   }
 
   @Test
   public void nestedAggregationTest_withFilter() {
-    val result = executeQuery("facets(consequenceTypeNested), eq(transcriptId, 'T7')");
+    val result = executeQuery("facets(consequenceType), eq(transcriptId, 'T7')");
 
-    Global global = result.getAggregations().get("consequenceTypeNested");
-    Nested nested = global.getAggregations().get("consequenceTypeNested");
-    Filter nestedFilter = nested.getAggregations().get("consequenceTypeNested");
-    Terms terms = nestedFilter.getAggregations().get("consequenceTypeNested");
+    Global global = result.getAggregations().get("consequenceType");
+    Nested nested = global.getAggregations().get("consequenceType");
+    Filter nestedFilter = nested.getAggregations().get("consequenceType");
+    Terms terms = nestedFilter.getAggregations().get("consequenceType");
 
     val intergenicAll = terms.getBucketByKey("intergenic_region");
     assertThat(intergenicAll.getDocCount()).isEqualTo(1L);
-    ReverseNested intergenicNested = intergenicAll.getAggregations().get("consequenceTypeNested");
+    ReverseNested intergenicNested = intergenicAll.getAggregations().get("consequenceType");
     assertThat(intergenicNested.getDocCount()).isEqualTo(1L);
   }
 
   @Test
   public void nestedAggregationTest_withNestedFilter() {
-    val result = executeQuery("facets(platformNested), eq(donor.projectId, 'ALL-US')");
+    val result = executeQuery("facets(platform), eq(donor.projectId, 'ALL-US')");
 
-    Global global = result.getAggregations().get("platformNested");
-    Nested nested = global.getAggregations().get("platformNested");
-    Filter nestedFilter = nested.getAggregations().get("platformNested");
-    nested = nestedFilter.getAggregations().get("platformNested");
-    Terms terms = nested.getAggregations().get("platformNested");
+    Global global = result.getAggregations().get("platform");
+    Nested nested = global.getAggregations().get("platform");
+    Filter nestedFilter = nested.getAggregations().get("platform");
+    nested = nestedFilter.getAggregations().get("platform");
+    Terms terms = nested.getAggregations().get("platform");
 
     val solidSeq = terms.getBucketByKey("SOLiD sequencing");
     assertThat(solidSeq.getDocCount()).isEqualTo(2L);
-    ReverseNested solidSeqNested = solidSeq.getAggregations().get("platformNested");
+    ReverseNested solidSeqNested = solidSeq.getAggregations().get("platform");
     assertThat(solidSeqNested.getDocCount()).isEqualTo(1L);
 
     val illuminaGa = terms.getBucketByKey("SOLiD sequencing");
     assertThat(illuminaGa.getDocCount()).isEqualTo(2L);
-    ReverseNested illuminaGaNested = illuminaGa.getAggregations().get("platformNested");
+    ReverseNested illuminaGaNested = illuminaGa.getAggregations().get("platform");
     assertThat(illuminaGaNested.getDocCount()).isEqualTo(1L);
   }
 
