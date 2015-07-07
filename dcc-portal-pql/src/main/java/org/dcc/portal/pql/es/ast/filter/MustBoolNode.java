@@ -30,6 +30,10 @@ public class MustBoolNode extends ExpressionNode {
     super(children);
   }
 
+  public MustBoolNode(Iterable<ExpressionNode> children) {
+    super(children);
+  }
+
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
     return visitor.visitMustBool(this, context);

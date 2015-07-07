@@ -47,7 +47,15 @@ public abstract class ExpressionNode {
   private final String nodeName = getClass().getSimpleName();
 
   public ExpressionNode(ExpressionNode... children) {
-    this.children = Lists.newArrayList(children);
+    this(Lists.newArrayList(children));
+  }
+
+  public ExpressionNode(Iterable<ExpressionNode> children) {
+    this(Lists.newArrayList(children));
+  }
+
+  private ExpressionNode(List<ExpressionNode> children) {
+    this.children = children;
     assignParent(this.children, this);
   }
 

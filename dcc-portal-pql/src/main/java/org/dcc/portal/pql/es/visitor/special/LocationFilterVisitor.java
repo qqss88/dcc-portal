@@ -18,15 +18,12 @@
 package org.dcc.portal.pql.es.visitor.special;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.checkOptional;
 import static org.dcc.portal.pql.es.utils.VisitorHelpers.visitChildren;
 import static org.dcc.portal.pql.meta.TypeModel.GENE_LOCATION;
 import static org.dcc.portal.pql.meta.TypeModel.MUTATION_LOCATION;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import lombok.NonNull;
 import lombok.val;
@@ -54,8 +51,9 @@ import org.dcc.portal.pql.es.visitor.NodeVisitor;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
+import org.icgc.dcc.common.core.model.ChromosomeLocation;
 
-import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Resolves filtering by {@code gene.location} and {@code mutation.location}
@@ -66,14 +64,10 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
   private static final String MUTATION_CHROMOSOME = "mutation.chromosome";
   private static final String GENE_CHROMOSOME = "gene.chromosome";
 
-  private static final Pattern CHROMOSOME_REGEX = Pattern.compile("^chr\\p{Alnum}{1,2}$");
   private static final String GENE_START = "gene.start";
   private static final String GENE_END = "gene.end";
   private static final String MUTATION_START = "mutation.start";
   private static final String MUTATION_END = "mutation.end";
-
-  private static final Splitter COLON_SPLITTER = Splitter.on(":");
-  private static final Splitter DASH_SPLITTER = Splitter.on("-");
 
   @Override
   public Optional<ExpressionNode> visitRoot(@NonNull RootNode node, @NonNull Optional<QueryContext> context) {
@@ -165,20 +159,34 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
   @Override
   public Optional<ExpressionNode> visitTerm(@NonNull TermNode node, @NonNull Optional<QueryContext> context) {
     checkOptional(context);
+
     val field = (String) node.getNameNode().getValue();
     log.debug("[visitTerm] Field: {}", field);
+
     if (!field.equals(GENE_LOCATION) && !field.equals(MUTATION_LOCATION)) {
       return Optional.empty();
     }
 
-    val locationValue = (String) node.getValueNode().getValue();
-    val typeModel = context.get().getTypeModel();
+    val locationString = (String) node.getValueNode().getValue();
+    log.debug("[visitTerm] Value: {}", locationString);
 
-    val result = new BoolNode(new MustBoolNode(
-        createTermNode(field, typeModel, locationValue),
-        createGreaterEqualNode(resolveStartField(field, typeModel), parseStart(locationValue)),
-        createLessEqualNode(resolveEndField(field, typeModel), parseEnd(locationValue))
-        ));
+    val typeModel = context.get().getTypeModel();
+    val location = ChromosomeLocation.parse(locationString);
+
+    val mustBoolNodes = ImmutableList.<ExpressionNode> builder()
+        .add(createTermNode(field, typeModel, location.getChromosome().getName()));
+
+    val start = location.getStart();
+    if (null != start) {
+      mustBoolNodes.add(createGreaterEqualNode(resolveStartField(field, typeModel), start));
+    }
+
+    val end = location.getEnd();
+    if (null != start) {
+      mustBoolNodes.add(createLessEqualNode(resolveEndField(field, typeModel), end));
+    }
+
+    val result = new BoolNode(new MustBoolNode(mustBoolNodes.build()));
 
     return Optional.of(nest(field, result, context.get().getTypeModel(), node));
   }
@@ -274,17 +282,6 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
         nestedNodePath);
   }
 
-  /**
-   * {@code expression} looks like chr12:123-346
-   * @return Chromosome end value. E.g. 346
-   */
-  private static long parseEnd(String expression) {
-    val components = splitByColon(expression);
-    val startEndComponents = splitByDash(components.get(1));
-
-    return (Long.valueOf(startEndComponents.get(1))).longValue();
-  }
-
   private static String resolveEndField(String field, TypeModel typeModel) {
     if (field.startsWith("gene")) {
       return typeModel.getField(GENE_END);
@@ -299,29 +296,8 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     return new RangeNode(field, leNode);
   }
 
-  private static ExpressionNode createTermNode(String field, TypeModel typeModel, String location) {
-    return new TermNode(resolveChromosomeField(field, typeModel), parseChromosome(location));
-  }
-
-  /**
-   * {@code expression} looks like chr12:123-346
-   * @return Chromosome start value. E.g. 123
-   */
-  private static long parseStart(String expression) {
-    val components = splitByColon(expression);
-    val startEndComponents = splitByDash(components.get(1));
-
-    return (Long.valueOf(startEndComponents.get(0))).longValue();
-  }
-
-  /**
-   * {@code expression} looks like 123-346
-   */
-  private static List<String> splitByDash(String expression) {
-    val components = DASH_SPLITTER.splitToList(expression);
-    checkState(components.size() == 2, format("Malformed location field '%s'", expression));
-
-    return components;
+  private static ExpressionNode createTermNode(String field, TypeModel typeModel, String chromosomeName) {
+    return new TermNode(resolveChromosomeField(field, typeModel), chromosomeName);
   }
 
   private static ExpressionNode createGreaterEqualNode(String field, long value) {
@@ -344,30 +320,6 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     }
 
     return typeModel.getField(MUTATION_CHROMOSOME);
-  }
-
-  /**
-   * {@code expression} looks like chr12:123-346
-   * @return Chromosome value. E.g. 12
-   */
-  private static String parseChromosome(String expression) {
-    val components = splitByColon(expression);
-    val chromosome = components.get(0);
-    checkChromosome(chromosome);
-
-    return chromosome.substring(3);
-  }
-
-  private static List<String> splitByColon(String expression) {
-    val components = COLON_SPLITTER.splitToList(expression);
-    checkState(components.size() == 2, format("Malformed location field '%s'", expression));
-
-    return components;
-  }
-
-  private static void checkChromosome(String chromosome) {
-    val matcher = CHROMOSOME_REGEX.matcher(chromosome);
-    checkState(matcher.find(), format("Malformed chromosome '%s'", chromosome));
   }
 
 }

@@ -29,15 +29,12 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 
 @Slf4j
 @Deprecated
 public class QueryService {
-
-  private final static ObjectMapper MAPPER = new ObjectMapper();
 
   public static String[] getFields(Query query, Kind kind) {
     val typeFieldsMap = FIELDS_MAPPING.get(kind);
