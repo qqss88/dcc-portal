@@ -182,7 +182,7 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     }
 
     val end = location.getEnd();
-    if (null != start) {
+    if (null != end) {
       mustBoolNodes.add(createLessEqualNode(resolveEndField(field, typeModel), end));
     }
 
