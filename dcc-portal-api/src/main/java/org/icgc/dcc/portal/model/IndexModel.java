@@ -158,12 +158,11 @@ public class IndexModel {
           .put("mirnaSeqTestedDonorCount", "_summary._mirna_seq_tested_donor_count")
           .put("jcnTestedDonorCount", "_summary._jcn_tested_donor_count")
           // .put("totalDonorCount", "_summary._total_donor_count")
-          .put("totalDonorCount", "_summary._total_complete_donor_count")
+          .put("totalDonorCount", "_summary._total_live_donor_count")
           .put("affectedDonorCount", "_summary._affected_donor_count")
           .put("experimentalAnalysisPerformedDonorCounts", "_summary.experimental_analysis_performed_donor_count")
           .put("experimentalAnalysisPerformedSampleCounts", "_summary.experimental_analysis_performed_sample_count")
           .put("repository", "_summary.repository")
-          .put("complete", "_summary._complete")
           .put("state", "_summary._state")
           .build();
 
@@ -209,7 +208,6 @@ public class IndexModel {
           .put("priorMalignancy", "prior_malignancy")
           .put("cancerTypePriorMalignancy", "cancer_type_prior_malignancy")
           .put("cancerHistoryFirstDegreeRelative", "cancer_history_first_degree_relative")
-          .put("complete", "_summary._complete")
           .put("state", "_summary._state")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
@@ -565,8 +563,8 @@ public class IndexModel {
           .put("primarySiteCount", "primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
-          .put("completeDonorCount", "complete_donor_count")
-          .put("completeProjectCount", "complete_project_count")
+          .put("liveDonorCount", "live_donor_count")
+          .put("liveProjectCount", "live_project_count")
           .build();
 
   private static final ImmutableMap<String, String> DIAGRAM_FIELDS_MAPPING =

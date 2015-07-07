@@ -732,6 +732,8 @@ public class QueryService {
       if (state.equalsIgnoreCase("*")) {
         list.add("live");
         list.add("pending");
+      } else {
+        list.add(state);
       }
     }
 
