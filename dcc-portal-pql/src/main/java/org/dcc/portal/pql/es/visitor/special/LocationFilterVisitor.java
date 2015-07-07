@@ -176,14 +176,12 @@ public class LocationFilterVisitor extends NodeVisitor<Optional<ExpressionNode>,
     val mustBoolNodes = ImmutableList.<ExpressionNode> builder()
         .add(createTermNode(field, typeModel, location.getChromosome().getName()));
 
-    val start = location.getStart();
-    if (null != start) {
-      mustBoolNodes.add(createGreaterEqualNode(resolveStartField(field, typeModel), start));
+    if (location.hasStart()) {
+      mustBoolNodes.add(createGreaterEqualNode(resolveStartField(field, typeModel), location.getStart()));
     }
 
-    val end = location.getEnd();
-    if (null != end) {
-      mustBoolNodes.add(createLessEqualNode(resolveEndField(field, typeModel), end));
+    if (location.hasEnd()) {
+      mustBoolNodes.add(createLessEqualNode(resolveEndField(field, typeModel), location.getEnd()));
     }
 
     val result = new BoolNode(new MustBoolNode(mustBoolNodes.build()));
