@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkState;
 import static lombok.AccessLevel.PRIVATE;
-import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_GENE_MUTATION_SORT;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.IOException;
@@ -32,8 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.annotation.PostConstruct;
 
 import lombok.Cleanup;
 import lombok.Getter;
@@ -49,12 +46,10 @@ import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.BaseEntitySetDefinition;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
 import org.icgc.dcc.portal.model.EntitySet;
-import org.icgc.dcc.portal.model.EntitySet.State;
 import org.icgc.dcc.portal.model.EntitySet.SubType;
 import org.icgc.dcc.portal.model.EntitySetDefinition;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
@@ -78,18 +73,6 @@ public class EntityListService {
   @Getter(lazy = true, value = PRIVATE)
   private final int currentDataVersion = resolveDataVersion();
 
-  private DemoEntitySet demoEntitySet;
-
-  @PostConstruct
-  private void init() {
-    val config = properties.getSetOperation();
-    val uuid = config.getDemoListUuid();
-    val filter = config.getDemoListFilterParam();
-    val dataVersion = getCurrentDataVersion();
-
-    demoEntitySet = new DemoEntitySet(uuid, filter, dataVersion);
-  }
-
   @SneakyThrows
   private static String toFilterParamForGeneSymbols(@NonNull final String symbolList) {
     // Build the ObjectNode to represent this filterParam: { "gene": "symbol": {"is": ["s1", "s2", ...]}
@@ -111,25 +94,6 @@ public class EntityListService {
     return URLEncoder.encode(result, UTF_8.name());
   }
 
-  private static final class DemoEntitySet {
-
-    private static final String NAME = "DEMO gene set";
-    private static final String DESCRIPTION = "Select this DEMO gene set then click on Enrichment Analysis";
-    private static final String SORT_BY = DEFAULT_GENE_MUTATION_SORT;
-
-    private final EntitySetDefinition.SortOrder SORT_ORDER = EntitySetDefinition.SortOrder.ASCENDING;
-    private final BaseEntitySet.Type TYPE = BaseEntitySet.Type.GENE;
-
-    private final EntitySetDefinition definition;
-    private final EntitySet demoSet;
-
-    private DemoEntitySet(@NonNull final String uuid, @NonNull final String geneSymbols, final int dataVersion) {
-      this.demoSet = new EntitySet(UUID.fromString(uuid), State.PENDING, 0L, NAME, DESCRIPTION, TYPE, dataVersion);
-      this.definition = new EntitySetDefinition(toFilterParamForGeneSymbols(geneSymbols),
-          SORT_BY, SORT_ORDER, NAME, DESCRIPTION, TYPE, 0, false);
-    }
-  }
-
   public EntitySet getEntityList(@NonNull final UUID entitySetId) {
     val list = repository.find(entitySetId);
 
@@ -148,25 +112,6 @@ public class EntityListService {
     analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
 
     return newEntitySet;
-  }
-
-  @Async
-  public void createDemoEntitySet() {
-    val newEntitySet = demoEntitySet.demoSet;
-    val entitySetId = newEntitySet.getId();
-
-    val list = repository.find(entitySetId);
-    if (null == list) {
-      // Create the demo record if it doesn't exist in the relational database.
-      log.info(
-          "The demo record in the relational store does not exist therefore is now being recreated: '{}'",
-          newEntitySet);
-
-      val insertCount = repository.save(newEntitySet, newEntitySet.getVersion());
-      checkState(insertCount == 1, "Could not save the demo list - Insert count: %s", insertCount);
-    }
-
-    analyzer.materializeList(entitySetId, demoEntitySet.definition);
   }
 
   public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition) {
