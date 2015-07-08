@@ -25,7 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import lombok.val;
 
+import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
+import org.icgc.dcc.portal.auth.oauth.UserScopesInternal;
 import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.User;
 import org.junit.Before;
@@ -59,13 +61,15 @@ public class TokenServiceTest {
   @Test
   public void createTest_successful() {
     when(client.createToken(USER_ID, SCOPE)).thenReturn(createAccessToken());
-    val result = tokenService.create(createUser(USER_ID, TRUE), SCOPE);
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(SCOPE));
+
+    val result = tokenService.create(createUser(USER_ID, TRUE), SCOPE, "");
     assertThat(result).isEqualTo(TOKEN_ID);
   }
 
   @Test(expected = ForbiddenAccessException.class)
   public void createTest_noDaco() {
-    tokenService.create(createUser(USER_ID, FALSE), SCOPE);
+    tokenService.create(createUser(USER_ID, FALSE), SCOPE, "");
   }
 
   @Test
@@ -82,8 +86,23 @@ public class TokenServiceTest {
 
   @Test
   public void userScopesTest() {
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(SCOPE));
     val result = tokenService.userScopes(createUser(USER_ID, TRUE));
-    assertThat(result.getScopes()).containsOnly(SCOPE);
+    val expectedScopes = Splitters.WHITESPACE.splitToList(SCOPE);
+
+    for (val accessScope : result.getScopes()) {
+      assertThat(expectedScopes).containsOnly(accessScope.getName());
+    }
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void userScopesTest_unrecognizedScope() {
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal("fake"));
+    tokenService.userScopes(createUser(USER_ID, TRUE));
+  }
+
+  private static UserScopesInternal createUserScopesInternal(String scope) {
+    return new UserScopesInternal(singleton(scope));
   }
 
   private static User createUser(String userId, Boolean hasDaco) {
@@ -95,7 +114,7 @@ public class TokenServiceTest {
   }
 
   private static AccessToken createAccessToken() {
-    return new AccessToken(TOKEN_ID, EXPIRES, singleton(SCOPE));
+    return new AccessToken(TOKEN_ID, "", EXPIRES, singleton(SCOPE));
   }
 
 }

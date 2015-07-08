@@ -24,6 +24,14 @@ import lombok.Value;
 @Value
 public class AccessTokenScopes {
 
-  Set<String> scopes;
+  Set<AccessTokenScope> scopes;
+
+  @Value
+  public static class AccessTokenScope {
+
+    String name;
+    String description;
+
+  }
 
 }

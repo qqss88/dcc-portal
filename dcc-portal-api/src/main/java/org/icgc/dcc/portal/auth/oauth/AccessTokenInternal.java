@@ -27,16 +27,20 @@ public class AccessTokenInternal {
 
   String id;
   String type;
+  String description;
   int expiresIn;
   String scope;
 
   @JsonCreator
-  public AccessTokenInternal(@JsonProperty("access_token") String id,
+  public AccessTokenInternal(
+      @JsonProperty("access_token") String id,
       @JsonProperty("token_type") String type,
+      @JsonProperty("desc") String description,
       @JsonProperty("expires_in") int expires,
       @JsonProperty("scope") String scope) {
     this.id = id;
     this.type = type;
+    this.description = description;
     this.expiresIn = expires;
     this.scope = scope;
   }

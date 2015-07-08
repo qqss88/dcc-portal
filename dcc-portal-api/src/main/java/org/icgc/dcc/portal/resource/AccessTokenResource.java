@@ -49,7 +49,7 @@ import com.yammer.dropwizard.auth.Auth;
  */
 @Component
 @Path("/v1/settings/tokens")
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AccessTokenResource {
 
   @NonNull
@@ -57,10 +57,11 @@ public class AccessTokenResource {
 
   @POST
   @Produces(TEXT_PLAIN)
-  public String create(@Auth(required = true) User user, @FormParam("scope") String scope) {
+  public String create(@Auth(required = true) User user, @FormParam("scope") String scope,
+      @FormParam("desc") String description) {
     checkArgument(!isNullOrEmpty(scope), "scope is null or empty");
 
-    return tokenService.create(user, scope);
+    return tokenService.create(user, scope, description);
   }
 
   @GET

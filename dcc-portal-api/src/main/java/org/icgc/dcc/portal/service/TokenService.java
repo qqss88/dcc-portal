@@ -17,34 +17,47 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.collect.Sets.difference;
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static org.icgc.dcc.portal.util.AuthUtils.throwForbiddenException;
+
+import java.util.Set;
+
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.common.collect.Sets;
+import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.model.AccessTokenScopes;
+import org.icgc.dcc.portal.model.AccessTokenScopes.AccessTokenScope;
 import org.icgc.dcc.portal.model.Tokens;
 import org.icgc.dcc.portal.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.ImmutableSet;
 
 /**
  * OAuth access tokens management service.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TokenService {
+
+  private static final String S3_DOWNLOAD_SCOPE_DESC = "Allows to download from the S3";
+  private static final String S3_UPLOAD_SCOPE_DESC = "Allows to upload to the S3";
+  private static final String S3_UPLOAD_SCOPE = "s3.upload";
+  private static final String S3_DOWNLOAD_SCOPE = "s3.download";
 
   @NonNull
   private final OAuthClient client;
 
-  public String create(User user, String scope) {
+  public String create(User user, String scope, String description) {
     log.debug("Creating access token of scope '{}' for user '{}'...", scope, user);
     val userId = user.getEmailAddress();
     if (user.getDaco() == FALSE) {
@@ -68,11 +81,44 @@ public class TokenService {
   }
 
   public AccessTokenScopes userScopes(User user) {
-    return new AccessTokenScopes(singleton("s3.download"));
+    val userScopes = client.getUserScopes(user.getEmailAddress());
+    val scopesResult = ImmutableSet.<AccessTokenScope> builder();
+
+    for (val scope : userScopes.getScopes()) {
+      switch (scope) {
+      case S3_DOWNLOAD_SCOPE:
+        scopesResult.add(new AccessTokenScope(S3_DOWNLOAD_SCOPE, S3_DOWNLOAD_SCOPE_DESC));
+        break;
+      case S3_UPLOAD_SCOPE:
+        scopesResult.add(new AccessTokenScope(S3_DOWNLOAD_SCOPE, S3_UPLOAD_SCOPE_DESC));
+        break;
+      default:
+        throw new RuntimeException(format("Unrecognized user scope: '%s'", scope));
+      }
+    }
+
+    return new AccessTokenScopes(scopesResult.build());
   }
 
   private void validateScope(User user, String scope) {
-    // FIXME: ensure user is allowed to generate tokens of such a scope
+    val requestScope = Sets.newHashSet(Splitters.WHITESPACE.split(scope));
+    val userScopes = extractScopeNames(userScopes(user));
+
+    // TODO: Create a method in common-core
+    val scopeDiff = difference(requestScope, userScopes);
+    if (!scopeDiff.isEmpty()) {
+      throwForbiddenException("The user is not allowed to create tokens of this scope",
+          format("User '%s' is not allowed to create tokens of scope '%s'.", user.getEmailAddress(), scope));
+    }
+  }
+
+  private Set<String> extractScopeNames(AccessTokenScopes userScopes) {
+    val result = ImmutableSet.<String> builder();
+    for (val scope : userScopes.getScopes()) {
+      result.add(scope.getName());
+    }
+
+    return result.build();
   }
 
 }

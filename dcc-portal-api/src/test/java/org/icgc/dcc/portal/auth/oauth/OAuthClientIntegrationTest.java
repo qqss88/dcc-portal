@@ -17,25 +17,27 @@
  */
 package org.icgc.dcc.portal.auth.oauth;
 
-import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
 import lombok.val;
 
+import org.apache.commons.lang.StringUtils;
+import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
 import org.icgc.dcc.portal.model.AccessToken;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.junit.Before;
 import org.junit.Test;
 
 public class OAuthClientIntegrationTest {
 
   private static final String SERVICE_URL = "http://localhost:8443";
-  private static final String CLIENT_ID = "mgmt";
   private static final String USER_ID = "fakeId@a.com";
-  private static final String[] SCOPES = { "os.download", "os.upload" };
+  private static final String SCOPES = "os.download os.upload";
 
   OAuthClient client;
 
@@ -47,13 +49,30 @@ public class OAuthClientIntegrationTest {
   @Test
   public void createTokenTest() {
     val result = client.createToken(USER_ID, SCOPES);
-    validateToken(result, copyOf(SCOPES));
+    validateToken(result, convertScope(SCOPES));
+    client.revokeToken(result.getId());
+  }
+
+  private Set<String> convertScope(String scopes) {
+    return newHashSet(Splitters.WHITESPACE.split(scopes));
+  }
+
+  @Test
+  public void createTokenTest_withDescription() {
+    val result = client.createToken(USER_ID, SCOPES, "Description");
+    assertThat(result.getDescription()).isEqualTo("Description");
+    client.revokeToken(result.getId());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void createTokenTest_longDescription() {
+    client.createToken(USER_ID, SCOPES, StringUtils.repeat("a", 201));
   }
 
   @Test
   public void listTokens() {
     client.createToken(USER_ID, SCOPES);
-    val result = client.listTokens(CLIENT_ID, USER_ID);
+    val result = client.listTokens(USER_ID);
     assertThat(result.getTokens().size()).isEqualTo(1);
   }
 
@@ -67,6 +86,13 @@ public class OAuthClientIntegrationTest {
     }
   }
 
+  @Test
+  public void getUserScopesTest() {
+    val scopes = client.getUserScopes(USER_ID);
+    val resultScopes = convertScope(SCOPES);
+    assertThat(scopes.getScopes()).containsOnly(resultScopes.toArray(new String[resultScopes.size()]));
+  }
+
   private static void validateToken(AccessToken token, Set<String> scope) {
     assertThat(token.getId()).isNotEmpty();
     assertThat(token.getExpiresIn()).isGreaterThan(1);
@@ -76,7 +102,7 @@ public class OAuthClientIntegrationTest {
   private static OAuthProperties createOAuthProperties() {
     val result = new PortalProperties.OAuthProperties();
     result.setServiceUrl(SERVICE_URL);
-    result.setClientId(CLIENT_ID);
+    result.setClientId("mgmt");
     result.setClientSecret("pass");
     result.setEnableStrictSSL(false);
     result.setEnableHttpLogging(true);

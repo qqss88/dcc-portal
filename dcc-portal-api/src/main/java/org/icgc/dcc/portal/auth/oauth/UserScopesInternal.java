@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.model;
+package org.icgc.dcc.portal.auth.oauth;
 
 import java.util.Set;
 
@@ -25,23 +25,13 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 @Value
-public class AccessToken {
+public class UserScopesInternal {
 
-  String id;
-  String description;
-  int expiresIn;
-  Set<String> scope;
+  Set<String> scopes;
 
   @JsonCreator
-  public AccessToken(
-      @JsonProperty("access_token") String id,
-      @JsonProperty("description") String description,
-      @JsonProperty("expires_in") int expires,
-      @JsonProperty("scope") Set<String> scope) {
-    this.id = id;
-    this.description = description;
-    this.expiresIn = expires;
-    this.scope = scope;
+  public UserScopesInternal(@JsonProperty("scopes") Set<String> scopes) {
+    this.scopes = scopes;
   }
 
 }

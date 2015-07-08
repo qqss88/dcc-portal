@@ -26,6 +26,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static com.sun.jersey.api.json.JSONConfiguration.FEATURE_POJO_MAPPING;
 import static com.sun.jersey.client.urlconnection.HTTPSProperties.PROPERTY_HTTPS_PROPERTIES;
 import static java.lang.Boolean.TRUE;
+import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
@@ -44,13 +45,14 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
 import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.Tokens;
+import org.icgc.dcc.portal.service.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Joiner;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -70,15 +72,15 @@ public class OAuthClient {
    */
   private static final String PASSWORD_GRANT_TYPE = "password";
   private static final String SCOPE_PARAM = "scope";
+  private static final String DESCRIPTION_PARAM = "desc";
+  private static final int MAX_DESCRIPTION_LENGTH = 200;
   private static final String USERNAME_PARAM = "username";
   private static final String GRANT_TYPE_PARAM = "grant_type";
-  private static final String SCOPE_SEPARATOR = " ";
   private static final String TOKENS_URL = "tokens";
+  private static final String USERS_URL = "users";
+  private static final String SCOPES_URL = "scopes";
   private static final String CREATE_TOKEN_URL = "oauth/token";
 
-  private static final Joiner SPACE_JOINER = Joiner.on(SCOPE_SEPARATOR);
-
-  private final String clientId;
   private final WebResource resource;
 
   @Autowired
@@ -87,15 +89,18 @@ public class OAuthClient {
     configureFilters(jerseyClient, config);
 
     this.resource = jerseyClient.resource(config.getServiceUrl());
-    this.clientId = config.getClientId();
   }
 
-  public AccessToken createToken(@NonNull String userId, @NonNull String... scope) {
+  public AccessToken createToken(@NonNull String userId, @NonNull String scope) {
+    return createToken(userId, scope, null);
+  }
+
+  public AccessToken createToken(@NonNull String userId, @NonNull String scope, String description) {
     checkArguments(userId);
     val response = resource.path(CREATE_TOKEN_URL)
         .type(APPLICATION_FORM_URLENCODED_TYPE)
         .accept(APPLICATION_JSON_TYPE)
-        .post(ClientResponse.class, createParameters(userId, scope));
+        .post(ClientResponse.class, createParameters(userId, scope, description));
     validateResponse(response);
     val accessToken = response.getEntity(AccessTokenInternal.class);
 
@@ -103,12 +108,8 @@ public class OAuthClient {
   }
 
   public Tokens listTokens(@NonNull String userId) {
-    return listTokens(clientId, userId);
-  }
-
-  public Tokens listTokens(@NonNull String clientId, @NonNull String userId) {
-    checkArguments(userId, clientId);
-    val response = resource.path(TOKENS_URL).path(clientId).path(userId).get(ClientResponse.class);
+    checkArguments(userId);
+    val response = resource.path(USERS_URL).path(userId).path(TOKENS_URL).get(ClientResponse.class);
     validateResponse(response);
 
     return response.getEntity(Tokens.class);
@@ -120,11 +121,28 @@ public class OAuthClient {
     validateResponse(response);
   }
 
-  private static MultivaluedMapImpl createParameters(String userId, String... scope) {
+  public UserScopesInternal getUserScopes(@NonNull String userId) {
+    checkArguments(userId);
+    val response = resource.path(USERS_URL).path(userId).path(SCOPES_URL).get(ClientResponse.class);
+    validateResponse(response);
+
+    return response.getEntity(UserScopesInternal.class);
+  }
+
+  private static MultivaluedMapImpl createParameters(String userId, String scope, String description) {
     val params = new MultivaluedMapImpl();
     params.add(GRANT_TYPE_PARAM, PASSWORD_GRANT_TYPE);
     params.add(USERNAME_PARAM, userId);
-    params.add(SCOPE_PARAM, convertScope(scope));
+    params.add(SCOPE_PARAM, scope);
+
+    if (!isNullOrEmpty(description)) {
+      if (description.length() > MAX_DESCRIPTION_LENGTH) {
+        throw new BadRequestException(format("Token description length is more than %d characters.",
+            MAX_DESCRIPTION_LENGTH));
+      }
+
+      params.add(DESCRIPTION_PARAM, description);
+    }
 
     return params;
   }
@@ -189,15 +207,11 @@ public class OAuthClient {
   }
 
   private static AccessToken convertToAccessToken(AccessTokenInternal token) {
-    return new AccessToken(token.getId(), token.getExpiresIn(), convertScope(token.getScope()));
+    return new AccessToken(token.getId(), token.getDescription(), token.getExpiresIn(), convertScope(token.getScope()));
   }
 
   private static Set<String> convertScope(String scope) {
-    return copyOf(scope.split(SCOPE_SEPARATOR));
-  }
-
-  private static String convertScope(String[] scopes) {
-    return SPACE_JOINER.join(scopes);
+    return copyOf(Splitters.WHITESPACE.split(scope));
   }
 
   private static void checkArguments(String... args) {
