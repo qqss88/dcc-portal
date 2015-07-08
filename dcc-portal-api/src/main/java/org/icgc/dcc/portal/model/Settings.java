@@ -44,7 +44,6 @@ public class Settings {
   /**
    * Set analysis settings.
    */
-  String demoListUuid;
   int maxNumberOfHits;
   int maxMultiplier;
 

@@ -120,12 +120,6 @@ public class PortalConfig {
 
   }
 
-  // NOTE: We no longer (re)generate the demo entity-set at startup.
-  // @PostConstruct
-  public void createDemoEntityList() {
-    entityListService.createDemoEntitySet();
-  }
-
   @Bean
   public Stage stage() {
     return properties.getDownload().getStage();
@@ -192,7 +186,6 @@ public class PortalConfig {
         .releaseDate(release.getReleaseDate())
         .dataVersion(release.getDataVersion())
         .downloadEnabled(download.isEnabled())
-        .demoListUuid(setAnalysis.demoListUuid)
         .maxNumberOfHits(setAnalysis.maxNumberOfHits)
         .maxMultiplier(setAnalysis.maxMultiplier)
         .build();
