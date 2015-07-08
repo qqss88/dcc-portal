@@ -157,20 +157,10 @@ public class DonorRepository implements Repository {
 
   @Override
   public SearchResponse findAllCentric(Query query) {
-
     val pql = converter.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
     val response = request.getRequestBuilder().execute().actionGet();
     return response;
-
-    // val search = buildFindAllRequest(query, CENTRIC_TYPE);
-    // search.setQuery(buildQuery(query));
-
-    // log.info("{}", search);
-    // val response = search.execute().actionGet();
-    // log.debug("{}", response);
-
-    // return response;
   }
 
   public List<PhenotypeResult> getPhenotypeAnalysisResult(@NonNull final Collection<UUID> entitySetIds) {
