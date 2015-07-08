@@ -94,7 +94,8 @@ public class DonorCentricTypeModel extends TypeModel {
       "availableDataTypes",
       "analysisTypes",
       "studies",
-      "ssmAffectedGenes");
+      "ssmAffectedGenes",
+      "state");
 
   public DonorCentricTypeModel() {
     super(initFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);

@@ -50,7 +50,6 @@ public class QueryService {
       result.addAll(typeFieldsMap.values().asList());
     }
     clearInvalidFields(result, kind);
-
     return result.toArray(new String[result.size()]);
   }
 
@@ -87,34 +86,12 @@ public class QueryService {
 
   // Default to donors with molecular information for donor-centric type
   public static FilterBuilder defaultDonorFilter() {
-    return FilterBuilders.termFilter("_summary._complete", true);
+    return FilterBuilders.termFilter("_summary._state", "live");
   }
 
   // Defaults to projects with at least 1 donor with molecular information
   public static FilterBuilder defaultProjectFilter() {
-    return FilterBuilders.termFilter("_summary._complete", true);
-  }
-
-  // Convert user specified state to elastic search complete field values
-  private static List<Boolean> convertEntityState(List<String> uiStates) {
-    val list = Lists.<Boolean> newArrayList();
-    for (val state : uiStates) {
-      if (state.equalsIgnoreCase("pending")) {
-        list.add(false);
-      } else if (state.equalsIgnoreCase("live")) {
-        list.add(true);
-      } else if (state.equalsIgnoreCase("*")) {
-        list.add(false);
-        list.add(true);
-      }
-    }
-
-    // Default if no value or only invalid values
-    if (list.isEmpty()) {
-      list.add(true);
-    }
-
-    return list;
+    return FilterBuilders.termFilter("_summary._state", "live");
   }
 
 }

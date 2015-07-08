@@ -71,7 +71,8 @@ public class ProjectTypeModel extends TypeModel {
       "experimentalAnalysisPerformedDonorCounts",
       "experimentalAnalysisPerformedSampleCounts",
       "pubmedIds",
-      "repository");
+      "repository",
+      "state");
 
   public ProjectTypeModel() {
     super(defineFields(), emptyMap(), PUBLIC_FIELDS, INCLUDE_FIELDS);
@@ -122,7 +123,7 @@ public class ProjectTypeModel extends TypeModel {
         long_("_pexp_tested_donor_count", "pexpTestedDonorCount"),
         long_("_mirna_seq_tested_donor_count", "mirnaSeqTestedDonorCount"),
         long_("_jcn_tested_donor_count", "jcnTestedDonorCount"),
-        long_("_total_complete_donor_count", "totalDonorCount"),
+        long_("_total_live_donor_count", "totalDonorCount"),
         long_("_affected_donor_count", "affectedDonorCount"),
         string("_state", "state"),
         object("experimental_analysis_performed_donor_count", "experimentalAnalysisPerformedDonorCounts"),
