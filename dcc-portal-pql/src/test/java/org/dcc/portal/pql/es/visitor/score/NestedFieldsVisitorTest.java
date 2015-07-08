@@ -154,7 +154,7 @@ public class NestedFieldsVisitorTest {
 
   @Test
   public void andTest() {
-    val esAst = new BoolNode(new MustBoolNode(new TermNode("platformNested", "1")));
+    val esAst = new BoolNode(new MustBoolNode(new TermNode("platform", "1")));
     val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
     val result = esAst.accept(visitor, Optional.of(requestContext)).get();
     log.debug("{}", result);
@@ -173,7 +173,7 @@ public class NestedFieldsVisitorTest {
 
   @Test
   public void orTest() {
-    val esAst = new BoolNode(new ShouldBoolNode(new TermNode("platformNested", "1")));
+    val esAst = new BoolNode(new ShouldBoolNode(new TermNode("platform", "1")));
     val requestContext = new NestedFieldsVisitor.RequestContext(IndexModel.getMutationCentricTypeModel(), nestedNode);
     val result = esAst.accept(visitor, Optional.of(requestContext)).get();
     log.debug("{}", result);

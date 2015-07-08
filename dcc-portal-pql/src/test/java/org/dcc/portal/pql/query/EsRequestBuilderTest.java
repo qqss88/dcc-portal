@@ -100,7 +100,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
   @Test
   public void inTest_nested() {
-    val result = executeQuery("in(sequencingStrategyNested, 'WGA', 'WGD')");
+    val result = executeQuery("in(sequencingStrategy, 'WGA', 'WGD')");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU1", "MU2");
   }
@@ -114,7 +114,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
   @Test
   public void eqTest_nested() {
-    val result = executeQuery("eq(functionalImpactNested, 'Low')");
+    val result = executeQuery("eq(functionalImpact, 'Low')");
     assertTotalHitsCount(result, 1);
     assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU1");
   }
@@ -130,7 +130,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
   @Test
   public void neTest_nested() {
-    val result = executeQuery("ne(functionalImpactNested, 'Low')");
+    val result = executeQuery("ne(functionalImpact, 'Low')");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU2", "MU3");
   }
@@ -194,14 +194,14 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void andTest() {
     val result =
-        executeQuery("and(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE'))");
+        executeQuery("and(eq(verificationStatus, 'tested'), eq(sequencingStrategy, 'WGE'))");
     assertTotalHitsCount(result, 1);
     assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
 
   @Test
   public void andTest_rootLevel() {
-    val result = executeQuery("eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGE')");
+    val result = executeQuery("eq(verificationStatus, 'tested'), eq(sequencingStrategy, 'WGE')");
     assertTotalHitsCount(result, 1);
     assertThat(getFirstSearchResult(result).getId()).isEqualTo("MU2");
   }
@@ -209,7 +209,7 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void orTest() {
     val result =
-        executeQuery("or(eq(verificationStatusNested, 'tested'), eq(sequencingStrategyNested, 'WGA')))");
+        executeQuery("or(eq(verificationStatus, 'tested'), eq(sequencingStrategy, 'WGA')))");
     assertTotalHitsCount(result, 3);
     containsOnlyIds(result, "MU1", "MU2", "MU3");
   }
@@ -217,18 +217,18 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void nestedTest() {
     val result = executeQuery("nested(ssm_occurrence.observation, " +
-        "eq(verificationStatusNested, 'tested'), lt(sequencingStrategyNested, 'WGE'))");
+        "eq(verificationStatus, 'tested'), lt(sequencingStrategy, 'WGE'))");
     assertTotalHitsCount(result, 1);
     containsOnlyIds(result, "MU2");
   }
 
   @Test
   public void facetsTest_noFilters() {
-    val result = executeQuery("facets(verificationStatusNested)");
+    val result = executeQuery("facets(verificationStatus)");
     assertTotalHitsCount(result, 3);
-    Global global = result.getAggregations().get("verificationStatusNested");
-    Nested nested = global.getAggregations().get("verificationStatusNested");
-    Terms terms = nested.getAggregations().get("verificationStatusNested");
+    Global global = result.getAggregations().get("verificationStatus");
+    Nested nested = global.getAggregations().get("verificationStatus");
+    Terms terms = nested.getAggregations().get("verificationStatus");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {
@@ -238,33 +238,33 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
       }
     }
 
-    Global globalMissing = result.getAggregations().get("verificationStatusNested_missing");
-    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatusNested_missing");
-    Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
+    Global globalMissing = result.getAggregations().get("verificationStatus_missing");
+    Nested nestedMissing = globalMissing.getAggregations().get("verificationStatus_missing");
+    Missing missing = nestedMissing.getAggregations().get("verificationStatus_missing");
     assertThat(missing.getDocCount()).isEqualTo(0L);
   }
 
   @Test
   public void facetsTest_missing() {
-    val result = executeQuery("facets(verificationStatusNested)");
+    val result = executeQuery("facets(verificationStatus)");
     assertTotalHitsCount(result, 3);
 
-    Global globaldMissing = result.getAggregations().get("verificationStatusNested_missing");
-    Nested nestedMissing = globaldMissing.getAggregations().get("verificationStatusNested_missing");
-    Missing missing = nestedMissing.getAggregations().get("verificationStatusNested_missing");
+    Global globaldMissing = result.getAggregations().get("verificationStatus_missing");
+    Nested nestedMissing = globaldMissing.getAggregations().get("verificationStatus_missing");
+    Missing missing = nestedMissing.getAggregations().get("verificationStatus_missing");
     assertThat(missing.getDocCount()).isEqualTo(0L);
   }
 
   @Test
   public void facetsTest_noMatchFilter() {
-    val result = executeQuery("facets(verificationStatusNested), in(transcriptId, 'T1', 'T2')");
+    val result = executeQuery("facets(verificationStatus), in(transcriptId, 'T1', 'T2')");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU1", "MU2");
 
-    Global globalAgg = result.getAggregations().get("verificationStatusNested");
-    Filter filterAgg = globalAgg.getAggregations().get("verificationStatusNested");
-    Nested nested = filterAgg.getAggregations().get("verificationStatusNested");
-    Terms terms = nested.getAggregations().get("verificationStatusNested");
+    Global globalAgg = result.getAggregations().get("verificationStatus");
+    Filter filterAgg = globalAgg.getAggregations().get("verificationStatus");
+    Nested nested = filterAgg.getAggregations().get("verificationStatus");
+    Terms terms = nested.getAggregations().get("verificationStatus");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {
@@ -277,13 +277,13 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
 
   @Test
   public void facetsTest_matchFilter() {
-    val result = executeQuery("facets(verificationStatusNested), eq(verificationStatusNested, 'tested')");
+    val result = executeQuery("facets(verificationStatus), eq(verificationStatus, 'tested')");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU2", "MU3");
 
-    Global global = result.getAggregations().get("verificationStatusNested");
-    Nested nested = global.getAggregations().get("verificationStatusNested");
-    Terms terms = nested.getAggregations().get("verificationStatusNested");
+    Global global = result.getAggregations().get("verificationStatus");
+    Nested nested = global.getAggregations().get("verificationStatus");
+    Terms terms = nested.getAggregations().get("verificationStatus");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {
@@ -297,14 +297,14 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
   @Test
   public void facetTest_multiFilters() {
     val result =
-        executeQuery("facets(verificationStatusNested), eq(verificationStatusNested, 'tested'), in(transcriptId, 'T1', 'T2')");
+        executeQuery("facets(verificationStatus), eq(verificationStatus, 'tested'), in(transcriptId, 'T1', 'T2')");
     assertTotalHitsCount(result, 1);
     containsOnlyIds(result, "MU2");
 
-    Global globalAgg = result.getAggregations().get("verificationStatusNested");
-    Filter filterAgg = globalAgg.getAggregations().get("verificationStatusNested");
-    Nested nested = filterAgg.getAggregations().get("verificationStatusNested");
-    Terms terms = nested.getAggregations().get("verificationStatusNested");
+    Global globalAgg = result.getAggregations().get("verificationStatus");
+    Filter filterAgg = globalAgg.getAggregations().get("verificationStatus");
+    Nested nested = filterAgg.getAggregations().get("verificationStatus");
+    Terms terms = nested.getAggregations().get("verificationStatus");
 
     for (val bucket : terms.getBuckets()) {
       if (bucket.getKey().equals("tested")) {

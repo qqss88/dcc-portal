@@ -157,10 +157,10 @@ public class FiltersConverterTest {
 
   @Test
   public void mutationNestedAndNonNestedTest() {
-    val filters = createFilters("{mutation:{platformNested:{is:['M1','M2']},id:{is:['M1','M2']}}}");
+    val filters = createFilters("{mutation:{platform:{is:['M1','M2']},id:{is:['M1','M2']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
     assertThat(result).
-        isEqualTo("in(mutation.id,'M1','M2'),nested(ssm_occurrence.observation,in(platformNested,'M1','M2'))");
+        isEqualTo("in(mutation.id,'M1','M2'),nested(ssm_occurrence.observation,in(platform,'M1','M2'))");
   }
 
   @Test
@@ -293,9 +293,9 @@ public class FiltersConverterTest {
 
   @Test
   public void curratedSetAndNestedFilterTest_mutation() {
-    val filters = createFilters("{gene:{curatedSetId:{is:['GS1']}},mutation:{consequenceTypeNested:{is:['sl']}}}");
+    val filters = createFilters("{gene:{curatedSetId:{is:['GS1']}},mutation:{consequenceType:{is:['sl']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
-    assertThat(result).isEqualTo("nested(transcript,in(gene.curatedSetId,'GS1'),in(consequenceTypeNested,'sl'))");
+    assertThat(result).isEqualTo("nested(transcript,in(gene.curatedSetId,'GS1'),in(consequenceType,'sl'))");
   }
 
   @Test
@@ -321,11 +321,11 @@ public class FiltersConverterTest {
 
   @Test
   public void differentLevelsNestingTest_mutationCentric() {
-    val filters = createFilters("{mutation:{platformNested:{is:['p']},functionalImpactNested:{is:['f']}}}");
+    val filters = createFilters("{mutation:{platform:{is:['p']},functionalImpact:{is:['f']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
     log.warn("{}", result);
-    assertThat(result).isEqualTo("nested(transcript,in(functionalImpactNested,'f')),"
-        + "nested(ssm_occurrence.observation,in(platformNested,'p'))");
+    assertThat(result).isEqualTo("nested(transcript,in(functionalImpact,'f')),"
+        + "nested(ssm_occurrence.observation,in(platform,'p'))");
   }
 
   @Test
