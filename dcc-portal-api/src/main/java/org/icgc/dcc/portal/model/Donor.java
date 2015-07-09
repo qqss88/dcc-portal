@@ -124,8 +124,8 @@ public class Donor {
   @ApiModelProperty(value = "Exposure")
   List<Exposure> exposure;
 
-  @ApiModelProperty(value = "Complete")
-  Boolean complete;
+  @ApiModelProperty(value = "State")
+  String state;
 
   @SuppressWarnings("unchecked")
   @JsonCreator
@@ -178,7 +178,7 @@ public class Donor {
     family = buildFamily((List<Map<String, Object>>) fieldMap.get("family"));
     exposure = buildExposure((List<Map<String, Object>>) fieldMap.get("exposure"));
 
-    complete = getBoolean(fieldMap.get(fields.get("complete")));
+    state = getString(fieldMap.get(fields.get("state")));
   }
 
   private List<Exposure> buildExposure(List<Map<String, Object>> field) {

@@ -38,6 +38,9 @@ import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.MUTA
 import java.util.List;
 import java.util.UUID;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -55,9 +58,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @SuppressWarnings("deprecation")
 @Slf4j
@@ -382,11 +382,11 @@ public class QueryService {
     boolean hasDonorStateFilter = false;
     boolean hasProjectStateFilter = false;
 
-    String completenessField = typeMapping.get("complete");
+    String stateField = typeMapping.get("state");
     if (prefixMapping != null && prefixMapping.containsKey(kind)) {
-      completenessField = String.format("%s.%s", prefixMapping.get(kind), completenessField);
+      stateField = String.format("%s.%s", prefixMapping.get(kind), stateField);
     }
-    TermFilterBuilder defaultCompletenessFilter = termFilter(completenessField, true);
+    TermFilterBuilder defaultStateFilter = termFilter(stateField, "live");
 
     while (fields.hasNext()) {
 
@@ -513,7 +513,7 @@ public class QueryService {
     // Inject hidden filters if none where passed in
     if (kind.getId().equals("donor") && hasDonorStateFilter == false) {
       log.info("injecting hidden donor completeness filter");
-      termFilters.must(defaultCompletenessFilter);
+      termFilters.must(defaultStateFilter);
     }
 
     if (kind.getId().equals("project") && prefixMapping == null && hasProjectStateFilter == false) {
@@ -717,31 +717,29 @@ public class QueryService {
 
   // Default to donors with molecular information for donor-centric type
   public static FilterBuilder defaultDonorFilter() {
-    return FilterBuilders.termFilter("_summary._complete", true);
+    return FilterBuilders.termFilter("_summary._state", "live");
   }
 
   // Defaults to projects with at least 1 donor with molecular information
   public static FilterBuilder defaultProjectFilter() {
-    return FilterBuilders.termFilter("_summary._complete", true);
+    return FilterBuilders.termFilter("_summary._state", "live");
   }
 
   // Convert user specified state to elastic search complete field values
-  private static List<Boolean> convertEntityState(List<String> uiStates) {
-    val list = Lists.<Boolean> newArrayList();
+  private static List<String> convertEntityState(List<String> uiStates) {
+    val list = Lists.<String> newArrayList();
     for (val state : uiStates) {
-      if (state.equalsIgnoreCase("pending")) {
-        list.add(false);
-      } else if (state.equalsIgnoreCase("live")) {
-        list.add(true);
-      } else if (state.equalsIgnoreCase("*")) {
-        list.add(false);
-        list.add(true);
+      if (state.equalsIgnoreCase("*")) {
+        list.add("live");
+        list.add("pending");
+      } else {
+        list.add(state);
       }
     }
 
     // Default if no value or only invalid values
     if (list.isEmpty()) {
-      list.add(true);
+      list.add("live");
     }
 
     return list;
