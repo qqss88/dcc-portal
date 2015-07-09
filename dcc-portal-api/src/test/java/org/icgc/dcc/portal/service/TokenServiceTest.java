@@ -56,7 +56,7 @@ public class TokenServiceTest {
 
   @Test
   public void createTest_successful() {
-    when(client.createToken(USER_ID, SCOPE)).thenReturn(createAccessToken());
+    when(client.createToken(USER_ID, SCOPE, "")).thenReturn(createAccessToken());
     when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(SCOPE));
 
     val result = tokenService.create(createUser(USER_ID, TRUE), SCOPE, "");
