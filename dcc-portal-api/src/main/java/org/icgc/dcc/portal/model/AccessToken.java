@@ -17,17 +17,21 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+
 import java.util.Set;
 
 import lombok.Value;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Value
 public class AccessToken {
 
   String id;
+  @JsonInclude(NON_EMPTY)
   String description;
   int expiresIn;
   Set<String> scope;
@@ -35,7 +39,7 @@ public class AccessToken {
   @JsonCreator
   public AccessToken(
       @JsonProperty("access_token") String id,
-      @JsonProperty("description") String description,
+      @JsonProperty("desc") String description,
       @JsonProperty("expires_in") int expires,
       @JsonProperty("scope") Set<String> scope) {
     this.id = id;

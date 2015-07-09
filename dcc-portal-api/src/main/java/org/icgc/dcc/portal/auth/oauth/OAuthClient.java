@@ -30,21 +30,19 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
-import java.security.cert.X509Certificate;
 import java.util.Set;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.core.MultivaluedMap;
 
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
+import org.icgc.dcc.common.core.security.DumbHostnameVerifier;
+import org.icgc.dcc.common.core.security.DumbX509TrustManager;
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
 import org.icgc.dcc.portal.model.AccessToken;
@@ -53,6 +51,7 @@ import org.icgc.dcc.portal.service.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -129,7 +128,7 @@ public class OAuthClient {
     return response.getEntity(UserScopesInternal.class);
   }
 
-  private static MultivaluedMapImpl createParameters(String userId, String scope, String description) {
+  private static MultivaluedMap<String, String> createParameters(String userId, String scope, String description) {
     val params = new MultivaluedMapImpl();
     params.add(GRANT_TYPE_PARAM, PASSWORD_GRANT_TYPE);
     params.add(USERNAME_PARAM, userId);
@@ -164,35 +163,8 @@ public class OAuthClient {
     if (!oauthConfig.isEnableStrictSSL()) {
       log.debug("Setting up SSL context");
       val context = SSLContext.getInstance("TLS");
-      context.init(null, new TrustManager[] {
-          new X509TrustManager() {
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-              return null;
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-
-          } },
-          null);
-
-      config.getProperties().put(PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
-          new HostnameVerifier() {
-
-            @Override
-            public boolean verify(String hostname, SSLSession sslSession) {
-              return true;
-            }
-
-          }, context
-          ));
+      context.init(null, new TrustManager[] { new DumbX509TrustManager() }, null);
+      config.getProperties().put(PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(new DumbHostnameVerifier(), context));
     }
 
     return config;

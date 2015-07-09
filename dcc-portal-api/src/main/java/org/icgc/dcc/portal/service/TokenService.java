@@ -20,8 +20,10 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.collect.Sets.difference;
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.util.AuthUtils.throwForbiddenException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import lombok.NonNull;
@@ -29,7 +31,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.common.collect.Sets;
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.model.AccessTokenScopes;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 /**
  * OAuth access tokens management service.
@@ -66,7 +68,7 @@ public class TokenService {
     }
 
     validateScope(user, scope);
-    val token = client.createToken(userId, scope);
+    val token = client.createToken(userId, scope, description);
     log.debug("Created token '{}' for '{}'", token, userId);
 
     return token.getId();
@@ -90,10 +92,10 @@ public class TokenService {
         scopesResult.add(new AccessTokenScope(S3_DOWNLOAD_SCOPE, S3_DOWNLOAD_SCOPE_DESC));
         break;
       case S3_UPLOAD_SCOPE:
-        scopesResult.add(new AccessTokenScope(S3_DOWNLOAD_SCOPE, S3_UPLOAD_SCOPE_DESC));
+        scopesResult.add(new AccessTokenScope(S3_UPLOAD_SCOPE, S3_UPLOAD_SCOPE_DESC));
         break;
       default:
-        throw new RuntimeException(format("Unrecognized user scope: '%s'", scope));
+        throw new IllegalArgumentException(format("Unrecognized user scope: '%s'", scope));
       }
     }
 
@@ -101,24 +103,24 @@ public class TokenService {
   }
 
   private void validateScope(User user, String scope) {
-    val requestScope = Sets.newHashSet(Splitters.WHITESPACE.split(scope));
+    val requestScopes = parseScopes(scope);
     val userScopes = extractScopeNames(userScopes(user));
 
-    // TODO: Create a method in common-core
-    val scopeDiff = difference(requestScope, userScopes);
+    val scopeDiff = difference(requestScopes, userScopes);
     if (!scopeDiff.isEmpty()) {
       throwForbiddenException("The user is not allowed to create tokens of this scope",
           format("User '%s' is not allowed to create tokens of scope '%s'.", user.getEmailAddress(), scope));
     }
   }
 
-  private Set<String> extractScopeNames(AccessTokenScopes userScopes) {
-    val result = ImmutableSet.<String> builder();
-    for (val scope : userScopes.getScopes()) {
-      result.add(scope.getName());
-    }
+  private static HashSet<String> parseScopes(String scope) {
+    return Sets.newHashSet(Splitters.WHITESPACE.split(scope));
+  }
 
-    return result.build();
+  private static Set<String> extractScopeNames(AccessTokenScopes userScopes) {
+    return userScopes.getScopes().stream()
+        .map(s -> s.getName())
+        .collect(toImmutableSet());
   }
 
 }

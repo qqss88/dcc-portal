@@ -19,8 +19,8 @@ package org.icgc.dcc.portal.auth.oauth;
 
 import lombok.Value;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Value
 public class AccessTokenInternal {

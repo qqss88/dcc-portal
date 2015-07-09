@@ -151,7 +151,7 @@ public final class AuthUtils {
    * @param logMessage logged to the log file
    */
   public static void throwForbiddenException(String userMessage, String logMessage) {
-    log.info(logMessage);
+    log.warn(logMessage);
     // entityName field is not used anywhere. Passing an empty string
     throw new ForbiddenAccessException(userMessage, "");
   }

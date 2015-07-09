@@ -30,9 +30,9 @@ import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.auth.oauth.UserScopesInternal;
 import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.User;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -48,15 +48,11 @@ public class TokenServiceTest {
   private static final String TOKEN_ID = "123";
   private static final int EXPIRES = 10;
 
+  @InjectMocks
   TokenService tokenService;
 
   @Mock
   OAuthClient client;
-
-  @Before
-  public void setUp() {
-    tokenService = new TokenService(client);
-  }
 
   @Test
   public void createTest_successful() {

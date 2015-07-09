@@ -22,6 +22,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -34,6 +36,7 @@ import javax.ws.rs.core.Response;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.icgc.dcc.portal.model.AccessTokenScopes;
 import org.icgc.dcc.portal.model.Tokens;
 import org.icgc.dcc.portal.model.User;
@@ -57,8 +60,10 @@ public class AccessTokenResource {
 
   @POST
   @Produces(TEXT_PLAIN)
-  public String create(@Auth(required = true) User user, @FormParam("scope") String scope,
-      @FormParam("desc") String description) {
+  public String create(
+      @Auth(required = true) User user,
+      @Valid @NotEmpty @FormParam("scope") String scope,
+      @Valid @Size(min = 0, max = 200) @FormParam("desc") String description) {
     checkArgument(!isNullOrEmpty(scope), "scope is null or empty");
 
     return tokenService.create(user, scope, description);

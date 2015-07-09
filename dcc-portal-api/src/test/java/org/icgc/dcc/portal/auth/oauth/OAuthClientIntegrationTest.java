@@ -24,7 +24,6 @@ import java.util.Set;
 
 import lombok.val;
 
-import org.apache.commons.lang.StringUtils;
 import org.icgc.dcc.common.core.util.Splitters;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.config.PortalProperties.OAuthProperties;
@@ -33,10 +32,12 @@ import org.icgc.dcc.portal.service.BadRequestException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Strings;
+
 public class OAuthClientIntegrationTest {
 
   private static final String SERVICE_URL = "http://localhost:8443";
-  private static final String USER_ID = "fakeId@a.com";
+  private static final String USERNAME = "fakeId@a.com";
   private static final String SCOPES = "os.download os.upload";
 
   OAuthClient client;
@@ -48,49 +49,48 @@ public class OAuthClientIntegrationTest {
 
   @Test
   public void createTokenTest() {
-    val result = client.createToken(USER_ID, SCOPES);
-    validateToken(result, convertScope(SCOPES));
+    val result = client.createToken(USERNAME, SCOPES);
+    validateToken(result, parseScopes(SCOPES));
     client.revokeToken(result.getId());
   }
 
-  private Set<String> convertScope(String scopes) {
+  private Set<String> parseScopes(String scopes) {
     return newHashSet(Splitters.WHITESPACE.split(scopes));
   }
 
   @Test
   public void createTokenTest_withDescription() {
-    val result = client.createToken(USER_ID, SCOPES, "Description");
+    val result = client.createToken(USERNAME, SCOPES, "Description");
     assertThat(result.getDescription()).isEqualTo("Description");
     client.revokeToken(result.getId());
   }
 
   @Test(expected = BadRequestException.class)
   public void createTokenTest_longDescription() {
-    client.createToken(USER_ID, SCOPES, StringUtils.repeat("a", 201));
+    client.createToken(USERNAME, SCOPES, Strings.repeat("a", 201));
   }
 
   @Test
   public void listTokens() {
-    client.createToken(USER_ID, SCOPES);
-    val result = client.listTokens(USER_ID);
-    assertThat(result.getTokens().size()).isEqualTo(1);
+    client.createToken(USERNAME, SCOPES);
+    val result = client.listTokens(USERNAME);
+    assertThat(result.getTokens()).hasSize(1);
   }
 
   @Test
   public void revokeTest() {
-    val token = client.createToken(USER_ID, SCOPES);
+    val token = client.createToken(USERNAME, SCOPES);
     client.revokeToken(token.getId());
 
-    for (val tok : client.listTokens(USER_ID).getTokens()) {
+    for (val tok : client.listTokens(USERNAME).getTokens()) {
       assertThat(tok).isNotEqualTo(token);
     }
   }
 
   @Test
   public void getUserScopesTest() {
-    val scopes = client.getUserScopes(USER_ID);
-    val resultScopes = convertScope(SCOPES);
-    assertThat(scopes.getScopes()).containsOnly(resultScopes.toArray(new String[resultScopes.size()]));
+    val scopes = client.getUserScopes(USERNAME);
+    assertThat(scopes.getScopes()).containsOnlyElementsOf(parseScopes(SCOPES));
   }
 
   private static void validateToken(AccessToken token, Set<String> scope) {
