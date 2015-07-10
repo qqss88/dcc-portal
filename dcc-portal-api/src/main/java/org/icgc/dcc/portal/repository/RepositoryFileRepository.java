@@ -18,6 +18,10 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -33,6 +37,7 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
+import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
@@ -63,6 +68,9 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
