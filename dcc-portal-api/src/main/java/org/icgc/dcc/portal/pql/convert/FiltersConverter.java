@@ -26,6 +26,7 @@ import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.newTreeSet;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
@@ -36,10 +37,11 @@ import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Stack;
+import java.util.stream.IntStream;
 
 import lombok.NonNull;
 import lombok.val;
@@ -232,36 +234,50 @@ public class FiltersConverter {
    */
   static String createFilterByNestedPath(Type indexType, ListMultimap<String, JqlField> sortedFields,
       List<String> sortedDescPaths) {
-    val filterStack = new Stack<String>();
+    val initialValue = createReducedValue("");
+    val result = zipWithIndex(sortedDescPaths).stream()
+        .reduce(initialValue, (result, pair) -> {
+          final int i = pair.getKey();
+          final String nestedPath = pair.getValue();
+          final String filter = createTypeFilter(sortedFields.get(nestedPath), indexType);
 
-    for (int i = 0; i < sortedDescPaths.size(); i++) {
-      val nestedPath = sortedDescPaths.get(i);
-      val filter = createTypeFilter(sortedFields.get(nestedPath), indexType);
+          val newReducedValue = (0 == i) ?
+              resolveFirstNestedPath(indexType, nestedPath, filter) :
+              resolveRestNestedPath(indexType, sortedDescPaths.get(i - 1), result.getValue(), nestedPath, filter);
 
-      val isFirstFilter = i == 0;
-      if (isFirstFilter) {
-        if (isNestFilter(nestedPath, indexType)) {
-          filterStack.push(format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), filter));
-        } else {
-          filterStack.push(filter);
-        }
-      } else {
-        val prevFilter = filterStack.pop();
+          return createReducedValue(newReducedValue);
+        });
 
-        if (isNestFilter(nestedPath, indexType)) {
-          if (isChildNesting(nestedPath, sortedDescPaths.get(i - 1))) {
-            filterStack.push(format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), prevFilter,
-                filter));
-          } else {
-            filterStack.push(format("nested(%s,%s),%s", nestedPath, filter, prevFilter));
-          }
-        } else {
-          filterStack.push(format("%s,%s", filter, prevFilter));
-        }
-      }
-    }
+    return result.getValue();
+  }
 
-    return filterStack.pop();
+  private static String resolveFirstNestedPath(Type indexType, final String nestedPath, final String filter) {
+    return isNestFilter(nestedPath, indexType) ?
+        format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), filter) :
+        filter;
+  }
+
+  private static String resolveRestNestedPath(Type indexType, String previousPath, String reducedValue,
+      String nestedPath, String filter) {
+    return isNestFilter(nestedPath, indexType) ?
+        (isChildNesting(nestedPath, previousPath) ?
+            format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), reducedValue, filter) :
+            format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) :
+        format("%s,%s", filter, reducedValue);
+  }
+
+  private static List<SimpleEntry<Integer, String>> zipWithIndex(@NonNull List<String> list) {
+    return IntStream.range(0, list.size()).boxed()
+        .map(i -> createPathIndexPair(i, list.get(i)))
+        .collect(toList());
+  }
+
+  private static SimpleEntry<Integer, String> createReducedValue(String reducedValue) {
+    return createPathIndexPair(-1, reducedValue);
+  }
+
+  private static SimpleEntry<Integer, String> createPathIndexPair(int index, String path) {
+    return new SimpleEntry<Integer, String>(index, path);
   }
 
   /**
