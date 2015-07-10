@@ -93,14 +93,17 @@
                 </a>
             </td>
         </tr>
-        <tr data-ng-if="ProjectCtrl.project.state === 'live'">
-            <th>Number of Donors involved in Study</th>
+
+        <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.study.length > 0">
+            <th>Number of donors in PCAWG</th>
             <td>
                 <ul>
                     <li data-ng-repeat="study in ProjectCtrl.studies">
                         <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
                         <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
+                        <!--
                         <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
+                        -->
                     </li>
                 </ul>
             </td>
