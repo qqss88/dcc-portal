@@ -53,10 +53,18 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -88,11 +96,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
-
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -646,5 +649,21 @@ public class RepositoryFileRepository {
     log.debug("Result {}", result);
 
     return result;
+  }
+
+  @SneakyThrows
+  public Map<String, String> getIndexMetaData() {
+    val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
+
+    val realIndex = (state.getMetaData().getAliases().get(index)).iterator().next().key;
+
+    IndexMetaData indexMetaData = state.getMetaData().index(realIndex);
+
+    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
+    Map<String, Object> source = mappingMetaData.sourceAsMap();
+    Map<String, String> meta = (Map<String, String>) source.get("_meta");
+    if (meta == null) return Maps.newHashMap();
+    return meta;
+
   }
 }

@@ -44,11 +44,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.annotation.Resource;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -81,16 +87,9 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileService {
 
   private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
@@ -129,11 +128,8 @@ public class RepositoryFileService {
 
   private final RepositoryFileRepository repositoryFileRepository;
 
-  @Resource
-  private Map<String, String> repoIndexMetadata;
-
   public Map<String, String> getIndexMetadata() {
-    return repoIndexMetadata;
+    return repositoryFileRepository.getIndexMetaData();
   }
 
   public StreamingOutput exportTableData(Query query) {
@@ -446,7 +442,7 @@ public class RepositoryFileService {
   @NonNull
   private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl,
       final int rowCount)
-          throws XMLStreamException {
+      throws XMLStreamException {
     writer.writeStartElement(XmlTags.RECORD);
     writer.writeAttribute("id", String.valueOf(rowCount));
 
