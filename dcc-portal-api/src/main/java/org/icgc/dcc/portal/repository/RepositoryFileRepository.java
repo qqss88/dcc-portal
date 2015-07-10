@@ -655,11 +655,9 @@ public class RepositoryFileRepository {
   public Map<String, String> getIndexMetaData() {
     val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
 
-    log.info("state {}", state);
     val realIndex = (state.getMetaData().getAliases().get(index)).iterator().next().key;
 
     IndexMetaData indexMetaData = state.getMetaData().index(realIndex);
-    log.info("Index meta data {} {}", indexMetaData, index);
 
     MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
     Map<String, Object> source = mappingMetaData.sourceAsMap();
