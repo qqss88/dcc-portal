@@ -83,7 +83,8 @@ public class FiltersConverter {
       "id",
       "primarySite",
       "primaryCountries",
-      "availableDataTypes");
+      "availableDataTypes",
+      "state");
 
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",

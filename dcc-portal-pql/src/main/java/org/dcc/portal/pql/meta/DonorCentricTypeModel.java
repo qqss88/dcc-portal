@@ -65,6 +65,8 @@ public class DonorCentricTypeModel extends TypeModel {
       "projectId",
       "primarySite",
       "projectName",
+      "tumourType",
+      "tumourSubtype",
       "ssmCount",
       "cnsmExists",
       "stsmExists",
@@ -95,7 +97,10 @@ public class DonorCentricTypeModel extends TypeModel {
       "analysisTypes",
       "studies",
       "ssmAffectedGenes",
-      "state");
+      "state",
+      "priorMalignancy",
+      "cancerTypePriorMalignancy",
+      "cancerHistoryFirstDegreeRelative");
 
   public DonorCentricTypeModel() {
     super(initFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
@@ -146,6 +151,10 @@ public class DonorCentricTypeModel extends TypeModel {
     fields.add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID));
     fields.add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID));
     fields.add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID));
+
+    fields.add(string("prior_malignancy", "priorMalignancy"));
+    fields.add(string("cancer_type_prior_malignancy", "cancerTypePriorMalignancy"));
+    fields.add(string("cancer_history_first_degree_relative", "cancerHistoryFirstDegreeRelative"));
 
     return fields.build();
   }
@@ -257,7 +266,9 @@ public class DonorCentricTypeModel extends TypeModel {
     return object("project",
         string("_project_id", "projectId"),
         string("primary_site", "primarySite"),
-        string("project_name", "projectName"));
+        string("project_name", "projectName"),
+        string("tumour_type", "tumourType"),
+        string("tumour_subtype", "tumourSubtype"));
   }
 
   private static Map<String, String> defineInternalAliases() {
