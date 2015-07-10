@@ -102,12 +102,6 @@ public class SearchConfig {
     return indexMetadata(indexStr);
   }
 
-  @Bean
-  public Map<String, String> repoIndexMetadata() {
-    String indexStr = resolveIndexName(properties.getElastic().getRepoIndexName());
-    return indexMetadata(indexStr);
-  }
-
   @SneakyThrows
   @SuppressWarnings("unchecked")
   private Map<String, String> indexMetadata(String indexName) {

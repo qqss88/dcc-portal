@@ -18,10 +18,6 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.collect.Iterables.transform;
-import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
-import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
-import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
-import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -37,7 +33,6 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
@@ -64,16 +59,16 @@ import javax.ws.rs.core.StreamingOutput;
 
 import lombok.Cleanup;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
-import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
-import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -526,7 +521,6 @@ public class RepositoryFileRepository {
         .setFrom(0)
         .setSize(maxNumberOfDocs)
         .setQuery(multiMatchQuery(queryString, toStringArray(names)));
-    log.info(">>> ES Search is: {}", search);
 
     return search.execute().actionGet();
   }
@@ -589,7 +583,6 @@ public class RepositoryFileRepository {
 
     search.addAggregation(donorCountAgg);
 
-    log.info(">>> {}", search);
     val response = search.execute().actionGet();
     val global = (Global) response.getAggregations().get(name);
     val filter = (Filter) global.getAggregations().get(name);
@@ -677,5 +670,21 @@ public class RepositoryFileRepository {
     log.debug("Result {}", result);
 
     return result;
+  }
+
+  @SneakyThrows
+  public Map<String, String> getIndexMetaData() {
+    val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
+
+    val realIndex = (state.getMetaData().getAliases().get(index)).iterator().next().key;
+
+    IndexMetaData indexMetaData = state.getMetaData().index(realIndex);
+
+    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
+    Map<String, Object> source = mappingMetaData.sourceAsMap();
+    Map<String, String> meta = (Map<String, String>) source.get("_meta");
+    if (meta == null) return Maps.newHashMap();
+    return meta;
+
   }
 }
