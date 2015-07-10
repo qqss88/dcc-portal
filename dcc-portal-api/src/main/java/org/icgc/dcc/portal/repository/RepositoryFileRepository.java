@@ -53,12 +53,6 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -96,6 +90,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -661,6 +661,7 @@ public class RepositoryFileRepository {
 
     MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
     Map<String, Object> source = mappingMetaData.sourceAsMap();
+    @SuppressWarnings("unchecked")
     Map<String, String> meta = (Map<String, String>) source.get("_meta");
     if (meta == null) return Maps.newHashMap();
     return meta;
