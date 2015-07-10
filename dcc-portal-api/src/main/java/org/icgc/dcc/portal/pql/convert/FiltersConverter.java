@@ -17,18 +17,20 @@
  */
 package org.icgc.dcc.portal.pql.convert;
 
+import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Iterables.getLast;
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.filterKeys;
+import static com.google.common.collect.Maps.transformEntries;
+import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.newTreeSet;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toMap;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
 import static org.dcc.portal.pql.util.Converters.stringValue;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.ALL;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
@@ -45,12 +47,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
+import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
@@ -63,7 +66,6 @@ public class FiltersConverter {
   private static final String GENE_PATH = "gene";
   private static final String MISSING_VALUE = "_missing";
   private static final String EMPTY_NESTED_PATH = "";
-  private static final String QUERY_SEPARATOR = ",";
   private static final String NOT_TEMPLATE = "not(%s)";
   private static final String IN_TEMPLATE = "in(%s,%s)";
   private static final String EQ_TEMPLATE = "eq(%s,%s)";
@@ -71,6 +73,9 @@ public class FiltersConverter {
   private static final String EXISTS_TEMPLATE = "exists(%s)";
   private static final String MISSING_TEMPLATE = "missing(%s)";
   private static final String NESTED_TEMPLATE = "nested(%s,%s)";
+
+  private static final Ordering<String> NATURAL_ORDER = Ordering.<String> natural();
+  private static final Joiner COMMA_JOINER = Joiners.COMMA.skipNulls();
 
   private static final List<String> VALID_PROJECT_FILTERS = ImmutableList.of(
       "id",
@@ -93,7 +98,8 @@ public class FiltersConverter {
       "sequencingStrategy",
       "verificationStatus");
 
-  public String convertFilters(@NonNull JqlFilters filters, @NonNull Type indexType) {
+  @NonNull
+  public String convertFilters(JqlFilters filters, Type indexType) {
     if (indexType == PROJECT) {
       filters = cleanProjectFilters(filters);
     }
@@ -102,46 +108,32 @@ public class FiltersConverter {
     val fieldsGrouppedByNestedPath = ArrayListMultimap.<String, JqlField> create();
 
     // filterKind is 'donor' in a filter {donor:{id:{is:'DO1'}}}
-    for (val filterKindEntry : filters.getKindValues().entrySet()) {
-      val fieldsByNestedPath = groupFieldsByNestedPath(filterKindEntry.getKey(), filterKindEntry.getValue(), indexType);
+    for (val entry : filters.getKindValues().entrySet()) {
+      val fieldsByNestedPath = groupFieldsByNestedPath(entry.getKey(), entry.getValue(), indexType);
       fieldsGrouppedByNestedPath.putAll(fieldsByNestedPath);
     }
 
     log.debug("Fields by nested path: {}", fieldsGrouppedByNestedPath);
-    val sortedDescPaths = newArrayList(newTreeSet(fieldsGrouppedByNestedPath.keySet()).descendingSet());
+    val sortedDescPaths = newTreeSet(fieldsGrouppedByNestedPath.keySet()).descendingSet();
     log.debug("Sorted: {}", sortedDescPaths);
     val groupedPaths = groupNestedPaths(sortedDescPaths, getTypeModel(indexType));
     log.debug("Groupped paths: {}", groupedPaths);
 
-    int index = groupedPaths.asMap().size();
-    val result = new StringBuilder();
+    val groupedFilters = transformEntries(groupedPaths.asMap(), (key, values) -> {
+      final String filter = createFilterByNestedPath(indexType, fieldsGrouppedByNestedPath,
+          newArrayList(newTreeSet(values).descendingSet()));
 
-    for (val entry : groupedPaths.asMap().entrySet()) {
-      val filter = createFilterByNestedPath(
-          indexType,
-          fieldsGrouppedByNestedPath,
-          newArrayList(newTreeSet(entry.getValue()).descendingSet()));
+      return isEncloseWithCommonParent(values) ?
+          encloseWithCommonParent(key, filter) : filter;
+    });
 
-      if (isEncloseWithCommonParent(entry.getValue())) {
-        result.append(encloseWithCommonParent(entry.getKey(), filter));
-      } else {
-        result.append(filter);
-      }
-
-      // Separate converted filters with comma except the last one
-      if (--index > 0) {
-        result.append(QUERY_SEPARATOR);
-      }
-    }
-
-    return result.toString();
+    return COMMA_JOINER.join(groupedFilters.values());
   }
 
   private static JqlFilters cleanProjectFilters(JqlFilters filters) {
     val indexType = PROJECT.getId();
-    val kindValues = filters.getKindValues().entrySet().stream()
-        .filter(k -> k.getKey().equals(indexType))
-        .collect(toMap(k -> k.getKey(), v -> filterValidProjectFilters(v.getValue())));
+    val kindValues = transformValues(filterKeys(filters.getKindValues(), key -> key.equals(indexType)),
+        value -> filterValidProjectFilters(value));
 
     return new JqlFilters(kindValues);
   }
@@ -155,18 +147,14 @@ public class FiltersConverter {
   }
 
   static boolean isEncloseWithCommonParent(Collection<String> nestedPaths) {
-    if (nestedPaths.size() > 1 && !hasCommonParent(nestedPaths)) {
-      return true;
-    }
-
-    return false;
+    return nestedPaths.size() > 1 && !hasCommonParent(nestedPaths);
   }
 
   /**
    * Checks if {@code nestedPaths} already contains a nested path which is common for all.
    */
   private static boolean hasCommonParent(Collection<String> nestedPaths) {
-    val firstPath = Ordering.<String> natural().min(nestedPaths);
+    val firstPath = NATURAL_ORDER.min(nestedPaths);
     return nestedPaths.stream()
         .allMatch(path -> path.startsWith(firstPath));
   }
@@ -177,16 +165,18 @@ public class FiltersConverter {
   static ListMultimap<String, String> groupNestedPaths(Collection<String> nestedPaths, TypeModel typeModel) {
     val result = ArrayListMultimap.<String, String> create();
     val sortedPaths = newArrayList(newTreeSet(nestedPaths));
+    val size = sortedPaths.size();
 
-    if (sortedPaths.size() == 1) {
-      result.put(sortedPaths.get(0), sortedPaths.get(0));
-
+    if (size == 1) {
+      val path = sortedPaths.get(0);
+      result.put(path, path);
       return result;
     }
 
     String parentPath = EMPTY_NESTED_PATH;
-    for (int i = 0; i < sortedPaths.size(); i++) {
+    for (int i = 0; i < size; i++) {
       val currentPath = sortedPaths.get(i);
+
       if (currentPath.equals(EMPTY_NESTED_PATH)) {
         result.put(parentPath, currentPath);
         continue;
@@ -195,13 +185,13 @@ public class FiltersConverter {
       val resolvedPath = typeModel.getParentNestedPath(currentPath);
 
       // DonorCentric: [gene.ssm, gene.ssm.observation]
-      if (hasNextPath(i, sortedPaths.size() - 1) && sortedPaths.get(i + 1).startsWith(currentPath)
-          && parentPath.equals(EMPTY_NESTED_PATH)) {
+      if (parentPath.equals(EMPTY_NESTED_PATH)
+          && doesNextPathStartWith(sortedPaths, currentPath, i, size)) {
         parentPath = currentPath;
 
         // DonorCentric: [gene.ssm.consequence, gene.ssm.observation]
-      } else if (currentPath.startsWith(resolvedPath) && hasNextPath(i, sortedPaths.size() - 1)
-          && sortedPaths.get(i + 1).startsWith(resolvedPath) && parentPath.equals(EMPTY_NESTED_PATH)) {
+      } else if (currentPath.startsWith(resolvedPath) && parentPath.equals(EMPTY_NESTED_PATH)
+          && doesNextPathStartWith(sortedPaths, resolvedPath, i, size)) {
         parentPath = resolvedPath;
 
         // Change from one common path to another
@@ -220,7 +210,18 @@ public class FiltersConverter {
   }
 
   private static boolean hasNextPath(int i, int size) {
-    return i < size;
+    return i < (size - 1);
+  }
+
+  @NonNull
+  private static boolean doesNextPathStartWith(List<String> paths, String prefix, int i, int size) {
+    val hasNext = hasNextPath(i, size);
+
+    if (hasNext) {
+      return paths.get(i + 1).startsWith(prefix);
+    }
+
+    return false;
   }
 
   /**
@@ -291,19 +292,9 @@ public class FiltersConverter {
     return !(nestedPath.equals(EMPTY_NESTED_PATH));
   }
 
-  private static String createTypeFilter(Collection<JqlField> fields, Type indexType) {
-    val result = new StringBuilder();
-    val lastField = getLast(fields);
-
-    for (val jqlField : fields) {
-      result.append(createFilter(jqlField, indexType));
-
-      if (!jqlField.equals(lastField)) {
-        result.append(QUERY_SEPARATOR);
-      }
-    }
-
-    return result.toString();
+  private static String createTypeFilter(Iterable<JqlField> fields, Type indexType) {
+    return COMMA_JOINER.join(transform(fields,
+        field -> createFilter(field, indexType)));
   }
 
   private static boolean isNestedField(@NonNull JqlField field) {
@@ -327,10 +318,11 @@ public class FiltersConverter {
     // The fields must be correctly separated before the next steps.
     if (indexType == MUTATION_CENTRIC && typePrefix.equals("mutation")) {
       final Predicate<JqlField> nestedPredicate = (f) -> isNestedField(f);
-      val nonNested = filter(fields, Predicates.not(nestedPredicate));
 
-      result.putAll(EMPTY_NESTED_PATH, nonNested);
+      val nonNestedFields = filter(fields, not(nestedPredicate));
+      result.putAll(EMPTY_NESTED_PATH, nonNestedFields);
 
+      // Resets the 'fields' variable for further processing (down below).
       fields = newArrayList(filter(fields, nestedPredicate));
     }
 
@@ -446,7 +438,7 @@ public class FiltersConverter {
   private static String resolveAllFilter(JqlField jqlField, Type indexType) {
     val values = createAllFilters(jqlField, indexType);
 
-    return format("and(%s)", COMMA.join(values));
+    return format("and(%s)", COMMA_JOINER.join(values));
   }
 
   private static List<String> createAllFilters(JqlField jqlField, Type indexType) {
