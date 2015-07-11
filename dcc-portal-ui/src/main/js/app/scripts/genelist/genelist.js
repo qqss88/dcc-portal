@@ -254,12 +254,15 @@
     // This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean
     // way of modeling [input type=file]. So to get file information, it is proxied through a
     // directive that gets the file value (myFile) from input $element
+    //
+    // Possible issues with illegal invocation
+    //  - https://github.com/danialfarid/ng-file-upload/issues/776#issuecomment-106929172
     $scope.$watch('params.myFile', function(newValue) {
       if (! newValue) {
         return;
       }
       verifyFile();
-    }, true);
+    });
 
 
     $scope.updateGenelist = function() {

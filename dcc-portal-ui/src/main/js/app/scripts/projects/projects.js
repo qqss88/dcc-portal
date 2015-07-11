@@ -665,7 +665,7 @@
   module.value('X2JS', new X2JS());
 
   module.service('PubMed', function (Restangular, X2JS) {
-    this.handler = Restangular.oneUrl('pubmed', 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi');
+    this.handler = Restangular.oneUrl('pubmed', 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi');
 
     function format(xml) {
       var pub = {}, json = X2JS.xml_str2json(xml).eSummaryResult.DocSum;

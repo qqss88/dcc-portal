@@ -64,6 +64,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import lombok.Cleanup;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,6 +75,8 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.IndexMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -526,7 +529,6 @@ public class RepositoryFileRepository {
         .setFrom(0)
         .setSize(maxNumberOfDocs)
         .setQuery(multiMatchQuery(queryString, toStringArray(names)));
-    log.info(">>> ES Search is: {}", search);
 
     return search.execute().actionGet();
   }
@@ -589,7 +591,6 @@ public class RepositoryFileRepository {
 
     search.addAggregation(donorCountAgg);
 
-    log.info(">>> {}", search);
     val response = search.execute().actionGet();
     val global = (Global) response.getAggregations().get(name);
     val filter = (Filter) global.getAggregations().get(name);
@@ -677,5 +678,21 @@ public class RepositoryFileRepository {
     log.debug("Result {}", result);
 
     return result;
+  }
+
+  @SneakyThrows
+  public Map<String, String> getIndexMetaData() {
+    val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
+
+    val realIndex = (state.getMetaData().getAliases().get(index)).iterator().next().key;
+
+    IndexMetaData indexMetaData = state.getMetaData().index(realIndex);
+
+    MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
+    Map<String, Object> source = mappingMetaData.sourceAsMap();
+    Map<String, String> meta = (Map<String, String>) source.get("_meta");
+    if (meta == null) return Maps.newHashMap();
+    return meta;
+
   }
 }

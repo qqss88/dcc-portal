@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.annotation.Resource;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -132,11 +131,8 @@ public class RepositoryFileService {
 
   private final RepositoryFileRepository repositoryFileRepository;
 
-  @Resource
-  private Map<String, String> repoIndexMetadata;
-
   public Map<String, String> getIndexMetadata() {
-    return repoIndexMetadata;
+    return repositoryFileRepository.getIndexMetaData();
   }
 
   public StreamingOutput exportTableData(Query query) {
