@@ -30,14 +30,6 @@
           return Genes.one($stateParams.id).get({include: ['projects', 'transcripts']}).then(function(gene) {
             return gene;
           });
-          // return Genes.one($stateParams.id).get({include: ['projects', 'transcripts',
-          //   'pathways']}).then(function (gene) {
-          //   gene.projects = _.map(gene.projects, function (p) {
-          //     p.uiAffectedDonorPercentage = p.affectedDonorCount / p.ssmTestedDonorCount;
-          //     return p;
-          //   });
-          //   return gene;
-          // });
         }]
       }
     });
@@ -80,7 +72,7 @@
     _ctrl.uiGeneSets = {};
     _ctrl.uiGeneSets.pathwayList = extractAndSort(_ctrl.gene.sets, 'pathway');
     _ctrl.uiGeneSets.goList = extractAndSort(_ctrl.gene.sets, 'go_term');
-    _ctrl.uiGeneSets.curatedList = extractAndSort(_ctrl.gene.sets, 'curated');
+    _ctrl.uiGeneSets.curatedList = extractAndSort(_ctrl.gene.sets, 'curated_set');
 
 
     function refresh() {

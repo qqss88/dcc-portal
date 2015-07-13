@@ -690,6 +690,7 @@ public class RepositoryFileRepository {
 
     MappingMetaData mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
     Map<String, Object> source = mappingMetaData.sourceAsMap();
+    @SuppressWarnings("unchecked")
     Map<String, String> meta = (Map<String, String>) source.get("_meta");
     if (meta == null) return Maps.newHashMap();
     return meta;
