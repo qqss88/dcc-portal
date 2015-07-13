@@ -26,7 +26,6 @@ import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.newTreeSet;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
@@ -37,16 +36,17 @@ import static org.icgc.dcc.portal.pql.convert.model.Operation.HAS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.IS;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.NOT;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.math3.util.Pair;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.icgc.dcc.common.core.util.Joiners;
@@ -235,50 +235,81 @@ public class FiltersConverter {
    */
   static String createFilterByNestedPath(Type indexType, ListMultimap<String, JqlField> sortedFields,
       List<String> sortedDescPaths) {
-    val initialValue = createReducedValue("");
-    val result = zipWithIndex(sortedDescPaths).stream()
-        .reduce(initialValue, (result, pair) -> {
-          final int i = pair.getKey();
-          final String nestedPath = pair.getValue();
-          final String filter = createTypeFilter(sortedFields.get(nestedPath), indexType);
+    val size = sortedDescPaths.size();
 
-          val newReducedValue = (0 == i) ?
-              resolveFirstNestedPath(indexType, nestedPath, filter) :
-              resolveRestNestedPath(indexType, sortedDescPaths.get(i - 1), result.getValue(), nestedPath, filter);
+    if (size < 1) {
+      return "";
+    }
 
-          return createReducedValue(newReducedValue);
+    val firstPath = head(sortedDescPaths);
+    val firstValue = resolveFirstNestedPath(indexType, firstPath, sortedFields);
+
+    if (size == 1) {
+      return firstValue;
+    }
+
+    val initialValue = createReduceValuePair(firstValue, firstPath);
+
+    val result = prepareForReduce(tail(sortedDescPaths))
+        .reduce(initialValue, (accumulated, value) -> {
+          final String nestedPath = unboxReduceValue(value);
+          final String newReducedValue = resolveRestNestedPath(indexType, accumulated, nestedPath, sortedFields);
+
+          return createReduceValuePair(newReducedValue, nestedPath);
         });
 
-    return result.getValue();
+    return unboxReduceValue(result);
   }
 
-  private static String resolveFirstNestedPath(Type indexType, final String nestedPath, final String filter) {
+  private static String resolveFirstNestedPath(Type indexType, String nestedPath,
+      ListMultimap<String, JqlField> sortedFields) {
+    val typeFilter = createTypeFilter(sortedFields.get(nestedPath), indexType);
+
     return isNestFilter(nestedPath, indexType) ?
-        format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), filter) :
-        filter;
+        format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), typeFilter) :
+        typeFilter;
   }
 
-  private static String resolveRestNestedPath(Type indexType, String previousPath, String reducedValue,
-      String nestedPath, String filter) {
+  private static String resolveRestNestedPath(Type indexType, Pair<String, String> reduceValuePair, String nestedPath,
+      ListMultimap<String, JqlField> sortedFields) {
+    val filter = createTypeFilter(sortedFields.get(nestedPath), indexType);
+    val reducedValue = unboxReduceValue(reduceValuePair);
+    val previousSiblingPath = reduceValuePair.getSecond();
+
     return isNestFilter(nestedPath, indexType) ?
-        (isChildNesting(nestedPath, previousPath) ?
+        (isChildNesting(nestedPath, previousSiblingPath) ?
             format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), reducedValue, filter) :
             format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) :
         format("%s,%s", filter, reducedValue);
   }
 
-  private static List<SimpleEntry<Integer, String>> zipWithIndex(@NonNull List<String> list) {
-    return IntStream.range(0, list.size()).boxed()
-        .map(i -> createPathIndexPair(i, list.get(i)))
-        .collect(toList());
+  private static <T> T head(@NonNull List<T> list) {
+    return list.isEmpty() ? null : list.get(0);
   }
 
-  private static SimpleEntry<Integer, String> createReducedValue(String reducedValue) {
-    return createPathIndexPair(-1, reducedValue);
+  private static <T> Stream<T> tail(@NonNull List<T> list) {
+    val size = list.size();
+
+    return (size < 2) ?
+        Stream.empty() :
+        IntStream.range(1, size).boxed()
+            .map(i -> list.get(i));
   }
 
-  private static SimpleEntry<Integer, String> createPathIndexPair(int index, String path) {
-    return new SimpleEntry<Integer, String>(index, path);
+  /*
+   * This prepares for a reduce operation. Due to that our accumulator is a pair of (accumulatedValue,
+   * previousSiblingPath), we have to wrap elements in our collection to the same type as the accumulator.
+   */
+  private static Stream<Pair<String, String>> prepareForReduce(@NonNull Stream<String> stream) {
+    return stream.map(value -> createReduceValuePair(value, value));
+  }
+
+  private static Pair<String, String> createReduceValuePair(String reducedValue, String previousSiblingPath) {
+    return new Pair<String, String>(reducedValue, previousSiblingPath);
+  }
+
+  private static String unboxReduceValue(@NonNull Pair<String, String> reduceValuePair) {
+    return reduceValuePair.getFirst();
   }
 
   /**
