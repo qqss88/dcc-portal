@@ -95,7 +95,7 @@
         resolve: {
           filters: function() {
             return {
-              donor: { id: { is: [_ctrl.donor.id] }, state:{is: ['*']} }
+              donor: { id: { is: [_ctrl.donor.id] } }
             };
           }
         }
@@ -250,7 +250,15 @@
         filters: LocationService.filters()
       };
 
-      return this.handler.one('', '').get(angular.extend(defaults, params)).then(function (data) {
+
+      // Sanitize filters, we want to enforce donor.state == 'live'
+      var liveFilters = angular.extend(defaults, _.cloneDeep(params));
+      if (! liveFilters.filters.donor) {
+        liveFilters.filters.donor = {};
+      }
+      liveFilters.filters.donor.state = { is: ['live']};
+
+      return this.handler.one('', '').get(liveFilters).then(function (data) {
         if (data.hasOwnProperty('facets')) {
           for (var facet in data.facets) {
             if (data.facets.hasOwnProperty(facet) && data.facets[facet].missing) {
