@@ -63,7 +63,10 @@ public class GeneCentricTypeModel extends TypeModel {
       "affectedTranscriptIds",
       "gene.location",
       "pathwayId",
-      "pathways");
+      "pathways",
+
+      // NOTE: Centric and non-centric are modelled different. Set only exists in gene and not gene-centric
+      "sets");
 
   public GeneCentricTypeModel() {
     super(defineFields(), defineInternalAliases(), PUBLIC_FIELDS, INCLUDE_FIELDS);
@@ -115,6 +118,10 @@ public class GeneCentricTypeModel extends TypeModel {
         .add(string(DONOR_ENTITY_SET_ID, DONOR_ENTITY_SET_ID))
         .add(string(GENE_ENTITY_SET_ID, GENE_ENTITY_SET_ID))
         .add(string(MUTATION_ENTITY_SET_ID, MUTATION_ENTITY_SET_ID))
+
+        // NOTE: Centric and non-centric are modelled different. Set only exists in gene and not gene-centric
+        .add(arrayOfObjects("sets", "sets", object()))
+
         .build();
   }
 
