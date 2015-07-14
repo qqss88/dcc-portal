@@ -91,7 +91,10 @@ public class UIResource {
       @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId
       ) {
 
-    val query = Query.builder().filters(filters.get()).sort("_score").size(10).order(DEFAULT_ORDER).build();
+    val query =
+        Query.builder().filters(filters.get()).sort("_score").size(10).order(DEFAULT_ORDER)
+            .includes(ImmutableList.of("consequences")).build();
+
     return mutationService.findMutationsByDonor(query, donorId);
   }
 

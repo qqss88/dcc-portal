@@ -71,6 +71,8 @@ public class MutationService {
       list.add(new Mutation(map));
     }
     val mutations = new Mutations(list.build());
+    mutations.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    mutations.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
     return mutations;
   }
 

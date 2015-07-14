@@ -138,7 +138,9 @@
 
   });
 
-  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService, ProjectCache) {
+  module.controller('DonorMutationsCtrl',
+    function($scope, Restangular, Donors, Projects, LocationService, ProjectCache) {
+
     var _ctrl = this, donor;
 
     function success(mutations) {
@@ -193,11 +195,26 @@
     function refresh() {
       Donors.one().get({include: 'specimen'}).then(function (d) {
         donor = d;
+
+        var filters = LocationService.filters();
+        if (! filters.donor) {
+          filters.donor = {};
+        }
+        filters.donor.projectId = { is: [ donor.projectId ]};
+
+        Restangular.one('ui/donor-mutations').get({
+          filters: filters,
+          donorId: d.id,
+          include: 'consequences'
+        }).then(success);
+
+        /*
         Donors.one().getMutations({
           include: 'consequences',
           filters: LocationService.filters(),
           scoreFilters: {donor: {projectId: {is: donor.projectId }}}
         }).then(success);
+        */
       });
     }
 
