@@ -39,6 +39,7 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -77,10 +78,28 @@ public class MutationRepository implements Repository {
     val pql = converter.convert(query, MUTATION_CENTRIC);
     val search = queryEngine.execute(pql, MUTATION_CENTRIC);
 
-    log.info("Mutation : {}", search.getRequestBuilder());
+    log.debug("Mutation : {}", search.getRequestBuilder());
 
     SearchResponse response = search.getRequestBuilder().execute().actionGet();
     return response;
+  }
+
+  /**
+   * The logic is kind of reversed here. We want to find top mutations of <strong>donorId</strong> while using query as
+   * a scoring mechanism. I.e., find top 10 mutations of donor X where mutations are ranked by number of donors affected
+   * within the same project as donor X.
+   */
+  public SearchResponse findMutationsByDonor(@NonNull Query query, @NonNull String donorId) {
+    val pql = converter.convert(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
+
+    val termFilter = FilterBuilders.termFilter("ssm_occurrence.donor._donor_id", donorId);
+    val nestedFilter = FilterBuilders.nestedFilter("ssm_occurrence", termFilter);
+    search.getRequestBuilder().setPostFilter(nestedFilter);
+
+    log.debug("Find mutations by donor {}", search.getRequestBuilder());
+
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   @Override

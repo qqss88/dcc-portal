@@ -59,6 +59,21 @@ public class MutationService {
     return mutations;
   }
 
+  public Mutations findMutationsByDonor(Query query, String donorId) {
+    val response = mutationRepository.findMutationsByDonor(query, donorId);
+
+    val hits = response.getHits();
+    val list = ImmutableList.<Mutation> builder();
+
+    for (val hit : hits) {
+      val map = createResponseMap(hit, query, Kind.MUTATION);
+      map.put("_score", hit.getScore());
+      list.add(new Mutation(map));
+    }
+    val mutations = new Mutations(list.build());
+    return mutations;
+  }
+
   public long count(Query query) {
     return mutationRepository.count(query);
   }

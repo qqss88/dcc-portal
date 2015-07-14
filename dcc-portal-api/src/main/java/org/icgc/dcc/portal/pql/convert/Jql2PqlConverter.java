@@ -78,10 +78,10 @@ public class Jql2PqlConverter {
       }
     }
 
-    if (query.hasScoreFilters()) {
-      result.append(SEPARATOR);
-      result.append(convertFilters(query.getScoreFilters().toString(), type));
-    }
+    // if (query.hasScoreFilters()) {
+    // result.append(SEPARATOR);
+    // result.append(convertFilters(query.getScoreFilters().toString(), type));
+    // }
 
     val sort = query.getSort();
     if (sort != null && !sort.isEmpty()) {

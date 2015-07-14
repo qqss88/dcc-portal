@@ -50,10 +50,12 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
+import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
+import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.service.OccurrenceService;
 import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +82,18 @@ public class UIResource {
   private final DonorService donorService;
   private final OccurrenceService occurrenceService;
   private final DiagramService diagramService;
+  private final MutationService mutationService;
+
+  @Path("/donor-mutations")
+  @GET
+  public Mutations getDonorMutations(
+      @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters,
+      @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId
+      ) {
+
+    val query = Query.builder().filters(filters.get()).sort("_score").size(10).order(DEFAULT_ORDER).build();
+    return mutationService.findMutationsByDonor(query, donorId);
+  }
 
   /*
    * This is used to fetch project-donorCount breakdown for a list of genes. It builds the data for gene chart on the
