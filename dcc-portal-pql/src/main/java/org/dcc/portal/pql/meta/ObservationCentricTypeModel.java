@@ -193,6 +193,8 @@ public class ObservationCentricTypeModel extends TypeModel {
         string("donor_vital_status", "donor.vitalStatus"),
         string("disease_status_last_followup", "donor.diseaseStatusLastFollowup"),
         string("donor_relapse_type", "donor.relapseType"),
+        string("_summary._state", "donor.state"),
+        arrayOfStrings("_summary._studies", "donor.studies"),
         defineDonorSummary());
   }
 

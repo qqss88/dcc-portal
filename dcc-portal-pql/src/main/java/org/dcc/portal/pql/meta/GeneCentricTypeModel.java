@@ -149,6 +149,8 @@ public class GeneCentricTypeModel extends TypeModel {
         // FIXME: This field has different spelling in different types
         string("donor_tumour_stage_at_diagnosis", "donor.tumourStageAtDiagnosis"),
         string("donor_vital_status", "donor.vitalStatus"),
+        string("_summary._state", "donor.state"),
+        arrayOfStrings("_summary._studies", "donor.studies"),
         object("project",
             string("_project_id", "donor.projectId"),
             string("primary_site", "donor.primarySite"),

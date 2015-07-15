@@ -184,7 +184,9 @@ public class MutationCentricTypeModel extends TypeModel {
         string("donor_relapse_type", "donor.relapseType"),
         object("_summary",
             string("_age_at_diagnosis_group", "donor.ageAtDiagnosisGroup"),
+            string("_state", "donor.state"),
             arrayOfStrings("_available_data_type", "donor.availableDataTypes"),
+            arrayOfStrings("_studies", "donor.studies"),
             arrayOfStrings("experimental_analysis_performed", "donor.analysisTypes")));
   }
 
