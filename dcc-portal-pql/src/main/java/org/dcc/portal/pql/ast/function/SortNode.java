@@ -63,7 +63,7 @@ public class SortNode extends PqlNode {
 
   public static class SortNodeBuilder {
 
-    private final Map<String, Order> sort = Maps.newHashMap();
+    private final Map<String, Order> sort = Maps.newLinkedHashMap();
 
     public SortNodeBuilder sort(@NonNull String field, @NonNull Order order) {
       sort.put(field, order);
