@@ -33,7 +33,7 @@ import com.google.common.collect.Maps;
 @EqualsAndHashCode(callSuper = true)
 public class SortNode extends ExpressionNode {
 
-  Map<String, Order> fields = Maps.newHashMap();
+  Map<String, Order> fields = Maps.newLinkedHashMap();
 
   @Override
   public <T, A> T accept(@NonNull NodeVisitor<T, A> visitor, @NonNull Optional<A> context) {
