@@ -52,8 +52,6 @@ public class Query {
 
   @JsonDeserialize(using = ObjectNodeDeserializer.class)
   ObjectNode filters;
-  @JsonDeserialize(using = ObjectNodeDeserializer.class)
-  ObjectNode scoreFilters;
 
   List<String> fields;
   List<String> includes;
@@ -71,10 +69,6 @@ public class Query {
 
   public boolean hasFilters() {
     return filters != null && filters.size() > 0;
-  }
-
-  public boolean hasScoreFilters() {
-    return scoreFilters != null && scoreFilters.size() > 0;
   }
 
   public boolean hasFields() {
