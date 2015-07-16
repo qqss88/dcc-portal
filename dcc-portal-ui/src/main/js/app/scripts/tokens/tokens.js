@@ -37,10 +37,11 @@
 
   module.controller('TokenController', function($scope, $timeout, $modalInstance, TokenService) {
 
-    // Transient 
+    // Transient
     $scope.selected = [];
     $scope.newToken = '';
     $scope.processing = false;
+    $scope.tokenDescription = '';
 
 
     // From server
@@ -48,18 +49,16 @@
     $scope.availableScopes = [];
 
     function refresh() {
-      console.log('refreshing...');
       $scope.selected = [];
 
       TokenService.getTokens().then(function(data) {
-        console.log('tokens', data);
         $scope.activeTokens = data.tokens;
 
-        $timeout(function() { $scope.processing = false; }, 300);
+        // Give this a slight delay to make viewers aware that UI is updating
+        $timeout(function() { $scope.processing = false; }, 250);
       });
 
       TokenService.getScopes().then(function(data) {
-        console.log('scopes', data);
         $scope.availableScopes = data.scopes;
       });
     }
@@ -85,7 +84,7 @@
 
     $scope.createToken = function() {
       $scope.processing = true;
-      TokenService.createToken($scope.selected).then(function() {
+      TokenService.createToken($scope.selected, $scope.tokenDescription).then(function() {
         refresh();
       });
     };
@@ -109,10 +108,10 @@
       return RestangularNoCache.one('settings/tokens').get({});
     };
 
-    this.createToken = function(scopes) {
-      console.log('creating tokens in service', scopes);
-      var scopeStr = scopes.join(' ');
-      return RestangularNoCache.one('settings').post('tokens', 'scope='+scopeStr, {}, {'Accept': 'text/plain'});
+    this.createToken = function(scopes, desc) {
+      var scopeStr = _.pluck(scopes, 'name').join(' ');
+      return RestangularNoCache.one('settings')
+        .post('tokens', 'scope='+scopeStr+'&desc='+desc, {}, {'Accept': 'text/plain'});
     };
 
     this.deleteToken = function(token) {
