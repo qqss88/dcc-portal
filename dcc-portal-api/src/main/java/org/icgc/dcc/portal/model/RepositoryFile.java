@@ -19,23 +19,21 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+
 /**
  * Models a file from external repositories such as CGHub
  */
 @Data
-@Slf4j
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(value = "RepositoryFile")
 public class RepositoryFile {

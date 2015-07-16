@@ -6,22 +6,23 @@ describe('Test SetService', function() {
 
   beforeEach(module('icgc'));
 
-  beforeEach(inject(function ($httpBackend, $q, $rootScope, _SetService_) {
+  beforeEach(inject(function ($httpBackend, $q, $rootScope, _SetService_, _API_) {
     window._gaq = [];
     httpMock = $httpBackend;
     SetService = _SetService_;
+    API = _API_;
 
     // Not sure why these are needed
-    httpMock.when('GET', '/api/v1/releases/current').respond({});
+    httpMock.when('GET', API.BASE_URL + '/releases/current').respond({});
     httpMock.when('GET', 'views/home.html').respond({});
 
-    httpMock.when('POST', '/api/v1/entityset').respond({
+    httpMock.when('POST', API.BASE_URL + '/entityset').respond({
       id: 'uu-id-1',
       name: 'regular set',
       type: 'donor',
       count: 10
     });
-    httpMock.when('POST', '/api/v1/entityset/union').respond({
+    httpMock.when('POST', API.BASE_URL + '/entityset/union').respond({
       id: 'uu-id-2',
       name: 'derived set',
       type: 'donor',

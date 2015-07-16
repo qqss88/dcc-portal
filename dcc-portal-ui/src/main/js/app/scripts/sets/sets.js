@@ -400,6 +400,9 @@
 
         function initVennDiagram() {
           $scope.setType = $scope.item.type.toLowerCase();
+          $scope.current = [];
+          $scope.selected = [];
+          $scope.selectedTotalCount = 0;
 
           // Normalize and sort for tabluar display
           $scope.data = SetOperationService.sortData($scope.item.result);

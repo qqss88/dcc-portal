@@ -17,11 +17,8 @@
  */
 package org.icgc.dcc.portal.auth.openid;
 
-import lombok.NonNull;
-
 import org.icgc.dcc.portal.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.sun.jersey.api.model.Parameter;
 import com.sun.jersey.core.spi.component.ComponentContext;
@@ -31,8 +28,11 @@ import com.sun.jersey.spi.inject.InjectableProvider;
 import com.yammer.dropwizard.auth.Auth;
 import com.yammer.dropwizard.auth.Authenticator;
 
+import lombok.NonNull;
+
 /**
- * Authentication provider to provide the following to Jersey: </p>
+ * Authentication provider to provide the following to Jersey:
+ * </p>
  * <ul>
  * <li>Bridge between Dropwizard and Jersey for HMAC authentication</li>
  * <li>Provides additional {@link org.icgc.dcc.portal.model.security.Authority} information</li>

@@ -18,14 +18,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.val;
-
 import org.elasticsearch.client.Client;
+import org.icgc.dcc.common.core.model.ChromosomeLocation;
 import org.icgc.dcc.portal.browser.ds.AnnotationDataSource;
 import org.icgc.dcc.portal.browser.model.DataSource;
-import org.icgc.dcc.portal.model.ChromosomeLocation;
 import org.icgc.dcc.portal.service.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +30,10 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
+
+import lombok.Setter;
+import lombok.SneakyThrows;
+import lombok.val;
 
 /**
  * Genome browser endpoints that mimic the Cellbase API style.
@@ -137,9 +137,7 @@ public class BrowserResource {
     val dataSource = newInstance(resource);
     val isHistogram = histogram != null && "true".equals(histogram);
 
-    return MAPPER.writeValueAsString(isHistogram ?
-        getHistogram(dataSource) :
-        getRecords(dataSource));
+    return MAPPER.writeValueAsString(isHistogram ? getHistogram(dataSource) : getRecords(dataSource));
   }
 
   /**

@@ -473,7 +473,7 @@ public class MutationRepository implements Repository {
         .prepareSearch(index)
         .setTypes(CENTRIC_TYPE.getId())
         .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(1)
+        .setFrom(0)
         .setSize(10000);
 
     search.setPostFilter(getFilters(query.getFilters(), null));
