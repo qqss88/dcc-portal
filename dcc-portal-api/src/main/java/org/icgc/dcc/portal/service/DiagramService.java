@@ -107,7 +107,8 @@ public class DiagramService {
   public String getPathwayDiagramString(@NonNull String pathwayId) {
     val pathwayXml = getPathway(pathwayId).get(INDEX_MODEL.get("xml"));
 
-    return unescape(pathwayXml.toString());
+    // return unescape(pathwayXml.toString());
+    return pathwayXml.toString();
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
