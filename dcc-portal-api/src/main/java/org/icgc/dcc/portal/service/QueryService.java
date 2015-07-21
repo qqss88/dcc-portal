@@ -22,17 +22,14 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import java.util.List;
 
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
 
-@Slf4j
 @Deprecated
 public class QueryService {
 
@@ -78,10 +75,6 @@ public class QueryService {
       fields.remove(typeFieldsMap.get("altIds"));
       break;
     }
-  }
-
-  static public final Boolean hasFilter(ObjectNode filters, Kind kind) {
-    return filters.has(kind.getId()) && filters.path(kind.getId()).fieldNames().hasNext();
   }
 
   // Default to donors with molecular information for donor-centric type

@@ -25,8 +25,6 @@ import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableList;
-
 @Slf4j
 @Component
 @SuppressWarnings("deprecation")
@@ -35,9 +33,6 @@ public class ProjectRepository {
   private static final String TYPE_ID = Type.PROJECT.getId();
   private static final Kind KIND = Kind.PROJECT;
   private static final Map<String, String> FIELD_MAP = FIELDS_MAPPING.get(KIND);
-
-  private static final ImmutableList<String> FACETS = ImmutableList.of("id", "primarySite", "primaryCountries",
-      "availableDataTypes");
 
   private final Client client;
   private final String index;

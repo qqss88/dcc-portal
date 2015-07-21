@@ -17,7 +17,6 @@
 
 package org.icgc.dcc.portal.model;
 
-import static java.lang.Math.floor;
 import lombok.Value;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -26,6 +25,7 @@ import com.wordnik.swagger.annotations.ApiModelProperty;
 @Value
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Pagination {
+
   @ApiModelProperty(value = "Actual Number of results returned", required = true)
   Integer count;
   @ApiModelProperty(value = "Total number of results matching query", required = true)
@@ -54,7 +54,7 @@ public class Pagination {
     this.from = query.getFrom() + 1;
     this.sort = query.getSort();
     this.order = query.getOrder().toString().toLowerCase();
-    this.page = size <= 1 ? from : (int) floor(from / size) + 1;
+    this.page = size <= 1 ? from : (from / size) + 1;
     this.pages = size <= 1 ? total : (total + size - 1) / size;
   }
 }

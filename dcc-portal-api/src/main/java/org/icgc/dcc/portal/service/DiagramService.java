@@ -32,10 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.common.core.util.Joiners;
@@ -53,8 +49,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DiagramService {
 
   @NonNull
@@ -63,16 +63,8 @@ public class DiagramService {
   private final MutationRepository mutationRepository;
 
   private String[][] replacements =
-  {
-      { "\b", "\\b" },
-      { "\n", "\\n" },
-      { "\t", "\\t" },
-      { "\f", "\\f" },
-      { "\r", "\\r" },
-      { "\"", "\\\"" },
-      { "\\", "\\\\" },
-      { "/", "\\/" }
-  };
+      { { "\b", "\\b" }, { "\n", "\\n" }, { "\t", "\\t" }, { "\f", "\\f" }, { "\r", "\\r" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" }
+      };
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
@@ -107,7 +99,8 @@ public class DiagramService {
   public String getPathwayDiagramString(@NonNull String pathwayId) {
     val pathwayXml = getPathway(pathwayId).get(INDEX_MODEL.get("xml"));
 
-    return unescape(pathwayXml.toString());
+    // return unescape(pathwayXml.toString());
+    return pathwayXml.toString();
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {

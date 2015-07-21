@@ -48,7 +48,7 @@ public class CreatePqlAstVisitorTest {
 
   @Test
   public void visitSortTest() {
-    assertThat(visit("select(i),sort(+id,-gene)")).isEqualTo("select(i),sort(-gene,+id)");
+    assertThat(visit("select(i),sort(+id,-gene)")).isEqualTo("select(i),sort(+id,-gene)");
   }
 
   @Test

@@ -22,12 +22,11 @@ import static org.dcc.portal.pql.util.Converters.isString;
 
 import java.util.List;
 
-import lombok.NonNull;
 import lombok.val;
 
 public class JqlArrayValue extends JqlValue {
 
-  public JqlArrayValue(@NonNull List<Object> values) {
+  public JqlArrayValue(List<Object> values) {
     super(values);
   }
 
