@@ -75,8 +75,8 @@ public class CreatePqlStringVisitorTest {
   @Test
   public void visitSortTest() {
     val node = SortNode.builder();
-    node.sortAsc("id");
     node.sortDesc("gene");
+    node.sortAsc("id");
 
     assertThat(visit(node.build())).isEqualTo("sort(-gene,+id)");
   }

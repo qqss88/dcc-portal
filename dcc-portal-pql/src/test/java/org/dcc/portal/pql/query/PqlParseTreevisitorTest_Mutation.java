@@ -23,7 +23,6 @@ import lombok.val;
 
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.meta.MutationCentricTypeModel;
-import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.junit.Test;
 
@@ -64,7 +63,7 @@ public class PqlParseTreevisitorTest_Mutation {
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("consequence_type");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("transcript.consequence.consequence_type");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
   }
 
