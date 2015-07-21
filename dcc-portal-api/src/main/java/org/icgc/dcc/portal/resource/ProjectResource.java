@@ -76,10 +76,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Genes;
@@ -106,12 +102,16 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Slf4j
 @Path("/v1/projects")
 @Produces(APPLICATION_JSON)
 @Api(value = "/projects", description = "Resources relating to " + PROJECT)
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class ProjectResource {
 
   private static final String PROJECT_FILTER_TEMPLATE = "{donor:{projectId:{is:['%s']}}}";
@@ -137,8 +137,7 @@ public class ProjectResource {
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_PROJECT_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
 
     log.info(FIND_ALL_TEMPLATE, new Object[] { size, PROJECT, from, sort, order, filters });
@@ -153,8 +152,7 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + PROJECT + S)
   public Long count(
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(COUNT_TEMPLATE, PROJECT, filters);
@@ -170,8 +168,7 @@ public class ProjectResource {
   public Project find(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
-      @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include
-      ) {
+      @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include) {
     log.info(FIND_ONE_TEMPLATE, projectId);
 
     return projectService.findOne(projectId, query().fields(fields).includes(include).build());
@@ -182,15 +179,15 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_LIST + DONOR + S + FOR_THE + PROJECT + S, response = Donors.class)
   public Donors findDonors(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_DONOR_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -208,8 +205,7 @@ public class ProjectResource {
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + FOR_THE + PROJECT)
   public Long countDonors(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_COUNT_TEMPLATE, DONOR, projectId);
@@ -224,9 +220,9 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + FOR_THE + PROJECT + S)
   public Map<String, Long> countsDonors(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -250,8 +246,7 @@ public class ProjectResource {
   public Long countDonorGenes(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_DONOR_VALUE, required = true) @PathParam(API_DONOR_PARAM) String donorId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { GENE, projectId, donorId });
@@ -266,10 +261,10 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + GENE + S + GROUPED_BY + DONOR + S + GROUPED_BY + PROJECT + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countsDonorGenes(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_DONOR_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_DONOR_PARAM) IdsParam donorIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
     List<String> projects = projectIds.get();
@@ -296,8 +291,7 @@ public class ProjectResource {
   public Long countDonorMutations(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_DONOR_VALUE, required = true) @PathParam(API_DONOR_PARAM) String donorId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { MUTATION, projectId, donorId });
@@ -311,11 +305,11 @@ public class ProjectResource {
   @GET
   @Timed
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + GROUPED_BY + DONOR + S + GROUPED_BY + PROJECT + S)
-  public LinkedHashMap<String, LinkedHashMap<String, Long>> countsDonorMutations(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+  public Map<String, LinkedHashMap<String, Long>> countsDonorMutations(
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_DONOR_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_DONOR_PARAM) IdsParam donorIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> donors = donorIds.get();
     List<String> projects = projectIds.get();
@@ -359,15 +353,15 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_LIST + GENE + S + FOR_THE + PROJECT + S, response = Genes.class)
   public Genes findGenes(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -386,8 +380,7 @@ public class ProjectResource {
   @ApiOperation(value = RETURNS_COUNT + GENE + S + FOR_THE + PROJECT)
   public Long countGenes(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_COUNT_TEMPLATE, GENE, projectId);
@@ -402,9 +395,9 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + GENE + S + FOR_THE + PROJECT + S)
   public Map<String, Long> countsGenes(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -429,8 +422,7 @@ public class ProjectResource {
   public Long countGeneMutations(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { MUTATION, projectId, geneId });
@@ -444,11 +436,11 @@ public class ProjectResource {
   @GET
   @Timed
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + GROUPED_BY + GENE + S + GROUPED_BY + PROJECT + S)
-  public LinkedHashMap<String, LinkedHashMap<String, Long>> countsGeneMutations(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+  public Map<String, LinkedHashMap<String, Long>> countsGeneMutations(
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
     List<String> genes = geneIds.get();
@@ -475,8 +467,7 @@ public class ProjectResource {
   public Long countGeneDonors(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, projectId, geneId });
@@ -491,10 +482,10 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + GROUPED_BY + GENE + S + GROUPED_BY + PROJECT + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countsGeneDonors(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
     List<String> genes = geneIds.get();
@@ -519,15 +510,15 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_LIST + MUTATION + S + FOR_THE + PROJECT + S, response = Mutations.class)
   public Mutations findMutations(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -545,8 +536,7 @@ public class ProjectResource {
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + FOR_THE + PROJECT)
   public Long countMutations(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_COUNT_TEMPLATE, MUTATION, projectId);
@@ -561,9 +551,9 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + FOR_THE + PROJECT + S)
   public Map<String, Long> countsMutations(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> projects = projectIds.get();
 
@@ -588,8 +578,7 @@ public class ProjectResource {
   public Long countMutationDonors(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_MUTATION_VALUE, required = true) @PathParam(API_MUTATION_PARAM) String mutationId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { DONOR, projectId, mutationId });
@@ -604,10 +593,11 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + GROUPED_BY + MUTATION + S + GROUPED_BY + PROJECT + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countsMutationDonors(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_MUTATION_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_MUTATION_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> mutations = mutationIds.get();
     List<String> projects = projectIds.get();
@@ -634,8 +624,7 @@ public class ProjectResource {
   public Long countMutationGenes(
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
       @ApiParam(value = API_MUTATION_VALUE, required = true) @PathParam(API_MUTATION_PARAM) String mutationId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     log.info(NESTED_NESTED_COUNT_TEMPLATE, new Object[] { GENE, projectId, mutationId });
@@ -650,10 +639,11 @@ public class ProjectResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + GENE + S + GROUPED_BY + MUTATION + S + GROUPED_BY + PROJECT + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countMutationGenes(
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_MUTATION_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_MUTATION_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     List<String> projects = projectIds.get();
     List<String> mutations = mutationIds.get();
     ObjectNode filters = filtersParam.get();
