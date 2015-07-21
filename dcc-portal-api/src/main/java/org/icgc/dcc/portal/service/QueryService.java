@@ -17,10 +17,11 @@
 
 package org.icgc.dcc.portal.service;
 
-import static com.google.common.base.Preconditions.checkState;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 
 import java.util.List;
+
+import lombok.val;
 
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -28,8 +29,6 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
-
-import lombok.val;
 
 @Deprecated
 public class QueryService {
@@ -76,7 +75,7 @@ public class QueryService {
       fields.remove(typeFieldsMap.get("altIds"));
       break;
     default:
-      checkState(false, "Unexpected kind: %s", kind);
+      break;
     }
   }
 
