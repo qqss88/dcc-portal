@@ -92,7 +92,7 @@ public class FiltersConverterTest {
   @Test
   public void missingTest() {
     val result = converter.convertFilters(createFilters("{donor:{id:{not:'DO1'}, hasPathway:false}}"), DONOR_CENTRIC);
-    assertThat(result).isEqualTo("ne(donor.id,'DO1'),missing(gene.pathwayId)");
+    assertThat(result).isEqualTo("missing(gene.pathwayId),ne(donor.id,'DO1')");
   }
 
   @Test
@@ -118,6 +118,43 @@ public class FiltersConverterTest {
                 + "and(nested(donor.ssm,and("
                 + "nested(donor.ssm.consequence,eq(mutation.consequenceType,'start_lost')),"
                 + "eq(mutation.id,'MU1'))),eq(donor.id,'DO1')))");
+  }
+
+  @Test
+  public void pathwayId_And_HasPathway() {
+    val jql = "{gene: {hasPathway: true, pathwayId: {is :['REACT_13797']}}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(pql).isEqualTo(
+        "or(in(gene.pathwayId,'REACT_13797'),exists(gene.pathwayId))");
+  }
+
+  @Test
+  public void pathwayId_And_NoHasPathway() {
+    val jql = "{gene: {type: {is: ['antisense']}, pathwayId: {is: ['REACT_13797']}}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(pql).isEqualTo(
+        "in(gene.type,'antisense'),in(gene.pathwayId,'REACT_13797')");
+  }
+
+  @Test
+  public void noPathwayId_And_HasPathway() {
+    val jql = "{gene: {type: {is: ['antisense']}, hasPathway: true}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(pql).isEqualTo(
+        "in(gene.type,'antisense'),exists(gene.pathwayId)");
+  }
+
+  @Test
+  public void entitySetId_And_Id() {
+    val jql =
+        "{gene: {entitySetId: {is: ['ab263008-db02-4631-a5c5-c4914a0fe6c8']}, id: {is: ['ENSG00000155657']}}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(pql).isEqualTo(
+        "or(in(gene.entitySetId,'ab263008-db02-4631-a5c5-c4914a0fe6c8'),in(gene.id,'ENSG00000155657'))");
   }
 
   @Test
@@ -266,21 +303,21 @@ public class FiltersConverterTest {
   public void pathwayAndGoTermTest_donor() {
     val filters = createFilters("{gene:{hasPathway:true,goTermId:{is:['123']}}}");
     val result = converter.convertFilters(filters, DONOR_CENTRIC);
-    assertThat(result).isEqualTo("nested(gene,exists(gene.pathwayId),in(gene.goTermId,'123'))");
+    assertThat(result).isEqualTo("nested(gene,in(gene.goTermId,'123'),exists(gene.pathwayId))");
   }
 
   @Test
   public void pathwayAndGoTermTest_gene() {
     val filters = createFilters("{gene:{hasPathway:true,goTermId:{is:['123']}}}");
     val result = converter.convertFilters(filters, GENE_CENTRIC);
-    assertThat(result).isEqualTo("exists(gene.pathwayId),in(gene.goTermId,'123')");
+    assertThat(result).isEqualTo("in(gene.goTermId,'123'),exists(gene.pathwayId)");
   }
 
   @Test
   public void pathwayAndGoTermTest_mutation() {
     val filters = createFilters("{gene:{hasPathway:true,goTermId:{is:['123']}}}");
     val result = converter.convertFilters(filters, MUTATION_CENTRIC);
-    assertThat(result).isEqualTo("nested(transcript,exists(gene.pathwayId),in(gene.goTermId,'123'))");
+    assertThat(result).isEqualTo("nested(transcript,in(gene.goTermId,'123'),exists(gene.pathwayId))");
   }
 
   @Test
@@ -354,7 +391,7 @@ public class FiltersConverterTest {
   public void nestedTest_two() {
     val filters = createFilters("{gene:{id:{is:'G1'},start:{is:123}}}");
     val result = converter.convertFilters(filters, DONOR_CENTRIC);
-    assertThat(result).isEqualTo("nested(gene,eq(gene.id,'G1'),eq(gene.start,123))");
+    assertThat(result).isEqualTo("nested(gene,eq(gene.start,123),eq(gene.id,'G1'))");
   }
 
   @Test
@@ -454,7 +491,7 @@ public class FiltersConverterTest {
     values.put("gene", new JqlField("start", IS, new JqlSingleValue(1), "gene"));
     assertThat(createFilterByNestedPath(DONOR_CENTRIC, values,
         Lists.newArrayList("gene")))
-        .isEqualTo("nested(gene,eq(gene.id,'G'),eq(gene.start,1))");
+        .isEqualTo("nested(gene,eq(gene.start,1),eq(gene.id,'G'))");
   }
 
   @Test
@@ -507,8 +544,8 @@ public class FiltersConverterTest {
     val filters = createFilters("{project:{primaryCountries:{is:['US']},id:{is:'P1'},primarySite:{is:'Blood'},"
         + "availableDataTypes:{is:'SSM'}}}");
     val result = converter.convertFilters(filters, Type.PROJECT);
-    assertThat(result).isEqualTo("in(project.primaryCountries,'US'),eq(project.id,'P1'),"
-        + "eq(project.primarySite,'Blood'),eq(project.availableDataTypes,'SSM')");
+    assertThat(result).isEqualTo("in(project.primaryCountries,'US'),"
+        + "eq(project.primarySite,'Blood'),eq(project.availableDataTypes,'SSM'),eq(project.id,'P1')");
   }
 
   @Test

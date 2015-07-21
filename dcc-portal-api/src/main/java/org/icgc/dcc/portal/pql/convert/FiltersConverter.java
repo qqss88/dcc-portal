@@ -25,6 +25,8 @@ import static com.google.common.collect.Maps.filterKeys;
 import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.newTreeSet;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
@@ -68,6 +70,7 @@ public class FiltersConverter {
   private static final String GENE_PATH = "gene";
   private static final String MISSING_VALUE = "_missing";
   private static final String EMPTY_NESTED_PATH = "";
+  private static final String PQL_OR_TEMPLATE = "or(%s)";
   private static final String NOT_TEMPLATE = "not(%s)";
   private static final String IN_TEMPLATE = "in(%s,%s)";
   private static final String EQ_TEMPLATE = "eq(%s,%s)";
@@ -340,9 +343,71 @@ public class FiltersConverter {
     return !(nestedPath.equals(EMPTY_NESTED_PATH));
   }
 
-  private static String createTypeFilter(Iterable<JqlField> fields, Type indexType) {
-    return COMMA_JOINER.join(transform(fields,
+  @NonNull
+  private static String toPqlFilter(Collection<JqlField> jqlFields, Type indexType) {
+    if (jqlFields.isEmpty()) {
+      return null;
+    }
+
+    return COMMA_JOINER.join(transform(jqlFields,
         field -> createFilter(field, indexType)));
+  }
+
+  private static String createTypeFilter(Collection<JqlField> fields, Type indexType) {
+    val pathwayIdFields = Lists.<JqlField> newArrayList();
+    val hasPathwayFields = Lists.<JqlField> newArrayList();
+    val entitySetIdFields = Lists.<JqlField> newArrayList();
+    val idFields = Lists.<JqlField> newArrayList();
+    val remainingFields = Lists.<JqlField> newArrayList();
+
+    // Separates fields into different categories.
+    for (val jqlField : fields) {
+      val fieldName = jqlField.getName();
+
+      if (fieldName.equals("pathwayId")) {
+        pathwayIdFields.add(jqlField);
+      } else if (fieldName.equals("hasPathway")) {
+        hasPathwayFields.add(jqlField);
+      } else if (fieldName.equals("entitySetId")) {
+        entitySetIdFields.add(jqlField);
+      } else if (fieldName.equals("id")) {
+        idFields.add(jqlField);
+      } else {
+        remainingFields.add(jqlField);
+      }
+
+    }
+
+    // Special handling when pathwayId and hasPathway are both present; if not, process normally
+    String pathwayRelatedFilter = null;
+
+    if (pathwayIdFields.isEmpty() || hasPathwayFields.isEmpty()) {
+      remainingFields.addAll(pathwayIdFields);
+      remainingFields.addAll(hasPathwayFields);
+    } else {
+      pathwayIdFields.addAll(hasPathwayFields);
+      pathwayRelatedFilter = toPqlFilter(pathwayIdFields, indexType);
+      pathwayRelatedFilter = (null == pathwayRelatedFilter) ? null :
+          format(PQL_OR_TEMPLATE, pathwayRelatedFilter);
+    }
+
+    // Special handling when entitySetId and id are both present; if not, process normally
+    String entitySetRelatedFilter = null;
+
+    if (entitySetIdFields.isEmpty() || idFields.isEmpty()) {
+      remainingFields.addAll(entitySetIdFields);
+      remainingFields.addAll(idFields);
+    } else {
+      entitySetIdFields.addAll(idFields);
+      entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
+      entitySetRelatedFilter = (null == entitySetRelatedFilter) ? null :
+          format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+    }
+
+    return COMMA_JOINER.join(
+        toPqlFilter(remainingFields, indexType),
+        pathwayRelatedFilter,
+        entitySetRelatedFilter);
   }
 
   private static boolean isNestedField(@NonNull JqlField field) {
@@ -362,9 +427,10 @@ public class FiltersConverter {
       return result;
     }
 
-    // Because of the particularity of MutationCentric type some of its fields are remapped to nested fields
+    // Because of the particularity of MutationCentric type some of its fields are re-mapped to nested fields
     // The fields must be correctly separated before the next steps.
-    if (indexType == MUTATION_CENTRIC && typePrefix.equals("mutation")) {
+    val isMutation = (indexType == MUTATION_CENTRIC) && typePrefix.equals("mutation");
+    if (isMutation) {
       final Predicate<JqlField> nestedPredicate = (f) -> isNestedField(f);
 
       val nonNestedFields = filter(fields, not(nestedPredicate));
@@ -477,7 +543,7 @@ public class FiltersConverter {
     val filterType = createFilterByValueType(jqlField, indexType);
 
     if (operation == NOT && fieldValue.isArray()) {
-      return (format(NOT_TEMPLATE, filterType));
+      return format(NOT_TEMPLATE, filterType);
     }
 
     return filterType;
@@ -498,9 +564,11 @@ public class FiltersConverter {
   }
 
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
-    return jqlField.getValue().get() == Boolean.TRUE ?
-        format(EXISTS_TEMPLATE, fieldName) :
-        format(MISSING_TEMPLATE, fieldName);
+    val formatTemplate = (jqlField.getValue().get() == TRUE) ?
+        EXISTS_TEMPLATE :
+        MISSING_TEMPLATE;
+
+    return format(formatTemplate, fieldName);
   }
 
   private static String createMissingFilter(JqlField jqlField, Type indexType) {
@@ -517,9 +585,10 @@ public class FiltersConverter {
           missingFilter;
     }
 
-    return fieldValue.get() == Boolean.FALSE ?
-        format(EXISTS_TEMPLATE, fieldName) :
-        format(MISSING_TEMPLATE, fieldName);
+    val formatTemplate = (fieldValue.get() == FALSE) ?
+        EXISTS_TEMPLATE :
+        MISSING_TEMPLATE;
+    return format(formatTemplate, fieldName);
   }
 
   private static Optional<String> createArrayFilterForMissingField(JqlField jqlField, Type indexType) {
@@ -544,9 +613,9 @@ public class FiltersConverter {
 
   private static String createEqFilter(JqlField jqlField, Type indexType) {
     val fieldValue = jqlField.getValue().get();
+    val formatTemplate = (IS == jqlField.getOperation()) ? EQ_TEMPLATE : NE_TEMPLATE;
 
-    return format(jqlField.getOperation() == IS ? EQ_TEMPLATE : NE_TEMPLATE,
-        parseFieldName(jqlField, indexType), stringValue(fieldValue));
+    return format(formatTemplate, parseFieldName(jqlField, indexType), stringValue(fieldValue));
   }
 
   private static String createInFilter(JqlField jqlField, Type indexType) {

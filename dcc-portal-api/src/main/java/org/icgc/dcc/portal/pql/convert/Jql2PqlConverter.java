@@ -68,7 +68,9 @@ public class Jql2PqlConverter {
     }
 
     if (query.hasFilters()) {
-      val filters = remapFilters(query.getFilters(), type);
+      // No need to call remapFilters() any more.
+      // val filters = remapFilters(query.getFilters(), type);
+      val filters = query.getFilters();
       val convertedFilters = convertFilters(filters.toString(), type);
 
       // After the cleaning project filters may get empty
@@ -126,26 +128,40 @@ public class Jql2PqlConverter {
     return root.toString();
   }
 
+  /*
+   * Note: Commented out because we no longer "augment" field names with the "Nested" suffix.
+   */
   private static ObjectNode remapFilters(ObjectNode filters, Type type) {
+
     if (type != Type.MUTATION_CENTRIC) {
       return filters;
     }
 
-    /*
-     * if (filters.has("mutation")) { val mutation = (ObjectNode) filters.get("mutation"); if
-     * (mutation.has("consequenceType")) { mutation.put("consequenceTypeNested", mutation.remove("consequenceType")); }
-     * 
-     * if (mutation.has("platform")) { mutation.put("platformNested", mutation.remove("platform")); }
-     * 
-     * if (mutation.has("sequencingStrategy")) { mutation.put("sequencingStrategyNested",
-     * mutation.remove("sequencingStrategy")); }
-     * 
-     * if (mutation.has("verificationStatus")) { mutation.put("verificationStatusNested",
-     * mutation.remove("verificationStatus")); }
-     * 
-     * if (mutation.has("functionalImpact")) { mutation.put("functionalImpactNested",
-     * mutation.remove("functionalImpact")); } }
-     */
+    if (filters.has("mutation")) {
+      val mutation = (ObjectNode) filters.get("mutation");
+      if (mutation.has("consequenceType")) {
+        mutation.put("consequenceTypeNested", mutation.remove("consequenceType"));
+      }
+
+      if (mutation.has("platform")) {
+        mutation.put("platformNested", mutation.remove("platform"));
+      }
+
+      if (mutation.has("sequencingStrategy")) {
+        mutation.put("sequencingStrategyNested",
+            mutation.remove("sequencingStrategy"));
+      }
+
+      if (mutation.has("verificationStatus")) {
+        mutation.put("verificationStatusNested",
+            mutation.remove("verificationStatus"));
+      }
+
+      if (mutation.has("functionalImpact")) {
+        mutation.put("functionalImpactNested",
+            mutation.remove("functionalImpact"));
+      }
+    }
 
     return filters;
   }
