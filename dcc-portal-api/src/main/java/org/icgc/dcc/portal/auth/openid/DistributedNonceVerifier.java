@@ -25,13 +25,13 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 
-import lombok.val;
-
 import org.openid4java.consumer.NonceVerifier;
 import org.openid4java.util.InternetDateFormat;
 
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+
+import lombok.val;
 
 /**
  * Implements NonceVerifier using Hazelcast as persistence storage. Will be injected in ConsumerManager
@@ -39,11 +39,11 @@ import com.hazelcast.core.HazelcastInstance;
 public class DistributedNonceVerifier implements NonceVerifier {
 
   public static final String NONCE_CACHE_NAME = "sharedNonces";
-  private static final InternetDateFormat NONCE_PARSER = new InternetDateFormat();
   private static final int DEFAULT_MAX_AGE_SECONDS = 60;
 
   // Can't use Set because Hazelcast's implementation does not support eviction policy on Sets
   private final Map<String, Boolean> nonces;
+  private final InternetDateFormat nonceParser = new InternetDateFormat();
 
   // Max age of nonce in seconds.
   private int maxAgeSeconds;
@@ -80,14 +80,13 @@ public class DistributedNonceVerifier implements NonceVerifier {
       nonces.put(key, Boolean.TRUE);
 
       return OK;
-    }
-    else {
+    } else {
       return SEEN;
     }
   }
 
   private void checkMaxAge(String nonce) throws ParseException {
-    val nonceAge = new Date().getTime() - NONCE_PARSER.parse(nonce).getTime();
+    val nonceAge = new Date().getTime() - nonceParser.parse(nonce).getTime();
     checkState(nonceAge < maxAgeSeconds * 1000);
   }
 
