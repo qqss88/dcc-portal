@@ -45,6 +45,7 @@ public class AlleleParserTest {
 
   @Test
   public void testCorrectSub() {
-    parseAllele("   ATAGA ");
+    assertThat(parseAllele("   ATAGA ")).isNotNull();
   }
+
 }
