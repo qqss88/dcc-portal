@@ -24,7 +24,6 @@ import javax.ws.rs.core.StreamingOutput;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -45,7 +44,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {

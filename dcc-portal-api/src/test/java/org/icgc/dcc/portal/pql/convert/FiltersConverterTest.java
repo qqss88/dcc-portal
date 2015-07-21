@@ -158,6 +158,30 @@ public class FiltersConverterTest {
   }
 
   @Test
+  public void entitySetId_And_Id_TwoCategories_GeneCentric() {
+    val jql =
+        "{gene: {entitySetId: {is: ['ab263008-db02-4631-a5c5-c4914a0fe6c8']}, id: {is: ['ENSG00000155657']}}," +
+            "donor: {entitySetId: {is: ['ab263008-db02-4631-a5c5-c4914a0fe6c8']}, id: {is: ['some_donor_id']}}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, GENE_CENTRIC);
+    assertThat(pql)
+        .isEqualTo(
+            "or(in(gene.entitySetId,'ab263008-db02-4631-a5c5-c4914a0fe6c8'),in(gene.id,'ENSG00000155657')),nested(donor,or(in(donor.entitySetId,'ab263008-db02-4631-a5c5-c4914a0fe6c8'),in(donor.id,'some_donor_id')))");
+  }
+
+  @Test
+  public void entitySetId_And_Id_TwoCategories_DonorCentric() {
+    val jql =
+        "{gene: {entitySetId: {is: ['ab263008-db02-4631-a5c5-c4914a0fe6c8']}, id: {is: ['ENSG00000155657']}}," +
+            "donor: {entitySetId: {is: ['ab263008-db02-4631-a5c5-c4914a0fe6c8']}, id: {is: ['some_donor_id']}}}";
+    val filters = createFilters(jql);
+    val pql = converter.convertFilters(filters, DONOR_CENTRIC);
+    assertThat(pql)
+        .isEqualTo(
+            "or(in(donor.entitySetId,'ab263008-db02-4631-a5c5-c4914a0fe6c8'),in(donor.id,'some_donor_id')),nested(gene,or(in(gene.entitySetId,'ab263008-db02-4631-a5c5-c4914a0fe6c8'),in(gene.id,'ENSG00000155657')))");
+  }
+
+  @Test
   public void donorFiltersTest_donor() {
     val filters = createFilters("{donor:{primarySite:{is:['Brain']},ageAtDiagnosisGroup:{is:['60 - 69']}}}");
     val result = converter.convertFilters(filters, DONOR_CENTRIC);
