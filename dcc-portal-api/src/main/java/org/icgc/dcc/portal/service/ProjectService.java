@@ -1,9 +1,6 @@
 package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -18,9 +15,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
 
-@Slf4j
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class ProjectService {
 
   private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();

@@ -1,18 +1,13 @@
 package org.icgc.dcc.portal.service;
 
-import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
-import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
+import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Mutation;
 import org.icgc.dcc.portal.model.Mutations;
@@ -27,9 +22,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class MutationService {
 
   private final MutationRepository mutationRepository;
@@ -80,17 +79,17 @@ public class MutationService {
     return mutationRepository.count(query);
   }
 
-  public LinkedHashMap<String, Long> counts(LinkedHashMap<String, Query> queries) {
-    MultiSearchResponse sr = mutationRepository.counts(queries);
+  public Map<String, Long> counts(LinkedHashMap<String, Query> queries) {
+    val sr = mutationRepository.counts(queries);
 
-    return buildCounts(queries, sr);
+    return getCounts(queries, sr);
   }
 
-  public LinkedHashMap<String, LinkedHashMap<String, Long>> nestedCounts(
+  public Map<String, LinkedHashMap<String, Long>> nestedCounts(
       LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
-    MultiSearchResponse sr = mutationRepository.nestedCounts(queries);
+    val sr = mutationRepository.nestedCounts(queries);
 
-    return buildNestedCounts(queries, sr);
+    return getNestedCounts(queries, sr);
   }
 
   public Mutation findOne(String mutationId, Query query) {
