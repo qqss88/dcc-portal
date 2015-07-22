@@ -34,10 +34,10 @@ import lombok.val;
 import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
-import org.elasticsearch.common.collect.ImmutableSet;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class ObservationCentricTypeModel extends TypeModel {
 

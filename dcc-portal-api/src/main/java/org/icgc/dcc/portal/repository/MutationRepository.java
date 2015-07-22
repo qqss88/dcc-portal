@@ -34,7 +34,6 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.query.QueryEngine;
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -122,9 +121,10 @@ public class MutationRepository implements Repository {
 
   @Override
   public MultiSearchResponse counts(@NonNull LinkedHashMap<String, Query> queries) {
-    MultiSearchRequestBuilder search = client.prepareMultiSearch();
-    for (val id : queries.keySet()) {
-      val pql = converter.convertCount(queries.get(id), MUTATION_CENTRIC);
+    val search = client.prepareMultiSearch();
+
+    for (val query : queries.values()) {
+      val pql = converter.convertCount(query, MUTATION_CENTRIC);
       search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
     }
 
@@ -151,11 +151,11 @@ public class MutationRepository implements Repository {
 
   @Override
   public MultiSearchResponse nestedCounts(LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
-    MultiSearchRequestBuilder search = client.prepareMultiSearch();
-    for (val id1 : queries.keySet()) {
-      val nestedQuery = queries.get(id1);
-      for (val id2 : nestedQuery.keySet()) {
-        val pql = converter.convertCount(nestedQuery.get(id2), MUTATION_CENTRIC);
+    val search = client.prepareMultiSearch();
+
+    for (val nestedQuery : queries.values()) {
+      for (val innerQuery : nestedQuery.values()) {
+        val pql = converter.convertCount(innerQuery, MUTATION_CENTRIC);
         search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
       }
     }

@@ -33,7 +33,6 @@ import lombok.val;
 
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -48,6 +47,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 // FIXME: Temporarily disables this test suite as the PQL implementation is not stable.
 @Ignore

@@ -32,6 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.common.core.util.Joiners;
@@ -49,22 +53,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DiagramService {
 
   @NonNull
   private final DiagramRepository diagramRepository;
   @NonNull
   private final MutationRepository mutationRepository;
-
-  private String[][] replacements =
-      { { "\b", "\\b" }, { "\n", "\\n" }, { "\t", "\\t" }, { "\f", "\\f" }, { "\r", "\\r" }, { "\"", "\\\"" }, { "\\", "\\\\" }, { "/", "\\/" }
-      };
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
@@ -123,16 +119,6 @@ public class DiagramService {
       }
     });
     return reverse;
-  }
-
-  /**
-   * Opposite of {@link dcc.etl.db.importer.diagram.reader.DiagramXmlReader}'s escape
-   */
-  private String unescape(String xml) {
-    for (String[] replacement : replacements) {
-      xml.replace(replacement[1], replacement[0]);
-    }
-    return xml;
   }
 
   private String parseUniprot(String uniprot) {

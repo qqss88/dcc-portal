@@ -25,8 +25,6 @@ import static com.google.common.collect.Maps.filterKeys;
 import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.newTreeSet;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
@@ -55,6 +53,7 @@ import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
+import org.icgc.dcc.portal.pql.convert.model.JqlValue;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -562,8 +561,16 @@ public class FiltersConverter {
         rawValue -> format(EQ_TEMPLATE, fieldName, stringValue(rawValue)));
   }
 
+  private static boolean isTrue(JqlValue boolValue) {
+    if (null == boolValue) {
+      return false;
+    }
+
+    return Boolean.parseBoolean(boolValue.get().toString());
+  }
+
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
-    val formatTemplate = (jqlField.getValue().get() == TRUE) ?
+    val formatTemplate = isTrue(jqlField.getValue()) ?
         EXISTS_TEMPLATE :
         MISSING_TEMPLATE;
 
@@ -584,9 +591,9 @@ public class FiltersConverter {
           missingFilter;
     }
 
-    val formatTemplate = (fieldValue.get() == FALSE) ?
-        EXISTS_TEMPLATE :
-        MISSING_TEMPLATE;
+    val formatTemplate = isTrue(fieldValue) ?
+        MISSING_TEMPLATE :
+        EXISTS_TEMPLATE;
     return format(formatTemplate, fieldName);
   }
 

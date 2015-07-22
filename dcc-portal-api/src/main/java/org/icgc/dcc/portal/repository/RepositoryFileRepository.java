@@ -223,8 +223,8 @@ public class RepositoryFileRepository {
     if (!nestedTerms.isEmpty()) {
       val nestedBoolFilter = boolFilter();
 
-      for (val fieldName : nestedTerms.keySet()) {
-        nestedBoolFilter.must(termsFilter(fieldName, nestedTerms.get(fieldName)));
+      for (val entry : nestedTerms.entrySet()) {
+        nestedBoolFilter.must(termsFilter(entry.getKey(), entry.getValue()));
       }
 
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
@@ -426,15 +426,20 @@ public class RepositoryFileRepository {
   @SuppressWarnings("unchecked")
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
-    for (val key : map.keySet()) {
+
+    for (val entry : map.entrySet()) {
+      val key = entry.getKey();
+      val value = entry.getValue();
+
       if (ARRAY_FIELDS.contains(key)) {
-        result.put(key, COMMA.join((List<String>) map.get(key)));
+        result.put(key, COMMA.join((List<String>) value));
       } else if (key.equals("repository.file_size")) {
-        result.put(key, getLong(map.get(key)).toString());
+        result.put(key, getLong(value).toString());
       } else {
-        result.put(key, getString(map.get(key)));
+        result.put(key, getString(value));
       }
     }
+
     return result;
   }
 

@@ -387,17 +387,19 @@ public class DonorRepository implements Repository {
 
   @Override
   public MultiSearchResponse nestedCounts(LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
-    MultiSearchRequestBuilder search = client.prepareMultiSearch();
+    val search = client.prepareMultiSearch();
 
-    for (val id1 : queries.keySet()) {
-      val nestedQuery = queries.get(id1);
-      for (val id2 : nestedQuery.keySet()) {
-        log.info("Nested converting {}", nestedQuery.get(id2));
-        val pql = converter.convertCount(nestedQuery.get(id2), DONOR_CENTRIC);
+    for (val nestedQuery : queries.values()) {
+      for (val innerQuery : nestedQuery.values()) {
+        log.info("Nested converting {}", innerQuery);
+
+        val pql = converter.convertCount(innerQuery, DONOR_CENTRIC);
         val request = queryEngine.execute(pql, DONOR_CENTRIC);
+
         search.add(request.getRequestBuilder());
       }
     }
+
     log.debug("{}", search);
     return search.execute().actionGet();
   }
