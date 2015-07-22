@@ -261,8 +261,13 @@ public abstract class TypeModel {
    */
   public final String getNestedPath(@NonNull String field) {
     val fullyQualifiedName = getFullName(field);
+
     for (val path : split(fullyQualifiedName)) {
+      checkState(fieldsByFullPath.containsKey(path),
+          "fieldsByFullPath does not contain this key: '%s'.", path);
+
       val pathByFullPath = fieldsByFullPath.get(path);
+
       if (pathByFullPath.isNested()) {
         return path;
       }

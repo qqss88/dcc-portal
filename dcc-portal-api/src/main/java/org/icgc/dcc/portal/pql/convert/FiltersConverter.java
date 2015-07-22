@@ -375,7 +375,6 @@ public class FiltersConverter {
       } else {
         remainingFields.add(jqlField);
       }
-
     }
 
     // Special handling when pathwayId and hasPathway are both present; if not, process normally
