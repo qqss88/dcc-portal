@@ -13,6 +13,7 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
@@ -32,6 +33,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class GeneService {
@@ -41,11 +43,11 @@ public class GeneService {
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
   public Map<String, Multimap<String, Gene>> validateIdentifiers(List<String> ids) {
-    val response = geneRepository.validateIdentifiers(ids);
+    val response = geneRepository.validateIdentifiers2(ids);
 
     // Initialize results container
     val result = Maps.<String, Multimap<String, Gene>> newHashMap();
-    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS.values()) {
       val typeResult = ArrayListMultimap.<String, Gene> create();
       result.put(searchField, typeResult);
     }
@@ -56,20 +58,28 @@ public class GeneService {
       val highlightedFields = hit.getHighlightFields();
 
       val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.GENE);
-      val matchedGene = new Gene(fieldMap);
+      Map<String, Object> geneMap = Maps.newHashMap();
+      for (val key : fieldMap.keySet()) {
+        geneMap.put(GeneRepository.GENE_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+      }
+      val matchedGene = new Gene(geneMap);
 
-      for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+      log.info(" --> {}", geneMap);
+
+      for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS.keySet()) {
         if (highlightedFields.containsKey(searchField)) {
-          if (searchField.equals(GENE_UNIPROT_IDS)) {
+
+          val field = GeneRepository.GENE_ID_SEARCH_FIELDS.get(searchField);
+          if (field.equals(GENE_UNIPROT_IDS)) {
             val keys = fields.get(searchField).getValues();
             for (val key : keys) {
               if (ids.contains(key)) {
-                result.get(searchField).put(getString(key), matchedGene);
+                result.get(field).put(getString(key), matchedGene);
               }
             }
           } else {
             val key = getString(fields.get(searchField).getValues());
-            result.get(searchField).put(key, matchedGene);
+            result.get(field).put(key, matchedGene);
           }
 
         }

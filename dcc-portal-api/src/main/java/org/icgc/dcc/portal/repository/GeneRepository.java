@@ -27,9 +27,6 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.search.facet.FacetBuilders.termsFacet;
 import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
-import static org.icgc.dcc.common.core.model.FieldNames.GENE_ID;
-import static org.icgc.dcc.common.core.model.FieldNames.GENE_SYMBOL;
-import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
@@ -101,12 +98,15 @@ public class GeneRepository implements Repository {
 
   private static final String SCORE = "x = doc['donor._summary._ssm_count']; x.empty || x.value < 1 ? 0 : 1";
 
-  public static final List<String> GENE_ID_SEARCH_FIELDS = ImmutableList.<String> of(
-      GENE_ID, GENE_SYMBOL, GENE_UNIPROT_IDS);
-
   private static final Type CENTRIC_TYPE = Type.GENE_CENTRIC;
   private static final Type TYPE = Type.GENE;
   private static final Kind KIND = Kind.GENE;
+
+  // Maps text-search fields to real object model fields
+  public static final Map<String, String> GENE_ID_SEARCH_FIELDS = ImmutableMap.<String, String>
+      of("id.search", "_gene_id",
+          "symbol.search", "symbol",
+          "uniprotkbSwissprot.search", "external_db_ids.uniprotkb_swissprot");
 
   private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap.of(
       Kind.DONOR, "donor",
@@ -474,24 +474,44 @@ public class GeneRepository implements Repository {
    * @returns a map of matched identifiers
    */
   // public Map<String, Multimap<String, String>> validateIdentifiers(List<String> input) {
-  public SearchResponse validateIdentifiers(List<String> input) {
+  // public SearchResponse validateIdentifiers(List<String> input) {
 
+  // val boolQuery = QueryBuilders.boolQuery();
+
+  // val search = client.prepareSearch(index)
+  // .setTypes(CENTRIC_TYPE.getId())
+  // .setSearchType(QUERY_THEN_FETCH)
+  // .setSize(5000);
+  // for (val searchField : GENE_ID_SEARCH_FIELDS) {
+  // boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
+  // search.addHighlightedField(searchField);
+  // search.addField(searchField);
+  // }
+  // search.setQuery(boolQuery);
+
+  // log.debug("Search is {}", search);
+  // val response = search.execute().actionGet();
+
+  // return response;
+  // }
+
+  public SearchResponse validateIdentifiers2(List<String> input) {
     val boolQuery = QueryBuilders.boolQuery();
 
     val search = client.prepareSearch(index)
-        .setTypes(CENTRIC_TYPE.getId())
+        .setTypes("gene-text")
         .setSearchType(QUERY_THEN_FETCH)
         .setSize(5000);
-    for (val searchField : GENE_ID_SEARCH_FIELDS) {
+
+    for (val searchField : GENE_ID_SEARCH_FIELDS.keySet()) {
       boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
       search.addHighlightedField(searchField);
       search.addField(searchField);
     }
     search.setQuery(boolQuery);
+    log.info("Search is {}", search);
 
-    log.debug("Search is {}", search);
     val response = search.execute().actionGet();
-
     return response;
   }
 
