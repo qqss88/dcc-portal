@@ -355,7 +355,7 @@
   module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
 
-    var _ctrl = this;
+    var _ctrl = this, project = Projects.one();
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
@@ -428,7 +428,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
@@ -506,7 +508,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
@@ -544,7 +548,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
