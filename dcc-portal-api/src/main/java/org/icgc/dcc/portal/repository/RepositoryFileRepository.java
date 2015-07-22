@@ -138,8 +138,7 @@ public class RepositoryFileRepository {
   private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
-  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
-      "projectCode", "primarySite", "donorStudy", "repositoryNames", "experimentalStrategy");
+  private static final List<String> FACETS = RepositoryFileTypeModel.AVAILABLE_FACETS;
 
   private final ImmutableMap<String, String> EXPORT_FIELDS = ImmutableMap.<String, String> builder()
       .put("access", "Access")
@@ -264,7 +263,7 @@ public class RepositoryFileRepository {
     }
 
     // Special filtered case - reponames, do not exclude self filtering
-    val field = TYPE_MAPPING.get("repositoryNames");
+    val field = TYPE_MAPPING.get("repoName");
     val repoFiltered = "repositoryNamesFiltered";
     val subAgg = addSubAggregations(filter(repoFiltered),
         buildRepoFilters(filters.deepCopy(), false), repoFiltered, field);

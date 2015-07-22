@@ -115,7 +115,7 @@ public class IndexModel {
           .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
           .put("repositoryType", "repository.repo_type")
           .put("repositoryCountries", "repository.repo_server.repo_country")
-          .put("repositoryNames", "repository.repo_server.repo_name")
+          .put("repoName", "repository.repo_server.repo_name")
           .put("fileName", "repository.file_name")
           .put("fileSize", "repository.file_size")
           .put("checksum", "repository.file_md5sum")

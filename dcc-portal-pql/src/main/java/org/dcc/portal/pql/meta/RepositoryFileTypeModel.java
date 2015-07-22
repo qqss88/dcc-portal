@@ -128,7 +128,7 @@ public class RepositoryFileTypeModel extends TypeModel {
   public static final List<String> PUBLIC_FIELDS = toAliasList(Fields.values());
 
   private static final String TYPE_PREFIX = "file";
-  private static final List<String> AVAILABLE_FACETS = toAliasList(
+  public static final List<String> AVAILABLE_FACETS = toAliasList(
       Fields.STUDY,
       Fields.DATA_TYPE,
       Fields.DATA_FORMAT,
@@ -136,11 +136,10 @@ public class RepositoryFileTypeModel extends TypeModel {
       Fields.PROJECT_CODE,
       Fields.PRIMARY_SITE,
       Fields.DONOR_STUDY,
-      // "repositoryNames",
+      Fields.REPO_NAME,
       Fields.EXPERIMENTAL_STRATEGY);
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
       EsFieldNames.REPOSITORY + "." + EsFieldNames.REPO_SERVER);
-  // TODO: should this really be empty??
   private static final Map<String, String> INTERNAL_ALIASES = emptyMap();
 
   // This represents the mapping of file index type in ElasticSearch.
