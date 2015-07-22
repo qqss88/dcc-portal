@@ -126,13 +126,13 @@ public final class ElasticsearchResponseUtils {
     }
 
     if (values instanceof Boolean) {
-      return ((Boolean) values).booleanValue();
+      return (Boolean) values;
     }
 
     if (values instanceof Iterable<?>) {
       val iterable = (Iterable<?>) values;
       return Iterables.isEmpty(iterable) ? defaultValue :
-          Boolean.parseBoolean(Iterables.get(iterable, 0).toString());
+          Boolean.TRUE.equals(Iterables.get(iterable, 0));
     }
 
     return defaultValue;

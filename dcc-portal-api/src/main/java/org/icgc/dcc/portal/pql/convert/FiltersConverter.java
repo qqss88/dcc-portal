@@ -566,7 +566,7 @@ public class FiltersConverter {
       return false;
     }
 
-    return Boolean.parseBoolean(boolValue.get().toString());
+    return Boolean.TRUE.equals(boolValue.get());
   }
 
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
