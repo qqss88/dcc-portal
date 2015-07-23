@@ -169,8 +169,8 @@
       var facets = data.termFacets;
       var activeRepos = [];
 
-      if (p.filters.file && p.filters.file.repositoryNames) {
-        activeRepos = p.filters.file.repositoryNames.is;
+      if (p.filters.file && p.filters.file.repoName) {
+        activeRepos = p.filters.file.repoName.is;
       }
 
 

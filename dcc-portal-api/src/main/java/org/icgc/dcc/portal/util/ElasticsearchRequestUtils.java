@@ -78,7 +78,7 @@ public class ElasticsearchRequestUtils {
   }
 
   @NonNull
-  public static boolean isRelatedToDoublePendingDonor(Client client, String fieldName, String value) {
+  public static boolean isRepositoryDonor(Client client, String fieldName, String value) {
     val search = client.prepareSearch(REPOSITORY_INDEX_NAME)
         .setTypes(FILE_INDEX_TYPE)
         .setSearchType(COUNT)

@@ -55,6 +55,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Ints;
 
 @Slf4j
 @Component
@@ -86,7 +87,7 @@ public class GeneSetRepository {
   public int countGenes(@NonNull String id) {
     val geneSet = findOne(id, "geneCount");
 
-    return (getLong(geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)).intValue());
+    return Ints.saturatedCast(getLong(geneSet.get(INDEX_GENE_COUNT_FIELD_NAME)));
   }
 
   public Map<String, Integer> countGenes(@NonNull Iterable<String> ids) {
@@ -131,12 +132,14 @@ public class GeneSetRepository {
       return -1;
     }
 
-    return (int) client.prepareCount(index)
+    val result = client.prepareCount(index)
         .setTypes(TYPE.getId())
         .setQuery(query)
         .execute()
         .actionGet()
         .getCount();
+
+    return Ints.saturatedCast(result);
   }
 
   public Map<String, String> findName(@NonNull Iterable<String> ids) {

@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -38,6 +38,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class GeneRepositoryTest extends BaseElasticSearchTest {
 
@@ -45,7 +46,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
   private static final String DEFAULT_ORDER = "desc";
 
   private static final String GENEID = "ENSG00000215529";
-  private static final String GENE_FILTER = "gene:{chromosome:{is:\"20\"}}";
+  private static final String GENE_FILTER = "gene:{chromosome:{is:[\"20\"]}}";
   private static final String GENE_NOT_FILTER = "gene:{chromosome:{not:\"20\"}}";
   private static final String DONOR_FILTER = "donor:{primarySite:{is:\"Brain\"}}";
   private static final String DONOR_FILTER2 = "donor:{primarySite:{is:\"Ovary\"}}";
@@ -61,25 +62,25 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
   @Before
   public void setUp() throws Exception {
     es.execute(createIndexMappings(Type.GENE, Type.GENE_CENTRIC).withData(bulkFile(getClass())));
-    geneRepository = new GeneRepository(es.client(), INDEX);
+    geneRepository = new GeneRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
   }
 
   @Test
   public void testFindAll() throws Exception {
     Query query = Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).build();
     SearchResponse response = geneRepository.findAllCentric(query);
-    assertThat(response.getHits().getTotalHits()).isEqualTo(4);
+    assertThat(response.getHits().getTotalHits()).isEqualTo(3);
   }
 
   @Test
   public void testFindAllWithFields() throws Exception {
     Query query =
         Query.builder().from(1).size(10).sort(DEFAULT_SORT).order(DEFAULT_ORDER).fields(Lists.newArrayList("id",
-            "symbol", "notarealfield")).build();
+            "symbol")).build();
     SearchResponse response = geneRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
-    assertThat(response.getHits().getTotalHits()).isEqualTo(4);
+    assertThat(response.getHits().getTotalHits()).isEqualTo(3);
 
     for (SearchHit hit : hits) {
       assertThat(hit.fields().keySet().size()).isEqualTo(2);
@@ -110,8 +111,8 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
     SearchResponse response = geneRepository.findAllCentric(query);
     SearchHits hits = response.getHits();
 
-    assertThat(hits.getTotalHits()).isEqualTo(3);
-    assertThat(hits.getHits().length).isEqualTo(3);
+    assertThat(hits.getTotalHits()).isEqualTo(2);
+    assertThat(hits.getHits().length).isEqualTo(2);
   }
 
   @Test
@@ -176,7 +177,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
 
   @Test
   public void testCountIntersection() throws Exception {
-    assertThat(geneRepository.count(Query.builder().build())).isEqualTo(4);
+    assertThat(geneRepository.count(Query.builder().build())).isEqualTo(3);
   }
 
   @Test
@@ -186,7 +187,7 @@ public class GeneRepositoryTest extends BaseElasticSearchTest {
         .isEqualTo(1);
     assertThat(
         geneRepository.count(Query.builder().filters(new FiltersParam(joinFilters(GENE_NOT_FILTER)).get())
-            .build())).isEqualTo(3);
+            .build())).isEqualTo(2);
   }
 
   @Test

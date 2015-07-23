@@ -44,7 +44,7 @@ public class OccurrenceRepositoryIntegrationTest extends BaseRepositoryIntegrati
     for (val f : FILTERS) {
       val filter = new FiltersParam(f).get();
       val query = qb.filters(filter).build();
-      val request = repo.buildFindAllRequest(query, type);
+      val request = repo.buildFindAllRequest(query);
 
       search.add(request);
     }

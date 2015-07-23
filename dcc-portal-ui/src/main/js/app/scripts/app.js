@@ -122,6 +122,39 @@
   });
 
 
+  /**
+   * This serves as a debugging service to toggle features that are merged
+   * but disabled.a
+   */
+  module.service('PortalFeature', function($rootScope, $state) {
+
+    var features = {
+      REACTOME_VIEWER: false
+    };
+
+    this.get = function(s) {
+      if (features.hasOwnProperty(s) === false) { return false; }
+      return features[s];
+    };
+
+    this.enable = function(s) {
+      if (features.hasOwnProperty(s) === false) { return; }
+      features[s] = true;
+      $state.go($state.current.name, {}, {reload: true});
+    };
+
+    this.disable = function(s) {
+      if (features.hasOwnProperty(s) === false) { return; }
+      features[s] = false;
+      $state.go($state.current.name, {}, {reload: true});
+    };
+
+    this.list = function() {
+      return features;
+    };
+  });
+
+
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
                           markdownConverterProvider, localStorageServiceProvider, API) {

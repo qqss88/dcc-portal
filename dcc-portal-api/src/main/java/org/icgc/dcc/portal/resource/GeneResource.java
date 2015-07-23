@@ -22,8 +22,6 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_PROJECT_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_PROJECT_VALUE;
-import static org.icgc.dcc.portal.resource.ResourceUtils.API_SCORE_FILTERS_PARAM;
-import static org.icgc.dcc.portal.resource.ResourceUtils.API_SCORE_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_ALLOW;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_VALUE;
@@ -70,10 +68,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Gene;
@@ -98,12 +92,16 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Slf4j
 @Path("/v1/genes")
 @Produces(APPLICATION_JSON)
 @Api(value = "/genes", description = "Resources relating to " + GENE)
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class GeneResource {
 
   private static final String GENE_FILTER_TEMPLATE = "{gene:{id:{is:['%s']}}}";
@@ -129,18 +127,16 @@ public class GeneResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
 
     log.info(FIND_ALL_TEMPLATE, new Object[] { size, GENE, from, sort, order, filters });
 
     return geneService.findAllCentric(query().fields(fields).filters(filters)
-        .scoreFilters(scoreFilters.get()).includes(include).from(from.get()).size(size.get()).sort(sort).order(order)
+        .includes(include).from(from.get()).size(size.get()).sort(sort).order(order)
         .build());
   }
 
@@ -149,8 +145,7 @@ public class GeneResource {
   @Timed
   @ApiOperation(value = RETURNS_COUNT + GENE + S)
   public Long count(
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filters) {
     log.info(COUNT_TEMPLATE, GENE, filters.get());
 
     return geneService.count(query().filters(filters.get()).build());
@@ -164,8 +159,7 @@ public class GeneResource {
   public Gene find(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
-      @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include
-      ) {
+      @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include) {
     log.info(FIND_ONE_TEMPLATE, geneId);
 
     return geneService.findOne(geneId, query().fields(fields).includes(include).build());
@@ -180,12 +174,10 @@ public class GeneResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_DONOR_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -195,7 +187,7 @@ public class GeneResource {
     filters = mergeFilters(filters, GENE_FILTER_TEMPLATE, JsonUtils.join(geneIds.get()));
 
     return donorService.findAllCentric(query().filters(filters).fields(fields).includes(include)
-        .from(from.get()).size(size.get()).sort(sort).order(order).scoreFilters(scoreFilters.get()).build());
+        .from(from.get()).size(size.get()).sort(sort).order(order).build());
   }
 
   @Path("/{" + API_GENE_PARAM + "}/donors/count")
@@ -204,8 +196,7 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + FOR_THE + GENE)
   public Long countDonors(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -223,8 +214,7 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + FOR_THE + GENE + S)
   public Map<String, Long> countDonors(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
 
@@ -250,8 +240,7 @@ public class GeneResource {
   public Long countDonorMutations(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
       @ApiParam(value = API_DONOR_VALUE, required = true) @PathParam(API_DONOR_PARAM) String donorId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -267,11 +256,10 @@ public class GeneResource {
   @GET
   @Timed
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + GROUPED_BY + DONOR + S + GROUPED_BY + GENE + S)
-  public LinkedHashMap<String, LinkedHashMap<String, Long>> countsDonorMutations(
+  public Map<String, LinkedHashMap<String, Long>> countsDonorMutations(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
       @ApiParam(value = API_DONOR_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_DONOR_PARAM) IdsParam donorIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
     List<String> donors = donorIds.get();
@@ -302,12 +290,10 @@ public class GeneResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
-      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order
-      ) {
+      @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -317,7 +303,7 @@ public class GeneResource {
     filters = mergeFilters(filters, GENE_FILTER_TEMPLATE, JsonUtils.join(geneIds.get()));
 
     return mutationService.findAllCentric(query().filters(filters).fields(fields).includes(include)
-        .from(from.get()).size(size.get()).sort(sort).order(order).scoreFilters(scoreFilters.get()).build());
+        .from(from.get()).size(size.get()).sort(sort).order(order).build());
   }
 
   @Path("/{" + API_GENE_PARAM + "}/mutations/count")
@@ -326,8 +312,7 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + FOR_THE + GENE)
   public Long countMutations(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -345,8 +330,7 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + FOR_THE + GENE + S)
   public Map<String, Long> countMutations(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
 
@@ -373,8 +357,7 @@ public class GeneResource {
   public Long countMutationDonors(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
       @ApiParam(value = API_MUTATION_VALUE, required = true) @PathParam(API_MUTATION_PARAM) String mutationId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -392,9 +375,9 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + GROUPED_BY + MUTATION + S + GROUPED_BY + GENE + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countMutationDonors(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_MUTATION_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_MUTATION_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_MUTATION_PARAM) IdsParam mutationIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
     List<String> mutations = mutationIds.get();
@@ -423,8 +406,7 @@ public class GeneResource {
   public Long countProjectMutations(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -440,11 +422,11 @@ public class GeneResource {
   @GET
   @Timed
   @ApiOperation(value = RETURNS_COUNT + MUTATION + S + GROUPED_BY + PROJECT + S + GROUPED_BY + GENE + S)
-  public LinkedHashMap<String, LinkedHashMap<String, Long>> countsProjectMutations(
+  public Map<String, LinkedHashMap<String, Long>> countsProjectMutations(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
     List<String> projects = projectIds.get();
@@ -473,8 +455,7 @@ public class GeneResource {
   public Long countProjectDonors(
       @ApiParam(value = API_GENE_VALUE, required = true) @PathParam(API_GENE_PARAM) String geneId,
       @ApiParam(value = API_PROJECT_VALUE, required = true) @PathParam(API_PROJECT_PARAM) String projectId,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
 
     removeGeneEntitySet(filters);
@@ -491,9 +472,9 @@ public class GeneResource {
   @ApiOperation(value = RETURNS_COUNT + DONOR + S + GROUPED_BY + PROJECT + S + GROUPED_BY + GENE + S)
   public LinkedHashMap<String, LinkedHashMap<String, Long>> countsProjectDonors(
       @ApiParam(value = API_GENE_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_GENE_PARAM) IdsParam geneIds,
-      @ApiParam(value = API_PROJECT_VALUE + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
-      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam
-      ) {
+      @ApiParam(value = API_PROJECT_VALUE
+          + MULTIPLE_IDS, required = true) @PathParam(API_PROJECT_PARAM) IdsParam projectIds,
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
     ObjectNode filters = filtersParam.get();
     List<String> genes = geneIds.get();
     List<String> projects = projectIds.get();

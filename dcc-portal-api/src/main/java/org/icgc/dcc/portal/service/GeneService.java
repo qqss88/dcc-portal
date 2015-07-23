@@ -2,17 +2,14 @@ package org.icgc.dcc.portal.service;
 
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
-import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
+import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
-import lombok.val;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.icgc.dcc.portal.model.Gene;
@@ -20,6 +17,7 @@ import org.icgc.dcc.portal.model.Genes;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
 import org.icgc.dcc.portal.repository.GeneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,11 +30,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class GeneService {
 
   private final GeneRepository geneRepository;
+  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   ImmutableMap<String, String> fields = FIELDS_MAPPING.get("gene");
 
@@ -94,6 +98,7 @@ public class GeneService {
     }
 
     val response = geneRepository.findAllCentric(query);
+    log.debug("Response: {}", response);
     val hits = response.getHits();
 
     boolean includeScore = !query.hasFields() || query.getFields().contains("affectedDonorCountFiltered");
@@ -108,7 +113,8 @@ public class GeneService {
     }
 
     Genes genes = new Genes(list.build());
-    genes.setFacets(response.getFacets());
+    genes.addFacets(aggregationsConverter.convert(response.getAggregations()));
+    // genes.setFacets(response.getFacets());
     genes.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return genes;
@@ -121,14 +127,14 @@ public class GeneService {
   public LinkedHashMap<String, Long> counts(LinkedHashMap<String, Query> queries) {
     MultiSearchResponse sr = geneRepository.counts(queries);
 
-    return buildCounts(queries, sr);
+    return getCounts(queries, sr);
   }
 
   public LinkedHashMap<String, LinkedHashMap<String, Long>> nestedCounts(
       LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
     MultiSearchResponse sr = geneRepository.nestedCounts(queries);
 
-    return buildNestedCounts(queries, sr);
+    return getNestedCounts(queries, sr);
   }
 
   public Gene findOne(String geneId, Query query) {
