@@ -17,37 +17,9 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.elasticsearch.action.search.SearchType.COUNT;
-import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
-import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
-import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
-import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
-import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
-import static org.elasticsearch.search.sort.SortBuilders.fieldSort;
-import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
-import static org.icgc.dcc.portal.service.QueryService.buildConsequenceFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildDonorFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildGeneSetFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildMutationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildObservationFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildProjectFilters;
-import static org.icgc.dcc.portal.service.QueryService.buildTranscriptFilters;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.service.QueryService.hasConsequence;
-import static org.icgc.dcc.portal.service.QueryService.hasDonor;
-import static org.icgc.dcc.portal.service.QueryService.hasGene;
-import static org.icgc.dcc.portal.service.QueryService.hasGeneSet;
-import static org.icgc.dcc.portal.service.QueryService.hasMutation;
-import static org.icgc.dcc.portal.service.QueryService.hasObservation;
-import static org.icgc.dcc.portal.service.QueryService.hasProject;
-import static org.icgc.dcc.portal.service.QueryService.hasTranscript;
-import static org.icgc.dcc.portal.service.QueryService.remapD2P;
-import static org.icgc.dcc.portal.service.QueryService.remapG2P;
-import static org.icgc.dcc.portal.service.QueryService.remapM2O;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
@@ -61,33 +33,23 @@ import lombok.NonNull;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.MultiSearchRequestBuilder;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 @Slf4j
 @Component
@@ -95,303 +57,75 @@ import com.google.common.collect.Maps;
 public class MutationRepository implements Repository {
 
   private static final Type CENTRIC_TYPE = Type.MUTATION_CENTRIC;
-  private static final Type TYPE = Type.MUTATION;
   private static final Kind KIND = Kind.MUTATION;
 
-  private static final ImmutableMap<Kind, String> NESTED_MAPPING = Maps.immutableEnumMap(ImmutableMap
-      .<Kind, String> builder()
-      .put(Kind.EMB_OCCURRENCE, "ssm_occurrence")
-      .put(Kind.PROJECT, "ssm_occurrence")
-      .put(Kind.DONOR, "ssm_occurrence")
-      .put(Kind.TRANSCRIPT, "transcript")
-      .put(Kind.GENE, "transcript")
-      .put(Kind.OBSERVATION, "ssm_occurrence.observation")
-      .build());
-
-  static final ImmutableMap<Kind, String> PREFIX_MAPPING = Maps.immutableEnumMap(ImmutableMap
-      .<Kind, String> builder()
-      .put(Kind.EMB_OCCURRENCE, "ssm_occurrence")
-      .put(Kind.PROJECT, "ssm_occurrence.project")
-      .put(Kind.DONOR, "ssm_occurrence.donor")
-      .put(Kind.TRANSCRIPT, "transcript")
-      .put(Kind.CONSEQUENCE, "transcript.consequence")
-      .put(Kind.GENE, "transcript.gene")
-      .put(Kind.GENE_SET, "transcript.gene")
-      .put(Kind.OBSERVATION, "ssm_occurrence.observation")
-      .build());
-
-  private static final ImmutableList<String> FACETS = ImmutableList.of("type", "consequenceTypeNested",
-      "consequenceType", "platform", "verificationStatus", "platformNested", "verificationStatusNested",
-      "functionalImpact", "functionalImpactNested", "sequencingStrategy", "sequencingStrategyNested");
+  private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   private final Client client;
   private final String index;
 
   @Autowired
-  MutationRepository(Client client, IndexModel indexModel) {
+  MutationRepository(Client client, IndexModel indexModel, QueryEngine queryEngine) {
     this.index = indexModel.getIndex();
     this.client = client;
-  }
-
-  private List<TermsFacetBuilder> getFacets(Query query, ObjectNode filters) {
-    val fs = Lists.<TermsFacetBuilder> newArrayList();
-    if (query.hasInclude("facets")) {
-      for (String facet : FACETS) {
-        val tf = FacetBuilders.termsFacet(facet).field(FIELDS_MAPPING.get(KIND).get(facet)).size(MAX_FACET_TERM_COUNT);
-
-        // For some reason these always have to be nested, unlike consequenceTypeNested which only needs it for filters
-        if (facet.equals("platformNested") || facet.equals("verificationStatusNested")
-            || facet.equals("sequencingStrategyNested")) {
-          // needs to be nested
-          tf.nested("ssm_occurrence.observation");
-        }
-
-        if (filters.fieldNames().hasNext()) {
-          val facetFilters = filters.deepCopy();
-          if (facetFilters.has(KIND.getId())) {
-            facetFilters.with(KIND.getId()).remove(facet);
-          }
-
-          // consequenceTypeNested is an internal facet that is needed to properly handle gene filters
-          // Will later be intersected with consequenceType
-          if (facet.equals("consequenceTypeNested") || facet.equals("functionalImpactNested")) {
-            // Consequence type needs to be nested
-            tf.nested("transcript");
-            // consequenceTypeNested facet can only be filtered by gene
-            if (facet.equals("consequenceTypeNested")) {
-              facetFilters.retain("gene", "transcript");
-            }
-            if (facet.equals("functionalImpactNested")) {
-              facetFilters.retain("gene", "consequence");
-            }
-          }
-
-          // platformNested and verificationStatusNested are internal facets that are needed to properly handle donor
-          // filters
-          // Will later be intersected with platform and verificationStatus respectively
-          else if (facet.equals("platformNested") || facet.equals("verificationStatusNested")
-              || facet.equals("sequencingStrategyNested")) {
-            // Can only be filtered by donor or project
-            // facetFilters.retain("donor", "project");
-
-            facetFilters.retain("observation");
-
-            // Nested attributes at the same level should not filtered by itself, but
-            // should be filtered by siblings
-            if (facetFilters.get("observation") != null) {
-              ObjectNode observationFilter = (ObjectNode) facetFilters.get("observation");
-              if (facet.equals("platformNested")) {
-                observationFilter.remove("platform");
-              } else if (facet.equals("verificationStatusNested")) {
-                observationFilter.remove("verificationStatus");
-              } else if (facet.equals("sequencingStrategyNested")) {
-                observationFilter.remove("sequencingStrategy");
-              }
-            }
-
-          }
-
-          tf.facetFilter(getFilters(facetFilters, facet));
-        }
-        fs.add(tf);
-      }
-    }
-    return fs;
-  }
-
-  // Needed to check for consequenceTypeNested
-  private FilterBuilder getFilters(ObjectNode filters, String facetName) {
-    if (filters.fieldNames().hasNext()) {
-      return buildFilters(filters, facetName);
-    }
-    return matchAllFilter();
-  }
-
-  private FilterBuilder buildFilters(ObjectNode filters, String facetName) {
-    val qb = FilterBuilders.boolFilter();
-    val musts = Lists.<FilterBuilder> newArrayList();
-    boolean matchAll = true;
-
-    boolean hasDonor = hasDonor(filters);
-    boolean hasProject = hasProject(filters);
-    boolean hasGene = hasGene(filters);
-    boolean hasGeneSet = hasGeneSet(filters);
-    boolean hasMutation = hasMutation(filters);
-    boolean hasConsequence = hasConsequence(filters);
-    boolean hasTranscript = hasTranscript(filters);
-    boolean hasObservation = hasObservation(filters);
-
-    if (hasProject || hasGene || hasGeneSet || hasDonor || hasMutation || hasConsequence || hasTranscript
-        || hasObservation) {
-      matchAll = false;
-      if (hasMutation) {
-        musts.add(buildMutationFilters(filters, PREFIX_MAPPING));
-      }
-      if (hasGene || hasGeneSet || hasConsequence || hasTranscript) {
-        val tb = FilterBuilders.boolFilter();
-        val tMusts = Lists.<FilterBuilder> newArrayList();
-        if (hasTranscript) tMusts.add(buildTranscriptFilters(filters, PREFIX_MAPPING));
-        if (hasConsequence) tMusts.add(buildConsequenceFilters(filters, PREFIX_MAPPING));
-        if (hasGene) tMusts.add(buildGeneFilters(filters, PREFIX_MAPPING));
-
-        if (hasGeneSet) tMusts.add(buildGeneSetFilters(filters, PREFIX_MAPPING));
-        // if (hasGeneSet) tMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.GENE_SET),
-        // buildGeneSetFilters(filters, PREFIX_MAPPING)));
-
-        tb.must(tMusts.toArray(new FilterBuilder[tMusts.size()]));
-
-        // Facet is nested so filter cannot be nested
-        if (facetName.equals("consequenceTypeNested") || facetName.equals("functionalImpactNested")) {
-          musts.add(tb);
-        } else {
-          musts.add(nestedFilter(NESTED_MAPPING.get(Kind.TRANSCRIPT), tb));
-        }
-      }
-      if (hasObservation || hasProject || hasDonor) {
-        val ob = FilterBuilders.boolFilter();
-
-        // Facet is nested so filter cannot be nested
-        if (facetName.equals("platformNested") || facetName.equals("verificationStatusNested")
-            || facetName.equals("sequencingStrategyNested")) {
-          val observationMusts = Lists.<FilterBuilder> newArrayList();
-          if (hasObservation) observationMusts.add(buildObservationFilters(filters, PREFIX_MAPPING));
-          ob.must(observationMusts.toArray(new FilterBuilder[observationMusts.size()]));
-          musts.add(ob);
-        } else {
-          val oMusts = buildOccurrenceNestedFilters(filters, hasDonor, hasProject, hasObservation);
-          ob.must(oMusts.toArray(new FilterBuilder[oMusts.size()]));
-          musts.add(nestedFilter(NESTED_MAPPING.get(Kind.EMB_OCCURRENCE), ob));
-        }
-      }
-      qb.must(musts.toArray(new FilterBuilder[musts.size()]));
-    }
-
-    return matchAll ? matchAllFilter() : qb;
+    this.queryEngine = queryEngine;
   }
 
   @Override
   public SearchResponse findAllCentric(Query query) {
-    val search = buildFindAllRequest(query, CENTRIC_TYPE);
+    val pql = converter.convert(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
 
-    search.setQuery(buildQuery(query));
+    log.debug("Mutation : {}", search.getRequestBuilder());
 
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
+    SearchResponse response = search.getRequestBuilder().execute().actionGet();
     return response;
+  }
+
+  /**
+   * The logic is kind of reversed here. We want to find top mutations of <strong>donorId</strong> while using query as
+   * a scoring mechanism. I.e., find top 10 mutations of donor X where mutations are ranked by number of donors affected
+   * within the same project as donor X.
+   */
+  public SearchResponse findMutationsByDonor(@NonNull Query query, @NonNull String donorId) {
+    val pql = converter.convert(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
+
+    val termFilter = FilterBuilders.termFilter("ssm_occurrence.donor._donor_id", donorId);
+    val nestedFilter = FilterBuilders.nestedFilter("ssm_occurrence", termFilter);
+    search.getRequestBuilder().setPostFilter(nestedFilter);
+
+    log.debug("Find mutations by donor {}", search.getRequestBuilder());
+
+    return search.getRequestBuilder().execute().actionGet();
   }
 
   @Override
   public SearchResponse findAll(Query query) {
-    val search = buildFindAllRequest(query, TYPE);
-
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
-    return response;
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   @Override
   public SearchRequestBuilder buildFindAllRequest(Query query, Type type) {
-    val search = client
-        .prepareSearch(index)
-        .setTypes(type.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(query.getFrom())
-        .setSize(query.getSize());
-
-    val filters = remapFilters(query.getFilters());
-    search.setPostFilter(getFilters(filters, ""));
-    search.addFields(getFields(query, KIND));
-    String[] sourceFields = resolveSourceFields(query, KIND);
-    if (sourceFields != EMPTY_SOURCE_FIELDS) {
-      search.setFetchSource(resolveSourceFields(query, KIND), EMPTY_SOURCE_FIELDS);
-    }
-
-    val facets = getFacets(query, filters);
-    for (val facet : facets) {
-      search.addFacet(facet);
-    }
-
-    String sort = FIELDS_MAPPING.get(KIND).get(query.getSort());
-    search.addSort(fieldSort(sort).order(query.getOrder()));
-    if (!sort.equals("_score")) search.addSort("_score", SortOrder.DESC);
-
-    return search;
-  }
-
-  public ObjectNode remapFilters(ObjectNode filters) {
-    return remapM2T(remapM2O(remapM2C(remapG2P(remapD2P(filters)))));
-  }
-
-  protected FilterBuilder buildScoreFilters(Query query) {
-    ObjectNode filters =
-        query.hasScoreFilters() ? remapFilters(query.getScoreFilters()) : remapFilters(query.getFilters());
-
-    val qb = FilterBuilders.boolFilter();
-
-    boolean matchAll = true;
-
-    boolean hasDonor = hasDonor(filters);
-    boolean hasProject = hasProject(filters);
-    boolean hasObservation = hasObservation(filters);
-
-    if (hasProject || hasDonor || hasObservation) {
-      matchAll = false;
-      val oMusts = buildOccurrenceNestedFilters(filters, hasDonor, hasProject, hasObservation);
-      qb.must(oMusts.toArray(new FilterBuilder[oMusts.size()]));
-    }
-
-    return matchAll ? matchAllFilter() : qb;
-  }
-
-  private List<FilterBuilder> buildOccurrenceNestedFilters(
-      ObjectNode filters, boolean hasDonor, boolean hasProject, boolean hasObservation) {
-    val oMusts = Lists.<FilterBuilder> newArrayList();
-    if (hasProject) oMusts.add(buildProjectFilters(filters, PREFIX_MAPPING));
-    // if (hasObservation) oMusts.add(buildObservationFilters(filters, PREFIX_MAPPING));
-    if (hasObservation) {
-      oMusts.add(nestedFilter(NESTED_MAPPING.get(Kind.OBSERVATION), buildObservationFilters(filters, PREFIX_MAPPING)));
-    }
-    if (hasDonor) oMusts.add(buildDonorFilters(filters, PREFIX_MAPPING));
-    return oMusts;
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   @Override
   public long count(Query query) {
-    val search = buildCountRequest(query, CENTRIC_TYPE);
-
-    log.debug("{}", search);
-    return search.execute().actionGet().getHits().getTotalHits();
-  }
-
-  public long countIntersection(AndQuery query) {
-    val search = client.prepareSearch(index).setTypes(CENTRIC_TYPE.getId()).setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      // Require all filter components to be true
-      val boolFilter = new BoolFilterBuilder();
-      for (val filters : query.getAndFilters()) {
-        val remappedFilters = remapFilters(filters);
-
-        boolFilter.must(getFilters(remappedFilters, ""));
-      }
-
-      search.setPostFilter(boolFilter);
-    }
-
-    log.debug("{}", search);
-
-    return search.execute().actionGet().getHits().getTotalHits();
+    log.info("Count Query {}", query.getFilters());
+    val pql = converter.convertCount(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC);
+    return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
   @Override
   public MultiSearchResponse counts(@NonNull LinkedHashMap<String, Query> queries) {
-    MultiSearchRequestBuilder search = client.prepareMultiSearch();
-    for (val id : queries.keySet()) {
-      search.add(buildCountRequest(queries.get(id), CENTRIC_TYPE));
+    val search = client.prepareMultiSearch();
+
+    for (val query : queries.values()) {
+      val pql = converter.convertCount(query, MUTATION_CENTRIC);
+      search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
     }
 
     log.debug("{}", search);
@@ -417,11 +151,12 @@ public class MutationRepository implements Repository {
 
   @Override
   public MultiSearchResponse nestedCounts(LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
-    MultiSearchRequestBuilder search = client.prepareMultiSearch();
-    for (val id1 : queries.keySet()) {
-      val nestedQuery = queries.get(id1);
-      for (val id2 : nestedQuery.keySet()) {
-        search.add(buildCountRequest(nestedQuery.get(id2), CENTRIC_TYPE));
+    val search = client.prepareMultiSearch();
+
+    for (val nestedQuery : queries.values()) {
+      for (val innerQuery : nestedQuery.values()) {
+        val pql = converter.convertCount(innerQuery, MUTATION_CENTRIC);
+        search.add(queryEngine.execute(pql, MUTATION_CENTRIC).getRequestBuilder());
       }
     }
 
@@ -429,24 +164,9 @@ public class MutationRepository implements Repository {
     return search.execute().actionGet();
   }
 
-  public SearchRequestBuilder buildCountRequest(Query query, Type type) {
-    val search = client.prepareSearch(index).setTypes(type.getId()).setSearchType(COUNT);
-
-    if (query.hasFilters()) {
-      ObjectNode filters = query.hasScoreFilters() ? query.getScoreFilters() : query.getFilters();
-      filters = remapFilters(filters);
-      search.setPostFilter(buildFilters(filters, ""));
-
-      search.setQuery(buildQuery(query));
-    }
-    return search;
-  }
-
   @Override
   public NestedQueryBuilder buildQuery(Query query) {
-    return nestedQuery("ssm_occurrence",
-        constantScoreQuery(filteredQuery(matchAllQuery(), buildScoreFilters(query))).boost(1.0f))
-        .scoreMode("total");
+    throw new UnsupportedOperationException("Not applicable");
   }
 
   public Map<String, Object> findOne(String id, Query query) {
@@ -467,76 +187,29 @@ public class MutationRepository implements Repository {
   }
 
   public SearchResponse protein(Query query) {
-    ImmutableMap<String, String> fields = FIELDS_MAPPING.get(KIND);
+    // Customize fields, we need to add more fields once we
+    // have the search request, as not all the fields are publicly addressable through the PQL interface
+    query.setFields(Lists.<String> newArrayList(
+        "id",
+        "mutation",
+        "affectedDonorCountTotal",
+        "functionalImpact",
+        "transcriptId"));
 
-    val search = client
-        .prepareSearch(index)
-        .setTypes(CENTRIC_TYPE.getId())
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(0)
-        .setSize(10000);
+    val pql = converter.convert(query, MUTATION_CENTRIC);
+    val search = queryEngine.execute(pql, MUTATION_CENTRIC)
+        .getRequestBuilder();
 
-    search.setPostFilter(getFilters(query.getFilters(), null));
+    search.setFrom(0)
+        .setSize(10000)
+        .addFields(new String[] {
+            "transcript.consequence.aa_mutation",
+            "transcript.functional_impact_prediction_summary"
+        });
 
-    search.addFields(new String[] {
-        fields.get("id"),
-        fields.get("mutation"),
-        fields.get("affectedDonorCountTotal"),
-        fields.get("functionalImpact"),
-        fields.get("transcriptId"),
-        "transcript.consequence.aa_mutation",
-        "transcript.functional_impact_prediction_summary"
-    });
+    log.info("!!! {}", search);
 
-    log.debug("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
-
+    val response = search.execute().actionGet();
     return response;
-  }
-
-  // NOTE: This changes the filter structure
-  // Moves mutation: {consequenceType} -> consequence: {type} because consequence type needs custom query
-  private static ObjectNode remapM2C(ObjectNode filters) {
-    // Needed only if both mutation and gene filters found, otherwise consequence can be on its own.
-    if (filters.has("mutation")) {
-      val mutation = (ObjectNode) filters.get("mutation");
-      val consequence = new ObjectMapper().createObjectNode();
-      if (mutation.has("consequenceType")) {
-        consequence.put("type", mutation.remove("consequenceType"));
-      }
-      if (consequence.fieldNames().hasNext()) {
-        filters.put("consequence", consequence);
-      }
-      if (mutation.fieldNames().hasNext()) {
-        filters.replace("mutation", mutation);
-      } else {
-        filters.remove("mutation");
-      }
-    }
-
-    return filters;
-  }
-
-  // NOTE: This changes the filter structure
-  // Moves mutation: functionalImpact -> transcript: functionalImpact
-  private static ObjectNode remapM2T(ObjectNode filters) {
-    if (filters.has("mutation")) {
-      val mutation = (ObjectNode) filters.get("mutation");
-      val transcript = new ObjectMapper().createObjectNode();
-      if (mutation.has("functionalImpact")) {
-        transcript.put("functionalImpact", mutation.remove("functionalImpact"));
-      }
-      if (transcript.fieldNames().hasNext()) {
-        filters.put("transcript", transcript);
-      }
-      if (mutation.fieldNames().hasNext()) {
-        filters.replace("mutation", mutation);
-      } else {
-        filters.remove("mutation");
-      }
-    }
-
-    return filters;
   }
 }

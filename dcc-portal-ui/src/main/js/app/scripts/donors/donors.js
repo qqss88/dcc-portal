@@ -95,7 +95,7 @@
         resolve: {
           filters: function() {
             return {
-              donor: { id: { is: [_ctrl.donor.id] }, state:{is: ['*']} }
+              donor: { id: { is: [_ctrl.donor.id] } }
             };
           }
         }
@@ -138,7 +138,9 @@
 
   });
 
-  module.controller('DonorMutationsCtrl', function ($scope, Donors, Projects, LocationService, ProjectCache) {
+  module.controller('DonorMutationsCtrl',
+    function($scope, Restangular, Donors, Projects, LocationService, ProjectCache) {
+
     var _ctrl = this, donor;
 
     function success(mutations) {
@@ -193,11 +195,26 @@
     function refresh() {
       Donors.one().get({include: 'specimen'}).then(function (d) {
         donor = d;
+
+        var filters = LocationService.filters();
+        if (! filters.donor) {
+          filters.donor = {};
+        }
+        filters.donor.projectId = { is: [ donor.projectId ]};
+
+        Restangular.one('ui/donor-mutations').get({
+          filters: filters,
+          donorId: d.id,
+          include: 'consequences'
+        }).then(success);
+
+        /*
         Donors.one().getMutations({
           include: 'consequences',
           filters: LocationService.filters(),
           scoreFilters: {donor: {projectId: {is: donor.projectId }}}
         }).then(success);
+        */
       });
     }
 
@@ -250,7 +267,15 @@
         filters: LocationService.filters()
       };
 
-      return this.handler.one('', '').get(angular.extend(defaults, params)).then(function (data) {
+
+      // Sanitize filters, we want to enforce donor.state == 'live'
+      var liveFilters = angular.extend(defaults, _.cloneDeep(params));
+      if (! liveFilters.filters.donor) {
+        liveFilters.filters.donor = {};
+      }
+      liveFilters.filters.donor.state = { is: ['live']};
+
+      return this.handler.one('', '').get(liveFilters).then(function (data) {
         if (data.hasOwnProperty('facets')) {
           for (var facet in data.facets) {
             if (data.facets.hasOwnProperty(facet) && data.facets[facet].missing) {

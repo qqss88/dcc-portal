@@ -20,8 +20,6 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ORDER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_PROJECT_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_PROJECT_VALUE;
-import static org.icgc.dcc.portal.resource.ResourceUtils.API_SCORE_FILTERS_PARAM;
-import static org.icgc.dcc.portal.resource.ResourceUtils.API_SCORE_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_ALLOW;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_SIZE_VALUE;
@@ -126,7 +124,6 @@ public class MutationResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
@@ -137,7 +134,7 @@ public class MutationResource {
     log.info(FIND_ALL_TEMPLATE, new Object[] { size, MUTATION, from, sort, order, filters });
 
     return mutationService
-        .findAllCentric(query().fields(fields).filters(filters).scoreFilters(scoreFilters.get())
+        .findAllCentric(query().fields(fields).filters(filters)
             .includes(include).from(from.get()).size(size.get()).sort(sort).order(order).build());
   }
 
@@ -179,7 +176,6 @@ public class MutationResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_DONOR_SORT) String sort,
@@ -194,7 +190,7 @@ public class MutationResource {
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, JsonUtils.join(mutationIds.get()));
 
     return donorService.findAllCentric(query().filters(filters).fields(fields).includes(include)
-        .from(from.get()).size(size.get()).sort(sort).order(order).scoreFilters(scoreFilters.get()).build());
+        .from(from.get()).size(size.get()).sort(sort).order(order).build());
   }
 
   @Path("/{" + API_MUTATION_PARAM + "}/donors/count")
@@ -251,7 +247,6 @@ public class MutationResource {
       @ApiParam(value = API_FIELD_VALUE, allowMultiple = true) @QueryParam(API_FIELD_PARAM) List<String> fields,
       @ApiParam(value = API_INCLUDE_VALUE, allowMultiple = true) @QueryParam(API_INCLUDE_PARAM) List<String> include,
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
-      @ApiParam(value = API_SCORE_FILTER_VALUE) @QueryParam(API_SCORE_FILTERS_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam scoreFilters,
       @ApiParam(value = API_FROM_VALUE) @QueryParam(API_FROM_PARAM) @DefaultValue(DEFAULT_FROM) IntParam from,
       @ApiParam(value = API_SIZE_VALUE, allowableValues = API_SIZE_ALLOW) @QueryParam(API_SIZE_PARAM) @DefaultValue(DEFAULT_SIZE) IntParam size,
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue(DEFAULT_GENE_MUTATION_SORT) String sort,
@@ -267,7 +262,7 @@ public class MutationResource {
     filters = mergeFilters(filters, MUTATION_FILTER_TEMPLATE, JsonUtils.join(mutations));
 
     return geneService.findAllCentric(query().filters(filters).fields(fields).includes(include)
-        .from(from.get()).size(size.get()).sort(sort).order(order).scoreFilters(scoreFilters.get()).build());
+        .from(from.get()).size(size.get()).sort(sort).order(order).build());
   }
 
   @Path("/{" + API_MUTATION_PARAM + "}/genes/count")

@@ -4,7 +4,7 @@
   var module = angular.module('icgc.common.codetable', []);
 
   /**
-   * Binds misc. code/value lookup 
+   * Binds misc. code/value lookup
    */
   module.service('CodeTable', function() {
 
@@ -60,7 +60,7 @@
       'sequencingStrategy': 'Analysis Type',
 
       'studies': 'Study',
-      'repositoryNames': 'Repository',
+      'repoName': 'Repository',
       'fileName': 'File',
       'study': 'Only Files in Study',
       'dataFormat': 'File Format',
@@ -114,13 +114,13 @@
 
     };
 
-    
+
     this.translate = function(id) {
-      return translateLookup[id]; 
+      return translateLookup[id];
     };
 
     this.tooltip = function(id) {
-      return tooltipLookup[id]; 
+      return tooltipLookup[id];
     };
 
   });

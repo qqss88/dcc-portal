@@ -27,9 +27,12 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
 
+import org.dcc.portal.pql.query.QueryEngine;
+import org.elasticsearch.client.Client;
 import org.icgc.dcc.common.client.api.ICGCClient;
 import org.icgc.dcc.common.client.api.ICGCClientConfig;
 import org.icgc.dcc.common.client.api.cms.CMSClient;
@@ -68,6 +71,7 @@ import org.openid4java.discovery.DiscoveryInformation;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -115,12 +119,6 @@ public class PortalConfig {
   public void initCache() {
     service.init();
 
-  }
-
-  // NOTE: We no longer (re)generate the demo entity-set at startup.
-  // @PostConstruct
-  public void createDemoEntityList() {
-    entityListService.createDemoEntitySet();
   }
 
   @Bean
@@ -189,7 +187,6 @@ public class PortalConfig {
         .releaseDate(release.getReleaseDate())
         .dataVersion(release.getDataVersion())
         .downloadEnabled(download.isEnabled())
-        .demoListUuid(setAnalysis.demoListUuid)
         .maxNumberOfHits(setAnalysis.maxNumberOfHits)
         .maxMultiplier(setAnalysis.maxMultiplier)
         .build();
@@ -316,6 +313,11 @@ public class PortalConfig {
   @Bean
   public OAuthProperties oauthProperties() {
     return properties.getOauth();
+  }
+
+  @Bean
+  public QueryEngine queryEngine(@NonNull Client client, @Value("#{indexName}") String index) {
+    return new QueryEngine(client, index);
   }
 
   private boolean isDistributed() {

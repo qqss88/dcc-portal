@@ -83,6 +83,11 @@
         filters: {'gene':{'id':{'is':[_ctrl.gene.id]}}}
       }).then(function(data) {
         var ids = _.pluck(data.facets.projectId.terms, 'term');
+
+        if (_.isEmpty(ids)) {
+          return [];
+        }
+
         return Projects.getList({
           filters: {'project': {'id': { 'is': ids}}}
         });

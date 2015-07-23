@@ -62,18 +62,6 @@ public class DiagramService {
   @NonNull
   private final MutationRepository mutationRepository;
 
-  private String[][] replacements =
-  {
-      { "\b", "\\b" },
-      { "\n", "\\n" },
-      { "\t", "\\t" },
-      { "\f", "\\f" },
-      { "\r", "\\r" },
-      { "\"", "\\\"" },
-      { "\\", "\\\\" },
-      { "/", "\\/" }
-  };
-
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
 
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
@@ -107,7 +95,8 @@ public class DiagramService {
   public String getPathwayDiagramString(@NonNull String pathwayId) {
     val pathwayXml = getPathway(pathwayId).get(INDEX_MODEL.get("xml"));
 
-    return unescape(pathwayXml.toString());
+    // return unescape(pathwayXml.toString());
+    return pathwayXml.toString();
   }
 
   public List<String> getShownPathwaySection(@NonNull String pathwayId) {
@@ -130,16 +119,6 @@ public class DiagramService {
       }
     });
     return reverse;
-  }
-
-  /**
-   * Opposite of {@link dcc.etl.db.importer.diagram.reader.DiagramXmlReader}'s escape
-   */
-  private String unescape(String xml) {
-    for (String[] replacement : replacements) {
-      xml.replace(replacement[1], replacement[0]);
-    }
-    return xml;
   }
 
   private String parseUniprot(String uniprot) {

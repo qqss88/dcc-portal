@@ -44,14 +44,14 @@ public class Query {
    */
   public static final List<String> NO_FIELDS = ImmutableList.of("_id");
 
+  public static final List<String> ID_FIELD = ImmutableList.of("id");
+
   private static final List<String> INCLUDE_FACETS = ImmutableList.of("facets");
 
   private Integer defaultLimit;
 
   @JsonDeserialize(using = ObjectNodeDeserializer.class)
   ObjectNode filters;
-  @JsonDeserialize(using = ObjectNodeDeserializer.class)
-  ObjectNode scoreFilters;
 
   List<String> fields;
   List<String> includes;
@@ -69,10 +69,6 @@ public class Query {
 
   public boolean hasFilters() {
     return filters != null && filters.size() > 0;
-  }
-
-  public boolean hasScoreFilters() {
-    return scoreFilters != null && scoreFilters.size() > 0;
   }
 
   public boolean hasFields() {
@@ -105,7 +101,7 @@ public class Query {
   }
 
   public static List<String> idField() {
-    return NO_FIELDS;
+    return ID_FIELD;
   }
 
   public static List<String> includeFacets() {

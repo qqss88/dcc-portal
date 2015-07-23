@@ -24,12 +24,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Occurrence;
 import org.icgc.dcc.portal.model.Occurrences;
@@ -44,17 +42,12 @@ import com.google.common.collect.ImmutableList;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class OccurrenceService {
 
   private final OccurrenceRepository occurrenceRepository;
-
   private final AtomicReference<Map<String, Map<String, Integer>>> projectMutationCache =
       new AtomicReference<Map<String, Map<String, Integer>>>();
-
-  @Autowired
-  public OccurrenceService(OccurrenceRepository occurrenceRepository) {
-    this.occurrenceRepository = occurrenceRepository;
-  }
 
   @Async
   public void init() {
@@ -74,12 +67,11 @@ public class OccurrenceService {
   }
 
   public Occurrences findAll(Query query) {
-    SearchResponse response = occurrenceRepository.findAllCentric(query);
-    SearchHits hits = response.getHits();
-
+    val response = occurrenceRepository.findAll(query);
+    val hits = response.getHits();
     val list = ImmutableList.<Occurrence> builder();
 
-    for (SearchHit hit : hits) {
+    for (val hit : hits) {
       val fieldMap = createResponseMap(hit, query, Kind.OCCURRENCE);
       list.add(new Occurrence(fieldMap));
     }
@@ -100,9 +92,11 @@ public class OccurrenceService {
 
   public Map<String, Map<String, Integer>> getProjectMutationDistribution() {
     val result = projectMutationCache.get();
+
     if (null == result) {
       throw new NotAvailableException("The donor mutation cache is currently not available. Please retry later.");
     }
+
     return result;
   }
 }

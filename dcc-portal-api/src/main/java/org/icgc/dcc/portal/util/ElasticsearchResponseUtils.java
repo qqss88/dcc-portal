@@ -119,18 +119,23 @@ public final class ElasticsearchResponseUtils {
   }
 
   public static Boolean getBoolean(Object values) {
+    val defaultValue = false;
+
     if (values == null) {
-      return null;
+      return defaultValue;
     }
 
     if (values instanceof Boolean) {
       return (Boolean) values;
     }
 
-    @SuppressWarnings("unchecked")
-    val resultList = (List<Object>) values;
+    if (values instanceof Iterable<?>) {
+      val iterable = (Iterable<?>) values;
+      return Iterables.isEmpty(iterable) ? defaultValue :
+          Boolean.TRUE.equals(Iterables.get(iterable, 0));
+    }
 
-    return (Boolean) resultList.get(0);
+    return defaultValue;
   }
 
   private static void processConsequences(Map<String, Object> map, Query query) {

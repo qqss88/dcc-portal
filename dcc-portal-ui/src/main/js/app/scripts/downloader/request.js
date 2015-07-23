@@ -23,6 +23,12 @@
 
     if (! filters) {
       filters = LocationService.filters();
+
+      // Unless explicitly specified, we want to inject the donor state filter
+      if (! filters.donor) {
+        filters.donor = {};
+      }
+      filters.donor.state = { is: ['live'] };
     }
 
     function sum(active, size) {

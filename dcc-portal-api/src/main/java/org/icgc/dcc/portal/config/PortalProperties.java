@@ -317,14 +317,6 @@ public class PortalProperties extends Configuration {
   public static class SetOperationProperties {
 
     @JsonProperty
-    @NotEmpty
-    String demoListUuid;
-
-    @JsonProperty
-    @NotEmpty
-    String demoListFilterParam;
-
-    @JsonProperty
     int maxPreviewNumberOfHits;
     @JsonProperty
     int maxNumberOfHits;

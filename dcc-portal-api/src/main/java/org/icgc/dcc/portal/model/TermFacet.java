@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 
+import lombok.NonNull;
 import lombok.Value;
 import lombok.val;
 
@@ -32,6 +33,9 @@ import com.google.common.collect.ImmutableList;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TermFacet {
 
+  private static final String FACET_TYPE = "terms";
+  private static final long DEFAULT_COUNT = 0L;
+
   String type;
   Long missing;
   Long total;
@@ -44,16 +48,20 @@ public class TermFacet {
   }
 
   // FIXME: Temporary work around until PQL, we need emulate a term facet from ES aggregations
-  private TermFacet(long total, long missing, ImmutableList<Term> terms) {
-    this.type = "terms";
-    this.other = -1L;
-    this.total = total;
-    this.missing = missing;
-    this.terms = terms;
-  }
+  // private TermFacet(long total, long missing, ImmutableList<Term> terms) {
+  // this.type = "terms";
+  // this.other = -1L;
+  // this.total = total;
+  // this.missing = missing;
+  // this.terms = terms;
+  // }
 
   public static TermFacet of(TermsFacet facet) {
     return new TermFacet(facet);
+  }
+
+  public static TermFacet of(long total, long missing, @NonNull ImmutableList<Term> terms) {
+    return new TermFacet(total, missing, terms);
   }
 
   private TermFacet(TermsFacet facet) {
@@ -62,6 +70,14 @@ public class TermFacet {
     this.total = facet.getTotalCount();
     this.other = facet.getOtherCount();
     this.terms = buildTerms(facet.getEntries(), facet.getMissingCount());
+  }
+
+  private TermFacet(long total, long missing, ImmutableList<Term> terms) {
+    this.type = FACET_TYPE;
+    this.missing = missing;
+    this.total = total;
+    this.other = DEFAULT_COUNT;
+    this.terms = terms;
   }
 
   private ImmutableList<Term> buildTerms(List<? extends TermsFacet.Entry> entries, Long missing) {
@@ -81,4 +97,5 @@ public class TermFacet {
     String term;
     Long count;
   }
+
 }
