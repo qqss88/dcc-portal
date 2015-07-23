@@ -466,36 +466,7 @@ public class GeneRepository implements Repository {
     return result.toArray(new String[result.size()]);
   }
 
-  /*
-   * Lookup up genes by ensembl gene_id or gene symbol or uniprot
-   * 
-   * @param input a list of string identifiers of either ensembl id or gene symbol or uniprot
-   * 
-   * @returns a map of matched identifiers
-   */
-  // public Map<String, Multimap<String, String>> validateIdentifiers(List<String> input) {
-  // public SearchResponse validateIdentifiers(List<String> input) {
-
-  // val boolQuery = QueryBuilders.boolQuery();
-
-  // val search = client.prepareSearch(index)
-  // .setTypes(CENTRIC_TYPE.getId())
-  // .setSearchType(QUERY_THEN_FETCH)
-  // .setSize(5000);
-  // for (val searchField : GENE_ID_SEARCH_FIELDS) {
-  // boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
-  // search.addHighlightedField(searchField);
-  // search.addField(searchField);
-  // }
-  // search.setQuery(boolQuery);
-
-  // log.debug("Search is {}", search);
-  // val response = search.execute().actionGet();
-
-  // return response;
-  // }
-
-  public SearchResponse validateIdentifiers2(List<String> input) {
+  public SearchResponse validateIdentifiers(List<String> input) {
     val boolQuery = QueryBuilders.boolQuery();
 
     val search = client.prepareSearch(index)

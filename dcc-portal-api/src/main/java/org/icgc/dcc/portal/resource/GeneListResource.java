@@ -66,21 +66,6 @@ public class GeneListResource {
   private final static Pattern GENE_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_GENE_LIST_SIZE = 1000;
 
-  /*
-   * This endpoint was not used at all. To be removed.
-   * 
-   * @Path("/{genelistIds}")
-   * 
-   * @GET public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) { val result =
-   * Lists.<Map<String, String>> newLinkedList(); for (val value : geneListIds.get()) { val id = UUID.fromString(value);
-   * val geneList = userGeneSetService.get(id);
-   * 
-   * if (isNullOrEmpty(geneList)) { result.add(ImmutableMap.of(value, "")); } else { result.add(ImmutableMap.of(value,
-   * geneList)); } }
-   * 
-   * return result; }
-   */
-
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Produces(APPLICATION_JSON)
