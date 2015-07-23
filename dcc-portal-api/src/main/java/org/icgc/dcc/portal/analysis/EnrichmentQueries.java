@@ -28,13 +28,11 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
 
-import org.icgc.dcc.portal.model.AndQuery;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Universe;
 import org.icgc.dcc.portal.util.Filters;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -43,7 +41,7 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class EnrichmentQueries {
 
-  public static AndQuery overlapQuery(@NonNull Query query, @NonNull Universe universe, @NonNull UUID inputGeneListId) {
+  public static Query overlapQuery(@NonNull Query query, @NonNull Universe universe, @NonNull UUID inputGeneListId) {
     // Components
     val queryFilter = query.getFilters();
     val universeFilter = universe.getFilter();
@@ -58,15 +56,13 @@ public class EnrichmentQueries {
     // EnrichmentSearchResponses?
     val includes = Lists.<String> newArrayList();
 
-    // val overlapQuery = new AndQuery(filters);
-    val overlapQuery = new AndQuery(ImmutableList.of(mergeResultFilter));
-
+    val overlapQuery = Query.builder().filters(mergeResultFilter).build();
     overlapQuery.setFields(idField()).setIncludes(includes);
 
     return overlapQuery;
   }
 
-  public static AndQuery geneSetOverlapQuery(@NonNull Query query, @NonNull Universe universe,
+  public static Query geneSetOverlapQuery(@NonNull Query query, @NonNull Universe universe,
       @NonNull UUID inputGeneListId, @NonNull String geneSetId) {
     val overlapQuery = overlapQuery(query, universe, inputGeneListId);
 
@@ -85,7 +81,8 @@ public class EnrichmentQueries {
     filters = Filters.mergeAnalysisUniverse(filters, universeFilter);
     filters = Filters.mergeAnalysisGeneSetFilter(filters, geneSetFilter);
 
-    overlapQuery.setAndFilters(ImmutableList.of(filters));
+    // overlapQuery.setAndFilters(ImmutableList.of(filters));
+    overlapQuery.setFilters(filters);
 
     return overlapQuery;
   }

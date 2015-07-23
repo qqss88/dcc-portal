@@ -18,9 +18,15 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
+import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
+import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
@@ -33,6 +39,9 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.IS;
+import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
+import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -53,6 +62,15 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -63,18 +81,16 @@ import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
+import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
-import org.elasticsearch.search.sort.SortOrder;
-import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
@@ -84,34 +100,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
 public class RepositoryFileRepository {
 
-  private final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
-  private final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
+  private static final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
+  private static final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
       "specimen_id",
       "sample_id",
       "submitted_specimen_id",
       "submitted_sample_id");
-  private final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
-  private final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
+  private static final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
+  private static final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
       "tcga_participant_barcode",
       "tcga_sample_barcode",
       "tcga_aliquot_barcode");
+  private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
+      Fields.REPO_TYPE,
+      Fields.REPO_ENTITY_ID,
+      Fields.REPO_DATA_PATH,
+      Fields.REPO_SERVER_OBJECT,
+      Fields.FILE_NAME,
+      Fields.FILE_SIZE,
+      Fields.FILE_MD5SUM);
+  private static final String MANIFEST_DOWNLOAD_INFO_SORT_FIELD = Fields.REPO_TYPE.getAlias();
 
   // private static final Type TYPE = Type.RELEASE;
   private static final Kind KIND = Kind.REPOSITORY_FILE;
@@ -120,8 +138,7 @@ public class RepositoryFileRepository {
   private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
-  private static final ImmutableList<String> FACETS = ImmutableList.of("study", "dataType", "dataFormat", "access",
-      "projectCode", "primarySite", "donorStudy", "repositoryNames", "experimentalStrategy");
+  private static final List<String> FACETS = RepositoryFileTypeModel.AVAILABLE_FACETS;
 
   private final ImmutableMap<String, String> EXPORT_FIELDS = ImmutableMap.<String, String> builder()
       .put("access", "Access")
@@ -141,11 +158,13 @@ public class RepositoryFileRepository {
 
   private final Client client;
   private final String index;
+  private final QueryEngine queryEngine;
 
   @Autowired
   public RepositoryFileRepository(Client client) {
     this.index = REPOSITORY_INDEX_NAME;
     this.client = client;
+    this.queryEngine = new QueryEngine(client, index);
   }
 
   /**
@@ -154,26 +173,31 @@ public class RepositoryFileRepository {
    * _missing is not supported for data_types.datatype and data_type.dataformat <br>
    */
   public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
-    val termFilters = FilterBuilders.boolFilter();
     val fields = filters.path(KIND.getId()).fields();
 
+    if (fields.hasNext() == false) {
+      return matchAllFilter();
+    }
+
+    val termFilters = boolFilter();
     val nestedTerms = Maps.<String, List<String>> newHashMap();
 
-    if (fields.hasNext() == false) return FilterBuilders.matchAllFilter();
     while (fields.hasNext()) {
       val facetField = fields.next();
+      val facetFieldKey = facetField.getKey();
 
-      if (!TYPE_MAPPING.containsKey(facetField.getKey())) {
+      if (!TYPE_MAPPING.containsKey(facetFieldKey)) {
         continue;
       }
 
-      val fieldName = TYPE_MAPPING.get(facetField.getKey());
+      val fieldName = TYPE_MAPPING.get(facetFieldKey);
 
       // Assume "IS"
-      JsonNode boolNode = facetField.getValue();
       FilterBuilder fb;
+      val boolNode = facetField.getValue();
       val items = Lists.<String> newArrayList();
-      for (val item : boolNode.get("is")) {
+
+      for (val item : boolNode.get(IS)) {
         items.add(item.textValue());
       }
 
@@ -184,11 +208,11 @@ public class RepositoryFileRepository {
         val terms = termsFilter(fieldName, items);
 
         // Special processing for "no data" terms
-        if (items.remove(IndexModel.MISSING)) {
+        if (items.remove(MISSING)) {
           val missing = missingFilter(fieldName).existence(true).nullValue(true);
-          fb = FilterBuilders.boolFilter().should(missing).should(terms);
+          fb = boolFilter().should(missing).should(terms);
         } else {
-          fb = FilterBuilders.boolFilter().must(terms);
+          fb = boolFilter().must(terms);
         }
 
       }
@@ -197,10 +221,12 @@ public class RepositoryFileRepository {
 
     // Handle special case. Datatype and Dataformat, note these should never have missing values
     if (!nestedTerms.isEmpty()) {
-      val nestedBoolFilter = FilterBuilders.boolFilter();
-      for (String fieldName : nestedTerms.keySet()) {
-        nestedBoolFilter.must(termsFilter(fieldName, nestedTerms.get(fieldName)));
+      val nestedBoolFilter = boolFilter();
+
+      for (val entry : nestedTerms.entrySet()) {
+        nestedBoolFilter.must(termsFilter(entry.getKey(), entry.getValue()));
       }
+
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
     }
 
@@ -212,8 +238,9 @@ public class RepositoryFileRepository {
 
     // General case
     for (String facet : FACETS) {
-      val globalAgg = AggregationBuilders.global(facet);
-      val facetAgg = AggregationBuilders.filter(facet);
+      val globalAgg = global(facet);
+      val facetAgg = filter(facet);
+
       // if (facet.equals("dataType") || facet.equals("dataFormat")) continue;
       val fieldName = TYPE_MAPPING.get(facet);
 
@@ -225,36 +252,43 @@ public class RepositoryFileRepository {
           facetFilters.with(KIND.getId()).remove(facet);
         }
         log.info("Processing {}", fieldName);
-        facetAgg.filter(buildRepoFilters(facetFilters, false));
-        facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
-        facetAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
+
+        addSubAggregations(facetAgg, buildRepoFilters(facetFilters, false), facet, fieldName);
       } else {
-        facetAgg.filter(FilterBuilders.matchAllFilter());
-        facetAgg.subAggregation(AggregationBuilders.terms(facet).size(1024).field(fieldName));
-        facetAgg.subAggregation(AggregationBuilders.missing("_missing").field(fieldName));
+        addSubAggregations(facetAgg, matchAllFilter(), facet, fieldName);
       }
+
       globalAgg.subAggregation(facetAgg);
       aggs.add(globalAgg);
     }
 
     // Special filtered case - reponames, do not exclude self filtering
-    val field = TYPE_MAPPING.get("repositoryNames");
+    val field = TYPE_MAPPING.get("repoName");
     val repoFiltered = "repositoryNamesFiltered";
+    val subAgg = addSubAggregations(filter(repoFiltered),
+        buildRepoFilters(filters.deepCopy(), false), repoFiltered, field);
     aggs.add(global(repoFiltered)
-        .subAggregation(filter(repoFiltered)
-            .filter(buildRepoFilters(filters.deepCopy(), false))
-            .subAggregation(terms(repoFiltered).size(1024).field(field))
-            .subAggregation(missing("_missing").field(field))));
+        .subAggregation(subAgg));
 
     // Special filtered case - repo sizes and repo donors
     val repoSizeFitered = "repositorySizes";
+
     aggs.add(global(repoSizeFitered)
         .subAggregation(filter(repoSizeFitered).filter(buildRepoFilters(filters.deepCopy(), false))
-            .subAggregation(terms(repoSizeFitered).size(1024).field(field)
+            .subAggregation(terms(repoSizeFitered).size(MAX_FACET_TERM_COUNT).field(field)
                 .subAggregation(terms("donor").size(100000).field("donor.donor_id"))
                 .subAggregation(sum("fileSize").field("repository.file_size")))));
 
     return aggs;
+  }
+
+  @NonNull
+  private static FilterAggregationBuilder addSubAggregations(FilterAggregationBuilder builder, FilterBuilder filter,
+      String facetName, String fieldName) {
+    return builder
+        .filter(filter)
+        .subAggregation(terms(facetName).size(MAX_FACET_TERM_COUNT).field(fieldName))
+        .subAggregation(missing(MISSING).field(fieldName));
   }
 
   /**
@@ -345,8 +379,8 @@ public class RepositoryFileRepository {
       @Override
       public void write(OutputStream os) throws IOException, WebApplicationException {
         val filters = buildRepoFilters(query.getFilters(), false);
-        String headers[] = EXPORT_FIELDS.values().toArray(new String[EXPORT_FIELDS.values().size()]);
-        String keys[] = EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]);
+        final String headers[] = toStringArray(EXPORT_FIELDS.values());
+        final String keys[] = toStringArray(EXPORT_FIELDS.keySet());
 
         @Cleanup
         val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
@@ -360,7 +394,7 @@ public class RepositoryFileRepository {
             .setScroll(KEEP_ALIVE)
             .setPostFilter(filters)
             .setQuery(matchAllQuery())
-            .addFields(EXPORT_FIELDS.keySet().toArray(new String[EXPORT_FIELDS.keySet().size()]));
+            .addFields(keys);
 
         SearchResponse response = search.execute().actionGet();
         while (true) {
@@ -373,14 +407,16 @@ public class RepositoryFileRepository {
           if (finished) {
             break;
           } else {
-
-            for (SearchHit hit : response.getHits()) {
+            for (val hit : response.getHits()) {
               val map = normalize(createResponseMap(hit, query, Kind.REPOSITORY_FILE));
               writer.write(map, keys);
             }
           }
+
         }
+
       }
+
     };
   }
 
@@ -390,15 +426,20 @@ public class RepositoryFileRepository {
   @SuppressWarnings("unchecked")
   private Map<String, String> normalize(Map<String, Object> map) {
     val result = Maps.<String, String> newHashMap();
-    for (val key : map.keySet()) {
+
+    for (val entry : map.entrySet()) {
+      val key = entry.getKey();
+      val value = entry.getValue();
+
       if (ARRAY_FIELDS.contains(key)) {
-        result.put(key, COMMA.join((List<String>) map.get(key)));
+        result.put(key, COMMA.join((List<String>) value));
       } else if (key.equals("repository.file_size")) {
-        result.put(key, getLong(map.get(key)).toString());
+        result.put(key, getLong(value).toString());
       } else {
-        result.put(key, getString(map.get(key)));
+        result.put(key, getString(value));
       }
     }
+
     return result;
   }
 
@@ -426,41 +467,35 @@ public class RepositoryFileRepository {
       search.addAggregation(agg);
     }
 
-    log.info("ES search query is: '{}'.", search);
+    log.info("findAll() - ES query is: '{}'.", search);
     val response = search.execute().actionGet();
-    log.debug("ES search response is: '{}'.", response);
+    log.debug("findAll() - ES response is: '{}'.", response);
 
     return response;
   }
 
   @NonNull
-  public SearchResponse findDownloadInfo(Query query, final String[] fields, String sortField, String sourceField) {
+  public SearchResponse findDownloadInfo(String pql) {
+    val pqlAst = parse(pql);
+    pqlAst.setSelect(select(MANIFEST_DOWNLOAD_INFO_FIELDS));
+    pqlAst.setSort(sortBuilder()
+        .sortAsc(MANIFEST_DOWNLOAD_INFO_SORT_FIELD).build());
+
+    val newPql = pqlAst.toString();
+    log.info("Updated PQL is: '{}'.", newPql);
+
     // Get the total count first.
-    query.setLimit(0);
-    val response = findDownloadInfo(COUNT, query, fields, sortField, sourceField);
-    val count = getTotalHitCount(response);
+    val count = getTotalHitCount(findDownloadInfo(newPql, COUNT, 0));
     log.info("A total of {} files for this query.", count);
 
-    // Run the query to retrieve.
-    query.setLimit(Ints.saturatedCast(count));
-    return findDownloadInfo(QUERY_THEN_FETCH, query, fields, sortField, sourceField);
+    return findDownloadInfo(newPql, QUERY_THEN_FETCH, Ints.saturatedCast(count));
   }
 
   @NonNull
-  private SearchResponse findDownloadInfo(SearchType searchType, Query query, final String[] fields, String sortField,
-      String sourceField) {
-    val filters = buildRepoFilters(query.getFilters(), false);
-    final String noExcludes = null;
-    val search = client.prepareSearch(index)
-        .setTypes(FILE_INDEX_TYPE)
+  private SearchResponse findDownloadInfo(String pql, SearchType searchType, int size) {
+    val search = queryEngine.execute(pql, REPOSITORY_FILE).getRequestBuilder()
         .setSearchType(searchType)
-        .setFrom(query.getFrom())
-        .setSize(query.getLimit())
-        .addSort(sortField, SortOrder.ASC)
-        .setPostFilter(filters)
-        .addFields(fields)
-        // Need to use _source because 'repository.repo_server' is an array.
-        .setFetchSource(sourceField, noExcludes);
+        .setSize(size);
 
     log.info("ES request is: {}", search);
     val response = search.execute().actionGet();
@@ -498,7 +533,6 @@ public class RepositoryFileRepository {
         .setFrom(0)
         .setSize(maxNumberOfDocs)
         .setQuery(multiMatchQuery(queryString, toStringArray(names)));
-    log.info(">>> ES Search is: {}", search);
 
     return search.execute().actionGet();
   }
@@ -561,7 +595,6 @@ public class RepositoryFileRepository {
 
     search.addAggregation(donorCountAgg);
 
-    log.info(">>> {}", search);
     val response = search.execute().actionGet();
     val global = (Global) response.getAggregations().get(name);
     val filter = (Filter) global.getAggregations().get(name);

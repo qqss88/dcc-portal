@@ -355,7 +355,7 @@
   module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
 
-    var _ctrl = this;
+    var _ctrl = this, project = Projects.one();
 
     function success(genes) {
       if (genes.hasOwnProperty('hits') ) {
@@ -428,7 +428,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
@@ -506,7 +508,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
@@ -544,7 +548,9 @@
     }
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
-      if (dest.indexOf('projects') !== -1) {
+
+      // Only refresh if we stay on the page
+      if (dest.indexOf('projects/' + project.id) !== -1) {
         refresh();
       }
     });
@@ -572,13 +578,7 @@
     // Get ALL projects metadata
     this.getMetadata = function() {
       var params = {
-        filters: {
-          project: {
-            state: {
-              is: ['*'] // Make sure we include both pending and live projects
-            }
-          }
-        },
+        filters: {},
         size: 100
       };
 
@@ -595,7 +595,15 @@
         filters: LocationService.filters()
       };
 
-      return this.all().get('', angular.extend(defaults, params)).then(function (data) {
+
+      // Sanitize filters, we want to enforce project.state == 'live'
+      var liveFilters = angular.extend(defaults, _.cloneDeep(params));
+      if (! liveFilters.filters.project) {
+        liveFilters.filters.project = {};
+      }
+      liveFilters.filters.project.state = { is: ['live']};
+
+      return this.all().get('', liveFilters).then(function (data) {
 
         if (data.hasOwnProperty('facets') &&
             data.facets.hasOwnProperty('id') &&
@@ -649,7 +657,15 @@
         size: 10,
         from: 1
       };
-      return this.handler.one('donors', '').get(angular.extend(defaults, params));
+
+      // Sanitize filters, we want to enforce donor.state == 'live'
+      var liveFilters = angular.extend(defaults, _.cloneDeep(params));
+      if (! liveFilters.filters.donor) {
+        liveFilters.filters.donor = {};
+      }
+      liveFilters.filters.donor.state = { is: ['live']};
+
+      return this.handler.one('donors', '').get(liveFilters);
     };
 
     this.getMutations = function (params) {

@@ -43,7 +43,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular) {
+      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular, PortalFeature) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -155,10 +155,10 @@
         });
 
         // 4) if it's a reactome pathway, get diagram
-        _ctrl.geneSet.showPathway = false;
+        _ctrl.geneSet.showPathway = PortalFeature.get('REACTOME_VIEWER');
 
         // FIXME: Disabled until reactome is ready
-        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && 1 === 2 /* FIXME: Temporary !!! */) {
+        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && _ctrl.geneSet.showPathway) {
           _ctrl.pathway = {};
           _ctrl.geneSet.showPathway = true;
 

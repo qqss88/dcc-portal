@@ -3,9 +3,9 @@ package org.icgc.dcc.portal.service;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
-import static org.icgc.dcc.portal.service.ServiceUtils.buildCounts;
-import static org.icgc.dcc.portal.service.ServiceUtils.buildNestedCounts;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
+import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedWriter;
@@ -21,10 +21,6 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -32,6 +28,7 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,11 +40,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
+import lombok.Cleanup;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DonorService {
 
   private final DonorRepository donorRepository;
+  private final AggregationToFacetConverter aggregationsConverter = AggregationToFacetConverter.getInstance();
 
   private Donors buildDonors(SearchResponse response, Query query) {
     val hits = response.getHits();
@@ -63,7 +65,7 @@ public class DonorService {
     }
 
     Donors donors = new Donors(list.build());
-    donors.setFacets(response.getFacets());
+    donors.addFacets(aggregationsConverter.convert(response.getAggregations()));
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;
@@ -73,10 +75,6 @@ public class DonorService {
     return buildDonors(donorRepository.findAllCentric(query), query);
   }
 
-  public Donors findAll(Query query) {
-    return buildDonors(donorRepository.findAll(query), query);
-  }
-
   public long count(Query query) {
     return donorRepository.count(query);
   }
@@ -84,14 +82,14 @@ public class DonorService {
   public LinkedHashMap<String, Long> counts(LinkedHashMap<String, Query> queries) {
     MultiSearchResponse sr = donorRepository.counts(queries);
 
-    return buildCounts(queries, sr);
+    return getCounts(queries, sr);
   }
 
   public LinkedHashMap<String, LinkedHashMap<String, Long>> nestedCounts(
       LinkedHashMap<String, LinkedHashMap<String, Query>> queries) {
     MultiSearchResponse sr = donorRepository.nestedCounts(queries);
 
-    return buildNestedCounts(queries, sr);
+    return getNestedCounts(queries, sr);
   }
 
   public Donor findOne(String donorId, Query query) {
@@ -100,6 +98,13 @@ public class DonorService {
 
   public Set<String> findIds(Query query) {
     return donorRepository.findIds(query);
+  }
+
+  public Donors getDonorAndSampleByProject(String projectId) {
+    Query query = new Query();
+    query.setSort("_id");
+    query.setOrder("desc");
+    return buildDonors(donorRepository.getDonorSamplesByProject(projectId), query);
   }
 
   public List<Map<String, Object>> getSamples(List<Donor> donors) {
@@ -162,23 +167,11 @@ public class DonorService {
         val writer =
             new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
 
-        final String[] headers = {
-            "icgc_sample_id",
-            "submitted_sample_id",
-            "icgc_specimen_id",
-            "submitted_specimen_id",
-            "icgc_donor_id",
-            "submitted_donor_id",
-            "project_code",
+        final String[] headers =
+            { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code",
 
-            "specimen_type",
-            "specimen_type_other",
-            "analyzed_sample_interval",
-            "repository",
-            "sequencing_strategy",
-            "raw_data_accession",
-            "study"
-        };
+            "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study"
+            };
 
         // Write TSV
         writer.writeHeader(headers);

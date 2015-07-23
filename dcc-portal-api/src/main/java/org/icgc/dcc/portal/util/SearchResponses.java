@@ -19,15 +19,20 @@ package org.icgc.dcc.portal.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+
+import org.elasticsearch.action.search.MultiSearchResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.icgc.dcc.portal.model.Query;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
-
-import org.elasticsearch.action.search.SearchResponse;
-
-import com.google.common.collect.Lists;
 
 /**
  * Elasticsearch {@link SearchResponses} utilities.
@@ -50,6 +55,47 @@ public final class SearchResponses {
 
   public static boolean hasHits(@NonNull SearchResponse response) {
     return response.getHits().hits().length > 0;
+  }
+
+  public static LinkedHashMap<String, Long> getCounts(LinkedHashMap<String, Query> queries,
+      MultiSearchResponse sr) {
+    val counts = Maps.<String, Long> newLinkedHashMap();
+    val ids = queries.keySet().iterator();
+    for (val item : sr.getResponses()) {
+      SearchResponse r = item.getResponse();
+      counts.put(ids.next(), r.getHits().getTotalHits());
+    }
+
+    return counts;
+  }
+
+  public static LinkedHashMap<String, LinkedHashMap<String, Long>> getNestedCounts(
+      LinkedHashMap<String, LinkedHashMap<String, Query>> queries,
+      MultiSearchResponse sr) {
+    val counts = Maps.<String, LinkedHashMap<String, Long>> newLinkedHashMap();
+
+    val idSet = queries.keySet();
+    val firstId = idSet.iterator().next();
+    val subIdSet = queries.get(firstId).keySet();
+
+    val ids = idSet.iterator();
+    Iterator<String> subIds = subIdSet.iterator();
+    LinkedHashMap<String, Long> subCounts = Maps.<String, Long> newLinkedHashMap();
+
+    for (val item : sr.getResponses()) {
+      SearchResponse r = item.getResponse();
+      if (!subIds.hasNext()) {
+        counts.put(ids.next(), subCounts);
+        subIds = subIdSet.iterator();
+        subCounts = Maps.<String, Long> newLinkedHashMap();
+      }
+      subCounts.put(subIds.next(), r.getHits().getTotalHits());
+    }
+
+    // catch last set of subCounts
+    counts.put(ids.next(), subCounts);
+
+    return counts;
   }
 
 }
