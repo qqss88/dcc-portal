@@ -125,12 +125,16 @@
 
   /**
    * This serves as a debugging service to toggle features that are merged
-   * but disabled.a
+   * but disabled.
+   *
+   * Note: This works automatically for views that are tied to a state, otherwise
+   * it will be up to the callers to check for state change via watch/observe or other means.
    */
-  module.service('PortalFeature', function($rootScope, $state) {
+  module.service('PortalFeature', function($state) {
 
     var features = {
-      REACTOME_VIEWER: false
+      REACTOME_VIEWER: false,
+      COLLABORATORY_TOKEN: false
     };
 
     this.get = function(s) {
