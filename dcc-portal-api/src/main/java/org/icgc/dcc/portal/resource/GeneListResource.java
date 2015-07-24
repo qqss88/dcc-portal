@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -67,21 +66,6 @@ public class GeneListResource {
   private final static Pattern GENE_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_GENE_LIST_SIZE = 1000;
 
-  /*
-   * This endpoint was not used at all. To be removed.
-   * 
-   * @Path("/{genelistIds}")
-   * 
-   * @GET public List<Map<String, String>> getGeneList(@PathParam("genelistIds") IdsParam geneListIds) { val result =
-   * Lists.<Map<String, String>> newLinkedList(); for (val value : geneListIds.get()) { val id = UUID.fromString(value);
-   * val geneList = userGeneSetService.get(id);
-   * 
-   * if (isNullOrEmpty(geneList)) { result.add(ImmutableMap.of(value, "")); } else { result.add(ImmutableMap.of(value,
-   * geneList)); } }
-   * 
-   * return result; }
-   */
-
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Produces(APPLICATION_JSON)
@@ -99,7 +83,7 @@ public class GeneListResource {
 
     // Extract the set of unique ensembl ids for storage
     Set<String> uniqueIds = Sets.<String> newHashSet();
-    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS.values()) {
       if (result.getValidGenes().containsKey(searchField)) {
         for (val gene : result.getValidGenes().get(searchField).values()) {
           uniqueIds.add(gene.getId());
@@ -137,7 +121,7 @@ public class GeneListResource {
     }
 
     for (val id : originalIds) {
-      matchIds.add(id.toUpperCase());
+      matchIds.add(id.toLowerCase());
     }
     val validResults = geneService.validateIdentifiers(matchIds.build());
 
@@ -145,16 +129,21 @@ public class GeneListResource {
 
     // All matched identifiers
     val allMatchedIdentifiers = Sets.<String> newHashSet();
-    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS) {
+    for (val searchField : GeneRepository.GENE_ID_SEARCH_FIELDS.values()) {
       if (!validResults.get(searchField).isEmpty()) {
-        allMatchedIdentifiers.addAll(validResults.get(searchField).keySet());
+
+        // Case doesn't matter
+        for (val k : validResults.get(searchField).keySet()) {
+          allMatchedIdentifiers.add(k.toLowerCase());
+        }
+
         geneList.getValidGenes().put(searchField, validResults.get(searchField));
       }
     }
 
     // Construct valid and invalid gene matches
     for (val id : originalIds) {
-      if (!allMatchedIdentifiers.contains(id.toUpperCase())) {
+      if (!allMatchedIdentifiers.contains(id.toLowerCase())) {
         geneList.getInvalidGenes().add(id);
       }
     }
