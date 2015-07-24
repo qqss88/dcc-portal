@@ -29,10 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -51,9 +47,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
-@SuppressWarnings("deprecation")
 public class MutationRepository implements Repository {
 
   private static final Type CENTRIC_TYPE = Type.MUTATION_CENTRIC;
@@ -202,10 +201,9 @@ public class MutationRepository implements Repository {
 
     search.setFrom(0)
         .setSize(10000)
-        .addFields(new String[] {
-            "transcript.consequence.aa_mutation",
-            "transcript.functional_impact_prediction_summary"
-        });
+        .addFields(
+            new String[] { "transcript.consequence.aa_mutation", "transcript.functional_impact_prediction_summary"
+            });
 
     log.info("!!! {}", search);
 
