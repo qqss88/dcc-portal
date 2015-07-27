@@ -117,6 +117,11 @@
     });
 
 
+
+  /**
+   * This is the base URL for API requests. We can change this to use API from a different server, this is useful
+   * when only testing the user interface, or to debug production UI issues.
+   */
   module.constant('API', {
     BASE_URL: '/api/v1'
   });
@@ -167,13 +172,7 @@
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
-    // Use to connect to production API regardless of setup
-    // RestangularProvider.setBaseUrl('https://dcc.icgc.org' + API.BASE_URL);
-    // RestangularProvider.setBaseUrl('https://hproxy-dcc.res.oicr.on.ca:54321' + API.BASE_URL);
-    // Use to connect to local API when running UI using JS dev server
-    // RestangularProvider.setBaseUrl('http://localhost:8080' + API.BASE_URL);
-    // Openstack
-    // RestangularProvider.setBaseUrl('http://10.5.74.170:5381' + API.BASE_URL);
+
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 
