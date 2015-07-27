@@ -227,7 +227,7 @@
 
         // Assign projects to controller so it can be rendered in the view
         geneSetProjectPromise.then(function(projects) {
-          _ctrl.geneSet.projects = projects.hits;
+          _ctrl.geneSet.projects = projects.hits || [];
         });
 
         var params = {
@@ -491,6 +491,11 @@
 
       return promise.then(function(data) {
         var ids = _.pluck(data.facets.projectId.terms, 'term');
+
+        if (_.isEmpty(ids)) {
+          return [];
+        }
+
         return Projects.getList({
           filters: {'project': {'id': { 'is': ids}}}
         });
