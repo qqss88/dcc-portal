@@ -17,8 +17,11 @@
  */
 package org.icgc.dcc.portal.pql.convert;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static org.dcc.portal.pql.util.Converters.isString;
 import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR;
 import static org.icgc.dcc.portal.model.IndexModel.Type.GENE;
 import static org.icgc.dcc.portal.model.IndexModel.Type.MUTATION;
@@ -29,6 +32,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.val;
@@ -81,25 +85,66 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
     val type = entry.getKey();
     log.debug("Parsing fields for type '{}'. Fields: {}", type, entry.getValue());
 
-    val typeFields = new ImmutableList.Builder<JqlField>();
+    val typeFieldsBuilder = new ImmutableList.Builder<JqlField>();
     val nodeFields = entry.getValue().fields();
     while (nodeFields.hasNext()) {
-      typeFields.add(parseField(type, nodeFields.next()));
+      val jqlField = parseField(type, nodeFields.next());
+      if (jqlField.isPresent()) {
+        typeFieldsBuilder.add(jqlField.get());
+      }
+
     }
 
-    return singletonMap(type, typeFields.build());
+    val typeFields = typeFieldsBuilder.build();
+
+    return typeFields.isEmpty() ? emptyMap() : singletonMap(type, typeFields);
   }
 
-  private static JqlField parseField(String type, Entry<String, JsonNode> next) {
+  private static Optional<JqlField> parseField(String type, Entry<String, JsonNode> next) {
     val fieldName = next.getKey();
     val fieldValue = next.getValue();
     log.debug("Parsing field {} - {}", fieldName, fieldValue);
 
     if (fieldName.startsWith("has")) {
-      return new JqlField(fieldName, Operation.HAS, parseSingleValue(fieldValue), type);
+      return parseHasOperationField(type, fieldName, fieldValue);
     }
 
-    return new JqlField(fieldName, parseOperation(fieldValue), parseValue(fieldValue), type);
+    val value = parseValue(fieldValue);
+
+    return hasValue(value) ?
+        Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) :
+        Optional.empty();
+  }
+
+  private static Optional<JqlField> parseHasOperationField(String type, String fieldName, JsonNode fieldValue) {
+    val value = parseSingleValue(fieldValue);
+    if (hasValue(value)) {
+      return Optional.of(new JqlField(fieldName, Operation.HAS, value, type));
+    }
+
+    return Optional.empty();
+  }
+
+  private static boolean hasValue(JqlValue value) {
+    return value.isArray() ? hasArrayValue(value) : hasSingleValue(value);
+  }
+
+  private static boolean hasSingleValue(JqlValue value) {
+    val _value = value.get();
+    if (isString(_value) && isNullOrEmpty((String) _value)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private static boolean hasArrayValue(JqlValue value) {
+    val arrayValue = (JqlArrayValue) value;
+    if (arrayValue.get().isEmpty()) {
+      return false;
+    }
+
+    return true;
   }
 
   private static JqlValue parseValue(JsonNode fieldValue) {
