@@ -100,6 +100,12 @@ public class JqlDeserializerTest {
   }
 
   @Test
+  public void removeEmptyFilterValueTest() {
+    assertThat(convert("{donor:{id:{is:[]}}}").getKindValues()).isEmpty();
+    assertThat(convert("{donor:{id:{is:''}}}").getKindValues()).isEmpty();
+  }
+
+  @Test
   public void invalidTypesTest() {
     thrown.expect(IllegalStateException.class);
     thrown.expectMessage("Node has no valid types.");
