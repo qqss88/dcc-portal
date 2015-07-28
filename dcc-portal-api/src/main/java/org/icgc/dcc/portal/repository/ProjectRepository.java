@@ -11,9 +11,6 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponse
 
 import java.util.Map;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -25,9 +22,11 @@ import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
-@SuppressWarnings("deprecation")
 public class ProjectRepository {
 
   private static final String TYPE_ID = Type.PROJECT.getId();

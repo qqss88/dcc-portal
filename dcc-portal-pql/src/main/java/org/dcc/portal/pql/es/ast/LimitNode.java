@@ -19,15 +19,14 @@ package org.dcc.portal.pql.es.ast;
 
 import java.util.Optional;
 
+import org.dcc.portal.pql.es.visitor.NodeVisitor;
+
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 
-import org.dcc.portal.pql.es.visitor.NodeVisitor;
-import org.dcc.portal.pql.query.PqlParseTreeVisitor;
-
 /**
- * Encapsulates {@code from} and {@code size}, because of the requirement that {@link PqlParseTreeVisitor} returns an
+ * Encapsulates {@code from} and {@code size}, because of the requirement that PqlParseTreeVisitor returns an
  * {@link ExpressionNode}
  */
 @Value
