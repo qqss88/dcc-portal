@@ -136,8 +136,6 @@
    * it will be up to the callers to check for state change via watch/observe or other means.
    */
   module.service('PortalFeature', function($state, LocationService) {
-    var _this = this;
-
     var features = {
       REACTOME_VIEWER: false,
       AUTH_TOKEN: false
