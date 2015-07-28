@@ -143,7 +143,7 @@
       $scope.params.openIDUrl = null;
       $scope.params.cudUsername = null;
       $scope.params.cudPassword = null;
-      $scope.params.showCollaboratoryToken = PortalFeature.get('COLLABORATORY_TOKEN');
+      $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
 
 
 
@@ -194,9 +194,9 @@
       // Auth isn't technically a state, so the default state reload in PortalFeature won't work.
       // We get around this by using a watcher instead on the actual var.
       $scope.$watch(function () {
-        return PortalFeature.get('COLLABORATORY_TOKEN');
+        return PortalFeature.get('AUTH_TOKEN');
       }, function() {
-        $scope.params.showCollaboratoryToken = PortalFeature.get('COLLABORATORY_TOKEN');
+        $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
       });
 
       $scope.openTokenManagerPopup = function() {

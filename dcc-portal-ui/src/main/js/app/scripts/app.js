@@ -135,12 +135,42 @@
    * Note: This works automatically for views that are tied to a state, otherwise
    * it will be up to the callers to check for state change via watch/observe or other means.
    */
-  module.service('PortalFeature', function($state) {
+  module.service('PortalFeature', function($state, LocationService) {
+    var _this = this;
 
     var features = {
       REACTOME_VIEWER: false,
-      COLLABORATORY_TOKEN: false
+      AUTH_TOKEN: false
     };
+    function _enable(feature) {
+      if (features.hasOwnProperty(feature) === false) { return; }
+      features[feature] = true;
+      if ($state.current.name) {
+        $state.go($state.current.name, {}, {reload: true});
+      }
+    }
+
+    function _disable(feature) {
+      if (features.hasOwnProperty(feature) === false) { return; }
+      features[feature] = false;
+      if ($state.current.name) {
+        $state.go($state.current.name, {}, {reload: true});
+      }
+    }
+
+    function init() {
+      var enable = LocationService.getParam('enable');
+      if (_.isEmpty(enable)) {
+        return;
+      }
+      enable.split(',').forEach(function(feature) {
+        _enable(feature.trim());
+      });
+    }
+
+    // Allow features to be turned on via query param on application load
+    init();
+
 
     this.get = function(s) {
       if (features.hasOwnProperty(s) === false) { return false; }
@@ -148,20 +178,17 @@
     };
 
     this.enable = function(s) {
-      if (features.hasOwnProperty(s) === false) { return; }
-      features[s] = true;
-      $state.go($state.current.name, {}, {reload: true});
+      _enable(s);
     };
 
     this.disable = function(s) {
-      if (features.hasOwnProperty(s) === false) { return; }
-      features[s] = false;
-      $state.go($state.current.name, {}, {reload: true});
+      _disable(s);
     };
 
     this.list = function() {
       return features;
     };
+
   });
 
 
