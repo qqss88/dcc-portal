@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.service.AuthenticationException;
+import org.icgc.dcc.portal.service.ForbiddenAccessException;
 
 /**
  * Contains helper methods to assist in the authentication process.
@@ -142,6 +143,17 @@ public final class AuthUtils {
    */
   public static void throwRedirectException(@NonNull String userMessage, URI redirect) {
     throwRedirectException(userMessage, userMessage, redirect);
+  }
+
+  /**
+   * Throws an {@link ForbiddenAccessException}.
+   * @param userMessage returned to the user
+   * @param logMessage logged to the log file
+   */
+  public static void throwForbiddenException(String userMessage, String logMessage) {
+    log.warn(logMessage);
+    // entityName field is not used anywhere. Passing an empty string
+    throw new ForbiddenAccessException(userMessage, "");
   }
 
   /**

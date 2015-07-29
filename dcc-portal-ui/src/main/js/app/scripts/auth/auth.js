@@ -134,7 +134,7 @@
   angular.module('icgc.auth.controllers', ['icgc.auth.models']);
 
   angular.module('icgc.auth.controllers').controller('authController',
-    function ($window, $scope, $modal, Auth, CUD, OpenID, $state, $stateParams) {
+    function ($window, $scope, $modal, Auth, CUD, OpenID, $state, $stateParams, PortalFeature) {
 
       $scope.params = {};
       $scope.params.provider = 'icgc';
@@ -143,6 +143,7 @@
       $scope.params.openIDUrl = null;
       $scope.params.cudUsername = null;
       $scope.params.cudPassword = null;
+      $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
 
 
 
@@ -189,6 +190,22 @@
       }
 
       var loginInstance, logoutInstance, authInstance;
+
+      // Auth isn't technically a state, so the default state reload in PortalFeature won't work.
+      // We get around this by using a watcher instead on the actual var.
+      $scope.$watch(function () {
+        return PortalFeature.get('AUTH_TOKEN');
+      }, function() {
+        $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
+      });
+
+      $scope.openTokenManagerPopup = function() {
+        $modal.open({
+          templateUrl: '/scripts/tokens/views/token.manager.html',
+          controller: 'TokenController',
+          size: 'lg'
+        });
+      };
 
       $scope.openLoginPopup = function() {
         loginInstance = $modal.open({
