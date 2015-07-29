@@ -19,17 +19,17 @@ package org.dcc.portal.pql.es.visitor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.query.EsRequestBuilder;
-import org.dcc.portal.pql.query.PqlParseListener;
 import org.dcc.portal.pql.query.QueryContext;
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.junit.Before;
 import org.junit.Test;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DonorScoreQueryTest extends BaseElasticsearchTest {
@@ -41,7 +41,6 @@ public class DonorScoreQueryTest extends BaseElasticsearchTest {
     es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
     visitor = new EsRequestBuilder(es.client());
     queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
-    listener = new PqlParseListener(queryContext);
   }
 
   @Test

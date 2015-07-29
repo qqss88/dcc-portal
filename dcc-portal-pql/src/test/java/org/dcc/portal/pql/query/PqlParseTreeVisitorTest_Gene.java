@@ -27,7 +27,7 @@ import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.junit.Test;
 
-public class PqlParseTreevisitorTest_Gene {
+public class PqlParseTreeVisitorTest_Gene {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new GeneCentricTypeModel());
 

@@ -26,7 +26,7 @@ import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.junit.Test;
 
-public class PqlParseTreevisitorTest_Mutation {
+public class PqlParseTreeVisitorTest_Mutation {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new MutationCentricTypeModel());
 

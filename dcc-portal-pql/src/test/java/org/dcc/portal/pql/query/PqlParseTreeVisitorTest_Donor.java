@@ -29,7 +29,7 @@ import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.junit.Test;
 
-public class PqlParseTreevisitorTest_Donor {
+public class PqlParseTreeVisitorTest_Donor {
 
   private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new DonorCentricTypeModel());
 

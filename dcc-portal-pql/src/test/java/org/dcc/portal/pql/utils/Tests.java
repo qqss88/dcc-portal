@@ -20,13 +20,13 @@ package org.dcc.portal.pql.utils;
 import static java.lang.String.format;
 import static lombok.AccessLevel.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.ast.visitor.Visitors.createEsAstVisitor;
 import static org.dcc.portal.pql.es.utils.ParseTrees.getParser;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+
+import java.util.Optional;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.NestedNode.ScoreMode;
@@ -36,8 +36,15 @@ import org.dcc.portal.pql.es.ast.filter.ShouldBoolNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
 import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.PqlParseListener;
+import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryContext;
+
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
@@ -49,6 +56,16 @@ public class Tests {
     return parser.statement();
   }
 
+  public static ExpressionNode createEsAst(@NonNull String query, QueryContext queryContext) {
+    StatementNode statement = PqlParser.parse(query);
+    Optional<TypeModel> typeModel = Optional.of(queryContext.getTypeModel());
+    ExpressionNode esAst = statement.accept(createEsAstVisitor(), typeModel);
+    log.debug("ES AST: - {}", esAst);
+
+    return esAst;
+  }
+
+  @Deprecated
   public static ExpressionNode createEsAst(@NonNull String query, PqlParseListener listener) {
     val parser = ParseTrees.getParser(query);
     parser.addParseListener(listener);
