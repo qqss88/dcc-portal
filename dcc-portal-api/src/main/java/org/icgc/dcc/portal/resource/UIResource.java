@@ -189,7 +189,7 @@ public class UIResource {
   }
 
   private Boolean isInvalidPathwayId(String id, Object... args) {
-    return isNullOrEmpty(id) || !(id.startsWith("REACT_") && tryParse(id.substring(6)) != null);
+    return isNullOrEmpty(id) || !(id.startsWith("R-HSA-") && tryParse(id.substring(6)) != null);
   }
 
 }
