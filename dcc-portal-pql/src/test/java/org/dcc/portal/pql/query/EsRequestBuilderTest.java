@@ -19,8 +19,6 @@ package org.dcc.portal.pql.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -32,6 +30,9 @@ import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.junit.Before;
 import org.junit.Test;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Contains 3 mutations: MU1, MU2, MU3
@@ -47,7 +48,6 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     es.execute(createIndexMappings(MUTATION_CENTRIC).withData(bulkFile(getClass())));
     visitor = new EsRequestBuilder(es.client());
     queryContext = new QueryContext(INDEX_NAME, MUTATION_CENTRIC);
-    listener = new PqlParseListener(queryContext);
     queryEngine = new QueryEngine(es.client(), INDEX_NAME);
   }
 

@@ -178,6 +178,11 @@ public abstract class TypeModel {
     for (val path : nestedPaths) {
       log.debug("Processing path: {}", path);
       val pathByFullPath = fieldsByFullPath.get(path);
+
+      if (pathByFullPath == null) {
+        throw new SemanticException(format("Search field %s is not available under %s", path, prefix()));
+      }
+
       if (pathByFullPath.isNested()) {
         return true;
       }

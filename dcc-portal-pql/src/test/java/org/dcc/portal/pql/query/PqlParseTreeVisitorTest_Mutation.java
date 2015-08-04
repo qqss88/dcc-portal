@@ -22,14 +22,13 @@ import static org.dcc.portal.pql.utils.Tests.createParseTree;
 import lombok.val;
 
 import org.dcc.portal.pql.es.ast.filter.TermNode;
-import org.dcc.portal.pql.meta.GeneCentricTypeModel;
-import org.dcc.portal.pql.query.PqlParseTreeVisitor;
+import org.dcc.portal.pql.meta.MutationCentricTypeModel;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
 import org.junit.Test;
 
-public class PqlParseTreevisitorTest_Gene {
+public class PqlParseTreeVisitorTest_Mutation {
 
-  private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new GeneCentricTypeModel());
+  private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new MutationCentricTypeModel());
 
   @Test
   public void visitEqualTest() {
@@ -39,31 +38,32 @@ public class PqlParseTreevisitorTest_Gene {
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor._summary._age_at_diagnosis_group");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo(
+        "ssm_occurrence.donor._summary._age_at_diagnosis_group");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(10.1);
   }
 
   @Test
   public void visitEqualTest_gene() {
-    val query = "eq(id, 'T1')";
+    val query = "eq(gene.id, 'T1')";
     val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("_gene_id");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("transcript.gene._gene_id");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
   }
 
   @Test
   public void visitEqualTest_mutation() {
-    val query = "eq(mutation.type, 'T1')";
+    val query = "eq(consequenceType, 'T1')";
     val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor.ssm.mutation_type");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("transcript.consequence.consequence_type");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
   }
 

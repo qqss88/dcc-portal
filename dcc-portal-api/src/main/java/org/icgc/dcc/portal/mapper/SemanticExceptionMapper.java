@@ -15,57 +15,35 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.dcc.portal.pql.query;
+package org.icgc.dcc.portal.mapper;
 
-import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.status;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
-import org.dcc.portal.pql.utils.BaseElasticsearchTest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.junit.Before;
-import org.junit.Test;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
+import org.dcc.portal.pql.exception.SemanticException;
+import org.icgc.dcc.portal.model.Error;
+import org.springframework.stereotype.Component;
 
-@Slf4j
-public class EsRequestBuilderTest_Donor extends BaseElasticsearchTest {
+@Component
+@Provider
+public class SemanticExceptionMapper implements ExceptionMapper<SemanticException> {
 
-  QueryEngine queryEngine;
+  @Override
+  public Response toResponse(SemanticException e) {
+    return status(BAD_REQUEST)
+        .type(APPLICATION_JSON_TYPE)
+        .entity(errorResponse(e))
+        .build();
 
-  @Before
-  public void setUp() {
-    es.execute(createIndexMappings(DONOR_CENTRIC).withData(bulkFile(getClass())));
-    queryContext = new QueryContext(INDEX_NAME, DONOR_CENTRIC);
-    queryEngine = new QueryEngine(es.client(), INDEX_NAME);
   }
 
-  @Test
-  public void geneLocationTest() {
-    val result = executeQuery("in(gene.location,'chr20:31446730-31549006')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO9");
-  }
-
-  @Test
-  public void mutationLocationTest() {
-    val result = executeQuery("in(mutation.location,'chrY:13463924-13463924')");
-    assertTotalHitsCount(result, 1);
-    containsOnlyIds(result, "DO2");
-  }
-
-  @Test
-  public void nonNestedTest() {
-    val result = executeQuery("select(id),facets(gender),eq(gene.chromosome, '2')");
-    containsOnlyIds(result, "DO2", "DO4", "DO8");
-  }
-
-  private SearchResponse executeQuery(String query) {
-    val request = queryEngine.execute(query, DONOR_CENTRIC);
-    log.debug("Request - {}", request);
-    val result = request.getRequestBuilder().execute().actionGet();
-    log.debug("Result - {}", result);
-
-    return result;
+  private Error errorResponse(SemanticException e) {
+    return new Error(BAD_REQUEST, e.getMessage());
   }
 
 }

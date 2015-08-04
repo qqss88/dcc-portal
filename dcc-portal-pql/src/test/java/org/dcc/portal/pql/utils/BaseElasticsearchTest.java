@@ -19,21 +19,15 @@ package org.dcc.portal.pql.utils;
 
 import static com.github.tlrx.elasticsearch.test.EsSetup.createIndex;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.utils.Tests.createEsAst;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.utils.EsAstTransformer;
-import org.dcc.portal.pql.es.utils.ParseTrees;
 import org.dcc.portal.pql.meta.Type;
-import org.dcc.portal.pql.query.PqlParseListener;
 import org.dcc.portal.pql.query.QueryContext;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -51,6 +45,11 @@ import com.github.tlrx.elasticsearch.test.provider.JSONProvider;
 import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 
 public class BaseElasticsearchTest {
 
@@ -81,7 +80,6 @@ public class BaseElasticsearchTest {
   /**
    * Parser's setup
    */
-  protected PqlParseListener listener;
   protected QueryContext queryContext;
   protected EsAstTransformer esAstTransformator = new EsAstTransformer();
 
@@ -173,11 +171,7 @@ public class BaseElasticsearchTest {
   }
 
   protected ExpressionNode createTree(String query) {
-    val parser = ParseTrees.getParser(query);
-    parser.addParseListener(listener);
-    parser.statement();
-
-    return listener.getEsAst();
+    return createEsAst(query, queryContext);
   }
 
   public static void containsOnlyIds(SearchResponse response, String... ids) {

@@ -21,62 +21,50 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.dcc.portal.pql.utils.Tests.createParseTree;
 import lombok.val;
 
-import org.dcc.portal.pql.es.ast.filter.RangeNode;
 import org.dcc.portal.pql.es.ast.filter.TermNode;
-import org.dcc.portal.pql.meta.DonorCentricTypeModel;
+import org.dcc.portal.pql.meta.GeneCentricTypeModel;
 import org.dcc.portal.pql.query.PqlParseTreeVisitor;
 import org.icgc.dcc.portal.pql.antlr4.PqlParser.EqualContext;
-import org.icgc.dcc.portal.pql.antlr4.PqlParser.GreaterEqualContext;
 import org.junit.Test;
 
-public class PqlParseTreevisitorTest_Donor {
+public class PqlParseTreeVisitorTest_Gene {
 
-  private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new DonorCentricTypeModel());
+  private static final PqlParseTreeVisitor VISITOR = new PqlParseTreeVisitor(new GeneCentricTypeModel());
 
   @Test
   public void visitEqualTest() {
-    val query = "eq(ageAtDiagnosis, 10.1)";
+    val query = "eq(donor.ageAtDiagnosisGroup, 10.1)";
     val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor_age_at_diagnosis");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor._summary._age_at_diagnosis_group");
     assertThat(termNode.getValueNode().getValue()).isEqualTo(10.1);
   }
 
   @Test
   public void visitEqualTest_gene() {
-    val query = "eq(gene.id, 'T1')";
+    val query = "eq(id, 'T1')";
     val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("gene._gene_id");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("_gene_id");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
   }
 
   @Test
   public void visitEqualTest_mutation() {
-    val query = "eq(mutation.consequenceType, 'T1')";
+    val query = "eq(mutation.type, 'T1')";
     val parseTree = createParseTree(query);
     val eqContext = (EqualContext) parseTree.getChild(0);
     val termNode = (TermNode) VISITOR.visitEqual(eqContext);
 
     assertThat(termNode.getChildren().size()).isEqualTo(2);
-    assertThat(termNode.getNameNode().getValue()).isEqualTo("gene.ssm.consequence.consequence_type");
+    assertThat(termNode.getNameNode().getValue()).isEqualTo("donor.ssm.mutation_type");
     assertThat(termNode.getValueNode().getValue()).isEqualTo("T1");
-  }
-
-  @Test
-  public void visitGreaterEqualTest_mutation() {
-    val query = "ge(mutation.consequenceType, 'T1')";
-    val parseTree = createParseTree(query);
-    val eqContext = (GreaterEqualContext) parseTree.getChild(0);
-    val termNode = (RangeNode) VISITOR.visitGreaterEqual(eqContext);
-
-    assertThat(termNode.getFieldName()).isEqualTo("gene.ssm.consequence.consequence_type");
   }
 
 }
