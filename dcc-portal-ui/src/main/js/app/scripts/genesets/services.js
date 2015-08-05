@@ -110,6 +110,21 @@
         .get({'pathwayId' : pathwayId},{'Accept':'application/xml'});
     };
 
+    this.getPathwayZoom = function(pathwayId) {
+      return Restangular.one('ui')
+        .one('reactome').one('pathway-sub-diagram')
+        .get({'pathwayId' : pathwayId}, {'Accept':'application/json'});
+    };
+
+    this.getPathwayProteinMap = function(pathwayId, mutationImpacts) {
+      return Restangular.one('ui')
+        .one('reactome').one('protein-map')
+        .get({
+          pathwayId: pathwayId,
+          impactFilter: _.isEmpty(mutationImpacts)? '': mutationImpacts.join(',')
+        });
+    };
+
   });
 
 

@@ -43,7 +43,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      FiltersUtil, ExternalLinks, geneSet, Restangular, PortalFeature) {
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PortalFeature) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -164,70 +164,68 @@
           var pathwayId = _ctrl.uiParentPathways[0].diagramId;
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
-          // get pathway xml
+          // Get pathway XML
           GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
             _ctrl.pathway.xml = xml;
           });
 
-          /*
-          Restangular.one('ui').one('reactome').one('pathway-diagram')
-            .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
-            .then(function(data){
-              _ctrl.pathway.xml = data;
-            }); */
 
-          // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
+          // If the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
           if(pathwayId !== parentPathwayId) {
-            Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
-              .get({'pathwayId' : parentPathwayId},{'Accept':'application/json'})
-              .then(function(data){
+            GeneSetService.getPathwayZoom(parentPathwayId).then(function(data) {
                 _ctrl.pathway.zooms = data;
-              });
+            });
           } else {
             _ctrl.pathway.zooms = [''];
           }
 
-          Restangular.one('ui').one('reactome').one('protein-map')
-            .get({pathwayId:parentPathwayId,
-                  impactFilter:_filter.mutation?_filter.mutation.functionalImpact.is.join(','):''})
-            .then(function(map){
-              var pathwayHighlights = [];
-              _.forEach(map,function(value,id) {
-                if(value && value.dbIds) {
-                  pathwayHighlights.push({
-                    uniprotId:id,
-                    dbIds:value.dbIds.split(','),
-                    value:value.value
-                  });
-                }
-              });
 
+          var mutationImpact = [];
+          if (_filter.mutation && _filter.mutation.functionalImpact) {
+            mutationImpact = _.filter.mutation.functionalImpact.is;
+          }
 
-              // Get ensembl ids for all the genes so we can link to advSearch page
-              Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','),
-                            undefined, {'validationOnly':true})
-                .then(function(data){
-                  _.forEach(pathwayHighlights,function(n){
-                    var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
-                    if(!uniprotObj){
-                      return;
-                    }
-                    var ensemblId = uniprotObj[0].id;
-                    n.advQuery =  LocationService.mergeIntoFilters(
-                      {
-                        gene: {
-                          id:  {is: [ensemblId]},
-                          pathwayId: {is: [parentPathwayId]}
-                        }
-                      });
-                    n.geneSymbol = uniprotObj[0].symbol;
-                    n.geneId = ensemblId;
-                  });
+          GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
+            var pathwayHighlights = [], uniprotIds;
+
+            // Normalize into array
+            _.forEach(map,function(value,id) {
+              if(value && value.dbIds) {
+                pathwayHighlights.push({
+                  uniprotId:id,
+                  dbIds:value.dbIds.split(','),
+                  value:value.value
                 });
-
-              _ctrl.pathway.highlights = pathwayHighlights;
+              }
             });
+
+
+            // Get ensembl ids for all the genes so we can link to advSearch page
+            uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
+            GeneSetVerificationService.verify( uniprotIds.join(',') ).then(function(data) {
+              _.forEach(pathwayHighlights,function(n){
+                var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
+                if(!uniprotObj){
+                  return;
+                }
+                var ensemblId = uniprotObj[0].id;
+                n.advQuery =  LocationService.mergeIntoFilters({
+                  gene: {
+                    id:  {is: [ensemblId]},
+                    pathwayId: {is: [parentPathwayId]}
+                  }
+                });
+                n.geneSymbol = uniprotObj[0].symbol;
+                n.geneId = ensemblId;
+              });
+            });
+
+
+
+            _ctrl.pathway.highlights = pathwayHighlights;
+          });
+
+
         }
 
         // Assign projects to controller so it can be rendered in the view
