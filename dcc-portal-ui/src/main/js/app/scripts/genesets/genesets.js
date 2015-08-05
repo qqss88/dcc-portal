@@ -64,6 +64,7 @@
       // 1) Create embedded search queries
       // 2) Project-donor breakdown
       // 3) Project-gene breakdwon
+      // 4) Build reactome pathways, if applicable
       function refresh() {
         var _filter = LocationService.mergeIntoFilters({gene:geneSetFilter});
         _ctrl.baseAdvQuery = _filter;
