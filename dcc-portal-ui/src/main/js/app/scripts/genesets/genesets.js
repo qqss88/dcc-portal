@@ -183,7 +183,7 @@
 
           var mutationImpact = [];
           if (_filter.mutation && _filter.mutation.functionalImpact) {
-            mutationImpact = _.filter.mutation.functionalImpact.is;
+            mutationImpact = _filter.mutation.functionalImpact.is;
           }
 
           GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
