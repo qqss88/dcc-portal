@@ -114,7 +114,7 @@ public class GeneService {
     }
 
     // Organize the results into the categories
-    // Note it may be possible that a uniprot id can be matched to multiple genes
+    // Note: it may be possible that a uniprot id can be matched to multiple genes
     for (val hit : response.getHits()) {
       val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
@@ -122,9 +122,14 @@ public class GeneService {
 
       // Check which search field got the "hit"
       for (val searchField : GENE_ID_SEARCH_FIELDS.keySet()) {
+
         if (highlightedFields.containsKey(searchField)) {
 
           val field = GENE_ID_SEARCH_FIELDS.get(searchField);
+
+          // Note: it is possible that a gene hit has multiple uniprot ids (TAF9, FAU, to name a few)
+          // Because we need to group by the inpu, we need to figure out which one of the uniprot ids
+          // was in the input identifiers - this requires us to normalize to lower case to make the comparisons
           if (field.equals(GENE_UNIPROT_IDS)) {
             val keys = fields.get(searchField).getValues();
 
@@ -137,7 +142,6 @@ public class GeneService {
             val key = getString(fields.get(searchField).getValues());
             result.get(field).put(key, matchedGene);
           }
-
         }
       }
     }
