@@ -43,7 +43,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular, PortalFeature) {
+      FiltersUtil, ExternalLinks, geneSet, Restangular, PortalFeature) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -71,11 +71,11 @@
         _ctrl.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(geneSet.hierarchy, _ctrl.geneSet);
         _ctrl.uiInferredTree = GeneSetHierarchy.uiInferredTree(geneSet.inferredTree);
 
-        Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
+        GeneSetService.getMutationCounts(_filter).then(function(count) {
           _ctrl.totalMutations = count;
         });
 
-        Genes.handler.one('count').get({filters:_filter}).then(function (count) {
+        GeneSetService.getGeneCounts(_filter).then(function(count) {
           _ctrl.totalGenes = count;
         });
 
@@ -157,7 +157,6 @@
         // 4) if it's a reactome pathway, get diagram
         _ctrl.geneSet.showPathway = PortalFeature.get('REACTOME_VIEWER');
 
-        // FIXME: Disabled until reactome is ready
         if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && _ctrl.geneSet.showPathway) {
           _ctrl.pathway = {};
           _ctrl.geneSet.showPathway = true;
@@ -166,11 +165,16 @@
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
           // get pathway xml
+          GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
+            _ctrl.pathway.xml = xml;
+          });
+
+          /*
           Restangular.one('ui').one('reactome').one('pathway-diagram')
             .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
             .then(function(data){
               _ctrl.pathway.xml = data;
-            });
+            }); */
 
           // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
           if(pathwayId !== parentPathwayId) {
@@ -197,6 +201,7 @@
                   });
                 }
               });
+
 
               // Get ensembl ids for all the genes so we can link to advSearch page
               Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
@@ -230,14 +235,10 @@
           _ctrl.geneSet.projects = projects.hits || [];
         });
 
-        var params = {
-          filters: _filter,
-          size: 0,
-          include: ['facets']
-        };
-        Mutations.getList(params).then(function (d) {
+        GeneSetService.getMutationImpactFacet(_filter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
         });
+
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {

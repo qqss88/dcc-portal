@@ -41,7 +41,7 @@
     };
   });
 
-  module.service('GeneSetService', function(Donors, Mutations, Genes, Projects) {
+  module.service('GeneSetService', function(Donors, Mutations, Genes, Projects, Restangular) {
 
     /**
      * Find out which projects are affected by this gene set, this data is used to generate cancer distribution
@@ -67,6 +67,10 @@
       });
     };
 
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Wrapper functions to make controller cleaner
+    ////////////////////////////////////////////////////////////////////////////////
     this.getProjectMutations = function(ids, filters) {
       return Projects.one(ids).handler.one('mutations', 'counts').get({filters: filters});
     };
@@ -77,6 +81,33 @@
 
     this.getProjectGenes = function(ids, filters) {
       return Projects.one(ids).handler.one('genes', 'counts').get({filters: filters});
+    };
+
+    this.getGeneCounts = function(f) {
+      return Genes.handler.one('count').get({filters: f});
+    };
+
+    this.getMutationCounts = function(f) {
+      return Mutations.handler.one('count').get({filters: f});
+    };
+
+    this.getMutationImpactFacet = function(f) {
+      var params = {
+        filters: f,
+        size: 0,
+        include: ['facets']
+      };
+      return Mutations.getList(params);
+    };
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Reactome pathway only
+    ////////////////////////////////////////////////////////////////////////////////
+    this.getPathwayXML = function(pathwayId) {
+      return Restangular.one('ui')
+        .one('reactome').one('pathway-diagram')
+        .get({'pathwayId' : pathwayId},{'Accept':'application/xml'});
     };
 
   });
