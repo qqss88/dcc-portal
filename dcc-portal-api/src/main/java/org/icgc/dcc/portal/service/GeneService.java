@@ -59,14 +59,50 @@ public class GeneService {
   }
 
   /**
-   * This organizes the search result into a pivoted tabular format, grouped by the input search fields. The first level
-   * keys denote the field it matched on, the second level key denotes the input identifiers. <br>
+   * Check whether <strong>ids</strong> match any gene identifiers.
    * 
-   * For example:<br>
-   * { <br>
-   * _gene_id: {id1:[g1, g2], id2:[g3, g4] } <br>
-   * symbol: {id1:[g1], id2:[g3, g4] } <br>
-   * } <br>
+   * The output is doubly grouped/pivoted. The first level is by the search type, i.e., symbol, id. The second level is
+   * by the input id. In most cases the input id is one-to-one with a specific gene, but there are exceptions.
+   * 
+   * Note here we assume the <strong>ids</strong> are in lower cases <br>
+   * <br>
+   * 
+   * Example repository response: <br>
+   * <ul>
+   * <li>hit1
+   * <ul>
+   * <li>fields: [...]</li>
+   * <li>highlight: [...]</li>
+   * </ul>
+   * </li>
+   * <li>hit2
+   * <ul>
+   * <li>fields: [...]</li>
+   * <li>highlight: [...]</li>
+   * </ul>
+   * </li>
+   * 
+   * </ul>
+   * 
+   * Example output:<br>
+   * <ul>
+   * <li>
+   * symbol:
+   * <ul>
+   * <li>id1: [G1]</li>
+   * <li>id2: [G2]</li>
+   * </ul>
+   * </li>
+   * <li>
+   * uniprot:
+   * <ul>
+   * <li>
+   * id3: [G3, G4]</li>
+   * <li>
+   * id:4: [G5]</li>
+   * </ul>
+   * </li>
+   * </ul>
    */
   public Map<String, Multimap<String, Gene>> validateIdentifiers(List<String> ids) {
     val response = geneRepository.validateIdentifiers(ids);
@@ -78,20 +114,27 @@ public class GeneService {
     }
 
     // Organize the results into the categories
-    // Note it may be possible that a uniprot id can be matched to multiple genes
+    // Note: it may be possible that a uniprot id can be matched to multiple genes
     for (val hit : response.getHits()) {
       val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
       val matchedGene = geneText2Gene(hit);
 
+      // Check which search field got the "hit"
       for (val searchField : GENE_ID_SEARCH_FIELDS.keySet()) {
+
         if (highlightedFields.containsKey(searchField)) {
 
           val field = GENE_ID_SEARCH_FIELDS.get(searchField);
+
+          // Note: it is possible that a gene hit has multiple uniprot ids (TAF9, FAU, to name a few)
+          // Because we need to group by the inpu, we need to figure out which one of the uniprot ids
+          // was in the input identifiers - this requires us to normalize to lower case to make the comparisons
           if (field.equals(GENE_UNIPROT_IDS)) {
             val keys = fields.get(searchField).getValues();
+
             for (val key : keys) {
-              if (ids.contains(key)) {
+              if (ids.contains(key.toString().toLowerCase())) {
                 result.get(field).put(getString(key), matchedGene);
               }
             }
@@ -99,10 +142,10 @@ public class GeneService {
             val key = getString(fields.get(searchField).getValues());
             result.get(field).put(key, matchedGene);
           }
-
         }
       }
     }
+
     return result;
   }
 
