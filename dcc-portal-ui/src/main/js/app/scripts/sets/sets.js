@@ -63,11 +63,13 @@
       if (angular.isDefined($scope.params.setLimit)) {
         params.filters = LocationService.filters();
 
+        /*
         // Make sure we save only completed (state=live) donors
         if (! params.filters.donor) {
           params.filters.donor = {};
         }
         params.filters.donor.state = {is: ['live']};
+        */
 
         sortParam = LocationService.getJsonParam($scope.setType + 's');
 
