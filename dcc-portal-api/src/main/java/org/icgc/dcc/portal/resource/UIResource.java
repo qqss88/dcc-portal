@@ -193,9 +193,9 @@ public class UIResource {
 
   private Boolean isInvalidPathwayId(String id) {
     if (isNullOrEmpty(id)) return true;
-    if (!id.startsWith(REACTOME_PREFIX_OLD) || !id.startsWith(REACTOME_PREFIX)) return false;
+    if (!(id.startsWith(REACTOME_PREFIX_OLD) || id.startsWith(REACTOME_PREFIX))) return true;
 
-    return tryParse(id.substring(6)) != null;
+    return tryParse(id.substring(6)) == null;
 
   }
 }
