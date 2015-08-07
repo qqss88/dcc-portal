@@ -64,12 +64,9 @@
             <div>
                 <strong>Query: </strong>
                 <a href="/search" data-ng-if="!job.filter">All </a>
-                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter && job.hasAdvLink">
+                <a href="/search?filters={{job.filterStr}}" data-ng-if="job.filter">
                     <query-display data-filters="job.uiQueryFilter"></query-display>
                 </a>
-                <span data-ng-if="job.filter && !job.hasAdvLink">
-                    <query-display data-filters="job.uiQueryFilter"></query-display>
-                </span>
             </div>
 
             <div data-ng-show="job.status === 'FAILED'" class="alert-error">
@@ -111,7 +108,7 @@
                     <tr data-ng-repeat="file in job.progress">
                         <td width="80%" valign="middle">
                             <div class="progress" style="height:8px; margin-bottom:0">
-                                <div class="progress-bar text-left" 
+                                <div class="progress-bar text-left"
                                      data-ng-class="{'progress-bar-success':file.completed === 'true'}"
                                      data-ng-style="convertProgress(file.percentage)"></div>
                             </div>
