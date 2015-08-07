@@ -84,6 +84,9 @@ public class UIResource {
   private final DiagramService diagramService;
   private final MutationService mutationService;
 
+  private final String REACTOME_PREFIX = "R-HSA-";
+  private final String REACTOME_PREFIX_OLD = "REACT_";
+
   @Path("/donor-mutations")
   @GET
   public Mutations getDonorMutations(
@@ -188,8 +191,11 @@ public class UIResource {
     return diagramService.getShownPathwaySection(pathwayId);
   }
 
-  private Boolean isInvalidPathwayId(String id, Object... args) {
-    return isNullOrEmpty(id) || !(id.startsWith("R-HSA-") && tryParse(id.substring(6)) != null);
-  }
+  private Boolean isInvalidPathwayId(String id) {
+    if (isNullOrEmpty(id)) return true;
+    if (!id.startsWith(REACTOME_PREFIX_OLD) || !id.startsWith(REACTOME_PREFIX)) return false;
 
+    return tryParse(id.substring(6)) != null;
+
+  }
 }
