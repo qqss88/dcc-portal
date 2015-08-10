@@ -152,18 +152,6 @@
     };
   });
 
-  /*
-  module.filter('typecv', function () {
-    return function (type) {
-      var types = {
-        'gene-centric': 'gene',
-        'mutation-centric': 'mutation',
-        'donor-centric': 'donor'
-      };
-      return types[type];
-    };
-  });
-  */
 
   module.filter('unique', function () {
     return function (items) {
@@ -192,48 +180,6 @@
     };
   });
 
-
-// Join parallel arrays into a single array
-// eg. [ ['a', 'b', 'c'], ['d', 'e', 'f'] ] | joinFields:''  => ['ad', 'be', 'cf']
-/*
-  module.filter('joinFields', function () {
-    return function (items, delim, checkEmpty) {
-      var i, j, list, tempList, joinedItem, hasEmpty;
-
-      list = [];
-
-      // Normalize
-      for (i = 0; i < items.length; i++) {
-        if (!angular.isArray(items[i])) {
-          items[i] = [items[i]];
-        }
-      }
-
-      // Join
-      for (i = 0; i < items[0].length; i++) {
-        tempList = [];
-        hasEmpty = false;
-        for (j = 0; j < items.length; j++) {
-          tempList.push(items[j][i]);
-          if (items[j][i] === '') {
-            hasEmpty = true;
-          }
-        }
-
-        // Skip join if one of the item is empty string
-        if (checkEmpty && checkEmpty === true && hasEmpty === true) {
-          continue;
-        }
-
-        joinedItem = tempList.join(delim).trim();
-        if (joinedItem && joinedItem !== '') {
-          list.push(joinedItem);
-        }
-      }
-      return list;
-    };
-  });
-  */
 
   module.filter('bytes', function () {
     return function (input) {

@@ -39,11 +39,11 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.models', 'icgc.genesets.services']);
+  var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services']);
 
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      Genes, Mutations, FiltersUtil, ExternalLinks, geneSet, Restangular, PortalFeature) {
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PortalFeature) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
       Page.setTitle(geneSet.id);
@@ -64,25 +64,26 @@
       // 1) Create embedded search queries
       // 2) Project-donor breakdown
       // 3) Project-gene breakdwon
+      // 4) Build reactome pathways, if applicable
       function refresh() {
-        var _filter = LocationService.mergeIntoFilters({gene:geneSetFilter});
-        _ctrl.baseAdvQuery = _filter;
+        var mergedGeneSetFilter = LocationService.mergeIntoFilters({gene:geneSetFilter});
+        _ctrl.baseAdvQuery = mergedGeneSetFilter;
 
         _ctrl.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(geneSet.hierarchy, _ctrl.geneSet);
         _ctrl.uiInferredTree = GeneSetHierarchy.uiInferredTree(geneSet.inferredTree);
 
-        Mutations.handler.one('count').get({filters: _filter}).then(function (count) {
+        GeneSetService.getMutationCounts(mergedGeneSetFilter).then(function(count) {
           _ctrl.totalMutations = count;
         });
 
-        Genes.handler.one('count').get({filters:_filter}).then(function (count) {
+        GeneSetService.getGeneCounts(mergedGeneSetFilter).then(function(count) {
           _ctrl.totalGenes = count;
         });
 
 
         // Find out which projects are affected by this gene set, this data is used to generate cancer distribution
         // 1) Find the impacted projects: genesetId -> {projectIds} -> {projects}
-        var geneSetProjectPromise = GeneSetService.getProjects(_filter);
+        var geneSetProjectPromise = GeneSetService.getProjects(mergedGeneSetFilter);
 
 
         // 2) Add mutation counts
@@ -93,7 +94,7 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          mutationPromise = GeneSetService.getProjectMutations(ids, _filter);
+          mutationPromise = GeneSetService.getProjectMutations(ids, mergedGeneSetFilter);
 
           mutationPromise.then(function(projectMutations) {
             projects.hits.forEach(function(proj) {
@@ -116,8 +117,8 @@
 
           ids = _.pluck(projects.hits, 'id');
 
-          donorPromise = GeneSetService.getProjectDonors(ids, _filter);
-          genePromise = GeneSetService.getProjectGenes(ids, _filter);
+          donorPromise = GeneSetService.getProjectDonors(ids, mergedGeneSetFilter);
+          genePromise = GeneSetService.getProjectGenes(ids, mergedGeneSetFilter);
 
           _ctrl.totalDonors = 0;
 
@@ -157,7 +158,6 @@
         // 4) if it's a reactome pathway, get diagram
         _ctrl.geneSet.showPathway = PortalFeature.get('REACTOME_VIEWER');
 
-        // FIXME: Disabled until reactome is ready
         if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && _ctrl.geneSet.showPathway) {
           _ctrl.pathway = {};
           _ctrl.geneSet.showPathway = true;
@@ -165,64 +165,68 @@
           var pathwayId = _ctrl.uiParentPathways[0].diagramId;
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
 
-          // get pathway xml
-          Restangular.one('ui').one('reactome').one('pathway-diagram')
-            .get({'pathwayId' : pathwayId},{'Accept':'application/xml'})
-            .then(function(data){
-              _ctrl.pathway.xml = data;
-            });
+          // Get pathway XML
+          GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
+            _ctrl.pathway.xml = xml;
+          });
 
-          // if the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
+
+          // If the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
           if(pathwayId !== parentPathwayId) {
-            Restangular.one('ui').one('reactome').one('pathway-sub-diagram')
-              .get({'pathwayId' : parentPathwayId},{'Accept':'application/json'})
-              .then(function(data){
+            GeneSetService.getPathwayZoom(parentPathwayId).then(function(data) {
                 _ctrl.pathway.zooms = data;
-              });
+            });
           } else {
             _ctrl.pathway.zooms = [''];
           }
 
-          Restangular.one('ui').one('reactome').one('protein-map')
-            .get({pathwayId:parentPathwayId,
-                  impactFilter:_filter.mutation?_filter.mutation.functionalImpact.is.join(','):''})
-            .then(function(map){
-              var pathwayHighlights = [];
-              _.forEach(map,function(value,id) {
-                if(value && value.dbIds) {
-                  pathwayHighlights.push({
-                    uniprotId:id,
-                    dbIds:value.dbIds.split(','),
-                    value:value.value
-                  });
-                }
-              });
 
-              // Get ensembl ids for all the genes so we can link to advSearch page
-              Restangular.one('genelists').withHttpConfig({transformRequest: angular.identity})
-                .customPOST('geneIds='+_.pluck(pathwayHighlights,'uniprotId').join(','),
-                            undefined, {'validationOnly':true})
-                .then(function(data){
-                  _.forEach(pathwayHighlights,function(n){
-                    var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
-                    if(!uniprotObj){
-                      return;
-                    }
-                    var ensemblId = uniprotObj[0].id;
-                    n.advQuery =  LocationService.mergeIntoFilters(
-                      {
-                        gene: {
-                          id:  {is: [ensemblId]},
-                          pathwayId: {is: [parentPathwayId]}
-                        }
-                      });
-                    n.geneSymbol = uniprotObj[0].symbol;
-                    n.geneId = ensemblId;
-                  });
+          var mutationImpact = [];
+          if (mergedGeneSetFilter.mutation && mergedGeneSetFilter.mutation.functionalImpact) {
+            mutationImpact = mergedGeneSetFilter.mutation.functionalImpact.is;
+          }
+
+          GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
+            var pathwayHighlights = [], uniprotIds;
+
+            // Normalize into array
+            _.forEach(map,function(value,id) {
+              if(value && value.dbIds) {
+                pathwayHighlights.push({
+                  uniprotId:id,
+                  dbIds:value.dbIds.split(','),
+                  value:value.value
                 });
-
-              _ctrl.pathway.highlights = pathwayHighlights;
+              }
             });
+
+
+            // Get ensembl ids for all the genes so we can link to advSearch page
+            uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
+            GeneSetVerificationService.verify( uniprotIds.join(',') ).then(function(data) {
+              _.forEach(pathwayHighlights,function(n){
+                var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
+                if(!uniprotObj){
+                  return;
+                }
+                var ensemblId = uniprotObj[0].id;
+                n.advQuery =  LocationService.mergeIntoFilters({
+                  gene: {
+                    id:  {is: [ensemblId]},
+                    pathwayId: {is: [parentPathwayId]}
+                  }
+                });
+                n.geneSymbol = uniprotObj[0].symbol;
+                n.geneId = ensemblId;
+              });
+            });
+
+
+
+            _ctrl.pathway.highlights = pathwayHighlights;
+          });
+
+
         }
 
         // Assign projects to controller so it can be rendered in the view
@@ -230,14 +234,10 @@
           _ctrl.geneSet.projects = projects.hits || [];
         });
 
-        var params = {
-          filters: _filter,
-          size: 0,
-          include: ['facets']
-        };
-        Mutations.getList(params).then(function (d) {
+        GeneSetService.getMutationImpactFacet(mergedGeneSetFilter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
         });
+
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {
@@ -249,8 +249,9 @@
       refresh();
     });
 
+
   module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
-    var _ctrl = this, _geneSet = '', _filter = {};
+    var _ctrl = this, _geneSet = '', mergedGeneSetFilter = {};
 
     function success(genes) {
       var geneSetQueryType = FiltersUtil.getGeneSetQueryType(_geneSet.type);
@@ -262,7 +263,7 @@
         }
 
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
-          'counts').get({filters: _filter}).then(function (data) {
+          'counts').get({filters: mergedGeneSetFilter}).then(function (data) {
             _ctrl.genes.hits.forEach(function (g) {
 
               var geneFilter = { id:{is:[g.id]}};
@@ -280,9 +281,9 @@
     function refresh() {
       GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
+        mergedGeneSetFilter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Genes.getList({
-          filters: _filter
+          filters: mergedGeneSetFilter
         }).then(success);
       });
     }
@@ -378,7 +379,7 @@
   });
 
   module.controller('GeneSetDonorsCtrl', function ($scope, LocationService, Donors, GeneSets, FiltersUtil) {
-    var _ctrl = this, _geneSet, _filter;
+    var _ctrl = this, _geneSet, mergedGeneSetFilter;
 
 
     function success(donors) {
@@ -394,7 +395,7 @@
         }
 
         Donors.one(_.pluck(_ctrl.donors.hits, 'id').join(',')).handler.one('mutations', 'counts').get({
-          filters: _filter
+          filters: mergedGeneSetFilter
         }).then(function (data) {
           _ctrl.donors.hits.forEach(function (d) {
             d.mutationCount = data[d.id];
@@ -410,8 +411,8 @@
     function refresh() {
       GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
-        Donors.getList({filters: _filter}).then(success);
+        mergedGeneSetFilter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
+        Donors.getList({filters: mergedGeneSetFilter}).then(success);
       });
     }
 
@@ -425,188 +426,3 @@
   });
 })();
 
-(function () {
-  'use strict';
-
-  var module = angular.module('icgc.genesets.models', []);
-
-  module.service('GeneSets', function (Restangular, LocationService, GeneSet) {
-    this.handler = Restangular.all('genesets');
-
-    this.several = function(list) {
-      return Restangular.several('genesets', list);
-    };
-
-    this.getList = function (params) {
-      var defaults = {
-        size: 10,
-        from: 1,
-        filters: LocationService.filters()
-      };
-
-      return this.handler.get('', angular.extend(defaults, params));
-    };
-
-    this.one = function (id) {
-      return id ? GeneSet.init(id) : GeneSet;
-    };
-  });
-
-  module.service('GeneSet', function (Restangular) {
-    var _this = this;
-    this.handler = {};
-
-    this.init = function (id) {
-      this.handler = Restangular.one('genesets', id);
-      return _this;
-    };
-
-    this.get = function (params) {
-      var defaults = {};
-
-      return this.handler.get(angular.extend(defaults, params));
-    };
-  });
-})();
-
-
-(function() {
-  'use strict';
-
-  var module = angular.module('icgc.genesets.services', []);
-
-  module.service('GeneSetService', function(Donors, Mutations, Genes, Projects) {
-
-
-    /**
-     * Find out which projects are affected by this gene set, this data is used to generate cancer distribution
-     */
-    this.getProjects = function(filters) {
-      var promise = Donors.getList({
-        size: 0,
-        from: 1,
-        include: ['facets'],
-        filters: filters
-      });
-
-      return promise.then(function(data) {
-        var ids = _.pluck(data.facets.projectId.terms, 'term');
-
-        if (_.isEmpty(ids)) {
-          return [];
-        }
-
-        return Projects.getList({
-          filters: {'project': {'id': { 'is': ids}}}
-        });
-      });
-    };
-
-    this.getProjectMutations = function(ids, filters) {
-      return Projects.one(ids).handler.one('mutations', 'counts').get({filters: filters});
-    };
-
-    this.getProjectDonors = function(ids, filters) {
-      return Projects.one(ids).handler.one('donors', 'counts').get({filters: filters});
-    };
-
-    this.getProjectGenes = function(ids, filters) {
-      return Projects.one(ids).handler.one('genes', 'counts').get({filters: filters});
-    };
-
-  });
-
-
-  /**
-   * Generate hierarchical structure for gene-ontology
-   * and reactome pathways.
-   */
-  module.service('GeneSetHierarchy', function() {
-
-    /**
-     * Builds an UI friendly inferred tree
-     * A -> [B, C] -> D -> [E, F, G]
-     */
-    function uiInferredTree(inferredTree) {
-      var root = {}, node = root, current = null;
-
-      if (! angular.isDefined(inferredTree) || _.isEmpty(inferredTree) ) {
-        return {};
-      }
-      current = inferredTree[0].level;
-
-      node.goTerms = [];
-      inferredTree.forEach(function(goTerm) {
-        // FIXME: Temporary fix to get around the issue where root level can be 0 and self is also 0
-        if ( (goTerm.level !== current || goTerm.relation === 'self') && !_.isEmpty(node.goTerms)) {
-          current = goTerm.level;
-          node.child = {};
-          node.child .goTerms = [];
-          node = node.child;
-        }
-        node.goTerms.push({
-          name: goTerm.name,
-          id: goTerm.id,
-          relation: goTerm.relation,
-          level: parseInt(goTerm.level, 10)
-        });
-      });
-      return root;
-    }
-
-    // Builds an UI friendly list of parent pathway hierarchies
-    // [ [A->B], [C-D->E->F] ]
-    function uiPathwayHierarchy(parentPathways, geneSet) {
-      var hierarchyList = [];
-      if (! angular.isDefined(parentPathways) || _.isEmpty(parentPathways) ) {
-        return hierarchyList;
-      }
-
-      parentPathways.forEach(function(path) {
-        var root = {}, node = root, diagramId = '';
-
-        // Add all ancestors
-        var geneSetId = geneSet.id;
-
-        path.forEach(function(n, idx) {
-          node.id = n.id;
-          node.name = n.name;
-
-          // FIXME: just make it bool in api?
-          if (n.diagrammed === 'true') {
-            diagramId = node.id;
-          }
-
-          // Has children, swap
-          if (idx < path.length) {
-            node.children = [];
-            node.children.push({});
-            node = node.children[0];
-          }
-        });
-
-        // Lastly, add self
-        node.id = geneSet.id;
-        node.name = geneSet.name;
-
-        if (geneSet.diagrammed === 'true') {
-          diagramId = node.id;
-        }
-
-
-        hierarchyList.push({
-          'root': root,
-          'diagramId': diagramId,
-          'geneSetId': geneSetId
-        });
-      });
-      return hierarchyList;
-    }
-
-
-    this.uiInferredTree = uiInferredTree;
-    this.uiPathwayHierarchy = uiPathwayHierarchy;
-  });
-
-
-})();
