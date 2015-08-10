@@ -205,7 +205,13 @@
             uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
             GeneSetVerificationService.verify( uniprotIds.join(',') ).then(function(data) {
               _.forEach(pathwayHighlights,function(n){
-                var uniprotObj = data.validGenes['external_db_ids.uniprotkb_swissprot'][n.uniprotId];
+
+                var geneKey = 'external_db_ids.uniprotkb_swissprot';
+                if (! data.validGenes[geneKey]) {
+                  return;
+                }
+
+                var uniprotObj = data.validGenes[geneKey][n.uniprotId];
                 if(!uniprotObj){
                   return;
                 }
