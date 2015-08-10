@@ -66,24 +66,24 @@
       // 3) Project-gene breakdwon
       // 4) Build reactome pathways, if applicable
       function refresh() {
-        var _filter = LocationService.mergeIntoFilters({gene:geneSetFilter});
-        _ctrl.baseAdvQuery = _filter;
+        var mergedGeneSetFilter = LocationService.mergeIntoFilters({gene:geneSetFilter});
+        _ctrl.baseAdvQuery = mergedGeneSetFilter;
 
         _ctrl.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(geneSet.hierarchy, _ctrl.geneSet);
         _ctrl.uiInferredTree = GeneSetHierarchy.uiInferredTree(geneSet.inferredTree);
 
-        GeneSetService.getMutationCounts(_filter).then(function(count) {
+        GeneSetService.getMutationCounts(mergedGeneSetFilter).then(function(count) {
           _ctrl.totalMutations = count;
         });
 
-        GeneSetService.getGeneCounts(_filter).then(function(count) {
+        GeneSetService.getGeneCounts(mergedGeneSetFilter).then(function(count) {
           _ctrl.totalGenes = count;
         });
 
 
         // Find out which projects are affected by this gene set, this data is used to generate cancer distribution
         // 1) Find the impacted projects: genesetId -> {projectIds} -> {projects}
-        var geneSetProjectPromise = GeneSetService.getProjects(_filter);
+        var geneSetProjectPromise = GeneSetService.getProjects(mergedGeneSetFilter);
 
 
         // 2) Add mutation counts
@@ -94,7 +94,7 @@
           }
 
           ids = _.pluck(projects.hits, 'id');
-          mutationPromise = GeneSetService.getProjectMutations(ids, _filter);
+          mutationPromise = GeneSetService.getProjectMutations(ids, mergedGeneSetFilter);
 
           mutationPromise.then(function(projectMutations) {
             projects.hits.forEach(function(proj) {
@@ -117,8 +117,8 @@
 
           ids = _.pluck(projects.hits, 'id');
 
-          donorPromise = GeneSetService.getProjectDonors(ids, _filter);
-          genePromise = GeneSetService.getProjectGenes(ids, _filter);
+          donorPromise = GeneSetService.getProjectDonors(ids, mergedGeneSetFilter);
+          genePromise = GeneSetService.getProjectGenes(ids, mergedGeneSetFilter);
 
           _ctrl.totalDonors = 0;
 
@@ -182,8 +182,8 @@
 
 
           var mutationImpact = [];
-          if (_filter.mutation && _filter.mutation.functionalImpact) {
-            mutationImpact = _filter.mutation.functionalImpact.is;
+          if (mergedGeneSetFilter.mutation && mergedGeneSetFilter.mutation.functionalImpact) {
+            mutationImpact = mergedGeneSetFilter.mutation.functionalImpact.is;
           }
 
           GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
@@ -234,7 +234,7 @@
           _ctrl.geneSet.projects = projects.hits || [];
         });
 
-        GeneSetService.getMutationImpactFacet(_filter).then(function(d) {
+        GeneSetService.getMutationImpactFacet(mergedGeneSetFilter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
         });
 
@@ -251,7 +251,7 @@
 
 
   module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
-    var _ctrl = this, _geneSet = '', _filter = {};
+    var _ctrl = this, _geneSet = '', mergedGeneSetFilter = {};
 
     function success(genes) {
       var geneSetQueryType = FiltersUtil.getGeneSetQueryType(_geneSet.type);
@@ -263,7 +263,7 @@
         }
 
         Genes.one(_.pluck(_ctrl.genes.hits, 'id').join(',')).handler.one('mutations',
-          'counts').get({filters: _filter}).then(function (data) {
+          'counts').get({filters: mergedGeneSetFilter}).then(function (data) {
             _ctrl.genes.hits.forEach(function (g) {
 
               var geneFilter = { id:{is:[g.id]}};
@@ -281,9 +281,9 @@
     function refresh() {
       GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
+        mergedGeneSetFilter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
         Genes.getList({
-          filters: _filter
+          filters: mergedGeneSetFilter
         }).then(success);
       });
     }
@@ -379,7 +379,7 @@
   });
 
   module.controller('GeneSetDonorsCtrl', function ($scope, LocationService, Donors, GeneSets, FiltersUtil) {
-    var _ctrl = this, _geneSet, _filter;
+    var _ctrl = this, _geneSet, mergedGeneSetFilter;
 
 
     function success(donors) {
@@ -395,7 +395,7 @@
         }
 
         Donors.one(_.pluck(_ctrl.donors.hits, 'id').join(',')).handler.one('mutations', 'counts').get({
-          filters: _filter
+          filters: mergedGeneSetFilter
         }).then(function (data) {
           _ctrl.donors.hits.forEach(function (d) {
             d.mutationCount = data[d.id];
@@ -411,8 +411,8 @@
     function refresh() {
       GeneSets.one().get().then(function (geneSet) {
         _geneSet = geneSet;
-        _filter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
-        Donors.getList({filters: _filter}).then(success);
+        mergedGeneSetFilter = LocationService.mergeIntoFilters({gene: {geneSetId: {is: [geneSet.id]}}});
+        Donors.getList({filters: mergedGeneSetFilter}).then(success);
       });
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013(c) The Ontario Institute for Cancer Research. All rights reserved.
+ * Copyright 2015(c) The Ontario Institute for Cancer Research. All rights reserved.
  *
  * This program and the accompanying materials are made available under the terms of the GNU Public
  * License v3.0. You should have received a copy of the GNU General Public License along with this
@@ -82,9 +82,9 @@
   ]);
 
   // Fix needed for loading subviews without jumping back to the
-// top of the page:
-// https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
-// modified for our needs
+  // top of the page:
+  // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
+  // modified for our needs
   module
     .value('$anchorScroll', angular.noop)
     .run(function($state, $stateParams, $window, $rootScope) {
@@ -197,7 +197,7 @@
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
 
-    // Combine calls - not working
+    // Combine calls - needs more testing
     // $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
@@ -293,8 +293,6 @@
 
     // Close any modal dialogs on location chagne
     $rootScope.$on('$locationChangeSuccess', function (newVal, oldVal) {
-      // console.log('rootscope location change success', oldVal, newVal);
-      // console.log('modal stack', $modalStack.getTop());
 
       if (oldVal !== newVal && $modalStack.getTop()) {
         $modalStack.dismiss($modalStack.getTop().key);
@@ -305,13 +303,18 @@
   });
 
 
+  /**
+   * This holds the constant values for special fields that do not have a 1-to-1 correspondence with our
+   * underlying data structure.
+   *  ENTITY is mapped to id but references a set of unique identifiers.
+   *  GENE_SET_ROOTS encapsulates the top level gene set information for various types of gene sets.
+   */
   module.constant('Extensions', {
-    GENE_ID: 'id',
 
-    // Donor, mutation or gene lists
+    // Donor, mutation or gene set ids
     ENTITY: 'entitySetId',
 
-    // Order matters, this is in most important to least important
+    // Order matters, this is in most important to least important (For enrichment analysis)
     GENE_SET_ROOTS: [
       {type: 'pathway', id: null, name: 'Reactome Pathways', universe: 'REACTOME_PATHWAYS'},
       {type: 'go_term', id: 'GO:0003674', name: 'GO Molecular Function', universe: 'GO_MOLECULAR_FUNCTION'},
