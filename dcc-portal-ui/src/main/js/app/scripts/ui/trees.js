@@ -1,7 +1,14 @@
 'use strict';
 
-// Cannot use a recursive template, partially because angularJS caps the number of digest cycles
-// to 10. While this can be modified (albeit globally), it may bring other problems...
+
+/**
+ * Renders gene-ontology inferred tree digram and reactome pathway hierarchies.
+ *
+ * Note:
+ * Cannot use a recursive template, partially because angularJS caps the number of digest cycles
+ * to 10. While this can be modified (albeit globally), it may bring other problems...
+ *
+ */
 angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) {
   return {
     restrict: 'E',
