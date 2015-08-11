@@ -72,6 +72,10 @@ angular.module('icgc.ui.fileUpload', []).directive('fileUpload', function($parse
 });
 
 
+/**
+ * Renders a check or "--", this is bit faster than directly manipulationg
+ * the view templates with ng-if's
+ */
 angular.module('app.ui.exists', []).directive('exists', function () {
   return {
     restrict: 'A',
@@ -154,6 +158,9 @@ angular.module('app.ui.nested', []).directive('nested', function ($location) {
 });
 
 
+/**
+ * Breaks down consequences, group by consequence type, then gene, then aa mutations
+ */
 angular.module('app.ui.mutation', []).directive('mutationConsequences', function ($filter, Consequence) {
   return {
     restrict: 'E',
@@ -236,7 +243,10 @@ angular.module('app.ui.mutation', []).directive('mutationConsequences', function
   };
 });
 
-// Used in keyword search, rename - DC
+
+/**
+ * Used in keyword search, should rename - DC
+ */
 angular.module('app.ui.param', []).directive('param', function (LocationService) {
   return {
     restrict: 'A',

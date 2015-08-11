@@ -20,15 +20,6 @@
 
   var module = angular.module('app.common.services', []);
 
-//  module.factory('PCAWG', function() {
-//    return {
-//      isPCAWGStudy: function(term) {
-//        return term === 'PCAWG';
-//      }
-//    };
-//  });
-
-
   module.factory('RestangularNoCache', function(Restangular) {
     return Restangular.withConfig(function(RestangularConfigurer) {
       RestangularConfigurer.setDefaultHttpFields({cache: false});
