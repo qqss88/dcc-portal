@@ -34,10 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
+import org.dcc.portal.pql.exception.SemanticException;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -52,6 +49,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
@@ -111,9 +112,8 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
 
     val value = parseValue(fieldValue);
 
-    return hasValue(value) ?
-        Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) :
-        Optional.empty();
+    return hasValue(value) ? Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) : Optional
+        .empty();
   }
 
   private static Optional<JqlField> parseHasOperationField(String type, String fieldName, JsonNode fieldValue) {
@@ -188,7 +188,7 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
   private static void validateTypes(JsonNode node) {
     val fieldNames = node.fieldNames();
     while (fieldNames.hasNext()) {
-      checkState(VALID_TYPES.contains(fieldNames.next()), "Node has no valid types. %s", node);
+      checkSemantic(VALID_TYPES.contains(fieldNames.next()), "Node has no valid types. %s", node);
     }
   }
 
@@ -206,6 +206,22 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
   private static void checkState(boolean expression, String message) {
     if (!expression) {
       throw new IllegalStateException(message);
+    }
+  }
+
+  /**
+   * Similar to checkState except it throws a SemanticException
+   */
+  private static void checkSemantic(boolean expression, String template, Object... args) {
+    checkSemantic(expression, format(template, args));
+  }
+
+  /**
+   * Similar to checkState except it throws a SemanticException
+   */
+  private static void checkSemantic(boolean expression, String message) {
+    if (!expression) {
+      throw new SemanticException(message);
     }
   }
 
