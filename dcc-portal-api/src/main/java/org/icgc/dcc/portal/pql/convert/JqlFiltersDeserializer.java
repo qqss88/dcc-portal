@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.util.Converters.isString;
@@ -110,10 +109,22 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
       return parseHasOperationField(type, fieldName, fieldValue);
     }
 
-    val value = parseValue(fieldValue);
+    /*
+     * In the case of an empty value "{}", just ignore.
+     */
+    if (!fieldValue.fields().hasNext()) {
+      return Optional.empty();
+    }
 
-    return hasValue(value) ? Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) : Optional
-        .empty();
+    try {
+      val value = parseValue(fieldValue);
+
+      return hasValue(value) ? Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) : Optional
+          .empty();
+    } catch (NullPointerException e) {
+      throw new SemanticException("Invalid input value or structure: %s", fieldValue);
+    }
+
   }
 
   private static Optional<JqlField> parseHasOperationField(String type, String fieldName, JsonNode fieldValue) {
@@ -194,34 +205,17 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
 
   private static void validateOperation(JsonNode fieldValue) {
     log.debug("Validating operation for {}", fieldValue);
-    checkState(fieldValue.size() == 1, "More than one operation detected. %s", fieldValue);
+    checkSemantic(fieldValue.size() == 1, "More than one operation detected. %s", fieldValue);
     val operation = getFirstFieldName(fieldValue);
-    checkState(Operation.operations().contains(operation), "Invalid operation '%s'", operation);
-  }
-
-  private static void checkState(boolean expression, String template, Object... args) {
-    checkState(expression, format(template, args));
-  }
-
-  private static void checkState(boolean expression, String message) {
-    if (!expression) {
-      throw new IllegalStateException(message);
-    }
+    checkSemantic(Operation.operations().contains(operation), "Invalid operation '%s'", operation);
   }
 
   /**
-   * Similar to checkState except it throws a SemanticException
+   * SemanticException thrown to respond with a 400 error to client.
    */
-  private static void checkSemantic(boolean expression, String template, Object... args) {
-    checkSemantic(expression, format(template, args));
-  }
-
-  /**
-   * Similar to checkState except it throws a SemanticException
-   */
-  private static void checkSemantic(boolean expression, String message) {
+  private static void checkSemantic(boolean expression, String message, Object... args) {
     if (!expression) {
-      throw new SemanticException(message);
+      throw new SemanticException(message, args);
     }
   }
 
