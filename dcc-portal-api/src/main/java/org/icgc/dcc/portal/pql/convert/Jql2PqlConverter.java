@@ -22,12 +22,8 @@ import static java.lang.String.format;
 
 import java.util.List;
 
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.builder.PqlBuilders;
+import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.query.PqlParser;
 import org.elasticsearch.search.sort.SortOrder;
@@ -37,6 +33,11 @@ import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.Lists;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Converts JSON-like queries to PQL ones.
@@ -102,7 +103,7 @@ public class Jql2PqlConverter {
       result.append(from > 0 ? format(LIMIT_TEMPLATE, from, size) : format(LIMIT_NO_FROM_TEMPLATE, size));
     }
 
-    // FIXME: implement
+    // FIXME`: implement
     checkState(query.getScore() == null && query.getQuery() == null, "Not implemented");
 
     return result.toString();
@@ -119,7 +120,12 @@ public class Jql2PqlConverter {
     val root = PqlBuilders.count().build();
     if (query.getFilters().elements().hasNext()) {
       log.debug(" +++ {}", query.getFilters());
-      root.setFilters(pqlNode.getFilters());
+      val curFilters = pqlNode.getFilters();
+      if (curFilters != null) {
+        root.setFilters(curFilters);
+      } else {
+        throw new SemanticException("Filter contains an invalid value: %s", query.getFilters());
+      }
     }
 
     log.debug("Converted count PQL query: {}", root.toString());
@@ -156,9 +162,7 @@ public class Jql2PqlConverter {
   }
 
   private static String parseSort(String field, SortOrder order) {
-    return order == SortOrder.ASC ?
-        format(SORT_TEMPLATE, ASC_SORT, field) :
-        format(SORT_TEMPLATE, DESC_SORT, field);
+    return order == SortOrder.ASC ? format(SORT_TEMPLATE, ASC_SORT, field) : format(SORT_TEMPLATE, DESC_SORT, field);
   }
 
   private static String parseFields(List<String> fields) {
