@@ -19,7 +19,7 @@ package org.icgc.dcc.portal.mapper;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static javax.ws.rs.core.Response.status;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.util.Random;
 
@@ -28,19 +28,19 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.ElasticsearchException;
 import org.icgc.dcc.portal.model.Error;
 import org.springframework.stereotype.Component;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 @Provider
 public class ElasticSearchExceptionMapper implements ExceptionMapper<ElasticsearchException> {
 
-  private final static Status STATUS = BAD_REQUEST;
+  private final static Status STATUS = INTERNAL_SERVER_ERROR;
   private static final Random RANDOM = new Random();
 
   @Override
