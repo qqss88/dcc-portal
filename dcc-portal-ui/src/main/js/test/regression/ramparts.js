@@ -118,7 +118,6 @@ function discovery(selector) {
   if (selector) {
     count = document.querySelectorAll(selector)[0].textContent;
     count = count.replace(/\n/, '').replace(/\s+/, '').replace(/,/g, '');
-    //count = parseInt(count, 10);
   }
 
   console.log('Found ', activeTerms.length, ' active terms, ', inactiveTerms.length, ' inactive terms, ', links.length + ' links');
@@ -144,8 +143,6 @@ function validateInnerText(route, innerText) {
 
       function validate(result) {
         var identical = result.innerText === innerText;
-        //console.log('first', innerText);
-        //console.log('second', result.innerText);
         console.log('*** Check page content is identical ... ', identical?'OK':'ERROR');
         ph.exit();
       }
@@ -249,31 +246,6 @@ function _getSelector(href) {
   }
   return selector;
 }
-
-
-/*
-function _getSelector(href) {
-  var selector = '';
-  if (href.indexOf('/search') >= 0) {
-    selector = '.t_tabs__tab__donor small';
-    if (href.indexOf('/search/m') >= 0)  {
-      selector = '.t_tabs__tab__mutation small';
-    } else if (href.indexOf('/search/g') >= 0) {
-      selector = '.t_tabs__tab__gene small';
-    }
-  } else if (href.indexOf('/projects/details') >= 0) {
-    selector = ".t_table_top strong";
-  } else if (href.indexOf('/projects/history') >= 0) {
-    selector = ".t_table_top strong";
-  } else if (href.indexOf('/projects/summary') >= 0) {
-    selector = ".t_table_top strong";
-  } else if (href.indexOf('/projects') >= 0) {
-    selector = ".t_table_top strong";
-  }
-  return selector;
-}
-*/
-
 
 
 function validateLink(href, value) {
