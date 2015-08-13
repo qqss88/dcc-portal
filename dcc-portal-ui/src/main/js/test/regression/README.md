@@ -45,6 +45,24 @@ At this moment (August 2015), the phantomJS binaries (1.9x and 2.0x) from npm ha
 https://github.com/eugene1g/phantomjs/releases
 
 
+Sample output
+---
+Checking home page
+
+```
+$ node ./ramparts.js https://dcc.icgc.org https://dcc.icgc.org /
+
+Running https://dcc.icgc.org https://dcc.icgc.org / 1
+waiting to process https://dcc.icgc.org/
+evaluating...
+Running cross validation: https://dcc.icgc.org/
+/search/m 16459160 16459160 		 OK
+/search 12979 12979 		 OK
+/projects/details 55 55 		 OK
+*** Check page content is identical ...  OK
+/search/g?filters={"donor":{"availableDataTypes":{"is":["ssm"]}}} 57543 57543 		 OK
+```
+
 
 Caveats
 ---
