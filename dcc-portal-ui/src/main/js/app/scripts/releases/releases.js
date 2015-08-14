@@ -23,7 +23,7 @@
   module.config(function ($stateProvider) {
     $stateProvider.state('home', {
       url: '/',
-      templateUrl: 'views/home.html',
+      templateUrl: '/scripts/releases/views/home.html',
       controller: 'ReleaseCtrl as ReleaseCtrl',
       resolve: {
         release: ['Releases', function (Releases) {
