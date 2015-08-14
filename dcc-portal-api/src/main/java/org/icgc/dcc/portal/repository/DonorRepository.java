@@ -55,11 +55,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -70,6 +65,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -94,6 +90,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 @SuppressWarnings("deprecation")
@@ -101,6 +102,20 @@ public class DonorRepository implements Repository {
 
   private static final Type TYPE = Type.DONOR;
   private static final Kind KIND = Kind.DONOR;
+
+  public static final Map<String, String> DONOR_ID_SEARCH_FIELDS =
+      ImmutableMap.<String, String> of("id.search", "_donor_id",
+          "submittedId.search", "submittedId",
+          "specimenIds.search", "specimenIds",
+          "sampleIds.search", "sampleIds");
+
+  public static final Map<String, String> FILE_DONOR_ID_SEARCH_FIELDS =
+      ImmutableMap.<String, String> of(
+          "tcga_participant_barcode.search", "tcga_participant_barcode",
+          "tcga_sample_barcode.search", "tcga_sample_barcode",
+          "tcga_aliquot_barcode.search", "tcga_aliquot_barcode",
+          "submitted_specimen_id.search", "submitted_specimen_id",
+          "submitted_sample_id.search", "submitted_sample_id");
 
   private static final class PhenotypeFacetNames {
 
@@ -145,6 +160,7 @@ public class DonorRepository implements Repository {
 
   private final Client client;
   private final String index;
+  private final String fileIndex = "icgc-repository";
   private final QueryEngine queryEngine;
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
@@ -212,8 +228,8 @@ public class DonorRepository implements Repository {
       final Map<String, Facet> facetMap, final Optional<SimpleImmutableEntry<String, String>> statsFacetConfigMap) {
     val termFacetList = buildTermFacetList(termsFacet, getBaselineTermsFacetsOfPhenotype());
 
-    val mean = wantsStatistics(statsFacetConfigMap) ?
-        getMeanFromTermsStatsFacet(facetMap.get(statsFacetConfigMap.get().getKey())) : null;
+    val mean = wantsStatistics(statsFacetConfigMap) ? getMeanFromTermsStatsFacet(
+        facetMap.get(statsFacetConfigMap.get().getKey())) : null;
     val summary = new Statistics(termsFacet.getTotalCount(), termsFacet.getMissingCount(), mean);
 
     return new EntitySetTermFacet(entitySetId, termFacetList, summary);
@@ -483,4 +499,45 @@ public class DonorRepository implements Repository {
 
     return donorIds;
   }
+
+  public SearchResponse validateIdentifiersDonorText(List<String> input) {
+    val boolQuery = QueryBuilders.boolQuery();
+
+    val search = client.prepareSearch(index)
+        .setTypes("donor-text")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setSize(5000);
+
+    for (val searchField : DONOR_ID_SEARCH_FIELDS.keySet()) {
+      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
+      search.addHighlightedField(searchField);
+      search.addField(searchField);
+    }
+    search.setQuery(boolQuery);
+    log.info("Search is {}", search);
+
+    val response = search.execute().actionGet();
+    return response;
+  }
+
+  public SearchResponse validateIdentifiersFileDoner(List<String> input) {
+    val boolQuery = QueryBuilders.boolQuery();
+
+    val search = client.prepareSearch(fileIndex)
+        .setTypes("file-donor-text")
+        .setSearchType(QUERY_THEN_FETCH)
+        .setSize(5000);
+
+    for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
+      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
+      search.addHighlightedField(searchField);
+      search.addField(searchField);
+    }
+    search.setQuery(boolQuery);
+    log.info("Search is {}", search);
+
+    val response = search.execute().actionGet();
+    return response;
+  }
+
 }

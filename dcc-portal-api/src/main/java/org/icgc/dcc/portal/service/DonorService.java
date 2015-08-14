@@ -3,7 +3,10 @@ package org.icgc.dcc.portal.service;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
+import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
+import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
@@ -23,6 +26,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -34,10 +38,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvMapWriter;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
 import lombok.Cleanup;
@@ -69,6 +75,74 @@ public class DonorService {
     donors.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return donors;
+  }
+
+  /**
+   * Convert result from gene-text to a gene model
+   */
+  private Donor donorText2Donor(SearchHit hit) {
+    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
+    Map<String, Object> donorMap = Maps.newHashMap();
+    for (val key : fieldMap.keySet()) {
+      donorMap.put(DONOR_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+    }
+    return new Donor(donorMap);
+  }
+
+  public Map<String, Multimap<String, Donor>> validateIdentifiersDonorText(List<String> ids) {
+    val response = donorRepository.validateIdentifiersDonorText(ids);
+    val result = Maps.<String, Multimap<String, Donor>> newHashMap();
+
+    for (val search : DONOR_ID_SEARCH_FIELDS.values()) {
+      val typeResult = ArrayListMultimap.<String, Donor> create();
+      result.put(search, typeResult);
+    }
+
+    for (val hit : response.getHits()) {
+      val fields = hit.getFields();
+      val highlightedFields = hit.getHighlightFields();
+      val matchedDonor = donorText2Donor(hit);
+
+      for (val searchField : DONOR_ID_SEARCH_FIELDS.keySet()) {
+
+        if (highlightedFields.containsKey(searchField)) {
+          val field = DONOR_ID_SEARCH_FIELDS.get(searchField);
+          val key = getString(fields.get(searchField).getValues());
+          result.get(field).put(key, matchedDonor);
+        }
+
+      }
+    }
+
+    return result;
+  }
+
+  public Map<String, Multimap<String, Donor>> validateIdentifiersFileDoner(List<String> ids) {
+    val response = donorRepository.validateIdentifiersFileDoner(ids);
+    val result = Maps.<String, Multimap<String, Donor>> newHashMap();
+
+    for (val search : FILE_DONOR_ID_SEARCH_FIELDS.values()) {
+      val typeResult = ArrayListMultimap.<String, Donor> create();
+      result.put(search, typeResult);
+    }
+
+    for (val hit : response.getHits()) {
+      val fields = hit.getFields();
+      val highlightedFields = hit.getHighlightFields();
+      val matchedDonor = donorText2Donor(hit);
+
+      for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
+
+        if (highlightedFields.containsKey(searchField)) {
+          val field = FILE_DONOR_ID_SEARCH_FIELDS.get(searchField);
+          val key = getString(fields.get(searchField).getValues());
+          result.get(field).put(key, matchedDonor);
+        }
+
+      }
+    }
+
+    return result;
   }
 
   public Donors findAllCentric(Query query) {
