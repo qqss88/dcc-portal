@@ -380,16 +380,17 @@ public class IndexModel {
           .put("name", "name")
           .put("releasedOn", "date")
           .put("donorCount", "donor_count")
+          .put("liveDonorCount", "live_donor_count")
           .put("mutationCount", "mutation_count")
           .put("sampleCount", "sample_count")
           .put("projectCount", "project_count")
+          .put("liveProjectCount", "live_project_count")
           .put("specimenCount", "specimen_count")
           .put("ssmCount", "ssm_count")
           .put("primarySiteCount", "primary_site_count")
+          .put("livePrimarySiteCount", "live_primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
-          .put("liveDonorCount", "live_donor_count")
-          .put("liveProjectCount", "live_project_count")
           .build();
 
   private static final ImmutableMap<String, String> DIAGRAM_FIELDS_MAPPING =
@@ -481,7 +482,7 @@ public class IndexModel {
    * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("ontology", "ontology") .put("altIds", "alt_ids") .put("synonyms", "synonyms") .put("inferredTree",
    * "inferred_tree") .build();
-   * 
+   *
    * private static final ImmutableMap<String, String> PATHWAY_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("hierarchy", "hierarchy") .build();
    */

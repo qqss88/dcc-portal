@@ -66,7 +66,7 @@
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
-    function ($q, $scope, $state, ProjectState, Page, Projects,
+    function ($q, $scope, $state, $filter, ProjectState, Page, Projects,
                HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
@@ -137,12 +137,21 @@
 	   return list.sort(function(a, b) { return b.total - a.total; });
     }
 
+    _ctrl.donutChartSubTitle = function () {
+      var formatNumber = $filter ('number');
+      var subtitle = '' + formatNumber (_ctrl.totalDonors) + ' Unique Donors';
+      var projects = _.get (_ctrl, 'projects.hits', undefined);
+
+      return _.isArray (projects) ?
+        subtitle + ' across ' + formatNumber (projects.length) + ' projects' :
+        subtitle;
+    };
 
     function success(data) {
+
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
-        _ctrl.projects = data;
         _ctrl.projectIds = _.pluck(data.hits, 'id');
 
         data.hits.forEach(function (p) {
@@ -153,6 +162,8 @@
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
+        _ctrl.projects = data;
+
         _ctrl.donut = HighchartsService.donut({
           data: data.hits,
           type: 'project',
@@ -161,7 +172,7 @@
           countBy: 'totalDonorCount'
         });
 
-        _ctrl.stacked = [];
+        // _ctrl.stacked = [];
 
 
         // Get project-donor-mutation distribution of exon impacted ssm
@@ -172,14 +183,13 @@
         });
 
 
-
-
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
           }).then(function (genes) {
             if ( !genes.hits || genes.hits.length === 0) {
+              _ctrl.stacked = [];
               Page.stopWork();
               return;
             }
@@ -213,6 +223,7 @@
 
                 gene.uiFIProjects = uiFIProjects;
               });
+
               _ctrl.stacked = transform(genes.hits);
             });
           });

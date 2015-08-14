@@ -18,6 +18,10 @@
   'use strict';
   var module = angular.module('icgc.visualization.stackedbar', []);
 
+  function ensureArray (a) {
+    return _.isArray (a) ? a : [];
+  }
+
   module.directive('stacked', function ($location, HighchartsService, $window) {
     return {
       restrict: 'E',
@@ -29,8 +33,8 @@
         subtitle: '@',
         yLabel: '@'
       },
-      template:'<div><div class="text-center graph_title">{{title}}</div>'+
-        '<div class="stackedsubtitle text-center">{{subtitle}} </div></div>',
+      template: '<div><div class="text-center graph_title"> {{title}} </div>' +
+        '<div class="stackedsubtitle text-center"> {{subtitle}} </div></div>',
       link: function ($scope, $element) {
         var chart, config;
 
@@ -76,19 +80,29 @@
         };
 
         $scope.$watch('items', function (newValue) {
-          if (newValue && typeof $scope.items[0] !== 'undefined') {
-            if (!chart) {
-              chart = new dcc.StackedBarChart(config);
-            }
-
-            // Adaptive margin based on char length of labels
-            var max = _.max(_.pluck( $scope.items, 'key').map(function(d) { return d.length; }));
-            if (max >= 10) {
-              config.margin.bottom += 25;
-            }
-
-            chart.render($element[0], $scope.items);
+          if (! chart) {
+            chart = new dcc.StackedBarChart (config);
           }
+
+          if (_.isEmpty (ensureArray (newValue))) {
+            if (chart) {
+              // FIXME: this displaysNoResultMessage() probably shouldn't be a method for the stackedbar class.
+              // But due to some dependencies and time, this should suffice for now.
+              // Will refactor this along with other improvements I wanted to make.
+              chart.displaysNoResultMessage ($element[0]);
+            }
+            return;
+          }
+
+          // Adaptive margin based on char length of labels
+          var max = _.max (
+            _.pluck (newValue, 'key').map (_.property ('length')));
+
+          if (max >= 10) {
+            config.margin.bottom += 25;
+          }
+
+          chart.render ($element[0], newValue);
         }, true);
 
         $scope.$on('$destroy', function () {

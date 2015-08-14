@@ -113,7 +113,9 @@
 <tbody>
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
-    <td style="white-space: nowrap"><a data-ui-sref="project({id:project.id})">{{project.id}}</a></td>
+    <td style="white-space: nowrap" data-ng-style="project.state === 'pending' ? {'border-left': 'solid red'} : {}">
+        <a data-ui-sref="project({id:project.id})">{{project.id}}</a>
+    </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
     <td>{{::project.primaryCountries.join(', ')}}</td>
