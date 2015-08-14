@@ -117,12 +117,6 @@
         data.isTransient = params.isTransient;
       }
 
-      /*
-      data.name = encodeURIComponent(params.name);
-      if (angular.isDefined(params.description)) {
-        data.description = encodeURIComponent(params.description);
-      } */
-
       // Set default sort values if necessary
       if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
         if (type === 'donor') {
@@ -291,8 +285,6 @@
       });
     };
 
-
-    // FIXME: Add cached version
     this.getMetaData = function( ids ) {
       return RestangularNoCache.several('entityset/sets', ids).get('', {});
     };

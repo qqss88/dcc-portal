@@ -110,11 +110,7 @@
       }
     }
 
-    // Scale function - FIXME: need to find max
-    // this.colours = ['#B8D0DE', '#9FC2D6', '#86B4CF', '#73A2BD', '#6792AB'];
-    this.colours = ['rgb(241,238,246)','rgb(189,201,225)','rgb(116,169,207)','rgb(43,140,190)','rgb(4,90,141)'];
-    this.colours = ['rgb(158,202,225)','rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)','rgb(8,69,148)'];
-
+    // Scale function
     this.colours = ['rgb(242,242,242)'];
     this.ramp = d3.scale.linear().domain([0, this.max]).range([0, this.colours.length-1]);
     this.getColourBySetIds = function() {
@@ -567,16 +563,10 @@
         config.mouseoverFunc(d);
       })
       .on('mouseout', function(d) {
-        //if (d.selected === false) {
         d3.select(this).style('fill', d.selected? config.selectColour : _this.getColourBySetIds());
-        //}
         config.mouseoutFunc(d);
       })
       .on('click', function(d) {
-        /*
-        d.selected = !d.selected;
-        _this.toggleHighlight(d.data, d.selected);
-        */
         config.clickFunc(d);
       });
 
