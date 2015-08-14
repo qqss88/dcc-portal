@@ -511,6 +511,8 @@ public class DonorRepository implements Repository {
     for (val searchField : DONOR_ID_SEARCH_FIELDS.keySet()) {
       boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
       search.addHighlightedField(searchField);
+      search.setHighlighterPreTags("");
+      search.setHighlighterPostTags("");
       search.addField(searchField);
     }
     search.setQuery(boolQuery);
@@ -531,6 +533,8 @@ public class DonorRepository implements Repository {
     for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
       boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
       search.addHighlightedField(searchField);
+      search.setHighlighterPreTags("");
+      search.setHighlighterPostTags("");
       search.addField(searchField);
     }
     search.setQuery(boolQuery);

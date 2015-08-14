@@ -6,7 +6,6 @@ import static java.util.Collections.sort;
 import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
-import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.icgc.dcc.portal.util.SearchResponses.getCounts;
 import static org.icgc.dcc.portal.util.SearchResponses.getNestedCounts;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
@@ -78,13 +77,26 @@ public class DonorService {
   }
 
   /**
-   * Convert result from gene-text to a gene model
+   * Convert result from donor-text to a donor model
    */
   private Donor donorText2Donor(SearchHit hit) {
     val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
     Map<String, Object> donorMap = Maps.newHashMap();
     for (val key : fieldMap.keySet()) {
       donorMap.put(DONOR_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
+    }
+    return new Donor(donorMap);
+  }
+
+  /**
+   * Convert result from file-donor-text to a donor model
+   */
+  private Donor fileDonorText2Donor(SearchHit hit) {
+    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
+    Map<String, Object> donorMap = Maps.newHashMap();
+    donorMap.put("_donor_id", hit.getId());
+    for (val key : fieldMap.keySet()) {
+      donorMap.put(FILE_DONOR_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
     }
     return new Donor(donorMap);
   }
@@ -107,7 +119,7 @@ public class DonorService {
 
         if (highlightedFields.containsKey(searchField)) {
           val field = DONOR_ID_SEARCH_FIELDS.get(searchField);
-          val key = getString(fields.get(searchField).getValues());
+          val key = highlightedFields.get(searchField).getFragments()[0].toString();
           result.get(field).put(key, matchedDonor);
         }
 
@@ -129,13 +141,13 @@ public class DonorService {
     for (val hit : response.getHits()) {
       val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
-      val matchedDonor = donorText2Donor(hit);
+      val matchedDonor = fileDonorText2Donor(hit);
 
       for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
 
         if (highlightedFields.containsKey(searchField)) {
           val field = FILE_DONOR_ID_SEARCH_FIELDS.get(searchField);
-          val key = getString(fields.get(searchField).getValues());
+          val key = highlightedFields.get(searchField).getFragments()[0].toString();
           result.get(field).put(key, matchedDonor);
         }
 
