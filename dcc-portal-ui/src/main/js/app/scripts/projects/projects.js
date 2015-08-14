@@ -607,14 +607,8 @@
       };
 
 
-      // Sanitize filters, we want to enforce project.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      /*
-      if (! liveFilters.filters.project) {
-        liveFilters.filters.project = {};
-      }
-      liveFilters.filters.project.state = { is: ['live']};
-      */
+
       return this.all().get('', liveFilters).then(function (data) {
 
         if (data.hasOwnProperty('facets') &&
@@ -670,14 +664,7 @@
         from: 1
       };
 
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      /*
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
-      */
 
       return this.handler.one('donors', '').get(liveFilters);
     };

@@ -267,14 +267,7 @@
         filters: LocationService.filters()
       };
 
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      /*
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
-      */
 
       return this.handler.one('', '').get(liveFilters).then(function (data) {
         if (data.hasOwnProperty('facets')) {
