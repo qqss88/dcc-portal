@@ -78,6 +78,8 @@ public class DonorService {
 
   /**
    * Convert result from donor-text to a donor model
+   * @param hit Takes the matched hit from elasticsearch
+   * @return A Donor object constructed from the hit.
    */
   private Donor donorText2Donor(SearchHit hit) {
     val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
@@ -90,6 +92,8 @@ public class DonorService {
 
   /**
    * Convert result from file-donor-text to a donor model
+   * @param hit Takes the matched hit from elasticsearch
+   * @return A Donor object constructed from the hit.
    */
   private Donor fileDonorText2Donor(SearchHit hit) {
     val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
@@ -101,6 +105,13 @@ public class DonorService {
     return new Donor(donorMap);
   }
 
+  /**
+   * Matches donors based on fields provided for the donor-text type.
+   * 
+   * @param ids List of ids as strings
+   * @return A Map keyed on search fields from donor-text with values being a multimap containing the matched field as
+   * the key and the matched donor as the value.
+   */
   public Map<String, Multimap<String, Donor>> validateIdentifiersDonorText(List<String> ids) {
     val response = donorRepository.validateIdentifiersDonorText(ids);
     val result = Maps.<String, Multimap<String, Donor>> newHashMap();
@@ -111,7 +122,6 @@ public class DonorService {
     }
 
     for (val hit : response.getHits()) {
-      val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
       val matchedDonor = donorText2Donor(hit);
 
@@ -129,6 +139,13 @@ public class DonorService {
     return result;
   }
 
+  /**
+   * Matches donors based on fields provided for the file-donor-text type.
+   * 
+   * @param ids List of ids as strings
+   * @return A Map keyed on search fields from file-donor-text with values being a multimap containing the matched field
+   * as the key and the matched donor as the value.
+   */
   public Map<String, Multimap<String, Donor>> validateIdentifiersFileDoner(List<String> ids) {
     val response = donorRepository.validateIdentifiersFileDoner(ids);
     val result = Maps.<String, Multimap<String, Donor>> newHashMap();
@@ -139,7 +156,6 @@ public class DonorService {
     }
 
     for (val hit : response.getHits()) {
-      val fields = hit.getFields();
       val highlightedFields = hit.getHighlightFields();
       val matchedDonor = fileDonorText2Donor(hit);
 

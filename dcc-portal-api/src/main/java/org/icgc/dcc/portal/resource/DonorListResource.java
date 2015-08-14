@@ -81,13 +81,18 @@ public class DonorListResource {
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Produces(APPLICATION_JSON)
-
   @Timed
-  public UploadedDonorList processGeneList(
+  public UploadedDonorList processDonorList(
       @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
       @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly) {
 
     val result = findDonorsByIdentifiers(donorIds);
+
+    if (validationOnly) {
+      return result;
+    } // otherwise we will need to store
+
+    // TODO: Saving the donor set as well as handling for external repository case.
 
     return result;
   }
@@ -102,7 +107,7 @@ public class DonorListResource {
     if (originalIds.size() > MAX_DONOR_LIST_SIZE) {
       log.info("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
       donorList.getWarnings().add(
-          String.format("Input data exceeds maximum threshold of %s gene identifiers.", MAX_DONOR_LIST_SIZE));
+          String.format("Input data exceeds maximum threshold of %s donor identifiers.", MAX_DONOR_LIST_SIZE));
       return donorList;
     }
 
@@ -110,34 +115,34 @@ public class DonorListResource {
       matchIds.add(id.toLowerCase());
     }
 
-    val validResults1 = donorService.validateIdentifiersDonorText(matchIds.build());
-    log.debug("Search results {}", validResults1);
+    val donorTextResults = donorService.validateIdentifiersDonorText(matchIds.build());
+    log.debug("Search results {}", donorTextResults);
 
     // All matched identifiers
     val allMatchedIdentifiers = Sets.<String> newHashSet();
     for (val searchField : DonorRepository.DONOR_ID_SEARCH_FIELDS.values()) {
-      if (!validResults1.get(searchField).isEmpty()) {
+      if (!donorTextResults.get(searchField).isEmpty()) {
 
         // Case doesn't matter
-        for (val k : validResults1.get(searchField).keySet()) {
+        for (val k : donorTextResults.get(searchField).keySet()) {
           allMatchedIdentifiers.add(k.toLowerCase());
         }
 
-        donorList.getValidDonors().put(searchField, validResults1.get(searchField));
+        donorList.getValidDonors().put(searchField, donorTextResults.get(searchField));
       }
     }
 
-    val validResults2 = donorService.validateIdentifiersFileDoner(matchIds.build());
-
+    val fileDonorTextResults = donorService.validateIdentifiersFileDoner(matchIds.build());
+    log.debug("Search results {}", fileDonorTextResults);
     for (val searchField : DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS.values()) {
-      if (!validResults2.get(searchField).isEmpty()) {
+      if (!fileDonorTextResults.get(searchField).isEmpty()) {
 
         // Case doesn't matter
-        for (val k : validResults2.get(searchField).keySet()) {
+        for (val k : fileDonorTextResults.get(searchField).keySet()) {
           allMatchedIdentifiers.add(k.toLowerCase());
         }
 
-        donorList.getValidDonors().put(searchField, validResults2.get(searchField));
+        donorList.getValidDonors().put(searchField, fileDonorTextResults.get(searchField));
       }
     }
 
