@@ -36,6 +36,7 @@
       template: '<div><div class="text-center graph_title"> {{title}} </div>' +
         '<div class="stackedsubtitle text-center"> {{subtitle}} </div></div>',
       link: function ($scope, $element) {
+        var isInitialized = false;
         var chart, config;
 
         config = {
@@ -85,7 +86,7 @@
           }
 
           if (_.isEmpty (ensureArray (newValue))) {
-            if (chart) {
+            if (chart && isInitialized) {
               // FIXME: this displaysNoResultMessage() probably shouldn't be a method for the stackedbar class.
               // But due to some dependencies and time, this should suffice for now.
               // Will refactor this along with other improvements I wanted to make.
@@ -93,6 +94,9 @@
             }
             return;
           }
+
+          // FIXME: Again, this is a band-aid solution for now.
+          isInitialized = true;
 
           // Adaptive margin based on char length of labels
           var max = _.max (

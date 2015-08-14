@@ -1,5 +1,4 @@
 
-<section>
 <span data-ng-init="predicate='totalDonorCount'"></span>
 <span data-ng-init="reverse=true"></span>
 
@@ -113,8 +112,13 @@
 <tbody>
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
-    <td style="white-space: nowrap" data-ng-style="project.state === 'pending' ? {'border-left': 'solid red'} : {}">
-        <a data-ui-sref="project({id:project.id})">{{project.id}}</a>
+    <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
+        <a data-ui-sref="project({id:project.id})">
+            <span ng-if="! isPendingProject">{{project.id}}</span>
+            <abbr ng-if="isPendingProject" data-tooltip="Project with pending donors only" data-tooltip-placement="top">
+                {{project.id}}
+            </abbr>
+        </a>
     </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
@@ -294,4 +298,3 @@
     </tr>
     </tbody>
 </table>
-</section>
