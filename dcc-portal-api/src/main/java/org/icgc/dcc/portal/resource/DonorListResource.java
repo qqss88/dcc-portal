@@ -20,6 +20,9 @@ package org.icgc.dcc.portal.resource;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
@@ -31,6 +34,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.UploadedDonorList;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.service.DonorService;
@@ -39,6 +43,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
@@ -62,9 +69,19 @@ public class DonorListResource {
   private final static Pattern DONOR_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_DONOR_LIST_SIZE = 1000;
 
+  private final static Set<String> ICDC_COL_TYPES =
+      ImmutableSet.<String> of(
+          "_donor_id",
+          "specimenIds",
+          "sampleIds");
+
+  private final static String ICDC_COL = "icdc";
+  private final static String SUBMITTER_COL = "submitter";
+
   @POST
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Produces(APPLICATION_JSON)
+
   @Timed
   public UploadedDonorList processGeneList(
       @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
@@ -124,14 +141,74 @@ public class DonorListResource {
       }
     }
 
-    // Construct valid and invalid gene matches
+    // Construct valid and invalid donor matches
     for (val id : originalIds) {
       if (!allMatchedIdentifiers.contains(id.toLowerCase())) {
         donorList.getInvalidDonors().add(id);
       }
     }
 
+    donorList.setPivotTable(pivotDonorList(donorList.getValidDonors()));
     return donorList;
+  }
+
+  private Map<String, Map<String, Set<String>>> pivotDonorList(Map<String, Multimap<String, Donor>> validDonors) {
+    Map<String, Map<String, Set<String>>> pivotedMap = Maps.<String, Map<String, Set<String>>> newHashMap();
+
+    // iterate across all field types that matched
+    for (val searchType : validDonors.entrySet()) {
+      val key = searchType.getKey();
+      val value = searchType.getValue();
+
+      // check if it belongs in the ICDC column
+      if (ICDC_COL_TYPES.contains(key)) {
+
+        val matchedIds = value.keySet();
+
+        for (val id : matchedIds) {
+          val donors = value.get(id); // this returns a collection but almost surely of size 1
+          for (val donor : donors) {
+
+            if (pivotedMap.containsKey(donor.getId())) { // donor occured already
+              pivotedMap.get(donor.getId()).get(ICDC_COL).add(id);
+            } else { // donor has not occured yet
+              val colMap = Maps.<String, Set<String>> newHashMap();
+              colMap.put(ICDC_COL, new HashSet<String>());
+              colMap.put(SUBMITTER_COL, new HashSet<String>());
+              colMap.get(ICDC_COL).add(id);
+              pivotedMap.put(donor.getId(), colMap);
+            }
+
+          }
+        }
+
+      } else { // otherwise belongs in the submitter column
+
+        val matchedIds = value.keySet();
+
+        for (val id : matchedIds) {
+          val donors = value.get(id); // this returns a collection but almost surely of size 1
+          for (val donor : donors) {
+
+            if (pivotedMap.containsKey(donor.getId())) { // donor occured already
+              pivotedMap.get(donor.getId()).get(SUBMITTER_COL).add(id);
+            } else { // donor has not occured yet
+              val colMap = Maps.<String, Set<String>> newHashMap();
+              colMap.put(ICDC_COL, new HashSet<String>());
+              colMap.put(SUBMITTER_COL, new HashSet<String>());
+              colMap.get(SUBMITTER_COL).add(id);
+              pivotedMap.put(donor.getId(), colMap);
+            }
+
+          }
+        }
+
+      }
+
+    }
+
+    return pivotedMap;
+
   }
 
 }

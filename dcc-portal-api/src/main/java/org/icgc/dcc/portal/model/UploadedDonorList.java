@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -35,6 +36,9 @@ public class UploadedDonorList {
 
   @JsonProperty
   Map<String, Multimap<String, Donor>> validDonors = Maps.<String, Multimap<String, Donor>> newHashMap();
+
+  @JsonProperty
+  Map<String, Map<String, Set<String>>> pivotTable = Maps.<String, Map<String, Set<String>>> newHashMap();
 
   @JsonProperty
   List<String> invalidDonors = Lists.newArrayList();
