@@ -129,14 +129,43 @@
 
 
   /**
-   * Generate hierarchical structure for gene-ontology
-   * and reactome pathways.
+   * Generate hierarchical structure for gene-ontology and reactome pathways.
+   * This is for displaying on the user interface
    */
   module.service('GeneSetHierarchy', function() {
 
     /**
-     * Builds an UI friendly inferred tree
-     * A -> [B, C] -> D -> [E, F, G]
+     * Converts the inferred tree from a list oriented structure to a tree-like structure for UI display
+     *
+     * Input is a flattened list of inferred tree nodes sorted by level
+     *   [
+     *     { level: 0, name ... },
+     *     { level: 1, name ... },
+     *     { level: 1, name ... },
+     *     { level: 1, name ... },
+     *     { level: 2, name ... },
+     *     { level: 3, name ... },
+     *     { level: 3, name ... }
+     *   ]
+     *
+     * Ouptut is a tree-like structure organized by level
+     *  {
+     *    level: 0
+     *    goTerms: ...
+     *    child: {
+     *      level: 1
+     *      goTerms: ...
+     *      child: {
+     *        level: 2
+     *        goTerms: ...
+     *        child: {
+     *          level: 3
+     *          goTerms: ...
+     *        }
+     *      }
+     *    }
+     *  }
+     *
      */
     function uiInferredTree(inferredTree) {
       var root = {}, node = root, current = null;
@@ -165,15 +194,30 @@
       return root;
     }
 
-    // Builds an UI friendly list of parent pathway hierarchies
-    // [ [A->B], [C-D->E->F] ]
-    function uiPathwayHierarchy(parentPathways, geneSet) {
+
+    /**
+     * Convert reactome pathway hierarchy from a list oriented structure to a tree-like structure for UI display
+     *
+     * Input is a list of lists of pathways, something like
+     *   [
+     *     [R-HSA-1, R-HSA-2, R-HSA-3, R-HSA-self],
+     *     [R-HSA-4, R-HSA-5, R-HSA-self],
+     *     ...
+     *   ]
+     *
+     * Output is a list of trees, where each tree describe a pathway hierarchy
+     *   [
+     *      { R-HSA-1 : { R-HSA-2: { R-HSA-3: {R-HSA-self}} } },
+     *      { R-HSA-4 : { R-HSA-5: { R-HSA-self}} }
+     *   ]
+     */
+    function uiPathwayHierarchy(hierarchy, geneSet) {
       var hierarchyList = [];
-      if (! angular.isDefined(parentPathways) || _.isEmpty(parentPathways) ) {
+      if (! angular.isDefined(hierarchy) || _.isEmpty(hierarchy) ) {
         return hierarchyList;
       }
 
-      parentPathways.forEach(function(path) {
+      hierarchy.forEach(function(path) {
         var root = {}, node = root, diagramId = '';
 
         // Add all ancestors
@@ -189,20 +233,12 @@
           }
 
           // Has children, swap
-          if (idx < path.length) {
+          if (idx < path.length-1) {
             node.children = [];
             node.children.push({});
             node = node.children[0];
           }
         });
-
-        // Lastly, add self
-        node.id = geneSet.id;
-        node.name = geneSet.name;
-
-        if (geneSet.diagrammed === 'true') {
-          diagramId = node.id;
-        }
 
 
         hierarchyList.push({

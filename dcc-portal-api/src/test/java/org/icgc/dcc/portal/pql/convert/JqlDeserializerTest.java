@@ -18,10 +18,8 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.exception.SemanticException;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
 import org.icgc.dcc.portal.pql.convert.model.Operation;
@@ -32,6 +30,10 @@ import org.junit.rules.ExpectedException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.Iterables;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JqlDeserializerTest {
@@ -107,7 +109,7 @@ public class JqlDeserializerTest {
 
   @Test
   public void invalidTypesTest() {
-    thrown.expect(IllegalStateException.class);
+    thrown.expect(SemanticException.class);
     thrown.expectMessage("Node has no valid types.");
 
     convert("{test:1}");

@@ -76,8 +76,25 @@
 
 
     /**
-     * Generate ui display table for matched genes, and compute
-     * summary statistics
+     * Generate UI display table for matched genes, and compute summary statistics.
+     * This will pivot the valid genes (organized by search type) and group it by
+     * gene symbols.
+     *
+     * Input:
+     *   {
+     *      _gene_id: { k1: g1, k2: g2 ....},
+     *      symbol: { k3: g3, k4: g4 ...},
+     *      external_db_ids.uniprotkb_swissprot: { k5: g5, k6: g6 }
+     *   }
+     *
+     * Output:
+     *   {
+     *      symbol1: { _gene_id: [...], symbol: [...], external_db_ids.uniprotkb_swissprot: [...] },
+     *      symbol2: { _gene_id: [...], symbol: [...], external_db_ids.uniprotkb_swissprot: [...] },
+     *      symbol3: { _gene_id: [...], symbol: [...], external_db_ids.uniprotkb_swissprot: [...] }
+     *      ...
+     *   }
+     *
      */
     this.formatResult = function(verifyResult) {
       var uiResult = {}, uniqueEnsemblMap = {}, totalInputCount = 0;
@@ -125,6 +142,7 @@
           totalInputCount ++;
         });
       });
+
 
       return {
         uiResult: uiResult,

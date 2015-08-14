@@ -18,7 +18,6 @@
 package org.icgc.dcc.portal.pql.convert;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.util.Converters.isString;
@@ -34,10 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
+import org.dcc.portal.pql.exception.SemanticException;
 import org.icgc.dcc.portal.pql.convert.model.JqlArrayValue;
 import org.icgc.dcc.portal.pql.convert.model.JqlField;
 import org.icgc.dcc.portal.pql.convert.model.JqlFilters;
@@ -52,6 +48,10 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
@@ -109,11 +109,22 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
       return parseHasOperationField(type, fieldName, fieldValue);
     }
 
-    val value = parseValue(fieldValue);
+    /*
+     * In the case of an empty value "{}", just ignore.
+     */
+    if (!fieldValue.fields().hasNext()) {
+      return Optional.empty();
+    }
 
-    return hasValue(value) ?
-        Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) :
-        Optional.empty();
+    try {
+      val value = parseValue(fieldValue);
+
+      return hasValue(value) ? Optional.of(new JqlField(fieldName, parseOperation(fieldValue), value, type)) : Optional
+          .empty();
+    } catch (NullPointerException e) {
+      throw new SemanticException("Invalid input value or structure: %s", fieldValue);
+    }
+
   }
 
   private static Optional<JqlField> parseHasOperationField(String type, String fieldName, JsonNode fieldValue) {
@@ -188,24 +199,23 @@ public class JqlFiltersDeserializer extends JsonDeserializer<JqlFilters> {
   private static void validateTypes(JsonNode node) {
     val fieldNames = node.fieldNames();
     while (fieldNames.hasNext()) {
-      checkState(VALID_TYPES.contains(fieldNames.next()), "Node has no valid types. %s", node);
+      checkSemantic(VALID_TYPES.contains(fieldNames.next()), "Node has no valid types. %s", node);
     }
   }
 
   private static void validateOperation(JsonNode fieldValue) {
     log.debug("Validating operation for {}", fieldValue);
-    checkState(fieldValue.size() == 1, "More than one operation detected. %s", fieldValue);
+    checkSemantic(fieldValue.size() == 1, "More than one operation detected. %s", fieldValue);
     val operation = getFirstFieldName(fieldValue);
-    checkState(Operation.operations().contains(operation), "Invalid operation '%s'", operation);
+    checkSemantic(Operation.operations().contains(operation), "Invalid operation '%s'", operation);
   }
 
-  private static void checkState(boolean expression, String template, Object... args) {
-    checkState(expression, format(template, args));
-  }
-
-  private static void checkState(boolean expression, String message) {
+  /**
+   * SemanticException thrown to respond with a 400 error to client.
+   */
+  private static void checkSemantic(boolean expression, String message, Object... args) {
     if (!expression) {
-      throw new IllegalStateException(message);
+      throw new SemanticException(message, args);
     }
   }
 

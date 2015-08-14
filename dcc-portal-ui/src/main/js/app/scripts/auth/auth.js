@@ -251,7 +251,7 @@
 
       $scope.tryLogin = function () {
         $scope.connecting = true;
-        // if ($scope.params.provider === 'icgc') {
+
         if ( ['icgc', 'google'].indexOf($scope.params.provider) >= 0) {
           CUD.login( $scope.params.provider );
         } else {
@@ -278,19 +278,13 @@
   angular.module('icgc.auth.directives', ['icgc.auth.controllers']);
 
 
-  // angular.module('icgc.auth.directives').directive('login', function ($compile) {
   angular.module('icgc.auth.directives').directive('login', function () {
     return {
       restrict: 'E',
       replace: true,
       transclude: true,
       templateUrl: '/scripts/auth/views/login.html',
-      controller: 'authController',
-      link: function () {
-        // element.after($compile('<login-popup></login-popup>')(scope));
-        // element.after($compile('<logout-popup></logout-popup>')(scope));
-        // element.after($compile('<auth-popup></auth-popup>')(scope));
-      }
+      controller: 'authController'
     };
   });
 
