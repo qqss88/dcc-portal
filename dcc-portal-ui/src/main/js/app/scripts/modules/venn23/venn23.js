@@ -126,9 +126,11 @@
   Venn23.prototype.render2 = function() {
     var _this = this;
     var config = _this.config;
-    // var cy = 0.5 * config.chartHeight;
+
+    // Just to position the set nicely
     var cy = 0.3 * config.chartHeight;
     var cx = 0.5 * config.chartWidth;
+
     var svg = _this.svg;
     var defs = svg.append('svg:defs');
     var radius = 100;
@@ -262,7 +264,8 @@
   Venn23.prototype.render3 = function() {
     var _this = this;
     var config = _this.config;
-    // var cy = 0.5 * config.chartHeight;
+
+    // Just to position the set nicely
     var cy = 0.4 * config.chartHeight;
     var cx = 0.5 * config.chartWidth;
     var svg = _this.svg;

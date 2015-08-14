@@ -50,7 +50,6 @@
             <tr data-ng-repeat="r in results.hits" data-ng-switch="r.type" class="t_quick__hit">
                 <td class="t_quick__hit__type">
                     <span class="t_badge t_badge__{{ ['pathway', 'go_term', 'curated_set'].indexOf(r.type) >= 0?'geneset':r.type }}"></span>
-                    <!--<span data-ng-class="'t_badge t_badge__'+r.type"></span>-->
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="file">
                     <a href="/repository/files/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery"></a>
