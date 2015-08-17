@@ -26,22 +26,18 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 
 import lombok.Data;
 
 @Data
 @JsonInclude(Include.NON_NULL)
-public class UploadedDonorList {
+public class UploadedDonorSet {
 
   @JsonProperty
-  Map<String, Multimap<String, Donor>> validDonors = Maps.<String, Multimap<String, Donor>> newHashMap();
+  Map<String, Map<String, Set<String>>> donorSet = Maps.<String, Map<String, Set<String>>> newHashMap();
 
   @JsonProperty
-  Map<String, Map<String, Set<String>>> pivotTable = Maps.<String, Map<String, Set<String>>> newHashMap();
-
-  @JsonProperty
-  List<String> invalidDonors = Lists.newArrayList();
+  List<String> invalidIds = Lists.newArrayList();
 
   @JsonProperty
   List<String> warnings = Lists.<String> newArrayList();

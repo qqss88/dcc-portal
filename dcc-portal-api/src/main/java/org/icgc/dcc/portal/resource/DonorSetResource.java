@@ -35,7 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.icgc.dcc.portal.model.Donor;
-import org.icgc.dcc.portal.model.UploadedDonorList;
+import org.icgc.dcc.portal.model.UploadedDonorSet;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.UserDonorListService;
@@ -58,10 +58,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@Path("/v1/donorlists")
+@Path("/v1/donorsets")
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
-public class DonorListResource {
+public class DonorSetResource {
 
   @NonNull
   private final UserDonorListService userDonorListService;
@@ -86,7 +86,7 @@ public class DonorListResource {
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Produces(APPLICATION_JSON)
   @Timed
-  public UploadedDonorList processDonorList(
+  public UploadedDonorSet processDonorSet(
       @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
       @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly) {
 
@@ -97,7 +97,7 @@ public class DonorListResource {
     } // otherwise we will need to store
 
     // uniqueIds are provided by the keyset of the pivoted table.
-    Set<String> uniqueIds = result.getPivotTable().keySet();
+    Set<String> uniqueIds = result.getDonorSet().keySet();
 
     // Sanity check, we require at least one valid id in order to store
     if (uniqueIds.size() == 0) {
@@ -114,12 +114,13 @@ public class DonorListResource {
 
   }
 
-  private UploadedDonorList findDonorsByIdentifiers(String data) {
-    val donorList = new UploadedDonorList();
+  private UploadedDonorSet findDonorsByIdentifiers(String data) {
+    val donorList = new UploadedDonorSet();
 
     val splitter = Splitter.on(DONOR_DELIMITERS).omitEmptyStrings();
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
     val matchIds = ImmutableList.<String> builder();
+    val validIds = Maps.<String, Multimap<String, Donor>> newHashMap();
 
     if (originalIds.size() > MAX_DONOR_LIST_SIZE) {
       log.info("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
@@ -145,7 +146,7 @@ public class DonorListResource {
           allMatchedIdentifiers.add(k.toLowerCase());
         }
 
-        donorList.getValidDonors().put(searchField, donorTextResults.get(searchField));
+        validIds.put(searchField, donorTextResults.get(searchField));
       }
     }
 
@@ -159,18 +160,18 @@ public class DonorListResource {
           allMatchedIdentifiers.add(k.toLowerCase());
         }
 
-        donorList.getValidDonors().put(searchField, fileDonorTextResults.get(searchField));
+        validIds.put(searchField, fileDonorTextResults.get(searchField));
       }
     }
 
     // Construct valid and invalid donor matches
     for (val id : originalIds) {
       if (!allMatchedIdentifiers.contains(id.toLowerCase())) {
-        donorList.getInvalidDonors().add(id);
+        donorList.getInvalidIds().add(id);
       }
     }
 
-    donorList.setPivotTable(pivotDonorList(donorList.getValidDonors()));
+    donorList.setDonorSet(pivotDonorList(validIds));
     return donorList;
   }
 
