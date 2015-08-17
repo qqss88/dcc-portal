@@ -4,7 +4,7 @@
 
 <div class="t_table_top" style="padding:0;margin: 0">
     Showing <strong id="projects-project-count">{{ ProjectsCtrl.projects.hits.length }}</strong> projects
-    <span data-toolbar data-dl="projects"></span>
+    <span data-toolbar data-dl="projects" ng-if="ProjectsCtrl.projects.hits.length > 0"></span>
 </div>
 <table class="table table-bordered table-striped">
 <thead>

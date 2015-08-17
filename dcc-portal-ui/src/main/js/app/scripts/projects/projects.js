@@ -147,6 +147,10 @@
         subtitle;
     };
 
+    function noHitsIn (results) {
+      return 0 === _.get (results, 'hits.length', 0);
+    }
+
     function success(data) {
 
       if (data.hasOwnProperty('hits')) {
@@ -174,7 +178,6 @@
 
         // _ctrl.stacked = [];
 
-
         // Get project-donor-mutation distribution of exon impacted ssm
         Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
@@ -182,13 +185,18 @@
           _ctrl.distribution = data;
         });
 
+        if (noHitsIn (data)) {
+          _ctrl.stacked = [];
+          Page.stopWork();
+          return;
+        }
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
           }).then(function (genes) {
-            if ( !genes.hits || genes.hits.length === 0) {
+            if (noHitsIn (genes)) {
               _ctrl.stacked = [];
               Page.stopWork();
               return;
