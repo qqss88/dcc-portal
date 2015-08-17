@@ -14,17 +14,27 @@
       .remove();
   }
 
-	/* Create the stacked bar chart using d3 */
-	var StackedBarChart = function (config) {
+  function getViewport (config, data) {
+    // Adaptive margin based on char length of labels
+    var lengthThreshold = 9;
+    var extra = 25;
+    var max = _.max (
+      _.pluck (data, 'key').map (_.property ('length')));
+    var extraHeight = (max > lengthThreshold) ? extra : 0;
+
     var margin = config.margin;
 
-    this.config = config;
-    this.viewport = {
+    return {
       x: 0,
       y: 0,
       width: config.width + margin.left + margin.right,
-      height: config.height + margin.top + margin.bottom
+      height: config.height + margin.top + margin.bottom + extraHeight
     };
+  }
+
+	/* Create the stacked bar chart using d3 */
+	var StackedBarChart = function (config) {
+    this.config = config;
 	};
 
   /**
@@ -51,7 +61,9 @@
 		this.element = element;
     this.data = data;
 
-		var config = this.config;
+    var config = this.config;
+    var margin = config.margin;
+    var viewport = getViewport (config, data);
 
 		// the scale for the x axis
 		var x = d3.scale.ordinal()
@@ -63,7 +75,7 @@
 
     var colors = config.colours;
 		// creates a colour scale to turn the project id into its project colour
-		var colour = d3.scale.ordinal()
+		var getColor = d3.scale.ordinal()
 		  .domain (d3.keys (colors))
 		  .range (d3.values (colors));
 
@@ -75,9 +87,6 @@
 		    .scale(y)
 		    .orient('left')
         .ticks (config.yaxis.ticks);
-
-    var margin = config.margin;
-    var viewport = this.viewport;
 
     removeContentElement (element);
 
@@ -163,7 +172,7 @@
       .append('rect')
       .classed('stack', true)
       .style ('fill', function (d, i) {
-        var fillColor = colour (d.colourKey);
+        var fillColor = getColor (d.colourKey);
 
         return config.alternateBrightness ?
           d3.rgb (fillColor).brighter (i%2 * 0.3) :
@@ -205,9 +214,10 @@
   };
 
   StackedBarChart.prototype.displaysNoResultMessage = function (element, message) {
-    message = _.isString (message) ? message : 'No mutations found';
-    var width = this.viewport.width + 'px';
-    var height = this.viewport.height + 'px';
+    message = _.isString (message) ? message : '';
+    var viewport = getViewport (this.config, this.data);
+    var width = viewport.width + 'px';
+    var height = viewport.height + 'px';
 
     removeContentElement (element);
 

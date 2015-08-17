@@ -90,21 +90,13 @@
               // FIXME: this displaysNoResultMessage() probably shouldn't be a method for the stackedbar class.
               // But due to some dependencies and time, this should suffice for now.
               // Will refactor this along with other improvements I wanted to make.
-              chart.displaysNoResultMessage ($element[0]);
+              chart.displaysNoResultMessage ($element[0], 'No mutations found');
             }
             return;
           }
 
           // FIXME: Again, this is a band-aid solution for now.
           isInitialized = true;
-
-          // Adaptive margin based on char length of labels
-          var max = _.max (
-            _.pluck (newValue, 'key').map (_.property ('length')));
-
-          if (max >= 10) {
-            config.margin.bottom += 25;
-          }
 
           chart.render ($element[0], newValue);
         }, true);
