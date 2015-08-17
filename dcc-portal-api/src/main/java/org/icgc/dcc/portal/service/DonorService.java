@@ -106,65 +106,36 @@ public class DonorService {
   }
 
   /**
-   * Matches donors based on fields provided for the donor-text type.
+   * Matches donors based on the ids provided.
    * 
    * @param ids List of ids as strings
-   * @return A Map keyed on search fields from donor-text with values being a multimap containing the matched field as
-   * the key and the matched donor as the value.
+   * @param False - donor-text, True - file-donor-text
+   * @return A Map keyed on search fields from file-donor-text or donor-text with values being a multimap containing the
+   * matched field as the key and the matched donor as the value.
    */
-  public Map<String, Multimap<String, Donor>> validateIdentifiersDonorText(List<String> ids) {
-    val response = donorRepository.validateIdentifiersDonorText(ids);
+  public Map<String, Multimap<String, Donor>> validateIdentifiers(List<String> ids, Boolean file) {
+    val response = donorRepository.validateIdentifiers(ids, file);
     val result = Maps.<String, Multimap<String, Donor>> newHashMap();
 
-    for (val search : DONOR_ID_SEARCH_FIELDS.values()) {
+    // which fields are we searching against?
+    val fields = file ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+
+    for (val search : fields.values()) {
       val typeResult = ArrayListMultimap.<String, Donor> create();
       result.put(search, typeResult);
     }
 
     for (val hit : response.getHits()) {
       val highlightedFields = hit.getHighlightFields();
-      val matchedDonor = donorText2Donor(hit);
 
-      for (val searchField : DONOR_ID_SEARCH_FIELDS.keySet()) {
+      // donors from donor-text and file-donor-text are constructed differently
+      val matchedDonor = file ? fileDonorText2Donor(hit) : donorText2Donor(hit);
 
+      for (val searchField : fields.keySet()) {
+
+        // find out which matched by looking at the highlighted field fragments
         if (highlightedFields.containsKey(searchField)) {
-          val field = DONOR_ID_SEARCH_FIELDS.get(searchField);
-          val keys = highlightedFields.get(searchField).getFragments();
-          for (val key : keys) {
-            result.get(field).put(key.toString(), matchedDonor);
-          }
-        }
-
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Matches donors based on fields provided for the file-donor-text type.
-   * 
-   * @param ids List of ids as strings
-   * @return A Map keyed on search fields from file-donor-text with values being a multimap containing the matched field
-   * as the key and the matched donor as the value.
-   */
-  public Map<String, Multimap<String, Donor>> validateIdentifiersFileDoner(List<String> ids) {
-    val response = donorRepository.validateIdentifiersFileDoner(ids);
-    val result = Maps.<String, Multimap<String, Donor>> newHashMap();
-
-    for (val search : FILE_DONOR_ID_SEARCH_FIELDS.values()) {
-      val typeResult = ArrayListMultimap.<String, Donor> create();
-      result.put(search, typeResult);
-    }
-
-    for (val hit : response.getHits()) {
-      val highlightedFields = hit.getHighlightFields();
-      val matchedDonor = fileDonorText2Donor(hit);
-
-      for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
-
-        if (highlightedFields.containsKey(searchField)) {
-          val field = FILE_DONOR_ID_SEARCH_FIELDS.get(searchField);
+          val field = fields.get(searchField);
           val keys = highlightedFields.get(searchField).getFragments();
           for (val key : keys) {
             result.get(field).put(key.toString(), matchedDonor);

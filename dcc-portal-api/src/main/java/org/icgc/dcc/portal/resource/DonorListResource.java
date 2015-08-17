@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -106,9 +106,9 @@ public class DonorListResource {
       return result;
     }
 
-    val id = userDonorListService.save(uniqueIds);
+    val id = userDonorListService.save(uniqueIds); // save list for retrieval later
 
-    result.setDonorListId(id.toString());
+    result.setDonorListId(id.toString()); // return the id to client
 
     return result;
 
@@ -132,7 +132,7 @@ public class DonorListResource {
       matchIds.add(id.toLowerCase());
     }
 
-    val donorTextResults = donorService.validateIdentifiersDonorText(matchIds.build());
+    val donorTextResults = donorService.validateIdentifiers(matchIds.build(), false);
     log.debug("Search results {}", donorTextResults);
 
     // All matched identifiers
@@ -149,7 +149,7 @@ public class DonorListResource {
       }
     }
 
-    val fileDonorTextResults = donorService.validateIdentifiersFileDoner(matchIds.build());
+    val fileDonorTextResults = donorService.validateIdentifiers(matchIds.build(), true);
     log.debug("Search results {}", fileDonorTextResults);
     for (val searchField : DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS.values()) {
       if (!fileDonorTextResults.get(searchField).isEmpty()) {

@@ -502,37 +502,36 @@ public class DonorRepository implements Repository {
     return donorIds;
   }
 
-  public SearchResponse validateIdentifiersDonorText(List<String> input) {
+  /**
+   * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based on
+   * boolean.
+   * @param input A List of ids that can identify a donor
+   * @param False - donor-text, True - file-donor-text
+   * @return Returns the SearchResponse object from the query.
+   */
+  public SearchResponse validateIdentifiers(List<String> input, Boolean files) {
     val boolQuery = QueryBuilders.boolQuery();
+    Map<String, String> fields;
+    SearchRequestBuilder search;
 
-    val search = client.prepareSearch(index)
-        .setTypes("donor-text")
-        .setSearchType(QUERY_THEN_FETCH)
-        .setSize(5000);
+    // donor-text or file-donor-text?
+    if (!files) {
+      search = client.prepareSearch(index)
+          .setTypes("donor-text")
+          .setSearchType(QUERY_THEN_FETCH)
+          .setSize(5000);
 
-    for (val searchField : DONOR_ID_SEARCH_FIELDS.keySet()) {
-      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
-      search.addHighlightedField(searchField);
-      search.setHighlighterPreTags("");
-      search.setHighlighterPostTags("");
-      search.addField(searchField);
+      fields = DONOR_ID_SEARCH_FIELDS;
+    } else {
+      search = client.prepareSearch(fileIndex)
+          .setTypes("file-donor-text")
+          .setSearchType(QUERY_THEN_FETCH)
+          .setSize(5000);
+
+      fields = FILE_DONOR_ID_SEARCH_FIELDS;
     }
-    search.setQuery(boolQuery);
-    log.info("Search is {}", search);
 
-    val response = search.execute().actionGet();
-    return response;
-  }
-
-  public SearchResponse validateIdentifiersFileDoner(List<String> input) {
-    val boolQuery = QueryBuilders.boolQuery();
-
-    val search = client.prepareSearch(fileIndex)
-        .setTypes("file-donor-text")
-        .setSearchType(QUERY_THEN_FETCH)
-        .setSize(5000);
-
-    for (val searchField : FILE_DONOR_ID_SEARCH_FIELDS.keySet()) {
+    for (val searchField : fields.keySet()) {
       boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
       search.addHighlightedField(searchField);
       search.setHighlighterPreTags("");
