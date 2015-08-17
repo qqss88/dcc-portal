@@ -73,13 +73,13 @@ public class DonorSetResource {
   private final static Pattern DONOR_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_DONOR_LIST_SIZE = 1000;
 
-  private final static Set<String> ICDC_COL_TYPES =
+  private final static Set<String> ICGC_COL_TYPES =
       ImmutableSet.<String> of(
           "_donor_id",
           "specimenIds",
           "sampleIds");
 
-  private final static String ICDC_COL = "icdc";
+  private final static String ICGC_COL = "icgc";
   private final static String SUBMITTER_COL = "submitter";
 
   @POST
@@ -183,8 +183,8 @@ public class DonorSetResource {
       val key = searchType.getKey();
       val value = searchType.getValue();
 
-      // check if it belongs in the ICDC column
-      if (ICDC_COL_TYPES.contains(key)) {
+      // check if it belongs in the ICGC column
+      if (ICGC_COL_TYPES.contains(key)) {
 
         val matchedIds = value.keySet();
 
@@ -193,12 +193,12 @@ public class DonorSetResource {
           for (val donor : donors) {
 
             if (pivotedMap.containsKey(donor.getId())) { // donor occured already
-              pivotedMap.get(donor.getId()).get(ICDC_COL).add(id);
+              pivotedMap.get(donor.getId()).get(ICGC_COL).add(id);
             } else { // donor has not occured yet
               val colMap = Maps.<String, Set<String>> newHashMap();
-              colMap.put(ICDC_COL, new HashSet<String>());
+              colMap.put(ICGC_COL, new HashSet<String>());
               colMap.put(SUBMITTER_COL, new HashSet<String>());
-              colMap.get(ICDC_COL).add(id);
+              colMap.get(ICGC_COL).add(id);
               pivotedMap.put(donor.getId(), colMap);
             }
 
@@ -217,7 +217,7 @@ public class DonorSetResource {
               pivotedMap.get(donor.getId()).get(SUBMITTER_COL).add(id);
             } else { // donor has not occured yet
               val colMap = Maps.<String, Set<String>> newHashMap();
-              colMap.put(ICDC_COL, new HashSet<String>());
+              colMap.put(ICGC_COL, new HashSet<String>());
               colMap.put(SUBMITTER_COL, new HashSet<String>());
               colMap.get(SUBMITTER_COL).add(id);
               pivotedMap.put(donor.getId(), colMap);
