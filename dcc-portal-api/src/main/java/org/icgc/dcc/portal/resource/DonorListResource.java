@@ -38,6 +38,7 @@ import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.UploadedDonorList;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.service.DonorService;
+import org.icgc.dcc.portal.service.UserDonorListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,6 +62,9 @@ import lombok.extern.slf4j.Slf4j;
 @Produces(MediaType.APPLICATION_JSON)
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DonorListResource {
+
+  @NonNull
+  private final UserDonorListService userDonorListService;
 
   @NonNull
   private final DonorService donorService;
@@ -92,9 +96,22 @@ public class DonorListResource {
       return result;
     } // otherwise we will need to store
 
-    // TODO: Saving the donor set as well as handling for external repository case.
+    // uniqueIds are provided by the keyset of the pivoted table.
+    Set<String> uniqueIds = result.getPivotTable().keySet();
+
+    // Sanity check, we require at least one valid id in order to store
+    if (uniqueIds.size() == 0) {
+      result.getWarnings().add("Request contains no valid donor Ids");
+
+      return result;
+    }
+
+    val id = userDonorListService.save(uniqueIds);
+
+    result.setDonorListId(id.toString());
 
     return result;
+
   }
 
   private UploadedDonorList findDonorsByIdentifiers(String data) {

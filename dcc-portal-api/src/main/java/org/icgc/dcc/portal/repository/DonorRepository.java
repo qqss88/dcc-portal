@@ -110,12 +110,14 @@ public class DonorRepository implements Repository {
           "sampleIds.search", "sampleIds");
 
   public static final Map<String, String> FILE_DONOR_ID_SEARCH_FIELDS =
-      ImmutableMap.<String, String> of(
-          "tcga_participant_barcode.search", "tcga_participant_barcode",
-          "tcga_sample_barcode.search", "tcga_sample_barcode",
-          "tcga_aliquot_barcode.search", "tcga_aliquot_barcode",
-          "submitted_specimen_id.search", "submitted_specimen_id",
-          "submitted_sample_id.search", "submitted_sample_id");
+      ImmutableMap.<String, String> builder()
+          .put("tcga_participant_barcode.search", "tcga_participant_barcode")
+          .put("tcga_sample_barcode.search", "tcga_sample_barcode")
+          .put("tcga_aliquot_barcode.search", "tcga_aliquot_barcode")
+          .put("submitted_specimen_id.search", "submitted_specimen_id")
+          .put("submitted_sample_id.search", "submitted_sample_id")
+          .put("submitted_donor_id", "submitted_donor_id")
+          .build(); // too many elements for of() so must use builder.
 
   private static final class PhenotypeFacetNames {
 
