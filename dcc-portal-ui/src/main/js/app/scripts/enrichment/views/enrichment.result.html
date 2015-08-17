@@ -113,7 +113,7 @@
             </thead>
             <tbody>
                 <tr data-ng-repeat="row in item.results | orderBy:predicate:reverse">
-                    <td><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
+                    <td style="white-space:nowrap"><a data-ng-href="/genesets/{{row.geneSetId}}">{{row.geneSetId}}</a></td>
                     <td>
                         {{row.geneSetName}}
                     </td>
