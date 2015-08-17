@@ -129,8 +129,10 @@ public class DonorService {
 
         if (highlightedFields.containsKey(searchField)) {
           val field = DONOR_ID_SEARCH_FIELDS.get(searchField);
-          val key = highlightedFields.get(searchField).getFragments()[0].toString();
-          result.get(field).put(key, matchedDonor);
+          val keys = highlightedFields.get(searchField).getFragments();
+          for (val key : keys) {
+            result.get(field).put(key.toString(), matchedDonor);
+          }
         }
 
       }
@@ -163,8 +165,10 @@ public class DonorService {
 
         if (highlightedFields.containsKey(searchField)) {
           val field = FILE_DONOR_ID_SEARCH_FIELDS.get(searchField);
-          val key = highlightedFields.get(searchField).getFragments()[0].toString();
-          result.get(field).put(key, matchedDonor);
+          val keys = highlightedFields.get(searchField).getFragments();
+          for (val key : keys) {
+            result.get(field).put(key.toString(), matchedDonor);
+          }
         }
 
       }
