@@ -91,7 +91,7 @@
         pathwayTypeFilters = LocationService.mergeIntoFilters({'gene':{'hasPathway':true}});
 
         Genes.handler.one('count').get({filters:pathwayTypeFilters}).then(function (result) {
-          $scope.allPathwayCounts = result;
+          $scope.allPathwayCounts = result || 0;
         });
         if (activeIds && activeIds.length > 0) {
           GeneSets.several(activeIds.join(',')).get('genes/counts', {filters: filters}).then(function(result) {
