@@ -19,13 +19,13 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.SetMultimap;
 
 import lombok.Data;
 
@@ -34,13 +34,13 @@ import lombok.Data;
 public class UploadedDonorSet {
 
   @JsonProperty
-  Map<String, Map<String, Set<String>>> donorSet = Maps.<String, Map<String, Set<String>>> newHashMap();
+  Map<String, SetMultimap<String, String>> donorSet = Maps.newHashMap();
 
   @JsonProperty
   List<String> invalidIds = Lists.newArrayList();
 
   @JsonProperty
-  List<String> warnings = Lists.<String> newArrayList();
+  List<String> warnings = Lists.newArrayList();
 
   @JsonProperty
   String donorListId;

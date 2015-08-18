@@ -19,8 +19,9 @@ package org.icgc.dcc.portal.resource;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
+import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -36,17 +37,18 @@ import javax.ws.rs.core.MediaType;
 
 import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.UploadedDonorSet;
-import org.icgc.dcc.portal.repository.DonorRepository;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.UserDonorListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
@@ -72,6 +74,7 @@ public class DonorSetResource {
   // Spaces, tabs, commas, or new lines
   private final static Pattern DONOR_DELIMITERS = Pattern.compile("[, \t\r\n]");
   private final static int MAX_DONOR_LIST_SIZE = 1000;
+  private final static Splitter splitter = Splitter.on(DONOR_DELIMITERS).omitEmptyStrings();
 
   private final static Set<String> ICGC_COL_TYPES =
       ImmutableSet.<String> of(
@@ -88,40 +91,28 @@ public class DonorSetResource {
   @Timed
   public UploadedDonorSet processDonorSet(
       @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
-      @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly) {
+      @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly,
+      @ApiParam(value = "External Repository") @QueryParam("externalRepo") @DefaultValue("false") boolean externalRepo) {
 
-    val result = findDonorsByIdentifiers(donorIds);
-
+    val result = findDonorsByIdentifiers(donorIds, externalRepo);
     if (validationOnly) {
-      return result;
-    } // otherwise we will need to store
-
-    // uniqueIds are provided by the keyset of the pivoted table.
-    Set<String> uniqueIds = result.getDonorSet().keySet();
-
-    // Sanity check, we require at least one valid id in order to store
-    if (uniqueIds.size() == 0) {
-      result.getWarnings().add("Request contains no valid donor Ids");
-
       return result;
     }
 
-    val id = userDonorListService.save(uniqueIds); // save list for retrieval later
+    val uniqueIds = result.getDonorSet().keySet();
+    if (uniqueIds.size() == 0) {
+      result.getWarnings().add("Request contains no valid donor Ids");
+      return result;
+    }
 
-    result.setDonorListId(id.toString()); // return the id to client
-
+    val id = userDonorListService.save(uniqueIds);
+    result.setDonorListId(id.toString());
     return result;
-
   }
 
-  private UploadedDonorSet findDonorsByIdentifiers(String data) {
+  private UploadedDonorSet findDonorsByIdentifiers(String data, boolean externalRepo) {
     val donorList = new UploadedDonorSet();
-
-    val splitter = Splitter.on(DONOR_DELIMITERS).omitEmptyStrings();
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
-    val matchIds = ImmutableList.<String> builder();
-    val validIds = Maps.<String, Multimap<String, Donor>> newHashMap();
-
     if (originalIds.size() > MAX_DONOR_LIST_SIZE) {
       log.info("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
       donorList.getWarnings().add(
@@ -129,109 +120,60 @@ public class DonorSetResource {
       return donorList;
     }
 
+    val matchIds = ImmutableList.<String> builder();
     for (val id : originalIds) {
       matchIds.add(id.toLowerCase());
     }
 
-    val donorTextResults = donorService.validateIdentifiers(matchIds.build(), false);
-    log.debug("Search results {}", donorTextResults);
+    val donorResults = donorService.validateIdentifiers(matchIds.build(), externalRepo);
+    log.debug("Search results {}", donorResults);
 
     // All matched identifiers
+    val validIds = Maps.<String, Multimap<String, Donor>> newHashMap();
     val allMatchedIdentifiers = Sets.<String> newHashSet();
-    for (val searchField : DonorRepository.DONOR_ID_SEARCH_FIELDS.values()) {
-      if (!donorTextResults.get(searchField).isEmpty()) {
-
+    val searchFields = externalRepo ? FILE_DONOR_ID_SEARCH_FIELDS.values() : DONOR_ID_SEARCH_FIELDS.values();
+    for (val searchField : searchFields) {
+      if (!donorResults.get(searchField).isEmpty()) {
         // Case doesn't matter
-        for (val k : donorTextResults.get(searchField).keySet()) {
+        for (val k : donorResults.get(searchField).keySet()) {
           allMatchedIdentifiers.add(k.toLowerCase());
         }
-
-        validIds.put(searchField, donorTextResults.get(searchField));
+        validIds.put(searchField, donorResults.get(searchField));
       }
     }
 
-    val fileDonorTextResults = donorService.validateIdentifiers(matchIds.build(), true);
-    log.debug("Search results {}", fileDonorTextResults);
-    for (val searchField : DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS.values()) {
-      if (!fileDonorTextResults.get(searchField).isEmpty()) {
-
-        // Case doesn't matter
-        for (val k : fileDonorTextResults.get(searchField).keySet()) {
-          allMatchedIdentifiers.add(k.toLowerCase());
-        }
-
-        validIds.put(searchField, fileDonorTextResults.get(searchField));
-      }
-    }
-
-    // Construct valid and invalid donor matches
     for (val id : originalIds) {
       if (!allMatchedIdentifiers.contains(id.toLowerCase())) {
         donorList.getInvalidIds().add(id);
       }
     }
-
     donorList.setDonorSet(pivotDonorList(validIds));
     return donorList;
   }
 
-  private Map<String, Map<String, Set<String>>> pivotDonorList(Map<String, Multimap<String, Donor>> validDonors) {
-    Map<String, Map<String, Set<String>>> pivotedMap = Maps.<String, Map<String, Set<String>>> newHashMap();
+  private Map<String, SetMultimap<String, String>> pivotDonorList(Map<String, Multimap<String, Donor>> validDonors) {
+    Map<String, SetMultimap<String, String>> pivotedMap = Maps.newHashMap();
 
-    // iterate across all field types that matched
     for (val searchType : validDonors.entrySet()) {
       val key = searchType.getKey();
       val value = searchType.getValue();
+      val matchedIds = value.keySet();
+      val colName = ICGC_COL_TYPES.contains(key) ? ICGC_COL : SUBMITTER_COL;
 
-      // check if it belongs in the ICGC column
-      if (ICGC_COL_TYPES.contains(key)) {
-
-        val matchedIds = value.keySet();
-
-        for (val id : matchedIds) {
-          val donors = value.get(id); // this returns a collection but almost surely of size 1
-          for (val donor : donors) {
-
-            if (pivotedMap.containsKey(donor.getId())) { // donor occured already
-              pivotedMap.get(donor.getId()).get(ICGC_COL).add(id);
-            } else { // donor has not occured yet
-              val colMap = Maps.<String, Set<String>> newHashMap();
-              colMap.put(ICGC_COL, new HashSet<String>());
-              colMap.put(SUBMITTER_COL, new HashSet<String>());
-              colMap.get(ICGC_COL).add(id);
-              pivotedMap.put(donor.getId(), colMap);
-            }
-
+      for (val id : matchedIds) {
+        val donors = value.get(id);
+        for (val donor : donors) {
+          if (pivotedMap.containsKey(donor.getId())) {
+            pivotedMap.get(donor.getId()).put(colName, id);
+          } else {
+            SetMultimap<String, String> setMultimap = HashMultimap.create();
+            setMultimap.put(colName, id);
+            pivotedMap.put(donor.getId(), setMultimap);
           }
         }
-
-      } else { // otherwise belongs in the submitter column
-
-        val matchedIds = value.keySet();
-
-        for (val id : matchedIds) {
-          val donors = value.get(id); // this returns a collection but almost surely of size 1
-          for (val donor : donors) {
-
-            if (pivotedMap.containsKey(donor.getId())) { // donor occured already
-              pivotedMap.get(donor.getId()).get(SUBMITTER_COL).add(id);
-            } else { // donor has not occured yet
-              val colMap = Maps.<String, Set<String>> newHashMap();
-              colMap.put(ICGC_COL, new HashSet<String>());
-              colMap.put(SUBMITTER_COL, new HashSet<String>());
-              colMap.get(SUBMITTER_COL).add(id);
-              pivotedMap.put(donor.getId(), colMap);
-            }
-
-          }
-        }
-
       }
-
     }
-
     return pivotedMap;
-
   }
 
 }

@@ -114,26 +114,21 @@ public class DonorService {
    * matched field as the key and the matched donor as the value.
    */
   public Map<String, Multimap<String, Donor>> validateIdentifiers(List<String> ids, Boolean file) {
-    val response = donorRepository.validateIdentifiers(ids, file);
     val result = Maps.<String, Multimap<String, Donor>> newHashMap();
-
-    // which fields are we searching against?
     val fields = file ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
-
     for (val search : fields.values()) {
       val typeResult = ArrayListMultimap.<String, Donor> create();
       result.put(search, typeResult);
     }
 
+    val response = donorRepository.validateIdentifiers(ids, file);
     for (val hit : response.getHits()) {
       val highlightedFields = hit.getHighlightFields();
-
-      // donors from donor-text and file-donor-text are constructed differently
+      // Donors from donor-text and file-donor-text are constructed differently
       val matchedDonor = file ? fileDonorText2Donor(hit) : donorText2Donor(hit);
 
       for (val searchField : fields.keySet()) {
-
-        // find out which matched by looking at the highlighted field fragments
+        // Find out which matched by looking at the highlighted field fragments
         if (highlightedFields.containsKey(searchField)) {
           val field = fields.get(searchField);
           val keys = highlightedFields.get(searchField).getFragments();
@@ -141,10 +136,8 @@ public class DonorService {
             result.get(field).put(key.toString(), matchedDonor);
           }
         }
-
       }
     }
-
     return result;
   }
 

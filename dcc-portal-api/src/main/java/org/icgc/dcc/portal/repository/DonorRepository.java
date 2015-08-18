@@ -510,27 +510,26 @@ public class DonorRepository implements Repository {
    * @return Returns the SearchResponse object from the query.
    */
   public SearchResponse validateIdentifiers(List<String> input, Boolean files) {
-    val boolQuery = QueryBuilders.boolQuery();
     Map<String, String> fields;
     SearchRequestBuilder search;
 
-    // donor-text or file-donor-text?
     if (!files) {
       search = client.prepareSearch(index)
-          .setTypes("donor-text")
+          .setTypes(Type.DONOR_TEXT.getId())
           .setSearchType(QUERY_THEN_FETCH)
           .setSize(5000);
 
       fields = DONOR_ID_SEARCH_FIELDS;
     } else {
       search = client.prepareSearch(fileIndex)
-          .setTypes("file-donor-text")
+          .setTypes(Type.REPOSITORY_FILE_DONOR_TEXT.getId())
           .setSearchType(QUERY_THEN_FETCH)
           .setSize(5000);
 
       fields = FILE_DONOR_ID_SEARCH_FIELDS;
     }
 
+    val boolQuery = QueryBuilders.boolQuery();
     for (val searchField : fields.keySet()) {
       boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
       search.addHighlightedField(searchField);
