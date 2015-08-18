@@ -2,9 +2,11 @@
 <span data-ng-init="predicate='totalDonorCount'"></span>
 <span data-ng-init="reverse=true"></span>
 
+<div ng-if="ProjectsCtrl.projects.hits.length < 1" class="empty loading-text"><h3>No Projects Found.</h3></div>
+<div ng-if="ProjectsCtrl.projects.hits.length > 0">
 <div class="t_table_top" style="padding:0;margin: 0">
     Showing <strong id="projects-project-count">{{ ProjectsCtrl.projects.hits.length }}</strong> projects
-    <span data-toolbar data-dl="projects" ng-if="ProjectsCtrl.projects.hits.length > 0"></span>
+    <span data-toolbar data-dl="projects"></span>
 </div>
 <table class="table table-bordered table-striped">
 <thead>
@@ -298,3 +300,6 @@
     </tr>
     </tbody>
 </table>
+
+</div>
+
