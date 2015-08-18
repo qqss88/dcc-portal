@@ -1,18 +1,18 @@
 /*
- * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
- *                                                                                                               
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.
+ *
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
- * You should have received a copy of the GNU General Public License along with                                  
- * this program. If not, see <http://www.gnu.org/licenses/>.                                                     
- *                                                                                                               
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY                           
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES                          
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT                           
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,                                
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED                          
- * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;                               
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER                              
- * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package org.dcc.portal.pql.query;
@@ -334,6 +334,64 @@ public class EsRequestBuilderTest extends BaseElasticsearchTest {
     val result = executeQuery("missing(assemblyVersion)");
     assertTotalHitsCount(result, 2);
     containsOnlyIds(result, "MU1", "MU2");
+  }
+
+  // We need these goTermId and geneSetId queries to be consumable by the PQL engine.
+  // As long as no exception occurs in these tests, we're fine.
+  @Test
+  public void singleGoTermId_InSimpleTest() {
+    val pql = "in(gene.goTermId,'GO:0003674')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void singleGoTermId_EqSimpleTest() {
+    val pql = "eq(gene.goTermId,'GO:0003674')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void multipleGoTermId_InTest() {
+    val pql =
+        "select(*),and(in(gene.goTermId,'GO:0003674','GO:0003673'),in(gene.goTermId,'GO:0003672','GO:0003671')),"
+            + "in(gene.entitySetId,'b9b06e98-351a-4fd2-a86e-5071c78c66eb')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void multipleGoTermId_EqTest() {
+    val pql =
+        "select(*),and(eq(gene.goTermId,'GO:0003674'),eq(gene.goTermId,'GO:0003674')),"
+            + "in(gene.entitySetId,'b9b06e98-351a-4fd2-a86e-5071c78c66eb')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void singleGeneSetId_InSimpleTest() {
+    val pql = "in(gene.geneSetId,'GO:0003674')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void singleGeneSetId_EqSimpleTest() {
+    val pql = "eq(gene.geneSetId,'GO:0003674')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void multipleGeneSetId_InTest() {
+    val pql =
+        "select(*),and(in(gene.geneSetId,'GO:0003674','GO:0003673'),in(gene.geneSetId,'GO:0003672','GO:0003671')),"
+            + "in(gene.entitySetId,'b9b06e98-351a-4fd2-a86e-5071c78c66eb')";
+    queryEngine.execute(pql, GENE_CENTRIC);
+  }
+
+  @Test
+  public void multipleGeneSetId_EqTest() {
+    val pql =
+        "select(*),and(eq(gene.geneSetId,'GO:0003674'),eq(gene.geneSetId,'GO:0003674')),"
+            + "in(gene.entitySetId,'b9b06e98-351a-4fd2-a86e-5071c78c66eb')";
+    queryEngine.execute(pql, GENE_CENTRIC);
   }
 
   // Location tests
