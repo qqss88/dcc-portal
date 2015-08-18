@@ -18,6 +18,7 @@
 package org.dcc.portal.pql.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.dcc.portal.pql.meta.Type.GENE_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 
 import org.dcc.portal.pql.utils.BaseElasticsearchTest;
