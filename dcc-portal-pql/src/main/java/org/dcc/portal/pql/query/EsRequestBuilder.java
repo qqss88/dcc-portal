@@ -88,7 +88,7 @@ public class EsRequestBuilder {
           // JIRA: DCC-3791
           val fieldName = entry.getKey();
           val sortOrder = SortOrder.valueOf(entry.getValue().toString());
-          if (queryContext.getType().getId() == DONOR_CENTRIC.getId() && fieldName.startsWith("project.")) {
+          if (queryContext.getType() == DONOR_CENTRIC && fieldName.startsWith("project.")) {
             val fullPath = queryContext.getType().getId() + "." + entry.getKey();
             result.addSort(fullPath, sortOrder);
           } else {
