@@ -19,7 +19,6 @@ package org.dcc.portal.pql.query;
 
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
-import static org.dcc.portal.pql.meta.Type.PROJECT;
 
 import java.util.Optional;
 
@@ -87,11 +86,13 @@ public class EsRequestBuilder {
         for (val entry : sortNode.getFields().entrySet()) {
           // Temporary solution to the sorting issue on the donor tab when sorting by primary site or project.
           // JIRA: DCC-3791
-          if (queryContext.getType().getId() == DONOR_CENTRIC.getId() && entry.getKey().contains(PROJECT.getId())) {
+          val fieldName = entry.getKey();
+          val sortOrder = SortOrder.valueOf(entry.getValue().toString());
+          if (queryContext.getType().getId() == DONOR_CENTRIC.getId() && fieldName.startsWith("project.")) {
             val fullPath = queryContext.getType().getId() + "." + entry.getKey();
-            result.addSort(fullPath, SortOrder.valueOf(entry.getValue().toString()));
+            result.addSort(fullPath, sortOrder);
           } else {
-            result.addSort(entry.getKey(), SortOrder.valueOf(entry.getValue().toString()));
+            result.addSort(fieldName, sortOrder);
           }
         }
       }
