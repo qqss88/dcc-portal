@@ -37,6 +37,7 @@ import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
+import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
@@ -162,7 +163,6 @@ public class DonorRepository implements Repository {
 
   private final Client client;
   private final String index;
-  private final String fileIndex = "icgc-repository";
   private final QueryEngine queryEngine;
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
@@ -521,7 +521,7 @@ public class DonorRepository implements Repository {
 
       fields = DONOR_ID_SEARCH_FIELDS;
     } else {
-      search = client.prepareSearch(fileIndex)
+      search = client.prepareSearch(REPOSITORY_INDEX_NAME)
           .setTypes(Type.REPOSITORY_FILE_DONOR_TEXT.getId())
           .setSearchType(QUERY_THEN_FETCH)
           .setSize(5000);
@@ -538,7 +538,7 @@ public class DonorRepository implements Repository {
       search.addField(searchField);
     }
     search.setQuery(boolQuery);
-    log.info("Search is {}", search);
+    log.debug("Search is {}", search);
 
     val response = search.execute().actionGet();
     return response;

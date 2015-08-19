@@ -77,7 +77,7 @@ public class DonorSetResource {
   private final static Splitter splitter = Splitter.on(DONOR_DELIMITERS).omitEmptyStrings();
 
   private final static Set<String> ICGC_COL_TYPES =
-      ImmutableSet.<String> of(
+      ImmutableSet.of(
           "_donor_id",
           "specimenIds",
           "sampleIds");
@@ -152,7 +152,7 @@ public class DonorSetResource {
   }
 
   private Map<String, SetMultimap<String, String>> pivotDonorList(Map<String, Multimap<String, Donor>> validDonors) {
-    Map<String, SetMultimap<String, String>> pivotedMap = Maps.newHashMap();
+    val pivotedMap = Maps.<String, SetMultimap<String, String>> newHashMap();
 
     for (val searchType : validDonors.entrySet()) {
       val key = searchType.getKey();
@@ -166,7 +166,7 @@ public class DonorSetResource {
           if (pivotedMap.containsKey(donor.getId())) {
             pivotedMap.get(donor.getId()).put(colName, id);
           } else {
-            SetMultimap<String, String> setMultimap = HashMultimap.create();
+            val setMultimap = HashMultimap.<String, String> create();
             setMultimap.put(colName, id);
             pivotedMap.put(donor.getId(), setMultimap);
           }
