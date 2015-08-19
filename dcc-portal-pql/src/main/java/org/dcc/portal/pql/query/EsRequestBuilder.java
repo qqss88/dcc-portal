@@ -18,13 +18,10 @@
 package org.dcc.portal.pql.query;
 
 import static org.dcc.portal.pql.es.utils.Nodes.getOptionalChild;
+import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.meta.Type.PROJECT;
 
 import java.util.Optional;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.es.ast.CountNode;
 import org.dcc.portal.pql.es.ast.ExpressionNode;
@@ -40,6 +37,11 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.sort.SortOrder;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -83,7 +85,14 @@ public class EsRequestBuilder {
       } else if (child instanceof SortNode) {
         val sortNode = (SortNode) child;
         for (val entry : sortNode.getFields().entrySet()) {
-          result.addSort(entry.getKey(), SortOrder.valueOf(entry.getValue().toString()));
+          // Temporary solution to the sorting issue on the donor tab when sorting by primary site or project.
+          // JIRA: DCC-3791
+          if (queryContext.getType().getId() == DONOR_CENTRIC.getId() && entry.getKey().contains(PROJECT.getId())) {
+            val fullPath = queryContext.getType().getId() + "." + entry.getKey();
+            result.addSort(fullPath, SortOrder.valueOf(entry.getValue().toString()));
+          } else {
+            result.addSort(entry.getKey(), SortOrder.valueOf(entry.getValue().toString()));
+          }
         }
       }
     }
@@ -91,7 +100,8 @@ public class EsRequestBuilder {
     return result;
   }
 
-  private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result, QueryContext queryContext) {
+  private void addAggregations(ExpressionNode aggregationsNode, SearchRequestBuilder result,
+      QueryContext queryContext) {
     log.debug("Adding aggregations for AggregationsNode\n{}", aggregationsNode);
     for (val child : aggregationsNode.getChildren()) {
       val aggregationBuilder = child.accept(Visitors.createAggregationBuilderVisitor(), Optional.of(queryContext));
