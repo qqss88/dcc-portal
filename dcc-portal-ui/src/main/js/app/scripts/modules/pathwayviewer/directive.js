@@ -38,13 +38,12 @@
           '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
                 '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header"># Mutations</th>' +
+                '<th class="pathway-gene-header-label pathway-gene-header"># ICGC Mutations</th>' +
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
               '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
               '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
             '</tr></table>' +
-            '<div data-ng-if="geneList.length==0">No associated mutated genes</div>'+
         '</div></div>'+
         '</div>',
       link: function ($scope) {
