@@ -30,6 +30,7 @@ import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
+import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
@@ -55,18 +56,13 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -105,6 +101,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -191,6 +193,18 @@ public class RepositoryFileRepository {
       }
 
       val fieldName = TYPE_MAPPING.get(facetFieldKey);
+
+      if (fieldName.equals("entitySetId")) {
+        val entitySetId = facetField.getValue().asText();
+        val termsLookup = new HashMap<String, String>();
+        val lookupFilter = termsLookupFilter("donor_id")
+            .lookupId(entitySetId)
+            .lookupIndex("terms-lookup")
+            .lookupType("donor-ids")
+            .lookupPath("values");
+        termFilters.must(boolFilter().must(lookupFilter));
+        continue;
+      }
 
       // Assume "IS"
       FilterBuilder fb;
