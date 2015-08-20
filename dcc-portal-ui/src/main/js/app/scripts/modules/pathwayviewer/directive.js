@@ -33,7 +33,8 @@
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info">'+
         '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
+        '<h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>'+
+          '<div class="pathway-info-content">'+
           '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
                 '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
@@ -102,6 +103,13 @@
             var mutationCount = '*';
             var node = $.extend({}, d);
             var geneList = [];
+
+            // Reset data
+            $scope.geneList = [];
+
+            // Getting type info, not sure if substr(10) will always work...
+            // assuming everything starts with 'Renderable'
+            $scope.entityType = d.type.substr(10);
             
             hideLegend();
             showInfo();
