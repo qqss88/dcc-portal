@@ -183,6 +183,16 @@
             } else {
               $scope.isDeprecated = false;
             }
+
+            // FIXME: Deprecate analyses with old Reactome (REACT_XXX) IDs.
+            // We should remove this when release 20 goes live, as all existing analyses will be
+            // depreated and any new ones will be on the new Reactome IDs
+            if (enrichment.results) {
+              if (_.startsWith( _.first(enrichment.results).geneSetId, 'REACT_') === true) {
+                $scope.isDeprecated = true;
+              }
+            }
+
           });
 
         }
