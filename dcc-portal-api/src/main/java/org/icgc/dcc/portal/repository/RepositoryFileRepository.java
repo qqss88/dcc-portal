@@ -30,7 +30,6 @@ import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
 import static org.elasticsearch.index.query.FilterBuilders.missingFilter;
 import static org.elasticsearch.index.query.FilterBuilders.nestedFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
-import static org.elasticsearch.index.query.FilterBuilders.termsLookupFilter;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
@@ -44,6 +43,7 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -56,9 +56,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
@@ -92,6 +92,7 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.service.TermsLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -196,12 +197,8 @@ public class RepositoryFileRepository {
 
       if (fieldName.equals("entitySetId")) {
         val entitySetId = facetField.getValue().asText();
-        val termsLookup = new HashMap<String, String>();
-        val lookupFilter = termsLookupFilter("donor_id")
-            .lookupId(entitySetId)
-            .lookupIndex("terms-lookup")
-            .lookupType("donor-ids")
-            .lookupPath("values");
+        val lookupFilter =
+            TermsLookupService.createTermsLookupFilter("donor_id", DONOR_IDS, UUID.fromString(entitySetId));
         termFilters.must(boolFilter().must(lookupFilter));
         continue;
       }
