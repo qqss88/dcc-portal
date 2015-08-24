@@ -35,6 +35,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.UploadedDonorSet;
 import org.icgc.dcc.portal.service.DonorService;
@@ -53,16 +58,11 @@ import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
 @Path("/v1/donorsets")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorSetResource {
 
   @NonNull
@@ -94,6 +94,8 @@ public class DonorSetResource {
       @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly,
       @ApiParam(value = "External Repository") @QueryParam("externalRepo") @DefaultValue("false") boolean externalRepo) {
 
+    log.info("validation flag is: {}", validationOnly);
+
     val result = findDonorsByIdentifiers(donorIds, externalRepo);
     if (validationOnly) {
       return result;
@@ -110,9 +112,10 @@ public class DonorSetResource {
     return result;
   }
 
-  private UploadedDonorSet findDonorsByIdentifiers(String data, boolean externalRepo) {
+  private UploadedDonorSet findDonorsByIdentifiers(String data, boolean isForExternalRepo) {
     val donorList = new UploadedDonorSet();
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
+
     if (originalIds.size() > MAX_DONOR_LIST_SIZE) {
       log.info("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
       donorList.getWarnings().add(
@@ -125,21 +128,26 @@ public class DonorSetResource {
       matchIds.add(id.toLowerCase());
     }
 
-    val donorResults = donorService.validateIdentifiers(matchIds.build(), externalRepo);
+    val donorResults = donorService.validateIdentifiers(matchIds.build(), isForExternalRepo);
     log.debug("Search results {}", donorResults);
 
     // All matched identifiers
     val validIds = Maps.<String, Multimap<String, Donor>> newHashMap();
     val allMatchedIdentifiers = Sets.<String> newHashSet();
-    val searchFields = externalRepo ? FILE_DONOR_ID_SEARCH_FIELDS.values() : DONOR_ID_SEARCH_FIELDS.values();
-    for (val searchField : searchFields) {
-      if (!donorResults.get(searchField).isEmpty()) {
-        // Case doesn't matter
-        for (val k : donorResults.get(searchField).keySet()) {
-          allMatchedIdentifiers.add(k.toLowerCase());
-        }
-        validIds.put(searchField, donorResults.get(searchField));
+    val searchFields = isForExternalRepo ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+
+    for (val searchField : searchFields.values()) {
+      val multiMap = donorResults.get(searchField);
+
+      if (null == multiMap || multiMap.isEmpty()) {
+        continue;
       }
+
+      for (val k : multiMap.keySet()) {
+        allMatchedIdentifiers.add(k.toLowerCase());
+      }
+
+      validIds.put(searchField, multiMap);
     }
 
     for (val id : originalIds) {
@@ -147,33 +155,46 @@ public class DonorSetResource {
         donorList.getInvalidIds().add(id);
       }
     }
-    donorList.setDonorSet(pivotDonorList(validIds));
-    return donorList;
+
+    return pivotDonorList(donorList, validIds);
   }
 
-  private Map<String, SetMultimap<String, String>> pivotDonorList(Map<String, Multimap<String, Donor>> validDonors) {
+  @NonNull
+  private UploadedDonorSet pivotDonorList(UploadedDonorSet donorSet, Map<String, Multimap<String, Donor>> validDonors) {
     val pivotedMap = Maps.<String, SetMultimap<String, String>> newHashMap();
+    boolean hasIcgcIds = false;
+    boolean hasSubmitterIds = false;
 
     for (val searchType : validDonors.entrySet()) {
-      val key = searchType.getKey();
+      val belongsToIcgcColumn = ICGC_COL_TYPES.contains(searchType.getKey());
       val value = searchType.getValue();
-      val matchedIds = value.keySet();
-      val colName = ICGC_COL_TYPES.contains(key) ? ICGC_COL : SUBMITTER_COL;
 
-      for (val id : matchedIds) {
-        val donors = value.get(id);
-        for (val donor : donors) {
-          if (pivotedMap.containsKey(donor.getId())) {
-            pivotedMap.get(donor.getId()).put(colName, id);
+      for (val id : value.keySet()) {
+        for (val donor : value.get(id)) {
+          val donorId = donor.getId();
+
+          if (!pivotedMap.containsKey(donorId)) {
+            pivotedMap.put(donorId, HashMultimap.<String, String> create());
+          }
+
+          pivotedMap.get(donorId)
+              .put((belongsToIcgcColumn ? ICGC_COL : SUBMITTER_COL), id);
+
+          // Sets the flags once they are "seen."
+          if (belongsToIcgcColumn) {
+            hasIcgcIds = true;
           } else {
-            val setMultimap = HashMultimap.<String, String> create();
-            setMultimap.put(colName, id);
-            pivotedMap.put(donor.getId(), setMultimap);
+            hasSubmitterIds = true;
           }
         }
       }
     }
-    return pivotedMap;
+
+    donorSet.setDonorSet(pivotedMap);
+    donorSet.setHasIcgcIds(hasIcgcIds);
+    donorSet.setHasSubmitterIds(hasSubmitterIds);
+
+    return donorSet;
   }
 
 }

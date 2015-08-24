@@ -20,14 +20,14 @@ package org.icgc.dcc.portal.model;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
-
-import lombok.Data;
 
 @Data
 @JsonInclude(Include.NON_NULL)
@@ -44,5 +44,11 @@ public class UploadedDonorSet {
 
   @JsonProperty
   String donorListId;
+
+  @JsonProperty
+  Boolean hasIcgcIds;
+
+  @JsonProperty
+  Boolean hasSubmitterIds;
 
 }
