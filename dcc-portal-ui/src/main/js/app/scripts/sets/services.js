@@ -220,7 +220,7 @@
           console.log('there is no id!!!!');
           return;
         } else {
-          var newFilter = JSON.stringify({file: {entitySetId: data.id}});
+          var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
           $location.path(forwardUrl).search('filters', newFilter);
         }
       });
