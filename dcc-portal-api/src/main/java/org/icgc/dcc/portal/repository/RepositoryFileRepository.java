@@ -195,15 +195,6 @@ public class RepositoryFileRepository {
 
       val fieldName = TYPE_MAPPING.get(facetFieldKey);
 
-      if (fieldName.equals("entitySetId")) {
-        val entitySetId = facetField.getValue().asText();
-        val lookupFilter =
-            TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(entitySetId))
-                .cache(false);
-        termFilters.must(lookupFilter);
-        continue;
-      }
-
       // Assume "IS"
       FilterBuilder fb;
       val boolNode = facetField.getValue();
@@ -215,6 +206,14 @@ public class RepositoryFileRepository {
 
       if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
+        continue;
+      } else if (fieldName.equals("entitySetId")) {
+        for (val item : items) {
+          val lookupFilter =
+              TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item))
+                  .cache(false);
+          termFilters.must(lookupFilter);
+        }
         continue;
       } else {
         val terms = termsFilter(fieldName, items);
