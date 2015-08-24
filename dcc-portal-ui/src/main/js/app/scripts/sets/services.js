@@ -208,7 +208,7 @@
     };
     
     this.createForwardSet = function(type, params, forwardUrl) {
-	  params.name = 'to_extern';
+	  params.name = 'From Advanced Search';
       params.description = '';
       params.sortBy = 'ssmAffectedGenes';
       params.sortOrder = 'DESCENDING';
