@@ -7,12 +7,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -47,31 +47,11 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {
-    PROJECT("project"),
-    DONOR("donor"),
-    GENE("gene"),
-    MUTATION("mutation"),
-    PATHWAY("pathway"),
+    PROJECT("project"), DONOR("donor"), GENE("gene"), MUTATION("mutation"), PATHWAY("pathway"),
 
-    GENE_SET("geneSet"),
-    REPOSITORY_FILE("file"),
+    GENE_SET("geneSet"), REPOSITORY_FILE("file"),
 
-    CONSEQUENCE("consequence"),
-    TRANSCRIPT("transcript"),
-    OCCURRENCE("occurrence"),
-    EMB_OCCURRENCE("embOccurrence"),
-    OBSERVATION("observation"),
-    RELEASE("release"),
-    KEYWORD(""),
-    SPECIMEN(""),
-    SAMPLE(""),
-    SEQ_DATA(""),
-    DOMAIN(""),
-    EXON(""),
-    DIAGRAM("diagram"),
-    FAMILY(""),
-    EXPOSURE(""),
-    THERAPY("");
+    CONSEQUENCE("consequence"), TRANSCRIPT("transcript"), OCCURRENCE("occurrence"), EMB_OCCURRENCE("embOccurrence"), OBSERVATION("observation"), RELEASE("release"), KEYWORD(""), SPECIMEN(""), SAMPLE(""), SEQ_DATA(""), DOMAIN(""), EXON(""), DIAGRAM("diagram"), FAMILY(""), EXPOSURE(""), THERAPY("");
 
     private final String id;
   }
@@ -80,28 +60,9 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Type {
-    PROJECT("project"),
-    DONOR("donor"),
-    GENE("gene"),
-    MUTATION("mutation"),
-    RELEASE("release"),
-    PATHWAY("pathway"),
-    GENE_SET("gene-set"),
-    DONOR_CENTRIC("donor-centric"),
-    GENE_CENTRIC("gene-centric"),
-    MUTATION_CENTRIC("mutation-centric"),
-    OCCURRENCE_CENTRIC("observation-centric"),
-    REPOSITORY_FILE("file"),
+    PROJECT("project"), DONOR("donor"), GENE("gene"), MUTATION("mutation"), RELEASE("release"), PATHWAY("pathway"), GENE_SET("gene-set"), DONOR_CENTRIC("donor-centric"), GENE_CENTRIC("gene-centric"), MUTATION_CENTRIC("mutation-centric"), OCCURRENCE_CENTRIC("observation-centric"), REPOSITORY_FILE("file"),
 
-    DONOR_TEXT("donor-text"),
-    GENE_TEXT("gene-text"),
-    MUTATION_TEXT("mutation-text"),
-    PATHWAY_TEXT("pathway-text"),
-    GENESET_TEXT("gene-set-text"),
-    DIAGRAM("diagram"),
-    REPOSITORY_FILE_TEXT("file-text"),
-    REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
-    PROJECT_TEXT("project-text");
+    DONOR_TEXT("donor-text"), GENE_TEXT("gene-text"), MUTATION_TEXT("mutation-text"), PATHWAY_TEXT("pathway-text"), GENESET_TEXT("gene-set-text"), DIAGRAM("diagram"), REPOSITORY_FILE_TEXT("file-text"), REPOSITORY_FILE_DONOR_TEXT("file-donor-text"), PROJECT_TEXT("project-text");
 
     @NonNull
     private final String id;
@@ -138,6 +99,7 @@ public class IndexModel {
           .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
           .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
           .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
+          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
   private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
@@ -372,7 +334,7 @@ public class IndexModel {
           .put("submittedMatchedSampleId", "matched_sample_id")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
 
-          .build();
+  .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -406,10 +368,10 @@ public class IndexModel {
           .put("id", "id")
           .put("type", "type")
 
-          // Gene and project and pathway
+  // Gene and project and pathway
           .put("name", "name")
 
-          // Gene
+  // Gene
           .put("symbol", "symbol")
           .put("ensemblTranscriptId", "ensemblTranscriptId")
           .put("ensemblTranslationId", "ensemblTranslationId")
@@ -419,37 +381,37 @@ public class IndexModel {
           .put("entrezGene", "entrezGene")
           .put("hgnc", "hgnc")
 
-          // Mutation
+  // Mutation
           .put("mutation", "mutation")
           .put("geneMutations", "geneMutations")
           .put("start", "start")
 
-          // Project
+  // Project
           .put("tumourType", "tumourType")
           .put("tumourSubtype", "tumourSubtype")
           .put("primarySite", "primarySite")
 
-          // Donor
+  // Donor
           .put("specimenIds", "specimenIds")
           .put("submittedSpecimenIds", "submittedSpecimenIds")
           .put("sampleIds", "sampleIds")
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
-          // Donor-file, these are derived from file
+  // Donor-file, these are derived from file
           .put("submittedId", "submittedId")
           .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
           .put("TCGASampleBarcode", "TCGASampleBarcode")
           .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 
-          // GO Term
+  // GO Term
           .put("altIds", "altIds")
 
-          // File Repo
+  // File Repo
           .put("file_name", "file_name")
           .put("donor_id", "donor_id")
 
-          // Pathway
+  // Pathway
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
@@ -488,6 +450,7 @@ public class IndexModel {
 
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
+
   static {
     FIELDS_MAPPING.put(Kind.PROJECT, createFieldsMapping(Kind.PROJECT));
     FIELDS_MAPPING.put(Kind.DONOR, createFieldsMapping(Kind.DONOR));
@@ -520,10 +483,7 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum GeneSetType {
-    GENE_SET_TYPE_ALL("geneSetId"),
-    GENE_SET_TYPE_GO("go_term"),
-    GENE_SET_TYPE_PATHWAY("pathway"),
-    GENE_SET_TYPE_CURATED("curated_set");
+    GENE_SET_TYPE_ALL("geneSetId"), GENE_SET_TYPE_GO("go_term"), GENE_SET_TYPE_PATHWAY("pathway"), GENE_SET_TYPE_CURATED("curated_set");
 
     private final String type;
   }

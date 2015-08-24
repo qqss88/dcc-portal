@@ -198,8 +198,9 @@ public class RepositoryFileRepository {
       if (fieldName.equals("entitySetId")) {
         val entitySetId = facetField.getValue().asText();
         val lookupFilter =
-            TermsLookupService.createTermsLookupFilter("donor_id", DONOR_IDS, UUID.fromString(entitySetId));
-        termFilters.must(boolFilter().must(lookupFilter));
+            TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(entitySetId))
+                .cache(false);
+        termFilters.must(lookupFilter);
         continue;
       }
 
@@ -241,7 +242,7 @@ public class RepositoryFileRepository {
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
     }
 
-    return termFilters;
+    return termFilters.cache(false);
   }
 
   public List<AggregationBuilder<?>> aggs(ObjectNode filters) {
