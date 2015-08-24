@@ -98,7 +98,7 @@
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
   module.service('SetService',
-    function($window, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions) {
+    function($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions) {
 
     var LIST_ENTITY = 'entity';
     var _this = this;
@@ -204,6 +204,26 @@
           'View in <a href="/analysis/sets">Data Analysis</a>', 4000, 'trustedHtml');
       });
 
+      return promise;
+    };
+    
+    this.createForwardSet = function(type, params, forwardUrl) {
+	  params.name = 'to_extern';
+      params.description = '';
+      params.sortBy = 'ssmAffectedGenes';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset').post(undefined, data, {}, {'Content-Type': 'application/json'});
+      promise.then(function(data) {
+        if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+        } else {
+          var newFilter = JSON.stringify({file: {entitySetId: data.id}});
+          $location.path(forwardUrl).search('filters', newFilter);
+        }
+      });
       return promise;
     };
 
