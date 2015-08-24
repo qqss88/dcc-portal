@@ -43,6 +43,7 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -57,16 +58,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
-
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -96,6 +92,7 @@ import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.service.TermsLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -105,6 +102,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -192,6 +195,15 @@ public class RepositoryFileRepository {
 
       val fieldName = TYPE_MAPPING.get(facetFieldKey);
 
+      if (fieldName.equals("entitySetId")) {
+        val entitySetId = facetField.getValue().asText();
+        val lookupFilter =
+            TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(entitySetId))
+                .cache(false);
+        termFilters.must(lookupFilter);
+        continue;
+      }
+
       // Assume "IS"
       FilterBuilder fb;
       val boolNode = facetField.getValue();
@@ -230,7 +242,7 @@ public class RepositoryFileRepository {
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
     }
 
-    return termFilters;
+    return termFilters.cache(false);
   }
 
   public List<AggregationBuilder<?>> aggs(ObjectNode filters) {
