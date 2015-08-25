@@ -4,11 +4,11 @@
             <i data-ng-class="{'icon-caret-down':!collapsed, 'icon-caret-right':collapsed}"></i>
             {{label}}
         </span>
-        <span data-ng-if="actives.length > 0 || activeEntityIds.length > 0" class="t_facets__facet__terms__inactive__reset t_tools">
+        <span data-ng-if="actives.length || hasExtension" class="t_facets__facet__terms__inactive__reset t_tools">
             <a data-ng-click="removeFacet()" class="t_tools__tool " href=""><i class="icon-undo"></i></a>
         </span>
     </li>
-    <li ng-if="shouldDisplayEntitySetId()">
+    <li>
         <ul class="t_facets__facet__terms__active">
             <li class="t_facets__facet__terms__active__term__label"
                 data-active-term
@@ -19,10 +19,12 @@
                 data-ng-mouseleave="mouseLeave($event)">
 
                 <span class="t_facets__facet__terms__active__term__label__text">
-                    <i class="icon-ok"></i>
-                    <span>{{ entityIdMap[item]}}</span>
+                <i class="icon-ok"></i>
+                <span data-tooltip="{{ item }}"
+                      data-tooltip-placement="top">{{ (entityIdMap [item] || item) }}</span>
                 </span>
             </li>
+
 
             <li class="t_facets__facet__terms__active__term__label"
                 data-active-term
@@ -33,8 +35,9 @@
                 data-ng-mouseleave="mouseLeave($event)">
 
                 <span class="t_facets__facet__terms__active__term__label__text">
-                    <i class="icon-ok"></i>
-                    <span>{{item}}</span>
+                <i class="icon-ok"></i>
+                <span data-tooltip="{{ item }}"
+                      data-tooltip-placement="top">{{item}}</span>
                 </span>
             </li>
         </ul>
@@ -47,5 +50,15 @@
         <i class="t_suggest__embedded t_suggest__embedded__right  icon-spin icon-spinner" data-ng-show='isBusy'></i>
         <i class="t_suggest__embedded t_suggest__embedded__right t_suggest__embedded__clear icon-cancel"
            data-ng-click="query='';quick()" data-ng-show='query && !isBusy'></i>
+    </li>
+    <li>
+        <ul class="t_facets__facet__terms__active">
+            <li class="text-right" data-ng-hide="collapsed">
+                <button type="button" class="t_button" data-ng-click="uploadDonorSet()">
+                    <i class="icon-search"></i> Upload Donor Set
+                </button>
+                <br><br>
+            </li>
+        </ul>
     </li>
 </ul>

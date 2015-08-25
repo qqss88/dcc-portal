@@ -38,6 +38,12 @@
       }
     };
 
+    // This function is called by tags.html to prevent the File input box in
+    // External Repo File page from displaying the "Uploaded donor set" label.
+    $scope.shouldDisplayEntitySetId = function () {
+      return $scope.type !== 'file' && $scope.facetName !== 'id';
+    }
+
     function setup() {
       var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
 
@@ -56,9 +62,10 @@
 
       // Fetch display names for entity lists
       $scope.entityIdMap = {};
+
       if ($scope.activeEntityIds.length > 0) {
-        SetService.getMetaData($scope.activeEntityIds).then(function(results) {
-          $scope.entityIdMap = SetService.lookupTable(results);
+        SetService.getMetaData ($scope.activeEntityIds).then (function (results) {
+          $scope.entityIdMap = SetService.lookupTable (results);
         });
       }
 
@@ -227,6 +234,12 @@
       });
     };
 
+    $scope.uploadDonorSet = function() {
+      $modal.open({
+        templateUrl: '/scripts/donorlist/views/upload.html',
+        controller: 'DonorListController'
+      });
+    };
 
     // Needed if term removed from outside scope
     $scope.$watch(function () {
@@ -254,22 +267,32 @@
         proxyType: '@',
         proxyFacetName: '@'
       },
-      templateUrl: function(elem, attr) {
-        if (attr.type === 'gene') {
-          if (attr.facetName === 'id') {
-            return 'scripts/facets/views/genetags.html';
-          }
+      templateUrl: function (elem, attr) {
+        var path_ = function (s) {
+          return 'scripts/facets/views/' + s + '.html';
         }
-        if (attr.type === 'go_term') {
-          return 'scripts/facets/views/gotags.html';
+        var type = attr.type;
+
+        if (type === 'go_term') {
+          return path_ ('gotags');
         }
-        if (attr.type === 'pathway') {
-          return 'scripts/facets/views/pathwaytags.html';
+        if (type === 'pathway') {
+          return path_ ('pathwaytags');
         }
-        if (attr.type === 'curated_set') {
-          return 'scripts/facets/views/curatedtags.html';
+        if (type === 'curated_set') {
+          return path_ ('curatedtags');
         }
-        return 'scripts/facets/views/tags.html';
+
+        var facetName = attr.facetName;
+
+        if (type === 'gene' && facetName === 'id') {
+          return path_ ('genetags');
+        }
+        if (_.contains (['donor', 'file-donor'], type) && facetName === 'id') {
+          return path_ ('donorfacet');
+        }
+
+        return path_ ('tags');
       },
       controller: 'tagsFacetCtrl'
     };
