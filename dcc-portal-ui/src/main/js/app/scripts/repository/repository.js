@@ -260,7 +260,7 @@
    * External repository controller
    */
   module.controller('ExternalRepoController',
-    function($scope, $window, $modal, LocationService, Page, ExternalRepoService) {
+    function($scope, $window, $modal, LocationService, Page, ExternalRepoService, SetService) {
 
     var _ctrl = this;
 
@@ -281,6 +281,16 @@
      */
     _ctrl.export = function() {
       ExternalRepoService.export( LocationService.filters() );
+    };
+
+    /**
+    * View in Advanced Search
+    */
+    _ctrl.viewInSearch = function(limit) {
+      var params = {};
+      params.filters = LocationService.filters();
+      params.size = limit;
+      SetService.createForwardRepositorySet('donor', params, '/search');
     };
 
 

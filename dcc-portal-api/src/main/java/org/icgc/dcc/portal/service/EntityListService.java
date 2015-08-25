@@ -32,14 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import lombok.Cleanup;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.analysis.UnionAnalyzer;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
@@ -55,12 +47,20 @@ import org.supercsv.io.CsvListWriter;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+import lombok.Cleanup;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * A service to facilitate entity set operations.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class EntityListService {
 
   @NonNull
@@ -111,6 +111,12 @@ public class EntityListService {
 
     analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
 
+    return newEntitySet;
+  }
+
+  public EntitySet createExternalEntityList(@NonNull final EntitySetDefinition entitySetDefinition) {
+    val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
+    analyzer.materializeRepositoryList(newEntitySet.getId(), entitySetDefinition);
     return newEntitySet;
   }
 
@@ -172,8 +178,9 @@ public class EntityListService {
     // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
     // overload.
     val content =
-        isGeneType ? convertToListOfListForGene(analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId()))
-            : convertToListOfList(analyzer.retriveListItems(entitySet));
+        isGeneType ? convertToListOfListForGene(
+            analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : convertToListOfList(
+                analyzer.retriveListItems(entitySet));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);
