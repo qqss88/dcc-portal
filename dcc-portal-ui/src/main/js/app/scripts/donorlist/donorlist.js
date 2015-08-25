@@ -173,20 +173,20 @@
 
     function closeMe () {
       $modalInstance.dismiss ('cancel');
-    };
+    }
     $scope.cancel = closeMe;
 
     // Publicly visible
     $scope.hasWarnings = hasWarnings;
     $scope.hasBothValidsAndInvalidsButNoWarnings = function () {
       return hasValids() && hasInvalids() && (! hasWarnings());
-    }
+    };
     $scope.hasValidsButNoWarnings = function () {
       return hasValids() && (! hasWarnings());
-    }
+    };
     $scope.hasNeitherValidsNorWarnings = function () {
       return (! hasValids()) && (! hasWarnings());
-    }
+    };
 
     $scope.isInState = function (state) {
       return state === $scope.params.state;
@@ -198,7 +198,8 @@
     };
 
     // This triggers the upload after user selects a file.
-    /* Daniel Chang's original comment: This may be a bit brittle, angularJS as of 1.2x does not seem to have any native/clean
+    /* Daniel Chang's original comment: This may be a bit brittle, angularJS as of 1.2x
+     * does not seem to have any native/clean
      * way of modeling [input type=file]. So to get file information, it is proxied through a
      * directive that gets the file value (myFile) from input $element
      * Possible issues with illegal invocation

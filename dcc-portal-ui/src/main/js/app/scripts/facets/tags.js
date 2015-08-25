@@ -42,7 +42,7 @@
     // External Repo File page from displaying the "Uploaded donor set" label.
     $scope.shouldDisplayEntitySetId = function () {
       return $scope.type !== 'file' && $scope.facetName !== 'id';
-    }
+    };
 
     function setup() {
       var type = $scope.proxyType || $scope.type, filters = LocationService.filters(), activeIds = [];
@@ -270,7 +270,7 @@
       templateUrl: function (elem, attr) {
         var path_ = function (s) {
           return 'scripts/facets/views/' + s + '.html';
-        }
+        };
         var type = attr.type;
 
         if (type === 'go_term') {
