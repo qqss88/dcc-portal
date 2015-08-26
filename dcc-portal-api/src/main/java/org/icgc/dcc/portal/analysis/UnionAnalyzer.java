@@ -341,6 +341,11 @@ public class UnionAnalyzer {
   }
 
   @Async
+  public void materializeListAsync(@NonNull final UUID newEntityId,
+      @NonNull final EntitySetDefinition entitySetDefinition) {
+    materializeList(newEntityId, entitySetDefinition);
+  }
+
   public void materializeList(@NonNull final UUID newEntityId, @NonNull final EntitySetDefinition entitySetDefinition) {
     EntitySet newEntity = null;
 
@@ -379,7 +384,6 @@ public class UnionAnalyzer {
     }
   }
 
-  @Async
   @SneakyThrows
   public void materializeRepositoryList(@NonNull final UUID newEntityId,
       @NonNull final EntitySetDefinition entitySetDefinition) {

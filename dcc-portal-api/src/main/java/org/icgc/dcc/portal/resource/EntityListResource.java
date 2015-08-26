@@ -22,6 +22,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_ASYNC;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_DEFINITION_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_ENTITY_LIST_ID_VALUE;
@@ -36,11 +37,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -134,8 +137,9 @@ public class EntityListResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
   public Response createList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition) {
-    val newList = service.createEntityList(listDefinition);
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition,
+      @ApiParam(value = API_ASYNC) @QueryParam("async") @DefaultValue("true") final boolean async) {
+    val newList = service.createEntityList(listDefinition, async);
 
     return newListResponse(newList);
   }

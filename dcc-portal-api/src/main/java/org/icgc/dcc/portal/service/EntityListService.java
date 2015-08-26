@@ -106,10 +106,14 @@ public class EntityListService {
     return list;
   }
 
-  public EntitySet createEntityList(@NonNull final EntitySetDefinition entitySetDefinition) {
+  public EntitySet createEntityList(@NonNull final EntitySetDefinition entitySetDefinition, boolean async) {
     val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
 
-    analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
+    if (async) {
+      analyzer.materializeListAsync(newEntitySet.getId(), entitySetDefinition);
+    } else {
+      analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
+    }
 
     return newEntitySet;
   }

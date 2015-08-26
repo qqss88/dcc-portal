@@ -222,7 +222,8 @@
       params.sortOrder = 'DESCENDING';
       var promise = null;
       var data = params2JSON(type, params);
-      promise = Restangular.one('entityset').post(undefined, data, {}, {'Content-Type': 'application/json'});
+      promise = Restangular.one('entityset')
+        .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         if (! data.id) {
           console.log('there is no id!!!!');
