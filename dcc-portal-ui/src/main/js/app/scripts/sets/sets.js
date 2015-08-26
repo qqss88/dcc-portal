@@ -94,6 +94,32 @@
       $modalInstance.dismiss('cancel');
     };
 
+    $scope.submitNewExternalSet = function() {
+      var params = {}, sortParam;
+
+      params.type = $scope.params.setType;
+      params.name = $scope.params.setName;
+      params.description = $scope.params.setDescription;
+      params.size = $scope.params.setSize;
+      params.sortBy = 'fileName';
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        params.filters = LocationService.filters();
+        sortParam = LocationService.getJsonParam($scope.setType + 's');
+      }
+
+      if (angular.isDefined($scope.params.setUnion)) {
+        params.union = $scope.params.setUnion;
+      }
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        SetService.addExternalSet(setType, params);
+      }
+
+      // Reset
+      $modalInstance.dismiss('cancel');
+    };
+
     $scope.cancel = function() {
       $modalInstance.dismiss('cancel');
     };
@@ -455,4 +481,3 @@
     };
   });
 })();
-

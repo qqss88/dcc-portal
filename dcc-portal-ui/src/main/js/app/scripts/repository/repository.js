@@ -293,6 +293,30 @@
       SetService.createForwardRepositorySet('donor', params, '/search');
     };
 
+    /**
+    * Save a donor set from files
+    */
+    _ctrl.saveDonorSet = function(type, limit) {
+      _ctrl.setLimit = limit;
+      _ctrl.setType = type;
+
+      $modal.open({
+        templateUrl: '/scripts/sets/views/sets.upload.external.html',
+        controller: 'SetUploadController',
+        resolve: {
+          setType: function() {
+            return _ctrl.setType;
+          },
+          setLimit: function() {
+            return _ctrl.setLimit;
+          },
+          setUnion: function() {
+            return undefined;
+          }
+        }
+      });
+    };
+
 
     /**
      * Download manifest
