@@ -279,6 +279,10 @@
           return union;
         }
 
+        $scope.downloadsEnabled = Settings.get().then(function(settings) {
+          return settings.downloadEnabled || false;
+        });
+
         $scope.saveDerivedSet = function() {
 
           $modal.open({
@@ -298,6 +302,48 @@
           });
         };
 
+        $scope.downloadDerivedSet = function(item) {
+          var params, type, name;
+          type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
+          Page.startWork();
+          return SetService.materializeSync(type, params).then(function(data) {
+            $modal.open({
+              templateUrl: '/scripts/downloader/views/request.html',
+              controller: 'DownloadRequestController',
+              resolve: {
+                filters: function() { return {donor:{entitySetId:{is:[data.id]}}}; }
+              }
+            });
+          });
+        };
+
+        $scope.viewInExternal = function(item) {
+          var params, type, name;
+          type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
+          SetService.materializeSync(type, params).then(function(data) {
+            if (! data.id) {
+              console.log('there is no id!!!!');
+              return;
+            } else {
+              var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
+              $location.path('repository/external').search('filters', newFilter);
+            }
+          });
+        };
 
         // Export the subset(s), materialize the set along the way
         $scope.export = function(item) {
@@ -310,7 +356,6 @@
             type: $scope.item.type.toLowerCase(),
             name: name
           };
-          Page.startWork();
           SetService.materialize(type, params).then(function(data) {
             function exportSet() {
               SetService.exportSet(data.id);

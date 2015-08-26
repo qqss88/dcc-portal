@@ -98,7 +98,7 @@
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
   module.service('SetService',
-    function($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions) {
+    function($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions, Page) {
 
     var LIST_ENTITY = 'entity';
     var _this = this;
@@ -177,6 +177,15 @@
       return Restangular.one('entityset').post('union', data, {}, {'Content-Type': 'application/json'});
     };
 
+    /**
+    * We want to materialize a new set in a synchronous request.
+    */
+    this.materializeSync = function(type, params) {
+      var data = params2JSON(type, params);
+      return Restangular.one('entityset')
+        .customPOST(data, 'union', {async:false}, {'Content-Type': 'application/json'});
+    };
+
 
     /**
     * params.filters
@@ -216,7 +225,8 @@
     };
 
     this.createForwardSet = function(type, params, forwardUrl) {
-	  params.name = 'From Advanced Search';
+      Page.startWork();
+      params.name = 'From Advanced Search';
       params.description = '';
       params.sortBy = 'ssmAffectedGenes';
       params.sortOrder = 'DESCENDING';
@@ -225,6 +235,7 @@
       promise = Restangular.one('entityset')
         .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
+        Page.stopWork();
         if (! data.id) {
           console.log('there is no id!!!!');
           return;
@@ -237,6 +248,7 @@
     };
 
     this.createForwardRepositorySet = function(type, params, forwardUrl) {
+      Page.startWork();
 	    params.name = 'From External';
       params.description = '';
       params.sortBy = 'fileName';
@@ -246,6 +258,7 @@
       promise = Restangular.one('entityset').one('external')
       .post(undefined, data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
+        Page.stopWork();
         if (! data.id) {
           console.log('there is no id!!!!');
           return;

@@ -163,8 +163,9 @@ public class EntityListResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set by combining two or more existing sets.", response = EntitySet.class)
   public Response deriveList(
-      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition) {
-    val newList = service.deriveEntityList(listDefinition);
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition,
+      @ApiParam(value = API_ASYNC) @QueryParam("async") @DefaultValue("true") final boolean async) {
+    val newList = service.deriveEntityList(listDefinition, async);
 
     return newListResponse(newList);
   }

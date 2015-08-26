@@ -108,13 +108,11 @@ public class EntityListService {
 
   public EntitySet createEntityList(@NonNull final EntitySetDefinition entitySetDefinition, boolean async) {
     val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
-
     if (async) {
       analyzer.materializeListAsync(newEntitySet.getId(), entitySetDefinition);
     } else {
       analyzer.materializeList(newEntitySet.getId(), entitySetDefinition);
     }
-
     return newEntitySet;
   }
 
@@ -124,11 +122,13 @@ public class EntityListService {
     return newEntitySet;
   }
 
-  public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition) {
+  public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition, boolean async) {
     val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
-
-    analyzer.combineLists(newEntitySet.getId(), entitySetDefinition);
-
+    if (async) {
+      analyzer.combineListsAsync(newEntitySet.getId(), entitySetDefinition);
+    } else {
+      analyzer.combineLists(newEntitySet.getId(), entitySetDefinition);
+    }
     return newEntitySet;
   }
 

@@ -229,6 +229,11 @@ public class UnionAnalyzer {
   }
 
   @Async
+  public void combineListsAsync(@NonNull final UUID newEntityId,
+      @NonNull final DerivedEntitySetDefinition entitySetDefinition) {
+    combineLists(newEntityId, entitySetDefinition);
+  }
+
   public void combineLists(@NonNull final UUID newEntityId,
       @NonNull final DerivedEntitySetDefinition entitySetDefinition) {
     EntitySet newEntity = null;
