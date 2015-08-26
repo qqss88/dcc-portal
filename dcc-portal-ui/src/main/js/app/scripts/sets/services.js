@@ -162,6 +162,14 @@
 
     };
 
+    this.createRepoLink = function(set) {
+      var filters = {};
+    	var type = 'file';
+      filters[type] = {};
+      filters[type][Extensions.ENTITY] = {is: [set.id]};
+      return '/repository/external/?filters=' + angular.toJson(filters);
+    };
+
 
 
     this.materialize = function(type, params) {
@@ -206,7 +214,7 @@
 
       return promise;
     };
-    
+
     this.createForwardSet = function(type, params, forwardUrl) {
 	  params.name = 'From Advanced Search';
       params.description = '';
@@ -221,6 +229,27 @@
           return;
         } else {
           var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
+          $location.path(forwardUrl).search('filters', newFilter);
+        }
+      });
+      return promise;
+    };
+
+    this.createForwardRepositorySet = function(type, params, forwardUrl) {
+	    params.name = 'From External';
+      params.description = '';
+      params.sortBy = 'fileName';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset').one('external')
+      .post(undefined, data, {}, {'Content-Type': 'application/json'});
+      promise.then(function(data) {
+        if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+        } else {
+          var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
           $location.path(forwardUrl).search('filters', newFilter);
         }
       });
@@ -307,6 +336,10 @@
           set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
         } else {
           set.advLink = '/search?filters=' + JSON.stringify(filters);
+          var fileFilters = {};
+          fileFilters.file = {};
+          fileFilters.file[Extensions.ENTITY] = {is: [set.id]};
+          set.repoLink = '/repository/external?filters=' + JSON.stringify(fileFilters);
         }
       });
     };
@@ -428,4 +461,3 @@
   });
 
 })();
-
