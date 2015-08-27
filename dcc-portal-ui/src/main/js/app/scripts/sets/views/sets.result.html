@@ -76,7 +76,7 @@
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
                             </span>
                             <span class="t_tools__tool" data-ng-if="item.count > 0 && setType === 'donor'">
-                              <i class="icon-download" data-tooltip="Download Donor DCC Data" data-ng-click="downloadDerivedSet(item)"></i>
+                              <i data-ng-if="downloadsEnabled" class="icon-download" data-tooltip="Download Donor DCC Data" data-ng-click="downloadDerivedSet(item)"></i>
                               <i class="icon-database" data-tooltip="View in External Repository" data-ng-click="viewInExternal(item)"></i>
                             </span>
                         </span>
@@ -94,6 +94,10 @@
                             <span class="t_tools__tool">
                                 <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
+                            </span>
+                            <span class="t_tools__tool">
+                              <i data-ng-if="downloadsEnabled" class="icon-download" data-tooltip="Download Donor DCC Data" data-ng-click="downloadDerivedSet()"></i>
+                              <i class="icon-database" data-tooltip="View in External Repository" data-ng-click="viewInExternal()"></i>
                             </span>
                         </span>
                         <br>

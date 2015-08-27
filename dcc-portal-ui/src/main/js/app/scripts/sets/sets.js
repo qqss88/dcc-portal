@@ -279,10 +279,6 @@
           return union;
         }
 
-        $scope.downloadsEnabled = Settings.get().then(function(settings) {
-          return settings.downloadEnabled || false;
-        });
-
         $scope.saveDerivedSet = function() {
 
           $modal.open({
@@ -303,6 +299,7 @@
         };
 
         $scope.downloadDerivedSet = function(item) {
+          Page.startWork();
           var params, type, name;
           type = $scope.item.type.toLowerCase();
           name = 'Input ' + type + ' set';
@@ -312,8 +309,8 @@
             type: $scope.item.type.toLowerCase(),
             name: name
           };
-          Page.startWork();
           return SetService.materializeSync(type, params).then(function(data) {
+            Page.stopWork();
             $modal.open({
               templateUrl: '/scripts/downloader/views/request.html',
               controller: 'DownloadRequestController',
@@ -325,6 +322,7 @@
         };
 
         $scope.viewInExternal = function(item) {
+          Page.startWork();
           var params, type, name;
           type = $scope.item.type.toLowerCase();
           name = 'Input ' + type + ' set';
@@ -335,6 +333,7 @@
             name: name
           };
           SetService.materializeSync(type, params).then(function(data) {
+            Page.stopWork();
             if (! data.id) {
               console.log('there is no id!!!!');
               return;
@@ -506,7 +505,7 @@
           $scope.isDeprecated = false;
           if (n && n.result) {
             Settings.get().then(function(settings) {
-
+              $scope.downloadsEnabled = settings.downloadEnabled || false;
               // The maximum allowed items from union operation
               $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
 
