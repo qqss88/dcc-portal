@@ -403,7 +403,7 @@ public class UnionAnalyzer {
     val filters = entitySetDefinition.getFilters();
     val size = entitySetDefinition.getSize();
     val sort = entitySetDefinition.getSortBy();
-    queryBuilder.filters(filters).size(size).sort(sort).order("desc");
+    queryBuilder.filters(filters).limit(size).size(size).sort(sort).order("desc");
     val response = repositoryFileRepository.findAll(queryBuilder.build());
 
     val entityIds = Sets.<String> newHashSet();
