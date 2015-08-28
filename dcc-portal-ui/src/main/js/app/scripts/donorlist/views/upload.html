@@ -74,6 +74,7 @@
         </div>
       </div>
 
+      <!-- Main table -->
       <div data-ng-if="hasValidsButNoWarnings()">
         <br>
         <span>
@@ -97,7 +98,7 @@
               <tr>
                 <td class="text-center" data-ng-if="out.hasIcgcIds">ICGC ID</td>
                 <td class="text-center" data-ng-if="out.hasSubmitterIds">Submitter ID</td>
-                <td>ICGC ID</td>
+                <td style="border-left:1px solid">ICGC ID</td>
               </tr>
             </thead>
 
@@ -105,8 +106,7 @@
               <tr data-ng-repeat="(donorId, row) in out.donorSet">
                 <td data-ng-if="out.hasIcgcIds">{{ row ['icgc'].join (', ') }}</td>
                 <td data-ng-if="out.hasSubmitterIds">{{ row ['submitter'].join (', ') }}</td>
-                <!-- <td style="border-left:1px solid">{{ row ['matchedId'].join (', ') }}</td> -->
-                <td>{{ donorId }}</td>
+                <td style="border-left:1px solid">{{ donorId }}</td>
               </tr>
             </tbody>
 

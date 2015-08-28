@@ -22,7 +22,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.toMap;
+import static com.google.common.collect.Maps.uniqueIndex;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
@@ -33,8 +36,10 @@ import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.FilterBuilders.matchAllFilter;
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
@@ -56,6 +61,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -66,7 +76,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.Facet;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -91,11 +100,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
 @SuppressWarnings("deprecation")
@@ -104,21 +108,14 @@ public class DonorRepository implements Repository {
   private static final Type TYPE = Type.DONOR;
   private static final Kind KIND = Kind.DONOR;
 
-  public static final Map<String, String> DONOR_ID_SEARCH_FIELDS =
-      ImmutableMap.<String, String> of("id.search", "_donor_id",
-          "submittedId.search", "submittedId",
-          "specimenIds.search", "specimenIds",
-          "sampleIds.search", "sampleIds");
+  // These are the raw field names from the 'donor-text' type in the main index.
+  public static final Map<String, String> DONOR_ID_SEARCH_FIELDS = transformToTextSearchFieldMap(
+      "id", "submittedId", "specimenIds", "sampleIds", "submittedSpecimenIds", "submittedSampleIds");
 
-  public static final Map<String, String> FILE_DONOR_ID_SEARCH_FIELDS =
-      ImmutableMap.<String, String> builder()
-          .put("tcga_participant_barcode.search", "tcga_participant_barcode")
-          .put("tcga_sample_barcode.search", "tcga_sample_barcode")
-          .put("tcga_aliquot_barcode.search", "tcga_aliquot_barcode")
-          .put("submitted_specimen_id.search", "submitted_specimen_id")
-          .put("submitted_sample_id.search", "submitted_sample_id")
-          .put("submitted_donor_id", "submitted_donor_id")
-          .build(); // too many elements for of() so must use builder.
+  // These are the raw field names from the 'file-donor-text' type in the icgc-repository index.
+  public static final Map<String, String> FILE_DONOR_ID_SEARCH_FIELDS = transformToTextSearchFieldMap(
+      "id", "specimen_id", "sample_id", "tcga_participant_barcode", "tcga_sample_barcode",
+      "tcga_aliquot_barcode", "submitted_specimen_id", "submitted_sample_id", "submitted_donor_id");
 
   private static final class PhenotypeFacetNames {
 
@@ -509,39 +506,45 @@ public class DonorRepository implements Repository {
    * @param False - donor-text, True - file-donor-text
    * @return Returns the SearchResponse object from the query.
    */
-  public SearchResponse validateIdentifiers(List<String> input, Boolean files) {
-    Map<String, String> fields;
-    SearchRequestBuilder search;
+  public SearchResponse validateIdentifiers(@NonNull List<String> input, boolean isForExternalFile) {
+    val maxSize = 5000;
+    val fields = isForExternalFile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+    val indexName = isForExternalFile ? REPOSITORY_INDEX_NAME : index;
+    val indexType = isForExternalFile ? Type.REPOSITORY_FILE_DONOR_TEXT : Type.DONOR_TEXT;
 
-    if (!files) {
-      search = client.prepareSearch(index)
-          .setTypes(Type.DONOR_TEXT.getId())
-          .setSearchType(QUERY_THEN_FETCH)
-          .setSize(5000);
+    val search = client.prepareSearch(indexName)
+        .setTypes(indexType.getId())
+        .setSearchType(QUERY_THEN_FETCH)
+        .setSize(maxSize);
 
-      fields = DONOR_ID_SEARCH_FIELDS;
-    } else {
-      search = client.prepareSearch(REPOSITORY_INDEX_NAME)
-          .setTypes(Type.REPOSITORY_FILE_DONOR_TEXT.getId())
-          .setSearchType(QUERY_THEN_FETCH)
-          .setSize(5000);
+    final Object[] values = input.toArray();
+    val boolQuery = boolQuery();
 
-      fields = FILE_DONOR_ID_SEARCH_FIELDS;
-    }
-
-    val boolQuery = QueryBuilders.boolQuery();
     for (val searchField : fields.keySet()) {
-      boolQuery.should(QueryBuilders.termsQuery(searchField, input.toArray()));
-      search.addHighlightedField(searchField);
-      search.setHighlighterPreTags("");
-      search.setHighlighterPostTags("");
-      search.addField(searchField);
+      boolQuery.should(termsQuery(searchField, values));
+      search.addHighlightedField(searchField)
+          .setHighlighterPreTags("")
+          .setHighlighterPostTags("");
     }
-    search.setQuery(boolQuery);
-    log.debug("Search is {}", search);
+
+    search.setQuery(boolQuery)
+        .setNoFields();
+    log.debug("ES query is: '{}'.", search);
 
     val response = search.execute().actionGet();
+    log.debug("ES search result is: '{}'.", response);
+
     return response;
+  }
+
+  /*
+   * This transforms a list of raw field names (of 'donor-text' or 'file-donor-text') into a map with the key being the
+   * search term (field name plus the '.search' suffix).
+   */
+  private static Map<String, String> transformToTextSearchFieldMap(@NonNull String... fields) {
+    // Appends the '.search' suffix here as that's how the mappings are
+    // defined in 'donor-text' and 'file-donor-text'.
+    return uniqueIndex(newArrayList(fields), field -> field + ".search");
   }
 
 }

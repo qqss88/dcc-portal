@@ -23,9 +23,14 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
@@ -45,12 +50,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
-import lombok.Cleanup;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@Slf4j
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
@@ -77,35 +79,6 @@ public class DonorService {
   }
 
   /**
-   * Convert result from donor-text to a donor model
-   * @param hit Takes the matched hit from elasticsearch
-   * @return A Donor object constructed from the hit.
-   */
-  private Donor donorText2Donor(SearchHit hit) {
-    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
-    Map<String, Object> donorMap = Maps.newHashMap();
-    for (val key : fieldMap.keySet()) {
-      donorMap.put(DONOR_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
-    }
-    return new Donor(donorMap);
-  }
-
-  /**
-   * Convert result from file-donor-text to a donor model
-   * @param hit Takes the matched hit from elasticsearch
-   * @return A Donor object constructed from the hit.
-   */
-  private Donor fileDonorText2Donor(SearchHit hit) {
-    val fieldMap = createResponseMap(hit, Query.builder().build(), Kind.DONOR);
-    Map<String, Object> donorMap = Maps.newHashMap();
-    donorMap.put("_donor_id", hit.getId());
-    for (val key : fieldMap.keySet()) {
-      donorMap.put(FILE_DONOR_ID_SEARCH_FIELDS.get(key), fieldMap.get(key));
-    }
-    return new Donor(donorMap);
-  }
-
-  /**
    * Matches donors based on the ids provided.
    * 
    * @param ids List of ids as strings
@@ -113,31 +86,34 @@ public class DonorService {
    * @return A Map keyed on search fields from file-donor-text or donor-text with values being a multimap containing the
    * matched field as the key and the matched donor as the value.
    */
-  public Map<String, Multimap<String, Donor>> validateIdentifiers(List<String> ids, Boolean file) {
-    val result = Maps.<String, Multimap<String, Donor>> newHashMap();
-    val fields = file ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+  public Map<String, Multimap<String, String>> validateIdentifiers(@NonNull List<String> ids, boolean isForExternalfile) {
+    val result = Maps.<String, Multimap<String, String>> newHashMap();
+    val fields = isForExternalfile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
+
     for (val search : fields.values()) {
-      val typeResult = ArrayListMultimap.<String, Donor> create();
+      val typeResult = ArrayListMultimap.<String, String> create();
       result.put(search, typeResult);
     }
 
-    val response = donorRepository.validateIdentifiers(ids, file);
+    val response = donorRepository.validateIdentifiers(ids, isForExternalfile);
+
     for (val hit : response.getHits()) {
       val highlightedFields = hit.getHighlightFields();
-      // Donors from donor-text and file-donor-text are constructed differently
-      val matchedDonor = file ? fileDonorText2Donor(hit) : donorText2Donor(hit);
+      // The 'id' field in both 'donor-text' and 'file-donor-text' is the donor ID.
+      val matchedDonor = hit.getId();
 
       for (val searchField : fields.keySet()) {
-        // Find out which matched by looking at the highlighted field fragments
         if (highlightedFields.containsKey(searchField)) {
           val field = fields.get(searchField);
           val keys = highlightedFields.get(searchField).getFragments();
+
           for (val key : keys) {
             result.get(field).put(key.toString(), matchedDonor);
           }
         }
       }
     }
+
     return result;
   }
 
@@ -237,11 +213,10 @@ public class DonorService {
         val writer =
             new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
 
-        final String[] headers =
-            { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code",
-
-            "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study"
-            };
+        final String[] headers = {
+            "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id",
+            "icgc_donor_id", "submitted_donor_id", "project_code", "specimen_type", "specimen_type_other",
+            "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study" };
 
         // Write TSV
         writer.writeHeader(headers);

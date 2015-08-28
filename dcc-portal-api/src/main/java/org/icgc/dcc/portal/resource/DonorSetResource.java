@@ -40,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.model.Donor;
 import org.icgc.dcc.portal.model.UploadedDonorSet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.UserDonorListService;
@@ -76,11 +75,8 @@ public class DonorSetResource {
   private final static int MAX_DONOR_LIST_SIZE = 1000;
   private final static Splitter splitter = Splitter.on(DONOR_DELIMITERS).omitEmptyStrings();
 
-  private final static Set<String> ICGC_COL_TYPES =
-      ImmutableSet.of(
-          "_donor_id",
-          "specimenIds",
-          "sampleIds");
+  private final static Set<String> ICGC_COL_TYPES = ImmutableSet.of(
+      "id", "specimenIds", "sampleIds");
 
   private final static String ICGC_COL = "icgc";
   private final static String SUBMITTER_COL = "submitter";
@@ -93,8 +89,6 @@ public class DonorSetResource {
       @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
       @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly,
       @ApiParam(value = "External Repository") @QueryParam("externalRepo") @DefaultValue("false") boolean externalRepo) {
-
-    log.info("validation flag is: {}", validationOnly);
 
     val result = findDonorsByIdentifiers(donorIds, externalRepo);
     if (validationOnly) {
@@ -109,6 +103,7 @@ public class DonorSetResource {
 
     val id = userDonorListService.save(uniqueIds);
     result.setDonorListId(id.toString());
+
     return result;
   }
 
@@ -117,7 +112,7 @@ public class DonorSetResource {
     val originalIds = ImmutableList.<String> copyOf(splitter.split(data));
 
     if (originalIds.size() > MAX_DONOR_LIST_SIZE) {
-      log.info("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
+      log.debug("Exceeds maximum size {}", MAX_DONOR_LIST_SIZE);
       donorList.getWarnings().add(
           String.format("Input data exceeds maximum threshold of %s donor identifiers.", MAX_DONOR_LIST_SIZE));
       return donorList;
@@ -132,7 +127,7 @@ public class DonorSetResource {
     log.debug("Search results {}", donorResults);
 
     // All matched identifiers
-    val validIds = Maps.<String, Multimap<String, Donor>> newHashMap();
+    val validIds = Maps.<String, Multimap<String, String>> newHashMap();
     val allMatchedIdentifiers = Sets.<String> newHashSet();
     val searchFields = isForExternalRepo ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
 
@@ -160,7 +155,7 @@ public class DonorSetResource {
   }
 
   @NonNull
-  private UploadedDonorSet pivotDonorList(UploadedDonorSet donorSet, Map<String, Multimap<String, Donor>> validDonors) {
+  private UploadedDonorSet pivotDonorList(UploadedDonorSet donorSet, Map<String, Multimap<String, String>> validDonors) {
     val pivotedMap = Maps.<String, SetMultimap<String, String>> newHashMap();
     boolean hasIcgcIds = false;
     boolean hasSubmitterIds = false;
@@ -170,8 +165,7 @@ public class DonorSetResource {
       val value = searchType.getValue();
 
       for (val id : value.keySet()) {
-        for (val donor : value.get(id)) {
-          val donorId = donor.getId();
+        for (val donorId : value.get(id)) {
 
           if (!pivotedMap.containsKey(donorId)) {
             pivotedMap.put(donorId, HashMultimap.<String, String> create());
