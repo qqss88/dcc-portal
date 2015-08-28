@@ -121,6 +121,10 @@ public class RepositoryFileRepository {
       "tcga_participant_barcode",
       "tcga_sample_barcode",
       "tcga_aliquot_barcode");
+  private static final String DONOR_SEARCH_LOWERCASE_MATCH_SUFFIX = ".search";
+  private static final List<String> DONOR_SEARCH_FIELDS_OF_LOWERCASE_MATCH = ImmutableList.of(
+      "id",
+      "submitted_donor_id");
   private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
       Fields.REPO_TYPE,
       Fields.REPO_ENTITY_ID,
@@ -520,19 +524,33 @@ public class RepositoryFileRepository {
     val maxNumberOfDocs = 5;
 
     // Due to the mapping of the file-donor-text type, we need to add certain suffixes to field names.
-    // Adds '.raw' to field names for fields that need exact match.
-    val fieldNames = transform(fields, fieldName -> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ? fieldName
-        + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
-    // Adds '.analyzed' to field names for fields that need partial match.
-    val names = transform(fieldNames, fieldName -> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ? fieldName
-        + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
+    val fieldNames = transform(fields, fieldName -> {
+      // Adds '.raw' to field names for fields that need exact match.
+        if (DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName)) {
+          return fieldName + DONOR_SEARCH_EXACT_MATCH_SUFFIX;
+        }
+
+        // Adds '.analyzed' to field names for fields that need partial match.
+        if (DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName)) {
+          return fieldName + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX;
+        }
+
+        // Adds '.search' to field names for fields that need the 'lowercase' match.
+        if (DONOR_SEARCH_FIELDS_OF_LOWERCASE_MATCH.contains(fieldName)) {
+          return fieldName + DONOR_SEARCH_LOWERCASE_MATCH_SUFFIX;
+        }
+
+        return fieldName;
+      });
 
     val search = client.prepareSearch(index)
         .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(maxNumberOfDocs)
-        .setQuery(multiMatchQuery(queryString, toStringArray(names)));
+        .setQuery(multiMatchQuery(queryString, toStringArray(fieldNames)));
+
+    log.debug("ES query is: '{}'.", search);
 
     return search.execute().actionGet();
   }
