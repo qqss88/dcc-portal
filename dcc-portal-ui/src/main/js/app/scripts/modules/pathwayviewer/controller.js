@@ -146,6 +146,8 @@
       // Recalcualte the scale factor and offset and the zoom and transition
       scaleFactor = Math.min(config.height / (pathwayBox.height - pathwayBox.minHeight),
                              config.width / (pathwayBox.width - pathwayBox.minWidth));
+                             
+      scaleFactor = scaleFactor * 0.95;
       offsetX = (config.width - (pathwayBox.width - pathwayBox.minWidth) * scaleFactor) / 2;
       offsetY = (config.height - (pathwayBox.height - pathwayBox.minHeight) * scaleFactor) / 2;
       zoom.scale(scaleFactor).translate([-pathwayBox.minWidth * scaleFactor + offsetX,
