@@ -53,7 +53,9 @@ public abstract class BaseEntitySet {
   @Getter
   public enum Type {
 
-    DONOR("donor"), GENE("gene"), MUTATION("mutation");
+    DONOR("donor"),
+    GENE("gene"),
+    MUTATION("mutation");
 
     @NonNull
     private final String name;

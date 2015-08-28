@@ -346,8 +346,7 @@
 
         // Export the subset(s), materialize the set along the way
         $scope.export = function(item) {
-          var params, type, name;
-          type = $scope.item.type.toLowerCase();
+          var params, name, type = $scope.item.type.toLowerCase();
           name = 'Input ' + type + ' set';
 
           params = {

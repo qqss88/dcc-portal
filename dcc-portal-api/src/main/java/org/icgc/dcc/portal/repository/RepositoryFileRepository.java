@@ -210,8 +210,7 @@ public class RepositoryFileRepository {
       } else if (fieldName.equals("entitySetId")) {
         for (val item : items) {
           val lookupFilter =
-              TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item))
-                  .cache(false);
+              TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item));
           termFilters.must(lookupFilter);
         }
         continue;
@@ -241,7 +240,7 @@ public class RepositoryFileRepository {
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
     }
 
-    return termFilters.cache(false);
+    return termFilters;
   }
 
   public List<AggregationBuilder<?>> aggs(ObjectNode filters) {

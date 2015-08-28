@@ -40,7 +40,6 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
-import org.elasticsearch.search.SearchHit;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
@@ -392,7 +391,6 @@ public class UnionAnalyzer {
   @SneakyThrows
   public void materializeRepositoryList(@NonNull final UUID newEntityId,
       @NonNull final EntitySetDefinition entitySetDefinition) {
-
     EntitySet newEntity = null;
     newEntity = entityListRepository.find(newEntityId);
     val dataVersion = newEntity.getVersion();
@@ -407,11 +405,12 @@ public class UnionAnalyzer {
     val response = repositoryFileRepository.findAll(queryBuilder.build());
 
     val entityIds = Sets.<String> newHashSet();
-    for (SearchHit hit : response.getHits()) {
+    for (val hit : response.getHits()) {
       val fileNode = READER.readTree(hit.sourceAsString());
       val donorId = fileNode.path("donor").path("donor_id").asText();
       entityIds.add(donorId);
     }
+
     val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
 
@@ -419,7 +418,6 @@ public class UnionAnalyzer {
     val count = getCountFrom(response, max);
     // Done - update status to finished
     entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
-
   }
 
   private SearchResponse runEsQuery(

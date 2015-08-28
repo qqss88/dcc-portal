@@ -131,8 +131,13 @@ public class EntityListResource {
     }
   }
 
+  /**
+   * This hits the root path of /v1/entityset
+   * @param listDefinition EntitySet definition from client.
+   * @param async Defaults to true. Set to false if a synchronous request is needed.
+   * @return JSON representation of new entity set.
+   */
   @POST
-  // this hits the root path of /v1/entityset
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
@@ -144,9 +149,13 @@ public class EntityListResource {
     return newListResponse(newList);
   }
 
+  /**
+   * Endpoint used for creating an entity set from the external repository.
+   * @param listDefinition EntitySet definition from client.
+   * @return JSON representation of new entity set.
+   */
   @POST
   @Path("/external")
-  // this hits the root path of /v1/entityset
   @Consumes(APPLICATION_JSON)
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Creates an entity set from an Advanced Search query.", response = EntitySet.class)
