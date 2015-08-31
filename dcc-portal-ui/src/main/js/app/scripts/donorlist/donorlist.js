@@ -192,6 +192,11 @@
       return state === $scope.params.state;
     };
 
+    $scope.validIdCount = function () {
+      var invalidIdCount = _.get ($scope, 'out.invalidIds.length', 0);
+      return $scope.out.uploadIdCount - invalidIdCount;
+    };
+
     $scope.save = function() {
       createDonorList();
       closeMe();

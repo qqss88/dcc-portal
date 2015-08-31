@@ -80,7 +80,7 @@
         <span>
           <span data-ng-init="expanded = true" data-ng-click="expanded = ! expanded">
             <a href="">
-              {{ numberOfUiRows }} submitted donor identifier(s) mapped to {{ numberOfUiRows }} ICGC Donor ID(s)
+              {{ validIdCount() }} submitted donor identifier(s) mapped to {{ numberOfUiRows }} ICGC Donor ID(s)
               <i class="{{ expanded? 'icon-caret-down' : 'icon-caret-left' }}"></i>
             </a>
           </span>

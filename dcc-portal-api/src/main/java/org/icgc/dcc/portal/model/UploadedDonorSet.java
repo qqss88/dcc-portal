@@ -46,6 +46,9 @@ public class UploadedDonorSet {
   String donorListId;
 
   @JsonProperty
+  Integer uploadIdCount;
+
+  @JsonProperty
   Boolean hasIcgcIds;
 
   @JsonProperty

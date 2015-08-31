@@ -151,11 +151,12 @@ public class DonorSetResource {
       }
     }
 
-    return pivotDonorList(donorList, validIds);
+    return enrichResult(donorList, validIds, originalIds.size());
   }
 
   @NonNull
-  private UploadedDonorSet pivotDonorList(UploadedDonorSet donorSet, Map<String, Multimap<String, String>> validDonors) {
+  private UploadedDonorSet enrichResult(UploadedDonorSet donorSet, Map<String, Multimap<String, String>> validDonors,
+      int uploadIdCount) {
     val pivotedMap = Maps.<String, SetMultimap<String, String>> newHashMap();
     boolean hasIcgcIds = false;
     boolean hasSubmitterIds = false;
@@ -185,6 +186,7 @@ public class DonorSetResource {
     }
 
     donorSet.setDonorSet(pivotedMap);
+    donorSet.setUploadIdCount(uploadIdCount);
     donorSet.setHasIcgcIds(hasIcgcIds);
     donorSet.setHasSubmitterIds(hasSubmitterIds);
 
