@@ -22,10 +22,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.toMap;
-import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
@@ -43,6 +42,7 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.model.IndexTypeSearchFields.indexTypeSearchFields;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
@@ -522,12 +522,12 @@ public class DonorRepository implements Repository {
 
     for (val searchField : fields.keySet()) {
       boolQuery.should(termsQuery(searchField, values));
-      search.addHighlightedField(searchField)
-          .setHighlighterPreTags("")
-          .setHighlighterPostTags("");
+      search.addHighlightedField(searchField);
     }
 
     search.setQuery(boolQuery)
+        .setHighlighterPreTags("")
+        .setHighlighterPostTags("")
         .setNoFields();
     log.debug("ES query is: '{}'.", search);
 
@@ -542,9 +542,10 @@ public class DonorRepository implements Repository {
    * search term (field name plus the '.search' suffix).
    */
   private static Map<String, String> transformToTextSearchFieldMap(@NonNull String... fields) {
-    // Appends the '.search' suffix here as that's how the mappings are
-    // defined in 'donor-text' and 'file-donor-text'.
-    return uniqueIndex(newArrayList(fields), field -> field + ".search");
+    return indexTypeSearchFields()
+        .lowercaseMatchFields(newHashSet(fields))
+        .build()
+        .toSearchFieldMap();
   }
 
 }
