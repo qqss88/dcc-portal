@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
@@ -44,7 +44,6 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.IndexTypeSearchFields.indexTypeSearchFields;
-import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -59,7 +58,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
@@ -100,7 +98,6 @@ import org.icgc.dcc.portal.model.IndexTypeSearchFields;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
-import org.icgc.dcc.portal.service.TermsLookupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -116,7 +113,7 @@ import com.google.common.primitives.Ints;
 public class RepositoryFileRepository {
 
   private static final IndexTypeSearchFields FILE_DONOR_TEXT_SEARCH_FIELDS = indexTypeSearchFields()
-      .partialMatchFields(newArrayList(
+      .partialMatchFields(newHashSet(
           "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
           "id", "submitted_donor_id",
           "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode"))
@@ -205,14 +202,6 @@ public class RepositoryFileRepository {
       if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
         continue;
-      } else if (fieldName.equals("entitySetId")) {
-        for (val item : items) {
-          val lookupFilter =
-              TermsLookupService.createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item))
-                  .cache(false);
-          termFilters.must(lookupFilter);
-        }
-        continue;
       } else {
         val terms = termsFilter(fieldName, items);
 
@@ -239,7 +228,7 @@ public class RepositoryFileRepository {
       termFilters.must(nestedFilter("data_types", nestedBoolFilter));
     }
 
-    return termFilters.cache(false);
+    return termFilters;
   }
 
   public List<AggregationBuilder<?>> aggs(ObjectNode filters) {
