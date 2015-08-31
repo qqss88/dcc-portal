@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
@@ -113,7 +113,7 @@ import com.google.common.primitives.Ints;
 public class RepositoryFileRepository {
 
   private static final IndexTypeSearchFields FILE_DONOR_TEXT_SEARCH_FIELDS = indexTypeSearchFields()
-      .partialMatchFields(newArrayList(
+      .partialMatchFields(newHashSet(
           "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
           "id", "submitted_donor_id",
           "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode"))

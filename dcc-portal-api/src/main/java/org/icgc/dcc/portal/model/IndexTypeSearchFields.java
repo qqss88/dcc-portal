@@ -17,17 +17,27 @@
  */
 package org.icgc.dcc.portal.model;
 
+import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Maps.uniqueIndex;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
+import lombok.val;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 /**
- * This represents a collection of raw field names grouped by the type of search analyzer (or lack of) defined by the
- * data model/mappings.
+ * This represents a collection of raw field names grouped by the type of search analyzer (or lack of) defined by our
+ * elasticsearch data model/mappings.
  */
 @Value
 @Builder
@@ -38,36 +48,65 @@ public class IndexTypeSearchFields {
   private static final String PARTIAL_MATCH_SUFFIX = ".analyzed";
   private static final String LOWERCASE_MATCH_SUFFIX = ".search";
 
-  List<String> exactMatchFields;
-  List<String> partialMatchFields;
-  List<String> lowercaseMatchFields;
+  Set<String> exactMatchFields;
+  Set<String> partialMatchFields;
+  Set<String> lowercaseMatchFields;
 
   public static IndexTypeSearchFieldsBuilder indexTypeSearchFields() {
     return builder();
   }
 
   public Iterable<String> toEsFieldNames(@NonNull Iterable<String> fields) {
-    return transform(fields, field -> field + getSearchSuffix(field));
+    final Iterable<Iterable<String>> result = transform(fields,
+        field -> transform(getSearchSuffixes(field), suffix -> field + suffix));
+
+    return concat(result);
   }
 
-  private static boolean contains(List<String> matchFields, String fieldName) {
+  public Iterable<String> toEsFieldNames() {
+    val fields = concat(ensureSet(exactMatchFields), ensureSet(partialMatchFields), ensureSet(lowercaseMatchFields));
+    return toEsFieldNames(fields);
+  }
+
+  public Map<String, String> toSearchFieldMap() {
+    return ImmutableMap.<String, String> builder()
+        .putAll(toSpecificSearchFieldMap(exactMatchFields, EXACT_MATCH_SUFFIX))
+        .putAll(toSpecificSearchFieldMap(partialMatchFields, PARTIAL_MATCH_SUFFIX))
+        .putAll(toSpecificSearchFieldMap(lowercaseMatchFields, LOWERCASE_MATCH_SUFFIX))
+        .build();
+  }
+
+  private static Map<String, String> toSpecificSearchFieldMap(Iterable<String> matchFields, String suffix) {
+    return (null == matchFields) ? emptyMap() : uniqueIndex(matchFields, field -> field + suffix);
+  }
+
+  private static Set<String> ensureSet(Set<String> set) {
+    return (null == set) ? emptySet() : set;
+  }
+
+  private static boolean contains(Set<String> matchFields, String fieldName) {
     return matchFields != null && matchFields.contains(fieldName);
   }
 
-  private String getSearchSuffix(String fieldName) {
+  private Iterable<String> getSearchSuffixes(String fieldName) {
     if (null == fieldName) {
-      return "";
+      return emptyList();
     }
 
+    val result = ImmutableList.<String> builder();
+
     if (contains(exactMatchFields, fieldName)) {
-      return EXACT_MATCH_SUFFIX;
-    } else if (contains(partialMatchFields, fieldName)) {
-      return PARTIAL_MATCH_SUFFIX;
-    } else if (contains(lowercaseMatchFields, fieldName)) {
-      return LOWERCASE_MATCH_SUFFIX;
-    } else {
-      // Pass-through
-      return "";
+      result.add(EXACT_MATCH_SUFFIX);
     }
+
+    if (contains(partialMatchFields, fieldName)) {
+      result.add(PARTIAL_MATCH_SUFFIX);
+    }
+
+    if (contains(lowercaseMatchFields, fieldName)) {
+      result.add(LOWERCASE_MATCH_SUFFIX);
+    }
+
+    return result.build();
   }
 }
