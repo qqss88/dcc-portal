@@ -41,6 +41,17 @@
 
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services']);
 
+  var fixScroll = function () {
+    var current = $('.current').children('a').attr('href');
+    if (current == '#pathway') {
+      $('body,html').stop(true, true);
+      console.log('trying to scroll!');
+      var offset = $(current).offset();
+      var to = offset.top - 40;
+      $('body,html').animate({scrollTop: to}, 400); 
+    } 
+  };
+
   module.controller('GeneSetCtrl',
     function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
       GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PortalFeature) {
@@ -243,7 +254,6 @@
         GeneSetService.getMutationImpactFacet(mergedGeneSetFilter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
         });
-
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {
@@ -280,6 +290,7 @@
                 gene: geneFilter
               });
             });
+            fixScroll();
           });
       }
     }
@@ -355,7 +366,8 @@
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
-              }
+              }  
+              fixScroll();            
             });
           });
         });
@@ -410,6 +422,7 @@
               donor: {id:{is:[d.id]}}
             });
           });
+          fixScroll();
         });
       }
     }
