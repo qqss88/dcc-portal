@@ -50,6 +50,16 @@
         var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
         
+        var typeMap = {
+          'RenderableComplex': 'Complex',
+          'RenderableProtein': 'Protein',
+          'RenderableEntitySet': 'EntitySet',
+          'RenderableChemical': 'Chemical',
+          'RenderableCompartment': 'Compartment',
+          'ProcessNode': 'ProcessNode',
+          'RenderableMutated Gene(s)': 'Mutated Gene(s)'
+        };
+        
         var showLegend = function(){
           $('.pathway-legend').animate({'left': '75%'});
           $('.pathway-legend-controller').addClass('fa-chevron-circle-right').removeClass('fa-question-circle');
@@ -105,10 +115,7 @@
 
             // Reset data
             $scope.geneList = [];
-
-            // Getting type info, not sure if substr(10) will always work...
-            // assuming everything starts with 'Renderable'
-            $scope.entityType = d.type.substr(10);
+            $scope.entityType = typeMap[d.type];
             
             hideLegend();
             showInfo();
