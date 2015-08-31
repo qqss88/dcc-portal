@@ -144,7 +144,7 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          subPathwayColor: 'hotpink'
+          subPathwayColor: 'navy'
         });
         
         $('.pathway-legend-controller').on('click',function(){

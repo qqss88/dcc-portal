@@ -8,7 +8,7 @@
     urlPath: '',
     strokeColor: '#696969',
     highlightColor: 'red',
-    subPathwayColor: 'hotpink'
+    subPathwayColor: 'navy'
   };
 
   var Renderer = function(svg, config) {
@@ -30,7 +30,6 @@
     var isCircular = function(type){return _.contains(['Catalyst','Catalyst-legend'],type);};
     var shifted = function(type){return _.contains(['Catalyst','Activator'],type);};
     var isLinear = function(type){return _.contains(['Inhibitor','Inhibitor-legend'],type);};
-    
     
     var circle = {
       'element':'circle',

@@ -71,8 +71,9 @@ $compartmentBorder:#ffc38b;
   fill:$nonNodeBoxColor;
 }
 
-.pathway-sub-reaction-line line{
-  stroke-width:1.5px;
+.pathway-sub-reaction-line {
+  stroke-width:2px;
+  stroke: navy;
 }
 
 // Special legend node has no background
