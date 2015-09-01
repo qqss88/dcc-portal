@@ -223,6 +223,34 @@
 
       return promise;
     };
+    
+    this.addExternalSet = function(type, params) {
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset').one('external')
+        .post(undefined, data, {}, {'Content-Type': 'application/json'});
+
+      promise.then(function(data) {
+        if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+        }
+
+        // If flagged as transient, don't save to local storage
+        if (data.subtype === 'TRANSIENT') {
+          return;
+        }
+
+        data.type = data.type.toLowerCase();
+        //setList.splice(1, 0, data);
+        setList.unshift(data);
+        localStorageService.set(LIST_ENTITY, setList);
+        toaster.pop('', 'Saving ' + data.name,
+          'View in <a href="/analysis/sets">Data Analysis</a>', 4000, 'trustedHtml');
+      });
+
+      return promise;
+    };
 
     this.createForwardSet = function(type, params, forwardUrl) {
       Page.startWork();
