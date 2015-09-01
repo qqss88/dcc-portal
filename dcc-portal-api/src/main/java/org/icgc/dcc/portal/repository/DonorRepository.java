@@ -42,7 +42,7 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
-import static org.icgc.dcc.portal.model.IndexTypeSearchFields.indexTypeSearchFields;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
@@ -542,10 +542,10 @@ public class DonorRepository implements Repository {
    * search term (field name plus the '.search' suffix).
    */
   private static Map<String, String> transformToTextSearchFieldMap(@NonNull String... fields) {
-    return indexTypeSearchFields()
+    return searchFieldMapper()
         .lowercaseMatchFields(newHashSet(fields))
         .build()
-        .toSearchFieldMap();
+        .toMap();
   }
 
 }
