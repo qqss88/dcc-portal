@@ -180,7 +180,7 @@
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')
       .html('<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-          '&larr; # mutations'+'</td></tr></table>');
+          '&larr; # ICGC Mutations'+'</td></tr></table>');
     
     return nodes;
   };

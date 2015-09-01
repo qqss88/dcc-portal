@@ -17,7 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.sortBuilder;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
@@ -43,6 +43,7 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -90,6 +91,7 @@ import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.service.TermsLookupService;
@@ -113,17 +115,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class RepositoryFileRepository {
 
-  private static final String DONOR_SEARCH_EXACT_MATCH_SUFFIX = ".raw";
-  private static final List<String> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH = ImmutableList.of(
-      "specimen_id",
-      "sample_id",
-      "submitted_specimen_id",
-      "submitted_sample_id");
-  private static final String DONOR_SEARCH_PARTIAL_MATCH_SUFFIX = ".analyzed";
-  private static final List<String> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH = ImmutableList.of(
-      "tcga_participant_barcode",
-      "tcga_sample_barcode",
-      "tcga_aliquot_barcode");
+  private static final SearchFieldMapper FILE_DONOR_TEXT_SEARCH_FIELDS = searchFieldMapper()
+      .partialMatchFields(newHashSet(
+          "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
+          "id", "submitted_donor_id",
+          "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode"))
+      .build();
+
   private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
       Fields.REPO_TYPE,
       Fields.REPO_ENTITY_ID,
@@ -528,21 +526,16 @@ public class RepositoryFileRepository {
   @NonNull
   public SearchResponse findRepoDonor(Iterable<String> fields, String queryString) {
     val maxNumberOfDocs = 5;
-
-    // Due to the mapping of the file-donor-text type, we need to add certain suffixes to field names.
-    // Adds '.raw' to field names for fields that need exact match.
-    val fieldNames = transform(fields, fieldName -> DONOR_SEARCH_FIELDS_OF_EXACT_MATCH.contains(fieldName) ? fieldName
-        + DONOR_SEARCH_EXACT_MATCH_SUFFIX : fieldName);
-    // Adds '.analyzed' to field names for fields that need partial match.
-    val names = transform(fieldNames, fieldName -> DONOR_SEARCH_FIELDS_OF_PARTIAL_MATCH.contains(fieldName) ? fieldName
-        + DONOR_SEARCH_PARTIAL_MATCH_SUFFIX : fieldName);
+    val fieldNames = FILE_DONOR_TEXT_SEARCH_FIELDS.map(fields);
 
     val search = client.prepareSearch(index)
         .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(maxNumberOfDocs)
-        .setQuery(multiMatchQuery(queryString, toStringArray(names)));
+        .setQuery(multiMatchQuery(queryString, toStringArray(fieldNames)));
+
+    log.debug("ES query is: '{}'.", search);
 
     return search.execute().actionGet();
   }
