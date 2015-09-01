@@ -43,7 +43,7 @@ import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
-import static org.icgc.dcc.portal.model.IndexTypeSearchFields.indexTypeSearchFields;
+import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -94,7 +94,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.model.IndexTypeSearchFields;
+import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
@@ -112,7 +112,7 @@ import com.google.common.primitives.Ints;
 @Component
 public class RepositoryFileRepository {
 
-  private static final IndexTypeSearchFields FILE_DONOR_TEXT_SEARCH_FIELDS = indexTypeSearchFields()
+  private static final SearchFieldMapper FILE_DONOR_TEXT_SEARCH_FIELDS = searchFieldMapper()
       .partialMatchFields(newHashSet(
           "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
           "id", "submitted_donor_id",
@@ -516,7 +516,7 @@ public class RepositoryFileRepository {
   @NonNull
   public SearchResponse findRepoDonor(Iterable<String> fields, String queryString) {
     val maxNumberOfDocs = 5;
-    val fieldNames = FILE_DONOR_TEXT_SEARCH_FIELDS.toEsFieldNames(fields);
+    val fieldNames = FILE_DONOR_TEXT_SEARCH_FIELDS.map(fields);
 
     val search = client.prepareSearch(index)
         .setTypes(FILE_DONOR_TEXT_INDEX_TYPE)
