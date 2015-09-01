@@ -59,7 +59,7 @@
       geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
 
       /**
-       * Our function for keep the page on the current section. 
+       * Our function for keeping the page on the current section. 
        */
       $scope.fixScroll = function () {
         var current = jQuery('.current').children('a').attr('href');
