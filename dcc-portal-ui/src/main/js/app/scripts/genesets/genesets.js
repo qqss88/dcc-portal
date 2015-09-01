@@ -41,19 +41,8 @@
 
   var module = angular.module('icgc.genesets.controllers', ['icgc.genesets.services']);
 
-  var fixScroll = function () {
-    var current = $('.current').children('a').attr('href');
-    if (current == '#pathway') {
-      $('body,html').stop(true, true);
-      console.log('trying to scroll!');
-      var offset = $(current).offset();
-      var to = offset.top - 40;
-      $('body,html').animate({scrollTop: to}, 400); 
-    } 
-  };
-
   module.controller('GeneSetCtrl',
-    function ($scope, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
+    function ($scope, $timeout, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
       GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet, PortalFeature) {
 
       var _ctrl = this, geneSetFilter = {gene: {geneSetId: {is: [geneSet.id]}}};
@@ -69,7 +58,19 @@
       geneSetFilter = {};
       geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
 
-
+      /**
+       * Our function for keep the page on the current section. 
+       */
+      $scope.fixScroll = function () {
+        var current = jQuery('.current').children('a').attr('href');
+        //We do not want to immediately scroll away from the controls on page load. 
+        if (current !== '#summary') {
+          jQuery('body,html').stop(true, true);
+          var offset = jQuery(current).offset();
+          var to = offset.top - 40;
+          jQuery('body,html').animate({scrollTop: to}, 200); 
+        } 
+      };
 
       // Builds the project-donor distribution based on thie gene set
       // 1) Create embedded search queries
@@ -254,6 +255,7 @@
         GeneSetService.getMutationImpactFacet(mergedGeneSetFilter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
         });
+        
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {
@@ -266,7 +268,7 @@
     });
 
 
-  module.controller('GeneSetGenesCtrl', function ($scope, LocationService, Genes, GeneSets, FiltersUtil) {
+  module.controller('GeneSetGenesCtrl', function ($scope, $timeout, LocationService, Genes, GeneSets, FiltersUtil) {
     var _ctrl = this, _geneSet = '', mergedGeneSetFilter = {};
 
     function success(genes) {
@@ -290,7 +292,8 @@
                 gene: geneFilter
               });
             });
-            fixScroll();
+            //Timeout so that our scroll function gets called after render. 
+            $timeout(function() {$scope.fixScroll();},0);
           });
       }
     }
@@ -315,7 +318,7 @@
   });
 
   module.controller('GeneSetMutationsCtrl',
-    function ($scope, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil, ProjectCache) {
+    function ($scope, $timeout, Mutations, GeneSets, Projects, LocationService, Donors, FiltersUtil, ProjectCache) {
 
     var _ctrl = this, geneSet;
 
@@ -366,8 +369,9 @@
                   facet.countTotal = p.ssmTestedDonorCount;
                   facet.percentage = facet.count / p.ssmTestedDonorCount;
                 });
-              }  
-              fixScroll();            
+              }
+              //Timeout so that our scroll function gets called after render. 
+              $timeout(function() {$scope.fixScroll();},0);            
             });
           });
         });
@@ -422,7 +426,6 @@
               donor: {id:{is:[d.id]}}
             });
           });
-          fixScroll();
         });
       }
     }
