@@ -192,7 +192,6 @@
             _ctrl.pathway.zooms = [''];
           }
 
-
           var mutationImpact = [];
           if (mergedGeneSetFilter.mutation && mergedGeneSetFilter.mutation.functionalImpact) {
             mutationImpact = mergedGeneSetFilter.mutation.functionalImpact.is;
@@ -211,7 +210,6 @@
                 });
               }
             });
-
 
             // Get ensembl ids for all the genes so we can link to advSearch page
             uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
@@ -239,8 +237,6 @@
               });
             });
 
-
-
             _ctrl.pathway.highlights = pathwayHighlights;
           });
 
@@ -254,8 +250,7 @@
 
         GeneSetService.getMutationImpactFacet(mergedGeneSetFilter).then(function(d) {
           _ctrl.mutationFacets = d.facets;
-        });
-        
+        });   
       }
 
       $scope.$on('$locationChangeSuccess', function (event, dest) {
@@ -447,4 +442,3 @@
     refresh();
   });
 })();
-
