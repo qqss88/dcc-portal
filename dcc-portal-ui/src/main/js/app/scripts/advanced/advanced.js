@@ -118,6 +118,8 @@
     	  var params = {};
     	  params.filters = LocationService.filters();
     	  params.size = limit;
+        //Ensure the scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
+        $scope.$destroy();
     	  SetService.createForwardSet(type, params, '/repository/external');
        };
 
