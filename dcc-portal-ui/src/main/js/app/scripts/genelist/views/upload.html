@@ -14,7 +14,7 @@
        <div data-ng-if="params.inputMethod === 'id'">
 
            <div style="padding:0.25rem" data-ng-if="analysisMode===true">
-               <div> 
+               <div>
                    <div>Name:</div>
                    <input type="text" tabindex=1 data-ng-model="params.setName" maxlength="32" data-select-on-click data-autofocus></input>
                </div>
@@ -42,7 +42,7 @@
 
            </div>
 
-               
+
            <div style="padding:0.25rem" data-ng-if="analysisMode===false">
                <span>Type or copy-and-paste a list of genes</span>
                <span class="pull-right"
@@ -92,7 +92,7 @@
 
                <div data-ng-if="out.validIds.length > 0 && out.warnings.length === 0">
                   <br>
-                  <span> 
+                  <span>
                       <span data-ng-init="expanded=true" data-ng-click="expanded=!expanded">
                           <a href="">
                                {{out.totalInput}} submitted gene identifier(s) mapped to {{out.totalMatch}} Ensembl ID
@@ -134,31 +134,8 @@
                      <i class="icon-attention-1"></i> No submitted gene recognized in the system
                   </span>
                </div>
-
-
-           </div>
-
-       </div>
-
-       <!-- By Set -->
-       <!-- disable upload set for now
-       <div data-ng-if="params.inputMethod === 'set'">
-           <div style="padding:0.5rem">
-               <div class="select-list" style="max-height:25rem" data-ng-focus="resetCustomInput()">
-                  <div data-ng-repeat="item in params.savedSets" class="select-list-item" 
-                     data-ng-class="{active: $index === params.selectedSavedSet}"
-                     data-ng-click="params.selectedSavedSet=$index">
-                     <span>
-                         <span class="text-right">{{item.name}}</span>
-                         <span class="pull-right">{{item.count | number}} genes</span>
-                         <br>
-                         <small>&nbsp;{{item.description}}</small>
-                     </span>
-                  </div>
-               </div>
            </div>
        </div>
-       -->
     </div>
 
     <!-- footer -->

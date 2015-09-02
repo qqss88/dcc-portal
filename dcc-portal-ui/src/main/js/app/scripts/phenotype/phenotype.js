@@ -191,7 +191,7 @@
       setIds.forEach(function(setId) {
         uiSeries.push({
           name: setMap[setId].name || setId,
-          // data: _.pluck(uiTable.map(function(row) { return row[setId]; }), 'percentage')
+
           data: uiTable.map(function(row) {
             return {
               y: row[setId].percentage,
