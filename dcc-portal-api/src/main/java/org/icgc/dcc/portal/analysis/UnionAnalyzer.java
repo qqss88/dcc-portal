@@ -405,7 +405,8 @@ public class UnionAnalyzer {
     val response = repositoryFileRepository.findAll(queryBuilder.build());
 
     val entityIds = Sets.<String> newHashSet();
-    for (val hit : response.getHits()) {
+    val hits = response.getHits();
+    for (val hit : hits) {
       val fileNode = READER.readTree(hit.sourceAsString());
       val donorId = fileNode.path("donor").path("donor_id").asText();
       entityIds.add(donorId);
@@ -413,9 +414,7 @@ public class UnionAnalyzer {
 
     val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
-
-    val max = entitySetDefinition.getLimit(maxNumberOfHits);
-    val count = getCountFrom(response, max);
+    val count = entityIds.size();
     // Done - update status to finished
     entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
   }
