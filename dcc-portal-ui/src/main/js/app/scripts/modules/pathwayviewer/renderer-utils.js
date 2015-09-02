@@ -140,7 +140,7 @@
       
       // This creates a base reaction line
       generateLine(baseLine,
-                   hasOutputs ?'black':'hotpink',
+                   hasOutputs ?'black':'navy',
                    hasOutputs ?reaction.type:'Output',id,reaction.class);
     });
 

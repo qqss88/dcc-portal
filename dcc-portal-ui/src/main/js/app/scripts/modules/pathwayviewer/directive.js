@@ -151,8 +151,8 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          subPathwayColor: 'hotpink',
-          initScaleFactor: 0.95
+          initScaleFactor: 0.95,
+          subPathwayColor: 'navy'
         });
         
         $('.pathway-legend-controller').on('click',function(){
