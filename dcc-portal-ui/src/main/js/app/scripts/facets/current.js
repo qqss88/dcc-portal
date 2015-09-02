@@ -15,12 +15,11 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 (function () {
-
   'use strict';
 
-  var module = angular.module('icgc.facets.current', []);
+  var toJson = angular.toJson;
+  var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',
     function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
@@ -40,26 +39,31 @@
       } else {
         $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
       }
+
       //$scope.isActive = _.keys($scope.filters).length;
       $scope.isActive = _.keys(currentFilters).length;
     }
-
 
     /**
      * Proxy to Facets service, it does addtional handling of fields that behaves like
      * like facets but are structured in different ways
      */
-    $scope.removeFacet = function(type, facet) {
-
+    $scope.removeFacet = function (type, facet) {
       // Remove primary facet
       Facets.removeFacet({
         type: type,
         facet: facet
       });
 
-
       // Remove secondary facet - entity
       if (_.contains(['gene', 'donor', 'mutation'], type) === true && facet === 'id') {
+        Facets.removeFacet({
+          type: type,
+          facet: Extensions.ENTITY
+        });
+      }
+
+      if ('file' === type && facet === 'donorId') {
         Facets.removeFacet({
           type: type,
           facet: Extensions.ENTITY
@@ -80,14 +84,17 @@
      * Proxy to Facets service, it does addtional handling of fields that behaves like
      * like facets but are structured in different ways
      */
-    $scope.removeTerm = function(type, facet, term) {
-
+    $scope.removeTerm = function (type, facet, term) {
       if (type === 'gene' && facet === 'hasPathway') {
         Facets.removeFacet({
           type: type,
           facet: facet
         });
       } else {
+        if ('file' === type && 'donorId' === facet && term === 'Uploaded donor set') {
+          facet = Extensions.ENTITY;
+        }
+
         Facets.removeTerm({
           type: type,
           facet: facet,

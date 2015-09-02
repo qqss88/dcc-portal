@@ -49,6 +49,29 @@
       return filter;
     };
 
+    /* This "moves" and combines the 'entitySetId' to 'donorId' in the filters.
+     * The reason for this is to make 'Uploaded Donor Set' appear as a filter along with other donor IDs in
+     * the donorId filter.
+     */
+    function fixFiltersForEntitySetIdInRepositoryFile (filters, translations) {
+      var path = ['file', Extensions.ENTITY, 'is'];
+      var entitySetIds = _.get (filters, path, []);
+
+      if ((! _.isArray (entitySetIds)) || _.isEmpty (entitySetIds)) {
+        return filters;
+      }
+
+      entitySetIds = _.map (entitySetIds, function (id) {
+        return translations [id] || id;
+      });
+
+      var donorIdPath = ['file', 'donorId', 'is'];
+      var donorIds = _.get (filters, donorIdPath, []);
+
+      delete filters ['file'] [Extensions.ENTITY];
+      return _.set (filters, donorIdPath, entitySetIds.concat (donorIds));
+    }
+
 
     /*
     * Builds a model that is is similar in strcuture to filters param, augmented
@@ -59,7 +82,10 @@
 
       entityIDMap = entityIDMap || {};
 
-      angular.forEach(filters, function(typeFilters, typeKey) {
+      var queryFilters = _.cloneDeep (filters);
+      queryFilters = fixFiltersForEntitySetIdInRepositoryFile (queryFilters, entityIDMap);
+
+      angular.forEach (queryFilters, function (typeFilters, typeKey) {
         display[typeKey] = {};
         angular.forEach(typeFilters, function(facetFilters, facetKey) {
           var uiFacetKey = facetKey;
@@ -105,6 +131,7 @@
             if (facetKey === Extensions.ENTITY) {
               //uiTerm = 'Gene List';
               uiTerm = entityIDMap[term] || term;
+
               isPredefined = true;
             } else if (typeKey === 'gene' && facetKey === 'goTermId') {
               var predefinedGO = _.find(Extensions.GENE_SET_ROOTS, function(set) {

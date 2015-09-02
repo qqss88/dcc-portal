@@ -84,6 +84,7 @@ import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -178,6 +179,7 @@ public class RepositoryFileRepository {
    * _missing is not supported for data_types.datatype and data_type.dataformat <br>
    */
   public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
+    val donorIdFieldName = "donor.donor_id";
     val fields = filters.path(KIND.getId()).fields();
 
     if (fields.hasNext() == false) {
@@ -186,6 +188,9 @@ public class RepositoryFileRepository {
 
     val termFilters = boolFilter();
     val nestedTerms = Maps.<String, List<String>> newHashMap();
+
+    BoolFilterBuilder entitySetIdFilter = null;
+    FilterBuilder donorIdFilter = null;
 
     while (fields.hasNext()) {
       val facetField = fields.next();
@@ -210,9 +215,10 @@ public class RepositoryFileRepository {
         nestedTerms.put(fieldName, items);
         continue;
       } else if (fieldName.equals("entitySetId")) {
+        entitySetIdFilter = boolFilter();
         for (val item : items) {
-          val lookupFilter = createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item));
-          termFilters.must(lookupFilter);
+          val lookupFilter = createTermsLookupFilter(donorIdFieldName, DONOR_IDS, UUID.fromString(item));
+          entitySetIdFilter.should(lookupFilter);
         }
         continue;
       } else {
@@ -226,8 +232,20 @@ public class RepositoryFileRepository {
           fb = boolFilter().must(terms);
         }
 
+        if (fieldName.equals(donorIdFieldName)) {
+          donorIdFilter = fb;
+          continue;
+        }
       }
       termFilters.must(fb);
+    }
+
+    if (null != donorIdFilter && null != entitySetIdFilter) {
+      termFilters.must(boolFilter().should(donorIdFilter).should(entitySetIdFilter));
+    } else if (null != donorIdFilter) {
+      termFilters.must(donorIdFilter);
+    } else if (null != entitySetIdFilter) {
+      termFilters.must(entitySetIdFilter);
     }
 
     // Handle special case. Datatype and Dataformat, note these should never have missing values
