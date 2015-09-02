@@ -124,7 +124,7 @@
    * when only testing the user interface, or to debug production UI issues.
    */
   module.constant('API', {
-    BASE_URL: 'http://localhost:8080/api/v1'
+    BASE_URL: '/api/v1'
   });
 
 
