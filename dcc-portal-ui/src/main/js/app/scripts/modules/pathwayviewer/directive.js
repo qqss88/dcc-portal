@@ -28,7 +28,8 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+
+      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+ 
+        '<i class="fa fa-expand pathway-fullscreen-controller"></i>' +
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info">'+
@@ -167,6 +168,22 @@
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
+        });
+        
+        var requestFullScreen = function(element) {
+          if (element.requestFullscreen) {
+            element.requestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+          } else if (element.webkitRequestFullScreen) {
+            element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+          } else if (element.msRequestFullscreen) {
+            element.msRequestFullScreen();  
+          }
+        };
+        
+        $('.pathway-fullscreen-controller').on('click', function() {
+          requestFullScreen(document.getElementById('pathway-viewer-mini'));
         });
         
         var handleRender = function(){

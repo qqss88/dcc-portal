@@ -3980,9 +3980,10 @@ td {
   position: relative;
   line-height: 0px;
   overflow: hidden;
+  background-color: white;
 }
 
-/* line 125, _modules/_pathwayviewer.scss */
+/* line 126, _modules/_pathwayviewer.scss */
 .pathway-legend, .pathway-info {
   position: absolute;
   top: 0;
@@ -3994,13 +3995,13 @@ td {
   background: white;
 }
 
-/* line 136, _modules/_pathwayviewer.scss */
+/* line 137, _modules/_pathwayviewer.scss */
 .pathway-info {
   width: 30%;
   opacity: 0.95;
 }
 
-/* line 141, _modules/_pathwayviewer.scss */
+/* line 142, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
@@ -4008,12 +4009,12 @@ td {
   overflow-y: auto;
 }
 
-/* line 148, _modules/_pathwayviewer.scss */
+/* line 149, _modules/_pathwayviewer.scss */
 .pathway-gene-table {
   margin: 0 auto;
 }
 
-/* line 152, _modules/_pathwayviewer.scss */
+/* line 153, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4021,22 +4022,22 @@ td {
   text-align: center !important;
 }
 
-/* line 159, _modules/_pathwayviewer.scss */
+/* line 160, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 163, _modules/_pathwayviewer.scss */
+/* line 164, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 167, _modules/_pathwayviewer.scss */
+/* line 168, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
-  margin-top: 0.7em;
+  margin-top: 0.5em;
 }
 
-/* line 171, _modules/_pathwayviewer.scss */
+/* line 172, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4048,18 +4049,40 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 182, _modules/_pathwayviewer.scss */
+/* line 183, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 188, _modules/_pathwayviewer.scss */
+/* line 189, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
+}
+
+/* line 195, _modules/_pathwayviewer.scss */
+.pathway-fullscreen-controller {
+  position: absolute;
+  left: 0;
+  float: left;
+  margin-left: 0.5em;
+  margin-top: 0.5em;
+  font-size: 1.5em;
+}
+
+/**
+* Needed to stretch the content in the div when using webkit. Otherwise
+* nothing is visible. 
+*/
+/* line 208, _modules/_pathwayviewer.scss */
+:-webkit-full-screen {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  background: white;
 }
 
 /* line 26, styles.scss */
