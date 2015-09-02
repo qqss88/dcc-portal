@@ -18,7 +18,6 @@
 (function () {
   'use strict';
 
-  var toJson = angular.toJson;
   var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',

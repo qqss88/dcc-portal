@@ -68,7 +68,7 @@
       var donorIdPath = ['file', 'donorId', 'is'];
       var donorIds = _.get (filters, donorIdPath, []);
 
-      delete filters ['file'] [Extensions.ENTITY];
+      delete filters.file [Extensions.ENTITY];
       return _.set (filters, donorIdPath, entitySetIds.concat (donorIds));
     }
 
