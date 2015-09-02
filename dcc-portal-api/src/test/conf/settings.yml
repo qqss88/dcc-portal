@@ -84,10 +84,10 @@ hazelcast:
 
 # ElasticSearch index and hosts
 elastic:
-  indexName: icgc19-0-2
-  # indexName: etl-test-release17-0-0
+  #indexName: icgc18-0-2
+  indexName: etl-test-release17-0-0
   nodeAddresses:
-    - host: "***REMOVED***"
+    - host: "localhost"
       port: 9300
 
 # Mail
