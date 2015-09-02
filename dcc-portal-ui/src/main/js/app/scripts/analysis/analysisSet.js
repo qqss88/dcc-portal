@@ -3,7 +3,7 @@
 
   var module = angular.module('icgc.analysis.controllers');
 
-  module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal, SetService) {
+  module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal, SetService, Settings) {
 
     var _this = this;
     var syncSetTimeout;
@@ -13,6 +13,9 @@
     _this.selectedSets = [];
     _this.checkAll = false;
 
+    Settings.get().then(function(settings) {
+      _this.downloadEnabled = settings.downloadEnabled || false;
+    });
 
     // Selected sets
     _this.update = function() {
@@ -40,6 +43,17 @@
     _this.exportSet = function(id) {
       SetService.exportSet(id);
     };
+
+    _this.downloadDonorData = function(id) {
+      $modal.open({
+        templateUrl: '/scripts/downloader/views/request.html',
+        controller: 'DownloadRequestController',
+        resolve: {
+          filters: function() { return {donor:{entitySetId:{is:[id]}}}; }
+        }
+      });
+    };
+
 
     _this.addCustomGeneSet = function() {
       var inst = $modal.open({
@@ -120,4 +134,3 @@
 
 
 })();
-

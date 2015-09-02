@@ -77,14 +77,23 @@
                     <i class="icon-file" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
                 </div>
                 <div class="quarter">
-                    <i class="icon-team" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.donorCount | number}}</strong> Donors
+                    <i class="icon-team" style="font-size:1.25rem"></i>
+                    <a href="" data-ng-click="ExternalRepoController.viewInSearch(ExternalRepoController.summary.fileCount)" >
+                      <strong>
+                        {{ExternalRepoController.summary.donorCount | number}}
+                      </strong> Donors
+                    </a>
                 </div>
                 <div class="quarter omega">
                     <i class="icon-database" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
                 </div>
             </section>
             <div class="clearfix"></div>
-
+            <span class="action-toolbar pull-right">
+              <span class="action-item">
+                  <i class="icon-floppy"></i><a href="" data-ng-click="ExternalRepoController.saveDonorSet('donor', ExternalRepoController.summary.donorCount)">Save Donor Set</a>
+              </span>
+            </span>
             <div class="t_table_top">
                 <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
                 <span class="t_tools">

@@ -1,12 +1,12 @@
 <section data-ng-controller="SavedSetController as SavedSetController">
     <div class="alert-error" data-ng-if="SavedSetController.syncError"><i class="icon-attention"></i>
-        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, <a href="" data-ng-click="SavedSetController.removeInvalidSets()"><i class="icon icon-trash"></i>DELETE THE SETS</a> that are in "processing" state. 
+        Failed retrieving some saved sets. Please refresh this page to retry. If problem persists, <a href="" data-ng-click="SavedSetController.removeInvalidSets()"><i class="icon icon-trash"></i>DELETE THE SETS</a> that are in "processing" state.
     </div>
     <div>
-        You can create and save new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of interest from 
-        <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search.</a></span></span> 
+        You can create and save new <strong>donor</strong>, <strong>gene</strong>, or <strong>mutation</strong> sets of interest from
+        <span class="action-toolbar"><span class="action-item"><i class="icon-search"></i><a href="/search">Advanced Search.</a></span></span>
         <br>
-        
+
         You can also
         <span class="action-toolbar">
             <span class="action-item">
@@ -16,7 +16,7 @@
         </span>
         <br>
 
-        You can use saved sets to 
+        You can use saved sets to
         <span class="action-toolbar">
             <span class="action-item">
                 <i class="icon-beaker"></i>
@@ -29,13 +29,13 @@
 
 
     <div style="padding:.5rem 0" data-ng-if="SavedSetController.entitySets.length > 0">
-        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeSets()" 
+        <button class="t_button t_button__destructive" data-ng-click="SavedSetController.removeSets()"
             data-ng-disabled="SavedSetController.selectedSets.length === 0"
             data-tooltip="Delete selected sets">
             <i class="icon-trash"></i>Delete selected
-        </button>   
+        </button>
     </div>
-    <div class="wide"> 
+    <div class="wide">
         <table class="table table-selectable">
             <thead>
                 <th class="text-center"  data-ng-click="SavedSetController.toggleSelectAll(); SavedSetController.update()">
@@ -53,7 +53,7 @@
                 </tr>
                 <tr data-ng-repeat="item in SavedSetController.entitySets" data-ng-init="item.checked=false">
                     <td class="text-center">
-                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer" 
+                        <span data-ng-if="(item.state === 'FINISHED' || SavedSetController.syncError === true)" style="cursor:pointer"
                               data-ng-click="item.checked = !item.checked; SavedSetController.update();">
                             <i class="{{item.checked === true? 'icon-check': 'icon-check-empty'}}"></i>
                         </span>
@@ -66,9 +66,15 @@
                     </td>
                     <td data-ng-if="item.state === 'FINISHED'">
                         <span style="float:left; font-size:1.25rem">
-                            <span class="t_tools__tool" data-tooltip="Export as TSV">
-                                <i class="icon-file" data-ng-click="SavedSetController.exportSet(item.id)"></i>
+                            <span class="t_tools__tool">
+                                <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="SavedSetController.exportSet(item.id)"></i>
                             </span>
+                            <span class="t_tools__tool" data-ng-if="SavedSetController.downloadEnabled && item.type==='donor'">
+                                <i data-tooltip="Download Donor DCC Data" class="icon-download" data-ng-click="SavedSetController.downloadDonorData(item.id)"></i>
+                            </span>
+                            <a data-ng-if="item.type==='donor'" class="t_tools__tool" data-tooltip="View in External Repository" href="{{item.repoLink}}">
+                              <i class="icon-database" data-ng-click=""></i>
+                            </a>
                         </span>
                     </td>
                     <td colspan="2" data-ng-if="item.state !== 'FINISHED'">
@@ -79,4 +85,3 @@
         </table>
     </div>
 </section>
-

@@ -11,10 +11,6 @@ import java.util.function.Supplier;
 
 import javax.validation.Validation;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Query.QueryBuilder;
@@ -25,6 +21,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ResourceUtils {
@@ -113,6 +113,8 @@ public class ResourceUtils {
   static final String API_ENTITY_LIST_DEFINITION_VALUE = "Entity Set Definition";
   static final String API_ENTITY_LIST_DEFINITION_PARAM = "entityListDefinition";
   static final String API_SET_ANALYSIS_DEFINITION_VALUE = "Set Analysis Definition";
+
+  static final String API_ASYNC = "Asyncronous API Request";
 
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
 

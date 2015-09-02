@@ -21,7 +21,6 @@ import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
-import static org.icgc.dcc.portal.util.JsonUtils.MAPPER;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,11 +30,6 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.validation.constraints.Min;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.query.QueryEngine;
@@ -59,6 +53,7 @@ import org.icgc.dcc.portal.model.UnionUnitWithCount;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.EntityListRepository;
 import org.icgc.dcc.portal.repository.GeneRepository;
+import org.icgc.dcc.portal.repository.RepositoryFileRepository;
 import org.icgc.dcc.portal.repository.UnionAnalysisRepository;
 import org.icgc.dcc.portal.service.TermsLookupService;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
@@ -68,15 +63,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
+
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Provides various set operations.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UnionAnalyzer {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final ObjectReader READER = MAPPER.reader();
 
   @NonNull
   private final Client client;
@@ -96,6 +103,8 @@ public class UnionAnalyzer {
   private final TermsLookupService termLookupService;
   @NonNull
   private final GeneRepository geneRepository;
+  @NonNull
+  private final RepositoryFileRepository repositoryFileRepository;
 
   @Min(1)
   private int maxNumberOfHits;
@@ -219,6 +228,11 @@ public class UnionAnalyzer {
   }
 
   @Async
+  public void combineListsAsync(@NonNull final UUID newEntityId,
+      @NonNull final DerivedEntitySetDefinition entitySetDefinition) {
+    combineLists(newEntityId, entitySetDefinition);
+  }
+
   public void combineLists(@NonNull final UUID newEntityId,
       @NonNull final DerivedEntitySetDefinition entitySetDefinition) {
     EntitySet newEntity = null;
@@ -331,6 +345,11 @@ public class UnionAnalyzer {
   }
 
   @Async
+  public void materializeListAsync(@NonNull final UUID newEntityId,
+      @NonNull final EntitySetDefinition entitySetDefinition) {
+    materializeList(newEntityId, entitySetDefinition);
+  }
+
   public void materializeList(@NonNull final UUID newEntityId, @NonNull final EntitySetDefinition entitySetDefinition) {
     EntitySet newEntity = null;
 
@@ -367,6 +386,37 @@ public class UnionAnalyzer {
         entityListRepository.update(newEntity.updateStateToError(), newEntity.getVersion());
       }
     }
+  }
+
+  @SneakyThrows
+  public void materializeRepositoryList(@NonNull final UUID newEntityId,
+      @NonNull final EntitySetDefinition entitySetDefinition) {
+    EntitySet newEntity = null;
+    newEntity = entityListRepository.find(newEntityId);
+    val dataVersion = newEntity.getVersion();
+    // Set status to 'in progress' for browser polling
+    entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);
+
+    val queryBuilder = Query.builder();
+    val filters = entitySetDefinition.getFilters();
+    val size = entitySetDefinition.getSize();
+    val sort = entitySetDefinition.getSortBy();
+    queryBuilder.filters(filters).limit(size).size(size).sort(sort).order("desc");
+    val response = repositoryFileRepository.findAll(queryBuilder.build());
+
+    val entityIds = Sets.<String> newHashSet();
+    val hits = response.getHits();
+    for (val hit : hits) {
+      val fileNode = READER.readTree(hit.sourceAsString());
+      val donorId = fileNode.path("donor").path("donor_id").asText();
+      entityIds.add(donorId);
+    }
+
+    val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
+    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
+    val count = entityIds.size();
+    // Done - update status to finished
+    entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
   }
 
   private SearchResponse runEsQuery(
