@@ -23,7 +23,7 @@
   module.config(function ($stateProvider) {
     $stateProvider.state('home', {
       url: '/',
-      templateUrl: 'views/home.html',
+      templateUrl: '/scripts/releases/views/home.html',
       controller: 'ReleaseCtrl as ReleaseCtrl',
       resolve: {
         release: ['Releases', function (Releases) {
@@ -43,6 +43,29 @@
     var _ctrl = this;
     Page.setTitle('Welcome');
     Page.setPage('home');
+
+    _ctrl.routeToProjectPageWithLiveDonorStateFilter = function () {
+      var liveDonorStateFilter = {
+        project: {
+          state: {
+            is: ['live']
+          }
+        }
+      };
+
+      return '/projects?filters=' + angular.toJson (liveDonorStateFilter);
+    };
+    _ctrl.routeToAdvancedSearchPageWithLiveDonorStateFilter = function () {
+      var liveDonorStateFilter = {
+        donor: {
+          state: {
+            is: ['live']
+          }
+        }
+      };
+
+      return '/search?filters=' + angular.toJson (liveDonorStateFilter);
+    };
 
     function successP(projects) {
       _ctrl.donut = HighchartsService.donut({

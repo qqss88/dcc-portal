@@ -5,10 +5,11 @@
             <donut height="350"
                    width="300"
                    data-items="ProjectsCtrl.donut"
-                   data-sub-title="{{ProjectsCtrl.totalDonors | number}} Unique Donors"
+                   data-sub-title="{{ProjectsCtrl.donutChartSubTitle()}}"
                    inner-label="Donors"
                    outer-label="Donors"
-                   heading="Donor Distribution"></donut>
+                   heading="Donor Distribution">
+            </donut>
         </div>
         <div class="wide omega">
             <stacked height="250"

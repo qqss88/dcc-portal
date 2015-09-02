@@ -35,7 +35,6 @@ import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
-import org.icgc.dcc.portal.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -125,11 +124,9 @@ public class SearchRepository {
     } else {
       // Search in the wild, need to apply both default filters to only donor and project
       val donor = boolFilter()
-          .must(termFilter("type", "donor"))
-          .must(QueryService.defaultDonorFilter());
+          .must(termFilter("type", "donor"));
       val project = boolFilter()
-          .must(termFilter("type", "project"))
-          .must(QueryService.defaultProjectFilter());
+          .must(termFilter("type", "project"));
       val others = boolFilter()
           .mustNot(termsFilter("type", "donor", "project"));
       search.setPostFilter(boolFilter()

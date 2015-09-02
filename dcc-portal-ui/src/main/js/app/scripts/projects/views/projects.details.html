@@ -1,8 +1,9 @@
 
-<section>
 <span data-ng-init="predicate='totalDonorCount'"></span>
 <span data-ng-init="reverse=true"></span>
 
+<div ng-if="ProjectsCtrl.projects.hits.length < 1" class="empty loading-text"><h3>No Projects Found.</h3></div>
+<div ng-if="ProjectsCtrl.projects.hits.length > 0">
 <div class="t_table_top" style="padding:0;margin: 0">
     Showing <strong id="projects-project-count">{{ ProjectsCtrl.projects.hits.length }}</strong> projects
     <span data-toolbar data-dl="projects"></span>
@@ -113,7 +114,14 @@
 <tbody>
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
-    <td style="white-space: nowrap"><a data-ui-sref="project({id:project.id})">{{project.id}}</a></td>
+    <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
+        <a data-ui-sref="project({id:project.id})">
+            <span ng-if="! isPendingProject">{{project.id}}</span>
+            <abbr ng-if="isPendingProject" data-tooltip="Project with pending donors only" data-tooltip-placement="top">
+                {{project.id}}
+            </abbr>
+        </a>
+    </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
     <td>{{::project.primaryCountries.join(', ')}}</td>
@@ -292,4 +300,6 @@
     </tr>
     </tbody>
 </table>
-</section>
+
+</div>
+

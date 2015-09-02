@@ -66,7 +66,7 @@
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
-    function ($q, $scope, $state, ProjectState, Page, Projects,
+    function ($q, $scope, $state, $filter, ProjectState, Page, Projects,
                HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
@@ -137,12 +137,25 @@
 	   return list.sort(function(a, b) { return b.total - a.total; });
     }
 
+    _ctrl.donutChartSubTitle = function () {
+      var formatNumber = $filter ('number');
+      var subtitle = '' + formatNumber (_ctrl.totalDonors) + ' Unique Donors';
+      var projects = _.get (_ctrl, 'projects.hits', undefined);
+
+      return _.isArray (projects) ?
+        subtitle + ' across ' + formatNumber (projects.length) + ' projects' :
+        subtitle;
+    };
+
+    function noHitsIn (results) {
+      return 0 === _.get (results, 'hits.length', 0);
+    }
 
     function success(data) {
+
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
-        _ctrl.projects = data;
         _ctrl.projectIds = _.pluck(data.hits, 'id');
 
         data.hits.forEach(function (p) {
@@ -153,6 +166,8 @@
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
+        _ctrl.projects = data;
+
         _ctrl.donut = HighchartsService.donut({
           data: data.hits,
           type: 'project',
@@ -161,8 +176,7 @@
           countBy: 'totalDonorCount'
         });
 
-        _ctrl.stacked = [];
-
+        // _ctrl.stacked = [];
 
         // Get project-donor-mutation distribution of exon impacted ssm
         Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
@@ -171,15 +185,19 @@
           _ctrl.distribution = data;
         });
 
-
-
+        if (noHitsIn (data)) {
+          _ctrl.stacked = [];
+          Page.stopWork();
+          return;
+        }
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
           }).then(function (genes) {
-            if ( !genes.hits || genes.hits.length === 0) {
+            if (noHitsIn (genes)) {
+              _ctrl.stacked = [];
               Page.stopWork();
               return;
             }
@@ -213,6 +231,7 @@
 
                 gene.uiFIProjects = uiFIProjects;
               });
+
               _ctrl.stacked = transform(genes.hits);
             });
           });
@@ -596,12 +615,7 @@
       };
 
 
-      // Sanitize filters, we want to enforce project.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.project) {
-        liveFilters.filters.project = {};
-      }
-      liveFilters.filters.project.state = { is: ['live']};
 
       return this.all().get('', liveFilters).then(function (data) {
 
@@ -658,12 +672,7 @@
         from: 1
       };
 
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
 
       return this.handler.one('donors', '').get(liveFilters);
     };

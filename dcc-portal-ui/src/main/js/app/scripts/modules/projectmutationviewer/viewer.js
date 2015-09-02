@@ -76,7 +76,6 @@
     _this.element = element;
 
     svg = d3.select(element).append('svg')
-      //.attr('width' , config.width).attr('height', config.height)
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
       .attr('preserveAspectRatio', 'xMidYMid');
 
