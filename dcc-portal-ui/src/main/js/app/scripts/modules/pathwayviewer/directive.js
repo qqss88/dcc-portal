@@ -93,7 +93,7 @@
               .attr('viewBox', '0 0 ' +150+ ' ' +50)
               .attr('preserveAspectRatio', 'xMidYMid')
               .append('g');
-          var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b'});
+          var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
           node.size={width:100-padding*2,height:50-padding*2};
           node.position={x:padding+25,y:padding};
