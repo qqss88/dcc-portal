@@ -44,6 +44,8 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
+import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -58,6 +60,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
@@ -94,8 +98,8 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,11 +116,14 @@ import com.google.common.primitives.Ints;
 @Component
 public class RepositoryFileRepository {
 
+  private static final Set<String> FILE_DONOR_FIELDS = newHashSet(
+      "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
+      "id", "submitted_donor_id",
+      "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode");
+
   private static final SearchFieldMapper FILE_DONOR_TEXT_SEARCH_FIELDS = searchFieldMapper()
-      .partialMatchFields(newHashSet(
-          "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
-          "id", "submitted_donor_id",
-          "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode"))
+      .partialMatchFields(FILE_DONOR_FIELDS)
+      .lowercaseMatchFields(FILE_DONOR_FIELDS)
       .build();
 
   private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
@@ -201,6 +208,12 @@ public class RepositoryFileRepository {
 
       if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
+        continue;
+      } else if (fieldName.equals("entitySetId")) {
+        for (val item : items) {
+          val lookupFilter = createTermsLookupFilter("donor.donor_id", DONOR_IDS, UUID.fromString(item));
+          termFilters.must(lookupFilter);
+        }
         continue;
       } else {
         val terms = termsFilter(fieldName, items);
@@ -524,10 +537,12 @@ public class RepositoryFileRepository {
         .setFrom(0)
         .setSize(maxNumberOfDocs)
         .setQuery(multiMatchQuery(queryString, toStringArray(fieldNames)));
-
     log.debug("ES query is: '{}'.", search);
 
-    return search.execute().actionGet();
+    val result = search.execute().actionGet();
+    log.debug("ES search result is: '{}'.", result);
+
+    return result;
   }
 
   /**

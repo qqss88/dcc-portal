@@ -113,4 +113,5 @@ public class SearchFieldMapper {
 
     return result.build();
   }
+
 }
