@@ -33,17 +33,17 @@
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info">'+
         '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div class="pathway-info-svg"></div><div class="pathway-info-content">'+
+        '<h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>'+
+          '<div class="pathway-info-content">'+
           '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
             '<tr>'+
                 '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header"># Mutations</th>' +
+                '<th class="pathway-gene-header-label pathway-gene-header"># ICGC Mutations</th>' +
             '</tr>'+
             '<tr data-ng-repeat="gene in geneList">' +
               '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
               '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
             '</tr></table>' +
-            '<div data-ng-if="geneList.length==0">No associated mutated genes</div>'+
         '</div></div>'+
         '</div>',
       link: function ($scope) {
@@ -102,6 +102,13 @@
             var mutationCount = '*';
             var node = $.extend({}, d);
             var geneList = [];
+
+            // Reset data
+            $scope.geneList = [];
+
+            // Getting type info, not sure if substr(10) will always work...
+            // assuming everything starts with 'Renderable'
+            $scope.entityType = d.type.substr(10);
             
             hideLegend();
             showInfo();
