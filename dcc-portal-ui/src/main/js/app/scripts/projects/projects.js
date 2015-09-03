@@ -139,11 +139,11 @@
 
     _ctrl.donutChartSubTitle = function () {
       var formatNumber = $filter ('number');
-      var subtitle = '' + formatNumber (_ctrl.totalDonors) + ' Unique Donors';
+      var subtitle = '' + formatNumber (_ctrl.totalDonors) + ' Donors';
       var projects = _.get (_ctrl, 'projects.hits', undefined);
 
       return _.isArray (projects) ?
-        subtitle + ' across ' + formatNumber (projects.length) + ' projects' :
+        subtitle + ' across ' + formatNumber (projects.length) + ' Projects' :
         subtitle;
     };
 

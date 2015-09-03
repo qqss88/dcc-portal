@@ -31,8 +31,14 @@
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primaryCountries'" class="icon-sort"></i>
         <i data-ng-if="predicate==='primaryCountries'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
+    <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalLiveDonorCount'; reverse=!reverse">
+        <abbr data-tooltip="Total number of donors with molecular data in DCC">Donors (DCC)</abbr>
+        <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalLiveDonorCount'"
+           class="icon-sort"></i>
+        <i data-ng-if="predicate==='totalLiveDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
+    </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalDonorCount'; reverse=!reverse">
-        <abbr data-tooltip="Total number of donors">Donors</abbr>
+        <abbr data-tooltip="Total number of all donors">Donors (All)</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalDonorCount'"
            class="icon-sort"></i>
         <i data-ng-if="predicate==='totalDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
@@ -125,6 +131,14 @@
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
     <td>{{::project.primaryCountries.join(', ')}}</td>
+
+    <td class="text-right">
+        <span data-ng-if="project.totalLiveDonorCount > 0">
+            <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"state\":{\"is\":[\"live\"]}}}"})'>
+                {{::project.totalLiveDonorCount | number}}</a>
+        </span>
+        <span data-ng-if="project.totalLiveDonorCount === 0">--</span>
+    </td>
     <td class="text-right">
             <span data-ng-if="project.totalDonorCount > 0">
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]}}}"})'>

@@ -44,34 +44,25 @@
             <table class="table table-striped table-bordered table-hover table-condensed">
                 <tbody>
                 <tr>
-                    <td>
-                        <abbr data-tooltip="# of projects with live donors only / # of projects with all donors, including pending donors"
-                            data-tooltip-placement="top">
-                        Cancer projects </abbr>
-                    </td>
+                    <td>Cancer projects</td>
                     <td class="text-right">
-                        <a href='{{ReleaseCtrl.routeToProjectPageWithLiveDonorStateFilter()}}'>{{ReleaseCtrl.release.liveProjectCount | number}}</a> /
                         <a href="/projects">{{ReleaseCtrl.release.projectCount | number}}</a>
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        <abbr data-tooltip="# of primiary sites with live donors only / # of primiary sites with all donors, including pending donors"
-                            data-tooltip-placement="top">
-                        Cancer primary sites </abbr>
-                    </td>
-                    <td class="text-right">{{ReleaseCtrl.release.livePrimarySiteCount | number}} /
-                        {{ReleaseCtrl.release.primarySiteCount | number}}
+                    <td>Cancer primary sites</td>
+                    <td class="text-right">{{ReleaseCtrl.release.primarySiteCount | number}}
                     </td>
                 </tr>
                 <tr>
-                    <td>
-                        <abbr data-tooltip="# of donors with experimental data in DCC / # of all donors, including pending donors"
-                            data-tooltip-placement="top">
-                        Donors </abbr>
-                    </td>
+                    <td>Donors with molecular data in DCC</td>
                     <td class="text-right">
-                        <a href="{{ReleaseCtrl.routeToAdvancedSearchPageWithLiveDonorStateFilter()}}">{{ReleaseCtrl.release.liveDonorCount | number}}</a> /
+                        <a href="{{ReleaseCtrl.routeToAdvancedSearchPageWithLiveDonorStateFilter()}}">{{ReleaseCtrl.release.liveDonorCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Total Donors</td>
+                    <td class="text-right">
                         <a href="/search">{{ReleaseCtrl.release.donorCount | number}}</a>
                     </td>
                 </tr>

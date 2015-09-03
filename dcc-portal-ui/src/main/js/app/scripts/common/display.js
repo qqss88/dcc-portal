@@ -49,11 +49,12 @@
       return filter;
     };
 
-    /* This "moves" and combines the 'entitySetId' to 'donorId' in the filters.
-     * The reason for this is to make 'Uploaded Donor Set' appear as a filter along with other donor IDs in
-     * the donorId filter.
+    /*
+     * This only applies when we're in the External File page. It "moves" (and merges) the 'entitySetId' filter
+     * into the 'donorId' filter. The reason is to make 'Uploaded Donor Set' appear as a filter along with
+     * other donor IDs in the 'donorId' filter.
      */
-    function fixFiltersForEntitySetIdInRepositoryFile (filters, translations) {
+    function adjustExternalFileFilters (filters, translations) {
       var path = ['file', Extensions.ENTITY, 'is'];
       var entitySetIds = _.get (filters, path, []);
 
@@ -65,25 +66,23 @@
         return translations [id] || id;
       });
 
-      var donorIdPath = ['file', 'donorId', 'is'];
+      var donorIdPath = 'file.donorId.is';
       var donorIds = _.get (filters, donorIdPath, []);
 
       delete filters.file [Extensions.ENTITY];
       return _.set (filters, donorIdPath, entitySetIds.concat (donorIds));
     }
 
-
     /*
-    * Builds a model that is is similar in strcuture to filters param, augmented
-    * with information for UI-display and UI-interactions
-    */
-    this.buildUIFilters = function(filters, entityIDMap) {
+     * Builds a model that is is similar in strcuture to filters param, augmented
+     * with information for UI-display and UI-interactions
+     */
+    this.buildUIFilters = function (filters, entityIDMap) {
       var display = {};
-
       entityIDMap = entityIDMap || {};
 
       var queryFilters = _.cloneDeep (filters);
-      queryFilters = fixFiltersForEntitySetIdInRepositoryFile (queryFilters, entityIDMap);
+      queryFilters = adjustExternalFileFilters (queryFilters, entityIDMap);
 
       angular.forEach (queryFilters, function (typeFilters, typeKey) {
         display[typeKey] = {};
