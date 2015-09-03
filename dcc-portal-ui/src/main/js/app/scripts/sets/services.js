@@ -271,7 +271,7 @@
 
     this.createForwardRepositorySet = function(type, params, forwardUrl) {
       Page.startWork();
-	    params.name = 'Input Donor Set';
+      params.name = 'Input Donor Set';
       params.description = '';
       params.sortBy = 'fileName';
       params.sortOrder = 'DESCENDING';
@@ -281,25 +281,20 @@
       .post(undefined, data, {}, {'Content-Type': 'application/json'});
       promise.then(function(data) {
         Page.stopWork();
-        if (! data.id) {
-          console.log('there is no id!!!!');
-          return;
-        } else {
-          var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
-          $location.path(forwardUrl).search('filters', newFilter);
-        }
+        var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
+        $location.path(forwardUrl).search('filters', newFilter);
       });
       return promise;
     };
 
 
     /**
-    * params.union
-    * params.name
-    * params.description - optional
-    *
-    * Create a new set from the union of various subsets of the same type
-    */
+     * params.union
+     * params.name
+     * params.description - optional
+     *
+     * Create a new set from the union of various subsets of the same type
+     */
     this.addDerivedSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);

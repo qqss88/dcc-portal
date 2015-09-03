@@ -391,8 +391,7 @@ public class UnionAnalyzer {
   @SneakyThrows
   public void materializeRepositoryList(@NonNull final UUID newEntityId,
       @NonNull final EntitySetDefinition entitySetDefinition) {
-    EntitySet newEntity = null;
-    newEntity = entityListRepository.find(newEntityId);
+    val newEntity = entityListRepository.find(newEntityId);
     val dataVersion = newEntity.getVersion();
     // Set status to 'in progress' for browser polling
     entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);

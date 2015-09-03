@@ -284,8 +284,8 @@
     };
 
     /**
-    * View in Advanced Search
-    */
+     * View in Advanced Search
+     */
     _ctrl.viewInSearch = function(limit) {
       var params = {};
       params.filters = LocationService.filters();
@@ -294,8 +294,8 @@
     };
 
     /**
-    * Save a donor set from files
-    */
+     * Save a donor set from files
+     */
     _ctrl.saveDonorSet = function(type, limit) {
       _ctrl.setLimit = limit;
       _ctrl.setType = type;

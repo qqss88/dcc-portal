@@ -23,12 +23,6 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -50,9 +44,15 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DonorService {
 
   private final DonorRepository donorRepository;
@@ -86,7 +86,8 @@ public class DonorService {
    * @return A Map keyed on search fields from file-donor-text or donor-text with values being a multimap containing the
    * matched field as the key and the matched donor as the value.
    */
-  public Map<String, Multimap<String, String>> validateIdentifiers(@NonNull List<String> ids, boolean isForExternalfile) {
+  public Map<String, Multimap<String, String>> validateIdentifiers(@NonNull List<String> ids,
+      boolean isForExternalfile) {
     val result = Maps.<String, Multimap<String, String>> newHashMap();
     val fields = isForExternalfile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
 
@@ -102,12 +103,12 @@ public class DonorService {
       // The 'id' field in both 'donor-text' and 'file-donor-text' is the donor ID.
       val matchedDonor = hit.getId();
 
-      for (val searchField : fields.keySet()) {
-        if (highlightedFields.containsKey(searchField)) {
-          val field = fields.get(searchField);
-          val keys = highlightedFields.get(searchField).getFragments();
+      for (val searchEntry : fields.entrySet()) {
+        val keys = highlightedFields.get(searchEntry.getKey());
+        if (keys != null) {
+          val field = searchEntry.getValue();
 
-          for (val key : keys) {
+          for (val key : keys.getFragments()) {
             result.get(field).put(key.toString(), matchedDonor);
           }
         }
@@ -213,10 +214,8 @@ public class DonorService {
         val writer =
             new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
 
-        final String[] headers = {
-            "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id",
-            "icgc_donor_id", "submitted_donor_id", "project_code", "specimen_type", "specimen_type_other",
-            "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study" };
+        final String[] headers =
+            { "icgc_sample_id", "submitted_sample_id", "icgc_specimen_id", "submitted_specimen_id", "icgc_donor_id", "submitted_donor_id", "project_code", "specimen_type", "specimen_type_other", "analyzed_sample_interval", "repository", "sequencing_strategy", "raw_data_accession", "study" };
 
         // Write TSV
         writer.writeHeader(headers);

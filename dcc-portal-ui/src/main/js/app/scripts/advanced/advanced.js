@@ -115,13 +115,13 @@
       };
 
       _ctrl.viewExternal = function(type, limit) {
-    	  var params = {};
-    	  params.filters = LocationService.filters();
-    	  params.size = limit;
-        //Ensure the scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
+        var params = {};
+        params.filters = LocationService.filters();
+        params.size = limit;
+        // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
         $scope.$destroy();
-    	  SetService.createForwardSet(type, params, '/repository/external');
-       };
+        SetService.createForwardSet(type, params, '/repository/external');
+      };
 
       /**
        * Create new enrichment analysis

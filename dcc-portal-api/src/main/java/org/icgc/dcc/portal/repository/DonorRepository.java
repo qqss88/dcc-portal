@@ -61,11 +61,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -99,6 +94,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -525,6 +525,7 @@ public class DonorRepository implements Repository {
       search.addHighlightedField(searchField);
     }
 
+    // Set tags to empty strings so we do not have to parse out fragments later.
     search.setQuery(boolQuery)
         .setHighlighterPreTags("")
         .setHighlighterPostTags("")

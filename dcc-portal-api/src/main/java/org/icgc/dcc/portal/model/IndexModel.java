@@ -47,11 +47,31 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Kind {
-    PROJECT("project"), DONOR("donor"), GENE("gene"), MUTATION("mutation"), PATHWAY("pathway"),
+    PROJECT("project"),
+    DONOR("donor"),
+    GENE("gene"),
+    MUTATION("mutation"),
+    PATHWAY("pathway"),
 
-    GENE_SET("geneSet"), REPOSITORY_FILE("file"),
+    GENE_SET("geneSet"),
+    REPOSITORY_FILE("file"),
 
-    CONSEQUENCE("consequence"), TRANSCRIPT("transcript"), OCCURRENCE("occurrence"), EMB_OCCURRENCE("embOccurrence"), OBSERVATION("observation"), RELEASE("release"), KEYWORD(""), SPECIMEN(""), SAMPLE(""), SEQ_DATA(""), DOMAIN(""), EXON(""), DIAGRAM("diagram"), FAMILY(""), EXPOSURE(""), THERAPY("");
+    CONSEQUENCE("consequence"),
+    TRANSCRIPT("transcript"),
+    OCCURRENCE("occurrence"),
+    EMB_OCCURRENCE("embOccurrence"),
+    OBSERVATION("observation"),
+    RELEASE("release"),
+    KEYWORD(""),
+    SPECIMEN(""),
+    SAMPLE(""),
+    SEQ_DATA(""),
+    DOMAIN(""),
+    EXON(""),
+    DIAGRAM("diagram"),
+    FAMILY(""),
+    EXPOSURE(""),
+    THERAPY("");
 
     private final String id;
   }
@@ -60,9 +80,28 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum Type {
-    PROJECT("project"), DONOR("donor"), GENE("gene"), MUTATION("mutation"), RELEASE("release"), PATHWAY("pathway"), GENE_SET("gene-set"), DONOR_CENTRIC("donor-centric"), GENE_CENTRIC("gene-centric"), MUTATION_CENTRIC("mutation-centric"), OCCURRENCE_CENTRIC("observation-centric"), REPOSITORY_FILE("file"),
+    PROJECT("project"),
+    DONOR("donor"),
+    GENE("gene"),
+    MUTATION("mutation"),
+    RELEASE("release"),
+    PATHWAY("pathway"),
+    GENE_SET("gene-set"),
+    DONOR_CENTRIC("donor-centric"),
+    GENE_CENTRIC("gene-centric"),
+    MUTATION_CENTRIC("mutation-centric"),
+    OCCURRENCE_CENTRIC("observation-centric"),
+    REPOSITORY_FILE("file"),
 
-    DONOR_TEXT("donor-text"), GENE_TEXT("gene-text"), MUTATION_TEXT("mutation-text"), PATHWAY_TEXT("pathway-text"), GENESET_TEXT("gene-set-text"), DIAGRAM("diagram"), REPOSITORY_FILE_TEXT("file-text"), REPOSITORY_FILE_DONOR_TEXT("file-donor-text"), PROJECT_TEXT("project-text");
+    DONOR_TEXT("donor-text"),
+    GENE_TEXT("gene-text"),
+    MUTATION_TEXT("mutation-text"),
+    PATHWAY_TEXT("pathway-text"),
+    GENESET_TEXT("gene-set-text"),
+    DIAGRAM("diagram"),
+    REPOSITORY_FILE_TEXT("file-text"),
+    REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
+    PROJECT_TEXT("project-text");
 
     @NonNull
     private final String id;
@@ -484,7 +523,10 @@ public class IndexModel {
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
   public static enum GeneSetType {
-    GENE_SET_TYPE_ALL("geneSetId"), GENE_SET_TYPE_GO("go_term"), GENE_SET_TYPE_PATHWAY("pathway"), GENE_SET_TYPE_CURATED("curated_set");
+    GENE_SET_TYPE_ALL("geneSetId"),
+    GENE_SET_TYPE_GO("go_term"),
+    GENE_SET_TYPE_PATHWAY("pathway"),
+    GENE_SET_TYPE_CURATED("curated_set");
 
     private final String type;
   }
