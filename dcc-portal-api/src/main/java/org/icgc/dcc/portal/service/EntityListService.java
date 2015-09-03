@@ -122,7 +122,7 @@ public class EntityListService {
     return newEntitySet;
   }
 
-  public EntitySet deriveEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition, boolean async) {
+  public EntitySet computeEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition, boolean async) {
     val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
     if (async) {
       analyzer.combineListsAsync(newEntitySet.getId(), entitySetDefinition);

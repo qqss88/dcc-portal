@@ -82,9 +82,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UnionAnalyzer {
 
+  /**
+   * Constants.
+   */
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final ObjectReader READER = MAPPER.reader();
 
+  /**
+   * Dependencies.
+   */
   @NonNull
   private final Client client;
   @Value("#{indexName}")
@@ -106,6 +112,9 @@ public class UnionAnalyzer {
   @NonNull
   private final RepositoryFileRepository repositoryFileRepository;
 
+  /**
+   * Configuration.
+   */
   @Min(1)
   private int maxNumberOfHits;
   @Min(1)
@@ -390,18 +399,19 @@ public class UnionAnalyzer {
 
   @SneakyThrows
   public void materializeRepositoryList(@NonNull final UUID newEntityId,
-      @NonNull final EntitySetDefinition entitySetDefinition) {
+      @NonNull final EntitySetDefinition entitySet) {
     val newEntity = entityListRepository.find(newEntityId);
     val dataVersion = newEntity.getVersion();
     // Set status to 'in progress' for browser polling
     entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);
 
-    val queryBuilder = Query.builder();
-    val filters = entitySetDefinition.getFilters();
-    val size = entitySetDefinition.getSize();
-    val sort = entitySetDefinition.getSortBy();
-    queryBuilder.filters(filters).limit(size).size(size).sort(sort).order("desc");
-    val response = repositoryFileRepository.findAll(queryBuilder.build());
+    val response = repositoryFileRepository.findAll(Query.builder()
+        .filters(entitySet.getFilters())
+        .limit(entitySet.getSize())
+        .size(entitySet.getSize())
+        .sort(entitySet.getSortBy())
+        .order("desc")
+        .build());
 
     val entityIds = Sets.<String> newHashSet();
     val hits = response.getHits();
@@ -411,7 +421,7 @@ public class UnionAnalyzer {
       entityIds.add(donorId);
     }
 
-    val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
+    val lookupType = entitySet.getType().toLookupTypeFrom();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
     val count = entityIds.size();
     // Done - update status to finished

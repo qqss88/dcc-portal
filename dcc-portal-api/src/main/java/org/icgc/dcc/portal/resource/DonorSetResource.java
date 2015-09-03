@@ -35,11 +35,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.UploadedDonorSet;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.UserDonorListService;
@@ -57,11 +52,16 @@ import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 @Path("/v1/donorsets")
 @Produces(MediaType.APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DonorSetResource {
 
   @NonNull
@@ -96,7 +96,7 @@ public class DonorSetResource {
     }
 
     val uniqueIds = result.getDonorSet().keySet();
-    if (uniqueIds.size() == 0) {
+    if (uniqueIds.isEmpty()) {
       result.getWarnings().add("Request contains no valid donor Ids");
       return result;
     }

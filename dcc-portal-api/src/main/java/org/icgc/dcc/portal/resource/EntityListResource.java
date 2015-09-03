@@ -174,7 +174,7 @@ public class EntityListResource {
   public Response deriveList(
       @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final DerivedEntitySetDefinition listDefinition,
       @ApiParam(value = API_ASYNC) @QueryParam("async") @DefaultValue("true") final boolean async) {
-    val newList = service.deriveEntityList(listDefinition, async);
+    val newList = service.computeEntityList(listDefinition, async);
 
     return newListResponse(newList);
   }
