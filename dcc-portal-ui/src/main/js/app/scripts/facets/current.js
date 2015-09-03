@@ -90,7 +90,8 @@
           facet: facet
         });
       } else {
-        if ('file' === type && 'donorId' === facet && term === 'Uploaded donor set') {
+        if ('file' === type && 'donorId' === facet &&
+          _.endsWith (_.capitalize (term), ' Donor Set')) {
           facet = Extensions.ENTITY;
         }
 
