@@ -24,7 +24,6 @@
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
-
     $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {
@@ -189,16 +188,19 @@
       });
     };
 
-
     /* Used for special cases where the relation is one-to-many instead of one-to-one */
     $scope.removeSpecificTerm = function(type, facet, term) {
+      // Special remapping for the 'Upload Donor Set' control in the External Repository File page.
+      if ('file-donor' === type && Extensions.ENTITY === facet) {
+        type = 'file';
+      }
+
       Facets.removeTerm({
         type: type,
         facet: facet,
         term: term
       });
     };
-
 
     $scope.removeFacet = function () {
       var type = $scope.proxyType? $scope.proxyType : $scope.type;
@@ -221,6 +223,13 @@
         Facets.removeFacet({
           type: type,
           facet: 'hasPathway'
+        });
+      }
+
+      if ('file' === type && facet === 'donorId') {
+        Facets.removeFacet({
+          type: type,
+          facet: Extensions.ENTITY
         });
       }
     };
