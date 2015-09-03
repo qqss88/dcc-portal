@@ -31,21 +31,23 @@
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='primaryCountries'" class="icon-sort"></i>
         <i data-ng-if="predicate==='primaryCountries'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
+    <th colspan="2" class="text-center">Donors</th>
+    <th colspan="11" class="text-center">Available Data Types</th>
+</tr>
+<tr>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalLiveDonorCount'; reverse=!reverse">
-        <abbr data-tooltip="Total number of donors with molecular data in DCC">Donors (DCC)</abbr>
+        <abbr data-tooltip="Total number of donors with molecular data in DCC">DCC</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalLiveDonorCount'"
            class="icon-sort"></i>
         <i data-ng-if="predicate==='totalLiveDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='totalDonorCount'; reverse=!reverse">
-        <abbr data-tooltip="Total number of all donors">Donors (All)</abbr>
+        <abbr data-tooltip="Total number of all donors">All</abbr>
         <i style="color:hsl(0,0%,80%)" data-ng-if="predicate!='totalDonorCount'"
            class="icon-sort"></i>
         <i data-ng-if="predicate==='totalDonorCount'" class="{{reverse? 'icon-sort-down' : 'icon-sort-up'}}"></i>
     </th>
-    <th colspan="11" class="text-center">Available Data Types</th>
-</tr>
-<tr>
+
     <th style="cursor: pointer" data-ng-click="predicate='ssmTestedDonorCount'; reverse=!reverse">
         <abbr data-tooltip="Number of donors with {{ 'ssm' | datatype }}"
               class="tiny-header">SSM</abbr>
@@ -220,6 +222,10 @@
 </tr>
 <tr>
     <td colspan="4"><strong>Total</strong></td>
+    <td class="text-right">
+        <a href="/search?filters={{createAdvanceFilters()}}">
+            {{ProjectsCtrl.projects.hits|sum:'totalLiveDonorCount'|number}}</a>
+    </td>
     <td class="text-right">
         <a href="/search?filters={{createAdvanceFilters()}}">
             {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
