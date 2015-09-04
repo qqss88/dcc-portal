@@ -182,9 +182,9 @@ public class EntityListService {
     // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
     // overload.
     val content =
-        isGeneType ? convertToListOfListForGene(
-            analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : convertToListOfList(
-                analyzer.retriveListItems(entitySet));
+        isGeneType ? 
+            convertToListOfListForGene(analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : 
+            convertToListOfList(analyzer.retriveListItems(entitySet));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);

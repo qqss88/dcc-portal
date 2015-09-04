@@ -500,8 +500,8 @@ public class DonorRepository implements Repository {
   }
 
   /**
-   * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based on
-   * boolean.
+   * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based 
+   * on a boolean.
    * 
    * @param input A List of ids that can identify a donor
    * @param False - donor-text, True - file-donor-text
