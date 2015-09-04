@@ -11,6 +11,10 @@ import java.util.function.Supplier;
 
 import javax.validation.Validation;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.Query.QueryBuilder;
@@ -22,10 +26,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 public class ResourceUtils {
 
@@ -35,7 +35,7 @@ public class ResourceUtils {
   static final String DEFAULT_SIZE = "10";
   static final String DEFAULT_FROM = "1";
   static final String DEFAULT_ORDER = "desc";
-  static final String DEFAULT_PROJECT_SORT = "totalDonorCount";
+  static final String DEFAULT_PROJECT_SORT = "totalLiveDonorCount";
   static final String DEFAULT_DONOR_SORT = "ssmAffectedGenes";
   public static final String DEFAULT_GENE_MUTATION_SORT = "affectedDonorCountFiltered";
   static final String DEFAULT_OCCURRENCE_SORT = "donorId";
