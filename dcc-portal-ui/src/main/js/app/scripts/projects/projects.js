@@ -87,8 +87,7 @@
       }, function () {
         _ctrl.setTab($state.current.data.tab);
       });
-    
-    
+
     // This is needed to translate projects filters to donor filters
     $scope.createAdvanceFilters = function(dataType) {
       var currentFilters = LocationService.filters();
@@ -140,6 +139,7 @@
 
 
     function success(data) {
+    	
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
@@ -149,6 +149,24 @@
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
+        });
+        
+        _ctrl.totals = {};
+        _ctrl.labels = ['totalDonorCount', 
+                        'ssmTestedDonorCount', 
+                        'cnsmTestedDonorCount', 
+                        'stsmTestedDonorCount', 
+                        'sgvTestedDonorCount', 
+                        'methArrayTestedDonorCount', 
+                        'methSeqTestedDonorCount', 
+                        'expArrayTestedDonorCount', 
+                        'expSeqTestedDonorCount', 
+                        'pexpTestedDonorCount',
+                        'mirnaSeqTestedDonorCount', 
+                        'jcnTestedDonorCount'];
+        
+        _ctrl.labels.forEach(function(fieldName) {
+        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
         });
 
         _ctrl.totalDonors = totalDonors;
@@ -172,9 +190,6 @@
           _ctrl.distribution = data;
         });
 
-        $scope.has = function(fieldName, ProjectsCtrl) {
-            return _.sum(ProjectsCtrl.projects.hits, fieldName) > 0;
-          }
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',
