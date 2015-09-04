@@ -285,7 +285,8 @@
         <th>Project Name</th>
         <th>Primary Site</th>
         <th>Country</th>
-        <th>Donors</th>
+        <th>Donors (DCC)</th>
+        <th>Donors (All)</th>
         <th>SSM</th>
         <th>CNSM</th>
         <th>STSM</th>
@@ -305,6 +306,7 @@
         <td>{{project.name}}</td>
         <td>{{project.primarySite}}</td>
         <td>{{project.primaryCountries.join(', ')}}</td>
+        <td>{{project.totalLiveDonorCount}}</td>
         <td>{{project.totalDonorCount}}</td>
         <td>{{project.ssmTestedDonorCount}}</td>
         <td>{{project.cnsmTestedDonorCount}}</td>
