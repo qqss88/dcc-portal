@@ -89,15 +89,11 @@
         _ctrl.setTab($state.current.data.tab);
       });
 
-    var pathMapping = _.constant (_({
-      ids: 'donor.projectId',
-      datatype: 'donor.availableDataTypes',
-      state: 'donor.state'
-    })
-    .mapValues (function (path) {
-      return path + '.is';
-    })
-    .value());
+    var pathMapping = {
+      ids: 'donor.projectId.is',
+      datatype: 'donor.availableDataTypes.is',
+      state: 'donor.state.is'
+    };
 
     function ensureObject (o) {
       return _.isPlainObject (o) ? o : {};
@@ -115,12 +111,12 @@
         .value();
 
       if (! isEmptyObject (LocationService.filters())) {
-        parameters = _.assign (parameters, {ids: _ctrl.projectIds});
+        _.assign (parameters, {ids: _ctrl.projectIds});
       }
 
       var resultFilter = _.transform (parameters, function (result, value, key) {
-        if (_.has (pathMapping(), key)) {
-          result = _.set (result, pathMapping()[key], value);
+        if (_.has (pathMapping, key)) {
+          result = _.set (result, pathMapping [key], value);
         }
       });
 
