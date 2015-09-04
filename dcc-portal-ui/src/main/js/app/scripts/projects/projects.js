@@ -87,7 +87,8 @@
       }, function () {
         _ctrl.setTab($state.current.data.tab);
       });
-
+    
+    
     // This is needed to translate projects filters to donor filters
     $scope.createAdvanceFilters = function(dataType) {
       var currentFilters = LocationService.filters();
@@ -171,8 +172,9 @@
           _ctrl.distribution = data;
         });
 
-
-
+        $scope.has = function(fieldName, ProjectsCtrl) {
+            return _.sum(ProjectsCtrl.projects.hits, fieldName) > 0;
+          }
 
         Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
             include: 'projects',

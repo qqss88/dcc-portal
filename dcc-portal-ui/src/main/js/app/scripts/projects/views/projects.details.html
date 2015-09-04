@@ -199,76 +199,76 @@
 <tr>
     <td colspan="4"><strong>Total</strong></td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number) === '0')"
+        <a data-ng-if="has('totalDonorCount', ProjectsCtrl)"
         href="/search?filters={{createAdvanceFilters()}}">
-            {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
-		<span data-ng-if="(ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number) === 0">0</span>
+        {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
+        <span data-ng-if="has('totalDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('ssmTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("ssm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('ssmTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('cnsmTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("cnsm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('cnsmTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('stsmTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("stsm")}}'>
             {{ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('stsmTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('sgvTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("sgv")}}'>
             {{ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number}}</a>
-        <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('sgvTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('methArrayTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("meth_array")}}'>
             {{ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('methArrayTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('methSeqTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("meth_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('methSeqTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('expArrayTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("exp_array")}}'>
             {{ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('expArrayTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('expSeqTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("exp_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('expSeqTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('pexpTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("pexp")}}'>
             {{ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('pexpTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('mirnaSeqTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("mirna_seq")}}'>
             {{ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('mirnaSeqTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
     <td class="text-right">
-        <a data-ng-if="!((ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number) === '0')"
+        <a data-ng-show="has('jcnTestedDonorCount', ProjectsCtrl)"
         href='/search?filters={{createAdvanceFilters("jcn")}}'>
             {{ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number}}</a>
-            <span data-ng-if="(ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number) === '0'">0</span>
+        <span data-ng-if="has('jcnTestedDonorCount', ProjectsCtrl) === false">0</span>
     </td>
 </tr>
 </tbody>
