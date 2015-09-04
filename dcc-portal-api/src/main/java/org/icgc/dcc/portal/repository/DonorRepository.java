@@ -502,6 +502,7 @@ public class DonorRepository implements Repository {
   /**
    * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based on
    * boolean.
+   * 
    * @param input A List of ids that can identify a donor
    * @param False - donor-text, True - file-donor-text
    * @return Returns the SearchResponse object from the query.
@@ -538,7 +539,7 @@ public class DonorRepository implements Repository {
     return response;
   }
 
-  /*
+  /**
    * This transforms a list of raw field names (of 'donor-text' or 'file-donor-text') into a map with the key being the
    * search term (field name plus the '.search' suffix).
    */

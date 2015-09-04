@@ -195,9 +195,11 @@ public class RepositoryFileRepository {
       return matchAllFilter();
     }
 
+    // Root filter
     val termFilters = boolFilter();
     val nestedTerms = Maps.<String, List<String>> newHashMap();
 
+    // Used for creating the terms lookup filter when passed an entitySet id.
     BoolFilterBuilder entitySetIdFilter = null;
     FilterBuilder donorIdFilter = null;
 

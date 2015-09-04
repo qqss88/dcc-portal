@@ -86,7 +86,7 @@ public class DonorSetResource {
   @Produces(APPLICATION_JSON)
   @Timed
   public UploadedDonorSet processDonorSet(
-      @ApiParam(value = "The Ids to be saved as a Donor List") @FormParam("donorIds") String donorIds,
+      @ApiParam(value = "The ids to be saved as a Donor Set") @FormParam("donorIds") String donorIds,
       @ApiParam(value = "Validation") @QueryParam("validationOnly") @DefaultValue("false") boolean validationOnly,
       @ApiParam(value = "External Repository") @QueryParam("externalRepo") @DefaultValue("false") boolean externalRepo) {
 

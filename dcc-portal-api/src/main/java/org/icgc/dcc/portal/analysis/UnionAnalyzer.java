@@ -64,6 +64,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 
 import lombok.NonNull;
@@ -79,6 +80,11 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UnionAnalyzer {
+
+  /**
+   * Constants.
+   */
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   /**
    * Dependencies.
