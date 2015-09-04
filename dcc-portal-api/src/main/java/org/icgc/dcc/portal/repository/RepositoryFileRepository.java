@@ -67,12 +67,6 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
 import org.dcc.portal.pql.query.QueryEngine;
@@ -103,6 +97,7 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -111,12 +106,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class RepositoryFileRepository {
 
+  /**
+   * Constants
+   */
   private static final Set<String> FILE_DONOR_FIELDS = newHashSet(
       "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
       "id", "submitted_donor_id",
@@ -162,9 +167,13 @@ public class RepositoryFileRepository {
       "data_type.data_format",
       "repository.repo_server.repo_name");
 
+  /**
+   * Dependencies.
+   */
   private final Client client;
   private final String index;
   private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   @Autowired
   public RepositoryFileRepository(Client client) {
@@ -518,6 +527,42 @@ public class RepositoryFileRepository {
     log.info("A total of {} files for this query.", count);
 
     return findDownloadInfo(newPql, QUERY_THEN_FETCH, Ints.saturatedCast(count));
+  }
+
+  public Set<String> findAllDonorIds(Query query, int setLimit) {
+    val type = org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+    val pql = converter.convert(query, type);
+    val request = queryEngine.execute(pql, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+
+    log.info("findAllDonorIds() - ES query is: '{}'.", request);
+    SearchResponse response = request.execute().actionGet();
+    log.debug("findAllDonorIds() - ES response is: '{}'.", response);
+
+    val entityIds = Sets.<String> newHashSet();
+    val total = response.getHits().getTotalHits();
+    val pages = Math.ceil(total / query.getSize());
+
+    int curPage = 0;
+    while (curPage <= pages) {
+      for (val hit : response.getHits()) {
+        val donorId = hit.field("donor.donor_id").getValue().toString();
+        entityIds.add(donorId);
+        if (entityIds.size() == setLimit) {
+          return entityIds;
+        }
+      }
+
+      curPage++;
+      query.setFrom(query.getSize() * curPage);
+      val nextPql = converter.convert(query, type);
+      val nextRequest =
+          queryEngine.execute(nextPql, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+      log.info("findAllDonorIds() - ES query is: '{}'.", nextRequest);
+      response = nextRequest.execute().actionGet();
+      log.debug("findAllDonorIds() - ES response is: '{}'.", response);
+    }
+
+    return entityIds;
   }
 
   @NonNull

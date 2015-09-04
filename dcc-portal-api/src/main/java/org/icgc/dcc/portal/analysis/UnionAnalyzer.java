@@ -23,6 +23,7 @@ import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -81,12 +79,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UnionAnalyzer {
-
-  /**
-   * Constants.
-   */
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final ObjectReader READER = MAPPER.reader();
 
   /**
    * Dependencies.
@@ -402,24 +394,17 @@ public class UnionAnalyzer {
       @NonNull final EntitySetDefinition entitySet) {
     val newEntity = entityListRepository.find(newEntityId);
     val dataVersion = newEntity.getVersion();
-    // Set status to 'in progress' for browser polling
-    entityListRepository.update(newEntity.updateStateToInProgress(), dataVersion);
 
-    val response = repositoryFileRepository.findAll(Query.builder()
+    val query = Query.builder()
         .filters(entitySet.getFilters())
-        .limit(entitySet.getSize())
-        .size(entitySet.getSize())
-        .sort(entitySet.getSortBy())
+        .fields(Arrays.asList("donorId"))
+        .sort("id")
         .order("desc")
-        .build());
-
-    val entityIds = Sets.<String> newHashSet();
-    val hits = response.getHits();
-    for (val hit : hits) {
-      val fileNode = READER.readTree(hit.sourceAsString());
-      val donorId = fileNode.path("donor").path("donor_id").asText();
-      entityIds.add(donorId);
-    }
+        .size(maxNumberOfHits)
+        .defaultLimit(maxNumberOfHits)
+        .build();
+    val maxSetSize = entitySet.getLimit(maxNumberOfHits);
+    val entityIds = repositoryFileRepository.findAllDonorIds(query, maxSetSize);
 
     val lookupType = entitySet.getType().toLookupTypeFrom();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
