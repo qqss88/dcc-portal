@@ -1,5 +1,5 @@
 
-<span data-ng-init="predicate='totalDonorCount'"></span>
+<span data-ng-init="predicate='totalLiveDonorCount'"></span>
 <span data-ng-init="reverse=true"></span>
 
 <div ng-if="ProjectsCtrl.projects.hits.length < 1" class="empty loading-text"><h3>No Projects Found.</h3></div>
@@ -123,12 +123,12 @@
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
     <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
-        <a data-ui-sref="project({id:project.id})">
-            <span ng-if="! isPendingProject">{{project.id}}</span>
+        <a data-ui-sref="project({id:project.id})">{{project.id}}
+<!--             <span ng-if="! isPendingProject">{{project.id}}</span>
             <abbr ng-if="isPendingProject" data-tooltip="Project with pending donors only" data-tooltip-placement="top">
                 {{project.id}}
             </abbr>
-        </a>
+ -->        </a>
     </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
@@ -223,55 +223,55 @@
 <tr>
     <td colspan="4"><strong>Total</strong></td>
     <td class="text-right">
-        <a href="/search?filters={{createAdvanceFilters()}}">
+        <a href="{{ toAdvanceSearchUrl ({state: 'live'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'totalLiveDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href="/search?filters={{createAdvanceFilters()}}">
+        <a href="{{ toAdvanceSearchUrl() }}">
             {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("ssm")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'ssm'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("cnsm")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'cnsm'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("stsm")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'stsm'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("sgv")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'sgv'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("meth_array")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'meth_array'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("meth_seq")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'meth_seq'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("exp_array")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'exp_array'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("exp_seq")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'exp_seq'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("pexp")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'pexp'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("mirna_seq")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'mirna_seq'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number}}</a>
     </td>
     <td class="text-right">
-        <a href='/search?filters={{createAdvanceFilters("jcn")}}'>
+        <a href="{{ toAdvanceSearchUrl ({datatype: 'jcn'}) }}">
             {{ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number}}</a>
     </td>
 </tr>

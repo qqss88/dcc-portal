@@ -91,7 +91,7 @@
         });
       } else {
         if ('file' === type && 'donorId' === facet &&
-          _.endsWith (_.capitalize (term), ' Donor Set')) {
+          _.endsWith ((term || '').toLowerCase(), ' donor set')) {
           facet = Extensions.ENTITY;
         }
 

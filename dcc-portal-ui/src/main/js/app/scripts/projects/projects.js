@@ -63,6 +63,7 @@
 (function () {
   'use strict';
 
+  var toJson = angular.toJson;
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
@@ -88,27 +89,43 @@
         _ctrl.setTab($state.current.data.tab);
       });
 
+    var pathMapping = _.constant (_({
+      ids: 'donor.projectId',
+      datatype: 'donor.availableDataTypes',
+      state: 'donor.state'
+    })
+    .mapValues (function (path) {
+      return path + '.is';
+    })
+    .value());
+
+    function ensureObject (o) {
+      return _.isPlainObject (o) ? o : {};
+    }
+
+    var isEmptyObject = _.flow (ensureObject, _.isEmpty);
+
     // This is needed to translate projects filters to donor filters
-    $scope.createAdvanceFilters = function(dataType) {
-      var currentFilters = LocationService.filters();
-      var filters = {};
+    $scope.toAdvanceSearchUrl = function (parameters) {
+      parameters = _(ensureObject (parameters))
+        .pick (_.isString)
+        .mapValues (function (s) {
+          return [s];
+        })
+        .value();
 
-      if (dataType || !_.isEmpty(currentFilters)) {
-        filters.donor = {};
+      if (! isEmptyObject (LocationService.filters())) {
+        parameters = _.assign (parameters, {ids: _ctrl.projectIds});
       }
 
-      if (dataType) {
-        filters.donor.availableDataTypes = {};
-        filters.donor.availableDataTypes.is = [dataType];
-      }
-      if (!_.isEmpty(currentFilters)) {
-        filters.donor.projectId = {};
-        filters.donor.projectId.is = _ctrl.projectIds;
-      }
+      var resultFilter = _.transform (parameters, function (result, value, key) {
+        if (_.has (pathMapping(), key)) {
+          result = _.set (result, pathMapping()[key], value);
+        }
+      });
 
-      return JSON.stringify(filters);
-    };
-
+      return '/search?filters=' + encodeURIComponent (toJson (resultFilter));
+    }
 
     // Helper to do the stacked chart
     function transform(data) {
