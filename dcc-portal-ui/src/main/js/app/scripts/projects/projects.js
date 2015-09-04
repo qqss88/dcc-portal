@@ -125,7 +125,7 @@
       });
 
       return '/search?filters=' + encodeURIComponent (toJson (resultFilter));
-    }
+    };
 
     // Helper to do the stacked chart
     function transform(data) {
