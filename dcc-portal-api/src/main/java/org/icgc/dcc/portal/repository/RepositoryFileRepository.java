@@ -67,8 +67,10 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.dcc.portal.pql.ast.function.FunctionBuilders;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -533,8 +535,10 @@ public class RepositoryFileRepository {
 
   public Set<String> findAllDonorIds(Query query, int setLimit) {
     val type = org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
-    val pql = converter.convert(query, type);
-    val request = queryEngine.execute(pql, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+    val pqlAst = PqlParser.parse(converter.convert(query, type));
+    val size = query.getSize();
+    pqlAst.setLimit(FunctionBuilders.limit(0, size));
+    val request = queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
 
     log.info("findAllDonorIds() - ES query is: '{}'.", request);
     SearchResponse response = request.execute().actionGet();
@@ -555,10 +559,9 @@ public class RepositoryFileRepository {
       }
 
       curPage++;
-      query.setFrom(query.getSize() * curPage);
-      val nextPql = converter.convert(query, type);
+      pqlAst.setLimit(FunctionBuilders.limit(curPage * size, size));
       val nextRequest =
-          queryEngine.execute(nextPql, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+          queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
       log.info("findAllDonorIds() - ES query is: '{}'.", nextRequest);
       response = nextRequest.execute().actionGet();
       log.debug("findAllDonorIds() - ES response is: '{}'.", response);
