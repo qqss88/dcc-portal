@@ -77,11 +77,44 @@ public class RepositoryFileTypeModel extends TypeModel {
   @Getter
   public static enum Fields {
 
-    ID("id"), STUDY("study"), ACCESS("access"), DATA_FORMAT("dataFormat"), DATA_TYPE("dataType"), EXPERIMENTAL_STRATEGY("experimentalStrategy"), PROJECT_CODE("projectCode"), PROGRAM("program"), DONOR_STUDY("donorStudy"), PRIMARY_SITE("primarySite"), DONOR_ID("donorId"), SPECIFMEN_ID("specimenId"), SPECIMEN_TYPE("specimenType"), SAMPLE_ID("sampleId"), DONOR_SUBMITTER_ID("donorSubmitterId"), SPECIMEN_SUBMITTER_ID("specimenSubmitterId"), SAMPLE_SUBMITTER_ID("sampleSubmitterId"), TCGA_PARTICIPANT_BARCODE("tcgaParticipantBarcode"), TCGA_SAMPLE_BARCODE("tcgaSampleBarcode"), TCGA_ALIQUOT_BARCODE("tcgaAliquotBarcode"), REPO_TYPE("repoType"), REPO_ORG("repoOrg"), REPO_ENTITY_ID("repoEntityId"), REPO_METADATA_PATH("repoMetadataPath"), REPO_DATA_PATH("repoDataPath"), LAST_MODIFIED("lastModified"), LAST_UPDATE("lastUpdate"), // An
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // alias
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // to
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // LAST_MODIFIED
-    FILE_NAME("fileName"), FILE_MD5SUM("fileMd5sum"), FILE_SIZE("fileSize"), REPO_SERVER_OBJECT("repoServer"), REPO_NAME("repoName"), REPO_CODE("repoCode"), REPO_COUNTRY("repoCountry"), REPO_BASE_URL("repoBaseUrl");
+    ID("id"),
+    STUDY("study"),
+    ACCESS("access"),
+    DATA_FORMAT("dataFormat"),
+    DATA_TYPE("dataType"),
+    EXPERIMENTAL_STRATEGY("experimentalStrategy"),
+    PROJECT_CODE("projectCode"),
+    PROGRAM("program"),
+    DONOR_STUDY("donorStudy"),
+    PRIMARY_SITE("primarySite"),
+    DONOR_ID("donorId"),
+    SPECIFMEN_ID("specimenId"),
+    SPECIMEN_TYPE("specimenType"),
+    SAMPLE_ID("sampleId"),
+    DONOR_SUBMITTER_ID("donorSubmitterId"),
+    SPECIMEN_SUBMITTER_ID("specimenSubmitterId"),
+    SAMPLE_SUBMITTER_ID("sampleSubmitterId"),
+    TCGA_PARTICIPANT_BARCODE("tcgaParticipantBarcode"),
+    TCGA_SAMPLE_BARCODE("tcgaSampleBarcode"),
+    TCGA_ALIQUOT_BARCODE("tcgaAliquotBarcode"),
+    REPO_TYPE("repoType"),
+    REPO_ORG("repoOrg"),
+    REPO_ENTITY_ID("repoEntityId"),
+    REPO_METADATA_PATH("repoMetadataPath"),
+    REPO_DATA_PATH("repoDataPath"),
+    LAST_MODIFIED("lastModified"),
+    LAST_UPDATE("lastUpdate"), // An
+                               // alias
+                               // to
+                               // LAST_MODIFIED
+    FILE_NAME("fileName"),
+    FILE_MD5SUM("fileMd5sum"),
+    FILE_SIZE("fileSize"),
+    REPO_SERVER_OBJECT("repoServer"),
+    REPO_NAME("repoName"),
+    REPO_CODE("repoCode"),
+    REPO_COUNTRY("repoCountry"),
+    REPO_BASE_URL("repoBaseUrl");
 
     @NonNull
     private final String alias;
