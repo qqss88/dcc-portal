@@ -23,7 +23,7 @@ angular.module('icgc.modules.genomeviewer.service').service('GMService', functio
 
   // FIXME: might want to move this else where to centralize all configs
   var config = {
-    cellBaseHost: 'https://www.ebi.ac.uk/cellbase/webservices/rest'
+    cellBaseHost: 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest'
   };
 
   this.getConfiguration = function() {

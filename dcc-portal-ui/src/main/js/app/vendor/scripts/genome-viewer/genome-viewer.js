@@ -992,7 +992,7 @@ FeatureBinarySearchTree.prototype = {
  */
 
 var CellBaseManager = {
-    host: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
+    host: 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest',
     version: 'v3',
     get: function (args) {
         var success = args.success;
@@ -17227,7 +17227,7 @@ ResultWidget.prototype = {
     _createGenomeViewer: function (target) {
         var _this = this;
         var genomeViewer = new GenomeViewer({
-            cellBaseHost: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
+            cellBaseHost: 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest',
             cellBaseVersion: 'v3',
             target: target,
             width: $(target).width(),
@@ -26786,7 +26786,7 @@ function NavigationBar(args) {
     this.target;
     this.autoRender = true;
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.species = 'Homo sapiens';
@@ -27335,7 +27335,7 @@ function ChromosomePanel(args) {
 
     this.target;
     this.autoRender = true;
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -27484,7 +27484,12 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
+              if (!_.isUndefined(data.response.result)){
                 _this.data = data.response[0].result.chromosomes;
+              } else {
+                _this.data = data.response[0].result[0].chromosomes[0];
+              }
+                
                 _this.data.cytobands.sort(function (a, b) {
                     return (a.start - b.start);
                 });
@@ -27899,7 +27904,7 @@ function KaryotypePanel(args) {
     this.autoRender = true;
     this.id = Utils.genId('KaryotypePanel');
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -28064,7 +28069,11 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
+              if (!_.isUndefined(data.response.result)){
                 _this.chromosomeList = data.response.result.chromosomes;
+              } else {
+                _this.chromosomeList = data.response[0].result[0].chromosomes;
+              }
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
             }
@@ -28389,7 +28398,7 @@ function TrackListPanel(args) {//parent is a DOM div element
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     //set default args
@@ -32355,7 +32364,7 @@ function GenomeViewer(args) {
     this.width;
     this.height;
 
-    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.quickSearchResultFn;
@@ -32624,7 +32633,11 @@ GenomeViewer.prototype = {
                 resource: 'all',
                 async: false,
                 success: function (data) {
+                  if (!_.isUndefined(data.response.result)){
                     chromosomes = saveChromosomes(data.response.result.chromosomes);
+                  } else {
+                    chromosomes = saveChromosomes(data.response[0].result[0].chromosomes);
+                  }
                 },
                 error: function (data) {
                     console.log('Could not get chromosome list');
