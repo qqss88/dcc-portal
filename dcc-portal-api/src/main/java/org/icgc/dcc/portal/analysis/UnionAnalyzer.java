@@ -387,14 +387,17 @@ public class UnionAnalyzer {
       log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
       val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
+      if (entitySetDefinition.isTransient()) {
+        val subType = new HashMap<String, Object>() {
 
-      // val watch = Stopwatch.createStarted();
-
-      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
-
-      // watch.stop();
-      // log.info("createTermsLookup took {} nanoseconds for creating a new list for entity type - {}",
-      // watch.elapsed(TimeUnit.NANOSECONDS), entityType);
+          {
+            put("transient", true);
+          }
+        };
+        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, subType);
+      } else {
+        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
+      }
 
       val count = getCountFrom(response, max);
       // Done - update status to finished
@@ -426,7 +429,17 @@ public class UnionAnalyzer {
     val entityIds = repositoryFileRepository.findAllDonorIds(query, maxSetSize);
 
     val lookupType = entitySet.getType().toLookupTypeFrom();
-    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
+    if (entitySet.isTransient()) {
+      val subType = new HashMap<String, Object>() {
+
+        {
+          put("transient", true);
+        }
+      };
+      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, subType);
+    } else {
+      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
+    }
     val count = entityIds.size();
     // Done - update status to finished
     entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);

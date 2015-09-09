@@ -290,6 +290,7 @@
       var params = {};
       params.filters = LocationService.filters();
       params.size = limit;
+      params.isTransient = true;
       SetService.createForwardRepositorySet('donor', params, '/search');
     };
 
