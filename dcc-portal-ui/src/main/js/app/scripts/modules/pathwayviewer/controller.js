@@ -60,7 +60,7 @@
     var zoom = d3.behavior.zoom().scaleExtent([scaleFactor*0.9, scaleFactor*17]);
     
     var svg = d3.select(config.container).append('svg')
-      .attr('class', 'pathwaysvg')
+      .attr('class', 'pathwaysvg pathway-no-scroll')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
       .attr('preserveAspectRatio', 'xMidYMid')
       .append('g')

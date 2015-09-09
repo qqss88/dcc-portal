@@ -47,9 +47,22 @@
             '</tr></table>' +
         '</div></div>'+
         '</div>',
-      link: function ($scope) {
+      link: function ($scope, element) {
         var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
+        
+        var scrollTimer;
+        
+        element.bind("mouseenter", function() {
+          scrollTimer = setTimeout(function() {
+            $('.pathwaysvg').attr('class', 'pathwaysvg');
+          }, 800);
+        });
+        
+        element.bind("mouseleave", function() {
+          clearTimeout(scrollTimer);
+          $('.pathwaysvg').attr('class', 'pathwaysvg pathway-no-scroll');
+        });
         
         var typeMap = {
           'RenderableComplex': 'Complex',

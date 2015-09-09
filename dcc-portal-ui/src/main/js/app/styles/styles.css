@@ -4085,6 +4085,14 @@ td {
   background: white;
 }
 
+/**
+ * For disabling zooming
+ */
+/* line 218, _modules/_pathwayviewer.scss */
+.pathway-no-scroll {
+  pointer-events: none;
+}
+
 /* line 26, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;

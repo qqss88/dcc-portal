@@ -211,3 +211,10 @@ $compartmentBorder:#ffc38b;
   top: 0;
   background: white;
 }
+
+/**
+ * For disabling zooming
+ */
+ .pathway-no-scroll {
+   pointer-events: none;
+ }
