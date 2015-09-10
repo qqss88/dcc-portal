@@ -27484,7 +27484,7 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
-              if (data.response[0].result){
+              if (data.response[0].result.chromosomes){
                 _this.data = data.response[0].result.chromosomes;
               } else {
                 _this.data = data.response[0].result[0].chromosomes[0];
