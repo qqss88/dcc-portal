@@ -32,10 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.common.core.util.Joiners;
@@ -53,8 +49,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class DiagramService {
 
   @NonNull
@@ -66,6 +66,9 @@ public class DiagramService {
 
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
+    if (dbToUniprotMap.isEmpty()) {
+      return Maps.<String, DiagramProtein> newHashMap();
+    }
     val uniprotToDbMap = getReverseMap(dbToUniprotMap);
 
     val queries = new ArrayList<QueryBuilder>();
@@ -133,11 +136,13 @@ public class DiagramService {
     val list = (List<Map<String, Object>>) pathway.get(fieldName);
 
     val map = Maps.<String, List<String>> newHashMap();
-    for (val element : list) {
-      val dbId = (String) element.get(DIAGRAM_PROTEIN_MAP_DB_ID);
-      val uniprotIds = (List<String>) element.get(DIAGRAM_PROTEIN_MAP_UNIPROT_IDS);
+    if (list != null) {
+      for (val element : list) {
+        val dbId = (String) element.get(DIAGRAM_PROTEIN_MAP_DB_ID);
+        val uniprotIds = (List<String>) element.get(DIAGRAM_PROTEIN_MAP_UNIPROT_IDS);
 
-      map.put(dbId, uniprotIds);
+        map.put(dbId, uniprotIds);
+      }
     }
 
     return map;
@@ -154,5 +159,4 @@ public class DiagramService {
 
     return query;
   }
-
 }

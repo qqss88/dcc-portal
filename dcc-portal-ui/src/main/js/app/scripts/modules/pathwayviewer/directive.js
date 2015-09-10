@@ -64,6 +64,10 @@
           $('.pathwaysvg').attr('class', 'pathwaysvg pathway-no-scroll');
         });
         
+        $scope.$on('$destroy', function () {
+          element.unbind();
+        });
+            
         var typeMap = {
           'RenderableComplex': 'Complex',
           'RenderableProtein': 'Protein',
