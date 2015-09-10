@@ -63,10 +63,6 @@
           clearTimeout(scrollTimer);
           $('.pathwaysvg').attr('class', 'pathwaysvg pathway-no-scroll');
         });
-        
-        $scope.$on('$destroy', function () {
-          element.unbind();
-        });
             
         var typeMap = {
           'RenderableComplex': 'Complex',
@@ -194,14 +190,42 @@
             element.mozRequestFullScreen();
           } else if (element.webkitRequestFullScreen) {
             element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-          } else if (element.msRequestFullscreen) {
-            element.msRequestFullScreen();  
           }
         };
         
-        $('.pathway-fullscreen-controller').on('click', function() {
-          requestFullScreen(document.getElementById('pathway-viewer-mini'));
+        var exitFullScreen = function() {
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+        };
+        
+        var fullScreenHandler = function() {
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            $('.pathway-fullscreen-controller').removeClass('fa-compress');
+            $('.pathway-fullscreen-controller').addClass('fa-expand');
+          } else {
+            $('.pathway-fullscreen-controller').removeClass('fa-expand');
+            $('.pathway-fullscreen-controller').addClass('fa-compress');
+          }
+        };
+        
+        $('.pathway-fullscreen-controller').on('click', function() {       
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            requestFullScreen(document.getElementById('pathway-viewer-mini'));
+          } else {
+            exitFullScreen();
+          }
         });
+        
+        if (document.addEventListener){
+            document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+            document.addEventListener('mozfullscreenchange', fullScreenHandler);
+            document.addEventListener('fullscreenchange', fullScreenHandler);
+        }
         
         var handleRender = function(){
           if(!xml || !zoomedOn){
@@ -232,6 +256,14 @@
         $scope.$watch('highlights', function (newValue) {
           highlights = newValue;
           handleRender();
+        });
+        
+        $scope.$on('$destroy', function () {
+          element.unbind();
+          
+          document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
+          document.removeEventListener('mozfullscreenchange', fullScreenHandler);
+          document.removeEventListener('fullscreenchange', fullScreenHandler);
         });
       }
     };
