@@ -992,7 +992,7 @@ FeatureBinarySearchTree.prototype = {
  */
 
 var CellBaseManager = {
-    host: 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest',
+    host: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
     version: 'v3',
     get: function (args) {
         var success = args.success;
@@ -17227,7 +17227,7 @@ ResultWidget.prototype = {
     _createGenomeViewer: function (target) {
         var _this = this;
         var genomeViewer = new GenomeViewer({
-            cellBaseHost: 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest',
+            cellBaseHost: 'https://www.ebi.ac.uk/cellbase/webservices/rest',
             cellBaseVersion: 'v3',
             target: target,
             width: $(target).width(),
@@ -26786,7 +26786,7 @@ function NavigationBar(args) {
     this.target;
     this.autoRender = true;
 
-    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.species = 'Homo sapiens';
@@ -27335,7 +27335,7 @@ function ChromosomePanel(args) {
 
     this.target;
     this.autoRender = true;
-    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -27904,7 +27904,7 @@ function KaryotypePanel(args) {
     this.autoRender = true;
     this.id = Utils.genId('KaryotypePanel');
 
-    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.pixelBase;
@@ -28398,7 +28398,7 @@ function TrackListPanel(args) {//parent is a DOM div element
     // Using Underscore 'extend' function to extend and add Backbone Events
     _.extend(this, Backbone.Events);
 
-    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     //set default args
@@ -32364,7 +32364,7 @@ function GenomeViewer(args) {
     this.width;
     this.height;
 
-    this.cellBaseHost = 'https://wwwdev.ebi.ac.uk/cellbase/webservices/rest';
+    this.cellBaseHost = 'https://www.ebi.ac.uk/cellbase/webservices/rest';
     this.cellBaseVersion = 'v3';
 
     this.quickSearchResultFn;
