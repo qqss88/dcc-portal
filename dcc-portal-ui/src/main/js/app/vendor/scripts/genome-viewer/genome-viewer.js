@@ -27484,7 +27484,7 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
-              if (!_.isUndefined(data.response.result)){
+              if (data.response[0].result){
                 _this.data = data.response[0].result.chromosomes;
               } else {
                 _this.data = data.response[0].result[0].chromosomes[0];
@@ -28069,7 +28069,7 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
-              if (!_.isUndefined(data.response.result)){
+              if (data.response.result){
                 _this.chromosomeList = data.response.result.chromosomes;
               } else {
                 _this.chromosomeList = data.response[0].result[0].chromosomes;
@@ -32633,7 +32633,7 @@ GenomeViewer.prototype = {
                 resource: 'all',
                 async: false,
                 success: function (data) {
-                  if (!_.isUndefined(data.response.result)){
+                  if (data.response.result){
                     chromosomes = saveChromosomes(data.response.result.chromosomes);
                   } else {
                     chromosomes = saveChromosomes(data.response[0].result[0].chromosomes);
