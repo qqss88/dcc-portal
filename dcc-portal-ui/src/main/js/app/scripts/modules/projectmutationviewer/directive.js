@@ -8,6 +8,7 @@
     return {
       restrict: 'E',
       replace: 'true',
+      // TODO: Move this into a template file.
       template: '<div>' +
         '<div class="text-center graph_title">' +
         'Number of Somatic Mutations in Donor\'s Exomes Across Cancer Projects' +
@@ -15,7 +16,8 @@
         '<small><i class="icon-help" data-tooltip="{{helpText}}" data-tooltip-placement="left"></i>' +
         '</small></a></span>' +
         '</div>' +
-        '<div ng-show="! showPlot" class="text-center"><strong>No mutations reported for the selected projects.</strong></div>' +
+        '<div ng-show="! showPlot" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">' +
+        '<strong>No mutations reported for the selected <ng-pluralize count="selected.length" when="{\'one\': \'project\', \'other\': \'projects\'}"></ng-pluralize>.</strong></div>' +
         '<div ng-show="showPlot">' +
         '<div class="canvas"></div>' +
         '<div class="text-right">' +
@@ -37,8 +39,10 @@
           'a given donor\'s exome. Donors are grouped by cancer projects. <br>Horizontal red lines ' +
           'provide the median number of somatic and exomic mutations within each cancer project.';
 
+        $scope.defaultGraphHeight = 230;
+
         config = {
-          height: 230,
+          height: $scope.defaultGraphHeight,
           width: 950,
           clickFunc: function(d) {
             $scope.$emit('tooltip::hide');

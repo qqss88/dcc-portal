@@ -4,7 +4,7 @@
 
 	window.dcc = window.dcc || {};
 
-  /* Dfault configulration */
+  /* Default configuration */
 
   var contentElementId = 'svgstackedbar';
 
@@ -224,8 +224,6 @@
     var messageDiv = d3.select (element)
       .append ('div')
       .attr ('id', contentElementId)
-      .style ('width', width)
-      .style ('height', height)
       .style ('line-height', height)
       .style ('text-align', 'center')
       .html ('<span><strong>' + message + '</strong></span>');
