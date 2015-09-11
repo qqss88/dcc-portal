@@ -170,7 +170,7 @@
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
         });
-        if (data.hits == true) {
+        if (data.hits.length > 0) {
           Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes', {
             include : 'projects',
             filters : {
