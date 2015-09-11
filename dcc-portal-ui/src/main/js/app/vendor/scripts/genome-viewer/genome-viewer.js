@@ -222,15 +222,9 @@ var Utils = {
     },
     
     getChromosomes: function(data) {
-      if (data.response.result) {
-        return data.response.result.chromosomes;
-      }
-      else if (data.response[0].result.chromosomes) {
-        return data.response[0].result.chromosomes;
-      }
-      else {
-        return data.response[0].result[0].chromosomes;
-      }
+      return _.get(data, 'response.result.chromosomes')|| 
+      _.get(data, 'response[0].result[0].chromosomes') ||
+      _.get(data, 'response[0].result.chromosomes');
     }
 
 };
@@ -27499,17 +27493,14 @@ ChromosomePanel.prototype = {
               
               _this.data = Utils.getChromosomes(data);
               
-              if (_this.data[0]) {
-                _this.data[0].cytobands.sort(function (a, b) {
-                  return (a.start - b.start);
-                });
-                _this._drawSvg(_this.data[0]);
-              } else {
-                _this.data.cytobands.sort(function (a, b) {
-                  return (a.start - b.start);
-                });
-                _this._drawSvg(_this.data);
-              }
+              var cytobands = _.get(_this, 'data.cytobands') || _.get(_this, 'data[0].cytobands');
+              
+              (cytobands).sort(function (a, b) {
+                return (a.start - b.start);
+              });
+              var data = _.get(_this, 'data[0]') || _.get(_this, 'data');
+              
+              _this._drawSvg(data);
             }
         });
 
@@ -32623,10 +32614,10 @@ GenomeViewer.prototype = {
         delete this;
     },
     getChromosomes: function () {
-        var saveChromosomes = function (chromsomeList) {
+        var saveChromosomes = function (chromosomeList) {
             var chromosomes = {};
-            for (var i = 0; i < chromsomeList.length; i++) {
-                var chromosome = chromsomeList[i];
+            for (var i = 0; i < chromosomeList.length; i++) {
+                var chromosome = chromosomeList[i];
                 chromosomes[chromosome.name] = chromosome;
             }
             return chromosomes;
