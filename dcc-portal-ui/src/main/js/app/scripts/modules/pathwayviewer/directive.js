@@ -169,13 +169,17 @@
           subPathwayColor: 'navy'
         });
         
-        $('.pathway-legend-controller').on('click',function(){
+        // Render legend last to ensure all dependancies are initialized. Timeout of 0 does not work in firefox.
+        setTimeout(function() {
+          var rect = $('.pathway-legend')[0].getBoundingClientRect();
+          controller.renderLegend(rect.width,rect.height);
+        }, 500);
+        
+        $('.pathway-legend-controller').on('click', function(){
           if(showingLegend){
             hideLegend();
           }else{
             showLegend();
-            var rect = $('.pathway-legend')[0].getBoundingClientRect();
-            controller.renderLegend(rect.width,rect.height);
           }
         });
 
