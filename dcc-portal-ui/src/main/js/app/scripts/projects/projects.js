@@ -222,50 +222,54 @@
           return;
         }
 
-        Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
-            include: 'projects',
-            filters: {mutation:{functionalImpact:{is:['High']}}},
-            size: 20
-          }).then(function (genes) {
-            if (noHitsIn (genes)) {
-              _ctrl.stacked = [];
-              Page.stopWork();
-              return;
-            }
-
-            var params = {
-              mutation: {functionalImpact:{is:['High']}}
-            };
+        Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes', {
+          include: 'projects',
+          filters: { mutation: { functionalImpact: { is: ['High'] } } },
+          size: 20
+        }).then(function (genes) {
+          if (noHitsIn(genes)) {
+            _ctrl.stacked = [];
             Page.stopWork();
+            return;
+          }
+          var params = {
+            mutation: {
+              functionalImpact: {
+                is: ['High']
+              }
+            }
+          };
+          Page.stopWork();
 
-            // FIXME: elasticsearch aggregation support may be more efficient
-            Restangular.one('ui').one('gene-project-donor-counts', _.pluck(genes.hits, 'id'))
-              .get({'filters': params}).then(function(geneProjectFacets) {
+          // FIXME: elasticsearch aggregation support may be more
+          // efficient
+          Restangular.one('ui').one('gene-project-donor-counts', _.pluck(genes.hits, 'id')).get({
+            'filters': params
+          }).then(function (geneProjectFacets) {
 
-              genes.hits.forEach(function(gene) {
-                var uiFIProjects = [];
+            genes.hits.forEach(function (gene) {
+              var uiFIProjects = [];
 
-                geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.find( data.hits, function(p) {
-                    return p.id === t.term;
-                  });
-
-                  if (angular.isDefined(proj)) {
-                    uiFIProjects.push({
-                      id: t.term,
-                      name: proj.name,
-                      primarySite: proj.primarySite,
-                      count: t.count
-                    });
-                  }
+              geneProjectFacets[gene.id].terms.forEach(function (t) {
+                var proj = _.find(data.hits, function (p) {
+                  return p.id === t.term;
                 });
 
-                gene.uiFIProjects = uiFIProjects;
+                if (angular.isDefined(proj)) {
+                  uiFIProjects.push({
+                    id: t.term,
+                    name: proj.name,
+                    primarySite: proj.primarySite,
+                    count: t.count
+                  });
+                }
               });
-
-              _ctrl.stacked = transform(genes.hits);
+              gene.uiFIProjects = uiFIProjects;
             });
+
+            _ctrl.stacked = transform(genes.hits);
           });
+        });
 
         // Id to primary site
         var id2site = {};
@@ -282,7 +286,6 @@
 
           _ctrl.donorData = data;
         });
-
       }
     }
 
@@ -404,7 +407,6 @@
 
   module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
-
     var _ctrl = this, project = Projects.one();
 
     function success(genes) {
