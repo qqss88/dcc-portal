@@ -139,6 +139,7 @@
 
 
     function success(data) {
+    	
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
@@ -148,6 +149,24 @@
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
+        });
+        
+        _ctrl.totals = {};
+        _ctrl.labels = ['totalDonorCount', 
+                        'ssmTestedDonorCount', 
+                        'cnsmTestedDonorCount', 
+                        'stsmTestedDonorCount', 
+                        'sgvTestedDonorCount', 
+                        'methArrayTestedDonorCount', 
+                        'methSeqTestedDonorCount', 
+                        'expArrayTestedDonorCount', 
+                        'expSeqTestedDonorCount', 
+                        'pexpTestedDonorCount',
+                        'mirnaSeqTestedDonorCount', 
+                        'jcnTestedDonorCount'];
+        
+        _ctrl.labels.forEach(function(fieldName) {
+        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
         });
 
         _ctrl.totalDonors = totalDonors;
@@ -170,6 +189,8 @@
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
         });
+        
+        
         if (data.hits.length > 0) {
           Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes', {
             include : 'projects',

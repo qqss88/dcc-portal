@@ -12,7 +12,8 @@
     urlPath: '',
     strokeColor: 'black',
     highlightColor: 'red',
-    subPathwayColor: 'blue'
+    subPathwayColor: 'blue',
+    initScaleFactor: 0.95
   };
 
   var ReactomePathway = function (config) {
@@ -72,7 +73,7 @@
     });
 
     // Set initial positioning and zoom out a little
-    scaleFactor = scaleFactor * 0.95;
+    scaleFactor = scaleFactor * config.initScaleFactor;
     var offsetX = (config.width - (pathwayBox.width - pathwayBox.minWidth) * scaleFactor) / 2;
     var offsetY = (config.height - (pathwayBox.height - pathwayBox.minHeight) * scaleFactor) / 2;
 
@@ -146,6 +147,8 @@
       // Recalcualte the scale factor and offset and the zoom and transition
       scaleFactor = Math.min(config.height / (pathwayBox.height - pathwayBox.minHeight),
                              config.width / (pathwayBox.width - pathwayBox.minWidth));
+                             
+      scaleFactor = scaleFactor * config.initScaleFactor;
       offsetX = (config.width - (pathwayBox.width - pathwayBox.minWidth) * scaleFactor) / 2;
       offsetY = (config.height - (pathwayBox.height - pathwayBox.minHeight) * scaleFactor) / 2;
       zoom.scale(scaleFactor).translate([-pathwayBox.minWidth * scaleFactor + offsetX,
