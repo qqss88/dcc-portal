@@ -223,56 +223,83 @@
 <tr>
     <td colspan="4"><strong>Total</strong></td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({state: 'live'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'totalLiveDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount > 0" 
+        href="{{ toAdvanceSearchUrl ({state: 'live'}) }}">
+            {{ProjectsCtrl.totals.totalLiveDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl() }}">
-            {{ProjectsCtrl.projects.hits|sum:'totalDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.totalDonorCount > 0"
+        href="{{ toAdvanceSearchUrl() }}">
+            {{ProjectsCtrl.totals.totalDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.totalDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'ssm'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'ssmTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.ssmTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'ssm'}) }}">
+            {{ProjectsCtrl.totals.ssmTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.ssmTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'cnsm'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'cnsmTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.cnsmTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'cnsm'}) }}">
+            {{ProjectsCtrl.totals.cnsmTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.cnsmTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'stsm'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'stsmTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.stsmTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'stsm'}) }}">
+            {{ProjectsCtrl.totals.stsmTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.stsmTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'sgv'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'sgvTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.sgvTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'sgv'}) }}">
+            {{ProjectsCtrl.totals.sgvTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.sgvTestedDonorCount === 0">0</span>
+
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'meth_array'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'methArrayTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.methArrayTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'meth_array'}) }}">
+            {{ProjectsCtrl.totals.methArrayTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.methArrayTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'meth_seq'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'methSeqTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.methSeqTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'meth_seq'}) }}">
+            {{ProjectsCtrl.totals.methSeqTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.methSeqTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'exp_array'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'expArrayTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.expArrayTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'exp_array'}) }}">
+            {{ProjectsCtrl.totals.expArrayTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.expArrayTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'exp_seq'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'expSeqTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.expSeqTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'exp_seq'}) }}">
+            {{ProjectsCtrl.totals.expSeqTestedDonorCount|number}}</a>
+        <span data-ng-if="ProjectsCtrl.totals.expSeqTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'pexp'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'pexpTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.pexpTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'pexp'}) }}">
+            {{ProjectsCtrl.totals.pexpTestedDonorCount|number}}</a>
+            <span data-ng-if="ProjectsCtrl.totals.pexpTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'mirna_seq'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'mirnaSeqTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.mirnaSeqTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'mirna_seq'}) }}">
+            {{ProjectsCtrl.totals.mirnaSeqTestedDonorCount|number}}</a>
+            <span data-ng-if="ProjectsCtrl.totals.mirnaSeqTestedDonorCount === 0">0</span>
     </td>
     <td class="text-right">
-        <a href="{{ toAdvanceSearchUrl ({datatype: 'jcn'}) }}">
-            {{ProjectsCtrl.projects.hits|sum:'jcnTestedDonorCount'|number}}</a>
+        <a data-ng-if="ProjectsCtrl.totals.jcnTestedDonorCount > 0"
+        href="{{ toAdvanceSearchUrl ({datatype: 'jcn'}) }}">
+            {{ProjectsCtrl.totals.jcnTestedDonorCount|number}}</a>
+            <span data-ng-if="ProjectsCtrl.totals.jcnTestedDonorCount === 0">0</span>
     </td>
 </tr>
 </tbody>

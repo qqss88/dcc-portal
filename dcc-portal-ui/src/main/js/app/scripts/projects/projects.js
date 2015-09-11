@@ -165,7 +165,6 @@
     }
 
     function success(data) {
-
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
@@ -174,6 +173,25 @@
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
+        });
+        
+        _ctrl.totals = {};
+        _ctrl.labels = ['totalDonorCount', 
+                        'totalLiveDonorCount',
+                        'ssmTestedDonorCount', 
+                        'cnsmTestedDonorCount', 
+                        'stsmTestedDonorCount', 
+                        'sgvTestedDonorCount', 
+                        'methArrayTestedDonorCount', 
+                        'methSeqTestedDonorCount', 
+                        'expArrayTestedDonorCount', 
+                        'expSeqTestedDonorCount', 
+                        'pexpTestedDonorCount',
+                        'mirnaSeqTestedDonorCount', 
+                        'jcnTestedDonorCount'];
+        
+        _ctrl.labels.forEach(function(fieldName) {
+        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
         });
 
         _ctrl.totalDonors = totalDonors;
