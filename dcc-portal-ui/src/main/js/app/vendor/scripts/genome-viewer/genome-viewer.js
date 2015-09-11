@@ -222,7 +222,15 @@ var Utils = {
     },
     
     getChromosomes: function(data) {
-      return data.response.result.chromosomes || data.response[0].result.chromosomes || data.response[0].result[0].chromosomes;
+      if (data.response.result) {
+        return data.response.result.chromosomes;
+      }
+      else if (data.response[0].result.chromosomes) {
+        return data.response[0].result.chromosomes;
+      }
+      else {
+        return data.response[0].result[0].chromosomes;
+      }
     }
 
 };
@@ -27488,16 +27496,20 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
-//              if (data.response[0].result.chromosomes){
-//                _this.data = data.response[0].result.chromosomes;
-//              } else {
-//                _this.data = data.response[0].result[0].chromosomes[0];
-//              }
-              _this.data = Utils.getChromosomes(data)[0];
+              
+              _this.data = Utils.getChromosomes(data);
+              
+              if (_this.data[0]) {
+                _this.data[0].cytobands.sort(function (a, b) {
+                  return (a.start - b.start);
+                });
+                _this._drawSvg(_this.data[0]);
+              } else {
                 _this.data.cytobands.sort(function (a, b) {
-                    return (a.start - b.start);
+                  return (a.start - b.start);
                 });
                 _this._drawSvg(_this.data);
+              }
             }
         });
 
@@ -28073,11 +28085,6 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
-//              if (data.response.result){
-//                _this.chromosomeList = data.response.result.chromosomes;
-//              } else {
-//                _this.chromosomeList = data.response[0].result[0].chromosomes;
-//              }
                 _this.chromosomeList = Utils.getChromosomes(data);
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
@@ -32638,11 +32645,6 @@ GenomeViewer.prototype = {
                 resource: 'all',
                 async: false,
                 success: function (data) {
-//                  if (data.response.result){
-//                    chromosomes = saveChromosomes(data.response.result.chromosomes);
-//                  } else {
-//                    chromosomes = saveChromosomes(data.response[0].result[0].chromosomes);
-//                  }
                   chromosomes = saveChromosomes(Utils.getChromosomes(data));
                 },
                 error: function (data) {
