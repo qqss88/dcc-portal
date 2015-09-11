@@ -67,7 +67,7 @@ public class DiagramService {
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
     if (dbToUniprotMap.isEmpty()) {
-      return Maps.<String, DiagramProtein> newHashMap();
+      return Maps.newHashMap();
     }
     val uniprotToDbMap = getReverseMap(dbToUniprotMap);
 
