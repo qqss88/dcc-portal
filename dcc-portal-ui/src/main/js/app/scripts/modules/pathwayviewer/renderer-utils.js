@@ -140,7 +140,7 @@
       
       // This creates a base reaction line
       generateLine(baseLine,
-                   hasOutputs ?'black':'hotpink',
+                   hasOutputs ?'black':'navy',
                    hasOutputs ?reaction.type:'Output',id,reaction.class);
     });
 
@@ -175,7 +175,7 @@
         x: marginLeft+90,
         y: y - 15,
         width:100,
-        height:30,
+        height:35,
         'fill':'none'
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')

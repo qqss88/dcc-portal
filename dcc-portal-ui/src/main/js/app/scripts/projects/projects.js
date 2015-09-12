@@ -202,6 +202,25 @@
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
 
+        _ctrl.totals = {};
+        _ctrl.labels = ['totalDonorCount',
+                        'totalLiveDonorCount',
+                        'ssmTestedDonorCount',
+                        'cnsmTestedDonorCount',
+                        'stsmTestedDonorCount',
+                        'sgvTestedDonorCount',
+                        'methArrayTestedDonorCount',
+                        'methSeqTestedDonorCount',
+                        'expArrayTestedDonorCount',
+                        'expSeqTestedDonorCount',
+                        'pexpTestedDonorCount',
+                        'mirnaSeqTestedDonorCount',
+                        'jcnTestedDonorCount'];
+
+        _ctrl.labels.forEach(function(fieldName) {
+        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
+        });
+
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
@@ -214,8 +233,6 @@
           countBy: 'totalDonorCount'
         });
 
-        // _ctrl.stacked = [];
-
         // Get project-donor-mutation distribution of exon impacted ssm
         Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
@@ -225,37 +242,39 @@
 
         if (stopIfNoHits (data)) {return;}
 
-        var projectIds = _.pluck (data.hits, 'id').join();
-        Projects.several (projectIds).get ('genes', {
-            include: 'projects',
-            filters: {mutation:{functionalImpact:{is:['High']}}},
-            size: 20
-          }).then (function (genes) {
-            // About to launch a new ajax getting project aggregation data. Cancel any active call.
-            cancelInFlightAggregationAjax();
+        var mutationFilter = {
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        };
 
-            if (stopIfNoHits (genes)) {return;}
+        Projects.several (_ctrl.projectIds.join()).get ('genes', {
+          include: 'projects',
+          filters: mutationFilter,
+          size: 20
+        }).then (function (genes) {
+          // About to launch a new ajax getting project aggregation data. Cancel any active call.
+          cancelInFlightAggregationAjax();
 
-            var params = {
-              mutation: {functionalImpact:{is:['High']}}
-            };
-            Page.stopWork();
+          if (stopIfNoHits (genes)) {return;}
 
-            aggregationAjaxAbort = $q.defer();
-            _ctrl.isLoadingData = true;
+          Page.stopWork();
 
-            // This call is relatively expensive.
-            // FIXME: elasticsearch aggregation support may be more efficient
-            Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
-              .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
-              .get ({'filters': params})
-              .then (function (geneProjectFacets) {
+          aggregationAjaxAbort = $q.defer();
+          _ctrl.isLoadingData = true;
+
+          // This call is relatively expensive.
+          // FIXME: elasticsearch aggregation support may be more efficient
+          Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
+            .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
+            .get ({'filters': mutationFilter})
+            .then (function (geneProjectFacets) {
 
               genes.hits.forEach (function (gene) {
                 var uiFIProjects = [];
 
-                geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.find( data.hits, function(p) {
+                geneProjectFacets[gene.id].terms.forEach(function (t) {
+                  var proj = _.find(data.hits, function (p) {
                     return p.id === t.term;
                   });
 
@@ -268,7 +287,6 @@
                     });
                   }
                 });
-
                 gene.uiFIProjects = uiFIProjects;
               });
 
@@ -276,7 +294,7 @@
               _ctrl.stacked = transform (genes.hits);
               aggregationAjaxAbort = null;
             });
-          });
+        });
 
         // Id to primary site
         var id2site = {};
@@ -414,7 +432,6 @@
 
   module.controller('ProjectGeneCtrl',
     function($scope, HighchartsService, Projects, Donors, LocationService, ProjectCache) {
-
     var _ctrl = this, project = Projects.one();
 
     function success(genes) {

@@ -157,7 +157,9 @@
         $scope.$on('$destroy', function() {
           $scope.items = null;
           $scope.selected = null;
-          chart.destroy();
+          if (chart) {
+            chart.destroy();
+          }
         });
       }
     };

@@ -33,7 +33,7 @@
       // TODO: Move this into a template file.
       template: '<div><div class="text-center graph_title">{{ title }}</div>' +
         '<div ng-show="showPlot" class="stackedsubtitle text-center">{{ subtitle }}</div>' +
-        '<div ng-show="! showPlot" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">' +
+        '<div ng-show="! showPlot && ! isLoadingData" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">' +
         '<strong>No mutations reported for the selected projects.</strong></div>' +
         '<div>' +
         '<div ng-show="isLoadingData" style="line-height: {{ defaultGraphHeight }}px; z-index: 1; position: absolute; margin-left: {{ defaultGraphWidth/2 + leftMargin}}px;">' +
@@ -91,7 +91,6 @@
 
         $scope.$watch ('isLoading', function (newValue) {
           $scope.isLoadingData = newValue;
-          $scope.showPlot = newValue;
         });
 
         var svgMountPoint = _.first ($element.find ('.canvas'));
