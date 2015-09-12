@@ -18,33 +18,40 @@
   'use strict';
   var module = angular.module('icgc.visualization.stackedbar', []);
 
-  function ensureArray (a) {
-    return _.isArray (a) ? a : [];
-  }
-
   module.directive('stacked', function ($location, HighchartsService, $window) {
     return {
       restrict: 'E',
       replace: true,
       scope: {
         items: '=',
+        isLoading: '=',
         alternateBrightness: '=',
         title: '@',
         subtitle: '@',
         yLabel: '@'
       },
-      template: '<div><div class="text-center graph_title"> {{title}} </div>' +
-        '<div class="stackedsubtitle text-center"> {{subtitle}} </div></div>',
+      // TODO: Move this into a template file.
+      template: '<div><div class="text-center graph_title">{{ title }}</div>' +
+        '<div ng-show="showPlot" class="stackedsubtitle text-center">{{ subtitle }}</div>' +
+        '<div ng-show="! showPlot" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">' +
+        '<strong>No mutations reported for the selected projects.</strong></div>' +
+        '<div>' +
+        '<div ng-show="isLoadingData" style="line-height: {{ defaultGraphHeight }}px; z-index: 1; position: absolute; margin-left: {{ defaultGraphWidth/2 + leftMargin}}px;">' +
+        '<i class="icon-spinner icon-spin"></i></div>' +
+        '<div ng-show="showPlot && ! isLoadingData" class="canvas"></div></div></div>',
       link: function ($scope, $element) {
-        var isInitialized = false;
-        var chart, config;
+        $scope.showPlot = false;
+        $scope.defaultGraphHeight = 250;
+        $scope.defaultGraphWidth = 500;
+        $scope.leftMargin = 50;
 
-        config = {
+        var chart;
+        var config = {
           margin: {
-             top: 5, right: 20, bottom: 50, left: 50
+             top: 5, right: 20, bottom: 50, left: $scope.leftMargin
           },
-          height: 250,
-          width: 500,
+          height: $scope.defaultGraphHeight,
+          width: $scope.defaultGraphWidth,
           colours: HighchartsService.primarySiteColours,
           alternateBrightness: $scope.alternateBrightness === true? true : false,
           yaxis: {
@@ -80,25 +87,37 @@
           }
         };
 
-        $scope.$watch('items', function (newValue) {
-          if (! chart) {
-            chart = new dcc.StackedBarChart (config);
-          }
+        $scope.isLoadingData = false;
 
-          if (_.isEmpty (ensureArray (newValue))) {
-            if (chart && isInitialized) {
-              // FIXME: this displaysNoResultMessage() probably shouldn't be a method for the stackedbar class.
-              // But due to some dependencies and time, this should suffice for now.
-              // Will refactor this along with other improvements I wanted to make.
-              chart.displaysNoResultMessage ($element[0], 'No mutations found');
+        $scope.$watch ('isLoading', function (newValue) {
+          $scope.isLoadingData = newValue;
+          $scope.showPlot = newValue;
+        });
+
+        var svgMountPoint = _.first ($element.find ('.canvas'));
+
+        function shouldShowPlot (data) {
+          return ! _.isEmpty (data);
+        }
+
+        $scope.$watch ('items', function (newValue) {
+          var showPlot = shouldShowPlot (newValue);
+          $scope.showPlot = showPlot;
+          if (! showPlot) {return;}
+
+          if (newValue && typeof $scope.items[0] !== 'undefined') {
+            if (!chart) {
+              chart = new dcc.StackedBarChart(config);
             }
-            return;
+
+            // Adaptive margin based on char length of labels
+            var max = _.max(_.pluck( $scope.items, 'key').map(function(d) { return d.length; }));
+            if (max >= 10) {
+              config.margin.bottom += 25;
+            }
+
+            chart.render (svgMountPoint, $scope.items);
           }
-
-          // FIXME: Again, this is a band-aid solution for now.
-          isInitialized = true;
-
-          chart.render ($element[0], newValue);
         }, true);
 
         $scope.$on('$destroy', function () {

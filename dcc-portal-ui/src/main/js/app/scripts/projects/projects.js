@@ -152,24 +152,50 @@
 
     _ctrl.donutChartSubTitle = function () {
       var formatNumber = $filter ('number');
-      var subtitle = '' + formatNumber (_ctrl.totalDonors) + ' Donors';
+      var pluralizer = function (n, singular) {
+        return '' + singular + (n > 1 ?  's' : '');
+      };
+      var toHumanReadable = function (n, singular) {
+        return '' + formatNumber (n) + ' ' + pluralizer (n, singular);
+      };
+      var subtitle = toHumanReadable (_ctrl.totalDonors, 'Donor');
       var projects = _.get (_ctrl, 'projects.hits', undefined);
 
-      return _.isArray (projects) ?
-        subtitle + ' across ' + formatNumber (projects.length) + ' Projects' :
-        subtitle;
+      return subtitle + (_.isArray (projects) ?
+        ' across ' + toHumanReadable (projects.length, 'Project') : '');
     };
 
     function noHitsIn (results) {
       return 0 === _.get (results, 'hits.length', 0);
     }
 
-    function success(data) {
+    _ctrl.isLoadingData = false;
 
+    function stopIfNoHits (data) {
+      if (noHitsIn (data)) {
+        _ctrl.isLoadingData = false;
+        _ctrl.stacked = [];
+        Page.stopWork();
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    var aggregationAjaxAbort = null;
+
+    function cancelInFlightAggregationAjax () {
+      if (aggregationAjaxAbort) {
+        aggregationAjaxAbort.resolve();
+        aggregationAjaxAbort = null;
+      }
+    }
+
+    function success (data) {
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
-        _ctrl.projectIds = _.pluck(data.hits, 'id');
+        _ctrl.projectIds = _.pluck (data.hits, 'id');
 
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
@@ -180,7 +206,6 @@
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
         _ctrl.projects = data;
-
         _ctrl.donut = HighchartsService.donut({
           data: data.hits,
           type: 'project',
@@ -198,33 +223,35 @@
           _ctrl.distribution = data;
         });
 
-        if (noHitsIn (data)) {
-          _ctrl.stacked = [];
-          Page.stopWork();
-          return;
-        }
+        if (stopIfNoHits (data)) {return;}
 
-        Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes',{
+        var projectIds = _.pluck (data.hits, 'id').join();
+        Projects.several (projectIds).get ('genes', {
             include: 'projects',
             filters: {mutation:{functionalImpact:{is:['High']}}},
             size: 20
-          }).then(function (genes) {
-            if (noHitsIn (genes)) {
-              _ctrl.stacked = [];
-              Page.stopWork();
-              return;
-            }
+          }).then (function (genes) {
+            // About to launch a new ajax getting project aggregation data. Cancel any active call.
+            cancelInFlightAggregationAjax();
+
+            if (stopIfNoHits (genes)) {return;}
 
             var params = {
               mutation: {functionalImpact:{is:['High']}}
             };
             Page.stopWork();
 
-            // FIXME: elasticsearch aggregation support may be more efficient
-            Restangular.one('ui').one('gene-project-donor-counts', _.pluck(genes.hits, 'id'))
-              .get({'filters': params}).then(function(geneProjectFacets) {
+            aggregationAjaxAbort = $q.defer();
+            _ctrl.isLoadingData = true;
 
-              genes.hits.forEach(function(gene) {
+            // This call is relatively expensive.
+            // FIXME: elasticsearch aggregation support may be more efficient
+            Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
+              .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
+              .get ({'filters': params})
+              .then (function (geneProjectFacets) {
+
+              genes.hits.forEach (function (gene) {
                 var uiFIProjects = [];
 
                 geneProjectFacets[gene.id].terms.forEach(function(t) {
@@ -245,7 +272,9 @@
                 gene.uiFIProjects = uiFIProjects;
               });
 
-              _ctrl.stacked = transform(genes.hits);
+              _ctrl.isLoadingData = false;
+              _ctrl.stacked = transform (genes.hits);
+              aggregationAjaxAbort = null;
             });
           });
 
@@ -264,7 +293,6 @@
 
           _ctrl.donorData = data;
         });
-
       }
     }
 
@@ -626,7 +654,6 @@
         from: 1,
         filters: LocationService.filters()
       };
-
 
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
 
