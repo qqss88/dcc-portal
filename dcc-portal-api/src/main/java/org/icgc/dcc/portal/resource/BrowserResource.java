@@ -3,7 +3,6 @@ package org.icgc.dcc.portal.resource;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
 
@@ -78,11 +78,6 @@ public class BrowserResource {
   private Client client;
 
   /**
-   * Request state.
-   */
-  private Map<String, String> queryMap = newHashMap();
-
-  /**
    * Handles requests for gene objects
    */
   @GET
@@ -126,6 +121,7 @@ public class BrowserResource {
       String interval, String resource, String bioType, String consequenceType) {
     checkRequest(isBlank(resource), "'resource' parameter is required but missing.");
 
+    val queryMap = Maps.<String, String> newHashMap();
     queryMap.put(ParameterNames.SEGMENT, segment);
     queryMap.put(ParameterNames.HISTOGRAM, histogram);
     queryMap.put(ParameterNames.DATATYPE, dataType);
@@ -137,7 +133,8 @@ public class BrowserResource {
     val dataSource = newInstance(resource);
     val isHistogram = histogram != null && "true".equals(histogram);
 
-    return MAPPER.writeValueAsString(isHistogram ? getHistogram(dataSource) : getRecords(dataSource));
+    return MAPPER
+        .writeValueAsString(isHistogram ? getHistogram(dataSource, queryMap) : getRecords(dataSource, queryMap));
   }
 
   /**
@@ -161,7 +158,7 @@ public class BrowserResource {
   /**
    * Retrieves histogram.
    */
-  List<Object> getHistogram(AnnotationDataSource dataSource) {
+  List<Object> getHistogram(AnnotationDataSource dataSource, Map<String, String> queryMap) {
     val errorMessage = "Histogram request requires '%s' parameter.";
 
     val interval = queryMap.get(ParameterNames.INTERVAL);
@@ -190,7 +187,7 @@ public class BrowserResource {
    * Retrieves complete data.
    */
   @SneakyThrows
-  List<List<Object>> getRecords(AnnotationDataSource dataSource) {
+  List<List<Object>> getRecords(AnnotationDataSource dataSource, Map<String, String> queryMap) {
     val segmentParameter = ParameterNames.SEGMENT;
     val errorMessage = "'%s' parameter is required but missing.";
 
@@ -227,7 +224,7 @@ public class BrowserResource {
    */
   // TODO: When requirements are stable
   @SuppressWarnings("unused")
-  private void validateSegmentRange(long start, long stop) {
+  private void validateSegmentRange(long start, long stop, Map<String, String> queryMap) {
     val histogram = nullToEmpty(queryMap.get("histogram")).equals("true");
     if (histogram) {
       return;
@@ -242,5 +239,4 @@ public class BrowserResource {
       throw new BadRequestException(message);
     }
   }
-
 }
