@@ -91,6 +91,7 @@ public class UnionAnalyzer {
    */
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final String DISTINCT = "DISTINCT";
+  private static final Long PRECISION = 40000L;
 
   /**
    * Dependencies.
@@ -520,7 +521,7 @@ public class UnionAnalyzer {
     val boolFilter = toDonorBoolFilter(unionDefinition);
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
 
-    val aggs = AggregationBuilders.cardinality(DISTINCT).field("donor_id");
+    val aggs = AggregationBuilders.cardinality(DISTINCT).field("donor_id").precisionThreshold(PRECISION);
     val search = client
         .prepareSearch(REPOSITORY_INDEX_NAME, indexName)
         .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
@@ -530,7 +531,7 @@ public class UnionAnalyzer {
         .setNoFields()
         .addAggregation(aggs);
 
-    log.debug("ElasticSearch query is: '{}'", search);
+    log.info("ElasticSearch query is: '{}'", search);
     val response = search.execute().actionGet();
     log.debug("ElasticSearch result is: '{}'", response);
 
