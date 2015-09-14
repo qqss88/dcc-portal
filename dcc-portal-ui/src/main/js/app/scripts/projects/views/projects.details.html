@@ -123,16 +123,15 @@
 <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
     <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
-        <a data-ui-sref="project({id:project.id})">{{project.id}}
-<!--             <span ng-if="! isPendingProject">{{project.id}}</span>
-            <abbr ng-if="isPendingProject" data-tooltip="Project with pending donors only" data-tooltip-placement="top">
-                {{project.id}}
-            </abbr>
- -->        </a>
+      <a data-ui-sref="project ({id:project.id})">{{ project.id }}</a>
     </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
-    <td>{{::project.primaryCountries.join(', ')}}</td>
+    <td style="text-align: center; vertical-align: middle;">
+      <span ng-repeat="country in project.primaryCountries"
+        class="flag flag-{{ countryCode (country) }}"
+        title="{{ country }}" />
+    </td>
 
     <td class="text-right">
         <span data-ng-if="project.totalLiveDonorCount > 0">
@@ -223,7 +222,7 @@
 <tr>
     <td colspan="4"><strong>Total</strong></td>
     <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount > 0" 
+        <a data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount > 0"
         href="{{ toAdvanceSearchUrl ({state: 'live'}) }}">
             {{ProjectsCtrl.totals.totalLiveDonorCount|number}}</a>
         <span data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount === 0">0</span>
