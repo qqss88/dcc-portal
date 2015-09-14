@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Doubles;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.yammer.metrics.annotation.Timed;
 
@@ -163,7 +164,8 @@ public class BrowserResource {
 
     val interval = queryMap.get(ParameterNames.INTERVAL);
     checkRequest(isBlank(interval), errorMessage, ParameterNames.INTERVAL);
-    checkRequest(Double.parseDouble(interval) <= 0, "Historgram requires %s > 0", ParameterNames.INTERVAL);
+    checkRequest(Doubles.tryParse(interval) == null, "Bad value '%s' for '%s'", interval, ParameterNames.INTERVAL);
+    checkRequest(Doubles.tryParse(interval) <= 0, "Historgram requires %s > 0", ParameterNames.INTERVAL);
 
     val segmentParameter = ParameterNames.SEGMENT;
     val segmentRegion = queryMap.get(segmentParameter);
