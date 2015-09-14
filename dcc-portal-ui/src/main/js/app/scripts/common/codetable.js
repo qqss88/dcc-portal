@@ -66,10 +66,13 @@
       'dataFormat': 'File Format',
       'dataType': 'Data Type',
       'donorStudy': 'Only Donors in Study',
-      'projectCode': 'Project'
+      'projectCode': 'Project',
 
+      // Donor states
+      'state': 'ICGC Donor',
+      'live': 'With molecular data in DCC',
+      'pending': 'Without molecular data in DCC'
     };
-
 
     var tooltipLookup = {
       // Sequencing analysis types (Sequencing strategy)
@@ -110,10 +113,12 @@
       'SELEX': 'Systematic Evolution of Ligands by EXponential enrichment',
       'RIP-Seq': 'Direct sequencing of RNA immunoprecipitates (includes CLIP-Seq, HITS-CLIP and PAR-CLIP).',
       'ChIA-PET': 'Direct sequencing of proximity-ligated chromatin immunoprecipitates.',
-      'OTHER': 'Library strategy not listed.'
+      'OTHER': 'Library strategy not listed.',
 
+      // Donor states
+      'live': 'With molecular data in DCC',
+      'pending': 'Without molecular data in DCC'
     };
-
 
     this.translate = function(id) {
       return translateLookup[id];
