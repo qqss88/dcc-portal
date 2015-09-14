@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.analysis;
 import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_TEXT;
+import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
 import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TEXT;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
@@ -37,10 +37,12 @@ import javax.validation.constraints.Min;
 
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.query.QueryEngine;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
@@ -268,7 +270,12 @@ public class UnionAnalyzer {
       val definitions = entitySetDefinition.getUnion();
       val entityType = entitySetDefinition.getType();
 
-      val response = unionAll(definitions, entityType, maxUnionCount);
+      SearchResponse response;
+      if (entityType == BaseEntitySet.Type.DONOR) {
+        response = getDonorUnion(definitions);
+      } else {
+        response = unionAll(definitions, entityType, maxUnionCount);
+      }
 
       val totalHits = SearchResponses.getTotalHitCount(response);
       if (totalHits > maxUnionCount) {
@@ -516,20 +523,20 @@ public class UnionAnalyzer {
     return boolFilter;
   }
 
+  private SearchResponse getDonorUnion(final Iterable<UnionUnit> definitions) {
+    val boolFilter = toBoolFilterFrom(definitions, BaseEntitySet.Type.DONOR);
+    val search = donorSearchRequest(boolFilter, false);
+
+    log.info("ElasticSearch query is: '{}'", search);
+    val response = search.execute().actionGet();
+    log.debug("ElasticSearch result is: '{}'", response);
+    
+    return response;
+  }
+
   private long getDonorCount(final UnionUnit unionDefinition) {
-
     val boolFilter = toDonorBoolFilter(unionDefinition);
-    val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
-
-    val aggs = AggregationBuilders.cardinality(DISTINCT).field("donor_id").precisionThreshold(PRECISION);
-    val search = client
-        .prepareSearch(REPOSITORY_INDEX_NAME, indexName)
-        .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
-        .setSearchType(SearchType.COUNT)
-        .setQuery(query)
-        .setSize(maxUnionCount)
-        .setNoFields()
-        .addAggregation(aggs);
+    val search = donorSearchRequest(boolFilter, true);
 
     log.info("ElasticSearch query is: '{}'", search);
     val response = search.execute().actionGet();
@@ -537,5 +544,25 @@ public class UnionAnalyzer {
 
     Cardinality retAgg = response.getAggregations().get(DISTINCT);
     return retAgg.getValue();
+  }
+  
+  private SearchRequestBuilder donorSearchRequest(final BoolFilterBuilder boolFilter, final boolean useAggs) {
+    val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
+    
+    val search = client
+        .prepareSearch(REPOSITORY_INDEX_NAME, indexName)
+        .setTypes(DONOR_CENTRIC.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
+        .setQuery(query)
+        .setSize(maxUnionCount)
+        .setNoFields();
+    
+    if (useAggs) {
+      val aggs = AggregationBuilders.cardinality(DISTINCT).field("donor_id").precisionThreshold(PRECISION);
+      search.addAggregation(aggs).setSearchType(SearchType.COUNT);
+    } else {
+      search.setSearchType(SearchType.DEFAULT);
+    }
+    
+    return search;
   }
 }
