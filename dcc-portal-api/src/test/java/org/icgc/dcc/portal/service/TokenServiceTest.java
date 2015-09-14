@@ -20,9 +20,9 @@ package org.icgc.dcc.portal.service;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.icgc.dcc.common.core.util.Joiners.WHITESPACE;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -102,7 +102,7 @@ public class TokenServiceTest {
   private Set<String> convertScopes(Set<AccessTokenScope> scopes) {
     return scopes.stream()
         .map(s -> s.getName())
-        .collect(toSet());
+        .collect(toImmutableSet());
   }
 
   @Test(expected = IllegalArgumentException.class)
