@@ -4071,18 +4071,31 @@ td {
   margin-left: 0.5em;
   margin-top: 0.5em;
   font-size: 1.5em;
+  border: 1px solid grey;
+  padding: 1px 2px 0px;
+  background-color: rgba(128, 128, 128, 0.2);
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 /**
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 208, _modules/_pathwayviewer.scss */
+/* line 213, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
   top: 0;
   background: white;
+}
+
+/**
+ * For disabling zooming
+ */
+/* line 223, _modules/_pathwayviewer.scss */
+.pathway-no-scroll {
+  pointer-events: none;
 }
 
 /* line 26, styles.scss */

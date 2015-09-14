@@ -60,7 +60,7 @@
     var zoom = d3.behavior.zoom().scaleExtent([scaleFactor*0.9, scaleFactor*17]);
     
     var svg = d3.select(config.container).append('svg')
-      .attr('class', 'pathwaysvg')
+      .attr('class', 'pathwaysvg pathway-no-scroll')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
       .attr('preserveAspectRatio', 'xMidYMid')
       .append('g')
@@ -215,7 +215,7 @@
 
         // Only highlight it if it's part of the pathway we're zooming in on
         // And only hide parts of it we are zooming in on a pathway
-        if((nodesInPathway.length === 0 || _.contains(nodesInPathway,dbId)) && rh.value > 0){
+        if((nodesInPathway.length === 0 || _.contains(nodesInPathway,dbId)) && rh.value >= 0){
           highlights.push({id:dbId,value:rh.value});
         }
       });
