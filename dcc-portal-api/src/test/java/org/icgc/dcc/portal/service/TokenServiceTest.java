@@ -21,14 +21,20 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.icgc.dcc.common.core.util.Joiners.WHITESPACE;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import lombok.val;
 
-import org.icgc.dcc.common.core.util.Splitters;
+import java.util.Set;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.auth.oauth.UserScopesInternal;
 import org.icgc.dcc.portal.model.AccessToken;
+import org.icgc.dcc.portal.model.AccessTokenScopes.AccessTokenScope;
 import org.icgc.dcc.portal.model.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +42,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.collect.ImmutableSet;
+
+@Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class TokenServiceTest {
 
@@ -43,7 +52,8 @@ public class TokenServiceTest {
    * Scope supported by default. <br>
    * // TODO: Make sure scope is correctly resolved.
    */
-  private static final String SCOPE = "s3.download";
+  private static final Set<String> USER_SCOPES = ImmutableSet.of("s3.download", "s3.upload", "collab.download",
+      "collab.upload", "id.create");
   private static final String USER_ID = "userId";
   private static final String TOKEN_ID = "123";
   private static final int EXPIRES = 10;
@@ -56,16 +66,16 @@ public class TokenServiceTest {
 
   @Test
   public void createTest_successful() {
-    when(client.createToken(USER_ID, SCOPE, "")).thenReturn(createAccessToken());
-    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(SCOPE));
+    when(client.createToken(USER_ID, createScope(), "")).thenReturn(createAccessToken());
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(USER_SCOPES));
 
-    val result = tokenService.create(createUser(USER_ID, TRUE), SCOPE, "");
+    val result = tokenService.create(createUser(USER_ID, TRUE), createScope(), "");
     assertThat(result).isEqualTo(TOKEN_ID);
   }
 
   @Test(expected = ForbiddenAccessException.class)
   public void createTest_noDaco() {
-    tokenService.create(createUser(USER_ID, FALSE), SCOPE, "");
+    tokenService.create(createUser(USER_ID, FALSE), createScope(), "");
   }
 
   @Test
@@ -82,23 +92,27 @@ public class TokenServiceTest {
 
   @Test
   public void userScopesTest() {
-    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(SCOPE));
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(USER_SCOPES));
     val result = tokenService.userScopes(createUser(USER_ID, TRUE));
-    val expectedScopes = Splitters.WHITESPACE.splitToList(SCOPE);
-
-    for (val accessScope : result.getScopes()) {
-      assertThat(expectedScopes).containsOnly(accessScope.getName());
-    }
+    val resultScopes = convertScopes(result.getScopes());
+    log.info("{}", resultScopes);
+    assertThat(resultScopes).containsOnlyElementsOf(USER_SCOPES);
   }
 
-  @Test(expected = RuntimeException.class)
+  private Set<String> convertScopes(Set<AccessTokenScope> scopes) {
+    return scopes.stream()
+        .map(s -> s.getName())
+        .collect(toImmutableSet());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void userScopesTest_unrecognizedScope() {
-    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal("fake"));
+    when(client.getUserScopes(USER_ID)).thenReturn(createUserScopesInternal(singleton("fake")));
     tokenService.userScopes(createUser(USER_ID, TRUE));
   }
 
-  private static UserScopesInternal createUserScopesInternal(String scope) {
-    return new UserScopesInternal(singleton(scope));
+  private static UserScopesInternal createUserScopesInternal(Set<String> scopes) {
+    return new UserScopesInternal(scopes);
   }
 
   private static User createUser(String userId, Boolean hasDaco) {
@@ -110,7 +124,11 @@ public class TokenServiceTest {
   }
 
   private static AccessToken createAccessToken() {
-    return new AccessToken(TOKEN_ID, "", EXPIRES, singleton(SCOPE));
+    return new AccessToken(TOKEN_ID, "", EXPIRES, USER_SCOPES);
+  }
+
+  private static String createScope() {
+    return WHITESPACE.join(USER_SCOPES);
   }
 
 }
