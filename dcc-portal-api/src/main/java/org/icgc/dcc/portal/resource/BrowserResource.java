@@ -163,6 +163,7 @@ public class BrowserResource {
 
     val interval = queryMap.get(ParameterNames.INTERVAL);
     checkRequest(isBlank(interval), errorMessage, ParameterNames.INTERVAL);
+    checkRequest(Double.parseDouble(interval) <= 0, "Historgram requires %s > 0", ParameterNames.INTERVAL);
 
     val segmentParameter = ParameterNames.SEGMENT;
     val segmentRegion = queryMap.get(segmentParameter);
