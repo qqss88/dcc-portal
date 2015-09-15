@@ -33,7 +33,7 @@
                 </td>
                 <td>
                     <input search-on-enter tabindex="3" data-ng-class="{'invalid': invalidParams.isPosition}"
-                           placeholder="eg. 29885594" type="text" integer-validator data-ng-model="params.position"
+                           placeholder="e.g. 29885594" type="text" integer-validator data-ng-model="params.position"
                            data-ng-change="checkParams();">
                            <i data-tooltip="Must be less than Chromosome {{params.chr}}'s length: {{lengths[params.chr]}}"
                               data-tooltip-placement="right" class="invalid-icon icon-attention"
@@ -46,7 +46,7 @@
                 </td>
                 <td>
                     <input search-on-enter tabindex="4" data-ng-class="{'invalid': invalidParams.isReference}"
-                           type="text" placeholder="eg. GRCh37" data-ng-model="params.reference"
+                           type="text" placeholder="e.g. GRCh37" data-ng-model="params.reference"
                            data-ng-change="checkParams();">
                            <i data-tooltip="Currently only GRCh37" data-tooltip-placement="right"
                               class="invalid-icon icon-attention" data-ng-if="invalidParams.isReference"></i>
@@ -58,7 +58,7 @@
                 </td>
                 <td>
                     <input search-on-enter tabindex="5" data-ng-class="{'invalid': invalidParams.isAllele}" allele-validator
-                           placeholder="eg. C, TTACG, GG" type="text" data-ng-model="params.allele"
+                           placeholder="e.g. C, TTACG, GG" type="text" data-ng-model="params.allele"
                            data-ng-change="checkParams();">
                            <i data-tooltip="Must be of form [ACTG]+ or an indel" data-tooltip-placement="right"
                               class="invalid-icon icon-attention" data-ng-if="invalidParams.isAllele"></i>

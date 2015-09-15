@@ -26,19 +26,12 @@
         items: '=',
         isLoading: '=',
         alternateBrightness: '=',
+        selected: '=',
         title: '@',
         subtitle: '@',
         yLabel: '@'
       },
-      // TODO: Move this into a template file.
-      template: '<div><div class="text-center graph_title">{{ title }}</div>' +
-        '<div ng-show="showPlot" class="stackedsubtitle text-center">{{ subtitle }}</div>' +
-        '<div ng-show="! showPlot && ! isLoadingData" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">' +
-        '<strong>No mutations reported for the selected projects.</strong></div>' +
-        '<div>' +
-        '<div ng-show="isLoadingData" style="line-height: {{ defaultGraphHeight }}px; z-index: 1; position: absolute; margin-left: {{ defaultGraphWidth/2 + leftMargin}}px;">' +
-        '<i class="icon-spinner icon-spin"></i></div>' +
-        '<div ng-show="showPlot && ! isLoadingData" class="canvas"></div></div></div>',
+      templateUrl: '/scripts/modules/stackedbarchart/views/stackedbarchart.html',
       link: function ($scope, $element) {
         $scope.showPlot = false;
         $scope.defaultGraphHeight = 250;
