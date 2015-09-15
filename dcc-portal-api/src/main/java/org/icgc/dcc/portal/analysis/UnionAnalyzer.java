@@ -27,7 +27,6 @@ import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -285,27 +284,8 @@ public class UnionAnalyzer {
       val entityIds = SearchResponses.getHitIds(response);
       log.debug("Union result is: '{}'", entityIds);
 
-      // val watch = Stopwatch.createStarted();
-
       val lookupType = entityType.toLookupTypeFrom();
-
-      if (entitySetDefinition.isTransient()) {
-        val additionalAttribute = new HashMap<String, Object>() {
-
-          {
-            put("transient", true);
-          }
-        };
-
-        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds,
-            additionalAttribute);
-      } else {
-        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
-      }
-
-      // watch.stop();
-      // log.info("createTermsLookup took {} nanoseconds for creating a derived list for entity type - {}",
-      // watch.elapsed(TimeUnit.NANOSECONDS), entityType);
+      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       val count = getCountFrom(response, maxUnionCount);
       // Done - update status to finished
@@ -389,17 +369,7 @@ public class UnionAnalyzer {
       log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
       val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
-      if (entitySetDefinition.isTransient()) {
-        val subType = new HashMap<String, Object>() {
-
-          {
-            put("transient", true);
-          }
-        };
-        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, subType);
-      } else {
-        termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
-      }
+      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       val count = getCountFrom(response, max);
       // Done - update status to finished
@@ -431,17 +401,8 @@ public class UnionAnalyzer {
     val entityIds = repositoryFileRepository.findAllDonorIds(query, maxSetSize);
 
     val lookupType = entitySet.getType().toLookupTypeFrom();
-    if (entitySet.isTransient()) {
-      val subType = new HashMap<String, Object>() {
+    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySet.isTransient());
 
-        {
-          put("transient", true);
-        }
-      };
-      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, subType);
-    } else {
-      termLookupService.createTermsLookup(lookupType, newEntityId, entityIds);
-    }
     val count = entityIds.size();
     // Done - update status to finished
     entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
@@ -542,7 +503,7 @@ public class UnionAnalyzer {
         .setNoFields()
         .setSearchType(SearchType.DEFAULT);
 
-    log.info("ElasticSearch query is: '{}'", search);
+    log.debug("ElasticSearch query is: '{}'", search);
     val response = search.execute().actionGet();
     log.debug("ElasticSearch result is: '{}'", response);
 

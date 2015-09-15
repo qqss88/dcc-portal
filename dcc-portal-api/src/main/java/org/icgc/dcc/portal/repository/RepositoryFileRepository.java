@@ -540,7 +540,7 @@ public class RepositoryFileRepository {
     pqlAst.setLimit(FunctionBuilders.limit(0, size));
     val request = queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
 
-    log.info("findAllDonorIds() - ES query is: '{}'.", request);
+    log.debug("findAllDonorIds() - ES query is: '{}'.", request);
     SearchResponse response = request.execute().actionGet();
     log.debug("findAllDonorIds() - ES response is: '{}'.", response);
 
@@ -548,6 +548,7 @@ public class RepositoryFileRepository {
     val total = response.getHits().getTotalHits();
     val pages = Math.ceil(total / query.getSize());
 
+    // Number of files > max limit, so we must page files in order to ensure we get all donors.
     int curPage = 0;
     while (curPage <= pages) {
       for (val hit : response.getHits()) {
@@ -562,7 +563,7 @@ public class RepositoryFileRepository {
       pqlAst.setLimit(FunctionBuilders.limit(curPage * size, size));
       val nextRequest =
           queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
-      log.info("findAllDonorIds() - ES query is: '{}'.", nextRequest);
+      log.debug("findAllDonorIds() - ES query is: '{}'.", nextRequest);
       response = nextRequest.execute().actionGet();
       log.debug("findAllDonorIds() - ES response is: '{}'.", response);
     }

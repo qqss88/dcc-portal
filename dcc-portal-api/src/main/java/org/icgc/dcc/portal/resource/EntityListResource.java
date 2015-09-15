@@ -133,6 +133,7 @@ public class EntityListResource {
 
   /**
    * This hits the root path of /v1/entityset
+   * 
    * @param listDefinition EntitySet definition from client.
    * @param async Defaults to true. Set to false if a synchronous request is needed.
    * @return JSON representation of new entity set.
@@ -151,6 +152,7 @@ public class EntityListResource {
 
   /**
    * Endpoint used for creating an entity set from the external repository.
+   * 
    * @param listDefinition EntitySet definition from client.
    * @return JSON representation of new entity set.
    */
