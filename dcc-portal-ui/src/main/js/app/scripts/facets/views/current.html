@@ -24,9 +24,7 @@
                         <span data-ng-switch-default="">{{facet | trans}}</span>
                     </span>
 
-                    <span class="t_current__or">
-                        {{ terms.is.length !== 1? "IN (" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1? "IS" : "IN (" }}
-                    </span>
+                    <span class="t_current__or">{{ syntaxExpression (terms, 'IS', 'IN (') }}</span>
 
                     <ul class="t_facets__facet__terms" data-ng-init="expandTerms=false; limit=3">
                         <li data-ng-repeat="termObj in terms.is | limitTo:(expandTerms===true? terms.is.length : limit) track by termObj.term"
@@ -43,9 +41,7 @@
                             </span></a>
                         </li>
                     </ul>
-                    <span class="t_current__or">
-                        {{ terms.is.length !== 1? ")" : [Extensions.ENTITY].indexOf(terms.is[0].controlFacet) === -1 ?  "" : ")"}}
-                    </span>
+                    <span class="t_current__or">{{ syntaxExpression (terms, '', ')') }}</span>
 
                     <span data-ng-if="!$last" class="t_current__and"> AND </span>
                 </li>

@@ -27,6 +27,42 @@
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
 
+    var uploadedDonorSetFilterInRepositoryFile = {
+      term: 'Uploaded donor set',
+      controlTerm: 'Uploaded donor set',
+      controlFacet: 'donorId',
+      controlType: 'file'
+    };
+
+    /*
+     * This function determines the opening or closing for a human-readable JQL expression,
+     * displayed in UI (usually a top panel above a data table).
+     * The main conditions is the number of items in the 'terms' variable,
+     * with additional logic for special cases.
+     */
+    $scope.syntaxExpression = function (terms, single, multiple) {
+      var filters = _.get (terms, 'is', []);
+
+      if (_.isEmpty (filters)) {return '';}
+      if (_.size (filters) > 1) {return multiple;}
+
+      var filter = _.first (filters);
+
+      /*
+       * This handles a special case for 'Uploaded Donor Set' in External Repository.
+       * In this scenario, we cannot compare the value of 'controlFacet' to Extensions.ENTITY,
+       * due to the transformation applied in adjustExternalFileFilters() of
+       * FiltersUtil service (/scripts/common/display.js). See comments in
+       * adjustExternalFileFilters() for more details.
+       * The strict comparison to uploadedDonorSetFilterInRepositoryFile variable is for extra
+       * caution only, ensuring we only apply this when we're in External Repository page.
+       */
+      if (_.isEqual (filter, uploadedDonorSetFilterInRepositoryFile)) {return multiple;}
+
+      return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY) ? multiple : single;
+    };
+
+
     function refresh() {
       var currentFilters = LocationService.filters();
       var ids = LocationService.extractSetIds(currentFilters);
