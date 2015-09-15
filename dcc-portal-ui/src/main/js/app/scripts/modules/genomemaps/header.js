@@ -60,7 +60,7 @@ angular.module('icgc.modules.genomeviewer.header').controller('GenomeViewerHeade
 
   $scope.fullScreen = function() {
     if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
-      var element = document.getElementById('gv-application') === null ? document.getElementById('genome-viewer') : document.getElementById('gv-application');
+      var element = document.getElementById('genomic');
       
       if (element.requestFullscreen) {
         element.requestFullscreen();
