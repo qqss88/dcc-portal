@@ -37,7 +37,6 @@ import javax.validation.constraints.Min;
 
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.query.QueryEngine;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -45,8 +44,6 @@ import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.icgc.dcc.portal.config.PortalProperties;
 import org.icgc.dcc.portal.model.BaseEntitySet;
 import org.icgc.dcc.portal.model.DerivedEntitySetDefinition;
@@ -91,8 +88,6 @@ public class UnionAnalyzer {
    * Constants.
    */
   private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final String DISTINCT = "DISTINCT";
-  private static final Long PRECISION = 40000L;
 
   /**
    * Dependencies.
@@ -524,28 +519,19 @@ public class UnionAnalyzer {
 
   private SearchResponse getDonorUnion(final Iterable<UnionUnit> definitions) {
     val boolFilter = toBoolFilterFrom(definitions, BaseEntitySet.Type.DONOR);
-    val search = donorSearchRequest(boolFilter, false);
-
-    log.info("ElasticSearch query is: '{}'", search);
-    val response = search.execute().actionGet();
-    log.debug("ElasticSearch result is: '{}'", response);
+    val response = donorSearchRequest(boolFilter);
 
     return response;
   }
 
   private long getDonorCount(final UnionUnit unionDefinition) {
     val boolFilter = toDonorBoolFilter(unionDefinition);
-    val search = donorSearchRequest(boolFilter, true);
+    val response = donorSearchRequest(boolFilter);
 
-    log.info("ElasticSearch query is: '{}'", search);
-    val response = search.execute().actionGet();
-    log.debug("ElasticSearch result is: '{}'", response);
-
-    Cardinality retAgg = response.getAggregations().get(DISTINCT);
-    return retAgg.getValue();
+    return SearchResponses.getHitIdsSet(response).size();
   }
 
-  private SearchRequestBuilder donorSearchRequest(final BoolFilterBuilder boolFilter, final boolean useAggs) {
+  private SearchResponse donorSearchRequest(final BoolFilterBuilder boolFilter) {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
 
     val search = client
@@ -553,15 +539,13 @@ public class UnionAnalyzer {
         .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
         .setQuery(query)
         .setSize(maxUnionCount)
-        .setNoFields();
+        .setNoFields()
+        .setSearchType(SearchType.DEFAULT);
 
-    if (useAggs) {
-      val aggs = AggregationBuilders.cardinality(DISTINCT).field("id.search").precisionThreshold(PRECISION);
-      search.addAggregation(aggs).setSearchType(SearchType.COUNT);
-    } else {
-      search.setSearchType(SearchType.DEFAULT);
-    }
+    log.info("ElasticSearch query is: '{}'", search);
+    val response = search.execute().actionGet();
+    log.debug("ElasticSearch result is: '{}'", response);
 
-    return search;
+    return response;
   }
 }
