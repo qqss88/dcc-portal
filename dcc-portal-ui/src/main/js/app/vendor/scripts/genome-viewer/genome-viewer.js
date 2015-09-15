@@ -219,6 +219,12 @@ var Utils = {
         setTimeout(function () {
             $(div).remove();
         }, 2200);
+    },
+    
+    getChromosomes: function(data) {
+      return _.get(data, 'response.result.chromosomes')|| 
+      _.get(data, 'response[0].result[0].chromosomes') ||
+      _.get(data, 'response[0].result.chromosomes');
     }
 
 };
@@ -27484,11 +27490,17 @@ ChromosomePanel.prototype = {
             resource: 'info',
             async: false,
             success: function (data) {
-                _this.data = data.response[0].result.chromosomes;
-                _this.data.cytobands.sort(function (a, b) {
-                    return (a.start - b.start);
-                });
-                _this._drawSvg(_this.data);
+              
+              _this.data = Utils.getChromosomes(data);
+              
+              var cytobands = _.get(_this, 'data.cytobands') || _.get(_this, 'data[0].cytobands');
+              
+              (cytobands).sort(function (a, b) {
+                return (a.start - b.start);
+              });
+              var data = _.get(_this, 'data[0]') || _.get(_this, 'data');
+              
+              _this._drawSvg(data);
             }
         });
 
@@ -28064,7 +28076,7 @@ KaryotypePanel.prototype = {
             resource: 'all',
             async: false,
             success: function (data) {
-                _this.chromosomeList = data.response.result.chromosomes;
+                _this.chromosomeList = Utils.getChromosomes(data);
                 _this.chromosomeList.sort(sortfunction);
                 _this._drawSvg(_this.chromosomeList);
             }
@@ -32602,10 +32614,10 @@ GenomeViewer.prototype = {
         delete this;
     },
     getChromosomes: function () {
-        var saveChromosomes = function (chromsomeList) {
+        var saveChromosomes = function (chromosomeList) {
             var chromosomes = {};
-            for (var i = 0; i < chromsomeList.length; i++) {
-                var chromosome = chromsomeList[i];
+            for (var i = 0; i < chromosomeList.length; i++) {
+                var chromosome = chromosomeList[i];
                 chromosomes[chromosome.name] = chromosome;
             }
             return chromosomes;
@@ -32624,7 +32636,7 @@ GenomeViewer.prototype = {
                 resource: 'all',
                 async: false,
                 success: function (data) {
-                    chromosomes = saveChromosomes(data.response.result.chromosomes);
+                  chromosomes = saveChromosomes(Utils.getChromosomes(data));
                 },
                 error: function (data) {
                     console.log('Could not get chromosome list');

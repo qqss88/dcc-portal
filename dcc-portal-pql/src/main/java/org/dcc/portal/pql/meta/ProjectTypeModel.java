@@ -44,7 +44,8 @@ public class ProjectTypeModel extends TypeModel {
       "primaryCountries",
       "primarySite",
       "availableDataTypes",
-      "state");
+      "state",
+      "tumourType");
 
   private final static List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",
