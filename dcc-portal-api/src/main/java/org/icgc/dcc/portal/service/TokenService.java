@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Sets.difference;
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
@@ -24,6 +25,7 @@ import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.util.AuthUtils.throwForbiddenException;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.NonNull;
@@ -40,6 +42,7 @@ import org.icgc.dcc.portal.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -51,10 +54,12 @@ import com.google.common.collect.Sets;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TokenService {
 
-  private static final String S3_DOWNLOAD_SCOPE_DESC = "Allows to download from the S3";
-  private static final String S3_UPLOAD_SCOPE_DESC = "Allows to upload to the S3";
-  private static final String S3_UPLOAD_SCOPE = "s3.upload";
-  private static final String S3_DOWNLOAD_SCOPE = "s3.download";
+  private static final Map<String, String> SCOPE_DESCRIPTIONS = ImmutableMap.of(
+      "s3.upload", "Allows to upload to the AWS S3",
+      "s3.download", "Allows to download from the AWS S3",
+      "collab.upload", "Allows to upload to the Collaboratory cloud",
+      "collab.download", "Allows to download from the Collaboratory cloud",
+      "id.create", "Allows to create new ICGC IDs at https://id.icgc.org");
 
   @NonNull
   private final OAuthClient client;
@@ -87,16 +92,9 @@ public class TokenService {
     val scopesResult = ImmutableSet.<AccessTokenScope> builder();
 
     for (val scope : userScopes.getScopes()) {
-      switch (scope) {
-      case S3_DOWNLOAD_SCOPE:
-        scopesResult.add(new AccessTokenScope(S3_DOWNLOAD_SCOPE, S3_DOWNLOAD_SCOPE_DESC));
-        break;
-      case S3_UPLOAD_SCOPE:
-        scopesResult.add(new AccessTokenScope(S3_UPLOAD_SCOPE, S3_UPLOAD_SCOPE_DESC));
-        break;
-      default:
-        throw new IllegalArgumentException(format("Unrecognized user scope: '%s'", scope));
-      }
+      val scopeDescription = SCOPE_DESCRIPTIONS.get(scope);
+      checkArgument(scopeDescription != null, "Unrecognized user scope: '%s'", scope);
+      scopesResult.add(new AccessTokenScope(scope, scopeDescription));
     }
 
     return new AccessTokenScopes(scopesResult.build());

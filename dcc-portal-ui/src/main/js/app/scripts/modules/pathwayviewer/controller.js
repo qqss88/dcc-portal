@@ -12,7 +12,8 @@
     urlPath: '',
     strokeColor: 'black',
     highlightColor: 'red',
-    subPathwayColor: 'blue'
+    subPathwayColor: 'blue',
+    initScaleFactor: 0.95
   };
 
   var ReactomePathway = function (config) {
@@ -59,7 +60,7 @@
     var zoom = d3.behavior.zoom().scaleExtent([scaleFactor*0.9, scaleFactor*17]);
     
     var svg = d3.select(config.container).append('svg')
-      .attr('class', 'pathwaysvg')
+      .attr('class', 'pathwaysvg pathway-no-scroll')
       .attr('viewBox', '0 0 ' + config.width + ' ' + config.height)
       .attr('preserveAspectRatio', 'xMidYMid')
       .append('g')
@@ -72,7 +73,7 @@
     });
 
     // Set initial positioning and zoom out a little
-    scaleFactor = scaleFactor * 0.95;
+    scaleFactor = scaleFactor * config.initScaleFactor;
     var offsetX = (config.width - (pathwayBox.width - pathwayBox.minWidth) * scaleFactor) / 2;
     var offsetY = (config.height - (pathwayBox.height - pathwayBox.minHeight) * scaleFactor) / 2;
 
@@ -146,6 +147,8 @@
       // Recalcualte the scale factor and offset and the zoom and transition
       scaleFactor = Math.min(config.height / (pathwayBox.height - pathwayBox.minHeight),
                              config.width / (pathwayBox.width - pathwayBox.minWidth));
+                             
+      scaleFactor = scaleFactor * config.initScaleFactor;
       offsetX = (config.width - (pathwayBox.width - pathwayBox.minWidth) * scaleFactor) / 2;
       offsetY = (config.height - (pathwayBox.height - pathwayBox.minHeight) * scaleFactor) / 2;
       zoom.scale(scaleFactor).translate([-pathwayBox.minWidth * scaleFactor + offsetX,
@@ -212,7 +215,7 @@
 
         // Only highlight it if it's part of the pathway we're zooming in on
         // And only hide parts of it we are zooming in on a pathway
-        if((nodesInPathway.length === 0 || _.contains(nodesInPathway,dbId)) && rh.value > 0){
+        if((nodesInPathway.length === 0 || _.contains(nodesInPathway,dbId)) && rh.value >= 0){
           highlights.push({id:dbId,value:rh.value});
         }
       });

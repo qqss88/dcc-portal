@@ -28,7 +28,8 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+
+      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+ 
+        '<i class="fa fa-expand pathway-fullscreen-controller"></i>' +
         '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
         '<h4>LEGEND</h4></div>'+
         '<div class="pathway-info">'+
@@ -46,9 +47,32 @@
             '</tr></table>' +
         '</div></div>'+
         '</div>',
-      link: function ($scope) {
+      link: function ($scope, element) {
         var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
+        
+        var scrollTimer;
+        
+        element.bind("mouseenter", function() {
+          scrollTimer = setTimeout(function() {
+            $('.pathwaysvg').attr('class', 'pathwaysvg');
+          }, 800);
+        });
+        
+        element.bind("mouseleave", function() {
+          clearTimeout(scrollTimer);
+          $('.pathwaysvg').attr('class', 'pathwaysvg pathway-no-scroll');
+        });
+            
+        var typeMap = {
+          'RenderableComplex': 'Complex',
+          'RenderableProtein': 'Protein',
+          'RenderableEntitySet': 'EntitySet',
+          'RenderableChemical': 'Chemical',
+          'RenderableCompartment': 'Compartment',
+          'ProcessNode': 'ProcessNode',
+          'RenderableMutated Gene(s)': 'Mutated Gene(s)'
+        };
         
         var showLegend = function(){
           $('.pathway-legend').animate({'left': '75%'});
@@ -82,7 +106,7 @@
               .attr('viewBox', '0 0 ' +150+ ' ' +50)
               .attr('preserveAspectRatio', 'xMidYMid')
               .append('g');
-          var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b'});
+          var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
           node.size={width:100-padding*2,height:50-padding*2};
           node.position={x:padding+25,y:padding};
@@ -105,10 +129,7 @@
 
             // Reset data
             $scope.geneList = [];
-
-            // Getting type info, not sure if substr(10) will always work...
-            // assuming everything starts with 'Renderable'
-            $scope.entityType = d.type.substr(10);
+            $scope.entityType = typeMap[d.type];
             
             hideLegend();
             showInfo();
@@ -144,22 +165,71 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          subPathwayColor: 'hotpink'
+          initScaleFactor: 0.95,
+          subPathwayColor: 'navy'
         });
         
-        $('.pathway-legend-controller').on('click',function(){
+        // Render legend last to ensure all dependancies are initialized. Timeout of 0 does not work in firefox.
+        setTimeout(function() {
+          var rect = $('.pathway-legend')[0].getBoundingClientRect();
+          controller.renderLegend(rect.width,rect.height);
+        }, 500);
+        
+        $('.pathway-legend-controller').on('click', function(){
           if(showingLegend){
             hideLegend();
           }else{
             showLegend();
-            var rect = $('.pathway-legend')[0].getBoundingClientRect();
-            controller.renderLegend(rect.width,rect.height);
           }
         });
 
         $('.pathway-info-controller').on('click',function(){
           hideInfo();
         });
+        
+        var requestFullScreen = function(element) {
+          if (element.requestFullscreen) {
+            element.requestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+          } else if (element.webkitRequestFullScreen) {
+            element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+          }
+        };
+        
+        var exitFullScreen = function() {
+          if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+        };
+        
+        var fullScreenHandler = function() {
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            $('.pathway-fullscreen-controller').removeClass('fa-compress');
+            $('.pathway-fullscreen-controller').addClass('fa-expand');
+          } else {
+            $('.pathway-fullscreen-controller').removeClass('fa-expand');
+            $('.pathway-fullscreen-controller').addClass('fa-compress');
+          }
+        };
+        
+        $('.pathway-fullscreen-controller').on('click', function() {       
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            requestFullScreen(document.getElementById('pathway-viewer-mini'));
+          } else {
+            exitFullScreen();
+          }
+        });
+        
+        if (document.addEventListener){
+            document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+            document.addEventListener('mozfullscreenchange', fullScreenHandler);
+            document.addEventListener('fullscreenchange', fullScreenHandler);
+        }
         
         var handleRender = function(){
           if(!xml || !zoomedOn){
@@ -190,6 +260,14 @@
         $scope.$watch('highlights', function (newValue) {
           highlights = newValue;
           handleRender();
+        });
+        
+        $scope.$on('$destroy', function () {
+          element.unbind();
+          
+          document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
+          document.removeEventListener('mozfullscreenchange', fullScreenHandler);
+          document.removeEventListener('fullscreenchange', fullScreenHandler);
         });
       }
     };

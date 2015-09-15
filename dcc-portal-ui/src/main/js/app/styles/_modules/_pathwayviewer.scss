@@ -71,8 +71,9 @@ $compartmentBorder:#ffc38b;
   fill:$nonNodeBoxColor;
 }
 
-.pathway-sub-reaction-line line{
-  stroke-width:1.5px;
+.pathway-sub-reaction-line {
+  stroke-width:2px;
+  stroke: navy;
 }
 
 // Special legend node has no background
@@ -119,6 +120,7 @@ $compartmentBorder:#ffc38b;
   position: relative;
   line-height: 0px;
   overflow: hidden;
+  background-color:white;
 }
 
 .pathway-legend, .pathway-info{
@@ -164,7 +166,7 @@ $compartmentBorder:#ffc38b;
 }
 
 .pathway-legend-controller, .pathway-info-controller{
-  margin-top: 0.7em;
+  margin-top: 0.5em;
 }
 
 .pathway-info h4, .pathway-legend h4{
@@ -189,3 +191,35 @@ $compartmentBorder:#ffc38b;
   padding-right:15%;
   max-height: 150px;
 }
+
+.pathway-fullscreen-controller {
+  position:absolute;
+  left: 0;
+  float:left;
+  margin-left: 0.5em;
+  margin-top: 0.5em;
+  font-size: 1.5em;
+  border: 1px solid grey;
+  padding: 1px 2px 0px;
+  background-color: rgba(128, 128, 128, 0.2);
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/**
+* Needed to stretch the content in the div when using webkit. Otherwise
+* nothing is visible. 
+*/
+:-webkit-full-screen {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  background: white;
+}
+
+/**
+ * For disabling zooming
+ */
+ .pathway-no-scroll {
+   pointer-events: none;
+ }
