@@ -58,6 +58,19 @@ angular.module('icgc.modules.genomeviewer.header').controller('GenomeViewerHeade
     $scope.$emit('gv:autofit', e);
   };
 
+  $scope.fullScreen = function() {
+    if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+      var element = document.getElementById('gv-application') === null ? document.getElementById('genome-viewer') : document.getElementById('gv-application');
+      
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullScreen) {
+        element.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+    }
+  };
 
   $scope.togglePanel = function (panel) {
     $scope.panels[panel] = !$scope.panels[panel];
