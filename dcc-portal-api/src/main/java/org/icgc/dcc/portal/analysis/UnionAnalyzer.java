@@ -68,6 +68,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -264,13 +265,19 @@ public class UnionAnalyzer {
       val entityType = entitySetDefinition.getType();
 
       SearchResponse response;
+      long totalHits;
+      Iterable<String> entityIds;
       if (entityType == BaseEntitySet.Type.DONOR) {
         response = getDonorUnion(definitions);
+        entityIds = SearchResponses.getHitIdsSet(response);
+        totalHits = Iterables.size(entityIds);
       } else {
         response = unionAll(definitions, entityType, maxUnionCount);
+        totalHits = SearchResponses.getTotalHitCount(response);
+        entityIds = SearchResponses.getHitIds(response);
       }
+      log.debug("Union result is: '{}'", entityIds);
 
-      val totalHits = SearchResponses.getTotalHitCount(response);
       if (totalHits > maxUnionCount) {
         // If the total hit count exceeds the allowed maximum, flag this list and quit.
         log.info(
@@ -281,15 +288,11 @@ public class UnionAnalyzer {
         return;
       }
 
-      val entityIds = SearchResponses.getHitIds(response);
-      log.debug("Union result is: '{}'", entityIds);
-
       val lookupType = entityType.toLookupTypeFrom();
       termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
-      val count = getCountFrom(response, maxUnionCount);
       // Done - update status to finished
-      entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
+      entityListRepository.update(newEntity.updateStateToFinished(totalHits), dataVersion);
     } catch (Exception e) {
       log.error("Error while combining lists for {}. See exception below.", newEntityId);
       log.error("Error while combining lists: '{}'", e);
