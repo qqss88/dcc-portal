@@ -20,7 +20,7 @@ package org.icgc.dcc.portal.analysis;
 import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
-import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_CENTRIC;
+import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_TEXT;
 import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TEXT;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
 import static org.icgc.dcc.portal.util.JsonUtils.LIST_TYPE_REFERENCE;
@@ -42,7 +42,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolFilterBuilder;
-import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermsLookupFilterBuilder;
@@ -530,7 +529,7 @@ public class UnionAnalyzer {
     log.info("ElasticSearch query is: '{}'", search);
     val response = search.execute().actionGet();
     log.debug("ElasticSearch result is: '{}'", response);
-    
+
     return response;
   }
 
@@ -545,24 +544,24 @@ public class UnionAnalyzer {
     Cardinality retAgg = response.getAggregations().get(DISTINCT);
     return retAgg.getValue();
   }
-  
+
   private SearchRequestBuilder donorSearchRequest(final BoolFilterBuilder boolFilter, final boolean useAggs) {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
-    
+
     val search = client
         .prepareSearch(REPOSITORY_INDEX_NAME, indexName)
-        .setTypes(DONOR_CENTRIC.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
+        .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
         .setQuery(query)
         .setSize(maxUnionCount)
         .setNoFields();
-    
+
     if (useAggs) {
-      val aggs = AggregationBuilders.cardinality(DISTINCT).field("donor_id").precisionThreshold(PRECISION);
+      val aggs = AggregationBuilders.cardinality(DISTINCT).field("id.search").precisionThreshold(PRECISION);
       search.addAggregation(aggs).setSearchType(SearchType.COUNT);
     } else {
       search.setSearchType(SearchType.DEFAULT);
     }
-    
+
     return search;
   }
 }
