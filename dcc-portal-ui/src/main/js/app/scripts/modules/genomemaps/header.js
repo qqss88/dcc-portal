@@ -57,6 +57,20 @@ angular.module('icgc.modules.genomeviewer.header').controller('GenomeViewerHeade
     //$scope.zoom.current = $scope.options.zoom;
     $scope.$emit('gv:autofit', e);
   };
+  
+  var fullScreenHandler = function() {
+    if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+      $scope.$emit('gv:resizeWidth');
+    } else {
+      $scope.$emit('gv:resizeWidth');
+    }
+  };
+  
+  if (document.addEventListener){
+    document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+    document.addEventListener('mozfullscreenchange', fullScreenHandler);
+    document.addEventListener('fullscreenchange', fullScreenHandler);
+  }
 
   $scope.fullScreen = function() {
     if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
@@ -133,7 +147,6 @@ angular.module('icgc.modules.genomeviewer.header').directive('gvHeader', functio
       options: '=?'
     },
     controller: 'GenomeViewerHeaderController',
-    link: function () {
-    }
+    link: function () {}
   };
 });

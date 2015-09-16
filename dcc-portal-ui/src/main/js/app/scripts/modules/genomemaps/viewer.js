@@ -523,6 +523,13 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         scope.$on('gv:autofit', function (e) {
           genomeViewer.enableAutoHeight();
         });
+        scope.$on('gv:resizeWidth', function () {
+          setTimeout( function() {
+            console.log('RESIZING!');
+            console.log(jQuery('.t_gv__navbar').width());
+            genomeViewer.setWidth(jQuery('.t_gv__navbar').width());
+          }, 100);
+        });
         scope.$on('$destroy', function() {
           if (genomeViewer) {
             genomeViewer.destroy();
