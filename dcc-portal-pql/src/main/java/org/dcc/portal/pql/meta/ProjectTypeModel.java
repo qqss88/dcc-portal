@@ -25,13 +25,13 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 
 import java.util.List;
 
-import lombok.val;
-
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import lombok.val;
 
 public class ProjectTypeModel extends TypeModel {
 
@@ -43,7 +43,8 @@ public class ProjectTypeModel extends TypeModel {
   private final static List<String> AVAILABLE_FACETS = ImmutableList.of(
       "primaryCountries",
       "primarySite",
-      "availableDataTypes");
+      "availableDataTypes",
+      "tumourType");
 
   private final static List<String> PUBLIC_FIELDS = ImmutableList.of(
       "id",
