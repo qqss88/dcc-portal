@@ -27,12 +27,17 @@
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
 
-    var uploadedDonorSetFilterInRepositoryFile = {
+    var donorSetFiltersInRepositoryFile = [{
       term: 'Uploaded donor set',
       controlTerm: 'Uploaded donor set',
       controlFacet: 'donorId',
       controlType: 'file'
-    };
+    }, {
+      term: 'Input Donor Set',
+      controlTerm: 'Input Donor Set',
+      controlFacet: 'donorId',
+      controlType: 'file'
+    }];
 
     /*
      * This function determines the opening or closing for a human-readable JQL expression,
@@ -40,11 +45,11 @@
      * The main conditions is the number of items in the 'terms' variable,
      * with additional logic for special cases.
      */
-    $scope.syntaxExpression = function (terms, single, multiple) {
+    $scope.inPluralForm = function (terms) {
       var filters = _.get (terms, 'is', []);
 
-      if (_.isEmpty (filters)) {return '';}
-      if (_.size (filters) > 1) {return multiple;}
+      if (_.isEmpty (filters)) {return false;}
+      if (_.size (filters) > 1) {return true;}
 
       var filter = _.first (filters);
 
@@ -54,12 +59,14 @@
        * due to the transformation applied in adjustExternalFileFilters() of
        * FiltersUtil service (/scripts/common/display.js). See comments in
        * adjustExternalFileFilters() for more details.
-       * The strict comparison to uploadedDonorSetFilterInRepositoryFile variable is for extra
+       * The strict comparison to elements in donorSetFiltersInRepositoryFile is for extra
        * caution only, ensuring we only apply this when we're in External Repository page.
        */
-      if (_.isEqual (filter, uploadedDonorSetFilterInRepositoryFile)) {return multiple;}
+      if (_.some (donorSetFiltersInRepositoryFile, function (o) {return _.isEqual (filter, o);})) {
+        return true;
+      }
 
-      return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY) ? multiple : single;
+      return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY);
     };
 
 
