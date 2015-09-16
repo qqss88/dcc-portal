@@ -272,6 +272,26 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
 
         }
       }, true);
+      
+      var fullScreenHandler = function() {
+        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+          jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-small');
+          jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-full');
+        } else {
+          jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-full');
+          jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-small');
+        }
+        
+        setTimeout( function() {         
+          // Ensure our setWidth triggers after the genome viewers interal resize callbacks
+          genomeViewer.setWidth(jQuery('.t_gv__navbar').width());}, 100);
+      };
+      
+      if (document.addEventListener){
+        document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+        document.addEventListener('mozfullscreenchange', fullScreenHandler);
+        document.addEventListener('fullscreenchange', fullScreenHandler);
+      }
 
       scope.$on('gv:set:region', function (e, params) {
         if (genomeViewer) {
@@ -296,6 +316,9 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         if (genomeViewer) {
           genomeViewer.destroy();
         }
+        document.removeEventListener('webkitfullscreenchange');
+        document.removeEventListener('mozfullscreenchange');
+        document.removeEventListener('fullscreenchange');
       });
     }
   };
@@ -510,6 +533,26 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         genomeViewer.draw();
 
         genomeViewer.enableAutoHeight();
+        
+        var fullScreenHandler = function() {
+          if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-small');
+            jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-full');
+          } else {
+            jQuery('#gv-fullscreen-ctrl').removeClass('icon-resize-full');
+            jQuery('#gv-fullscreen-ctrl').addClass('icon-resize-small');
+          }
+        
+          // Ensure our setWidth triggers after the genome viewers interal resize callbacks
+          setTimeout( function() {
+            genomeViewer.setWidth(jQuery('.t_gv__navbar').width());}, 100);
+        };
+        
+        if (document.addEventListener){
+          document.addEventListener('webkitfullscreenchange', fullScreenHandler);
+          document.addEventListener('mozfullscreenchange', fullScreenHandler);
+          document.addEventListener('fullscreenchange', fullScreenHandler);
+        }
 
         scope.$on('gv:set:region', function (e, params) {
           genomeViewer.setRegion(params);
@@ -523,17 +566,13 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
         scope.$on('gv:autofit', function (e) {
           genomeViewer.enableAutoHeight();
         });
-        scope.$on('gv:resizeWidth', function () {
-          setTimeout( function() {
-            console.log('RESIZING!');
-            console.log(jQuery('.t_gv__navbar').width());
-            genomeViewer.setWidth(jQuery('.t_gv__navbar').width());
-          }, 100);
-        });
         scope.$on('$destroy', function() {
           if (genomeViewer) {
             genomeViewer.destroy();
           }
+          document.removeEventListener('webkitfullscreenchange');
+          document.removeEventListener('mozfullscreenchange');
+          document.removeEventListener('fullscreenchange');
         });
 
       }
