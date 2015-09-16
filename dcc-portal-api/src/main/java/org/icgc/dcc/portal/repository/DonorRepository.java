@@ -500,14 +500,14 @@ public class DonorRepository implements Repository {
   }
 
   /**
-   * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based 
-   * on a boolean.
+   * Searches for donors based on the ids provided. It will either search against donor-text or donor-file-text based on
+   * a boolean.
    * 
-   * @param input A List of ids that can identify a donor
+   * @param ids A List of ids that can identify a donor
    * @param False - donor-text, True - file-donor-text
    * @return Returns the SearchResponse object from the query.
    */
-  public SearchResponse validateIdentifiers(@NonNull List<String> input, boolean isForExternalFile) {
+  public SearchResponse validateIdentifiers(@NonNull List<String> ids, boolean isForExternalFile) {
     val maxSize = 5000;
     val fields = isForExternalFile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
     val indexName = isForExternalFile ? REPOSITORY_INDEX_NAME : index;
@@ -518,7 +518,7 @@ public class DonorRepository implements Repository {
         .setSearchType(QUERY_THEN_FETCH)
         .setSize(maxSize);
 
-    final Object[] values = input.toArray();
+    final Object[] values = ids.toArray();
     val boolQuery = boolQuery();
 
     for (val searchField : fields.keySet()) {
