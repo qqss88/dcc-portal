@@ -42,10 +42,6 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.math3.util.Pair;
 import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
@@ -62,6 +58,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiltersConverter {
@@ -86,7 +86,8 @@ public class FiltersConverter {
       "primarySite",
       "primaryCountries",
       "availableDataTypes",
-      "state");
+      "state",
+      "tumourType");
 
   private static final List<String> SPECIAL_FIELDS_NESTING = ImmutableList.of(
       "gene.goTermId",
@@ -128,8 +129,7 @@ public class FiltersConverter {
       final String filter = createFilterByNestedPath(indexType, fieldsGrouppedByNestedPath,
           newArrayList(newTreeSet(values).descendingSet()));
 
-      return isEncloseWithCommonParent(values) ?
-          encloseWithCommonParent(key, filter) : filter;
+      return isEncloseWithCommonParent(values) ? encloseWithCommonParent(key, filter) : filter;
     });
 
     return COMMA_JOINER.join(groupedFilters.values());
@@ -267,9 +267,8 @@ public class FiltersConverter {
       ListMultimap<String, JqlField> sortedFields) {
     val typeFilter = createTypeFilter(sortedFields.get(nestedPath), indexType);
 
-    return isNestFilter(nestedPath, indexType) ?
-        format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType), typeFilter) :
-        typeFilter;
+    return isNestFilter(nestedPath, indexType) ? format(NESTED_TEMPLATE, resolveNestedPath(nestedPath, indexType),
+        typeFilter) : typeFilter;
   }
 
   private static String resolveRestNestedPath(Type indexType, Pair<String, String> reduceValuePair, String nestedPath,
@@ -278,11 +277,11 @@ public class FiltersConverter {
     val reducedValue = unboxReduceValue(reduceValuePair);
     val previousSiblingPath = reduceValuePair.getSecond();
 
-    return isNestFilter(nestedPath, indexType) ?
-        (isChildNesting(nestedPath, previousSiblingPath) ?
-            format("nested(%s,and(%s,%s))", resolveNestedPath(nestedPath, indexType), reducedValue, filter) :
-            format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) :
-        format("%s,%s", filter, reducedValue);
+    return isNestFilter(nestedPath,
+        indexType) ? (isChildNesting(nestedPath, previousSiblingPath) ? format("nested(%s,and(%s,%s))",
+            resolveNestedPath(nestedPath, indexType), reducedValue,
+            filter) : format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) : format("%s,%s", filter,
+                reducedValue);
   }
 
   private static <T> T head(@NonNull List<T> list) {
@@ -292,10 +291,8 @@ public class FiltersConverter {
   private static <T> Stream<T> tail(@NonNull List<T> list) {
     val size = list.size();
 
-    return (size < 2) ?
-        Stream.empty() :
-        IntStream.range(1, size).boxed()
-            .map(i -> list.get(i));
+    return (size < 2) ? Stream.empty() : IntStream.range(1, size).boxed()
+        .map(i -> list.get(i));
   }
 
   /*
@@ -385,8 +382,7 @@ public class FiltersConverter {
     } else {
       pathwayIdFields.addAll(hasPathwayFields);
       pathwayRelatedFilter = toPqlFilter(pathwayIdFields, indexType);
-      pathwayRelatedFilter = (null == pathwayRelatedFilter) ? null :
-          format(PQL_OR_TEMPLATE, pathwayRelatedFilter);
+      pathwayRelatedFilter = (null == pathwayRelatedFilter) ? null : format(PQL_OR_TEMPLATE, pathwayRelatedFilter);
     }
 
     // Special handling when entitySetId and id are both present; if not, process normally
@@ -398,8 +394,8 @@ public class FiltersConverter {
     } else {
       entitySetIdFields.addAll(idFields);
       entitySetRelatedFilter = toPqlFilter(entitySetIdFields, indexType);
-      entitySetRelatedFilter = (null == entitySetRelatedFilter) ? null :
-          format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
+      entitySetRelatedFilter =
+          (null == entitySetRelatedFilter) ? null : format(PQL_OR_TEMPLATE, entitySetRelatedFilter);
     }
 
     return COMMA_JOINER.join(
@@ -570,9 +566,7 @@ public class FiltersConverter {
   }
 
   private static String resolveMissingFilter(String fieldName, JqlField jqlField) {
-    val formatTemplate = isTrue(jqlField.getValue()) ?
-        EXISTS_TEMPLATE :
-        MISSING_TEMPLATE;
+    val formatTemplate = isTrue(jqlField.getValue()) ? EXISTS_TEMPLATE : MISSING_TEMPLATE;
 
     return format(formatTemplate, fieldName);
   }
@@ -586,14 +580,10 @@ public class FiltersConverter {
       val arrayFilter = createArrayFilterForMissingField(jqlField, indexType);
       val missingFilter = format(MISSING_TEMPLATE, fieldName);
 
-      return arrayFilter.isPresent() ?
-          format("or(%s,%s)", missingFilter, arrayFilter.get()) :
-          missingFilter;
+      return arrayFilter.isPresent() ? format("or(%s,%s)", missingFilter, arrayFilter.get()) : missingFilter;
     }
 
-    val formatTemplate = isTrue(fieldValue) ?
-        MISSING_TEMPLATE :
-        EXISTS_TEMPLATE;
+    val formatTemplate = isTrue(fieldValue) ? MISSING_TEMPLATE : EXISTS_TEMPLATE;
     return format(formatTemplate, fieldName);
   }
 
@@ -612,9 +602,7 @@ public class FiltersConverter {
   }
 
   private static String createFilterByValueType(JqlField jqlField, Type indexType) {
-    return jqlField.getValue().isArray() ?
-        createInFilter(jqlField, indexType) :
-        createEqFilter(jqlField, indexType);
+    return jqlField.getValue().isArray() ? createInFilter(jqlField, indexType) : createEqFilter(jqlField, indexType);
   }
 
   private static String createEqFilter(JqlField jqlField, Type indexType) {
