@@ -304,7 +304,7 @@
         </form>
     </div>
 </section>
-<section id="genomic" data-ng-class="{'empty': !GeneCtrl.gene.hasGVChromosome}">
+<section id="genomic" class="gv_full_screen" data-ng-class="{'empty': !GeneCtrl.gene.hasGVChromosome}">
     <h3 data-ng-if="GeneCtrl.gene.hasGVChromosome">Genomic Context
         <span data-open-in-list='/g?filters={"gene":{"id":{"is":["{{GeneCtrl.gene.id}}"]}}}' data-type="viewer"></span>
     </h3>
