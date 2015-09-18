@@ -69,9 +69,9 @@
       'projectCode': 'Project',
 
       // Donor states
-      'state': 'ICGC Donor',
-      'live': 'With molecular data in DCC',
-      'pending': 'Without molecular data in DCC'
+      'state': 'Donor Molecular Data',
+      'live': 'Present in DCC',
+      'pending': 'Absent from DCC'
     };
 
     var tooltipLookup = {
@@ -116,8 +116,8 @@
       'OTHER': 'Library strategy not listed.',
 
       // Donor states
-      'live': 'With molecular data in DCC',
-      'pending': 'Without molecular data in DCC'
+      'live': 'Present in DCC',
+      'pending': 'Absent from DCC'
     };
 
     this.translate = function(id) {

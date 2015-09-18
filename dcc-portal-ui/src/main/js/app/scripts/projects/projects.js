@@ -494,6 +494,7 @@
           _ctrl.distribution = data;
         });
 
+        cancelInFlightAggregationAjax();
         if (stopIfNoHits (data)) {return;}
 
         var mutationFilter = {

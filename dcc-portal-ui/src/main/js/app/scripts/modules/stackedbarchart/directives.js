@@ -34,7 +34,7 @@
       templateUrl: '/scripts/modules/stackedbarchart/views/stackedbarchart.html',
       link: function ($scope, $element) {
         $scope.showPlot = false;
-        $scope.defaultGraphHeight = 250;
+        $scope.lineHeight = 310;
         $scope.defaultGraphWidth = 500;
         $scope.leftMargin = 50;
 
@@ -43,7 +43,7 @@
           margin: {
              top: 5, right: 20, bottom: 50, left: $scope.leftMargin
           },
-          height: $scope.defaultGraphHeight,
+          height: 250,
           width: $scope.defaultGraphWidth,
           colours: HighchartsService.primarySiteColours,
           alternateBrightness: $scope.alternateBrightness === true? true : false,

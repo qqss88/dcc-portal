@@ -45,13 +45,7 @@
         items: '=',
         selected: '='
       },
-      // TODO: Move this into a template file.
-      template:'<div class="text-center">' +
-        '<div ng-show="! showPlot" class="text-center"><span class="graph_title">{{ defaultGraphTitle }}</span>' +
-        '<div style="line-height: {{ defaultGraphHeight }}px;">' +
-        '<strong>No data found for the selected <ng-pluralize count="selected.length" when="{\'one\': \'project\', \'other\': \'projects\'}"></ng-pluralize>.</strong></div>' +
-        '</div>' +
-        '<div ng-show="showPlot"><div class="canvas"></div></div></div>',
+      templateUrl: '/scripts/modules/stackedareachart/views/stackedareachart.html',
       link: function ($scope, $element) {
         var chart;
         var filterProjects = function(data, includedProjects){
