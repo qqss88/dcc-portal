@@ -419,6 +419,19 @@
         ' across ' + toHumanReadable (projects.length, 'Project') : '');
     };
 
+    _ctrl.hasDonutData = function () {
+      var donutData = _ctrl.donut;
+      var lengths = _.map (['inner', 'outer'], function (key) {
+        return _.get (donutData, [key, 'length'], 0);
+      });
+      return _.sum (lengths) > 0;
+    };
+
+    _ctrl.numberOfSelectedProjectsInFilter = function () {
+      var queryFilter = LocationService.filters();
+      return _.get (queryFilter, 'project.id.is.length', 0);
+    };
+
     function noHitsIn (results) {
       return 0 === _.get (results, 'hits.length', 0);
     }

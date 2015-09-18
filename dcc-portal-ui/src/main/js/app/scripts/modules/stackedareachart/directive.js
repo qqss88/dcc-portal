@@ -43,7 +43,8 @@
       replace: true,
       scope: {
         items: '=',
-        selected: '='
+        selected: '=',
+        selectedProjectCount: '='
       },
       templateUrl: '/scripts/modules/stackedareachart/views/stackedareachart.html',
       link: function ($scope, $element) {

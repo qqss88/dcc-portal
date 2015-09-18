@@ -27,6 +27,8 @@
         isLoading: '=',
         alternateBrightness: '=',
         selected: '=',
+        selectedProjectCount: '=',
+        lineHeight: '=',
         title: '@',
         subtitle: '@',
         yLabel: '@'
@@ -34,15 +36,17 @@
       templateUrl: '/scripts/modules/stackedbarchart/views/stackedbarchart.html',
       link: function ($scope, $element) {
         $scope.showPlot = false;
-        $scope.lineHeight = 310;
         $scope.defaultGraphWidth = 500;
-        $scope.leftMargin = 50;
+        $scope.margin = {
+           top: 5,
+           right: 20,
+           bottom: 50,
+           left: 50
+        };
 
         var chart;
         var config = {
-          margin: {
-             top: 5, right: 20, bottom: 50, left: $scope.leftMargin
-          },
+          margin: $scope.margin,
           height: 250,
           width: $scope.defaultGraphWidth,
           colours: HighchartsService.primarySiteColours,

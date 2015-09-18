@@ -11,7 +11,8 @@
       templateUrl: '/scripts/modules/projectmutationviewer/views/projectmutationviewer.html',
       scope: {
         items: '=',
-        selected: '='
+        selected: '=',
+        selectedProjectCount: '='
       },
       link: function($scope, $element) {
         var chart, config;

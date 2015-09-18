@@ -1,8 +1,15 @@
 
-<div data-ng-show="ProjectsCtrl.projects">
+<div data-ng-show="ProjectsCtrl.projects" ng-init="lineHeight = 310">
     <section>
         <div class="narrow">
-            <donut height="350"
+            <div ng-show="! ProjectsCtrl.hasDonutData()" class="text-center">
+              <span class="graph_title">Donor Distribution</span>
+              <div style="line-height: {{ lineHeight }}px;">
+                <strong>No data found.</strong>
+              </div>
+            </div>
+            <donut ng-show="ProjectsCtrl.hasDonutData()"
+                   height="350"
                    width="300"
                    data-items="ProjectsCtrl.donut"
                    data-sub-title="{{ProjectsCtrl.donutChartSubTitle()}}"
@@ -11,22 +18,27 @@
                    heading="Donor Distribution">
             </donut>
         </div>
+
         <div class="wide omega">
             <stacked height="250"
+                     line-height="lineHeight"
                      data-items="ProjectsCtrl.stacked"
                      data-is-loading="ProjectsCtrl.isLoadingData"
                      data-selected="ProjectsCtrl.projectIds"
+                     selected-project-count="ProjectsCtrl.numberOfSelectedProjectsInFilter()"
                      data-title="Top 20 Mutated Genes with High Functional Impact SSMs"
                      data-y-label="Donors Affected"
                      data-subtitle="{{ProjectsCtrl.ssmTotalDonors | number}} Unique SSM-Tested Donors">
             </stacked>
         </div>
     </section>
+
     <section>
         <div>
            <project-mutation-distribution
                data-items="ProjectsCtrl.distribution"
-               data-selected="ProjectsCtrl.projectIds">
+               data-selected="ProjectsCtrl.projectIds"
+               selected-project-count="ProjectsCtrl.numberOfSelectedProjectsInFilter()">
            </project-mutation-distribution>
         </div>
     </section>

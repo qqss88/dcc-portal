@@ -10,7 +10,7 @@
 
   <div ng-show="! showPlot" class="text-center" style="line-height: {{ defaultGraphHeight }}px;">
     <strong>No data found for the selected
-      <ng-pluralize count="selected.length" when="{'0': 'project', 'one': 'project', 'other': 'projects'}"></ng-pluralize>.
+      <ng-pluralize count="selectedProjectCount" when="{'0': 'project', 'one': 'project', 'other': 'projects'}"></ng-pluralize>.
     </strong>
   </div>
 
