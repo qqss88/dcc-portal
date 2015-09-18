@@ -194,7 +194,7 @@
 
           data: uiTable.map(function(row) {
             return {
-              y: row[setId].percentage,
+              y: isNaN(row[setId].percentage) ? 0 : row[setId].percentage,
               count: row[setId].count
             };
           })
