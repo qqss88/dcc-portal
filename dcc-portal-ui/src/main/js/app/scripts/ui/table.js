@@ -79,8 +79,20 @@ angular.module('icgc.ui.table.counts').directive('tableCounts', function () {
               'of <strong>{{page.total | number}}</strong> {{label}}' +
               '</span>'
   };
+})
+.directive ('linkableNumberCell', function () {
+  return {
+    restrict: 'E',
+    scope: {
+      theNumber: '=',
+      sref: '=',
+      zeroText: '@'
+    },
+    replace: true,
+    template: '<span><a ng-if="theNumber > 0" ui-sref="{{ sref }}">{{:: theNumber | number }}</a>' +
+      '<span ng-if="theNumber === 0">{{ zeroText }}</span></span>'
+  };
 });
-
 
 angular.module('icgc.ui.table.pagination', [])
 

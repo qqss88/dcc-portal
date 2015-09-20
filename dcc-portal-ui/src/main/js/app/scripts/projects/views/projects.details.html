@@ -3,12 +3,15 @@
 <span data-ng-init="reverse=true"></span>
 
 <div ng-if="ProjectsCtrl.projects.hits.length < 1" class="empty loading-text"><h3>No Projects Found.</h3></div>
+
 <div ng-if="ProjectsCtrl.projects.hits.length > 0">
 <div class="t_table_top" style="padding:0;margin: 0">
     Showing <strong id="projects-project-count">{{ ProjectsCtrl.projects.hits.length }}</strong> projects
     <span data-toolbar data-dl="projects"></span>
 </div>
+
 <table class="table table-bordered table-striped">
+
 <thead>
 <tr>
     <th rowspan="2" style="cursor: pointer" data-ng-click="predicate='id'; reverse=!reverse">
@@ -119,188 +122,44 @@
     </th>
 </tr>
 </thead>
+
 <tbody>
-<tr class="transition-fade"
+
+  <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
+
     <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
       <a data-ui-sref="project ({id:project.id})">{{ project.id }}</a>
     </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
+
     <td style="text-align: center; vertical-align: middle;">
       <span ng-repeat="country in project.primaryCountries"
         class="flag flag-{{ countryCode (country) }}"
         tooltip="{{ country }}" />
     </td>
 
-    <td class="text-right">
-        <span data-ng-if="project.totalLiveDonorCount > 0">
-            <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"state\":{\"is\":[\"live\"]}}}"})'>
-                {{::project.totalLiveDonorCount | number}}</a>
-        </span>
-        <span data-ng-if="project.totalLiveDonorCount === 0">--</span>
+    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.labels">
+      <linkable-number-cell
+        the-number="project [fieldKey]"
+        sref="toAdvanceSearch (fieldKey, project.id)"
+        zero-text="--" />
     </td>
-    <td class="text-right">
-            <span data-ng-if="project.totalDonorCount > 0">
-                <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]}}}"})'>
-                    {{::project.totalDonorCount | number}}</a>
-            </span>
-        <span data-ng-if="project.totalDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.ssmTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"ssm\"]}}}"})'>
-            {{::project.ssmTestedDonorCount | number}}</a>
-        <span data-ng-if="project.ssmTestedDonorCount== 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.cnsmTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"cnsm\"]}}}"})'>
-            {{::project.cnsmTestedDonorCount | number}}</a>
-        <span data-ng-if="project.cnsmTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.stsmTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"stsm\"]}}}"})'>
-            {{::project.stsmTestedDonorCount | number}}</a>
-        <span data-ng-if="project.stsmTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.sgvTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"sgv\"]}}}"})'>
-            {{::project.sgvTestedDonorCount | number}}</a>
-        <span data-ng-if="project.sgvTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.methArrayTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_array\"]}}}"})'>
-            {{::project.methArrayTestedDonorCount | number}}
-        </a>
-        <span data-ng-if="project.methArrayTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.methSeqTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"meth_seq\"]}}}"})'>
-            {{::project.methSeqTestedDonorCount | number}}
-        </a>
-        <span data-ng-if="project.methSeqTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.expArrayTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_array\"]}}}"})'>
-            {{::project.expArrayTestedDonorCount | number}}
-        </a>
-        <span data-ng-if="project.expArrayTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.expSeqTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"exp_seq\"]}}}"})'>
-            {{::project.expSeqTestedDonorCount | number}}
-        </a>
-        <span data-ng-if="project.expSeqTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.pexpTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"pexp\"]}}}"})'>
-            {{::project.pexpTestedDonorCount | number}}
-        </a>
-        <span data-ng-if="project.pexpTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.mirnaSeqTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"mirna_seq\"]}}}"})'>
-            {{::project.mirnaSeqTestedDonorCount | number}}</a>
-        <span data-ng-if="project.mirnaSeqTestedDonorCount === 0">--</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="project.jcnTestedDonorCount > 0"
-           data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{project.id}}\"]},\"availableDataTypes\":{\"is\":[\"jcn\"]}}}"})'>
-            {{::project.jcnTestedDonorCount | number}}</a>
-        <span data-ng-if="project.jcnTestedDonorCount === 0">--</span>
-    </td>
-</tr>
-<tr>
-    <td colspan="4"><strong>Total</strong></td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({state: 'live'}) }}">
-            {{ProjectsCtrl.totals.totalLiveDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.totalLiveDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.totalDonorCount > 0"
-        href="{{ toAdvanceSearchUrl() }}">
-            {{ProjectsCtrl.totals.totalDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.totalDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.ssmTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'ssm'}) }}">
-            {{ProjectsCtrl.totals.ssmTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.ssmTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.cnsmTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'cnsm'}) }}">
-            {{ProjectsCtrl.totals.cnsmTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.cnsmTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.stsmTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'stsm'}) }}">
-            {{ProjectsCtrl.totals.stsmTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.stsmTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.sgvTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'sgv'}) }}">
-            {{ProjectsCtrl.totals.sgvTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.sgvTestedDonorCount === 0">0</span>
 
+  </tr>
+
+  <tr>
+    <td colspan="4"><strong>Total</strong></td>
+
+    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.labels">
+      <linkable-number-cell
+        the-number="ProjectsCtrl.totals [fieldKey]"
+        sref="toAdvanceSearch (fieldKey)"
+        zero-text="0" />
     </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.methArrayTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'meth_array'}) }}">
-            {{ProjectsCtrl.totals.methArrayTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.methArrayTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.methSeqTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'meth_seq'}) }}">
-            {{ProjectsCtrl.totals.methSeqTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.methSeqTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.expArrayTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'exp_array'}) }}">
-            {{ProjectsCtrl.totals.expArrayTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.expArrayTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.expSeqTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'exp_seq'}) }}">
-            {{ProjectsCtrl.totals.expSeqTestedDonorCount|number}}</a>
-        <span data-ng-if="ProjectsCtrl.totals.expSeqTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.pexpTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'pexp'}) }}">
-            {{ProjectsCtrl.totals.pexpTestedDonorCount|number}}</a>
-            <span data-ng-if="ProjectsCtrl.totals.pexpTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.mirnaSeqTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'mirna_seq'}) }}">
-            {{ProjectsCtrl.totals.mirnaSeqTestedDonorCount|number}}</a>
-            <span data-ng-if="ProjectsCtrl.totals.mirnaSeqTestedDonorCount === 0">0</span>
-    </td>
-    <td class="text-right">
-        <a data-ng-if="ProjectsCtrl.totals.jcnTestedDonorCount > 0"
-        href="{{ toAdvanceSearchUrl ({datatype: 'jcn'}) }}">
-            {{ProjectsCtrl.totals.jcnTestedDonorCount|number}}</a>
-            <span data-ng-if="ProjectsCtrl.totals.jcnTestedDonorCount === 0">0</span>
-    </td>
-</tr>
+  </tr>
+
 </tbody>
 </table>
 
@@ -350,4 +209,3 @@
 </table>
 
 </div>
-
