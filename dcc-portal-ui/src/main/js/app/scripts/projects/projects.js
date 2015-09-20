@@ -400,8 +400,8 @@
         return [s];
       });
 
-      var needsToAddProjectIds = (! _.has (filter, 'ids')) && hasQueryFilter()
-        && (! _.isEmpty (_ctrl.projectIds));
+      var needsToAddProjectIds = (! _.has (filter, 'ids')) && hasQueryFilter() &&
+        (! _.isEmpty (_ctrl.projectIds));
 
       if (needsToAddProjectIds) {
         _.assign (filter, {ids: _ctrl.projectIds});
@@ -412,7 +412,7 @@
           result = _.set (result, pathMapping [key], value);
         }
       });
-    };
+    }
 
     $scope.toAdvanceSearch = function (fieldKey, projectId) {
       var filter = {

@@ -89,8 +89,8 @@ angular.module('icgc.ui.table.counts').directive('tableCounts', function () {
       zeroText: '@'
     },
     replace: true,
-    template: '<span><a ng-if="theNumber > 0" ui-sref="{{ sref }}">{{:: theNumber | number }}</a>' +
-      '<span ng-if="theNumber === 0">{{ zeroText }}</span></span>'
+    template: '<span><a ng-if="theNumber > 0" ui-sref="{{:: sref }}">{{:: theNumber | number }}</a>' +
+      '<span ng-if="theNumber === 0">{{:: zeroText }}</span></span>'
   };
 });
 
