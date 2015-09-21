@@ -222,7 +222,9 @@ public class DonorRepository implements Repository {
         // We want to include the number of missing donor documents in our final missing count
         if (facet instanceof TermsFacet) {
           val termsFacet = (TermsFacet) facet;
-          val realMissing = termsFacet.getMissingCount() + entitySetCount - termsFacet.getTotalCount();
+          val realMissing =
+              termsFacet.getMissingCount() + entitySetCount
+                  - (termsFacet.getTotalCount() + termsFacet.getMissingCount()) - termsFacet.getOtherCount();
           facet = new CustomMissingTermsFacet(termsFacet, realMissing);
         }
 
