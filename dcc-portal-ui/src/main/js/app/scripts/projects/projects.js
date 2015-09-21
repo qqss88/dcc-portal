@@ -355,29 +355,74 @@
 
     var isEmptyObject = _.flow (ensureObject, _.isEmpty);
 
-    // This is needed to translate projects filters to donor filters
-    $scope.toAdvanceSearchUrl = function (parameters) {
-      parameters = _(ensureObject (parameters))
-        .pick (_.isString)
-        .mapValues (function (s) {
-          return [s];
-        })
-        .value();
+    function hasQueryFilter() {
+      return (! isEmptyObject (LocationService.filters()));
+    }
 
-      if (! isEmptyObject (LocationService.filters())) {
-        _.assign (parameters, {ids: _ctrl.projectIds});
+    _ctrl.fieldKeys = [
+      'totalLiveDonorCount',
+      'totalDonorCount',
+      'ssmTestedDonorCount',
+      'cnsmTestedDonorCount',
+      'stsmTestedDonorCount',
+      'sgvTestedDonorCount',
+      'methArrayTestedDonorCount',
+      'methSeqTestedDonorCount',
+      'expArrayTestedDonorCount',
+      'expSeqTestedDonorCount',
+      'pexpTestedDonorCount',
+      'mirnaSeqTestedDonorCount',
+      'jcnTestedDonorCount'];
+
+    var fieldMapping = {
+      totalLiveDonorCount: {state: 'live'},
+      totalDonorCount: {},
+      ssmTestedDonorCount: {datatype: 'ssm'},
+      cnsmTestedDonorCount: {datatype: 'cnsm'},
+      stsmTestedDonorCount: {datatype: 'stsm'},
+      sgvTestedDonorCount: {datatype: 'sgv'},
+      methArrayTestedDonorCount: {datatype: 'meth_array'},
+      methSeqTestedDonorCount: {datatype: 'meth_seq'},
+      expArrayTestedDonorCount: {datatype: 'exp_array'},
+      expSeqTestedDonorCount: {datatype: 'exp_seq'},
+      pexpTestedDonorCount: {datatype: 'pexp'},
+      mirnaSeqTestedDonorCount: {datatype: 'mirna_seq'},
+      jcnTestedDonorCount: {datatype: 'jcn'}
+    };
+
+    function buildFilter (fieldKey, projectId) {
+      var filter = _.clone (_.get (fieldMapping, fieldKey, {}));
+
+      if (_.isString (projectId)) {
+        _.assign (filter, {ids: projectId});
       }
 
-      var resultFilter = _.transform (parameters, function (result, value, key) {
+      filter = _.mapValues (filter, function (s) {
+        return [s];
+      });
+
+      var needsToAddProjectIds = (! _.has (filter, 'ids')) && hasQueryFilter() &&
+        (! _.isEmpty (_ctrl.projectIds));
+
+      if (needsToAddProjectIds) {
+        _.assign (filter, {ids: _ctrl.projectIds});
+      }
+
+      return _.transform (filter, function (result, value, key) {
         if (_.has (pathMapping, key)) {
           result = _.set (result, pathMapping [key], value);
         }
       });
+    }
 
-      return '/search?filters=' + encodeURIComponent (toJson (resultFilter));
+    $scope.toAdvancedSearch = function (fieldKey, projectId) {
+      var filter = {
+        filters: toJson (buildFilter (fieldKey, projectId))
+      };
+      return 'advanced (' + toJson (filter) + ')';
     };
 
-    // Helper to do the stacked chart
+    // Transforms data for the stacked bar chart
     function transform(data) {
       var list = [];
 
@@ -469,24 +514,10 @@
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
 
-        _ctrl.totals = {};
-        _ctrl.labels = ['totalDonorCount',
-                        'totalLiveDonorCount',
-                        'ssmTestedDonorCount',
-                        'cnsmTestedDonorCount',
-                        'stsmTestedDonorCount',
-                        'sgvTestedDonorCount',
-                        'methArrayTestedDonorCount',
-                        'methSeqTestedDonorCount',
-                        'expArrayTestedDonorCount',
-                        'expSeqTestedDonorCount',
-                        'pexpTestedDonorCount',
-                        'mirnaSeqTestedDonorCount',
-                        'jcnTestedDonorCount'];
-
-        _ctrl.labels.forEach(function(fieldName) {
-        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
-        });
+        _ctrl.totals = _.reduce (_ctrl.fieldKeys, function (result, fieldName) {
+          result [fieldName] = _.sum (data.hits, fieldName);
+          return result;
+        }, {});
 
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
