@@ -23,7 +23,7 @@ function IcgcMutationAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = '/api/browser';
+  this.host = 'http://localhost:8080/api/browser';
   this.gzip = true;
 
   this.params = {};
@@ -70,7 +70,7 @@ function IcgcMutationAdapter(args) {
       }
     }
   }
-  this.featureCache = new FileFeatureCache(argsFeatureCache);
+  this.featureCache = new FeatureCache(argsFeatureCache);
 }
 
 IcgcMutationAdapter.prototype.clearData = function () {
@@ -245,7 +245,7 @@ IcgcMutationAdapter.prototype._callWebService = function (segmentString, callbac
   };
 
   var url = this.host + '/' + this.resource + this._getQuery(callParams);
-//    console.log(url);
+    console.log(url);
   $.ajax({
     type: 'GET',
     url: url,

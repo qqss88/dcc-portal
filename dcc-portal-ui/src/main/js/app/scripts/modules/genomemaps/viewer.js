@@ -38,6 +38,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
           cellBaseHost: GMService.getConfiguration().cellBaseHost,
           cellBaseVersion: 'v3',
           target: 'genome-viewer',
+//          autoRender: true,
           width: 1135,
           region: regionObj,
           defaultRegion: regionObj,
@@ -88,7 +89,9 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
               genomeViewer._regionMoveHandler(event);
             },
             'zoom:change': function (event) {
-              genomeViewer._zoomChangeHandler(event);
+              genomeViewer.setZoom(event.zoom);
+              genomeViewer.region.load(genomeViewer._calculateRegionByZoom(event.zoom));
+              genomeViewer.setRegion(genomeViewer.region);
             }
           }
         });
@@ -238,6 +241,7 @@ angular.module('icgc.modules.genomeviewer').directive('genomeViewer', function (
         genomeViewer.karyotypePanel.hide();
         genomeViewer.chromosomePanel.hide();
       }
+      
 
       scope.$watch('[genes, mutations, tab]', function (params) {
         var genes, mutations, tab;
@@ -317,6 +321,7 @@ angular.module('icgc.modules.genomeviewer').directive('gvembed', function (GMSer
           cellBaseVersion: 'v3',
           target: 'gv-application',
           width: 1135,
+//          autoRender: true,
           region: regionObj,
           defaultRegion: regionObj,
           sidePanel: false,

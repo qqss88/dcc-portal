@@ -23,7 +23,7 @@ function IcgcGeneAdapter(args) {
 
   _.extend(this, Backbone.Events);
 
-  this.host = '/api/browser';
+  this.host = 'http://localhost:8080/api/browser';
   this.gzip = true;
 
   this.params = {};
@@ -70,7 +70,7 @@ function IcgcGeneAdapter(args) {
       }
     }
   }
-  this.featureCache = new FileFeatureCache(argsFeatureCache);
+  this.featureCache = new FeatureCache(argsFeatureCache);
 }
 
 IcgcGeneAdapter.prototype.clearData = function () {
@@ -210,7 +210,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
   var updateStart = true;
   var updateEnd = true;
   if (chunks.length > 0) {
-    //		console.log(chunks);
+    //    console.log(chunks);
 
     for (var i = 0; i < chunks.length; i++) {
 
@@ -239,7 +239,7 @@ IcgcGeneAdapter.prototype.getData = function (args) {
         updateEnd = true;
       }
     }
-    //		console.log(querys);
+    //    console.log(querys);
     console.time(_this.resource + ' get and save ' + rnd);
 
     var queryCount = queries.length;

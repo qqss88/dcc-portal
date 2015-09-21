@@ -184,9 +184,9 @@ FEATURE_TYPES = {
     },
     getTipCommons: function (f) {
         var strand = (f.strand != null) ? f.strand : "NA";
-        return '<span class="gmkeys">start-end:&nbsp;</span>' + f.start + '-' + f.end + '<br>' +
-            '<span class="gmkeys">strand:&nbsp;</span>' + strand + '<br>' +
-            '<span class="gmkeys">length:&nbsp;</span>' + (f.end - f.start + 1).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '<br>';
+        return 'start-end:&nbsp;<span class="emph">' + f.start + '-' + f.end + '</span><br>' +
+            'strand:&nbsp;<span class="emph">' + strand + '</span><br>' +
+            'length:&nbsp;<span class="info">' + (f.end - f.start + 1).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</span><br>';
     },
 
     //items
@@ -194,18 +194,18 @@ FEATURE_TYPES = {
         color: SEQUENCE_COLORS
     },
     undefined: {
-        label: function (f) {
+        getLabel: function (f) {
             var str = "";
             str += f.chromosome + ":" + f.start + "-" + f.end;
             return str;
         },
-        tooltipTitle: function (f) {
+        getTipTitle: function (f) {
             return " ";
         },
-        tooltipText: function (f) {
+        getTipText: function (f) {
             return " ";
         },
-        color: function (f) {
+        getColor: function (f) {
             return "grey";
         },
 //		infoWidgetId: "id",
@@ -226,15 +226,15 @@ FEATURE_TYPES = {
         },
         tooltipTitle: function (f) {
             var name = (f.name != null) ? f.name : f.id;
-            return '<span class="gmtitle">'+FEATURE_TYPES.formatTitle('Gene') +' - ' + name + '</span>';
+            return FEATURE_TYPES.formatTitle('Gene') +' - <span class="ok">' + name + '</span>';
         },
         tooltipText: function (f) {
             var color = GENE_BIOTYPE_COLORS[f.biotype];
-            return    '<span class="gmkeys">id:&nbsp;</span>' + f.id + '<br>' +
-                '<span class="gmkeys">biotype:&nbsp;</span><span style="color:' + color + ';">' + f.biotype + '</span><br>' +
+            return    'id:&nbsp;<span class="ssel">' + f.id + '</span><br>' +
+                'biotype:&nbsp;<span class="emph" style="color:' + color + ';">' + f.biotype + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f) +
-                '<span class="gmkeys">source:&nbsp;</span>' + f.source + '<br><br>' +
-                '<span class="gmkeys">description:&nbsp;</span>' + f.description + '<br>';
+                'source:&nbsp;<span class="ssel">' + f.source + '</span><br><br>' +
+                'description:&nbsp;<span class="emph">' + f.description + '</span><br>';
         },
         color: function (f) {
             return GENE_BIOTYPE_COLORS[f.biotype];
@@ -286,13 +286,13 @@ FEATURE_TYPES = {
         tooltipTitle: function (f) {
             var name = (f.name != null) ? f.name : f.id;
             return FEATURE_TYPES.formatTitle('Transcript') +
-                ' - <span class="gmtitle">' + name + '</span>';
+                ' - <span class="ok">' + name + '</span>';
         },
         tooltipText: function (f) {
             var color = GENE_BIOTYPE_COLORS[f.biotype];
-            return    '<span class="gmkeys">id:&nbsp;</span>' + f.id + '<br>' +
-                '<span class="gmkeys">biotype:&nbsp;</span><span style="color:' + color + ';">' + f.biotype + '</span><br>' +
-                '<span class="gmkeys">description:&nbsp;</span>' + f.description + '<br>' +
+            return    'id:&nbsp;<span class="ssel">' + f.id + '</span><br>' +
+                'biotype:&nbsp;<span class="emph" style="color:' + color + ';">' + f.biotype + '</span><br>' +
+                'description:&nbsp;<span class="emph">' + f.description + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f);
         },
         color: function (f) {
@@ -312,20 +312,20 @@ FEATURE_TYPES = {
             if (name == null) {
                 name = ''
             }
-            return '<span class="gmtitle">'+FEATURE_TYPES.formatTitle('Exon') + ' - ' + name + '</span>';
+            return FEATURE_TYPES.formatTitle('Exon') + ' - <span class="ok">' + name + '</span>';
         },
         tooltipText: function (e, t) {
             var ename = (e.name != null) ? e.name : e.id;
             var tname = (t.name != null) ? t.name : t.id;
             var color = GENE_BIOTYPE_COLORS[t.biotype];
-            return    '<span class="gmkeys">transcript name:&nbsp;</span>' + t.name + '<br>' +
-                '<span class="gmkeys">transcript Ensembl&nbsp;ID:&nbsp;</span>' + t.id + '<br>' +
-                '<span class="gmkeys">transcript biotype:&nbsp;<span style="color:' + color + ';">' + t.biotype + '</span><br>' +
-                '<span class="gmkeys">transcript description:&nbsp;</span>' + t.description + '<br>' +
-                '<span class="gmkeys">transcript start-end:&nbsp;</span>' + t.start + '-' + t.end + '<br>' +
-                '<span class="gmkeys">exon start-end:&nbsp;</span>' + e.start + '-' + e.end + '<br>' +
-                '<span class="gmkeys">strand:&nbsp;</span>' + t.strand + '<br>' +
-                '<span class="gmkeys">length:&nbsp;</span>' + (e.end - e.start + 1).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '<br>';
+            return    'transcript name:&nbsp;<span class="ssel">' + t.name + '</span><br>' +
+                'transcript Ensembl&nbsp;ID:&nbsp;<span class="ssel">' + t.id + '</span><br>' +
+                'transcript biotype:&nbsp;<span class="emph" style="color:' + color + ';">' + t.biotype + '</span><br>' +
+                'transcript description:&nbsp;<span class="emph">' + t.description + '</span><br>' +
+                'transcript start-end:&nbsp;<span class="emph">' + t.start + '-' + t.end + '</span><br>' +
+                'exon start-end:&nbsp;<span class="emph">' + e.start + '-' + e.end + '</span><br>' +
+                'strand:&nbsp;<span class="emph">' + t.strand + '</span><br>' +
+                'length:&nbsp;<span class="info">' + (e.end - e.start + 1).toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</span><br>';
         },
         color: function (f) {
             return "black";
@@ -343,9 +343,9 @@ FEATURE_TYPES = {
             return f.featureType.toUpperCase() + ' - <span class="ok">' + name + '</span>';
         },
         tooltipText: function (f) {
-            return '<span class="gmkeys">alleles:&nbsp;</span>' + f.alleleString + '<br>' +
+            return 'alleles:&nbsp;<span class="ssel">' + f.alleleString + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f) +
-                '<span class="gmkeys">conseq. type :&nbsp;</span>' + f.displayConsequenceType + '<br>';
+                'conseq. type :&nbsp;<span class="ssel">' + f.displayConsequenceType + '</span><br>';
 //                'source:&nbsp;<span class="ssel">' + f.source + '</span><br>';
 
         },
@@ -355,26 +355,6 @@ FEATURE_TYPES = {
         infoWidgetId: "id",
         height: 8,
         histogramColor: "orange"
-    },
-    mutation: {
-        label: function (f) {
-            return ('name' in f) ? f.name : f.id;
-        },
-        tooltipTitle: function (f) {
-            var name = (f.name != null) ? f.name : f.id;
-            return '<span class="gmtitle">'+f.featureType.toUpperCase() + ' - ' + name + '</span>';
-        },
-        tooltipText: function (f) {
-            return   FEATURE_TYPES.getTipCommons(f) +
-                '';
-
-        },
-        color: function (f) {
-            return 'limegreen'
-        },
-        infoWidgetId: "id",
-        height: 8,
-        histogramColor: "limegreen"
     },
     file: {
         getLabel: function (f) {
@@ -431,12 +411,12 @@ FEATURE_TYPES = {
             }
         },
         tooltipTitle: function (f) {
-            return '<span class="gmtitle">VCF variant - ' + f.id + '</span>';
+            return 'VCF variant - <span class="ok">' + f.id + '</span>';
         },
         tooltipText: function (f) {
-            return '<span class="gmkeys">calleles (ref/alt):&nbsp;</span>' + f.reference + "/" + f.alternate + '<br>' +
-                '<span class="gmkeys">cquality:&nbsp;</span>' + f.quality + '<br>' +
-                '<span class="gmkeys">cfilter:&nbsp;</span>' + f.filter + '<br>' +
+            return 'alleles (ref/alt):&nbsp;<span class="emph">' + f.reference + "/" + f.alternate + '</span><br>' +
+                'quality:&nbsp;<span class="emph">' + f.quality + '</span><br>' +
+                'filter:&nbsp;<span class="emph">' + f.filter + '</span><br>' +
                 FEATURE_TYPES.getTipCommons(f);
         },
         getColor: function (f) {
