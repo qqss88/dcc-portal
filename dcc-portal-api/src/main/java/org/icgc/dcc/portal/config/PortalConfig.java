@@ -35,6 +35,7 @@ import org.icgc.dcc.common.client.api.cms.CMSClient;
 import org.icgc.dcc.common.client.api.cud.CUDClient;
 import org.icgc.dcc.common.client.api.daco.DACOClient;
 import org.icgc.dcc.common.client.api.shorturl.ShortURLClient;
+import org.icgc.dcc.common.core.mail.Mailer;
 import org.icgc.dcc.downloader.client.DownloaderClient;
 import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
 import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
@@ -315,6 +316,21 @@ public class PortalConfig {
   public QueryEngine queryEngine(@NonNull Client client, @Value("#{indexName}") String index) {
     return new QueryEngine(client, index);
   }
+
+  @Bean
+  public Mailer mailer(MailProperties mail) {
+    return Mailer.builder()
+        .enabled(mail.isEnabled())
+        .recipient(mail.getRecipientEmail())
+        .from(mail.getSenderName())
+        .host(mail.getSmtpServer())
+        .port(Integer.toString(mail.getSmtpPort()))
+        .build();
+  }
+
+  //
+  // Utilities
+  //
 
   private boolean isDistributed() {
     return properties.getHazelcast().isEnabled();
