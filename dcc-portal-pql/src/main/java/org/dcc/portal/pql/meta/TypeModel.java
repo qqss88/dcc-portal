@@ -25,10 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.exception.SemanticException;
 import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.visitor.CreateAliasVisitor;
@@ -38,6 +34,10 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class TypeModel {
@@ -66,6 +66,7 @@ public abstract class TypeModel {
   public static final String DONOR_ENTITY_SET_ID = format("%s.%s", "donor", ENTITY_SET_ID);
   public static final String GENE_ENTITY_SET_ID = format("%s.%s", "gene", ENTITY_SET_ID);
   public static final String MUTATION_ENTITY_SET_ID = format("%s.%s", "mutation", ENTITY_SET_ID);
+  public static final String REPO_FILE_ENTITY_SET_ID = format("%s.%s", "file", ENTITY_SET_ID);
 
   public static final String SCORE = "_score";
 
@@ -90,7 +91,8 @@ public abstract class TypeModel {
       MUTATION_LOCATION,
       DONOR_ENTITY_SET_ID,
       GENE_ENTITY_SET_ID,
-      MUTATION_ENTITY_SET_ID);
+      MUTATION_ENTITY_SET_ID,
+      REPO_FILE_ENTITY_SET_ID);
 
   protected final Map<String, FieldModel> fieldsByFullPath;
   protected final Map<String, String> fieldsByAlias;

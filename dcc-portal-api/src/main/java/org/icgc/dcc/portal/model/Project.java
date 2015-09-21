@@ -66,6 +66,8 @@ public class Project {
   Long jcnTestedDonorCount;
   @ApiModelProperty(value = "Total Donor Count", required = true)
   Long totalDonorCount;
+  @ApiModelProperty(value = "Total Live Donor Count", required = true)
+  Long totalLiveDonorCount;
   @ApiModelProperty(value = "Total Affected Donor Count", required = true)
   Long affectedDonorCount;
   @ApiModelProperty(value = "Map of Donor counts by experimental analysis", required = true)
@@ -98,6 +100,7 @@ public class Project {
     mirnaSeqTestedDonorCount = getLong(fieldMap.get(fields.get("mirnaSeqTestedDonorCount")));
     jcnTestedDonorCount = getLong(fieldMap.get(fields.get("jcnTestedDonorCount")));
     totalDonorCount = getLong(fieldMap.get(fields.get("totalDonorCount")));
+    totalLiveDonorCount = getLong(fieldMap.get(fields.get("totalLiveDonorCount")));
     affectedDonorCount = getLong(fieldMap.get(fields.get("affectedDonorCount")));
     availableDataTypes = (List<String>) fieldMap.get(fields.get("availableDataTypes"));
     icgcId = getString(fieldMap.get(fields.get("icgcId")));

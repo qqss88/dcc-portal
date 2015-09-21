@@ -44,6 +44,8 @@ import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
+import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
@@ -58,19 +60,17 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
+import org.dcc.portal.pql.ast.function.FunctionBuilders;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.query.PqlParser;
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -78,8 +78,8 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableMap;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -94,29 +94,44 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
-import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
+import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
 public class RepositoryFileRepository {
 
+  /**
+   * Constants
+   */
+  private static final Set<String> FILE_DONOR_FIELDS = newHashSet(
+      "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
+      "id", "submitted_donor_id",
+      "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode");
+
   private static final SearchFieldMapper FILE_DONOR_TEXT_SEARCH_FIELDS = searchFieldMapper()
-      .partialMatchFields(newHashSet(
-          "specimen_id", "sample_id", "submitted_specimen_id", "submitted_sample_id",
-          "id", "submitted_donor_id",
-          "tcga_participant_barcode", "tcga_sample_barcode", "tcga_aliquot_barcode"))
+      .partialMatchFields(FILE_DONOR_FIELDS)
+      .lowercaseMatchFields(FILE_DONOR_FIELDS)
       .build();
 
   private static final ImmutableList<String> MANIFEST_DOWNLOAD_INFO_FIELDS = RepositoryFileTypeModel.toAliasList(
@@ -154,9 +169,13 @@ public class RepositoryFileRepository {
       "data_type.data_format",
       "repository.repo_server.repo_name");
 
+  /**
+   * Dependencies.
+   */
   private final Client client;
   private final String index;
   private final QueryEngine queryEngine;
+  private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   @Autowired
   public RepositoryFileRepository(Client client) {
@@ -171,14 +190,20 @@ public class RepositoryFileRepository {
    * _missing is not supported for data_types.datatype and data_type.dataformat <br>
    */
   public static FilterBuilder buildRepoFilters(ObjectNode filters, boolean nested) {
+    val donorIdFieldName = "donor.donor_id";
     val fields = filters.path(KIND.getId()).fields();
 
     if (fields.hasNext() == false) {
       return matchAllFilter();
     }
 
+    // Root filter
     val termFilters = boolFilter();
     val nestedTerms = Maps.<String, List<String>> newHashMap();
+
+    // Used for creating the terms lookup filter when passed an entitySet id.
+    BoolFilterBuilder entitySetIdFilter = null;
+    FilterBuilder donorIdFilter = null;
 
     while (fields.hasNext()) {
       val facetField = fields.next();
@@ -202,6 +227,13 @@ public class RepositoryFileRepository {
       if (nested && (fieldName.equals("data_types.data_type") || fieldName.equals("data_types.data_format"))) {
         nestedTerms.put(fieldName, items);
         continue;
+      } else if (fieldName.equals("entitySetId")) {
+        entitySetIdFilter = boolFilter();
+        for (val item : items) {
+          val lookupFilter = createTermsLookupFilter(donorIdFieldName, DONOR_IDS, UUID.fromString(item));
+          entitySetIdFilter.should(lookupFilter);
+        }
+        continue;
       } else {
         val terms = termsFilter(fieldName, items);
 
@@ -213,8 +245,20 @@ public class RepositoryFileRepository {
           fb = boolFilter().must(terms);
         }
 
+        if (fieldName.equals(donorIdFieldName)) {
+          donorIdFilter = fb;
+          continue;
+        }
       }
       termFilters.must(fb);
+    }
+
+    if (null != donorIdFilter && null != entitySetIdFilter) {
+      termFilters.must(boolFilter().should(donorIdFilter).should(entitySetIdFilter));
+    } else if (null != donorIdFilter) {
+      termFilters.must(donorIdFilter);
+    } else if (null != entitySetIdFilter) {
+      termFilters.must(entitySetIdFilter);
     }
 
     // Handle special case. Datatype and Dataformat, note these should never have missing values
@@ -489,6 +533,44 @@ public class RepositoryFileRepository {
     return findDownloadInfo(newPql, QUERY_THEN_FETCH, Ints.saturatedCast(count));
   }
 
+  public Set<String> findAllDonorIds(Query query, int setLimit) {
+    val type = org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
+    val pqlAst = PqlParser.parse(converter.convert(query, type));
+    val size = query.getSize();
+    pqlAst.setLimit(FunctionBuilders.limit(0, size));
+    val request = queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+
+    log.debug("findAllDonorIds() - ES query is: '{}'.", request);
+    SearchResponse response = request.execute().actionGet();
+    log.debug("findAllDonorIds() - ES response is: '{}'.", response);
+
+    val entityIds = Sets.<String> newHashSet();
+    val total = response.getHits().getTotalHits();
+    val pages = Math.ceil(total / query.getSize());
+
+    // Number of files > max limit, so we must page files in order to ensure we get all donors.
+    int curPage = 0;
+    while (curPage <= pages) {
+      for (val hit : response.getHits()) {
+        val donorId = hit.field("donor.donor_id").getValue().toString();
+        entityIds.add(donorId);
+        if (entityIds.size() == setLimit) {
+          return entityIds;
+        }
+      }
+
+      curPage++;
+      pqlAst.setLimit(FunctionBuilders.limit(curPage * size, size));
+      val nextRequest =
+          queryEngine.execute(pqlAst, type).getRequestBuilder().setIndices(index).setTypes(FILE_INDEX_TYPE);
+      log.debug("findAllDonorIds() - ES query is: '{}'.", nextRequest);
+      response = nextRequest.execute().actionGet();
+      log.debug("findAllDonorIds() - ES response is: '{}'.", response);
+    }
+
+    return entityIds;
+  }
+
   @NonNull
   private SearchResponse findDownloadInfo(String pql, SearchType searchType, int size) {
     val search = queryEngine.execute(pql, REPOSITORY_FILE).getRequestBuilder()
@@ -524,10 +606,12 @@ public class RepositoryFileRepository {
         .setFrom(0)
         .setSize(maxNumberOfDocs)
         .setQuery(multiMatchQuery(queryString, toStringArray(fieldNames)));
-
     log.debug("ES query is: '{}'.", search);
 
-    return search.execute().actionGet();
+    val result = search.execute().actionGet();
+    log.debug("ES search result is: '{}'.", result);
+
+    return result;
   }
 
   /**

@@ -19,7 +19,6 @@ package org.dcc.portal.pql.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static java.util.Collections.emptyMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
@@ -29,14 +28,15 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-
 import org.dcc.portal.pql.meta.field.FieldModel;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
  * TypeModel for Repository File index type
@@ -103,7 +103,10 @@ public class RepositoryFileTypeModel extends TypeModel {
     REPO_METADATA_PATH("repoMetadataPath"),
     REPO_DATA_PATH("repoDataPath"),
     LAST_MODIFIED("lastModified"),
-    LAST_UPDATE("lastUpdate"), // An alias to LAST_MODIFIED
+    LAST_UPDATE("lastUpdate"), // An
+                               // alias
+                               // to
+                               // LAST_MODIFIED
     FILE_NAME("fileName"),
     FILE_MD5SUM("fileMd5sum"),
     FILE_SIZE("fileSize"),
@@ -140,7 +143,11 @@ public class RepositoryFileTypeModel extends TypeModel {
       Fields.EXPERIMENTAL_STRATEGY);
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
       EsFieldNames.REPOSITORY + "." + EsFieldNames.REPO_SERVER);
-  private static final Map<String, String> INTERNAL_ALIASES = emptyMap();
+
+  private static final Map<String, String> INTERNAL_ALIASES = new ImmutableMap.Builder<String, String>()
+      .put(REPO_FILE_ENTITY_SET_ID, "donor.donor_id")
+      .put(LOOKUP_TYPE, "donor-ids")
+      .build();
 
   // This represents the mapping of file index type in ElasticSearch.
   private static final List<FieldModel> MAPPINGS = new ImmutableList.Builder<FieldModel>()
@@ -148,43 +155,45 @@ public class RepositoryFileTypeModel extends TypeModel {
       .add(string("study", Fields.STUDY.alias))
       .add(string("access", Fields.ACCESS.alias))
 
-      .add(object("data_type",
-          string("data_format", Fields.DATA_FORMAT.alias),
-          string("data_type", Fields.DATA_TYPE.alias),
-          string("experimental_strategy", Fields.EXPERIMENTAL_STRATEGY.alias)))
+  .add(string(REPO_FILE_ENTITY_SET_ID, REPO_FILE_ENTITY_SET_ID))
 
-      .add(object("donor",
-          string("project_code", Fields.PROJECT_CODE.alias),
-          string("program", Fields.PROGRAM.alias),
-          string("study", Fields.DONOR_STUDY.alias),
-          string("primary_site", Fields.PRIMARY_SITE.alias),
-          string("donor_id", Fields.DONOR_ID.alias),
-          string("specimen_id", Fields.SPECIFMEN_ID.alias),
-          string("specimen_type", Fields.SPECIMEN_TYPE.alias),
-          string("sample_id", Fields.SAMPLE_ID.alias),
-          string("submitted_donor_id", Fields.DONOR_SUBMITTER_ID.alias),
-          string("submitted_specimen_id", Fields.SPECIMEN_SUBMITTER_ID.alias),
-          string("submitted_sample_id", Fields.SAMPLE_SUBMITTER_ID.alias),
-          string("tcga_participant_barcode", Fields.TCGA_PARTICIPANT_BARCODE.alias),
-          string("tcga_sample_barcode", Fields.TCGA_SAMPLE_BARCODE.alias),
-          string("tcga_aliquot_barcode", Fields.TCGA_ALIQUOT_BARCODE.alias)))
+  .add(object("data_type",
+      string("data_format", Fields.DATA_FORMAT.alias),
+      string("data_type", Fields.DATA_TYPE.alias),
+      string("experimental_strategy", Fields.EXPERIMENTAL_STRATEGY.alias)))
 
-      .add(object(EsFieldNames.REPOSITORY,
-          string("repo_type", Fields.REPO_TYPE.alias),
-          string("repo_org", Fields.REPO_ORG.alias),
-          string("repo_entity_id", Fields.REPO_ENTITY_ID.alias),
-          string("repo_metadata_path", Fields.REPO_METADATA_PATH.alias),
-          string("repo_data_path", Fields.REPO_DATA_PATH.alias),
-          string("file_name", Fields.FILE_NAME.alias),
-          string("file_md5sum", Fields.FILE_MD5SUM.alias),
-          string("last_modified", ImmutableSet.of(Fields.LAST_MODIFIED.alias, Fields.LAST_UPDATE.alias)),
-          long_("file_size", Fields.FILE_SIZE.alias),
+  .add(object("donor",
+      string("project_code", Fields.PROJECT_CODE.alias),
+      string("program", Fields.PROGRAM.alias),
+      string("study", Fields.DONOR_STUDY.alias),
+      string("primary_site", Fields.PRIMARY_SITE.alias),
+      string("donor_id", Fields.DONOR_ID.alias),
+      string("specimen_id", Fields.SPECIFMEN_ID.alias),
+      string("specimen_type", Fields.SPECIMEN_TYPE.alias),
+      string("sample_id", Fields.SAMPLE_ID.alias),
+      string("submitted_donor_id", Fields.DONOR_SUBMITTER_ID.alias),
+      string("submitted_specimen_id", Fields.SPECIMEN_SUBMITTER_ID.alias),
+      string("submitted_sample_id", Fields.SAMPLE_SUBMITTER_ID.alias),
+      string("tcga_participant_barcode", Fields.TCGA_PARTICIPANT_BARCODE.alias),
+      string("tcga_sample_barcode", Fields.TCGA_SAMPLE_BARCODE.alias),
+      string("tcga_aliquot_barcode", Fields.TCGA_ALIQUOT_BARCODE.alias)))
 
-          arrayOfObjects(EsFieldNames.REPO_SERVER, Fields.REPO_SERVER_OBJECT.alias, object(
-              string("repo_name", Fields.REPO_NAME.alias),
-              string("repo_code", Fields.REPO_CODE.alias),
-              string("repo_country", Fields.REPO_COUNTRY.alias),
-              string("repo_base_url", Fields.REPO_BASE_URL.alias)))))
+  .add(object(EsFieldNames.REPOSITORY,
+      string("repo_type", Fields.REPO_TYPE.alias),
+      string("repo_org", Fields.REPO_ORG.alias),
+      string("repo_entity_id", Fields.REPO_ENTITY_ID.alias),
+      string("repo_metadata_path", Fields.REPO_METADATA_PATH.alias),
+      string("repo_data_path", Fields.REPO_DATA_PATH.alias),
+      string("file_name", Fields.FILE_NAME.alias),
+      string("file_md5sum", Fields.FILE_MD5SUM.alias),
+      string("last_modified", ImmutableSet.of(Fields.LAST_MODIFIED.alias, Fields.LAST_UPDATE.alias)),
+      long_("file_size", Fields.FILE_SIZE.alias),
+
+  arrayOfObjects(EsFieldNames.REPO_SERVER, Fields.REPO_SERVER_OBJECT.alias, object(
+      string("repo_name", Fields.REPO_NAME.alias),
+      string("repo_code", Fields.REPO_CODE.alias),
+      string("repo_country", Fields.REPO_COUNTRY.alias),
+      string("repo_base_url", Fields.REPO_BASE_URL.alias)))))
       .build();
 
 }

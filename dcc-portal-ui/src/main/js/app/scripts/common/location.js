@@ -130,7 +130,7 @@
       // Extract UUIDs from filters
       extractSetIds: function(filters) {
         var result = [];
-        ['donor', 'gene', 'mutation'].forEach(function(type) {
+        ['donor', 'gene', 'mutation', 'file'].forEach(function(type) {
           if (filters.hasOwnProperty(type) === false) {
             return;
           }

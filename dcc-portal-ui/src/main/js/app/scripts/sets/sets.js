@@ -63,12 +63,6 @@
       if (angular.isDefined($scope.params.setLimit)) {
         params.filters = LocationService.filters();
 
-        // Make sure we save only completed (state=live) donors
-        if (! params.filters.donor) {
-          params.filters.donor = {};
-        }
-        params.filters.donor.state = {is: ['live']};
-
         sortParam = LocationService.getJsonParam($scope.setType + 's');
 
         if (angular.isDefined(sortParam)) {
@@ -88,6 +82,32 @@
         SetService.addSet(setType, params);
       } else {
         SetService.addDerivedSet(setType, params);
+      }
+
+      // Reset
+      $modalInstance.dismiss('cancel');
+    };
+
+    $scope.submitNewExternalSet = function() {
+      var params = {}, sortParam;
+
+      params.type = $scope.params.setType;
+      params.name = $scope.params.setName;
+      params.description = $scope.params.setDescription;
+      params.size = $scope.params.setSize;
+      params.sortBy = 'fileName';
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        params.filters = LocationService.filters();
+        sortParam = LocationService.getJsonParam($scope.setType + 's');
+      }
+
+      if (angular.isDefined($scope.params.setUnion)) {
+        params.union = $scope.params.setUnion;
+      }
+
+      if (angular.isDefined($scope.params.setLimit)) {
+        SetService.addExternalSet(setType, params);
       }
 
       // Reset
@@ -272,9 +292,8 @@
           });
         };
 
-
-        // Export the subset(s), materialize the set along the way
-        $scope.export = function(item) {
+        $scope.downloadDerivedSet = function(item) {
+          Page.startWork();
           var params, type, name;
           type = $scope.item.type.toLowerCase();
           name = 'Input ' + type + ' set';
@@ -284,7 +303,51 @@
             type: $scope.item.type.toLowerCase(),
             name: name
           };
+          return SetService.materializeSync(type, params).then(function(data) {
+            Page.stopWork();
+            $modal.open({
+              templateUrl: '/scripts/downloader/views/request.html',
+              controller: 'DownloadRequestController',
+              resolve: {
+                filters: function() { return {donor:{entitySetId:{is:[data.id]}}}; }
+              }
+            });
+          });
+        };
+
+        $scope.viewInExternal = function(item) {
           Page.startWork();
+          var params, type, name;
+          type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
+          SetService.materializeSync(type, params).then(function(data) {
+            Page.stopWork();
+            if (! data.id) {
+              console.log('there is no id!!!!');
+              return;
+            } else {
+              var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
+              $location.path('repository/external').search('filters', newFilter);
+            }
+          });
+        };
+
+        // Export the subset(s), materialize the set along the way
+        $scope.export = function(item) {
+          var params, name, type = $scope.item.type.toLowerCase();
+          name = 'Input ' + type + ' set';
+
+          params = {
+            union: computeUnion(item),
+            type: $scope.item.type.toLowerCase(),
+            name: name
+          };
           SetService.materialize(type, params).then(function(data) {
             function exportSet() {
               SetService.exportSet(data.id);
@@ -435,7 +498,7 @@
           $scope.isDeprecated = false;
           if (n && n.result) {
             Settings.get().then(function(settings) {
-
+              $scope.downloadsEnabled = settings.downloadEnabled || false;
               // The maximum allowed items from union operation
               $scope.unionMaxLimit = settings.maxNumberOfHits * settings.maxMultiplier;
 
@@ -455,4 +518,3 @@
     };
   });
 })();
-

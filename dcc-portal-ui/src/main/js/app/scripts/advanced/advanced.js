@@ -51,11 +51,11 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services']);
+  var module = angular.module('icgc.advanced.controllers', ['icgc.advanced.services', 'icgc.sets.services']);
 
   module.controller('AdvancedCtrl',
-    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService, AdvancedGeneService,
-              AdvancedMutationService, Settings) {
+    function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
+              AdvancedGeneService, AdvancedMutationService, SetService, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -114,6 +114,15 @@
         });
       };
 
+      _ctrl.viewExternal = function(type, limit) {
+        var params = {};
+        params.filters = LocationService.filters();
+        params.size = limit;
+        params.isTransient = true;
+        // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
+        $scope.$destroy();
+        SetService.createForwardSet(type, params, '/repository/external');
+      };
 
       /**
        * Create new enrichment analysis

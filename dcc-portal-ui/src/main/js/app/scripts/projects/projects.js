@@ -63,10 +63,11 @@
 (function () {
   'use strict';
 
+  var toJson = angular.toJson;
   var module = angular.module('icgc.projects.controllers', ['icgc.projects.models']);
 
   module.controller('ProjectsCtrl',
-    function ($q, $scope, $state, ProjectState, Page, Projects,
+    function ($q, $scope, $state, $filter, ProjectState, Page, Projects,
                HighchartsService, Donors, Restangular, LocationService) {
 
     var _ctrl = this;
@@ -88,29 +89,331 @@
         _ctrl.setTab($state.current.data.tab);
       });
 
-    // This is needed to translate projects filters to donor filters
-    $scope.createAdvanceFilters = function(dataType) {
-      var currentFilters = LocationService.filters();
-      var filters = {};
+    // TODO: Move this to a service.
+    var countryMapping = _.invert ({
+        'af' : 'Afghanistan',
+        'ax' : 'Aland Islands',
+        'al' : 'Albania',
+        'dz' : 'Algeria',
+        'as' : 'American Samoa',
+        'ad' : 'Andorra',
+        'ao' : 'Angola',
+        'ai' : 'Anguilla',
+        'aq' : 'Antarctica',
+        'ag' : 'Antigua And Barbuda',
+        'ar' : 'Argentina',
+        'am' : 'Armenia',
+        'aw' : 'Aruba',
+        'au' : 'Australia',
+        'at' : 'Austria',
+        'az' : 'Azerbaijan',
+        'bs' : 'Bahamas',
+        'bh' : 'Bahrain',
+        'bd' : 'Bangladesh',
+        'bb' : 'Barbados',
+        'by' : 'Belarus',
+        'be' : 'Belgium',
+        'bz' : 'Belize',
+        'bj' : 'Benin',
+        'bm' : 'Bermuda',
+        'bt' : 'Bhutan',
+        'bo' : 'Bolivia',
+        'ba' : 'Bosnia And Herzegovina',
+        'bw' : 'Botswana',
+        'bv' : 'Bouvet Island',
+        'br' : 'Brazil',
+        'io' : 'British Indian Ocean Territory',
+        'bn' : 'Brunei Darussalam',
+        'bg' : 'Bulgaria',
+        'bf' : 'Burkina Faso',
+        'bi' : 'Burundi',
+        'kh' : 'Cambodia',
+        'cm' : 'Cameroon',
+        'ca' : 'Canada',
+        'cv' : 'Cape Verde',
+        'ky' : 'Cayman Islands',
+        'cf' : 'Central African Republic',
+        'td' : 'Chad',
+        'cl' : 'Chile',
+        'cn' : 'China',
+        'cx' : 'Christmas Island',
+        'cc' : 'Cocos (Keeling) Islands',
+        'co' : 'Colombia',
+        'km' : 'Comoros',
+        'cg' : 'Congo',
+        'cd' : 'Congo, Democratic Republic',
+        'ck' : 'Cook Islands',
+        'cr' : 'Costa Rica',
+        'ci' : 'Cote D\'Ivoire',
+        'hr' : 'Croatia',
+        'cu' : 'Cuba',
+        'cy' : 'Cyprus',
+        'cz' : 'Czech Republic',
+        'dk' : 'Denmark',
+        'dj' : 'Djibouti',
+        'dm' : 'Dominica',
+        'do' : 'Dominican Republic',
+        'ec' : 'Ecuador',
+        'eg' : 'Egypt',
+        'sv' : 'El Salvador',
+        'gq' : 'Equatorial Guinea',
+        'er' : 'Eritrea',
+        'ee' : 'Estonia',
+        'et' : 'Ethiopia',
+        'eu' : 'European Union',
+        'fk' : 'Falkland Islands (Malvinas)',
+        'fo' : 'Faroe Islands',
+        'fj' : 'Fiji',
+        'fi' : 'Finland',
+        'fr' : 'France',
+        'gf' : 'French Guiana',
+        'pf' : 'French Polynesia',
+        'tf' : 'French Southern Territories',
+        'ga' : 'Gabon',
+        'gm' : 'Gambia',
+        'ge' : 'Georgia',
+        'de' : 'Germany',
+        'gh' : 'Ghana',
+        'gi' : 'Gibraltar',
+        'gr' : 'Greece',
+        'gl' : 'Greenland',
+        'gd' : 'Grenada',
+        'gp' : 'Guadeloupe',
+        'gu' : 'Guam',
+        'gt' : 'Guatemala',
+        'gg' : 'Guernsey',
+        'gn' : 'Guinea',
+        'gw' : 'Guinea-Bissau',
+        'gy' : 'Guyana',
+        'ht' : 'Haiti',
+        'hm' : 'Heard Island & Mcdonald Islands',
+        'va' : 'Holy See (Vatican City State)',
+        'hn' : 'Honduras',
+        'hk' : 'Hong Kong',
+        'hu' : 'Hungary',
+        'is' : 'Iceland',
+        'in' : 'India',
+        'id' : 'Indonesia',
+        'ir' : 'Iran, Islamic Republic Of',
+        'iq' : 'Iraq',
+        'ie' : 'Ireland',
+        'im' : 'Isle Of Man',
+        'il' : 'Israel',
+        'it' : 'Italy',
+        'jm' : 'Jamaica',
+        'jp' : 'Japan',
+        'je' : 'Jersey',
+        'jo' : 'Jordan',
+        'kz' : 'Kazakhstan',
+        'ke' : 'Kenya',
+        'ki' : 'Kiribati',
+        'kr' : 'South Korea',
+        'kw' : 'Kuwait',
+        'kg' : 'Kyrgyzstan',
+        'la' : 'Lao People\'s Democratic Republic',
+        'lv' : 'Latvia',
+        'lb' : 'Lebanon',
+        'ls' : 'Lesotho',
+        'lr' : 'Liberia',
+        'ly' : 'Libyan Arab Jamahiriya',
+        'li' : 'Liechtenstein',
+        'lt' : 'Lithuania',
+        'lu' : 'Luxembourg',
+        'mo' : 'Macao',
+        'mk' : 'Macedonia',
+        'mg' : 'Madagascar',
+        'mw' : 'Malawi',
+        'my' : 'Malaysia',
+        'mv' : 'Maldives',
+        'ml' : 'Mali',
+        'mt' : 'Malta',
+        'mh' : 'Marshall Islands',
+        'mq' : 'Martinique',
+        'mr' : 'Mauritania',
+        'mu' : 'Mauritius',
+        'yt' : 'Mayotte',
+        'mx' : 'Mexico',
+        'fm' : 'Micronesia, Federated States Of',
+        'md' : 'Moldova',
+        'mc' : 'Monaco',
+        'mn' : 'Mongolia',
+        'me' : 'Montenegro',
+        'ms' : 'Montserrat',
+        'ma' : 'Morocco',
+        'mz' : 'Mozambique',
+        'mm' : 'Myanmar',
+        'na' : 'Namibia',
+        'nr' : 'Nauru',
+        'np' : 'Nepal',
+        'nl' : 'Netherlands',
+        'an' : 'Netherlands Antilles',
+        'nc' : 'New Caledonia',
+        'nz' : 'New Zealand',
+        'ni' : 'Nicaragua',
+        'ne' : 'Niger',
+        'ng' : 'Nigeria',
+        'nu' : 'Niue',
+        'nf' : 'Norfolk Island',
+        'mp' : 'Northern Mariana Islands',
+        'no' : 'Norway',
+        'om' : 'Oman',
+        'pk' : 'Pakistan',
+        'pw' : 'Palau',
+        'ps' : 'Palestinian Territory, Occupied',
+        'pa' : 'Panama',
+        'pg' : 'Papua New Guinea',
+        'py' : 'Paraguay',
+        'pe' : 'Peru',
+        'ph' : 'Philippines',
+        'pn' : 'Pitcairn',
+        'pl' : 'Poland',
+        'pt' : 'Portugal',
+        'pr' : 'Puerto Rico',
+        'qa' : 'Qatar',
+        're' : 'Reunion',
+        'ro' : 'Romania',
+        'ru' : 'Russian Federation',
+        'rw' : 'Rwanda',
+        'bl' : 'Saint Barthelemy',
+        'sh' : 'Saint Helena',
+        'kn' : 'Saint Kitts And Nevis',
+        'lc' : 'Saint Lucia',
+        'mf' : 'Saint Martin',
+        'pm' : 'Saint Pierre And Miquelon',
+        'vc' : 'Saint Vincent And Grenadines',
+        'ws' : 'Samoa',
+        'sm' : 'San Marino',
+        'st' : 'Sao Tome And Principe',
+        'sa' : 'Saudi Arabia',
+        'sn' : 'Senegal',
+        'rs' : 'Serbia',
+        'sc' : 'Seychelles',
+        'sl' : 'Sierra Leone',
+        'sg' : 'Singapore',
+        'sk' : 'Slovakia',
+        'si' : 'Slovenia',
+        'sb' : 'Solomon Islands',
+        'so' : 'Somalia',
+        'za' : 'South Africa',
+        'gs' : 'South Georgia And Sandwich Isl.',
+        'es' : 'Spain',
+        'lk' : 'Sri Lanka',
+        'sd' : 'Sudan',
+        'sr' : 'Suriname',
+        'sj' : 'Svalbard And Jan Mayen',
+        'sz' : 'Swaziland',
+        'se' : 'Sweden',
+        'ch' : 'Switzerland',
+        'sy' : 'Syrian Arab Republic',
+        'tw' : 'Taiwan',
+        'tj' : 'Tajikistan',
+        'tz' : 'Tanzania',
+        'th' : 'Thailand',
+        'tl' : 'Timor-Leste',
+        'tg' : 'Togo',
+        'tk' : 'Tokelau',
+        'to' : 'Tonga',
+        'tt' : 'Trinidad And Tobago',
+        'tn' : 'Tunisia',
+        'tr' : 'Turkey',
+        'tm' : 'Turkmenistan',
+        'tc' : 'Turks And Caicos Islands',
+        'tv' : 'Tuvalu',
+        'ug' : 'Uganda',
+        'ua' : 'Ukraine',
+        'ae' : 'United Arab Emirates',
+        'gb' : 'United Kingdom',
+        'us' : 'United States',
+        'um' : 'United States Outlying Islands',
+        'uy' : 'Uruguay',
+        'uz' : 'Uzbekistan',
+        'vu' : 'Vanuatu',
+        've' : 'Venezuela',
+        'vn' : 'Viet Nam',
+        'vg' : 'Virgin Islands, British',
+        'vi' : 'Virgin Islands, U.S.',
+        'wf' : 'Wallis And Futuna',
+        'eh' : 'Western Sahara',
+        'ye' : 'Yemen',
+        'zm' : 'Zambia',
+        'zw' : 'Zimbabwe'
+    });
 
-      if (dataType || !_.isEmpty(currentFilters)) {
-        filters.donor = {};
-      }
-
-      if (dataType) {
-        filters.donor.availableDataTypes = {};
-        filters.donor.availableDataTypes.is = [dataType];
-      }
-      if (!_.isEmpty(currentFilters)) {
-        filters.donor.projectId = {};
-        filters.donor.projectId.is = _ctrl.projectIds;
-      }
-
-      return JSON.stringify(filters);
+    $scope.countryCode = function (country) {
+      return _.get (countryMapping, country, '');
     };
 
+    var pathMapping = {
+      ids: 'donor.projectId.is',
+      datatype: 'donor.availableDataTypes.is',
+      state: 'donor.state.is'
+    };
 
-    // Helper to do the stacked chart
+    function ensureObject (o) {
+      return _.isPlainObject (o) ? o : {};
+    }
+
+    var isEmptyObject = _.flow (ensureObject, _.isEmpty);
+
+    function hasQueryFilter() {
+      return (! isEmptyObject (LocationService.filters()));
+    }
+
+    _ctrl.fieldKeys = [
+      'totalLiveDonorCount',
+      'totalDonorCount',
+      'ssmTestedDonorCount',
+      'cnsmTestedDonorCount',
+      'stsmTestedDonorCount',
+      'sgvTestedDonorCount',
+      'methArrayTestedDonorCount',
+      'methSeqTestedDonorCount',
+      'expArrayTestedDonorCount',
+      'expSeqTestedDonorCount',
+      'pexpTestedDonorCount',
+      'mirnaSeqTestedDonorCount',
+      'jcnTestedDonorCount'];
+
+    var fieldMapping = {
+      totalLiveDonorCount: {state: 'live'},
+      totalDonorCount: {},
+      ssmTestedDonorCount: {datatype: 'ssm'},
+      cnsmTestedDonorCount: {datatype: 'cnsm'},
+      stsmTestedDonorCount: {datatype: 'stsm'},
+      sgvTestedDonorCount: {datatype: 'sgv'},
+      methArrayTestedDonorCount: {datatype: 'meth_array'},
+      methSeqTestedDonorCount: {datatype: 'meth_seq'},
+      expArrayTestedDonorCount: {datatype: 'exp_array'},
+      expSeqTestedDonorCount: {datatype: 'exp_seq'},
+      pexpTestedDonorCount: {datatype: 'pexp'},
+      mirnaSeqTestedDonorCount: {datatype: 'mirna_seq'},
+      jcnTestedDonorCount: {datatype: 'jcn'}
+    };
+
+    function buildFilter (fieldKey, projectIds) {
+      var filter = _.mapValues (_.clone (_.get (fieldMapping, fieldKey, {})), function (v) {
+        return [v];
+      });
+
+      if (_.isArray (projectIds) && (! _.isEmpty (projectIds))) {
+        _.assign (filter, {ids: projectIds});
+      }
+
+      return _.transform (filter, function (result, value, key) {
+        if (_.has (pathMapping, key)) {
+          result = _.set (result, pathMapping [key], value);
+        }
+      });
+    }
+
+    $scope.toAdvancedSearch = function (fieldKey, projectIds) {
+      var filter = {
+        filters: toJson (buildFilter (fieldKey, projectIds))
+      };
+      return 'advanced (' + toJson (filter) + ')';
+    };
+
+    // Transforms data for the stacked bar chart
     function transform(data) {
       var list = [];
 
@@ -137,41 +440,83 @@
 	   return list.sort(function(a, b) { return b.total - a.total; });
     }
 
+    _ctrl.donutChartSubTitle = function () {
+      var formatNumber = $filter ('number');
+      var pluralizer = function (n, singular) {
+        return '' + singular + (n > 1 ?  's' : '');
+      };
+      var toHumanReadable = function (n, singular) {
+        return '' + formatNumber (n) + ' ' + pluralizer (n, singular);
+      };
+      var subtitle = toHumanReadable (_ctrl.totalDonors, 'Donor');
+      var projects = _.get (_ctrl, 'projects.hits', undefined);
 
-    function success(data) {
-    	
+      return subtitle + (_.isArray (projects) ?
+        ' across ' + toHumanReadable (projects.length, 'Project') : '');
+    };
+
+    _ctrl.hasDonutData = function () {
+      var donutData = _ctrl.donut;
+      var lengths = _.map (['inner', 'outer'], function (key) {
+        return _.get (donutData, [key, 'length'], 0);
+      });
+      return _.sum (lengths) > 0;
+    };
+
+    _ctrl.numberOfSelectedProjectsInFilter = function () {
+      var queryFilter = LocationService.filters();
+      return _.get (queryFilter, 'project.id.is.length', 0);
+    };
+
+    function noHitsIn (results) {
+      return 0 === _.get (results, 'hits.length', 0);
+    }
+
+    _ctrl.isLoadingData = false;
+
+    function stopIfNoHits (data) {
+      if (noHitsIn (data)) {
+        _ctrl.isLoadingData = false;
+        _ctrl.stacked = [];
+        Page.stopWork();
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    var aggregationAjaxAbort = null;
+
+    function cancelInFlightAggregationAjax () {
+      if (aggregationAjaxAbort) {
+        aggregationAjaxAbort.resolve();
+        aggregationAjaxAbort = null;
+      }
+    }
+
+    function success (data) {
       if (data.hasOwnProperty('hits')) {
         var totalDonors = 0, ssmTotalDonors = 0;
 
-        _ctrl.projects = data;
-        _ctrl.projectIds = _.pluck(data.hits, 'id');
+        _ctrl.projectIds = _.pluck (data.hits, 'id');
 
         data.hits.forEach(function (p) {
           totalDonors += p.totalDonorCount;
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
-        
-        _ctrl.totals = {};
-        _ctrl.labels = ['totalDonorCount', 
-                        'ssmTestedDonorCount', 
-                        'cnsmTestedDonorCount', 
-                        'stsmTestedDonorCount', 
-                        'sgvTestedDonorCount', 
-                        'methArrayTestedDonorCount', 
-                        'methSeqTestedDonorCount', 
-                        'expArrayTestedDonorCount', 
-                        'expSeqTestedDonorCount', 
-                        'pexpTestedDonorCount',
-                        'mirnaSeqTestedDonorCount', 
-                        'jcnTestedDonorCount'];
-        
-        _ctrl.labels.forEach(function(fieldName) {
-        	_ctrl.totals[fieldName] = _.sum(data.hits, fieldName);
+
+        var totalRowProjectIds = hasQueryFilter() ? _ctrl.projectIds : undefined;
+        _ctrl.totals = _.map (_ctrl.fieldKeys, function (fieldKey) {
+          return {
+            total: _.sum (data.hits, fieldKey),
+            sref: $scope.toAdvancedSearch (fieldKey, totalRowProjectIds)
+          };
         });
 
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
 
+        _ctrl.projects = data;
         _ctrl.donut = HighchartsService.donut({
           data: data.hits,
           type: 'project',
@@ -180,73 +525,69 @@
           countBy: 'totalDonorCount'
         });
 
-        _ctrl.stacked = [];
-
-
         // Get project-donor-mutation distribution of exon impacted ssm
         Restangular.one('ui', '').one('projects/donor-mutation-counts', '').get({}).then(function(data) {
           // Remove restangular attributes to make data easier to parse
           data = Restangular.stripRestangular(data);
           _ctrl.distribution = data;
         });
-        
-        
-        if (data.hits.length > 0) {
-          Projects.several(_.pluck(data.hits, 'id').join(',')).get('genes', {
-            include : 'projects',
-            filters : {
-              mutation : {
-                functionalImpact : {
-                  is : [ 'High' ]
-                }
-              }
-            },
-            size : 20
-          }).then(function(genes) {
-            if (!genes.hits || genes.hits.length === 0) {
-              Page.stopWork();
-              return;
-            }
-            var params = {
-              mutation : {
-                functionalImpact : {
-                  is : [ 'High' ]
-                }
-              }
-            };
-            Page.stopWork();
 
-            // FIXME: elasticsearch aggregation support may be more
-            // efficient
-            Restangular.one('ui').one('gene-project-donor-counts', _.pluck(genes.hits, 'id')).get({
-              'filters' : params
-            }).then(function(geneProjectFacets) {
+        cancelInFlightAggregationAjax();
+        if (stopIfNoHits (data)) {return;}
 
-              genes.hits.forEach(function(gene) {
+        var mutationFilter = {
+          mutation: {
+            functionalImpact: {is: ['High']}
+          }
+        };
+
+        Projects.several (_ctrl.projectIds.join()).get ('genes', {
+          include: 'projects',
+          filters: mutationFilter,
+          size: 20
+        }).then (function (genes) {
+          // About to launch a new ajax getting project aggregation data. Cancel any active call.
+          cancelInFlightAggregationAjax();
+
+          if (stopIfNoHits (genes)) {return;}
+
+          Page.stopWork();
+
+          aggregationAjaxAbort = $q.defer();
+          _ctrl.isLoadingData = true;
+
+          // This call is relatively expensive.
+          // FIXME: elasticsearch aggregation support may be more efficient
+          Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
+            .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
+            .get ({'filters': mutationFilter})
+            .then (function (geneProjectFacets) {
+
+              genes.hits.forEach (function (gene) {
                 var uiFIProjects = [];
 
-                geneProjectFacets[gene.id].terms.forEach(function(t) {
-                  var proj = _.find(data.hits, function(p) {
+                geneProjectFacets[gene.id].terms.forEach(function (t) {
+                  var proj = _.find(data.hits, function (p) {
                     return p.id === t.term;
                   });
 
                   if (angular.isDefined(proj)) {
                     uiFIProjects.push({
-                      id : t.term,
-                      name : proj.name,
-                      primarySite : proj.primarySite,
-                      count : t.count
+                      id: t.term,
+                      name: proj.name,
+                      primarySite: proj.primarySite,
+                      count: t.count
                     });
                   }
                 });
                 gene.uiFIProjects = uiFIProjects;
               });
-              _ctrl.stacked = transform(genes.hits);
+
+              _ctrl.isLoadingData = false;
+              _ctrl.stacked = transform (genes.hits);
+              aggregationAjaxAbort = null;
             });
-          });
-        } else {
-          Page.stopWork();
-        }
+        });
 
         // Id to primary site
         var id2site = {};
@@ -624,13 +965,7 @@
         filters: LocationService.filters()
       };
 
-
-      // Sanitize filters, we want to enforce project.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.project) {
-        liveFilters.filters.project = {};
-      }
-      liveFilters.filters.project.state = { is: ['live']};
 
       return this.all().get('', liveFilters).then(function (data) {
 
@@ -687,12 +1022,7 @@
         from: 1
       };
 
-      // Sanitize filters, we want to enforce donor.state == 'live'
       var liveFilters = angular.extend(defaults, _.cloneDeep(params));
-      if (! liveFilters.filters.donor) {
-        liveFilters.filters.donor = {};
-      }
-      liveFilters.filters.donor.state = { is: ['live']};
 
       return this.handler.one('donors', '').get(liveFilters);
     };

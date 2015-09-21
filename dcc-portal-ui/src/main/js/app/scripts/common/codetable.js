@@ -58,6 +58,7 @@
       'consequenceType': 'Consequence Type',
       'functionalImpact': 'Functional Impact',
       'sequencingStrategy': 'Analysis Type',
+      'tumourType': 'Tumour Type',
 
       'studies': 'Study',
       'repoName': 'Repository',
@@ -68,8 +69,11 @@
       'donorStudy': 'Only Donors in Study',
       'projectCode': 'Project',
 
+      // Donor states
+      'state': 'Donor Molecular Data',
+      'live': 'Present in DCC',
+      'pending': 'Absent from DCC'
     };
-
 
     var tooltipLookup = {
       // Sequencing analysis types (Sequencing strategy)
@@ -110,10 +114,12 @@
       'SELEX': 'Systematic Evolution of Ligands by EXponential enrichment',
       'RIP-Seq': 'Direct sequencing of RNA immunoprecipitates (includes CLIP-Seq, HITS-CLIP and PAR-CLIP).',
       'ChIA-PET': 'Direct sequencing of proximity-ligated chromatin immunoprecipitates.',
-      'OTHER': 'Library strategy not listed.'
+      'OTHER': 'Library strategy not listed.',
 
+      // Donor states
+      'live': 'Present in DCC',
+      'pending': 'Absent from DCC'
     };
-
 
     this.translate = function(id) {
       return translateLookup[id];

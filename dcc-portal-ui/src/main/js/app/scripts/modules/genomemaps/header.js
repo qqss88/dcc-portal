@@ -136,7 +136,7 @@ angular.module('icgc.modules.genomeviewer.header').controller('GenomeViewerHeade
 angular.module('icgc.modules.genomeviewer.header').directive('gvHeader', function () {
   return {
     restrict: 'A',
-    templateUrl: '/views/modules/genomeviewer/header.html',
+    templateUrl: '/scripts/modules/genomemaps/views/header.html',
     scope: {
       options: '=?'
     },

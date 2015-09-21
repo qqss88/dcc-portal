@@ -3,7 +3,7 @@
         <form class="t_suggest">
             <input
                     class="t_suggest__input"
-                    placeholder="eg. BRAF, KRAS G12D, DO35100, MU7870, apoptosis, Cancer Gene Census, GO:0016049"
+                    placeholder="e.g. BRAF, KRAS G12D, DO35100, MU7870, apoptosis, Cancer Gene Census, GO:0016049"
                     autofocus="true"
                     data-suggest
                     />
@@ -25,9 +25,9 @@
         <p>New features will be regularly added by the <a href="/team">DCC development team</a>.
             <a href="mailto:dcc-support@icgc.org?Subject=Data%20Portal%20Feedback"><i class="icon-mail"></i>Feedback is welcome.</a>
         </p>
-        
+
         <div class="divider"></div>
-        
+
         <p>
          <div class="text-left"><a href="/pcawg" style="background:none"><img id="#pcawg-logo" src="styles/images/PCAWG-final-small.png"></a></div>
          The <a href="/pcawg">Pancancer Analysis of Whole Genomes</a> (PCAWG) study is an international collaboration to identify common patterns of mutation in more than 2,600 cancer whole genomes from the International Cancer Genome Consortium.
@@ -46,17 +46,24 @@
                 <tr>
                     <td>Cancer projects</td>
                     <td class="text-right">
-                        <a href="/projects">{{ReleaseCtrl.release.liveProjectCount | number}}</a>
+                        <a href="/projects">{{ReleaseCtrl.release.projectCount | number}}</a>
                     </td>
                 </tr>
                 <tr>
                     <td>Cancer primary sites</td>
-                    <td class="text-right">{{ReleaseCtrl.release.primarySiteCount | number}}</td>
+                    <td class="text-right">{{ReleaseCtrl.release.primarySiteCount | number}}
+                    </td>
                 </tr>
                 <tr>
-                    <td>Donors</td>
+                    <td>Donors with molecular data in DCC</td>
                     <td class="text-right">
-                        <a href="/search">{{ReleaseCtrl.release.liveDonorCount | number}}</a>
+                        <a href="{{ReleaseCtrl.routeToAdvancedSearchPageWithLiveDonorStateFilter()}}">{{ReleaseCtrl.release.liveDonorCount | number}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Total Donors</td>
+                    <td class="text-right">
+                        <a href="/search">{{ReleaseCtrl.release.donorCount | number}}</a>
                     </td>
                 </tr>
                 <tr>
@@ -96,7 +103,7 @@
                 <a href='/search?filters={"donor":{"primarySite":{"is":["Brain"]}, "availableDataTypes":{"is":["meth_array", "meth_seq"]}},"mutation":{"consequenceType":{"is":["frameshift_variant"]}}}'>Brain
                     cancer donors with frameshift mutations and having methylation data available</a></li>
         </ol>
-        <!-- 
+        <!--
         <div data-ng-include src="'views/common/twitter.html'"></div>
          -->
     </section>

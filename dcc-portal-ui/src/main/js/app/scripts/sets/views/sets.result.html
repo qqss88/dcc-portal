@@ -57,7 +57,7 @@
                     data-ng-mouseenter="tableMouseEnter(item.intersection)"
                     data-ng-mouseleave="tableMouseOut(item.intersection)">
 
-                    <td style="cursor:pointer" 
+                    <td style="cursor:pointer"
                         data-ng-click="toggleSelection(item.intersection, item.count)" class="text-center">
                         <i class="{{ isSelected(item.intersection)? 'icon-check' : 'icon-check-empty'}}"
                            style="color: {{ isHighlighted(item.intersection)? '#B8D6E2' : isSelected(item.intersection)? '#7ABDDA' : ''}}"></i>
@@ -70,10 +70,14 @@
                         <span data-ng-if="item.count === 0">{{item.count | number}}</span>
                     </td>
                     <td>
-                        <span style="float:left; font-size:1.25rem"> 
+                        <span style="float:left; font-size:1.25rem">
                             <span class="t_tools__tool" data-ng-if="item.count > 0">
                                 <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(item); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export as TSV" data-ng-click="export(item)"></i>
+                            </span>
+                            <span class="t_tools__tool" data-ng-if="item.count > 0 && setType === 'donor'">
+                              <i data-ng-if="downloadsEnabled" class="icon-download" data-tooltip="Download Donor Data" data-ng-click="downloadDerivedSet(item)"></i>
+                              <i class="icon-database" data-tooltip="View in External Repository" data-ng-click="viewInExternal(item)"></i>
                             </span>
                         </span>
                     </td>
@@ -86,10 +90,14 @@
                         <span data-ng-if="selectedTotalCount > unionMaxLimit"><strong>{{selectedTotalCount}}</strong></span>
                     </td>
                     <td>
-                        <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit"> 
+                        <span style="float:left; font-size:1.25rem" data-ng-show="selectedTotalCount > 0 && selectedTotalCount <= unionMaxLimit">
                             <span class="t_tools__tool">
                                 <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
+                            </span>
+                            <span class="t_tools__tool" data-ng-if="setType === 'donor'">
+                              <i data-ng-if="downloadsEnabled" class="icon-download" data-tooltip="Download Donor Data" data-ng-click="downloadDerivedSet()"></i>
+                              <i class="icon-database" data-tooltip="View in External Repository" data-ng-click="viewInExternal()"></i>
                             </span>
                         </span>
                         <br>

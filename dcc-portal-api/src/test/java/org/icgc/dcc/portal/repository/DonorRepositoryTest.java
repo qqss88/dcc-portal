@@ -29,12 +29,13 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
-import lombok.val;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.icgc.dcc.portal.model.BaseEntitySet;
+import org.icgc.dcc.portal.model.EntitySet;
+import org.icgc.dcc.portal.model.EntitySet.State;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -44,10 +45,19 @@ import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import lombok.val;
+
+@RunWith(MockitoJUnitRunner.class)
 
 // FIXME: Temporarily disables this test suite as the PQL implementation is not stable.
 @Ignore
@@ -63,16 +73,22 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
       "mutation:{platform:{is:\"Nimblegen Human Methylation 2.1M Whole-Genome sets\"}}";
 
   DonorRepository donorRepository;
+  @Mock
+  EntityListRepository entityListRepository;
 
   ImmutableMap<String, String> FIELDS = FIELDS_MAPPING.get(Kind.DONOR);
 
   @Before
   public void setUp() throws Exception {
+    val set = new EntitySet(UUID.randomUUID(), State.FINISHED, 200l, "test", "test", BaseEntitySet.Type.DONOR, 1);
+    Mockito.when(entityListRepository.find(Matchers.any())).thenReturn(set);
+
     es.execute(createIndexMappings(Type.DONOR, Type.DONOR_CENTRIC)
         .withData(bulkFile(getClass()))
         // This is needed because the DonorRepository now does a 'secondary' search on icgc-repository index.
         .withData(bulkFile("RepositoryFileServiceTest.json")));
-    donorRepository = new DonorRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME));
+    donorRepository =
+        new DonorRepository(es.client(), INDEX, new QueryEngine(es.client(), INDEX_NAME), entityListRepository);
   }
 
   @Test
@@ -273,10 +289,8 @@ public class DonorRepositoryTest extends BaseElasticSearchTest {
     // Here we are only interested in results that contain stats, which is under "ageAtDiagnosisGroup", and we use
     // flatMap to flatten/unwrap the result to a simple list.
     val data = results.stream()
-        .filter(result ->
-            result.getName().equals("ageAtDiagnosisGroup"))
-        .flatMap(result ->
-            result.getData().stream())
+        .filter(result -> result.getName().equals("ageAtDiagnosisGroup"))
+        .flatMap(result -> result.getData().stream())
         .collect(Collectors.toList());
 
     assertThat(data.size()).isEqualTo(2);

@@ -4,8 +4,7 @@
 
 	window.dcc = window.dcc || {};
 
-   /* Dfault configulration */
-
+   /* Default configuration */
 
 	/* Create the stacked bar chart using d3 */
 	var StackedBarChart = function(config){
@@ -149,8 +148,8 @@
         })
         .attr('width', x.rangeBand())
         .attr('x',function(d){return x(d.key);})
-        .attr('y', function(d) { return y(d.y1); })
-        .attr('height', function(d) { return y(d.y0) - y(d.y1); })
+        .attr ('y', function (d) {return y (d.y0);})
+        .attr ('height', 0)
         .on('mouseover', function(d) {
 
           svg.append('rect')
@@ -174,7 +173,10 @@
           if (d.link) {
             config.onClick(d.link);
           }
-        });
+        })
+        .transition()
+        .attr ('y', function (d) {return y (d.y1);})
+        .attr ('height', function (d) {return y (d.y0) - y (d.y1);});
   };
 
 	StackedBarChart.prototype.destroy = function(){

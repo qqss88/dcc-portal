@@ -7,12 +7,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -138,6 +138,7 @@ public class IndexModel {
           .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
           .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
           .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
+          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
           .build();
 
   private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
@@ -372,7 +373,7 @@ public class IndexModel {
           .put("submittedMatchedSampleId", "matched_sample_id")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
 
-          .build();
+  .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -380,16 +381,17 @@ public class IndexModel {
           .put("name", "name")
           .put("releasedOn", "date")
           .put("donorCount", "donor_count")
+          .put("liveDonorCount", "live_donor_count")
           .put("mutationCount", "mutation_count")
           .put("sampleCount", "sample_count")
           .put("projectCount", "project_count")
+          .put("liveProjectCount", "live_project_count")
           .put("specimenCount", "specimen_count")
           .put("ssmCount", "ssm_count")
           .put("primarySiteCount", "primary_site_count")
+          .put("livePrimarySiteCount", "live_primary_site_count")
           .put("mutatedGeneCount", "mutated_gene_count")
           .put("releaseNumber", "number")
-          .put("liveDonorCount", "live_donor_count")
-          .put("liveProjectCount", "live_project_count")
           .build();
 
   private static final ImmutableMap<String, String> DIAGRAM_FIELDS_MAPPING =
@@ -406,10 +408,10 @@ public class IndexModel {
           .put("id", "id")
           .put("type", "type")
 
-          // Gene and project and pathway
+  // Gene and project and pathway
           .put("name", "name")
 
-          // Gene
+  // Gene
           .put("symbol", "symbol")
           .put("ensemblTranscriptId", "ensemblTranscriptId")
           .put("ensemblTranslationId", "ensemblTranslationId")
@@ -419,37 +421,37 @@ public class IndexModel {
           .put("entrezGene", "entrezGene")
           .put("hgnc", "hgnc")
 
-          // Mutation
+  // Mutation
           .put("mutation", "mutation")
           .put("geneMutations", "geneMutations")
           .put("start", "start")
 
-          // Project
+  // Project
           .put("tumourType", "tumourType")
           .put("tumourSubtype", "tumourSubtype")
           .put("primarySite", "primarySite")
 
-          // Donor
+  // Donor
           .put("specimenIds", "specimenIds")
           .put("submittedSpecimenIds", "submittedSpecimenIds")
           .put("sampleIds", "sampleIds")
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
-          // Donor-file, these are derived from file
+  // Donor-file, these are derived from file
           .put("submittedId", "submittedId")
           .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
           .put("TCGASampleBarcode", "TCGASampleBarcode")
           .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 
-          // GO Term
+  // GO Term
           .put("altIds", "altIds")
 
-          // File Repo
+  // File Repo
           .put("file_name", "file_name")
           .put("donor_id", "donor_id")
 
-          // Pathway
+  // Pathway
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
@@ -481,13 +483,14 @@ public class IndexModel {
    * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("ontology", "ontology") .put("altIds", "alt_ids") .put("synonyms", "synonyms") .put("inferredTree",
    * "inferred_tree") .build();
-   * 
+   *
    * private static final ImmutableMap<String, String> PATHWAY_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("hierarchy", "hierarchy") .build();
    */
 
   public static final EnumMap<Kind, ImmutableMap<String, String>> FIELDS_MAPPING =
       new EnumMap<Kind, ImmutableMap<String, String>>(Kind.class);
+
   static {
     FIELDS_MAPPING.put(Kind.PROJECT, createFieldsMapping(Kind.PROJECT));
     FIELDS_MAPPING.put(Kind.DONOR, createFieldsMapping(Kind.DONOR));

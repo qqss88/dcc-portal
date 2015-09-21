@@ -18,8 +18,8 @@
 package org.icgc.dcc.portal.repository;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.size;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
-import static org.elasticsearch.common.collect.Iterables.size;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.EMPTY_SOURCE_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.resolveSourceFields;
@@ -29,10 +29,6 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getLong;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 
 import java.util.Map;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -57,8 +53,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
 
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
+@SuppressWarnings("deprecation")
 public class GeneSetRepository {
 
   /**
@@ -111,21 +112,20 @@ public class GeneSetRepository {
     switch (type) {
     case GO_TERM:
       query =
-          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("go_term.inferred_tree.id", id.get()) :
-              new TermFilterBuilder("type", "go_term"));
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(),
+              id.isPresent() ? new TermFilterBuilder("go_term.inferred_tree.id",
+                  id.get()) : new TermFilterBuilder("type", "go_term"));
       break;
     case PATHWAY:
       query =
-          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("pathway.hierarchy.id", id.get()) :
-              new TermFilterBuilder("type", "pathway"));
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(),
+              id.isPresent() ? new TermFilterBuilder("pathway.hierarchy.id", id.get()) : new TermFilterBuilder("type",
+                  "pathway"));
       break;
     case CURATED_SET:
       query =
-          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ?
-              new TermFilterBuilder("curated_set.id", id.get()) :
-              new TermFilterBuilder("type", "curated_set"));
+          new FilteredQueryBuilder(new MatchAllQueryBuilder(), id.isPresent() ? new TermFilterBuilder("curated_set.id",
+              id.get()) : new TermFilterBuilder("type", "curated_set"));
       break;
     default:
       checkState(false, "Unexpected type %s", type);

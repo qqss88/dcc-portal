@@ -97,8 +97,6 @@ angular.module('icgc.ui.trees', []).directive('pathwayTree', function($compile) 
         } else if (relation === 'self') {
           return element.text('');
         } else {
-          // FIXME: need to find out how to resolve unknowns
-          // return element.text('?');
           return element.text('U')
             .attr('data-tooltip', 'Unknown - Not possible to infer relation')
             .attr('class', 'goterm_unknown');

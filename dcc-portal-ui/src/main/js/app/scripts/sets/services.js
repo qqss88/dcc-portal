@@ -98,7 +98,7 @@
    * Abstracts CRUD operations on entity lists (gene, donor, mutation)
    */
   module.service('SetService',
-    function($window, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions) {
+    function($window, $location, Restangular, RestangularNoCache, API, localStorageService, toaster, Extensions, Page) {
 
     var LIST_ENTITY = 'entity';
     var _this = this;
@@ -116,12 +116,6 @@
       if (params.isTransient) {
         data.isTransient = params.isTransient;
       }
-
-      /*
-      data.name = encodeURIComponent(params.name);
-      if (angular.isDefined(params.description)) {
-        data.description = encodeURIComponent(params.description);
-      } */
 
       // Set default sort values if necessary
       if (angular.isDefined(params.filters) && !angular.isDefined(params.sortBy)) {
@@ -162,11 +156,28 @@
 
     };
 
+    this.createRepoLink = function(set) {
+      var filters = {};
+    	var type = 'file';
+      filters[type] = {};
+      filters[type][Extensions.ENTITY] = {is: [set.id]};
+      return '/repository/external/?filters=' + angular.toJson(filters);
+    };
+
 
 
     this.materialize = function(type, params) {
       var data = params2JSON(type, params);
       return Restangular.one('entityset').post('union', data, {}, {'Content-Type': 'application/json'});
+    };
+
+    /**
+    * We want to materialize a new set in a synchronous request.
+    */
+    this.materializeSync = function(type, params) {
+      var data = params2JSON(type, params);
+      return Restangular.one('entityset')
+        .customPOST(data, 'union', {async:false}, {'Content-Type': 'application/json'});
     };
 
 
@@ -206,15 +217,84 @@
 
       return promise;
     };
+    
+    this.addExternalSet = function(type, params) {
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset').one('external')
+        .post(undefined, data, {}, {'Content-Type': 'application/json'});
+
+      promise.then(function(data) {
+        if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+        }
+
+        // If flagged as transient, don't save to local storage
+        if (data.subtype === 'TRANSIENT') {
+          return;
+        }
+
+        data.type = data.type.toLowerCase();
+        //setList.splice(1, 0, data);
+        setList.unshift(data);
+        localStorageService.set(LIST_ENTITY, setList);
+        toaster.pop('', 'Saving ' + data.name,
+          'View in <a href="/analysis/sets">Data Analysis</a>', 4000, 'trustedHtml');
+      });
+
+      return promise;
+    };
+
+    this.createForwardSet = function(type, params, forwardUrl) {
+      Page.startWork();
+      params.name = 'Input Donor Set';
+      params.description = '';
+      params.sortBy = 'ssmAffectedGenes';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset')
+        .customPOST(data, undefined, {async:'false'}, {'Content-Type': 'application/json'});
+      promise.then(function(data) {
+        Page.stopWork();
+        if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+        } else {
+          var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
+          $location.path(forwardUrl).search('filters', newFilter);
+        }
+      });
+      return promise;
+    };
+
+    this.createForwardRepositorySet = function(type, params, forwardUrl) {
+      Page.startWork();
+      params.name = 'Input Donor Set';
+      params.description = '';
+      params.sortBy = 'fileName';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON(type, params);
+      promise = Restangular.one('entityset').one('external')
+      .post(undefined, data, {}, {'Content-Type': 'application/json'});
+      promise.then(function(data) {
+        Page.stopWork();
+        var newFilter = JSON.stringify({donor: {entitySetId: {is: [data.id]}}});
+        $location.path(forwardUrl).search('filters', newFilter);
+      });
+      return promise;
+    };
 
 
     /**
-    * params.union
-    * params.name
-    * params.description - optional
-    *
-    * Create a new set from the union of various subsets of the same type
-    */
+     * params.union
+     * params.name
+     * params.description - optional
+     *
+     * Create a new set from the union of various subsets of the same type
+     */
     this.addDerivedSet = function(type, params) {
       var promise = null;
       var data = params2JSON(type, params);
@@ -287,12 +367,14 @@
           set.advLink = '/search/' + set.type.charAt(0) + '?filters=' + JSON.stringify(filters);
         } else {
           set.advLink = '/search?filters=' + JSON.stringify(filters);
+          var fileFilters = {};
+          fileFilters.file = {};
+          fileFilters.file[Extensions.ENTITY] = {is: [set.id]};
+          set.repoLink = '/repository/external?filters=' + JSON.stringify(fileFilters);
         }
       });
     };
 
-
-    // FIXME: Add cached version
     this.getMetaData = function( ids ) {
       return RestangularNoCache.several('entityset/sets', ids).get('', {});
     };
@@ -408,4 +490,3 @@
   });
 
 })();
-

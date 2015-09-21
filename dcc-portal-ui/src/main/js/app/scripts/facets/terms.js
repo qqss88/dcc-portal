@@ -16,64 +16,55 @@
  */
 
 (function () {
-
   'use strict';
 
   var module = angular.module('icgc.facets.terms', ['icgc.facets.helpers']);
 
   module.controller('termsCtrl', function ($scope, $filter, Facets, HighchartsService, ProjectCache, ValueTranslator) {
-    function setActiveTerms() {
-      $scope.actives = Facets.getActiveTerms({
-        type: $scope.type,
-        facet: $scope.facetName,
-        terms: $scope.facet.terms
-      });
 
-      // Transltion on UI is slow, do in here
-      $scope.actives.forEach(function(term) {
-        term.label = ValueTranslator.translate(term.term, $scope.facetName);
-        if (term.term === '_missing' && $scope.missingText) {
-          term.label = $scope.missingText;
+    // Translation on UI is slow, do in here
+    function addTranslations (terms, facetName, missingText) {
+      var t = ValueTranslator;
+
+      terms.forEach (function (term) {
+        var termName = term.term;
+        term.label = t.translate (termName, facetName);
+
+        if (termName === '_missing' && missingText) {
+          term.label = missingText;
         }
 
-        if (_.contains(['projectId', 'projectCode'], $scope.facetName)) {
-          ProjectCache.getData().then(function(cache) {
-            term.tooltip = cache[term.term];
+        if (_.contains (['projectId', 'projectCode'], facetName)) {
+          ProjectCache.getData().then (function (cache) {
+            term.tooltip = cache [termName];
           });
-        } else  {
-          term.tooltip = ValueTranslator.tooltip(term.term, $scope.facetName);
-        }
-
-      });
-
-    }
-
-    function setInactiveTerms() {
-      $scope.inactives = Facets.getInactiveTerms({
-        actives: $scope.actives,
-        terms: $scope.facet.terms
-      });
-
-      // Transltion on UI is slow, do in here
-      $scope.inactives.forEach(function(term) {
-        term.label = ValueTranslator.translate(term.term, $scope.facetName);
-        if (term.term === '_missing' && $scope.missingText) {
-          term.label = $scope.missingText;
-        }
-
-        if (_.contains(['projectId', 'projectCode'], $scope.facetName) ) {
-          ProjectCache.getData().then(function(cache) {
-            term.tooltip = cache[term.term];
-          });
-        } else  {
-          term.tooltip = ValueTranslator.tooltip(term.term, $scope.facetName);
+        } else {
+          term.tooltip = t.tooltip (termName, facetName);
         }
       });
     }
 
     function splitTerms() {
-      setActiveTerms();
-      setInactiveTerms();
+      var facetName = $scope.facetName;
+      var terms = $scope.facet.terms;
+      var missingText = $scope.missingText;
+
+      var actives = Facets.getActiveTerms ({
+        type: $scope.type,
+        facet: facetName,
+        terms: terms
+      });
+
+      $scope.actives = actives;
+      addTranslations (actives, facetName, missingText);
+
+      var inactives = Facets.getInactiveTerms ({
+        actives: actives,
+        terms: terms
+      });
+
+      $scope.inactives = inactives;
+      addTranslations (inactives, facetName, missingText);
     }
 
     function refresh() {

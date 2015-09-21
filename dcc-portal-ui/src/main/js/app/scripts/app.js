@@ -60,6 +60,7 @@
     'icgc.releases',
     'icgc.keyword',
     'icgc.browser',
+    'icgc.donorlist',
     'icgc.genelist',
     'icgc.genesets',
     'icgc.visualization',
@@ -124,7 +125,7 @@
    * when only testing the user interface, or to debug production UI issues.
    */
   module.constant('API', {
-    BASE_URL: '/api/v1'
+    BASE_URL: '/api/v1' //'http://localhost:8080/api/v1'
   });
 
 

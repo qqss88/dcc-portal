@@ -15,12 +15,10 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 (function () {
-
   'use strict';
 
-  var module = angular.module('icgc.facets.current', []);
+  var module = angular.module ('icgc.facets.current', []);
 
   module.controller('currentCtrl',
     function ($scope, Facets, LocationService, FiltersUtil, Extensions, SetService, Page) {
@@ -28,6 +26,49 @@
     $scope.Page = Page;
     $scope.Facets = Facets;
     $scope.Extensions = Extensions;
+
+    var donorSetFiltersInRepositoryFile = [{
+      term: 'Uploaded donor set',
+      controlTerm: 'Uploaded donor set',
+      controlFacet: 'donorId',
+      controlType: 'file'
+    }, {
+      term: 'Input Donor Set',
+      controlTerm: 'Input Donor Set',
+      controlFacet: 'donorId',
+      controlType: 'file'
+    }];
+
+    /*
+     * This function determines the opening or closing for a human-readable JQL expression,
+     * displayed in UI (usually a top panel above a data table).
+     * The main conditions is the number of items in the 'terms' variable,
+     * with additional logic for special cases.
+     */
+    $scope.inPluralForm = function (terms) {
+      var filters = _.get (terms, 'is', []);
+
+      if (_.isEmpty (filters)) {return false;}
+      if (_.size (filters) > 1) {return true;}
+
+      var filter = _.first (filters);
+
+      /*
+       * This handles a special case for 'Uploaded Donor Set' in External Repository.
+       * In this scenario, we cannot compare the value of 'controlFacet' to Extensions.ENTITY,
+       * due to the transformation applied in adjustExternalFileFilters() of
+       * FiltersUtil service (/scripts/common/display.js). See comments in
+       * adjustExternalFileFilters() for more details.
+       * The strict comparison to elements in donorSetFiltersInRepositoryFile is for extra
+       * caution only, ensuring we only apply this when we're in External Repository page.
+       */
+      if (_.some (donorSetFiltersInRepositoryFile, function (o) {return _.isEqual (filter, o);})) {
+        return true;
+      }
+
+      return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY);
+    };
+
 
     function refresh() {
       var currentFilters = LocationService.filters();
@@ -40,26 +81,31 @@
       } else {
         $scope.filters = FiltersUtil.buildUIFilters(currentFilters, {});
       }
+
       //$scope.isActive = _.keys($scope.filters).length;
       $scope.isActive = _.keys(currentFilters).length;
     }
-
 
     /**
      * Proxy to Facets service, it does addtional handling of fields that behaves like
      * like facets but are structured in different ways
      */
-    $scope.removeFacet = function(type, facet) {
-
+    $scope.removeFacet = function (type, facet) {
       // Remove primary facet
       Facets.removeFacet({
         type: type,
         facet: facet
       });
 
-
       // Remove secondary facet - entity
       if (_.contains(['gene', 'donor', 'mutation'], type) === true && facet === 'id') {
+        Facets.removeFacet({
+          type: type,
+          facet: Extensions.ENTITY
+        });
+      }
+
+      if ('file' === type && facet === 'donorId') {
         Facets.removeFacet({
           type: type,
           facet: Extensions.ENTITY
@@ -80,14 +126,18 @@
      * Proxy to Facets service, it does addtional handling of fields that behaves like
      * like facets but are structured in different ways
      */
-    $scope.removeTerm = function(type, facet, term) {
-
+    $scope.removeTerm = function (type, facet, term) {
       if (type === 'gene' && facet === 'hasPathway') {
         Facets.removeFacet({
           type: type,
           facet: facet
         });
       } else {
+        if ('file' === type && 'donorId' === facet &&
+          _.endsWith ((term || '').toLowerCase(), ' donor set')) {
+          facet = Extensions.ENTITY;
+        }
+
         Facets.removeTerm({
           type: type,
           facet: facet,

@@ -191,10 +191,10 @@
       setIds.forEach(function(setId) {
         uiSeries.push({
           name: setMap[setId].name || setId,
-          // data: _.pluck(uiTable.map(function(row) { return row[setId]; }), 'percentage')
+
           data: uiTable.map(function(row) {
             return {
-              y: row[setId].percentage,
+              y: isNaN(row[setId].percentage) ? 0 : row[setId].percentage,
               count: row[setId].count
             };
           })

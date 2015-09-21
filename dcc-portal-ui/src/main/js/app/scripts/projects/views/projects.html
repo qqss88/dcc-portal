@@ -6,7 +6,7 @@
             <i class="icon-spinner icon-spin"></i>
         </div>
         <ul data-ng-show="ProjectsCtrl.projects.facets" class="t_facets">
-            <li data-tags-facet data-label="Project" data-facet-name="id" data-placeholder="eg. PACA-CA, Brain, TCGA"
+            <li data-tags-facet data-label="Project" data-facet-name="id" data-placeholder="e.g. PACA-CA, Brain, TCGA"
                 data-type="project"></li>
             <terms data-type="project" data-facet-name="primarySite" data-label="Primary Site"
                    data-facet="ProjectsCtrl.projects.facets.primarySite"></terms>
@@ -65,6 +65,6 @@
              data-ng-class="{active: ProjectsCtrl.state.isTab('history')}"
              data-ng-include="'scripts/projects/views/projects.history.html'">
       </div>
-    </section> 
+    </section>
 </div>
 </article>

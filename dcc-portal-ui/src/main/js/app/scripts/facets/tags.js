@@ -24,7 +24,6 @@
     function ($scope, $modal, Facets, LocationService, HighchartsService, FiltersUtil,
       Extensions, GeneSets, Genes, GeneSetNameLookupService, SetService ) {
 
-
     $scope.Extensions = Extensions;
 
     var _fetchNameForSelections = function ( selections ) {
@@ -36,6 +35,12 @@
           }
         });
       }
+    };
+
+    // This function is called by tags.html to prevent the File input box in
+    // External Repo File page from displaying the "Uploaded donor set" label.
+    $scope.shouldDisplayEntitySetId = function () {
+      return $scope.type !== 'file' && $scope.facetName !== 'id';
     };
 
     function setup() {
@@ -56,9 +61,10 @@
 
       // Fetch display names for entity lists
       $scope.entityIdMap = {};
+
       if ($scope.activeEntityIds.length > 0) {
-        SetService.getMetaData($scope.activeEntityIds).then(function(results) {
-          $scope.entityIdMap = SetService.lookupTable(results);
+        SetService.getMetaData ($scope.activeEntityIds).then (function (results) {
+          $scope.entityIdMap = SetService.lookupTable (results);
         });
       }
 
@@ -182,16 +188,19 @@
       });
     };
 
-
     /* Used for special cases where the relation is one-to-many instead of one-to-one */
     $scope.removeSpecificTerm = function(type, facet, term) {
+      // Special remapping for the 'Upload Donor Set' control in the External Repository File page.
+      if ('file-donor' === type && Extensions.ENTITY === facet) {
+        type = 'file';
+      }
+
       Facets.removeTerm({
         type: type,
         facet: facet,
         term: term
       });
     };
-
 
     $scope.removeFacet = function () {
       var type = $scope.proxyType? $scope.proxyType : $scope.type;
@@ -216,6 +225,13 @@
           facet: 'hasPathway'
         });
       }
+
+      if ('file' === type && facet === 'donorId') {
+        Facets.removeFacet({
+          type: type,
+          facet: Extensions.ENTITY
+        });
+      }
     };
 
 
@@ -227,6 +243,12 @@
       });
     };
 
+    $scope.uploadDonorSet = function() {
+      $modal.open({
+        templateUrl: '/scripts/donorlist/views/upload.html',
+        controller: 'DonorListController'
+      });
+    };
 
     // Needed if term removed from outside scope
     $scope.$watch(function () {
@@ -254,22 +276,32 @@
         proxyType: '@',
         proxyFacetName: '@'
       },
-      templateUrl: function(elem, attr) {
-        if (attr.type === 'gene') {
-          if (attr.facetName === 'id') {
-            return 'scripts/facets/views/genetags.html';
-          }
+      templateUrl: function (elem, attr) {
+        var path_ = function (s) {
+          return 'scripts/facets/views/' + s + '.html';
+        };
+        var type = attr.type;
+
+        if (type === 'go_term') {
+          return path_ ('gotags');
         }
-        if (attr.type === 'go_term') {
-          return 'scripts/facets/views/gotags.html';
+        if (type === 'pathway') {
+          return path_ ('pathwaytags');
         }
-        if (attr.type === 'pathway') {
-          return 'scripts/facets/views/pathwaytags.html';
+        if (type === 'curated_set') {
+          return path_ ('curatedtags');
         }
-        if (attr.type === 'curated_set') {
-          return 'scripts/facets/views/curatedtags.html';
+
+        var facetName = attr.facetName;
+
+        if (type === 'gene' && facetName === 'id') {
+          return path_ ('genetags');
         }
-        return 'scripts/facets/views/tags.html';
+        if (_.contains (['donor', 'file-donor'], type) && facetName === 'id') {
+          return path_ ('donorfacet');
+        }
+
+        return path_ ('tags');
       },
       controller: 'tagsFacetCtrl'
     };
