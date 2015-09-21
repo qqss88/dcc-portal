@@ -359,19 +359,20 @@
       return (! isEmptyObject (LocationService.filters()));
     }
 
-    _ctrl.labels = ['totalLiveDonorCount',
-                    'totalDonorCount',
-                    'ssmTestedDonorCount',
-                    'cnsmTestedDonorCount',
-                    'stsmTestedDonorCount',
-                    'sgvTestedDonorCount',
-                    'methArrayTestedDonorCount',
-                    'methSeqTestedDonorCount',
-                    'expArrayTestedDonorCount',
-                    'expSeqTestedDonorCount',
-                    'pexpTestedDonorCount',
-                    'mirnaSeqTestedDonorCount',
-                    'jcnTestedDonorCount'];
+    _ctrl.fieldKeys = [
+      'totalLiveDonorCount',
+      'totalDonorCount',
+      'ssmTestedDonorCount',
+      'cnsmTestedDonorCount',
+      'stsmTestedDonorCount',
+      'sgvTestedDonorCount',
+      'methArrayTestedDonorCount',
+      'methSeqTestedDonorCount',
+      'expArrayTestedDonorCount',
+      'expSeqTestedDonorCount',
+      'pexpTestedDonorCount',
+      'mirnaSeqTestedDonorCount',
+      'jcnTestedDonorCount'];
 
     var fieldMapping = {
       totalLiveDonorCount: {state: 'live'},
@@ -414,7 +415,7 @@
       });
     }
 
-    $scope.toAdvanceSearch = function (fieldKey, projectId) {
+    $scope.toAdvancedSearch = function (fieldKey, projectId) {
       var filter = {
         filters: toJson (buildFilter (fieldKey, projectId))
       };
@@ -513,7 +514,7 @@
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
 
-        _ctrl.totals = _.reduce (_ctrl.labels, function (result, fieldName) {
+        _ctrl.totals = _.reduce (_ctrl.fieldKeys, function (result, fieldName) {
           result [fieldName] = _.sum (data.hits, fieldName);
           return result;
         }, {});

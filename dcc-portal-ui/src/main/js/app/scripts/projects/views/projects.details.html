@@ -128,8 +128,8 @@
   <tr class="transition-fade"
     data-ng-repeat="project in ProjectsCtrl.projects.hits | orderBy:predicate:reverse track by project.id">
 
-    <td style="white-space: nowrap" ng-init="isPendingProject = project.state === 'pending'">
-      <a data-ui-sref="project ({id:project.id})">{{ project.id }}</a>
+    <td style="white-space: nowrap">
+      <a data-ui-sref="project ({id: project.id})">{{:: project.id }}</a>
     </td>
     <td>{{::project.name}}</td>
     <td>{{::project.primarySite}}</td>
@@ -140,10 +140,10 @@
         tooltip="{{ country }}" />
     </td>
 
-    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.labels">
+    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.fieldKeys">
       <linkable-number-cell
         the-number="project [fieldKey]"
-        sref="toAdvanceSearch (fieldKey, project.id)"
+        sref="toAdvancedSearch (fieldKey, project.id)"
         zero-text="--" />
     </td>
 
@@ -152,10 +152,10 @@
   <tr>
     <td colspan="4"><strong>Total</strong></td>
 
-    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.labels">
+    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.fieldKeys">
       <linkable-number-cell
         the-number="ProjectsCtrl.totals [fieldKey]"
-        sref="toAdvanceSearch (fieldKey)"
+        sref="toAdvancedSearch (fieldKey)"
         zero-text="0" />
     </td>
   </tr>
