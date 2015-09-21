@@ -98,7 +98,6 @@ import com.google.common.collect.Maps;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -185,7 +184,6 @@ public class DonorRepository implements Repository {
     return response;
   }
 
-  @SneakyThrows
   public List<PhenotypeResult> getPhenotypeAnalysisResult(@NonNull final Collection<UUID> entitySetIds) {
     // Here we eliminate duplicates and impose ordering (needed for reading the response items).
     val setIds = ImmutableSet.copyOf(entitySetIds).asList();
