@@ -87,6 +87,7 @@ import org.icgc.dcc.portal.model.Statistics;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.service.TermsLookupService.TermLookupType;
+import org.icgc.dcc.portal.util.ForwardingTermsFacet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -97,6 +98,7 @@ import com.google.common.collect.Maps;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -107,6 +109,9 @@ public class DonorRepository implements Repository {
 
   private static final Type TYPE = Type.DONOR;
   private static final Kind KIND = Kind.DONOR;
+
+  @NonNull
+  private final EntityListRepository entityListRepository;
 
   // These are the raw field names from the 'donor-text' type in the main index.
   public static final Map<String, String> DONOR_ID_SEARCH_FIELDS = transformToTextSearchFieldMap(
@@ -164,10 +169,12 @@ public class DonorRepository implements Repository {
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
   @Autowired
-  DonorRepository(Client client, IndexModel indexModel, QueryEngine queryEngine) {
+  DonorRepository(Client client, IndexModel indexModel, QueryEngine queryEngine,
+      EntityListRepository entityListRepository) {
     this.index = indexModel.getIndex();
     this.client = client;
     this.queryEngine = queryEngine;
+    this.entityListRepository = entityListRepository;
   }
 
   @Override
@@ -178,6 +185,7 @@ public class DonorRepository implements Repository {
     return response;
   }
 
+  @SneakyThrows
   public List<PhenotypeResult> getPhenotypeAnalysisResult(@NonNull final Collection<UUID> entitySetIds) {
     // Here we eliminate duplicates and impose ordering (needed for reading the response items).
     val setIds = ImmutableSet.copyOf(entitySetIds).asList();
@@ -203,14 +211,22 @@ public class DonorRepository implements Repository {
       val facetMap = facets.facetsAsMap();
       val entitySetId = setIds.get(i);
 
+      val entitySetCount = entityListRepository.find(entitySetId).getCount();
+
       // We go through the main Results map for each facet and build the inner list by populating it with instances of
       // EntitySetTermFacet.
       for (val facetKv : facetKeyValuePairs) {
         val facetName = facetKv.getKey();
-        val facet = facetMap.get(facetName);
+        Facet facet = facetMap.get(facetName);
+
+        // We want to include the number of missing donor documents in our final missing count
+        if (facet instanceof TermsFacet) {
+          val termsFacet = (TermsFacet) facet;
+          val realMissing = termsFacet.getMissingCount() + entitySetCount - termsFacet.getTotalCount();
+          facet = new CustomMissingTermsFacet(termsFacet, realMissing);
+        }
 
         if (!(facet instanceof TermsFacet)) continue;
-
         results.get(facetName).add(
             buildEntitySetTermFacet(entitySetId, (TermsFacet) facet, facetMap, facetKv.getValue()));
       }
@@ -548,6 +564,18 @@ public class DonorRepository implements Repository {
         .lowercaseMatchFields(newHashSet(fields))
         .build()
         .toMap();
+  }
+
+  public final class CustomMissingTermsFacet extends ForwardingTermsFacet {
+
+    @Getter
+    long missingCount;
+
+    public CustomMissingTermsFacet(TermsFacet delegate, long missingCount) {
+      super(delegate);
+      this.missingCount = missingCount;
+    }
+
   }
 
 }
