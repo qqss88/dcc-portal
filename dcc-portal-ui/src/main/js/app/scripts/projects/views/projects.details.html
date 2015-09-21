@@ -131,8 +131,8 @@
     <td style="white-space: nowrap">
       <a data-ui-sref="project ({id: project.id})">{{:: project.id }}</a>
     </td>
-    <td>{{::project.name}}</td>
-    <td>{{::project.primarySite}}</td>
+    <td>{{:: project.name }}</td>
+    <td>{{:: project.primarySite }}</td>
 
     <td style="text-align: center; vertical-align: middle;">
       <span ng-repeat="country in project.primaryCountries"
@@ -143,7 +143,7 @@
     <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.fieldKeys">
       <linkable-number-cell
         the-number="project [fieldKey]"
-        sref="toAdvancedSearch (fieldKey, project.id)"
+        sref="toAdvancedSearch (fieldKey, [project.id])"
         zero-text="--" />
     </td>
 
@@ -152,10 +152,10 @@
   <tr>
     <td colspan="4"><strong>Total</strong></td>
 
-    <td class="text-right" ng-repeat="fieldKey in ProjectsCtrl.fieldKeys">
+    <td class="text-right" ng-repeat="data in ProjectsCtrl.totals">
       <linkable-number-cell
-        the-number="ProjectsCtrl.totals [fieldKey]"
-        sref="toAdvancedSearch (fieldKey)"
+        the-number="data.total"
+        sref="data.sref"
         zero-text="0" />
     </td>
   </tr>

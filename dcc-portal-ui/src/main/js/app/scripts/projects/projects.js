@@ -390,22 +390,13 @@
       jcnTestedDonorCount: {datatype: 'jcn'}
     };
 
-    function buildFilter (fieldKey, projectId) {
-      var filter = _.clone (_.get (fieldMapping, fieldKey, {}));
-
-      if (_.isString (projectId)) {
-        _.assign (filter, {ids: projectId});
-      }
-
-      filter = _.mapValues (filter, function (s) {
-        return [s];
+    function buildFilter (fieldKey, projectIds) {
+      var filter = _.mapValues (_.clone (_.get (fieldMapping, fieldKey, {})), function (v) {
+        return [v];
       });
 
-      var needsToAddProjectIds = (! _.has (filter, 'ids')) && hasQueryFilter() &&
-        (! _.isEmpty (_ctrl.projectIds));
-
-      if (needsToAddProjectIds) {
-        _.assign (filter, {ids: _ctrl.projectIds});
+      if (_.isArray (projectIds) && (! _.isEmpty (projectIds))) {
+        _.assign (filter, {ids: projectIds});
       }
 
       return _.transform (filter, function (result, value, key) {
@@ -415,9 +406,9 @@
       });
     }
 
-    $scope.toAdvancedSearch = function (fieldKey, projectId) {
+    $scope.toAdvancedSearch = function (fieldKey, projectIds) {
       var filter = {
-        filters: toJson (buildFilter (fieldKey, projectId))
+        filters: toJson (buildFilter (fieldKey, projectIds))
       };
       return 'advanced (' + toJson (filter) + ')';
     };
@@ -514,10 +505,13 @@
           ssmTotalDonors += p.ssmTestedDonorCount;
         });
 
-        _ctrl.totals = _.reduce (_ctrl.fieldKeys, function (result, fieldName) {
-          result [fieldName] = _.sum (data.hits, fieldName);
-          return result;
-        }, {});
+        var totalRowProjectIds = hasQueryFilter() ? _ctrl.projectIds : undefined;
+        _ctrl.totals = _.map (_ctrl.fieldKeys, function (fieldKey) {
+          return {
+            total: _.sum (data.hits, fieldKey),
+            sref: $scope.toAdvancedSearch (fieldKey, totalRowProjectIds)
+          };
+        });
 
         _ctrl.totalDonors = totalDonors;
         _ctrl.ssmTotalDonors = ssmTotalDonors;
