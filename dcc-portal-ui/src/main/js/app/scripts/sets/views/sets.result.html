@@ -95,7 +95,7 @@
                                 <i class="icon-floppy" data-tooltip="Save as new set" data-ng-click="calculateUnion(); saveDerivedSet()"></i>
                                 <i class="icon-file" data-tooltip="Export" data-ng-click="export()"></i>
                             </span>
-                            <span class="t_tools__tool">
+                            <span class="t_tools__tool" data-ng-if="setType === 'donor'">
                               <i data-ng-if="downloadsEnabled" class="icon-download" data-tooltip="Download Donor Data" data-ng-click="downloadDerivedSet()"></i>
                               <i class="icon-database" data-tooltip="View in External Repository" data-ng-click="viewInExternal()"></i>
                             </span>
