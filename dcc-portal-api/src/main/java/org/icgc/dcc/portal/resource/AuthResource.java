@@ -7,6 +7,7 @@ import static javax.ws.rs.core.HttpHeaders.SET_COOKIE;
 import static javax.ws.rs.core.Response.status;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.util.AuthUtils.createSessionCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.deleteCookie;
 import static org.icgc.dcc.portal.util.AuthUtils.stringToUuid;
@@ -29,12 +30,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.common.client.api.ICGCEntityNotFoundException;
 import org.icgc.dcc.common.client.api.ICGCException;
 import org.icgc.dcc.common.client.api.daco.DACOClient.UserType;
@@ -49,11 +44,17 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Path("/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class AuthResource extends BaseResource {
 
   private static final String DACO_ACCESS_KEY = "daco";
@@ -210,6 +211,7 @@ public class AuthResource extends BaseResource {
   @POST
   @Path("/login")
   public Response login(Map<String, String> creds) {
+    checkRequest((creds.isEmpty() || !creds.containsKey(USERNAME_KEY)), "Null or empty argument");
     val username = creds.get(USERNAME_KEY);
     log.info("Logging into CUD as {}", username);
 

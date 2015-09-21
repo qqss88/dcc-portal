@@ -33,11 +33,6 @@ import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import java.util.Optional;
 import java.util.Stack;
 
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.es.ast.ExpressionNode;
 import org.dcc.portal.pql.es.ast.NestedNode;
 import org.dcc.portal.pql.es.ast.TerminalNode;
@@ -60,14 +55,21 @@ import org.dcc.portal.pql.es.ast.filter.TermsNode;
 import org.dcc.portal.pql.es.ast.query.QueryNode;
 import org.dcc.portal.pql.es.utils.Nodes;
 import org.dcc.portal.pql.es.utils.Visitors;
+import org.dcc.portal.pql.meta.Type;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.dcc.portal.pql.query.QueryContext;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.TermFilterBuilder;
 
 import com.google.common.collect.Lists;
+
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Visits {@link FilterNode} and builds FilterBuilders
@@ -197,7 +199,19 @@ public class FilterBuilderVisitor extends NodeVisitor<FilterBuilder, QueryContex
     checkOptional(context);
     val field = node.getField();
     log.debug("[visitMissing] Field: {}", field);
-    val result = missingFilter(field);
+    val missing = missingFilter(field);
+
+    FilterBuilder result;
+    // It is possible for genes to have no donors aside from a placeholder value.
+    // In order to exclude these genes from filters with donors, we require a check for this case.
+    // JIRA: DCC-3914 for more information.
+    if (context.get().getType() == Type.GENE_CENTRIC && field.startsWith("donor.")) {
+      result = new BoolFilterBuilder()
+          .must(missing)
+          .mustNot(new TermFilterBuilder("placeholder", true));
+    } else {
+      result = missing;
+    }
 
     return createNestedFilter(node, field, result, context.get().getTypeModel());
   }
