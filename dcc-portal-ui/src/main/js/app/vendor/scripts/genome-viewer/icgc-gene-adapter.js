@@ -150,34 +150,37 @@ IcgcGeneAdapter.prototype.getData = function (args) {
       jsonResponse = data;
 
     }
-    for (var i = 0; i < jsonResponse.length; i++) {
-      var feature = jsonResponse[i];
-      feature.transcripts = feature.transcripts || [];
-      feature.name = feature.externalName;
-      feature.id = feature.stableId;
-      delete feature.externalName;
-      delete feature.stableId;
-
-      for (var j = 0; j < feature.transcripts.length; j++) {
-        var transcript = feature.transcripts[j];
-        transcript.exons = transcript.exonToTranscripts;
-        transcript.name = transcript.externalName;
-        transcript.id = transcript.stableId;
-        transcript.geneId = feature.id;
-        transcript.genomicCodingEnd = transcript.codingRegionEnd;
-        transcript.genomicCodingStart = transcript.codingRegionStart;
-        delete transcript.exonToTranscripts;
-        delete transcript.externalName;
-        delete transcript.stableId;
-        delete transcript.codingRegionEnd;
-        delete transcript.codingRegionStart;
-        for (var k = 0; k < transcript.exons.length; k++) {
-          var exon = transcript.exons[k];
-          _.extend(exon, exon.exon);
-          delete exon.exon;
-          exon.id = exon.stableId;
-          exon.geneId = feature.id;
-          delete exon.stableId;
+    
+    if (typeof jsonResponse !== 'undefined') {
+      for (var i = 0; i < jsonResponse.length; i++) {
+        var feature = jsonResponse[i];
+        feature.transcripts = feature.transcripts || [];
+        feature.name = feature.externalName;
+        feature.id = feature.stableId;
+        delete feature.externalName;
+        delete feature.stableId;
+  
+        for (var j = 0; j < feature.transcripts.length; j++) {
+          var transcript = feature.transcripts[j];
+          transcript.exons = transcript.exonToTranscripts;
+          transcript.name = transcript.externalName;
+          transcript.id = transcript.stableId;
+          transcript.geneId = feature.id;
+          transcript.genomicCodingEnd = transcript.codingRegionEnd;
+          transcript.genomicCodingStart = transcript.codingRegionStart;
+          delete transcript.exonToTranscripts;
+          delete transcript.externalName;
+          delete transcript.stableId;
+          delete transcript.codingRegionEnd;
+          delete transcript.codingRegionStart;
+          for (var k = 0; k < transcript.exons.length; k++) {
+            var exon = transcript.exons[k];
+            _.extend(exon, exon.exon);
+            delete exon.exon;
+            exon.id = exon.stableId;
+            exon.geneId = feature.id;
+            delete exon.stableId;
+          }
         }
       }
     }
@@ -271,6 +274,10 @@ IcgcGeneAdapter.prototype._callWebService = function (segmentString, callback, p
     success: function (data) {
       var region = new Region(segmentString);
       callback(data, region);
+    },
+    error: function(e) {
+      var region = new Region(segmentString);
+      callback({}, region);
     }
   });
 };
