@@ -25,18 +25,18 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-
-import org.elasticsearch.common.collect.ImmutableList;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 
+import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.Responses;
 import com.sun.jersey.core.header.InBoundHeaders;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.WebApplication;
+
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
 
 @NoArgsConstructor(access = PRIVATE)
 public final class FilterUtils {
