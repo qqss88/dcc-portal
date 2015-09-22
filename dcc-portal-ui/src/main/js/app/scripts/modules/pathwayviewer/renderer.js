@@ -162,6 +162,14 @@
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
     var crossed = _.filter(nodes, function(n){return n.crossed === true;});
 
+    var pointMapToString = function(map) {
+      var val = '';
+      map.forEach(function (elem) {
+        val= val+elem.x+','+elem.y+' ';
+      });
+      return val;
+    };
+
     // Create a point map for the octagons
     var getPointsMap = function(x,y,w,h,a){
       var points = [{x:x+a,   y:y},
@@ -172,34 +180,21 @@
                     {x:x+a,   y:y+h},
                     {x:x,     y:y+h-a},
                     {x:x,     y:y+a}];
-      var val = '';
-      points.forEach(function (elem) {
-        val= val+elem.x+','+elem.y+' ';
-      });
-      return val;
+      return pointMapToString(points);
     };
     
     var getCrossMap = function(x,y,w,h){
-    var points = [{x:x, y:y},
-                  {x:x+w, y:y+h}];
-      var val = '';
-      points.forEach(function (elem) {
-        val= val+elem.x+','+elem.y+' ';
-      });
-      return val;
+      var points = [{x:x, y:y},
+                    {x:x+w, y:y+h}];
+      return pointMapToString(points);
     };
   
     var getReverseCrossMap = function(x,y,w,h){
       var points = [{x:x, y:y+h},
                     {x:x+w, y:y}];
-      var val = '';
-      points.forEach(function (elem) {
-        val= val+elem.x+','+elem.y+' ';
-      });
-      return val;
+      return pointMapToString(points);
     };
-
-
+    
     // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({

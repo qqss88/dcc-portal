@@ -18,10 +18,13 @@
     var nodes = this.nodes;
     
     // Find if there are any crossed out
-    var crossedComponents = [];
-    var crossedText = parsedXml.find('crossedComponents')[0].textContent;
-    crossedComponents = crossedComponents.concat(crossedText.split(','));
-
+    var crossedList = [];
+    var crossedComponents = parsedXml.find('crossedComponents');
+    if (typeof crossedComponents !== 'undefined' && typeof crossedComponents[0] !== 'undefined') {
+      var crossedText = crossedComponents[0].textContent;
+      crossedList = crossedList.concat(crossedText.split(','));
+    }
+    
     $(xmlNodes).each(function(){
       var attrs = this.attributes;
 
@@ -41,7 +44,7 @@
         },
         type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
-        crossed: (crossedComponents.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
+        crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {
