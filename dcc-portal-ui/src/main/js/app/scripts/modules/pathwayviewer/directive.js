@@ -56,7 +56,7 @@
         element.bind("mouseenter", function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');
-          }, 800);
+          }, 500);
         });
         
         element.bind("mouseleave", function() {
