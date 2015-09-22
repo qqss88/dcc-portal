@@ -160,6 +160,7 @@
     // Split into normal rectangles and octagons based on node type
     var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
+    var crossed = _.filter(nodes, function(n){return n.crossed === true;});
 
     // Create a point map for the octagons
     var getPointsMap = function(x,y,w,h,a){
@@ -177,6 +178,27 @@
       });
       return val;
     };
+    
+    var getCrossMap = function(x,y,w,h){
+    var points = [{x:x, y:y},
+                  {x:x+w, y:y+h}];
+      var val = '';
+      points.forEach(function (elem) {
+        val= val+elem.x+','+elem.y+' ';
+      });
+      return val;
+    };
+  
+    var getReverseCrossMap = function(x,y,w,h){
+      var points = [{x:x, y:y+h},
+                    {x:x+w, y:y}];
+      var val = '';
+      points.forEach(function (elem) {
+        val= val+elem.x+','+elem.y+' ';
+      });
+      return val;
+    };
+
 
     // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
@@ -255,6 +277,22 @@
         return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
           d.text.content+'</td></tr></table>';
       });
+
+      svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+        'class': 'CrossedNode',
+        'fill': 'none',
+        'stroke': 'red',
+        'stroke-width': '3',
+        'points': function(d) {return getCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+      });
+      
+      svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+        'class': 'CrossedNode',
+        'fill': 'none',
+        'stroke': 'red',
+        'stroke-width': '3',
+        'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+      });
     
     // if it's a gene, we have to add a sepcial array in the top right corner
     var genes =  _.where(nodes,{type : 'RenderableGene'});
@@ -283,12 +321,18 @@
     var isStartMarker = function(type){return _.contains(['FlowLine','RenderableInteraction'],type);};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
-      'class':function(d){return 'RenderableStroke reaction'+d.id+' '+d.type;},
+      'class':function(d){
+          var classes = 'RenderableStroke reaction'+d.id+' '+d.type;
+          if (d.failedReaction) {
+            classes += ' ' + 'failed-reaction';
+          }
+          return classes;
+        },
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':config.strokeColor//function(d){return d.color;}
+      'stroke':function(d){ return (d.failedReaction) ? 'red': config.strokeColor;}
     }).style({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?

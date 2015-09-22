@@ -4079,6 +4079,11 @@ td {
 }
 
 /* line 195, _modules/_pathwayviewer.scss */
+.failed-reaction {
+  stroke-width: 2px;
+}
+
+/* line 199, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4097,7 +4102,7 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 213, _modules/_pathwayviewer.scss */
+/* line 217, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
@@ -4108,7 +4113,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 223, _modules/_pathwayviewer.scss */
+/* line 227, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }
