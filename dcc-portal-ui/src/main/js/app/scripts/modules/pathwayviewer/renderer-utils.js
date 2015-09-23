@@ -192,7 +192,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway'];
+    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway', 'Failed-Reaction'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -202,7 +202,15 @@
         marked: true,
         marker: elem+'-legend',
         color: 'black',
-        id: elem==='Sub-Pathway'?'-sub-example':'fake',
+        id: (function(elem) {
+          if (elem==='Sub-Pathway') {
+            return '-sub-example';
+          } else if (elem==='Failed-Reaction') {
+            return '-failed-example';
+          } else {
+            return 'fake';
+          }
+        })(elem),
         type: elem==='Link'?'entitysetandmemberlink':'fake'
       });
       svg.append('foreignObject').attr({
@@ -222,7 +230,7 @@
     return lines;
   };
   
-   /*
+ /*
   * Create a list of reaction lines for legend
   */
   RendererUtils.prototype.getLegendLabels = function (marginLeft,marginTop,svg) {

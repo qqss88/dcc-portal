@@ -198,6 +198,8 @@
     legendSvg.selectAll('.reaction-sub-example')
           .attr('stroke',config.subPathwayColor)
           .classed('pathway-sub-reaction-line',true);
+    legendSvg.selectAll('.reaction-failed-example')
+          .classed('failed-reaction',true);
   };
 
   /**

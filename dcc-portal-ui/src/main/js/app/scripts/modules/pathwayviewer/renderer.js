@@ -327,7 +327,7 @@
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':function(d){ return (d.failedReaction) ? 'red': config.strokeColor;}
+      'stroke': config.strokeColor
     }).style({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
