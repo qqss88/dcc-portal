@@ -189,11 +189,11 @@
     var nodes = rendererUtils.getLegendNodes(20,0,legendSvg);
     
     legendRenderer.renderNodes(nodes);
-    legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.34,legendSvg));
-    legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.64,legendSvg),true);
+    legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.38,legendSvg));
+    legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.68,legendSvg),true);
     legendRenderer.highlightEntity(
       [{id:'Mutated',value:99}],
-      {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
+      {getNodesByReactomeId:function (){return [nodes[nodes.length-2]];}
     });
     legendSvg.selectAll('.reaction-sub-example')
           .attr('stroke',config.subPathwayColor)

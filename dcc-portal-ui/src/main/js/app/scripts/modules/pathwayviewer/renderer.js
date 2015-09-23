@@ -226,6 +226,8 @@
           return 0;
         case 'RenderableChemical':
           return d.size.width / 2;
+        case 'RenderableFailed':
+          return d.size.width / 2;
         default:
           return 3;
         }
@@ -237,6 +239,8 @@
         case 'RenderableEntity':
           return 0;
         case 'RenderableChemical':
+          return d.size.width / 2;
+        case 'RenderableFailed':
           return d.size.width / 2;
         default:
           return 3;
