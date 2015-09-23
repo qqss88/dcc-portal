@@ -4085,6 +4085,18 @@ td {
 }
 
 /* line 200, _modules/_pathwayviewer.scss */
+.lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
+  background-color: #b5f9a7;
+  border: 2px dotted red;
+}
+
+/* line 205, _modules/_pathwayviewer.scss */
+.lof-RenderableComplex, .lof-RenderableEntitySet {
+  background-color: #b6e2ff;
+  border: 2px dotted red;
+}
+
+/* line 210, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4103,7 +4115,7 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 218, _modules/_pathwayviewer.scss */
+/* line 228, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
@@ -4114,7 +4126,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 228, _modules/_pathwayviewer.scss */
+/* line 238, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }

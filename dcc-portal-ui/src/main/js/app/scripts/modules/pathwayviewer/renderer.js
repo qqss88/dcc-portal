@@ -273,8 +273,14 @@
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')
       .html(function(d){
-        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-          d.text.content+'</td></tr></table>';
+        if (d.lof) {
+          var lofClass = 'lof-'+ d.type;
+          return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr><td valign="middle">'+
+            d.text.content+'</td></tr></table>';
+        } else {
+          return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+            d.text.content+'</td></tr></table>';
+        }
       });
 
       svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({

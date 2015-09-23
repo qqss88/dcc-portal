@@ -25,6 +25,14 @@
       crossedList = crossedList.concat(crossedText.split(','));
     }
     
+    // Find if there are any loss of function nodes
+    var lofList = [];
+    var lofNodes = parsedXml.find('lofNodes');
+    if (typeof lofNodes !== 'undefined' && typeof lofNodes[0] !== 'undefined') {
+      var lofText = lofNodes[0].textContent;
+      lofList = lofList.concat(lofText.split(','));
+    }
+    
     $(xmlNodes).each(function(){
       var attrs = this.attributes;
 
@@ -45,6 +53,7 @@
         type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
         crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
+        lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {

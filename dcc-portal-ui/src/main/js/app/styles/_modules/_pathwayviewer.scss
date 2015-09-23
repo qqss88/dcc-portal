@@ -197,6 +197,16 @@ $compartmentBorder:#ffc38b;
   stroke-width: 2px;
 }
 
+.lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode{
+  background-color:$primaryNodeColor;
+  border: 2px dotted red;
+}
+
+.lof-RenderableComplex, .lof-RenderableEntitySet{
+  background-color:$secondaryNodeColor;
+  border: 2px dotted red;
+}
+
 .pathway-fullscreen-controller {
   position:absolute;
   left: 0;
