@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
+/** DEPRECATED **/
 
 function IcgcGeneAdapter(args) {
 

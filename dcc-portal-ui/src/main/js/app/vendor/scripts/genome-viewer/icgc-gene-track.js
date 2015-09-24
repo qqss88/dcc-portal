@@ -19,6 +19,8 @@
  * along with JS Common Libs. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** DEPRECATED **/
+
 'use strict';
 
 IcgcGeneTrack.prototype = new Track({});
