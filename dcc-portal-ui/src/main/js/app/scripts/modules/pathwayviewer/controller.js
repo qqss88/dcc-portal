@@ -193,7 +193,7 @@
     legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(25,h*0.68,legendSvg),true);
     legendRenderer.highlightEntity(
       [{id:'Mutated',value:99}],
-      {getNodesByReactomeId:function (){return [nodes[nodes.length-2]];}
+      {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
     });
     legendSvg.selectAll('.reaction-sub-example')
           .attr('stroke',config.subPathwayColor)

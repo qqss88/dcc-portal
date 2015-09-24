@@ -155,9 +155,10 @@
     var nodes = [];
     var mutatedNodeText = 'Mutated Gene(s)';
     var failedText = 'Failed Reaction';
+    var lofText = "LossOfFunction";
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',mutatedNodeText, failedText];
-    for(var i=0;i<types.length - 1;i++){
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText, lofText, mutatedNodeText];
+    for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
       var type = types[i];
@@ -165,26 +166,24 @@
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
-        type:type==='ProcessNode'?type:'Renderable'+type,
+        type:(function(type) {
+          if (type==='ProcessNode') {
+            return type;
+          } else if (type===failedText) {
+            return 'RenderableFailed';
+          } else if (type===lofText) {
+            return 'RenderableEntitySet';
+          } else {
+            return 'Renderable'+type;
+          }
+        })(type),
         id:type===mutatedNodeText?'mutated':'fake',
-        crossed:false,
+        crossed:type===failedText?true:false,
+        lof:type===lofText?true:false,
         reactomeId:type===mutatedNodeText?'mutated':'fake',
         text:{content:type,position:{x:x,y:y}}
       });
     }
-    
-    // Do failed node last on a new row
-    type = types[types.length-1];
-    var yLast = Math.ceil(i/2)*40 + marginTop + 5*Math.ceil(i/2);
-    nodes.push({
-        position:{x:x,y:yLast},
-        size:{width:90,height:30},
-        type:'RenderableFailed',
-        id:type===mutatedNodeText?'mutated':'fake',
-        crossed:type===failedText?true:false,
-        reactomeId:type===mutatedNodeText?'mutated':'fake',
-        text:{content:type,position:{x:x,y:yLast}}
-      });
     
     // Add extra comment for mutated gene node to show what the value in the corner means
     svg.append('foreignObject').attr({
@@ -207,7 +206,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway', 'Disease-Pathway'];
+    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway', 'Disease-Associated'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -220,7 +219,7 @@
         id: (function(elem) {
           if (elem==='Sub-Pathway') {
             return '-sub-example';
-          } else if (elem==='Disease-Pathway') {
+          } else if (elem==='Disease-Associated') {
             return '-failed-example';
           } else {
             return 'fake';
@@ -231,7 +230,7 @@
       svg.append('foreignObject').attr({
         x: marginLeft+80,
         y:y-15,
-        width:100,
+        width:105,
         height:30,
         'fill':'none'
       }).append('xhtml:body')
