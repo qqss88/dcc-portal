@@ -25,7 +25,6 @@
       var overlaidText = overlaidComponents[0].textContent;
       overlaidList = overlaidList.concat(overlaidText.split(','));
       overlaid = true;
-      console.log('We have an overlay');
     }
     
     // Find if there are any crossed out
