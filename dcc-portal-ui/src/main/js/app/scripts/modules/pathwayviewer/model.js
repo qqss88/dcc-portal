@@ -17,6 +17,17 @@
     var xmlNodes = parsedXml.find('Nodes')[0].children;
     var nodes = this.nodes;
     
+    // Check if there will be an overlay
+    var overlaidList = [];
+    var overlaid = false;
+    var overlaidComponents = parsedXml.find('overlaidComponents');
+    if (typeof overlaidComponents !== 'undefined' && typeof overlaidComponents[0] !== 'undefined') {
+      var overlaidText = overlaidComponents[0].textContent;
+      overlaidList = overlaidList.concat(overlaidText.split(','));
+      overlaid = true;
+      console.log('We have an overlay');
+    }
+    
     // Find if there are any crossed out
     var crossedList = [];
     var crossedComponents = parsedXml.find('crossedComponents');
@@ -54,6 +65,7 @@
         id: attrs.id.nodeValue,
         crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
         lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
+        grayed: (overlaid && (overlaidList.indexOf(attrs.id.nodeValue) < 0)) ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {

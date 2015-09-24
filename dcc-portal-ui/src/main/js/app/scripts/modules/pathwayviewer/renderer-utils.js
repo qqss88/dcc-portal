@@ -180,6 +180,7 @@
         id:type===mutatedNodeText?'mutated':'fake',
         crossed:type===failedText?true:false,
         lof:type===lofText?true:false,
+        grayed: false,
         reactomeId:type===mutatedNodeText?'mutated':'fake',
         text:{content:type,position:{x:x,y:y}}
       });

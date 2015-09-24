@@ -68,6 +68,14 @@
       refX: '0',
       viewBox:'0 -6 2 11'
     };
+    
+    // Provides the grayscale filter in case of disease pathways
+    svg.append('svg:defs').append('svg:filter').attr({
+      id: 'grayscale'
+    }).append('feColorMatrix').attr({
+      type: 'matrix',
+      values: '0.6666 0.3333 0.3333 0 0 0.3333 0.6666 0.3333 0 0 0.3333 0.3333 0.6666 0 0 0 0 0 1 0'
+    });
    
     markers.forEach(function (elem) {
       var def;
@@ -198,11 +206,18 @@
     // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
-        class: function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
-        points: function (d) {
+        'class': function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
+        'filter': function (d) {
+          if (d.grayed) {
+            return 'url('+config.urlPath+'#grayscale)';
+          } else {
+            return '';
+          }
+        },
+        'points': function (d) {
           return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
         },
-        stroke: 'Red',
+        'stroke': 'Red',
         'stroke-width': 1
       }).on('mouseover', function (d) {
         d.oldColor = d3.rgb(d3.select(this).style('fill'));
@@ -214,6 +229,13 @@
     // Render all other normal rectangular nodes after octagons
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
+      'filter': function (d) {
+        if (d.grayed) {
+          return 'url('+config.urlPath+'#grayscale)';
+        } else {
+          return '';
+        }
+      },
       'x': function (d) {return d.position.x;},
       'y': function (d) {return d.position.y;},
       'width': function (d) {return d.size.width;},
@@ -287,7 +309,7 @@
         'class': 'CrossedNode',
         'fill': 'none',
         'stroke': 'red',
-        'stroke-width': '3',
+        'stroke-width': '2',
         'points': function(d) {return getCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
       });
       
@@ -295,7 +317,7 @@
         'class': 'CrossedNode',
         'fill': 'none',
         'stroke': 'red',
-        'stroke-width': '3',
+        'stroke-width': '2',
         'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
       });
     
