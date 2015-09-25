@@ -68,15 +68,8 @@
       refX: '0',
       viewBox:'0 -6 2 11'
     };
-    
-    // Provides the grayscale filter in case of disease pathways
-    svg.append('svg:defs').append('svg:filter').attr({
-      id: 'grayscale'
-    }).append('feColorMatrix').attr({
-      type: 'matrix',
-      values: '0.6666 0.3333 0.3333 0 0 0.3333 0.6666 0.3333 0 0 0.3333 0.3333 0.6666 0 0 0 0 0 1 0'
-    });
    
+    var defs = svg.append('svg:defs');
     markers.forEach(function (elem) {
       var def;
       if(isCircular(elem)){
@@ -96,7 +89,7 @@
         color = 'black';
       }
       
-      svg.append('svg:defs').append('svg:marker')
+      defs.append('svg:marker')
         .attr({
           'id': elem,
           'viewBox': def.viewBox,
@@ -112,7 +105,7 @@
       if(isBaseMarker(elem)){
         color = config.subPathwayColor;
         
-        svg.append('svg:defs').append('svg:marker')
+        defs.append('svg:marker')
           .attr({
             'id': elem+'-subpathway',
             'viewBox': def.viewBox,
@@ -209,7 +202,7 @@
         'class': function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
         'filter': function (d) {
           if (d.grayed) {
-            return 'url('+config.urlPath+'#grayscale)';
+            return 'url(\'/scripts/modules/pathwayviewer/dependencies.svg#grayscale\')';
           } else {
             return '';
           }
@@ -231,7 +224,7 @@
       'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
       'filter': function (d) {
         if (d.grayed) {
-          return 'url('+config.urlPath+'#grayscale)';
+          return 'url(\'/scripts/modules/pathwayviewer/dependencies.svg#grayscale\')';
         } else {
           return '';
         }
