@@ -154,7 +154,7 @@
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop, svg){
     var nodes = [];
     var mutatedNodeText = 'Mutated Gene(s)';
-    var failedText = 'Failed Reaction';
+    var failedText = 'Failed Output';
     var lofText = "LossOfFunction";
     var x = marginLeft, y= marginTop;
     var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText, lofText, mutatedNodeText];
@@ -207,7 +207,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway', 'Disease-Associated'];
+    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Disease-Associated'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -218,9 +218,7 @@
         marker: elem+'-legend',
         color: 'black',
         id: (function(elem) {
-          if (elem==='Sub-Pathway') {
-            return '-sub-example';
-          } else if (elem==='Disease-Associated') {
+          if (elem==='Disease-Associated') {
             return '-failed-example';
           } else {
             return 'fake';
