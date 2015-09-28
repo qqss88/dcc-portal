@@ -70,6 +70,15 @@
     };
    
     var defs = svg.append('svg:defs');
+    
+    // Provides the grayscale filter in case of disease pathways		
+    defs.append('svg:filter').attr({		
+      id: 'grayscale'		
+    }).append('feColorMatrix').attr({		
+      type: 'matrix',		
+      values: '0.4666 0.3333 0.3333 0 0 0.3333 0.4666 0.3333 0 0 0.3333 0.3333 0.4666 0 0 0 0 0 1 0'		
+    });
+    
     markers.forEach(function (elem) {
       var def;
       if(isCircular(elem)){
@@ -202,7 +211,7 @@
         'class': function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
         'filter': function (d) {
           if (d.grayed) {
-            return 'url(\'/scripts/modules/pathwayviewer/dependencies.svg#grayscale\')';
+            return 'url(\''+config.urlPath+'#grayscale\')';
           } else {
             return '';
           }
@@ -224,7 +233,7 @@
       'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
       'filter': function (d) {
         if (d.grayed) {
-          return 'url(\'/scripts/modules/pathwayviewer/dependencies.svg#grayscale\')';
+          return 'url(\''+config.urlPath+'#grayscale\')';
         } else {
           return '';
         }
@@ -324,7 +333,7 @@
       'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
       'y2':function(d){return (+d.position.y) + 1;},
     }).attr('stroke','black')
-      .style('marker-end','url('+config.urlPath+'#GeneArrow)');
+      .attr('marker-end','url('+config.urlPath+'#GeneArrow)');
     
   };
 
@@ -353,7 +362,7 @@
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
       'stroke': config.strokeColor
-    }).style({
+    }).attr({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
           'url('+config.urlPath+'#'+d.marker+')':'';

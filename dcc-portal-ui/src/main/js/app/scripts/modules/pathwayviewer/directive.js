@@ -231,6 +231,42 @@
             document.addEventListener('fullscreenchange', fullScreenHandler);
         }
         
+        var fixFilters = function () {
+          if (this.hasAttribute("filter") && this.getAttribute("filter")!== false) {
+            if (this.getAttribute("filter").split("#").length > 1) {
+              var svgId = this.getAttribute("filter").split("#")[1].split("'")[0];
+              var newPath = window.location.pathname + window.location.search;
+              var newFilter = "url('" + newPath + "#" + svgId + "')";
+        
+              this.setAttribute('filter', newFilter);
+            }
+          }
+        };
+        
+        var fixMarkers = function () {
+          var svgId, newPath, newMarker;
+          
+          if (this.hasAttribute("marker-end") && this.getAttribute("marker-end")!== false) {
+            if (this.getAttribute("marker-end").split("#").length > 1) {
+              svgId = this.getAttribute("marker-end").split("#")[1];
+              newPath = window.location.pathname + window.location.search;
+              newMarker = "url(" + newPath + "#" + svgId;
+        
+              this.setAttribute('marker-end', newMarker);
+            }
+          }
+          
+          if (this.hasAttribute("marker-start") && this.getAttribute("marker-end")!== false) {
+            if (this.getAttribute("marker-start").split("#").length > 1) {
+              svgId = this.getAttribute("marker-start").split("#")[1];
+              newPath = window.location.pathname + window.location.search;
+              newMarker = "url(" + newPath + "#" + svgId;
+        
+              this.setAttribute('marker-start', newMarker);
+            }
+          }
+        };
+        
         var handleRender = function(){
           if(!xml || !zoomedOn){
             return;
@@ -260,6 +296,13 @@
         $scope.$watch('highlights', function (newValue) {
           highlights = newValue;
           handleRender();
+        });
+        
+        // Needed to fix url paths for SVGs on url change due to <base> tag required by angular
+        $scope.$on('$locationChangeSuccess', function() {
+          jQuery('rect').map(fixFilters);
+          jQuery('polygon').map(fixFilters);
+          jQuery('line').map(fixMarkers);
         });
         
         $scope.$on('$destroy', function () {
