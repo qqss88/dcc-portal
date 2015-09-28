@@ -28,25 +28,7 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+ 
-        '<i class="fa fa-expand pathway-fullscreen-controller"></i>' +
-        '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
-        '<h4>LEGEND</h4></div>'+
-        '<div class="pathway-info">'+
-        '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>'+
-          '<div class="pathway-info-content">'+
-          '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
-            '<tr>'+
-                '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header"># ICGC Mutations</th>' +
-            '</tr>'+
-            '<tr data-ng-repeat="gene in geneList">' +
-              '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
-              '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
-            '</tr></table>' +
-        '</div></div>'+
-        '</div>',
+      templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
       link: function ($scope, element) {
         var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
@@ -130,6 +112,7 @@
             // Reset data
             $scope.geneList = [];
             $scope.entityType = typeMap[d.type];
+            $scope.subPathwayId = d.reactomeId;
             
             hideLegend();
             showInfo();
