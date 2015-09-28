@@ -285,6 +285,22 @@
       d3.select(this).style('fill', d.oldColor);
     }).on('click',config.onClick);
     
+    svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+      'class': 'CrossedNode',
+      'fill': 'none',
+      'stroke': 'red',
+      'stroke-width': '2',
+      'points': function(d) {return getCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+    });
+    
+    svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+      'class': 'CrossedNode',
+      'fill': 'none',
+      'stroke': 'red',
+      'stroke-width': '2',
+      'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+    });
+    
     // Add a foreignObject to contain all text so that warpping is done for us
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableText';},
@@ -305,22 +321,6 @@
           return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
             d.text.content+'</td></tr></table>';
         }
-      });
-
-      svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
-        'class': 'CrossedNode',
-        'fill': 'none',
-        'stroke': 'red',
-        'stroke-width': '2',
-        'points': function(d) {return getCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
-      });
-      
-      svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
-        'class': 'CrossedNode',
-        'fill': 'none',
-        'stroke': 'red',
-        'stroke-width': '2',
-        'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
       });
     
     // if it's a gene, we have to add a sepcial array in the top right corner
