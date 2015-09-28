@@ -195,9 +195,6 @@
       [{id:'Mutated',value:99}],
       {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
     });
-    legendSvg.selectAll('.reaction-sub-example')
-          .attr('stroke',config.subPathwayColor)
-          .classed('pathway-sub-reaction-line',true);
     legendSvg.selectAll('.reaction-failed-example')
           .classed('failed-reaction',true);
   };

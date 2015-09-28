@@ -79,7 +79,7 @@
     };
 
     // Generate a line based on the type of reaction & node using human-curated points
-    var getNodeLines = function (reaction, node, reactionId,reactionClass, failed) {
+    var getNodeLines = function (reaction, node, reactionId, reactionClass, failed) {
       var count = {inputs:0,outputs:0};
       if(!node.base || node.base.length === 0){
         return 'missing';
@@ -90,29 +90,29 @@
       case 'Input':
         base.push(reaction.base[0]);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'red', 'Input',reactionId,reactionClass, failed);
+        generateLine(base, 'red', 'Input', reactionId, reactionClass, failed);
         count.inputs = count.inputs + 1;
         break;
       case 'Output':
         base.push(reaction.center);
         base.reverse(); // Make sure output points at the output
-        generateLine(base, 'green', 'Output',reactionId,reactionClass, failed);
+        generateLine(base, 'green', 'Output', reactionId,reactionClass, failed);
         count.outputs = count.outputs + 1;
         break;
       case 'Activator':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'blue', 'Activator',reactionId,reactionClass, failed);
+        generateLine(base, 'blue', 'Activator', reactionId, reactionClass, failed);
         break;
       case 'Catalyst':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'purple', 'Catalyst',reactionId,reactionClass, failed);
+        generateLine(base, 'purple', 'Catalyst', reactionId, reactionClass, failed);
         break;
       case 'Inhibitor':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'orange', 'Inhibitor',reactionId,reactionClass ,failed);
+        generateLine(base, 'orange', 'Inhibitor', reactionId, reactionClass, failed);
         break;
       }
 
@@ -124,7 +124,7 @@
       var addedTypes = [];
 
       reaction.nodes.forEach(function (node) {
-        addedTypes.push(getNodeLines(reaction,node,id,reaction.class,reaction.failedReaction));
+        addedTypes.push(getNodeLines(reaction, node, id, reaction.class, reaction.failedReaction));
       });
       
       var hasInputs = _.contains(addedTypes,'Input');
@@ -142,7 +142,7 @@
       // This creates a base reaction line
       generateLine(baseLine,
                    hasOutputs ?'black':'navy',
-                   hasOutputs ?reaction.type:'Output',id,reaction.class, reaction.failedReaction);
+                   hasOutputs ?reaction.type:'Output', id, reaction.class, reaction.failedReaction);
     });
 
     return lines;
@@ -157,7 +157,7 @@
     var failedText = 'Failed Output';
     var lofText = "LossOfFunction";
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText, lofText, mutatedNodeText];
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText,lofText,mutatedNodeText];
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
