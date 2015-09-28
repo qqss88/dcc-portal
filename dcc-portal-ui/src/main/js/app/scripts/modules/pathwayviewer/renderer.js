@@ -211,7 +211,7 @@
         'class': function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
         'filter': function (d) {
           if (d.grayed) {
-            return 'url(\''+config.urlPath+'#grayscale\')';
+            return (typeof config.urlPath==='undefined') ? '' : 'url(\''+config.urlPath+'#grayscale\')';
           } else {
             return '';
           }
@@ -233,7 +233,7 @@
       'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
       'filter': function (d) {
         if (d.grayed) {
-          return 'url(\''+config.urlPath+'#grayscale\')';
+          return (typeof config.urlPath==='undefined') ? '' : 'url(\''+config.urlPath+'#grayscale\')';
         } else {
           return '';
         }
