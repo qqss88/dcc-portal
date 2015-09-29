@@ -4097,6 +4097,11 @@ td {
 }
 
 /* line 210, _modules/_pathwayviewer.scss */
+.lof-cell {
+  padding: 0px;
+}
+
+/* line 214, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4115,7 +4120,7 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 228, _modules/_pathwayviewer.scss */
+/* line 232, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
@@ -4126,7 +4131,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 238, _modules/_pathwayviewer.scss */
+/* line 242, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }

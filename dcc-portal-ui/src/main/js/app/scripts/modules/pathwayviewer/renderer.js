@@ -315,7 +315,8 @@
       .html(function(d){
         if (d.lof) {
           var lofClass = 'lof-'+ d.type;
-          return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr><td valign="middle">'+
+          return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr>' + 
+            '<td class="RenderableNodeTextCell lof-cell" valign="middle">'+
             d.text.content+'</td></tr></table>';
         } else {
           return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
