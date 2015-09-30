@@ -22,7 +22,6 @@ import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
-import static org.elasticsearch.search.facet.FacetBuilders.histogramFacet;
 
 import java.util.List;
 
@@ -30,6 +29,9 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +39,9 @@ import org.springframework.stereotype.Component;
 
 import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class BrowserRepository {
 
@@ -88,6 +92,7 @@ public class BrowserRepository {
         .setFrom(0)
         .setSize(MUTATION_SIZE);
 
+    log.debug("Browser Mutation Request", request);
     return request.execute().actionGet();
   }
 
@@ -115,47 +120,48 @@ public class BrowserRepository {
       request.setFetchSource("transcripts", null);
     }
 
+    log.debug("Browser Gene Request", request);
     return request.execute().actionGet();
   }
 
-  @SuppressWarnings("deprecation")
   public SearchResponse getGeneHistogram(Long interval, String segmentId, Long start, Long stop,
       List<String> biotypes) {
     val filter = getGeneFilter(segmentId, start, stop, biotypes);
 
-    val histogramFacet = histogramFacet("hf")
-        .facetFilter(filter)
+    val histogramAggs = AggregationBuilders.histogram("hf")
         .field("start")
         .interval(interval);
 
+    val query = QueryBuilders.filteredQuery(new MatchAllQueryBuilder(), filter);
     val request = client.prepareSearch(indexName)
         .setTypes(GENE)
         .setSearchType(QUERY_AND_FETCH)
-        .setPostFilter(filter)
-        .addFacet(histogramFacet)
+        .setQuery(query)
+        .addAggregation(histogramAggs)
         .setSize(0);
 
+    log.info("Browser Gene Histogram Request", request);
     return request.execute().actionGet();
   }
 
-  @SuppressWarnings("deprecation")
   public SearchResponse getMutationHistogram(Long interval, String segmentId, Long start, Long stop,
       List<String> consequenceTypes, List<String> projectFilters) {
     val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters);
 
-    val histogramFacet = histogramFacet("hf")
-        .facetFilter(filter)
+    val histogramAggs = AggregationBuilders.histogram("hf")
         .field("chromosome_start")
         .interval(interval);
 
+    val query = QueryBuilders.filteredQuery(new MatchAllQueryBuilder(), filter);
     val request = client.prepareSearch(indexName)
         .setTypes(MUTATION)
         .setSearchType(QUERY_AND_FETCH)
-        .setPostFilter(filter)
-        .addFacet(histogramFacet)
+        .setQuery(query)
+        .addAggregation(histogramAggs)
         .setFrom(0)
         .setSize(0);
 
+    log.debug("Browser Mutation Histogram Request", request);
     return request.execute().actionGet();
   }
 
@@ -249,5 +255,4 @@ public class BrowserRepository {
 
     return projectFilter;
   }
-
 }

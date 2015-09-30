@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.facet.histogram.HistogramFacet;
-import org.elasticsearch.search.facet.histogram.HistogramFacet.Entry;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram.Bucket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -109,16 +109,16 @@ public final class BrowserParsers {
    */
   public static List<Object> parseHistogramMutation(String segmentId, Long start, Long stop, Long interval,
       List<String> consequenceTypes, List<String> projectFilters, SearchResponse searchResponse) {
-    val histogram = (HistogramFacet) searchResponse.getFacets().facetsAsMap().get("hf");
+    val histogramAggs = (Histogram) searchResponse.getAggregations().get("hf");
 
     // Find max and index entries by start
     long highestAbsolute = 0l;
-    Map<Long, HistogramFacet.Entry> entries = newHashMap();
-    for (val entry : histogram.getEntries()) {
-      entries.put(entry.getKey(), entry);
+    Map<String, Histogram.Bucket> buckets = newHashMap();
+    for (val bucket : histogramAggs.getBuckets()) {
+      buckets.put(bucket.getKey(), bucket);
 
-      if (entry.getCount() > highestAbsolute) {
-        highestAbsolute = entry.getCount();
+      if (bucket.getDocCount() > highestAbsolute) {
+        highestAbsolute = bucket.getDocCount();
       }
     }
 
@@ -128,8 +128,8 @@ public final class BrowserParsers {
     long intervalStop = intervalStart + interval - 1;
     while (intervalStart < stop) {
       if (intervalStop >= start) {
-        Entry entry = entries.get(intervalStart);
-        val mutationCount = entry != null ? entry.getCount() : 0;
+        Bucket bucket = buckets.get(String.valueOf(intervalStart));
+        val mutationCount = bucket != null ? bucket.getDocCount() : 0;
 
         val mutation = new HistogramMutation(
             intervalStart,
@@ -157,16 +157,16 @@ public final class BrowserParsers {
   public static List<Object> parseHistogramGene(String segmentId, Long start, Long stop, Long interval,
       List<String> biotypes,
       SearchResponse searchResponse) {
-    val histogram = (HistogramFacet) searchResponse.getFacets().facetsAsMap().get("hf");
+    val histogramAggs = (Histogram) searchResponse.getAggregations().get("hf");
 
     // Find max and index entries by start
     long highestAbsolute = 0l;
-    Map<Long, HistogramFacet.Entry> entries = newHashMap();
-    for (val entry : histogram.getEntries()) {
-      entries.put(entry.getKey(), entry);
+    Map<String, Histogram.Bucket> buckets = newHashMap();
+    for (val bucket : histogramAggs.getBuckets()) {
+      buckets.put(bucket.getKey(), bucket);
 
-      if (entry.getCount() > highestAbsolute) {
-        highestAbsolute = entry.getCount();
+      if (bucket.getDocCount() > highestAbsolute) {
+        highestAbsolute = bucket.getDocCount();
       }
     }
 
@@ -176,8 +176,8 @@ public final class BrowserParsers {
     long intervalStop = intervalStart + interval - 1;
     while (intervalStart < stop) {
       if (intervalStop >= start) {
-        Entry entry = entries.get(intervalStart);
-        val geneCount = entry != null ? entry.getCount() : 0;
+        Bucket bucket = buckets.get(String.valueOf(intervalStart));
+        val geneCount = bucket != null ? bucket.getDocCount() : 0;
 
         val gene = new HistogramGene(
             intervalStart,
