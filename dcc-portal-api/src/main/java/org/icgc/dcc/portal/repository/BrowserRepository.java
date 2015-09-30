@@ -46,6 +46,8 @@ public class BrowserRepository {
    */
   private static final String MUTATION = Type.MUTATION_CENTRIC.getId();
   private static final String GENE = Type.GENE_CENTRIC.getId();
+  private static final Integer MUTATION_SIZE = 100000;
+  private static final Integer GENE_SIZE = 10000;
 
   private final Client client;
   private final String indexName;
@@ -57,7 +59,7 @@ public class BrowserRepository {
   }
 
   public SearchResponse getMutation(String segmentId, Long start, Long stop, List<String> consequenceTypes,
-      List<String> projectFilters, Integer size) {
+      List<String> projectFilters) {
     val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters);
 
     val request = client.prepareSearch(indexName)
@@ -84,13 +86,13 @@ public class BrowserRepository {
                 "transcript.consequence.aa_mutation"),
             excludes())
         .setFrom(0)
-        .setSize(size);
+        .setSize(MUTATION_SIZE);
 
     return request.execute().actionGet();
   }
 
   public SearchResponse getGene(String segmentId, Long start, Long stop, List<String> biotypes,
-      boolean withTranscripts, Integer size) {
+      boolean withTranscripts) {
     val filter = getGeneFilter(segmentId, start, stop, biotypes);
 
     val request = client.prepareSearch(indexName)
@@ -107,7 +109,7 @@ public class BrowserRepository {
             "description")
         .setPostFilter(filter)
         .setFrom(0)
-        .setSize(size);
+        .setSize(GENE_SIZE);
 
     if (withTranscripts) {
       request.setFetchSource("transcripts", null);

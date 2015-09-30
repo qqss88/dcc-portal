@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.icgc.dcc.common.core.model.ChromosomeLocation;
-import org.icgc.dcc.portal.browser.ds.GeneParser;
-import org.icgc.dcc.portal.browser.ds.MutationParser;
+import org.icgc.dcc.portal.repository.BrowserRepository;
+import org.icgc.dcc.portal.util.BrowserParsers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +38,7 @@ import lombok.val;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class BrowserService {
 
-  private final MutationParser mutationParser;
-  private final GeneParser geneParser;
+  private final BrowserRepository browserRepository;
 
   private static final class ParameterNames {
 
@@ -122,7 +121,8 @@ public class BrowserService {
     String projectFilterValue = queryMap.get("consequence_type");
     List<String> projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
 
-    return mutationParser.parse(segmentId, start, stop, consequenceTypes, projectFilters);
+    val searchResponse = browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters);
+    return BrowserParsers.parseMutations(segmentId, start, stop, consequenceTypes, projectFilters, searchResponse);
   }
 
   private List<Object> getHistogramSegmentMutation(String segmentId, Long start, Long stop,
@@ -136,7 +136,10 @@ public class BrowserService {
     String intervalValue = queryMap.get("interval");
     Long interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
 
-    return mutationParser.parseHistogram(segmentId, start, stop, interval, consequenceTypes, projectFilters);
+    val searchResponse =
+        browserRepository.getMutationHistogram(interval, segmentId, start, stop, consequenceTypes, projectFilters);
+    return BrowserParsers.parseHistogramMutation(segmentId, start, stop, interval, consequenceTypes, projectFilters,
+        searchResponse);
   }
 
   private List<Object> getSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
@@ -145,7 +148,8 @@ public class BrowserService {
 
     val withTranscripts = nullToEmpty(queryMap.get("dataType")).equals("withTranscripts");
 
-    return geneParser.parse(segmentId, start, stop, biotypes, withTranscripts);
+    val searchResponse = browserRepository.getGene(segmentId, start, stop, biotypes, withTranscripts);
+    return BrowserParsers.parseGenes(segmentId, start, stop, biotypes, withTranscripts, searchResponse);
   }
 
   private List<Object> getHistogramSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
@@ -155,7 +159,8 @@ public class BrowserService {
     String intervalValue = queryMap.get("interval");
     Long interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
 
-    return geneParser.parseHistogram(segmentId, start, stop, interval, biotypes);
+    val searchResponse = browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes);
+    return BrowserParsers.parseHistogramGene(segmentId, start, stop, interval, biotypes, searchResponse);
   }
 
 }
