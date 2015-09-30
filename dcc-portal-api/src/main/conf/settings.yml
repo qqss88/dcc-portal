@@ -115,14 +115,6 @@ mail:
   enabled: false
   recipientEmail: ***REMOVED***
 
-# Genomemaps
-browser:
-  dataSources:
-     - uri: gene
-       className: org.icgc.dcc.portal.browser.ds.GeneDataSource
-     - uri: mutation
-       className: org.icgc.dcc.portal.browser.ds.MutationDataSource
-
 # Data download
 download:
   enabled: true
