@@ -17,27 +17,22 @@
 
 package org.icgc.dcc.portal.resource;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.sun.jersey.api.client.ClientResponse.Status.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
-import lombok.val;
-
-import org.elasticsearch.client.Client;
-import org.icgc.dcc.portal.browser.ds.GeneDataSource;
-import org.icgc.dcc.portal.browser.ds.MutationDataSource;
-import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
+import org.icgc.dcc.portal.service.BrowserService;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.yammer.dropwizard.testing.ResourceTest;
+
+import lombok.val;
 
 @RunWith(MockitoJUnitRunner.class)
 @Ignore
@@ -46,20 +41,14 @@ public class BrowserResourceTest extends ResourceTest {
   private final static String RESOURCE = "/browser";
 
   @Mock
-  private Client client;
-  @Mock
-  private GeneDataSource geneDataSource;
-  @Mock
-  private MutationDataSource mutationDataSource;
+  BrowserService browserService;
+
+  @InjectMocks
+  BrowserResource browserResource;
 
   @Override
   protected final void setUpResources() {
-    val resource = new BrowserResource();
-    resource.setClient(client);
-    resource.setIndexName("indexName");
-    resource.setDataSources(dataSources());
-
-    addResource(resource);
+    addResource(browserResource);
     addProvider(BadRequestExceptionMapper.class);
   }
 
@@ -73,19 +62,6 @@ public class BrowserResourceTest extends ResourceTest {
         .get(ClientResponse.class);
 
     assertThat(response.getStatus()).isEqualTo(BAD_REQUEST.getStatusCode());
-  }
-
-  private List<DataSource> dataSources() {
-    DataSource gene = new DataSource();
-    gene.setUri("gene");
-    gene.setClassName(geneDataSource.getClass().getName());
-
-    DataSource mutation = new DataSource();
-    mutation.setUri("mutation");
-    mutation.setClassName(mutationDataSource.getClass().getName());
-
-    List<DataSource> dataSources = newArrayList(gene, mutation);
-    return dataSources;
   }
 
 }

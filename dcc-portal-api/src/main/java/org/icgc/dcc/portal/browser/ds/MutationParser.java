@@ -3,33 +3,19 @@ package org.icgc.dcc.portal.browser.ds;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static org.elasticsearch.action.search.SearchType.QUERY_AND_FETCH;
-import static org.elasticsearch.index.query.FilterBuilders.andFilter;
-import static org.elasticsearch.index.query.FilterBuilders.orFilter;
-import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
-import static org.elasticsearch.index.query.FilterBuilders.termFilter;
-import static org.elasticsearch.search.facet.FacetBuilders.histogramFacet;
-import static org.icgc.dcc.portal.util.FormatUtils.formatRequest;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.search.facet.histogram.HistogramFacet;
 import org.elasticsearch.search.facet.histogram.HistogramFacet.Entry;
 import org.icgc.dcc.portal.browser.model.HistogramMutation;
 import org.icgc.dcc.portal.browser.model.Mutation;
+import org.icgc.dcc.portal.repository.BrowserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -37,26 +23,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-@Slf4j
-@RequiredArgsConstructor
-@SuppressWarnings("deprecation")
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@Service
 public class MutationParser {
+
+  @NonNull
+  private BrowserRepository browserRepository;
 
   /**
    * Constants.
    */
-  private static final String INDEX_TYPE = "mutation-centric";
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final ObjectReader READER = MAPPER.reader();
   private static final TypeReference<List<String>> LIST_TYPE_REFERENCE = new TypeReference<List<String>>() {};
-
-  /**
-   * Parser state.
-   */
-  @NonNull
-  private final Client client;
-  @NonNull
-  private final String indexName;
 
   /**
    * Build a fully completed list of Mutation objects.
@@ -130,37 +114,7 @@ public class MutationParser {
    */
   private SearchResponse getResponse(String segmentId, Long start, Long stop, List<String> consequenceTypes,
       List<String> projectFilters, Integer size) {
-    val filter = getFilter(segmentId, start, stop, consequenceTypes, projectFilters);
-
-    val request = client.prepareSearch(indexName)
-        .setTypes(INDEX_TYPE)
-        .setSearchType(QUERY_AND_FETCH)
-        .setPostFilter(filter)
-        .addFields(
-            "_mutation_id",
-            "chromosome",
-            "chromosome_start",
-            "chromosome_end",
-            "mutation_type",
-            "mutation",
-            "reference_genome_allele",
-            "functional_impact_prediction_summary",
-            "ssm_occurrence.project._project_id",
-            "ssm_occurrence.project.project_name",
-            "ssm_occurrence.project._summary._ssm_tested_donor_count")
-        .setFetchSource(
-            includes(
-                "transcript.gene.symbol",
-                "transcript.consequence._transcript_id",
-                "transcript.consequence.consequence_type",
-                "transcript.consequence.aa_mutation"),
-            excludes())
-        .setFrom(0)
-        .setSize(size);
-
-    logRequest(request);
-
-    return request.execute().actionGet();
+    return browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters, size);
   }
 
   /**
@@ -168,24 +122,7 @@ public class MutationParser {
    */
   private SearchResponse getHistogramResponse(Long interval, String segmentId, Long start, Long stop,
       List<String> consequenceTypes, List<String> projectFilters) {
-    val filter = getFilter(segmentId, start, stop, consequenceTypes, projectFilters);
-
-    val histogramFacet = histogramFacet("hf")
-        .facetFilter(filter)
-        .field("chromosome_start")
-        .interval(interval);
-
-    val request = client.prepareSearch(indexName)
-        .setTypes(INDEX_TYPE)
-        .setSearchType(QUERY_AND_FETCH)
-        .setPostFilter(filter)
-        .addFacet(histogramFacet)
-        .setFrom(0)
-        .setSize(0);
-
-    logRequest(request);
-
-    return request.execute().actionGet();
+    return browserRepository.getMutationHistogram(interval, segmentId, start, stop, consequenceTypes, projectFilters);
   }
 
   /**
@@ -207,8 +144,7 @@ public class MutationParser {
     for (val entry : projectIds.entrySet()) {
       projectInfo.add(entry.getKey() + ": " +
           entry.getValue().get("affectedDonors") + " / " +
-          entry.getValue().get("ssmTestedDonors")
-          );
+          entry.getValue().get("ssmTestedDonors"));
     }
 
     List<List<String>> consequences = newArrayList();
@@ -257,17 +193,16 @@ public class MutationParser {
    * @return formatted consequence string
    */
   private static List<String> getConsequence(JsonNode consequence, JsonNode gene) {
-    String transcriptId = consequence.path("_transcript_id").isMissingNode() ? "null" :
-        consequence.path("_transcript_id").asText();
+    String transcriptId =
+        consequence.path("_transcript_id").isMissingNode() ? "null" : consequence.path("_transcript_id").asText();
 
-    String consequenceType = consequence.path("consequence_type").isMissingNode() ? "null" :
-        consequence.path("consequence_type").asText();
+    String consequenceType =
+        consequence.path("consequence_type").isMissingNode() ? "null" : consequence.path("consequence_type").asText();
 
-    String aaMutation = consequence.path("aa_mutation").isMissingNode() ? "null" :
-        consequence.path("aa_mutation").asText();
+    String aaMutation =
+        consequence.path("aa_mutation").isMissingNode() ? "null" : consequence.path("aa_mutation").asText();
 
-    String geneSymbol = gene.path("symbol").isMissingNode() ? "null" :
-        gene.path("symbol").asText();
+    String geneSymbol = gene.path("symbol").isMissingNode() ? "null" : gene.path("symbol").asText();
 
     List<String> result = newArrayList();
     result.add(transcriptId);
@@ -310,80 +245,11 @@ public class MutationParser {
   }
 
   /**
-   * Readability method for naming literal array of inclusion paths.
-   */
-  private static String[] includes(String... paths) {
-    return paths.length == 0 ? null : paths;
-  }
-
-  /**
-   * Readability method for naming literal array of exclusion paths.
-   */
-  private static String[] excludes(String... paths) {
-    return paths.length == 0 ? null : paths;
-  }
-
-  /**
    * Readability method to build a list from a JsonNode returned as an array.
    */
   @SneakyThrows
   private static List<String> asList(JsonNode node) {
     return MAPPER.readValue(node.traverse(), LIST_TYPE_REFERENCE);
-  }
-
-  /**
-   * Builds a FilterBuilder with only the applicable filter values.
-   */
-  private static FilterBuilder getFilter(String segmentId, Long start, Long stop, List<String> consequenceTypes,
-      List<String> projectFilters) {
-
-    val filter = andFilter(
-        termFilter("chromosome", segmentId),
-        rangeFilter("chromosome_start").lte(stop),
-        rangeFilter("chromosome_end").gte(start));
-
-    if (consequenceTypes != null) {
-      val consequenceFilter = getConsequenceFilter(consequenceTypes);
-      filter.add(consequenceFilter);
-    }
-
-    if (projectFilters != null) {
-      val projectFilter = getProjectFilter(projectFilters);
-      filter.add(projectFilter);
-    }
-
-    return filter;
-  }
-
-  /**
-   * Builds a FilterBuilder for project names.
-   */
-  private static FilterBuilder getProjectFilter(List<String> projects) {
-    val projectFilter = orFilter();
-    for (val project : projects) {
-      projectFilter.add(FilterBuilders.termFilter("ssm_occurrence.project.project_name", project));
-    }
-
-    return projectFilter;
-  }
-
-  /**
-   * Builds a FilterBuilder for consequence types
-   */
-  private static FilterBuilder getConsequenceFilter(List<String> consequenceTypes) {
-    val consequenceFilter = orFilter();
-    for (val consequenceType : consequenceTypes) {
-      consequenceFilter.add(FilterBuilders.termFilter("transcript.consequence.consequence_type", consequenceType));
-    }
-
-    return consequenceFilter;
-  }
-
-  private static void logRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
-    String requestType = builder.request().getClass().getSimpleName();
-    String message = formatRequest(builder);
-
-    log.info("Sending {}: \n{}\n", requestType, message);
   }
 
 }

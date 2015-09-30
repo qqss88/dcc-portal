@@ -2,29 +2,13 @@ package org.icgc.dcc.portal.browser.ds;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static org.elasticsearch.action.search.SearchType.QUERY_AND_FETCH;
-import static org.elasticsearch.index.query.FilterBuilders.andFilter;
-import static org.elasticsearch.index.query.FilterBuilders.orFilter;
-import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
-import static org.elasticsearch.index.query.FilterBuilders.termFilter;
-import static org.elasticsearch.search.facet.FacetBuilders.histogramFacet;
 import static org.icgc.dcc.portal.browser.model.Transcript.getTranscriptEnd;
 import static org.icgc.dcc.portal.browser.model.Transcript.getTranscriptStart;
-import static org.icgc.dcc.portal.util.FormatUtils.formatRequest;
 
 import java.util.List;
 import java.util.Map;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
-import org.elasticsearch.action.ActionRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.facet.histogram.HistogramFacet;
 import org.elasticsearch.search.facet.histogram.HistogramFacet.Entry;
 import org.icgc.dcc.portal.browser.model.Exon;
@@ -32,30 +16,32 @@ import org.icgc.dcc.portal.browser.model.ExonToTranscript;
 import org.icgc.dcc.portal.browser.model.Gene;
 import org.icgc.dcc.portal.browser.model.HistogramGene;
 import org.icgc.dcc.portal.browser.model.Transcript;
+import org.icgc.dcc.portal.repository.BrowserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-@Slf4j
-@RequiredArgsConstructor
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@Service
 public class GeneParser {
+
+  @NonNull
+  private BrowserRepository browserRepository;
 
   /**
    * Constants.
    */
-  private static final String TYPE_NAME = "gene-centric";
   private static final ObjectReader READER = new ObjectMapper().reader();
   private static final String EXON_ID_SEPERATOR = ".";
   private static final int MAX_HIT_COUNT = 10000;
-
-  /**
-   * Parser state.
-   */
-  @NonNull
-  private final Client client;
-  @NonNull
-  private final String indexName;
 
   /**
    * Build a fully completed list of Gene objects.
@@ -144,56 +130,15 @@ public class GeneParser {
    */
   private SearchResponse getResponse(String segmentId, Long start, Long stop, List<String> biotypes,
       boolean withTranscripts, Integer size) {
-    val filter = getFilter(segmentId, start, stop, biotypes);
-
-    val request = client.prepareSearch(indexName)
-        .setTypes(TYPE_NAME)
-        .setSearchType(QUERY_AND_FETCH)
-        .addFields(
-            "_gene_id",
-            "name",
-            "biotype",
-            "chromosome",
-            "start",
-            "end",
-            "strand",
-            "description")
-        .setPostFilter(filter)
-        .setFrom(0)
-        .setSize(size);
-
-    if (withTranscripts) {
-      request.setFetchSource("transcripts", null);
-    }
-
-    logRequest(request);
-
-    return request.execute().actionGet();
+    return browserRepository.getGene(segmentId, start, stop, biotypes, withTranscripts, size);
   }
 
   /**
    * EnrichmentQueries elasticsearch with a histogram facet.
    */
-  @SuppressWarnings("deprecation")
   private SearchResponse getHistogramResponse(Long interval, String segmentId, Long start, Long stop,
       List<String> biotypes) {
-    val filter = getFilter(segmentId, start, stop, biotypes);
-
-    val histogramFacet = histogramFacet("hf")
-        .facetFilter(filter)
-        .field("start")
-        .interval(interval);
-
-    val request = client.prepareSearch(indexName)
-        .setTypes(TYPE_NAME)
-        .setSearchType(QUERY_AND_FETCH)
-        .setPostFilter(filter)
-        .addFacet(histogramFacet)
-        .setSize(0);
-
-    logRequest(request);
-
-    return request.execute().actionGet();
+    return browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes);
   }
 
   /**
@@ -268,41 +213,4 @@ public class GeneParser {
   private static JsonNode embeddedHit(JsonNode hit, String fieldName) {
     return hit.get(fieldName);
   }
-
-  /**
-   * Builds a FilterBuilder with only the applicable filter values.
-   */
-  private static FilterBuilder getFilter(String segmentId, Long start, Long stop, List<String> biotypes) {
-    val filter = andFilter(
-        termFilter("chromosome", segmentId),
-        rangeFilter("start").lte(stop),
-        rangeFilter("end").gte(start));
-
-    if (biotypes != null) {
-      val biotypeFilter = getBiotypeFilterBuilder(biotypes);
-      filter.add(biotypeFilter);
-    }
-
-    return filter;
-  }
-
-  /**
-   * Readability method to build list of biotype filters.
-   */
-  private static FilterBuilder getBiotypeFilterBuilder(List<String> biotypes) {
-    val biotypeFilter = orFilter();
-    for (val biotype : biotypes) {
-      biotypeFilter.add(termFilter("biotype", biotype));
-    }
-
-    return biotypeFilter;
-  }
-
-  private static void logRequest(ActionRequestBuilder<?, ?, ?, ?> builder) {
-    String requestType = builder.request().getClass().getSimpleName();
-    String message = formatRequest(builder);
-
-    log.info("Sending {}: \n{}\n", requestType, message);
-  }
-
 }
