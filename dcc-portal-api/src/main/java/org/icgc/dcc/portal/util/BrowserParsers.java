@@ -20,8 +20,6 @@ package org.icgc.dcc.portal.util;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static org.icgc.dcc.portal.browser.model.Transcript.getTranscriptEnd;
-import static org.icgc.dcc.portal.browser.model.Transcript.getTranscriptStart;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,13 +28,6 @@ import java.util.Map;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.facet.histogram.HistogramFacet;
 import org.elasticsearch.search.facet.histogram.HistogramFacet.Entry;
-import org.icgc.dcc.portal.browser.model.Exon;
-import org.icgc.dcc.portal.browser.model.ExonToTranscript;
-import org.icgc.dcc.portal.browser.model.Gene;
-import org.icgc.dcc.portal.browser.model.HistogramGene;
-import org.icgc.dcc.portal.browser.model.HistogramMutation;
-import org.icgc.dcc.portal.browser.model.Mutation;
-import org.icgc.dcc.portal.browser.model.Transcript;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,7 +35,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import lombok.Builder;
 import lombok.SneakyThrows;
+import lombok.Value;
 import lombok.val;
 
 public final class BrowserParsers {
@@ -391,6 +384,30 @@ public final class BrowserParsers {
     return exonToTranscripts;
   }
 
+  private static Long getTranscriptStart(JsonNode trans) {
+    Long transcriptStart = Long.MAX_VALUE;
+    for (val exon : trans.path("exons")) {
+      Long start = exon.path("start").asLong();
+      if (start < transcriptStart) {
+        transcriptStart = start;
+      }
+    }
+
+    return transcriptStart;
+  }
+
+  private static long getTranscriptEnd(JsonNode trans) {
+    Long transcriptEnd = 0l;
+    for (val exon : trans.path("exons")) {
+      Long end = exon.path("end").asLong();
+      if (end > transcriptEnd) {
+        transcriptEnd = end;
+      }
+    }
+
+    return transcriptEnd;
+  }
+
   /**
    * Readability method to build a list from a JsonNode returned as an array.
    */
@@ -399,4 +416,109 @@ public final class BrowserParsers {
     return MAPPER.readValue(node.traverse(), LIST_TYPE_REFERENCE);
   }
 
+  @Value
+  @Builder
+  private static class Exon {
+
+    private String stableId;
+    private String chromosome;
+    private String start;
+    private String end;
+    private String strand;
+  }
+
+  @Value
+  @Builder
+  private static class ExonToTranscript {
+
+    private Integer exonToTranscriptId;
+    private Integer genomicCodingStart;
+    private Integer genomicCodingEnd;
+    private Integer cdnaCodingStart;
+    private Integer cdnaCodingEnd;
+    private Integer cdnaStart;
+    private Integer cdnaEnd;
+    private Integer phase;
+    private Integer isConstitutive;
+    private Exon exon;
+  }
+
+  @Value
+  @Builder
+  private static class Gene {
+
+    private Integer geneId;
+    private String stableId;
+    private String externalName;
+    private String externalDb;
+    private String biotype;
+    private String status;
+    private String chromosome;
+    private Long start;
+    private Long end;
+    private String strand;
+    private String source;
+    private String description;
+    private List<Transcript> transcripts;
+
+  }
+
+  @Value
+  private static class HistogramMutation {
+
+    private final long start;
+    private final long end;
+    private final int interval;
+    private final long absolute;
+    private final double value;
+  }
+
+  @Value
+  private static class HistogramGene {
+
+    private final long start;
+    private final long end;
+    private final int interval;
+    private final long absolute;
+    private final double value;
+  }
+
+  @Value
+  @Builder
+  private static class Mutation {
+
+    private String id;
+    private String chromosome;
+    private Long start;
+    private Long end;
+    private String mutationType;
+    private String mutation;
+    private String refGenAllele;
+    private Integer total;
+    private List<String> projectInfo;
+    private List<List<String>> consequences;
+    private List<String> functionalImpact;
+  }
+
+  @Value
+  @Builder
+  private static class Transcript {
+
+    private Integer transcriptId;
+    private String stableId;
+    private String externalName;
+    private String externalDb;
+    private String biotype;
+    private String status;
+    private String chromosome;
+    private Long start;
+    private Long end;
+    private String strand;
+    private Long codingRegionStart;
+    private Long codingRegionEnd;
+    private Long cdnaCodingStart;
+    private Long cdnaCodingEnd;
+    private String description;
+    private List<ExonToTranscript> exonToTranscripts;
+  }
 }
