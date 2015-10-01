@@ -214,40 +214,27 @@
             document.addEventListener('fullscreenchange', fullScreenHandler);
         }
         
-        var fixFilters = function () {
-          if (this.hasAttribute("filter") && this.getAttribute("filter")!== false) {
-            if (this.getAttribute("filter").split("#").length > 1) {
-              var svgId = this.getAttribute("filter").split("#")[1].split("'")[0];
+        var fixUrl = function(e,attr) {
+          if (e.hasAttribute(attr) && e.getAttribute(attr)!== false) {
+            var idMatcher = /(#.*)\'\)/;
+            var matches = e.getAttribute(attr).match(idMatcher);
+            if (matches !== null) {
+              var svgId = matches[1];
               var newPath = window.location.pathname + window.location.search;
-              var newFilter = "url('" + newPath + "#" + svgId + "')";
+              var newUrl = "url('" + newPath + svgId + "')";
         
-              this.setAttribute('filter', newFilter);
+              e.setAttribute(attr, newUrl);
             }
           }
         };
         
+        var fixFilters = function () {
+          fixUrl(this, 'filter');
+        };
+        
         var fixMarkers = function () {
-          var svgId, newPath, newMarker;
-          
-          if (this.hasAttribute("marker-end") && this.getAttribute("marker-end")!== false) {
-            if (this.getAttribute("marker-end").split("#").length > 1) {
-              svgId = this.getAttribute("marker-end").split("#")[1];
-              newPath = window.location.pathname + window.location.search;
-              newMarker = "url(" + newPath + "#" + svgId;
-        
-              this.setAttribute('marker-end', newMarker);
-            }
-          }
-          
-          if (this.hasAttribute("marker-start") && this.getAttribute("marker-end")!== false) {
-            if (this.getAttribute("marker-start").split("#").length > 1) {
-              svgId = this.getAttribute("marker-start").split("#")[1];
-              newPath = window.location.pathname + window.location.search;
-              newMarker = "url(" + newPath + "#" + svgId;
-        
-              this.setAttribute('marker-start', newMarker);
-            }
-          }
+          fixUrl(this, 'marker-end');
+          fixUrl(this, 'marker-start');
         };
         
         var handleRender = function(){
@@ -283,9 +270,9 @@
         
         // Needed to fix url paths for SVGs on url change due to <base> tag required by angular
         $scope.$on('$locationChangeSuccess', function() {
-          jQuery('rect').map(fixFilters);
-          jQuery('polygon').map(fixFilters);
-          jQuery('line').map(fixMarkers);
+          jQuery('rect', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('polygon', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('line', '#pathway-viewer-mini').map(fixMarkers);
         });
         
         $scope.$on('$destroy', function () {

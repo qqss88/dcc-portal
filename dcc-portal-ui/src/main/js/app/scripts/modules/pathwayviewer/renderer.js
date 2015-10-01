@@ -334,7 +334,7 @@
       'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
       'y2':function(d){return (+d.position.y) + 1;},
     }).attr('stroke','black')
-      .attr('marker-end','url('+config.urlPath+'#GeneArrow)');
+      .attr('marker-end',"url('"+config.urlPath+"#GeneArrow')");
     
   };
 
@@ -366,11 +366,11 @@
     }).attr({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
-          'url('+config.urlPath+'#'+d.marker+')':'';
+          "url('"+config.urlPath+'#'+d.marker+"')":"";
       },
       'marker-end':function(d){
         return d.marked && !isStartMarker(d.marker)?
-          'url('+config.urlPath+'#'+d.marker+')':'';
+          "url('"+config.urlPath+'#'+d.marker+"')":"";
       }
     });
   };

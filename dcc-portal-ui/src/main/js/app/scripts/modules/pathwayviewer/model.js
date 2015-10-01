@@ -13,35 +13,28 @@
   PathwayModel.prototype.parse = function (xml) {
     var parsedXml =  $($.parseXML(xml));
 
+    var checkandReturn = function(elements) {
+      if (typeof elements !== 'undefined' && typeof elements[0] !== 'undefined') {
+        var text = elements[0].textContent;
+        return text.split(',');
+      }else {
+        return [];
+      }
+    }
+
     // Parse all the nodes first
     var xmlNodes = parsedXml.find('Nodes')[0].children;
     var nodes = this.nodes;
     
     // Check if there will be an overlay
-    var overlaidList = [];
-    var overlaid = false;
-    var overlaidComponents = parsedXml.find('overlaidComponents');
-    if (typeof overlaidComponents !== 'undefined' && typeof overlaidComponents[0] !== 'undefined') {
-      var overlaidText = overlaidComponents[0].textContent;
-      overlaidList = overlaidList.concat(overlaidText.split(','));
-      overlaid = true;
-    }
+    var overlaidList = checkandReturn(parsedXml.find('overlaidComponents'));
+    var overlaid = (overlaidList.length > 0) ? true : false;
     
     // Find if there are any crossed out
-    var crossedList = [];
-    var crossedComponents = parsedXml.find('crossedComponents');
-    if (typeof crossedComponents !== 'undefined' && typeof crossedComponents[0] !== 'undefined') {
-      var crossedText = crossedComponents[0].textContent;
-      crossedList = crossedList.concat(crossedText.split(','));
-    }
+    var crossedList = checkandReturn(parsedXml.find('crossedComponents'));
     
     // Find if there are any loss of function nodes
-    var lofList = [];
-    var lofNodes = parsedXml.find('lofNodes');
-    if (typeof lofNodes !== 'undefined' && typeof lofNodes[0] !== 'undefined') {
-      var lofText = lofNodes[0].textContent;
-      lofList = lofList.concat(lofText.split(','));
-    }
+    var lofList = checkandReturn( parsedXml.find('lofNodes'));
     
     $(xmlNodes).each(function(){
       var attrs = this.attributes;
