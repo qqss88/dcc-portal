@@ -28,20 +28,19 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.URL;
-import org.icgc.dcc.portal.browser.model.DataSource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.Stage;
 import com.yammer.dropwizard.config.Configuration;
 import com.yammer.dropwizard.db.DatabaseConfiguration;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -54,10 +53,6 @@ public class PortalProperties extends Configuration {
   @Valid
   @JsonProperty
   ElasticSearchProperties elastic = new ElasticSearchProperties();
-
-  @Valid
-  @JsonProperty
-  BrowserProperties browser = new BrowserProperties();
 
   @Valid
   @JsonProperty
@@ -99,14 +94,6 @@ public class PortalProperties extends Configuration {
   @Valid
   @JsonProperty
   OAuthProperties oauth = new OAuthProperties();
-
-  @Data
-  public static class BrowserProperties {
-
-    @JsonProperty
-    List<DataSource> dataSources;
-
-  }
 
   @Data
   public static class CacheProperties {

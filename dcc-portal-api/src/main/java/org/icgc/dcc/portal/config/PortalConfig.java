@@ -21,7 +21,6 @@ import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.icgc.dcc.portal.service.SessionService.DISCOVERY_INFO_CACHE_NAME;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,7 +41,6 @@ import org.icgc.dcc.portal.auth.openid.DistributedConsumerAssociationStore;
 import org.icgc.dcc.portal.auth.openid.DistributedNonceVerifier;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
 import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
-import org.icgc.dcc.portal.browser.model.DataSource;
 import org.icgc.dcc.portal.config.PortalProperties.CacheProperties;
 import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.config.PortalProperties.DownloadProperties;
@@ -66,7 +64,6 @@ import org.openid4java.consumer.InMemoryNonceVerifier;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.skife.jdbi.v2.DBI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -133,12 +130,6 @@ public class PortalConfig {
 
     val rootDir = downloadConfig.getUri() + downloadConfig.getStaticRootPath();
     return new ExportedDataFileSystem(rootDir, downloadConfig.getCurrentReleaseSymlink());
-  }
-
-  @Bean
-  @Qualifier
-  public List<DataSource> dataSources() {
-    return properties.getBrowser().getDataSources();
   }
 
   @Bean
