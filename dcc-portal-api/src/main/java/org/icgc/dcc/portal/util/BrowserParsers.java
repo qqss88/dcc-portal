@@ -27,7 +27,6 @@ import java.util.Map;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram.Bucket;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -79,8 +78,8 @@ public final class BrowserParsers {
   @SneakyThrows
   public static List<Object> parseGenes(String segmentId, Long start, Long stop, List<String> biotypes,
       boolean withTranscripts, SearchResponse searchResponse) {
-    String json = searchResponse.toString();
-    JsonNode response = READER.readTree(json);
+    val json = searchResponse.toString();
+    val response = READER.readTree(json);
 
     int geneId = 1;
     List<Object> genes = newArrayList();
@@ -132,7 +131,7 @@ public final class BrowserParsers {
     long intervalStop = intervalStart + interval - 1;
     while (intervalStart < stop) {
       if (intervalStop >= start) {
-        Bucket bucket = buckets.get(String.valueOf(intervalStart));
+        val bucket = buckets.get(String.valueOf(intervalStart));
         val mutationCount = bucket != null ? bucket.getDocCount() : 0;
 
         val mutation = new HistogramMutation(
@@ -271,16 +270,16 @@ public final class BrowserParsers {
    * @return formatted consequence string
    */
   private static List<String> getConsequence(JsonNode consequence, JsonNode gene) {
-    String transcriptId =
+    val transcriptId =
         consequence.path("_transcript_id").isMissingNode() ? "null" : consequence.path("_transcript_id").asText();
 
-    String consequenceType =
+    val consequenceType =
         consequence.path("consequence_type").isMissingNode() ? "null" : consequence.path("consequence_type").asText();
 
-    String aaMutation =
+    val aaMutation =
         consequence.path("aa_mutation").isMissingNode() ? "null" : consequence.path("aa_mutation").asText();
 
-    String geneSymbol = gene.path("symbol").isMissingNode() ? "null" : gene.path("symbol").asText();
+    val geneSymbol = gene.path("symbol").isMissingNode() ? "null" : gene.path("symbol").asText();
 
     List<String> result = newArrayList();
     result.add(transcriptId);
