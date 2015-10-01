@@ -71,6 +71,7 @@
     'icgc.beacon',
     'icgc.downloader',
     'icgc.pathwayviewer',
+    'icgc.repositories',
     'icgc.repository',
     'icgc.pancancer',
     'icgc.auth',
