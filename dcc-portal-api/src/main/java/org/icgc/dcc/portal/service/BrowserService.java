@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
+import lombok.experimental.UtilityClass;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
@@ -40,10 +41,11 @@ public class BrowserService {
 
   private final BrowserRepository browserRepository;
 
-  private static final class ParameterNames {
+  @UtilityClass
+  private class ParameterNames {
 
-    private static final String SEGMENT = "segment";
-    private static final String RESOURCE = "resource";
+    private final String SEGMENT = "segment";
+    private final String RESOURCE = "resource";
   }
 
   /**
@@ -51,15 +53,7 @@ public class BrowserService {
    */
   public List<Object> getHistogram(Map<String, String> queryMap) {
 
-    val segmentRegion = queryMap.get(ParameterNames.SEGMENT);
-    ChromosomeLocation chromosome = null;
-    try {
-      chromosome = ChromosomeLocation.parse(segmentRegion);
-    } catch (Exception e) {
-      val message = "Value of the '" + ParameterNames.SEGMENT +
-          "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
-      throw new BadRequestException(message);
-    }
+    ChromosomeLocation chromosome = getChromosomeLocation(queryMap.get(ParameterNames.SEGMENT));
 
     if (queryMap.get(ParameterNames.RESOURCE).equals("mutation")) {
       return getHistogramSegmentMutation(chromosome.getChromosome().getName(),
@@ -86,15 +80,7 @@ public class BrowserService {
     List<List<Object>> result = newArrayList();
 
     for (val chromosomeString : segmentRegion.split(",")) {
-      ChromosomeLocation chromosome = null;
-
-      try {
-        chromosome = ChromosomeLocation.parse(chromosomeString);
-      } catch (Exception e) {
-        val message = "Value of the '" + ParameterNames.SEGMENT +
-            "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
-        throw new BadRequestException(message);
-      }
+      ChromosomeLocation chromosome = getChromosomeLocation(chromosomeString);
 
       if (queryMap.get(ParameterNames.RESOURCE).equals("mutation")) {
         result.add(getSegmentMutation(chromosome.getChromosome().getName(),
@@ -115,11 +101,11 @@ public class BrowserService {
   }
 
   private List<Object> getSegmentMutation(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
-    String consequenceValue = queryMap.get("consequence_type");
-    List<String> consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
+    val consequenceValue = queryMap.get("consequence_type");
+    val consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
 
-    String projectFilterValue = queryMap.get("consequence_type");
-    List<String> projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
+    val projectFilterValue = queryMap.get("consequence_type");
+    val projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
 
     val searchResponse = browserRepository.getMutation(segmentId, start, stop, consequenceTypes, projectFilters);
     return BrowserParsers.parseMutations(segmentId, start, stop, consequenceTypes, projectFilters, searchResponse);
@@ -127,14 +113,14 @@ public class BrowserService {
 
   private List<Object> getHistogramSegmentMutation(String segmentId, Long start, Long stop,
       Map<String, String> queryMap) {
-    String consequenceValue = queryMap.get("consequence_type");
-    List<String> consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
+    val consequenceValue = queryMap.get("consequence_type");
+    val consequenceTypes = consequenceValue != null ? Arrays.asList(consequenceValue.split(",")) : null;
 
-    String projectFilterValue = queryMap.get("consequence_type");
-    List<String> projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
+    val projectFilterValue = queryMap.get("consequence_type");
+    val projectFilters = projectFilterValue != null ? Arrays.asList(projectFilterValue.split(",")) : null;
 
-    String intervalValue = queryMap.get("interval");
-    Long interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
+    val intervalValue = queryMap.get("interval");
+    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
 
     val searchResponse =
         browserRepository.getMutationHistogram(interval, segmentId, start, stop, consequenceTypes, projectFilters);
@@ -143,8 +129,8 @@ public class BrowserService {
   }
 
   private List<Object> getSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
-    String biotypeValue = queryMap.get("biotype");
-    List<String> biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
+    val biotypeValue = queryMap.get("biotype");
+    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
 
     val withTranscripts = nullToEmpty(queryMap.get("dataType")).equals("withTranscripts");
 
@@ -153,14 +139,24 @@ public class BrowserService {
   }
 
   private List<Object> getHistogramSegmentGene(String segmentId, Long start, Long stop, Map<String, String> queryMap) {
-    String biotypeValue = queryMap.get("biotype");
-    List<String> biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
+    val biotypeValue = queryMap.get("biotype");
+    val biotypes = biotypeValue != null ? Arrays.asList(biotypeValue.split(",")) : null;
 
-    String intervalValue = queryMap.get("interval");
-    Long interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
+    val intervalValue = queryMap.get("interval");
+    val interval = intervalValue != null ? Math.round(Double.parseDouble(intervalValue)) : null;
 
     val searchResponse = browserRepository.getGeneHistogram(interval, segmentId, start, stop, biotypes);
     return BrowserParsers.parseHistogramGene(segmentId, start, stop, interval, biotypes, searchResponse);
+  }
+
+  private static ChromosomeLocation getChromosomeLocation(String segmentRegion) {
+    try {
+      return ChromosomeLocation.parse(segmentRegion);
+    } catch (Exception e) {
+      val message = "Value of the '" + ParameterNames.SEGMENT +
+          "' parameter (" + segmentRegion + ") is not valid. Reason: " + e.getMessage();
+      throw new BadRequestException(message);
+    }
   }
 
 }

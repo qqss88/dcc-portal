@@ -34,12 +34,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.ImmutableList;
 
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.val;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BrowserParsers {
 
   /**
@@ -170,13 +174,13 @@ public final class BrowserParsers {
       }
     }
 
-    List<Object> genes = newArrayList();
+    val genes = ImmutableList.<Object> builder();
     int intervalNumber = 0;
     long intervalStart = 0;
     long intervalStop = intervalStart + interval - 1;
     while (intervalStart < stop) {
       if (intervalStop >= start) {
-        Bucket bucket = buckets.get(String.valueOf(intervalStart));
+        val bucket = buckets.get(String.valueOf(intervalStart));
         val geneCount = bucket != null ? bucket.getDocCount() : 0;
 
         val gene = new HistogramGene(
@@ -196,7 +200,7 @@ public final class BrowserParsers {
       intervalStop += interval;
     }
 
-    return genes;
+    return genes.build();
   }
 
   /**
@@ -212,7 +216,7 @@ public final class BrowserParsers {
 
     int totalNumberOfDonors = projectKeys.size();
 
-    List<String> projectInfo = newArrayList();
+    val projectInfo = ImmutableList.<String> builder();
 
     // Builds project display string
     for (val entry : projectIds.entrySet()) {
@@ -221,7 +225,7 @@ public final class BrowserParsers {
           entry.getValue().get("ssmTestedDonors"));
     }
 
-    List<List<String>> consequences = newArrayList();
+    val consequences = ImmutableList.<List<String>> builder();
     for (val transcript : response.get("_source").get("transcript")) {
       List<String> consequence = getConsequence(
           transcript.path("consequence"),
@@ -251,8 +255,8 @@ public final class BrowserParsers {
         .mutation(hit.path("mutation").get(0).asText())
         .refGenAllele(refGenAllele)
         .total(totalNumberOfDonors)
-        .projectInfo(projectInfo)
-        .consequences(consequences)
+        .projectInfo(projectInfo.build())
+        .consequences(consequences.build())
         .functionalImpact(functionalImpact)
         .build();
 
@@ -466,21 +470,21 @@ public final class BrowserParsers {
   @Value
   private static class HistogramMutation {
 
-    private final long start;
-    private final long end;
-    private final int interval;
-    private final long absolute;
-    private final double value;
+    private long start;
+    private long end;
+    private int interval;
+    private long absolute;
+    private double value;
   }
 
   @Value
   private static class HistogramGene {
 
-    private final long start;
-    private final long end;
-    private final int interval;
-    private final long absolute;
-    private final double value;
+    private long start;
+    private long end;
+    private int interval;
+    private long absolute;
+    private double value;
   }
 
   @Value

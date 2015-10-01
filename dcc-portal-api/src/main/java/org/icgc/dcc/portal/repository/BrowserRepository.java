@@ -22,15 +22,17 @@ import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.orFilter;
 import static org.elasticsearch.index.query.FilterBuilders.rangeFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
+import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 
 import java.util.List;
+import java.util.function.Consumer;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class BrowserRepository {
 
-  /*
+  /**
    * Constants
    */
   private static final String MUTATION = Type.MUTATION_CENTRIC.getId();
@@ -57,7 +59,7 @@ public class BrowserRepository {
   private final String indexName;
 
   @Autowired
-  public BrowserRepository(@NonNull Client client, @Value("#{indexName}") String indexName) {
+  public BrowserRepository(@NonNull Client client, @NonNull @Value("#{indexName}") String indexName) {
     this.indexName = indexName;
     this.client = client;
   }
@@ -66,7 +68,7 @@ public class BrowserRepository {
       List<String> projectFilters) {
     val filter = getMutationFilter(segmentId, start, stop, consequenceTypes, projectFilters);
 
-    val request = client.prepareSearch(indexName)
+    return execute("Browser Mutation Request", (request) -> request
         .setTypes(MUTATION)
         .setSearchType(QUERY_AND_FETCH)
         .setPostFilter(filter)
@@ -90,10 +92,7 @@ public class BrowserRepository {
                 "transcript.consequence.aa_mutation"),
             excludes())
         .setFrom(0)
-        .setSize(MUTATION_SIZE);
-
-    log.debug("Browser Mutation Request", request);
-    return request.execute().actionGet();
+        .setSize(MUTATION_SIZE));
   }
 
   public SearchResponse getGene(String segmentId, Long start, Long stop, List<String> biotypes,
@@ -132,16 +131,13 @@ public class BrowserRepository {
         .field("start")
         .interval(interval);
 
-    val query = QueryBuilders.filteredQuery(new MatchAllQueryBuilder(), filter);
-    val request = client.prepareSearch(indexName)
+    val query = filteredQuery(new MatchAllQueryBuilder(), filter);
+    return execute("Browser Gene Histogram Request", (request) -> request
         .setTypes(GENE)
         .setSearchType(QUERY_AND_FETCH)
         .setQuery(query)
         .addAggregation(histogramAggs)
-        .setSize(0);
-
-    log.info("Browser Gene Histogram Request", request);
-    return request.execute().actionGet();
+        .setSize(0));
   }
 
   public SearchResponse getMutationHistogram(Long interval, String segmentId, Long start, Long stop,
@@ -152,16 +148,21 @@ public class BrowserRepository {
         .field("chromosome_start")
         .interval(interval);
 
-    val query = QueryBuilders.filteredQuery(new MatchAllQueryBuilder(), filter);
-    val request = client.prepareSearch(indexName)
+    val query = filteredQuery(new MatchAllQueryBuilder(), filter);
+    return execute("Browser Mutation Histogram Request", (request) -> request
         .setTypes(MUTATION)
         .setSearchType(QUERY_AND_FETCH)
         .setQuery(query)
         .addAggregation(histogramAggs)
         .setFrom(0)
-        .setSize(0);
+        .setSize(0));
+  }
 
-    log.debug("Browser Mutation Histogram Request", request);
+  private SearchResponse execute(String message, Consumer<SearchRequestBuilder> customizer) {
+    val request = client.prepareSearch(indexName);
+    customizer.accept(request);
+
+    log.debug("{}: {}", message, request);
     return request.execute().actionGet();
   }
 
@@ -255,4 +256,5 @@ public class BrowserRepository {
 
     return projectFilter;
   }
+
 }
