@@ -18,22 +18,31 @@
 (function () {
 	'use strict';
 	
-	var module = angular.module('icgc.repositories', []);
+	var module = angular.module('icgc.software', []);
 	
 	module.config(function ($stateProvider) {
-		$stateProvider.state('repositories', {
-			url: '/repositories/{repoCode}/guide',
-			templateUrl: function ($stateParams) {
-				return 'scripts/repositories/views/guides/' + $stateParams.repoCode + '.html';
-			},
-			controller: 'RepositoriesController'
+		
+		$stateProvider.state('software', {
+			url: '/software',
+			templateUrl: 'scripts/software/views/software.html',
+			controller: 'SoftwareController'
 		});
 	});
 	
-	module.controller('RepositoriesController', function($scope, Page) {
+	module.controller('SoftwareController', function($scope, Page) {
 		Page.stopWork();
     Page.setPage('entity');
-    Page.setTitle('Repositories');
-  });
+    Page.setTitle('Software Downloads');
+		
+		jQuery.get('api/v1/ui/artifacts/dcc-storage-client', function(v) {
+			var $versions = jQuery('#versions');
+			for (var i = 0; i < v.length; i++) {
+				var url = '<tr><td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' +
+					v[i].version+'">'+v[i].version+'</a></td></tr>';
+				$versions.append(url);
+			}
+		});
+		
+	});
 	
 })();

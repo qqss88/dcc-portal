@@ -1,0 +1,183 @@
+<div style="margin-left:2rem; margin-right:2rem;">
+<h1 id="toc_0">ICGC Amazon Data Access User Guide</h1>
+
+<h2 id="toc_1">Overview</h2>
+
+<p>This is a user guide that walks through the steps needed to start downloading ICGC data within EC2 on AWS. A custom download tool named <code>dcc-storage-client</code> is required to ensure additional security measures while operating in cloud environments. Security is enforced by using an intermediary server that the client communicates with in order to convert ICGC access tokens to Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html">pre-signed urls</a>.</p>
+
+<p>It is important to note that this software will only function within EC2 <code>us-east1</code>. Trying to use the software outside of this region will be denied. </p>
+
+<p>The general process is described in the following section. Please see <a href="#terms">Terms</a> for a glossary of related terms.</p>
+
+<h2 id="toc_2">Getting Started</h2>
+
+<p>The following describes the general process of accessing the data:</p>
+
+<ol>
+<li>Apply for DACO access if not already approved</li>
+<li>Upon approval, login to the Data Portal</li>
+<li>Generate an access token for S3</li>
+<li>Create an EC2 instance in AWS</li>
+<li>Download the ICGC tools</li>
+<li>Configure the tool to use the access token from step 3.</li>
+<li>Identify files of interest using the Data Portal</li>
+<li>Download or view data with the provided tool or external tool</li>
+</ol>
+
+<p>The subsequent sections will provide additional details on these topics.</p>
+
+<h2 id="toc_3">Authorization</h2>
+
+<p>This section describes how to gain access to use the software.</p>
+
+<h3 id="toc_4">DACO Access</h3>
+
+<p>The DACO access is prerequisite to using the <code>dcc-storage-client</code>. To apply for DACO access, please follow the instructions at <a href="https://icgc.org/daco">https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a href="#Access%20Token">access token</a>. To login, click on the &quot;Login&quot; link in the upper right-hand corner of the page. Either select &quot;ICGC.org&quot; or one of the OpenID providers. After successfully authentication redirect, you will know you have the necessary access when you login and see a green shield where the &quot;Login&quot; link used to be.</p>
+
+<h3 id="toc_5">Access Token</h3>
+
+<p>The access token model used for protecting the AWS data set follows a similar process to Github&#39;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/">personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>s3.download</code> scope is required to access the controlled data. Note that access to the data is all-or-nothing.</p>
+
+<p>After logging into the portal, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account (you will need to specify the <code>s3.download</code> scope when you generate your token). </p>
+
+<p>You will then need to edit the client properties file in the <code>dcc-storage-client</code> to include this token. See the <a href="#configuration">Configuration</a> section for additional information.</p>
+
+<h2 id="toc_6">Installation</h2>
+
+<p>This section describes how to install the tool. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>
+
+<h3 id="toc_7">From Tarball</h3>
+
+<h4 id="toc_8">Prerequisites</h4>
+
+<p>The tool requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used. </p>
+
+<h4 id="toc_9">Tool Download</h4>
+
+<p>To begin using the tool, the first step is to download the tool. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
+
+<pre><code class="language-bash">wget -qO- https://dcc.icgc.org/software/dcc-storage-client/latest | tar xvz --strip-components 1</code></pre>
+
+<p>The tool will be available at <code>bin/dcc-dcc-storage-client</code>.</p>
+
+<h3 id="toc_10">From Docker Image</h3>
+
+<p>We also support a Docker image of the tool that is bundled with Java 8 for easy deployment.</p>
+
+<p>TBD</p>
+
+<h2 id="toc_11">Configuration</h2>
+
+<p>The main configuration element is the access token generated in <a href="#Access%20Token">Access Token</a> above. Configuration is stored in the <code>conf/</code> directory of the distribution.</p>
+
+<p>Edit <code>application.properties</code> and add the generated accesss token to the line:</p>
+
+<pre><code class="language-yaml">accessToken=&lt;access token&gt;</code></pre>
+
+<h2 id="toc_12">Search</h2>
+
+<p>Finding files of interest can be done via the Data Portal. Objects are identified by their object id.</p>
+
+<ul>
+<li>Navigate to <a href="https://dcc.icgc.org/repository/external">repository file search</a></li>
+<li>Click on <code>AWS</code> filter</li>
+<li>Filter based on properties of interest (e.g. donor id, specimen id)</li>
+<li>Export manifest for future use with the tool</li>
+</ul>
+
+<h2 id="toc_13">Usage</h2>
+
+<p>This section provides information on how to use the tool once it has been properly downloaded and configured. It assumes the user has the requisite access token. </p>
+
+<p>The tool has the general syntax:</p>
+
+<pre><code class="language-bash">dcc-storage-client [options] [command] [command options]</code></pre>
+
+<p>It offers a set of commands, where each command has its own set of options to influence its operation.</p>
+
+<h3 id="toc_14">Help</h3>
+
+<p>The tool provides a <code>--help</code> option to list the available commands and a brief description their supported options:</p>
+
+<pre><code class="language-bash">bin/dcc-storage-client --help`</code></pre>
+
+<h3 id="toc_15">URL Command</h3>
+
+<p>The <code>url</code> command is the most basic supported by the tool. It allows one to resolve the underyling S3 URL for the requested object. This is useful if one wants to directly access the URL via HTTPS with another tool (e.g. <code>curl</code>, <code>wget</code>, etc.)</p>
+
+<pre><code class="language-bash">bin/dcc-storage-client url --object-id 00000000-00000000-00000000-00000000</code></pre>
+
+<h3 id="toc_16">Download Command</h3>
+
+<p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) manifest driven mode</p>
+
+<h4 id="toc_17">Single Object</h4>
+
+<p>This mode is most useful when downloading a single object given a known object id.</p>
+
+<pre><code class="language-bash">bin/dcc-storage-client download --object-id 00000000-00000000-00000000-00000000 --output-dir data</code></pre>
+
+<h4 id="toc_18">Manifest</h4>
+
+<p>Using a manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repository/external">repository file search</a> allows one to generate a manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
+
+<pre><code class="language-bash">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
+
+<h3 id="toc_19">View Command</h3>
+
+<p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html">samtools view</a>. It allows to request a &quot;genomic slice&quot; of the remote BAM file, preventing the user from having to download the entire file locally.</p>
+
+<pre><code class="language-bash">bin/dcc-storage-client view --object-id 00000000-00000000-00000000-00000000</code></pre>
+
+<p>It is also possible to pipe the output of the above to <code>samtools</code>, etc. for pipelining a workflow: </p>
+
+<pre><code class="language-bash">bin/dcc-storage-client view --object-id 00000000-00000000-00000000-00000000 | samtools</code></pre>
+
+<h2 id="toc_20">FAQs</h2>
+
+<h5 id="toc_21">Where are detailed logs stored?</h5>
+
+<p>The client log file is stored in at<code>logs/client.log</code></p>
+
+<h5 id="toc_22">How do I report a bug in the software?</h5>
+
+<p>Please contact <a href="dcc-support@icgc.org">dcc-support@icgc.org</a> and include the version of the software in the body of the message (<code>bin/dcc-storage-client --version</code>). </p>
+
+<h5 id="toc_23">Why do I get a security exception?</h5>
+
+<p>Ensure that you are running within the AWS <code>us-east1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones">region</a>.</p>
+
+<h5 id="toc_24">I can&#39;t use the <code>url</code> command with <code>samtools</code></h5>
+
+<p><code>samtools</code> doesn&#39;t support HTTPS which is a requirement for ICGC&#39;s security policy concerning S3. Use the <code>view</code> command to pipe to samtools or download the entire file locally.</p>
+
+<h2 id="toc_25">Terms</h2>
+
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><em>object id</em></td>
+<td>The unique identifier of an object</td>
+</tr>
+<tr>
+<td><em>manifest</em></td>
+<td>A file used as input to the tool to describe and identify files to be downloaded</td>
+</tr>
+<tr>
+<td><em>access token</em></td>
+<td>A authorization mechanism used to access data</td>
+</tr>
+<tr>
+<td><em>token manager</em></td>
+<td>Section of the portal used to manage <em>access tokens</em></td>
+</tr>
+</tbody>
+</table>
+</div>

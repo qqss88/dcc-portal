@@ -27,6 +27,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +42,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FieldsParam;
@@ -53,6 +50,8 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
+import org.icgc.dcc.portal.service.ClientService;
+import org.icgc.dcc.portal.service.ClientService.MavenArtifactVersion;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.MutationService;
@@ -71,11 +70,16 @@ import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.metrics.annotation.Timed;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
@@ -83,6 +87,7 @@ public class UIResource {
   private final OccurrenceService occurrenceService;
   private final DiagramService diagramService;
   private final MutationService mutationService;
+  private final ClientService clientService;
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -91,8 +96,7 @@ public class UIResource {
   @GET
   public Mutations getDonorMutations(
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters,
-      @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId
-      ) {
+      @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId) {
 
     val query =
         Query.builder().filters(filters.get()).sort("_score").size(10).order(DEFAULT_ORDER)
@@ -114,8 +118,7 @@ public class UIResource {
   @GET
   public Map<String, TermFacet> countProjectDonor(
       @ApiParam(value = "Gene ID. Multiple IDs can be entered as ENSG00000155657,ENSG00000141510", required = true) @PathParam("geneIds") IdsParam geneIds,
-      @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
-      ) {
+      @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters) {
 
     val result = Maps.<String, TermFacet> newHashMap();
 
@@ -172,7 +175,7 @@ public class UIResource {
 
   @Path("/reactome/pathway-diagram")
   @GET
-  @Produces(APPLICATION_XML)
+  @Produces(APPLICATION_JSON)
   public Response getReactomePathwayDiagram(
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
 
@@ -189,6 +192,29 @@ public class UIResource {
     checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return diagramService.getShownPathwaySection(pathwayId);
+  }
+
+  @Path("/artifacts/dcc-storage-client")
+  @GET
+  public List<MavenArtifactVersion> getArtifacts() {
+    val results = clientService.getVersions();
+    return results;
+  }
+
+  @Path("/software/dcc-storage-client/latest")
+  @GET
+  @SneakyThrows
+  public Response getLatest() {
+    URL targetURIForRedirection = new URL(clientService.getLatestVersionUrl());
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}")
+  @GET
+  @SneakyThrows
+  public Response getArtifacts(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionUrl(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
   }
 
   private Boolean isInvalidPathwayId(String id) {
