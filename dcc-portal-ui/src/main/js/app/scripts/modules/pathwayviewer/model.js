@@ -11,11 +11,31 @@
   };
 
   PathwayModel.prototype.parse = function (xml) {
-    // Parse all the nodes first
     var parsedXml =  $($.parseXML(xml));
+
+    var checkandReturn = function(elements) {
+      if (typeof elements !== 'undefined' && typeof elements[0] !== 'undefined') {
+        var text = elements[0].textContent;
+        return text.split(',');
+      }else {
+        return [];
+      }
+    }
+
+    // Parse all the nodes first
     var xmlNodes = parsedXml.find('Nodes')[0].children;
     var nodes = this.nodes;
-
+    
+    // Check if there will be an overlay
+    var overlaidList = checkandReturn(parsedXml.find('overlaidComponents'));
+    var overlaid = (overlaidList.length > 0) ? true : false;
+    
+    // Find if there are any crossed out
+    var crossedList = checkandReturn(parsedXml.find('crossedComponents'));
+    
+    // Find if there are any loss of function nodes
+    var lofList = checkandReturn( parsedXml.find('lofNodes'));
+    
     $(xmlNodes).each(function(){
       var attrs = this.attributes;
 
@@ -35,6 +55,9 @@
         },
         type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
+        crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
+        lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
+        grayed: (overlaid && (overlaidList.indexOf(attrs.id.nodeValue) < 0)) ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {
@@ -67,19 +90,26 @@
       var base = getPointsArray(this.attributes.points.nodeValue);
       var nodes=[];
       var description = $(this).children().find('properties').context;
+      
+      var schemaClass = this.attributes.schemaClass;
+      var failedReaction = false;
+      if (!(typeof schemaClass === 'undefined') && schemaClass.nodeValue === 'FailedReaction') {
+        failedReaction = true;
+      }
 
       $(this).find('input,output,catalyst,activator,inhibitor').each(function(){
         nodes.push({
             type: this.localName.substring(0,1).toUpperCase()+this.localName.substring(1),
             base: this.getAttribute('points') ?
               getPointsArray(this.getAttribute('points')) : [],
-            id: this.id
+            id: this.id,
           });
       });
       
       reactions.push({
         base: base,
         nodes: nodes,
+        failedReaction: failedReaction,
         reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
         id: this.attributes.id.nodeValue,
         type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',

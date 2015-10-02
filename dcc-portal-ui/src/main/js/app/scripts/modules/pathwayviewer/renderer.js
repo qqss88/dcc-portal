@@ -69,6 +69,16 @@
       viewBox:'0 -6 2 11'
     };
    
+    var defs = svg.append('svg:defs');
+    
+    // Provides the grayscale filter in case of disease pathways		
+    defs.append('svg:filter').attr({		
+      id: 'grayscale'		
+    }).append('feColorMatrix').attr({		
+      type: 'matrix',		
+      values: '0.4666 0.3333 0.3333 0 0 0.3333 0.4666 0.3333 0 0 0.3333 0.3333 0.4666 0 0 0 0 0 1 0'		
+    });
+    
     markers.forEach(function (elem) {
       var def;
       if(isCircular(elem)){
@@ -88,7 +98,7 @@
         color = 'black';
       }
       
-      svg.append('svg:defs').append('svg:marker')
+      defs.append('svg:marker')
         .attr({
           'id': elem,
           'viewBox': def.viewBox,
@@ -104,7 +114,7 @@
       if(isBaseMarker(elem)){
         color = config.subPathwayColor;
         
-        svg.append('svg:defs').append('svg:marker')
+        defs.append('svg:marker')
           .attr({
             'id': elem+'-subpathway',
             'viewBox': def.viewBox,
@@ -160,6 +170,15 @@
     // Split into normal rectangles and octagons based on node type
     var octs = _.filter(nodes,function(n){return n.type === 'RenderableComplex';});
     var rects = _.filter(nodes,function(n){return n.type !== 'RenderableComplex';});
+    var crossed = _.filter(nodes, function(n){return n.crossed === true;});
+
+    var pointMapToString = function(map) {
+      var val = '';
+      map.forEach(function (elem) {
+        val= val+elem.x+','+elem.y+' ';
+      });
+      return val;
+    };
 
     // Create a point map for the octagons
     var getPointsMap = function(x,y,w,h,a){
@@ -171,21 +190,36 @@
                     {x:x+a,   y:y+h},
                     {x:x,     y:y+h-a},
                     {x:x,     y:y+a}];
-      var val = '';
-      points.forEach(function (elem) {
-        val= val+elem.x+','+elem.y+' ';
-      });
-      return val;
+      return pointMapToString(points);
     };
-
+    
+    var getCrossMap = function(x,y,w,h){
+      var points = [{x:x, y:y},
+                    {x:x+w, y:y+h}];
+      return pointMapToString(points);
+    };
+  
+    var getReverseCrossMap = function(x,y,w,h){
+      var points = [{x:x, y:y+h},
+                    {x:x+w, y:y}];
+      return pointMapToString(points);
+    };
+    
     // Render all complexes as octagons
     svg.selectAll('.RenderableOct').data(octs).enter().append('polygon')
       .attr({
-        class: function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
-        points: function (d) {
+        'class': function(d){return 'pathway-node RenderableOct RenderableComplex entity'+d.id;},
+        'filter': function (d) {
+          if (d.grayed) {
+            return (typeof config.urlPath==='undefined') ? '' : 'url(\''+config.urlPath+'#grayscale\')';
+          } else {
+            return '';
+          }
+        },
+        'points': function (d) {
           return getPointsMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height, 4);
         },
-        stroke: 'Red',
+        'stroke': 'Red',
         'stroke-width': 1
       }).on('mouseover', function (d) {
         d.oldColor = d3.rgb(d3.select(this).style('fill'));
@@ -197,6 +231,13 @@
     // Render all other normal rectangular nodes after octagons
     svg.selectAll('.RenderableRect').data(rects).enter().append('rect').attr({
       'class': function (d) {return 'pathway-node RenderableRect ' + d.type + ' entity'+d.id;},
+      'filter': function (d) {
+        if (d.grayed) {
+          return (typeof config.urlPath==='undefined') ? '' : 'url(\''+config.urlPath+'#grayscale\')';
+        } else {
+          return '';
+        }
+      },
       'x': function (d) {return d.position.x;},
       'y': function (d) {return d.position.y;},
       'width': function (d) {return d.size.width;},
@@ -209,6 +250,8 @@
           return 0;
         case 'RenderableChemical':
           return d.size.width / 2;
+        case 'RenderableFailed':
+          return d.size.width / 2;
         default:
           return 3;
         }
@@ -220,6 +263,8 @@
         case 'RenderableEntity':
           return 0;
         case 'RenderableChemical':
+          return d.size.width / 2;
+        case 'RenderableFailed':
           return d.size.width / 2;
         default:
           return 3;
@@ -240,6 +285,22 @@
       d3.select(this).style('fill', d.oldColor);
     }).on('click',config.onClick);
     
+    svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+      'class': 'CrossedNode',
+      'fill': 'none',
+      'stroke': 'red',
+      'stroke-width': '2',
+      'points': function(d) {return getCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+    });
+    
+    svg.selectAll('.crossed').data(crossed).enter().append('polyline').attr({
+      'class': 'CrossedNode',
+      'fill': 'none',
+      'stroke': 'red',
+      'stroke-width': '2',
+      'points': function(d) {return getReverseCrossMap(+d.position.x, +d.position.y, +d.size.width, +d.size.height);}
+    });
+    
     // Add a foreignObject to contain all text so that warpping is done for us
     svg.selectAll('.RenderableText').data(nodes).enter().append('foreignObject').attr({
         'class':function(d){return d.type+'Text RenderableText';},
@@ -252,8 +313,15 @@
       }).append('xhtml:body')
       .attr('class','RenderableNodeText')
       .html(function(d){
-        return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
-          d.text.content+'</td></tr></table>';
+        if (d.lof) {
+          var lofClass = 'lof-'+ d.type;
+          return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr>' + 
+            '<td class="RenderableNodeTextCell lof-cell" valign="middle">'+
+            d.text.content+'</td></tr></table>';
+        } else {
+          return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+            d.text.content+'</td></tr></table>';
+        }
       });
     
     // if it's a gene, we have to add a sepcial array in the top right corner
@@ -266,7 +334,7 @@
       'x2':function(d){return (+d.position.x)+(+d.size.width)  + 5.5;},
       'y2':function(d){return (+d.position.y) + 1;},
     }).attr('stroke','black')
-      .style('marker-end','url('+config.urlPath+'#GeneArrow)');
+      .attr('marker-end',"url('"+config.urlPath+"#GeneArrow')");
     
   };
 
@@ -283,20 +351,26 @@
     var isStartMarker = function(type){return _.contains(['FlowLine','RenderableInteraction'],type);};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
-      'class':function(d){return 'RenderableStroke reaction'+d.id+' '+d.type;},
+      'class':function(d){
+          var classes = 'RenderableStroke reaction'+d.id+' '+d.type;
+          if (d.failedReaction) {
+            classes += ' ' + 'failed-reaction';
+          }
+          return classes;
+        },
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},
       'y2':function(d){return d.y2;},
-      'stroke':config.strokeColor//function(d){return d.color;}
-    }).style({
+      'stroke': config.strokeColor
+    }).attr({
       'marker-start':function(d){
         return d.marked && isStartMarker(d.marker)?
-          'url('+config.urlPath+'#'+d.marker+')':'';
+          "url('"+config.urlPath+'#'+d.marker+"')":"";
       },
       'marker-end':function(d){
         return d.marked && !isStartMarker(d.marker)?
-          'url('+config.urlPath+'#'+d.marker+')':'';
+          "url('"+config.urlPath+'#'+d.marker+"')":"";
       }
     });
   };

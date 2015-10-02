@@ -28,25 +28,7 @@
         highlights: '=',
         zooms: '='
       },
-      template:'<div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">'+ 
-        '<i class="fa fa-expand pathway-fullscreen-controller"></i>' +
-        '<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>'+
-        '<h4>LEGEND</h4></div>'+
-        '<div class="pathway-info">'+
-        '<i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>'+
-        '<h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>'+
-          '<div class="pathway-info-content">'+
-          '<table class="table pathway-gene-table" data-ng-if="geneList.length>0">'+
-            '<tr>'+
-                '<th class="pathway-gene-header-label pathway-gene-header">Gene</th>' +
-                '<th class="pathway-gene-header-label pathway-gene-header"># ICGC Mutations</th>' +
-            '</tr>'+
-            '<tr data-ng-repeat="gene in geneList">' +
-              '<th class="pathway-gene-label"><a href="/genes/{{gene.id}}">{{gene.symbol}}</a></th>' +
-              '<th class="pathway-gene-label"><a href="/search/m?filters={{gene.advQuery}}">{{gene.value}}</a></th>' +
-            '</tr></table>' +
-        '</div></div>'+
-        '</div>',
+      templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
       link: function ($scope, element) {
         var showingLegend = false,  rendered = false;
         var zoomedOn, xml, highlights;
@@ -56,7 +38,7 @@
         element.bind("mouseenter", function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');
-          }, 800);
+          }, 500);
         });
         
         element.bind("mouseleave", function() {
@@ -130,6 +112,7 @@
             // Reset data
             $scope.geneList = [];
             $scope.entityType = typeMap[d.type];
+            $scope.subPathwayId = d.reactomeId;
             
             hideLegend();
             showInfo();
@@ -231,6 +214,29 @@
             document.addEventListener('fullscreenchange', fullScreenHandler);
         }
         
+        var fixUrl = function(e,attr) {
+          if (e.hasAttribute(attr) && e.getAttribute(attr)!== false) {
+            var idMatcher = /(#.*)\'\)/;
+            var matches = e.getAttribute(attr).match(idMatcher);
+            if (matches !== null) {
+              var svgId = matches[1];
+              var newPath = window.location.pathname + window.location.search;
+              var newUrl = "url('" + newPath + svgId + "')";
+        
+              e.setAttribute(attr, newUrl);
+            }
+          }
+        };
+        
+        var fixFilters = function () {
+          fixUrl(this, 'filter');
+        };
+        
+        var fixMarkers = function () {
+          fixUrl(this, 'marker-end');
+          fixUrl(this, 'marker-start');
+        };
+        
         var handleRender = function(){
           if(!xml || !zoomedOn){
             return;
@@ -260,6 +266,13 @@
         $scope.$watch('highlights', function (newValue) {
           highlights = newValue;
           handleRender();
+        });
+        
+        // Needed to fix url paths for SVGs on url change due to <base> tag required by angular
+        $scope.$on('$locationChangeSuccess', function() {
+          jQuery('rect', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('polygon', '#pathway-viewer-mini').map(fixFilters);
+          jQuery('line', '#pathway-viewer-mini').map(fixMarkers);
         });
         
         $scope.$on('$destroy', function () {
