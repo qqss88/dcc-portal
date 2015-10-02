@@ -175,7 +175,7 @@ public class UIResource {
 
   @Path("/reactome/pathway-diagram")
   @GET
-  @Produces(APPLICATION_JSON)
+  @Produces(APPLICATION_XML)
   public Response getReactomePathwayDiagram(
       @ApiParam(value = "A pathway reactome id", required = true) @QueryParam("pathwayId") String pathwayId) {
 
@@ -196,6 +196,7 @@ public class UIResource {
 
   @Path("/artifacts/dcc-storage-client")
   @GET
+  @Produces(APPLICATION_JSON)
   public List<MavenArtifactVersion> getArtifacts() {
     val results = clientService.getVersions();
     return results;
