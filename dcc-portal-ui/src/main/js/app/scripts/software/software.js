@@ -37,9 +37,17 @@
 		jQuery.get('api/v1/ui/artifacts/dcc-storage-client', function(v) {
 			var $versions = jQuery('#versions');
 			for (var i = 0; i < v.length; i++) {
-				var url = '<tr><td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' +
-					v[i].version+'">'+v[i].version+'</a></td></tr>';
-				$versions.append(url);
+				
+				var row = '<tr><td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' +
+					v[i].version+'">'+v[i].version+'</a></td>' +
+					'<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'">' +
+						'dcc-storage-client-' + v[i].version + '-dist.tar.gz </td>' +
+					'<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'/md5">' +
+						'dcc-storage-client-' + v[i].version + '-dist.tar.gz.md5 </td>' +	
+					'</tr>';
+					
+					
+				$versions.append(row);
 			}
 		});
 		

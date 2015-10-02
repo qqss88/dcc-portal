@@ -213,8 +213,16 @@ public class UIResource {
   @Path("/software/dcc-storage-client/{version}")
   @GET
   @SneakyThrows
-  public Response getArtifacts(@PathParam("version") String version) {
+  public Response getVersion(@PathParam("version") String version) {
     URL targetURIForRedirection = new URL(clientService.getVersionUrl(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}/md5")
+  @GET
+  @SneakyThrows
+  public Response getVersionChecksum(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionChecksum(version));
     return Response.seeOther(targetURIForRedirection.toURI()).build();
   }
 

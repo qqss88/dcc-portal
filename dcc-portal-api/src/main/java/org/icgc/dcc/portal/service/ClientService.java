@@ -63,6 +63,10 @@ public class ClientService {
     return mavenRepositoryUrl + "/simple/dcc-release" + getVersionPath(version);
   }
 
+  public String getVersionChecksum(String version) {
+    return mavenRepositoryUrl + "/simple/dcc-release" + getVersionPath(version) + ".md5";
+  }
+
   public String getVersionPath(String version) {
     return "/org/icgc/dcc/dcc-storage-client/" + version + "/dcc-storage-client-" + version + "-dist.tar.gz";
   }

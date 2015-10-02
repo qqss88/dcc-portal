@@ -14,7 +14,7 @@
 @media screen and (-webkit-min-device-pixel-ratio:0) {
   @font-face {
     font-family: 'fontello';
-    src: url('../font/fontello.svg?24741710#fontello') format('svg');
+    src: url('../font/fontello.svg?23795603#fontello') format('svg');
   }
 }
 */
@@ -115,6 +115,8 @@
 .icon-caret-down:before { content: '\e83e'; } /* '' */
 .icon-pilcrow:before { content: '\e83f'; } /* '' */
 .icon-caret-left:before { content: '\e840'; } /* '' */
+.icon-box:before { content: '\e841'; } /* '' */
+.icon-book-open:before { content: '\e842'; } /* '' */
 
 /*
    Animation example, for spinners
