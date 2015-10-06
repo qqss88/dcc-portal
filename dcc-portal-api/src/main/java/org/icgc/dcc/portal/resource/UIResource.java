@@ -226,6 +226,14 @@ public class UIResource {
     return Response.seeOther(targetURIForRedirection.toURI()).build();
   }
 
+  @Path("/software/dcc-storage-client/{version}/asc")
+  @GET
+  @SneakyThrows
+  public Response getVersionSignature(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionSignature(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
   private Boolean isInvalidPathwayId(String id) {
     if (isNullOrEmpty(id)) return true;
     if (!(id.startsWith(REACTOME_PREFIX_OLD) || id.startsWith(REACTOME_PREFIX))) return true;
