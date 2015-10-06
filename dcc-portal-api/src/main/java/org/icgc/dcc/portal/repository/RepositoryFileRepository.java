@@ -633,7 +633,7 @@ public class RepositoryFileRepository {
           .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
           .setPostFilter(filters);
 
-      for (val agg : aggs(queryFilter)) {
+      for (AggregationBuilder<?> agg : aggs(queryFilter)) {
         request.addAggregation(agg);
       }
     });
