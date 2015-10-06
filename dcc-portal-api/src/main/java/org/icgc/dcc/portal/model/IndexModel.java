@@ -107,7 +107,7 @@ public class IndexModel {
     GENESET_TEXT("gene-set-text"),
     DIAGRAM("diagram"),
     REPOSITORY_FILE_TEXT("file-text"),
-    REPOSITORY_FILE_DONOR_TEXT("file-donor-text"),
+    REPOSITORY_FILE_DONOR_TEXT("donor-text"),
     PROJECT_TEXT("project-text");
 
     @NonNull

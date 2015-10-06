@@ -36,8 +36,6 @@ import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
-import static org.icgc.dcc.portal.service.RepositoryFileService.RepoTypes.isAws;
-import static org.icgc.dcc.portal.service.RepositoryFileService.RepoTypes.isGnos;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -385,9 +383,9 @@ public class RepositoryFileService {
     @Cleanup
     val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
 
-    if (isGnos(repoType)) {
+    if (RepoTypes.isGnos(repoType)) {
       generateXmlFile(buffer, downloadUrlGroups, timestamp);
-    } else if (isAws(repoType)) {
+    } else if (RepoTypes.isAws(repoType)) {
       generateAwsTextFile(buffer, downloadUrlGroups);
     } else {
       generateTextFile(buffer, downloadUrlGroups);
@@ -480,7 +478,7 @@ public class RepositoryFileService {
   }
 
   private static String getFileExtensionOf(String repoType) {
-    return isGnos(repoType) ? "xml" : "txt";
+    return RepoTypes.isGnos(repoType) ? "xml" : "txt";
   }
 
   @NonNull
