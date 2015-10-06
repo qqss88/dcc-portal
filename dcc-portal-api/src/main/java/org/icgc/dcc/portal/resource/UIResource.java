@@ -65,6 +65,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -88,6 +89,7 @@ public class UIResource {
   private final DiagramService diagramService;
   private final MutationService mutationService;
   private final ClientService clientService;
+  private static final String PUBLIC_KEY_PATH = "data/jenkins_pub.gpg";
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -232,6 +234,17 @@ public class UIResource {
   public Response getVersionSignature(@PathParam("version") String version) {
     URL targetURIForRedirection = new URL(clientService.getVersionSignature(version));
     return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("software/key")
+  @GET
+  @SneakyThrows
+  public Response getKey() {
+    val url = Resources.getResource(PUBLIC_KEY_PATH);
+    return Response.ok(Resources.toByteArray(url))
+        .type("text/plain")
+        .header("Content-Disposition", "attachment; filename=\"jenkins_pub.gpg\"")
+        .build();
   }
 
   private Boolean isInvalidPathwayId(String id) {
