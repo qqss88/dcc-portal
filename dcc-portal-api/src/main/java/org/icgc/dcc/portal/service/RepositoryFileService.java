@@ -19,13 +19,26 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.toMap;
+import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Sets.intersection;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
+import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.right;
+import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
+import static org.apache.commons.lang.time.DateFormatUtils.formatUTC;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
+import static org.icgc.dcc.portal.model.RepositoryFile.parse;
+import static org.icgc.dcc.portal.service.RepositoryFileService.RepoTypes.isAws;
+import static org.icgc.dcc.portal.service.RepositoryFileService.RepoTypes.isGnos;
+import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedOutputStream;
@@ -33,15 +46,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,18 +67,24 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.val;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.lang.time.DateFormatUtils;
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.icgc.dcc.portal.model.Keyword;
 import org.icgc.dcc.portal.model.Keywords;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
+import org.icgc.dcc.portal.model.RepositoryFile.Donor;
+import org.icgc.dcc.portal.model.RepositoryFile.FileCopy;
 import org.icgc.dcc.portal.model.RepositoryFiles;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.repository.RepositoryFileRepository;
@@ -75,18 +93,13 @@ import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
 @Service
@@ -95,11 +108,18 @@ import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
+  private static final TypeModel TYPE_MODEL = IndexModel.getRepositoryFileTypeModel();
 
-  private static final String DATE_FORMAT_PATTERN = DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
-  private static final String GNOS_REPO = "GNOS";
-  private static final String UTF_8 = java.nio.charset.StandardCharsets.UTF_8.name();
-  private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(Collections.emptyList());
+  private static final String DATE_FORMAT_PATTERN = ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
+  private static final String UTF_8 = StandardCharsets.UTF_8.name();
+  private static final int BUFFER_SIZE = 1024 * 100;
+  private static final List<String> MANIFEST_FIELDS = ImmutableList.of(
+      Fields.FILE_UUID,
+      Fields.FILE_ID,
+      Fields.DATA_BUNDLE_ID);
+
+  private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(emptyList());
+
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
       new ImmutableMap.Builder<String, String>()
           .put("id", "id")
@@ -112,6 +132,8 @@ public class RepositoryFileService {
           .put("tcga_sample_barcode", "TCGASampleBarcode")
           .put("tcga_aliquot_barcode", "TCGAAliquotBarcode")
           .build();
+
+  // Manifest column definitions
   private static final String[] TSV_HEADERS = new String[] {
       "url",
       "file_name",
@@ -119,15 +141,36 @@ public class RepositoryFileService {
       "md5_sum"
   };
   private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
-      FieldNames.FILE_NAME,
-      FieldNames.FILE_SIZE,
-      FieldNames.CHECK_SUM);
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-  private static final ObjectReader READER = MAPPER.reader();
-  private static final MapType MAP_TYPE = MAPPER.getTypeFactory()
-      .constructMapType(Map.class, String.class, String.class);
+      Fields.FILE_NAME,
+      Fields.FILE_SIZE,
+      Fields.FILE_MD5SUM);
+
+  private static final String[] AWS_TSV_HEADERS = new String[] {
+      "repo_code",
+      "file_id",
+      "file_uuid",
+      "file_format",
+      "file_name",
+      "file_size",
+      "md5_sum",
+      "index_file_uuid",
+      "donor_id/donor_count",
+      "project_id/project_count"
+  };
+  private static final List<String> AWS_TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
+      Fields.REPO_CODE,
+      Fields.FILE_ID,
+      Fields.FILE_UUID,
+      Fields.FILE_FORMAT,
+      Fields.FILE_NAME,
+      Fields.FILE_SIZE,
+      Fields.FILE_MD5SUM,
+      Fields.INDEX_FILE_UUID,
+      Fields.DONOR_ID,
+      Fields.PROJECT_CODE);
+
   private static final BiFunction<Collection<Map<String, String>>, String, String> CONCAT_WITH_COMMA =
-      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, info -> info.get(fieldName)));
+      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, m -> m.get(fieldName)));
 
   private final RepositoryFileRepository repositoryFileRepository;
 
@@ -161,7 +204,7 @@ public class RepositoryFileService {
     log.info("External repository file id is: '{}'.", fileId);
 
     val response = repositoryFileRepository.findOne(fileId);
-    return RepositoryFile.parse(response.getSourceAsString());
+    return parse(response.getSourceAsString());
   }
 
   public long getDonorCount(Query query) {
@@ -173,7 +216,7 @@ public class RepositoryFileService {
     val hits = response.getHits();
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    externalFiles.setTermFacets(repositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
+    externalFiles.setTermFacets(RepositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
     // externalFiles.setFacets(response.getFacets());
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
@@ -183,22 +226,14 @@ public class RepositoryFileService {
   @NonNull
   public void generateManifestArchive(OutputStream output, Date timestamp, Query query, List<String> repoList)
       throws JsonProcessingException, IOException {
-    val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
-    log.info("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
-
-    val searchResult = repositoryFileRepository.findDownloadInfo(pql);
-    val hits = newArrayList(searchResult.getHits().hits());
-    val all = FluentIterable.from(hits)
-        .transformAndConcat(hit -> expandByFlatteningRepoServers(hit));
+    val data = getData(query);
 
     @Cleanup
     val tar = new TarArchiveOutputStream(new GZIPOutputStream(new BufferedOutputStream(output)));
     tar.setLongFileMode(LONGFILE_GNU);
 
-    val repoCodeGroups = Multimaps.index(all, entry -> entry.get(FieldNames.REPO_CODE));
-    val repoIncludes = FluentIterable.from(repoList)
-        .filter(repoCode -> !isBlank(repoCode))
-        .toList();
+    val repoIncludes = removeEmptyString(repoList);
+    val repoCodeGroups = Multimaps.index(data, m -> m.get(Fields.REPO_CODE));
 
     // This writes out the results to the tar archive.
     for (val repoCode : repoCodeGroups.keySet()) {
@@ -208,24 +243,37 @@ public class RepositoryFileService {
 
       val entries = repoCodeGroups.get(repoCode);
 
-      if (entries.isEmpty()) {
+      if (isEmpty(entries)) {
         continue;
       }
 
-      val firstEntry = entries.get(0);
       // Entries with the same repoCode should & must have the same repoType.
-      val repoType = firstEntry.get(FieldNames.REPO_TYPE);
+      val repoType = entries.get(0).get(Fields.REPO_TYPE);
 
       generateTarEntry(tar, entries, repoCode, repoType, timestamp);
     }
+  }
 
+  private Iterable<Map<String, String>> getData(@NonNull final Query query) {
+    val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
+    log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
+
+    val searchResult = repositoryFileRepository.findDownloadInfo(pql);
+
+    return FluentIterable.from(searchResult.getHits())
+        .transformAndConcat(hit -> toValueMap(hit));
+  }
+
+  private List<String> removeEmptyString(@NonNull List<String> list) {
+    return FluentIterable.from(list)
+        .filter(s -> !isBlank(s))
+        .toList();
   }
 
   @NonNull
   private static Map<String, Object> toKeywordFieldMap(SearchHit hit) {
     val valueMap = hit.getSource();
-    val commonKeys = Sets.intersection(
-        FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), valueMap.keySet());
+    val commonKeys = intersection(FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), valueMap.keySet());
     val mapBuilder = ImmutableMap.<String, Object> builder();
 
     for (val key : commonKeys) {
@@ -238,50 +286,109 @@ public class RepositoryFileService {
 
   private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
     return FluentIterable.from(hits)
-        .transform(hit -> RepositoryFile.parse(hit.getSourceAsString()))
+        .transform(hit -> parse(hit.getSourceAsString()))
         .toList();
   }
 
-  @NonNull
   private static boolean shouldRepositoryBeExcluded(List<String> repoIncludes, String repoCode) {
-    return !(repoIncludes.isEmpty() || repoIncludes.contains(repoCode));
+    return !(isEmpty(repoIncludes) || repoIncludes.contains(repoCode));
   }
 
-  @SneakyThrows
-  private static Iterable<Map<String, String>> expandByFlatteningRepoServers(SearchHit hit) {
-    val fields = Maps.transformValues(hit.getFields(), field -> field.getValues().get(0).toString());
-    final Function<JsonNode, Map<String, String>> combineMaps = (server) -> ImmutableMap.<String, String> builder()
-        // There shouldn't be collision on the keys.
-        .putAll(fields)
-        .putAll(MAPPER.<Map<String, String>> convertValue(server, MAP_TYPE))
-        .build();
-    val fileNode = READER.readTree(hit.sourceAsString());
-    val serverArray = fileNode
-        .path(FieldNames.REPOSITORY)
-        .path(FieldNames.REPO_SERVER);
+  // Merge the fields with flattened file copies fields.
+  private static Iterable<Map<String, String>> toValueMap(SearchHit hit) {
+    val repoFile = parse(hit.sourceAsString());
+    val fileCopies = repoFile.getFileCopies();
 
-    return transform(serverArray, combineMaps::apply);
+    if (isEmpty(fileCopies)) {
+      return emptyList();
+    }
+
+    val fields = asValueMap(hit);
+    val donorInfoMap = getDonorValueMap(repoFile.getDonors());
+
+    final Function<FileCopy, Map<String, String>> combineMaps = (fileCopy) -> ImmutableMap.<String, String> builder()
+        .putAll(fields)
+        .putAll(donorInfoMap)
+        .putAll(getFileCopyMap(fileCopy))
+        .build();
+
+    return transform(fileCopies, combineMaps::apply);
+  }
+
+  private static Map<String, String> getDonorValueMap(List<Donor> donors) {
+    val noDonor = isEmpty(donors);
+    val count = noDonor ? 0 : donors.size();
+
+    Map<String, Function<Donor, String>> aliasAccessors = ImmutableMap.of(
+        Fields.DONOR_ID, Donor::getDonorId,
+        Fields.PROJECT_CODE, Donor::getProjectCode);
+
+    // Get the value if there is only one element; otherwise get the count or empty string if empty.
+    return transformValues(aliasAccessors, accessor -> noDonor ? "" :
+        (count > 1) ? String.valueOf(count) : accessor.apply(donors.get(0)));
+  }
+
+  @NonNull
+  private static SearchHitField getResultByFieldAlias(Map<String, SearchHitField> valueMap, String alias) {
+    return valueMap.get(TYPE_MODEL.getField(alias));
+  }
+
+  private static Map<String, String> asValueMap(SearchHit hit) {
+    val valueMap = hit.getFields();
+
+    return toMap(MANIFEST_FIELDS, alias -> {
+      final SearchHitField resultField = getResultByFieldAlias(valueMap, alias);
+
+      return (null == resultField) ? "" : defaultString(getString(resultField.getValues()));
+    });
+  }
+
+  private static Map<String, String> getFileCopyMap(FileCopy fileCopy) {
+    val indexFile = fileCopy.getIndexFile();
+    val indexFileId = (null == indexFile) ? "" : defaultString(indexFile.getId());
+
+    return ImmutableMap.<String, String> builder()
+        .put(Fields.FILE_NAME, defaultString(fileCopy.getFileName()))
+        .put(Fields.FILE_FORMAT, defaultString(fileCopy.getFileFormat()))
+        .put(Fields.FILE_MD5SUM, defaultString(fileCopy.getFileMd5sum()))
+        .put(Fields.FILE_SIZE, String.valueOf(fileCopy.getFileSize()))
+        .put(Fields.INDEX_FILE_UUID, indexFileId)
+        .put(Fields.REPO_CODE, defaultString(fileCopy.getRepoCode()))
+        .put(Fields.REPO_TYPE, defaultString(fileCopy.getRepoType()))
+        .put(Fields.REPO_BASE_URL, defaultString(fileCopy.getRepoBaseUrl()))
+        .put(Fields.REPO_DATA_PATH, defaultString(fileCopy.getRepoDataPath()))
+        .build();
+  }
+
+  @UtilityClass
+  class RepoTypes {
+
+    final String GNOS = "GNOS";
+    final String AWS_S3 = "S3";
+
+    boolean isGnos(String repoType) {
+      return GNOS.equalsIgnoreCase(repoType);
+    }
+
+    boolean isAws(String repoType) {
+      return AWS_S3.equalsIgnoreCase(repoType);
+    }
   }
 
   @SneakyThrows
   @NonNull
   private static void generateTarEntry(TarArchiveOutputStream tar, List<Map<String, String>> allFileInfoOfOneRepo,
       String repoCode, String repoType, Date timestamp) {
-    // FIXME - magic number
-    val bufferSize = 1024 * 100;
+    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry -> buildDownloadUrl(entry));
 
     // A buffer to hold all the file content before writing it to the tar archive
     @Cleanup
-    val buffer = new ByteArrayOutputStream(bufferSize);
+    val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
 
-    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo,
-        entry -> buildDownloadUrl(
-            entry.get(FieldNames.BASE_URL),
-            entry.get(FieldNames.DATA_PATH),
-            entry.get(FieldNames.REPO_ID)));
-
-    if (isGnosRepo(repoType)) {
+    if (isGnos(repoType)) {
       generateXmlFile(buffer, downloadUrlGroups, timestamp);
+    } else if (isAws(repoType)) {
+      generateAwsTextFile(buffer, downloadUrlGroups);
     } else {
       generateTextFile(buffer, downloadUrlGroups);
     }
@@ -304,11 +411,12 @@ public class RepositoryFileService {
     for (val url : downloadUrlGroups.keySet()) {
       val rowInfo = downloadUrlGroups.get(url);
 
-      if (rowInfo.isEmpty()) {
+      if (isEmpty(rowInfo)) {
         continue;
       }
 
-      val repoId = rowInfo.get(0).get(FieldNames.REPO_ID);
+      // TODO: is this still true that same url has the same data_bundle_id??
+      val repoId = rowInfo.get(0).get(Fields.DATA_BUNDLE_ID);
 
       writeXmlEntry(writer, repoId, url, rowInfo, ++rowCount);
     }
@@ -338,43 +446,41 @@ public class RepositoryFileService {
     tsv.flush();
   }
 
-  private final static class FieldNames {
+  @SneakyThrows
+  @NonNull
+  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+    @Cleanup
+    val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
+    tsv.writeHeader(AWS_TSV_HEADERS);
 
-    final static String REPOSITORY = "repository";
-    final static String REPO_SERVER = "repo_server";
-    final static String REPO_CODE = "repo_code";
-    final static String BASE_URL = "repo_base_url";
+    for (val url : downloadUrlGroups.keySet()) {
+      val fileInfo = downloadUrlGroups.get(url);
+      val row = Lists.transform(AWS_TSV_COLUMN_FIELD_NAMES,
+          fieldName -> CONCAT_WITH_COMMA.apply(fileInfo, fieldName));
 
-    final static String REPO_TYPE = REPOSITORY + ".repo_type";
-    final static String DATA_PATH = REPOSITORY + ".repo_data_path";
-    final static String REPO_ID = REPOSITORY + ".repo_entity_id";
+      tsv.write(row);
+    }
 
-    final static String FILE_NAME = REPOSITORY + ".file_name";
-    final static String FILE_SIZE = REPOSITORY + ".file_size";
-    final static String CHECK_SUM = REPOSITORY + ".file_md5sum";
-
+    tsv.flush();
   }
 
-  private final static class XmlTags {
+  @UtilityClass
+  private class XmlTags {
 
-    final static String ROOT = "ResultSet";
-    final static String RECORD = "Result";
-    final static String RECORD_ID = "analysis_id";
-    final static String RECORD_URI = "analysis_data_uri";
-    final static String FILES = "files";
-    final static String FILE = "file";
-    final static String FILE_NAME = "filename";
-    final static String FILE_SIZE = "filesize";
-    final static String CHECK_SUM = "checksum";
+    final String ROOT = "ResultSet";
+    final String RECORD = "Result";
+    final String RECORD_ID = "analysis_id";
+    final String RECORD_URI = "analysis_data_uri";
+    final String FILES = "files";
+    final String FILE = "file";
+    final String FILE_NAME = "filename";
+    final String FILE_SIZE = "filesize";
+    final String CHECK_SUM = "checksum";
 
-  }
-
-  private static boolean isGnosRepo(String repoType) {
-    return GNOS_REPO.equalsIgnoreCase(repoType);
   }
 
   private static String getFileExtensionOf(String repoType) {
-    return isGnosRepo(repoType) ? "xml" : "txt";
+    return isGnos(repoType) ? "xml" : "txt";
   }
 
   @NonNull
@@ -419,12 +525,18 @@ public class RepositoryFileService {
   private static String buildDownloadUrl(String baseUrl, String dataPath, String id) {
     return Stream.of(baseUrl, dataPath, id)
         .map(part -> part.replaceAll("^/+|/+$", ""))
-        .collect(Collectors.joining("/"));
+        .collect(joining("/"));
   }
 
-  @NonNull
-  private static String formatToUtc(Date timestamp) {
-    return DateFormatUtils.formatUTC(timestamp, DATE_FORMAT_PATTERN);
+  private static String buildDownloadUrl(@NonNull Map<String, String> valueMap) {
+    return buildDownloadUrl(
+        valueMap.get(Fields.REPO_BASE_URL),
+        valueMap.get(Fields.REPO_DATA_PATH),
+        valueMap.get(Fields.FILE_NAME));
+  }
+
+  private static String formatToUtc(@NonNull Date timestamp) {
+    return formatUTC(timestamp, DATE_FORMAT_PATTERN);
   }
 
   @NonNull
@@ -442,8 +554,7 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl,
-      final int rowCount)
+  private static void addDownloadUrlEntryToXml(XMLStreamWriter writer, String id, String downloadUrl, int rowCount)
       throws XMLStreamException {
     writer.writeStartElement(XmlTags.RECORD);
     writer.writeAttribute("id", String.valueOf(rowCount));
@@ -454,8 +565,7 @@ public class RepositoryFileService {
     writer.writeStartElement(XmlTags.FILES);
   }
 
-  @NonNull
-  private static void closeDownloadUrlElement(XMLStreamWriter writer) throws XMLStreamException {
+  private static void closeDownloadUrlElement(@NonNull XMLStreamWriter writer) throws XMLStreamException {
     // Close off XmlTags.FILES ("files") element.
     writer.writeEndElement();
     // Close off XmlTags.RECORD ("Result") element.
@@ -468,12 +578,12 @@ public class RepositoryFileService {
     for (val fileInfo : info) {
       writer.writeStartElement(XmlTags.FILE);
 
-      addXmlElement(writer, XmlTags.FILE_NAME, fileInfo.get(FieldNames.FILE_NAME));
-      addXmlElement(writer, XmlTags.FILE_SIZE, fileInfo.get(FieldNames.FILE_SIZE));
+      addXmlElement(writer, XmlTags.FILE_NAME, fileInfo.get(Fields.FILE_NAME));
+      addXmlElement(writer, XmlTags.FILE_SIZE, fileInfo.get(Fields.FILE_SIZE));
 
       writer.writeStartElement(XmlTags.CHECK_SUM);
       writer.writeAttribute("type", "md5");
-      writer.writeCharacters(fileInfo.get(FieldNames.CHECK_SUM));
+      writer.writeCharacters(fileInfo.get(Fields.FILE_MD5SUM));
       writer.writeEndElement();
 
       writer.writeEndElement();
@@ -496,10 +606,6 @@ public class RepositoryFileService {
     closeDownloadUrlElement(writer);
   }
 
-  /**
-   * @param build
-   * @return
-   */
   public Map<String, Long> getSummary(Query query) {
     return repositoryFileRepository.getSummary(query);
   }

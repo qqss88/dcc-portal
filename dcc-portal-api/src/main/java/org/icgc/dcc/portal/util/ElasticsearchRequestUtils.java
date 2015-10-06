@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.util;
 
 import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
@@ -35,7 +36,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
@@ -43,7 +43,7 @@ import com.google.common.collect.Lists;
 @NoArgsConstructor(access = PRIVATE)
 public class ElasticsearchRequestUtils {
 
-  private static final String FILE_INDEX_TYPE = Type.REPOSITORY_FILE.getId();
+  private static final String FILE_INDEX_TYPE = REPOSITORY_FILE.getId();
   public static final String[] EMPTY_SOURCE_FIELDS = null;
 
   public static String[] resolveSourceFields(Query query, Kind kind) {

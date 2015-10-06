@@ -21,7 +21,7 @@
 
 
     this.translate = function(id) {
-      return shortLabelMap[id];
+      return _.get (shortLabelMap, id, id);
     };
 
     this.precedence = function() {

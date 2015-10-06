@@ -74,7 +74,7 @@
       filters: {
         file: {
           donorId: {is: [_ctrl.donor.id]},
-          dataFormat: { is: ['XML']}
+          fileFormat: {is: ['XML']}
         }
       }
     });

@@ -19,16 +19,16 @@ package org.icgc.dcc.portal.model;
 
 import java.util.List;
 
+import lombok.Data;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
-
-import lombok.Data;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
 
 /**
  * Models a file from external repositories such as CGHub
@@ -39,11 +39,10 @@ import lombok.val;
 public class RepositoryFile {
 
   private static final Class<RepositoryFile> MY_CLASS = RepositoryFile.class;
-  private static final ObjectMapper MAPPER = createJacksonMapper();
+  private static final ObjectMapper MAPPER = createMapper();
 
   @SneakyThrows
-  @NonNull
-  public static RepositoryFile parse(String json) {
+  public static RepositoryFile parse(@NonNull String json) {
     return MAPPER.readValue(json, MY_CLASS);
   }
 
@@ -53,139 +52,142 @@ public class RepositoryFile {
   @ApiModelProperty(value = "ID of a repository file")
   String id;
 
-  @ApiModelProperty(value = "Study type of a repository file")
-  String study;
+  String fileId;
 
   @ApiModelProperty(value = "Access type of a repository file")
   String access;
 
-  @ApiModelProperty(value = "Data type details of a repository file")
-  DataType dataType;
+  @ApiModelProperty(value = "Study type of a repository file")
+  List<String> study;
 
-  @ApiModelProperty(value = "Repository details of a repository file")
-  Repository repository;
-
-  @ApiModelProperty(value = "Donor details of a repository file")
-  Donor donor;
+  DataCategorization dataCategorization;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
-  private static final class DataType {
+  public static final class DataCategorization {
 
     @ApiModelProperty(value = "Data type of a repository file")
     String dataType;
-
-    @ApiModelProperty(value = "Data format of a repository file")
-    String dataFormat;
 
     @ApiModelProperty(value = "Experimental strategy of a repository file")
     String experimentalStrategy;
 
   }
 
+  DataBundle dataBundle;
+
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
-  private static final class Repository {
+  public static final class DataBundle {
 
-    @ApiModelProperty(value = "Repository type")
-    String repoType;
+    @ApiModelProperty(value = "")
+    String dataBundleId;
 
-    @ApiModelProperty(value = "Repository organization")
+  }
+
+  List<FileCopy> fileCopies;
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class FileCopy {
+
+    @ApiModelProperty(value = "")
+    String repoCode;
     String repoOrg;
-
-    @ApiModelProperty(value = "Repository entity ID")
-    String repoEntityId;
-
-    @ApiModelProperty(value = "List of repository details")
-    List<RepoServer> repoServer;
-
-    @ApiModelProperty(value = "Path to repository's meta-data")
+    String repoName;
+    String repoType;
+    String repoCountry;
+    String repoBaseUrl;
+    String repoDataPath;
     String repoMetadataPath;
 
-    @ApiModelProperty(value = "Path to Repository data file")
-    String repoDataPath;
+    IndexFile indexFile;
 
-    @ApiModelProperty(value = "Repository file name")
     String fileName;
+    String fileFormat;
+    String fileMd5sum;
+    Long fileSize;
+    Long lastModified;
 
-    @ApiModelProperty(value = "Repository file size")
+  }
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class IndexFile {
+
+    @ApiModelProperty(value = "")
+    String id;
+    String fileId;
+    String fileName;
+    String fileFormat;
+    String fileMd5sum;
     Long fileSize;
 
-    @ApiModelProperty(value = "MD5 checksum of a repository file")
-    String fileMd5sum;
-
-    @ApiModelProperty(value = "Last modified timestamp of a repository file")
-    String lastModified;
-
   }
+
+  List<Donor> donors;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
-  private static final class RepoServer {
+  public static final class Donor {
 
-    @ApiModelProperty(value = "Repository name")
-    String repoName;
-
-    @ApiModelProperty(value = "Repository code")
-    String repoCode;
-
-    @ApiModelProperty(value = "Country where the repository resides")
-    String repoCountry;
-
-    @ApiModelProperty(value = "Base URL of a repository")
-    String repoBaseUrl;
-
-  }
-
-  @Data
-  @JsonIgnoreProperties(ignoreUnknown = true)
-  private static final class Donor {
-
-    @ApiModelProperty(value = "Project code")
+    @ApiModelProperty(value = "")
+    String donorId;
+    String program;
+    String primarySite;
     String projectCode;
 
-    @ApiModelProperty(value = "Program")
-    String program;
-
-    @ApiModelProperty(value = "Study")
     String study;
-
-    @ApiModelProperty(value = "Primary Site")
-    String primarySite;
-
-    @ApiModelProperty(value = "Donor ID")
-    String donorId;
-
-    @ApiModelProperty(value = "Donor submitter ID")
-    String submittedDonorId;
-
-    @ApiModelProperty(value = "Specimen ID")
+    String sampleId;
     String specimenId;
+    String specimenType;
 
-    @ApiModelProperty(value = "Specimen submitter ID")
+    String submittedDonorId;
+    String submittedSampleId;
     String submittedSpecimenId;
 
-    @ApiModelProperty(value = "Sample ID")
-    String sampleId;
+    String matchedControlSampleId;
 
-    @ApiModelProperty(value = "Sample submitter ID")
-    String submittedSampleId;
-
-    @ApiModelProperty(value = "TCGA participant barcode")
-    String tcgaParticipantBarcode;
-
-    @ApiModelProperty(value = "TCGA sample barcode")
-    String tcgaSampleBarcode;
-
-    @ApiModelProperty(value = "TCGA aliquot barcode")
-    String tcgaAliquotBarcode;
+    OtherIdentifiers otherIdentifiers;
 
   }
 
-  /*
-   * Here the visibility is package-private because the unit test for this class calls this method.
-   */
-  static final ObjectMapper createJacksonMapper() {
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class OtherIdentifiers {
+
+    @ApiModelProperty(value = "")
+    String tcgaSampleBarcode;
+    String tcgaAliquotBarcode;
+    String tcgaParticipantBarcode;
+
+  }
+
+  AnalysisMethod analysisMethod;
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class AnalysisMethod {
+
+    String analysisType;
+    String software;
+
+  }
+
+  ReferenceGenome referenceGenome;
+
+  @Data
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public static final class ReferenceGenome {
+
+    String genomeBuild;
+    String referenceName;
+    String downloadUrl;
+
+  }
+
+  // Helpers
+  static final ObjectMapper createMapper() {
     /*
      * We read fields in snake case from an ES response into fields in camel case in Java. Note: Due to this, the serde
      * process is one-way only (deserializing from snake case but serializing in camel case). Don't expect a serialized

@@ -1,54 +1,59 @@
 <aside class="t_sidebar">
-    <div style="position: relative; margin-right: -2rem">
-        <ul class="t_facets">
-            <li data-tags-facet
-                data-type="file"
-                data-facet-name="id"
-                data-proxy-type="file"
-                data-proxy-facet-name="id"
-                data-label="File"
-                data-placeholder="Enter file name, file ID" ></li>
-            <li data-tags-facet
-                data-type="file-donor"
-                data-facet-name="id"
-                data-label="Donor"
-                data-placeholder="e.g. DO45299, SA501608"
-                data-proxy-type="file"
-                data-proxy-facet-name="donorId"></li>
-            <terms data-type="file" data-facet-name="projectCode"
-                   data-label="Project"
-                   data-facet="ExternalRepoController.files.termFacets.projectCode"
-                   data-defined="true"></terms>
-            <terms data-type="file" data-facet-name="primarySite"
-                   data-label="Primary Site"
-                   data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
-            <terms data-type="file" data-facet-name="repoName"
-                   data-facet="ExternalRepoController.files.termFacets.repoName"
-                   data-label="Repository"></terms>
-            <terms data-type="file" data-facet-name="dataType"
-                   data-label="Data Type"
-                   data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
-            <terms data-type="file" data-facet-name="experimentalStrategy"
-                   data-label="Experimental Strategy"
-                   data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
-                   data-defined="true"></terms>
-            <terms data-type="file" data-facet-name="study"
-                   data-label="Only Files in Study"
-                   data-missing-text="None"
-                   data-facet="ExternalRepoController.files.termFacets.study"></terms>
-            <terms data-type="file" data-facet-name="dataFormat"
-                   data-label="File Format"
-                   data-facet="ExternalRepoController.files.termFacets.dataFormat"></terms>
-            <terms data-type="file" data-facet-name="access"
-                   data-label="Access"
-                   data-facet="ExternalRepoController.files.termFacets.access"></terms>
-            <terms data-type="file" data-facet-name="donorStudy"
-                   data-label="Only Donors in Study"
-                   data-missing-text="None"
-                   data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
-        </ul>
-    </div>
+  <div style="position: relative; margin-right: -2rem">
+    <ul class="t_facets">
+      <li data-tags-facet
+          data-type="file"
+          data-facet-name="id"
+          data-proxy-type="file"
+          data-proxy-facet-name="id"
+          data-label="File"
+          data-placeholder="Enter file name, file ID" ></li>
+      <li data-tags-facet
+          data-type="file-donor"
+          data-facet-name="id"
+          data-label="Donor"
+          data-placeholder="e.g. DO45299, SA501608"
+          data-proxy-type="file"
+          data-proxy-facet-name="donorId"></li>
+
+      <terms data-type="file" data-facet-name="projectCode"
+             data-label="Project"
+             data-facet="ExternalRepoController.files.termFacets.projectCode"
+             data-defined="true"></terms>
+      <terms data-type="file" data-facet-name="primarySite"
+             data-label="Primary Site"
+             data-facet="ExternalRepoController.files.termFacets.primarySite"></terms>
+      <terms data-type="file" data-facet-name="specimenType"
+             data-facet="ExternalRepoController.files.termFacets.specimenType"
+             data-label="Specimen Type"></terms>
+      <terms data-type="file" data-facet-name="repoName"
+             data-facet="ExternalRepoController.files.termFacets.repoName"
+             data-label="Repository"></terms>
+      <terms data-type="file" data-facet-name="dataType"
+             data-label="Data Type"
+             data-facet="ExternalRepoController.files.termFacets.dataType"></terms>
+      <terms data-type="file" data-facet-name="experimentalStrategy"
+             data-label="Experimental Strategy"
+             data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
+             data-defined="true"></terms>
+      <terms data-type="file" data-facet-name="study"
+             data-label="Only Files in Study"
+             data-missing-text="None"
+             data-facet="ExternalRepoController.files.termFacets.study"></terms>
+      <terms data-type="file" data-facet-name="fileFormat"
+             data-label="File Format"
+             data-facet="ExternalRepoController.files.termFacets.fileFormat"></terms>
+      <terms data-type="file" data-facet-name="access"
+             data-label="Access"
+             data-facet="ExternalRepoController.files.termFacets.access"></terms>
+      <terms data-type="file" data-facet-name="donorStudy"
+             data-label="Only Donors in Study"
+             data-missing-text="None"
+             data-facet="ExternalRepoController.files.termFacets.donorStudy"></terms>
+    </ul>
+  </div>
 </aside>
+
 <article style="position: relative;">
     <current></current>
     <section style="padding-top:0">
@@ -85,15 +90,18 @@
                     </a>
                 </div>
                 <div class="quarter omega">
-                    <i class="icon-database" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
+                    <i class="icon-database" style="font-size:1.25rem"></i>
+                    <strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong> (average)
                 </div>
             </section>
             <div class="clearfix"></div>
+
             <span class="action-toolbar pull-right">
               <span class="action-item">
                   <i class="icon-floppy"></i><a href="" data-ng-click="ExternalRepoController.saveDonorSet('donor', ExternalRepoController.summary.donorCount)">Save Donor Set</a>
               </span>
             </span>
+
             <div class="t_table_top">
                 <span data-table-counts data-label="files" data-page="ExternalRepoController.files.pagination"></span>
                 <span class="t_tools">
@@ -108,43 +116,68 @@
             <table class="table table-selectable">
                 <thead>
                     <th>&nbsp;</th>
-                    <th data-sortable data-type="files" data-field="fileName" data-active="true" data-reversed="true">File Name</th>
+                    <th data-sortable data-type="files" data-field="fileName"
+                      data-active="true" data-reversed="true">File ID</th>
+
                     <th data-sortable data-type="files" data-field="donorId">Donor</th>
+
                     <th>Repository</th>
+
                     <th data-sortable data-type="files" data-field="projectCode">Project</th>
+
                     <th>Study</th>
                     <th>Data type</th>
                     <th>Format</th>
-                    <th data-sortable data-type="files" data-field="fileSize">Size</th>
+
+                    <!-- <th data-sortable data-type="files" data-field="fileSize">Size</th> -->
+                    <th>Size (avg.)</th>
+
                 </thead>
+
                 <tbody>
-                    <tr data-ng-repeat="row in ExternalRepoController.files.hits">
-                        <td class="text-center" data-ng-click="ExternalRepoController.toggleRow(row)" style="cursor:pointer">
-                           <i class="{{ ExternalRepoController.isSelected(row)? 'icon-check':'icon-check-empty' }}"></i>
-                        </td>
-                        <td style="max-width:28rem; font-size: {{ row.repository.fileName.length > 100? '0.75rem' : ' inherit' }}">
-                           <i class="{{row.access==='open'? 'icon-lock-open':'icon-lock'}}"></i>
-                           <a href="/repository/external/files/{{row.id}}">{{row.repository.fileName}}</a>
-                        </td>
-                        <td><a href="/donors/{{row.donor.donorId}}">{{row.donor.donorId}}</a></td>
-                        <td>{{ ExternalRepoController.displayRepoNames (row) }}</td>
-                        <td><a href="/projects/{{row.donor.projectCode}}">{{row.donor.projectCode}}</a></td>
-                        <td>
-                            <span class="badge" style="font-size:0.5rem" data-ng-if="row.study === 'PCAWG'"><small>PCAWG</small></span>
-                            <span data-ng-if="row.study !== 'PCAWG'">{{row.study}}</span>
-                        </td>
-                        <td>
-                          {{ row.dataType.dataType }}
-                        </td>
-                        <td>
-                          {{ row.dataType.dataFormat }}
-                        </td>
-                        <td>{{ row.repository.fileSize | bytes }}</td>
-                    </tr>
+                  <tr data-ng-repeat="row in ExternalRepoController.files.hits">
+                    <td class="text-center" data-ng-click="ExternalRepoController.toggleRow (row)" style="cursor: pointer">
+                     <i class="{{ ExternalRepoController.isSelected (row) ? 'icon-check' : 'icon-check-empty' }}" />
+                    </td>
+
+                    <td style="max-width:28rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
+                       <i class="{{row.access === 'open' ? 'icon-lock-open' : 'icon-lock'}}" />
+                       <a href="/repository/external/files/{{row.id}}"
+                        tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}">
+                        {{ row.fileId }}
+                       </a>
+                    </td>
+
+                    <td ng-init="donorData = ExternalRepoController.buildDonorInfo (row.donors)">
+                      <a href="{{ donorData.href }}" tooltip="{{ donorData.tooltip}} ">
+                        {{ donorData.text }}
+                      </a>
+                    </td>
+
+                    <td>{{ ExternalRepoController.repoNames (row.fileCopies) }}</td>
+
+                    <td ng-init="ProjectData = ExternalRepoController.buildProjectInfo (row.donors)">
+                      <a href="{{ ProjectData.href }}" tooltip="{{ ProjectData.tooltip }}">
+                        {{ ProjectData.text }}
+                      </a>
+                    </td>
+
+                    <td>
+                      <study-badge study="{{ row.study [0] }}" text="{{ row.study [0] }}">
+                    </td>
+
+                    <td>{{ row.dataCategorization.dataType }}</td>
+
+                    <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
+
+                    <td>{{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}</td>
+
+                  </tr>
                 </tbody>
             </table>
            <pagination-controls data-type="files" data-data="ExternalRepoController.files"></pagination-controls>
         </div>
+
         <div>
             <br>
 

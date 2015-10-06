@@ -54,6 +54,30 @@ public abstract class FieldModel {
     OBJECT
   }
 
+  public boolean isLong() {
+    return type == FieldType.LONG;
+  }
+
+  public boolean isDouble() {
+    return type == FieldType.DOUBLE;
+  }
+
+  public boolean isString() {
+    return type == FieldType.STRING;
+  }
+
+  public boolean isArray() {
+    return type == FieldType.ARRAY;
+  }
+
+  public boolean isBoolean() {
+    return type == FieldType.BOOLEAN;
+  }
+
+  public boolean isObject() {
+    return type == FieldType.OBJECT;
+  }
+
   public abstract <T> T accept(FieldVisitor<T> visitor);
 
 }

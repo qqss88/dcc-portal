@@ -82,7 +82,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -123,7 +122,8 @@ public class RepositoryFileResource {
       @ApiParam(value = API_SORT_VALUE) @QueryParam(API_SORT_FIELD) @DefaultValue("fileName") String sort,
       @ApiParam(value = API_ORDER_VALUE, allowableValues = API_ORDER_ALLOW) @QueryParam(API_ORDER_PARAM) @DefaultValue(DEFAULT_ORDER) String order) {
 
-    ObjectNode filters = filtersParam.get();
+    val filters = filtersParam.get();
+    log.debug("Received filters: '{}'", filters);
 
     return repositoryFileService.findAll(query().fields(fields).filters(filters)
         .from(from.get())

@@ -25,17 +25,18 @@
 
     // FIXME: Move this out
     var repoMap = {
-       'CGHub - Santa Cruz': 'cghub',
-       // 'TCGA DCC - Washington': 'tcga',
-       'TCGA DCC - Bethesda': 'tcga',
-       'PCAWG - Barcelona': 'pcawg-barcelona',
-       'PCAWG - Santa Cruz': 'pcawg-cghub',
-       'PCAWG - Tokyo': 'pcawg-tokyo',
-       'PCAWG - Seoul': 'pcawg-seoul',
-       'PCAWG - London': 'pcawg-london',
-       'PCAWG - Heidelberg': 'pcawg-heidelberg',
-       'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
-       'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
+      'AWS - Virginia': 'aws-virginia',
+      'CGHub - Santa Cruz': 'cghub',
+      // 'TCGA DCC - Washington': 'tcga',
+      'TCGA DCC - Bethesda': 'tcga',
+      'PCAWG - Barcelona': 'pcawg-barcelona',
+      'PCAWG - Santa Cruz': 'pcawg-cghub',
+      'PCAWG - Tokyo': 'pcawg-tokyo',
+      'PCAWG - Seoul': 'pcawg-seoul',
+      'PCAWG - London': 'pcawg-london',
+      'PCAWG - Heidelberg': 'pcawg-heidelberg',
+      'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
+      'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
     };
 
 

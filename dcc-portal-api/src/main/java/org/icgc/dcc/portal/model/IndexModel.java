@@ -2,24 +2,30 @@ package org.icgc.dcc.portal.model;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toMap;
+import static org.dcc.portal.pql.meta.IndexModel.getRepositoryFileTypeModel;
+import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.dcc.portal.pql.meta.TypeModel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
+import org.dcc.portal.pql.meta.TypeModel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 
 @Component
 public class IndexModel {
@@ -39,10 +45,11 @@ public class IndexModel {
   /**
    * Special cases for term lookups
    */
-  public static final String API_ENTITY_LIST_ID_FIELD_NAME = "entitySetId";
+  public static final String API_ENTITY_LIST_ID_FIELD_NAME = ENTITY_SET_ID;
 
   // Index name for the icgc-repository index.
-  public static final String REPOSITORY_INDEX_NAME = "icgc-repository";
+  // FIXME: Change the value to "icgc-repository"
+  public static final String REPOSITORY_INDEX_NAME = "test-icgc-repository";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -91,7 +98,7 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
-    REPOSITORY_FILE("file"),
+    REPOSITORY_FILE("file-centric"),
 
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
@@ -107,39 +114,34 @@ public class IndexModel {
     private final String id;
   }
 
-  private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          .put("id", "id")
-          .put("repositoryEntityId", "repository.repo_entity_id")
-          .put("repositoryDataPath", "repository.repo_data_path")
-          .put("repositoryBaseURLs", "repository.repo_server.repo_base_url") // This is a list
-          .put("repositoryType", "repository.repo_type")
-          .put("repositoryCountries", "repository.repo_server.repo_country")
-          .put("repoName", "repository.repo_server.repo_name")
-          .put("fileName", "repository.file_name")
-          .put("fileSize", "repository.file_size")
-          .put("checksum", "repository.file_md5sum")
-          .put("lastUpdate", "repository.last_modified")
-          .put("projectCode", "donor.project_code")
-          .put("primarySite", "donor.primary_site")
-          .put("study", "study")
-          .put("donorStudy", "donor.study")
-          .put("dataType", "data_type.data_type")
-          .put("experimentalStrategy", "data_type.experimental_strategy")
-          .put("dataFormat", "data_type.data_format")
-          .put("access", "access")
-          .put("donorId", "donor.donor_id")
-          .put("donorSubmitterId", "donor.submitted_donor_id")
-          .put("specimenId", "donor.specimen_id")
-          .put("specimenSubmitterId", "donor.submitted_specimen_id")
-          .put("sampleId", "donor.sample_id")
-          .put("sampleSubmitterId", "donor.submitted_sample_id")
-          .put("program", "donor.program")
-          .put("TCGAParticipantBarcode", "donor.tcga_participant_barcode")
-          .put("TCGASampleBarcode", "donor.tcga_sample_barcode")
-          .put("TCGAAliquotBarcode", "donor.tcga_aliquot_barcode")
-          .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
-          .build();
+  private static final TypeModel REPO_FILE_TYPE_MODEL = getRepositoryFileTypeModel();
+
+  // These names are used by the client
+  private static final List<String> REPOSITORY_FILE_CLIENT_FIELD_ALIAS_MAPPING = ImmutableList.<String> builder()
+      .add(RepositoryFileTypeModel.Fields.ID)
+      .add(RepositoryFileTypeModel.Fields.REPO_NAME)
+      .add(RepositoryFileTypeModel.Fields.FILE_NAME)
+      .add(RepositoryFileTypeModel.Fields.FILE_SIZE)
+      .add(RepositoryFileTypeModel.Fields.PROJECT_CODE)
+      .add(RepositoryFileTypeModel.Fields.PRIMARY_SITE)
+      .add(RepositoryFileTypeModel.Fields.STUDY)
+      .add(RepositoryFileTypeModel.Fields.DONOR_STUDY)
+      .add(RepositoryFileTypeModel.Fields.DATA_TYPE)
+      .add(RepositoryFileTypeModel.Fields.EXPERIMENTAL_STRATEGY)
+      .add(RepositoryFileTypeModel.Fields.FILE_FORMAT)
+      .add(RepositoryFileTypeModel.Fields.ACCESS)
+      .add(RepositoryFileTypeModel.Fields.DONOR_ID)
+      .add(RepositoryFileTypeModel.Fields.SUBMITTED_DONOR_ID)
+      .add(RepositoryFileTypeModel.Fields.SPECIMEN_ID)
+      .add(RepositoryFileTypeModel.Fields.SPECIMEN_TYPE)
+      .add(RepositoryFileTypeModel.Fields.SAMPLE_ID)
+      .add(RepositoryFileTypeModel.Fields.PROGRAM)
+      .build();
+  private static final ImmutableMap<String, String> REPOSITORY_FILE_FIELDS_MAPPING = ImmutableMap
+      .<String, String> builder()
+      .putAll(Maps.toMap(REPOSITORY_FILE_CLIENT_FIELD_ALIAS_MAPPING, alias -> REPO_FILE_TYPE_MODEL.getField(alias)))
+      .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
+      .build();
 
   private static final ImmutableMap<String, String> FAMILY_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -373,7 +375,7 @@ public class IndexModel {
           .put("submittedMatchedSampleId", "matched_sample_id")
           .put(API_ENTITY_LIST_ID_FIELD_NAME, API_ENTITY_LIST_ID_FIELD_NAME)
 
-  .build();
+          .build();
 
   private static final ImmutableMap<String, String> RELEASE_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
@@ -408,10 +410,10 @@ public class IndexModel {
           .put("id", "id")
           .put("type", "type")
 
-  // Gene and project and pathway
+          // Gene and project and pathway
           .put("name", "name")
 
-  // Gene
+          // Gene
           .put("symbol", "symbol")
           .put("ensemblTranscriptId", "ensemblTranscriptId")
           .put("ensemblTranslationId", "ensemblTranslationId")
@@ -421,37 +423,37 @@ public class IndexModel {
           .put("entrezGene", "entrezGene")
           .put("hgnc", "hgnc")
 
-  // Mutation
+          // Mutation
           .put("mutation", "mutation")
           .put("geneMutations", "geneMutations")
           .put("start", "start")
 
-  // Project
+          // Project
           .put("tumourType", "tumourType")
           .put("tumourSubtype", "tumourSubtype")
           .put("primarySite", "primarySite")
 
-  // Donor
+          // Donor
           .put("specimenIds", "specimenIds")
           .put("submittedSpecimenIds", "submittedSpecimenIds")
           .put("sampleIds", "sampleIds")
           .put("submittedSampleIds", "submittedSampleIds")
           .put("projectId", "projectId")
 
-  // Donor-file, these are derived from file
+          // Donor-file, these are derived from file
           .put("submittedId", "submittedId")
           .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
           .put("TCGASampleBarcode", "TCGASampleBarcode")
           .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 
-  // GO Term
+          // GO Term
           .put("altIds", "altIds")
 
-  // File Repo
+          // File Repo
           .put("file_name", "file_name")
           .put("donor_id", "donor_id")
 
-  // Pathway
+          // Pathway
           .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
@@ -483,7 +485,7 @@ public class IndexModel {
    * private static final ImmutableMap<String, String> GO_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("ontology", "ontology") .put("altIds", "alt_ids") .put("synonyms", "synonyms") .put("inferredTree",
    * "inferred_tree") .build();
-   *
+   * 
    * private static final ImmutableMap<String, String> PATHWAY_SET_FIELDS_MAPPING = new ImmutableMap.Builder<String,
    * String>() .put("hierarchy", "hierarchy") .build();
    */

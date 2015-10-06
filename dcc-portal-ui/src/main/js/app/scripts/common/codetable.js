@@ -64,7 +64,7 @@
       'repoName': 'Repository',
       'fileName': 'File',
       'study': 'Only Files in Study',
-      'dataFormat': 'File Format',
+      'fileFormat': 'File Format',
       'dataType': 'Data Type',
       'donorStudy': 'Only Donors in Study',
       'projectCode': 'Project',
