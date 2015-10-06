@@ -470,8 +470,7 @@ public class DonorRepository implements Repository {
 
     // Only download donor with complete (has submitted molecular data)
     val donorFilters = FilterBuilders.boolFilter()
-        .must(FilterBuilders.termFilter("_project_id", projectId))
-        .must(FilterBuilders.termFilter("_summary._complete", true));
+        .must(FilterBuilders.termFilter("_project_id", projectId));
 
     val search = client.prepareSearch(index)
         .setTypes(TYPE.getId())
