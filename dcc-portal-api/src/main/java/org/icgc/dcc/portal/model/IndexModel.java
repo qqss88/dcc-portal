@@ -98,7 +98,8 @@ public class IndexModel {
     GENE_CENTRIC("gene-centric"),
     MUTATION_CENTRIC("mutation-centric"),
     OCCURRENCE_CENTRIC("observation-centric"),
-    REPOSITORY_FILE("file-centric"),
+    REPOSITORY_FILE("file"),
+    REPOSITORY_FILE_CENTRIC("file-centric"),
 
     DONOR_TEXT("donor-text"),
     GENE_TEXT("gene-text"),
