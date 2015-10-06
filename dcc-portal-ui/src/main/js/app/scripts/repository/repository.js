@@ -314,10 +314,10 @@
           paths.many + createFilter (category, ids) :
           paths.one + _.first (ids)
       };
-    };
+    }
 
     _ctrl.buildDonorInfo = function (donors) {
-      var toolTipMaker = function (ids) {
+      var toolTipMaker = function () {
         return '';
       };
       return buildDataInfo (donors, 'donorId', {one: '/donors/', many: '/search?filters='},
@@ -355,12 +355,12 @@
         .map ('fileName')
         .unique()
         .join ('<br>');
-    }
+    };
 
     _ctrl.fileAverageSize = function (fileCopies) {
       var count = _.size (fileCopies);
       return (count > 0) ? _.sum (fileCopies, 'fileSize') / count : 0;
-    }
+    };
 
     /**
      * Export table
