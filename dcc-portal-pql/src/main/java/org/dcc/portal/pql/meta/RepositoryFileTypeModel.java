@@ -18,21 +18,6 @@
 package org.dcc.portal.pql.meta;
 
 import static java.util.Collections.emptyMap;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.ACCESS;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.DATA_BUNDLE_ID;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.DATA_TYPE;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.DONORS;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.DONOR_STUDY;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.EXPERIMENTAL_STRATEGY;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.FILE_COPIES;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.FILE_FORMAT;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.FILE_ID;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.FILE_UUID;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.PRIMARY_SITE;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.PROJECT_CODE;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.REPO_NAME;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.SPECIMEN_TYPE;
-import static org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields.STUDY;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
@@ -255,23 +240,23 @@ public class RepositoryFileTypeModel extends TypeModel {
 
   // Used for select(*) - default projection
   public static final List<String> PUBLIC_FIELDS = ImmutableList.of(
-      DATA_BUNDLE_ID,
-      FILE_UUID,
-      FILE_ID,
-      FILE_COPIES,
-      DONORS);
+      Fields.DATA_BUNDLE_ID,
+      Fields.FILE_UUID,
+      Fields.FILE_ID,
+      Fields.FILE_COPIES,
+      Fields.DONORS);
 
   public static final List<String> AVAILABLE_FACETS = ImmutableList.<String> builder()
-      .add(PROJECT_CODE)
-      .add(PRIMARY_SITE)
-      .add(SPECIMEN_TYPE)
-      .add(REPO_NAME)
-      .add(DATA_TYPE)
-      .add(EXPERIMENTAL_STRATEGY)
-      .add(STUDY)
-      .add(FILE_FORMAT)
-      .add(ACCESS)
-      .add(DONOR_STUDY)
+      .add(Fields.PROJECT_CODE)
+      .add(Fields.PRIMARY_SITE)
+      .add(Fields.SPECIMEN_TYPE)
+      .add(Fields.REPO_NAME)
+      .add(Fields.DATA_TYPE)
+      .add(Fields.EXPERIMENTAL_STRATEGY)
+      .add(Fields.STUDY)
+      .add(Fields.FILE_FORMAT)
+      .add(Fields.ACCESS)
+      .add(Fields.DONOR_STUDY)
       .build();
 
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
