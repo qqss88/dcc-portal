@@ -44,7 +44,7 @@
     };
 
     // Adds a line to the lines array gives an array of points and description of the line
-    var generateLine = function (points, color, type, id, lineType) {
+    var generateLine = function (points, color, type, id, lineType, failed) {
       for (var j = 0; j < points.length - 1; j++) {
         lines.push({
           x1: points[j].x,
@@ -55,7 +55,8 @@
           marker: type,
           color: color, // For debugging, every line type has a color
           id:id,
-          type: lineType
+          type: lineType,
+          failedReaction: failed
         });
       }
     };
@@ -78,7 +79,7 @@
     };
 
     // Generate a line based on the type of reaction & node using human-curated points
-    var getNodeLines = function (reaction, node, reactionId,reactionClass) {
+    var getNodeLines = function (reaction, node, reactionId, reactionClass, failed) {
       var count = {inputs:0,outputs:0};
       if(!node.base || node.base.length === 0){
         return 'missing';
@@ -89,29 +90,29 @@
       case 'Input':
         base.push(reaction.base[0]);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'red', 'Input',reactionId,reactionClass);
+        generateLine(base, 'red', 'Input', reactionId, reactionClass, failed);
         count.inputs = count.inputs + 1;
         break;
       case 'Output':
         base.push(reaction.center);
         base.reverse(); // Make sure output points at the output
-        generateLine(base, 'green', 'Output',reactionId,reactionClass);
+        generateLine(base, 'green', 'Output', reactionId,reactionClass, failed);
         count.outputs = count.outputs + 1;
         break;
       case 'Activator':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'blue', 'Activator',reactionId,reactionClass);
+        generateLine(base, 'blue', 'Activator', reactionId, reactionClass, failed);
         break;
       case 'Catalyst':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'purple', 'Catalyst',reactionId,reactionClass);
+        generateLine(base, 'purple', 'Catalyst', reactionId, reactionClass, failed);
         break;
       case 'Inhibitor':
         base.push(reaction.center);
         base[0] = getNodeCenter(node.id);
-        generateLine(base, 'orange', 'Inhibitor',reactionId,reactionClass);
+        generateLine(base, 'orange', 'Inhibitor', reactionId, reactionClass, failed);
         break;
       }
 
@@ -123,7 +124,7 @@
       var addedTypes = [];
 
       reaction.nodes.forEach(function (node) {
-        addedTypes.push(getNodeLines(reaction,node,id,reaction.class));
+        addedTypes.push(getNodeLines(reaction, node, id, reaction.class, reaction.failedReaction));
       });
       
       var hasInputs = _.contains(addedTypes,'Input');
@@ -141,7 +142,7 @@
       // This creates a base reaction line
       generateLine(baseLine,
                    hasOutputs ?'black':'navy',
-                   hasOutputs ?reaction.type:'Output',id,reaction.class);
+                   hasOutputs ?reaction.type:'Output', id, reaction.class, reaction.failedReaction);
     });
 
     return lines;
@@ -153,8 +154,10 @@
   RendererUtils.prototype.getLegendNodes =  function(marginLeft,marginTop, svg){
     var nodes = [];
     var mutatedNodeText = 'Mutated Gene(s)';
+    var failedText = 'Failed Output';
+    var lofText = "LossOfFunction";
     var x = marginLeft, y= marginTop;
-    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',mutatedNodeText];
+    var types = ['Complex','Protein','EntitySet','Chemical','Compartment','ProcessNode',failedText,lofText,mutatedNodeText];
     for(var i=0;i<types.length;i++){
       x = i%2===0?marginLeft:marginLeft+100+10;
       y = Math.floor(i/2)*40 + marginTop + 5*Math.floor(i/2);
@@ -163,8 +166,21 @@
       nodes.push({
         position:{x:x,y:y},
         size:{width:90,height:30},
-        type:type==='ProcessNode'?type:'Renderable'+type,
+        type:(function(type) {
+          if (type==='ProcessNode') {
+            return type;
+          } else if (type===failedText) {
+            return 'RenderableFailed';
+          } else if (type===lofText) {
+            return 'RenderableEntitySet';
+          } else {
+            return 'Renderable'+type;
+          }
+        })(type),
         id:type===mutatedNodeText?'mutated':'fake',
+        crossed:type===failedText?true:false,
+        lof:type===lofText?true:false,
+        grayed: false,
         reactomeId:type===mutatedNodeText?'mutated':'fake',
         text:{content:type,position:{x:x,y:y}}
       });
@@ -191,7 +207,7 @@
   RendererUtils.prototype.getLegendLines = function (marginLeft,marginTop,svg) {
     var lines = [];
     var y=marginTop;
-    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Sub-Pathway'];
+    var markers = ['Output','Catalyst','Activator','Inhibitor','Link','Disease-Associated'];
     markers.forEach(function (elem) {
       lines.push({
         x1: marginLeft,
@@ -201,13 +217,19 @@
         marked: true,
         marker: elem+'-legend',
         color: 'black',
-        id: elem==='Sub-Pathway'?'-sub-example':'fake',
+        id: (function(elem) {
+          if (elem==='Disease-Associated') {
+            return '-failed-example';
+          } else {
+            return 'fake';
+          }
+        })(elem),
         type: elem==='Link'?'entitysetandmemberlink':'fake'
       });
       svg.append('foreignObject').attr({
         x: marginLeft+80,
         y:y-15,
-        width:90,
+        width:105,
         height:30,
         'fill':'none'
       }).append('xhtml:body')
@@ -221,7 +243,7 @@
     return lines;
   };
   
-   /*
+ /*
   * Create a list of reaction lines for legend
   */
   RendererUtils.prototype.getLegendLabels = function (marginLeft,marginTop,svg) {

@@ -192,6 +192,25 @@ $compartmentBorder:#ffc38b;
   max-height: 150px;
 }
 
+.failed-reaction {
+  stroke: red;
+  stroke-width: 2px;
+}
+
+.lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode{
+  background-color:$primaryNodeColor;
+  border: 2px dotted red;
+}
+
+.lof-RenderableComplex, .lof-RenderableEntitySet{
+  background-color:$secondaryNodeColor;
+  border: 2px dotted red;
+}
+
+.lof-cell {
+  padding: 0px;
+}
+
 .pathway-fullscreen-controller {
   position:absolute;
   left: 0;
