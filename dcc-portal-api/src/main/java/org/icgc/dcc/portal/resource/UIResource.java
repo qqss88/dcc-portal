@@ -243,7 +243,7 @@ public class UIResource {
     val url = Resources.getResource(PUBLIC_KEY_PATH);
     return Response.ok(Resources.toByteArray(url))
         .type("text/plain")
-        .header("Content-Disposition", "attachment; filename=\"jenkins_pub.gpg\"")
+        .header("Content-Disposition", "attachment; filename=\"icgc-software.pub\"")
         .build();
   }
 
