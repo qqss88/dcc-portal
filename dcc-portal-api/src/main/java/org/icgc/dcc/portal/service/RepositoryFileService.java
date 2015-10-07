@@ -36,6 +36,7 @@ import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
+import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregations2Facets;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -146,12 +147,12 @@ public class RepositoryFileService {
   private static final String[] AWS_TSV_HEADERS = new String[] {
       "repo_code",
       "file_id",
-      "file_uuid",
+      "object_id",
       "file_format",
       "file_name",
       "file_size",
       "md5_sum",
-      "index_file_uuid",
+      "index_object_id",
       "donor_id/donor_count",
       "project_id/project_count"
   };
@@ -214,8 +215,7 @@ public class RepositoryFileService {
     val hits = response.getHits();
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    externalFiles.setTermFacets(RepositoryFileRepository.convertAggregations2Facets(response.getAggregations()));
-    // externalFiles.setFacets(response.getFacets());
+    externalFiles.setTermFacets(convertAggregations2Facets(response.getAggregations()));
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return externalFiles;

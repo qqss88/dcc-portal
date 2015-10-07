@@ -325,9 +325,9 @@ public class RepositoryFileRepository {
 
     private final String DONOR = "donor";
     private final String FILE_SIZE = "fileSize";
-    // Special filtered case - repo sizes and repo donors
     private final String REPO_SIZE = "repositorySizes";
     private final String REPO_NAME = "repositoryNamesFiltered";
+
   }
 
   private static List<AggregationBuilder<?>> aggs(final ObjectNode filters) {
@@ -346,8 +346,10 @@ public class RepositoryFileRepository {
     val repoFilters = buildRepoFilters(filters.deepCopy());
     val repoNameFieldName = toRawFieldName(Fields.REPO_NAME);
 
-    // Facets that aren't visible in the UI.
-    // Special filtered cases (do not exclude self filtering): repositoryNamesFiltered & repositorySize
+    /*
+     * Facets that aren't visible in the UI. Special filtered cases (do not exclude self filtering):
+     * repositoryNamesFiltered & repositorySize
+     */
     // repositoryNamesFiltered
     val repoNameAggName = CustomAggregationFields.REPO_NAME;
     val filterAgg = filter(repoNameAggName).filter(repoFilters);
@@ -408,10 +410,7 @@ public class RepositoryFileRepository {
     return builder.subAggregation(termsAgg).subAggregation(missingAgg);
   }
 
-  /**
-   * FIXME: This is just temporary until PQL is in place, it does just enough to work.
-   */
-  public static Map<String, TermFacet> convertAggregations2Facets(Aggregations aggs) {
+  public static Map<String, TermFacet> convertAggregations2Facets(@NonNull Aggregations aggs) {
     val result = Maps.<String, TermFacet> newHashMap();
 
     for (val agg : aggs) {
@@ -531,6 +530,8 @@ public class RepositoryFileRepository {
     return request.execute().actionGet();
   }
 
+  // FIXME: Move the CSV writing piece out to the service and leave the ES search here.
+  // The CSV generation belongs to the service, not to the repository.
   public StreamingOutput exportData(Query query) {
     return new StreamingOutput() {
 
