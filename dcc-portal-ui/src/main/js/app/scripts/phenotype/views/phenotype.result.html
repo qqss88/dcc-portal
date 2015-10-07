@@ -67,11 +67,20 @@
             <tbody>
                 <tr data-ng-repeat="row in gender.uiTable">
                     <td>{{row.term | readable}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[0]].count > 0" href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a>
+                      <span data-ng-if="row[setIds[0]].count === 0" >--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[1]].count > 0" href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a>
+                      <span data-ng-if="row[setIds[1]].count === 0" >--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[1]].percentage*100 | number:2}}</td>
-                    <td class="text-right" data-ng-if="setIds[2]"><a href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a></td>
+                    <td class="text-right" data-ng-if="setIds[2]">
+                      <a data-ng-if="row[setIds[2]].count > 0" href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a>
+                      <span data-ng-if="row[setIds[2]].count === 0" >--</span>
+                    </td>
                     <td class="text-right" data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
                 </tr>
             </tbody>
@@ -121,11 +130,20 @@
             <tbody>
                 <tr data-ng-repeat="row in vital.uiTable">
                     <td>{{row.term | readable}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[0]].count > 0" href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a>
+                      <span data-ng-if="row[setIds[0]].count === 0">--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[1]].count > 0" href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a>
+                      <span data-ng-if="row[setIds[1]].count === 0">--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[1]].percentage*100 | number:2}}</td>
-                    <td class="text-right" data-ng-if="setIds[2]"><a href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a></td>
+                    <td class="text-right" data-ng-if="setIds[2]">
+                      <a data-ng-if="row[setIds[2]].count > 0" href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a>
+                      <span data-ng-if="row[setIds[2]].count === 0">--</span>
+                    </td>
                     <td class="text-right" data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
                 </tr>
             </tbody>
@@ -175,11 +193,20 @@
             <tbody>
                 <tr data-ng-repeat="row in age.uiTable">
                     <td>{{row.term | readable}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[0]].count > 0" href="/search?filters={{row[setIds[0]].advQuery}}">{{row[setIds[0]].count | number}}</a>
+                      <span data-ng-if="row[setIds[0]].count === 0">--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[0]].percentage*100 | number:2}}</td>
-                    <td class="text-right"><a href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a></td>
+                    <td class="text-right">
+                      <a data-ng-if="row[setIds[1]].count > 0" href="/search?filters={{row[setIds[1]].advQuery}}">{{row[setIds[1]].count | number}}</a>
+                      <span data-ng-if="row[setIds[1]].count === 0">--</span>
+                    </td>
                     <td class="text-right">{{row[setIds[1]].percentage*100 | number:2}}</td>
-                    <td class="text-right" data-ng-if="setIds[2]"><a href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a></td>
+                    <td class="text-right" data-ng-if="setIds[2]">
+                      <a data-ng-if="row[setIds[2]].count > 0" href="/search?filters={{row[setIds[2]].advQuery}}">{{row[setIds[2]].count | number}}</a>
+                      <span data-ng-if="row[setIds[2]].count === 0">--</span>
+                    </td>
                     <td class="text-right" data-ng-if="setIds[2]">{{row[setIds[2]].percentage*100 | number:2}}</td>
                 </tr>
             </tbody>
