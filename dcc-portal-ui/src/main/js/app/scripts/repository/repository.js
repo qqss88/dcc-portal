@@ -32,6 +32,10 @@
     return _.isPlainObject (o) ? o : {};
   }
 
+  function stringOrDefault (s) {
+    return isEmptyString (s) ? '--' : s;
+  }
+
   var toJson = angular.toJson;
   var commaAndSpace = ', ';
 
@@ -232,6 +236,7 @@
     var slash = '/';
 
     this.fileInfo = fileInfo;
+    this.stringOrDefault = stringOrDefault;
 
     // Private helpers
     function convertToString (input) {
@@ -270,7 +275,8 @@
     };
 
     this.noNullConcat = function (values) {
-      return isEmptyArray (values) ? '' : _.filter (values, _.negate (isEmptyString)).join (commaAndSpace);
+      var result = isEmptyArray (values) ? '' : _.filter (values, _.negate (isEmptyString)).join (commaAndSpace);
+      return stringOrDefault (result);
     };
 
     this.shouldShowMetaData = function (repoType) {

@@ -31,17 +31,17 @@
     <table class="table table-info">
       <tr>
         <th>File ID</th>
-        <td>{{:: info.fileId }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (info.fileId) }}</td>
       </tr>
       <tr>
         <th>File UUID</th>
-        <td>{{:: info.id }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (info.id) }}</td>
       </tr>
       <tr ng-init="accessType = info.access">
         <th>Access</th>
         <td>
           <i class="{{ fileCtrlr.equalsIgnoringCase (accessType, 'open') ? 'icon-lock-open' : 'icon-lock' }}" />
-          {{:: accessType }}
+          {{ fileCtrlr.stringOrDefault (accessType) }}
         </td>
       </tr>
       <tr>
@@ -59,11 +59,11 @@
     <table class="table table-info" ng-init="categorization = info.dataCategorization">
       <tr>
         <th>Data Type</th>
-        <td>{{:: categorization.dataType }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (categorization.dataType) }}</td>
       </tr>
       <tr>
         <th>Experimental Strategy</th>
-        <td>{{:: categorization.experimentalStrategy }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (categorization.experimentalStrategy) }}</td>
       </tr>
     </table>
   </div>
@@ -74,11 +74,11 @@
     <table class="table table-info" ng-init="analysisMethod = info.analysisMethod">
       <tr>
         <th>Analysis Type</th>
-        <td>{{:: analysisMethod.analysisType }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (analysisMethod.analysisType) }}</td>
       </tr>
       <tr>
         <th>Software</th>
-        <td>{{:: analysisMethod.software }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (analysisMethod.software) }}</td>
       </tr>
     </table>
   </div>
@@ -89,12 +89,12 @@
     <table class="table table-info" ng-init="referenceGenome = info.referenceGenome">
       <tr>
         <th>Genome Build</th>
-        <td>{{:: referenceGenome.genomeBuild }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (referenceGenome.genomeBuild) }}</td>
       </tr>
       <tr>
         <th>Reference Name</th>
         <td ng-init="downloadUrl = referenceGenome.downloadUrl">
-          {{:: referenceGenome.referenceName }}
+          {{fileCtrlr.stringOrDefault (referenceGenome.referenceName) }}
           <a href="{{ downloadUrl }}">{{:: downloadUrl }}</a>
         </td>
       </tr>
@@ -122,14 +122,14 @@
 
       <tbody>
         <tr ng-repeat="fileCopy in info.fileCopies">
-          <td>{{:: fileCopy.fileName }}</td>
-          <td>{{:: fileCopy.fileMd5sum }}</td>
-          <td>{{:: fileCopy.fileFormat }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileName) }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileMd5sum) }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileFormat) }}</td>
           <td>{{:: fileCopy.fileSize | bytes }}</td>
-          <td>{{:: fileCopy.lastModified | date: 'medium' }}</td>
-          <td>{{:: fileCopy.repoName }}</td>
-          <td>{{:: fileCopy.repoCountry }}</td>
-          <td>{{:: fileCopy.repoType }}</td>
+          <td>{{:: fileCopy.lastModified * 1000 | date: 'short' }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoName) }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoCountry) }}</td>
+          <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoType) }}</td>
 
           <td ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
             <i class="icon-download"></i>
@@ -170,16 +170,16 @@
       <tr>
         <th>Project ID</th>
         <td ng-init="projCode = donorInfo.projectCode">
-            <a href="/projects/{{ projCode }}">{{ projCode }}</a>
+            <a href="/projects/{{ projCode }}">{{ fileCtrlr.stringOrDefault (projCode) }}</a>
         </td>
       </tr>
       <tr>
         <th>Program</th>
-        <td>{{:: donorInfo.program }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.program) }}</td>
       </tr>
       <tr>
         <th>Primary site</th>
-        <td>{{:: donorInfo.primarySite }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.primarySite) }}</td>
       </tr>
       <tr>
         <th>Donor in Study</th>
@@ -190,7 +190,7 @@
       <tr>
         <th>Donor ID</th>
         <td ng-init="donorId = donorInfo.donorId">
-            <a href="/donors/{{ donorId }}">{{:: donorId }}</a>
+            <a href="/donors/{{ donorId }}">{{ fileCtrlr.stringOrDefault (donorId) }}</a>
         </td>
       </tr>
       <tr>
@@ -199,7 +199,7 @@
       </tr>
       <tr>
         <th>Specimen ID</th>
-        <td>{{:: donorInfo.specimenId }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.specimenId) }}</td>
       </tr>
       <tr>
         <th>Specimen Submitter IDs</th>
@@ -207,11 +207,11 @@
       </tr>
       <tr>
         <th>Specimen Type</th>
-        <td>{{:: donorInfo.specimenType }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.specimenType) }}</td>
       </tr>
       <tr>
         <th>Sample ID</th>
-        <td>{{:: donorInfo.sampleId }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.sampleId) }}</td>
       </tr>
       <tr>
         <th>Sample Submitter IDs</th>
@@ -219,7 +219,7 @@
       </tr>
       <tr>
         <th>Matched Control Sample ID</th>
-        <td>{{:: donorInfo.matchedControlSampleId }}</td>
+        <td>{{ fileCtrlr.stringOrDefault (donorInfo.matchedControlSampleId) }}</td>
       </tr>
     </table>
 
