@@ -284,10 +284,9 @@ public class RepositoryFileRepository {
   private static BoolFilterBuilder buildEntitySetIdFilter(Iterable<String> filterValues) {
     val result = boolFilter();
 
-    // TODO: Do we need to take nested into account here?
     for (val value : filterValues) {
       val lookupFilter = createTermsLookupFilter(DONOR_ID_RAW_FIELD_NAME, DONOR_IDS, UUID.fromString(value));
-      result.should(lookupFilter);
+      result.should(nestedFilter(EsFields.DONORS, lookupFilter));
     }
 
     return result;
@@ -639,7 +638,6 @@ public class RepositoryFileRepository {
       }
     });
 
-    // FIXME - log.debug
     log.debug("findAll() - ES response is: '{}'.", response);
     return response;
   }
