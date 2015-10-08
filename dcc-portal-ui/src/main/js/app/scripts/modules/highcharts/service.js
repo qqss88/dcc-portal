@@ -15,6 +15,7 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 'use strict';
 
 angular.module('highcharts.services', []);
@@ -105,10 +106,66 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     'Bone': this.colours[4],
     'Bladder': this.colours[6],
     'Mesenchymal': this.colours[8],
-    'Nervous System': this.colours[10],
-    'Gall Bladder': this.colours[12]
+    'Nervous System': this.colours[10]
   };
 
+  // we need this to be able to quickily figure out the next colour in our sequence of colours
+  // for non-harcoded projects that might come from the portal rest call
+  this.primarySiteColours._length = _.size(this.primarySiteColours);
+
+  // WORKAROUND: getPrimarySiteColourForTerm is a fallback method used to return a colour of an unknown and
+  // non-harcoded (*sigh*) project that may be added to the data portal
+
+  // TODO: Provide backend service to supply colour info if people would link
+  // distinct colours for specific projects.
+  this.getPrimarySiteColourForTerm = function(term) {
+
+    var primaryColours = _this.primarySiteColours,
+        colours = _this.colours,
+        colourLength = colours.length,
+        currentPrimaryColoursLength = primaryColours._length,
+        colourIndex = 0,
+        chosenColour = colours[colourIndex];
+
+    // do some quick validation and fail gracefully
+    if (! angular.isString(term)) {
+      console.error('Expected string term but got: ', term);
+      return chosenColour;
+    }
+
+    // wanted to standardize the property names but it appears
+    // it is depended on for formatting
+
+    // TODO: refactor the formatting depedency out so the properties
+    // can be normalized as not to be case sensitive
+    var normalizedTerm = term; //term.toLowerCase().replace(/[^\w]+/, '_');
+
+    if (angular.isDefined(primaryColours[normalizedTerm])){
+      return primaryColours[term];
+    }
+
+
+    var relativeIndexPosition = currentPrimaryColoursLength % colourLength, // 0 ... (colourLength - 1)
+        sequenceBoundary = Math.floor(colourLength / 2);
+
+    if (relativeIndexPosition < sequenceBoundary) {
+      // even sequence
+      colourIndex = 2 * relativeIndexPosition;
+    }
+    else {
+      // odd sequence
+      colourIndex = 2 * (relativeIndexPosition - sequenceBoundary) + 1;
+    }
+
+    chosenColour = colours[colourIndex];
+    //console.log('For Term "' + term + '" (normalized to: ' + normalizedTerm + ' ). The colour Index Chosen is ' + colourIndex + ' (' + colour + ')');
+
+    // save it to the primaryColour object store for later caching purposes
+    primaryColours[normalizedTerm] = chosenColour;
+    primaryColours._length++;
+
+    return chosenColour;
+  };
 
   // new
   this.donut = function (params) {
@@ -143,7 +200,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
           y: count,
           type: type,
           facet: outerFacet,
-          color: Highcharts.Color(_this.primarySiteColours[iName]).brighten(0.2).get()
+          color: Highcharts.Color(_this.getPrimarySiteColourForTerm(iName)).brighten(0.2).get()
         });
       }
     }
@@ -174,7 +231,7 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
           y: innerPie[iName],
           type: type,
           facet: innerFacet,
-          color: _this.primarySiteColours[iName]
+          color: _this.getPrimarySiteColourForTerm(iName)
         });
         data.forEach(buildOuterRing);
       }
@@ -213,7 +270,12 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
       };
 
       if (term.facet === 'primarySite') {
-        term.color = _this.primarySiteColours[term.name];
+
+        // check to see if there is a colour for this particular term
+        // if no then lets assign one based on the even/odd sequencing
+        // convention used
+
+        term.color = _this.getPrimarySiteColourForTerm(term.name);
       }
 
       // Only shows active terms if facet active
