@@ -26,7 +26,6 @@ import static java.util.stream.Collectors.toMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
-import static org.icgc.dcc.portal.model.Query.builder;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.util.JsonUtils.merge;
@@ -128,7 +127,7 @@ public class UIResource {
     val result = geneIds.get().parallelStream().collect(toMap(identity(), geneId -> {
       final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, geneId));
       final ObjectNode filterNode = merge(userFilter, geneFilter.get());
-      final Query query = builder()
+      final Query query = Query.builder()
           .filters(filterNode)
           .sort(sortField)
           .order(DEFAULT_ORDER)
