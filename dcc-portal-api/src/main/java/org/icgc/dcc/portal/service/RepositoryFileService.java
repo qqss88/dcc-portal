@@ -61,14 +61,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.IndexModel;
@@ -101,9 +93,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -133,29 +133,16 @@ public class RepositoryFileService {
           .build();
 
   // Manifest column definitions
-  private static final String[] TSV_HEADERS = new String[] {
-      "url",
-      "file_name",
-      "file_size",
-      "md5_sum"
+  private static final String[] TSV_HEADERS = new String[] { "url", "file_name", "file_size", "md5_sum"
   };
   private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.FILE_NAME,
       Fields.FILE_SIZE,
       Fields.FILE_MD5SUM);
 
-  private static final String[] AWS_TSV_HEADERS = new String[] {
-      "repo_code",
-      "file_id",
-      "object_id",
-      "file_format",
-      "file_name",
-      "file_size",
-      "md5_sum",
-      "index_object_id",
-      "donor_id/donor_count",
-      "project_id/project_count"
-  };
+  private static final String[] AWS_TSV_HEADERS =
+      new String[] { "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size", "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count"
+      };
   private static final List<String> AWS_TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.REPO_CODE,
       Fields.FILE_ID,
@@ -179,6 +166,10 @@ public class RepositoryFileService {
 
   public StreamingOutput exportTableData(Query query) {
     return repositoryFileRepository.exportData(query);
+  }
+
+  public StreamingOutput exportTableDataFromSet(String setId) {
+    return repositoryFileRepository.exportDataFromSet(setId);
   }
 
   /**
@@ -290,11 +281,55 @@ public class RepositoryFileService {
     }
   }
 
+  @NonNull
+  @SneakyThrows
+  public void generateManifestFileFromSet(OutputStream output, Date timestamp, String setId) {
+    val data = getDataFromSet(setId);
+
+    // FIXME: Infer repoCode from the set.
+    String repoCode = "aws-virginia";
+
+    @Cleanup
+    val buffer = new BufferedOutputStream(output);
+
+    val repoCodeGroups = Multimaps.index(data, m -> m.get(Fields.REPO_CODE));
+
+    for (val code : repoCodeGroups.keySet()) {
+      // Make sure we process the target repo only.
+      if (!repoCode.equals(code)) {
+        continue;
+      }
+
+      val repoData = repoCodeGroups.get(repoCode);
+
+      if (isEmpty(repoData)) {
+        break;
+      }
+
+      // Entries with the same repoCode should & must have the same repoType.
+      val repoType = repoData.get(0).get(Fields.REPO_TYPE);
+      val downloadUrlGroups = Multimaps.index(repoData, entry -> buildDownloadUrl(entry));
+
+      if (RepoTypes.isAws(repoType)) {
+        generateAwsTextFile(buffer, downloadUrlGroups);
+      }
+
+      break;
+    }
+  }
+
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
     val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
     log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
 
     val searchResult = repositoryFileRepository.findDownloadInfo(pql);
+
+    return FluentIterable.from(searchResult.getHits())
+        .transformAndConcat(hit -> toValueMap(hit));
+  }
+
+  private Iterable<Map<String, String>> getDataFromSet(@NonNull final String setId) {
+    val searchResult = repositoryFileRepository.findDownloadInfoFromSet(setId);
 
     return FluentIterable.from(searchResult.getHits())
         .transformAndConcat(hit -> toValueMap(hit));
@@ -355,13 +390,16 @@ public class RepositoryFileService {
     val noDonor = isEmpty(donors);
     val count = noDonor ? 0 : donors.size();
 
-    val aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
+    Map<String, Function<Donor, String>> aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
         Fields.DONOR_ID, Donor::getDonorId,
         Fields.PROJECT_CODE, Donor::getProjectCode);
 
     // Get the value if there is only one element; otherwise get the count or empty string if empty.
-    return transformValues(aliasAccessors, accessor -> noDonor ? "" :
-        (count > 1) ? String.valueOf(count) : accessor.apply(donors.get(0)));
+    return transformValues(aliasAccessors,
+        accessor -> {
+          if (noDonor) return "";
+          return (count > 1) ? String.valueOf(count) : accessor.apply(donors.get(0));
+        });
   }
 
   @NonNull
@@ -488,7 +526,8 @@ public class RepositoryFileService {
 
   @SneakyThrows
   @NonNull
-  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
+  private static void generateAwsTextFile(OutputStream buffer,
+      Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);

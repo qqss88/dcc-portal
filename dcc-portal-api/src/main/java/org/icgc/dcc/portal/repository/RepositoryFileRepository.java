@@ -62,6 +62,7 @@ import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.model.TermFacet.repoTermFacet;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
+import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.FILE_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
@@ -100,6 +101,7 @@ import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -575,6 +577,51 @@ public class RepositoryFileRepository {
     };
   }
 
+  // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
+  public StreamingOutput exportDataFromSet(String setId) {
+    return new StreamingOutput() {
+
+      @Override
+      public void write(OutputStream os) throws IOException, WebApplicationException {
+        val size = 5000;
+        val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
+        val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
+        val fields = DATA_TABLE_EXPORT_MAP.keySet();
+        final String keys[] = toStringArray(fields);
+
+        @Cleanup
+        val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
+        writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
+
+        SearchResponse response = searchFileCentric("exportData", request -> request
+            .setSearchType(SCAN)
+            .setSize(size)
+            .setScroll(KEEP_ALIVE)
+            .setQuery(query)
+            .addFields(keys));
+
+        while (true) {
+          response = client.prepareSearchScroll(response.getScrollId())
+              .setScroll(KEEP_ALIVE)
+              .execute().actionGet();
+
+          val finished = !hasHits(response);
+
+          if (finished) {
+            break;
+          } else {
+            for (val hit : response.getHits()) {
+              writer.write(toRowValueMap(hit, fields), keys);
+            }
+          }
+
+        }
+
+      }
+
+    };
+  }
+
   private static String combineUniqueItemsToString(SearchHitField hitField, Function<Set<Object>, String> combiner) {
     return (null == hitField) ? "" : combiner.apply(newHashSet(hitField.getValues()));
   }
@@ -696,6 +743,28 @@ public class RepositoryFileRepository {
     log.debug("findAll() - ES response is: '{}'.", response);
 
     return SearchResponses.getHitIds(response);
+  }
+
+  // FIXME: Maybe switch to using pql in the future?
+  @NonNull
+  public SearchResponse findDownloadInfoFromSet(String setId) {
+    val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
+    val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
+    String[] includes = { "file_copies" };
+    String[] excludes = { "donors" };
+    val search = client.prepareSearch(index)
+        .setTypes(REPOSITORY_FILE.getId())
+        .setFrom(0)
+        .setSize(20000)
+        .setQuery(query)
+        .setFetchSource(includes, excludes)
+        .addFields("id", "file_id", "data_bundle.data_bundle_id");
+
+    log.info("ES request is: {}", search);
+    val response = search.execute().actionGet();
+    log.debug("ES response is: {}", response);
+
+    return response;
   }
 
   public SearchResponse findDownloadInfo(@NonNull final String pql) {
