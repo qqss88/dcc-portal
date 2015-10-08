@@ -19,15 +19,20 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Doubles.tryParse;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static org.icgc.dcc.portal.model.Query.builder;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
+import static org.icgc.dcc.portal.util.JsonUtils.merge;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +51,6 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.DiagramProtein;
-import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IdsParam;
@@ -57,14 +61,13 @@ import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.MutationService;
 import org.icgc.dcc.portal.service.OccurrenceService;
-import org.icgc.dcc.portal.util.JsonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.io.CharStreams;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -116,22 +119,26 @@ public class UIResource {
       @ApiParam(value = "Gene ID. Multiple IDs can be entered as ENSG00000155657,ENSG00000141510", required = true) @PathParam("geneIds") IdsParam geneIds,
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
       ) {
+    val sortField = "id";
+    val facetName = "projectId";
+    val geneFilterJson = "{gene:{id:{is:[\"%s\"]}}}";
+    val userFilter = filters.get();
+    val includes = ImmutableList.of("facets");
 
-    val result = Maps.<String, TermFacet> newHashMap();
-
-    for (val geneId : geneIds.get()) {
-      val geneFilter = new FiltersParam(String.format("{gene:{id:{is:[\"%s\"]}}}", geneId));
-      val filterNode = JsonUtils.merge(filters.get(), geneFilter.get());
-
-      Donors donors = donorService.findAllCentric(Query.builder()
+    val result = geneIds.get().parallelStream().collect(toMap(identity(), geneId -> {
+      final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, geneId));
+      final ObjectNode filterNode = merge(userFilter, geneFilter.get());
+      final Query query = builder()
           .filters(filterNode)
-          .sort("id")
+          .sort(sortField)
           .order(DEFAULT_ORDER)
-          .fields(Collections.<String> emptyList())
-          .includes(ImmutableList.of("facets"))
-          .size(0).build());
-      result.put(geneId, donors.getFacets().get("projectId"));
-    }
+          .fields(emptyList())
+          .includes(includes)
+          .size(0)
+          .build();
+
+      return donorService.findAllCentric(query).getFacets().get(facetName);
+    }));
 
     log.debug("geneProjectDonorCounts {}", result);
     return result;
