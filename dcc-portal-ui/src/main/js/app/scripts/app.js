@@ -125,7 +125,8 @@
    * when only testing the user interface, or to debug production UI issues.
    */
   module.constant('API', {
-    BASE_URL: '/api/v1' //'http://localhost:8080/api/v1'
+    BASE_URL: '/api/v1', // '/api/v1' (<--- default non-local server route),   'http://localhost:8080/api/v1' (<--- use route with localhost 'grunt' run)
+    DEBUG_ENABLED: false // set DEBUG_ENABLED to true if you want to turn on the request/response console output
   });
 
 
@@ -204,6 +205,18 @@
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
 
+    if (API.DEBUG_ENABLED) {
+      RestangularProvider.setRequestInterceptor(function(data, operation, model) {
+          console.log('Request Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
+          return data;
+       });
+
+       RestangularProvider.setResponseInterceptor(
+        function(data, operation, model) {
+          console.log('Response Method: ', operation.toUpperCase(), '\nModel: ', model, '\nData: ', data);
+          return data;
+      });
+   }
 
     RestangularProvider.setDefaultHttpFields({cache: true});
 

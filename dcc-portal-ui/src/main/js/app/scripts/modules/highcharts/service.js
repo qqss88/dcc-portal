@@ -83,6 +83,8 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
   });
 
   this.colours = Highcharts.getOptions().colors;
+
+  // this colouring scheme follows a even/odd sequence for picking colours
   this.primarySiteColours = {
     'Liver': this.colours[0],
     'Pancreas': this.colours[2],
@@ -103,7 +105,8 @@ angular.module('highcharts.services').service('HighchartsService', function ($q,
     'Bone': this.colours[4],
     'Bladder': this.colours[6],
     'Mesenchymal': this.colours[8],
-    'Nervous System': this.colours[10]
+    'Nervous System': this.colours[10],
+    'Gall Bladder': this.colours[12]
   };
 
 
