@@ -245,6 +245,28 @@
 
       return promise;
     };
+    
+    this.createFileSet = function (params) {
+      params.name = 'File Set';
+      params.description = 'File Set for Manifest';
+      params.sortBy = 'id';
+      params.sortOrder = 'DESCENDING';
+      var promise = null;
+      var data = params2JSON('FILE', params);
+      promise = Restangular.one('entityset').one('file')
+        .post(undefined, data, {}, {'Content-Type': 'application/json'});
+        
+     promise.then(function(data) {
+       if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+       }
+
+       jQuery('#aws-v').html(data.id);
+     });
+     
+     return promise;
+    };
 
     this.createForwardSet = function(type, params, forwardUrl) {
       Page.startWork();

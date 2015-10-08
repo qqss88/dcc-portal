@@ -161,7 +161,7 @@
   });
 
   module.controller('ExternalFileDownloadController',
-    function($scope, $window, $modalInstance, ExternalRepoService, LocationService, params) {
+    function($scope, $window, $modalInstance, ExternalRepoService, SetService, LocationService, params) {
 
     $scope.selectedFiles = params.selectedFiles;
     $scope.cancel = function() {
@@ -221,6 +221,27 @@
         ExternalRepoService.downloadSelected($scope.selectedFiles, $scope.selectedRepos);
       }
       $scope.cancel();
+    };
+    
+    $scope.createManifestId = function(repoName, fileCount) {
+      var params = {};
+      
+      var filters = LocationService.filters();
+      if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
+        if (! filters.file) {
+          filters.file = {};
+        }
+        filters.file.id = {is: $scope.selectedFiles};
+      }
+      
+      delete filters.file.repoName;
+      filters.file.repoName = {'is': [repoName]};
+      
+      params.size = fileCount;
+      params.isTransient = true;
+      params.filters = filters;
+      
+      SetService.createFileSet(params);
     };
 
   });

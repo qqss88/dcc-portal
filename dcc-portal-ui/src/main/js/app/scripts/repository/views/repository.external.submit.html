@@ -20,7 +20,12 @@
            </thead>
            <tbody>
                <tr data-ng-repeat="(k, v) in repos">
-                   <td>{{k}}</td>
+                   <td>
+                     {{k}}
+                     <span id="aws-v" class="pull-right" data-ng-if="k === 'AWS - Virginia'">
+                       <button class="t_button" data-ng-click="createManifestId(k, fileCount)">Create Manifest ID</button>
+                     </span>
+                   </td>
                    <td class="text-right">{{v.donorCount| number}}</td>
                    <td class="text-right">{{v.fileCount| number}}</td>
                    <td class="text-right">{{v.fileSize | bytes }}</td>
