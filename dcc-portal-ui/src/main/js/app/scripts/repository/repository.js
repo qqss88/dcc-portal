@@ -224,6 +224,8 @@
     };
     
     $scope.createManifestId = function(repoName, fileCount) {
+      
+      jQuery('#aws-v').html('<i class="icon-spinner icon-spin pull-right"></i>');
       var params = {};
       
       var filters = LocationService.filters();
@@ -234,14 +236,27 @@
         filters.file.id = {is: $scope.selectedFiles};
       }
       
-      delete filters.file.repoName;
-      filters.file.repoName = {'is': [repoName]};
+      if (filters.file) {
+        delete filters.file.repoName;
+        filters.file.repoName = {'is': [repoName]};
+      } else {
+        filters.file = {};
+        filters.file.repoName = {'is': [repoName]};
+      }
       
       params.size = fileCount;
       params.isTransient = true;
       params.filters = filters;
       
-      SetService.createFileSet(params);
+      var promise = SetService.createFileSet(params);
+      promise.then(function(data) {
+       if (! data.id) {
+          console.log('there is no id!!!!');
+          return;
+       }
+
+       jQuery('#aws-v').html(data.id);
+     });
     };
 
   });

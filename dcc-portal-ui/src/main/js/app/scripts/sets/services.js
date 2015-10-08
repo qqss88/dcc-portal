@@ -255,17 +255,8 @@
       var data = params2JSON('FILE', params);
       promise = Restangular.one('entityset').one('file')
         .post(undefined, data, {}, {'Content-Type': 'application/json'});
-        
-     promise.then(function(data) {
-       if (! data.id) {
-          console.log('there is no id!!!!');
-          return;
-       }
-
-       jQuery('#aws-v').html(data.id);
-     });
      
-     return promise;
+      return promise;
     };
 
     this.createForwardSet = function(type, params, forwardUrl) {
