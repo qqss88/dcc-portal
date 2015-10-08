@@ -120,7 +120,7 @@ public class RepositoryFileService {
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(emptyList());
 
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
-      new ImmutableMap.Builder<String, String>()
+      ImmutableMap.<String, String> builder()
           .put("id", "id")
           .put("specimen_id", "specimenIds")
           .put("sample_id", "sampleIds")
@@ -252,6 +252,44 @@ public class RepositoryFileService {
     }
   }
 
+  @SneakyThrows
+  @NonNull
+  public void generateManifestFile(OutputStream output, Date timestamp, Query query, String repoCode) {
+    val data = getData(query);
+
+    @Cleanup
+    val buffer = new BufferedOutputStream(output);
+
+    val repoCodeGroups = Multimaps.index(data, m -> m.get(Fields.REPO_CODE));
+
+    for (val code : repoCodeGroups.keySet()) {
+      // Make sure we process the target repo only.
+      if (!repoCode.equals(code)) {
+        continue;
+      }
+
+      val repoData = repoCodeGroups.get(repoCode);
+
+      if (isEmpty(repoData)) {
+        break;
+      }
+
+      // Entries with the same repoCode should & must have the same repoType.
+      val repoType = repoData.get(0).get(Fields.REPO_TYPE);
+      val downloadUrlGroups = Multimaps.index(repoData, entry -> buildDownloadUrl(entry));
+
+      if (RepoTypes.isGnos(repoType)) {
+        generateXmlFile(buffer, downloadUrlGroups, timestamp);
+      } else if (RepoTypes.isAws(repoType)) {
+        generateAwsTextFile(buffer, downloadUrlGroups);
+      } else {
+        generateTextFile(buffer, downloadUrlGroups);
+      }
+
+      break;
+    }
+  }
+
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
     val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
     log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
@@ -317,7 +355,7 @@ public class RepositoryFileService {
     val noDonor = isEmpty(donors);
     val count = noDonor ? 0 : donors.size();
 
-    Map<String, Function<Donor, String>> aliasAccessors = ImmutableMap.of(
+    val aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
         Fields.DONOR_ID, Donor::getDonorId,
         Fields.PROJECT_CODE, Donor::getProjectCode);
 
@@ -422,11 +460,15 @@ public class RepositoryFileService {
     endXmlDocument(writer);
   }
 
+  private static CsvListWriter createTsv(OutputStream stream) {
+    return new CsvListWriter(new OutputStreamWriter(stream), TAB_PREFERENCE);
+  }
+
   @SneakyThrows
   @NonNull
   private static void generateTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
-    val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
+    val tsv = createTsv(buffer);
     tsv.writeHeader(TSV_HEADERS);
 
     for (val url : downloadUrlGroups.keySet()) {
@@ -448,7 +490,7 @@ public class RepositoryFileService {
   @NonNull
   private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
-    val tsv = new CsvListWriter(new OutputStreamWriter(buffer), TAB_PREFERENCE);
+    val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);
 
     for (val url : downloadUrlGroups.keySet()) {

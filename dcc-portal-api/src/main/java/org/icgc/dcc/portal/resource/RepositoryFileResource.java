@@ -19,6 +19,7 @@ package org.icgc.dcc.portal.resource;
 
 import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
+import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.icgc.dcc.common.core.util.Splitters.COMMA;
@@ -28,6 +29,8 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_IDS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_IDS_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPOS_VALUE;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPO_CODE_PARAM;
+import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILE_REPO_CODE_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FILTER_VALUE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FROM_PARAM;
@@ -48,6 +51,7 @@ import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_SIZE;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.resource.ResourceUtils.query;
+import static org.icgc.dcc.portal.util.JsonUtils.merge;
 import static org.icgc.dcc.portal.util.MediaTypes.GZIP;
 import static org.icgc.dcc.portal.util.MediaTypes.TEXT_TSV;
 
@@ -96,7 +100,9 @@ import com.yammer.metrics.annotation.Timed;
 @RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileResource {
 
-  private final static String TYPE_ATTACHMENT = "attachment";
+  private static final String API_PATH_MANIFEST = "/manifest";
+  private static final String API_PATH_MANIFEST_REPOCODE = API_PATH_MANIFEST + "/{" + API_FILE_REPO_CODE_PARAM + "}";
+  private static final String TYPE_ATTACHMENT = "attachment";
 
   private final RepositoryFileService repositoryFileService;
 
@@ -175,7 +181,7 @@ public class RepositoryFileResource {
   }
 
   @GET
-  @Path("/manifest")
+  @Path(API_PATH_MANIFEST)
   @Produces(GZIP)
   @Timed
   @ApiOperation(value = "Generate a tar.gz archive containing the manifests of matching repository files.")
@@ -191,7 +197,7 @@ public class RepositoryFileResource {
             toQuery(filtersParam),
             COMMA.splitToList(repoList));
     val attechmentType = type(TYPE_ATTACHMENT)
-        .fileName(buildManifestFileName(timestamp))
+        .fileName(manifestArchiveFileName(timestamp))
         .creationDate(timestamp)
         .modificationDate(timestamp)
         .build();
@@ -203,7 +209,7 @@ public class RepositoryFileResource {
   }
 
   @POST
-  @Path("/manifest")
+  @Path(API_PATH_MANIFEST)
   @Consumes(APPLICATION_FORM_URLENCODED)
   @Timed
   @ApiOperation(value = "Generate a tar.gz archive containing the manifests of selected repository files.")
@@ -218,6 +224,55 @@ public class RepositoryFileResource {
     val filter = buildFileIdListFilterParam(fileIds);
     return generateManifestArchiveByFilters(new FiltersParam(filter),
         null == repoList ? "" : repoList);
+  }
+
+  @GET
+  @Path(API_PATH_MANIFEST_REPOCODE)
+  @Produces(TEXT_TSV)
+  @Timed
+  @ApiOperation(value = "Generates a manifest of matching repository files.")
+  public Response generateManifestFileByFilters(
+      @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam,
+      @ApiParam(value = API_FILE_REPO_CODE_VALUE, required = true) @PathParam(API_FILE_REPO_CODE_PARAM) final String repoCode) {
+    log.info("filtersParam is: '{}' AND repoCode is: '{}'.", filtersParam, repoCode);
+
+    val repoCodeFilter = new FiltersParam(format("{file:{repoCode:{is:[\"%s\"]}}}", repoCode));
+    val filterNode = merge(filtersParam.get(), repoCodeFilter.get());
+
+    val timestamp = new Date();
+    final StreamingOutput outputGenerator = (outputStream) ->
+        repositoryFileService.generateManifestFile(outputStream,
+            timestamp,
+            query().filters(filterNode).build(),
+            repoCode);
+    val attechmentType = type(TYPE_ATTACHMENT)
+        .fileName(manifestFileName(repoCode, timestamp))
+        .creationDate(timestamp)
+        .modificationDate(timestamp)
+        .build();
+
+    return Response
+        .ok(outputGenerator)
+        .header(CONTENT_DISPOSITION, attechmentType)
+        .build();
+  }
+
+  @POST
+  @Path(API_PATH_MANIFEST_REPOCODE)
+  @Consumes(APPLICATION_FORM_URLENCODED)
+  @Produces(TEXT_TSV)
+  @Timed
+  @ApiOperation(value = "Generates a manifest of selected repository files.")
+  public Response generateManifestFileByIdList(
+      @ApiParam(value = API_FILE_IDS_VALUE) @FormParam(API_FILE_IDS_PARAM) List<String> fileIds,
+      @ApiParam(value = API_FILE_REPO_CODE_VALUE, required = true) @PathParam(API_FILE_REPO_CODE_PARAM) final String repoCode) {
+    checkRequest(null == fileIds,
+        "Form field, '%s', is missing in the POST payload.", API_FILE_IDS_PARAM);
+    checkRequest(fileIds.isEmpty(),
+        "Form field, '%s', must contain a list of repository file IDs.", API_FILE_IDS_PARAM);
+
+    val filter = buildFileIdListFilterParam(fileIds);
+    return generateManifestArchiveByFilters(new FiltersParam(filter), repoCode);
   }
 
   @GET
@@ -236,8 +291,13 @@ public class RepositoryFileResource {
   }
 
   @NonNull
-  private static String buildManifestFileName(Date timestamp) {
+  private static String manifestArchiveFileName(Date timestamp) {
     return "manifest." + timestamp.getTime() + ".tar.gz";
+  }
+
+  @NonNull
+  private static String manifestFileName(String repoCode, Date timestamp) {
+    return "manifest." + repoCode + "." + timestamp.getTime() + ".txt";
   }
 
   private static String buildFileIdListFilterParam(@NonNull List<String> fileIds) {
