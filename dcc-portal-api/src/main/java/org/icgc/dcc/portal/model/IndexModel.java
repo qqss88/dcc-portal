@@ -453,6 +453,7 @@ public class IndexModel {
           // File Repo
           .put("file_name", "file_name")
           .put("donor_id", "donor_id")
+          .put("file_id", "file_id")
 
           // Pathway
           .build();
