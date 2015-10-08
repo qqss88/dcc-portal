@@ -120,6 +120,12 @@ public class TermsLookupService {
     createTermsLookup(type, id, attributes);
   }
 
+  public void createTermsLookup(@NonNull final TermLookupType type, @NonNull final UUID id,
+      @NonNull final Iterable<String> values, @NonNull final String repoName) {
+    val attributes = ImmutableMap.<String, Object> of(TERMS_LOOKUP_PATH, values, "repo", repoName);
+    createTermsLookup(type, id, attributes);
+  }
+
   public static TermsLookupFilterBuilder createTermsLookupFilter(@NonNull String fieldName,
       @NonNull TermLookupType type, @NonNull UUID id) {
     val key = id.toString();
@@ -149,7 +155,8 @@ public class TermsLookupService {
 
     GENE_IDS("gene-ids"),
     MUTATION_IDS("mutation-ids"),
-    DONOR_IDS("donor-ids");
+    DONOR_IDS("donor-ids"),
+    FILE_IDS("file-ids");
 
     @NonNull
     private final String name;
