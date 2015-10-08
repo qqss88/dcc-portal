@@ -114,7 +114,7 @@
         <th>Format</th>
         <th>Size</th>
         <th>Last Update</th>
-        <th>Repository Name</th>
+        <th>Repository</th>
         <th>Country</th>
         <th>Type</th>
         <th>Actions</th>
@@ -172,10 +172,6 @@
         <td ng-init="projCode = donorInfo.projectCode">
             <a href="/projects/{{ projCode }}">{{ fileCtrlr.stringOrDefault (projCode) }}</a>
         </td>
-      </tr>
-      <tr>
-        <th>Program</th>
-        <td>{{ fileCtrlr.stringOrDefault (donorInfo.program) }}</td>
       </tr>
       <tr>
         <th>Primary site</th>
