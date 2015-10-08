@@ -122,6 +122,12 @@ public class EntityListService {
     return newEntitySet;
   }
 
+  public EntitySet createFileEntitySet(@NonNull final EntitySetDefinition entitySetDefinition) {
+    val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
+    analyzer.materializeFileSet(newEntitySet.getId(), entitySetDefinition);
+    return newEntitySet;
+  }
+
   public EntitySet computeEntityList(@NonNull final DerivedEntitySetDefinition entitySetDefinition, boolean async) {
     val newEntitySet = createAndSaveNewListFrom(entitySetDefinition);
     if (async) {
@@ -182,9 +188,9 @@ public class EntityListService {
     // I need this 'convolution' to achieve the correct type inference to satisfy CsvListWriter.write (List<?>)
     // overload.
     val content =
-        isGeneType ? 
-            convertToListOfListForGene(analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : 
-            convertToListOfList(analyzer.retriveListItems(entitySet));
+        isGeneType ? convertToListOfListForGene(
+            analyzer.retrieveGeneIdsAndSymbolsByListId(entitySet.getId())) : convertToListOfList(
+                analyzer.retriveListItems(entitySet));
 
     @Cleanup
     val writer = new CsvListWriter(new OutputStreamWriter(outputStream), TAB_PREFERENCE);

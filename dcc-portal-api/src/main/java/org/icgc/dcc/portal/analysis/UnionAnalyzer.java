@@ -67,6 +67,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -405,6 +406,30 @@ public class UnionAnalyzer {
 
     val lookupType = entitySet.getType().toLookupTypeFrom();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySet.isTransient());
+
+    val count = entityIds.size();
+    // Done - update status to finished
+    entityListRepository.update(newEntity.updateStateToFinished(count), dataVersion);
+  }
+
+  public void materializeFileSet(@NonNull final UUID newEntityId,
+      @NonNull final EntitySetDefinition entitySet) {
+    val newEntity = entityListRepository.find(newEntityId);
+    val dataVersion = newEntity.getVersion();
+
+    val query = Query.builder()
+        .filters(entitySet.getFilters())
+        .sort("id")
+        .order("desc")
+        .size(maxNumberOfHits)
+        .defaultLimit(maxNumberOfHits)
+        .build();
+
+    val entityIds = repositoryFileRepository.findAllFileIds(query);
+    val lookupType = entitySet.getType().toLookupTypeFrom();
+
+    val repoList = (ArrayNode) entitySet.getFilters().path("file").path("repoName").path("is");
+    termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, repoList.get(0).asText());
 
     val count = entityIds.size();
     // Done - update status to finished

@@ -83,13 +83,6 @@ import java.util.stream.StreamSupport;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
@@ -133,6 +126,7 @@ import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
+import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.supercsv.io.CsvMapWriter;
@@ -145,6 +139,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -304,8 +305,8 @@ public class RepositoryFileRepository {
       result.must(terms);
     }
 
-    return isNestedField(fieldAlias) ?
-        boolFilter().must(nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) : result;
+    return isNestedField(fieldAlias) ? boolFilter()
+        .must(nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) : result;
   }
 
   @NonNull
@@ -335,9 +336,8 @@ public class RepositoryFileRepository {
     // Regular UI facets
     for (val facet : AVAILABLE_FACETS) {
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
-      val subAgg = isNestedField(facet) ?
-          addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet), TYPE_MODEL.getNestedPath(facet)) :
-          addSubAggregations(filterAgg, facet, toRawFieldName(facet));
+      val subAgg = isNestedField(facet) ? addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
+          TYPE_MODEL.getNestedPath(facet)) : addSubAggregations(filterAgg, facet, toRawFieldName(facet));
 
       result.add(global(facet).subAggregation(subAgg));
     }
@@ -679,6 +679,25 @@ public class RepositoryFileRepository {
     return response;
   }
 
+  public List<String> findAllFileIds(Query query) {
+    val queryFilter = query.getFilters();
+    val filters = buildRepoFilters(queryFilter);
+
+    val search = client.prepareSearch(index)
+        .setTypes(FILE_INDEX_TYPE)
+        .setSearchType(QUERY_THEN_FETCH)
+        .setFrom(query.getFrom())
+        .setSize(query.getSize())
+        .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
+        .setPostFilter(filters);
+
+    log.info("findAll() - ES query is: '{}'.", search);
+    val response = search.execute().actionGet();
+    log.debug("findAll() - ES response is: '{}'.", response);
+
+    return SearchResponses.getHitIds(response);
+  }
+
   public SearchResponse findDownloadInfo(@NonNull final String pql) {
     val pqlAst = parse(pql);
     pqlAst.setSelect(MANIFEST_DOWNLOAD_INFO_SELECT);
@@ -751,10 +770,10 @@ public class RepositoryFileRepository {
   public Map<String, Long> getSummary(Query query) {
     val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
         terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
-        .subAggregation(
-            terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
-        .subAggregation(
-            terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
+            .subAggregation(
+                terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
+            .subAggregation(
+                terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
 
     val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryFields.FILE);
 
