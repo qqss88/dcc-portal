@@ -22,7 +22,9 @@ import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.union;
 import static com.google.common.math.LongMath.divide;
+import static java.lang.Long.parseLong;
 import static java.math.RoundingMode.CEILING;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -72,17 +74,24 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
@@ -142,13 +151,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
 @Component
 public class RepositoryFileRepository {
@@ -183,15 +185,24 @@ public class RepositoryFileRepository {
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
 
   private static final Map<String, String> DATA_TABLE_EXPORT_MAP = ImmutableMap.<String, String> builder()
-      .put(toRawFieldName(Fields.ACCESS), "Access")
-      .put(toRawFieldName(Fields.FILE_ID), "File ID")
-      .put(DONOR_ID_RAW_FIELD_NAME, "ICGC Donor")
-      .put(toRawFieldName(Fields.REPO_NAME), "Repository")
-      .put(toRawFieldName(Fields.PROJECT_CODE), "Project")
-      .put(toRawFieldName(Fields.STUDY), "Study")
-      .put(toRawFieldName(Fields.DATA_TYPE), "Data Type")
-      .put(toRawFieldName(Fields.FILE_FORMAT), "Format")
+      .put(Fields.ACCESS, "Access")
+      .put(Fields.FILE_ID, "File ID")
+      .put(Fields.DONOR_ID, "ICGC Donor")
+      .put(Fields.REPO_NAME, "Repository")
+      .put(Fields.PROJECT_CODE, "Project")
+      .put(Fields.STUDY, "Study")
+      .put(Fields.DATA_TYPE, "Data Type")
+      .put(Fields.FILE_FORMAT, "Format")
+      .put(Fields.FILE_SIZE, "Size (bytes)")
       .build();
+  private static final Set<String> DATA_TABLE_EXPORT_MAP_FIELD_KEYS = toRawFieldSet(
+      DATA_TABLE_EXPORT_MAP.keySet());
+  private static final Set<String> DATA_TABLE_EXPORT_SUMMARY_FIELDs = toRawFieldSet(newArrayList(
+      Fields.DONOR_ID, Fields.PROJECT_CODE));
+  private static final Set<String> DATA_TABLE_EXPORT_AVERAGE_FIELDs = toRawFieldSet(newArrayList(
+      Fields.FILE_SIZE));
+  private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDs = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
+      union(DATA_TABLE_EXPORT_SUMMARY_FIELDs, DATA_TABLE_EXPORT_AVERAGE_FIELDs));
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
   private static final Kind KIND = Kind.REPOSITORY_FILE;
@@ -216,11 +227,16 @@ public class RepositoryFileRepository {
     this.queryEngine = new QueryEngine(client, index);
   }
 
+  private static Set<String> toRawFieldSet(Collection<String> aliases) {
+    return aliases.stream().map(k -> toRawFieldName(k))
+        .collect(toImmutableSet());
+  }
+
   private static boolean isNestedField(String fieldAlias) {
     return TYPE_MODEL.isAliasDefined(fieldAlias) && TYPE_MODEL.isNested(fieldAlias);
   }
 
-  private static String toRawFieldName(String alias) {
+  public static String toRawFieldName(@NonNull String alias) {
     return TYPE_MODEL.getField(alias);
   }
 
@@ -526,34 +542,23 @@ public class RepositoryFileRepository {
     val request = queryEngine.execute(pqlAst, REPOSITORY_FILE).getRequestBuilder();
     customizer.accept(request);
 
-    // FIXME: log.debug
     log.info(logMessage + "; ES query is: '{}'", request);
     return request.execute().actionGet();
   }
 
   // FIXME: Move the CSV writing piece out to the service and leave the ES search here.
   // The CSV generation belongs to the service, not to the repository.
-  public StreamingOutput exportData(Query query) {
+  @NonNull
+  private StreamingOutput exportDataTable(Consumer<SearchRequestBuilder> queryCustomizer, String[] keys) {
     return new StreamingOutput() {
 
       @Override
       public void write(OutputStream os) throws IOException, WebApplicationException {
-        val size = 5000;
-        val filters = buildRepoFilters(query.getFilters());
-        val fields = DATA_TABLE_EXPORT_MAP.keySet();
-        final String keys[] = toStringArray(fields);
-
         @Cleanup
         val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
         writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
 
-        SearchResponse response = searchFileCentric("exportData", request -> request
-            .setSearchType(SCAN)
-            .setSize(size)
-            .setScroll(KEEP_ALIVE)
-            .setPostFilter(filters)
-            .setQuery(MATCH_ALL_QUERY)
-            .addFields(keys));
+        SearchResponse response = searchFileCentric("exportDataTable", queryCustomizer);
 
         while (true) {
           response = client.prepareSearchScroll(response.getScrollId())
@@ -566,7 +571,7 @@ public class RepositoryFileRepository {
             break;
           } else {
             for (val hit : response.getHits()) {
-              writer.write(toRowValueMap(hit, fields), keys);
+              writer.write(toRowValueMap(hit), keys);
             }
           }
 
@@ -577,49 +582,33 @@ public class RepositoryFileRepository {
     };
   }
 
+  public StreamingOutput exportData(@NonNull Query query) {
+    val size = 5000;
+    final String[] keys = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
+    val filters = buildRepoFilters(query.getFilters());
+
+    return exportDataTable((request) -> request
+        .setSearchType(SCAN)
+        .setSize(size)
+        .setScroll(KEEP_ALIVE)
+        .setPostFilter(filters)
+        .setQuery(MATCH_ALL_QUERY)
+        .addFields(keys), keys);
+  }
+
   // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
-  public StreamingOutput exportDataFromSet(String setId) {
-    return new StreamingOutput() {
+  public StreamingOutput exportDataFromSet(@NonNull String setId) {
+    val size = 5000;
+    final String[] keys = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
+    val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.FILE_UUID), FILE_IDS, UUID.fromString(setId));
+    val query = new FilteredQueryBuilder(MATCH_ALL_QUERY, lookupFilter);
 
-      @Override
-      public void write(OutputStream os) throws IOException, WebApplicationException {
-        val size = 5000;
-        val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
-        val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
-        val fields = DATA_TABLE_EXPORT_MAP.keySet();
-        final String keys[] = toStringArray(fields);
-
-        @Cleanup
-        val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
-        writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
-
-        SearchResponse response = searchFileCentric("exportData", request -> request
-            .setSearchType(SCAN)
-            .setSize(size)
-            .setScroll(KEEP_ALIVE)
-            .setQuery(query)
-            .addFields(keys));
-
-        while (true) {
-          response = client.prepareSearchScroll(response.getScrollId())
-              .setScroll(KEEP_ALIVE)
-              .execute().actionGet();
-
-          val finished = !hasHits(response);
-
-          if (finished) {
-            break;
-          } else {
-            for (val hit : response.getHits()) {
-              writer.write(toRowValueMap(hit, fields), keys);
-            }
-          }
-
-        }
-
-      }
-
-    };
+    return exportDataTable((request) -> request
+        .setSearchType(SCAN)
+        .setSize(size)
+        .setScroll(KEEP_ALIVE)
+        .setQuery(query)
+        .addFields(keys), keys);
   }
 
   private static String combineUniqueItemsToString(SearchHitField hitField, Function<Set<Object>, String> combiner) {
@@ -645,17 +634,28 @@ public class RepositoryFileRepository {
     return (count > 1) ? String.valueOf(count) : Iterables.get(values, 0).toString();
   }
 
+  private static String toAverageSizeString(SearchHitField hitField) {
+    if (null == hitField) {
+      return "0";
+    }
+
+    val average = hitField.getValues().stream()
+        .mapToLong(o -> parseLong(o.toString()))
+        .average();
+
+    return String.valueOf(average.orElse(0));
+  }
+
   @NonNull
-  private static Map<String, String> toRowValueMap(SearchHit hit, Set<String> fields) {
+  private static Map<String, String> toRowValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
-    val summaryFields = Stream.of(Fields.DONOR_ID, Fields.PROJECT_CODE).map(f -> toRawFieldName(f))
-        .collect(toImmutableSet());
-    val otherFields = difference(fields, summaryFields);
 
     return ImmutableMap.<String, String> builder()
-        .putAll(toMap(summaryFields,
+        .putAll(toMap(DATA_TABLE_EXPORT_SUMMARY_FIELDs,
             field -> toSummarizedString(valueMap.get(field))))
-        .putAll(toMap(otherFields,
+        .putAll(toMap(DATA_TABLE_EXPORT_AVERAGE_FIELDs,
+            field -> toAverageSizeString(valueMap.get(field))))
+        .putAll(toMap(DATA_TABLE_EXPORT_OTHER_FIELDs,
             field -> toStringValue(valueMap.get(field))))
         .build();
   }
@@ -839,10 +839,10 @@ public class RepositoryFileRepository {
   public Map<String, Long> getSummary(Query query) {
     val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
         terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
-            .subAggregation(
-                terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
-            .subAggregation(
-                terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
+        .subAggregation(
+            terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
+        .subAggregation(
+            terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
 
     val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryFields.FILE);
 

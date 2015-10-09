@@ -20,8 +20,10 @@ package org.icgc.dcc.portal.service;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.toMap;
+import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.intersection;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -37,6 +39,7 @@ import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
 import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregations2Facets;
+import static org.icgc.dcc.portal.repository.RepositoryFileRepository.toRawFieldName;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
@@ -71,9 +74,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
-import org.dcc.portal.pql.meta.TypeModel;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -107,8 +108,6 @@ import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
-  private static final TypeModel TYPE_MODEL = IndexModel.getRepositoryFileTypeModel();
-
   private static final String DATE_FORMAT_PATTERN = ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String UTF_8 = StandardCharsets.UTF_8.name();
   private static final int BUFFER_SIZE = 1024 * 100;
@@ -133,16 +132,22 @@ public class RepositoryFileService {
           .build();
 
   // Manifest column definitions
-  private static final String[] TSV_HEADERS = new String[] { "url", "file_name", "file_size", "md5_sum"
-  };
+  private static final String[] TSV_HEADERS = { "url", "file_name", "file_size", "md5_sum" };
   private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.FILE_NAME,
       Fields.FILE_SIZE,
       Fields.FILE_MD5SUM);
+  private static final Map<String, String> COUNT_FIELD_FORMAT_STRINGS = ImmutableMap.<String, String> of(
+      Fields.DONOR_ID, "%d donors",
+      Fields.PROJECT_CODE, "%d projects");
+  private static final Map<String, Function<Donor, String>> COUNT_FIELD_GETTERS =
+      ImmutableMap.<String, Function<Donor, String>> of(
+          Fields.DONOR_ID, Donor::getDonorId,
+          Fields.PROJECT_CODE, Donor::getProjectCode);
 
-  private static final String[] AWS_TSV_HEADERS =
-      new String[] { "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size", "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count"
-      };
+  private static final String[] AWS_TSV_HEADERS = {
+      "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size",
+      "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count" };
   private static final List<String> AWS_TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.REPO_CODE,
       Fields.FILE_ID,
@@ -388,22 +393,19 @@ public class RepositoryFileService {
 
   private static Map<String, String> getDonorValueMap(List<Donor> donors) {
     val count = isEmpty(donors) ? 0 : donors.size();
-    val oneDonor = (count == 1);
-    val countString = (count > 0) ? String.valueOf(count) : "";
     val donor = (count > 0) ? donors.get(0) : null;
 
-    val aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
-        Fields.DONOR_ID, Donor::getDonorId,
-        Fields.PROJECT_CODE, Donor::getProjectCode);
+    val counts = transformValues(COUNT_FIELD_FORMAT_STRINGS,
+        formatString -> (count > 0) ? format(formatString, count) : "");
 
-    // Get the value if there is only one element; otherwise get the count or empty string if empty.
-    return transformValues(aliasAccessors, getter ->
-        oneDonor ? getter.apply(donor) : countString);
+    // Get the value if there is only one element; otherwise get the formatted count.
+    return transformEntries(COUNT_FIELD_GETTERS,
+        (key, getter) -> (count == 1) ? getter.apply(donor) : counts.get(key));
   }
 
   @NonNull
   private static SearchHitField getResultByFieldAlias(Map<String, SearchHitField> valueMap, String alias) {
-    return valueMap.get(TYPE_MODEL.getField(alias));
+    return valueMap.get(toRawFieldName(alias));
   }
 
   private static Map<String, String> asValueMap(SearchHit hit) {

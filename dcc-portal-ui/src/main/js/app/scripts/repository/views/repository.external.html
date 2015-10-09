@@ -75,11 +75,12 @@
             <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
                 <div class="quarter">
                     <button class="t_button" data-ng-click="ExternalRepoController.downloadManifest()">
-                        <i class="icon-download"></i>Download manifests
+                      <i class="icon-download"></i>Download manifests
                     </button>
                 </div>
                 <div class="quarter">
-                    <i class="icon-file" style="font-size:1.25rem"></i><strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
+                    <i class="icon-file" style="font-size:1.25rem"></i>
+                    <strong>{{ExternalRepoController.summary.fileCount | number}}</strong> Files
                 </div>
                 <div class="quarter">
                     <i class="icon-team" style="font-size:1.25rem"></i>
@@ -91,7 +92,7 @@
                 </div>
                 <div class="quarter omega">
                     <i class="icon-database" style="font-size:1.25rem"></i>
-                    <strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong> (average)
+                    <strong>{{ExternalRepoController.summary.totalFileSize | bytes}}</strong>
                 </div>
             </section>
             <div class="clearfix"></div>
@@ -130,7 +131,7 @@
                     <th>Format</th>
 
                     <!-- <th data-sortable data-type="files" data-field="fileSize">Size</th> -->
-                    <th>Size (avg.)</th>
+                    <th>Size</th>
 
                 </thead>
 
