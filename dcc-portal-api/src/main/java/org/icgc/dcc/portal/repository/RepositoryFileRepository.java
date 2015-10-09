@@ -750,8 +750,8 @@ public class RepositoryFileRepository {
   public SearchResponse findDownloadInfoFromSet(String setId) {
     val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
     val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
-    String[] includes = { "file_copies" };
-    String[] excludes = { "donors" };
+    String[] includes = { "file_copies", "donors" };
+    String[] excludes = {};
     val search = client.prepareSearch(index)
         .setTypes(REPOSITORY_FILE.getId())
         .setFrom(0)
