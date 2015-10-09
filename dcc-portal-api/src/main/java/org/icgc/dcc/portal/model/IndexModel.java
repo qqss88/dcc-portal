@@ -405,58 +405,58 @@ public class IndexModel {
           .put("highlights", "highlights")
           .build();
 
-  private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING =
-      new ImmutableMap.Builder<String, String>()
-          // Common
-          .put("id", "id")
-          .put("type", "type")
+  private static final ImmutableMap<String, String> KEYWORD_FIELDS_MAPPING = ImmutableMap.<String, String> builder()
+      // Common
+      .put("id", "id")
+      .put("type", "type")
 
-          // Gene and project and pathway
-          .put("name", "name")
+      // Gene and project and pathway
+      .put("name", "name")
 
-          // Gene
-          .put("symbol", "symbol")
-          .put("ensemblTranscriptId", "ensemblTranscriptId")
-          .put("ensemblTranslationId", "ensemblTranslationId")
-          .put("synonyms", "synonyms")
-          .put("uniprotkbSwissprot", "uniprotkbSwissprot")
-          .put("omimGene", "omimGene")
-          .put("entrezGene", "entrezGene")
-          .put("hgnc", "hgnc")
+      // Gene
+      .put("symbol", "symbol")
+      .put("ensemblTranscriptId", "ensemblTranscriptId")
+      .put("ensemblTranslationId", "ensemblTranslationId")
+      .put("synonyms", "synonyms")
+      .put("uniprotkbSwissprot", "uniprotkbSwissprot")
+      .put("omimGene", "omimGene")
+      .put("entrezGene", "entrezGene")
+      .put("hgnc", "hgnc")
 
-          // Mutation
-          .put("mutation", "mutation")
-          .put("geneMutations", "geneMutations")
-          .put("start", "start")
+      // Mutation
+      .put("mutation", "mutation")
+      .put("geneMutations", "geneMutations")
+      .put("start", "start")
 
-          // Project
-          .put("tumourType", "tumourType")
-          .put("tumourSubtype", "tumourSubtype")
-          .put("primarySite", "primarySite")
+      // Project
+      .put("tumourType", "tumourType")
+      .put("tumourSubtype", "tumourSubtype")
+      .put("primarySite", "primarySite")
 
-          // Donor
-          .put("specimenIds", "specimenIds")
-          .put("submittedSpecimenIds", "submittedSpecimenIds")
-          .put("sampleIds", "sampleIds")
-          .put("submittedSampleIds", "submittedSampleIds")
-          .put("projectId", "projectId")
+      // Donor
+      .put("specimenIds", "specimenIds")
+      .put("submittedSpecimenIds", "submittedSpecimenIds")
+      .put("sampleIds", "sampleIds")
+      .put("submittedSampleIds", "submittedSampleIds")
+      .put("projectId", "projectId")
 
-          // Donor-file, these are derived from file
-          .put("submittedId", "submittedId")
-          .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
-          .put("TCGASampleBarcode", "TCGASampleBarcode")
-          .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
+      // Donor-file, these are derived from file
+      .put("submittedId", "submittedId")
+      .put("TCGAParticipantBarcode", "TCGAParticipantBarcode")
+      .put("TCGASampleBarcode", "TCGASampleBarcode")
+      .put("TCGAAliquotBarcode", "TCGAAliquotBarcode")
 
-          // GO Term
-          .put("altIds", "altIds")
+      // GO Term
+      .put("altIds", "altIds")
 
-          // File Repo
-          .put("file_name", "file_name")
-          .put("donor_id", "donor_id")
-          .put("file_id", "file_id")
+      // File Repo
+      .put("file_name", "file_name")
+      .put("donor_id", "donor_id")
+      .put("file_id", "file_id")
+      .put("data_type", "data_type")
+      .put("project_code", "project_code")
 
-          // Pathway
-          .build();
+      .build();
 
   private static final ImmutableMap<String, String> PATHWAY_FIELDS_MAPPING =
       new ImmutableMap.Builder<String, String>()
