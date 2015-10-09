@@ -730,17 +730,12 @@ public class RepositoryFileRepository {
     val queryFilter = query.getFilters();
     val filters = buildRepoFilters(queryFilter);
 
-    val search = client.prepareSearch(index)
-        .setTypes(FILE_INDEX_TYPE)
+    val response = searchFileCentric("Files Ids from Query", (request) -> request
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize())
         .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
-        .setPostFilter(filters);
-
-    log.info("findAll() - ES query is: '{}'.", search);
-    val response = search.execute().actionGet();
-    log.debug("findAll() - ES response is: '{}'.", response);
+        .setPostFilter(filters));
 
     return SearchResponses.getHitIds(response);
   }
@@ -750,21 +745,18 @@ public class RepositoryFileRepository {
   public SearchResponse findDownloadInfoFromSet(String setId) {
     val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
     val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
-    String[] includes = { "file_copies", "donors" };
-    String[] excludes = {};
-    val search = client.prepareSearch(index)
-        .setTypes(REPOSITORY_FILE.getId())
-        .setFrom(0)
-        .setSize(20000)
-        .setQuery(query)
-        .setFetchSource(includes, excludes)
-        .addFields("id", "file_id", "data_bundle.data_bundle_id");
 
-    log.info("ES request is: {}", search);
-    val response = search.execute().actionGet();
-    log.debug("ES response is: {}", response);
-
-    return response;
+    return searchFileCentric("Donor Info From Set Id", (request) -> {
+      String[] includes = { EsFields.FILE_COPIES, EsFields.DONORS };
+      String[] excludes = {};
+      request
+          .setFrom(0)
+          .setSize(20000)
+          .setQuery(query)
+          .setFetchSource(includes, excludes)
+          .addFields(toRawFieldName(Fields.FILE_UUID), toRawFieldName(Fields.FILE_ID),
+              toRawFieldName(Fields.DATA_BUNDLE_ID));
+    });
   }
 
   public SearchResponse findDownloadInfo(@NonNull final String pql) {
