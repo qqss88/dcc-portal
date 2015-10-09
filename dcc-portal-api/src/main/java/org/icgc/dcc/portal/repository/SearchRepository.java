@@ -32,6 +32,7 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -82,6 +83,8 @@ public class SearchRepository {
   private static final Set<String> FIELD_KEYS = FIELDS_MAPPING.get(KIND).keySet();
   private static final String FILE_NAME_FIELD = "file_name";
   private static final float TIE_BREAKER = 0.7F;
+  private static final List<String> SIMPLE_TERM_FILTER_TYPES = ImmutableList.of(
+      Types.PATHWAY, Types.CURATED_SET, Types.GO_TERM);
 
   private static final Map<String, Type> TYPE_MAPPINGS = ImmutableMap.<String, Type> builder()
       .put(Types.GENE, Type.GENE_TEXT)
@@ -153,10 +156,9 @@ public class SearchRepository {
 
   private static FilterBuilder getPostFilter(String type) {
     val field = "type";
-    val simpleTermFilterTypes = ImmutableList.of(Types.PATHWAY, Types.CURATED_SET, Types.GO_TERM);
     val result = boolFilter();
 
-    if (simpleTermFilterTypes.contains(type)) {
+    if (SIMPLE_TERM_FILTER_TYPES.contains(type)) {
       return result.must(termFilter(field, type));
     }
 

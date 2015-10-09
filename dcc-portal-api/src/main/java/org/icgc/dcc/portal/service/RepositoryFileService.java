@@ -61,6 +61,14 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.IndexModel;
@@ -93,17 +101,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -387,19 +387,18 @@ public class RepositoryFileService {
   }
 
   private static Map<String, String> getDonorValueMap(List<Donor> donors) {
-    val noDonor = isEmpty(donors);
-    val count = noDonor ? 0 : donors.size();
+    val count = isEmpty(donors) ? 0 : donors.size();
+    val oneDonor = (count == 1);
+    val countString = (count > 0) ? String.valueOf(count) : "";
+    val donor = (count > 0) ? donors.get(0) : null;
 
-    Map<String, Function<Donor, String>> aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
+    val aliasAccessors = ImmutableMap.<String, Function<Donor, String>> of(
         Fields.DONOR_ID, Donor::getDonorId,
         Fields.PROJECT_CODE, Donor::getProjectCode);
 
     // Get the value if there is only one element; otherwise get the count or empty string if empty.
-    return transformValues(aliasAccessors,
-        accessor -> {
-          if (noDonor) return "";
-          return (count > 1) ? String.valueOf(count) : accessor.apply(donors.get(0));
-        });
+    return transformValues(aliasAccessors, getter ->
+        oneDonor ? getter.apply(donor) : countString);
   }
 
   @NonNull
