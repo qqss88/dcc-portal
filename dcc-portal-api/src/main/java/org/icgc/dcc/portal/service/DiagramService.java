@@ -29,6 +29,7 @@ import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GEN
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +64,23 @@ public class DiagramService {
   private final MutationRepository mutationRepository;
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+
+  private static final List<String> cTypes = new ArrayList<String>(
+      Arrays.asList(
+          "frameshift_variant",
+          "missense_variant",
+          "start_lost",
+          "initiator_codon_variant",
+          "stop_gained",
+          "stop_lost",
+          "exon_loss_variant",
+          "splice_acceptor_variant",
+          "splice_donor_variant", "splice_region_variant",
+          "5_prime_UTR_premature_start_codon_gain_variant",
+          "disruptive_inframe_deletion",
+          "inframe_deletion",
+          "disruptive_inframe_insertion",
+          "inframe_insertion"));
 
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
@@ -156,6 +174,7 @@ public class DiagramService {
     if (impacts.length > 0) {
       query.must(termsQuery(functionalImpactFieldName, impacts));
     }
+    query.must(termsQuery("consequence_type", cTypes));
 
     return query;
   }

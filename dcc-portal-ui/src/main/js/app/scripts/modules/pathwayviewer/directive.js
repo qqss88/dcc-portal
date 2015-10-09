@@ -35,6 +35,22 @@
         
         var scrollTimer;
         
+        var consequenceFilter = {"is":
+          ["frameshift_variant",
+          "missense_variant",
+          "start_lost",
+          "initiator_codon_variant",
+          "stop_gained","stop_lost",
+          "exon_loss_variant",
+          "splice_acceptor_variant",
+          "splice_donor_variant",
+          "splice_region_variant",
+          "5_prime_UTR_premature_start_codon_gain_variant",
+          "disruptive_inframe_deletion",
+          "inframe_deletion",
+          "disruptive_inframe_insertion",
+          "inframe_insertion"]};
+        
         element.bind("mouseenter", function() {
           scrollTimer = setTimeout(function() {
             $('.pathwaysvg').attr('class', 'pathwaysvg');
@@ -125,6 +141,12 @@
                   
                   if(!highlight.advQuery){
                     return;
+                  }
+                  
+                  if (highlight.advQuery.mutation) {
+                    highlight.advQuery.mutation.consequenceType = consequenceFilter;
+                  } else {
+                    highlight.advQuery.mutation = {"consequenceType": consequenceFilter};
                   }
                   
                   geneList.push({
