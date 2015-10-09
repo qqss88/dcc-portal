@@ -59,6 +59,7 @@
       'functionalImpact': 'Functional Impact',
       'sequencingStrategy': 'Analysis Type',
       'tumourType': 'Tumour Type',
+      'specimenType': 'Specimen Type',
 
       'studies': 'Study',
       'repoName': 'Repository',
