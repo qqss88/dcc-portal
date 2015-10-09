@@ -99,6 +99,7 @@ public class SearchRepository {
       .put(Types.FILE_DONOR, Type.REPOSITORY_FILE_DONOR_TEXT)
       .build();
   private static final Map<String, String> TYPE_ID_MAPPINGS = transformValues(TYPE_MAPPINGS, type -> type.getId());
+  private static final String MUTATION_PREFIX = TYPE_ID_MAPPINGS.get(Types.MUTATION);
 
   private static final Set<String> MULTIPLE_SEARCH_TYPES = Stream.of(
       Types.GENE,
@@ -188,7 +189,6 @@ public class SearchRepository {
 
   @NonNull
   private static String[] buildMultiMatchFieldList(Iterable<String> baseKeys, String queryString) {
-    val mutationPrefix = TYPE_ID_MAPPINGS.get(Types.MUTATION);
     val keys = Sets.<String> newHashSet();
 
     for (val baseKey : baseKeys) {
@@ -199,7 +199,7 @@ public class SearchRepository {
         // We need to prefix the document type here to prevent NumberFormatException, it appears that ES
         // cannot determine what type 'start' is.
         // This is for ES 0.9, later versions may not have this problem.
-        keys.add(format("%s.%s", mutationPrefix, baseKey));
+        keys.add(format("%s.%s", MUTATION_PREFIX, baseKey));
 
       } else if (!baseKey.equals("geneMutations") && !baseKey.equals(FILE_NAME_FIELD)) {
         keys.add(baseKey + ".search^2");
