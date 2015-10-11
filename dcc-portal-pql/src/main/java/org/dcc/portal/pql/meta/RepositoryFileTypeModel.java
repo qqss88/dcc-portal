@@ -17,7 +17,6 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static java.util.Collections.emptyMap;
 import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
@@ -33,6 +32,7 @@ import org.dcc.portal.pql.meta.field.FieldModel;
 import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
@@ -40,13 +40,19 @@ import com.google.common.collect.ImmutableSet;
  */
 public class RepositoryFileTypeModel extends TypeModel {
 
+  private static final Type MY_TYPE = Type.REPOSITORY_FILE;
+  private static final String TYPE_PREFIX = MY_TYPE.getPrefix();
+  private static final String TERMS_LOOKUP_DONOR_IDS = "donor-ids";
+
+  // private static final String TERMS_LOOKUP_FILE_IDS = "file-ids";
+
   public RepositoryFileTypeModel() {
     super(Fields.MAPPINGS, INTERNAL_ALIASES, PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override
   public Type getType() {
-    return Type.REPOSITORY_FILE;
+    return MY_TYPE;
   }
 
   @Override
@@ -56,8 +62,7 @@ public class RepositoryFileTypeModel extends TypeModel {
 
   @Override
   public String prefix() {
-    // return TYPE_PREFIX;
-    return getType().getPrefix();
+    return TYPE_PREFIX;
   }
 
   /**
@@ -68,6 +73,7 @@ public class RepositoryFileTypeModel extends TypeModel {
 
     public final String FILE_COPIES = "file_copies";
     public final String DONORS = "donors";
+    public final String DONOR_ID = "donor_id";
 
   }
 
@@ -187,7 +193,7 @@ public class RepositoryFileTypeModel extends TypeModel {
 
     private ArrayFieldModel donors() {
       return nestedArrayOfObjects(EsFields.DONORS, DONORS, object(
-          string("donor_id", DONOR_ID),
+          string(EsFields.DONOR_ID, DONOR_ID),
           string("program", PROGRAM),
           string("primary_site", PRIMARY_SITE),
           string("project_code", PROJECT_CODE),
@@ -229,6 +235,7 @@ public class RepositoryFileTypeModel extends TypeModel {
         .add(string("file_id", FILE_ID))
         .add(string("access", ACCESS))
         .add(string("study", STUDY))
+        .add(string(REPO_FILE_ENTITY_SET_ID, REPO_FILE_ENTITY_SET_ID))
         .add(dataCategorization())
         .add(dataBundle())
         .add(fileCopies())
@@ -263,6 +270,8 @@ public class RepositoryFileTypeModel extends TypeModel {
       EsFields.FILE_COPIES,
       EsFields.DONORS);
 
-  private static final Map<String, String> INTERNAL_ALIASES = emptyMap();
+  private static final Map<String, String> INTERNAL_ALIASES = ImmutableMap.<String, String> of(
+      REPO_FILE_ENTITY_SET_ID, EsFields.DONORS + "." + EsFields.DONOR_ID,
+      LOOKUP_TYPE, TERMS_LOOKUP_DONOR_IDS);
 
 }

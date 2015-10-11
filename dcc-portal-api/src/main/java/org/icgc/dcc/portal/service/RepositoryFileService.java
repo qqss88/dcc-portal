@@ -224,8 +224,10 @@ public class RepositoryFileService {
     val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(output)), TAB_PREFERENCE);
     writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
 
+    String scrollId = prepResponse.getScrollId();
+
     while (true) {
-      val response = repositoryFileRepository.fetchSearchScrollData(prepResponse.getScrollId());
+      val response = repositoryFileRepository.fetchSearchScrollData(scrollId);
 
       if (!hasHits(response)) {
         break;
@@ -234,6 +236,8 @@ public class RepositoryFileService {
       for (val hit : response.getHits()) {
         writer.write(toRowValueMap(hit), keys);
       }
+
+      scrollId = response.getScrollId();
     }
 
   }
