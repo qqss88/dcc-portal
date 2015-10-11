@@ -151,7 +151,7 @@
         list.push({
           id: d,
           count: data[d],
-          colour: HighchartsService.primarySiteColours[d]
+          colour: HighchartsService.getPrimarySiteColourForTerm(d)
         });
       });
       list = _.sortBy(list, function(d) { return -d.count; });
@@ -216,6 +216,3 @@
     };
   });
 })();
-
-
-
