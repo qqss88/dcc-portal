@@ -19,14 +19,11 @@ package org.icgc.dcc.portal.repository;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
-import static com.google.common.collect.Maps.toMap;
-import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.newHashSet;
-import static com.google.common.collect.Sets.union;
 import static com.google.common.math.LongMath.divide;
-import static java.lang.Long.parseLong;
 import static java.math.RoundingMode.CEILING;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
@@ -53,8 +50,6 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
-import static org.icgc.dcc.common.core.util.Joiners.COMMA;
-import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
@@ -67,26 +62,14 @@ import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONO
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.FILE_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
-import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
-import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.StreamingOutput;
-
-import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.val;
@@ -106,15 +89,13 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
+import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -140,10 +121,8 @@ import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.supercsv.io.CsvMapWriter;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -182,28 +161,6 @@ public class RepositoryFileRepository {
   private static final String DONOR_ID_RAW_FIELD_NAME = toRawFieldName(Fields.DONOR_ID);
   private static final MatchAllQueryBuilder MATCH_ALL_QUERY = matchAllQuery();
   private static final MatchAllFilterBuilder MATCH_ALL_FILTER = matchAllFilter();
-  private static final Joiner COMMA_JOINER = COMMA.skipNulls();
-
-  private static final Map<String, String> DATA_TABLE_EXPORT_MAP = ImmutableMap.<String, String> builder()
-      .put(Fields.ACCESS, "Access")
-      .put(Fields.FILE_ID, "File ID")
-      .put(Fields.DONOR_ID, "ICGC Donor")
-      .put(Fields.REPO_NAME, "Repository")
-      .put(Fields.PROJECT_CODE, "Project")
-      .put(Fields.STUDY, "Study")
-      .put(Fields.DATA_TYPE, "Data Type")
-      .put(Fields.FILE_FORMAT, "Format")
-      .put(Fields.FILE_SIZE, "Size (bytes)")
-      .build();
-  private static final Set<String> DATA_TABLE_EXPORT_MAP_FIELD_KEYS = toRawFieldSet(
-      DATA_TABLE_EXPORT_MAP.keySet());
-  private static final Set<String> DATA_TABLE_EXPORT_SUMMARY_FIELDs = toRawFieldSet(newArrayList(
-      Fields.DONOR_ID, Fields.PROJECT_CODE));
-  private static final Set<String> DATA_TABLE_EXPORT_AVERAGE_FIELDs = toRawFieldSet(newArrayList(
-      Fields.FILE_SIZE));
-  private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDs = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
-      union(DATA_TABLE_EXPORT_SUMMARY_FIELDs, DATA_TABLE_EXPORT_AVERAGE_FIELDs));
-
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
   private static final Kind KIND = Kind.REPOSITORY_FILE;
   private static final Map<String, String> JQL_FIELD_NAME_MAPPING = FIELDS_MAPPING.get(KIND);
@@ -227,12 +184,7 @@ public class RepositoryFileRepository {
     this.queryEngine = new QueryEngine(client, index);
   }
 
-  private static Set<String> toRawFieldSet(Collection<String> aliases) {
-    return aliases.stream().map(k -> toRawFieldName(k))
-        .collect(toImmutableSet());
-  }
-
-  private static boolean isNestedField(String fieldAlias) {
+  public static boolean isNestedField(String fieldAlias) {
     return TYPE_MODEL.isAliasDefined(fieldAlias) && TYPE_MODEL.isNested(fieldAlias);
   }
 
@@ -256,7 +208,7 @@ public class RepositoryFileRepository {
     val result = boolFilter();
 
     // Used for creating the terms lookup filter when ENTITY_SET_ID and donorId are in the JQL.
-    BoolFilterBuilder entitySetIdFilter = null;
+    FilterBuilder entitySetIdFilter = null;
     BoolFilterBuilder donorIdFilter = null;
 
     while (fields.hasNext()) {
@@ -274,10 +226,9 @@ public class RepositoryFileRepository {
         // The assumption here is there should be only one "entitySetId" filter in JQL.
         entitySetIdFilter = buildEntitySetIdFilter(filterValues);
       } else {
-        val rawFieldName = toRawFieldName(fieldAlias);
-        val filter = buildDataFilter(fieldAlias, rawFieldName, filterValues);
+        val filter = buildDataFilter(fieldAlias, filterValues);
 
-        if (rawFieldName.equals(DONOR_ID_RAW_FIELD_NAME)) {
+        if (fieldAlias.equals(Fields.DONOR_ID)) {
           // The assumption here is there should be only one "donorId" filter in JQL.
           donorIdFilter = filter;
         } else {
@@ -300,31 +251,45 @@ public class RepositoryFileRepository {
     return result;
   }
 
-  private static BoolFilterBuilder buildEntitySetIdFilter(Iterable<String> filterValues) {
+  private static NestedFilterBuilder createNestedEntitySetIdFilter(String uuid) {
+    return nestedFilter(EsFields.DONORS,
+        createTermsLookupFilter(DONOR_ID_RAW_FIELD_NAME, DONOR_IDS, UUID.fromString(uuid)));
+  }
+
+  private static FilterBuilder buildEntitySetIdFilter(List<String> uuids) {
+    if (isEmpty(uuids)) {
+      return null;
+    }
+
+    if (1 == uuids.size()) {
+      return createNestedEntitySetIdFilter(uuids.get(0));
+    }
+
     val result = boolFilter();
 
-    for (val value : filterValues) {
-      val lookupFilter = createTermsLookupFilter(DONOR_ID_RAW_FIELD_NAME, DONOR_IDS, UUID.fromString(value));
-      result.should(nestedFilter(EsFields.DONORS, lookupFilter));
+    for (val uuid : uuids) {
+      result.should(createNestedEntitySetIdFilter(uuid));
     }
 
     return result;
   }
 
-  private static BoolFilterBuilder buildDataFilter(String fieldAlias, String rawfieldName, List<String> filterValues) {
+  private static BoolFilterBuilder buildDataFilter(String fieldAlias, List<String> filterValues) {
+    val rawFieldName = toRawFieldName(fieldAlias);
     val result = boolFilter();
-    val terms = termsFilter(rawfieldName, filterValues);
+    val terms = termsFilter(rawFieldName, filterValues);
 
     // Special processing for "no data" terms
     if (filterValues.remove(MISSING)) {
-      val missing = missingFilter(rawfieldName).existence(true).nullValue(true);
+      val missing = missingFilter(rawFieldName).existence(true).nullValue(true);
       result.should(missing).should(terms);
     } else {
       result.must(terms);
     }
 
-    return isNestedField(fieldAlias) ? boolFilter()
-        .must(nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) : result;
+    return isNestedField(fieldAlias) ? boolFilter().must(
+        nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) :
+        result;
   }
 
   @NonNull
@@ -354,8 +319,10 @@ public class RepositoryFileRepository {
     // Regular UI facets
     for (val facet : AVAILABLE_FACETS) {
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
-      val subAgg = isNestedField(facet) ? addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
-          TYPE_MODEL.getNestedPath(facet)) : addSubAggregations(filterAgg, facet, toRawFieldName(facet));
+      val subAgg = isNestedField(facet) ?
+          addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
+              TYPE_MODEL.getNestedPath(facet)) :
+          addSubAggregations(filterAgg, facet, toRawFieldName(facet));
 
       result.add(global(facet).subAggregation(subAgg));
     }
@@ -427,7 +394,7 @@ public class RepositoryFileRepository {
     return builder.subAggregation(termsAgg).subAggregation(missingAgg);
   }
 
-  public static Map<String, TermFacet> convertAggregations2Facets(@NonNull Aggregations aggs) {
+  public static Map<String, TermFacet> convertAggregationsToFacets(@NonNull Aggregations aggs) {
     val result = Maps.<String, TermFacet> newHashMap();
 
     for (val agg : aggs) {
@@ -523,7 +490,6 @@ public class RepositoryFileRepository {
     val request = client.prepareSearch(index).setTypes(indexType);
     customizer.accept(request);
 
-    // FIXME: log.debug
     log.info(logMessage + "; ES query is: '{}'", request);
     return request.execute().actionGet();
   }
@@ -546,118 +512,45 @@ public class RepositoryFileRepository {
     return request.execute().actionGet();
   }
 
-  // FIXME: Move the CSV writing piece out to the service and leave the ES search here.
-  // The CSV generation belongs to the service, not to the repository.
-  @NonNull
-  private StreamingOutput exportDataTable(Consumer<SearchRequestBuilder> queryCustomizer, String[] keys) {
-    return new StreamingOutput() {
+  private SearchResponse prepareDataTableExport(Consumer<SearchRequestBuilder> queryCustomizer, String[] fields) {
+    val size = 5000;
 
-      @Override
-      public void write(OutputStream os) throws IOException, WebApplicationException {
-        @Cleanup
-        val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(os)), TAB_PREFERENCE);
-        writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
+    return searchFileCentric("Preparing data table export", request -> {
+      request.setSearchType(SCAN)
+          .setSize(size)
+          .setScroll(KEEP_ALIVE)
+          .addFields(fields);
 
-        SearchResponse response = searchFileCentric("exportDataTable", queryCustomizer);
-
-        while (true) {
-          response = client.prepareSearchScroll(response.getScrollId())
-              .setScroll(KEEP_ALIVE)
-              .execute().actionGet();
-
-          val finished = !hasHits(response);
-
-          if (finished) {
-            break;
-          } else {
-            for (val hit : response.getHits()) {
-              writer.write(toRowValueMap(hit), keys);
-            }
-          }
-
-        }
-
-      }
-
-    };
+      queryCustomizer.accept(request);
+    });
   }
 
-  public StreamingOutput exportData(@NonNull Query query) {
-    val size = 5000;
-    final String[] keys = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
+  public SearchResponse fetchSearchScrollData(@NonNull String scrollId) {
+    return client.prepareSearchScroll(scrollId)
+        .setScroll(KEEP_ALIVE)
+        .execute()
+        .actionGet();
+  }
+
+  @NonNull
+  public SearchResponse prepareDataExport(Query query, final String[] fields) {
     val filters = buildRepoFilters(query.getFilters());
 
-    return exportDataTable((request) -> request
-        .setSearchType(SCAN)
-        .setSize(size)
-        .setScroll(KEEP_ALIVE)
-        .setPostFilter(filters)
-        .setQuery(MATCH_ALL_QUERY)
-        .addFields(keys), keys);
+    return prepareDataTableExport(request ->
+        request.setPostFilter(filters).setQuery(MATCH_ALL_QUERY), fields);
   }
 
   // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
-  public StreamingOutput exportDataFromSet(@NonNull String setId) {
-    val size = 5000;
-    final String[] keys = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
-    val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.FILE_UUID), FILE_IDS, UUID.fromString(setId));
-    val query = new FilteredQueryBuilder(MATCH_ALL_QUERY, lookupFilter);
-
-    return exportDataTable((request) -> request
-        .setSearchType(SCAN)
-        .setSize(size)
-        .setScroll(KEEP_ALIVE)
-        .setQuery(query)
-        .addFields(keys), keys);
-  }
-
-  private static String combineUniqueItemsToString(SearchHitField hitField, Function<Set<Object>, String> combiner) {
-    return (null == hitField) ? "" : combiner.apply(newHashSet(hitField.getValues()));
-  }
-
-  private static String toStringValue(SearchHitField hitField) {
-    return combineUniqueItemsToString(hitField, COMMA_JOINER::join);
-  }
-
-  private static String toSummarizedString(SearchHitField hitField) {
-    return combineUniqueItemsToString(hitField, RepositoryFileRepository::toSummarizedString);
-  }
-
-  private static String toSummarizedString(Set<Object> values) {
-    if (isEmpty(values)) {
-      return "";
-    }
-
-    val count = values.size();
-
-    // Get the value if there is only one element; otherwise get the count or empty string if empty.
-    return (count > 1) ? String.valueOf(count) : Iterables.get(values, 0).toString();
-  }
-
-  private static String toAverageSizeString(SearchHitField hitField) {
-    if (null == hitField) {
-      return "0";
-    }
-
-    val average = hitField.getValues().stream()
-        .mapToLong(o -> parseLong(o.toString()))
-        .average();
-
-    return String.valueOf(average.orElse(0));
-  }
-
   @NonNull
-  private static Map<String, String> toRowValueMap(SearchHit hit) {
-    val valueMap = hit.getFields();
+  public SearchResponse prepareDataExportFromSet(String setId, final String[] fields) {
+    val query = buildFileSetIdQuery(setId);
 
-    return ImmutableMap.<String, String> builder()
-        .putAll(toMap(DATA_TABLE_EXPORT_SUMMARY_FIELDs,
-            field -> toSummarizedString(valueMap.get(field))))
-        .putAll(toMap(DATA_TABLE_EXPORT_AVERAGE_FIELDs,
-            field -> toAverageSizeString(valueMap.get(field))))
-        .putAll(toMap(DATA_TABLE_EXPORT_OTHER_FIELDs,
-            field -> toStringValue(valueMap.get(field))))
-        .build();
+    return prepareDataTableExport(request -> request.setQuery(query), fields);
+  }
+
+  private static FilteredQueryBuilder buildFileSetIdQuery(String setId) {
+    val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.FILE_UUID), FILE_IDS, UUID.fromString(setId));
+    return new FilteredQueryBuilder(MATCH_ALL_QUERY, lookupFilter);
   }
 
   public GetResponse findOne(@NonNull String id) {
@@ -740,23 +633,18 @@ public class RepositoryFileRepository {
     return SearchResponses.getHitIds(response);
   }
 
-  // FIXME: Maybe switch to using pql in the future?
   @NonNull
   public SearchResponse findDownloadInfoFromSet(String setId) {
-    val lookupFilter = createTermsLookupFilter("id", FILE_IDS, UUID.fromString(setId));
-    val query = new FilteredQueryBuilder(new MatchAllQueryBuilder(), lookupFilter);
+    val pqlAst = parse("select(*)");
+    pqlAst.setSelect(MANIFEST_DOWNLOAD_INFO_SELECT);
 
-    return searchFileCentric("Donor Info From Set Id", (request) -> {
-      String[] includes = { EsFields.FILE_COPIES, EsFields.DONORS };
-      String[] excludes = {};
-      request
-          .setFrom(0)
-          .setSize(20000)
-          .setQuery(query)
-          .setFetchSource(includes, excludes)
-          .addFields(toRawFieldName(Fields.FILE_UUID), toRawFieldName(Fields.FILE_ID),
-              toRawFieldName(Fields.DATA_BUNDLE_ID));
-    });
+    val response = pqlSearchFileCentric("Donor Info From Set Id", pqlAst, request -> request
+        .setFrom(0)
+        .setSize(20000)
+        .setQuery(buildFileSetIdQuery(setId)));
+
+    log.debug("ES response is: {}", response);
+    return response;
   }
 
   public SearchResponse findDownloadInfo(@NonNull final String pql) {
@@ -784,7 +672,7 @@ public class RepositoryFileRepository {
   }
 
   @NonNull
-  private static String[] toStringArray(Iterable<String> strings) {
+  public static String[] toStringArray(Iterable<String> strings) {
     return StreamSupport.stream(strings.spliterator(), false)
         .toArray(String[]::new);
   }
@@ -828,6 +716,7 @@ public class RepositoryFileRepository {
   /**
    * Get total file size, total donor count and total number of files based on query
    */
+  @NonNull
   public Map<String, Long> getSummary(Query query) {
     val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
         terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
@@ -878,6 +767,7 @@ public class RepositoryFileRepository {
    * Returns the unique donor count across repositories Note we are counting the bucket size of a term aggregation. It
    * appears that using cardinality aggregation yields imprecise result.
    */
+  @NonNull
   public long getDonorCount(Query query) {
     val aggName = "donorCount";
     val filters = buildRepoFilters(query.getFilters());
@@ -944,7 +834,7 @@ public class RepositoryFileRepository {
 
   }
 
-  public Map<String, Map<String, Object>> getPancancerStats() {
+  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
     // Cardinality doesn't work, set size to large number to get accurate bucket (donor) count
     val donorCountAgg = nestedAgg(PanCancerStatsFields.DONOR, EsFields.DONORS,
         terms(PanCancerStatsFields.DONOR).field(DONOR_ID_RAW_FIELD_NAME).size(30000));
@@ -985,42 +875,36 @@ public class RepositoryFileRepository {
         .size(size);
   }
 
-  private static Map<String, Map<String, Object>> extractPancancerStats(Aggregations aggs) {
+  private static Map<String, Map<String, Map<String, Object>>> extractPancancerStats(Aggregations aggs) {
     val stats = (Filter) aggs.get(PCAWG);
     val statsAggregations = stats.getAggregations();
 
-    val result = Maps.<String, Map<String, Object>> newHashMap();
+    val result = Maps.<String, Map<String, Map<String, Object>>> newHashMap();
 
     // donorPrimarySite
-    val donorPrimarySite = Maps.<String, Object> newHashMap();
-    val donorFacets = (Terms) getSubAggResultFromNested(statsAggregations, PanCancerStatsFields.DONOR_PRIMARY_SITE)
-        .get(PanCancerStatsFields.DONOR_PRIMARY_SITE);
+    val donorPrimarySite = Maps.<String, Map<String, Object>> newHashMap();
+    val primarySiteAggKey = PanCancerStatsFields.DONOR_PRIMARY_SITE;
+    val donorFacets = (Terms) getSubAggResultFromNested(statsAggregations, primarySiteAggKey)
+        .get(primarySiteAggKey);
 
     for (val bucket : donorFacets.getBuckets()) {
+      val projectFacets = (Terms) bucket.getAggregations().get(primarySiteAggKey);
+      val newEntries = projectFacets.getBuckets().stream().collect(toMap(
+          project -> project.getKey(),
+          project -> bucketSize(project.getAggregations(), primarySiteAggKey)));
+
       val name = bucket.getKey();
+      val map = donorPrimarySite.getOrDefault(name, Maps.<String, Object> newHashMap());
+      map.putAll(newEntries);
 
-      @SuppressWarnings("unchecked")
-      Map<String, Object> map = (Map<String, Object>) donorPrimarySite.get(name);
-
-      if (map == null) {
-        map = Maps.<String, Object> newHashMap();
-        donorPrimarySite.put(name, map);
-      }
-
-      val projectFacets = (Terms) bucket.getAggregations().get(PanCancerStatsFields.DONOR_PRIMARY_SITE);
-
-      for (val projectBucket : projectFacets.getBuckets()) {
-        val donorCount = bucketSize(projectBucket.getAggregations(), PanCancerStatsFields.DONOR_PRIMARY_SITE);
-
-        map.put(projectBucket.getKey(), Long.valueOf(donorCount));
-      }
+      donorPrimarySite.putIfAbsent(name, map);
     }
 
-    result.put(PanCancerStatsFields.DONOR_PRIMARY_SITE, donorPrimarySite);
+    result.put(primarySiteAggKey, donorPrimarySite);
 
     // statistics
     val fileSizeAggName = PanCancerStatsFields.SIZE;
-    val statistics = Maps.<String, Object> newHashMap();
+    val statistics = Maps.<String, Map<String, Object>> newHashMap();
     val datatypes = (Terms) statsAggregations.get(PCAWG);
 
     for (val bucket : datatypes.getBuckets()) {
@@ -1029,12 +913,11 @@ public class RepositoryFileRepository {
           PanCancerStatsFields.DONOR);
 
       val fileSizeResult = (Terms) bucketAggregations.get(fileSizeAggName);
-      long totalFileSize = 0;
 
-      for (val fileSizeBucket : fileSizeResult.getBuckets()) {
-        totalFileSize += averageValue(getSubAggResultFromNested(fileSizeBucket.getAggregations(), fileSizeAggName),
-            fileSizeAggName);
-      }
+      val totalFileSize = fileSizeResult.getBuckets().stream().mapToDouble(
+          fileSize -> averageValue(getSubAggResultFromNested(fileSize.getAggregations(), fileSizeAggName),
+              fileSizeAggName))
+          .sum();
 
       val dataFormat = (Terms) getSubAggResultFromNested(bucketAggregations, PanCancerStatsFields.FORMAT)
           .get(PanCancerStatsFields.FORMAT);
@@ -1043,7 +926,7 @@ public class RepositoryFileRepository {
       // TODO: We should use PanCancerStatsFields for these keys too, though it requires changes in the client side.
       val map = ImmutableMap.<String, Object> of(
           "fileCount", bucket.getDocCount(),
-          "donorCount", Long.valueOf(donorCount),
+          "donorCount", donorCount,
           "fileSize", totalFileSize,
           "dataFormat", formats);
 

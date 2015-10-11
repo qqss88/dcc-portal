@@ -22,7 +22,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Sets.difference;
 import static com.google.common.collect.Sets.intersection;
+import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.union;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
@@ -32,18 +35,23 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.right;
+import static org.apache.commons.lang.math.NumberUtils.toLong;
 import static org.apache.commons.lang.time.DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT;
 import static org.apache.commons.lang.time.DateFormatUtils.formatUTC;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
-import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregations2Facets;
+import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregationsToFacets;
 import static org.icgc.dcc.portal.repository.RepositoryFileRepository.toRawFieldName;
+import static org.icgc.dcc.portal.repository.RepositoryFileRepository.toStringArray;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
+import static org.icgc.dcc.portal.util.SearchResponses.hasHits;
 import static org.supercsv.prefs.CsvPreference.TAB_PREFERENCE;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -54,12 +62,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.ws.rs.core.StreamingOutput;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -75,6 +83,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -91,8 +101,10 @@ import org.icgc.dcc.portal.repository.RepositoryFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvListWriter;
+import org.supercsv.io.CsvMapWriter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -116,6 +128,29 @@ public class RepositoryFileService {
       Fields.FILE_ID,
       Fields.DATA_BUNDLE_ID);
 
+  private static final Map<String, String> DATA_TABLE_EXPORT_MAP = ImmutableMap.<String, String> builder()
+      .put(Fields.ACCESS, "Access")
+      .put(Fields.FILE_ID, "File ID")
+      .put(Fields.DONOR_ID, "ICGC Donor")
+      .put(Fields.REPO_NAME, "Repository")
+      .put(Fields.PROJECT_CODE, "Project")
+      .put(Fields.STUDY, "Study")
+      .put(Fields.DATA_TYPE, "Data Type")
+      .put(Fields.FILE_FORMAT, "Format")
+      .put(Fields.FILE_SIZE, "Size (bytes)")
+      .build();
+  private static final Set<String> DATA_TABLE_EXPORT_MAP_FIELD_KEYS = toRawFieldSet(
+      DATA_TABLE_EXPORT_MAP.keySet());
+  private static final String[] DATA_TABLE_EXPORT_MAP_FIELD_ARRAY = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
+
+  private static final Set<String> DATA_TABLE_EXPORT_SUMMARY_FIELDs = toRawFieldSet(newArrayList(
+      Fields.DONOR_ID, Fields.PROJECT_CODE));
+  private static final Set<String> DATA_TABLE_EXPORT_AVERAGE_FIELDs = toRawFieldSet(newArrayList(
+      Fields.FILE_SIZE));
+  private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDs = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
+      union(DATA_TABLE_EXPORT_SUMMARY_FIELDs, DATA_TABLE_EXPORT_AVERAGE_FIELDs));
+
+  private static final Joiner COMMA_JOINER = COMMA.skipNulls();
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(emptyList());
 
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
@@ -169,12 +204,92 @@ public class RepositoryFileService {
     return repositoryFileRepository.getIndexMetaData();
   }
 
-  public StreamingOutput exportTableData(Query query) {
-    return repositoryFileRepository.exportData(query);
+  @NonNull
+  public void exportTableData(OutputStream output, Query query) {
+    val prepResponse = repositoryFileRepository.prepareDataExport(query, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
+
+    generateTabDelimitedData(output, prepResponse, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
   }
 
-  public StreamingOutput exportTableDataFromSet(String setId) {
-    return repositoryFileRepository.exportDataFromSet(setId);
+  @NonNull
+  public void exportTableDataFromSet(OutputStream output, String setId) {
+    val prepResponse = repositoryFileRepository.prepareDataExportFromSet(setId, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
+
+    generateTabDelimitedData(output, prepResponse, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
+  }
+
+  @SneakyThrows
+  private void generateTabDelimitedData(OutputStream output, SearchResponse prepResponse, String[] keys) {
+    @Cleanup
+    val writer = new CsvMapWriter(new BufferedWriter(new OutputStreamWriter(output)), TAB_PREFERENCE);
+    writer.writeHeader(toStringArray(DATA_TABLE_EXPORT_MAP.values()));
+
+    while (true) {
+      val response = repositoryFileRepository.fetchSearchScrollData(prepResponse.getScrollId());
+
+      if (!hasHits(response)) {
+        break;
+      }
+
+      for (val hit : response.getHits()) {
+        writer.write(toRowValueMap(hit), keys);
+      }
+    }
+
+  }
+
+  private static Set<String> toRawFieldSet(Collection<String> aliases) {
+    return aliases.stream().map(k -> toRawFieldName(k))
+        .collect(toImmutableSet());
+  }
+
+  private static String combineUniqueItemsToString(SearchHitField hitField, Function<Set<Object>, String> combiner) {
+    return (null == hitField) ? "" : combiner.apply(newHashSet(hitField.getValues()));
+  }
+
+  private static String toStringValue(SearchHitField hitField) {
+    return combineUniqueItemsToString(hitField, COMMA_JOINER::join);
+  }
+
+  private static String toSummarizedString(SearchHitField hitField) {
+    return combineUniqueItemsToString(hitField, RepositoryFileService::toSummarizedString);
+  }
+
+  private static String toSummarizedString(Set<Object> values) {
+    if (isEmpty(values)) {
+      return "";
+    }
+
+    val count = values.size();
+
+    // Get the value if there is only one element; otherwise get the count or empty string if empty.
+    return (count > 1) ? String.valueOf(count) : Iterables.get(values, 0).toString();
+  }
+
+  private static String toAverageSizeString(SearchHitField hitField) {
+    if (null == hitField) {
+      return "0";
+    }
+
+    val average = hitField.getValues().stream()
+        .mapToLong(o -> toLong(o.toString(), 0))
+        .average();
+
+    return String.valueOf(average.orElse(0));
+  }
+
+  @NonNull
+  private static Map<String, String> toRowValueMap(SearchHit hit) {
+    val valueMap = hit.getFields();
+
+    return ImmutableMap.<String, String> builder()
+        .putAll(toMap(DATA_TABLE_EXPORT_SUMMARY_FIELDs,
+            field -> toSummarizedString(valueMap.get(field))))
+        .putAll(toMap(DATA_TABLE_EXPORT_AVERAGE_FIELDs,
+            field -> toAverageSizeString(valueMap.get(field))))
+        .putAll(toMap(DATA_TABLE_EXPORT_OTHER_FIELDs,
+            field -> toStringValue(valueMap.get(field))))
+        .build();
   }
 
   /**
@@ -211,7 +326,7 @@ public class RepositoryFileService {
     val hits = response.getHits();
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    externalFiles.setTermFacets(convertAggregations2Facets(response.getAggregations()));
+    externalFiles.setTermFacets(convertAggregationsToFacets(response.getAggregations()));
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return externalFiles;
@@ -690,7 +805,7 @@ public class RepositoryFileService {
     return repositoryFileRepository.getSummary(query);
   }
 
-  public Map<String, Map<String, Object>> getPancancerStats() {
+  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
     return repositoryFileRepository.getPancancerStats();
   }
 

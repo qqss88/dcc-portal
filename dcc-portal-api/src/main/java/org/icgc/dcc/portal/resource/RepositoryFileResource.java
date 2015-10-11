@@ -21,6 +21,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_DISPOSITION;
 import static com.sun.jersey.core.header.ContentDisposition.type;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.ok;
 import static org.icgc.dcc.common.core.util.Splitters.COMMA;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_PARAM;
 import static org.icgc.dcc.portal.resource.ResourceUtils.API_FIELD_VALUE;
@@ -68,6 +69,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
@@ -83,17 +89,12 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Component
 @Slf4j
 @Path("/v1/repository/files")
 @Produces(APPLICATION_JSON)
 @Api(value = "/repository/files", description = "Resources relating to external files")
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileResource {
 
   private static final String API_PATH_MANIFEST = "/manifest";
@@ -159,11 +160,13 @@ public class RepositoryFileResource {
   public Response exportFiles(
       @ApiParam(value = API_FILTER_VALUE) @QueryParam(API_FILTER_PARAM) @DefaultValue(DEFAULT_FILTERS) FiltersParam filtersParam) {
 
-    val stream = repositoryFileService.exportTableData(toQuery(filtersParam));
+    final StreamingOutput outputGenerator = outputStream ->
+        repositoryFileService.exportTableData(outputStream, toQuery(filtersParam));
+
     // Make this similar to client-side export naming format
     val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
 
-    return Response.ok(stream).header(CONTENT_DISPOSITION,
+    return ok(outputGenerator).header(CONTENT_DISPOSITION,
         type(TYPE_ATTACHMENT).fileName(fileName).creationDate(new Date()).build()).build();
   }
 
@@ -178,10 +181,13 @@ public class RepositoryFileResource {
   @Path("/export/{setId}")
   @Produces(TEXT_TSV)
   public Response getExportFromSet(@ApiParam(value = "Set Id", required = true) @PathParam("setId") String setId) {
-    val stream = repositoryFileService.exportTableDataFromSet(setId);
+
+    final StreamingOutput outputGenerator = outputStream ->
+        repositoryFileService.exportTableDataFromSet(outputStream, setId);
+
     val fileName = String.format("repository_%s.tsv", (new SimpleDateFormat("yyyy_MM_dd").format(new Date())));
 
-    return Response.ok(stream).header(CONTENT_DISPOSITION,
+    return ok(outputGenerator).header(CONTENT_DISPOSITION,
         type(TYPE_ATTACHMENT).fileName(fileName).creationDate(new Date()).build()).build();
   }
 
@@ -199,8 +205,7 @@ public class RepositoryFileResource {
         .modificationDate(timestamp)
         .build();
 
-    return Response
-        .ok(outputGenerator)
+    return ok(outputGenerator)
         .header(CONTENT_DISPOSITION, attechmentType)
         .build();
   }
@@ -216,8 +221,9 @@ public class RepositoryFileResource {
     log.info("filtersParam is: '{}' AND repoList is: '{}'.", filtersParam, repoList);
 
     val timestamp = new Date();
-    final StreamingOutput outputGenerator =
-        (outputStream) -> repositoryFileService.generateManifestArchive(outputStream,
+    final StreamingOutput outputGenerator = outputStream ->
+        repositoryFileService.generateManifestArchive(
+            outputStream,
             timestamp,
             toQuery(filtersParam),
             COMMA.splitToList(repoList));
@@ -227,8 +233,7 @@ public class RepositoryFileResource {
         .modificationDate(timestamp)
         .build();
 
-    return Response
-        .ok(outputGenerator)
+    return ok(outputGenerator)
         .header(CONTENT_DISPOSITION, attechmentType)
         .build();
   }
@@ -255,7 +260,7 @@ public class RepositoryFileResource {
   @Path("/pcawg/stats")
   @Timed
   @ApiOperation(value = "Get pancancer repositories statistics")
-  public Map<String, Map<String, Object>> getPancancerStats() {
+  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
     return repositoryFileService.getPancancerStats();
   }
 

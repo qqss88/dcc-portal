@@ -52,6 +52,7 @@ public class RepositoryFile {
   @ApiModelProperty(value = "ID of a repository file")
   String id;
 
+  @ApiModelProperty(value = "Short ID of a repository file")
   String fileId;
 
   @ApiModelProperty(value = "Access type of a repository file")
@@ -60,6 +61,7 @@ public class RepositoryFile {
   @ApiModelProperty(value = "Study type of a repository file")
   List<String> study;
 
+  @ApiModelProperty(value = "Data categorization of a repository file")
   DataCategorization dataCategorization;
 
   @Data
@@ -74,39 +76,65 @@ public class RepositoryFile {
 
   }
 
+  @ApiModelProperty(value = "Data bundle info of a repository file")
   DataBundle dataBundle;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class DataBundle {
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Data bundle ID of a repository file")
     String dataBundleId;
 
   }
 
+  @ApiModelProperty(value = "Copies of a repository file")
   List<FileCopy> fileCopies;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class FileCopy {
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Repository code of a file copy")
     String repoCode;
+
+    @ApiModelProperty(value = "Repository organization of a file copy")
     String repoOrg;
+
+    @ApiModelProperty(value = "Repository name of a file copy")
     String repoName;
+
+    @ApiModelProperty(value = "Repository type of a file copy")
     String repoType;
+
+    @ApiModelProperty(value = "Repository country of a file copy")
     String repoCountry;
+
+    @ApiModelProperty(value = "Repository's base URL of a file copy")
     String repoBaseUrl;
+
+    @ApiModelProperty(value = "Repository's data path of a file copy")
     String repoDataPath;
+
+    @ApiModelProperty(value = "Repository's meta-data path of a file copy")
     String repoMetadataPath;
 
+    @ApiModelProperty(value = "Repository's index info of a file copy")
     IndexFile indexFile;
 
+    @ApiModelProperty(value = "File name of a file copy")
     String fileName;
+
+    @ApiModelProperty(value = "File format of a file copy")
     String fileFormat;
+
+    @ApiModelProperty(value = "File MD5 sum of a file copy")
     String fileMd5sum;
+
+    @ApiModelProperty(value = "File size of a file copy")
     Long fileSize;
+
+    @ApiModelProperty(value = "Last modification timestamp of a file copy")
     Long lastModified;
 
   }
@@ -115,39 +143,70 @@ public class RepositoryFile {
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class IndexFile {
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "ID of a repository index file")
     String id;
+
+    @ApiModelProperty(value = "Short ID of a repository index file")
     String fileId;
+
+    @ApiModelProperty(value = "Name of a repository index file")
     String fileName;
+
+    @ApiModelProperty(value = "Format of a repository index file")
     String fileFormat;
+
+    @ApiModelProperty(value = "MD5 sum of a repository index file")
     String fileMd5sum;
+
+    @ApiModelProperty(value = "Size of a repository index file")
     Long fileSize;
 
   }
 
+  @ApiModelProperty(value = "Donors info of a repository file")
   List<Donor> donors;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class Donor {
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Donor ID of a repository file")
     String donorId;
+
+    @ApiModelProperty(value = "Program of a repository file")
     String program;
+
+    @ApiModelProperty(value = "Primary site of a repository file")
     String primarySite;
+
+    @ApiModelProperty(value = "Project ID of a repository file")
     String projectCode;
 
+    @ApiModelProperty(value = "Donor study of a repository file")
     String study;
+
+    @ApiModelProperty(value = "Sample ID of a repository file")
     String sampleId;
+
+    @ApiModelProperty(value = "Specimen ID of a repository file")
     String specimenId;
+
+    @ApiModelProperty(value = "Specimen type of a repository file")
     String specimenType;
 
+    @ApiModelProperty(value = "Donor submitter ID of a repository file")
     String submittedDonorId;
+
+    @ApiModelProperty(value = "Sample submitter ID of a repository file")
     String submittedSampleId;
+
+    @ApiModelProperty(value = "Specimen submitter ID of a repository file")
     String submittedSpecimenId;
 
+    @ApiModelProperty(value = "Matched control sample ID of a repository file")
     String matchedControlSampleId;
 
+    @ApiModelProperty(value = "Other identifiers of a repository file")
     OtherIdentifiers otherIdentifiers;
 
   }
@@ -156,32 +215,46 @@ public class RepositoryFile {
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class OtherIdentifiers {
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "TCGA sample barcode of a repository file")
     String tcgaSampleBarcode;
+
+    @ApiModelProperty(value = "TCGA aliquot barcode of a repository file")
     String tcgaAliquotBarcode;
+
+    @ApiModelProperty(value = "TCGA participant barcode of a repository file")
     String tcgaParticipantBarcode;
 
   }
 
+  @ApiModelProperty(value = "Analysis method of a repository file")
   AnalysisMethod analysisMethod;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class AnalysisMethod {
 
+    @ApiModelProperty(value = "Analysis type of a repository file")
     String analysisType;
+
+    @ApiModelProperty(value = "Analysis software of a repository file")
     String software;
 
   }
 
+  @ApiModelProperty(value = "Reference genome of a repository file")
   ReferenceGenome referenceGenome;
 
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static final class ReferenceGenome {
 
+    @ApiModelProperty(value = "Genome build of  reference genome")
     String genomeBuild;
+
+    @ApiModelProperty(value = "Reference Name of reference genome")
     String referenceName;
+
+    @ApiModelProperty(value = "Download URL of reference genome")
     String downloadUrl;
 
   }
