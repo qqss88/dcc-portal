@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -143,16 +144,17 @@ public class RepositoryFileService {
       DATA_TABLE_EXPORT_MAP.keySet());
   private static final String[] DATA_TABLE_EXPORT_MAP_FIELD_ARRAY = toStringArray(DATA_TABLE_EXPORT_MAP_FIELD_KEYS);
 
-  private static final Set<String> DATA_TABLE_EXPORT_SUMMARY_FIELDs = toRawFieldSet(newArrayList(
+  private static final Set<String> DATA_TABLE_EXPORT_SUMMARY_FIELDS = toRawFieldSet(newArrayList(
       Fields.DONOR_ID, Fields.PROJECT_CODE));
-  private static final Set<String> DATA_TABLE_EXPORT_AVERAGE_FIELDs = toRawFieldSet(newArrayList(
+  private static final Set<String> DATA_TABLE_EXPORT_AVERAGE_FIELDS = toRawFieldSet(newArrayList(
       Fields.FILE_SIZE));
-  private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDs = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
-      union(DATA_TABLE_EXPORT_SUMMARY_FIELDs, DATA_TABLE_EXPORT_AVERAGE_FIELDs));
+  private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDS = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
+      union(DATA_TABLE_EXPORT_SUMMARY_FIELDS, DATA_TABLE_EXPORT_AVERAGE_FIELDS));
 
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(emptyList());
-
+  private static final Map<String, String> KEYWORD_SEARCH_TYPE_ENTRY = ImmutableMap.of(
+      "type", "donor");
   private static final Map<String, String> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING =
       ImmutableMap.<String, String> builder()
           .put("id", "id")
@@ -196,7 +198,7 @@ public class RepositoryFileService {
       Fields.PROJECT_CODE);
 
   private static final BiFunction<Collection<Map<String, String>>, String, String> CONCAT_WITH_COMMA =
-      (fileInfo, fieldName) -> COMMA.join(transform(fileInfo, m -> m.get(fieldName)));
+      (fileInfo, fieldName) -> COMMA_JOINER.join(transform(fileInfo, m -> m.get(fieldName)));
 
   private final RepositoryFileRepository repositoryFileRepository;
 
@@ -285,21 +287,24 @@ public class RepositoryFileService {
   @NonNull
   private static Map<String, String> toRowValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
+    // Takes a collection of fields and a function and produces a map of field and its value.
+    final BiFunction<Iterable<String>, Function<SearchHitField, String>, Map<String, String>> toFieldValueMap =
+        (c, f) -> toMap(c, field -> f.apply(valueMap.get(field)));
 
     return ImmutableMap.<String, String> builder()
-        .putAll(toMap(DATA_TABLE_EXPORT_SUMMARY_FIELDs,
-            field -> toSummarizedString(valueMap.get(field))))
-        .putAll(toMap(DATA_TABLE_EXPORT_AVERAGE_FIELDs,
-            field -> toAverageSizeString(valueMap.get(field))))
-        .putAll(toMap(DATA_TABLE_EXPORT_OTHER_FIELDs,
-            field -> toStringValue(valueMap.get(field))))
+        .putAll(toFieldValueMap.apply(
+            DATA_TABLE_EXPORT_SUMMARY_FIELDS, RepositoryFileService::toSummarizedString))
+        .putAll(toFieldValueMap.apply(
+            DATA_TABLE_EXPORT_AVERAGE_FIELDS, RepositoryFileService::toAverageSizeString))
+        .putAll(toFieldValueMap.apply(
+            DATA_TABLE_EXPORT_OTHER_FIELDS, RepositoryFileService::toStringValue))
         .build();
   }
 
   /**
    * Emulating keyword search, but without prefix/ngram analyzers..ie: exact match
    */
-  public Keywords findRepoDonor(Query query) {
+  public Keywords findRepoDonor(@NonNull Query query) {
     val response = repositoryFileRepository.findRepoDonor(
         FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), query.getQuery());
     val hits = response.getHits();
@@ -314,18 +319,18 @@ public class RepositoryFileService {
     return new Keywords(newArrayList(keywords));
   }
 
-  public RepositoryFile findOne(String fileId) {
+  public RepositoryFile findOne(@NonNull String fileId) {
     log.info("External repository file id is: '{}'.", fileId);
 
     val response = repositoryFileRepository.findOne(fileId);
     return parse(response.getSourceAsString());
   }
 
-  public long getDonorCount(Query query) {
+  public long getDonorCount(@NonNull Query query) {
     return repositoryFileRepository.getDonorCount(query);
   }
 
-  public RepositoryFiles findAll(Query query) {
+  public RepositoryFiles findAll(@NonNull Query query) {
     val response = repositoryFileRepository.findAll(query);
     val hits = response.getHits();
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
@@ -368,13 +373,13 @@ public class RepositoryFileService {
   }
 
   @SneakyThrows
-  @NonNull
-  public void generateManifestFile(OutputStream output, Date timestamp, Query query, String repoCode) {
-    val data = getData(query);
+  private void generateManifestFileOfRepo(OutputStream output, String repoCode, SearchResponse searchResult,
+      Date timestamp) {
+    val data = FluentIterable.from(searchResult.getHits())
+        .transformAndConcat(hit -> toValueMap(hit));
 
     @Cleanup
     val buffer = new BufferedOutputStream(output);
-
     val repoCodeGroups = Multimaps.index(data, m -> m.get(Fields.REPO_CODE));
 
     for (val code : repoCodeGroups.keySet()) {
@@ -406,40 +411,22 @@ public class RepositoryFileService {
   }
 
   @NonNull
-  @SneakyThrows
+  public void generateManifestFile(OutputStream output, Date timestamp, Query query, String repoCode) {
+    val pql = PQL_CONVERTER.convert(query, REPOSITORY_FILE);
+    log.debug("Received JQL: '{}'; converted to PQL: '{}'.", query.getFilters(), pql);
+
+    val searchResult = repositoryFileRepository.findDownloadInfo(pql);
+
+    generateManifestFileOfRepo(output, repoCode, searchResult, timestamp);
+  }
+
+  @NonNull
   public void generateManifestFileFromSet(OutputStream output, Date timestamp, String setId) {
-    val data = getDataFromSet(setId);
-
     // FIXME: Infer repoCode from the set.
-    String repoCode = "aws-virginia";
+    val repoCode = "aws-virginia";
+    val searchResult = repositoryFileRepository.findDownloadInfoFromSet(setId);
 
-    @Cleanup
-    val buffer = new BufferedOutputStream(output);
-
-    val repoCodeGroups = Multimaps.index(data, m -> m.get(Fields.REPO_CODE));
-
-    for (val code : repoCodeGroups.keySet()) {
-      // Make sure we process the target repo only.
-      if (!repoCode.equals(code)) {
-        continue;
-      }
-
-      val repoData = repoCodeGroups.get(repoCode);
-
-      if (isEmpty(repoData)) {
-        break;
-      }
-
-      // Entries with the same repoCode should & must have the same repoType.
-      val repoType = repoData.get(0).get(Fields.REPO_TYPE);
-      val downloadUrlGroups = Multimaps.index(repoData, entry -> buildDownloadUrl(entry));
-
-      if (RepoTypes.isAws(repoType)) {
-        generateAwsTextFile(buffer, downloadUrlGroups);
-      }
-
-      break;
-    }
+    generateManifestFileOfRepo(output, repoCode, searchResult, timestamp);
   }
 
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
@@ -452,31 +439,22 @@ public class RepositoryFileService {
         .transformAndConcat(hit -> toValueMap(hit));
   }
 
-  private Iterable<Map<String, String>> getDataFromSet(@NonNull final String setId) {
-    val searchResult = repositoryFileRepository.findDownloadInfoFromSet(setId);
-
-    return FluentIterable.from(searchResult.getHits())
-        .transformAndConcat(hit -> toValueMap(hit));
-  }
-
-  private List<String> removeEmptyString(@NonNull List<String> list) {
+  private List<String> removeEmptyString(@NonNull Iterable<String> list) {
     return FluentIterable.from(list)
         .filter(s -> !isBlank(s))
         .toList();
   }
 
-  @NonNull
-  private static Map<String, Object> toKeywordFieldMap(SearchHit hit) {
+  private static Map<String, Object> toKeywordFieldMap(@NonNull SearchHit hit) {
     val valueMap = hit.getSource();
     val commonKeys = intersection(FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), valueMap.keySet());
-    val mapBuilder = ImmutableMap.<String, Object> builder();
 
-    for (val key : commonKeys) {
-      mapBuilder.put(FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.get(key), valueMap.get(key));
-    }
+    val result = commonKeys.stream().collect(Collectors.toMap(
+        key -> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.get(key),
+        key -> valueMap.get(key)));
+    result.putAll(KEYWORD_SEARCH_TYPE_ENTRY);
 
-    return mapBuilder.put("type", "donor")
-        .build();
+    return result;
   }
 
   private static List<RepositoryFile> convertHitsToRepoFiles(SearchHits hits) {
@@ -805,7 +783,7 @@ public class RepositoryFileService {
     closeDownloadUrlElement(writer);
   }
 
-  public Map<String, Long> getSummary(Query query) {
+  public Map<String, Long> getSummary(@NonNull Query query) {
     return repositoryFileRepository.getSummary(query);
   }
 
