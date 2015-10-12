@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.service;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.toMap;
 import static com.google.common.collect.Maps.transformEntries;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.difference;
@@ -29,6 +28,7 @@ import static com.google.common.collect.Sets.union;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.compress.archivers.tar.TarArchiveOutputStream.LONGFILE_GNU;
 import static org.apache.commons.lang.StringUtils.defaultString;
@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -111,6 +110,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
@@ -150,6 +150,11 @@ public class RepositoryFileService {
       Fields.FILE_SIZE));
   private static final Set<String> DATA_TABLE_EXPORT_OTHER_FIELDS = difference(DATA_TABLE_EXPORT_MAP_FIELD_KEYS,
       union(DATA_TABLE_EXPORT_SUMMARY_FIELDS, DATA_TABLE_EXPORT_AVERAGE_FIELDS));
+  private static final Map<Collection<String>, Function<SearchHitField, String>> DATA_TABLE_EXPORT_FIELD_PROCESSORS =
+      ImmutableMap.<Collection<String>, Function<SearchHitField, String>> of(
+          DATA_TABLE_EXPORT_SUMMARY_FIELDS, RepositoryFileService::toSummarizedString,
+          DATA_TABLE_EXPORT_AVERAGE_FIELDS, RepositoryFileService::toAverageSizeString,
+          DATA_TABLE_EXPORT_OTHER_FIELDS, RepositoryFileService::toStringValue);
 
   private static final Joiner COMMA_JOINER = COMMA.skipNulls();
   private static final Keywords NO_MATCH_KEYWORD_SEARCH_RESULT = new Keywords(emptyList());
@@ -284,21 +289,22 @@ public class RepositoryFileService {
     return String.valueOf(average.orElse(0));
   }
 
+  private static <K, V> Map<K, V> combineMaps(Stream<? extends Map<K, V>> source) {
+    return source.map(Map::entrySet)
+        .flatMap(Collection::stream)
+        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
   @NonNull
   private static Map<String, String> toRowValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
-    // Takes a collection of fields and a function and produces a map of field and its value.
-    final BiFunction<Iterable<String>, Function<SearchHitField, String>, Map<String, String>> toFieldValueMap =
-        (c, f) -> toMap(c, field -> f.apply(valueMap.get(field)));
+    val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
+      // Takes a collection of fields and its processor and produces a map of field and its value.
+        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(), field ->
+            fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+      });
 
-    return ImmutableMap.<String, String> builder()
-        .putAll(toFieldValueMap.apply(
-            DATA_TABLE_EXPORT_SUMMARY_FIELDS, RepositoryFileService::toSummarizedString))
-        .putAll(toFieldValueMap.apply(
-            DATA_TABLE_EXPORT_AVERAGE_FIELDS, RepositoryFileService::toAverageSizeString))
-        .putAll(toFieldValueMap.apply(
-            DATA_TABLE_EXPORT_OTHER_FIELDS, RepositoryFileService::toStringValue))
-        .build();
+    return combineMaps(maps);
   }
 
   /**
@@ -423,10 +429,10 @@ public class RepositoryFileService {
   @NonNull
   public void generateManifestFileFromSet(OutputStream output, Date timestamp, String setId) {
     // FIXME: Infer repoCode from the set.
-    val repoCode = "aws-virginia";
+    val awsRepoCode = "aws-virginia";
     val searchResult = repositoryFileRepository.findDownloadInfoFromSet(setId);
 
-    generateManifestFileOfRepo(output, repoCode, searchResult, timestamp);
+    generateManifestFileOfRepo(output, awsRepoCode, searchResult, timestamp);
   }
 
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {
@@ -449,7 +455,7 @@ public class RepositoryFileService {
     val valueMap = hit.getSource();
     val commonKeys = intersection(FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.keySet(), valueMap.keySet());
 
-    val result = commonKeys.stream().collect(Collectors.toMap(
+    val result = commonKeys.stream().collect(toMap(
         key -> FILE_DONOR_INDEX_TYPE_TO_KEYWORD_FIELD_MAPPING.get(key),
         key -> valueMap.get(key)));
     result.putAll(KEYWORD_SEARCH_TYPE_ENTRY);
@@ -479,13 +485,8 @@ public class RepositoryFileService {
     val fields = asValueMap(hit);
     val donorInfoMap = getDonorValueMap(repoFile.getDonors());
 
-    final Function<FileCopy, Map<String, String>> combineMaps = (fileCopy) -> ImmutableMap.<String, String> builder()
-        .putAll(fields)
-        .putAll(donorInfoMap)
-        .putAll(getFileCopyMap(fileCopy))
-        .build();
-
-    return transform(fileCopies, combineMaps::apply);
+    return transform(fileCopies, (fileCopy) ->
+        combineMaps(Stream.of(fields, donorInfoMap, getFileCopyMap(fileCopy))));
   }
 
   private static Map<String, String> getDonorValueMap(List<Donor> donors) {
@@ -508,7 +509,7 @@ public class RepositoryFileService {
   private static Map<String, String> asValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
 
-    return toMap(MANIFEST_FIELDS, alias -> {
+    return Maps.toMap(MANIFEST_FIELDS, alias -> {
       final SearchHitField resultField = getResultByFieldAlias(valueMap, alias);
 
       return (null == resultField) ? "" : defaultString(getString(resultField.getValues()));

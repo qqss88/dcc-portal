@@ -61,6 +61,7 @@ import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFi
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.FILE_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.List;
@@ -118,7 +119,6 @@ import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
-import org.icgc.dcc.portal.util.SearchResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -251,7 +251,7 @@ public class RepositoryFileRepository {
     return result;
   }
 
-  private static NestedFilterBuilder createNestedEntitySetIdFilter(String uuid) {
+  private static NestedFilterBuilder nestedEntitySetIdFilter(String uuid) {
     return nestedFilter(EsFields.DONORS,
         createTermsLookupFilter(DONOR_ID_RAW_FIELD_NAME, DONOR_IDS, UUID.fromString(uuid)));
   }
@@ -262,13 +262,13 @@ public class RepositoryFileRepository {
     }
 
     if (1 == uuids.size()) {
-      return createNestedEntitySetIdFilter(uuids.get(0));
+      return nestedEntitySetIdFilter(uuids.get(0));
     }
 
     val result = boolFilter();
 
     for (val uuid : uuids) {
-      result.should(createNestedEntitySetIdFilter(uuid));
+      result.should(nestedEntitySetIdFilter(uuid));
     }
 
     return result;
@@ -573,9 +573,8 @@ public class RepositoryFileRepository {
           .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
           .setPostFilter(filters);
 
-      for (AggregationBuilder<?> agg : aggs(queryFilter)) {
-        request.addAggregation(agg);
-      }
+      aggs(queryFilter).stream().forEach(
+          agg -> request.addAggregation(agg));
     });
 
     log.debug("findAll() - ES response is: '{}'.", response);
@@ -630,7 +629,7 @@ public class RepositoryFileRepository {
         .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
         .setPostFilter(filters));
 
-    return SearchResponses.getHitIds(response);
+    return getHitIds(response);
   }
 
   @NonNull
