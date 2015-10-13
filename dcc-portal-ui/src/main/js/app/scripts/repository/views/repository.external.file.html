@@ -95,9 +95,9 @@
         <th>Reference Name</th>
         <td ng-init="downloadUrl = referenceGenome.downloadUrl">
           {{fileCtrlr.stringOrDefault (referenceGenome.referenceName) }}
-          <a ng-if="downloadUrl" tooltip="Download URL"
+          <a ng-if="downloadUrl" tooltip="Download"
             title="{{ downloadUrl }}" href="{{ downloadUrl }}">
-            <i class="icon-external-link"></i>
+            <i class="icon-download" />
             <!-- {{:: downloadUrl }} -->
           </a>
         </td>
@@ -115,7 +115,7 @@
       <thead>
         <tr>
           <th rowspan="2">File Name</th>
-          <th rowspan="2">Checksum</th>
+          <!-- <th rowspan="2">Checksum</th> -->
           <th rowspan="2">Format</th>
           <th rowspan="2">Size</th>
           <th rowspan="2">Last Update</th>
@@ -133,10 +133,12 @@
       <tbody>
         <tr ng-repeat="fileCopy in info.fileCopies">
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileName) }}</td>
-          <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileMd5sum) }}</td>
+          <!-- <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileMd5sum) }}</td> -->
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.fileFormat) }}</td>
           <td>{{:: fileCopy.fileSize | bytes }}</td>
-          <td>{{:: fileCopy.lastModified * 1000 | date: 'short' }}</td>
+          <td tooltip="{{:: fileCopy.lastModified * 1000 | date: 'medium' }}">
+            {{:: fileCopy.lastModified * 1000 | date: 'mediumDate' }}
+          </td>
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoName) }}</td>
 
           <td style="text-align: center; vertical-align: middle;"
@@ -147,24 +149,22 @@
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoType) }}</td>
 
           <td ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
-            <a href="#" ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
-              <i class="icon-download"></i>
-              Download Manifest
+            <a href="#"
+              ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
+              <i class="icon-download" />Manifest
             </a>
 
-            <span data-ng-if="showMetaData"> |
+            <span data-ng-if="showMetaData"><br>
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, info.dataBundle.dataBundleId) }}">
-                <i class="icon-external-link"></i>
-                Show Metadata
+                <i class="icon-external-link" />Metadata
               </a>
             </span>
 
-            <span data-ng-if="! showMetaData"> |
+            <span data-ng-if="! showMetaData"><br>
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoDataPath, fileCopy.fileName) }}">
-                <i class="icon-download"></i>
-                Download Data
+                <i class="icon-download" />Data
               </a>
             </span>
           </td>
