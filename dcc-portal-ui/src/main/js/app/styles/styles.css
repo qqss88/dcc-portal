@@ -1854,6 +1854,13 @@ input.valid:focus {
   width: 100%;
 }
 
+/* line 41, _modules/_form.scss */
+.input_manifest {
+  line-height: 10px;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
 /* line 1, _modules/_tables.scss */
 .table {
   width: 100%;

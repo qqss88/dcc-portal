@@ -255,7 +255,9 @@
           return;
        }
 
-       jQuery('#aws-v').html(data.id);
+       jQuery('#aws-v').html('<input id="aws-input" class="input_manifest" type="text" size="33" readonly value="' +
+        data.id + '"/>');
+       jQuery('#aws-input').select();
      });
     };
 
