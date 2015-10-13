@@ -199,14 +199,14 @@ public class RepositoryFileResource {
 
     final StreamingOutput outputGenerator =
         (outputStream) -> repositoryFileService.generateManifestFileFromSet(outputStream, timestamp, setId);
-    val attechmentType = type(TYPE_ATTACHMENT)
+    val attachmentType = type(TYPE_ATTACHMENT)
         .fileName(manifestFileName(setId, timestamp))
         .creationDate(timestamp)
         .modificationDate(timestamp)
         .build();
 
     return ok(outputGenerator)
-        .header(CONTENT_DISPOSITION, attechmentType)
+        .header(CONTENT_DISPOSITION, attachmentType)
         .build();
   }
 

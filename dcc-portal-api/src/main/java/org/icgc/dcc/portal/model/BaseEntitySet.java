@@ -61,6 +61,10 @@ public abstract class BaseEntitySet {
     @NonNull
     private final String name;
 
+    /**
+     * Returns the TermsLookupType value based on the Type value of this object.
+     * @return TermsLookupType value for use in Elasticsearch
+     */
     public TermLookupType toLookupTypeFrom() {
       if (this == DONOR) {
         return TermLookupType.DONOR_IDS;
