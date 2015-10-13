@@ -143,11 +143,7 @@
                     return;
                   }
                   
-                  if (highlight.advQuery.mutation) {
-                    highlight.advQuery.mutation.consequenceType = consequenceFilter;
-                  } else {
-                    highlight.advQuery.mutation = {"consequenceType": consequenceFilter};
-                  }
+                  _.set(highlight.advQuery, 'mutation.consequenceType', consequenceFilter);
                   
                   geneList.push({
                     symbol:highlight.geneSymbol,
