@@ -95,7 +95,11 @@
         <th>Reference Name</th>
         <td ng-init="downloadUrl = referenceGenome.downloadUrl">
           {{fileCtrlr.stringOrDefault (referenceGenome.referenceName) }}
-          <a href="{{ downloadUrl }}">{{:: downloadUrl }}</a>
+          <a ng-if="downloadUrl" tooltip="Download URL"
+            title="{{ downloadUrl }}" href="{{ downloadUrl }}">
+            <i class="icon-external-link"></i>
+            <!-- {{:: downloadUrl }} -->
+          </a>
         </td>
       </tr>
     </table>
@@ -109,15 +113,21 @@
 
     <table class="table table-info" ng-init="fileCopies = info.fileCopies">
       <thead>
-        <th>File Name</th>
-        <th>Checksum</th>
-        <th>Format</th>
-        <th>Size</th>
-        <th>Last Update</th>
-        <th>Repository</th>
-        <th>Country</th>
-        <th>Type</th>
-        <th>Actions</th>
+        <tr>
+          <th rowspan="2">File Name</th>
+          <th rowspan="2">Checksum</th>
+          <th rowspan="2">Format</th>
+          <th rowspan="2">Size</th>
+          <th rowspan="2">Last Update</th>
+          <th colspan="3" class="text-center">Repository</th>
+          <th rowspan="2">Actions</th>
+        </tr>
+
+        <tr>
+          <th rowspan="2">Name</th>
+          <th rowspan="2">Country</th>
+          <th rowspan="2">Type</th>
+        </tr>
       </thead>
 
       <tbody>
@@ -137,23 +147,23 @@
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoType) }}</td>
 
           <td ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
-            <i class="icon-download"></i>
             <a href="#" ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
+              <i class="icon-download"></i>
               Download Manifest
             </a>
 
             <span data-ng-if="showMetaData"> |
-              <i class="icon-external-link"></i>
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, info.dataBundle.dataBundleId) }}">
+                <i class="icon-external-link"></i>
                 Show Metadata
               </a>
             </span>
 
             <span data-ng-if="! showMetaData"> |
-              <i class="icon-download"></i>
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoDataPath, fileCopy.fileName) }}">
+                <i class="icon-download"></i>
                 Download Data
               </a>
             </span>
