@@ -655,14 +655,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -693,14 +693,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -718,14 +718,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -753,14 +753,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -778,14 +778,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -797,14 +797,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -876,14 +876,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -945,14 +945,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -2003,14 +2003,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2114,14 +2114,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2413,14 +2413,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2576,14 +2576,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -4134,6 +4134,353 @@ td {
 /* line 242, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
+}
+
+/* line 1, _modules/_repositories.scss */
+.t_cloud_partners {
+  font-size: 1rem;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /**
+  * prism.js default theme for JavaScript, CSS and HTML
+  * Based on dabblet (http://dabblet.com)
+  * @author Lea Verou
+  */
+  /* Code blocks */
+  /* Inline code */
+}
+/* line 5, _modules/_repositories.scss */
+.t_cloud_partners nav ul {
+  margin: 0 0;
+}
+/* line 9, _modules/_repositories.scss */
+.t_cloud_partners section {
+  padding: 2rem;
+  margin: 0;
+  box-shadow: none;
+  background: white;
+  border-radius: 0;
+  border-bottom: 1px solid #cccccc;
+}
+/* line 21, _modules/_repositories.scss */
+.t_cloud_partners section h5 {
+  font-weight: bold;
+}
+/* line 25, _modules/_repositories.scss */
+.t_cloud_partners section .section_ident {
+  margin-left: 2rem;
+}
+/* line 29, _modules/_repositories.scss */
+.t_cloud_partners a {
+  color: #4183C4;
+}
+/* line 33, _modules/_repositories.scss */
+.t_cloud_partners img.aws-process-diagram {
+  display: block;
+  width: 50%;
+  margin: 1rem auto;
+  border: none;
+}
+/* line 41, _modules/_repositories.scss */
+.t_cloud_partners h1, .t_cloud_partners h2, .t_cloud_partners h3, .t_cloud_partners h4, .t_cloud_partners h5, .t_cloud_partners h6 {
+  margin: 3rem 0rem 0rem 0rem;
+  padding: 0;
+  font-weight: normal;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative;
+  text-transform: none;
+  font-style: normal;
+}
+/* line 53, _modules/_repositories.scss */
+.t_cloud_partners h1 tt, .t_cloud_partners h1 code {
+  font-size: inherit;
+}
+/* line 57, _modules/_repositories.scss */
+.t_cloud_partners h2 tt, .t_cloud_partners h2 code {
+  font-size: inherit;
+}
+/* line 61, _modules/_repositories.scss */
+.t_cloud_partners h3 tt, .t_cloud_partners h3 code {
+  font-size: inherit;
+}
+/* line 65, _modules/_repositories.scss */
+.t_cloud_partners h4 tt, .t_cloud_partners h4 code {
+  font-size: inherit;
+}
+/* line 70, _modules/_repositories.scss */
+.t_cloud_partners h5 tt, .t_cloud_partners h5 code {
+  font-size: inherit;
+}
+/* line 73, _modules/_repositories.scss */
+.t_cloud_partners h6 tt, .t_cloud_partners h6 code {
+  font-size: inherit;
+}
+/* line 76, _modules/_repositories.scss */
+.t_cloud_partners h1 {
+  font-size: 28px;
+  color: black;
+}
+/* line 80, _modules/_repositories.scss */
+.t_cloud_partners h2 {
+  font-size: 2.0rem;
+  line-height: 1.25rem;
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+}
+/* line 87, _modules/_repositories.scss */
+.t_cloud_partners h3 {
+  font-size: 18px;
+}
+/* line 91, _modules/_repositories.scss */
+.t_cloud_partners h4 {
+  font-size: 16px;
+}
+/* line 95, _modules/_repositories.scss */
+.t_cloud_partners h5 {
+  font-size: 14px;
+}
+/* line 99, _modules/_repositories.scss */
+.t_cloud_partners h6 {
+  color: #777777;
+  font-size: 14px;
+}
+/* line 104, _modules/_repositories.scss */
+.t_cloud_partners p, .t_cloud_partners blockquote, .t_cloud_partners ul, .t_cloud_partners ol, .t_cloud_partners dl, .t_cloud_partners li, .t_cloud_partners table, .t_cloud_partners pre {
+  margin: 15px 0;
+}
+/* line 110, _modules/_repositories.scss */
+.t_cloud_partners body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* line 115, _modules/_repositories.scss */
+.t_cloud_partners body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* line 120, _modules/_repositories.scss */
+.t_cloud_partners body > h1:first-child + h2 {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* line 124, _modules/_repositories.scss */
+.t_cloud_partners body > h3:first-child, .t_cloud_partners body > h4:first-child, .t_cloud_partners body > h5:first-child, .t_cloud_partners body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* line 129, _modules/_repositories.scss */
+.t_cloud_partners a:first-child h1, .t_cloud_partners a:first-child h2, .t_cloud_partners a:first-child h3, .t_cloud_partners a:first-child h4, .t_cloud_partners a:first-child h5, .t_cloud_partners a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+/* line 133, _modules/_repositories.scss */
+.t_cloud_partners h1 p, .t_cloud_partners h2 p, .t_cloud_partners h3 p, .t_cloud_partners h4 p, .t_cloud_partners h5 p, .t_cloud_partners h6 p {
+  margin-top: 0;
+}
+/* line 137, _modules/_repositories.scss */
+.t_cloud_partners li p.first {
+  display: inline-block;
+}
+/* line 141, _modules/_repositories.scss */
+.t_cloud_partners li {
+  margin: 0;
+}
+/* line 145, _modules/_repositories.scss */
+.t_cloud_partners ul, .t_cloud_partners ol {
+  padding-left: 30px;
+}
+/* line 149, _modules/_repositories.scss */
+.t_cloud_partners ul :first-child, .t_cloud_partners ol :first-child {
+  margin-top: 0;
+}
+/* line 154, _modules/_repositories.scss */
+.t_cloud_partners img {
+  max-width: 100%;
+}
+/* line 158, _modules/_repositories.scss */
+.t_cloud_partners code {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+/* line 167, _modules/_repositories.scss */
+.t_cloud_partners pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+/* line 176, _modules/_repositories.scss */
+.t_cloud_partners pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+/* line 186, _modules/_repositories.scss */
+.t_cloud_partners pre code, .t_cloud_partners pre tt {
+  background-color: transparent;
+  border: none;
+}
+/* line 192, _modules/_repositories.scss */
+.t_cloud_partners * {
+  -webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+  /* line 197, _modules/_repositories.scss */
+  .t_cloud_partners body {
+    width: 854px;
+    margin: 0 auto;
+  }
+}
+@media print {
+  /* line 204, _modules/_repositories.scss */
+  .t_cloud_partners table, .t_cloud_partners pre {
+    page-break-inside: avoid;
+  }
+  /* line 207, _modules/_repositories.scss */
+  .t_cloud_partners pre {
+    word-wrap: break-word;
+  }
+}
+/* line 212, _modules/_repositories.scss */
+.t_cloud_partners table th {
+  font-weight: bold;
+}
+/* line 223, _modules/_repositories.scss */
+.t_cloud_partners code[class*="language-"],
+.t_cloud_partners pre[class*="language-"] {
+  color: black;
+  text-shadow: 0 1px white;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+/* line 246, _modules/_repositories.scss */
+.t_cloud_partners pre[class*="language-"]::-moz-selection, .t_cloud_partners pre[class*="language-"] ::-moz-selection,
+.t_cloud_partners code[class*="language-"]::-moz-selection, .t_cloud_partners code[class*="language-"] ::-moz-selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+/* line 252, _modules/_repositories.scss */
+.t_cloud_partners pre[class*="language-"]::selection, .t_cloud_partners pre[class*="language-"] ::selection,
+.t_cloud_partners code[class*="language-"]::selection, .t_cloud_partners code[class*="language-"] ::selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+@media print {
+  /* line 259, _modules/_repositories.scss */
+  .t_cloud_partners code[class*="language-"],
+  .t_cloud_partners pre[class*="language-"] {
+    text-shadow: none;
+  }
+}
+/* line 265, _modules/_repositories.scss */
+.t_cloud_partners pre[class*="language-"] {
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
+}
+/* line 272, _modules/_repositories.scss */
+.t_cloud_partners :not(pre) > code[class*="language-"],
+.t_cloud_partners pre[class*="language-"] {
+  background: #f5f2f0;
+}
+/* line 277, _modules/_repositories.scss */
+.t_cloud_partners :not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+}
+/* line 286, _modules/_repositories.scss */
+.t_cloud_partners .token.comment,
+.t_cloud_partners .token.prolog,
+.t_cloud_partners .token.doctype,
+.t_cloud_partners .token.cdata {
+  color: slategray;
+}
+/* line 290, _modules/_repositories.scss */
+.t_cloud_partners .token.punctuation {
+  color: #999;
+}
+/* line 294, _modules/_repositories.scss */
+.t_cloud_partners .namespace {
+  opacity: .7;
+}
+/* line 304, _modules/_repositories.scss */
+.t_cloud_partners .token.property,
+.t_cloud_partners .token.tag,
+.t_cloud_partners .token.boolean,
+.t_cloud_partners .token.number,
+.t_cloud_partners .token.constant,
+.t_cloud_partners .token.symbol,
+.t_cloud_partners .token.deleted {
+  color: #905;
+}
+/* line 313, _modules/_repositories.scss */
+.t_cloud_partners .token.selector,
+.t_cloud_partners .token.attr-name,
+.t_cloud_partners .token.string,
+.t_cloud_partners .token.char,
+.t_cloud_partners .token.builtin,
+.t_cloud_partners .token.inserted {
+  color: #690;
+}
+/* line 321, _modules/_repositories.scss */
+.t_cloud_partners .token.operator,
+.t_cloud_partners .token.entity,
+.t_cloud_partners .token.url,
+.t_cloud_partners .language-css .token.string,
+.t_cloud_partners .style .token.string {
+  color: #a67f59;
+  background: rgba(255, 255, 255, 0.5);
+}
+/* line 328, _modules/_repositories.scss */
+.t_cloud_partners .token.atrule,
+.t_cloud_partners .token.attr-value,
+.t_cloud_partners .token.keyword {
+  color: #07a;
+}
+/* line 332, _modules/_repositories.scss */
+.t_cloud_partners .token.function {
+  color: #DD4A68;
+}
+/* line 338, _modules/_repositories.scss */
+.t_cloud_partners .token.regex,
+.t_cloud_partners .token.important,
+.t_cloud_partners .token.variable {
+  color: #e90;
+}
+/* line 343, _modules/_repositories.scss */
+.t_cloud_partners .token.important,
+.t_cloud_partners .token.bold {
+  font-weight: bold;
+}
+/* line 346, _modules/_repositories.scss */
+.t_cloud_partners .token.italic {
+  font-style: italic;
+}
+/* line 350, _modules/_repositories.scss */
+.t_cloud_partners .token.entity {
+  cursor: help;
 }
 
 /* line 26, styles.scss */

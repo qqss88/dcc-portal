@@ -20,20 +20,33 @@
 	
 	var module = angular.module('icgc.repositories', []);
 	
-	module.config(function ($stateProvider) {
-		$stateProvider.state('repositories', {
-			url: '/repositories/{repoCode}/guide',
-			templateUrl: function ($stateParams) {
-				return 'scripts/repositories/views/guides/' + $stateParams.repoCode + '.html';
-			},
-			controller: 'RepositoriesController'
+	module
+		.config(function ($stateProvider) {
+			$stateProvider
+				.state('cloud-partners', {
+					url: '/cloud-partners',
+					templateUrl: 'scripts/repositories/views/home.html',
+					controller: 'RepositoriesHomeController'
+				})
+				.state('repositories', {
+					url: '/cloud-partners/repositories/{repoCode}/guide',
+					templateUrl: function ($stateParams) {
+						return 'scripts/repositories/views/guides/' + $stateParams.repoCode + '.html';
+					},
+					controller: 'RepositoriesGuideController'
+				});
 		});
-	});
 	
-	module.controller('RepositoriesController', function($scope, Page) {
-		Page.stopWork();
-    Page.setPage('entity');
-    Page.setTitle('Repositories');
-  });
+	module
+		.controller('RepositoriesHomeController', function($scope, Page) {
+			Page.stopWork();
+			Page.setPage('entity');
+			Page.setTitle('ICGC in the Cloud');
+		})
+		.controller('RepositoriesGuideController', function($scope, Page) {
+			Page.stopWork();
+			Page.setPage('entity');
+			Page.setTitle('Repositories');
+		});
 	
 })();

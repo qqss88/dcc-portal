@@ -268,7 +268,7 @@ module.exports = function (grunt) {
 
               // 'vendor/scripts/angularjs/*',
               'vendor/styles/genomeviewer/**/*',
-              'styles/images/{,*/}*.{gif,webp,svg,png}',
+              'styles/images/**/*.{gif,webp,svg,png}',
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',
