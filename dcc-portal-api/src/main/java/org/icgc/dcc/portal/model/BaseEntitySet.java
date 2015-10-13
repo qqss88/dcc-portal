@@ -65,7 +65,7 @@ public abstract class BaseEntitySet {
      * Returns the TermsLookupType value based on the Type value of this object.
      * @return TermsLookupType value for use in Elasticsearch
      */
-    public TermLookupType toLookupTypeFrom() {
+    public TermLookupType toLookupType() {
       if (this == DONOR) {
         return TermLookupType.DONOR_IDS;
       } else if (this == GENE) {

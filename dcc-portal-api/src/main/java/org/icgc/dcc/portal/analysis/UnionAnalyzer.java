@@ -146,7 +146,7 @@ public class UnionAnalyzer {
 
   private static BoolFilterBuilder toBoolFilterFrom(final UnionUnit unionDefinition,
       final BaseEntitySet.Type entityType) {
-    val lookupType = entityType.toLookupTypeFrom();
+    val lookupType = entityType.toLookupType();
     val boolFilter = boolFilter();
 
     // Adding Musts
@@ -289,7 +289,7 @@ public class UnionAnalyzer {
         return;
       }
 
-      val lookupType = entityType.toLookupTypeFrom();
+      val lookupType = entityType.toLookupType();
       termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       // Done - update status to finished
@@ -372,7 +372,7 @@ public class UnionAnalyzer {
       val entityIds = SearchResponses.getHitIds(response);
       log.debug("The result of running a FilterParam query is: '{}'", entityIds);
 
-      val lookupType = entitySetDefinition.getType().toLookupTypeFrom();
+      val lookupType = entitySetDefinition.getType().toLookupType();
       termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySetDefinition.isTransient());
 
       val count = getCountFrom(response, max);
@@ -404,7 +404,7 @@ public class UnionAnalyzer {
     val maxSetSize = entitySet.getLimit(maxNumberOfHits);
     val entityIds = repositoryFileRepository.findAllDonorIds(query, maxSetSize);
 
-    val lookupType = entitySet.getType().toLookupTypeFrom();
+    val lookupType = entitySet.getType().toLookupType();
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, entitySet.isTransient());
 
     val count = entityIds.size();
@@ -426,7 +426,7 @@ public class UnionAnalyzer {
         .build();
 
     val entityIds = repositoryFileRepository.findAllFileIds(query);
-    val lookupType = entitySet.getType().toLookupTypeFrom();
+    val lookupType = entitySet.getType().toLookupType();
 
     val repoList = (ArrayNode) entitySet.getFilters().path("file").path("repoName").path("is");
     termLookupService.createTermsLookup(lookupType, newEntityId, entityIds, repoList.get(0).asText());
@@ -468,7 +468,7 @@ public class UnionAnalyzer {
   }
 
   public List<String> retriveListItems(@NonNull final EntitySet entityList) {
-    val lookupTypeName = entityList.getType().toLookupTypeFrom().getName();
+    val lookupTypeName = entityList.getType().toLookupType().getName();
     val query = client.prepareGet(TermsLookupService.TERMS_LOOKUP_INDEX_NAME,
         lookupTypeName, entityList.getId().toString());
 
