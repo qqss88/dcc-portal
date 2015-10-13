@@ -743,19 +743,13 @@ public class RepositoryFileRepository {
 
     val aggResult = getAggregationResult(response, aggName);
     val buckets = ((Terms) aggResult.get(SummaryFields.FILE)).getBuckets();
-    long totalFileSize = 0;
-
-    for (val bucket : buckets) {
-      totalFileSize += averageValue(getSubAggResultFromNested(bucket.getAggregations(), SummaryFields.FILE),
-          SummaryFields.FILE);
-    }
-
+    val totalFileSize = sumFileCopySize(buckets, SummaryFields.FILE);
     val donorAggResult = getSubAggResultFromNested(aggResult, SummaryFields.DONOR);
 
     return ImmutableMap.<String, Long> builder()
         // FIXME: this fileCount might not be correct!
         .put("fileCount", getTotalHitCount(response))
-        .put("totalFileSize", totalFileSize)
+        .put("totalFileSize", (long) totalFileSize)
         .put("donorCount", (long) bucketSize(donorAggResult, SummaryFields.DONOR))
         .put("projectCount", (long) bucketSize(donorAggResult, SummaryFields.PROJECT))
         .put("primarySiteCount", (long) bucketSize(donorAggResult, SummaryFields.PRIMARY_SITE))
@@ -821,6 +815,13 @@ public class RepositoryFileRepository {
   @NonNull
   private static double averageValue(Aggregations aggResult, String name) {
     return ((Avg) aggResult.get(name)).getValue();
+  }
+
+  private static double sumFileCopySize(List<Bucket> buckets, String aggregationKey) {
+    return buckets.stream().mapToDouble(
+        bucket -> averageValue(
+            getSubAggResultFromNested(bucket.getAggregations(), aggregationKey), aggregationKey))
+        .sum();
   }
 
   @UtilityClass
@@ -902,7 +903,6 @@ public class RepositoryFileRepository {
     result.put(primarySiteAggKey, donorPrimarySite);
 
     // statistics
-    val fileSizeAggName = PanCancerStatsFields.SIZE;
     val statistics = Maps.<String, Map<String, Object>> newHashMap();
     val datatypes = (Terms) statsAggregations.get(PCAWG);
 
@@ -911,12 +911,8 @@ public class RepositoryFileRepository {
       val donorCount = bucketSize(getSubAggResultFromNested(bucketAggregations, PanCancerStatsFields.DONOR),
           PanCancerStatsFields.DONOR);
 
-      val fileSizeResult = (Terms) bucketAggregations.get(fileSizeAggName);
-
-      val totalFileSize = fileSizeResult.getBuckets().stream().mapToDouble(
-          fileSize -> averageValue(getSubAggResultFromNested(fileSize.getAggregations(), fileSizeAggName),
-              fileSizeAggName))
-          .sum();
+      val fileSizeResult = (Terms) bucketAggregations.get(PanCancerStatsFields.SIZE);
+      val totalFileSize = sumFileCopySize(fileSizeResult.getBuckets(), PanCancerStatsFields.SIZE);
 
       val dataFormat = (Terms) getSubAggResultFromNested(bucketAggregations, PanCancerStatsFields.FORMAT)
           .get(PanCancerStatsFields.FORMAT);

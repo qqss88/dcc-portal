@@ -128,7 +128,12 @@
           <td>{{:: fileCopy.fileSize | bytes }}</td>
           <td>{{:: fileCopy.lastModified * 1000 | date: 'short' }}</td>
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoName) }}</td>
-          <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoCountry) }}</td>
+
+          <td style="text-align: center; vertical-align: middle;"
+            ng-init="countryCode = fileCtrlr.translateCountryCode (fileCopy.repoCountry.toLowerCase())">
+            <span class="flag flag-{{ countryCode }}"
+              tooltip="{{ fileCtrlr.countryName (countryCode) }}" />
+          </td>
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoType) }}</td>
 
           <td ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">

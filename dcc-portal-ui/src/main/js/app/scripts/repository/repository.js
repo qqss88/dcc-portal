@@ -222,12 +222,12 @@
       }
       $scope.cancel();
     };
-    
+
     $scope.createManifestId = function(repoName, fileCount) {
-      
+
       jQuery('#aws-v').html('<i class="icon-spinner icon-spin pull-right"></i>');
       var params = {};
-      
+
       var filters = LocationService.filters();
       if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
         if (! filters.file) {
@@ -235,7 +235,7 @@
         }
         filters.file.id = {is: $scope.selectedFiles};
       }
-      
+
       if (filters.file) {
         delete filters.file.repoName;
         filters.file.repoName = {'is': [repoName]};
@@ -243,11 +243,11 @@
         filters.file = {};
         filters.file.repoName = {'is': [repoName]};
       }
-      
+
       params.size = fileCount;
       params.isTransient = true;
       params.filters = filters;
-      
+
       var promise = SetService.createFileSet(params);
       promise.then(function(data) {
        if (! data.id) {
@@ -264,7 +264,7 @@
   /**
    * Controller for File Entity page
    */
-  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, fileInfo) {
+  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, CodeTable, fileInfo) {
 
     Page.setTitle('External File Entity');
     Page.setPage('externalFileEntity');
@@ -319,6 +319,8 @@
       return equalsIgnoringCase (repoType, 'GNOS') || equalsIgnoringCase (repoType, 'S3');
     };
 
+    this.translateCountryCode = CodeTable.translateCountryCode;
+    this.countryName = CodeTable.countryName;
   });
 
   /**
