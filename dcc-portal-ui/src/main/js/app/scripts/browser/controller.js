@@ -137,6 +137,20 @@
         $scope.genes.from += pageSize;
         genes({scroll: true});
       };
+      
+      function handleMutationResponse(response, settings) {
+        $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
+        $scope.mutations.isBusy = false;
+
+        if (settings.scroll) {
+          $scope.mutations.data.pagination = response.pagination ? response.pagination : {};
+          for (var i = 0; i < response.hits.length; i++) {
+            $scope.mutations.data.hits.push(response.hits[i]);
+          }
+        } else {
+          $scope.mutations.data = response;
+        }
+      }
 
       function mutations(settings) {
         settings = settings || {};
@@ -153,36 +167,15 @@
             include: 'consequences',
             from: $scope.mutations.from,
             size: $scope.mutations.size
-          }).then(function (response) {
-            $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
-            $scope.mutations.isBusy = false;
-  
-            if (settings.scroll) {
-              $scope.mutations.data.pagination = response.pagination ? response.pagination : {};
-              for (var i = 0; i < response.hits.length; i++) {
-                $scope.mutations.data.hits.push(response.hits[i]);
-              }
-            } else {
-              $scope.mutations.data = response;
-            }
+          }).then(function(response) {
+            handleMutationResponse(response, settings);
           });
-          
         } else {
           Mutations.getList({
             from: $scope.mutations.from,
             size: $scope.mutations.size
-          }).then(function (response) {
-            $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
-            $scope.mutations.isBusy = false;
-  
-            if (settings.scroll) {
-              $scope.mutations.data.pagination = response.pagination ? response.pagination : {};
-              for (var i = 0; i < response.hits.length; i++) {
-                $scope.mutations.data.hits.push(response.hits[i]);
-              }
-            } else {
-              $scope.mutations.data = response;
-            }
+          }).then(function(response) {
+            handleMutationResponse(response, settings);
           });
         }
         
