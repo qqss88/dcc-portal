@@ -19,7 +19,7 @@
   'use strict';
   
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // define global namespace for the icgc app to be used by third parties as well as in the console.
+  // Define global namespace for the icgc app to be used by third parties as well as in the console.
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (typeof window.$icgc === 'undefined') {
     (function() {
@@ -85,9 +85,9 @@
             _angularInjector = null;
             
         ///////////////////////////////////////////////////////       
-        // private methods
+        // Private methods
         ///////////////////////////////////////////////////////  
-        // default initializer
+        // Default initializer
         function __initDefaultAPI() {
           _APIInterface = new API(_currentAPIVersion, _isLocalUIRun);
         }
@@ -128,7 +128,7 @@
           
           
         ///////////////////////////////////////////////////////       
-        // public API      
+        // Public API      
         ////////////////////////////////////////////////////////
         this.getAPI = function() {
           
@@ -146,7 +146,7 @@
           return this;
         };
   
-        // turn on all debug across the app
+        // Turn on all debug across the app
         this.setDebugEnabled = function(isEnabled) {
           _isDebugEnabled = isEnabled;
           __setAPIDebugEnabled(isEnabled); // turn on the API debug as well
@@ -158,7 +158,7 @@
           return this;
         };
   
-        // this method should be used for checking before performing a console.*
+        // This method should be used for checking before performing a console.*
         // useful if debuging in a different environment that is not development       
         this.isDebugEnabled = function() {
           return _isDebugEnabled;
@@ -176,10 +176,10 @@
     }
       
  
-     // singleton global variable used to control the application settings across non-angular 
+     // Singleton global variable used to control the application settings across non-angular 
      // libraries as well the the JS console
      window.$icgcApp = new ICGCApp()
-                        .setLocalUIRun(false); // set to true if you are running this using 'grunt server'
+                        .setLocalUIRun(false); // Set to true if you are running this using 'grunt server'
                      
                       
     })();
@@ -379,7 +379,7 @@
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
     
-    // function that returns a interceptor function
+    // Function that returns a interceptor function
     function _getInterceptorDebugFunction(requestType){
          
       return function(data, operation, model) {
