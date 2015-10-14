@@ -23,17 +23,31 @@
 	module
 		.config(function ($stateProvider) {
 			$stateProvider
-				.state('cloud-partners', {
-					url: '/cloud-partners',
-					templateUrl: 'scripts/repositories/views/home.html',
-					controller: 'RepositoriesHomeController'
+				.state('ICGCcloud', {
+						url: '/icgc-in-the-cloud',
+						template: 	'<div data-ui-view="home"></div>' +
+									'<div data-ui-view="repos"></div>',
+						abstract: true			
 				})
-				.state('repositories', {
-					url: '/cloud-partners/repositories/{repoCode}/guide',
-					templateUrl: function ($stateParams) {
-						return 'scripts/repositories/views/guides/' + $stateParams.repoCode + '.html';
-					},
-					controller: 'RepositoriesGuideController'
+				.state('ICGCcloud.home', {
+						url: '/home',
+						views: {
+							'home': {
+								templateUrl: 'scripts/repositories/views/home.html',
+								controller: 'RepositoriesHomeController' 
+							}
+						}
+				})	
+				.state('ICGCcloud.repositories', {
+					url: '/repositories/{repoCode}/guide',
+					views: {
+						'repos': {
+							templateUrl: function ($stateParams) {
+								return 'scripts/repositories/views/guides/' + $stateParams.repoCode + '.html';
+							},
+							controller: 'RepositoriesGuideController'
+						}
+					}
 				});
 		});
 	

@@ -167,7 +167,9 @@ module.exports = function (grunt) {
         relativeAssets: false,
         require: ['compass', 'bootstrap-sass', 'singularitygs', 'singularity-extras']
       },
-      dist: {},
+      dist: {
+        sassDir: '<%= yeoman.app %>/styles'
+      },
       server: {
         options: {
           //debugInfo: true
@@ -368,6 +370,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'compass:dist', // run in case files were changed outside of grunt server (dev environment)
     'bower-install',
     'jshint',
     'peg',
