@@ -100,7 +100,8 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
             + "nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml",
         "nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml",
         "62464",
-        "c2be918abd8d63c21cee69987a61fc23");
+        "c2be918abd8d63c21cee69987a61fc23",
+        "PCAWG");
 
   }
 

@@ -86,7 +86,7 @@
 {
   "id": "2489e862-9fa7-5e06-9429-c80fdd4b3118",
   "file_id": "FI226785",
-  "study": null,
+  "study": "PCAWG",
   "access": "open",
   "data_bundle": {
     "data_bundle_id": "cesc/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_CESC.bio.Level_1.114.68.0/nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml"
