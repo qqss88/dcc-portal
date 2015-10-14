@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -63,6 +64,22 @@ public class DiagramService {
   private final MutationRepository mutationRepository;
 
   private ImmutableMap<String, String> INDEX_MODEL = IndexModel.FIELDS_MAPPING.get(Kind.DIAGRAM);
+
+  private static final List<String> CONSEQUENCE_TYPES = ImmutableList.<String> builder().add(
+      "frameshift_variant",
+      "missense_variant",
+      "start_lost",
+      "initiator_codon_variant",
+      "stop_gained",
+      "stop_lost",
+      "exon_loss_variant",
+      "splice_acceptor_variant",
+      "splice_donor_variant", "splice_region_variant",
+      "5_prime_UTR_premature_start_codon_gain_variant",
+      "disruptive_inframe_deletion",
+      "inframe_deletion",
+      "disruptive_inframe_insertion",
+      "inframe_insertion").build();
 
   public Map<String, DiagramProtein> mapProteinIds(@NonNull String pathwayId, @NonNull String[] impactFilter) {
     val dbToUniprotMap = getProteinIdMap(pathwayId);
@@ -156,6 +173,7 @@ public class DiagramService {
     if (impacts.length > 0) {
       query.must(termsQuery(functionalImpactFieldName, impacts));
     }
+    query.must(termsQuery("consequence_type", CONSEQUENCE_TYPES));
 
     return query;
   }
