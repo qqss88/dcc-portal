@@ -178,9 +178,6 @@
             handleMutationResponse(response, settings);
           });
         }
-        
-        
-        
       }
 
       $scope.nextMutations = function () {
