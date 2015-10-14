@@ -148,23 +148,23 @@
           </td>
           <td>{{ fileCtrlr.stringOrDefault (fileCopy.repoType) }}</td>
 
-          <td ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
-            <a href="#"
-              ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
+          <td style="min-width: 157px"
+            ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
+            <a href="#" ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
               <i class="icon-download" />Manifest
             </a>
 
-            <span data-ng-if="showMetaData"><br>
+            <span data-ng-if="showMetaData"> |
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, info.dataBundle.dataBundleId) }}">
                 <i class="icon-external-link" />Metadata
               </a>
             </span>
 
-            <span data-ng-if="! showMetaData"><br>
+            <span data-ng-if="! showMetaData"> |
               <a target="_blank"
                 href="{{ fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoDataPath, fileCopy.fileName) }}">
-                <i class="icon-download" />Data
+                <i class="icon-external-link" />Data
               </a>
             </span>
           </td>

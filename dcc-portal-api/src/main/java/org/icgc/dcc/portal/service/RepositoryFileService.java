@@ -124,9 +124,10 @@ public class RepositoryFileService {
   private static final String DATE_FORMAT_PATTERN = ISO_DATETIME_TIME_ZONE_FORMAT.getPattern();
   private static final String UTF_8 = StandardCharsets.UTF_8.name();
   private static final int BUFFER_SIZE = 1024 * 100;
-  private static final List<String> MANIFEST_FIELDS = ImmutableList.of(
+  private static final List<String> MANIFEST_SIMPLE_FIELDS = ImmutableList.of(
       Fields.FILE_UUID,
       Fields.FILE_ID,
+      Fields.STUDY,
       Fields.DATA_BUNDLE_ID);
 
   private static final Map<String, String> DATA_TABLE_EXPORT_MAP = ImmutableMap.<String, String> builder()
@@ -174,11 +175,12 @@ public class RepositoryFileService {
           .build();
 
   // Manifest column definitions
-  private static final String[] TSV_HEADERS = { "url", "file_name", "file_size", "md5_sum" };
+  private static final String[] TSV_HEADERS = { "url", "file_name", "file_size", "md5_sum", "study" };
   private static final List<String> TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.FILE_NAME,
       Fields.FILE_SIZE,
-      Fields.FILE_MD5SUM);
+      Fields.FILE_MD5SUM,
+      Fields.STUDY);
   private static final Map<String, String> COUNT_FIELD_FORMAT_STRINGS = ImmutableMap.<String, String> of(
       Fields.DONOR_ID, "%d donors",
       Fields.PROJECT_CODE, "%d projects");
@@ -189,7 +191,7 @@ public class RepositoryFileService {
 
   private static final String[] AWS_TSV_HEADERS = {
       "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size",
-      "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count" };
+      "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count", "study" };
   private static final List<String> AWS_TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.REPO_CODE,
       Fields.FILE_ID,
@@ -200,10 +202,11 @@ public class RepositoryFileService {
       Fields.FILE_MD5SUM,
       Fields.INDEX_FILE_UUID,
       Fields.DONOR_ID,
-      Fields.PROJECT_CODE);
+      Fields.PROJECT_CODE,
+      Fields.STUDY);
 
   private static final BiFunction<Collection<Map<String, String>>, String, String> CONCAT_WITH_COMMA =
-      (fileInfo, fieldName) -> COMMA_JOINER.join(transform(fileInfo, m -> m.get(fieldName)));
+      (fileInfo, fieldName) -> COMMA_JOINER.join(transform(fileInfo, map -> map.get(fieldName)));
 
   private final RepositoryFileRepository repositoryFileRepository;
 
@@ -445,8 +448,8 @@ public class RepositoryFileService {
         .transformAndConcat(hit -> toValueMap(hit));
   }
 
-  private List<String> removeEmptyString(@NonNull Iterable<String> list) {
-    return FluentIterable.from(list)
+  private List<String> removeEmptyString(@NonNull Iterable<String> strings) {
+    return FluentIterable.from(strings)
         .filter(s -> !isBlank(s))
         .toList();
   }
@@ -485,7 +488,7 @@ public class RepositoryFileService {
     val fields = asValueMap(hit);
     val donorInfoMap = getDonorValueMap(repoFile.getDonors());
 
-    return transform(fileCopies, (fileCopy) ->
+    return transform(fileCopies, fileCopy ->
         combineMaps(Stream.of(fields, donorInfoMap, getFileCopyMap(fileCopy))));
   }
 
@@ -509,7 +512,7 @@ public class RepositoryFileService {
   private static Map<String, String> asValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
 
-    return Maps.toMap(MANIFEST_FIELDS, alias -> {
+    return Maps.toMap(MANIFEST_SIMPLE_FIELDS, alias -> {
       final SearchHitField resultField = getResultByFieldAlias(valueMap, alias);
 
       return (null == resultField) ? "" : defaultString(getString(resultField.getValues()));

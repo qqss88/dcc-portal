@@ -150,6 +150,7 @@ public class RepositoryFileRepository {
   private static final SelectNode MANIFEST_DOWNLOAD_INFO_SELECT = select(ImmutableList.of(
       Fields.FILE_UUID,
       Fields.FILE_ID,
+      Fields.STUDY,
       Fields.DATA_BUNDLE_ID,
       Fields.FILE_COPIES,
       Fields.DONORS));
