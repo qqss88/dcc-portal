@@ -150,6 +150,8 @@
         _ctrl.mutations = mutations;
 
         _ctrl.mutations.advQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]}}});
+        _ctrl.mutations.viewerQuery = LocationService.mergeIntoFilters({donor: {id: {is: [donor.id]},
+        projectId: {is: [donor.projectId]}}});
 
         // Need to get SSM Test Donor counts from projects
         Projects.getList().then(function (projects) {
