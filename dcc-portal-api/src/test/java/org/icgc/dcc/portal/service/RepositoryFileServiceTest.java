@@ -83,23 +83,25 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
    */
   private final static class ExpectedValues {
 
-    final static String REPO_CODE_FOR_XML = "pcawg-barcelona";
+    final static String REPO_CODE_FOR_XML = "pcawg-heidelberg";
     final static String REPO_TYPE_FOR_XML = "GNOS";
     final static List<String> CONTENT_FOR_XML = ImmutableList.of(
-        "2286df6e-e269-44fe-ba9b-492f2933c52d",
-        "https://gtrepo-bsc.annailabs.com/cghub/data/analysis/download/2286df6e-e269-44fe-ba9b-492f2933c52d",
-        "7ef9fd9b-d349-4ec3-ab4d-1a1d11c0204b.svcp_1-0-5.20150228.somatic.imputeCounts.tar.gz",
-        "464923839",
-        "e42d41da7072ea0828cdf8f7a73491ce");
+        "c08b8fec-78a3-4f95-b472-953a5d0b46ef",
+        // "https://gtrepo-dkfz.annailabs.com/cghub/data/analysis/download/c08b8fec-78a3-4f95-b472-953a5d0b46ef",
+        "https://gtrepo-dkfz.annailabs.com/cghub/data/analysis/download/ffe2ed5dedcf27e52280c16db5eb2d04.bam",
+        "ffe2ed5dedcf27e52280c16db5eb2d04.bam",
+        "94359085765",
+        "ffe2ed5dedcf27e52280c16db5eb2d04");
     final static String REPO_CODE_FOR_TSV = "tcga";
     final static String REPO_TYPE_FOR_TSV = "Web Archive";
     final static List<String> CONTENT_FOR_TSV = ImmutableList.of(
-        "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/cesc/bcr/"
-            + "nationwidechildrens.org/bio/clin/nationwidechildrens.org_CESC.bio.Level_1.114.68.0/"
-            + "nationwidechildrens.org_clinical.TCGA-C5-A1M6.xml",
-        "nationwidechildrens.org_clinical.TCGA-C5-A1M6.xml",
-        "92160",
-        "0b7809dc31d05521b8105ea1d7b4e7a6");
+        "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/"
+            // + "cesc/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_CESC.bio.Level_1.114.68.0/"
+            + "nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml",
+        "nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml",
+        "62464",
+        "c2be918abd8d63c21cee69987a61fc23",
+        "PCAWG");
 
   }
 
@@ -111,7 +113,7 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
   @Before
   public void setUp() {
     // This creates and populates the test index with fixture data.
-    es.execute(createIndexMapping(Type.REPOSITORY_FILE)
+    es.execute(createIndexMapping(Type.REPOSITORY_FILE_CENTRIC)
         .withData(bulkFile(getClass())));
     service = new RepositoryFileService(new RepositoryFileRepository(es.client()));
   }

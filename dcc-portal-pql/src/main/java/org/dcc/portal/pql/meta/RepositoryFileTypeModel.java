@@ -17,10 +17,7 @@
  */
 package org.dcc.portal.pql.meta;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
-import static lombok.AccessLevel.PRIVATE;
-import static org.dcc.portal.pql.meta.field.ArrayFieldModel.arrayOfObjects;
+import static org.dcc.portal.pql.meta.field.ArrayFieldModel.nestedArrayOfObjects;
 import static org.dcc.portal.pql.meta.field.LongFieldModel.long_;
 import static org.dcc.portal.pql.meta.field.ObjectFieldModel.object;
 import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
@@ -28,28 +25,34 @@ import static org.dcc.portal.pql.meta.field.StringFieldModel.string;
 import java.util.List;
 import java.util.Map;
 
+import lombok.experimental.UtilityClass;
+
+import org.dcc.portal.pql.meta.field.ArrayFieldModel;
 import org.dcc.portal.pql.meta.field.FieldModel;
+import org.dcc.portal.pql.meta.field.ObjectFieldModel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 /**
  * TypeModel for Repository File index type
  */
 public class RepositoryFileTypeModel extends TypeModel {
 
+  private static final Type MY_TYPE = Type.REPOSITORY_FILE;
+  private static final String TYPE_PREFIX = MY_TYPE.getPrefix();
+  private static final String TERMS_LOOKUP_DONOR_IDS = "donor-ids";
+
+  // private static final String TERMS_LOOKUP_FILE_IDS = "file-ids";
+
   public RepositoryFileTypeModel() {
-    super(MAPPINGS, INTERNAL_ALIASES, PUBLIC_FIELDS, INCLUDE_FIELDS);
+    super(Fields.MAPPINGS, INTERNAL_ALIASES, PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
 
   @Override
   public Type getType() {
-    return Type.REPOSITORY_FILE;
+    return MY_TYPE;
   }
 
   @Override
@@ -62,138 +65,213 @@ public class RepositoryFileTypeModel extends TypeModel {
     return TYPE_PREFIX;
   }
 
-  /*
-   * We enforce ImmutableList here (instead of List).
+  /**
+   * Raw ES fields
    */
-  public static ImmutableList<String> toAliasList(Fields... fields) {
-    return ImmutableList.copyOf(transform(newArrayList(fields),
-        field -> field.alias));
+  @UtilityClass
+  public class EsFields {
+
+    public final String FILE_COPIES = "file_copies";
+    public final String DONORS = "donors";
+    public final String DONOR_ID = "donor_id";
+
   }
 
   /**
-   * Aliases for ES fields
+   * Field aliases
    */
-  @RequiredArgsConstructor(access = PRIVATE)
-  @Getter
-  public static enum Fields {
+  @UtilityClass
+  public class Fields {
 
-    ID("id"),
-    STUDY("study"),
-    ACCESS("access"),
-    DATA_FORMAT("dataFormat"),
-    DATA_TYPE("dataType"),
-    EXPERIMENTAL_STRATEGY("experimentalStrategy"),
-    PROJECT_CODE("projectCode"),
-    PROGRAM("program"),
-    DONOR_STUDY("donorStudy"),
-    PRIMARY_SITE("primarySite"),
-    DONOR_ID("donorId"),
-    SPECIFMEN_ID("specimenId"),
-    SPECIMEN_TYPE("specimenType"),
-    SAMPLE_ID("sampleId"),
-    DONOR_SUBMITTER_ID("donorSubmitterId"),
-    SPECIMEN_SUBMITTER_ID("specimenSubmitterId"),
-    SAMPLE_SUBMITTER_ID("sampleSubmitterId"),
-    TCGA_PARTICIPANT_BARCODE("tcgaParticipantBarcode"),
-    TCGA_SAMPLE_BARCODE("tcgaSampleBarcode"),
-    TCGA_ALIQUOT_BARCODE("tcgaAliquotBarcode"),
-    REPO_TYPE("repoType"),
-    REPO_ORG("repoOrg"),
-    REPO_ENTITY_ID("repoEntityId"),
-    REPO_METADATA_PATH("repoMetadataPath"),
-    REPO_DATA_PATH("repoDataPath"),
-    LAST_MODIFIED("lastModified"),
-    LAST_UPDATE("lastUpdate"), // An
-                               // alias
-                               // to
-                               // LAST_MODIFIED
-    FILE_NAME("fileName"),
-    FILE_MD5SUM("fileMd5sum"),
-    FILE_SIZE("fileSize"),
-    REPO_SERVER_OBJECT("repoServer"),
-    REPO_NAME("repoName"),
-    REPO_CODE("repoCode"),
-    REPO_COUNTRY("repoCountry"),
-    REPO_BASE_URL("repoBaseUrl");
+    // Sub-object aliases
+    public final String DATA_CATEGORIZATION = "dataCategorization";
+    public final String DATA_BUNDLE = "dataBundle";
+    public final String FILE_COPIES = "fileCopies";
+    public final String INDEX_FILE = "indexFile";
+    public final String DONORS = "donors";
+    public final String OTHER_IDENTIFIERS = "otherIdentifiers";
+    public final String ANALYSIS_METHOD = "analysisMethod";
+    public final String REFERENCE_GENOME = "referenceGenome";
 
-    @NonNull
-    private final String alias;
+    // Individual field aliases
+    public final String DATA_TYPE = "dataType";
+    public final String EXPERIMENTAL_STRATEGY = "experimentalStrategy";
+    public final String DATA_BUNDLE_ID = "dataBundleId";
 
+    public final String REPO_CODE = "repoCode";
+    public final String REPO_ORG = "repoOrg";
+    public final String REPO_NAME = "repoName";
+    public final String REPO_TYPE = "repoType";
+    public final String REPO_COUNTRY = "repoCountry";
+    public final String REPO_BASE_URL = "repoBaseUrl";
+    public final String REPO_DATA_PATH = "repoDataPath";
+    public final String REPO_METADATA_PATH = "repoMetadataPath";
+
+    public final String FILE_NAME = "fileName";
+    public final String FILE_FORMAT = "fileFormat";
+    public final String FILE_MD5SUM = "fileMd5sum";
+    public final String FILE_SIZE = "fileSize";
+    public final String LAST_MODIFIED = "lastModified";
+    public final String LAST_UPDATED = "lastUpdated";
+
+    public final String INDEX_FILE_UUID = INDEX_FILE + ".id";
+    public final String INDEX_FILE_ID = INDEX_FILE + ".fileId";
+    public final String INDEX_FILE_NAME = INDEX_FILE + ".fileName";
+    public final String INDEX_FILE_FORMAT = INDEX_FILE + ".fileFormat";
+    public final String INDEX_FILE_MD5SUM = INDEX_FILE + ".fileMd5sum";
+    public final String INDEX_FILE_SIZE = INDEX_FILE + ".fileSize";
+
+    public final String PROGRAM = "program";
+    public final String DONOR_STUDY = "donorStudy";
+    public final String DONOR_ID = "donorId";
+    public final String PRIMARY_SITE = "primarySite";
+    public final String PROJECT_CODE = "projectCode";
+    public final String SAMPLE_ID = "sampleId";
+    public final String SPECIMEN_ID = "specimenId";
+    public final String SPECIMEN_TYPE = "specimenType";
+    public final String SUBMITTED_DONOR_ID = "submittedDonorId";
+    public final String SUBMITTED_SAMPLE_ID = "submittedSampleId";
+    public final String SUBMITTED_SPECIMEN_ID = "submittedSpecimenId";
+    public final String MATCHED_CONTROL_SAMPLE_ID = "matchedControlSampleId";
+
+    public final String TCGA_ALIQUOT_BARCODE = "tcgaAliquotBarcode";
+    public final String TCGA_PARTICIPANT_BARCODE = "tcgaParticipantBarcode";
+    public final String TCGA_SAMPLE_BARCODE = "tcgaSampleBarcode";
+
+    public final String ANALYSIS_TYPE = "analysisType";
+    public final String ANALYSIS_SOFTWARE = "software";
+
+    public final String REFERENCE_NAME = "referenceName";
+    public final String GENOME_BUILD = "genomeBuild";
+    public final String DOWNLOAD_URL = "downloadUrl";
+
+    public final String ID = "id";
+    public final String FILE_UUID = "fileUuid";
+    public final String FILE_ID = "fileId";
+    public final String ACCESS = "access";
+    public final String STUDY = "study";
+
+    // Sub-object mappings
+    private ObjectFieldModel dataCategorization() {
+      return object("data_categorization", DATA_CATEGORIZATION,
+          string("data_type", DATA_TYPE),
+          string("experimental_strategy", EXPERIMENTAL_STRATEGY));
+    }
+
+    private ObjectFieldModel dataBundle() {
+      return object("data_bundle", DATA_BUNDLE,
+          string("data_bundle_id", DATA_BUNDLE_ID));
+    }
+
+    private ArrayFieldModel fileCopies() {
+      return nestedArrayOfObjects(EsFields.FILE_COPIES, FILE_COPIES, object(
+          string("repo_code", REPO_CODE),
+          string("repo_org", REPO_ORG),
+          string("repo_name", REPO_NAME),
+          string("repo_type", REPO_TYPE),
+          string("repo_country", REPO_COUNTRY),
+          string("repo_base_url", REPO_BASE_URL),
+          string("repo_data_path", REPO_DATA_PATH),
+          string("repo_metadata_path", REPO_METADATA_PATH),
+          indexFile(),
+          string("file_name", FILE_NAME),
+          string("file_format", FILE_FORMAT),
+          string("file_md5sum", FILE_MD5SUM),
+          long_("file_size", FILE_SIZE),
+          long_("last_modified", ImmutableSet.of(LAST_MODIFIED, LAST_UPDATED))));
+    }
+
+    private ObjectFieldModel indexFile() {
+      return object("index_file", INDEX_FILE,
+          string("id", INDEX_FILE_UUID),
+          string("file_id", INDEX_FILE_ID),
+          string("file_name", INDEX_FILE_NAME),
+          string("file_format", INDEX_FILE_FORMAT),
+          string("file_md5sum", INDEX_FILE_MD5SUM),
+          long_("file_size", INDEX_FILE_SIZE));
+    }
+
+    private ArrayFieldModel donors() {
+      return nestedArrayOfObjects(EsFields.DONORS, DONORS, object(
+          string(EsFields.DONOR_ID, DONOR_ID),
+          string("program", PROGRAM),
+          string("primary_site", PRIMARY_SITE),
+          string("project_code", PROJECT_CODE),
+          string("study", DONOR_STUDY),
+          string("sample_id", SAMPLE_ID),
+          string("specimen_id", SPECIMEN_ID),
+          string("specimen_type", SPECIMEN_TYPE),
+          string("submitted_donor_id", SUBMITTED_DONOR_ID),
+          string("submitted_sample_id", SUBMITTED_SAMPLE_ID),
+          string("submitted_specimen_id", SUBMITTED_SPECIMEN_ID),
+          string("matched_control_sample_id", MATCHED_CONTROL_SAMPLE_ID),
+          otherIdentifiers()));
+    }
+
+    private ObjectFieldModel otherIdentifiers() {
+      return object("other_identifiers", OTHER_IDENTIFIERS,
+          string("tcga_sample_barcode", TCGA_SAMPLE_BARCODE),
+          string("tcga_aliquot_barcode", TCGA_ALIQUOT_BARCODE),
+          string("tcga_participant_barcode", TCGA_PARTICIPANT_BARCODE));
+    }
+
+    // TODO: temp definitions?
+    private ObjectFieldModel analysisMethod() {
+      return object("analysis_method", ANALYSIS_METHOD,
+          string("analysis_type", ANALYSIS_TYPE),
+          string("software", ANALYSIS_SOFTWARE));
+    }
+
+    private ObjectFieldModel referenceGenome() {
+      return object("reference_genome", REFERENCE_GENOME,
+          string("reference_name", REFERENCE_NAME),
+          string("genome_build", GENOME_BUILD),
+          string("download_url", DOWNLOAD_URL));
+    }
+
+    // Main mapping
+    private final List<FieldModel> MAPPINGS = ImmutableList.<FieldModel> builder()
+        .add(string("id", ImmutableSet.of(ID, FILE_UUID)))
+        .add(string("file_id", FILE_ID))
+        .add(string("access", ACCESS))
+        .add(string("study", STUDY))
+        .add(string(REPO_FILE_ENTITY_SET_ID, REPO_FILE_ENTITY_SET_ID))
+        .add(dataCategorization())
+        .add(dataBundle())
+        .add(fileCopies())
+        .add(donors())
+        .add(analysisMethod())
+        .add(referenceGenome())
+        .build();
   }
 
-  private static final class EsFieldNames {
+  // Used for select(*) - default projection
+  public static final List<String> PUBLIC_FIELDS = ImmutableList.of(
+      Fields.DATA_BUNDLE_ID,
+      Fields.FILE_UUID,
+      Fields.FILE_ID,
+      Fields.FILE_COPIES,
+      Fields.DONORS);
 
-    private static final String REPOSITORY = "repository";
-    private static final String REPO_SERVER = "repo_server";
+  public static final List<String> AVAILABLE_FACETS = ImmutableList.<String> builder()
+      .add(Fields.PROJECT_CODE)
+      .add(Fields.PRIMARY_SITE)
+      .add(Fields.SPECIMEN_TYPE)
+      .add(Fields.REPO_NAME)
+      .add(Fields.DATA_TYPE)
+      .add(Fields.EXPERIMENTAL_STRATEGY)
+      .add(Fields.STUDY)
+      .add(Fields.FILE_FORMAT)
+      .add(Fields.ACCESS)
+      .add(Fields.DONOR_STUDY)
+      .build();
 
-  }
-
-  public static final List<String> PUBLIC_FIELDS = toAliasList(Fields.values());
-
-  private static final String TYPE_PREFIX = "file";
-  public static final List<String> AVAILABLE_FACETS = toAliasList(
-      Fields.STUDY,
-      Fields.DATA_TYPE,
-      Fields.DATA_FORMAT,
-      Fields.ACCESS,
-      Fields.PROJECT_CODE,
-      Fields.PRIMARY_SITE,
-      Fields.DONOR_STUDY,
-      Fields.REPO_NAME,
-      Fields.EXPERIMENTAL_STRATEGY);
   private static final List<String> INCLUDE_FIELDS = ImmutableList.of(
-      EsFieldNames.REPOSITORY + "." + EsFieldNames.REPO_SERVER);
+      EsFields.FILE_COPIES,
+      EsFields.DONORS);
 
-  private static final Map<String, String> INTERNAL_ALIASES = new ImmutableMap.Builder<String, String>()
-      .put(REPO_FILE_ENTITY_SET_ID, "donor.donor_id")
-      .put(LOOKUP_TYPE, "donor-ids")
-      .build();
-
-  // This represents the mapping of file index type in ElasticSearch.
-  private static final List<FieldModel> MAPPINGS = new ImmutableList.Builder<FieldModel>()
-      .add(string("id", Fields.ID.alias))
-      .add(string("study", Fields.STUDY.alias))
-      .add(string("access", Fields.ACCESS.alias))
-
-  .add(string(REPO_FILE_ENTITY_SET_ID, REPO_FILE_ENTITY_SET_ID))
-
-  .add(object("data_type",
-      string("data_format", Fields.DATA_FORMAT.alias),
-      string("data_type", Fields.DATA_TYPE.alias),
-      string("experimental_strategy", Fields.EXPERIMENTAL_STRATEGY.alias)))
-
-  .add(object("donor",
-      string("project_code", Fields.PROJECT_CODE.alias),
-      string("program", Fields.PROGRAM.alias),
-      string("study", Fields.DONOR_STUDY.alias),
-      string("primary_site", Fields.PRIMARY_SITE.alias),
-      string("donor_id", Fields.DONOR_ID.alias),
-      string("specimen_id", Fields.SPECIFMEN_ID.alias),
-      string("specimen_type", Fields.SPECIMEN_TYPE.alias),
-      string("sample_id", Fields.SAMPLE_ID.alias),
-      string("submitted_donor_id", Fields.DONOR_SUBMITTER_ID.alias),
-      string("submitted_specimen_id", Fields.SPECIMEN_SUBMITTER_ID.alias),
-      string("submitted_sample_id", Fields.SAMPLE_SUBMITTER_ID.alias),
-      string("tcga_participant_barcode", Fields.TCGA_PARTICIPANT_BARCODE.alias),
-      string("tcga_sample_barcode", Fields.TCGA_SAMPLE_BARCODE.alias),
-      string("tcga_aliquot_barcode", Fields.TCGA_ALIQUOT_BARCODE.alias)))
-
-  .add(object(EsFieldNames.REPOSITORY,
-      string("repo_type", Fields.REPO_TYPE.alias),
-      string("repo_org", Fields.REPO_ORG.alias),
-      string("repo_entity_id", Fields.REPO_ENTITY_ID.alias),
-      string("repo_metadata_path", Fields.REPO_METADATA_PATH.alias),
-      string("repo_data_path", Fields.REPO_DATA_PATH.alias),
-      string("file_name", Fields.FILE_NAME.alias),
-      string("file_md5sum", Fields.FILE_MD5SUM.alias),
-      string("last_modified", ImmutableSet.of(Fields.LAST_MODIFIED.alias, Fields.LAST_UPDATE.alias)),
-      long_("file_size", Fields.FILE_SIZE.alias),
-
-  arrayOfObjects(EsFieldNames.REPO_SERVER, Fields.REPO_SERVER_OBJECT.alias, object(
-      string("repo_name", Fields.REPO_NAME.alias),
-      string("repo_code", Fields.REPO_CODE.alias),
-      string("repo_country", Fields.REPO_COUNTRY.alias),
-      string("repo_base_url", Fields.REPO_BASE_URL.alias)))))
-      .build();
+  private static final Map<String, String> INTERNAL_ALIASES = ImmutableMap.<String, String> of(
+      REPO_FILE_ENTITY_SET_ID, EsFields.DONORS + "." + EsFields.DONOR_ID,
+      LOOKUP_TYPE, TERMS_LOOKUP_DONOR_IDS);
 
 }

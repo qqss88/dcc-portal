@@ -1854,6 +1854,13 @@ input.valid:focus {
   width: 100%;
 }
 
+/* line 41, _modules/_form.scss */
+.input_manifest {
+  line-height: 10px;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
 /* line 1, _modules/_tables.scss */
 .table {
   width: 100%;
@@ -2259,6 +2266,11 @@ input.valid:focus {
 /* line 46, _modules/_labels.scss */
 .t_labels__label__files {
   background-color: #666666;
+}
+
+/* line 50, _modules/_labels.scss */
+.manifest-span {
+  min-width: 220px;
 }
 
 /* line 1, _modules/_badges.scss */

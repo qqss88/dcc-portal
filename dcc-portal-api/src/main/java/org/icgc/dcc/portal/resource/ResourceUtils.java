@@ -106,6 +106,8 @@ public class ResourceUtils {
   static final String API_FILE_IDS_VALUE = "Limits the file manifest archive to this list of file IDs";
   static final String API_FILE_REPOS_PARAM = "repositories";
   static final String API_FILE_REPOS_VALUE = "Limits the file manifest archive to this list of file repositories";
+  static final String API_FILE_REPO_CODE_PARAM = "repoCode";
+  static final String API_FILE_REPO_CODE_VALUE = "File Repository Code";
 
   static final String API_ENTITY_LIST_ID_VALUE = "Entity Set ID";
   static final String API_ENTITY_LIST_ID_PARAM = "entitySetId";

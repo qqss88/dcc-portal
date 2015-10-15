@@ -74,19 +74,18 @@
       filters: {
         file: {
           donorId: {is: [_ctrl.donor.id]},
-          dataFormat: { is: ['XML']}
+          fileFormat: {is: ['XML']}
         }
       }
     });
-    promise.then(function(results) {
-      if (results.hits && results.hits[0]) {
-        var file = results.hits[0];
-        var repo = file.repository;
-        _ctrl.donor.clinicalXML = repo.repoServer[0].repoBaseUrl.replace(/\/$/, '') +
-          repo.repoDataPath + repo.repoEntityId;
+    promise.then (function (results) {
+      var fileCopy = _.get (results, 'hits[0].fileCopies[0]', undefined);
+
+      if (_.isPlainObject (fileCopy)) {
+        _ctrl.donor.clinicalXML = fileCopy.repoBaseUrl.replace (/\/$/, '') +
+          fileCopy.repoDataPath + fileCopy.fileName;
       }
     });
-
 
     _ctrl.downloadDonorData = function() {
       $modal.open({

@@ -61,6 +61,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
 import org.elasticsearch.action.search.MultiSearchResponse;
@@ -95,11 +100,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -180,7 +180,10 @@ public class DonorRepository implements Repository {
   public SearchResponse findAllCentric(Query query) {
     val pql = converter.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
+
+    log.info("Request of Donor findAllCentric is: '{}'.", request);
     val response = request.getRequestBuilder().execute().actionGet();
+
     return response;
   }
 
@@ -448,13 +451,10 @@ public class DonorRepository implements Repository {
     val response = search.execute().actionGet();
 
     if (response.isExists()) {
-      val result = createResponseMap(response, query, KIND);
-      log.debug("Found donor: '{}'.", result);
-
-      return result;
+      return createResponseMap(response, query, KIND);
     }
 
-    if (!isRepositoryDonor(client, "donor_id", id)) {
+    if (!isRepositoryDonor(client, id)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }

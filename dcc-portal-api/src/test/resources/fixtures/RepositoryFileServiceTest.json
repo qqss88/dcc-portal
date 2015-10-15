@@ -1,106 +1,146 @@
 {  
   "index":{  
-    "_index":"icgc-repository",
-    "_type":"file",
-    "_id":"AU2YtBwVl7BE7AZSYliB"
+    "_index":"test-icgc-repository",
+    "_type":"file-centric",
+    "_id":"9154037d-ba72-5977-9f50-b575eaee5979"
   }
 }
-{  
-  "id":"4eaf75ba-64c3-533a-9c1e-e7cba947d6db",
-  "study":"PCAWG",
-  "access":"controlled",
-  "data_types":[  
-    {  
-      "data_type":"Other",
-      "data_format":"Other",
-      "experimental_strategy":"WGS"
+{
+  "id": "9154037d-ba72-5977-9f50-b575eaee5979",
+  "file_id": "FI49283",
+  "study": [
+    "PCAWG"
+  ],
+  "access": "controlled",
+  "data_bundle": {
+    "data_bundle_id": "c08b8fec-78a3-4f95-b472-953a5d0b46ef"
+  },
+  "analysis_method": {
+    "analysis_type": "Reference alignment",
+    "software": "BWA MEM"
+  },
+  "data_categorization": {
+    "data_type": "Aligned Reads",
+    "experimental_strategy": "WGS"
+  },
+  "reference_genome": {
+    "genome_build": "GRCh37",
+    "reference_name": "hs37d5",
+    "download_url": "ftp://ftp.sanger.ac.uk/pub/project/PanCancer/genome.fa.gz"
+  },
+  "file_copies": [
+    {
+      "file_name": "ffe2ed5dedcf27e52280c16db5eb2d04.bam",
+      "file_format": "BAM",
+      "file_size": 94359085765,
+      "file_md5sum": "ffe2ed5dedcf27e52280c16db5eb2d04",
+      "last_modified": 1420480562,
+      "index_file": {
+        "id": "62de8725-94ee-5f4f-9778-d8ce288a2f1e",
+        "file_id": "FI210995",
+        "file_name": "ffe2ed5dedcf27e52280c16db5eb2d04.bam.bai",
+        "file_format": "BAI",
+        "file_size": 11381552,
+        "file_md5sum": "d505af2caee36aa99b8e6974692b64cb"
+      },
+      "repo_type": "GNOS",
+      "repo_org": "PCAWG",
+      "repo_name": "PCAWG - Heidelberg",
+      "repo_code": "pcawg-heidelberg",
+      "repo_country": "DE",
+      "repo_base_url": "https://gtrepo-dkfz.annailabs.com/",
+      "repo_data_path": "/cghub/data/analysis/download/",
+      "repo_metadata_path": "/cghub/metadata/analysisFull/"
     }
   ],
-  "repository":{  
-    "repo_type":"GNOS",
-    "repo_org":"PCAWG",
-    "repo_entity_id":"2286df6e-e269-44fe-ba9b-492f2933c52d",
-    "repo_server":[  
-      {  
-        "repo_name":"PCAWG - Barcelona",
-        "repo_code":"pcawg-barcelona",
-        "repo_country":"ES",
-        "repo_base_url":"https://gtrepo-bsc.annailabs.com/"
+  "donors": [
+    {
+      "project_code": "PBCA-DE",
+      "program": null,
+      "study": "PCAWG",
+      "primary_site": "Brain",
+      "donor_id": "DO35741",
+      "specimen_id": "SP107417",
+      "specimen_type": "Normal - blood derived",
+      "sample_id": "SA517428",
+      "matched_control_sample_id": null,
+      "submitted_donor_id": "ICGC_MB111",
+      "submitted_specimen_id": "ICGC_BL111",
+      "submitted_sample_id": "ICGC_BL111",
+      "other_identifiers": {
+        "tcga_participant_barcode": null,
+        "tcga_sample_barcode": null,
+        "tcga_aliquot_barcode": null
       }
-    ],
-    "repo_metadata_path":"/cghub/metadata/analysisFull/",
-    "repo_data_path":"/cghub/data/analysis/download/",
-    "file_name":"7ef9fd9b-d349-4ec3-ab4d-1a1d11c0204b.svcp_1-0-5.20150228.somatic.imputeCounts.tar.gz",
-    "file_size":464923839,
-    "file_md5sum":"e42d41da7072ea0828cdf8f7a73491ce",
-    "last_modified":"2015-03-18T05:47:45Z"
-  },
-  "donor":{  
-    "project_code":"PACA-CA",
-    "program":null,
-    "study":"PCAWG",
-    "primary_site":"Pancreas",
-    "donor_id":"DO35098",
-    "specimen_id":"SP116962",
-    "sample_id":"SA520264",
-    "submitted_donor_id":"PCSI_0019",
-    "submitted_specimen_id":"PCSI_0019_Pa_P_526",
-    "submitted_sample_id":"PCSI_0019_Pa_P_526",
-    "tcga_participant_barcode":null,
-    "tcga_sample_barcode":null,
-    "tcga_aliquot_barcode":null
-  }
+    }
+  ]
 }
 
 {  
   "index":{  
-    "_index":"icgc-repository",
-    "_type":"file",
-    "_id":"AU2OZ1MmiXT-nJuhlU4y"
+    "_index":"test-icgc-repository",
+    "_type":"file-centric",
+    "_id":"2489e862-9fa7-5e06-9429-c80fdd4b3118"
   }
 }
-{  
-  "study":null,
-  "access":"open",
-  "data_types":[  
-    {  
-      "data_type":"Clinical",
-      "data_format":"XML",
-      "experimental_strategy":null
+{
+  "id": "2489e862-9fa7-5e06-9429-c80fdd4b3118",
+  "file_id": "FI226785",
+  "study": "PCAWG",
+  "access": "open",
+  "data_bundle": {
+    "data_bundle_id": "cesc/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_CESC.bio.Level_1.114.68.0/nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml"
+  },
+  "analysis_method": {
+    "analysis_type": null,
+    "software": null
+  },
+  "data_categorization": {
+    "data_type": "Clinical",
+    "experimental_strategy": null
+  },
+  "reference_genome": {
+    "genome_build": null,
+    "reference_name": null,
+    "download_url": null
+  },
+  "file_copies": [
+    {
+      "file_name": "nationwidechildrens.org_clinical.TCGA-ZX-AA5X.xml",
+      "file_format": "XML",
+      "file_size": 62464,
+      "file_md5sum": "c2be918abd8d63c21cee69987a61fc23",
+      "last_modified": 1443223440,
+      "index_file": null,
+      "repo_type": "Web Archive",
+      "repo_org": "TCGA",
+      "repo_name": "TCGA DCC - Bethesda",
+      "repo_code": "tcga",
+      "repo_country": "US",
+      "repo_base_url": "https://tcga-data.nci.nih.gov/",
+      "repo_data_path": "/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/",
+      "repo_metadata_path": null
     }
   ],
-  "repository":{  
-    "repo_type":"Web Archive",
-    "repo_org":"TCGA",
-    "repo_entity_id":"cesc/bcr/nationwidechildrens.org/bio/clin/nationwidechildrens.org_CESC.bio.Level_1.114.68.0/nationwidechildrens.org_clinical.TCGA-C5-A1M6.xml",
-    "repo_server":[  
-      {  
-        "repo_name":"TCGA DCC - Washington",
-        "repo_code":"tcga",
-        "repo_country":"US",
-        "repo_base_url":"https://tcga-data.nci.nih.gov/"
+  "donors": [
+    {
+      "project_code": "CESC-US",
+      "program": "TCGA",
+      "study": null,
+      "primary_site": "Cervix",
+      "donor_id": "DO219762",
+      "specimen_id": null,
+      "specimen_type": null,
+      "sample_id": null,
+      "matched_control_sample_id": null,
+      "submitted_donor_id": "4756acc0-4e96-44d4-b359-04d64dc7eb84",
+      "submitted_specimen_id": null,
+      "submitted_sample_id": null,
+      "other_identifiers": {
+        "tcga_participant_barcode": "TCGA-ZX-AA5X",
+        "tcga_sample_barcode": null,
+        "tcga_aliquot_barcode": null
       }
-    ],
-    "repo_metadata_path":null,
-    "repo_data_path":"/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor/",
-    "file_name":"nationwidechildrens.org_clinical.TCGA-C5-A1M6.xml",
-    "file_size":92160,
-    "file_md5sum":"0b7809dc31d05521b8105ea1d7b4e7a6",
-    "last_modified":"2015-05-15T00:19:00Z"
-  },
-  "donor":{  
-    "project_code":"CESC-US",
-    "program":"TCGA",
-    "study":null,
-    "primary_site":"Cervix",
-    "donor_id":"DO48985",
-    "specimen_id":null,
-    "sample_id":null,
-    "submitted_donor_id":"825a6fbb-aede-436f-800b-c7f096da0a77",
-    "submitted_specimen_id":null,
-    "submitted_sample_id":null,
-    "tcga_participant_barcode":"TCGA-C5-A1M6",
-    "tcga_sample_barcode":null,
-    "tcga_aliquot_barcode":null
-  }
+    }
+  ]
 }

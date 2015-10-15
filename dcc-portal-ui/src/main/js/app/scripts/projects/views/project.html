@@ -85,6 +85,22 @@
                 </ul>
             </td>
         </tr>
+        <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.studies.length > 0">
+            <th>Number of donors in
+              <a href="/pcawg">PCAWG</a>
+            </th>
+            <td>
+                <ul>
+                    <li data-ng-repeat="study in ProjectCtrl.studies">
+                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
+                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
+                        <!--
+                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
+                        -->
+                    </li>
+                </ul>
+            </td>
+        </tr>
         <tr>
             <th>Number of donors with molecular data in DCC </th>
             <td>
@@ -102,20 +118,6 @@
                 <a data-ui-sref='advanced({filters:"{\"donor\":{\"projectId\":{\"is\":[\"{{ProjectCtrl.project.id}}\"]}}}"})'>
                     {{::ProjectCtrl.project.totalDonorCount | number}}
                 </a>
-            </td>
-        </tr>
-        <tr data-ng-if="ProjectCtrl.project.state === 'live' && ProjectCtrl.studies.length > 0">
-            <th>Number of donors in PCAWG</th>
-            <td>
-                <ul>
-                    <li data-ng-repeat="study in ProjectCtrl.studies">
-                        <a href="/search?filters={{study.advQuery}}">{{study.count | number }}</a>
-                        <span data-ng-if="!ProjectCtrl.isPCAWG(study.term)"> {{study.term}} </span>
-                        <!--
-                        <span data-ng-if="ProjectCtrl.isPCAWG(study.term)"><pcawg-badge></pcawg-badge></span>
-                        -->
-                    </li>
-                </ul>
             </td>
         </tr>
 

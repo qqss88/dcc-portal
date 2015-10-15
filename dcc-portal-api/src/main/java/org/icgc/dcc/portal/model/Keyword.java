@@ -94,10 +94,19 @@ public class Keyword {
   String source;
 
   @ApiModelProperty(required = false)
-  String donorId;
+  List<String> donorId;
 
   @ApiModelProperty(required = false)
-  String fileName;
+  List<String> fileName;
+
+  @ApiModelProperty(required = false)
+  String dataType;
+
+  @ApiModelProperty(required = false)
+  List<String> projectCode;
+
+  @ApiModelProperty(required = false)
+  String fileId;
 
   @ApiModelProperty(required = false)
   List<String> tcgaParticipantBarcode;
@@ -142,8 +151,13 @@ public class Keyword {
     source = getString(fieldMap.get(fields.get("source")));
 
     // File
-    fileName = getString(fieldMap.get(fields.get("file_name")));
-    donorId = getString(fieldMap.get(fields.get("donor_id")));
+    fileId = getString(fieldMap.get(fields.get("file_id")));
+    dataType = getString(fieldMap.get(fields.get("data_type")));
+
+    fileName = (List<String>) fieldMap.get(fields.get("file_name"));
+    donorId = (List<String>) fieldMap.get(fields.get("donor_id"));
+    projectCode = (List<String>) fieldMap.get(fields.get("project_code"));
+
     tcgaParticipantBarcode = (List<String>) fieldMap.get(fields.get("TCGAParticipantBarcode"));
     tcgaAliquotBarcode = (List<String>) fieldMap.get(fields.get("TCGAAliquotBarcode"));
     tcgaSampleBarcode = (List<String>) fieldMap.get(fields.get("TCGASampleBarcode"));

@@ -37,7 +37,7 @@ public class RepositoryFileTest {
 
   private static final Class<RepositoryFile> TEST_TARGET_CLASS = RepositoryFile.class;
   private static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
-  private static final ObjectMapper CLASS_MAPPER = RepositoryFile.createJacksonMapper(); // configured with strategy
+  private static final ObjectMapper CLASS_MAPPER = RepositoryFile.createMapper(); // configured with strategy
 
   private static final String TEST_JSON_DIRECTORY = "fixtures/model/";
   private static final String TEST_JSON_FILE =
