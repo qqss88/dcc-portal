@@ -94,7 +94,7 @@ public class UIResource {
   @GET
   public Mutations getDonorMutations(
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters,
-      @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId,
+      @ApiParam(value = "The donor to search for ") @QueryParam("donorId") String donorId,
       @ApiParam(value = "From") @QueryParam("from") @DefaultValue("1") IntParam from,
       @ApiParam(value = "Size") @QueryParam("size") @DefaultValue("10") IntParam size) {
 
