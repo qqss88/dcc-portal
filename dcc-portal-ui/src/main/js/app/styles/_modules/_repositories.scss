@@ -1,5 +1,51 @@
-/** Used for the ICGC in the cloud sub site **/
-.t_cloud_partners {
+/** Used for the ICGC in the cloud user repository sub site **/
+$button-colour: #1693c0;
+
+.cloud-repository-container {
+    
+    .repo-header {
+        
+        .logo {
+            height: 3.5rem; 
+            margin-left: 2rem; 
+            vertical-align: bottom;
+        }
+        div {
+            display: inline-block;
+        }
+    }
+        
+    .cloud-repository-content {
+        
+        p { 
+            text-align:justify; 
+            text-indent:1rem
+        }
+    }
+    
+    .repo-controls-container {
+        margin: 4rem 2rem;
+        text-align: center;
+       
+        .btn {
+            background: transparent;
+            color: darken($button-colour, 30%);
+            border: solid 2px darken($button-colour, 5%);
+            transition: all 0.1s ease-in; 
+        }
+        
+        .btn:nth-child(2) {
+            margin-left: 2rem;
+        }
+        
+         .btn:hover {
+            background: lighten($button-colour, 30%);
+            border-color: lighten($button-colour, 5%);
+        }
+    }
+}
+/** Used for the ICGC in the cloud user guide sub site **/
+.cloud-guide-content {
     font-size: 1rem;
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     

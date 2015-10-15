@@ -1,0 +1,24 @@
+<div data-ng-init="repoContextName = repositoryCtrl.getRepoContext()">
+    <h1 class="repo-header" data-ng-if="repoContextName == 'aws-virginia'">
+        <img src="styles/images/PCAWG-icon.png" class="logo" alt="ICGC AWS Logo" />
+        <div>
+            The ICGC AWS S3 Repository
+        </div>
+    </h1>
+    <h1 class="repo-header" data-ng-if="repoContextName == 'collaboratory'">
+        <img src="styles/images/PCAWG-icon.png" class="logo" alt="Collaboratory Logo" />
+        <div>
+        The Cancer Genome Collaboratory Repository
+        </div>
+    </h1>
+    <section class="cloud-repository-content">
+        <div class="half pull-right" data-ui-view="dataContent">     
+        </div>
+        <div data-ui-view="bodyContent">
+        </div>
+        <div class="repo-controls-container">
+                <a class="btn" data-ng-href="#">Search Respository</a>
+                <a class="btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextName}}/guide">User Guide</a>
+        </div>
+    </section>
+</div>
