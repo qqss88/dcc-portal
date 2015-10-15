@@ -71,12 +71,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
@@ -130,6 +124,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class RepositoryFileRepository {
@@ -168,7 +168,6 @@ public class RepositoryFileRepository {
   private static final String FILE_INDEX_TYPE = REPOSITORY_FILE.getId();
   private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
-  private static final String PCAWG = "PCAWG";
 
   // Instance variables
   private final String index = REPOSITORY_INDEX_NAME;
@@ -289,8 +288,7 @@ public class RepositoryFileRepository {
     }
 
     return isNestedField(fieldAlias) ? boolFilter().must(
-        nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) :
-        result;
+        nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) : result;
   }
 
   @NonNull
@@ -320,10 +318,8 @@ public class RepositoryFileRepository {
     // Regular UI facets
     for (val facet : AVAILABLE_FACETS) {
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
-      val subAgg = isNestedField(facet) ?
-          addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
-              TYPE_MODEL.getNestedPath(facet)) :
-          addSubAggregations(filterAgg, facet, toRawFieldName(facet));
+      val subAgg = isNestedField(facet) ? addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
+          TYPE_MODEL.getNestedPath(facet)) : addSubAggregations(filterAgg, facet, toRawFieldName(facet));
 
       result.add(global(facet).subAggregation(subAgg));
     }
@@ -537,8 +533,7 @@ public class RepositoryFileRepository {
   public SearchResponse prepareDataExport(Query query, final String[] fields) {
     val filters = buildRepoFilters(query.getFilters());
 
-    return prepareDataTableExport(request ->
-        request.setPostFilter(filters).setQuery(MATCH_ALL_QUERY), fields);
+    return prepareDataTableExport(request -> request.setPostFilter(filters).setQuery(MATCH_ALL_QUERY), fields);
   }
 
   // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
@@ -720,10 +715,10 @@ public class RepositoryFileRepository {
   public Map<String, Long> getSummary(Query query) {
     val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
         terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
-        .subAggregation(
-            terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
-        .subAggregation(
-            terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
+            .subAggregation(
+                terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
+            .subAggregation(
+                terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
 
     val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryFields.FILE);
 
@@ -835,8 +830,21 @@ public class RepositoryFileRepository {
 
   }
 
-  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
-    // Cardinality doesn't work, set size to large number to get accurate bucket (donor) count
+  public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
+    val aggsFilter = nestedFilter(EsFields.FILE_COPIES, termFilter(toRawFieldName(Fields.REPO_CODE), repoName));
+    val response = getStats(aggsFilter, repoName);
+
+    return extractStats(response.getAggregations(), repoName);
+  }
+
+  public Map<String, Map<String, Map<String, Object>>> getStudyStats(String study) {
+    val aggsFilter = termFilter(toRawFieldName(Fields.STUDY), study);
+    val response = getStats(aggsFilter, study);
+
+    return extractStats(response.getAggregations(), study);
+  }
+
+  private SearchResponse getStats(FilterBuilder filter, String aggName) {
     val donorCountAgg = nestedAgg(PanCancerStatsFields.DONOR, EsFields.DONORS,
         terms(PanCancerStatsFields.DONOR).field(DONOR_ID_RAW_FIELD_NAME).size(30000));
 
@@ -845,7 +853,7 @@ public class RepositoryFileRepository {
     val fileFormatAgg = nestedAgg(PanCancerStatsFields.FORMAT, EsFields.FILE_COPIES,
         terms(PanCancerStatsFields.FORMAT).field(toRawFieldName(Fields.FILE_FORMAT)));
 
-    val dataTypeAgg = terms(PCAWG).field(toRawFieldName(Fields.DATA_TYPE))
+    val dataTypeAgg = terms(aggName).field(toRawFieldName(Fields.DATA_TYPE))
         .subAggregation(donorCountAgg)
         .subAggregation(fileSizeAgg)
         .subAggregation(fileFormatAgg);
@@ -855,19 +863,20 @@ public class RepositoryFileRepository {
         .subAggregation(primarySiteAgg(Fields.PROJECT_CODE, 100)
             .subAggregation(primarySiteAgg(Fields.DONOR_ID, 30000)));
 
-    val statsAgg = filter(PCAWG).filter(termFilter(toRawFieldName(Fields.STUDY), PCAWG))
+    val statsAgg = filter(aggName)
+        .filter(filter)
         .subAggregation(dataTypeAgg)
         .subAggregation(nestedAgg(PanCancerStatsFields.DONOR_PRIMARY_SITE, EsFields.DONORS, primarySiteAgg));
 
-    val response = searchFileCentric("PCAWG getPancancerStats", request -> request
+    val response = searchFileCentric("getStats Request", request -> request
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(0)
         .addAggregation(statsAgg));
 
-    log.debug("PCAWG getPancancerStats query result: '{}'.", response);
+    log.debug("getStats Response: '{}'.", response);
 
-    return extractPancancerStats(response.getAggregations());
+    return response;
   }
 
   private static TermsBuilder primarySiteAgg(@NonNull String fieldAlias, int size) {
@@ -876,8 +885,8 @@ public class RepositoryFileRepository {
         .size(size);
   }
 
-  private static Map<String, Map<String, Map<String, Object>>> extractPancancerStats(Aggregations aggs) {
-    val stats = (Filter) aggs.get(PCAWG);
+  private static Map<String, Map<String, Map<String, Object>>> extractStats(Aggregations aggs, String aggName) {
+    val stats = (Filter) aggs.get(aggName);
     val statsAggregations = stats.getAggregations();
 
     val result = Maps.<String, Map<String, Map<String, Object>>> newHashMap();
@@ -905,7 +914,7 @@ public class RepositoryFileRepository {
 
     // statistics
     val statistics = Maps.<String, Map<String, Object>> newHashMap();
-    val datatypes = (Terms) statsAggregations.get(PCAWG);
+    val datatypes = (Terms) statsAggregations.get(aggName);
 
     for (val bucket : datatypes.getBuckets()) {
       val bucketAggregations = bucket.getAggregations();
