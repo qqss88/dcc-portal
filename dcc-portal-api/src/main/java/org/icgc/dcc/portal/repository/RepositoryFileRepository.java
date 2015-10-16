@@ -17,6 +17,7 @@
  */
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Sets.newHashSet;
@@ -169,7 +170,6 @@ public class RepositoryFileRepository {
   private static final String FILE_INDEX_TYPE = REPOSITORY_FILE.getId();
   private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
-  private static final String PCAWG = "PCAWG";
 
   // Instance variables
   private final String index = REPOSITORY_INDEX_NAME;
@@ -217,9 +217,8 @@ public class RepositoryFileRepository {
       val facetField = fields.next();
       val fieldAlias = facetField.getKey();
 
-      if (!JQL_FIELD_NAME_MAPPING.containsKey(fieldAlias)) {
-        continue;
-      }
+      checkArgument(JQL_FIELD_NAME_MAPPING.containsKey(fieldAlias),
+          "'%s' is not a valid field in this query.", fieldAlias);
 
       val filterValues = transform(newArrayList(facetField.getValue().get(IS)),
           item -> item.textValue());
@@ -290,8 +289,7 @@ public class RepositoryFileRepository {
     }
 
     return isNestedField(fieldAlias) ? boolFilter().must(
-        nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) :
-        result;
+        nestedFilter(TYPE_MODEL.getNestedPath(fieldAlias), result)) : result;
   }
 
   @NonNull
@@ -551,8 +549,7 @@ public class RepositoryFileRepository {
   public SearchResponse prepareDataExport(Query query, final String[] fields) {
     val filters = buildRepoFilters(query.getFilters());
 
-    return prepareDataTableExport(request ->
-        request.setPostFilter(filters).setQuery(MATCH_ALL_QUERY), fields);
+    return prepareDataTableExport(request -> request.setPostFilter(filters).setQuery(MATCH_ALL_QUERY), fields);
   }
 
   // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
@@ -840,7 +837,7 @@ public class RepositoryFileRepository {
   }
 
   @UtilityClass
-  private class PanCancerStatsFields {
+  private class StatsAggregationKeys {
 
     private final String DONOR = "donor";
     private final String SIZE = "size";
@@ -849,17 +846,30 @@ public class RepositoryFileRepository {
 
   }
 
-  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
-    // Cardinality doesn't work, set size to large number to get accurate bucket (donor) count
-    val donorCountAgg = nestedAgg(PanCancerStatsFields.DONOR, EsFields.DONORS,
-        terms(PanCancerStatsFields.DONOR).field(DONOR_ID_RAW_FIELD_NAME).size(30000));
+  public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
+    val aggsFilter = nestedFilter(EsFields.FILE_COPIES, termFilter(toRawFieldName(Fields.REPO_CODE), repoName));
+    val response = getStats(aggsFilter, repoName);
 
-    val fileSizeAgg = averageFileSizePerFileCopyAgg(PanCancerStatsFields.SIZE);
+    return extractStats(response.getAggregations(), repoName);
+  }
 
-    val fileFormatAgg = nestedAgg(PanCancerStatsFields.FORMAT, EsFields.FILE_COPIES,
-        terms(PanCancerStatsFields.FORMAT).field(toRawFieldName(Fields.FILE_FORMAT)));
+  public Map<String, Map<String, Map<String, Object>>> getStudyStats(String study) {
+    val aggsFilter = termFilter(toRawFieldName(Fields.STUDY), study);
+    val response = getStats(aggsFilter, study);
 
-    val dataTypeAgg = terms(PCAWG).field(toRawFieldName(Fields.DATA_TYPE))
+    return extractStats(response.getAggregations(), study);
+  }
+
+  private SearchResponse getStats(FilterBuilder filter, String aggName) {
+    val donorCountAgg = nestedAgg(StatsAggregationKeys.DONOR, EsFields.DONORS,
+        terms(StatsAggregationKeys.DONOR).field(DONOR_ID_RAW_FIELD_NAME).size(30000));
+
+    val fileSizeAgg = averageFileSizePerFileCopyAgg(StatsAggregationKeys.SIZE);
+
+    val fileFormatAgg = nestedAgg(StatsAggregationKeys.FORMAT, EsFields.FILE_COPIES,
+        terms(StatsAggregationKeys.FORMAT).field(toRawFieldName(Fields.FILE_FORMAT)));
+
+    val dataTypeAgg = terms(aggName).field(toRawFieldName(Fields.DATA_TYPE))
         .subAggregation(donorCountAgg)
         .subAggregation(fileSizeAgg)
         .subAggregation(fileFormatAgg);
@@ -869,36 +879,37 @@ public class RepositoryFileRepository {
         .subAggregation(primarySiteAgg(Fields.PROJECT_CODE, 100)
             .subAggregation(primarySiteAgg(Fields.DONOR_ID, 30000)));
 
-    val statsAgg = filter(PCAWG).filter(termFilter(toRawFieldName(Fields.STUDY), PCAWG))
+    val statsAgg = filter(aggName)
+        .filter(filter)
         .subAggregation(dataTypeAgg)
-        .subAggregation(nestedAgg(PanCancerStatsFields.DONOR_PRIMARY_SITE, EsFields.DONORS, primarySiteAgg));
+        .subAggregation(nestedAgg(StatsAggregationKeys.DONOR_PRIMARY_SITE, EsFields.DONORS, primarySiteAgg));
 
-    val response = searchFileCentric("PCAWG getPancancerStats", request -> request
+    val response = searchFileCentric("getStats Request", request -> request
         .setSearchType(QUERY_THEN_FETCH)
         .setFrom(0)
         .setSize(0)
         .addAggregation(statsAgg));
 
-    log.debug("PCAWG getPancancerStats query result: '{}'.", response);
+    log.debug("getStats Response: '{}'.", response);
 
-    return extractPancancerStats(response.getAggregations());
+    return response;
   }
 
   private static TermsBuilder primarySiteAgg(@NonNull String fieldAlias, int size) {
-    return terms(PanCancerStatsFields.DONOR_PRIMARY_SITE)
+    return terms(StatsAggregationKeys.DONOR_PRIMARY_SITE)
         .field(toRawFieldName(fieldAlias))
         .size(size);
   }
 
-  private static Map<String, Map<String, Map<String, Object>>> extractPancancerStats(Aggregations aggs) {
-    val stats = (Filter) aggs.get(PCAWG);
+  private static Map<String, Map<String, Map<String, Object>>> extractStats(Aggregations aggs, String aggName) {
+    val stats = (Filter) aggs.get(aggName);
     val statsAggregations = stats.getAggregations();
 
     val result = Maps.<String, Map<String, Map<String, Object>>> newHashMap();
 
     // donorPrimarySite
     val donorPrimarySite = Maps.<String, Map<String, Object>> newHashMap();
-    val primarySiteAggKey = PanCancerStatsFields.DONOR_PRIMARY_SITE;
+    val primarySiteAggKey = StatsAggregationKeys.DONOR_PRIMARY_SITE;
     val donorFacets = (Terms) getSubAggResultFromNested(statsAggregations, primarySiteAggKey)
         .get(primarySiteAggKey);
 
@@ -919,21 +930,21 @@ public class RepositoryFileRepository {
 
     // statistics
     val statistics = Maps.<String, Map<String, Object>> newHashMap();
-    val datatypes = (Terms) statsAggregations.get(PCAWG);
+    val datatypes = (Terms) statsAggregations.get(aggName);
 
     for (val bucket : datatypes.getBuckets()) {
       val bucketAggregations = bucket.getAggregations();
-      val donorCount = bucketSize(getSubAggResultFromNested(bucketAggregations, PanCancerStatsFields.DONOR),
-          PanCancerStatsFields.DONOR);
+      val donorCount = bucketSize(getSubAggResultFromNested(bucketAggregations, StatsAggregationKeys.DONOR),
+          StatsAggregationKeys.DONOR);
 
-      val fileSizeResult = (Terms) bucketAggregations.get(PanCancerStatsFields.SIZE);
-      val totalFileSize = sumFileCopySize(fileSizeResult.getBuckets(), PanCancerStatsFields.SIZE);
+      val fileSizeResult = (Terms) bucketAggregations.get(StatsAggregationKeys.SIZE);
+      val totalFileSize = sumFileCopySize(fileSizeResult.getBuckets(), StatsAggregationKeys.SIZE);
 
-      val dataFormat = (Terms) getSubAggResultFromNested(bucketAggregations, PanCancerStatsFields.FORMAT)
-          .get(PanCancerStatsFields.FORMAT);
+      val dataFormat = (Terms) getSubAggResultFromNested(bucketAggregations, StatsAggregationKeys.FORMAT)
+          .get(StatsAggregationKeys.FORMAT);
       val formats = transform(dataFormat.getBuckets(), b -> b.getKey());
 
-      // TODO: We should use PanCancerStatsFields for these keys too, though it requires changes in the client side.
+      // TODO: We should use StatsAggregationKeys for these keys too, though it requires changes in the client side.
       val map = ImmutableMap.<String, Object> of(
           "fileCount", bucket.getDocCount(),
           "donorCount", donorCount,

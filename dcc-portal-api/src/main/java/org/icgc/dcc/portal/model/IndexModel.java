@@ -121,6 +121,7 @@ public class IndexModel {
   private static final List<String> REPOSITORY_FILE_CLIENT_FIELD_ALIAS_MAPPING = ImmutableList.<String> builder()
       .add(RepositoryFileTypeModel.Fields.ID)
       .add(RepositoryFileTypeModel.Fields.REPO_NAME)
+      .add(RepositoryFileTypeModel.Fields.REPO_CODE)
       .add(RepositoryFileTypeModel.Fields.FILE_NAME)
       .add(RepositoryFileTypeModel.Fields.FILE_SIZE)
       .add(RepositoryFileTypeModel.Fields.PROJECT_CODE)

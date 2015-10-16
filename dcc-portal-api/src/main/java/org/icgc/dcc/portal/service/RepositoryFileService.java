@@ -72,14 +72,6 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -115,9 +107,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -189,9 +189,8 @@ public class RepositoryFileService {
           Fields.DONOR_ID, Donor::getDonorId,
           Fields.PROJECT_CODE, Donor::getProjectCode);
 
-  private static final String[] AWS_TSV_HEADERS = {
-      "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size",
-      "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count", "study" };
+  private static final String[] AWS_TSV_HEADERS =
+      { "repo_code", "file_id", "object_id", "file_format", "file_name", "file_size", "md5_sum", "index_object_id", "donor_id/donor_count", "project_id/project_count", "study" };
   private static final List<String> AWS_TSV_COLUMN_FIELD_NAMES = ImmutableList.of(
       Fields.REPO_CODE,
       Fields.FILE_ID,
@@ -303,9 +302,9 @@ public class RepositoryFileService {
     val valueMap = hit.getFields();
     val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
       // Takes a collection of fields and its processor and produces a map of field and its value.
-        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(), field ->
-            fieldsProcessorPair.getValue().apply(valueMap.get(field)));
-      });
+      return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
+          field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+    });
 
     return combineMaps(maps);
   }
@@ -488,8 +487,7 @@ public class RepositoryFileService {
     val fields = asValueMap(hit);
     val donorInfoMap = getDonorValueMap(repoFile.getDonors());
 
-    return transform(fileCopies, fileCopy ->
-        combineMaps(Stream.of(fields, donorInfoMap, getFileCopyMap(fileCopy))));
+    return transform(fileCopies, fileCopy -> combineMaps(Stream.of(fields, donorInfoMap, getFileCopyMap(fileCopy))));
   }
 
   private static Map<String, String> getDonorValueMap(List<Donor> donors) {
@@ -791,8 +789,12 @@ public class RepositoryFileService {
     return repositoryFileRepository.getSummary(query);
   }
 
-  public Map<String, Map<String, Map<String, Object>>> getPancancerStats() {
-    return repositoryFileRepository.getPancancerStats();
+  public Map<String, Map<String, Map<String, Object>>> getStudyStats(String study) {
+    return repositoryFileRepository.getStudyStats(study);
+  }
+
+  public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
+    return repositoryFileRepository.getRepoStats(repoName);
   }
 
 }
