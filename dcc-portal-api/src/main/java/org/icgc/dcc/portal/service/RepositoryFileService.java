@@ -41,6 +41,7 @@ import static org.apache.commons.lang.time.DateFormatUtils.formatUTC;
 import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.icgc.dcc.common.core.util.Joiners.COMMA;
 import static org.icgc.dcc.common.core.util.Joiners.DOT;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
 import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregationsToFacets;
@@ -71,6 +72,14 @@ import java.util.zip.GZIPOutputStream;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -107,17 +116,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.sun.xml.txw2.output.IndentingXMLStreamWriter;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileService {
 
   private static final Jql2PqlConverter PQL_CONVERTER = Jql2PqlConverter.getInstance();
@@ -297,14 +298,19 @@ public class RepositoryFileService {
         .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
+  private static <T> List<T> combineCollections(Stream<? extends Collection<T>> source) {
+    return source.flatMap(Collection::stream)
+        .collect(toImmutableList());
+  }
+
   @NonNull
   private static Map<String, String> toRowValueMap(SearchHit hit) {
     val valueMap = hit.getFields();
     val maps = DATA_TABLE_EXPORT_FIELD_PROCESSORS.entrySet().stream().map(fieldsProcessorPair -> {
       // Takes a collection of fields and its processor and produces a map of field and its value.
-      return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
-          field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
-    });
+        return Maps.<String, String> toMap(fieldsProcessorPair.getKey(),
+            field -> fieldsProcessorPair.getValue().apply(valueMap.get(field)));
+      });
 
     return combineMaps(maps);
   }
@@ -611,12 +617,9 @@ public class RepositoryFileService {
 
     for (val url : downloadUrlGroups.keySet()) {
       val fileInfo = downloadUrlGroups.get(url);
-      val otherColumns = transform(TSV_COLUMN_FIELD_NAMES,
+      val otherColumns = Lists.transform(TSV_COLUMN_FIELD_NAMES,
           fieldName -> CONCAT_WITH_COMMA.apply(fileInfo, fieldName));
-      val row = ImmutableList.<String> builder()
-          .add(url)
-          .addAll(otherColumns)
-          .build();
+      val row = combineCollections(Stream.of(newArrayList(url), otherColumns));
 
       tsv.write(row);
     }
