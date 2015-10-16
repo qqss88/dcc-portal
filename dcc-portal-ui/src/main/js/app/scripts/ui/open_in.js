@@ -15,6 +15,7 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+(function() {
 'use strict';
 
 angular.module('icgc.ui.openin', []).directive('openInList', function () {
@@ -25,6 +26,11 @@ angular.module('icgc.ui.openin', []).directive('openInList', function () {
       openInList: '@',
       type: '@'
     },
-    templateUrl: '/scripts/ui/views/open_in.html'
+    templateUrl: '/scripts/ui/views/open_in.html',
+    link: function (scope, element, attr) {
+     scope.context = attr.context || null;
+     scope.openInViewer = attr.contextUrl;
+   }
   };
 });
+})();
