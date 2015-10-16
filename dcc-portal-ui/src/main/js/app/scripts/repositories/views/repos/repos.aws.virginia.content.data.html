@@ -30,7 +30,7 @@
               <th>Size</th>
           </thead>
           <tbody>
-              <tr data-ng-repeat="type in pcawgDatatypes">
+              <tr data-ng-repeat="type in repositoryCtrl.getRepoDataTypes()">
                   <td> {{type.uiName}}</td>
                   <td class="text-right">{{type.donorCount | number}}</td>
                   <td class="text-right">
@@ -43,6 +43,6 @@
       </table>
 
       <span>
-          Available data as of <a href="/repository/external?filters={{filters}}">{{indexDate | date}}</a>
+          Available data as of <a href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
       </span>
    </div>

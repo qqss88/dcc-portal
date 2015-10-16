@@ -15,143 +15,352 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+'use strict';
+
 ////////////////////////////////////////////////////////////////////////
 // Primary Repository Module
 ////////////////////////////////////////////////////////////////////////
-(function () {
-	'use strict';
-	
-	var module = angular.module('icgc.repositories', [
-		'icgc.repositories.controllers',
-		'icgc.repositories.services'
-	]);
-	
-	function _normalizeRepoCode(repoCode) {
-		return repoCode.toLowerCase().replace(/[^\w]+/i, '.');
-	}
-	
-	module
-		.config(function ($stateProvider) {
-			$stateProvider
-				.state('ICGCcloud', {
-						url: '/icgc-in-the-cloud',
-						template: 	'<div data-ui-view="home"></div>' +
-									'<div data-ui-view="repositoryGuides"></div>' +
-									'<div data-ui-view="repos" class="cloud-repository-container"></div>',
-						abstract: true			
-				})
-				.state('ICGCcloud.home', {
-						url: '/',
-						views: {
-							'home': {
-								templateUrl: 'scripts/repositories/views/home.html',
-								controller: 'RepositoriesHomeController' 
-							}
-						}
-				})
-				.state('ICGCcloud.repositories', {
-					url: '/repositories/{repoCode}/',
-					// UI-Router only instantiates RepositoriesController once
-					// which is good for us in this context 
-					views: {
-						'repos': {
-							templateUrl: 'scripts/repositories/views/repos/repos.html',
-							controller: 'RepositoriesController as repositoryCtrl'
-						},
-						'bodyContent@ICGCcloud.repositories': {
-							templateUrl: function ($stateParams) {
-								return 	'scripts/repositories/views/repos/repos.' + 
-										_normalizeRepoCode($stateParams.repoCode) + '.content.html';
-							},
-							controller: 'RepositoriesController as repositoryCtrl'
-						},
-						'dataContent@ICGCcloud.repositories': {
-							templateUrl: function ($stateParams) {
-								return 	'scripts/repositories/views/repos/repos.' + 
-										_normalizeRepoCode($stateParams.repoCode) + '.content.data.html';
-							},
-							controller: 'RepositoriesController as repositoryCtrl'
-						}
-					}
-				})
-				.state('ICGCcloud.repositoryGuides', {
-					url: '/repositories/{repoCode}/guide',
-					views: {
-						'repositoryGuides': {
-							templateUrl: function ($stateParams) {
-								return 	'scripts/repositories/views/guides/' + 
-										_normalizeRepoCode($stateParams.repoCode) + '.html';
-							},
-							controller: 'RepositoriesGuideController'
-						}
-					}
-				});
-				
-		});
+angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repositories.services'])
+	.config(function ($stateProvider) {
 		
-})();
+		function _normalizeRepoCode(repoCode) {
+			return repoCode.toLowerCase().replace(/[^\w]+/i, '.');
+		}
+
+		$stateProvider
+			.state('ICGCcloud', {
+					url: '/icgc-in-the-cloud',
+					template: 	'<div data-ui-view="home"></div>' +
+								'<div data-ui-view="repositoryGuides"></div>' +
+								'<div data-ui-view="repos" class="cloud-repository-container"></div>',
+					abstract: true			
+			})
+			.state('ICGCcloud.home', {
+					url: '/',
+					views: {
+						'home': {
+							templateUrl: 'scripts/repositories/views/home.html',
+							controller: 'RepositoriesHomeController' 
+						}
+					}
+			})
+			.state('ICGCcloud.repositories', {
+				url: '/repositories/{repoCode}/',
+				// UI-Router only instantiates RepositoriesController once
+				// which is good for us in this context 
+				views: {
+					'repos': {
+						templateUrl: 'scripts/repositories/views/repos/repos.html',
+						controller: 'RepositoriesController as repositoryCtrl'
+					},
+					'bodyContent@ICGCcloud.repositories': {
+						templateUrl: function ($stateParams) {
+							return 	'scripts/repositories/views/repos/repos.' + 
+									_normalizeRepoCode($stateParams.repoCode) + '.content.html';
+						},
+						controller: 'RepositoriesController as repositoryCtrl'
+					},
+					'dataContent@ICGCcloud.repositories': {
+						templateUrl: function ($stateParams) {
+							return 	'scripts/repositories/views/repos/repos.' + 
+									_normalizeRepoCode($stateParams.repoCode) + '.content.data.html';
+						},
+						controller: 'RepositoriesController as repositoryCtrl'
+					}
+				}
+			})
+			.state('ICGCcloud.repositoryGuides', {
+				url: '/repositories/{repoCode}/guide',
+				views: {
+					'repositoryGuides': {
+						templateUrl: function ($stateParams) {
+							return 	'scripts/repositories/views/guides/' + 
+									_normalizeRepoCode($stateParams.repoCode) + '.html';
+						},
+						controller: 'RepositoriesGuideController'
+					}
+				}
+			});
+			
+	});
+		
+
 
 ////////////////////////////////////////////////////////////////////////
 // Controller Declaration
 ////////////////////////////////////////////////////////////////////////
-(function () {
-	'use strict';
-	
-	var module = angular.module('icgc.repositories.controllers', []);
-	console.log('instantiated!');
-	module
-		.controller('RepositoriesHomeController', function($scope, Page) {
-			Page.stopWork();
-			Page.setPage('entity');
-			Page.setTitle('ICGC in the Cloud');
-		})
-		.controller('RepositoriesGuideController', function($scope, Page) {
-			Page.stopWork();
-			Page.setPage('entity');
-			Page.setTitle('Repositories - User Guides');
-		})
-		.controller('RepositoriesController', function($scope, Page, $stateParams) {
-			var _ctrl = this,
-				_repoContext = $stateParams.repoCode.toLowerCase();
-				
-			function _capitalizeWords(str) {
-				return str.replace(/[^\s]+/g, function(word) {
-					return word.replace(/^[a-z]/i, function(firstLetter) {
-						return firstLetter.toUpperCase();
-					});
-				});
-			}
+angular.module('icgc.repositories.controllers', [])
+	.controller('RepositoriesHomeController', function($scope, Page) {
+		Page.stopWork();
+		Page.setPage('entity');
+		Page.setTitle('ICGC in the Cloud');
+	})
+	.controller('RepositoriesGuideController', function($scope, Page) {
+		Page.stopWork();
+		Page.setPage('entity');
+		Page.setTitle('Repositories - User Guides');
+	})
+	.controller('RepositoriesController', function($scope, Page, RepositoriesService, $stateParams) {
+		var _ctrl = this,
+			_repoContext = $stateParams.repoCode.toLowerCase(),
+			_repoDataCollectionManager = RepositoriesService.getRepoDataCollectionManagerFactory(_repoContext),
+			_repoCreationDate = null,
+			_filterQueryStr = null,
+			_repoStats = {};
 		
 			
-			function _init() {
-				Page.stopWork();
-				Page.setPage('entity');
-				Page.setTitle('ICGC in the cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
-			}
+		function _capitalizeWords(str) {
+			return str.replace(/[^\s]+/g, function(word) {
+				return word.replace(/^[a-z]/i, function(firstLetter) {
+					return firstLetter.toUpperCase();
+				});
+			});
+		}
+		
+		function _refreshData() {
+			//_repoDataCollectionManager.getFileSummary().then(function(repoSummaryData) { console.log(repoSummaryData); });
 			
-			// Initialize the controller
-			_init();
+			_repoDataCollectionManager.getFileStats().then(function(repoStats) { 
+				console.log(repoStats); 
+				_repoStats.repoDataTypes = _repoDataCollectionManager.orderDataTypes(repoStats.stats);
+        		_repoStats.primarySites = _repoDataCollectionManager.getSiteProjectDonorChart(repoStats.donorPrimarySite);
+			});
 			
-			////////////////////////////////////////////////////////////////////////
-			// Controller Public API
-			////////////////////////////////////////////////////////////////////////
-			_ctrl.getRepoContext = function() {
-				return _repoContext;
-			}; 
-		});
+			
+			// Get index creation time
+			_repoDataCollectionManager.getMetaData().then(function(repoMetaData) {
+				if (angular.isObject(repoMetaData) && angular.isDefined(repoMetaData)) {
+					_repoCreationDate = repoMetaData.creation_date;
+				}
+				else {
+					console.warn('Expected a repository object with a creation date but got: ', repoMetaData);
+				}
+			});
+			
+			_filterQueryStr = JSON.stringify(_repoDataCollectionManager.buildRepoFilter());
+		}
 	
-})();
+		
+		function _init() {
+			Page.stopWork();
+			Page.setPage('entity');
+			Page.setTitle('ICGC in the cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
+			_refreshData();
+		}
+		
+		// Initialize the controller
+		_init();
+			
+		//
+		
+		
+		
+		////////////////////////////////////////////////////////////////////////
+		// Controller Public API
+		////////////////////////////////////////////////////////////////////////
+		_ctrl.getRepoDataTypes = function() {
+			return _repoStats.repoDataTypes || null;
+		};
+		
+		_ctrl.getPrimarySites = function() {
+			return _repoStats.primarySites || null;	
+		};
+		
+		_ctrl.getRepoContextID = function() {
+			return _repoContext;
+		}; 
+		
+		_ctrl.getRepoCreationDate = function() {
+			return 	_repoCreationDate;
+		};
+		
+		_ctrl.getFilterQueryStr = function() {
+			return _filterQueryStr;
+		};
+});
+	
 
 ////////////////////////////////////////////////////////////////////////
 // Services Declaration
 ////////////////////////////////////////////////////////////////////////
-(function () {
-	'use strict';
-	
-	var module = angular.module('icgc.repositories.services', []);
-	
-	module.service('RepositoriesService', function(/* Restangular, HighchartsService */) {
+angular.module('icgc.repositories.services', [])
+	.constant('RepositoryServiceConstants', { 
+		DATA_TARGET_TYPE: { 
+			REPO: 'repoCode', 
+			STUDY: 'study' 
+		}
+	})
+	.service('RepositoriesService', function(PCAWG, Restangular, HighchartsService, RepositoryServiceConstants) {
+		var _srv = this;
+			// constants used by the service
 		
-  	});
+		var _repoServiceURLs = {
+				// Absolute Path: /api/v1/repository/files/repo/stats/{{repoCode}}
+				GET_REPO_STATS: 'repository/files/repo/stats',
+				
+				// uses GET param filters={'file': {'repoCode':{ is: ['<repo_context>'] } } }
+				GET_REPO_FILE_SUMMARY_STATS: 'repository/files/summary',
+				
+				// Absolute Path: /api/v1/repository/files/metadata
+				GET_REPO_METADATA: 'repository/files/metadata'
+			};
+			
+			
+		function RepoCollectionDataManager(repoContextID, targettedType) {
+			var _self = this,
+				_repoContextID = repoContextID,
+				// if null it's target is the whole repo study
+				_targettedType = targettedType || RepositoryServiceConstants.DATA_TARGET_TYPE.REPO;
+				
+			function _buildRepoFilter(datatype) {
+				var filter = { file: {} };
+				
+				filter.file[_self._targettedType] =  {
+						is: [_self._repoContextID]
+					};
+				
+				if (angular.isDefined(datatype)) {
+					filter.file.dataType = {
+						is: [datatype]
+					};
+				}
+				
+				return filter;	
+			}
+			
+				
+			_self._repoContextID = _repoContextID;
+			_self._targettedType = _targettedType;
+			_self.buildRepoFilter = _buildRepoFilter;	
+			
+			
+			return this;	
+		}
 	
-})();
+	
+		// set up prototypes so we don't duplicate logic unnecessarily
+		RepoCollectionDataManager.prototype.getSiteProjectDonorChart = function(data) {
+			var list = [];
+		
+			// Stack friendly format
+			Object.keys(data).forEach(function(siteKey) {
+				var bar = {};
+				
+				bar.total = 0;
+				bar.stack = [];
+				bar.key = siteKey;
+		
+				Object.keys(data[siteKey]).forEach(function(projKey) {
+					bar.stack.push({
+						name: projKey,
+						label: projKey,
+						count: data[siteKey][projKey],
+						key: siteKey, // parent key
+						colourKey: siteKey,
+						link: '/projects/' + projKey
+					});
+				});
+		
+				bar.stack.sort(function(a, b) { 
+						return b.count - a.count; 
+					})
+					.forEach(function(p) {
+						p.y0 = bar.total;
+						p.y1 = bar.total + p.count;
+						bar.total += p.count;
+					});
+				
+					list.push(bar);
+				});
+			
+				// Sorted
+				return list.sort(function(a, b) { return b.total - a.total; });
+		};
+
+
+		RepoCollectionDataManager.prototype.getPrimarySiteDonorChart = function(data) {
+			var list = [];
+		
+			Object.keys(data).forEach(function(d) {
+				list.push({
+				id: d,
+				count: data[d],
+				colour: HighchartsService.getPrimarySiteColourForTerm(d)
+				});
+			});
+			list = _.sortBy(list, function(d) { return -d.count; });
+		
+			return HighchartsService.bar({
+				hits: list,
+				xAxis: 'id',
+				yValue: 'count'
+			});
+		};
+
+
+		/**
+		* Reorder for UI, the top 5 items are fixed, the remining are appended to the end
+		* on a first-come-first-serve basis.
+		*/
+		RepoCollectionDataManager.prototype.orderDataTypes = function(data) {
+			var _precedence = PCAWG.precedence(),
+				_list = [],
+				_self = this;
+		
+		
+			// Scrub
+			var dataTypeData = Restangular.stripRestangular(data);
+		
+			// Flatten and normalize for display
+			Object.keys(dataTypeData).forEach(function(key) {
+				_list.push({
+					name: key,
+					uiName: PCAWG.translate(key),
+					donorCount: +data[key].donorCount,
+					fileCount: +data[key].fileCount,
+					fileSize: +data[key].fileSize,
+					fileFormat: data[key].dataFormat,
+					filters: JSON.stringify(_self.buildRepoFilter(key))
+				});
+			});
+		
+			// Sort
+			return _.sortBy(_list, function(d) {
+				return _precedence.indexOf(d.name);
+			});
+	
+		};
+	
+	
+		/**
+		* Get pancancer statistics - This uses ICGC's external repository end point
+		* datatype
+		*   - # donors
+		*   - # files
+		*   - file size
+		*/
+		RepoCollectionDataManager.prototype.getFileStats = function() {
+		return Restangular.one(_repoServiceURLs.GET_REPO_STATS, this._repoContextID).get();
+		};
+	
+		RepoCollectionDataManager.prototype.getFileSummary = function() {
+			var params = { filters: this.buildRepoFilter() };
+			
+			return 	Restangular
+						.one(_repoServiceURLs.GET_REPO_FILE_SUMMARY_STATS)
+						.get(params);
+		};
+		
+		RepoCollectionDataManager.prototype.getMetaData = function() {
+			return Restangular
+					.one(_repoServiceURLs.GET_REPO_METADATA)
+					.get();
+		};
+		
+		// Public API for Repositories Service
+		_srv.getRepoDataCollectionManagerFactory = function(repoContextID, targettedType) {
+			return new RepoCollectionDataManager(repoContextID, targettedType);
+		};
+  
+	});
+

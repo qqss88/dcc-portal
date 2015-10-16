@@ -3,7 +3,10 @@
 
   var module = angular.module('icgc.common.pcawg', []);
 
-
+  // TODO: This service needs to be generalized as this does not deal with
+  // just PCAWG alone it is also used in the general Repositories Data file
+  // service. I am leaving (MMoncada) this alone right now because other
+  // code in the application depends on this service.
   module.service('PCAWG', function() {
 
     var data = [
