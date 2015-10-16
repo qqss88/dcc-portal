@@ -299,7 +299,11 @@
    */
   
   module.constant('API', {
-    BASE_URL: $icgcApp.getAPI().getBasePathURL()
+    // BASE_URL options
+    // '/api/v1' (<--- default non-local server route)
+    // 'http://localhost:8080/api/v1' (<--- use route with localhost 'grunt' run)
+    BASE_URL: 'http://localhost:8080/api/v1', 
+    DEBUG_ENABLED: false // set DEBUG_ENABLED to true if you want to turn on the request/response console output
   });
 
 
