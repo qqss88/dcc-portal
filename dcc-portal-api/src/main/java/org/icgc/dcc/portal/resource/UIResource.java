@@ -71,6 +71,7 @@ import com.google.common.io.CharStreams;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
+import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
 @Component
@@ -93,11 +94,12 @@ public class UIResource {
   @GET
   public Mutations getDonorMutations(
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters,
-      @ApiParam(value = "The donor to serch for ") @QueryParam("donorId") String donorId
-      ) {
+      @ApiParam(value = "The donor to search for ") @QueryParam("donorId") String donorId,
+      @ApiParam(value = "From") @QueryParam("from") @DefaultValue("1") IntParam from,
+      @ApiParam(value = "Size") @QueryParam("size") @DefaultValue("10") IntParam size) {
 
     val query =
-        Query.builder().filters(filters.get()).sort("_score").size(10).order(DEFAULT_ORDER)
+        Query.builder().filters(filters.get()).sort("_score").from(from.get()).size(size.get()).order(DEFAULT_ORDER)
             .includes(ImmutableList.of("consequences")).build();
 
     return mutationService.findMutationsByDonor(query, donorId);

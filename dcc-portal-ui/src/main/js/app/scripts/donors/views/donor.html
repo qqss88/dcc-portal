@@ -266,7 +266,10 @@
 
     <div data-ng-if="DonorMutationsCtrl.mutations.hits.length > 0">
         <h3>Most Frequent Mutations
-            <span data-open-in-list='/m?filters={{DonorMutationsCtrl.mutations.advQuery}}'></span>
+            <span 
+            data-open-in-list='/m?filters={{DonorMutationsCtrl.mutations.advQuery}}' 
+            context="donor"
+            context-url='/m?filters={{DonorMutationsCtrl.mutations.viewerQuery}}'></span>
         </h3>
 
         <div class="t_table_top">
