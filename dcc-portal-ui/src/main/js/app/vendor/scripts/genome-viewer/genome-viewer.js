@@ -1,5 +1,5 @@
-/*! genome-viewer October 15, 2015 16:23:29 */
-/*! lib October 15, 2015 16:23:27 */
+/*! genome-viewer October 16, 2015 11:08:36 */
+/*! lib October 16, 2015 11:08:33 */
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -25792,7 +25792,6 @@ FeatureTemplateAdapter.prototype = {
                     args.webServiceCallCount++;
                     var queryRegion = queriesList[i];
 
-
                     var request = new XMLHttpRequest();
 
                     /** Temporal fix save queried region **/
@@ -25800,19 +25799,22 @@ FeatureTemplateAdapter.prototype = {
                     request._originalRegion = region;
 
                     request.onload = function() {
-                        var response;
-                        try {
-                            response = JSON.parse(this.response);
-                        } catch (e) {
-                            console.log('Warning: Response is not JSON');
-                            response = this.response;
-                        }
-
-                        /** Process response **/
-                        var responseChunks = _this._success(response, categories, dataType, this._queryRegion, this._originalRegion, chunkSize);
                         args.webServiceCallCount--;
+                        if (request.status === 200) {
+                            var response;
+                            try {
+                                response = JSON.parse(this.response);
+                            } catch (e) {
+                                console.log('Warning: Response is not JSON');
+                                response = this.response;
+                            }
 
-                        chunks = chunks.concat(responseChunks);
+                            /** Process response **/
+                            var responseChunks = _this._success(response, categories, dataType, this._queryRegion, this._originalRegion, chunkSize);
+                            chunks = chunks.concat(responseChunks);
+                        } else {
+                            console.log("request.status: " + request.status);
+                        }
                         if (args.webServiceCallCount === 0) {
                             chunks.sort(function(a, b) {
                                 return a.chunkKey.localeCompare(b.chunkKey)
