@@ -328,7 +328,7 @@
       var longName = PCAWG.translate (dataType);
 
       return (longName === dataType) ? dataType : longName + ' (' + dataType + ')';
-    }
+    };
 
     this.translateCountryCode = CodeTable.translateCountryCode;
     this.countryName = CodeTable.countryName;
