@@ -20,7 +20,7 @@
   var module = angular.module('icgc.browser.controllers', []);
 
   module.controller('BrowserController',
-    function ($scope, $state, Page, Genes, Mutations, GMService, LocationService) {
+    function ($scope, $state, Page, Genes, Mutations, GMService, Restangular, LocationService) {
       Page.setTitle('Genome Viewer');
       Page.setPage('browser');
 
@@ -137,27 +137,47 @@
         $scope.genes.from += pageSize;
         genes({scroll: true});
       };
+      
+      function handleMutationResponse(response, settings) {
+        $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
+        $scope.mutations.isBusy = false;
+
+        if (settings.scroll) {
+          $scope.mutations.data.pagination = response.pagination ? response.pagination : {};
+          for (var i = 0; i < response.hits.length; i++) {
+            $scope.mutations.data.hits.push(response.hits[i]);
+          }
+        } else {
+          $scope.mutations.data = response;
+        }
+      }
 
       function mutations(settings) {
         settings = settings || {};
         $scope.mutations.isBusy = true;
 
-        Mutations.getList({
-          from: $scope.mutations.from,
-          size: $scope.mutations.size
-        }).then(function (response) {
-          $scope.mutations.isFinished = response.pagination.total - $scope.mutations.from < pageSize;
-          $scope.mutations.isBusy = false;
-
-          if (settings.scroll) {
-            $scope.mutations.data.pagination = response.pagination ? response.pagination : {};
-            for (var i = 0; i < response.hits.length; i++) {
-              $scope.mutations.data.hits.push(response.hits[i]);
-            }
-          } else {
-            $scope.mutations.data = response;
-          }
-        });
+        if (LocationService.search().context === 'donor') {
+          var donorId = LocationService.filters().donor.id.is[0];
+          var filters = LocationService.filters();
+          delete filters.donor.id;
+          
+          Restangular.one('ui/donor-mutations').get({
+            filters: filters,
+            donorId: donorId,
+            include: 'consequences',
+            from: $scope.mutations.from,
+            size: $scope.mutations.size
+          }).then(function(response) {
+            handleMutationResponse(response, settings);
+          });
+        } else {
+          Mutations.getList({
+            from: $scope.mutations.from,
+            size: $scope.mutations.size
+          }).then(function(response) {
+            handleMutationResponse(response, settings);
+          });
+        }
       }
 
       $scope.nextMutations = function () {
