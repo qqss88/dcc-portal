@@ -22,7 +22,7 @@
   var module = angular.module('icgc.repository.services', []);
 
   module.service('ExternalRepoService', function($window, Restangular, API) {
-
+    // TODO: Stop hardcoding!!! :/
     // FIXME: Move this out
     var repoMap = {
       'AWS - Virginia': 'aws-virginia',
@@ -37,7 +37,8 @@
       'PCAWG - Heidelberg': 'pcawg-heidelberg',
       'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
       'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
-    };
+    },
+    invertedRepoMap  = _.invert(repoMap);
 
 
     this.getList = function(params) {
@@ -47,11 +48,18 @@
       };
       return Restangular.one('repository/files').get(angular.extend(defaults, params));
     };
+    
+    this.getRepoNameFromCode = function(repoCode) {
+      return invertedRepoMap[repoCode] || null;
+    };
 
 
     /**
      * Get total donor, file and file size statistics
      */
+    // TODO: This is a duplicate function that was organized into
+    // the repositories service. Remove this once the dependencies
+    // are determined
     this.getSummary = function(params) {
       return Restangular.one('repository/files/summary').get(params);
     };

@@ -32,6 +32,8 @@ import static org.icgc.dcc.portal.util.JsonUtils.merge;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -45,10 +47,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.FieldsParam;
 import org.icgc.dcc.portal.model.FiltersParam;
@@ -56,6 +54,8 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
+import org.icgc.dcc.portal.service.ClientService;
+import org.icgc.dcc.portal.service.ClientService.MavenArtifactVersion;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.MutationService;
@@ -68,17 +68,23 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
@@ -86,6 +92,8 @@ public class UIResource {
   private final OccurrenceService occurrenceService;
   private final DiagramService diagramService;
   private final MutationService mutationService;
+  private final ClientService clientService;
+  private static final String PUBLIC_KEY_PATH = "data/jenkins_pub.gpg";
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -97,6 +105,7 @@ public class UIResource {
       @ApiParam(value = "The donor to search for ") @QueryParam("donorId") String donorId,
       @ApiParam(value = "From") @QueryParam("from") @DefaultValue("1") IntParam from,
       @ApiParam(value = "Size") @QueryParam("size") @DefaultValue("10") IntParam size) {
+
 
     val query =
         Query.builder().filters(filters.get()).sort("_score").from(from.get()).size(size.get()).order(DEFAULT_ORDER)
@@ -197,6 +206,57 @@ public class UIResource {
     checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return diagramService.getShownPathwaySection(pathwayId);
+  }
+
+  @Path("/artifacts/dcc-storage-client")
+  @GET
+  @Produces(APPLICATION_JSON)
+  public List<MavenArtifactVersion> getArtifacts() {
+    val results = clientService.getVersions();
+    return results;
+  }
+
+  @Path("/software/dcc-storage-client/latest")
+  @GET
+  @SneakyThrows
+  public Response getLatest() {
+    URL targetURIForRedirection = new URL(clientService.getLatestVersionUrl());
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}")
+  @GET
+  @SneakyThrows
+  public Response getVersion(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionUrl(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}/md5")
+  @GET
+  @SneakyThrows
+  public Response getVersionChecksum(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionChecksum(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}/asc")
+  @GET
+  @SneakyThrows
+  public Response getVersionSignature(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionSignature(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("software/key")
+  @GET
+  @SneakyThrows
+  public Response getKey() {
+    val url = Resources.getResource(PUBLIC_KEY_PATH);
+    return Response.ok(Resources.toByteArray(url))
+        .type("text/plain")
+        .header("Content-Disposition", "attachment; filename=\"icgc-software.pub\"")
+        .build();
   }
 
   private Boolean isInvalidPathwayId(String id) {

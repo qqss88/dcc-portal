@@ -9,15 +9,28 @@ angular.module('icgc.ui.scroll', [
 angular.module('icgc.ui.scroll.scrollto', []).directive('scrollto', function () {
   return function (scope, elm, attrs) {
     elm.bind('click', function (e) {
-      var top;
+      var top,
+          scrollOffset = 40,
+          animationSpeed = 800;
+          
+          if (angular.isDefined(attrs.scrollOffset) && angular.isNumber(parseInt(attrs.scrollOffset, 10))) {
+            scrollOffset = parseInt(attrs.scrollOffset, 10);
+          }
+          
+           if (angular.isDefined(attrs.animationSpeed) && angular.isNumber(parseInt(attrs.animationSpeed, 10))) {
+            animationSpeed = parseInt(attrs.animationSpeed, 10);
+          }
 
       e.preventDefault();
+      
       if (attrs.href) {
         attrs.scrollto = attrs.href;
       }
-
-      top = jQuery(attrs.scrollto).offset().top - 40;
-      jQuery('body,html').animate({ scrollTop: top }, 800);
+      
+      
+      // scrollOffset is the offset to scroll bay
+      top = jQuery(attrs.scrollto).offset().top - scrollOffset;
+      jQuery('body,html').animate({ scrollTop: top }, animationSpeed);
     });
   };
 });
