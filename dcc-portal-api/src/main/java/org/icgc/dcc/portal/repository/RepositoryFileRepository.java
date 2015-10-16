@@ -50,6 +50,7 @@ import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.sum;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.terms;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
@@ -311,6 +312,7 @@ public class RepositoryFileRepository {
     private final String FILE_SIZE = "fileSize";
     private final String REPO_SIZE = "repositorySizes";
     private final String REPO_NAME = "repositoryNamesFiltered";
+    private final String REPO_DONOR_COUNT = "repositoryDonorCount";
 
   }
 
@@ -319,11 +321,11 @@ public class RepositoryFileRepository {
 
     // Regular UI facets
     for (val facet : AVAILABLE_FACETS) {
+      val rawFieldName = toRawFieldName(facet);
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
       val subAgg = isNestedField(facet) ?
-          addNestedSubAggregations(filterAgg, facet, toRawFieldName(facet),
-              TYPE_MODEL.getNestedPath(facet)) :
-          addSubAggregations(filterAgg, facet, toRawFieldName(facet));
+          addNestedSubAggregations(filterAgg, facet, rawFieldName, TYPE_MODEL.getNestedPath(facet)) :
+          addSubAggregations(filterAgg, facet, rawFieldName);
 
       result.add(global(facet).subAggregation(subAgg));
     }
@@ -335,7 +337,7 @@ public class RepositoryFileRepository {
      * Facets that aren't visible in the UI. Special filtered cases (do not exclude self filtering):
      * repositoryNamesFiltered & repositorySize
      */
-    // repositoryNamesFiltered
+    // repositoryNamesFiltered - file count
     val repoNameAggName = CustomAggregationFields.REPO_NAME;
     val filterAgg = filter(repoNameAggName).filter(repoFilters);
     val repoNameSubAgg = addNestedSubAggregations(filterAgg, repoNameAggName, repoNameFieldName, EsFields.FILE_COPIES);
@@ -402,7 +404,7 @@ public class RepositoryFileRepository {
       val name = agg.getName();
 
       if (name.equals(CustomAggregationFields.REPO_SIZE)) {
-        val buckets = getAggregationBuckets(agg);
+        val buckets = getBucketsOfRepoAggregations(agg);
 
         result.put(CustomAggregationFields.REPO_SIZE, convertRepoSizeAggregation(buckets));
         result.put("repositoryDonors", convertRepoDonorAggregation(buckets));
@@ -411,29 +413,38 @@ public class RepositoryFileRepository {
       }
     }
 
+    log.debug("Result of convertAggregationsToFacets is: '{}'.", result);
     return result;
   }
 
-  private static List<Bucket> getAggregationBuckets(Aggregation aggregation) {
+  private static List<Bucket> getBucketsOfRepoAggregations(Aggregation aggregation) {
     val name = aggregation.getName();
     val globalAgg = (Global) aggregation;
     val filterAgg = (Filter) globalAgg.getAggregations().get(name);
     val termAgg = (Terms) getSubAggResultFromNested(filterAgg.getAggregations(), name).get(name);
+    // val termAgg = (Terms) filterAgg.getAggregations().get(name);
 
     return termAgg.getBuckets();
   }
 
   // Special aggregation to get unique donor count for each repository
   private static TermFacet convertRepoDonorAggregation(List<Bucket> buckets) {
-    val terms = transform(buckets, bucket -> {
-      final int size = bucketSize(getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
+    val terms = buckets.stream().map(bucket -> {
+
+      log.info("convertRepoDonorAggregation aggs are: '{}'.", bucket.getAggregations());
+
+      final int size = bucketSize(
+          getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
           CustomAggregationFields.DONOR);
 
       return new Term(bucket.getKey(), Long.valueOf(size));
-    });
+    }).collect(toImmutableList());
 
-    val total = -1L; // Total does not have any meaning in this context because a donor can cross repositories
-    return repoTermFacet(total, 0, ImmutableList.copyOf(terms));
+    log.info("convertRepoDonorAggregation terms are: '{}'.", terms);
+
+    // Total does not have any meaning in this context because a donor can cross repositories
+    val total = -1L;
+    return repoTermFacet(total, 0, terms);
   }
 
   // Special aggregation to get file size for each repository
@@ -443,6 +454,9 @@ public class RepositoryFileRepository {
 
     for (val bucket : buckets) {
       val childCount = sumValue(bucket.getAggregations(), CustomAggregationFields.FILE_SIZE);
+      // val childCount = sumValue(
+      // getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.FILE_SIZE),
+      // CustomAggregationFields.FILE_SIZE);
 
       termsBuilder.add(new Term(bucket.getKey(), (long) childCount));
       total += childCount;
@@ -740,7 +754,7 @@ public class RepositoryFileRepository {
         .setPostFilter(filters)
         .addAggregation(global(aggName).subAggregation(subAgg)));
 
-    log.debug("ES aggregation result is: '{}'.", response);
+    log.debug("getSummary aggregation result is: '{}'.", response);
 
     val aggResult = getAggregationResult(response, aggName);
     val buckets = ((Terms) aggResult.get(SummaryFields.FILE)).getBuckets();
@@ -748,7 +762,7 @@ public class RepositoryFileRepository {
     val donorAggResult = getSubAggResultFromNested(aggResult, SummaryFields.DONOR);
 
     return ImmutableMap.<String, Long> builder()
-        // FIXME: this fileCount might not be correct!
+        // TODO: Double-check if hit count is what fileCount is.
         .put("fileCount", getTotalHitCount(response))
         .put("totalFileSize", (long) totalFileSize)
         .put("donorCount", (long) bucketSize(donorAggResult, SummaryFields.DONOR))
@@ -777,7 +791,7 @@ public class RepositoryFileRepository {
         .setPostFilter(filters)
         .addAggregation(global(aggName).subAggregation(filterAgg)));
 
-    log.debug("ES aggregation result is: '{}'.", response);
+    log.debug("getDonorCount aggregation result is: '{}'.", response);
 
     return bucketSize(getSubAggResultFromNested(
         getAggregationResult(response, aggName), aggName), aggName);

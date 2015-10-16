@@ -25,10 +25,10 @@
 <article>
 <section id="summary">
 
-  <div class="wide">
+  <div class="half">
     <h3>Summary</h3>
 
-    <table class="table table-info">
+    <table class="table table-info fixed-width">
       <tr>
         <th>File ID</th>
         <td ng-bind="fileCtrlr.stringOrDefault (info.fileId)" />
@@ -53,25 +53,28 @@
     </table>
   </div>
 
-  <div class="narrow omega">
+  <div class="half omega">
     <h3>Data Type</h3>
 
-    <table class="table table-info" ng-init="categorization = info.dataCategorization">
+    <table class="table table-info fixed-width" ng-init="categorization = info.dataCategorization">
       <tr>
         <th>Data Type</th>
-        <td ng-bind="fileCtrlr.stringOrDefault (categorization.dataType)" />
+        <td ng-bind="fileCtrlr.translateDataType (categorization.dataType)" />
       </tr>
       <tr>
         <th>Experimental Strategy</th>
-        <td ng-bind="fileCtrlr.stringOrDefault (categorization.experimentalStrategy)" />
+        <td ng-init="expStrategy = categorization.experimentalStrategy; isEmpty = fileCtrlr.isEmptyString (expStrategy);">
+          <span ng-if="isEmpty" ng-bind="fileCtrlr.defaultString" />
+          <abbr ng-if="! isEmpty" tooltip="{{ expStrategy | define }}" ng-bind="expStrategy" />
+        </td>
       </tr>
     </table>
   </div>
 
-  <div class="wide">
+  <div class="half">
     <h3>Analysis Method</h3>
 
-    <table class="table table-info" ng-init="analysisMethod = info.analysisMethod">
+    <table class="table table-info fixed-width" ng-init="analysisMethod = info.analysisMethod">
       <tr>
         <th>Analysis Type</th>
         <td ng-bind="fileCtrlr.stringOrDefault (analysisMethod.analysisType)" />
@@ -86,7 +89,7 @@
   <div class="narrow omega">
     <h3>Reference Genome</h3>
 
-    <table class="table table-info" ng-init="referenceGenome = info.referenceGenome">
+    <table class="table table-info fixed-width" ng-init="referenceGenome = info.referenceGenome">
       <tr>
         <th>Genome Build</th>
         <td ng-bind="fileCtrlr.stringOrDefault (referenceGenome.genomeBuild)" />
@@ -130,31 +133,26 @@
         </tr>
       </thead>
 
-      <tbody>
+      <tbody class="cell-vertically-centered">
         <tr ng-repeat="fileCopy in info.fileCopies">
-          <td style="vertical-align: middle;"
-            ng-bind="fileCtrlr.stringOrDefault (fileCopy.fileName)" />
+          <td ng-bind="fileCtrlr.stringOrDefault (fileCopy.fileName)" />
           <!-- <td ng-bind="fileCtrlr.stringOrDefault (fileCopy.fileMd5sum)" /> -->
-          <td style="vertical-align: middle;"
-            ng-bind="fileCtrlr.stringOrDefault (fileCopy.fileFormat)" />
-          <td style="vertical-align: middle;"
+          <td ng-bind="fileCtrlr.stringOrDefault (fileCopy.fileFormat)" />
+          <td tooltip="{{:: fileCopy.fileSize | number }} bytes"
             ng-bind="fileCopy.fileSize | bytes" />
-          <td style="vertical-align: middle;"
-            tooltip="{{:: fileCopy.lastModified * 1000 | date: 'medium' }}"
+          <td tooltip="{{:: fileCopy.lastModified * 1000 | date: 'medium' }}"
             ng-bind="fileCopy.lastModified * 1000 | date: 'mediumDate'" />
 
-          <td style="vertical-align: middle;"
-            ng-bind="fileCtrlr.stringOrDefault (fileCopy.repoName)" />
+          <td ng-bind="fileCtrlr.stringOrDefault (fileCopy.repoName)" />
 
-          <td style="text-align: center; vertical-align: middle;"
+          <td style="text-align: center;"
             ng-init="countryCode = fileCtrlr.translateCountryCode (fileCopy.repoCountry.toLowerCase())">
             <span class="flag flag-{{ countryCode }}"
               tooltip="{{ fileCtrlr.countryName (countryCode) }}" />
           </td>
-          <td style="vertical-align: middle;"
-            ng-bind="fileCtrlr.stringOrDefault (fileCopy.repoType)" />
+          <td ng-bind="fileCtrlr.stringOrDefault (fileCopy.repoType)" />
 
-          <td style="min-width: 80px"
+          <td style="min-width: 90px"
             ng-init="showMetaData = fileCtrlr.shouldShowMetaData (fileCopy.repoType)">
             <a href="#" tooltip="Download Manifest"
               ng-click="fileCtrlr.downloadManifest (info.id, fileCopy.repoName)">
@@ -190,7 +188,7 @@
   <div class="wide">
     <h3>Donor</h3>
 
-    <table class="table table-info" ng-repeat="donorInfo in info.donors">
+    <table class="table table-info fixed-width" ng-repeat="donorInfo in info.donors">
       <tr>
         <th>Project ID</th>
         <td ng-init="projCode = donorInfo.projectCode">

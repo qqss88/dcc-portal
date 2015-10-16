@@ -32,8 +32,9 @@
     return _.isPlainObject (o) ? o : {};
   }
 
+  var defaultString = '--';
   function stringOrDefault (s) {
-    return isEmptyString (s) ? '--' : s;
+    return isEmptyString (s) ? defaultString : s;
   }
 
   var toJson = angular.toJson;
@@ -266,7 +267,7 @@
   /**
    * Controller for File Entity page
    */
-  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, CodeTable, fileInfo) {
+  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, CodeTable, PCAWG, fileInfo) {
 
     Page.setTitle('External File Entity');
     Page.setPage('externalFileEntity');
@@ -275,6 +276,8 @@
 
     this.fileInfo = fileInfo;
     this.stringOrDefault = stringOrDefault;
+    this.isEmptyString = isEmptyString;
+    this.defaultString = defaultString;
 
     // Private helpers
     function convertToString (input) {
@@ -320,6 +323,12 @@
     this.shouldShowMetaData = function (repoType) {
       return equalsIgnoringCase (repoType, 'GNOS') || equalsIgnoringCase (repoType, 'S3');
     };
+
+    this.translateDataType = function (dataType) {
+      var longName = PCAWG.translate (dataType);
+
+      return (longName === dataType) ? dataType : longName + ' (' + dataType + ')';
+    }
 
     this.translateCountryCode = CodeTable.translateCountryCode;
     this.countryName = CodeTable.countryName;
