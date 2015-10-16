@@ -55,6 +55,11 @@
         terms: terms
       });
 
+      $scope.isNot = Facets.isNot({
+        type: $scope.type,
+        facet: facetName
+      });
+
       $scope.actives = actives;
       addTranslations (actives, facetName, missingText);
 
@@ -71,6 +76,10 @@
       if ($scope.facet) {
         splitTerms();
       }
+      $scope.isNot = Facets.isNot({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
       $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
     }
 
@@ -98,7 +107,21 @@
         facet: $scope.facetName
       });
     };
+    
+    $scope.notFacet = function() {
+      Facets.notFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
 
+    $scope.isFacet = function() {
+      Facets.isFacet({
+        type: $scope.type,
+        facet: $scope.facetName
+      });
+    };
+    
     $scope.bar = function (count) {
       return {width: (count / ($scope.facet.total + $scope.facet.missing) * 100) + '%'};
     };

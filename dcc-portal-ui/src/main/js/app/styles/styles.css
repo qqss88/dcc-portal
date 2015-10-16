@@ -2639,31 +2639,38 @@ aside .t_tabs__tab {
   color: #e9931c;
 }
 
+/* line 30, _modules/_facets.scss */
+.t_facets__facet__is__not {
+  font-size: 0.75rem;
+  font-weight: 200;
+  cursor: pointer;
+}
+
 /************************************************
  *   Terms
  ***********************************************/
-/* line 33, _modules/_facets.scss */
+/* line 39, _modules/_facets.scss */
 .t_facets__facet__terms__inactive ul li:last-child {
   border-bottom: none;
 }
 
-/* line 37, _modules/_facets.scss */
+/* line 43, _modules/_facets.scss */
 .t_facets__facet__terms__inactive {
   padding: 0;
 }
 
-/* line 42, _modules/_facets.scss */
+/* line 48, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term,
 .t_facets__facet__terms__active__term__label {
   position: relative;
 }
 
-/* line 46, _modules/_facets.scss */
+/* line 52, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term {
   border-bottom: 1px dashed #e6e6e6;
 }
 
-/* line 51, _modules/_facets.scss */
+/* line 57, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__label,
 .t_facets__facet__terms__active__term__label__text {
   position: relative;
@@ -2676,19 +2683,19 @@ aside .t_tabs__tab {
   line-height: 1rem;
 }
 
-/* line 62, _modules/_facets.scss */
+/* line 68, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__label {
   padding-left: .5rem;
   color: #166aa2;
   cursor: pointer;
   transition: .5s color;
 }
-/* line 68, _modules/_facets.scss */
+/* line 74, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__label:hover {
   color: #ce6503;
 }
 
-/* line 74, _modules/_facets.scss */
+/* line 80, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__bar,
 .t_facets__facet__terms__active__term__bar {
   position: absolute;
@@ -2698,45 +2705,45 @@ aside .t_tabs__tab {
   transition: width 1s;
 }
 
-/* line 83, _modules/_facets.scss */
+/* line 89, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__bar {
   background: #f2f2f2;
 }
 
-/* line 87, _modules/_facets.scss */
+/* line 93, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__bar {
   background: #bbe7f7;
 }
 
-/* line 91, _modules/_facets.scss */
+/* line 97, _modules/_facets.scss */
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
   background: #d1effa;
 }
 
-/* line 97, _modules/_facets.scss */
+/* line 103, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__count,
 .t_facets__facet__terms__active__term__count {
   position: relative;
   float: right;
 }
 
-/* line 102, _modules/_facets.scss */
+/* line 108, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__term__count {
   margin-right: 1rem;
 }
 
-/* line 106, _modules/_facets.scss */
+/* line 112, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__count {
   margin-right: .5rem;
 }
 
-/* line 110, _modules/_facets.scss */
+/* line 116, _modules/_facets.scss */
 .t_facets__facet__terms__inactive__reset {
   font-size: 1.2rem;
 }
 
-/* line 113, _modules/_facets.scss */
+/* line 119, _modules/_facets.scss */
 .t_facets__facet__term__na {
   color: #cccccc;
 }
@@ -2744,55 +2751,55 @@ aside .t_tabs__tab {
 /************************************************
  *   Labels
  ***********************************************/
-/* line 121, _modules/_facets.scss */
+/* line 127, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label,
 .t_facets__facet__label {
   padding: 0 .5rem;
   line-height: 2.1rem;
 }
 
-/* line 127, _modules/_facets.scss */
+/* line 133, _modules/_facets.scss */
 .t_facets__facet__label:hover, .t_facets__facet__terms__active__term__label:hover {
   cursor: pointer;
   text-decoration: line-through;
 }
 
-/* line 133, _modules/_facets.scss */
+/* line 139, _modules/_facets.scss */
 .t_facets__facet__label {
   background: #e6e6e6;
   color: #166aa2;
 }
-/* line 136, _modules/_facets.scss */
+/* line 142, _modules/_facets.scss */
 .t_facets__facet__label:hover {
   background: #dedede;
 }
 
-/* line 141, _modules/_facets.scss */
+/* line 147, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label {
   background: #daf2fb;
   color: #1693c0;
 }
-/* line 144, _modules/_facets.scss */
+/* line 150, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label:hover {
   background: #cdedf9;
 }
 
-/* line 149, _modules/_facets.scss */
+/* line 155, _modules/_facets.scss */
 .t_impact_high {
   color: #dc502e;
 }
 
-/* line 152, _modules/_facets.scss */
+/* line 158, _modules/_facets.scss */
 .t_impact_medium {
   color: #ce6503;
 }
 
-/* line 155, _modules/_facets.scss */
+/* line 161, _modules/_facets.scss */
 .t_impact_low {
   color: #1a9900;
 }
 
-/* line 158, _modules/_facets.scss */
+/* line 164, _modules/_facets.scss */
 .t_impact_unknown {
   color: #666666;
 }
@@ -2800,26 +2807,26 @@ aside .t_tabs__tab {
 /************************************************
  *   Input
  ***********************************************/
-/* line 165, _modules/_facets.scss */
+/* line 171, _modules/_facets.scss */
 .t_facets__facet__input {
   padding: .5rem;
   position: relative;
 }
-/* line 168, _modules/_facets.scss */
+/* line 174, _modules/_facets.scss */
 .t_facets__facet__input input {
   padding-right: 1.5rem;
 }
-/* line 172, _modules/_facets.scss */
+/* line 178, _modules/_facets.scss */
 .t_facets__facet__input .t_suggest_flyout {
   margin-top: .25rem;
 }
-/* line 176, _modules/_facets.scss */
+/* line 182, _modules/_facets.scss */
 .t_facets__facet__input .t_suggest__embedded__right {
   top: .9rem;
   right: 1rem;
 }
 
-/* line 182, _modules/_facets.scss */
+/* line 188, _modules/_facets.scss */
 .t_facets__facet__button {
   padding-right: .5rem;
   position: relative;
@@ -2829,7 +2836,7 @@ aside .t_tabs__tab {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 192, _modules/_facets.scss */
+  /* line 198, _modules/_facets.scss */
   .t_facets__facet__terms__inactive__term__label,
   .t_facets__facet__terms__active__term__label__text {
     line-height: 2.2rem;

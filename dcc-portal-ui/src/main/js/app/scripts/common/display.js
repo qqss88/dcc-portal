@@ -123,8 +123,8 @@
             display[typeKey][uiFacetKey].is = [];
           }
 
-
-          facetFilters.is.forEach(function(term) {
+          var facetIter = ( _.has(facetFilters,'is')) ? facetFilters.is : facetFilters.not;
+          facetIter.forEach(function(term) {
             var uiTerm = term, isPredefined = false;
             // if (typeKey === 'gene' && facetKey === Extensions.ENTITY) {
             if (facetKey === Extensions.ENTITY) {

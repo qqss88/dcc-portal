@@ -69,9 +69,70 @@
 
       ensurePath(filters, params);
 
-      // TODO make is possible to use 'is' or 'not'
-      if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
-        filters[params.type][params.facet].is.push(params.term);
+      if (isNot(params)) {
+        if (filters[params.type][params.facet].not.indexOf(params.term) === -1) {
+          filters[params.type][params.facet].not.push(params.term);
+        }
+      } else {
+        if (filters[params.type][params.facet].is.indexOf(params.term) === -1) {
+          filters[params.type][params.facet].is.push(params.term);
+        }
+      }
+
+      LocationService.setFilters(filters);
+    }
+    
+    /** 
+     * Make the facet an IS NOT   
+     */
+    function notFacet(params) {
+      var filters;
+      
+      // Check for required parameters
+      [ 'type', 'facet'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+      
+      filters = LocationService.filters();
+      if (!filters.hasOwnProperty(params.type)) {
+        filters[params.type] = {};
+      }
+      if (!filters[params.type].hasOwnProperty(params.facet)) {
+        filters[params.type][params.facet] = {not: []};
+      }
+      if (filters[params.type][params.facet].hasOwnProperty('is')) {
+        filters[params.type][params.facet] = {not: filters[params.type][params.facet].is};
+        delete filters[params.type][params.facet].is;
+      }
+
+      LocationService.setFilters(filters);
+    }
+    
+    /**
+     * Remove the IS NOT
+     */
+    function isFacet(params) {
+      var filters;
+      
+      // Check for required parameters
+      [ 'type', 'facet'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+      
+      filters = LocationService.filters();
+      if (!filters.hasOwnProperty(params.type)) {
+        filters[params.type] = {};
+      }
+      if (!filters[params.type].hasOwnProperty(params.facet)) {
+        filters[params.type][params.facet] = {is: []};
+      }
+      if (filters[params.type][params.facet].hasOwnProperty('not')) {
+        filters[params.type][params.facet] = {is: filters[params.type][params.facet].not};
+        delete filters[params.type][params.facet].not;
       }
 
       LocationService.setFilters(filters);
@@ -91,15 +152,23 @@
       });
 
       filters = LocationService.filters();
-
-      // TODO make is possible to use 'is' or 'not'
-      index = filters[params.type][params.facet].is.indexOf(params.term);
-      filters[params.type][params.facet].is.splice(index, 1);
-
-      if (!filters[params.type][params.facet].is.length) {
-        removeFacet(params);
+      
+      if (isNot(params)) {
+        index = filters[params.type][params.facet].not.indexOf(params.term);
+        filters[params.type][params.facet].not.splice(index, 1);
+        if (!filters[params.type][params.facet].not.length) {
+          removeFacet(params);
+        } else {
+          LocationService.setFilters(filters);
+        }
       } else {
-        LocationService.setFilters(filters);
+        index = filters[params.type][params.facet].is.indexOf(params.term);
+        filters[params.type][params.facet].is.splice(index, 1);
+        if (!filters[params.type][params.facet].is.length) {
+          removeFacet(params);
+        } else {
+          LocationService.setFilters(filters);
+        }
       }
     }
 
@@ -187,10 +256,31 @@
 
       if (filters.hasOwnProperty(params.type) && filters[params.type].hasOwnProperty(params.facet)) {
         // TODO make is possible to use 'is' or 'not'
-        list = _.map(filters[params.type][params.facet].is, filterFn);
+        if (filters[params.type][params.facet].hasOwnProperty('is')) {
+          list = _.map(filters[params.type][params.facet].is, filterFn);
+        } else {
+          list = _.map(filters[params.type][params.facet].not, filterFn);
+        }
       }
 
       return list;
+    }
+    
+    /**
+     * Determine if this facet is an "IS NOT"
+     */
+    function isNot(params) { 
+      var filters;
+
+      [ 'type', 'facet'].forEach(function (rp) {
+        if (!params.hasOwnProperty(rp)) {
+          throw new Error('Missing required parameter: ' + rp);
+        }
+      });
+
+      filters = LocationService.filters();
+      
+      return _.has(filters, params['type']+'.'+params['facet']+'.not');
     }
 
     /*
@@ -251,9 +341,12 @@
       toggleTerm: toggleTerm,
       addTerm: addTerm,
       removeTerm: removeTerm,
+      notFacet: notFacet,
+      isFacet: isFacet,
       removeFacet: removeFacet,
       removeAll: removeAll,
       getActiveTerms: getActiveTerms,
+      isNot: isNot,
       getInactiveTerms: getInactiveTerms,
       getActiveTags: getActiveTags,
       getActiveLocations: getActiveLocations
