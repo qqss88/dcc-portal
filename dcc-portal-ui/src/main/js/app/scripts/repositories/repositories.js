@@ -58,15 +58,15 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 							return 	'scripts/repositories/views/repos/repos.' + 
 									_normalizeRepoCode($stateParams.repoCode) + '.content.html';
 						},
-						controller: 'RepositoriesController as repositoryCtrl'
-					},
+						controller: 'RepositoriesContentController as repositoryContentCtrl'
+					} /*,
 					'dataContent@ICGCcloud.repositories': {
 						templateUrl: function ($stateParams) {
 							return 	'scripts/repositories/views/repos/repos.' + 
 									_normalizeRepoCode($stateParams.repoCode) + '.content.data.html';
 						},
 						controller: 'RepositoriesController as repositoryCtrl'
-					}
+					} */
 				}
 			})
 			.state('ICGCcloud.repositoryGuides', {
@@ -77,7 +77,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 							return 	'scripts/repositories/views/guides/' + 
 									_normalizeRepoCode($stateParams.repoCode) + '.html';
 						},
-						controller: 'RepositoriesGuideController'
+						controller: 'RepositoriesGuideController as repositoryGuideCtrl'
 					}
 				}
 			});
@@ -103,9 +103,10 @@ angular.module('icgc.repositories.controllers', [])
 	.controller('RepositoriesController', function($scope, Page, RepositoriesService, $stateParams) {
 		var _ctrl = this,
 			_repoContext = $stateParams.repoCode.toLowerCase(),
-			_repoDataCollectionManager = RepositoriesService.getRepoDataCollectionManagerFactory(_repoContext),
+			_repoDataCollectionManager = null, 
 			_repoCreationDate = null,
 			_filterQueryStr = null,
+			_repoSummaryData = null,
 			_repoStats = {};
 		
 			
@@ -118,12 +119,19 @@ angular.module('icgc.repositories.controllers', [])
 		}
 		
 		function _refreshData() {
-			//_repoDataCollectionManager.getFileSummary().then(function(repoSummaryData) { console.log(repoSummaryData); });
+			_repoDataCollectionManager.getFileSummary()
+				.then(function(repoSummaryData) { 
+					console.log(repoSummaryData); 
+					_repoSummaryData = repoSummaryData;
+				});
 			
 			_repoDataCollectionManager.getFileStats().then(function(repoStats) { 
-				console.log(repoStats); 
-				_repoStats.repoDataTypes = _repoDataCollectionManager.orderDataTypes(repoStats.stats);
-        		_repoStats.primarySites = _repoDataCollectionManager.getSiteProjectDonorChart(repoStats.donorPrimarySite);
+			
+				var chartProvider = RepositoriesService.getChartProvider();
+				_repoStats.repoDataTypes = _repoDataCollectionManager.orderDataTypes(repoStats.stats);	
+        		_repoStats.primarySites = chartProvider.getSiteProjectDonorChart(repoStats.donorPrimarySite);
+				
+				console.log(repoStats, _repoStats.repoDataTypes, _repoStats.primarySites);
 			});
 			
 			
@@ -145,6 +153,21 @@ angular.module('icgc.repositories.controllers', [])
 			Page.stopWork();
 			Page.setPage('entity');
 			Page.setTitle('ICGC in the cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
+			
+			
+			// In this case we are querying by the repo name which is indexed.
+			// We currently cannot search by Repo Code and there
+			// are no relevant filter facets in the UI to represent Repo Code
+			// queries.
+			try {
+				_repoDataCollectionManager = RepositoriesService.getRepoDataCollectionManagerFactory(_repoContext);
+			}
+			catch (e) {
+				console.error(e, '\nAborting data refresh...');
+				return;
+			}
+			
+			
 			_refreshData();
 		}
 		
@@ -168,6 +191,10 @@ angular.module('icgc.repositories.controllers', [])
 		
 		_ctrl.getRepoContextID = function() {
 			return _repoContext;
+		};
+		
+		_ctrl.getRepoSummaryData = function() {
+			return _repoSummaryData;
 		}; 
 		
 		_ctrl.getRepoCreationDate = function() {
@@ -186,19 +213,21 @@ angular.module('icgc.repositories.controllers', [])
 angular.module('icgc.repositories.services', [])
 	.constant('RepositoryServiceConstants', { 
 		DATA_TARGET_TYPE: { 
-			REPO: 'repoCode', 
+			REPO: 'repoName', 
 			STUDY: 'study' 
 		}
 	})
-	.service('RepositoriesService', function(PCAWG, Restangular, HighchartsService, RepositoryServiceConstants) {
-		var _srv = this;
+	.service('RepositoriesService', function(	PCAWG, ExternalRepoService, Restangular, 
+												HighchartsService, RepositoryServiceConstants) {
+		var _srv = this,
+			_chartProvider = null;
 			// constants used by the service
 		
 		var _repoServiceURLs = {
 				// Absolute Path: /api/v1/repository/files/repo/stats/{{repoCode}}
 				GET_REPO_STATS: 'repository/files/repo/stats',
 				
-				// uses GET param filters={'file': {'repoCode':{ is: ['<repo_context>'] } } }
+				// uses GET param filters={'file': {'repoName':{ is: ['<repo_context>'] } } }
 				GET_REPO_FILE_SUMMARY_STATS: 'repository/files/summary',
 				
 				// Absolute Path: /api/v1/repository/files/metadata
@@ -206,98 +235,51 @@ angular.module('icgc.repositories.services', [])
 			};
 			
 			
-		function RepoCollectionDataManager(repoContextID, targettedType) {
+		function RepoCollectionDataManager(repoID, targettedType) {
 			var _self = this,
-				_repoContextID = repoContextID,
+				_repoID = repoID,
 				// if null it's target is the whole repo study
 				_targettedType = targettedType || RepositoryServiceConstants.DATA_TARGET_TYPE.REPO;
 				
-			function _buildRepoFilter(datatype) {
-				var filter = { file: {} };
-				
-				filter.file[_self._targettedType] =  {
-						is: [_self._repoContextID]
-					};
-				
-				if (angular.isDefined(datatype)) {
-					filter.file.dataType = {
-						is: [datatype]
-					};
+			
+			
+			
+			function _init() {
+				var repoName = ExternalRepoService.getRepoNameFromCode(_repoID);
+			
+				if (repoName === null) {
+					throw new Error('Could not find repository name with the repo code: ' + _repoID + '\nAborting...');
 				}
 				
-				return filter;	
+				//console.log(repoName);
+				_self._repoID = _repoID;
+				_self._repoName = repoName;
+				_self._targettedType = _targettedType;
 			}
-			
 				
-			_self._repoContextID = _repoContextID;
-			_self._targettedType = _targettedType;
-			_self.buildRepoFilter = _buildRepoFilter;	
-			
+				
+			_init();
 			
 			return this;	
 		}
-	
-	
-		// set up prototypes so we don't duplicate logic unnecessarily
-		RepoCollectionDataManager.prototype.getSiteProjectDonorChart = function(data) {
-			var list = [];
 		
-			// Stack friendly format
-			Object.keys(data).forEach(function(siteKey) {
-				var bar = {};
-				
-				bar.total = 0;
-				bar.stack = [];
-				bar.key = siteKey;
-		
-				Object.keys(data[siteKey]).forEach(function(projKey) {
-					bar.stack.push({
-						name: projKey,
-						label: projKey,
-						count: data[siteKey][projKey],
-						key: siteKey, // parent key
-						colourKey: siteKey,
-						link: '/projects/' + projKey
-					});
-				});
-		
-				bar.stack.sort(function(a, b) { 
-						return b.count - a.count; 
-					})
-					.forEach(function(p) {
-						p.y0 = bar.total;
-						p.y1 = bar.total + p.count;
-						bar.total += p.count;
-					});
-				
-					list.push(bar);
-				});
+		RepoCollectionDataManager.prototype.buildRepoFilter = function(datatype) {
+			var filter = { file: {} };
 			
-				// Sorted
-				return list.sort(function(a, b) { return b.total - a.total; });
+			filter.file[this._targettedType] =  {
+					is: [this._repoName]
+				};
+			
+			if (angular.isDefined(datatype)) {
+				filter.file.dataType = {
+					is: [datatype]
+				};
+			}
+			
+			return filter;	
 		};
-
-
-		RepoCollectionDataManager.prototype.getPrimarySiteDonorChart = function(data) {
-			var list = [];
 		
-			Object.keys(data).forEach(function(d) {
-				list.push({
-				id: d,
-				count: data[d],
-				colour: HighchartsService.getPrimarySiteColourForTerm(d)
-				});
-			});
-			list = _.sortBy(list, function(d) { return -d.count; });
 		
-			return HighchartsService.bar({
-				hits: list,
-				xAxis: 'id',
-				yValue: 'count'
-			});
-		};
-
-
 		/**
 		* Reorder for UI, the top 5 items are fixed, the remining are appended to the end
 		* on a first-come-first-serve basis.
@@ -332,6 +314,8 @@ angular.module('icgc.repositories.services', [])
 		};
 	
 	
+		// set up prototypes so we don't duplicate logic unnecessarily
+	
 		/**
 		* Get pancancer statistics - This uses ICGC's external repository end point
 		* datatype
@@ -340,7 +324,7 @@ angular.module('icgc.repositories.services', [])
 		*   - file size
 		*/
 		RepoCollectionDataManager.prototype.getFileStats = function() {
-		return Restangular.one(_repoServiceURLs.GET_REPO_STATS, this._repoContextID).get();
+		return Restangular.one(_repoServiceURLs.GET_REPO_STATS, this._repoID).get();
 		};
 	
 		RepoCollectionDataManager.prototype.getFileSummary = function() {
@@ -357,10 +341,83 @@ angular.module('icgc.repositories.services', [])
 					.get();
 		};
 		
+		
+		function ChartProvider() {
+			var _self = this;
+			
+			_self.getSiteProjectDonorChart = function(data) {
+				var list = [];
+			
+				// Stack friendly format
+				Object.keys(data).forEach(function(siteKey) {
+					var bar = {};
+					
+					bar.total = 0;
+					bar.stack = [];
+					bar.key = siteKey;
+			
+					Object.keys(data[siteKey]).forEach(function(projKey) {
+						bar.stack.push({
+							name: projKey,
+							label: projKey,
+							count: data[siteKey][projKey],
+							key: siteKey, // parent key
+							colourKey: siteKey,
+							link: '/projects/' + projKey
+						});
+					});
+			
+					bar.stack.sort(function(a, b) { 
+							return b.count - a.count; 
+						})
+						.forEach(function(p) {
+							p.y0 = bar.total;
+							p.y1 = bar.total + p.count;
+							bar.total += p.count;
+						});
+					
+						list.push(bar);
+					});
+				
+					// Sorted
+					return list.sort(function(a, b) { return b.total - a.total; });
+			};
+		
+			_self.getPrimarySiteDonorChart = function(data) {
+				var list = [];
+			
+				Object.keys(data).forEach(function(d) {
+					list.push({
+					id: d,
+					count: data[d],
+					colour: HighchartsService.getPrimarySiteColourForTerm(d)
+					});
+				});
+				list = _.sortBy(list, function(d) { return -d.count; });
+			
+				return HighchartsService.bar({
+					hits: list,
+					xAxis: 'id',
+					yValue: 'count'
+				});
+			};
+				
+		}
+			
 		// Public API for Repositories Service
-		_srv.getRepoDataCollectionManagerFactory = function(repoContextID, targettedType) {
-			return new RepoCollectionDataManager(repoContextID, targettedType);
+		_srv.getRepoDataCollectionManagerFactory = function(repoID, targettedType) {
+			return new RepoCollectionDataManager(repoID, targettedType);
+		};
+		
+		_srv.getChartProvider = function() {
+			// lazy initialization
+			if (_chartProvider === null) {
+				_chartProvider = new ChartProvider();
+			}
+			
+			return _chartProvider;	
 		};
   
-	});
+	})
+	.controller('RepositoriesContentController', function() {});
 

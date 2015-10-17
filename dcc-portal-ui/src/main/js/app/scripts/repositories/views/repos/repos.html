@@ -12,12 +12,62 @@
         </div>
     </h1>
     <section class="cloud-repository-content">
-        <div class="half pull-right" data-ui-view="dataContent">     
+        <div class="half pull-right" data-ui-view2="dataContent">
+             <!-- Bar Chart Status Region -->
+            <div data-ng-show="repositoryCtrl.getRepoSummaryData()" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
+
+                <stacked height="250"
+                    data-title="Donor Distribution by Primary Site"
+                    data-subtitle="{{repositoryCtrl.getRepoSummaryData().projectCount}} projects and {{summary.primarySiteCount}} primary sites"
+                    data-y-label="Donors"
+                    data-alternate-brightness="true"
+                    data-items="repositoryCtrl.getPrimarySites()"
+                    data-is-loading="false">
+                </stacked>
+            
+                <section class="well" style="padding-top:0.5rem; padding-bottom:0.5rem">
+                    <div class="third text-center">
+                        <i class="icon-team" style="font-size:1.25rem"></i><strong data-ng-bind="repositoryCtrl.getRepoSummaryData().donorCount | number"></strong> Donors
+                    </div>
+                    <div class="third text-center">
+                        <i class="icon-file" style="font-size:1.25rem"></i><strong data-ng-bind="repositoryCtrl.getRepoSummaryData().fileCount | number"></strong> Files
+                    </div>
+                    <div class="third omega text-center">
+                        <i class="icon-database" style="font-size:1.25rem"></i><strong data-ng-bind="repositoryCtrl.getRepoSummaryData().totalFileSize | bytes"></strong>
+                    </div>
+                </section>
+            
+                <table class="table table-info">
+                    <thead>
+                        <th>Data Type</th>
+                        <th># Donors</th>
+                        <th># Files</th>
+                        <th>Format</th>
+                        <th>Size</th>
+                    </thead>
+                    <tbody>
+                        <tr data-ng-repeat="type in repositoryCtrl.getRepoDataTypes()">
+                            <td data-ng-bind="type.uiName"></td>
+                            <td class="text-right" data-ng-bind="type.donorCount | number"></td>
+                            <td class="text-right">
+                                <a href="/repository/external?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
+                            </td>
+                            <td data-ng-bind="type.fileFormat.join(', ')"></td>
+                            <td class="text-right" data-ng-bind="type.fileSize | bytes"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+                <span>
+                    Available data as of <a href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
+                </span>
+            </div>
+            <!-- -->     
         </div>
         <div data-ui-view="bodyContent">
         </div>
         <div class="repo-controls-container">
-                <a class="btn" data-ng-href="#">Search Respository</a>
+                <a class="btn" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}">Search Respository</a>
                 <a class="btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextID}}/guide">User Guide</a>
         </div>
     </section>
