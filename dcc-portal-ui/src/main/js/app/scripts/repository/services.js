@@ -31,16 +31,16 @@
 
     // Initial values until the call to getRepoMap() returns.
     var repoCodeToName = {
-      "pcawg-chicago-tcga": "PCAWG - Chicago (TCGA)",
-      "cghub": "CGHub - Santa Cruz",
-      "pcawg-heidelberg": "PCAWG - Heidelberg",
-      "pcawg-tokyo": "PCAWG - Tokyo",
-      "aws-virginia": "AWS - Virginia",
-      "pcawg-barcelona": "PCAWG - Barcelona",
-      "pcawg-cghub": "PCAWG - Santa Cruz",
-      "pcawg-chicago-icgc": "PCAWG - Chicago (ICGC)",
-      "pcawg-london": "PCAWG - London",
-      "tcga": "TCGA DCC - Bethesda"
+      'pcawg-chicago-tcga': 'PCAWG - Chicago (TCGA)',
+      'cghub': 'CGHub - Santa Cruz',
+      'pcawg-heidelberg': 'PCAWG - Heidelberg',
+      'pcawg-tokyo': 'PCAWG - Tokyo',
+      'aws-virginia': 'AWS - Virginia',
+      'pcawg-barcelona': 'PCAWG - Barcelona',
+      'pcawg-cghub': 'PCAWG - Santa Cruz',
+      'pcawg-chicago-icgc': 'PCAWG - Chicago (ICGC)',
+      'pcawg-london': 'PCAWG - London',
+      'tcga': 'TCGA DCC - Bethesda'
     };
     var repoNameToCode = _.invert (repoCodeToName);
 
