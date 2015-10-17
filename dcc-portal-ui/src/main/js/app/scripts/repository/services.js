@@ -25,18 +25,22 @@
   var module = angular.module('icgc.repository.services', []);
 
   module.service ('ExternalRepoService', function ($window, Restangular, API) {
+    function getRepoMap () {
+      return Restangular.one (REPO_API_PATH).one('repo_map').get ({});
+    }
+
     // Initial values until the call to getRepoMap() returns.
     var repoCodeToName = {
-      'pcawg-chicago-tcga': "PCAWG - Chicago (TCGA)",
-      'cghub': "CGHub - Santa Cruz",
-      'pcawg-heidelberg': "PCAWG - Heidelberg",
-      'pcawg-tokyo': "PCAWG - Tokyo",
-      'aws-virginia': "AWS - Virginia",
-      'pcawg-barcelona': "PCAWG - Barcelona",
-      'pcawg-cghub': "PCAWG - Santa Cruz",
-      'pcawg-chicago-icgc': "PCAWG - Chicago (ICGC)",
-      'pcawg-london': "PCAWG - London",
-      'tcga': "TCGA DCC - Bethesda"
+      "pcawg-chicago-tcga": "PCAWG - Chicago (TCGA)",
+      "cghub": "CGHub - Santa Cruz",
+      "pcawg-heidelberg": "PCAWG - Heidelberg",
+      "pcawg-tokyo": "PCAWG - Tokyo",
+      "aws-virginia": "AWS - Virginia",
+      "pcawg-barcelona": "PCAWG - Barcelona",
+      "pcawg-cghub": "PCAWG - Santa Cruz",
+      "pcawg-chicago-icgc": "PCAWG - Chicago (ICGC)",
+      "pcawg-london": "PCAWG - London",
+      "tcga": "TCGA DCC - Bethesda"
     };
     var repoNameToCode = _.invert (repoCodeToName);
 
@@ -101,10 +105,6 @@
     this.getMetaData = function() {
       return Restangular.one (REPO_API_PATH).one('metadata').get ({});
     };
-
-    function getRepoMap () {
-      return Restangular.one (REPO_API_PATH).one('repo_map').get ({});
-    }
 
     this.getFileInfo = function (id) {
       return Restangular.one (REPO_API_PATH, id).get();
