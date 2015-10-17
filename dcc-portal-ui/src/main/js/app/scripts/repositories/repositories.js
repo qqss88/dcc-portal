@@ -195,6 +195,10 @@ angular.module('icgc.repositories.controllers', [])
 		
 		_ctrl.getRepoSummaryData = function() {
 			return _repoSummaryData;
+		};
+		
+		_ctrl.hasSummaryData = function() {
+			return _repoSummaryData !== null;
 		}; 
 		
 		_ctrl.getRepoCreationDate = function() {

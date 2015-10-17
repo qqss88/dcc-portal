@@ -14,7 +14,7 @@
     <section class="cloud-repository-content">
         <div class="half pull-right" data-ui-view2="dataContent">
              <!-- Bar Chart Status Region -->
-            <div data-ng-show="repositoryCtrl.getRepoSummaryData()" style="margin-bottom:1.5rem; margin-top:1rem; margin-left:2rem; margin-right: 2rem">
+            <div data-ng-show="repositoryCtrl.hasSummaryData()" class="bar-chart-container">
 
                 <stacked height="250"
                     data-title="Donor Distribution by Primary Site"
@@ -67,7 +67,7 @@
         <div data-ui-view="bodyContent">
         </div>
         <div class="repo-controls-container">
-                <a class="btn" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}">Search Respository</a>
+                <a class="btn" data-ng-show="repositoryCtrl.hasSummaryData()" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}">Search Respository</a>
                 <a class="btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextID}}/guide">User Guide</a>
         </div>
     </section>
