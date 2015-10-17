@@ -32,6 +32,7 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,7 @@ import lombok.val;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -103,11 +105,15 @@ public class SearchRepository {
 
   private static final Set<String> MULTIPLE_SEARCH_TYPES = Stream.of(
       Types.GENE,
+      /*
+       * Types.FILE must appear before Types.DONOR for searching file UUID in "file-text" to work. See DCC-3967 and
+       * https://github.com/elastic/elasticsearch/issues/2218 for details.
+       */
+      Types.FILE,
       Types.DONOR,
       Types.PROJECT,
       Types.MUTATION,
-      Types.GENE_SET,
-      Types.FILE)
+      Types.GENE_SET)
       .map(t -> TYPE_ID_MAPPINGS.get(t))
       .collect(toImmutableSet());
 
@@ -127,13 +133,8 @@ public class SearchRepository {
   public SearchResponse findAll(Query query, String type) {
     log.info("Requested search type is: '{}'.", type);
 
-    // Determines which index to use as external file repository are in a daily generated index separated
-    // from the main icgc-index.
-    val search = type.equals(Types.FILE) || type.equals(Types.FILE_DONOR) ?
-        client.prepareSearch(REPOSITORY_INDEX_NAME) :
-        client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
-
-    search.setSearchType(DFS_QUERY_THEN_FETCH)
+    val search = createSearch(type)
+        .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
         .setSize(query.getSize())
         .setTypes(getSearchTypes(type))
@@ -143,16 +144,30 @@ public class SearchRepository {
 
     log.info("ES search query is: {}", search);
     val response = search.execute().actionGet();
-    log.info("ES search result is: {}", response);
+    log.debug("ES search result is: {}", response);
 
     return response;
   }
 
   // Helpers
-  private static String[] getSearchTypes(String type) {
-    val result = TYPE_ID_MAPPINGS.containsKey(type) ? newHashSet(TYPE_ID_MAPPINGS.get(type)) : MULTIPLE_SEARCH_TYPES;
+  private SearchRequestBuilder createSearch(String type) {
+    // Determines which index to use as external file repository are in a daily generated index separated
+    // from the main icgc-index.
+    return type.equals(Types.FILE) || type.equals(Types.FILE_DONOR) ?
+        client.prepareSearch(REPOSITORY_INDEX_NAME) :
+        client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
+  }
 
-    return result.toArray(new String[result.size()]);
+  private static String[] toStringArray(Collection<String> source) {
+    return source.stream().toArray(String[]::new);
+  }
+
+  private static String[] getSearchTypes(String type) {
+    val result = TYPE_ID_MAPPINGS.containsKey(type) ?
+        newHashSet(TYPE_ID_MAPPINGS.get(type)) :
+        MULTIPLE_SEARCH_TYPES;
+
+    return toStringArray(result);
   }
 
   private static FilterBuilder getPostFilter(String type) {
@@ -220,7 +235,7 @@ public class SearchRepository {
     // Exact-match search on "id".
     keys.add("id");
 
-    return keys.toArray(new String[keys.size()]);
+    return toStringArray(keys);
   }
 
 }
