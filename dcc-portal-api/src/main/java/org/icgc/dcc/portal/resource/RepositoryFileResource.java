@@ -69,6 +69,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.RepositoryFile;
@@ -84,17 +89,12 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Component
 @Slf4j
 @Path("/v1/repository/files")
 @Produces(APPLICATION_JSON)
 @Api(value = "/repository/files", description = "Resources relating to external files")
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class RepositoryFileResource {
 
   private static final String API_PATH_MANIFEST = "/manifest";
@@ -175,6 +175,13 @@ public class RepositoryFileResource {
   @Timed
   public Map<String, String> getIndexMetaData() {
     return repositoryFileService.getIndexMetadata();
+  }
+
+  @GET
+  @Path("/repo_map")
+  @Timed
+  public Map<String, String> getRepositoryMap() {
+    return repositoryFileService.getRepositoryMap();
   }
 
   @GET

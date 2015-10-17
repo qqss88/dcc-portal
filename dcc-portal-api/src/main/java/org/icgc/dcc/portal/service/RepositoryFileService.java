@@ -214,6 +214,10 @@ public class RepositoryFileService {
     return repositoryFileRepository.getIndexMetaData();
   }
 
+  public Map<String, String> getRepositoryMap() {
+    return repositoryFileRepository.getRepositoryMap();
+  }
+
   @NonNull
   public void exportTableData(OutputStream output, Query query) {
     val prepResponse = repositoryFileRepository.prepareDataExport(query, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);

@@ -16,43 +16,47 @@
  */
 
 (function() {
-
   'use strict';
+
+  var REPO_API_PATH = 'repository/files';
+  var toJson = angular.toJson;
+  var uriString = _.flow (toJson, encodeURIComponent);
 
   var module = angular.module('icgc.repository.services', []);
 
-  module.service('ExternalRepoService', function($window, Restangular, API) {
-    // TODO: Stop hardcoding!!! :/
-    // FIXME: Move this out
-    var repoMap = {
-      'AWS - Virginia': 'aws-virginia',
-      'CGHub - Santa Cruz': 'cghub',
-      // 'TCGA DCC - Washington': 'tcga',
-      'TCGA DCC - Bethesda': 'tcga',
-      'PCAWG - Barcelona': 'pcawg-barcelona',
-      'PCAWG - Santa Cruz': 'pcawg-cghub',
-      'PCAWG - Tokyo': 'pcawg-tokyo',
-      'PCAWG - Seoul': 'pcawg-seoul',
-      'PCAWG - London': 'pcawg-london',
-      'PCAWG - Heidelberg': 'pcawg-heidelberg',
-      'PCAWG - Chicago (ICGC)': 'pcawg-chicago-icgc',
-      'PCAWG - Chicago (TCGA)': 'pcawg-chicago-tcga'
-    },
-    invertedRepoMap  = _.invert(repoMap);
+  module.service ('ExternalRepoService', function ($window, Restangular, API) {
+    // Initial values until the call to getRepoMap() returns.
+    var repoCodeToName = {
+      'pcawg-chicago-tcga': "PCAWG - Chicago (TCGA)",
+      'cghub': "CGHub - Santa Cruz",
+      'pcawg-heidelberg': "PCAWG - Heidelberg",
+      'pcawg-tokyo': "PCAWG - Tokyo",
+      'aws-virginia': "AWS - Virginia",
+      'pcawg-barcelona': "PCAWG - Barcelona",
+      'pcawg-cghub': "PCAWG - Santa Cruz",
+      'pcawg-chicago-icgc': "PCAWG - Chicago (ICGC)",
+      'pcawg-london': "PCAWG - London",
+      'tcga': "TCGA DCC - Bethesda"
+    };
+    var repoNameToCode = _.invert (repoCodeToName);
 
+    getRepoMap().then (function (data) {
+      data = data.plain();
+      repoCodeToName = data;
+      repoNameToCode = _.invert (data);
+    });
 
-    this.getList = function(params) {
+    this.getList = function (params) {
       var defaults = {
         size: 10,
         from:1
       };
-      return Restangular.one('repository/files').get(angular.extend(defaults, params));
-    };
-    
-    this.getRepoNameFromCode = function(repoCode) {
-      return invertedRepoMap[repoCode] || null;
+      return Restangular.one (REPO_API_PATH).get (angular.extend (defaults, params));
     };
 
+    this.getRepoNameFromCode = function (repoCode) {
+      return _.get (repoCodeToName, repoCode, null);
+    };
 
     /**
      * Get total donor, file and file size statistics
@@ -60,32 +64,28 @@
     // TODO: This is a duplicate function that was organized into
     // the repositories service. Remove this once the dependencies
     // are determined
-    this.getSummary = function(params) {
-      return Restangular.one('repository/files/summary').get(params);
+    this.getSummary = function (params) {
+      return Restangular.one (REPO_API_PATH + '/summary').get (params);
     };
 
+    function concatRepoCodes (repoNames) {
+      return _.map (repoNames, function (name) {
+        return _.get (repoNameToCode, name, name);
+      }).join();
+    }
 
-    this.download = function(filters, repos) {
-      var filtersStr = encodeURIComponent(JSON.stringify(filters));
-      var repoStr = _.map(repos, function(repo) {
-        return repoMap[repo] || repo;
-      }).join(',');
-
-      $window.location.href = API.BASE_URL + '/repository/files/manifest?filters=' +
-        filtersStr + '&repositories=' + repoStr;
+    this.download = function (filters, repos) {
+      $window.location.href = API.BASE_URL + '/' + REPO_API_PATH + '/manifest?filters=' +
+        uriString (filters) + '&repositories=' + concatRepoCodes (repos);
     };
 
-    this.downloadSelected = function(ids, repos) {
-      var repoStr = _.map(repos, function(repo) {
-        return repoMap[repo] || repo;
-      }).join(',');
-
-      jQuery('<form method="POST" id="fileDownload" action="' + API.BASE_URL +
-             '/repository/files/manifest" style="display:none">' +
-             _.map(ids, function(id) {
+    this.downloadSelected = function (ids, repos) {
+      jQuery('<form method="POST" id="fileDownload" action="' +
+              API.BASE_URL + '/' + REPO_API_PATH + '/manifest" style="display:none">' +
+             _.map (ids, function (id) {
                 return '<input type="hidden" name="fileIds" value="' + id + '"/>';
               }) +
-             '<input type="hidden" name="repositories" value="' + repoStr + '"/>' +
+             '<input type="hidden" name="repositories" value="' + concatRepoCodes (repos) + '"/>' +
              '<input type="submit" value="Submit"/>' +
              '</form>').appendTo('body');
 
@@ -93,17 +93,21 @@
       jQuery('#fileDownload').remove();
     };
 
-    this.export = function(filters) {
-      var filtersStr = encodeURIComponent(JSON.stringify(filters));
-      $window.location.href = API.BASE_URL + '/repository/files/export?filters=' + filtersStr;
+    this.export = function (filters) {
+      $window.location.href = API.BASE_URL + '/' + REPO_API_PATH +
+        '/export?filters=' + uriString (filters);
     };
 
     this.getMetaData = function() {
-      return Restangular.one('repository/files').one('metadata').get({});
+      return Restangular.one (REPO_API_PATH).one('metadata').get ({});
     };
 
+    function getRepoMap () {
+      return Restangular.one (REPO_API_PATH).one('repo_map').get ({});
+    }
+
     this.getFileInfo = function (id) {
-      return Restangular.one('repository/files', id).get();
+      return Restangular.one (REPO_API_PATH, id).get();
     };
 
   });

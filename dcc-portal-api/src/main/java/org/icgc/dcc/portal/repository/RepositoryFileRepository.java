@@ -428,16 +428,17 @@ public class RepositoryFileRepository {
   // Special aggregation to get unique donor count for each repository
   private static TermFacet convertRepoDonorAggregation(List<Bucket> buckets) {
     val terms = buckets.stream().map(bucket -> {
+      // FIXME
+        log.info("convertRepoDonorAggregation aggs are: '{}'.", bucket.getAggregations());
 
-      log.info("convertRepoDonorAggregation aggs are: '{}'.", bucket.getAggregations());
+        final int size = bucketSize(
+            getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
+            CustomAggregationFields.DONOR);
 
-      final int size = bucketSize(
-          getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
-          CustomAggregationFields.DONOR);
+        return new Term(bucket.getKey(), Long.valueOf(size));
+      }).collect(toImmutableList());
 
-      return new Term(bucket.getKey(), Long.valueOf(size));
-    }).collect(toImmutableList());
-
+    // FIXME
     log.info("convertRepoDonorAggregation terms are: '{}'.", terms);
 
     // Total does not have any meaning in this context because a donor can cross repositories
@@ -758,14 +759,13 @@ public class RepositoryFileRepository {
     val totalFileSize = sumFileCopySize(buckets, SummaryFields.FILE);
     val donorAggResult = getSubAggResultFromNested(aggResult, SummaryFields.DONOR);
 
-    return ImmutableMap.<String, Long> builder()
-        // TODO: Double-check if hit count is what fileCount is.
-        .put("fileCount", getTotalHitCount(response))
-        .put("totalFileSize", (long) totalFileSize)
-        .put("donorCount", (long) bucketSize(donorAggResult, SummaryFields.DONOR))
-        .put("projectCount", (long) bucketSize(donorAggResult, SummaryFields.PROJECT))
-        .put("primarySiteCount", (long) bucketSize(donorAggResult, SummaryFields.PRIMARY_SITE))
-        .build();
+    return ImmutableMap.<String, Long> of(
+        // TODO: Double-check if hit count is indeed fileCount.
+        "fileCount", getTotalHitCount(response),
+        "totalFileSize", (long) totalFileSize,
+        "donorCount", (long) bucketSize(donorAggResult, SummaryFields.DONOR),
+        "projectCount", (long) bucketSize(donorAggResult, SummaryFields.PROJECT),
+        "primarySiteCount", (long) bucketSize(donorAggResult, SummaryFields.PRIMARY_SITE));
   }
 
   /**
@@ -836,6 +836,25 @@ public class RepositoryFileRepository {
         .sum();
   }
 
+  public Map<String, String> getRepositoryMap() {
+    val repoName = toRawFieldName(Fields.REPO_NAME);
+    val repoCode = toRawFieldName(Fields.REPO_CODE);
+    val repoNameSubAgg = terms(repoName).field(repoName);
+    val repoCodeSubAgg = nestedAgg(repoCode, EsFields.FILE_COPIES,
+        terms(repoCode).field(repoCode).subAggregation(repoNameSubAgg));
+    val response = searchFileCentric("repoCodeNameMapping", request -> request
+        .setSearchType(COUNT)
+        .addAggregation(repoCodeSubAgg));
+    val terms = (Terms) getSubAggResultFromNested(response.getAggregations(), repoCode).get(repoCode);
+
+    return terms.getBuckets().stream().collect(toMap(bucket -> bucket.getKey(),
+        bucket -> {
+          final List<Bucket> repoNameBuckets = ((Terms) bucket.getAggregations().get(repoName)).getBuckets();
+
+          return isEmpty(repoNameBuckets) ? "" : repoNameBuckets.get(0).getKey();
+        }));
+  }
+
   @UtilityClass
   private class StatsAggregationKeys {
 
@@ -846,6 +865,7 @@ public class RepositoryFileRepository {
 
   }
 
+  @NonNull
   public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
     val aggsFilter = nestedFilter(EsFields.FILE_COPIES, termFilter(toRawFieldName(Fields.REPO_CODE), repoName));
     val response = getStats(aggsFilter, repoName);
@@ -853,6 +873,7 @@ public class RepositoryFileRepository {
     return extractStats(response.getAggregations(), repoName);
   }
 
+  @NonNull
   public Map<String, Map<String, Map<String, Object>>> getStudyStats(String study) {
     val aggsFilter = termFilter(toRawFieldName(Fields.STUDY), study);
     val response = getStats(aggsFilter, study);
