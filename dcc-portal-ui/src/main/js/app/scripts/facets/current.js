@@ -74,6 +74,12 @@
       var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not');
       return isNot;
     };
+    
+    $scope.activeClass = function(terms) {
+      var currentFilters = LocationService.filters();
+      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not');
+      return isNot? 't_facets__facet__not' : '';
+    };
 
     function refresh() {
       var currentFilters = LocationService.filters();

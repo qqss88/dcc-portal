@@ -104,23 +104,44 @@
             var uiTerm = 'Reactome Pathways';
             uiFacetKey = 'pathwayId';
 
+            if (_.has(facetFilters, 'not')) { 
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+                display[typeKey][uiFacetKey] = {};
+                display[typeKey][uiFacetKey].not = [];
+              }
+              display[typeKey][uiFacetKey].not.unshift({
+                term: uiTerm,
+                controlTerm: undefined,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+              return;
+            } else {
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+                display[typeKey][uiFacetKey] = {};
+                display[typeKey][uiFacetKey].is = [];
+              }
+              display[typeKey][uiFacetKey].is.unshift({
+                term: uiTerm,
+                controlTerm: undefined,
+                controlFacet: facetKey,
+                controlType: typeKey
+              });
+              return;
+            }
+          }
+
+          // Allocate terms
+          if ( _.has(facetFilters,'is')) {
             if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
               display[typeKey][uiFacetKey] = {};
               display[typeKey][uiFacetKey].is = [];
             }
-            display[typeKey][uiFacetKey].is.unshift({
-              term: uiTerm,
-              controlTerm: undefined,
-              controlFacet: facetKey,
-              controlType: typeKey
-            });
-            return;
-          }
-
-          // Allocate terms
-          if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
-            display[typeKey][uiFacetKey] = {};
-            display[typeKey][uiFacetKey].is = [];
+          } else {
+              if (! display[typeKey].hasOwnProperty(uiFacetKey)) {
+              display[typeKey][uiFacetKey] = {};
+              display[typeKey][uiFacetKey].not = [];
+            }
           }
 
           var facetIter = ( _.has(facetFilters,'is')) ? facetFilters.is : facetFilters.not;
@@ -154,21 +175,39 @@
               }
             }
 
-            // Extension terms goes first
-            if (isPredefined) {
-              display[typeKey][uiFacetKey].is.unshift({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
+            if (( _.has(facetFilters,'is'))) {
+              // Extension terms goes first
+              if (isPredefined) {
+                display[typeKey][uiFacetKey].is.unshift({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              } else {
+                display[typeKey][uiFacetKey].is.push({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              }
             } else {
-              display[typeKey][uiFacetKey].is.push({
-                term: uiTerm,
-                controlTerm: term,
-                controlFacet: facetKey,
-                controlType: typeKey
-              });
+              if (isPredefined) {
+                display[typeKey][uiFacetKey].not.unshift({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              } else {
+                display[typeKey][uiFacetKey].not.push({
+                  term: uiTerm,
+                  controlTerm: term,
+                  controlFacet: facetKey,
+                  controlType: typeKey
+                });
+              }
             }
 
           });

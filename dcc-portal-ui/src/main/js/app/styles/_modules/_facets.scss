@@ -92,12 +92,12 @@
 }
 
 .t_facets__facet__terms__active__term__bar {
-  background: lighten($green, 43);
+  background: lighten($cyan, 43);
 }
 
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
-  background: lighten($green, 48);
+  background: lighten($cyan, 48);
 }
 
 .t_facets__facet__terms__inactive__term__count,
@@ -146,10 +146,10 @@
 }
 
 .t_facets__facet__terms__active__term__label {
-  background: lighten($green, 60);
-  color: $black;
+  background: lighten($cyan, 50);
+  color: $cyan;
   &:hover {
-    background: lighten($green, 55);
+    background: lighten($cyan, 47);
   }
 }
 

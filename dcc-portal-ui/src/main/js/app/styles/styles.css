@@ -2713,13 +2713,13 @@ aside .t_tabs__tab {
 
 /* line 94, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__bar {
-  background: #8cff75;
+  background: #bbe7f7;
 }
 
 /* line 98, _modules/_facets.scss */
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
-  background: #a2ff8f;
+  background: #d1effa;
 }
 
 /* line 104, _modules/_facets.scss */
@@ -2777,12 +2777,12 @@ aside .t_tabs__tab {
 
 /* line 148, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label {
-  background: #d5ffcc;
-  color: black;
+  background: #daf2fb;
+  color: #1693c0;
 }
 /* line 151, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label:hover {
-  background: #bfffb3;
+  background: #cdedf9;
 }
 
 /* line 156, _modules/_facets.scss */
