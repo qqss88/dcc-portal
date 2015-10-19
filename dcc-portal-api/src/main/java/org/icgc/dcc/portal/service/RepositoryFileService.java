@@ -633,8 +633,7 @@ public class RepositoryFileService {
 
   @SneakyThrows
   @NonNull
-  private static void generateAwsTextFile(OutputStream buffer,
-      Multimap<String, Map<String, String>> downloadUrlGroups) {
+  private static void generateAwsTextFile(OutputStream buffer, Multimap<String, Map<String, String>> downloadUrlGroups) {
     @Cleanup
     val tsv = createTsv(buffer);
     tsv.writeHeader(AWS_TSV_HEADERS);

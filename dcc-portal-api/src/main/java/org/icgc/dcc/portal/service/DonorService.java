@@ -29,6 +29,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 
+import org.dcc.portal.pql.meta.DonorCentricTypeModel.Fields;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -125,7 +126,12 @@ public class DonorService {
 
   @NonNull
   public Map<String, TermFacet> projectDonorCount(List<String> geneIds, List<Query> queries) {
-    val facetName = "projectId";
+    // The queries should be derived from geneIds, which means they are of the same size and order.
+    checkState(geneIds.size() == queries.size(),
+        "The number of gene IDs ({}) does not match the number of queries.",
+        geneIds);
+
+    val facetName = Fields.PROJECT_ID;
     val result = ImmutableMap.<String, TermFacet> builder();
 
     val response = donorRepository.projectDonorCount(queries, facetName);

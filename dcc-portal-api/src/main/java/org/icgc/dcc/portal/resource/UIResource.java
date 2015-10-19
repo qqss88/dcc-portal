@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Doubles.tryParse;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
@@ -126,7 +125,6 @@ public class UIResource {
       @ApiParam(value = "Gene ID. Multiple IDs can be entered as ENSG00000155657,ENSG00000141510", required = true) @PathParam("geneIds") IdsParam geneIds,
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
       ) {
-    val sortField = "id";
     val geneFilterJson = "{gene:{id:{is:[\"%s\"]}}}";
     val userFilter = filters.get();
 
@@ -135,12 +133,7 @@ public class UIResource {
       final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, gene));
       final ObjectNode filterNode = merge(userFilter, geneFilter.get());
 
-      return Query.builder()
-          .filters(filterNode)
-          .sort(sortField)
-          .order(DEFAULT_ORDER)
-          .fields(emptyList())
-          .size(0)
+      return Query.builder().filters(filterNode)
           .build();
     }).collect(toImmutableList());
 
