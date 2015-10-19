@@ -428,18 +428,12 @@ public class RepositoryFileRepository {
   // Special aggregation to get unique donor count for each repository
   private static TermFacet convertRepoDonorAggregation(List<Bucket> buckets) {
     val terms = buckets.stream().map(bucket -> {
-      // FIXME
-        log.info("convertRepoDonorAggregation aggs are: '{}'.", bucket.getAggregations());
+      final int size = bucketSize(
+          getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
+          CustomAggregationFields.DONOR);
 
-        final int size = bucketSize(
-            getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
-            CustomAggregationFields.DONOR);
-
-        return new Term(bucket.getKey(), Long.valueOf(size));
-      }).collect(toImmutableList());
-
-    // FIXME
-    log.info("convertRepoDonorAggregation terms are: '{}'.", terms);
+      return new Term(bucket.getKey(), Long.valueOf(size));
+    }).collect(toImmutableList());
 
     // Total does not have any meaning in this context because a donor can cross repositories
     val total = -1L;
@@ -562,7 +556,7 @@ public class RepositoryFileRepository {
   }
 
   private static FilteredQueryBuilder buildFileSetIdQuery(String setId) {
-    val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.FILE_UUID), FILE_IDS, UUID.fromString(setId));
+    val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.ID), FILE_IDS, UUID.fromString(setId));
     return new FilteredQueryBuilder(MATCH_ALL_QUERY, lookupFilter);
   }
 

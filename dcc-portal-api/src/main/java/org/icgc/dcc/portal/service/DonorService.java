@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toMap;
 import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -20,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
@@ -47,7 +49,6 @@ import org.supercsv.io.CsvMapWriter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -127,29 +128,26 @@ public class DonorService {
   @NonNull
   public Map<String, TermFacet> projectDonorCount(List<String> geneIds, List<Query> queries) {
     // The queries should be derived from geneIds, which means they are of the same size and order.
-    checkState(geneIds.size() == queries.size(),
+    val geneCount = geneIds.size();
+    checkState(geneCount == queries.size(),
         "The number of gene IDs ({}) does not match the number of queries.",
         geneIds);
 
     val facetName = Fields.PROJECT_ID;
-    val result = ImmutableMap.<String, TermFacet> builder();
-
     val response = donorRepository.projectDonorCount(queries, facetName);
     val responseItems = response.getResponses();
     val responseItemCount = responseItems.length;
 
-    checkState(responseItemCount == geneIds.size(),
+    checkState(geneCount == responseItemCount,
         "The number of gene IDs ({}) does not match the number of responses in a multi-search.",
         geneIds);
 
-    for (int i = 0; i < responseItemCount; i++) {
-      val item = responseItems[i].getResponse();
-      val facet = aggregationsConverter.convert(item.getAggregations()).get(facetName);
-
-      result.put(geneIds.get(i), facet);
-    }
-
-    return result.build();
+    return IntStream.range(0, geneCount).boxed().collect(toMap(
+        i -> geneIds.get(i),
+        i -> {
+          final SearchResponse item = responseItems[i].getResponse();
+          return aggregationsConverter.convert(item.getAggregations()).get(facetName);
+        }));
   }
 
   public long count(Query query) {

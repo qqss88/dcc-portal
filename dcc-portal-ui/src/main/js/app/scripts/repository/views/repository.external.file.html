@@ -1,7 +1,7 @@
-<div class="h1-wrap" ng-init="info = fileCtrlr.fileInfo">
+<div class="h1-wrap" ng-init="info = fileCtrlr.fileInfo; fileId = fileCtrlr.stringOrDefault (info.id)">
   <h1 data-ui-scrollfix=79 style="text-transform: none">
     <span class="t_badge t_badge__file"></span>
-    <span ng-bind="info.fileId" />
+    <span ng-bind="fileId" />
   </h1>
 </div>
 <div data-scroll-spy="">
@@ -31,11 +31,11 @@
     <table class="table table-info fixed-width">
       <tr>
         <th>File ID</th>
-        <td ng-bind="fileCtrlr.stringOrDefault (info.fileId)" />
+        <td ng-bind="fileId" />
       </tr>
       <tr>
-        <th>File UUID</th>
-        <td ng-bind="fileCtrlr.stringOrDefault (info.id)" />
+        <th>File Object ID</th>
+        <td ng-bind="fileCtrlr.stringOrDefault (info.objectId)" />
       </tr>
       <tr ng-init="accessType = info.access">
         <th>Access</th>

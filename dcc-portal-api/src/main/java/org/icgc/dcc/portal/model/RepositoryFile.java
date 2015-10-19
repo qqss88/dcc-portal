@@ -52,8 +52,8 @@ public class RepositoryFile {
   @ApiModelProperty(value = "ID of a repository file")
   String id;
 
-  @ApiModelProperty(value = "Short ID of a repository file")
-  String fileId;
+  @ApiModelProperty(value = "Object ID of a repository file")
+  String objectId;
 
   @ApiModelProperty(value = "Access type of a repository file")
   String access;

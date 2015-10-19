@@ -2,12 +2,12 @@
   "index":{  
     "_index":"test-icgc-repository",
     "_type":"file-centric",
-    "_id":"9154037d-ba72-5977-9f50-b575eaee5979"
+    "_id":"FI49283"
   }
 }
 {
-  "id": "9154037d-ba72-5977-9f50-b575eaee5979",
-  "file_id": "FI49283",
+  "id": "FI49283",
+  "object_id": "9154037d-ba72-5977-9f50-b575eaee5979",
   "study": [
     "PCAWG"
   ],
@@ -80,12 +80,12 @@
   "index":{  
     "_index":"test-icgc-repository",
     "_type":"file-centric",
-    "_id":"2489e862-9fa7-5e06-9429-c80fdd4b3118"
+    "_id":"FI226785"
   }
 }
 {
-  "id": "2489e862-9fa7-5e06-9429-c80fdd4b3118",
-  "file_id": "FI226785",
+  "id": "FI226785",
+  "object_id": "2489e862-9fa7-5e06-9429-c80fdd4b3118",
   "study": "PCAWG",
   "access": "open",
   "data_bundle": {

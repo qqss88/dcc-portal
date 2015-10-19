@@ -44,8 +44,6 @@ public class RepositoryFileTypeModel extends TypeModel {
   private static final String TYPE_PREFIX = MY_TYPE.getPrefix();
   private static final String TERMS_LOOKUP_DONOR_IDS = "donor-ids";
 
-  // private static final String TERMS_LOOKUP_FILE_IDS = "file-ids";
-
   public RepositoryFileTypeModel() {
     super(Fields.MAPPINGS, INTERNAL_ALIASES, PUBLIC_FIELDS, INCLUDE_FIELDS);
   }
@@ -147,6 +145,7 @@ public class RepositoryFileTypeModel extends TypeModel {
 
     public final String ID = "id";
     public final String FILE_UUID = "fileUuid";
+    public final String FILE_OBJECT_ID = "fileObjectId";
     public final String FILE_ID = "fileId";
     public final String ACCESS = "access";
     public final String STUDY = "study";
@@ -215,7 +214,6 @@ public class RepositoryFileTypeModel extends TypeModel {
           string("tcga_participant_barcode", TCGA_PARTICIPANT_BARCODE));
     }
 
-    // TODO: temp definitions?
     private ObjectFieldModel analysisMethod() {
       return object("analysis_method", ANALYSIS_METHOD,
           string("analysis_type", ANALYSIS_TYPE),
@@ -231,8 +229,8 @@ public class RepositoryFileTypeModel extends TypeModel {
 
     // Main mapping
     private final List<FieldModel> MAPPINGS = ImmutableList.<FieldModel> builder()
-        .add(string("id", ImmutableSet.of(ID, FILE_UUID)))
-        .add(string("file_id", FILE_ID))
+        .add(string("id", ImmutableSet.of(ID, FILE_ID)))
+        .add(string("object_id", ImmutableSet.of(FILE_OBJECT_ID, FILE_UUID)))
         .add(string("access", ACCESS))
         .add(string("study", STUDY))
         .add(string(REPO_FILE_ENTITY_SET_ID, REPO_FILE_ENTITY_SET_ID))
