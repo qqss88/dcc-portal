@@ -127,7 +127,8 @@
                     <th data-sortable data-type="files" data-field="projectCode">Project</th>
 
                     <th>Study</th>
-                    <th>Data type</th>
+                    <th data-sortable data-type="files" data-field="dataType">Data Type</th>
+                    <th data-sortable data-type="files" data-field="experimentalStrategy">Strategy</th>
                     <th>Format</th>
 
                     <!-- <th data-sortable data-type="files" data-field="fileSize">Size</th> -->
@@ -168,6 +169,7 @@
                     </td>
 
                     <td>{{ row.dataCategorization.dataType }}</td>
+                    <td>{{ row.dataCategorization.experimentalStrategy }}</td>
 
                     <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
 

@@ -139,6 +139,7 @@ public class RepositoryFileService {
       .put(Fields.PROJECT_CODE, "Project")
       .put(Fields.STUDY, "Study")
       .put(Fields.DATA_TYPE, "Data Type")
+      .put(Fields.EXPERIMENTAL_STRATEGY, "Experimental Strategy")
       .put(Fields.FILE_FORMAT, "Format")
       .put(Fields.FILE_SIZE, "Size (bytes)")
       .build();
