@@ -1445,7 +1445,40 @@ header #brand img {
   margin-left: 1rem;
   margin-bottom: 1rem;
 }
-/* line 23, _sections/_home.scss */
+/* line 25, _sections/_home.scss */
+#home-page section.icgc-cloud-home {
+  margin: 0 0;
+  padding-top: 0;
+  position: relative;
+  opacity: 0.88;
+  transition: opacity 0.2s ease-in;
+}
+/* line 32, _sections/_home.scss */
+#home-page section.icgc-cloud-home img {
+  max-width: 274px;
+  display: block;
+}
+/* line 37, _sections/_home.scss */
+#home-page section.icgc-cloud-home .cloud-caption {
+  position: absolute;
+  width: 274px;
+  background: #000;
+  opacity: 0.80;
+  bottom: 12px;
+  padding: 0.2rem 0.8rem;
+  color: #fff;
+  font-weight: lighter;
+  font-size: 1.2rem;
+}
+/* line 51, _sections/_home.scss */
+#home-page section.icgc-cloud-home:hover {
+  opacity: 1;
+}
+/* line 54, _sections/_home.scss */
+#home-page section.icgc-cloud-home:hover .cloud-caption {
+  opacity: 0.9;
+}
+/* line 62, _sections/_home.scss */
 #home-page .divider {
   border-top: 1px solid #eee;
   margin-top: 2rem;
@@ -4183,9 +4216,7 @@ td {
   width: 100%;
   display: block;
   margin: 0 auto;
-  border: solid 1px #e6e6e6;
   padding: 0.5rem 0.5rem;
-  box-shadow: 5px 5px 5px #e6e6e6;
 }
 /* line 32, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a .screen-caption {
