@@ -18,7 +18,7 @@
 (function () {
   'use strict';
 
-  var DEVELOPER_LOCAL_MODE = false;
+  var DEVELOPER_LOCAL_MODE = window.$ICGC_DEVELOP_ENV === true ? true : false;
   /*
    * IMPORTANT: Comment out the following line (DEVELOPER_LOCAL_MODE = true) in production!
    * Uncomment it if you are running this using 'grunt server'

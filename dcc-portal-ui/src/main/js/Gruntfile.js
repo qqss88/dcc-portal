@@ -24,7 +24,8 @@ module.exports = function (grunt) {
   // configurable paths
   var yeomanConfig = {
     app: 'app',
-    dist: '../../../target/app'
+    dist: '../../../target/app',
+    developIndexFile: 'develop/html/index.develop.html'
   };
 
 // The purpose of the provider is to ensure that the appropriate configs 
@@ -215,6 +216,7 @@ function ICGCGruntConfigProvider() {
           '<%= yeoman.app %>/{,*/}*.html',
           '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
           '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
+          '<%= yeoman.app %>/develop/scripts/{,*/}*.js',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
@@ -231,7 +233,8 @@ function ICGCGruntConfigProvider() {
           middleware: function (connect) {
             return [
               modRewrite([
-                '!\\.html|\\images|\\.js|\\.css|\\.png|\\.jpg|\\.woff|\\.ttf|\\.svg /index.html [L]'
+                '!\\.html|\\images|\\.js|\\.css|\\.png|\\.jpg|\\.woff|\\.ttf|\\.svg ' + 
+                '/' + yeomanConfig.developIndexFile + ' [L]'
               ]),
               lrSnippet,
               mountFolder(connect, '.tmp'),
@@ -256,7 +259,8 @@ function ICGCGruntConfigProvider() {
           middleware: function (connect) {
             return [
               modRewrite([
-                '!\\.html|\\images|\\.js|\\.css|\\.png|\\.jpg|\\.woff|\\.ttf|\\.svg /index.html [L]'
+                '!\\.html|\\images|\\.js|\\.css|\\.png|\\.jpg|\\.woff|\\.ttf|\\.svg ' +
+                '/' + yeomanConfig.developIndexFile + ' [L]'
               ]),
               mountFolder(connect, yeomanConfig.dist)
             ];
@@ -309,9 +313,7 @@ function ICGCGruntConfigProvider() {
         relativeAssets: false,
         require: ['compass', 'bootstrap-sass', 'singularitygs', 'singularity-extras']
       },
-      dist: {
-        sassDir: '<%= yeoman.app %>/styles'
-      },
+      dist: {},
       server: {
         options: {
           //debugInfo: true
@@ -447,7 +449,7 @@ function ICGCGruntConfigProvider() {
         'compass'
       ],
       dist: [
-        'compass:dist',
+        //'compass:dist',
         'imagemin',
         'htmlmin'
       ]
@@ -483,6 +485,22 @@ function ICGCGruntConfigProvider() {
           ]
         }
       }
+    },
+    injector: {
+      options: {},
+      dev: {
+        options: {
+          template: '<%= yeoman.app %>/index.html',
+          destFile: '<%= yeoman.app %>/<%= yeoman.developIndexFile %>',
+          relative: false,
+          ignorePath: 'app'
+        },
+        files: [{
+          expand: true,
+          cwd: '<%= yeoman.app %>/develop/scripts',
+          src: ['*.js']
+        }]
+      }
     }
   });
 
@@ -496,6 +514,7 @@ function ICGCGruntConfigProvider() {
 
     grunt.task.run([
       'ICGC-setBuildEnv:development',
+      'injector:dev',
       'clean:server',
       'concurrent:server',
       'connect:livereload',
