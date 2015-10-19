@@ -194,7 +194,7 @@ public class DonorRepository implements Repository {
     val pqlAst = parse(converter.convert(query, DONOR_CENTRIC));
     pqlAst.setFacets(facets(facetName));
 
-    val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder();
+    val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder().setNoFields();
 
     log.debug("projectDonorCountSearch ES query is: '{}'.", result);
     return result;
