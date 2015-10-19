@@ -7,7 +7,7 @@
 			User Guide: ICGC Data Analysis on Amazon
 		</h1>
 	</div>
-	<div data-scroll-spy class="cloud-guide-content">
+	<div data-scroll-spy class="cloud-guide-content icgc-cloud">
 		
 		<aside class="t_side_nav" data-ui-scrollfix="79">
 			<nav>
@@ -38,9 +38,12 @@
 				<h3>Process</h3>
 				
 				<p>The figure below illustrates the overall process and software components involved:</p>
-				<a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
-					<img class="aws-process-diagram" src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
-				</a>
+				<div class="screen-shot">
+					<a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
+						<img src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
+						<i class="icon-external-link screen-caption"></i>
+					</a>
+				</div>
 				<ol>
 					<li><a data-scrollto href="#auth">Authorization</a>: Apply for DACO access if not already approved</li>
 					<li><a data-scrollto href="#auth">Authorization</a>: Upon approval, login to the <em>Data Portal</em></li>
@@ -81,10 +84,19 @@
 				
 				<p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>s3.download</code> scope when you generate your token. </p>
 				
-				&lt;screenshots required&gt;
+					
+				<div class="screen-shot">
+						<img src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
+				</div>
 				
 				<p>You will then need to edit the client configuration file in the storage client to include this token. See the <a <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
 				<p>You can delete and regenerate an access token if you believe that it has been compromised.</p>
+				<div class="screen-shot">
+					<a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/aws/token_manager_screenshot.png" target="_blank">
+						<img src="styles/images/repositories/guides/aws/token_manager_screenshot.png" alt="Token Manager Screenshot" />
+						<i class="icon-external-link screen-caption"></i>
+					</a>
+				</div>
 			</section>
 			<section id="preqs">
 				<h2>Prerequisites</h2>
