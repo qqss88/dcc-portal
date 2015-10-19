@@ -1,5 +1,5 @@
-/*! genome-viewer October 16, 2015 11:08:36 */
-/*! lib October 16, 2015 11:08:33 */
+/*! genome-viewer October 19, 2015 17:13:53 */
+/*! lib October 19, 2015 17:13:50 */
 /*
  * Copyright (c) 2012 Francisco Salavert (ICM-CIPF)
  * Copyright (c) 2012 Ruben Sanchez (ICM-CIPF)
@@ -25800,7 +25800,7 @@ FeatureTemplateAdapter.prototype = {
 
                     request.onload = function() {
                         args.webServiceCallCount--;
-                        if (request.status === 200) {
+                        if (request.status !== 400) {
                             var response;
                             try {
                                 response = JSON.parse(this.response);
