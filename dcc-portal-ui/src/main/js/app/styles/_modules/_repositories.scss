@@ -1,6 +1,14 @@
 /** Used for the ICGC in the cloud user repository sub site **/
 $button-colour: #1693c0;
 
+.cloud-home {
+    .icgc-workflow-diagram {
+        width: 60%;
+        display: block;
+        margin: 1rem auto;
+    }
+}
+
 .cloud-repository-container {
     
     .repo-header {
