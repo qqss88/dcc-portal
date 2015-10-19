@@ -115,6 +115,10 @@
 .icon-caret-down:before { content: '\e83e'; } /* '' */
 .icon-pilcrow:before { content: '\e83f'; } /* '' */
 .icon-caret-left:before { content: '\e840'; } /* '' */
+.icon-box:before { content: '\e841'; } /* '' */
+.icon-book-open:before { content: '\e842'; } /* '' */
+.icon-toggle-off:before { content: '\e843'; } /* '' */
+.icon-toggle-on:before { content: '\e844'; } /* '' */
 
 /*
    Animation example, for spinners
