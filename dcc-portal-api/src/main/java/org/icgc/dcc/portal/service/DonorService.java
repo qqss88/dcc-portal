@@ -1,5 +1,6 @@
 package org.icgc.dcc.portal.service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
@@ -23,6 +24,11 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
+import lombok.Cleanup;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.icgc.dcc.portal.model.Donor;
@@ -30,6 +36,7 @@ import org.icgc.dcc.portal.model.Donors;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Pagination;
 import org.icgc.dcc.portal.model.Query;
+import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.pql.convert.AggregationToFacetConverter;
 import org.icgc.dcc.portal.repository.DonorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +46,14 @@ import org.supercsv.io.CsvMapWriter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
-import lombok.Cleanup;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
 public class DonorService {
 
   private final DonorRepository donorRepository;
@@ -118,6 +121,29 @@ public class DonorService {
 
   public Donors findAllCentric(Query query) {
     return buildDonors(donorRepository.findAllCentric(query), query);
+  }
+
+  @NonNull
+  public Map<String, TermFacet> projectDonorCount(List<String> geneIds, List<Query> queries) {
+    val facetName = "projectId";
+    val result = ImmutableMap.<String, TermFacet> builder();
+
+    val response = donorRepository.projectDonorCount(queries, facetName);
+    val responseItems = response.getResponses();
+    val responseItemCount = responseItems.length;
+
+    checkState(responseItemCount == geneIds.size(),
+        "The number of gene IDs ({}) does not match the number of responses in a multi-search.",
+        geneIds);
+
+    for (int i = 0; i < responseItemCount; i++) {
+      val item = responseItems[i].getResponse();
+      val facet = aggregationsConverter.convert(item.getAggregations()).get(facetName);
+
+      result.put(geneIds.get(i), facet);
+    }
+
+    return result.build();
   }
 
   public long count(Query query) {

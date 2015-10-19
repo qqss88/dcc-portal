@@ -29,7 +29,9 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -177,6 +179,7 @@ public class DonorRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
     val pql = converter.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
@@ -184,6 +187,29 @@ public class DonorRepository implements Repository {
     log.info("Request of Donor findAllCentric is: '{}'.", request);
     val response = request.getRequestBuilder().execute().actionGet();
 
+    return response;
+  }
+
+  private SearchRequestBuilder projectDonorCountSearch(Query query, String facetName) {
+    val pqlAst = parse(converter.convert(query, DONOR_CENTRIC));
+    pqlAst.setFacets(facets(facetName));
+
+    val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder();
+
+    log.debug("projectDonorCountSearch ES query is: '{}'.", result);
+    return result;
+  }
+
+  @NonNull
+  public MultiSearchResponse projectDonorCount(List<Query> queries, String facetName) {
+    val multiSearch = client.prepareMultiSearch();
+
+    queries.stream().forEach(query ->
+        multiSearch.add(projectDonorCountSearch(query, facetName)));
+
+    val response = multiSearch.execute().actionGet();
+
+    log.debug("projectDonorCount ES response is: '{}'.", response);
     return response;
   }
 

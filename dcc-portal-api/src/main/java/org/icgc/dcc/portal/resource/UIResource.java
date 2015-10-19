@@ -21,11 +21,10 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Doubles.tryParse;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.util.JsonUtils.merge;
@@ -33,7 +32,6 @@ import static org.icgc.dcc.portal.util.JsonUtils.merge;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +44,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.FieldsParam;
@@ -75,16 +78,11 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.yammer.dropwizard.jersey.params.IntParam;
 import com.yammer.metrics.annotation.Timed;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 @Component
 @Slf4j
 @Path("/v1/ui")
 @Produces(APPLICATION_JSON)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired) )
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UIResource {
 
   protected static final String DEFAULT_FILTERS = "{}";
@@ -105,7 +103,6 @@ public class UIResource {
       @ApiParam(value = "The donor to search for ") @QueryParam("donorId") String donorId,
       @ApiParam(value = "From") @QueryParam("from") @DefaultValue("1") IntParam from,
       @ApiParam(value = "Size") @QueryParam("size") @DefaultValue("10") IntParam size) {
-
 
     val query =
         Query.builder().filters(filters.get()).sort("_score").from(from.get()).size(size.get()).order(DEFAULT_ORDER)
@@ -130,28 +127,24 @@ public class UIResource {
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
       ) {
     val sortField = "id";
-    val facetName = "projectId";
     val geneFilterJson = "{gene:{id:{is:[\"%s\"]}}}";
     val userFilter = filters.get();
-    val includes = ImmutableList.of("facets");
 
-    val result = geneIds.get().parallelStream().collect(toMap(identity(), geneId -> {
-      final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, geneId));
+    val genes = geneIds.get();
+    val queries = genes.stream().map(gene -> {
+      final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, gene));
       final ObjectNode filterNode = merge(userFilter, geneFilter.get());
-      final Query query = Query.builder()
+
+      return Query.builder()
           .filters(filterNode)
           .sort(sortField)
           .order(DEFAULT_ORDER)
           .fields(emptyList())
-          .includes(includes)
           .size(0)
           .build();
+    }).collect(toImmutableList());
 
-      return donorService.findAllCentric(query).getFacets().get(facetName);
-    }));
-
-    log.debug("geneProjectDonorCounts {}", result);
-    return result;
+    return donorService.projectDonorCount(genes, queries);
   }
 
   @Path("/file")
