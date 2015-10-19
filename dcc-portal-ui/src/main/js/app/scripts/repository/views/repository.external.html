@@ -117,7 +117,7 @@
             <table class="table table-selectable">
                 <thead>
                     <th>&nbsp;</th>
-                    <th data-sortable data-type="files" data-field="fileName"
+                    <th data-sortable data-type="files" data-field="id"
                       data-active="true" data-reversed="true">File ID</th>
 
                     <th data-sortable data-type="files" data-field="donorId">Donor</th>
@@ -142,10 +142,10 @@
                     </td>
 
                     <td style="max-width:28rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
-                       <i class="{{row.access === 'open' ? 'icon-lock-open' : 'icon-lock'}}" />
-                       <a href="/repository/external/files/{{row.id}}"
+                       <i class="{{ row.access === 'open' ? 'icon-lock-open' : 'icon-lock' }}" />
+                       <a href="/repository/external/files/{{ row.id }}"
                         tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}">
-                        {{ row.fileId }}
+                        {{ row.id }}
                        </a>
                     </td>
 

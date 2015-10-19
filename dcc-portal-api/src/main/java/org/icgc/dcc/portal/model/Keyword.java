@@ -106,7 +106,7 @@ public class Keyword {
   List<String> projectCode;
 
   @ApiModelProperty(required = false)
-  String fileId;
+  String fileObjectId;
 
   @ApiModelProperty(required = false)
   List<String> tcgaParticipantBarcode;
@@ -151,7 +151,7 @@ public class Keyword {
     source = getString(fieldMap.get(fields.get("source")));
 
     // File
-    fileId = getString(fieldMap.get(fields.get("file_id")));
+    fileObjectId = getString(fieldMap.get(fields.get("object_id")));
     dataType = getString(fieldMap.get(fields.get("data_type")));
 
     fileName = (List<String>) fieldMap.get(fields.get("file_name"));

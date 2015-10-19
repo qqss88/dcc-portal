@@ -453,7 +453,7 @@ public class IndexModel {
       // File Repo
       .put("file_name", "file_name")
       .put("donor_id", "donor_id")
-      .put("file_id", "file_id")
+      .put("object_id", "object_id")
       .put("data_type", "data_type")
       .put("project_code", "project_code")
 
