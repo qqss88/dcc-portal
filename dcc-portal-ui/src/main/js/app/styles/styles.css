@@ -2713,13 +2713,13 @@ aside .t_tabs__tab {
 
 /* line 94, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__bar {
-  background: #bbe7f7;
+  background: #8cff75;
 }
 
 /* line 98, _modules/_facets.scss */
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
-  background: #d1effa;
+  background: #a2ff8f;
 }
 
 /* line 104, _modules/_facets.scss */
@@ -2777,30 +2777,46 @@ aside .t_tabs__tab {
 
 /* line 148, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label {
-  background: #daf2fb;
-  color: #1693c0;
+  background: #d5ffcc;
+  color: black;
 }
 /* line 151, _modules/_facets.scss */
 .t_facets__facet__terms__active__term__label:hover {
-  background: #cdedf9;
+  background: #bfffb3;
 }
 
 /* line 156, _modules/_facets.scss */
+.t_facets__facet__not {
+  background: #f5d0c6;
+  color: black;
+}
+/* line 159, _modules/_facets.scss */
+.t_facets__facet__not:hover {
+  background: #f2beb1;
+}
+
+/* line 164, _modules/_facets.scss */
+.t_facets__facet__not__bar {
+  background: #eeab9b;
+  color: black;
+}
+
+/* line 169, _modules/_facets.scss */
 .t_impact_high {
   color: #dc502e;
 }
 
-/* line 159, _modules/_facets.scss */
+/* line 172, _modules/_facets.scss */
 .t_impact_medium {
   color: #ce6503;
 }
 
-/* line 162, _modules/_facets.scss */
+/* line 175, _modules/_facets.scss */
 .t_impact_low {
   color: #1a9900;
 }
 
-/* line 165, _modules/_facets.scss */
+/* line 178, _modules/_facets.scss */
 .t_impact_unknown {
   color: #666666;
 }
@@ -2808,26 +2824,26 @@ aside .t_tabs__tab {
 /************************************************
  *   Input
  ***********************************************/
-/* line 172, _modules/_facets.scss */
+/* line 185, _modules/_facets.scss */
 .t_facets__facet__input {
   padding: .5rem;
   position: relative;
 }
-/* line 175, _modules/_facets.scss */
+/* line 188, _modules/_facets.scss */
 .t_facets__facet__input input {
   padding-right: 1.5rem;
 }
-/* line 179, _modules/_facets.scss */
+/* line 192, _modules/_facets.scss */
 .t_facets__facet__input .t_suggest_flyout {
   margin-top: .25rem;
 }
-/* line 183, _modules/_facets.scss */
+/* line 196, _modules/_facets.scss */
 .t_facets__facet__input .t_suggest__embedded__right {
   top: .9rem;
   right: 1rem;
 }
 
-/* line 189, _modules/_facets.scss */
+/* line 202, _modules/_facets.scss */
 .t_facets__facet__button {
   padding-right: .5rem;
   position: relative;
@@ -2837,7 +2853,7 @@ aside .t_tabs__tab {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 199, _modules/_facets.scss */
+  /* line 212, _modules/_facets.scss */
   .t_facets__facet__terms__inactive__term__label,
   .t_facets__facet__terms__active__term__label__text {
     line-height: 2.2rem;

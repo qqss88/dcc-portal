@@ -92,12 +92,12 @@
 }
 
 .t_facets__facet__terms__active__term__bar {
-  background: lighten($cyan, 43);
+  background: lighten($green, 43);
 }
 
 .table .t_facets__facet__terms__active__term__bar {
   max-height: 2.2rem;
-  background: lighten($cyan, 48);
+  background: lighten($green, 48);
 }
 
 .t_facets__facet__terms__inactive__term__count,
@@ -146,11 +146,24 @@
 }
 
 .t_facets__facet__terms__active__term__label {
-  background: lighten($cyan, 50);
-  color: $cyan;
+  background: lighten($green, 60);
+  color: $black;
   &:hover {
-    background: lighten($cyan, 47);
+    background: lighten($green, 55);
   }
+}
+
+.t_facets__facet__not {
+  background: lighten($red, 35%);
+  color: $black;
+  &:hover {
+    background: lighten($red, 30%);
+  }
+}
+
+.t_facets__facet__not__bar {
+  background: lighten($red, 25%);
+  color: $black;
 }
 
 .t_impact_high {

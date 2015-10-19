@@ -55,10 +55,10 @@
         terms: terms
       });
 
-      $scope.isNot = Facets.isNot({
-        type: $scope.type,
-        facet: facetName
-      });
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
 
       $scope.actives = actives;
       addTranslations (actives, facetName, missingText);
@@ -76,10 +76,11 @@
       if ($scope.facet) {
         splitTerms();
       }
-      $scope.isNot = Facets.isNot({
-        type: $scope.type,
-        facet: $scope.facetName
-      });
+      
+      var params = {type: $scope.type,facet: $scope.facetName};
+      $scope.isNot = Facets.isNot(params);
+      $scope.activeClass = Facets.isNot(params) ? 
+        't_facets__facet__not' : '';
       $scope.displayLimit = $scope.expanded === true? $scope.inactives.length : 5;
     }
 

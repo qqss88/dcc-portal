@@ -280,7 +280,7 @@
 
       filters = LocationService.filters();
       
-      return _.has(filters, params['type']+'.'+params['facet']+'.not');
+      return _.has(filters, params.type+'.'+params.facet+'.not');
     }
 
     /*
