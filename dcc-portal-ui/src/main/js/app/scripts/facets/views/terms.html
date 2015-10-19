@@ -8,12 +8,12 @@
             <span data-ng-click="removeFacet()" class="t_tools__tool"><i class="icon-undo"></i></span>
         </span>
         <span class="pull-right t_facets__facet__is__not" 
-            data-ng-if="!isNot"
+            data-ng-if="type !== 'file' && !isNot"
             data-ng-click="notFacet(facet)">
             <i style='' class="icon-check-empty"></i> IS NOT
         </span>
         <span class="pull-right t_facets__facet__is__not" 
-            data-ng-if="isNot"
+            data-ng-if="type !== 'file' && isNot"
             data-ng-click="isFacet(facet)">
             <i style='' class="icon-ok"></i> IS NOT
         </span>

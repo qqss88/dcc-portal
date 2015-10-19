@@ -68,7 +68,12 @@
 
       return _.contains (_.get (filter, 'controlFacet', ''), Extensions.ENTITY);
     };
-
+    
+    $scope.isNot = function(terms) {
+      var currentFilters = LocationService.filters();
+      var isNot = _.has(currentFilters, terms.type +'.'+terms.facet+'.not');
+      return isNot;
+    };
 
     function refresh() {
       var currentFilters = LocationService.filters();
