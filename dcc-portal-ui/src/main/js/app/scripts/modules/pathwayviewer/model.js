@@ -20,7 +20,10 @@
       }else {
         return [];
       }
-    }
+    };
+
+    // Is this a disease pathway?
+    var isDisease = (parsedXml.find('Process')[0].attributes.isDisease && parsedXml.find('Process')[0].attributes.isDisease.nodeValue === 'true');
 
     // Parse all the nodes first
     var xmlNodes = parsedXml.find('Nodes')[0].children;
@@ -55,9 +58,10 @@
         },
         type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
-        crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
-        lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ) ? true : false,
-        grayed: (overlaid && (overlaidList.indexOf(attrs.id.nodeValue) < 0)) ? true : false,
+        crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
+        lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ),
+        grayed: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) < 0)),
+        overlaid: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) >= 0) && lofList.indexOf(attrs.id.nodeValue) < 0 ),
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {
@@ -93,8 +97,14 @@
       
       var schemaClass = this.attributes.schemaClass;
       var failedReaction = false;
-      if (!(typeof schemaClass === 'undefined') && schemaClass.nodeValue === 'FailedReaction') {
+      if ((!(typeof schemaClass === 'undefined') && schemaClass.nodeValue === 'FailedReaction') || 
+        (this.attributes.lineColor && (this.attributes.lineColor.nodeValue === '255 0 0' || this.attributes.lineColor.nodeValue === '255 51 51'))) {
         failedReaction = true;
+      }
+      
+      var grayed = false;
+      if (isDisease && this.attributes.lineColor && this.attributes.lineColor.nodeValue === '255 51 51') {
+        grayed = true;
       }
 
       $(this).find('input,output,catalyst,activator,inhibitor').each(function(){
@@ -110,6 +120,7 @@
         base: base,
         nodes: nodes,
         failedReaction: failedReaction,
+        grayed: grayed,
         reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
         id: this.attributes.id.nodeValue,
         type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',

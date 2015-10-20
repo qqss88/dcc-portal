@@ -76,7 +76,7 @@
       id: 'grayscale'		
     }).append('feColorMatrix').attr({		
       type: 'matrix',		
-      values: '0.4666 0.3333 0.3333 0 0 0.3333 0.4666 0.3333 0 0 0.3333 0.3333 0.4666 0 0 0 0 0 1 0'		
+      values: '0.5066 0.3333 0.3333 0 0 0.3333 0.5066 0.3333 0 0 0.3333 0.3333 0.5066 0 0 0 0 0 1 0'		
     });
     
     markers.forEach(function (elem) {
@@ -318,6 +318,10 @@
           return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr>' + 
             '<td class="RenderableNodeTextCell lof-cell" valign="middle">'+
             d.text.content+'</td></tr></table>';
+        } else if (d.overlaid && !d.crossed) {
+          return '<table class="RenderableNodeTextCell"><tr><td valign="middle">' + 
+          '<span class="span__'+ d.type +'">'+
+            d.text.content+'</span></td></tr></table>';
         } else {
           return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
             d.text.content+'</td></tr></table>';
@@ -358,6 +362,13 @@
           }
           return classes;
         },
+      'filter': function (d) {
+        if (d.grayed) {
+          return (typeof config.urlPath==='undefined') ? '' : 'url(\''+config.urlPath+'#grayscale\')';
+        } else {
+          return '';
+        }
+      },
       'x1':function(d){return d.x1;},
       'y1':function(d){return d.y1;},
       'x2':function(d){return d.x2;},

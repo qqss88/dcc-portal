@@ -3882,36 +3882,48 @@ td {
 }
 
 /* line 24, _modules/_pathwayviewer.scss */
+.span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode {
+  background: #b5f9a7;
+  padding: 2px;
+}
+
+/* line 29, _modules/_pathwayviewer.scss */
 .RenderableComplex, .RenderableEntitySet {
   fill: #b6e2ff;
   stroke-width: 0.5px;
   stroke: #166aa2;
 }
 
-/* line 30, _modules/_pathwayviewer.scss */
+/* line 35, _modules/_pathwayviewer.scss */
+.span__RenderableComplex, .span__RenderableEntitySet {
+  background: #b6e2ff;
+  padding: 2px;
+}
+
+/* line 40, _modules/_pathwayviewer.scss */
 .RenderableEntitySet {
   stroke-width: 1.5px;
 }
 
-/* line 34, _modules/_pathwayviewer.scss */
+/* line 44, _modules/_pathwayviewer.scss */
 .ProcessNode {
   stroke: #1a9900;
   stroke-width: 2px;
   fill: #ebffe7;
 }
 
-/* line 40, _modules/_pathwayviewer.scss */
+/* line 50, _modules/_pathwayviewer.scss */
 .RenderableGene {
   stroke: #333;
   fill: none;
 }
 
-/* line 45, _modules/_pathwayviewer.scss */
+/* line 55, _modules/_pathwayviewer.scss */
 .RenderableText {
   font-size: 7px;
 }
 
-/* line 49, _modules/_pathwayviewer.scss */
+/* line 59, _modules/_pathwayviewer.scss */
 .RenderableCompartment {
   fill: #fbf7f4;
   stroke: #ffc38b;
@@ -3919,41 +3931,41 @@ td {
   fill-opacity: 0.25;
 }
 
-/* line 56, _modules/_pathwayviewer.scss */
+/* line 66, _modules/_pathwayviewer.scss */
 .RenderableStroke {
   stroke-width: 1px;
 }
 
-/* line 60, _modules/_pathwayviewer.scss */
+/* line 70, _modules/_pathwayviewer.scss */
 .renderableinteraction {
   stroke-width: 1.5px;
 }
 
-/* line 64, _modules/_pathwayviewer.scss */
+/* line 74, _modules/_pathwayviewer.scss */
 .entitysetandmemberlink, .entitysetandentitysetlink {
   stroke-dasharray: 5 7;
   stroke-width: 0.5px;
 }
 
-/* line 69, _modules/_pathwayviewer.scss */
+/* line 79, _modules/_pathwayviewer.scss */
 .Note {
   stroke: gray;
   fill: #ebffe7;
 }
 
-/* line 74, _modules/_pathwayviewer.scss */
+/* line 84, _modules/_pathwayviewer.scss */
 .pathway-sub-reaction-line {
   stroke-width: 2px;
   stroke: navy;
 }
 
-/* line 80, _modules/_pathwayviewer.scss */
+/* line 90, _modules/_pathwayviewer.scss */
 .RenderableMutated {
   fill: white;
 }
 
 /** ESSENTIALS **/
-/* line 86, _modules/_pathwayviewer.scss */
+/* line 96, _modules/_pathwayviewer.scss */
 .RenderableNodeText .RenderableNodeTextCell {
   text-align: center;
   height: 100%;
@@ -3961,35 +3973,35 @@ td {
   color: #444;
 }
 
-/* line 93, _modules/_pathwayviewer.scss */
+/* line 103, _modules/_pathwayviewer.scss */
 .RenderableCompartmentText {
   font-size: 9px;
   line-height: 1.1em;
 }
 
-/* line 99, _modules/_pathwayviewer.scss */
+/* line 109, _modules/_pathwayviewer.scss */
 .RenderableNodeText td {
   padding: none;
 }
 
-/* line 103, _modules/_pathwayviewer.scss */
+/* line 113, _modules/_pathwayviewer.scss */
 .RenderableNodeText tbody {
   line-height: normal;
 }
 
-/* line 107, _modules/_pathwayviewer.scss */
+/* line 117, _modules/_pathwayviewer.scss */
 .RenderableBorder {
   fill: none;
 }
 
 /** CONTAINER AND INFO BAR STYLES **/
-/* line 113, _modules/_pathwayviewer.scss */
+/* line 123, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
   margin: 0;
   background: none;
 }
 
-/* line 118, _modules/_pathwayviewer.scss */
+/* line 128, _modules/_pathwayviewer.scss */
 #pathway-viewer-mini {
   border: 1px solid #b3b3b3;
   position: relative;
@@ -3998,7 +4010,7 @@ td {
   background-color: white;
 }
 
-/* line 126, _modules/_pathwayviewer.scss */
+/* line 136, _modules/_pathwayviewer.scss */
 .pathway-legend, .pathway-info {
   position: absolute;
   top: 0;
@@ -4010,13 +4022,13 @@ td {
   background: white;
 }
 
-/* line 137, _modules/_pathwayviewer.scss */
+/* line 147, _modules/_pathwayviewer.scss */
 .pathway-info {
   width: 30%;
   opacity: 0.95;
 }
 
-/* line 142, _modules/_pathwayviewer.scss */
+/* line 152, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
@@ -4024,12 +4036,12 @@ td {
   overflow-y: auto;
 }
 
-/* line 149, _modules/_pathwayviewer.scss */
+/* line 159, _modules/_pathwayviewer.scss */
 .pathway-gene-table {
   margin: 0 auto;
 }
 
-/* line 153, _modules/_pathwayviewer.scss */
+/* line 163, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4037,22 +4049,22 @@ td {
   text-align: center !important;
 }
 
-/* line 160, _modules/_pathwayviewer.scss */
+/* line 170, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 164, _modules/_pathwayviewer.scss */
+/* line 174, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 168, _modules/_pathwayviewer.scss */
+/* line 178, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   margin-top: 0.5em;
 }
 
-/* line 172, _modules/_pathwayviewer.scss */
+/* line 182, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4064,44 +4076,44 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 183, _modules/_pathwayviewer.scss */
+/* line 193, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 189, _modules/_pathwayviewer.scss */
+/* line 199, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
 }
 
-/* line 195, _modules/_pathwayviewer.scss */
+/* line 205, _modules/_pathwayviewer.scss */
 .failed-reaction {
   stroke: red;
   stroke-width: 2px;
 }
 
-/* line 200, _modules/_pathwayviewer.scss */
+/* line 210, _modules/_pathwayviewer.scss */
 .lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
   background-color: #b5f9a7;
   border: 2px dotted red;
 }
 
-/* line 205, _modules/_pathwayviewer.scss */
+/* line 215, _modules/_pathwayviewer.scss */
 .lof-RenderableComplex, .lof-RenderableEntitySet {
   background-color: #b6e2ff;
   border: 2px dotted red;
 }
 
-/* line 210, _modules/_pathwayviewer.scss */
+/* line 220, _modules/_pathwayviewer.scss */
 .lof-cell {
   padding: 0px;
 }
 
-/* line 214, _modules/_pathwayviewer.scss */
+/* line 224, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4120,7 +4132,7 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 232, _modules/_pathwayviewer.scss */
+/* line 242, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
@@ -4131,7 +4143,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 242, _modules/_pathwayviewer.scss */
+/* line 252, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }

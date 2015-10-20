@@ -21,10 +21,20 @@ $compartmentBorder:#ffc38b;
   stroke:$primaryNodeBorder;
 }
 
+.span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode{
+  background: $primaryNodeColor;
+  padding: 2px;
+}
+
 .RenderableComplex, .RenderableEntitySet{
   fill:$secondaryNodeColor;
   stroke-width:$lineThicknessLight;
   stroke: $secondaryNodeBorder;
+}
+
+.span__RenderableComplex, .span__RenderableEntitySet{
+  background:$secondaryNodeColor;
+  padding:2px;
 }
 
 .RenderableEntitySet{
