@@ -1,6 +1,7 @@
 /** Used for the ICGC in the cloud user repository sub site **/
 $button-colour: #1693c0;
 
+/** ICGC Cloud Home Page **/
 .cloud-home {
     .icgc-workflow-diagram {
         width: 60%;
@@ -9,6 +10,7 @@ $button-colour: #1693c0;
     }
 }
 
+/* shared classes */
 .icgc-cloud {
     .screen-shot {
         position: relative;
@@ -57,6 +59,7 @@ $button-colour: #1693c0;
     }
 }
 
+/* Repo Stats Pages (w/stacked bar chart page) */
 .cloud-repository-container {
     
     .repo-header {
@@ -103,6 +106,15 @@ $button-colour: #1693c0;
             border-color: lighten($button-colour, 5%);
         }
     }
+    
+    .icons-container {
+        padding-top:0.5rem; padding-bottom:0.5rem;
+        
+        i {
+            font-size: 1.25rem;
+        }
+    }
+    
 }
 /** Used for the ICGC in the cloud user guide sub site **/
 .cloud-guide-content {
