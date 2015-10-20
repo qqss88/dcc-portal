@@ -87,8 +87,7 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
     final static String REPO_TYPE_FOR_XML = "GNOS";
     final static List<String> CONTENT_FOR_XML = ImmutableList.of(
         "c08b8fec-78a3-4f95-b472-953a5d0b46ef",
-        // "https://gtrepo-dkfz.annailabs.com/cghub/data/analysis/download/c08b8fec-78a3-4f95-b472-953a5d0b46ef",
-        "https://gtrepo-dkfz.annailabs.com/cghub/data/analysis/download/ffe2ed5dedcf27e52280c16db5eb2d04.bam",
+        "https://gtrepo-dkfz.annailabs.com/cghub/data/analysis/download/c08b8fec-78a3-4f95-b472-953a5d0b46ef",
         "ffe2ed5dedcf27e52280c16db5eb2d04.bam",
         "94359085765",
         "ffe2ed5dedcf27e52280c16db5eb2d04");
