@@ -24,6 +24,9 @@ $compartmentBorder:#ffc38b;
 .span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode{
   background: $primaryNodeColor;
   padding: 2px;
+  &:hover {
+    background: lighten($primaryNodeColor,10%);
+  }
 }
 
 .RenderableComplex, .RenderableEntitySet{
@@ -35,6 +38,9 @@ $compartmentBorder:#ffc38b;
 .span__RenderableComplex, .span__RenderableEntitySet{
   background:$secondaryNodeColor;
   padding:2px;
+    &:hover {
+    background: lighten($secondaryNodeColor,10%);
+  }
 }
 
 .RenderableEntitySet{

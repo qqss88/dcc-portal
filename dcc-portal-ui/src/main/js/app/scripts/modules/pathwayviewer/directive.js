@@ -99,15 +99,16 @@
         var renderinfo = function(node,mutationCount,isMutated){
           $('.pathway-info-svg').html('');
           
-          var padding = 7;
+          var padding = 2;
           var infoSvg = d3.select('.pathway-info-svg').append('svg')
-              .attr('viewBox', '0 0 ' +150+ ' ' +50)
+              .attr('viewBox', '0 0 ' +150+ ' ' +70)
               .attr('preserveAspectRatio', 'xMidYMid')
+              .attr('style', 'padding-top:10px')
               .append('g');
           var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
-          node.size={width:100-padding*2,height:50-padding*2};
-          node.position={x:padding+25,y:padding};
+          node.size={width:120-padding*2,height:60-padding*2};
+          node.position={x:padding+15,y:padding};
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
@@ -174,7 +175,7 @@
         setTimeout(function() {
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
-        }, 500);
+        }, 700);
         
         $('.pathway-legend-controller').on('click', function(){
           if(showingLegend){
