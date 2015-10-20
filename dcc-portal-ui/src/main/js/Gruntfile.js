@@ -356,6 +356,9 @@ function ICGCGruntConfigProvider() {
           {
             expand: true,
             cwd: '<%= yeoman.app %>/images',
+            // TODO: looks like imagemin is not processing module image deps
+            // copy is doing this instead -
+            // will research proper way to fix this 
             src: '{,*/}*.{png,jpg,jpeg}',
             dest: '<%= yeoman.dist %>/images'
           }
@@ -414,7 +417,7 @@ function ICGCGruntConfigProvider() {
 
               // 'vendor/scripts/angularjs/*',
               'vendor/styles/genomeviewer/**/*',
-              'styles/images/**/*.{gif,webp,svg,png}',
+              'styles/images/**/*.{gif,webp,svg,png,jpg}',
               'styles/fonts/*',
               'views/**/*',
               'scripts/**/*.html',

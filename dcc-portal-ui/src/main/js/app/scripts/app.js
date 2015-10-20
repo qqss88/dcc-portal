@@ -18,24 +18,22 @@
 (function () {
   'use strict';
 
-  var DEVELOPER_LOCAL_MODE = window.$ICGC_DEVELOP_ENV === true ? true : false;
-  /*
-   * IMPORTANT: Comment out the following line (DEVELOPER_LOCAL_MODE = true) in production!
-   * Uncomment it if you are running this using 'grunt server'
-   */
-  // DEVELOPER_LOCAL_MODE = true;
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Define global namespace for the icgc app to be used by third parties as well as in the console.
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (typeof window.$icgc === 'undefined') {
-    (function() {
+    (function(devConfig) {
+      var _defaultDevConfiguration = devConfig || {},
+          _defaultDevHost = _defaultDevConfiguration.HOST || 'localhost',
+          _defaultDevPort = _defaultDevConfiguration.API_PORT || '8080',
+          _developerLocalMode = _defaultDevConfiguration.DEVELOPER_LOCAL_MODE === true ? true : false;
 
       // API Base class
       function API(version, localUIDevRun, host, port, context) {
         var _version = version || 1,
-            _host = host || (localUIDevRun === true ? 'localhost' : null),
-            _port =  port || (localUIDevRun === true ? '8080' : null),
+            _host = host || (localUIDevRun === true ? _defaultDevHost : null),
+            _port =  port || (localUIDevRun === true ? _defaultDevPort : null),
             _context = context || '/api',
             _isDebugEnabled = false;
 
@@ -185,9 +183,9 @@
 
      // Singleton global variable used to control the application settings across non-angular
      // libraries as well the the JS console
-     window.$icgcApp = new ICGCApp().setLocalUIRun (DEVELOPER_LOCAL_MODE);
+     window.$icgcApp = new ICGCApp().setLocalUIRun(_developerLocalMode);
 
-    })();
+    })(window.$ICGC_DEV_CONFIG || null);
 
   }
   //////////////////////////////////////////////////////////////////////////
