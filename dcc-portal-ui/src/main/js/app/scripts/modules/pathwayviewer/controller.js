@@ -13,7 +13,7 @@
     strokeColor: 'black',
     highlightColor: 'red',
     subPathwayColor: 'blue',
-    initScaleFactor: 0.95
+    initScaleFactor: 0.90
   };
 
   var ReactomePathway = function (config) {
@@ -115,7 +115,7 @@
     });
     this.rendererUtils = new dcc.RendererUtils();
     
-    this.renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment'}));
+    this.renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment', hasClass:true}));
     this.renderer.renderEdges(this.rendererUtils.generateLines(model));
     this.renderer.renderNodes(_.filter(model.getNodes(),
                                        function(n){return n.type!=='RenderableCompartment';}));

@@ -167,7 +167,7 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          initScaleFactor: 0.95,
+          initScaleFactor: 0.90,
           subPathwayColor: 'navy'
         });
         

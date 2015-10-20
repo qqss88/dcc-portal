@@ -63,6 +63,7 @@
         lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ),
         grayed: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
         overlaid: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) >= 0) && lofList.indexOf(attrs.id.nodeValue) < 0 ),
+        hasClass: attrs.schemaClass ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
         text: {
