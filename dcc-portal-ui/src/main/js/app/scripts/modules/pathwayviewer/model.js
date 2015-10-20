@@ -24,6 +24,7 @@
 
     // Is this a disease pathway?
     var isDisease = (parsedXml.find('Process')[0].attributes.isDisease && parsedXml.find('Process')[0].attributes.isDisease.nodeValue === 'true');
+    var diseaseComponents = checkandReturn(parsedXml.find('diseaseComponents'));
 
     // Parse all the nodes first
     var xmlNodes = parsedXml.find('Nodes')[0].children;
@@ -60,7 +61,7 @@
         id: attrs.id.nodeValue,
         crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
         lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ),
-        grayed: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) < 0)),
+        grayed: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
         overlaid: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) >= 0) && lofList.indexOf(attrs.id.nodeValue) < 0 ),
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
