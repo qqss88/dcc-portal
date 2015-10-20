@@ -51,7 +51,18 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 				views: {
 					'repos': {
 						templateUrl: 'scripts/repositories/views/repos/repos.html',
-						controller: 'RepositoriesController as repositoryCtrl'
+						controller: 'RepositoriesController as repositoryCtrl',
+						resolve: {
+							// Use the explicit dependency injection
+							// declaration so the code doesn't blow up
+							// after its minified/uglified.
+							repoMap: ['ExternalRepoService', function(ExternalRepoService) {
+								// Force a refresh of the repo map from the server
+								// before instantianting the controller...
+								console.log('Force Repo Map Refresh...');
+								return ExternalRepoService.refreshRepoMap();
+							}]
+						}
 					},
 					'bodyContent@ICGCcloud.repositories': {
 						templateUrl: function ($stateParams) {

@@ -24,6 +24,8 @@
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (typeof window.$icgc === 'undefined') {
     (function(devConfig) {
+      
+      // used to configure dev profile for the API class
       var _defaultDevConfiguration = devConfig || {},
           _defaultDevHost = _defaultDevConfiguration.HOST || 'localhost',
           _defaultDevPort = _defaultDevConfiguration.API_PORT || '8080',

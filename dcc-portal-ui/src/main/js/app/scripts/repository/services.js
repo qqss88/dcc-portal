@@ -25,32 +25,69 @@
   var module = angular.module('icgc.repository.services', []);
 
   module.service ('ExternalRepoService', function ($window, Restangular, API) {
-    function getRepoMap () {
+    
+    // Initial values until the call to getRepoMap() returns.
+    var _srv = this,
+        _repoCodeToName = {
+          'pcawg-chicago-tcga': 'PCAWG - Chicago (TCGA)',
+          'cghub': 'CGHub - Santa Cruz',
+          'pcawg-heidelberg': 'PCAWG - Heidelberg',
+          'pcawg-tokyo': 'PCAWG - Tokyo',
+          'aws-virginia': 'AWS - Virginia',
+          'pcawg-barcelona': 'PCAWG - Barcelona',
+          'pcawg-cghub': 'PCAWG - Santa Cruz',
+          'pcawg-chicago-icgc': 'PCAWG - Chicago (ICGC)',
+          'pcawg-london': 'PCAWG - London',
+          'tcga': 'TCGA DCC - Bethesda'
+        },
+        _repoNameToCode = _.invert (_repoCodeToName),
+        _repoMapRefreshPromise = null;
+    
+    
+    // Private functions....
+    function _init() {
+      // Force a refresh
+      _srv.refreshRepoMap();
+      /////////////////////////// 
+    }
+    
+    function _getRepoMap() {
       return Restangular.one (REPO_API_PATH).one('repo_map').get ({});
     }
+    
+    function _concatRepoCodes (repoNames) {
+      return _.map (repoNames, function (name) {
+        return _.get (_repoNameToCode, name, name);
+      }).join();
+    }
 
-    // Initial values until the call to getRepoMap() returns.
-    var repoCodeToName = {
-      'pcawg-chicago-tcga': 'PCAWG - Chicago (TCGA)',
-      'cghub': 'CGHub - Santa Cruz',
-      'pcawg-heidelberg': 'PCAWG - Heidelberg',
-      'pcawg-tokyo': 'PCAWG - Tokyo',
-      'aws-virginia': 'AWS - Virginia',
-      'pcawg-barcelona': 'PCAWG - Barcelona',
-      'pcawg-cghub': 'PCAWG - Santa Cruz',
-      'pcawg-chicago-icgc': 'PCAWG - Chicago (ICGC)',
-      'pcawg-london': 'PCAWG - London',
-      'tcga': 'TCGA DCC - Bethesda'
+     
+    //////////////////////////////////////////////////////////
+    // Public API
+    //////////////////////////////////////////////////////////
+    // We need a way to force the refresh of the Repo Map from the server.
+    // Returning the promise is useful when it's a dependency.
+    _srv.refreshRepoMap = function() {
+      
+      // If a refresh promise has been made in the past return it..
+      if (_repoMapRefreshPromise !== null) {
+        return _repoMapRefreshPromise;
+      }
+      
+      _repoMapRefreshPromise = _getRepoMap();
+      
+      _repoMapRefreshPromise.then(function (restangularMapData) {
+        var repoMapData = restangularMapData.plain();
+        _repoCodeToName = repoMapData;
+        _repoNameToCode = _.invert (repoMapData);
+        _repoMapRefreshPromise = null;
+      });
+      
+      return _repoMapRefreshPromise;
     };
-    var repoNameToCode = _.invert (repoCodeToName);
+    
 
-    getRepoMap().then (function (data) {
-      data = data.plain();
-      repoCodeToName = data;
-      repoNameToCode = _.invert (data);
-    });
-
-    this.getList = function (params) {
+    _srv.getList = function (params) {
       var defaults = {
         size: 10,
         from:1
@@ -58,8 +95,8 @@
       return Restangular.one (REPO_API_PATH).get (angular.extend (defaults, params));
     };
 
-    this.getRepoNameFromCode = function (repoCode) {
-      return _.get (repoCodeToName, repoCode, null);
+    _srv.getRepoNameFromCode = function (repoCode) {
+      return _.get (_repoCodeToName, repoCode, null);
     };
 
     /**
@@ -68,28 +105,23 @@
     // TODO: This is a duplicate function that was organized into
     // the repositories service. Remove this once the dependencies
     // are determined
-    this.getSummary = function (params) {
+    _srv.getSummary = function (params) {
       return Restangular.one (REPO_API_PATH + '/summary').get (params);
     };
 
-    function concatRepoCodes (repoNames) {
-      return _.map (repoNames, function (name) {
-        return _.get (repoNameToCode, name, name);
-      }).join();
-    }
-
-    this.download = function (filters, repos) {
+    
+    _srv.download = function (filters, repos) {
       $window.location.href = API.BASE_URL + '/' + REPO_API_PATH + '/manifest?filters=' +
-        uriString (filters) + '&repositories=' + concatRepoCodes (repos);
+        uriString (filters) + '&repositories=' + _concatRepoCodes (repos);
     };
 
-    this.downloadSelected = function (ids, repos) {
+    _srv.downloadSelected = function (ids, repos) {
       jQuery('<form method="POST" id="fileDownload" action="' +
               API.BASE_URL + '/' + REPO_API_PATH + '/manifest" style="display:none">' +
              _.map (ids, function (id) {
                 return '<input type="hidden" name="fileIds" value="' + id + '"/>';
               }) +
-             '<input type="hidden" name="repositories" value="' + concatRepoCodes (repos) + '"/>' +
+             '<input type="hidden" name="repositories" value="' + _concatRepoCodes (repos) + '"/>' +
              '<input type="submit" value="Submit"/>' +
              '</form>').appendTo('body');
 
@@ -97,18 +129,22 @@
       jQuery('#fileDownload').remove();
     };
 
-    this.export = function (filters) {
+    _srv.export = function (filters) {
       $window.location.href = API.BASE_URL + '/' + REPO_API_PATH +
         '/export?filters=' + uriString (filters);
     };
 
-    this.getMetaData = function() {
+    _srv.getMetaData = function() {
       return Restangular.one (REPO_API_PATH).one('metadata').get ({});
     };
 
-    this.getFileInfo = function (id) {
+    _srv.getFileInfo = function (id) {
       return Restangular.one (REPO_API_PATH, id).get();
     };
+    
+    
+     // Initialize this service
+    _init();
 
   });
 
