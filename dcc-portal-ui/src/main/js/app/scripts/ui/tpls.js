@@ -88,7 +88,7 @@ angular.module('template/pagination.html', []).run(function ($templateCache) {
     '<span ng-if="data.pagination.pages > 1" class="pull-right">' +
     '<div><ul class="pagination">' +
     '<li ng-repeat="page in pages" ng-class="{active: page.active, disabled: page.disabled}">' +
-    '<a ng-click="selectPage(page.number)">{{page.text}}</a></li>' +
+    '<a ng-click="selectPage(page.number)" tooltip="{{:: page.tooltip }}">{{page.text}}</a></li>' +
     '</ul></div>' +
     '</span></div></div>'
   );

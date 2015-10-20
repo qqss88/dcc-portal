@@ -17,6 +17,9 @@
 (function () {
   'use strict';
 
+  var toJson = angular.toJson;
+  var isDefined = angular.isDefined;
+
   var module = angular.module('icgc.facets.helpers', []);
 
   module.factory('Facets', function (LocationService) {
@@ -38,7 +41,7 @@
 
       // Check for required parameters
       ['type', 'facet', 'terms'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp) || !angular.isDefined(params[rp])) {
+        if (!params.hasOwnProperty(rp) || !isDefined(params[rp])) {
           throw new Error('Missing required parameter: ' + rp);
         }
       });
@@ -80,20 +83,19 @@
     /*
      * Remove a Term
      */
-    function removeTerm(params) {
-      var filters, index;
+    function removeTerm (params) {
+      var properties = ['type', 'facet', 'term'];
 
-      // Check for required parameters
-      [ 'type', 'facet', 'term'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
+      if (anyIs (false, propertyValues (params, properties), isDefined)) {
+        // Quits if any of these properties is missing.
+        console.error ("Invalid params passed to Facets.removeTerm: " + toJson (params));
+        return;
+      }
 
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       // TODO make is possible to use 'is' or 'not'
-      index = filters[params.type][params.facet].is.indexOf(params.term);
+      var index = filters[params.type][params.facet].is.indexOf(params.term);
       filters[params.type][params.facet].is.splice(index, 1);
 
       if (!filters[params.type][params.facet].is.length) {
@@ -101,6 +103,16 @@
       } else {
         LocationService.setFilters(filters);
       }
+    }
+
+    function propertyValues (obj, properties) {
+      return _(obj).pick (properties)
+        .values().value();
+    }
+
+    function anyIs (truthy, collection, predicate) {
+      return _.some (collection,
+        truthy ? predicate : _.negate (predicate));
     }
 
     /*

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
 import static org.icgc.dcc.portal.repository.DonorRepository.DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.repository.DonorRepository.FILE_DONOR_ID_SEARCH_FIELDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
@@ -21,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.IntStream;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
@@ -142,7 +142,7 @@ public class DonorService {
         "The number of gene IDs ({}) does not match the number of responses in a multi-search.",
         geneIds);
 
-    return IntStream.range(0, geneCount).boxed().collect(toMap(
+    return range(0, geneCount).boxed().collect(toMap(
         i -> geneIds.get(i),
         i -> {
           final SearchResponse item = responseItems[i].getResponse();
