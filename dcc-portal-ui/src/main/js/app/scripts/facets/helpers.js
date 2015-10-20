@@ -37,16 +37,11 @@
      * TODO Set Terms
      */
     function setTerms(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      ['type', 'facet', 'terms'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp) || !isDefined(params[rp])) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
@@ -59,16 +54,11 @@
      * Add a Term
      */
     function addTerm(params) {
-      var filters;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
+      }
 
-      // Check for required parameters
-      [ 'type', 'facet', 'term'].forEach(function (rp) {
-        if (!params.hasOwnProperty(rp)) {
-          throw new Error('Missing required parameter: ' + rp);
-        }
-      });
-
-      filters = LocationService.filters();
+      var filters = LocationService.filters();
 
       ensurePath(filters, params);
 
@@ -84,12 +74,8 @@
      * Remove a Term
      */
     function removeTerm (params) {
-      var properties = ['type', 'facet', 'term'];
-
-      if (anyIs (false, propertyValues (params, properties), isDefined)) {
-        // Quits if any of these properties is missing.
-        console.error ("Invalid params passed to Facets.removeTerm: " + toJson (params));
-        return;
+      if (invalidParams (params)) {
+        throw new Error ('Missing property in params: ' + toJson (params));
       }
 
       var filters = LocationService.filters();
@@ -103,6 +89,12 @@
       } else {
         LocationService.setFilters(filters);
       }
+    }
+
+    function invalidParams (params) {
+      var properties = ['type', 'facet', 'term'];
+
+      return anyIs (false, propertyValues (params, properties), isDefined);
     }
 
     function propertyValues (obj, properties) {
