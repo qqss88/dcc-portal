@@ -564,13 +564,14 @@ public class RepositoryFileService {
   @NonNull
   private static void generateTarEntry(TarArchiveOutputStream tar, List<Map<String, String>> allFileInfoOfOneRepo,
       String repoCode, String repoType, Date timestamp) {
-    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry -> buildDownloadUrl(entry));
+    val isGnos = RepoTypes.isGnos(repoType);
+    val downloadUrlGroups = Multimaps.index(allFileInfoOfOneRepo, entry ->
+        isGnos ? buildGnosDownloadUrl(entry) : buildDownloadUrl(entry));
 
-    // A buffer to hold all the file content before writing it to the tar archive
     @Cleanup
     val buffer = new ByteArrayOutputStream(BUFFER_SIZE);
 
-    if (RepoTypes.isGnos(repoType)) {
+    if (isGnos) {
       generateXmlFile(buffer, downloadUrlGroups, timestamp);
     } else if (RepoTypes.isAws(repoType)) {
       generateAwsTextFile(buffer, downloadUrlGroups);
@@ -650,21 +651,6 @@ public class RepositoryFileService {
     tsv.flush();
   }
 
-  @UtilityClass
-  private class XmlTags {
-
-    final String ROOT = "ResultSet";
-    final String RECORD = "Result";
-    final String RECORD_ID = "analysis_id";
-    final String RECORD_URI = "analysis_data_uri";
-    final String FILES = "files";
-    final String FILE = "file";
-    final String FILE_NAME = "filename";
-    final String FILE_SIZE = "filesize";
-    final String CHECK_SUM = "checksum";
-
-  }
-
   private static String getFileExtensionOf(String repoType) {
     return RepoTypes.isGnos(repoType) ? "xml" : "txt";
   }
@@ -721,8 +707,30 @@ public class RepositoryFileService {
         valueMap.get(Fields.FILE_NAME));
   }
 
+  private static String buildGnosDownloadUrl(@NonNull Map<String, String> valueMap) {
+    return buildDownloadUrl(
+        valueMap.get(Fields.REPO_BASE_URL),
+        valueMap.get(Fields.REPO_DATA_PATH),
+        valueMap.get(Fields.DATA_BUNDLE_ID));
+  }
+
   private static String formatToUtc(@NonNull Date timestamp) {
     return formatUTC(timestamp, DATE_FORMAT_PATTERN);
+  }
+
+  @UtilityClass
+  private class XmlTags {
+
+    final String ROOT = "ResultSet";
+    final String RECORD = "Result";
+    final String RECORD_ID = "analysis_id";
+    final String RECORD_URI = "analysis_data_uri";
+    final String FILES = "files";
+    final String FILE = "file";
+    final String FILE_NAME = "filename";
+    final String FILE_SIZE = "filesize";
+    final String CHECK_SUM = "checksum";
+
   }
 
   @NonNull

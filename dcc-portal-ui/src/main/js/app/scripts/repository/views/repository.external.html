@@ -7,7 +7,7 @@
           data-proxy-type="file"
           data-proxy-facet-name="id"
           data-label="File"
-          data-placeholder="Enter file name, file ID" ></li>
+          data-placeholder="Enter file ID, name, or object ID" ></li>
       <li data-tags-facet
           data-type="file-donor"
           data-facet-name="id"
@@ -142,7 +142,7 @@
                      <i class="{{ ExternalRepoController.isSelected (row) ? 'icon-check' : 'icon-check-empty' }}" />
                     </td>
 
-                    <td style="max-width:28rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
+                    <td style="min-width: 6rem; max-width: 8rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{ row.access === 'open' ? 'icon-lock-open' : 'icon-lock' }}" />
                        <a href="/repository/external/files/{{ row.id }}"
                         tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}">
@@ -173,7 +173,7 @@
 
                     <td>{{ ExternalRepoController.fileFormats (row.fileCopies) }}</td>
 
-                    <td>{{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}</td>
+                    <td style="min-width: 6rem;">{{ ExternalRepoController.fileAverageSize (row.fileCopies) | bytes }}</td>
 
                   </tr>
                 </tbody>
