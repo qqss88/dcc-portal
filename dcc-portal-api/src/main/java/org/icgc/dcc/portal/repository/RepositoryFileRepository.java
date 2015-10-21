@@ -835,7 +835,7 @@ public class RepositoryFileRepository {
     val repoCode = toRawFieldName(Fields.REPO_CODE);
     val repoNameSubAgg = terms(repoName).field(repoName);
     val repoCodeSubAgg = nestedAgg(repoCode, EsFields.FILE_COPIES,
-        terms(repoCode).field(repoCode).subAggregation(repoNameSubAgg));
+        terms(repoCode).size(100).field(repoCode).subAggregation(repoNameSubAgg));
     val response = searchFileCentric("repoCodeNameMapping", request -> request
         .setSearchType(COUNT)
         .addAggregation(repoCodeSubAgg));
