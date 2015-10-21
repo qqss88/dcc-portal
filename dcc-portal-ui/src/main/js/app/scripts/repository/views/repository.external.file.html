@@ -160,7 +160,7 @@
             </a>
 
             <span ng-if="showMetaData"
-            ng-init="metaDataUrl = fileCtrlr.buildUrl (fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, info.dataBundle.dataBundleId)">
+            ng-init="metaDataUrl = fileCtrlr.buildMetaDataUrl (fileCopy, info)">
               <br>
               <a target="_blank" href="{{ metaDataUrl }}" tooltip="Show Metadata" title="{{ metaDataUrl }}">
                 <i class="icon-external-link" />Metadata

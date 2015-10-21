@@ -302,10 +302,27 @@
       return toUppercaseString (test) === toUppercaseString (expected);
     }
 
+    function isS3 (repoType) {
+      return equalsIgnoringCase (repoType, 'S3');
+    }
+
+    function isGnos (repoType) {
+      return equalsIgnoringCase (repoType, 'GNOS');
+    }
+
     // Public functions
     this.buildUrl = function (baseUrl, dataPath, entityId) {
       // Removes any opening and closing slash in all parts then concatenates.
       return _.map ([baseUrl, dataPath, entityId], removeBookendingSlash)
+        .join (slash);
+    };
+
+    this.buildMetaDataUrl = function (fileCopy, fileInfo) {
+      var parts = isS3 (fileCopy.repoType) ?
+        [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath] :
+        [fileCopy.repoBaseUrl, fileCopy.repoMetadataPath, fileInfo.dataBundle.dataBundleId];
+
+      return _.map (parts, removeBookendingSlash)
         .join (slash);
     };
 
@@ -321,7 +338,7 @@
     };
 
     this.shouldShowMetaData = function (repoType) {
-      return equalsIgnoringCase (repoType, 'GNOS') || equalsIgnoringCase (repoType, 'S3');
+      return isGnos (repoType) || isS3 (repoType);
     };
 
     this.translateDataType = function (dataType) {
