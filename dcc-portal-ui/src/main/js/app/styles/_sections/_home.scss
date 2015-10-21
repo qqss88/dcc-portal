@@ -24,45 +24,17 @@
     
     .icgc-cloud-home {
       margin-right: 0;
-      padding-top: 0;
       
       .icgc-container {
-        
-       
-        
         margin: 0 0;
-        padding-top: 0;
         position:relative;
-        opacity: 0.88;
-        transition: opacity 0.2s ease-in;
-        width: 274px;
+        transition: opacity 0.2s ease-in;      
+        width: 320px;
         
         img { 
-            max-width: 274px;
+            width: 100%;
             display: block;
         } 
-        
-        .cloud-caption {
-          position: absolute;
-          width: 274px;
-          background: #000;
-          opacity: 0.80;
-          bottom: 0px;
-          padding: 0.2rem 0.8rem;
-          color: #fff;
-          font-weight: lighter;
-          font-size: 1.2rem;
-          
-          
-        
-        }
-        &:hover {
-          opacity: 1;
-          
-          .cloud-caption {
-            opacity: 0.9;
-          }
-        }
       }  
     }
 
