@@ -11,7 +11,7 @@
       {id: 'frameshift_variant', label: 'Frameshift'},
       {id: 'missense_variant', label: 'Missense'},
       {id: 'start_lost', label: 'Start Lost'},
-      {id: 'initiator_codon_variant', label: 'Initiator Condon',},
+      {id: 'initiator_codon_variant', label: 'Initiator Codon'},
       {id: 'stop_gained', label: 'Stop Gained'},
       {id: 'stop_lost', label: 'Stop Lost'},
       {id: 'exon_loss_variant', label: 'Exon Loss'},
