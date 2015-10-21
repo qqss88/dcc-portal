@@ -1448,43 +1448,20 @@ header #brand img {
 /* line 25, _sections/_home.scss */
 #home-page .icgc-cloud-home {
   margin-right: 0;
-  padding-top: 0;
 }
-/* line 29, _sections/_home.scss */
+/* line 28, _sections/_home.scss */
 #home-page .icgc-cloud-home .icgc-container {
   margin: 0 0;
-  padding-top: 0;
   position: relative;
-  opacity: 0.88;
   transition: opacity 0.2s ease-in;
-  width: 274px;
+  width: 320px;
 }
-/* line 40, _sections/_home.scss */
+/* line 34, _sections/_home.scss */
 #home-page .icgc-cloud-home .icgc-container img {
-  max-width: 274px;
+  width: 100%;
   display: block;
 }
-/* line 45, _sections/_home.scss */
-#home-page .icgc-cloud-home .icgc-container .cloud-caption {
-  position: absolute;
-  width: 274px;
-  background: #000;
-  opacity: 0.80;
-  bottom: 0px;
-  padding: 0.2rem 0.8rem;
-  color: #fff;
-  font-weight: lighter;
-  font-size: 1.2rem;
-}
-/* line 59, _sections/_home.scss */
-#home-page .icgc-cloud-home .icgc-container:hover {
-  opacity: 1;
-}
-/* line 62, _sections/_home.scss */
-#home-page .icgc-cloud-home .icgc-container:hover .cloud-caption {
-  opacity: 0.9;
-}
-/* line 70, _sections/_home.scss */
+/* line 42, _sections/_home.scss */
 #home-page .divider {
   border-top: 1px solid #eee;
   margin-top: 2rem;
