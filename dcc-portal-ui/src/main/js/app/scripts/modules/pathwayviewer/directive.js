@@ -104,12 +104,12 @@
           var infoSvg = d3.select('.pathway-info-svg').append('svg')
               .attr('viewBox', '0 0 ' +150+ ' ' +70)
               .attr('preserveAspectRatio', 'xMidYMid')
-              .attr('style', 'padding-top:10px')
+              .attr('style', 'padding-top:20px')
               .append('g');
           var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
           node.size={width:120-padding*2,height:60-padding*2};
-          node.position={x:padding+15,y:padding};
+          node.position={x:padding+15,y:padding+10};
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
