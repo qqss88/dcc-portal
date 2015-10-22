@@ -353,6 +353,7 @@
     edges = _.sortBy(edges,function(n){return n.marked?1:0;});
 
     var isStartMarker = function(type){return _.contains(['FlowLine','RenderableInteraction'],type);};
+    var isLink = function(type) { return _.contains(['EntitySetAndMemberLink', 'EntitySetAndEntitySetLink'],type);};
 
     svg.selectAll('line').data(edges).enter().append('line').attr({
       'class':function(d){
@@ -376,11 +377,11 @@
       'stroke': config.strokeColor
     }).attr({
       'marker-start':function(d){
-        return d.marked && isStartMarker(d.marker)?
+        return d.marked && isStartMarker(d.marker) && !isLink(d.type)?
           "url('"+config.urlPath+'#'+d.marker+"')":"";
       },
       'marker-end':function(d){
-        return d.marked && !isStartMarker(d.marker)?
+        return d.marked && !isStartMarker(d.marker) && !isLink(d.type)?
           "url('"+config.urlPath+'#'+d.marker+"')":"";
       }
     });

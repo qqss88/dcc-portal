@@ -99,6 +99,14 @@ $compartmentBorder:#ffc38b;
 
 /** ESSENTIALS **/
 
+.EntitySetAndMemberLink {
+  stroke-dasharray: 5 7;
+}
+
+.EntitySetAndEntitySetLink {
+  stroke-dasharray: 5 7;
+}
+
 .RenderableNodeText .RenderableNodeTextCell{
   text-align: center;
   height: 100%;
