@@ -18,31 +18,57 @@
 (function () {
   'use strict';
 	
-	var module = angular.module('icgc.pathways', []);
+	var module = angular.module('icgc.pathways', ['icgc.enrichment.directives']);
 	
 	module.config(function($stateProvider) {
 		$stateProvider.state('pathways', {
-			url: '/pathways/:id',
+			url: '/pathways/:entityID',
 			templateUrl: '/scripts/modules/pathwayviewer/views/pathways.html',
-			controller: 'PathwaysController'
+			controller: 'PathwaysController',
+			resolve: {
+                enrichmentData: ['$q', '$stateParams', 'Restangular',
+
+                function($q, $stateParams, Restangular) {
+                    var entityID = $stateParams.entityID,
+                        deferred = $q.defer();
+
+                    Restangular.one('analysis/enrichment', entityID).get()
+                        .then(function(rectangularEnrichmentData) {
+                            deferred.resolve(rectangularEnrichmentData.plain());       
+						},
+						function(response) {
+							deferred.reject(response);
+						}
+						);          
+
+                    return deferred.promise;
+                }]
+            }
 		});
 	});
 	
-	module.controller('PathwaysController', function($scope, Page, Restangular, $stateParams) {
-		Page.stopWork();
-		Page.setPage('entity');
-		Page.setTitle('Pathway Viewer');		
-
-		$scope.pathways = [];
+	module.controller('PathwaysController', function($scope, Page, enrichmentData) {
+				
 		
-		function getPathways(id) {
-			Restangular.one('analysis').one('enrichment').one(id).get().then(function(response){
-				console.log(response.results);
-				$scope.pathways = response.results;
-			});
+		
+		
+		function _init() {
+			Page.stopWork();
+			Page.setPage('entity');
+			Page.setTitle('Pathway Viewer');
+			console.log(enrichmentData.results);
+			$scope.pathways = enrichmentData.results;
+			$scope.analysis = {
+						getData: function() {
+							return enrichmentData;
+						},
+						getContext: function() {
+							return 'pathways';
+						}
+			};
 		}
 		
-		getPathways($stateParams.id);
+		_init();
 		
 	});
 })();
