@@ -74,12 +74,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
@@ -135,6 +129,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
+
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -322,11 +322,11 @@ public class RepositoryFileRepository {
   @UtilityClass
   private class CustomAggregationFields {
 
-    private final String DONOR = "donor";
-    private final String FILE_SIZE = "fileSize";
-    private final String REPO_SIZE = "repositorySizes";
-    private final String REPO_NAME = "repositoryNamesFiltered";
-    private final String REPO_DONOR_COUNT = "repositoryDonorCount";
+    public final String DONOR = "donor";
+    public final String FILE_SIZE = "fileSize";
+    public final String REPO_SIZE = "repositorySizes";
+    public final String REPO_NAME = "repositoryNamesFiltered";
+    public final String REPO_DONOR_COUNT = "repositoryDonorCount";
 
   }
 
@@ -339,10 +339,10 @@ public class RepositoryFileRepository {
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
 
       // FIXME - tentative implementation!!!
-      val subAgg = isNestedField(facet) ? (facet.equals(Fields.FILE_FORMAT) ?
-          addNestedSubAggregationsForFileFormat(filterAgg, facet, rawFieldName, TYPE_MODEL.getNestedPath(facet)) :
-          addNestedSubAggregations(filterAgg, facet, rawFieldName, TYPE_MODEL.getNestedPath(facet))) :
-          addSubAggregations(filterAgg, facet, rawFieldName);
+      val subAgg =
+          isNestedField(facet) ? (facet.equals(Fields.FILE_FORMAT) ? addNestedSubAggregationsForFileFormat(filterAgg,
+              facet, rawFieldName, TYPE_MODEL.getNestedPath(facet)) : addNestedSubAggregations(filterAgg, facet,
+                  rawFieldName, TYPE_MODEL.getNestedPath(facet))) : addSubAggregations(filterAgg, facet, rawFieldName);
 
       result.add(global(facet).subAggregation(subAgg));
     }
@@ -653,9 +653,9 @@ public class RepositoryFileRepository {
           .setQuery(new FilteredQueryBuilder(MATCH_ALL_QUERY, filters));
       // .setPostFilter(filters);
 
-        aggs(queryFilter).stream().forEach(
-            agg -> request.addAggregation(agg));
-      });
+      aggs(queryFilter).stream().forEach(
+          agg -> request.addAggregation(agg));
+    });
 
     log.debug("findAll() - ES response is: '{}'.", response);
     return response;
@@ -799,10 +799,10 @@ public class RepositoryFileRepository {
   public Map<String, Long> getSummary(Query query) {
     val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
         terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
-        .subAggregation(
-            terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
-        .subAggregation(
-            terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
+            .subAggregation(
+                terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
+            .subAggregation(
+                terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
 
     val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryFields.FILE);
 

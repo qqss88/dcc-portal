@@ -16,43 +16,39 @@
  */
 
 (function () {
-	'use strict';
-	
-	var module = angular.module('icgc.software', []);
-	
-	module.config(function ($stateProvider) {
-		
-		$stateProvider.state('software', {
-			url: '/software',
-			templateUrl: 'scripts/software/views/software.html',
-			controller: 'SoftwareController'
-		});
-	});
-	
-	module.controller('SoftwareController', function($scope, Page) {
-		Page.stopWork();
-    Page.setPage('entity');
-    Page.setTitle('Software Downloads');
-		
-		jQuery.get('api/v1/ui/artifacts/dcc-storage-client', function(v) {
-			var $versions = jQuery('#versions');
-			for (var i = 0; i < v.length && i <= 4; i++) {
-				
-				var row = '<tr><td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' +
-					v[i].version+'">'+v[i].version+'</a></td>' +
-					'<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'">' +
-						'dcc-storage-client-' + v[i].version + '-dist.tar.gz </td>' +
-					'<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'/md5">' +
-						'dcc-storage-client-' + v[i].version + '-dist.tar.gz.md5 </td>' +	
-					'<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'/asc">' +
-						'dcc-storage-client-' + v[i].version + '-dist.tar.gz.asc </td>' +	
-					'</tr>';
-					
-					
-				$versions.append(row);
-			}
-		});
-		
-	});
-	
+   'use strict';
+
+   var module = angular.module('icgc.software', []);
+
+   module.config(function ($stateProvider) {
+
+      $stateProvider.state('software', {
+         url: '/software',
+         templateUrl: 'scripts/software/views/software.html',
+         controller: 'SoftwareController'
+      });
+   });
+
+   module.controller('SoftwareController', function($scope, Page) {
+      Page.stopWork();
+      Page.setPage('entity');
+      Page.setTitle('Software Downloads');
+
+      jQuery.get('api/v1/ui/artifacts/dcc-storage-client', function(v) {
+         var $versions = jQuery('#versions');
+         for (var i = 0; i < v.length && i <= 4; i++) {
+            var row = '<tr><td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' +
+                v[i].version+'">'+v[i].version+'</a></td>' +
+                '<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'">' +
+                'dcc-storage-client-' + v[i].version + '-dist.tar.gz </td>' +
+                '<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'/md5">' +
+                'dcc-storage-client-' + v[i].version + '-dist.tar.gz.md5 </td>' +	
+                '<td><a target="_blank" href="api/v1/ui/software/dcc-storage-client/' + v[i].version+'/asc">' +
+                'dcc-storage-client-' + v[i].version + '-dist.tar.gz.asc </td>' +	
+                '</tr>';
+            $versions.append(row);
+         }
+      });
+
+   });
 })();

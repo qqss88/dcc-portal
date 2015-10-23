@@ -38,11 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import lombok.NonNull;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -59,6 +54,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -128,7 +128,6 @@ public class SearchRepository {
     this.client = client;
   }
 
-  @SuppressWarnings("deprecation")
   @NonNull
   public SearchResponse findAll(Query query, String type) {
     log.info("Requested search type is: '{}'.", type);
@@ -153,9 +152,8 @@ public class SearchRepository {
   private SearchRequestBuilder createSearch(String type) {
     // Determines which index to use as external file repository are in a daily generated index separated
     // from the main icgc-index.
-    return type.equals(Types.FILE) || type.equals(Types.FILE_DONOR) ?
-        client.prepareSearch(REPOSITORY_INDEX_NAME) :
-        client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
+    return type.equals(Types.FILE) || type.equals(Types.FILE_DONOR) ? client
+        .prepareSearch(REPOSITORY_INDEX_NAME) : client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
   }
 
   private static String[] toStringArray(Collection<String> source) {
@@ -163,9 +161,7 @@ public class SearchRepository {
   }
 
   private static String[] getSearchTypes(String type) {
-    val result = TYPE_ID_MAPPINGS.containsKey(type) ?
-        newHashSet(TYPE_ID_MAPPINGS.get(type)) :
-        MULTIPLE_SEARCH_TYPES;
+    val result = TYPE_ID_MAPPINGS.containsKey(type) ? newHashSet(TYPE_ID_MAPPINGS.get(type)) : MULTIPLE_SEARCH_TYPES;
 
     return toStringArray(result);
   }
