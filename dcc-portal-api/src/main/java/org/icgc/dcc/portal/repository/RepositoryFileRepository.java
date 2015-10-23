@@ -76,6 +76,12 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
 import org.dcc.portal.pql.ast.function.SortNode;
@@ -128,12 +134,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
-
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -338,6 +338,7 @@ public class RepositoryFileRepository {
       result.add(subAgg);
     }
 
+    val repoFilters = buildRepoFilters(filters.deepCopy());
     val repoNameFieldName = toRawFieldName(Fields.REPO_NAME);
 
     /*
@@ -345,15 +346,21 @@ public class RepositoryFileRepository {
      * (do not exclude self filtering): repositoryNamesFiltered & repositorySize
      */
     // repositoryNamesFiltered - file count
-    result.add(nestedAggregations(CustomAggregationKeys.REPO_NAME, repoNameFieldName, EsFields.FILE_COPIES));
+    val repoNameAggName = CustomAggregationKeys.REPO_NAME;
+    val filterAgg = filter(repoNameAggName).filter(repoFilters);
+    val repoNameSubAgg = addNestedSubAggregations(filterAgg, repoNameAggName, repoNameFieldName, EsFields.FILE_COPIES);
+    result.add(repoNameSubAgg);
 
     // repositorySize
     val repoSizeAggName = CustomAggregationKeys.REPO_SIZE;
     val repoSizeTermsSubAgg = terms(repoSizeAggName).size(MAX_FACET_TERM_COUNT).field(repoNameFieldName)
         .subAggregation(
             sum(CustomAggregationKeys.FILE_SIZE).field(toRawFieldName(Fields.FILE_SIZE)));
+    val repoSizeSubAgg = filter(repoSizeAggName)
+        .filter(repoFilters)
+        .subAggregation(nestedAgg(repoSizeAggName, EsFields.FILE_COPIES, repoSizeTermsSubAgg));
 
-    result.add(nestedAgg(repoSizeAggName, EsFields.FILE_COPIES, repoSizeTermsSubAgg));
+    result.add(repoSizeSubAgg);
 
     return result;
   }
@@ -425,7 +432,8 @@ public class RepositoryFileRepository {
       val name = agg.getName();
 
       if (name.equals(CustomAggregationKeys.REPO_SIZE)) {
-        val nestedAgg = ((Nested) agg).getAggregations();
+        val filterAgg = ((Filter) agg).getAggregations().get(name);
+        val nestedAgg = ((Nested) filterAgg).getAggregations();
         val buckets = ((Terms) nestedAgg.get(name)).getBuckets();
 
         result.put(CustomAggregationKeys.REPO_SIZE, convertRepoSizeAggregation(buckets));
@@ -436,7 +444,8 @@ public class RepositoryFileRepository {
 
         result.put(name, convertFileFormatAggregation(filterAgg, name));
       } else if (name.equals(CustomAggregationKeys.REPO_NAME)) {
-        val nestedAgg = ((Nested) agg).getAggregations();
+        val filterAgg = ((Filter) agg).getAggregations().get(name);
+        val nestedAgg = ((Nested) filterAgg).getAggregations();
 
         result.put(name, convertNormalAggregation(nestedAgg, name));
       } else {
@@ -658,7 +667,7 @@ public class RepositoryFileRepository {
           .setFrom(query.getFrom())
           .setSize(query.getSize())
           .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
-          .setQuery(filteredQuery(filters));
+          .setPostFilter(filters);
 
       aggs(queryFilter).stream().forEach(
           agg -> request.addAggregation(agg));
