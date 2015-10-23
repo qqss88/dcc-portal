@@ -28,10 +28,13 @@
 		});
 	});
 	
-	module.controller('PathwaysController', function($scope, Page, Restangular, $stateParams) {
+	module.controller('PathwaysController', function($scope, Page, Restangular, $stateParams,
+		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, LocationService) {
 		Page.stopWork();
 		Page.setPage('entity');
 		Page.setTitle('Pathway Viewer');		
+
+		var _ctrl = this;
 
 		$scope.pathways = [];
 		
@@ -42,7 +45,80 @@
 			});
 		}
 		
+		$scope.showPathway = function(id) {			
+			$scope.pathway = {};
+			Restangular.one("genesets").one(id).get().then(function (geneSet) {
+				$scope.geneSet = geneSet;
+				$scope.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy($scope.geneSet.hierarchy, $scope.geneSet);
+				$scope.geneSet.showPathway = true;
+				
+				var pathwayId = $scope.uiParentPathways[0].diagramId;
+				var parentPathwayId = $scope.uiParentPathways[0].geneSetId;
+				
+				// Get pathway XML
+				GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
+					$scope.pathway.xml = xml;
+				});
+				
+				// If the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
+				if(pathwayId !== parentPathwayId) {
+					GeneSetService.getPathwayZoom(parentPathwayId).then(function(data) {
+							$scope.pathway.zooms = data;
+					});
+				} else {
+					$scope.pathway.zooms = [''];
+				}
+	
+				var mutationImpact = [];
+				
+				GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
+				var pathwayHighlights = [], uniprotIds;
+	
+				// Normalize into array
+				_.forEach(map,function(value,id) {
+					if(value && value.dbIds) {
+						pathwayHighlights.push({
+							uniprotId:id,
+							dbIds:value.dbIds.split(','),
+							value:value.value
+						});
+					}
+				});
+	
+				// Get ensembl ids for all the genes so we can link to advSearch page
+				uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
+				GeneSetVerificationService.verify( uniprotIds.join(',') ).then(function(data) {
+					_.forEach(pathwayHighlights,function(n){
+	
+						var geneKey = 'external_db_ids.uniprotkb_swissprot';
+						if (! data.validGenes[geneKey]) {
+							return;
+						}
+	
+						var uniprotObj = data.validGenes[geneKey][n.uniprotId];
+						if(!uniprotObj){
+							return;
+						}
+						var ensemblId = uniprotObj[0].id;
+						n.advQuery =  LocationService.mergeIntoFilters({
+							gene: {
+								id:  {is: [ensemblId]},
+								pathwayId: {is: [parentPathwayId]}
+							}
+						});
+						n.geneSymbol = uniprotObj[0].symbol;
+						n.geneId = ensemblId;
+					});
+					});
+	
+					$scope.pathway.highlights = pathwayHighlights;
+				});
+			});
+		};
+		
 		getPathways($stateParams.id);
+		
+		
 		
 	});
 })();
