@@ -388,7 +388,7 @@
       };
     }
 
-    _ctrl.buildDonorInfo = function (donors) {
+    _ctrl.donorInfo = function (donors) {
       var toolTipMaker = function () {
         return '';
       };
@@ -422,11 +422,29 @@
       return uniquelyConcat (fileCopies, 'fileFormat');
     };
 
+    function tooltipList (objects, property, oneItemHandler) {
+      var uniqueItems = _(objects)
+        .map (property)
+        .unique();
+
+      if (uniqueItems.size() < 2) {
+        return _.isFunction (oneItemHandler) ? oneItemHandler() :
+          '' + oneItemHandler;
+      }
+      return uniqueItems.map (function (s) {
+          return '<li>' + s;
+        })
+        .join ('</li>');
+    }
+
     _ctrl.fileNames = function (fileCopies) {
-      return _(fileCopies)
-        .map ('fileName')
-        .unique()
-        .join ('<br>');
+      return tooltipList (fileCopies, 'fileName', function () {
+          return _.get (fileCopies, '[0].fileName', '');
+        });
+    };
+
+    _ctrl.repoNamesInTooltip = function (fileCopies) {
+      return tooltipList (fileCopies, 'repoName', '');
     };
 
     _ctrl.fileAverageSize = function (fileCopies) {

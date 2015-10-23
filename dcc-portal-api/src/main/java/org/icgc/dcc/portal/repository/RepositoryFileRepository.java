@@ -22,9 +22,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.math.LongMath.divide;
+import static java.lang.String.format;
 import static java.math.RoundingMode.CEILING;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.range;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.limit;
 import static org.dcc.portal.pql.ast.function.FunctionBuilders.select;
@@ -46,7 +48,6 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.avg;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.filter;
-import static org.elasticsearch.search.aggregations.AggregationBuilders.global;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.missing;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.nested;
 import static org.elasticsearch.search.aggregations.AggregationBuilders.reverseNested;
@@ -64,6 +65,7 @@ import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFi
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.DONOR_IDS;
 import static org.icgc.dcc.portal.service.TermsLookupService.TermLookupType.FILE_IDS;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
+import static org.icgc.dcc.portal.util.JsonUtils.merge;
 import static org.icgc.dcc.portal.util.SearchResponses.getHitIds;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
@@ -101,23 +103,20 @@ import org.elasticsearch.index.query.MatchAllFilterBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.SingleBucketAggregation;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
-import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
-import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.aggregations.metrics.avg.Avg;
 import org.elasticsearch.search.aggregations.metrics.sum.Sum;
+import org.icgc.dcc.portal.model.FiltersParam;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
@@ -307,26 +306,18 @@ public class RepositoryFileRepository {
     return result;
   }
 
-  @NonNull
-  private static ReverseNestedBuilder reverseNestedAgg(String aggName, String path,
-      AbstractAggregationBuilder... subAggs) {
-    val result = reverseNested(aggName).path(path);
-
-    for (val subAgg : subAggs) {
-      result.subAggregation(subAgg);
-    }
-
-    return result;
+  private static NestedBuilder donorIdAgg(String aggKey) {
+    return nestedAgg(aggKey, EsFields.DONORS,
+        terms(aggKey).size(100000).field(DONOR_ID_RAW_FIELD_NAME));
   }
 
   @UtilityClass
-  private class CustomAggregationFields {
+  private class CustomAggregationKeys {
 
-    private final String DONOR = "donor";
-    private final String FILE_SIZE = "fileSize";
-    private final String REPO_SIZE = "repositorySizes";
-    private final String REPO_NAME = "repositoryNamesFiltered";
-    private final String REPO_DONOR_COUNT = "repositoryDonorCount";
+    public final String FILE_SIZE = "fileSize";
+    public final String REPO_SIZE = "repositorySizes";
+    public final String REPO_NAME = "repositoryNamesFiltered";
+    public final String REPO_DONOR_COUNT = "repositoryDonors";
 
   }
 
@@ -338,42 +329,31 @@ public class RepositoryFileRepository {
       val rawFieldName = toRawFieldName(facet);
       val filterAgg = filter(facet).filter(aggFilter(filters, facet));
 
-      // FIXME - tentative implementation!!!
+      // FIXME - tentative implementation as we could generalize this
       val subAgg = isNestedField(facet) ? (facet.equals(Fields.FILE_FORMAT) ?
           addNestedSubAggregationsForFileFormat(filterAgg, facet, rawFieldName, TYPE_MODEL.getNestedPath(facet)) :
           addNestedSubAggregations(filterAgg, facet, rawFieldName, TYPE_MODEL.getNestedPath(facet))) :
           addSubAggregations(filterAgg, facet, rawFieldName);
 
-      result.add(global(facet).subAggregation(subAgg));
+      result.add(subAgg);
     }
 
-    val repoFilters = buildRepoFilters(filters.deepCopy());
     val repoNameFieldName = toRawFieldName(Fields.REPO_NAME);
 
     /*
-     * Facets that aren't visible in the UI. Special filtered cases (do not exclude self filtering):
-     * repositoryNamesFiltered & repositorySize
+     * Facets that aren't visible in the UI, mostly used by the Manifest Download modal dialog. Special filtered cases
+     * (do not exclude self filtering): repositoryNamesFiltered & repositorySize
      */
     // repositoryNamesFiltered - file count
-    val repoNameAggName = CustomAggregationFields.REPO_NAME;
-    val filterAgg = filter(repoNameAggName).filter(repoFilters);
-    val repoNameSubAgg = addNestedSubAggregations(filterAgg, repoNameAggName, repoNameFieldName, EsFields.FILE_COPIES);
-
-    result.add(global(repoNameAggName).subAggregation(repoNameSubAgg));
+    result.add(nestedAggregations(CustomAggregationKeys.REPO_NAME, repoNameFieldName, EsFields.FILE_COPIES));
 
     // repositorySize
-    val repoSizeAggName = CustomAggregationFields.REPO_SIZE;
-    val repoSizeTermsSubAgg = terms(repoSizeAggName).field(repoNameFieldName)
-        .size(MAX_FACET_TERM_COUNT)
-        .subAggregation(reverseNestedAgg(CustomAggregationFields.DONOR, EsFields.DONORS,
-            terms(CustomAggregationFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME)))
+    val repoSizeAggName = CustomAggregationKeys.REPO_SIZE;
+    val repoSizeTermsSubAgg = terms(repoSizeAggName).size(MAX_FACET_TERM_COUNT).field(repoNameFieldName)
         .subAggregation(
-            sum(CustomAggregationFields.FILE_SIZE).field(toRawFieldName(Fields.FILE_SIZE)));
-    val repoSizeSubAgg = filter(repoSizeAggName)
-        .filter(repoFilters)
-        .subAggregation(nestedAgg(repoSizeAggName, EsFields.FILE_COPIES, repoSizeTermsSubAgg));
+            sum(CustomAggregationKeys.FILE_SIZE).field(toRawFieldName(Fields.FILE_SIZE)));
 
-    result.add(global(repoSizeAggName).subAggregation(repoSizeSubAgg));
+    result.add(nestedAgg(repoSizeAggName, EsFields.FILE_COPIES, repoSizeTermsSubAgg));
 
     return result;
   }
@@ -404,7 +384,16 @@ public class RepositoryFileRepository {
     return builder.subAggregation(nestedAgg);
   }
 
-  // FIXME - tentative implementation
+  @NonNull
+  private static NestedBuilder nestedAggregations(String aggKey, String fieldName, String path) {
+    val termsAgg = terms(aggKey).field(fieldName)
+        .size(MAX_FACET_TERM_COUNT);
+    val missingAgg = missing(MISSING).field(fieldName);
+
+    return nestedAgg(aggKey, path, termsAgg, missingAgg);
+  }
+
+  // FIXME - tentative implementation as we could generalize this
   @NonNull
   private static FilterAggregationBuilder addNestedSubAggregationsForFileFormat(FilterAggregationBuilder builder,
       String facetName, String fieldName, String path) {
@@ -427,23 +416,34 @@ public class RepositoryFileRepository {
     return builder.subAggregation(termsAgg).subAggregation(missingAgg);
   }
 
-  public static Map<String, TermFacet> convertAggregationsToFacets(@NonNull Aggregations aggs) {
+  @NonNull
+  public Map<String, TermFacet> convertAggregationsToFacets(Aggregations aggs, Query query) {
     val result = Maps.<String, TermFacet> newHashMap();
 
+    // FIXME: make all this more readable.
     for (val agg : aggs) {
       val name = agg.getName();
 
-      if (name.equals(CustomAggregationFields.REPO_SIZE)) {
-        val buckets = getBucketsOfRepoAggregations(agg);
+      if (name.equals(CustomAggregationKeys.REPO_SIZE)) {
+        val nestedAgg = ((Nested) agg).getAggregations();
+        val buckets = ((Terms) nestedAgg.get(name)).getBuckets();
 
-        result.put(CustomAggregationFields.REPO_SIZE, convertRepoSizeAggregation(buckets));
-        result.put("repositoryDonors", convertRepoDonorAggregation(buckets));
-
+        result.put(CustomAggregationKeys.REPO_SIZE, convertRepoSizeAggregation(buckets));
+        result.put(CustomAggregationKeys.REPO_DONOR_COUNT, groupByRepoNameAndDonor(buckets, query));
       } else if (name.equals(Fields.FILE_FORMAT)) {
         // FIXME - tentative implementation
-        result.put(name, convertFileFormatAggregation(agg));
+        val filterAgg = ((Filter) agg).getAggregations();
+
+        result.put(name, convertFileFormatAggregation(filterAgg, name));
+      } else if (name.equals(CustomAggregationKeys.REPO_NAME)) {
+        val nestedAgg = ((Nested) agg).getAggregations();
+
+        result.put(name, convertNormalAggregation(nestedAgg, name));
       } else {
-        result.put(name, convertNormalAggregation(agg));
+        val filterAgg = ((Filter) agg).getAggregations();
+        val termsAgg = isNestedField(name) ? getSubAggResultFromNested(filterAgg, name) : filterAgg;
+
+        result.put(name, convertNormalAggregation(termsAgg, name));
       }
     }
 
@@ -451,29 +451,53 @@ public class RepositoryFileRepository {
     return result;
   }
 
-  private static List<Bucket> getBucketsOfRepoAggregations(Aggregation aggregation) {
-    val name = aggregation.getName();
-    val globalAgg = (Global) aggregation;
-    val filterAgg = (Filter) globalAgg.getAggregations().get(name);
-    val termAgg = (Terms) getSubAggResultFromNested(filterAgg.getAggregations(), name).get(name);
-    // val termAgg = (Terms) filterAgg.getAggregations().get(name);
-
-    return termAgg.getBuckets();
+  private static FilteredQueryBuilder filteredQuery(FilterBuilder filters) {
+    return new FilteredQueryBuilder(MATCH_ALL_QUERY, filters);
   }
 
   // Special aggregation to get unique donor count for each repository
-  private static TermFacet convertRepoDonorAggregation(List<Bucket> buckets) {
-    val terms = buckets.stream().map(bucket -> {
-      final int size = bucketSize(
-          getSubAggResultFromReverseNested(bucket.getAggregations(), CustomAggregationFields.DONOR),
-          CustomAggregationFields.DONOR);
+  private TermFacet groupByRepoNameAndDonor(List<Bucket> buckets, Query query) {
+    if (isEmpty(buckets)) {
+      return repoTermFacet(0L, 0, ImmutableList.of());
+    }
 
-      return new Term(bucket.getKey(), Long.valueOf(size));
-    }).collect(toImmutableList());
+    val repoNames = transform(buckets, bucket -> bucket.getKey());
 
-    // Total does not have any meaning in this context because a donor can cross repositories
+    val donorAggKey = CustomAggregationKeys.REPO_DONOR_COUNT;
+    val repoFilterTemplate = "{file: {repoName: {is: [\"%s\"]}}}";
+    val userFilter = query.getFilters();
+
+    val multiSearch = client.prepareMultiSearch();
+
+    for (val repoName : repoNames) {
+      val repoFilter = new FiltersParam(format(repoFilterTemplate, repoName));
+      val mergedFilter = merge(userFilter, repoFilter.get());
+      val filters = buildRepoFilters(mergedFilter);
+
+      val oneSearch = client.prepareSearch(index)
+          .setSearchType(COUNT)
+          .setQuery(filteredQuery(filters))
+          .addAggregation(donorIdAgg(donorAggKey));
+
+      multiSearch.add(oneSearch);
+    }
+
+    val response = multiSearch.execute().actionGet();
+    val responseItems = response.getResponses();
+    val responseItemCount = responseItems.length;
+
+    val donorResult = range(0, responseItemCount).boxed()
+        .map(i -> {
+          final Aggregations aggResult = responseItems[i].getResponse().getAggregations();
+          final int donorCount = bucketSize(getSubAggResultFromNested(aggResult, donorAggKey), donorAggKey);
+
+          return new Term(repoNames.get(i), Long.valueOf(donorCount));
+        })
+        .collect(toImmutableList());
+
+    // Total does not have any meaning in this context because a donor can cross multiple repositories.
     val total = -1L;
-    return repoTermFacet(total, 0, terms);
+    return repoTermFacet(total, 0, donorResult);
   }
 
   // Special aggregation to get file size for each repository
@@ -482,27 +506,19 @@ public class RepositoryFileRepository {
     long total = 0;
 
     for (val bucket : buckets) {
-      val childCount = sumValue(bucket.getAggregations(), CustomAggregationFields.FILE_SIZE);
-      // val childCount = sumValue(
-      // getSubAggResultFromNested(bucket.getAggregations(), CustomAggregationFields.FILE_SIZE),
-      // CustomAggregationFields.FILE_SIZE);
+      val childCount = sumValue(bucket.getAggregations(), CustomAggregationKeys.FILE_SIZE);
 
       termsBuilder.add(new Term(bucket.getKey(), (long) childCount));
       total += childCount;
     }
 
-    return repoTermFacet(total, 0, termsBuilder.build());
+    val result = repoTermFacet(total, 0, termsBuilder.build());
+
+    log.debug("Result of convertRepoSizeAggregation is: {}", result);
+    return result;
   }
 
-  private static TermFacet convertNormalAggregation(Aggregation agg) {
-    val name = agg.getName();
-    log.debug("Normal Facet {}", name);
-
-    val globalAggs = ((Global) agg).getAggregations();
-    val filterAgg = ((Filter) globalAggs.get(name)).getAggregations();
-
-    val isNested = isNestedField(name) || name.equals(CustomAggregationFields.REPO_NAME);
-    val termsAgg = isNested ? getSubAggResultFromNested(filterAgg, name) : filterAgg;
+  private static TermFacet convertNormalAggregation(Aggregations termsAgg, String name) {
     val aggResult = (Terms) termsAgg.get(name);
 
     val termsBuilder = ImmutableList.<Term> builder();
@@ -528,15 +544,9 @@ public class RepositoryFileRepository {
     return repoTermFacet(total, missingCount, termsBuilder.build());
   }
 
-  // FIXME - tentative implementation
-  private static TermFacet convertFileFormatAggregation(Aggregation agg) {
-    val name = agg.getName();
-    log.debug("Normal Facet {}", name);
-
-    val globalAggs = ((Global) agg).getAggregations();
-    val filterAgg = ((Filter) globalAggs.get(name)).getAggregations();
-
-    val isNested = isNestedField(name) || name.equals(CustomAggregationFields.REPO_NAME);
+  // FIXME - tentative implementation as we could generalize this
+  private static TermFacet convertFileFormatAggregation(Aggregations filterAgg, String name) {
+    val isNested = isNestedField(name) || name.equals(CustomAggregationKeys.REPO_NAME);
     val termsAgg = isNested ? getSubAggResultFromNested(filterAgg, name) : filterAgg;
     val aggResult = (Terms) termsAgg.get(name);
 
@@ -607,8 +617,7 @@ public class RepositoryFileRepository {
   public SearchResponse fetchSearchScrollData(@NonNull String scrollId) {
     return client.prepareSearchScroll(scrollId)
         .setScroll(KEEP_ALIVE)
-        .execute()
-        .actionGet();
+        .execute().actionGet();
   }
 
   @NonNull
@@ -628,7 +637,7 @@ public class RepositoryFileRepository {
 
   private static FilteredQueryBuilder buildFileSetIdQuery(String setId) {
     val lookupFilter = createTermsLookupFilter(toRawFieldName(Fields.ID), FILE_IDS, UUID.fromString(setId));
-    return new FilteredQueryBuilder(MATCH_ALL_QUERY, lookupFilter);
+    return filteredQuery(lookupFilter);
   }
 
   public GetResponse findOne(@NonNull String id) {
@@ -649,13 +658,11 @@ public class RepositoryFileRepository {
           .setFrom(query.getFrom())
           .setSize(query.getSize())
           .addSort(JQL_FIELD_NAME_MAPPING.get(query.getSort()), query.getOrder())
-          // .setQuery(boolFilter().must(filters));
-          .setQuery(new FilteredQueryBuilder(MATCH_ALL_QUERY, filters));
-      // .setPostFilter(filters);
+          .setQuery(filteredQuery(filters));
 
-        aggs(queryFilter).stream().forEach(
-            agg -> request.addAggregation(agg));
-      });
+      aggs(queryFilter).stream().forEach(
+          agg -> request.addAggregation(agg));
+    });
 
     log.debug("findAll() - ES response is: '{}'.", response);
     return response;
@@ -783,12 +790,12 @@ public class RepositoryFileRepository {
   }
 
   @UtilityClass
-  private class SummaryFields {
+  private class SummaryAggregationKeys {
 
-    private final String FILE = "file";
-    private final String DONOR = "donor";
-    private final String PROJECT = "project";
-    private final String PRIMARY_SITE = "primarySite";
+    public final String FILE = "file";
+    public final String DONOR = "donor";
+    public final String PROJECT = "project";
+    public final String PRIMARY_SITE = "primarySite";
 
   }
 
@@ -797,38 +804,34 @@ public class RepositoryFileRepository {
    */
   @NonNull
   public Map<String, Long> getSummary(Query query) {
-    val donorSubAggs = nestedAgg(SummaryFields.DONOR, EsFields.DONORS,
-        terms(SummaryFields.DONOR).size(100000).field(DONOR_ID_RAW_FIELD_NAME))
+    val donorSubAggs = donorIdAgg(SummaryAggregationKeys.DONOR)
         .subAggregation(
-            terms(SummaryFields.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
+            terms(SummaryAggregationKeys.PROJECT).size(1000).field(toRawFieldName(Fields.PROJECT_CODE)))
         .subAggregation(
-            terms(SummaryFields.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
+            terms(SummaryAggregationKeys.PRIMARY_SITE).size(1000).field(toRawFieldName(Fields.PRIMARY_SITE)));
 
-    val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryFields.FILE);
-
+    val fileSizeSubAgg = averageFileSizePerFileCopyAgg(SummaryAggregationKeys.FILE);
     val filters = buildRepoFilters(query.getFilters());
 
     val response = searchFileCentric("Summary aggregation", request -> request
         .setSearchType(COUNT)
-        .setFrom(0)
-        .setSize(0)
-        .setQuery(new FilteredQueryBuilder(MATCH_ALL_QUERY, filters))
+        .setQuery(filteredQuery(filters))
         .addAggregation(fileSizeSubAgg)
         .addAggregation(donorSubAggs));
 
     log.debug("getSummary aggregation result is: '{}'.", response);
 
     val aggResult = response.getAggregations();
-    val buckets = ((Terms) aggResult.get(SummaryFields.FILE)).getBuckets();
-    val totalFileSize = sumFileCopySize(buckets, SummaryFields.FILE);
-    val donorAggResult = getSubAggResultFromNested(aggResult, SummaryFields.DONOR);
+    val totalFileSize = sumFileCopySize(termsBuckets(aggResult, SummaryAggregationKeys.FILE),
+        SummaryAggregationKeys.FILE);
+    val donorAggResult = getSubAggResultFromNested(aggResult, SummaryAggregationKeys.DONOR);
 
     return ImmutableMap.<String, Long> of(
         "fileCount", getTotalHitCount(response),
         "totalFileSize", (long) totalFileSize,
-        "donorCount", (long) bucketSize(donorAggResult, SummaryFields.DONOR),
-        "projectCount", (long) bucketSize(donorAggResult, SummaryFields.PROJECT),
-        "primarySiteCount", (long) bucketSize(donorAggResult, SummaryFields.PRIMARY_SITE));
+        "donorCount", (long) bucketSize(donorAggResult, SummaryAggregationKeys.DONOR),
+        "projectCount", (long) bucketSize(donorAggResult, SummaryAggregationKeys.PROJECT),
+        "primarySiteCount", (long) bucketSize(donorAggResult, SummaryAggregationKeys.PRIMARY_SITE));
   }
 
   /**
@@ -837,53 +840,30 @@ public class RepositoryFileRepository {
    */
   @NonNull
   public long getDonorCount(Query query) {
-    val aggName = "donorCount";
+    val aggKey = "donorCount";
     val filters = buildRepoFilters(query.getFilters());
-    // TODO: Look into a better solution than using terms agg and buckets.
-    val nestedAgg = nestedAgg(aggName, EsFields.DONORS,
-        terms(aggName).size(100000).field(DONOR_ID_RAW_FIELD_NAME));
-    val filterAgg = filter(aggName).filter(filters).subAggregation(nestedAgg);
 
     val response = searchFileCentric("Donor Count aggregation", request -> request
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(0)
-        .setSize(0)
-        .setPostFilter(filters)
-        .addAggregation(global(aggName).subAggregation(filterAgg)));
+        .setSearchType(COUNT)
+        .setQuery(filteredQuery(filters))
+        .addAggregation(donorIdAgg(aggKey)));
 
     log.debug("getDonorCount aggregation result is: '{}'.", response);
 
-    return bucketSize(getSubAggResultFromNested(
-        getAggregationResult(response, aggName), aggName), aggName);
-  }
-
-  @NonNull
-  private static Aggregations getAggregationResult(SearchResponse response, String name) {
-    val global = (Global) response.getAggregations().get(name);
-    val filter = (Filter) global.getAggregations().get(name);
-
-    return filter.getAggregations();
-  }
-
-  @NonNull
-  private static Aggregations getNestedAggregationResult(SearchResponse response, String name) {
-    val global = (Global) response.getAggregations().get(name);
-    val filter = (Filter) getSubAggResultFromNested(global.getAggregations(), name).get(name);
-
-    return filter.getAggregations();
+    return bucketSize(getSubAggResultFromNested(response.getAggregations(), aggKey), aggKey);
   }
 
   private static Aggregations getSubAggResultFromNested(Aggregations nestedAggs, String aggKey) {
     return ((Nested) nestedAggs.get(aggKey)).getAggregations();
   }
 
-  private static Aggregations getSubAggResultFromReverseNested(Aggregations nestedAggs, String aggKey) {
-    return ((ReverseNested) nestedAggs.get(aggKey)).getAggregations();
+  @NonNull
+  private static List<Bucket> termsBuckets(Aggregations aggResult, String aggKey) {
+    return ((Terms) aggResult.get(aggKey)).getBuckets();
   }
 
-  @NonNull
-  private static int bucketSize(Aggregations aggResult, String name) {
-    return ((Terms) aggResult.get(name)).getBuckets().size();
+  private static int bucketSize(Aggregations aggResult, String aggKey) {
+    return termsBuckets(aggResult, aggKey).size();
   }
 
   @NonNull
@@ -909,14 +889,14 @@ public class RepositoryFileRepository {
     val repoNameSubAgg = terms(repoName).field(repoName);
     val repoCodeSubAgg = nestedAgg(repoCode, EsFields.FILE_COPIES,
         terms(repoCode).size(100).field(repoCode).subAggregation(repoNameSubAgg));
-    val response = searchFileCentric("repoCodeNameMapping", request -> request
+    val response = searchFileCentric("getRepositoryMap", request -> request
         .setSearchType(COUNT)
         .addAggregation(repoCodeSubAgg));
     val terms = (Terms) getSubAggResultFromNested(response.getAggregations(), repoCode).get(repoCode);
 
     return terms.getBuckets().stream().collect(toMap(bucket -> bucket.getKey(),
         bucket -> {
-          final List<Bucket> repoNameBuckets = ((Terms) bucket.getAggregations().get(repoName)).getBuckets();
+          final List<Bucket> repoNameBuckets = termsBuckets(bucket.getAggregations(), repoName);
 
           return isEmpty(repoNameBuckets) ? "" : repoNameBuckets.get(0).getKey();
         }));
@@ -925,16 +905,17 @@ public class RepositoryFileRepository {
   @UtilityClass
   private class StatsAggregationKeys {
 
-    private final String DONOR = "donor";
-    private final String SIZE = "size";
-    private final String FORMAT = "format";
-    private final String DONOR_PRIMARY_SITE = "donorPrimarySite";
+    public final String DONOR = "donor";
+    public final String SIZE = "size";
+    public final String FORMAT = "format";
+    public final String DONOR_PRIMARY_SITE = "donorPrimarySite";
 
   }
 
   @NonNull
   public Map<String, Map<String, Map<String, Object>>> getRepoStats(String repoName) {
-    val aggsFilter = nestedFilter(EsFields.FILE_COPIES, termFilter(toRawFieldName(Fields.REPO_CODE), repoName));
+    val aggsFilter = nestedFilter(EsFields.FILE_COPIES,
+        termFilter(toRawFieldName(Fields.REPO_CODE), repoName));
     val response = getStats(aggsFilter, repoName);
 
     return extractStats(response.getAggregations(), repoName);
@@ -949,16 +930,13 @@ public class RepositoryFileRepository {
   }
 
   private SearchResponse getStats(FilterBuilder filter, String aggName) {
-    val donorCountAgg = nestedAgg(StatsAggregationKeys.DONOR, EsFields.DONORS,
-        terms(StatsAggregationKeys.DONOR).field(DONOR_ID_RAW_FIELD_NAME).size(30000));
-
     val fileSizeAgg = averageFileSizePerFileCopyAgg(StatsAggregationKeys.SIZE);
 
     val fileFormatAgg = nestedAgg(StatsAggregationKeys.FORMAT, EsFields.FILE_COPIES,
         terms(StatsAggregationKeys.FORMAT).field(toRawFieldName(Fields.FILE_FORMAT)));
 
     val dataTypeAgg = terms(aggName).field(toRawFieldName(Fields.DATA_TYPE))
-        .subAggregation(donorCountAgg)
+        .subAggregation(donorIdAgg(StatsAggregationKeys.DONOR))
         .subAggregation(fileSizeAgg)
         .subAggregation(fileFormatAgg);
 
@@ -973,9 +951,7 @@ public class RepositoryFileRepository {
         .subAggregation(nestedAgg(StatsAggregationKeys.DONOR_PRIMARY_SITE, EsFields.DONORS, primarySiteAgg));
 
     val response = searchFileCentric("getStats Request", request -> request
-        .setSearchType(QUERY_THEN_FETCH)
-        .setFrom(0)
-        .setSize(0)
+        .setSearchType(COUNT)
         .addAggregation(statsAgg));
 
     log.debug("getStats Response: '{}'.", response);

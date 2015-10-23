@@ -153,9 +153,15 @@ public class SearchRepository {
   private SearchRequestBuilder createSearch(String type) {
     // Determines which index to use as external file repository are in a daily generated index separated
     // from the main icgc-index.
-    return type.equals(Types.FILE) || type.equals(Types.FILE_DONOR) ?
-        client.prepareSearch(REPOSITORY_INDEX_NAME) :
-        client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
+    if (type.equals(Types.FILE) || type.equals(Types.FILE_DONOR)) {
+      return client.prepareSearch(REPOSITORY_INDEX_NAME);
+    }
+
+    if (type.equals(Types.DONOR)) {
+      return client.prepareSearch(indexName);
+    }
+
+    return client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
   }
 
   private static String[] toStringArray(Collection<String> source) {

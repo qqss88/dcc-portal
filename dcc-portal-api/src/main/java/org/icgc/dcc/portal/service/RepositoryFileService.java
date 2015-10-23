@@ -44,7 +44,6 @@ import static org.icgc.dcc.common.core.util.Joiners.DOT;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.RepositoryFile.parse;
-import static org.icgc.dcc.portal.repository.RepositoryFileRepository.convertAggregationsToFacets;
 import static org.icgc.dcc.portal.repository.RepositoryFileRepository.toRawFieldName;
 import static org.icgc.dcc.portal.repository.RepositoryFileRepository.toStringArray;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.getString;
@@ -354,7 +353,8 @@ public class RepositoryFileService {
     val hits = response.getHits();
     val externalFiles = new RepositoryFiles(convertHitsToRepoFiles(hits));
 
-    externalFiles.setTermFacets(convertAggregationsToFacets(response.getAggregations()));
+    externalFiles.setTermFacets(
+        repositoryFileRepository.convertAggregationsToFacets(response.getAggregations(), query));
     externalFiles.setPagination(Pagination.of(hits.getHits().length, hits.getTotalHits(), query));
 
     return externalFiles;

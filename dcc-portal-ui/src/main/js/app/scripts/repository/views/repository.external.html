@@ -7,7 +7,7 @@
           data-proxy-type="file"
           data-proxy-facet-name="id"
           data-label="File"
-          data-placeholder="Enter file ID, name or Object ID" ></li>
+          data-placeholder="Enter File ID, Name or Object ID" ></li>
       <li data-tags-facet
           data-type="file-donor"
           data-facet-name="id"
@@ -145,23 +145,21 @@
                     <td style="min-width: 6rem; max-width: 8rem; font-size: {{ row.fileId.length > 100? '0.75rem' : ' inherit' }}">
                        <i class="{{ row.access === 'open' ? 'icon-lock-open' : 'icon-lock' }}" />
                        <a href="/repository/external/files/{{ row.id }}"
-                        tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}">
-                        {{ row.id }}
-                       </a>
+                        tooltip="{{ ExternalRepoController.fileNames (row.fileCopies) }}"
+                        ng-bind="row.id" />
                     </td>
 
-                    <td ng-init="donorData = ExternalRepoController.buildDonorInfo (row.donors)">
-                      <a href="{{ donorData.href }}" tooltip="{{ donorData.tooltip}} ">
-                        {{ donorData.text }}
-                      </a>
+                    <td ng-init="donorData = ExternalRepoController.donorInfo (row.donors)">
+                      <a href="{{ donorData.href }}" tooltip="{{ donorData.tooltip }}"
+                        ng-bind="donorData.text" />
                     </td>
 
-                    <td>{{ ExternalRepoController.repoNames (row.fileCopies) }}</td>
+                    <td tooltip="{{ ExternalRepoController.repoNamesInTooltip (row.fileCopies) }}"
+                      ng-bind="ExternalRepoController.repoNames (row.fileCopies)" />
 
                     <td ng-init="ProjectData = ExternalRepoController.buildProjectInfo (row.donors)">
-                      <a href="{{ ProjectData.href }}" tooltip="{{ ProjectData.tooltip }}">
-                        {{ ProjectData.text }}
-                      </a>
+                      <a href="{{ ProjectData.href }}" tooltip="{{ ProjectData.tooltip }}"
+                        ng-bind="ProjectData.text" />
                     </td>
 
                     <td>
