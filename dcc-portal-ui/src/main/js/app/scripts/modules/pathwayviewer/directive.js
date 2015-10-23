@@ -263,7 +263,9 @@
           if(!xml || !zoomedOn){
             return;
           }else if(!rendered){
+            $('.pathwaysvg').remove();
             controller.render(xml,zoomedOn);
+            console.log(xml);
             rendered = true;
           }else{
             hideInfo();
@@ -275,17 +277,29 @@
           }
         };
         
-        $scope.$watch('items', function (newValue) {
+        $scope.$watch('items', function (newValue, oldValue) {
+          if (newValue === oldValue) {
+            return;
+          }
+          rendered = false;
           xml = newValue;
           handleRender();
         });
         
-        $scope.$watch('zooms', function (newValue) {
+        $scope.$watch('zooms', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+            
           zoomedOn = newValue;
           handleRender();
         });
 
-        $scope.$watch('highlights', function (newValue) {
+        $scope.$watch('highlights', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+          
           highlights = newValue;
           handleRender();
         });
