@@ -100,7 +100,26 @@
 
         return o1;
       },
+      toURLParam: function(filterParamObj) {
+        var filterStr = '';
+        
+        if (filterParamObj === null) {
+          return filterStr;  
+        }
+        
+        switch(typeof filterParamObj) {
+          case 'object':
+            filterStr = JSON.stringify(filterParamObj);
+          break;
+          default: 
+            filterStr = filterParamObj;
+          break;
+        }
+        
+        return encodeURIComponent(filterStr);
+      },
       getJsonParam: function (param) {
+        
         try {
           return angular.fromJson(this.search()[param]) || {};
         } catch (e) {

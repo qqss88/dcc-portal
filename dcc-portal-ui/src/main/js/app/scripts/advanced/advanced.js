@@ -71,10 +71,11 @@
       _ctrl.Location = LocationService;
 
       function refresh() {
+        var filters = LocationService.filters();
         _ctrl.Donor.refresh();
         _ctrl.Gene.refresh();
         _ctrl.Mutation.refresh();
-        _ctrl.hasGeneFilter = LocationService.filters().hasOwnProperty('gene');
+        _ctrl.hasGeneFilter = angular.isObject(filters) ?  filters.hasOwnProperty('gene') : false;
       }
 
       function ajax() {
@@ -400,7 +401,10 @@
                 }
 
 
-                gene.uiDonorsLink = LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet');
+                gene.uiDonorsLink = LocationService.toURLParam(
+                                      LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet')
+                                    );
+        
                 gene.uiDonors = data.facets.projectId.terms;
                 gene.uiDonors.forEach(function (facet) {
                   var p = _.find(projects.hits, function (item) {
@@ -530,7 +534,9 @@
                     }
                   }
 
-                  mutation.uiDonorsLink = LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet');
+                  mutation.uiDonorsLink = LocationService.toURLParam( 
+                                            LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet')
+                                          );
                   mutation.uiDonors = data.facets.projectId.terms;
                   mutation.uiDonors.forEach(function (facet) {
                     var p = _.find(projects.hits, function (item) {

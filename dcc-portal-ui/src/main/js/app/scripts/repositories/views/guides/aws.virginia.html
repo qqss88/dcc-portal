@@ -1,328 +1,323 @@
+<div class="h1-wrap">
+   <h1 data-ui-scrollfix="79">
+      <span class="t_badge t_badge_icon">
+         <span class="icon-book-open"></span>
+      </span>
+      User Guide: ICGC Data Analysis on Amazon
+   </h1>
+</div>
+<div data-scroll-spy class="cloud-guide-content icgc-cloud">
+   <aside class="t_side_nav" data-ui-scrollfix="79">
+      <nav>
+         <ul class="t_subnav__items">
+            <li data-spy="overview" class="t_subnav__items__item current"><a data-scrollto href="#overview">Overview</a></li>
+            <li data-spy="auth" class="t_subnav__items__item"><a data-scrollto href="#auth">Authorization</a></li>
+            <li data-spy="preqs" class="t_subnav__items__item"><a data-scrollto href="#preqs">Prerequisites</a></li>
+            <li data-spy="install" class="t_subnav__items__item"><a data-scrollto href="#install">Installation</a></li>
+            <li data-spy="config" class="t_subnav__items__item"><a data-scrollto href="#config">Configuration</a></li>
+            <li data-spy="fs-search" class="t_subnav__items__item"><a data-scrollto href="#fs-search">File Search</a></li>
+            <li data-spy="storage-client" class="t_subnav__items__item"><a data-scrollto href="#storage-client">Storage Client Usage</a></li>
+            <li data-spy="faq" class="t_subnav__items__item"><a data-scrollto href="#faq">FAQs</a></li>
+            <li data-spy="terms" class="t_subnav__items__item"><a data-scrollto href="#terms">Used Terms</a></li>
+         </ul>
+      </nav>
+   </aside>
+   <article>
+      <section id="overview">
+         <h2>Overview</h2>
 
-	<div class="h1-wrap">
-		<h1 data-ui-scrollfix="79">
-			<span class="t_badge t_badge_icon">
-				<span class="icon-book-open"></span>
-			</span>
-			User Guide: ICGC Data Analysis on Amazon
-		</h1>
-	</div>
-	<div data-scroll-spy class="cloud-guide-content icgc-cloud">
-		
-		<aside class="t_side_nav" data-ui-scrollfix="79">
-			<nav>
-				<ul class="t_subnav__items">
-					<li data-spy="overview" class="t_subnav__items__item current"><a data-scrollto href="#overview">Overview</a></li>
-					<li data-spy="auth" class="t_subnav__items__item"><a data-scrollto href="#auth">Authorization</a></li>
-					<li data-spy="preqs" class="t_subnav__items__item"><a data-scrollto href="#preqs">Prerequisites</a></li>
-					<li data-spy="install" class="t_subnav__items__item"><a data-scrollto href="#install">Installation</a></li>
-					<li data-spy="config" class="t_subnav__items__item"><a data-scrollto href="#config">Configuration</a></li>
-					<li data-spy="fs-search" class="t_subnav__items__item"><a data-scrollto href="#fs-search">File Search</a></li>
-					<li data-spy="storage-client" class="t_subnav__items__item"><a data-scrollto href="#storage-client">Storage Client Usage</a></li>
-					<li data-spy="faq" class="t_subnav__items__item"><a data-scrollto href="#faq">FAQs</a></li>
-					<li data-spy="terms" class="t_subnav__items__item"><a data-scrollto href="#terms">Used Terms</a></li>
-				</ul>
-			</nav>
-		</aside>
-		<article>
-			<section id="overview">
-				<h2>Overview</h2>
-				
-				<p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank">Amazon Web Services (AWS)</a>. </p>
-				
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank">Amazon Web Services (AWS)</a>. </p>
 
-				
-				
-				<p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
-			
-				<h3>Process</h3>
-				
-				<p>The figure below illustrates the overall process and software components involved:</p>
-				<div class="screen-shot">
-					<a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
-						<img src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
-						<i class="icon-external-link screen-caption"></i>
-					</a>
-				</div>
-				<ol>
-					<li><a data-scrollto href="#auth">Authorization</a>: Apply for DACO access if not already approved</li>
-					<li><a data-scrollto href="#auth">Authorization</a>: Upon approval, login to the <em>Data Portal</em></li>
-					<li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for S3 download</li>
-					<li><a data-scrollto href="#preqs">Prerequistes</a>: Create an EC2 instance in AWS if not aready available</li>
-					<li><a data-scrollto href="#install">Installation</a>: Download and install the ICGC Storage Client</li>
-					<li><a data-scrollto href="#config">Configuration</a>: Configure the storage client to use the access token from step 3.</li>
-					<li><a data-scrollto href="#fs-search">Search</a>: Identify files of interest using the Data Portal</li>
-					<li><a data-scrollto href="#terms">Usage</a>: Download or view data with the provided Storage Client or via an external tool</li>
-				</ol>
-				
-				<p>The subsequent sections will provide additional details on each of these topics.</p>
-				
-				<h3>Security</h3>
-				<p>The usage of the distributed <a href="/software">Storage Client</a> is required to provide additional security while operating in participating cloud environments and to enhance user download speeds. </p>
-				<p>
-					Security is enforced by using a coordinating ICGC EC2 server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank">pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.  
-				</p>
-				<p>
-					It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
-				</p>
-				<p>
-					Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any AWS and downstream resources.
-				</p>
-			</section>
-			<section id="auth">		
-				<h2>Authorization</h2>
-				
-				<p>This section describes how to attain the required access to use the software by first ensuring DACO access and subsequently self-provisioning an acess token.</p>
-				
-				<h3 id="auth-daco">DACO Access</h3>
-				
-				<p>DACO access is prerequisite to using the storage client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank">https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login">ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
-				
-				<h3 id="auth-token">Access Token</h3>
-				
-				<p>The access token model used for protecting the AWS S3 data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank">personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>s3.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank">controlled access data</a>. This scope will become available after acquiring DACO access. A instance of this token will grant access to all of the available data.</p>
-				
-				<p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>s3.download</code> scope when you generate your token. </p>
-				
-					
-				<div class="screen-shot">
-						<img src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
-				</div>
-				
-				<p>You will then need to edit the client configuration file in the storage client to include this token. See the <a <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
-				<p>You can delete and regenerate an access token if you believe that it has been compromised.</p>
-				<div class="screen-shot">
-					<a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/aws/token_manager_screenshot.png" target="_blank">
-						<img src="styles/images/repositories/guides/aws/token_manager_screenshot.png" alt="Token Manager Screenshot" />
-						<i class="icon-external-link screen-caption"></i>
-					</a>
-				</div>
-			</section>
-			<section id="preqs">
-				<h2>Prerequisites</h2>
-			
-					<h3>EC2 Instance</h3>
-					<p>
-						In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank">EC2</a>, you will need to provision a running EC2 instance. Please see Amazon&rsquo;s documentation for detailed instructions.
-						The following sections will give guidance on the selecting and configuring the chosen instance type.
-					</p>
-					
-					<h3>Hardware</h3>
-					<p>
-						As data files are quite large, users should have enough local disk space to store files downloaded from the S3 repository. 
-						More cores will give greater parallelism, and therefore, better thoughput of downloads.
-						By default the storage client is configured to use a maximum of 3G of RAM. Most of time this is more than sufficient.
-					</p>	
-					
-					<h3>Operating System</h3>	
-					<p>The storage client has been designed to work on modern Mac and Linux distributions. Windows should work as well but remains untested.</p>
-	
-				
-					<h3>Dependencies</h3>
-					
-					<p>The storage client requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used.</p>
-			</section>
-			<section id="install">
-					<h2>Installation</h2>
-					<p>This section describes how to install the storage client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>		
-					
-					<div class="section_ident">
-						<h3>From Tarball</h3>
-			
-						<h4>Download</h4>		
-						<p>To begin using the storage client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
-						
-						<pre class="language-shell"><code class="language-shell">wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>dcc<span class="token punctuation">.</span>icgc<span class="token punctuation">.</span>org<span class="token operator">/</span>software<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client<span class="token operator">/</span>latest</code></pre>
-			
-							<p>After untaring the archive, the storage client will be available at <code>bin/dcc-storage-client</code>. Steps to verify the authenticity and integrity of the download can be found on our <a href="/software">software</a> page.</p>
-							<h3>From Docker Image</h3>
-							
-							<p>We also support a Docker image of the storage client that is bundled with Java 8 for easy deployment.</p>
-							
-							<p>The image is hosted at <a href="https://hub.docker.com/r/icgc/dcc-storage-client/" target="_blank">https://hub.docker.com/r/icgc/dcc-storage-client/</a> and downloaded by issuing the following command:</p>
-							
-							<pre class="language-shell"><code class="language-shell">docker pull icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
-							
-							<p>Once pulled, you can enter in to the container with the following:</p>
-							
-							<pre class="language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
-							
-							<p>There is no entry point or command defined for the image. The software may be located at <code>/icgc/dcc-storage-client</code> which is also the working directory of the container. All other steps for <a data-scrollto href="#storage-client">using the storage client</a> will be the same for both Docker and tarball installations.</p>
-					</div>
-			
-				</section>
-				<section id="config">
-					<h2>Configuration</h2>
-					
-					<p>The main configuration element is the access token generated in <a data-scrollto data-scroll-offset="70" href="#auth-token">Access Token</a> above. Configuration is stored in the <code>conf/</code> directory of the distribution.</p>
-					
-					<p>Edit <code>application.properties</code> and add the generated accesss token to the line:</p>
-					
-					<pre class="language-shell"><code class="language-shell">accessToken<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span></code></pre>
-					
-					<p>With docker, this can also be set with an environmental variable:</p>
-					
-					<pre class=" language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it <span class="token operator">-</span>e ACCESSTOKEN<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span> icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
-				</section>
-				<section id="fs-search">			
-					<h2>File Search</h2>
-					
-					<p>Finding files of interest can be done via the Data Portal. Objects are identified by their object id.</p>
-					
-					<ul>
-						<li>Navigate to <a href="https://dcc.icgc.org/repository/external">repository file search</a></li>
-						<li>Click on the <code>AWS</code> filter in the left hand pane</li>
-						<li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
-						<li>Export manifest for future use with the storage client</li>
-					</ul>
-					
-					<p>The manifest is the main way to define what files should be downloaded by the storage client. However, knowing the object id is sufficient for a single file download.</p>
-				</section>
-				<section id="storage-client">		
-					<h2>Storage Client Usage</h2>
-					
-					<p>This section provides information on how to use the storage client once it has been properly downloaded and configured. It assumes the user possesses and has configured the requisite access token discussed previously. </p>
-					
-					<p>The storage client has the general syntax:</p>
-					
-					<pre class="language-shell"><code class=" language-shell">dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>command options<span class="token punctuation">]</span></code></pre>
-					
-					<p>It offers a set of commands, where each command has its own set of options to influence its operation.</p>
-						
-						<h3>Help</h3>
-						
-						<p>The storage client provides a <code>--help</code> option to list the available commands and a brief description of their supported options:</p>
-						
-						<pre class="language-shell"><code class="language-shell">bin/dcc-storage-client --help</code></pre>
-						
-						<h3>URL Command</h3>
-						
-						<p>The <code>url</code> command is the most basic command supported by the storage client. It allows one to resolve the underyling S3 URL for the requested object. This is useful if one wants to directly access the URL via HTTPS with an external client or tool (e.g. <code>curl</code>, <code>wget</code>, etc.)</p>
-						
-						<pre class=" language-javascript"><code class=" language-javascript">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client url <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd</code></pre>
-						
-						<p>An example of using <code>wget</code>:</p>
-						
-						<pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client url <span class="token operator">--</span>object<span class="token operator">-</span>id <span class="token operator">&lt;</span>object id<span class="token operator">&gt;</span>
+         <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
+
+         <h3>Process</h3>
+
+         <p>The figure below illustrates the overall process and software components involved:</p>
+         <div class="screen-shot">
+            <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
+               <img src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
+               <i class="icon-external-link screen-caption"></i>
+            </a>
+         </div>
+         <ol>
+            <li><a data-scrollto href="#auth">Authorization</a>: Apply for DACO access if not already approved</li>
+            <li><a data-scrollto href="#auth">Authorization</a>: Upon approval, login to the <em>Data Portal</em></li>
+            <li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for S3 download</li>
+            <li><a data-scrollto href="#preqs">Prerequistes</a>: Create an EC2 instance in AWS if not aready available</li>
+            <li><a data-scrollto href="#install">Installation</a>: Download and install the ICGC Storage Client</li>
+            <li><a data-scrollto href="#config">Configuration</a>: Configure the storage client to use the access token from step 3.</li>
+            <li><a data-scrollto href="#fs-search">Search</a>: Identify files of interest using the Data Portal</li>
+            <li><a data-scrollto href="#terms">Usage</a>: Download or view data with the provided Storage Client or via an external tool</li>
+         </ol>
+
+         <p>The subsequent sections will provide additional details on each of these topics.</p>
+
+         <h3>Security</h3>
+         <p>The usage of the distributed <a href="/software">Storage Client</a> is required to provide additional security while operating in participating cloud environments and to enhance user download speeds. </p>
+         <p>
+            Security is enforced by using a coordinating ICGC EC2 server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank">pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.  
+         </p>
+         <p>
+            It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
+         </p>
+         <p>
+            Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any AWS and downstream resources.
+         </p>
+      </section>
+      <section id="auth">		
+         <h2>Authorization</h2>
+
+         <p>This section describes how to attain the required access to use the software by first ensuring DACO access and subsequently self-provisioning an acess token.</p>
+
+         <h3 id="auth-daco">DACO Access</h3>
+
+         <p>DACO access is prerequisite to using the storage client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank">https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login">ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
+
+         <h3 id="auth-token">Access Token</h3>
+
+         <p>The access token model used for protecting the AWS S3 data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank">personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>s3.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank">controlled access data</a>. This scope will become available after acquiring DACO access. A instance of this token will grant access to all of the available data.</p>
+
+         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>s3.download</code> scope when you generate your token. </p>
+
+
+         <div class="screen-shot">
+            <img src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
+         </div>
+
+         <p>You will then need to edit the client configuration file in the storage client to include this token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
+         <p>You can delete and regenerate an access token if you believe that it has been compromised.</p>
+         <div class="screen-shot">
+            <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/aws/token_manager_screenshot.png" target="_blank">
+               <img src="styles/images/repositories/guides/aws/token_manager_screenshot.png" alt="Token Manager Screenshot" />
+               <i class="icon-external-link screen-caption"></i>
+            </a>
+         </div>
+      </section>
+      <section id="preqs">
+         <h2>Prerequisites</h2>
+
+         <h3>EC2 Instance</h3>
+         <p>
+            In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank">EC2</a>, you will need to provision a running EC2 instance. Please see Amazon&rsquo;s documentation for detailed instructions.
+            The following sections will give guidance on the selecting and configuring the chosen instance type.
+         </p>
+
+         <h3>Hardware</h3>
+         <p>
+            As data files are quite large, users should have enough local disk space to store files downloaded from the S3 repository. 
+            More cores will give greater parallelism, and therefore, better thoughput of downloads.
+            By default the storage client is configured to use a maximum of 3G of RAM. Most of time this is more than sufficient.
+         </p>	
+
+         <h3>Operating System</h3>	
+         <p>The storage client has been designed to work on modern Mac and Linux distributions. Windows should work as well but remains untested.</p>
+
+
+         <h3>Dependencies</h3>
+
+         <p>The storage client requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used.</p>
+      </section>
+      <section id="install">
+         <h2>Installation</h2>
+         <p>This section describes how to install the storage client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>		
+
+         <div class="section_ident">
+            <h3>From Tarball</h3>
+
+            <h4>Download</h4>		
+            <p>To begin using the storage client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
+
+            <pre class="language-shell"><code class="language-shell">wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>dcc<span class="token punctuation">.</span>icgc<span class="token punctuation">.</span>org<span class="token operator">/</span>software<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client<span class="token operator">/</span>latest</code></pre>
+
+            <p>After untaring the archive, the storage client will be available at <code>bin/dcc-storage-client</code>. Steps to verify the authenticity and integrity of the download can be found on our <a href="/software">software</a> page.</p>
+            <h3>From Docker Image</h3>
+
+            <p>We also support a Docker image of the storage client that is bundled with Java 8 for easy deployment.</p>
+
+            <p>The image is hosted at <a href="https://hub.docker.com/r/icgc/dcc-storage-client/" target="_blank">https://hub.docker.com/r/icgc/dcc-storage-client/</a> and downloaded by issuing the following command:</p>
+
+            <pre class="language-shell"><code class="language-shell">docker pull icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
+
+            <p>Once pulled, you can enter in to the container with the following:</p>
+
+            <pre class="language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
+
+            <p>There is no entry point or command defined for the image. The software may be located at <code>/icgc/dcc-storage-client</code> which is also the working directory of the container. All other steps for <a data-scrollto href="#storage-client">using the storage client</a> will be the same for both Docker and tarball installations.</p>
+         </div>
+
+      </section>
+      <section id="config">
+         <h2>Configuration</h2>
+
+         <p>The main configuration element is the access token generated in <a data-scrollto data-scroll-offset="70" href="#auth-token">Access Token</a> above. Configuration is stored in the <code>conf/</code> directory of the distribution.</p>
+
+         <p>Edit <code>application.properties</code> and add the generated accesss token to the line:</p>
+
+         <pre class="language-shell"><code class="language-shell">accessToken<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span></code></pre>
+
+         <p>With docker, this can also be set with an environmental variable:</p>
+
+         <pre class=" language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it <span class="token operator">-</span>e ACCESSTOKEN<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span> icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
+      </section>
+      <section id="fs-search">			
+         <h2>File Search</h2>
+
+         <p>Finding files of interest can be done via the Data Portal. Objects are identified by their object id.</p>
+
+         <ul>
+            <li>Navigate to <a href="https://dcc.icgc.org/repository/external">repository file search</a></li>
+            <li>Click on the <code>AWS</code> filter in the left hand pane</li>
+            <li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
+            <li>Export manifest for future use with the storage client</li>
+         </ul>
+
+         <p>The manifest is the main way to define what files should be downloaded by the storage client. However, knowing the object id is sufficient for a single file download.</p>
+      </section>
+      <section id="storage-client">		
+         <h2>Storage Client Usage</h2>
+
+         <p>This section provides information on how to use the storage client once it has been properly downloaded and configured. It assumes the user possesses and has configured the requisite access token discussed previously. </p>
+
+         <p>The storage client has the general syntax:</p>
+
+         <pre class="language-shell"><code class=" language-shell">dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>command options<span class="token punctuation">]</span></code></pre>
+
+         <p>It offers a set of commands, where each command has its own set of options to influence its operation.</p>
+
+         <h3>Help</h3>
+
+         <p>The storage client provides a <code>--help</code> option to list the available commands and a brief description of their supported options:</p>
+
+         <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client --help</code></pre>
+
+         <h3>URL Command</h3>
+
+         <p>The <code>url</code> command is the most basic command supported by the storage client. It allows one to resolve the underyling S3 URL for the requested object. This is useful if one wants to directly access the URL via HTTPS with an external client or tool (e.g. <code>curl</code>, <code>wget</code>, etc.)</p>
+
+         <pre class=" language-javascript"><code class=" language-javascript">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client url <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd</code></pre>
+
+         <p>An example of using <code>wget</code>:</p>
+
+         <pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client url <span class="token operator">--</span>object<span class="token operator">-</span>id <span class="token operator">&lt;</span>object id<span class="token operator">&gt;</span>
 Resolving URL <span class="token keyword">for</span> object<span class="token punctuation">:</span> ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token punctuation">(</span>offset <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> length <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
 https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>s3<span class="token operator">-</span>external<span class="token number">-1</span><span class="token punctuation">.</span>amazonaws<span class="token punctuation">.</span>com<span class="token operator">/</span><span class="token operator">&lt;</span>snip<span class="token operator">&gt;</span>
-	
+
 wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>s3<span class="token operator">-</span>external<span class="token number">-1</span><span class="token punctuation">.</span>amazonaws<span class="token punctuation">.</span>com<span class="token operator">/</span><span class="token operator">&lt;</span>snip<span class="token operator">&gt;</span></code></pre>
-						
-						<h3>Download Command</h3>
-						
-						<p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) manifest driven mode</p>
-								
-							<h4>Single Object</h4>
-							
-							<p>This mode is most useful when downloading a single object given a known object id, perhaps acquired from the Data Portal:</p>
-							
-							<pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client download <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>output<span class="token operator">-</span>dir data</code></pre>
-							
-							<p>Downloads will be stored in the <code>--output-dir</code>.</p>
-				
-							<h4>Manifest</h4>
-							
-							<p>Using a manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repository/external" target="_blank">repository file search</a> allows one to generate a manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
-							
-							<pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
-							
-							<p>The optional <code>--output-layout</code> option can be used to organize the downloads into a couple of predefined directory layouts. See the <code>--help</code> for addional information.</p>
-			
-						<h3>View Command</h3>
-						
-						<p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html" target="_blank">samtools view</a>. It allows to request a &ldquo;genomic slice&rdquo; of the remote BAM file, freeing the user from having to download the entire file locally, saving bytes and time.</p>
-						
-						<p>The following example will download reads overlapping the region 1 - 100000 in chromosome 1:</p>
-						
-						<pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>query <span class="token number">1</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token operator">-</span><span class="token number">100000</span></code></pre>
-						
-						<p>The BAI is automatically discovered and streamed as part of the operation.</p>
-						<p>For quickly accessing the only the BAM header one can issue:</p>
-						<pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>header<span class="token operator">-</span>only <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd</code></pre>
-						<p>It is also possible to pipe the output of the above to <code>samtools</code>, etc. for pipelining a workflow: </p>
-						
-						<pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">|</span> samtools mpileup <span class="token operator">-</span></code></pre>
-				</section>
-			
-				<section id="faq">
-					<h2>FAQs</h2>
-					
-					<h5>Where are detailed logs stored?</h5>
-					
-					<p>The client log file is stored in at<code>logs/client.log</code></p>
-					
-					<h5>How long will pre-signed urls valid?</h5>
-					
-					<p>Pre-signed URLs will be valid for 7 days after the time they were created.</p>
-					
-					<h5>Does the client maintain state?</h5>
-					
-					<p>Yes, the client maintains state in the working directory in a hidden file <code>.&lt;object id&gt;/meta</code>. This file includes cached pre-signed urls. If your downloads fail unexpectedly, then try deleting this directory. It could be that the pre-signed URLs have expired. </p>
-					
-					<h5>Why do I get a security exception?</h5>
-					
-					<p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank">region</a>.</p>
-					
-					<h5>I can&rsquo;t use the <code>url</code> command with <code>samtools</code></h5>
-					
-					<p><code>samtools</code> doesn&rsquo;t support HTTPS which is a requirement for ICGC&rsquo;s security policy concerning S3. Use the <code>view</code> command to pipe to samtools or download the entire file locally.</p>
-					
-					<h5>How do I report a bug in the software?</h5>
-					
-					<p>Please contact <a href="mailto:dcc-support@icgc.org">dcc-support@icgc.org</a> and include the version of the software in the body of the message (<code>bin/dcc-storage-client --version</code>). </p>
-			</section>
-			<section id="terms">
-				<h2>Terms</h2>
-				
-				<p>Related terms and their defintions are given below:</p>
-				
-				<table class="table table-info">
-					<thead>
-						<tr>
-							<th>Term</th>
-							<th>Meaning</th>
-						</tr>
-					</thead>		
-					<tbody>
-						<tr>
-							<td><em>Access Token</em></td>
-							<td>An authorization mechanism used to access data. Created by the <em>Data Portal</em></td>
-						</tr>
-						<tr>
-							<td><em>Controlled Access</em></td>
-							<td>Data that requires DACO approval</td>
-						</tr>
-						<tr>
-							<td><em>DCC</em></td>
-							<td>The ICGC Data Coordination Center (<a href="https://icgc.org/icgc/goals-structure-policies-guidelines/coordination" target="_blank">DCC</a>) performs quality assessment, curation and data releases and also manages the data flow from projects and centers to the central ICGC database and public repositories.</td>
-						</tr>
-						<tr>
-							<td><em>Data Portal</em></td>
-							<td>The ICGC data portal located at <a href="https://dcc.icgc.org">https://dcc.icgc.org</a></td>
-						</tr>
-						<tr>
-							<td><em>Manifest</em></td>
-							<td>A file used as input to the storage client to describe and identify files to be downloaded</td>
-						</tr>
-						<tr>
-							<td><em>Object Id</em></td>
-							<td>The unique identifier of an object expressed as a UUID. In the command line interface this is refered to as <code>--object-id</code>.</td>
-						</tr>
-						<tr>
-							<td><em>Storage Client</em></td>
-							<td>Sofware provided by ICGC required to download data from AWS S3</td>
-						</tr>
-						<tr>
-							<td><em>S3</em></td>
-							<td><a href="https://aws.amazon.com/s3/" target="_blank">Amazon Simple Storage Service</a>, the physical store of the ICGC AWS data.</td>
-						</tr>					
-						<tr>
-							<td><em>Token Manager</em></td>
-							<td>Section of the portal used to manage <em>Access Tokens</em></td>
-						</tr>						
-					</tbody>
-				</table>
-			</section>
-		</article>
-	</div>
+
+         <h3>Download Command</h3>
+
+         <p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) manifest driven mode</p>
+
+         <h4>Single Object</h4>
+
+         <p>This mode is most useful when downloading a single object given a known object id, perhaps acquired from the Data Portal:</p>
+
+         <pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client download <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>output<span class="token operator">-</span>dir data</code></pre>
+
+         <p>Downloads will be stored in the <code>--output-dir</code>.</p>
+
+         <h4>Manifest</h4>
+
+         <p>Using a manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repository/external" target="_blank">repository file search</a> allows one to generate a manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
+
+         <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
+
+         <p>The optional <code>--output-layout</code> option can be used to organize the downloads into a couple of predefined directory layouts. See the <code>--help</code> for addional information.</p>
+
+         <h3>View Command</h3>
+
+         <p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html" target="_blank">samtools view</a>. It allows to request a &ldquo;genomic slice&rdquo; of the remote BAM file, freeing the user from having to download the entire file locally, saving bytes and time.</p>
+
+         <p>The following example will download reads overlapping the region 1 - 100000 in chromosome 1:</p>
+
+         <pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>query <span class="token number">1</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token operator">-</span><span class="token number">100000</span></code></pre>
+
+         <p>The BAI is automatically discovered and streamed as part of the operation.</p>
+         <p>For quickly accessing the only the BAM header one can issue:</p>
+         <pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>header<span class="token operator">-</span>only <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd</code></pre>
+         <p>It is also possible to pipe the output of the above to <code>samtools</code>, etc. for pipelining a workflow: </p>
+
+         <pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">|</span> samtools mpileup <span class="token operator">-</span></code></pre>
+      </section>
+
+      <section id="faq">
+         <h2>FAQs</h2>
+
+         <h5>Where are detailed logs stored?</h5>
+
+         <p>The client log file is stored in at<code>logs/client.log</code></p>
+
+         <h5>How long will pre-signed urls valid?</h5>
+
+         <p>Pre-signed URLs will be valid for 7 days after the time they were created.</p>
+
+         <h5>Does the client maintain state?</h5>
+
+         <p>Yes, the client maintains state in the working directory in a hidden file <code>.&lt;object id&gt;/meta</code>. This file includes cached pre-signed urls. If your downloads fail unexpectedly, then try deleting this directory. It could be that the pre-signed URLs have expired. </p>
+
+         <h5>Why do I get a security exception?</h5>
+
+         <p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank">region</a>.</p>
+
+         <h5>I can&rsquo;t use the <code>url</code> command with <code>samtools</code></h5>
+
+         <p><code>samtools</code> doesn&rsquo;t support HTTPS which is a requirement for ICGC&rsquo;s security policy concerning S3. Use the <code>view</code> command to pipe to samtools or download the entire file locally.</p>
+
+         <h5>How do I report a bug in the software?</h5>
+
+         <p>Please contact <a href="mailto:dcc-support@icgc.org">dcc-support@icgc.org</a> and include the version of the software in the body of the message (<code>bin/dcc-storage-client --version</code>). </p>
+      </section>
+      <section id="terms">
+         <h2>Terms</h2>
+
+         <p>Related terms and their defintions are given below:</p>
+
+         <table class="table table-info">
+            <thead>
+               <tr>
+                  <th>Term</th>
+                  <th>Meaning</th>
+               </tr>
+            </thead>		
+            <tbody>
+               <tr>
+                  <td><em>Access Token</em></td>
+                  <td>An authorization mechanism used to access data. Created by the <em>Data Portal</em></td>
+               </tr>
+               <tr>
+                  <td><em>Controlled Access</em></td>
+                  <td>Data that requires DACO approval</td>
+               </tr>
+               <tr>
+                  <td><em>DCC</em></td>
+                  <td>The ICGC Data Coordination Center (<a href="https://icgc.org/icgc/goals-structure-policies-guidelines/coordination" target="_blank">DCC</a>) performs quality assessment, curation and data releases and also manages the data flow from projects and centers to the central ICGC database and public repositories.</td>
+               </tr>
+               <tr>
+                  <td><em>Data Portal</em></td>
+                  <td>The ICGC data portal located at <a href="https://dcc.icgc.org">https://dcc.icgc.org</a></td>
+               </tr>
+               <tr>
+                  <td><em>Manifest</em></td>
+                  <td>A file used as input to the storage client to describe and identify files to be downloaded</td>
+               </tr>
+               <tr>
+                  <td><em>Object Id</em></td>
+                  <td>The unique identifier of an object expressed as a UUID. In the command line interface this is refered to as <code>--object-id</code>.</td>
+               </tr>
+               <tr>
+                  <td><em>Storage Client</em></td>
+                  <td>Sofware provided by ICGC required to download data from AWS S3</td>
+               </tr>
+               <tr>
+                  <td><em>S3</em></td>
+                  <td><a href="https://aws.amazon.com/s3/" target="_blank">Amazon Simple Storage Service</a>, the physical store of the ICGC AWS data.</td>
+               </tr>					
+               <tr>
+                  <td><em>Token Manager</em></td>
+                  <td>Section of the portal used to manage <em>Access Tokens</em></td>
+               </tr>						
+            </tbody>
+         </table>
+      </section>
+   </article>
+</div>
