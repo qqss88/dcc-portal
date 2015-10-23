@@ -101,6 +101,8 @@
           $('.pathway-info-svg').html('');
           
           var padding = 2;
+          // Need extra node padding on the top for firefox. Otherwise mutation count gets cut off
+          var nodeTopPadding = 10;
           var infoSvg = d3.select('.pathway-info-svg').append('svg')
               .attr('viewBox', '0 0 ' +150+ ' ' +70)
               .attr('preserveAspectRatio', 'xMidYMid')
@@ -109,7 +111,7 @@
           var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
           node.size={width:120-padding*2,height:60-padding*2};
-          node.position={x:padding+15,y:padding+10};
+          node.position={x:padding+15,y:padding+nodeTopPadding};
           infoRenderer.renderNodes([node]);
           
           if(isMutated){

@@ -47,6 +47,8 @@
       var textPosition = attrs.textPosition ?
         attrs.textPosition.nodeValue.split(' ') :
         attrs.bounds.nodeValue.split(' ');
+      var lofIndex = lofList.indexOf(attrs.id.nodeValue);
+      var overlaidIndex = overlaidList.indexOf(attrs.id.nodeValue);
 
       nodes.push({
         position: {
@@ -60,9 +62,11 @@
         type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
         id: attrs.id.nodeValue,
         crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
-        lof: (lofList.indexOf(attrs.id.nodeValue) >= 0 ),
-        grayed: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
-        overlaid: (isDisease && (overlaid && overlaidList.indexOf(attrs.id.nodeValue) >= 0) && lofList.indexOf(attrs.id.nodeValue) < 0 ),
+        lof: (lofIndex >= 0 ),
+        grayed: (isDisease && (overlaid && overlaidIndex < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
+        // Do not set as overlaid if it is already a loss of function node as lof ensures opaque background
+        overlaid: (isDisease && (overlaid && overlaidIndex >= 0) && lofIndex < 0 ),
+        // Empty compartments will not have any schemaClass. We use this info to not render them
         hasClass: attrs.schemaClass ? true : false,
         reactomeId: attrs.reactomeId ?
           attrs.reactomeId.nodeValue : 'missing',
