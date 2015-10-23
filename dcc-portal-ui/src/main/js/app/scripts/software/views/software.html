@@ -19,22 +19,25 @@
    <article>
       <section id="overview" class="tab-content" style="padding-top:0px;">
          <h2>Overview</h2>
-         <p>This is the official DCC software page which publishes various tools for download. For feature requests and reporting bugs, please contact <a href="mailto:dcc-support@icgc.org">dcc-support@icgc.org</a>. To verify the contents of the download, please see <a data-scrollto href="#verifying-downloads">Verifying Downloads</a></p>
+         <p>This is the official DCC software page which publishes various tools for working with ICGC data. Software is provided in both tarball and Docker image format.</p>
+         <p>For feature requests and reporting bugs, please contact <a href="mailto:dcc-support@icgc.org">dcc-support@icgc.org</a>. To verify the contents of the download, please see <a data-scrollto href="#verifying-downloads">Verifying Downloads</a>.</p>
       </section>
    </article>   
    <article>
       <section id="storage-client" class="tab-content" style="padding-top:0px;">
          <h2>Storage Client</h2>
          <div>
-            <p>To interact with cloud repositories such as <a href="/icgc-in-the-cloud/repositories/aws-virginia">AWS</a> and <a href="/icgc-in-the-cloud/repositories/collaboratory/">Collaboratory</a>, you will require a the Storage Client. For usage information, please see the <a href="/icgc-in-the-cloud/repositories/aws-virginia/guide">User Guide</a>.</p>
+            <p>To interact with cloud repositories such as <a href="/icgc-in-the-cloud/repositories/aws-virginia">AWS</a> and <a href="/icgc-in-the-cloud/repositories/collaboratory/">Collaboratory</a>, you will require a the Storage Client. For system requirements and usage information, please see the <a href="/icgc-in-the-cloud/repositories/aws-virginia/guide">User Guide</a>.</p>
             
-            <h3>Latest Release</h3>
-            <p>Users are encouraged to use the latest version of our software to keep current with bug fixes. Click on the following to download the latest client package:</p>
+            <h3>Latest Release Tarball</h3>
+            <p>Users are encouraged to use the latest version of our software to keep current with bug fixes, enhancements and new features. Click on the following to download the latest client package:</p>
             <p>
                <a id="latest-version" class="t_button" target="_blank" href="api/v1/ui/software/dcc-storage-client/latest">Download</a>
             </p>
-            <h3>Previous Releases</h3>
-            <p>For all published versions, you may choose from the following:</p>
+            <h3>Previous Release Tarballs</h3>
+            <p>It is strongly recommended to use the latest release to take advantage of newest features and bug fixes.</p>
+
+            <p>However, if you wish to use an old version you may choose from the following:</p>
             <table class="table table-striped">
                <thead>
                   <tr>
@@ -44,6 +47,8 @@
                <tbody id="versions">
                </tbody>
             </table>
+            <h3>Docker Images</h3>
+            <p>For Docker images, please visit <a href="https://hub.docker.com/r/icgc/dcc-storage-client">Docker Hub</a>.</p>
          </div>
       </section>
    </article>
@@ -55,7 +60,7 @@
          <div>
             <p>To verify the signatures you will need our public key used for software releases:</p>
             <p>
-               <a class="t_button" target="_blank" href="api/v1/ui/software/key">Public Key</a>
+               <a class="t_button" style="color:white" target="_blank" href="api/v1/ui/software/key">Public Key</a>
             </p>				
          </div>
          <h3>GPG Verification</h3>
