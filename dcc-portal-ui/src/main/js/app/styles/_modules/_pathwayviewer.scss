@@ -20,8 +20,8 @@ $compartmentBorder:#ffc38b;
   height: 100%;
   width: 100%;
   
-  .content-body{
-    
+  .content-body {
+    border-top: solid 1px #ccc;
   }
   
   .search-control {
@@ -50,15 +50,15 @@ $compartmentBorder:#ffc38b;
     border-left: solid 1px #ccc;
     margin: 0 0;
     min-width: 200px;
-    border: solid 1px #ccc;
-    border-left: none;
-    
+    border-right: solid 1px #ccc;
+    border-bottom: solid 1px #ccc; 
   }
   
   .pathway-filter-container {
       max-height: 76rem; 
       overflow-y: scroll;
       padding-bottom: 1rem;
+      border-top: solid 1px #ccc
     }
     
   .pathways-content {

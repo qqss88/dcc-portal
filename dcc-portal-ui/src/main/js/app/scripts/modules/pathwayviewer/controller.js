@@ -18,6 +18,7 @@
 
   var ReactomePathway = function (config) {
     this.config = config || defaultConfig;
+    this.rendererUtils = new dcc.RendererUtils();
   };
 
   /*
@@ -113,7 +114,6 @@
       highlightColor: config.highlightColor,
       subPathwayColor: config.subPathwayColor
     });
-    this.rendererUtils = new dcc.RendererUtils();
     
     this.renderer.renderCompartments(_.where(model.getNodes(),{type:'RenderableCompartment', hasClass:true}));
     this.renderer.renderEdges(this.rendererUtils.generateLines(model));

@@ -1,3 +1,4 @@
+
 <div id="pathways">
   <h1 data-ui-scrollfix="79" class="ui-scrollfix"><i class="t_badge t_badge_icon"><i class="icon-chart"></i></i>Pathway Viewer</h1>
   <div class="content-body">
@@ -9,20 +10,37 @@
         </div>
         <div class="pathway-filter-container">
             <ul class="t_suggest_flyout__hits">
-              <li class="t_suggest_flyout__hits__hit" ng-repeat="pathway in pathways|filter:pathwayFilter">
-                <span style="font-size: 1.2rem">{{ pathway.geneSetId }}</span>
+              <li class="t_suggest_flyout__hits__hit" 
+              data-ng-repeat="pw in pathways|filter:pathwayFilter"
+              data-ng-click="showPathway(pw.geneSetId)"
+              data-ng-class="{'selected': selectedPathwayId ==  pw.geneSetId}"
+              >
+                <span style="font-size: 1.2rem">{{ pw.geneSetId }}</span>
                 <ul>
                         <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
-                          <small>{{ pathway.geneSetName }}</small>
+                          <small>{{ pw.geneSetName }}</small>
                         </li>
                     </ul>
               </li>
             </ul>
-            </div>
-      </div>
+        </div>
+       </div>
     </aside>
     <article class="pathways-content">
-      <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-resul>
+      <section>
+        <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-resul>
+      </section>
+      <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
+         data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
+        <div data-ng-if="pathway">
+            <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+            <pathway-viewer data-items="pathway.xml" data-zooms="pathway.zooms" data-highlights="pathway.highlights">
+            </pathway-viewer>
+        </div>
+        <h3 data-ng-if="!pathway">
+            No Pathway Diagram Found.
+        </h3>
+      </section>
     </article>
   </div>
 </div>

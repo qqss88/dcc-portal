@@ -3895,6 +3895,10 @@ td {
   height: 100%;
   width: 100%;
 }
+/* line 23, _modules/_pathwayviewer.scss */
+#pathways .content-body {
+  border-top: solid 1px #ccc;
+}
 /* line 27, _modules/_pathwayviewer.scss */
 #pathways .search-control {
   position: relative;
@@ -3921,14 +3925,15 @@ td {
   border-left: solid 1px #ccc;
   margin: 0 0;
   min-width: 200px;
-  border: solid 1px #ccc;
-  border-left: none;
+  border-right: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
 }
-/* line 58, _modules/_pathwayviewer.scss */
+/* line 57, _modules/_pathwayviewer.scss */
 #pathways .pathway-filter-container {
   max-height: 76rem;
   overflow-y: scroll;
   padding-bottom: 1rem;
+  border-top: solid 1px #cccccc;
 }
 /* line 64, _modules/_pathwayviewer.scss */
 #pathways .pathways-content {
