@@ -16,6 +16,62 @@ $nonNodeBoxColor: #ebffe7;
 $compartmentBackground: #fbf7f4;
 $compartmentBorder:#ffc38b;
 
+#pathways {
+  height: 100%;
+  width: 100%;
+  
+  .content-body{
+    
+  }
+  
+  .search-control {
+    position: relative;
+    padding: 1rem;
+    
+    .search-icon {
+      position: absolute;
+      top: 1.4rem;
+      left: 1.3rem;
+    }
+    
+    
+    input[type="text"].pathway-filter {
+      margin: 0 auto;
+      display: block;
+      width: 100%;
+      padding-left: 1.5rem
+    }
+  }
+  
+  aside {
+    display: inline-block;
+    width: 20%;
+    float: none;
+    border-left: solid 1px #ccc;
+    margin: 0 0;
+    min-width: 200px;
+    border: solid 1px #ccc;
+    border-left: none;
+    
+  }
+  
+  .pathway-filter-container {
+      max-height: 76rem; 
+      overflow-y: scroll;
+      padding-bottom: 1rem;
+    }
+    
+  .pathways-content {
+    padding: 0.5rem 0.5rem;
+    height: 100%;
+    border: none;
+    width: 79%;
+    display: inline-block;
+    float: none;
+    vertical-align: top;
+  }
+}
+
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode{
   fill:$primaryNodeColor;
   stroke:$primaryNodeBorder;

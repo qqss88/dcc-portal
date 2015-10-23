@@ -1,24 +1,28 @@
-<div id="pathways" class="">
+<div id="pathways">
   <h1 data-ui-scrollfix="79" class="ui-scrollfix"><i class="t_badge t_badge_icon"><i class="icon-chart"></i></i>Pathway Viewer</h1>
-  <aside class="t_sidebar">
-      <div style="margin-right: -2rem">
-          <div class=''>
-            <div style="max-height: 76rem; overflow-y: scroll;padding-bottom: 1rem">
-                  <ul class="t_suggest_flyout__hits">
-                    <li class="t_suggest_flyout__hits__hit" ng-repeat="pathway in pathways">
-                      <span style="font-size: 1.2rem">{{ pathway.geneSetId }}</span>
-                      <ul>
-                              <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
-                                <small>{{ pathway.geneSetName }}</small>
-                              </li>
-                          </ul>
-                    </li>
-                  </ul>
+  <div class="content-body">
+    <aside>
+      <div>
+        <div class="search-control">
+            <div class="search-icon"><i class="icon-search"></i></div>
+            <input class="pathway-filter" type="text" placeholder="Filter pathways" data-ng-model="pathwayFilter">
+        </div>
+        <div class="pathway-filter-container">
+            <ul class="t_suggest_flyout__hits">
+              <li class="t_suggest_flyout__hits__hit" ng-repeat="pathway in pathways|filter:pathwayFilter">
+                <span style="font-size: 1.2rem">{{ pathway.geneSetId }}</span>
+                <ul>
+                        <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
+                          <small>{{ pathway.geneSetName }}</small>
+                        </li>
+                    </ul>
+              </li>
+            </ul>
             </div>
-          </div>
       </div>
-  </aside>
-  <article>
-     <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-resul>
-  </article>
+    </aside>
+    <article class="pathways-content">
+      <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-resul>
+    </article>
+  </div>
 </div>
