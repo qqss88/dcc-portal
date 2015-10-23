@@ -77,6 +77,7 @@
     'icgc.pancancer',
     'icgc.auth',
     'icgc.tokens',
+    'icgc.pathways',
 
     // old
     'app.ui',
