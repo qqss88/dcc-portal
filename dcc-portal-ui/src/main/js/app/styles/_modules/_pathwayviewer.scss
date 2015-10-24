@@ -69,6 +69,16 @@ $compartmentBorder:#ffc38b;
     display: inline-block;
     float: none;
     vertical-align: top;
+    
+    .summary-header {
+      margin: 0;
+      float: left;
+    }
+    
+    .summary-back-link {
+      margin: 0;
+      float: right;
+    }
   }
 }
 

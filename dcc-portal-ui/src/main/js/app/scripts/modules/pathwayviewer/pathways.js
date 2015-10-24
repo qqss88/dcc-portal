@@ -48,7 +48,7 @@
 	});
 	
 
-	module.controller('PathwaysController', function($scope, Page, enrichmentData, Restangular, $stateParams,
+	module.controller('PathwaysController', function($scope, Page, enrichmentData, Restangular,
 		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, LocationService) {
 				
 		
@@ -61,9 +61,12 @@
 			Page.setTitle('Pathway Viewer');
 			
 			console.log(enrichmentData.results);
-			
+				
 			$scope.pathways = enrichmentData.results;
 			$scope.analysis = {
+						getID: function() {
+							return enrichmentData.id;	
+						},
 						getData: function() {
 							return enrichmentData;
 						},
@@ -73,10 +76,15 @@
 			};
 			
 			
+			// Select the first gene set in the pathway as the
+			// default value if one exists...
+			if ( angular.isArray($scope.pathways) && $scope.pathways.length > 0 
+					&& angular.isObject($scope.pathways[0]) ) {
+				$scope.showPathway($scope.pathways[0].geneSetId);
+			}
+				
 		}
 		
-
-		_init();
 
 		$scope.showPathway = function(id) {			
 			$scope.pathway = {};
@@ -151,7 +159,8 @@
 			});
 		};	
 		
-		
+		// Initialize our controller and it's corresponding scope.
+		_init();
 		
 	});
 })();
