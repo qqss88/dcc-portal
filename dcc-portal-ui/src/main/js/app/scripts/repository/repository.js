@@ -474,11 +474,11 @@
       }
 
       if (_.startsWith (repoCode, 'aws-') || repoCode === 'collaboratory') {
-        return 'icon-download';
+        return 'icon-download-cloud';
       }
 
       return 'icon-database';
-    }
+    };
 
     /**
      * Export table
