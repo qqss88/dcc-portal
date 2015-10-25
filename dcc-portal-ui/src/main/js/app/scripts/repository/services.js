@@ -25,7 +25,7 @@
   var module = angular.module('icgc.repository.services', []);
 
   module.service ('ExternalRepoService', function ($window, Restangular, API) {
-    
+
     // Initial values until the call to getRepoMap() returns.
     var _srv = this,
         _repoCodeToName = {
@@ -42,50 +42,50 @@
         },
         _repoNameToCode = _.invert (_repoCodeToName),
         _repoMapRefreshPromise = null;
-    
-    
+
+
     // Private functions....
     function _init() {
       // Force a refresh
       _srv.refreshRepoMap();
-      /////////////////////////// 
+      ///////////////////////////
     }
-    
+
     function _getRepoMap() {
       return Restangular.one (REPO_API_PATH).one('repo_map').get ({});
     }
-    
+
     function _concatRepoCodes (repoNames) {
       return _.map (repoNames, function (name) {
         return _.get (_repoNameToCode, name, name);
       }).join();
     }
 
-     
+
     //////////////////////////////////////////////////////////
     // Public API
     //////////////////////////////////////////////////////////
     // We need a way to force the refresh of the Repo Map from the server.
     // Returning the promise is useful when it's a dependency.
     _srv.refreshRepoMap = function() {
-      
+
       // If a refresh promise has been made in the past return it..
       if (_repoMapRefreshPromise !== null) {
         return _repoMapRefreshPromise;
       }
-      
+
       _repoMapRefreshPromise = _getRepoMap();
-      
+
       _repoMapRefreshPromise.then(function (restangularMapData) {
         var repoMapData = restangularMapData.plain();
         _repoCodeToName = repoMapData;
         _repoNameToCode = _.invert (repoMapData);
         _repoMapRefreshPromise = null;
       });
-      
+
       return _repoMapRefreshPromise;
     };
-    
+
 
     _srv.getList = function (params) {
       var defaults = {
@@ -99,6 +99,10 @@
       return _.get (_repoCodeToName, repoCode, null);
     };
 
+    _srv.getRepoCodeFromName = function (repoName) {
+      return _.get (_repoNameToCode, repoName, null);
+    };
+
     /**
      * Get total donor, file and file size statistics
      */
@@ -109,7 +113,7 @@
       return Restangular.one (REPO_API_PATH + '/summary').get (params);
     };
 
-    
+
     _srv.download = function (filters, repos) {
       $window.location.href = API.BASE_URL + '/' + REPO_API_PATH + '/manifest?filters=' +
         uriString (filters) + '&repositories=' + _concatRepoCodes (repos);
@@ -141,8 +145,8 @@
     _srv.getFileInfo = function (id) {
       return Restangular.one (REPO_API_PATH, id).get();
     };
-    
-    
+
+
      // Initialize this service
     _init();
 

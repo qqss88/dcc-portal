@@ -467,7 +467,17 @@
     };
 
     _ctrl.repoIconClass = function (repoName) {
-      return '';
+      var repoCode = ExternalRepoService.getRepoCodeFromName (repoName);
+
+      if (! _.isString (repoCode)) {
+        return '';
+      }
+
+      if (_.startsWith (repoCode, 'aws-') || repoCode === 'collaboratory') {
+        return 'icon-download';
+      }
+
+      return 'icon-database';
     }
 
     /**
