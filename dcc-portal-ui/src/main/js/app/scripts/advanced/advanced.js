@@ -55,7 +55,7 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
-              AdvancedGeneService, AdvancedMutationService, SetService, Settings) {
+              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
@@ -143,6 +143,22 @@
         });
       };
 
+      function ensureString (string) {
+        return _.isString (string) ? string.trim() : '';
+      }
+
+      _ctrl.projectFlagIconClass = function (projectCode) {
+        var defaultValue = '';
+        var last3 = _.takeRight (ensureString (projectCode), 3);
+
+        if (_.size (last3) < 3 || _.first (last3) !== '-') {
+          return defaultValue;
+        }
+
+        var last2 = _.rest (last3).join ('');
+
+        return 'flag flag-' + CodeTable.translateCountryCode (last2.toLowerCase());
+      };
 
       /**
        * View observation/experimental details
@@ -404,7 +420,7 @@
                 gene.uiDonorsLink = LocationService.toURLParam(
                                       LocationService.merge(_f, {gene: {id: {is: [gene.id]}}}, 'facet')
                                     );
-        
+
                 gene.uiDonors = data.facets.projectId.terms;
                 gene.uiDonors.forEach(function (facet) {
                   var p = _.find(projects.hits, function (item) {
@@ -534,7 +550,7 @@
                     }
                   }
 
-                  mutation.uiDonorsLink = LocationService.toURLParam( 
+                  mutation.uiDonorsLink = LocationService.toURLParam(
                                             LocationService.merge(_f, {mutation: {id: {is: [mutation.id]}}}, 'facet')
                                           );
                   mutation.uiDonors = data.facets.projectId.terms;

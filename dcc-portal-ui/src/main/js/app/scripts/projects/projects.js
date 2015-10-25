@@ -304,8 +304,6 @@
           aggregationAjaxAbort = $q.defer();
           _ctrl.isLoadingData = true;
 
-          // This call is relatively expensive.
-          // FIXME: elasticsearch aggregation support may be more efficient
           Restangular.one ('ui').one ('gene-project-donor-counts', _.pluck (genes.hits, 'id'))
             .withHttpConfig ({timeout: aggregationAjaxAbort.promise})
             .get ({'filters': mutationFilter})
@@ -359,6 +357,13 @@
       Page.startWork();
       Projects.getList({include: 'facets'}).then(success);
     }
+
+    _ctrl.countryIconClass = function (countryName) {
+      var defaultValue = '';
+      var countryCode = CodeTable.countryCode (countryName);
+
+      return _.isEmpty (countryCode) ? defaultValue : 'flag flag-' + countryCode;
+    };
 
     $scope.$on('$locationChangeSuccess', function (event, dest) {
 
