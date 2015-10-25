@@ -355,7 +355,8 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController',
-    function ($scope, $window, $modal, LocationService, Page, ExternalRepoService, SetService, ProjectCache) {
+    function ($scope, $window, $modal, LocationService, Page, ExternalRepoService,
+      SetService, ProjectCache, CodeTable) {
 
     var projectMap = {};
     var _ctrl = this;
@@ -451,6 +452,23 @@
       var count = _.size (fileCopies);
       return (count > 0) ? _.sum (fileCopies, 'fileSize') / count : 0;
     };
+
+    _ctrl.flagIconClass = function (projectCode) {
+      var defaultValue = '';
+      var last3 = _.takeRight (ensureString (projectCode), 3);
+
+      if (_.size (last3) < 3 || _.first (last3) !== '-') {
+        return defaultValue;
+      }
+
+      var last2 = _.rest (last3).join ('');
+
+      return 'flag flag-' + CodeTable.translateCountryCode (last2.toLowerCase());
+    };
+
+    _ctrl.repoIconClass = function (repoName) {
+      return '';
+    }
 
     /**
      * Export table
