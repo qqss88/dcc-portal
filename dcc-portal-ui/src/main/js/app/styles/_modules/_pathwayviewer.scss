@@ -241,7 +241,15 @@ $compartmentBorder:#ffc38b;
 }
 
 .pathway-gene-table{
-  margin:0 auto;
+  margin:2rem auto;
+  
+  .pathway-gene-table:-webkit-full-screen {
+    margin:30rem auto;
+  }
+  
+  .pathway-gene-table:fullscreen {
+    margin:30rem auto;
+  }
 }
 
 .pathway-gene-label, .pathway-gene-header-label{

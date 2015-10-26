@@ -252,11 +252,8 @@
         });
   
         // 4) if it's a reactome pathway, get diagram
-        _ctrl.geneSet.showPathway = PortalFeature.get('REACTOME_VIEWER');
-
-        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0] && _ctrl.geneSet.showPathway) {
+        if(_ctrl.geneSet.source === 'Reactome' && _ctrl.uiParentPathways[0]) {
           _ctrl.pathway = {};
-          _ctrl.geneSet.showPathway = true;
 
           var pathwayId = _ctrl.uiParentPathways[0].diagramId;
           var parentPathwayId = _ctrl.uiParentPathways[0].geneSetId;
