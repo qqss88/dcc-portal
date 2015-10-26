@@ -204,8 +204,9 @@ public class DonorRepository implements Repository {
   public MultiSearchResponse projectDonorCount(List<Query> queries, String facetName) {
     val multiSearch = client.prepareMultiSearch();
 
-    queries.stream().forEach(query ->
-        multiSearch.add(projectDonorCountSearch(query, facetName)));
+    for (val query : queries) {
+      multiSearch.add(projectDonorCountSearch(query, facetName));
+    }
 
     val response = multiSearch.execute().actionGet();
 

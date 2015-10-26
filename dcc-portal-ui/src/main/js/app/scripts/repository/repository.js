@@ -341,6 +341,8 @@
       return isGnos (repoType) || isS3 (repoType);
     };
 
+    this.isS3 = isS3;
+
     this.translateDataType = function (dataType) {
       var longName = PCAWG.translate (dataType);
 

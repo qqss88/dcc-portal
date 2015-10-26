@@ -561,7 +561,7 @@ public class RepositoryFileRepository {
     val request = client.prepareSearch(index).setTypes(indexType);
     customizer.accept(request);
 
-    log.info(logMessage + "; ES query is: '{}'", request);
+    log.debug(logMessage + "; ES query is: '{}'", request);
     return request.execute().actionGet();
   }
 
@@ -579,7 +579,7 @@ public class RepositoryFileRepository {
     val request = queryEngine.execute(pqlAst, REPOSITORY_FILE).getRequestBuilder();
     customizer.accept(request);
 
-    log.info(logMessage + "; ES query is: '{}'", request);
+    log.debug(logMessage + "; ES query is: '{}'", request);
     return request.execute().actionGet();
   }
 
@@ -611,7 +611,7 @@ public class RepositoryFileRepository {
 
   // FIXME: Support terms lookup on files as part of the filter builder so we don't need an extra method.
   @NonNull
-  public SearchResponse prepareDataExportFromSet(String setId, final String[] fields) {
+  public SearchResponse prepareSetDataExport(String setId, final String[] fields) {
     val query = buildFileSetIdQuery(setId);
 
     return prepareDataTableExport(request -> request.setQuery(query), fields);

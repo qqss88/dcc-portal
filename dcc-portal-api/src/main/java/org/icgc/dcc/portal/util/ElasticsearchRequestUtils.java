@@ -103,7 +103,7 @@ public class ElasticsearchRequestUtils {
         .setSearchType(COUNT)
         .setQuery(query);
 
-    log.info("ES query: '{}'.", search);
+    log.debug("ES query: '{}'.", search);
     val response = search.execute().actionGet();
 
     return getTotalHitCount(response) > 0;

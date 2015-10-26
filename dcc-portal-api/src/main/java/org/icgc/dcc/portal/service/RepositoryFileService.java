@@ -227,7 +227,7 @@ public class RepositoryFileService {
 
   @NonNull
   public void exportTableDataFromSet(OutputStream output, String setId) {
-    val prepResponse = repositoryFileRepository.prepareDataExportFromSet(setId, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
+    val prepResponse = repositoryFileRepository.prepareSetDataExport(setId, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
 
     generateTabDelimitedData(output, prepResponse, DATA_TABLE_EXPORT_MAP_FIELD_ARRAY);
   }
@@ -392,7 +392,7 @@ public class RepositoryFileService {
   }
 
   @SneakyThrows
-  private void generateManifestFileOfRepo(OutputStream output, String repoCode, SearchResponse searchResult,
+  private void generateRepoManifestFile(OutputStream output, String repoCode, SearchResponse searchResult,
       Date timestamp) {
     val data = FluentIterable.from(searchResult.getHits())
         .transformAndConcat(hit -> toValueMap(hit));
@@ -436,7 +436,7 @@ public class RepositoryFileService {
 
     val searchResult = repositoryFileRepository.findDownloadInfo(pql);
 
-    generateManifestFileOfRepo(output, repoCode, searchResult, timestamp);
+    generateRepoManifestFile(output, repoCode, searchResult, timestamp);
   }
 
   @NonNull
@@ -445,7 +445,7 @@ public class RepositoryFileService {
     val awsRepoCode = "aws-virginia";
     val searchResult = repositoryFileRepository.findDownloadInfoFromSet(setId);
 
-    generateManifestFileOfRepo(output, awsRepoCode, searchResult, timestamp);
+    generateRepoManifestFile(output, awsRepoCode, searchResult, timestamp);
   }
 
   private Iterable<Map<String, String>> getData(@NonNull final Query query) {

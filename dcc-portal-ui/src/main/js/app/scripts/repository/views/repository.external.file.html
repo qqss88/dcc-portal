@@ -160,9 +160,14 @@
             </a>
 
             <span ng-if="showMetaData"
-            ng-init="metaDataUrl = fileCtrlr.buildMetaDataUrl (fileCopy, info)">
+              ng-init="metaDataUrl = fileCtrlr.buildMetaDataUrl (fileCopy, info); isS3 = fileCtrlr.isS3 (fileCopy.repoType);">
               <br>
-              <a target="_blank" href="{{ metaDataUrl }}" tooltip="Show Metadata" title="{{ metaDataUrl }}">
+              <a ng-if="isS3"
+                href="{{ metaDataUrl }}" tooltip="Download Metadata" title="{{ metaDataUrl }}">
+                <i class="icon-download" />Metadata
+              </a>
+              <a ng-if="! isS3"
+                target="_blank" href="{{ metaDataUrl }}" tooltip="Show Metadata" title="{{ metaDataUrl }}">
                 <i class="icon-external-link" />Metadata
               </a>
             </span>
