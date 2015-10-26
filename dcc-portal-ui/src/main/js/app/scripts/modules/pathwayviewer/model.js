@@ -22,12 +22,14 @@
       }
     };
 
+    var process = parsedXml.find('Process')[0].attributes;
+
     // Is this a disease pathway?
-    var isDisease = (parsedXml.find('Process')[0].attributes.isDisease && parsedXml.find('Process')[0].attributes.isDisease.nodeValue === 'true');
+    var isDisease = (process.isDisease && process.isDisease.nodeValue === 'true');
     var diseaseComponents = checkandReturn(parsedXml.find('diseaseComponents'));
     
     // Is this a normal draw diagram? (Disease Diagrams are sometimes resued in a non disease context)
-    var forNormalDraw = (parsedXml.find('Process')[0].attributes.forNormalDraw && parsedXml.find('Process')[0].attributes.forNormalDraw.nodeValue === 'true');
+    var forNormalDraw = (process.forNormalDraw && process.forNormalDraw.nodeValue === 'true');
     var normalComponents = checkandReturn(parsedXml.find('normalComponents'));
 
     // Parse all the nodes first
