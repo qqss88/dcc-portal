@@ -30,12 +30,13 @@
       },
       templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
       link: function ($scope, element) {
-        var showingLegend = false,  rendered = false;
-        var zoomedOn, xml, highlights;
-        
-        var scrollTimer;
-        
-        var consequenceFilter = {"is":
+        var showingLegend = false,  
+            rendered = false,
+            zoomedOn = $scope.zooms || [''],
+            xml = $scope.items,
+            highlights = $scope.highlights,
+            scrollTimer,
+            consequenceFilter = {"is":
           ["frameshift_variant",
           "missense_variant",
           "start_lost",
@@ -313,7 +314,7 @@
         
         $scope.$on('$destroy', function () {
           element.unbind();
-          
+          console.log('I am dying! Love Pathway Viewer...')
           document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
           document.removeEventListener('mozfullscreenchange', fullScreenHandler);
           document.removeEventListener('fullscreenchange', fullScreenHandler);

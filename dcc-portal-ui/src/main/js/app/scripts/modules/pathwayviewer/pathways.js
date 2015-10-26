@@ -34,7 +34,7 @@
 
                     Restangular.one('analysis/enrichment', entityID).get()
                         .then(function(rectangularEnrichmentData) {
-                            deferred.resolve(rectangularEnrichmentData.plain());       
+                            deferred.resolve(rectangularEnrichmentData.plain());      
 						},
 						function(response) {
 							deferred.reject(response);
@@ -78,12 +78,14 @@
 			
 			// Select the first gene set in the pathway as the
 			// default value if one exists...
-			if ( angular.isArray($scope.pathways) && $scope.pathways.length > 0 
-					&& angular.isObject($scope.pathways[0]) ) {
-				$scope.showPathway($scope.pathways[0].geneSetId);
+			var firstGeneSetID = _( _.first($scope.pathways) ).get('geneSetId');
+			
+			if ( firstGeneSetID ) {
+				$scope.showPathway(firstGeneSetID);
 			}
-				
-		}
+			
+		}		
+		
 		
 
 		$scope.showPathway = function(id) {			
