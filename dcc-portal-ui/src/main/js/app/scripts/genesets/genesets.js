@@ -48,6 +48,7 @@
     function ($scope, $timeout, $state, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
       GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet) {
 
+
       var _ctrl = this, 
           geneSetFilter = {}; // Build adv query based on type
           

@@ -266,7 +266,6 @@
           }else if(!rendered){
             $('.pathwaysvg').remove();
             controller.render(xml,zoomedOn);
-            console.log(xml);
             rendered = true;
           }else{
             hideInfo();
