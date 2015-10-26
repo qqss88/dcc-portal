@@ -117,7 +117,7 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, $timeout, $state, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSetParams, PortalFeature) {
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSetParams) {
 
       var _ctrl = this, 
           geneSet = geneSetParams.getGeneSet(),

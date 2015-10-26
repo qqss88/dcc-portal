@@ -26,7 +26,7 @@
     var isDisease = (parsedXml.find('Process')[0].attributes.isDisease && parsedXml.find('Process')[0].attributes.isDisease.nodeValue === 'true');
     var diseaseComponents = checkandReturn(parsedXml.find('diseaseComponents'));
     
-    // Is this a normal draw diagram?
+    // Is this a normal draw diagram? (Disease Diagrams are sometimes resued in a non disease context)
     var forNormalDraw = (parsedXml.find('Process')[0].attributes.forNormalDraw && parsedXml.find('Process')[0].attributes.forNormalDraw.nodeValue === 'true');
     var normalComponents = checkandReturn(parsedXml.find('normalComponents'));
 
@@ -55,6 +55,7 @@
       var overlaidIndex = overlaidList.indexOf(attrs.id.nodeValue); 
       var type = this.tagName.substring(this.tagName.lastIndexOf('.') + 1);
 
+      // We need to be careful and check if forNormalDraw has been set. If so ONLY draw compartments and normal nodes
       if ((forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) || !forNormalDraw || type === 'RenderableCompartment') {
         nodes.push({
           position: {
@@ -129,6 +130,7 @@
           });
       });
       
+      // We need to be careful and check if forNormalDraw has been set. If so ONLY draw normal nodes
       if ((forNormalDraw && normalComponents.indexOf(this.attributes.id.nodeValue) >= 0) || !forNormalDraw) {
         reactions.push({
           base: base,
