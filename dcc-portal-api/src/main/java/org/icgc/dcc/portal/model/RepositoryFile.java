@@ -146,8 +146,8 @@ public class RepositoryFile {
     @ApiModelProperty(value = "ID of a repository index file")
     String id;
 
-    @ApiModelProperty(value = "Short ID of a repository index file")
-    String fileId;
+    @ApiModelProperty(value = "Object UUID of a repository index file")
+    String objectId;
 
     @ApiModelProperty(value = "Name of a repository index file")
     String fileName;
