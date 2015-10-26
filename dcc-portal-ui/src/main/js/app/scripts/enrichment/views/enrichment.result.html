@@ -56,8 +56,18 @@
                 </tr>
             </tbody>
         </table>
+        <br />
+        <span class="action-toolbar pull-right" 
+          data-ng-if="callingContext != 'pathways' && item.params.universe == 'REACTOME_PATHWAYS'">
+          <span class="action-item">
+            <i class="icon-search"></i>
+              <a href="/pathways/{{item.id}}"
+                title="Click to open in Pathwayviewer">
+                Open In Pathway Viewer
+              </a>
+            </span>
+        </span>
         <br>
-
         <span>Original Query:</span>
         <div>
             <a href="/search/g?filters={{encode(item.query.filters)}}&genes={{sortParams}}">
@@ -74,7 +84,7 @@
                     0 enriched gene set with FDR &le; {{item.params.fdr}}. You may increase the FDR q-value threshold and launch Enrichment Analysis again.
                 </span>
     
-    
+                
                 <span data-ng-if="item.params.maxGeneSetCount < item.overview.overlapFdrGeneSetCount && item.results.length > 0">
                     Top <strong>{{item.params.maxGeneSetCount | number}}</strong> gene sets out of <strong>{{item.overview.overlapFdrGeneSetCount | number}}</strong> enriched gene sets with FDR &le; <strong>{{item.params.fdr}}</strong>
                 </span>
@@ -83,14 +93,6 @@
                 </span>
     
                 <span class="t_tools" data-ng-if="item.results.length > 0">
-                    <a class="t_tools__tool"
-                        href="/pathways/{{item.id}}"
-                        data-ng-if="item.params.universe == 'REACTOME_PATHWAYS'"
-                        data-tooltip-placement="left"
-                        title="Click to open in Pathwayviewer">
-                        <i class="icon-search"></i>
-                        <span class="text-label">Open In Pathway Viewer</span>
-                    </a>
                     <span class="t_tools__tool"
                         data-tooltip-placement="left"
                         data-tooltip="Export Table as TSV"

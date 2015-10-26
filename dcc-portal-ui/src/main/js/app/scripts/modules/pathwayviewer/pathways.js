@@ -26,7 +26,7 @@
 			templateUrl: '/scripts/modules/pathwayviewer/views/pathways.html',
 			controller: 'PathwaysController',
 			resolve: {
-                enrichmentData: ['$q', '$stateParams', 'Restangular',
+                EnrichmentData: ['$q', '$stateParams', 'Restangular',
 
                 function($q, $stateParams, Restangular) {
                     var entityID = $stateParams.entityID,
@@ -48,27 +48,28 @@
 	});
 	
 
-	module.controller('PathwaysController', function($scope, Page, enrichmentData, Restangular,
-		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, LocationService) {
+	module.controller('PathwaysController', function($scope, Page, EnrichmentData, Restangular,
+		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService) {
 				
 		
-		var _ctrl = this;
+		var _ctrl = this,
+        _selectedPathway = null;
 
-		
+	
 		function _init() {
 			Page.stopWork();
 			Page.setPage('entity');
-			Page.setTitle('Pathway Viewer');
+			Page.setTitle('Enrichment Analysis Pathway Viewer');
+      
+      $scope.TooltipText = TooltipText
 			
-			console.log(enrichmentData.results);
-				
-			$scope.pathways = enrichmentData.results;
+			$scope.pathways = EnrichmentData.results;
 			$scope.analysis = {
 						getID: function() {
-							return enrichmentData.id;	
+							return EnrichmentData.id;	
 						},
 						getData: function() {
-							return enrichmentData;
+							return EnrichmentData;
 						},
 						getContext: function() {
 							return 'pathways';
@@ -78,19 +79,25 @@
 			
 			// Select the first gene set in the pathway as the
 			// default value if one exists...
-			var firstGeneSetID = _( _.first($scope.pathways) ).get('geneSetId');
-			
-			if ( firstGeneSetID ) {
-				$scope.showPathway(firstGeneSetID);
+      var firstGenesetPathway = _.first($scope.pathways);
+	
+			if ( firstGenesetPathway ) {
+				$scope.setSelectedPathway(firstGenesetPathway);
 			}
 			
-		}		
+		}
+    	
 		
-		
+		$scope.getSelectedPathway = function() {
+      return _selectedPathway;
+    }
 
-		$scope.showPathway = function(id) {			
+		$scope.setSelectedPathway = function(pathway) {			
 			$scope.pathway = {};
-			$scope.selectedPathwayId = id;
+      
+			_selectedPathway = pathway; 
+     
+      var id = pathway.geneSetId;
 			
 			Restangular.one("genesets").one(id).get().then(function (geneSet) {
 				$scope.geneSet = geneSet;

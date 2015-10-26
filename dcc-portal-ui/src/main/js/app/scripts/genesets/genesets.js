@@ -28,85 +28,14 @@
       templateUrl: 'scripts/genesets/views/geneset.html',
       controller: 'GeneSetCtrl as GeneSetCtrl',
       resolve: {
-        geneSetParams: ['$stateParams', 'GeneSets', function ($stateParams, GeneSets) {
+        geneSet: ['$stateParams', 'GeneSets', function ($stateParams, GeneSets) {
           return GeneSets.one($stateParams.id).get().then(function (geneSet) {
-            
-            // Pass back anonymous object with the appropriate data for the 
-            // given state
-            return {'getGeneSet': function() {
+
                 return geneSet;
-              }, 
-              'getEnrichmentAnalysisData': function() {
-                return null;
-              }
-            };            
-          });     
-        }]
-      },
-      data: {
-        getCallingContext: function() {
-          return {
-              contextName: 'genset'
-          };
+            });            
+          }]     
         }
-      }
-    })
-    // TODO: To be extropolated if this functionity is not to be included 
-    // --- for now just copy it and change the state. Need to do some
-    // minor rewiring to revert it back to previous version.
-    .state('geneset_enrichment_analysis', {
-      url: '/genesets/analysis/:entityID',
-      templateUrl: 'scripts/genesets/views/geneset.html',
-      controller: 'GeneSetCtrl as GeneSetCtrl',
-      resolve: {
-        geneSetParams: ['$q', '$stateParams', 'GeneSets', 'Restangular', 
-          function ($q, $stateParams, GeneSets, Restangular) {
-            var entityID = $stateParams.entityID,
-                deferred = $q.defer();
-                
-          
-          Restangular.one('analysis')
-            .one('enrichment', entityID). get()
-            .then(function(rectangularEnrichmentData) {   
-                    var enrichmentData = rectangularEnrichmentData.plain(),
-                        firstGeneSetInEntity = _.get(enrichmentData, 'results[0].geneSetId' , null);
-                    
-                    if (firstGeneSetInEntity === null) {
-                      console.error(  'Could not find a geneset ID to assign ' +
-                                      ' as the default! Data returned: ', enrichmentData);
-                      deferred.reject(enrichmentData);
-                      return;
-                    }
-                    
-                    return GeneSets.one(firstGeneSetInEntity).get().then(function (geneSet) {
-                      
-                      // Pass back anonymous object with the appropriate data for the 
-                      // given state. In this case we should include the enrichment data
-                      // as well.
-                      deferred.resolve({'getGeneSet': function() {
-                          return geneSet;
-                        }, 
-                        'getEnrichmentAnalysisData': function() {
-                          return enrichmentData;
-                        }
-                      });
-                  });
-                }, function(response) {
-                  // Make sure we 
-                  deferred.reject(response);
-                });
-                
-          return deferred.promise;
-        }]
-      },
-      data: {
-        getCallingContext: function() {
-          return {
-              contextName: 'enrichment'
-          };
-        }
-      }
-    });
+      });
   });
 })();
 
@@ -117,13 +46,12 @@
 
   module.controller('GeneSetCtrl',
     function ($scope, $timeout, $state, LocationService, HighchartsService, Page, GeneSetHierarchy, GeneSetService,
-      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSetParams) {
+      GeneSetVerificationService, FiltersUtil, ExternalLinks, geneSet) {
+
 
       var _ctrl = this, 
-          geneSet = geneSetParams.getGeneSet(),
-          //enrichmentAnalysisData = geneSetParams.getEnrichmentAnalysisData(),
-          geneSetFilter = {}, // Build adv query based on type
-          _callingModuleContext = $state.current.data.getCallingContext();
+          geneSetFilter = {}; // Build adv query based on type
+          
           
                  
       Page.setTitle(geneSet.id);
@@ -132,10 +60,6 @@
       _ctrl.geneSet = geneSet;
       _ctrl.geneSet.queryType = FiltersUtil.getGeneSetQueryType(_ctrl.geneSet.type);
       geneSetFilter[_ctrl.geneSet.queryType] = {is:[_ctrl.geneSet.id]};
-      
-      _ctrl.isCallingContextModule = function(contextName) {
-        return _callingModuleContext.contextName === contextName.toLowerCase();  
-      };
 
       _ctrl.ExternalLinks = ExternalLinks;
 

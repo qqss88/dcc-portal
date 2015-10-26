@@ -58,7 +58,32 @@ $compartmentBorder:#ffc38b;
       max-height: 76rem; 
       overflow-y: scroll;
       padding-bottom: 1rem;
-      border-top: solid 1px #ccc
+      border-top: solid 1px #ccc;
+      
+      .pathway-item-header {
+        position: relative;
+        @include clearfix;
+        
+        .item-title {
+          float: left;
+        }
+        
+        
+        
+        .item-pval {
+          float: right;
+          padding-right: 0.6rem;
+          color: $secondaryNodeBorder;
+          font-size: 1rem; 
+        }
+        
+        
+        
+      }
+      
+      .selected .item-pval {
+            color: #fff; 
+        }
     }
     
   .pathways-content {
@@ -69,6 +94,14 @@ $compartmentBorder:#ffc38b;
     display: inline-block;
     float: none;
     vertical-align: top;
+    
+    .pathway-summary {
+      padding-bottom: 0rem;
+    }
+    
+    .table-pathway-info {
+      margin: 0rem 0rem 2rem 0rem;
+    }
     
     .pathway-analysis-header {
       @include clearfix;
