@@ -19,6 +19,7 @@
   var ReactomePathway = function (config) {
     this.config = config || defaultConfig;
     this.rendererUtils = new dcc.RendererUtils();
+    this.model = null;
   };
 
   /*

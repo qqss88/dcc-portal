@@ -70,14 +70,18 @@ $compartmentBorder:#ffc38b;
     float: none;
     vertical-align: top;
     
-    .summary-header {
-      margin: 0;
-      float: left;
-    }
+    .pathway-analysis-header {
+      @include clearfix;
     
-    .summary-back-link {
-      margin: 0;
-      float: right;
+      .summary-header {
+        margin: 0;
+        float: left;
+      }
+      
+      .summary-back-link {
+        margin: 0;
+        float: right;
+      }
     }
   }
 }
