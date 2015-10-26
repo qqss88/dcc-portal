@@ -12,8 +12,8 @@
             <ul class="t_suggest_flyout__hits">
               <li class="t_suggest_flyout__hits__hit" 
               data-ng-repeat="pw in pathways|filter:pathwayFilter"
-              data-ng-click="showPathway(pw.geneSetId)"
-              data-ng-class="{'selected': selectedPathwayId ==  pw.geneSetId}"
+              data-ng-click="setSelectedPathway(pw)"
+              data-ng-class="{'selected': getSelectedPathway() ==  pw}"
               >
                 <span style="font-size: 1.2rem">{{ pw.geneSetId }}</span>
                 <ul>
@@ -27,11 +27,60 @@
        </div>
     </aside>
     <article class="pathways-content">
-      <section>
-        <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-resul>
+      <section class="pathway-summary">
+        <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-result>
       </section>
       <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
+         <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_GENES}}"><abbr># Genes</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_GENES_OVERLAP}}"><abbr># Genes in overlap</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_DONORS}}"><abbr># Donors affected</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_MUTATIONS}}"><abbr># Mutations</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_EXPECTED}}"><abbr>Expected</abbr></th>
+                        <th>
+                            <abbr data-tooltip="{{TooltipText.ENRICHMENT.GENESET_PVALUE}}">P-Value</abbr>
+                        </th>
+                        <th >
+                            <abbr data-tooltip="{{TooltipText.ENRICHMENT.GENESET_ADJUSTED_PVALUE}}">Adjusted P-Value</abbr>
+       
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="white-space:nowrap"><a data-ng-href="/genesets/{{getSelectedPathway().geneSetId}}"  data-ng-bind="getSelectedPathway().geneSetId"></a></td>
+                        <td  data-ng-bind="getSelectedPathway().geneSetName">
+                        </td>
+                        <td class="text-right">
+                            <a href="/search/g?filters={{getSelectedPathway().geneSetFilters}}" data-ng-bind="getSelectedPathway().geneCount | number"></a>
+                        </td>
+                        <td class="text-right">
+                            <span>
+                                <a href="/search/g?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></a>
+                            </span>
+                        </td>
+    
+                        <td class="text-right">
+                            <span>
+                                <a href="/search?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></a>
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <span>
+                                <a href="/search/m?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></a>
+                            </span>
+                        </td>
+                        <td class="text-right" data-ng-bind="getSelectedPathway().expectedValue.toExponential(2)"></td>
+                        <td class="text-right"  data-ng-bind="getSelectedPathway().pvalue.toExponential(2)"></td>
+                        <td class="text-right" data-ng-bind="getSelectedPathway().adjustedPValue.toExponential(2)"></td>
+                    </tr>
+                </tbody>
+            </table>
         <div data-ng-if="pathway">
             <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
             <pathway-viewer data-items="pathway.xml" data-zooms="pathway.zooms" data-highlights="pathway.highlights">
