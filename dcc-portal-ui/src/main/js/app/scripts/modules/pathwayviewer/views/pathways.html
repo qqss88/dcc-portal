@@ -20,7 +20,7 @@
                     <span style="font-size: 1.2rem" data-ng-bind="pw.geneSetId"></span>
                   </div>
                   <div class="item-pval">
-                    <abbrev data-tooltip="{{TooltipText.ENRICHMENT.GENESET_PVALUE}}" data-ng-bind="pw.pvalue.toExponential(2)"></abbrev>
+                    <abbrev data-tooltip="{{TooltipText.ENRICHMENT.GENESET_ADJUSTED_PVALUE}}" data-ng-bind="pw.adjustedPValue.toExponential(2)"></abbrev>
                   </div>
                 </div>
                   <ul>
@@ -40,6 +40,13 @@
       </section>
       <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
+         
+         <div class="action-toolbar pathway-analysis-header">
+               <div class="action-item summary-back-link">
+                    <i class="icon-beaker"></i>Go back to <a href="/analysis/view/enrichment/{{analysis.getID()}}">Enrichment Analysis Results</a>
+               </div>        
+        </span>
+        <br />
          <table class="table table-bordered table-pathway-info">
                 <thead>
                     <tr>

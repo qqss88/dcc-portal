@@ -20,6 +20,10 @@ $compartmentBorder:#ffc38b;
   height: 100%;
   width: 100%;
   
+  #pathway {
+    padding-top: 1rem;
+  }
+  
   .content-body {
     border-top: solid 1px #ccc;
   }
@@ -97,6 +101,7 @@ $compartmentBorder:#ffc38b;
     
     .pathway-summary {
       padding-bottom: 0rem;
+      border: none;
     }
     
     .table-pathway-info {
@@ -112,10 +117,16 @@ $compartmentBorder:#ffc38b;
       }
       
       .summary-back-link {
-        margin: 0;
+        margin: 0rem 0rem 2rem 0rem;
         float: right;
+        border: none;
       }
     }
+    
+    .action-item {
+      padding: 0rem 0rem 3rem 0rem 0rem;
+    }
+    
   }
 }
 
