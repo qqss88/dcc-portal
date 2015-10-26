@@ -655,14 +655,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -693,14 +693,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -718,14 +718,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -753,14 +753,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -778,14 +778,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -797,14 +797,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -876,14 +876,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -945,14 +945,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -1733,18 +1733,19 @@ footer .dcc-col {
 }
 /* line 64, _sections/_analysis.scss */
 .analysis .sidepanel {
-  float: left;
+  display: inline-block;
+  vertical-align: top;
   width: 20%;
-  margin-right: 1rem;
+  height: 100%;
+  padding: 0rem 1rem 2rem 0rem;
 }
-/* line 70, _sections/_analysis.scss */
+/* line 75, _sections/_analysis.scss */
 .analysis .content {
-  float: left;
-  clear: right;
-  width: 77%;
+  display: inline-block;
+  width: 76%;
   min-height: 20rem;
 }
-/* line 79, _sections/_analysis.scss */
+/* line 85, _sections/_analysis.scss */
 .analysis .multi-line-heading {
   line-height: 1.5rem;
 }
@@ -1802,6 +1803,16 @@ footer .dcc-col {
   cursor: not-allowed;
   color: #999999;
   background: #f2f2f2;
+}
+
+/* line 57, _modules/_button.scss */
+.t_button_info {
+  background: #5b7fa4;
+  border-color: #5b7fa4;
+}
+/* line 61, _modules/_button.scss */
+.t_button_info:hover {
+  background: #3f5973;
 }
 
 /* line 2, _modules/_form.scss */
@@ -2003,14 +2014,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2114,14 +2125,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2413,14 +2424,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2568,6 +2579,10 @@ aside .t_tabs__tab {
   background: transparent;
   text-decoration: none;
 }
+/* line 20, _modules/_tools.scss */
+.t_tools__tool .text-label, a.t_tools__tool .text-label, a.t_tools__tool:visited .text-label {
+  font-size: 1.2rem;
+}
 
 /* line 1, _modules/_hide.scss */
 .t_sh {
@@ -2576,14 +2591,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -3876,42 +3891,198 @@ td {
 
 /** PATHWAY COLOR CUSTOMIZATION **/
 /* line 19, _modules/_pathwayviewer.scss */
+#pathways {
+  height: 100%;
+  width: 100%;
+}
+/* line 23, _modules/_pathwayviewer.scss */
+#pathways #pathway {
+  padding-top: 1rem;
+}
+/* line 27, _modules/_pathwayviewer.scss */
+#pathways .content-body {
+  border-top: solid 1px #ccc;
+}
+/* line 31, _modules/_pathwayviewer.scss */
+#pathways .search-control {
+  position: relative;
+  padding: 1rem;
+}
+/* line 35, _modules/_pathwayviewer.scss */
+#pathways .search-control .search-icon {
+  position: absolute;
+  top: 1.4rem;
+  left: 1.3rem;
+}
+/* line 42, _modules/_pathwayviewer.scss */
+#pathways .search-control input[type="text"].pathway-filter {
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+  padding-left: 1.5rem;
+}
+/* line 50, _modules/_pathwayviewer.scss */
+#pathways aside {
+  display: inline-block;
+  width: 20%;
+  float: none;
+  border-left: solid 1px #ccc;
+  margin: 0 0;
+  min-width: 200px;
+  border-right: solid 1px #ccc;
+  border-bottom: solid 1px #ccc;
+}
+/* line 61, _modules/_pathwayviewer.scss */
+#pathways .pathway-filter-container {
+  max-height: 76rem;
+  overflow-y: scroll;
+  padding-bottom: 1rem;
+  border-top: solid 1px #ccc;
+}
+/* line 67, _modules/_pathwayviewer.scss */
+#pathways .pathway-filter-container .pathway-item-header {
+  position: relative;
+  /* for IE 6/7 */
+  *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
+  /* non-JS fallback */
+  *zoom: 1;
+}
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+#pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
+  content: ".";
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+#pathways .pathway-filter-container .pathway-item-header:after {
+  clear: both;
+}
+/* line 71, _modules/_pathwayviewer.scss */
+#pathways .pathway-filter-container .pathway-item-header .item-title {
+  float: left;
+}
+/* line 77, _modules/_pathwayviewer.scss */
+#pathways .pathway-filter-container .pathway-item-header .item-pval {
+  float: right;
+  padding-right: 0.6rem;
+  color: #166aa2;
+  font-size: 1rem;
+}
+/* line 88, _modules/_pathwayviewer.scss */
+#pathways .pathway-filter-container .selected .item-pval {
+  color: #fff;
+}
+/* line 93, _modules/_pathwayviewer.scss */
+#pathways .pathways-content {
+  padding: 0.5rem 0.5rem;
+  height: 100%;
+  border: none;
+  width: 79%;
+  display: inline-block;
+  float: none;
+  vertical-align: top;
+}
+/* line 102, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .pathway-summary {
+  padding-bottom: 0rem;
+  border: none;
+}
+/* line 107, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .table-pathway-info {
+  margin: 0rem 0rem 2rem 0rem;
+}
+/* line 111, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .pathway-analysis-header {
+  /* for IE 6/7 */
+  *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
+  /* non-JS fallback */
+  *zoom: 1;
+}
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+#pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
+  content: ".";
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+#pathways .pathways-content .pathway-analysis-header:after {
+  clear: both;
+}
+/* line 114, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .pathway-analysis-header .summary-header {
+  margin: 0;
+  float: left;
+}
+/* line 119, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .pathway-analysis-header .summary-back-link {
+  margin: 0rem 0rem 2rem 0rem;
+  float: right;
+  border: none;
+}
+/* line 126, _modules/_pathwayviewer.scss */
+#pathways .pathways-content .action-item {
+  padding: 0rem 0rem 3rem 0rem 0rem;
+}
+
+/* line 133, _modules/_pathwayviewer.scss */
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode {
   fill: #b5f9a7;
   stroke: #1a9900;
 }
 
-/* line 24, _modules/_pathwayviewer.scss */
+/* line 138, _modules/_pathwayviewer.scss */
+.span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode {
+  background: #b5f9a7;
+  padding: 2px;
+}
+/* line 141, _modules/_pathwayviewer.scss */
+.span__RenderableRect:hover, .span__RenderableProtein:hover, .span__RenderableChemical:hover, .span__RenderableEntity:hover, .span__ProcessNode:hover {
+  background: #ddfcd7;
+}
+
+/* line 146, _modules/_pathwayviewer.scss */
 .RenderableComplex, .RenderableEntitySet {
   fill: #b6e2ff;
   stroke-width: 0.5px;
   stroke: #166aa2;
 }
 
-/* line 30, _modules/_pathwayviewer.scss */
+/* line 152, _modules/_pathwayviewer.scss */
+.span__RenderableComplex, .span__RenderableEntitySet {
+  background: #b6e2ff;
+  padding: 2px;
+}
+/* line 155, _modules/_pathwayviewer.scss */
+.span__RenderableComplex:hover, .span__RenderableEntitySet:hover {
+  background: #e9f6ff;
+}
+
+/* line 160, _modules/_pathwayviewer.scss */
 .RenderableEntitySet {
   stroke-width: 1.5px;
 }
 
-/* line 34, _modules/_pathwayviewer.scss */
+/* line 164, _modules/_pathwayviewer.scss */
 .ProcessNode {
   stroke: #1a9900;
   stroke-width: 2px;
   fill: #ebffe7;
 }
 
-/* line 40, _modules/_pathwayviewer.scss */
+/* line 170, _modules/_pathwayviewer.scss */
 .RenderableGene {
   stroke: #333;
   fill: none;
 }
 
-/* line 45, _modules/_pathwayviewer.scss */
+/* line 175, _modules/_pathwayviewer.scss */
 .RenderableText {
   font-size: 7px;
 }
 
-/* line 49, _modules/_pathwayviewer.scss */
+/* line 179, _modules/_pathwayviewer.scss */
 .RenderableCompartment {
   fill: #fbf7f4;
   stroke: #ffc38b;
@@ -3919,41 +4090,51 @@ td {
   fill-opacity: 0.25;
 }
 
-/* line 56, _modules/_pathwayviewer.scss */
+/* line 186, _modules/_pathwayviewer.scss */
 .RenderableStroke {
   stroke-width: 1px;
 }
 
-/* line 60, _modules/_pathwayviewer.scss */
+/* line 190, _modules/_pathwayviewer.scss */
 .renderableinteraction {
   stroke-width: 1.5px;
 }
 
-/* line 64, _modules/_pathwayviewer.scss */
+/* line 194, _modules/_pathwayviewer.scss */
 .entitysetandmemberlink, .entitysetandentitysetlink {
   stroke-dasharray: 5 7;
   stroke-width: 0.5px;
 }
 
-/* line 69, _modules/_pathwayviewer.scss */
+/* line 199, _modules/_pathwayviewer.scss */
 .Note {
   stroke: gray;
   fill: #ebffe7;
 }
 
-/* line 74, _modules/_pathwayviewer.scss */
+/* line 204, _modules/_pathwayviewer.scss */
 .pathway-sub-reaction-line {
   stroke-width: 2px;
   stroke: navy;
 }
 
-/* line 80, _modules/_pathwayviewer.scss */
+/* line 210, _modules/_pathwayviewer.scss */
 .RenderableMutated {
   fill: white;
 }
 
 /** ESSENTIALS **/
-/* line 86, _modules/_pathwayviewer.scss */
+/* line 216, _modules/_pathwayviewer.scss */
+.EntitySetAndMemberLink {
+  stroke-dasharray: 5 7;
+}
+
+/* line 220, _modules/_pathwayviewer.scss */
+.EntitySetAndEntitySetLink {
+  stroke-dasharray: 5 7;
+}
+
+/* line 224, _modules/_pathwayviewer.scss */
 .RenderableNodeText .RenderableNodeTextCell {
   text-align: center;
   height: 100%;
@@ -3961,35 +4142,35 @@ td {
   color: #444;
 }
 
-/* line 93, _modules/_pathwayviewer.scss */
+/* line 231, _modules/_pathwayviewer.scss */
 .RenderableCompartmentText {
   font-size: 9px;
   line-height: 1.1em;
 }
 
-/* line 99, _modules/_pathwayviewer.scss */
+/* line 237, _modules/_pathwayviewer.scss */
 .RenderableNodeText td {
   padding: none;
 }
 
-/* line 103, _modules/_pathwayviewer.scss */
+/* line 241, _modules/_pathwayviewer.scss */
 .RenderableNodeText tbody {
   line-height: normal;
 }
 
-/* line 107, _modules/_pathwayviewer.scss */
+/* line 245, _modules/_pathwayviewer.scss */
 .RenderableBorder {
   fill: none;
 }
 
 /** CONTAINER AND INFO BAR STYLES **/
-/* line 113, _modules/_pathwayviewer.scss */
+/* line 251, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
   margin: 0;
   background: none;
 }
 
-/* line 118, _modules/_pathwayviewer.scss */
+/* line 256, _modules/_pathwayviewer.scss */
 #pathway-viewer-mini {
   border: 1px solid #b3b3b3;
   position: relative;
@@ -3998,7 +4179,7 @@ td {
   background-color: white;
 }
 
-/* line 126, _modules/_pathwayviewer.scss */
+/* line 264, _modules/_pathwayviewer.scss */
 .pathway-legend, .pathway-info {
   position: absolute;
   top: 0;
@@ -4010,26 +4191,25 @@ td {
   background: white;
 }
 
-/* line 137, _modules/_pathwayviewer.scss */
+/* line 275, _modules/_pathwayviewer.scss */
 .pathway-info {
   width: 30%;
   opacity: 0.95;
 }
 
-/* line 142, _modules/_pathwayviewer.scss */
+/* line 280, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-
-/* line 149, _modules/_pathwayviewer.scss */
-.pathway-gene-table {
-  margin: 0 auto;
+/* line 286, _modules/_pathwayviewer.scss */
+.pathway-info-content .pathway-gene-table {
+  margin: 2rem auto;
 }
 
-/* line 153, _modules/_pathwayviewer.scss */
+/* line 291, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4037,22 +4217,22 @@ td {
   text-align: center !important;
 }
 
-/* line 160, _modules/_pathwayviewer.scss */
+/* line 298, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 164, _modules/_pathwayviewer.scss */
+/* line 302, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 168, _modules/_pathwayviewer.scss */
+/* line 306, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   margin-top: 0.5em;
 }
 
-/* line 172, _modules/_pathwayviewer.scss */
+/* line 310, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4064,44 +4244,44 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 183, _modules/_pathwayviewer.scss */
+/* line 321, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 189, _modules/_pathwayviewer.scss */
+/* line 327, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
 }
 
-/* line 195, _modules/_pathwayviewer.scss */
+/* line 333, _modules/_pathwayviewer.scss */
 .failed-reaction {
   stroke: red;
   stroke-width: 2px;
 }
 
-/* line 200, _modules/_pathwayviewer.scss */
+/* line 338, _modules/_pathwayviewer.scss */
 .lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
   background-color: #b5f9a7;
   border: 2px dotted red;
 }
 
-/* line 205, _modules/_pathwayviewer.scss */
+/* line 343, _modules/_pathwayviewer.scss */
 .lof-RenderableComplex, .lof-RenderableEntitySet {
   background-color: #b6e2ff;
   border: 2px dotted red;
 }
 
-/* line 210, _modules/_pathwayviewer.scss */
+/* line 348, _modules/_pathwayviewer.scss */
 .lof-cell {
   padding: 0px;
 }
 
-/* line 214, _modules/_pathwayviewer.scss */
+/* line 352, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4120,18 +4300,53 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 232, _modules/_pathwayviewer.scss */
+/* line 370, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
   top: 0;
   background: white;
 }
+/* line 376, _modules/_pathwayviewer.scss */
+:-webkit-full-screen .pathway-info-content {
+  line-height: 1.4rem;
+  padding: 5%;
+  height: 70%;
+  overflow-y: auto;
+}
+/* line 382, _modules/_pathwayviewer.scss */
+:-webkit-full-screen .pathway-info-content .pathway-gene-table {
+  margin: 4rem auto;
+}
+
+/* line 390, _modules/_pathwayviewer.scss */
+:-moz-full-screen .pathway-info-content {
+  line-height: 1.4rem;
+  padding: 5%;
+  height: 70%;
+  overflow-y: auto;
+}
+/* line 396, _modules/_pathwayviewer.scss */
+:-moz-full-screen .pathway-info-content .pathway-gene-table {
+  margin: 4rem auto;
+}
+
+/* line 404, _modules/_pathwayviewer.scss */
+:fullscreen .pathway-info-content {
+  line-height: 1.4rem;
+  padding: 5%;
+  height: 70%;
+  overflow-y: auto;
+}
+/* line 410, _modules/_pathwayviewer.scss */
+:fullscreen .pathway-info-content .pathway-gene-table {
+  margin: 4rem auto;
+}
 
 /**
  * For disabling zooming
  */
-/* line 242, _modules/_pathwayviewer.scss */
+/* line 419, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }

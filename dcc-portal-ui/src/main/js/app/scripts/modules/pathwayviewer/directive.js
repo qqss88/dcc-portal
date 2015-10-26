@@ -30,18 +30,20 @@
       },
       templateUrl: 'scripts/modules/pathwayviewer/views/viewer.html',
       link: function ($scope, element) {
-        var showingLegend = false,  rendered = false;
-        var zoomedOn, xml, highlights;
-        
-        var scrollTimer;
-        
-        var consequenceFilter = {"is":
+        var showingLegend = false,  
+            rendered = false,
+            zoomedOn = $scope.zooms || [''],
+            xml = $scope.items,
+            highlights = $scope.highlights,
+            scrollTimer,
+            consequenceFilter = {"is":
           ["frameshift_variant",
           "missense_variant",
           "start_lost",
           "initiator_codon_variant",
           "stop_gained","stop_lost",
           "exon_loss_variant",
+          "exon_variant",
           "splice_acceptor_variant",
           "splice_donor_variant",
           "splice_region_variant",
@@ -99,15 +101,18 @@
         var renderinfo = function(node,mutationCount,isMutated){
           $('.pathway-info-svg').html('');
           
-          var padding = 7;
+          var padding = 2;
+          // Need extra node padding on the top for firefox. Otherwise mutation count gets cut off
+          var nodeTopPadding = 10;
           var infoSvg = d3.select('.pathway-info-svg').append('svg')
-              .attr('viewBox', '0 0 ' +150+ ' ' +50)
+              .attr('viewBox', '0 0 ' +150+ ' ' +70)
               .attr('preserveAspectRatio', 'xMidYMid')
+              .attr('style', 'padding-top:20px')
               .append('g');
           var infoRenderer = new dcc.Renderer(infoSvg, {onClick: function(){},highlightColor: '#9b315b', strokeColor: '#696969'});
           
-          node.size={width:100-padding*2,height:50-padding*2};
-          node.position={x:padding+25,y:padding};
+          node.size={width:120-padding*2,height:60-padding*2};
+          node.position={x:padding+15,y:padding+nodeTopPadding};
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
@@ -166,7 +171,7 @@
           urlPath: $location.url(),
           strokeColor: '#696969',
           highlightColor: '#9b315b',
-          initScaleFactor: 0.95,
+          initScaleFactor: 0.90,
           subPathwayColor: 'navy'
         });
         
@@ -174,7 +179,7 @@
         setTimeout(function() {
           var rect = $('.pathway-legend')[0].getBoundingClientRect();
           controller.renderLegend(rect.width,rect.height);
-        }, 500);
+        }, 700);
         
         $('.pathway-legend-controller').on('click', function(){
           if(showingLegend){
@@ -259,6 +264,7 @@
           if(!xml || !zoomedOn){
             return;
           }else if(!rendered){
+            $('.pathwaysvg').remove();
             controller.render(xml,zoomedOn);
             rendered = true;
           }else{
@@ -271,17 +277,26 @@
           }
         };
         
-        $scope.$watch('items', function (newValue) {
+        $scope.$watch('items', function (newValue, oldValue) {         
+          rendered = false;
           xml = newValue;
           handleRender();
         });
         
-        $scope.$watch('zooms', function (newValue) {
+        $scope.$watch('zooms', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+            
           zoomedOn = newValue;
           handleRender();
         });
 
-        $scope.$watch('highlights', function (newValue) {
+        $scope.$watch('highlights', function (newValue, oldValue) {
+           if (newValue === oldValue) {
+            return;
+          }
+          
           highlights = newValue;
           handleRender();
         });
@@ -295,7 +310,6 @@
         
         $scope.$on('$destroy', function () {
           element.unbind();
-          
           document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
           document.removeEventListener('mozfullscreenchange', fullScreenHandler);
           document.removeEventListener('fullscreenchange', fullScreenHandler);

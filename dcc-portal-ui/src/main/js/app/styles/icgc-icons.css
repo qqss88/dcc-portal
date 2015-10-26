@@ -50,6 +50,7 @@
   /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
 }
  
+
 .icon-resize-full:before { content: '\e800'; } /* '' */
 .icon-resize-small:before { content: '\e801'; } /* '' */
 .icon-fire:before { content: '\e802'; } /* '' */
@@ -115,6 +116,7 @@
 .icon-caret-down:before { content: '\e83e'; } /* '' */
 .icon-pilcrow:before { content: '\e83f'; } /* '' */
 .icon-caret-left:before { content: '\e840'; } /* '' */
+.icon-spread:before { content: '\e841'; } /* '' */
 
 /*
    Animation example, for spinners
