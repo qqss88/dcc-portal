@@ -238,17 +238,9 @@ $compartmentBorder:#ffc38b;
   padding:5%;
   height: 70%;
   overflow-y: auto;
-}
-
-.pathway-gene-table{
-  margin:2rem auto;
   
-  .pathway-gene-table:-webkit-full-screen {
-    margin:30rem auto;
-  }
-  
-  .pathway-gene-table:fullscreen {
-    margin:30rem auto;
+  .pathway-gene-table{
+    margin:2rem auto; 
   }
 }
 
@@ -336,6 +328,45 @@ $compartmentBorder:#ffc38b;
   position: fixed;
   top: 0;
   background: white;
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }  
+}
+
+:-moz-full-screen {
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }   
+}
+
+:fullscreen {
+   
+  .pathway-info-content{
+    line-height: 1.4rem;
+    padding:5%;
+    height: 70%;
+    overflow-y: auto;
+    
+    .pathway-gene-table{
+      margin:4rem auto; 
+    }
+  }  
 }
 
 /**
