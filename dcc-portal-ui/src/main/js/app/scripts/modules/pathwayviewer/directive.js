@@ -278,10 +278,7 @@
           }
         };
         
-        $scope.$watch('items', function (newValue, oldValue) {
-          if (newValue === oldValue) {
-            return;
-          }
+        $scope.$watch('items', function (newValue, oldValue) {         
           rendered = false;
           xml = newValue;
           handleRender();
@@ -314,7 +311,6 @@
         
         $scope.$on('$destroy', function () {
           element.unbind();
-          console.log('I am dying! Love Pathway Viewer...')
           document.removeEventListener('webkitfullscreenchange', fullScreenHandler);
           document.removeEventListener('mozfullscreenchange', fullScreenHandler);
           document.removeEventListener('fullscreenchange', fullScreenHandler);
