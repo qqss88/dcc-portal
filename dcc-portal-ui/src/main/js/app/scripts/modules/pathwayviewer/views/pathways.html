@@ -15,12 +15,20 @@
               data-ng-click="setSelectedPathway(pw)"
               data-ng-class="{'selected': getSelectedPathway() ==  pw}"
               >
-                <span style="font-size: 1.2rem">{{ pw.geneSetId }}</span>
-                <ul>
-                        <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
-                          <small>{{ pw.geneSetName }}</small>
-                        </li>
-                    </ul>
+                <div class="pathway-item-header">
+                  <div class="item-title">
+                    <span style="font-size: 1.2rem" data-ng-bind="pw.geneSetId"></span>
+                  </div>
+                  <div class="item-pval">
+                    <abbrev data-tooltip="{{TooltipText.ENRICHMENT.GENESET_PVALUE}}" data-ng-bind="pw.pvalue.toExponential(2)"></abbrev>
+                  </div>
+                </div>
+                  <ul>
+                      <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
+                        <small data-ng-bind="pw.geneSetName"></small>
+                      </li>
+                  </ul>
+                 
               </li>
             </ul>
         </div>
@@ -32,7 +40,7 @@
       </section>
       <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
-         <table class="table table-bordered">
+         <table class="table table-bordered table-pathway-info">
                 <thead>
                     <tr>
                         <th>ID</th>

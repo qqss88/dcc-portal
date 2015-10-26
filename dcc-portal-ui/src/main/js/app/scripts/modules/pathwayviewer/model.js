@@ -25,6 +25,10 @@
     // Is this a disease pathway?
     var isDisease = (parsedXml.find('Process')[0].attributes.isDisease && parsedXml.find('Process')[0].attributes.isDisease.nodeValue === 'true');
     var diseaseComponents = checkandReturn(parsedXml.find('diseaseComponents'));
+    
+    // Is this a normal draw diagram?
+    var forNormalDraw = (parsedXml.find('Process')[0].attributes.forNormalDraw && parsedXml.find('Process')[0].attributes.forNormalDraw.nodeValue === 'true');
+    var normalComponents = checkandReturn(parsedXml.find('normalComponents'));
 
     // Parse all the nodes first
     var xmlNodes = parsedXml.find('Nodes')[0].children;
@@ -48,36 +52,39 @@
         attrs.textPosition.nodeValue.split(' ') :
         attrs.bounds.nodeValue.split(' ');
       var lofIndex = lofList.indexOf(attrs.id.nodeValue);
-      var overlaidIndex = overlaidList.indexOf(attrs.id.nodeValue);
+      var overlaidIndex = overlaidList.indexOf(attrs.id.nodeValue); 
+      var type = this.tagName.substring(this.tagName.lastIndexOf('.') + 1);
 
-      nodes.push({
-        position: {
-          x: +bounds[0],
-          y: +bounds[1]
-        },
-        size: {
-          width: +bounds[2],
-          height: +bounds[3]
-        },
-        type: this.tagName.substring(this.tagName.lastIndexOf('.') + 1),
-        id: attrs.id.nodeValue,
-        crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
-        lof: (lofIndex >= 0 ),
-        grayed: (isDisease && (overlaid && overlaidIndex < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
-        // Do not set as overlaid if it is already a loss of function node as lof ensures opaque background
-        overlaid: (isDisease && (overlaid && overlaidIndex >= 0) && lofIndex < 0 ),
-        // Empty compartments will not have any schemaClass. We use this info to not render them
-        hasClass: attrs.schemaClass ? true : false,
-        reactomeId: attrs.reactomeId ?
-          attrs.reactomeId.nodeValue : 'missing',
-        text: {
-          content: this.textContent.trim(),
+      if ((forNormalDraw && normalComponents.indexOf(attrs.id.nodeValue) >= 0 ) || !forNormalDraw || type === 'RenderableCompartment') {
+        nodes.push({
           position: {
-            x: +textPosition[0],
-            y: +textPosition[1]
+            x: +bounds[0],
+            y: +bounds[1]
+          },
+          size: {
+            width: +bounds[2],
+            height: +bounds[3]
+          },
+          type: type,
+          id: attrs.id.nodeValue,
+          crossed: (crossedList.indexOf(attrs.id.nodeValue) >= 0 ),
+          lof: (lofIndex >= 0 ),
+          grayed: (isDisease && (overlaid && overlaidIndex < 0) && diseaseComponents.indexOf(attrs.id.nodeValue) < 0),
+          // Do not set as overlaid if it is already a loss of function node as lof ensures opaque background
+          overlaid: (isDisease && (overlaid && overlaidIndex >= 0) && lofIndex < 0 ),
+          // Empty compartments will not have any schemaClass. We use this info to not render them
+          hasClass: attrs.schemaClass ? true : false,
+          reactomeId: attrs.reactomeId ?
+            attrs.reactomeId.nodeValue : 'missing',
+          text: {
+            content: this.textContent.trim(),
+            position: {
+              x: +textPosition[0],
+              y: +textPosition[1]
+            }
           }
-        }
-      });
+        });
+      }
     });
     
     var edges = parsedXml.find('Edges')[0].children;
@@ -122,18 +129,20 @@
           });
       });
       
-      reactions.push({
-        base: base,
-        nodes: nodes,
-        failedReaction: failedReaction,
-        grayed: grayed,
-        reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
-        id: this.attributes.id.nodeValue,
-        type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',
-        description: description ? description.textContent.trim() : 'no details',
-        class: this.localName.substring(this.localName.lastIndexOf('.') + 1),
-        center: getPointsArray(this.attributes.position.nodeValue)[0]
-      });
+      if ((forNormalDraw && normalComponents.indexOf(this.attributes.id.nodeValue) >= 0) || !forNormalDraw) {
+        reactions.push({
+          base: base,
+          nodes: nodes,
+          failedReaction: failedReaction,
+          grayed: grayed,
+          reactomeId: this.attributes.reactomeId ? this.attributes.reactomeId.nodeValue : 'missing',
+          id: this.attributes.id.nodeValue,
+          type: this.attributes.reactionType ? this.attributes.reactionType.nodeValue : 'missing',
+          description: description ? description.textContent.trim() : 'no details',
+          class: this.localName.substring(this.localName.lastIndexOf('.') + 1),
+          center: getPointsArray(this.attributes.position.nodeValue)[0]
+        });
+      }
     });
   };
 
