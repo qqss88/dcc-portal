@@ -311,19 +311,19 @@
         'pointer-events':'none',
         'fill':'none'
       }).append('xhtml:body')
-      .attr('class','RenderableNodeText')
+      .attr('class','node-text-body RenderableNodeText')
       .html(function(d){
         if (d.lof) {
           var lofClass = 'lof-'+ d.type;
           return '<table class="RenderableNodeTextCell ' + lofClass +'"><tr>' + 
-            '<td class="RenderableNodeTextCell lof-cell" valign="middle">'+
+            '<td style="max-width:'+d.size.width+'px;" class="RenderableNodeTextCell lof-cell" valign="middle">'+
             d.text.content+'</td></tr></table>';
         } else if (d.overlaid && !d.crossed) {
-          return '<table class="RenderableNodeTextCell"><tr><td valign="middle">' + 
+          return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">' + 
           '<span class="span__'+ d.type +'">'+
             d.text.content+'</span></td></tr></table>';
         } else {
-          return '<table class="RenderableNodeTextCell"><tr><td valign="middle">'+
+          return '<table class="RenderableNodeTextCell"><tr><td style="max-width:'+d.size.width+'px;" valign="middle">'+
             d.text.content+'</td></tr></table>';
         }
       });
