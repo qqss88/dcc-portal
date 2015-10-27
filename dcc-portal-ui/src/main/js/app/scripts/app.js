@@ -254,6 +254,7 @@
     'icgc.pancancer',
     'icgc.auth',
     'icgc.tokens',
+    'icgc.pathways',
 
     // old
     'app.ui',
@@ -307,6 +308,7 @@
   module.constant('API', {
     BASE_URL: $icgcApp.getAPI().getBasePathURL()
   });
+
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,

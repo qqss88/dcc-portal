@@ -73,6 +73,7 @@ public class DiagramService {
       "stop_gained",
       "stop_lost",
       "exon_loss_variant",
+      "exon_variant",
       "splice_acceptor_variant",
       "splice_donor_variant", "splice_region_variant",
       "5_prime_UTR_premature_start_codon_gain_variant",

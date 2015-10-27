@@ -1,0 +1,113 @@
+
+<div id="pathways">
+  <h1 data-ui-scrollfix="79"><i class="t_badge t_badge_icon"><i class="icon-spread"></i></i>Pathway Viewer</h1>
+  <div class="content-body">
+    <aside>
+      <div>
+        <div class="search-control">
+            <div class="search-icon"><i class="icon-search"></i></div>
+            <input class="pathway-filter" type="text" placeholder="Filter pathways" data-ng-model="pathwayFilter">
+        </div>
+        <div class="pathway-filter-container">
+            <ul class="t_suggest_flyout__hits">
+              <li class="t_suggest_flyout__hits__hit" 
+              data-ng-repeat="pw in pathways|filter:pathwayFilter"
+              data-ng-click="setSelectedPathway(pw)"
+              data-ng-class="{'selected': getSelectedPathway() ==  pw}"
+              >
+                <div class="pathway-item-header">
+                  <div class="item-title">
+                    <span style="font-size: 1.2rem" data-ng-bind="pw.geneSetId"></span>
+                  </div>
+                  <div class="item-pval">
+                    <abbrev data-tooltip="{{TooltipText.ENRICHMENT.GENESET_ADJUSTED_PVALUE}}" data-ng-bind="pw.adjustedPValue.toExponential(2)"></abbrev>
+                  </div>
+                </div>
+                  <ul>
+                      <li class="item-body">
+                        <small data-ng-bind="pw.geneSetName"></small>
+                      </li>
+                  </ul>
+                 
+              </li>
+            </ul>
+        </div>
+       </div>
+    </aside>
+    <article class="pathways-content" ng-init="analysisData = analysis.getData()">
+      <section class="pathway-summary">
+        <enrichment-result data-item="analysisData" data-calling-context="{{analysis.getContext()}}"></enrichment-result>
+      </section>
+      <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
+         data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
+         
+         <div class="action-toolbar pathway-analysis-header">
+               <div class="action-item summary-back-link">
+                    <i class="icon-beaker"></i>Go back to <a href="/analysis/view/enrichment/{{analysis.getID()}}">Enrichment Analysis Results</a>
+               </div>        
+        </div>
+        
+        <span data-ng-if="analysisData.results.length > 0">
+            Enriched gene set with FDR &le; <strong>{{analysisData.params.fdr}}</strong>
+        </span>
+         <table class="table table-bordered table-pathway-info">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_GENES}}"><abbr># Genes</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_GENES_OVERLAP}}"><abbr># Genes in overlap</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_DONORS}}"><abbr># Donors affected</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_MUTATIONS}}"><abbr># Mutations</abbr></th>
+                        <th data-tooltip="{{TooltipText.ENRICHMENT.GENESET_EXPECTED}}"><abbr>Expected</abbr></th>
+                        <th>
+                            <abbr data-tooltip="{{TooltipText.ENRICHMENT.GENESET_PVALUE}}">P-Value</abbr>
+                        </th>
+                        <th >
+                            <abbr data-tooltip="{{TooltipText.ENRICHMENT.GENESET_ADJUSTED_PVALUE}}">Adjusted P-Value</abbr>
+       
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="white-space:nowrap"><a data-ng-href="/genesets/{{getSelectedPathway().geneSetId}}"  data-ng-bind="getSelectedPathway().geneSetId"></a></td>
+                        <td  data-ng-bind="getSelectedPathway().geneSetName">
+                        </td>
+                        <td class="text-right">
+                            <a href="/search/g?filters={{getSelectedPathway().geneSetFilters}}" data-ng-bind="getSelectedPathway().geneCount | number"></a>
+                        </td>
+                        <td class="text-right">
+                            <span>
+                                <a href="/search/g?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></a>
+                            </span>
+                        </td>
+    
+                        <td class="text-right">
+                            <span>
+                                <a href="/search?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></a>
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <span>
+                                <a href="/search/m?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></a>
+                            </span>
+                        </td>
+                        <td class="text-right" data-ng-bind="getSelectedPathway().expectedValue.toExponential(2)"></td>
+                        <td class="text-right"  data-ng-bind="getSelectedPathway().pvalue.toExponential(2)"></td>
+                        <td class="text-right" data-ng-bind="getSelectedPathway().adjustedPValue.toExponential(2)"></td>
+                    </tr>
+                </tbody>
+            </table>
+        <div data-ng-if="pathway">
+            <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+            <pathway-viewer data-items="pathway.xml" data-zooms="pathway.zooms" data-highlights="pathway.highlights">
+            </pathway-viewer>
+        </div>
+        <h3 data-ng-if="!pathway">
+            No Pathway Diagram Found.
+        </h3>
+      </section>
+    </article>
+  </div>
+</div>

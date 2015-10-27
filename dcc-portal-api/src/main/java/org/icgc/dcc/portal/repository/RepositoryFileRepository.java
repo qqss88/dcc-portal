@@ -663,7 +663,15 @@ public class RepositoryFileRepository {
     // Number of files > max limit, so we must page files in order to ensure we get all donors.
     while (pageNumber <= pageCount) {
       for (val hit : response.getHits()) {
-        val donorIds = hit.field(DONOR_ID_RAW_FIELD_NAME).getValues();
+        val donorIdField = hit.field(DONOR_ID_RAW_FIELD_NAME);
+
+        if (null == donorIdField) {
+          // Skips when donorId doesn't appear in the fields.
+          log.warn("The Donors array in this document (id: {}) is empty, which is not valid.", hit.getId());
+          continue;
+        }
+
+        val donorIds = donorIdField.getValues();
         result.addAll(transform(donorIds, id -> id.toString()));
 
         if (result.size() >= setLimit) {
