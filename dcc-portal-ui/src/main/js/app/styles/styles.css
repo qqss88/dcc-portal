@@ -1765,12 +1765,16 @@ footer .dcc-col {
   line-height: 1.5rem;
 }
 
-/* line 1, _sections/_team.scss */
-.team-section-header {
-  margin-top: 0.75rem;
+/* line 2, _sections/_team.scss */
+.team-content .team-section-header {
+  margin-top: 2rem;
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
   font-weight: 500;
+}
+/* line 10, _sections/_team.scss */
+.team-content .full .team-section-header:first-child {
+  margin-top: 0.75rem;
 }
 
 /* line 1, _modules/_button.scss */
