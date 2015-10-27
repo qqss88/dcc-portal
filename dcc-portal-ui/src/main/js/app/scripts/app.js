@@ -234,6 +234,7 @@
     'icgc.mutations',
     'icgc.advanced',
     'icgc.releases',
+    'icgc.portalfeature',
     'icgc.keyword',
     'icgc.browser',
     'icgc.donorlist',
@@ -306,70 +307,6 @@
   module.constant('API', {
     BASE_URL: $icgcApp.getAPI().getBasePathURL()
   });
-
-
-
-  /**
-   * This serves as a debugging service to toggle features that are merged
-   * but disabled.
-   *
-   * Note: This works automatically for views that are tied to a state, otherwise
-   * it will be up to the callers to check for state change via watch/observe or other means.
-   */
-  module.service('PortalFeature', function($state, LocationService) {
-    var features = {
-      REACTOME_VIEWER: false,
-      AUTH_TOKEN: false
-    };
-    function _enable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = true;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function _disable(feature) {
-      if (features.hasOwnProperty(feature) === false) { return; }
-      features[feature] = false;
-      if ($state.current.name) {
-        $state.go($state.current.name, {}, {reload: true});
-      }
-    }
-
-    function init() {
-      var enable = LocationService.getParam('enable');
-      if (_.isEmpty(enable)) {
-        return;
-      }
-      enable.split(',').forEach(function(feature) {
-        _enable(feature.trim());
-      });
-    }
-
-    // Allow features to be turned on via query param on application load
-    init();
-
-
-    this.get = function(s) {
-      if (features.hasOwnProperty(s) === false) { return false; }
-      return features[s];
-    };
-
-    this.enable = function(s) {
-      _enable(s);
-    };
-
-    this.disable = function(s) {
-      _disable(s);
-    };
-
-    this.list = function() {
-      return features;
-    };
-
-  });
-
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,

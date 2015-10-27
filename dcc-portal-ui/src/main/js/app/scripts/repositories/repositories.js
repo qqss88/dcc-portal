@@ -21,7 +21,7 @@
 // Primary Repository Module
 ////////////////////////////////////////////////////////////////////////
 angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repositories.services'])
-	.config(function ($stateProvider) {
+	.config(function ($stateProvider, PortalFeatureProvider) {
 		
 		function _normalizeRepoCode(repoCode) {
 			return repoCode.toLowerCase().replace(/[^\w]+/i, '.');
@@ -30,9 +30,19 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 		$stateProvider
 			.state('ICGCcloud', {
 					url: '/icgc-in-the-cloud',
-					template: 	'<div data-ui-view="home"></div>' +
-								'<div data-ui-view="repositoryGuides"></div>' +
-								'<div data-ui-view="repos" class="cloud-repository-container"></div>',
+					template: function() {	
+            
+            var _templateStr = '',
+                isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
+                  
+                if (isICGCCloudFunctionlityEnabled) {
+                   _templateStr = '<div data-ui-view="home"></div>' +
+                      '<div data-ui-view="repositoryGuides"></div>' +
+                      '<div data-ui-view="repos" class="cloud-repository-container"></div>';
+                }
+                
+              return _templateStr;  
+          },
 					abstract: true			
 			})
 			.state('ICGCcloud.home', {
