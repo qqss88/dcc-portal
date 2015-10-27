@@ -131,6 +131,9 @@ $compartmentBorder:#ffc38b;
     .pathway-analysis-header {
       @include clearfix;
     
+      padding-top:0.2rem;
+      padding-bottom:0.8rem;
+    
       .summary-header {
         margin: 0;
         float: left;
@@ -367,6 +370,17 @@ $compartmentBorder:#ffc38b;
 
 .lof-cell {
   padding: 0px;
+}
+
+.node-text-body {
+  -ms-word-break: break-all;
+  -ms-word-wrap: break-all;
+  -webkit-word-break: break-word;
+  -webkit-word-wrap: break-word;
+  word-break: break-word;
+  word-wrap: break-word;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
 }
 
 .pathway-fullscreen-controller {
