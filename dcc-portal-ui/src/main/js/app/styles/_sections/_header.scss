@@ -142,6 +142,16 @@ header {
     background: $mauve;
   }
 
+  &.t_nav__items__item__data_repositories a {
+    color: $greyDark;
+    border: .3rem solid $greyDark;
+  }
+
+  &.t_nav__items__item__data_repositories a:hover {
+    color: $white;
+    background: $greyDark;
+  }
+
   &.t_nav__items__item__download a {
     color: $cyan;
     border: .3rem solid $cyan;
@@ -337,6 +347,10 @@ header {
     background: $cyan;
     color: $white;
   }
+  .t_nav__items__item__data_repositories a {
+    background: $greyDark;
+    color: $white;
+  }
 }
 
 #projects-page {
@@ -380,6 +394,18 @@ header {
   .t_nav__items__item__download a {
     cursor: default;
     background: $cyan;
+    color: $white;
+    i {
+      box-shadow: none;
+      background: none;
+    }
+  }
+}
+
+#data-repo-page {
+  .t_nav__items__item__data_repositories a {
+    cursor: default;
+    background: $greyDark;
     color: $white;
     i {
       box-shadow: none;

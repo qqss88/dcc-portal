@@ -354,6 +354,12 @@
   module.controller ('ExternalRepoController', function ($scope, $window, $modal, LocationService, Page,
     ExternalRepoService, SetService, ProjectCache, CodeTable) {
 
+    var tabNames = {
+      files: 'Files',
+      donors: 'Donors'
+    };
+    var currentTabName = tabNames.files;
+
     var projectMap = {};
     var _ctrl = this;
 
@@ -384,6 +390,20 @@
           paths.one + _.first (ids)
       };
     }
+
+    _ctrl.setTabToFiles = function() {
+      currentTabName = tabNames.files;
+    };
+    _ctrl.setTabToDonors = function() {
+      currentTabName = tabNames.donors;
+    };
+
+    _ctrl.isOnFilesTab = function(debug) {
+      return currentTabName === tabNames.files;
+    };
+    _ctrl.isOnDonorsTab = function(debug) {
+      return currentTabName === tabNames.donors;
+    };
 
     _ctrl.donorInfo = function (donors) {
       var toolTipMaker = function () {
@@ -470,7 +490,7 @@
       }
 
       if (_.startsWith (repoCode, 'aws-') || repoCode === 'collaboratory') {
-        return 'icon-cloud';
+        return 'icon-cloud-1';
       }
 
       return '';
