@@ -20,6 +20,15 @@ $compartmentBorder:#ffc38b;
   height: 100%;
   width: 100%;
   
+  .t_badge_icon {
+    position: relative;
+    // fix offsetted icon in banner
+    .icon-spread {
+      position: relative;
+      left: -2px;
+    }
+  }
+  
   #pathway {
     padding-top: 0rem;
   }
