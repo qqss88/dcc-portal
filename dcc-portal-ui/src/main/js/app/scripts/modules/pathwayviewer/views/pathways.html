@@ -24,7 +24,7 @@
                   </div>
                 </div>
                   <ul>
-                      <li style="overflow: hidden;text-overflow: ellipsis;white-space: nowrap">
+                      <li class="item-body">
                         <small data-ng-bind="pw.geneSetName"></small>
                       </li>
                   </ul>
@@ -34,9 +34,9 @@
         </div>
        </div>
     </aside>
-    <article class="pathways-content">
+    <article class="pathways-content" ng-init="analysisData = analysis.getData()">
       <section class="pathway-summary">
-        <enrichment-result data-item="analysis.getData()" data-calling-context="{{analysis.getContext()}}"></enrichment-result>
+        <enrichment-result data-item="analysisData" data-calling-context="{{analysis.getContext()}}"></enrichment-result>
       </section>
       <section id="pathway" data-ng-if="geneSet.showPathway && geneSet.source === 'Reactome'"
          data-ng-class="{'loading': !geneSet.projects, 'empty': geneSet.projects.length == 0}">
@@ -45,8 +45,11 @@
                <div class="action-item summary-back-link">
                     <i class="icon-beaker"></i>Go back to <a href="/analysis/view/enrichment/{{analysis.getID()}}">Enrichment Analysis Results</a>
                </div>        
+        </div>
+        
+        <span data-ng-if="analysisData.params.maxGeneSetCount < analysisData.overview.overlapFdrGeneSetCount && analysisData.results.length > 0">
+            Enriched gene set with FDR &le; <strong>{{analysisData.params.fdr}}</strong>
         </span>
-        <br />
          <table class="table table-bordered table-pathway-info">
                 <thead>
                     <tr>
