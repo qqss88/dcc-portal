@@ -4,12 +4,15 @@ import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
-import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonor;
+import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.isRepositoryDonorInProject;
 import static org.icgc.dcc.portal.util.ElasticsearchRequestUtils.setFetchSourceOfGetRequest;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.checkResponseState;
 import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponseMap;
 
 import java.util.Map;
+
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
@@ -21,9 +24,6 @@ import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -73,7 +73,7 @@ public class ProjectRepository {
       return result;
     }
 
-    if (!isRepositoryDonor(client, "project_code", id)) {
+    if (!isRepositoryDonorInProject(client, id)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }

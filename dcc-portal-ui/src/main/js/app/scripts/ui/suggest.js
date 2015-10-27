@@ -117,7 +117,7 @@ angular.module('icgc.ui.suggest').directive('suggest', function ($compile, $docu
         function url(item) {
           var resourceType = item.type;
 
-          if (_.contains(['curated_set', 'go_term', 'pathway'], resourceType)) {
+          if (_.contains (['curated_set', 'go_term', 'pathway'], resourceType)) {
             resourceType = 'geneset';
           } else if ('file' === resourceType) {
             resourceType = 'repository/external/file';

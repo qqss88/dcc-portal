@@ -18,12 +18,22 @@
 (function () {
   'use strict';
 
-  var module = angular.module('icgc.releases', ['icgc.releases.controllers', 'ui.router']);
+  var module = angular.module('icgc.releases', ['icgc.portalfeature','icgc.releases.controllers', 'ui.router']);
 
-  module.config(function ($stateProvider) {
+  module.config(function ($stateProvider, PortalFeatureProvider) {
     $stateProvider.state('home', {
       url: '/',
-      templateUrl: '/scripts/releases/views/home.html',
+      templateUrl: function() {
+       
+        var _templateURL = '/scripts/releases/views/home.html',
+            isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
+       
+        if (isICGCCloudFunctionlityEnabled) {
+          _templateURL = '/scripts/releases/views/home-beta.html';
+        }
+
+        return _templateURL;
+      },
       controller: 'ReleaseCtrl as ReleaseCtrl',
       resolve: {
         release: ['Releases', function (Releases) {

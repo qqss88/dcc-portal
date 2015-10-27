@@ -20,18 +20,17 @@ package org.icgc.dcc.portal.resource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.primitives.Doubles.tryParse;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableList;
 import static org.icgc.dcc.portal.resource.ResourceUtils.DEFAULT_ORDER;
 import static org.icgc.dcc.portal.resource.ResourceUtils.checkRequest;
 import static org.icgc.dcc.portal.util.JsonUtils.merge;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +45,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,6 +56,8 @@ import org.icgc.dcc.portal.model.IdsParam;
 import org.icgc.dcc.portal.model.Mutations;
 import org.icgc.dcc.portal.model.Query;
 import org.icgc.dcc.portal.model.TermFacet;
+import org.icgc.dcc.portal.service.ClientService;
+import org.icgc.dcc.portal.service.ClientService.MavenArtifactVersion;
 import org.icgc.dcc.portal.service.DiagramService;
 import org.icgc.dcc.portal.service.DonorService;
 import org.icgc.dcc.portal.service.MutationService;
@@ -68,6 +70,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -86,6 +89,8 @@ public class UIResource {
   private final OccurrenceService occurrenceService;
   private final DiagramService diagramService;
   private final MutationService mutationService;
+  private final ClientService clientService;
+  private static final String PUBLIC_KEY_PATH = "data/jenkins_pub.gpg";
 
   private final String REACTOME_PREFIX = "R-HSA-";
   private final String REACTOME_PREFIX_OLD = "REACT_";
@@ -120,29 +125,19 @@ public class UIResource {
       @ApiParam(value = "Gene ID. Multiple IDs can be entered as ENSG00000155657,ENSG00000141510", required = true) @PathParam("geneIds") IdsParam geneIds,
       @ApiParam(value = "Filter the search results") @QueryParam("filters") @DefaultValue(DEFAULT_FILTERS) FiltersParam filters
       ) {
-    val sortField = "id";
-    val facetName = "projectId";
     val geneFilterJson = "{gene:{id:{is:[\"%s\"]}}}";
     val userFilter = filters.get();
-    val includes = ImmutableList.of("facets");
 
-    val result = geneIds.get().parallelStream().collect(toMap(identity(), geneId -> {
-      final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, geneId));
+    val genes = geneIds.get();
+    val queries = genes.stream().map(gene -> {
+      final FiltersParam geneFilter = new FiltersParam(format(geneFilterJson, gene));
       final ObjectNode filterNode = merge(userFilter, geneFilter.get());
-      final Query query = Query.builder()
-          .filters(filterNode)
-          .sort(sortField)
-          .order(DEFAULT_ORDER)
-          .fields(emptyList())
-          .includes(includes)
-          .size(0)
+
+      return Query.builder().filters(filterNode)
           .build();
+    }).collect(toImmutableList());
 
-      return donorService.findAllCentric(query).getFacets().get(facetName);
-    }));
-
-    log.debug("geneProjectDonorCounts {}", result);
-    return result;
+    return donorService.projectDonorCount(genes, queries);
   }
 
   @Path("/file")
@@ -197,6 +192,57 @@ public class UIResource {
     checkRequest(isInvalidPathwayId(pathwayId), "Pathway id '%s' is empty or not valid", pathwayId);
 
     return diagramService.getShownPathwaySection(pathwayId);
+  }
+
+  @Path("/artifacts/dcc-storage-client")
+  @GET
+  @Produces(APPLICATION_JSON)
+  public List<MavenArtifactVersion> getArtifacts() {
+    val results = clientService.getVersions();
+    return results;
+  }
+
+  @Path("/software/dcc-storage-client/latest")
+  @GET
+  @SneakyThrows
+  public Response getLatest() {
+    URL targetURIForRedirection = new URL(clientService.getLatestVersionUrl());
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}")
+  @GET
+  @SneakyThrows
+  public Response getVersion(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionUrl(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}/md5")
+  @GET
+  @SneakyThrows
+  public Response getVersionChecksum(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionChecksum(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("/software/dcc-storage-client/{version}/asc")
+  @GET
+  @SneakyThrows
+  public Response getVersionSignature(@PathParam("version") String version) {
+    URL targetURIForRedirection = new URL(clientService.getVersionSignature(version));
+    return Response.seeOther(targetURIForRedirection.toURI()).build();
+  }
+
+  @Path("software/key")
+  @GET
+  @SneakyThrows
+  public Response getKey() {
+    val url = Resources.getResource(PUBLIC_KEY_PATH);
+    return Response.ok(Resources.toByteArray(url))
+        .type("text/plain")
+        .header("Content-Disposition", "attachment; filename=\"icgc-software.pub\"")
+        .build();
   }
 
   private Boolean isInvalidPathwayId(String id) {

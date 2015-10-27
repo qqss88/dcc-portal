@@ -184,7 +184,7 @@
       Facets.removeTerm({
         type: type,
         facet: facet,
-        term: term.id
+        term: term
       });
     };
 

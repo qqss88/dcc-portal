@@ -58,6 +58,7 @@ import org.icgc.dcc.portal.service.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -166,6 +167,29 @@ public class EntityListResource {
     val newList = service.createExternalEntityList(listDefinition);
 
     return newListResponse(newList);
+  }
+
+  /**
+   * Endpoint for creating an entity set from files from a single repository
+   * 
+   * @param listDefinition EntitySet definition from client.
+   * @return JSON representation of new entity set.
+   */
+  @POST
+  @Path("/file")
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Creates an entity set from an Repository Query.", response = EntitySet.class)
+  public Response createFileSet(
+      @ApiParam(value = API_ENTITY_LIST_DEFINITION_VALUE) final EntitySetDefinition listDefinition) {
+    val filters = listDefinition.getFilters();
+    val repoList = (ArrayNode) filters.path("file").path("repoName").path("is");
+    if (!repoList.isMissingNode() && repoList.size() == 1) {
+      val newList = service.createFileEntitySet(listDefinition);
+      return newListResponse(newList);
+    } else {
+      throw new BadRequestException("Need to filter by exactly one Repository.");
+    }
   }
 
   @POST

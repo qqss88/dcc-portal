@@ -53,14 +53,23 @@
                 </td>
                 <td class="t_quick__hit__text" data-ng-switch-when="file">
                     <a href="/repository/external/files/{{r.id}}" data-ng-bind-html="r.id | highlight:activeQuery"></a>
+
                     <ul class="t_quick__hit__text__details">
                         <li>
-                            <span class="t_quick__hit__text__details__label">Name</span>
+                            <span class="t_quick__hit__text__details__label">File Name</span>
                             <span class="t_quick__hit__text__details__value" data-ng-bind-html="r.fileName | highlight:activeQuery"></span>
                         </li>
                         <li>
-                            <span class="t_quick__hit__text__details__label">Donor</span>
-                            <span class="t_quick__hit__text__details__value">{{r.donorId}}</span>
+                            <span class="t_quick__hit__text__details__label">File Object ID</span>
+                            <span class="t_quick__hit__text__details__value">{{r.fileObjectId}}</span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Data Type</span>
+                            <span class="t_quick__hit__text__details__value">{{r.dataType}}</span>
+                        </li>
+                        <li>
+                            <span class="t_quick__hit__text__details__label">Project ID</span>
+                            <span class="t_quick__hit__text__details__value">{{r.projectCode}}</span>
                         </li>
                     </ul>
                 </td>

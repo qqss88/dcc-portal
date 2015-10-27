@@ -29,7 +29,9 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.singletonMap;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.dcc.portal.pql.ast.function.FunctionBuilders.facets;
 import static org.dcc.portal.pql.meta.Type.DONOR_CENTRIC;
+import static org.dcc.portal.pql.query.PqlParser.parse;
 import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.action.search.SearchType.QUERY_THEN_FETCH;
 import static org.elasticsearch.action.search.SearchType.SCAN;
@@ -60,6 +62,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
@@ -95,11 +102,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -177,10 +179,38 @@ public class DonorRepository implements Repository {
   }
 
   @Override
+  @NonNull
   public SearchResponse findAllCentric(Query query) {
     val pql = converter.convert(query, DONOR_CENTRIC);
     val request = queryEngine.execute(pql, DONOR_CENTRIC);
+
+    log.info("Request of Donor findAllCentric is: '{}'.", request);
     val response = request.getRequestBuilder().execute().actionGet();
+
+    return response;
+  }
+
+  private SearchRequestBuilder projectDonorCountSearch(Query query, String facetName) {
+    val pqlAst = parse(converter.convert(query, DONOR_CENTRIC));
+    pqlAst.setFacets(facets(facetName));
+
+    val result = queryEngine.execute(pqlAst, DONOR_CENTRIC).getRequestBuilder().setNoFields();
+
+    log.debug("projectDonorCountSearch ES query is: '{}'.", result);
+    return result;
+  }
+
+  @NonNull
+  public MultiSearchResponse projectDonorCount(List<Query> queries, String facetName) {
+    val multiSearch = client.prepareMultiSearch();
+
+    for (val query : queries) {
+      multiSearch.add(projectDonorCountSearch(query, facetName));
+    }
+
+    val response = multiSearch.execute().actionGet();
+
+    log.debug("projectDonorCount ES response is: '{}'.", response);
     return response;
   }
 
@@ -448,13 +478,10 @@ public class DonorRepository implements Repository {
     val response = search.execute().actionGet();
 
     if (response.isExists()) {
-      val result = createResponseMap(response, query, KIND);
-      log.debug("Found donor: '{}'.", result);
-
-      return result;
+      return createResponseMap(response, query, KIND);
     }
 
-    if (!isRepositoryDonor(client, "donor_id", id)) {
+    if (!isRepositoryDonor(client, id)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }

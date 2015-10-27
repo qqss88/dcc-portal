@@ -19,7 +19,10 @@ package org.icgc.dcc.portal.util;
 
 import static java.util.Collections.emptyList;
 import static lombok.AccessLevel.PRIVATE;
+import static org.dcc.portal.pql.meta.Type.REPOSITORY_FILE;
 import static org.elasticsearch.action.search.SearchType.COUNT;
+import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
@@ -29,21 +32,26 @@ import java.util.List;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
+import org.dcc.portal.pql.meta.IndexModel;
+import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
+import org.dcc.portal.pql.meta.TypeModel;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
-import org.icgc.dcc.portal.model.IndexModel.Type;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
 
+@Slf4j
 @NoArgsConstructor(access = PRIVATE)
 public class ElasticsearchRequestUtils {
 
-  private static final String FILE_INDEX_TYPE = Type.REPOSITORY_FILE.getId();
+  private static final String FILE_INDEX_TYPE = REPOSITORY_FILE.getId();
+  private static final TypeModel TYPE_MODEL = IndexModel.getRepositoryFileTypeModel();
+
   public static final String[] EMPTY_SOURCE_FIELDS = null;
 
   public static String[] resolveSourceFields(Query query, Kind kind) {
@@ -78,15 +86,27 @@ public class ElasticsearchRequestUtils {
   }
 
   @NonNull
-  public static boolean isRepositoryDonor(Client client, String fieldName, String value) {
+  public static boolean isRepositoryDonor(Client client, String donorId) {
+    return isRepositoryDonor(client, Fields.DONOR_ID, donorId);
+  }
+
+  @NonNull
+  public static boolean isRepositoryDonorInProject(Client client, String projectId) {
+    return isRepositoryDonor(client, Fields.PROJECT_CODE, projectId);
+  }
+
+  private static boolean isRepositoryDonor(Client client, String fieldAlias, String value) {
+    val query = nestedQuery(TYPE_MODEL.getNestedPath(fieldAlias),
+        termQuery(TYPE_MODEL.getField(fieldAlias), value));
     val search = client.prepareSearch(REPOSITORY_INDEX_NAME)
         .setTypes(FILE_INDEX_TYPE)
         .setSearchType(COUNT)
-        .setQuery(QueryBuilders.termQuery("donor." + fieldName, value));
+        .setQuery(query);
 
+    log.debug("ES query: '{}'.", search);
     val response = search.execute().actionGet();
-    val hitCount = getTotalHitCount(response);
-    return hitCount > 0;
+
+    return getTotalHitCount(response) > 0;
   }
 
   private static List<String> getSource(Query query, Kind kind) {

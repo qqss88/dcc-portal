@@ -17,6 +17,10 @@
 
 package org.icgc.dcc.portal.repository;
 
+import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.Maps.transformValues;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
 import static org.elasticsearch.action.search.SearchType.DFS_QUERY_THEN_FETCH;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
 import static org.elasticsearch.index.query.FilterBuilders.termFilter;
@@ -24,12 +28,27 @@ import static org.elasticsearch.index.query.FilterBuilders.termsFilter;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
+import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
+import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -38,144 +57,220 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@SuppressWarnings("deprecation")
 public class SearchRepository {
 
-  private static final Kind KIND = Kind.KEYWORD;
-  private static final Type GENE_TEXT = Type.GENE_TEXT;
-  private static final Type DONOR_TEXT = Type.DONOR_TEXT;
-  private static final Type PROJECT_TEXT = Type.PROJECT_TEXT;
-  private static final Type MUTATION_TEXT = Type.MUTATION_TEXT;
-  private static final Type GENESET_TEXT = Type.GENESET_TEXT;
-  private static final Type REPOSITORY_FILE_TEXT = Type.REPOSITORY_FILE_TEXT;
-  private static final Type REPOSITORY_FILE_DONOR_TEXT = Type.REPOSITORY_FILE_DONOR_TEXT;
-  private static final String FILE_NAME_FIELD = "file_name";
-  private static final float TIE_BREAKER = 0.7F;
+  // Constants
+  @UtilityClass
+  private class Types {
 
+    public final String PATHWAY = "pathway";
+    public final String CURATED_SET = "curated_set";
+    public final String GO_TERM = "go_term";
+    public final String DONOR = "donor";
+    public final String PROJECT = "project";
+    public final String GENE = "gene";
+    public final String MUTATION = "mutation";
+    public final String GENE_SET = "geneSet";
+    public final String FILE = "file";
+    public final String FILE_DONOR = "file-donor";
+
+  }
+
+  @UtilityClass
+  private class FieldNames {
+
+    public final String FILE_NAME = "file_name";
+    public final String GENE_MUTATIONS = "geneMutations";
+    public final String ID = "id";
+
+  }
+
+  private static final Kind KIND = Kind.KEYWORD;
+  private static final Set<String> FIELD_KEYS = FIELDS_MAPPING.get(KIND).keySet();
+  private static final float TIE_BREAKER = 0.7F;
+  private static final List<String> SIMPLE_TERM_FILTER_TYPES = ImmutableList.of(
+      Types.PATHWAY, Types.CURATED_SET, Types.GO_TERM);
+
+  private static final Map<String, Type> TYPE_MAPPINGS = ImmutableMap.<String, Type> builder()
+      .put(Types.GENE, Type.GENE_TEXT)
+      .put(Types.MUTATION, Type.MUTATION_TEXT)
+      .put(Types.DONOR, Type.DONOR_TEXT)
+      .put(Types.PROJECT, Type.PROJECT_TEXT)
+      .put(Types.PATHWAY, Type.GENESET_TEXT)
+      .put(Types.GENE_SET, Type.GENESET_TEXT)
+      .put(Types.GO_TERM, Type.GENESET_TEXT)
+      .put(Types.CURATED_SET, Type.GENESET_TEXT)
+      .put(Types.FILE, Type.REPOSITORY_FILE_TEXT)
+      .put(Types.FILE_DONOR, Type.REPOSITORY_FILE_DONOR_TEXT)
+      .build();
+  private static final Map<String, String> TYPE_ID_MAPPINGS = transformValues(TYPE_MAPPINGS, type -> type.getId());
+  private static final String MUTATION_PREFIX = TYPE_ID_MAPPINGS.get(Types.MUTATION);
+
+  private static final Set<String> MULTIPLE_SEARCH_TYPES = Stream.of(
+      Types.GENE,
+      /*
+       * Types.FILE must appear before Types.DONOR for searching file UUID in "file-text" to work. See DCC-3967 and
+       * https://github.com/elastic/elasticsearch/issues/2218 for details.
+       */
+      Types.FILE,
+      Types.DONOR,
+      Types.PROJECT,
+      Types.MUTATION,
+      Types.GENE_SET)
+      .map(t -> TYPE_ID_MAPPINGS.get(t))
+      .collect(toImmutableSet());
+
+  // Instance variables
   private final Client client;
 
   @Value("#{indexName}")
   private String indexName;
-
-  private final String repoIndexName = IndexModel.REPOSITORY_INDEX_NAME;
 
   @Autowired
   SearchRepository(Client client, IndexModel indexModel) {
     this.client = client;
   }
 
+  @NonNull
   public SearchResponse findAll(Query query, String type) {
+    log.info("Requested search type is: '{}'.", type);
 
-    SearchRequestBuilder search;
-
-    // Determine which index to use, external file repository are in a daily generated index separated from the main
-    // icgc-index
-    if (type.equals("file") || type.equals("file-donor")) {
-      log.info("Setting index to icgc-repository");
-      search = client.prepareSearch(repoIndexName);
-    } else {
-      search = client.prepareSearch(indexName, repoIndexName);
-    }
-
-    search.setSearchType(DFS_QUERY_THEN_FETCH)
+    @SuppressWarnings("deprecation")
+    val search = createSearch(type)
+        .setSearchType(DFS_QUERY_THEN_FETCH)
         .setFrom(query.getFrom())
-        .setSize(query.getSize());
+        .setSize(query.getSize())
+        .setTypes(getSearchTypes(type))
+        .addFields(getFields(query, KIND))
+        .setQuery(getQuery(query, type))
+        .setPostFilter(getPostFilter(type));
 
-    if (type.equals("gene")) search.setTypes(GENE_TEXT.getId());
-    else if (type.equals("mutation")) search.setTypes(MUTATION_TEXT.getId());
-    else if (type.equals("donor")) search.setTypes(DONOR_TEXT.getId());
-    else if (type.equals("project")) search.setTypes(PROJECT_TEXT.getId());
-    else if (type.equals("pathway")) search.setTypes(GENESET_TEXT.getId());
-    else if (type.equals("geneSet")) search.setTypes(GENESET_TEXT.getId());
-    else if (type.equals("go_term")) search.setTypes(GENESET_TEXT.getId());
-    else if (type.equals("curated_set")) search.setTypes(GENESET_TEXT.getId());
-    else if (type.equals("file")) search.setTypes(REPOSITORY_FILE_TEXT.getId());
-    else if (type.equals("file-donor")) search.setTypes(REPOSITORY_FILE_DONOR_TEXT.getId());
-    else {
-      search.setTypes(GENE_TEXT.getId(), DONOR_TEXT.getId(), PROJECT_TEXT.getId(), MUTATION_TEXT.getId(),
-          GENESET_TEXT.getId(), REPOSITORY_FILE_TEXT.getId());
-    }
-
-    search.addFields(getFields(query, KIND));
-
-    val baseKeys = FIELDS_MAPPING.get(KIND).keySet();
-    val queryString = query.getQuery();
-    val keys = buildMultiMatchFieldList(baseKeys, queryString);
-    val multiMatchQuery = multiMatchQuery(queryString, keys).tieBreaker(TIE_BREAKER);
-    val prefixQuery = prefixQuery(FILE_NAME_FIELD + ".raw", queryString);
-    search.setQuery(boolQuery()
-        .should(prefixQuery)
-        .should(multiMatchQuery));
-
-    // Setting post filter
-    if (type.equals("pathway")) {
-      search.setPostFilter(boolFilter().must(termFilter("type", "pathway")));
-    } else if (type.equals("curated_set")) {
-      search.setPostFilter(boolFilter().must(termFilter("type", "curated_set")));
-    } else if (type.equals("go_term")) {
-      search.setPostFilter(boolFilter().must(termFilter("type", "go_term")));
-    } else {
-      // Search in the wild, need to apply both default filters to only donor and project
-      val donor = boolFilter()
-          .must(termFilter("type", "donor"));
-      val project = boolFilter()
-          .must(termFilter("type", "project"));
-      val others = boolFilter()
-          .mustNot(termsFilter("type", "donor", "project"));
-      search.setPostFilter(boolFilter()
-          .should(donor)
-          .should(project)
-          .should(others));
-    }
-
-    log.info("{}", search);
-    SearchResponse response = search.execute().actionGet();
-    log.debug("{}", response);
+    log.info("ES search query is: {}", search);
+    val response = search.execute().actionGet();
+    log.debug("ES search result is: {}", response);
 
     return response;
   }
 
-  @NonNull
-  private static String[] buildMultiMatchFieldList(Iterable<String> baseKeys, String queryString) {
-    val keys = Sets.<String> newHashSet();
-    for (val baseKey : baseKeys) {
+  // Helpers
+  private static boolean isRepositoryFileRelated(String type) {
+    return type.equals(Types.FILE) || type.equals(Types.FILE_DONOR);
+  }
 
-      // Exact match fields (DCC-2324)
-      if (baseKey.equals("start")) {
-        // NOTE: This is a work around quirky ES issue.
-        // We need to prefix the document type here to prevent NumberFormatException, it appears that ES
-        // cannot determine what type 'start' is.
-        // This is for ES 0.9, later versions may not have this problem.
-        keys.add(String.format("%s.%s", MUTATION_TEXT.getId(), baseKey));
-
-      } else if (!baseKey.equals("geneMutations") && !baseKey.equals(FILE_NAME_FIELD)) {
-        keys.add(baseKey + ".search^2");
-        keys.add(baseKey + ".analyzed");
-      }
-
+  private SearchRequestBuilder createSearch(String type) {
+    // Determines which index to use as external file repository are in a daily generated index separated
+    // from the main icgc-index.
+    if (isRepositoryFileRelated(type)) {
+      return client.prepareSearch(REPOSITORY_INDEX_NAME);
     }
 
-    // don't boost without space or genes won't show when partially matched
+    if (type.equals(Types.DONOR)) {
+      return client.prepareSearch(indexName);
+    }
+
+    return client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
+  }
+
+  private static String[] toStringArray(Collection<String> source) {
+    return source.stream().toArray(String[]::new);
+  }
+
+  private static String[] getSearchTypes(String type) {
+    val result = TYPE_ID_MAPPINGS.containsKey(type) ? newHashSet(TYPE_ID_MAPPINGS.get(type)) : MULTIPLE_SEARCH_TYPES;
+
+    return toStringArray(result);
+  }
+
+  private static FilterBuilder getPostFilter(String type) {
+    val field = "type";
+    val result = boolFilter();
+
+    if (SIMPLE_TERM_FILTER_TYPES.contains(type)) {
+      return result.must(termFilter(field, type));
+    }
+
+    val donor = boolFilter()
+        .must(termFilter(field, Types.DONOR));
+    val project = boolFilter()
+        .must(termFilter(field, Types.PROJECT));
+    val others = boolFilter()
+        .mustNot(termsFilter(field, Types.DONOR, Types.PROJECT));
+
+    return result
+        .should(donor)
+        .should(project)
+        .should(others);
+  }
+
+  private static QueryBuilder getQuery(Query query, String type) {
+    val queryString = query.getQuery();
+    val prefixQuery = prefixQuery(FieldNames.FILE_NAME + ".raw", queryString);
+    val keys = buildMultiMatchFieldList(FIELD_KEYS, queryString, type);
+    val multiMatchQuery = multiMatchQuery(queryString, toStringArray(keys)).tieBreaker(TIE_BREAKER);
+
+    return boolQuery()
+        .should(prefixQuery)
+        .should(multiMatchQuery);
+  }
+
+  private static boolean shouldProcess(String sourceField) {
+    val fieldsToSkip = ImmutableList.of(FieldNames.FILE_NAME, FieldNames.GENE_MUTATIONS);
+    return fieldsToSkip.stream().noneMatch(fieldToAvoid -> sourceField.equals(fieldToAvoid));
+  }
+
+  private static final List<String> SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed");
+  private static final List<String> BOOSTED_SEARCH_SUFFIXES = ImmutableList.of(".search^2", ".analyzed^2");
+
+  private static List<String> appendSearchSuffixes(String field) {
+    return transform(SEARCH_SUFFIXES, suffix -> field + suffix);
+  }
+
+  private static List<String> appendBoostedSearchSuffixes(String field) {
+    return transform(BOOSTED_SEARCH_SUFFIXES, suffix -> field + suffix);
+  }
+
+  @NonNull
+  private static Set<String> buildMultiMatchFieldList(Iterable<String> fields, String queryString, String type) {
+    val keys = Sets.<String> newHashSet();
+
+    for (val field : fields) {
+      // Exact match fields (DCC-2324)
+      if (field.equals("start")) {
+        // TODO: Investigate and see if we still need this in the ES version wer're using.
+        /*
+         * NOTE: This is a work around quirky ES issue. We need to prefix the document type here to prevent
+         * NumberFormatException, it appears that ES cannot determine what type 'start' is. This is for ES 0.9, later
+         * versions may not have this problem.
+         */
+        keys.add(format("%s.%s", MUTATION_PREFIX, field));
+
+      } else if (shouldProcess(field)) {
+        keys.addAll(appendSearchSuffixes(field));
+      }
+    }
+
+    // Don't boost without space or genes won't show when partially matched
     if (queryString.contains(" ")) {
-      keys.add("geneMutations.search^2");
-      keys.add("geneMutations.analyzed^2");
+      keys.addAll(appendBoostedSearchSuffixes(FieldNames.GENE_MUTATIONS));
     } else {
-      keys.add("geneMutations.search^2");
-      keys.add("geneMutations.analyzed");
+      keys.addAll(appendSearchSuffixes(FieldNames.GENE_MUTATIONS));
     }
 
     // Exact-match search on "id".
-    keys.add("id");
+    keys.add(FieldNames.ID);
 
-    return keys.toArray(new String[keys.size()]);
+    if (isRepositoryFileRelated(type)) {
+      // For repository file related searches, we want fuzzy search.
+      keys.addAll(appendSearchSuffixes(FieldNames.ID));
+    }
+
+    return keys;
   }
 
 }

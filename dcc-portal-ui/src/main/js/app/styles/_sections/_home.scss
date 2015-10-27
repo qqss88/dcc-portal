@@ -20,6 +20,25 @@
   	margin-bottom: 1rem;
   }
   
+
+    
+    .icgc-cloud-home {
+      margin-right: 0;
+      
+      .icgc-container {
+        margin: 0 0;
+        position:relative;
+        transition: opacity 0.2s ease-in;      
+        width: 320px;
+        
+        img { 
+            width: 100%;
+            display: block;
+        } 
+      }  
+    }
+
+  
   .divider {
   	border-top: 1px solid #eee; 
   	margin-top: 2rem; 

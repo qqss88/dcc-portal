@@ -32,6 +32,7 @@
   "white": false,
 
   "globals": {
+    "$icgcApp": false,
     "angular": false,
     "jQuery": false,
     "Highcharts": false,

@@ -55,18 +55,25 @@ public abstract class BaseEntitySet {
 
     DONOR("donor"),
     GENE("gene"),
-    MUTATION("mutation");
+    MUTATION("mutation"),
+    FILE("file");
 
     @NonNull
     private final String name;
 
-    public TermLookupType toLookupTypeFrom() {
+    /**
+     * Returns the TermsLookupType value based on the Type value of this object.
+     * @return TermsLookupType value for use in Elasticsearch
+     */
+    public TermLookupType toLookupType() {
       if (this == DONOR) {
         return TermLookupType.DONOR_IDS;
       } else if (this == GENE) {
         return TermLookupType.GENE_IDS;
       } else if (this == MUTATION) {
         return TermLookupType.MUTATION_IDS;
+      } else if (this == FILE) {
+        return TermLookupType.FILE_IDS;
       }
 
       log.error("No mapping for enum value '{}' of BaseEntityList.Type.", this);
