@@ -224,41 +224,36 @@
       $scope.cancel();
     };
 
-    $scope.createManifestId = function(repoName, fileCount) {
+    $scope.createManifestId = function (repoName, fileCount, buttonId, textBoxId) {
 
-      jQuery('#aws-v').html('<i class="icon-spinner icon-spin pull-right"></i>');
-      var params = {};
+      jQuery('#' + buttonId).html ('<i class="icon-spinner icon-spin pull-right"></i>');
 
+      var selectedFiles = $scope.selectedFiles;
       var filters = LocationService.filters();
-      if ($scope.selectedFiles && !_.isEmpty($scope.selectedFiles)) {
-        if (! filters.file) {
-          filters.file = {};
-        }
-        filters.file.id = {is: $scope.selectedFiles};
+
+      if (! _.isEmpty (selectedFiles)) {
+        filters = _.set (filters, 'file.id.is', selectedFiles);
       }
 
-      if (filters.file) {
-        delete filters.file.repoName;
-        filters.file.repoName = {'is': [repoName]};
-      } else {
-        filters.file = {};
-        filters.file.repoName = {'is': [repoName]};
-      }
+      filters = _.set (filters, 'file.repoName.is', [repoName]);
 
-      params.size = fileCount;
-      params.isTransient = true;
-      params.filters = filters;
+      var params = {
+        size: fileCount,
+        isTransient: true,
+        filters: filters
+      };
 
-      var promise = SetService.createFileSet(params);
-      promise.then(function(data) {
+      SetService.createFileSet (params).then (function (data) {
        if (! data.id) {
           console.log('there is no id!!!!');
           return;
        }
 
-       jQuery('#aws-v').html('<input id="aws-input" class="input_manifest" type="text" size="33" readonly value="' +
-        data.id + '"/>');
-       jQuery('#aws-input').select();
+       var textBoxHtml = '<input id="' + textBoxId +
+         '" class="input_manifest pull-right" type="text" size="33" readonly value="' +
+         data.id + '"/>';
+       jQuery ('#' + buttonId).html (textBoxHtml);
+       jQuery ('#' + textBoxId).select();
      });
     };
 
@@ -357,8 +352,7 @@
    * External repository controller
    */
   module.controller ('ExternalRepoController',
-    function ($scope, $window, $modal, LocationService, Page, ExternalRepoService,
-      SetService, ProjectCache, CodeTable) {
+    function ($scope, $window, $modal, LocationService, Page, ExternalRepoService, SetService, ProjectCache, CodeTable) {
 
     var projectMap = {};
     var _ctrl = this;

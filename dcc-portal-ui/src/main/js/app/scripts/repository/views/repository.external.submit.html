@@ -1,41 +1,49 @@
 <div class="modal-content">
     <div class="modal-header clearfix">
-        <h3 class="pull-left">Download manifests</h3>
-        <button class="pull-right t_button" data-ng-click="cancel()"><i
-                class="icon-cancel"></i>
-        </button>
+      <h3 class="pull-left">Download manifests</h3>
+      <button class="pull-right t_button" data-ng-click="cancel()"><i
+              class="icon-cancel"></i>
+      </button>
     </div>
 
     <div class="modal-body">
-       A manifest is a text file passed to download clients in order to download files. 
+       A manifest is a text file passed to download clients in order to download files.
        You will get a single manifest file per repository. Please note that some files may be stored in multiple repositories.
        The list below is restricted by your repository filter.
        <br>
        <table class="table table-info">
-           <thead>
-               <th>Repository</th>
-               <th class="text-right"># Donors</th>
-               <th class="text-right"># Files</th>
-               <th class="text-right">Total file size</th>
-           </thead>
-           <tbody>
-               <tr data-ng-repeat="(k, v) in repos">
-                   <td>
-                     {{k}}
-                     <span id="aws-v" class="manifest-span pull-right" data-ng-if="k === 'AWS - Virginia'">
-                       <button class="t_button pull-right" data-ng-click="createManifestId(k, fileCount)">Create Manifest ID</button>
-                     </span>
-                   </td>
-                   <td class="text-right">{{v.donorCount| number}}</td>
-                   <td class="text-right">{{v.fileCount| number}}</td>
-                   <td class="text-right">{{v.fileSize | bytes }}</td>
-               </tr>
-           </tbody>
+         <thead>
+           <th>Repository</th>
+           <th class="text-right"># Donors</th>
+           <th class="text-right"># Files</th>
+           <th class="text-right">Total file size</th>
+         </thead>
+
+         <tbody>
+           <tr data-ng-repeat="(k, v) in repos">
+             <td>
+               {{ k }}
+               <span id="aws-v" class="manifest-span pull-right" data-ng-if="k === 'AWS - Virginia'">
+                 <button class="t_button pull-right" data-ng-click="createManifestId (k, fileCount, 'aws-v', 'aws-v-input')">
+                  Create Manifest ID
+                 </button>
+               </span>
+               <span id="collab" class="manifest-span pull-right" data-ng-if="k === 'Collaboratory'">
+                 <button class="t_button pull-right" data-ng-click="createManifestId (k, fileCount, 'collab', 'collab-input')">
+                  Create Manifest ID
+                 </button>
+               </span>
+             </td>
+             <td class="text-right">{{ v.donorCount | number }}</td>
+             <td class="text-right">{{ v.fileCount | number }}</td>
+             <td class="text-right">{{ v.fileSize | bytes }}</td>
+           </tr>
+         </tbody>
        </table>
     </div>
 
     <div class="modal-footer">
-        <button class="t_button" data-ng-click="cancel();">Cancel</button>
-        <button class="t_button" data-ng-click="download()"><i class="icon-download"></i>Download</button> 
+      <button class="t_button" data-ng-click="cancel();">Cancel</button>
+      <button class="t_button" data-ng-click="download()"><i class="icon-download"></i>Download</button>
     </div>
 </div>
