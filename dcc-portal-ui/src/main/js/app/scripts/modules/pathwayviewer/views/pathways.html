@@ -47,7 +47,7 @@
                </div>        
         </div>
         
-        <span data-ng-if="analysisData.params.maxGeneSetCount < analysisData.overview.overlapFdrGeneSetCount && analysisData.results.length > 0">
+        <span data-ng-if="analysisData.results.length > 0">
             Enriched gene set with FDR &le; <strong>{{analysisData.params.fdr}}</strong>
         </span>
          <table class="table table-bordered table-pathway-info">
