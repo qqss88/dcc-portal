@@ -72,7 +72,6 @@
       };
       
       this.$get = ['$state', 'LocationService', function($state, LocationService) {
-          console.log('I am called!!');
           return new PortalFeatureConstructor(_features, $state, LocationService);
       }];
   });
