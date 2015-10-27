@@ -21,11 +21,13 @@ $compartmentBorder:#ffc38b;
   width: 100%;
   
   #pathway {
-    padding-top: 1rem;
+    padding-top: 0rem;
   }
   
   .content-body {
     border-top: solid 1px #ccc;
+    display: table;
+    width:100%;
   }
   
   .search-control {
@@ -48,21 +50,29 @@ $compartmentBorder:#ffc38b;
   }
   
   aside {
-    display: inline-block;
+    //display: inline-block;
+    display: table-cell;
     width: 20%;
     float: none;
     border-left: solid 1px #ccc;
     margin: 0 0;
     min-width: 200px;
     border-right: solid 1px #ccc;
-    border-bottom: solid 1px #ccc; 
   }
   
   .pathway-filter-container {
-      max-height: 76rem; 
+      max-height: 81rem;
       overflow-y: scroll;
       padding-bottom: 1rem;
       border-top: solid 1px #ccc;
+      
+      
+     .item-body {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 17rem;
+     }
       
       .pathway-item-header {
         position: relative;
@@ -94,8 +104,9 @@ $compartmentBorder:#ffc38b;
     padding: 0.5rem 0.5rem;
     height: 100%;
     border: none;
-    width: 79%;
+    width: 100%;
     display: inline-block;
+    //display: table-cell;
     float: none;
     vertical-align: top;
     
@@ -306,7 +317,7 @@ $compartmentBorder:#ffc38b;
 .pathway-legend-controller, .pathway-info-controller{
   margin-top: 0.5em;
 }
-
+ 
 .pathway-info h4, .pathway-legend h4{
   margin-left: 1em;
   margin-right: 1em;
