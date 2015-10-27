@@ -253,6 +253,7 @@
     'icgc.pancancer',
     'icgc.auth',
     'icgc.tokens',
+    'icgc.pathways',
 
     // old
     'app.ui',
@@ -318,8 +319,8 @@
    */
   module.service('PortalFeature', function($state, LocationService) {
     var features = {
-      REACTOME_VIEWER: false,
-      AUTH_TOKEN: false
+      AUTH_TOKEN: false,
+      ICGC_IN_THE_CLOUD_DOCS: false
     };
     function _enable(feature) {
       if (features.hasOwnProperty(feature) === false) { return; }
