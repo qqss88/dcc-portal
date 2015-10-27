@@ -131,6 +131,9 @@ $compartmentBorder:#ffc38b;
     .pathway-analysis-header {
       @include clearfix;
     
+      padding-top:0.2rem;
+      padding-bottom:0.8rem;
+    
       .summary-header {
         margin: 0;
         float: left;
