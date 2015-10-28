@@ -48,8 +48,8 @@ public class IndexModel {
   public static final String API_ENTITY_LIST_ID_FIELD_NAME = ENTITY_SET_ID;
 
   // Index name for the icgc-repository index.
-  // FIXME: Change the value to "icgc-repository"
-  public static final String REPOSITORY_INDEX_NAME = "test-icgc-repository";
+  // TODO: Externalize
+  public static final String REPOSITORY_INDEX_NAME = "icgc-repository";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
