@@ -141,7 +141,7 @@ public abstract class BaseRepositoryRequestTest {
   }
 
   @Spy
-  final IndexModel indexModel = new IndexModel("test-index");
+  final IndexModel indexModel = new IndexModel("test-index", "icgc-repository");
 
   @Mock
   Client client;

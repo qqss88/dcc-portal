@@ -58,7 +58,6 @@ import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.IS;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
 import static org.icgc.dcc.portal.model.IndexModel.MISSING;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.model.TermFacet.repoTermFacet;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
@@ -76,13 +75,6 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
-
-import lombok.NonNull;
-import lombok.SneakyThrows;
-import lombok.Value;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.ast.StatementNode;
 import org.dcc.portal.pql.ast.function.SelectNode;
@@ -137,6 +129,13 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 
+import lombok.NonNull;
+import lombok.SneakyThrows;
+import lombok.Value;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class RepositoryFileRepository {
@@ -176,19 +175,19 @@ public class RepositoryFileRepository {
   private static final String FILE_DONOR_TEXT_INDEX_TYPE = Type.REPOSITORY_FILE_DONOR_TEXT.getId();
   private static final TimeValue KEEP_ALIVE = new TimeValue(10000);
 
-  // Instance variables
-  private final String index = REPOSITORY_INDEX_NAME;
-
   /**
    * Dependencies.
    */
   private final Client client;
+  private final String index;
   private final QueryEngine queryEngine;
 
   @Autowired
-  public RepositoryFileRepository(Client client) {
+  public RepositoryFileRepository(Client client,
+      @NonNull @org.springframework.beans.factory.annotation.Value("#{repoIndexName}") String repoIndexName) {
     this.client = client;
-    this.queryEngine = new QueryEngine(client, index);
+    this.index = repoIndexName;
+    this.queryEngine = new QueryEngine(client, repoIndexName);
   }
 
   public static boolean isNestedField(String fieldAlias) {
@@ -1018,9 +1017,7 @@ public class RepositoryFileRepository {
   public Map<String, String> getIndexMetaData() {
     val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
 
-    val realIndex = (state.getMetaData().getAliases().get(index)).iterator().next().key;
-
-    val indexMetaData = state.getMetaData().index(realIndex);
+    val indexMetaData = state.getMetaData().index(index);
 
     val mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
     val source = mappingMetaData.sourceAsMap();
