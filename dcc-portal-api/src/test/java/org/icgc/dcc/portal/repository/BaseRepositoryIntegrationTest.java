@@ -51,7 +51,7 @@ import com.google.common.collect.Maps;
 public class BaseRepositoryIntegrationTest {
 
   @Spy
-  final IndexModel indexModel = new IndexModel("dcc-release-load-prod-08d-49-icgc16-14", "icgc-repository");
+  final IndexModel indexModel = new IndexModel("dcc-release-load-prod-08d-49-icgc16-14", "test-repo-index");
 
   @Spy
   final TransportClient client = new TransportClient().addTransportAddress(new InetSocketTransportAddress("localhost",

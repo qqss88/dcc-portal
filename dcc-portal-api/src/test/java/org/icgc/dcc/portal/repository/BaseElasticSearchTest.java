@@ -56,7 +56,7 @@ public abstract class BaseElasticSearchTest {
    * Test configuration.
    */
   protected static final String INDEX_NAME = "test_index";
-  protected static final String REPO_INDEX_NAME = "icgc-repository";
+  protected static final String REPO_INDEX_NAME = "test-repo-index";
   protected static final String SETTINGS_FILE_NAME = "index.settings.json";
   protected static final String JSON_DIR = "mappings";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
