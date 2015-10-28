@@ -20,11 +20,20 @@
 
    var module = angular.module('icgc.software', []);
 
-   module.config(function ($stateProvider) {
+   module.config(function ($stateProvider, PortalFeatureProvider) {
 
       $stateProvider.state('software', {
          url: '/software',
-         templateUrl: 'scripts/software/views/software.html',
+         templateUrl: function() {
+           var templateURL = '',
+               isSoftwarePageEnabled = PortalFeatureProvider.hasFeature('SOFTWARE_PAGE') !== false;
+               
+           if (isSoftwarePageEnabled) {
+              templateURL = 'scripts/software/views/software.html';
+           }
+           
+           return templateURL;
+         },
          controller: 'SoftwareController'
       });
    });

@@ -37,6 +37,8 @@ angular.module('app.common.footer.controllers').controller('FooterCtrl', functio
           {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory Info'}
         ];
  
+  $scope.portalFeature = PortalFeature;
+  
   $scope.stagedFeatures = {
     getCloudLinks: function() {
       if (PortalFeature.get('ICGC_CLOUD')) {
