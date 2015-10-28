@@ -86,7 +86,35 @@
 			}
 			
 		}
-    	
+    
+    function _addFilters(pathway) {
+      
+      
+      if (_.get(pathway, 'geneSetFilters', false)) {
+        return;
+      }
+      
+      var geneOverlapFilter = {
+        'gene': {
+          'entitySetId': {
+            'is': [EnrichmentData.id]},
+            'pathwayId': {
+              'is':[pathway.geneSetId]
+            }
+          }
+        },
+        geneSetFilters = {
+          'gene': { 
+            'pathwayId': {
+              'is': [pathway.geneSetId]
+            }
+          }
+        };
+      
+      pathway.geneSetFilters = encodeURIComponent(JSON.stringify(geneSetFilters));
+      pathway.geneSetOverlapFilters = encodeURIComponent(JSON.stringify(geneOverlapFilter));
+     
+    }	
 		
 		$scope.getSelectedPathway = function() {
       return _selectedPathway;
@@ -95,20 +123,20 @@
 		$scope.setSelectedPathway = function(pathway) {			
 			$scope.pathway = {};
       
+      _addFilters(pathway);
+      
 			_selectedPathway = pathway; 
      
       var id = pathway.geneSetId;
       
       
       var _geneSet = null,
-        _pathway = null,
         _pathwayId = null,
         _parentPathwayId = null,
         _uiParentPathways = null,
         _uniprotIds = null,
         _xml = null,
         _zooms = [''],
-        _highlights = [''],
         _pathwayHighlights = [];
         
         
