@@ -48,7 +48,7 @@
 	});
 	
 
-	module.controller('PathwaysController', function($scope, Page, EnrichmentData, Restangular,
+	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
 		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService) {
 				
 		
@@ -98,74 +98,119 @@
 			_selectedPathway = pathway; 
      
       var id = pathway.geneSetId;
-			
-			Restangular.one("genesets").one(id).get().then(function (geneSet) {
-				$scope.geneSet = geneSet;
-				$scope.uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy($scope.geneSet.hierarchy, $scope.geneSet);
-				$scope.geneSet.showPathway = true;
-				
-				var pathwayId = $scope.uiParentPathways[0].diagramId;
-				var parentPathwayId = $scope.uiParentPathways[0].geneSetId;
-				
-				// Get pathway XML
-				GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
-					$scope.pathway.xml = xml;
-				});
-				
-				// If the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
-				if(pathwayId !== parentPathwayId) {
-					GeneSetService.getPathwayZoom(parentPathwayId).then(function(data) {
-							$scope.pathway.zooms = data;
-					});
-				} else {
-					$scope.pathway.zooms = [''];
-				}
-	
-				var mutationImpact = [];
-				
-				GeneSetService.getPathwayProteinMap(parentPathwayId, mutationImpact).then(function(map) {
-				var pathwayHighlights = [], uniprotIds;
-	
-				// Normalize into array
-				_.forEach(map,function(value,id) {
-					if(value && value.dbIds) {
-						pathwayHighlights.push({
-							uniprotId:id,
-							dbIds:value.dbIds.split(','),
-							value:value.value
-						});
-					}
-				});
-	
-				// Get ensembl ids for all the genes so we can link to advSearch page
-				uniprotIds = _.pluck(pathwayHighlights, 'uniprotId');
-				GeneSetVerificationService.verify( uniprotIds.join(',') ).then(function(data) {
-					_.forEach(pathwayHighlights,function(n){
-	
-						var geneKey = 'external_db_ids.uniprotkb_swissprot';
-						if (! data.validGenes[geneKey]) {
-							return;
-						}
-	
-						var uniprotObj = data.validGenes[geneKey][n.uniprotId];
-						if(!uniprotObj){
-							return;
-						}
-						var ensemblId = uniprotObj[0].id;
-						n.advQuery =  LocationService.mergeIntoFilters({
-							gene: {
-								id:  {is: [ensemblId]},
-								pathwayId: {is: [parentPathwayId]}
-							}
-						});
-						n.geneSymbol = uniprotObj[0].symbol;
-						n.geneId = ensemblId;
-					});
-					});
-	
-					$scope.pathway.highlights = pathwayHighlights;
-				});
-			});
+      
+      
+      var _geneSet = null,
+        _pathway = null,
+        _pathwayId = null,
+        _parentPathwayId = null,
+        _uiParentPathways = null,
+        _uniprotIds = null,
+        _xml = null,
+        _zooms = [''],
+        _highlights = [''],
+        _pathwayHighlights = [];
+        
+        
+        
+        
+       Restangular.one("genesets").one(id).get()
+       .then(function(geneSet){
+          _geneSet = geneSet;
+          _uiParentPathways = GeneSetHierarchy.uiPathwayHierarchy(_geneSet.hierarchy, _geneSet);
+          _geneSet.showPathway = true;
+          _pathwayId = _uiParentPathways[0].diagramId;
+          _parentPathwayId= _uiParentPathways[0].geneSetId;
+       })
+       .then(function() {
+         var deferred = $q.defer();
+        
+         GeneSetService.getPathwayXML(_pathwayId)  
+          .then(function(xml) {
+              _xml = xml;
+              deferred.resolve();
+          });
+          
+         return deferred.promise;
+       })
+       .then(function() {
+          var deferred = $q.defer();
+          
+         // If the diagram itself isnt the one being diagrammed, get list of stuff to zoom in on
+          if(_pathwayId !== _parentPathwayId) {
+            GeneSetService.getPathwayZoom(_parentPathwayId).then(function(data) {
+                _zooms = data;
+                 deferred.resolve();
+            });
+          } 
+          else {
+            _zooms = [''];
+            deferred.resolve();
+          }
+          
+          return deferred.promise;
+       })
+       .then(function() {
+          var deferred = $q.defer();
+         
+   
+          GeneSetService.getPathwayProteinMap(_parentPathwayId, []).then(function(map) {
+            
+              // Normalize into array
+                  _.forEach(map,function(value,id) {
+                    if(value && value.dbIds) {
+                      _pathwayHighlights.push({
+                        uniprotId:id,
+                        dbIds:value.dbIds.split(','),
+                        value:value.value
+                      });
+                    }
+                  });
+      
+              // Get ensembl ids for all the genes so we can link to advSearch page
+              _uniprotIds = _.pluck(_pathwayHighlights, 'uniprotId');
+              deferred.resolve();
+          });
+           return deferred.promise;
+       })
+       .then(function() {
+          var deferred = $q.defer()
+          
+          GeneSetVerificationService.verify(_uniprotIds.join(',') )
+          .then(function(data) {
+            _.forEach(_pathwayHighlights,function(n){
+                var geneKey = 'external_db_ids.uniprotkb_swissprot';
+                if (! data.validGenes[geneKey]) {
+                  return;
+                }
+      
+                var uniprotObj = data.validGenes[geneKey][n.uniprotId];
+                if(!uniprotObj){
+                  return;
+                }
+                var ensemblId = uniprotObj[0].id;
+                n.advQuery =  LocationService.mergeIntoFilters({
+                  gene: {
+                    id:  {is: [ensemblId]},
+                    pathwayId: {is: [_parentPathwayId]}
+                  }
+                });
+                n.geneSymbol = uniprotObj[0].symbol;
+                n.geneId = ensemblId;
+            });
+            
+            deferred.resolve();
+          });
+          
+          return deferred.promise;
+       }).
+       then(function(){
+         $scope.geneSet = _geneSet;
+         $scope.pathway = {xml: _xml, zooms: _zooms, highlights: _pathwayHighlights };
+         $scope.uiParentPathways = _uiParentPathways;
+         //console.log($scope.pathway);
+       });
+ 
 		};	
 		
 		// Initialize our controller and it's corresponding scope.
