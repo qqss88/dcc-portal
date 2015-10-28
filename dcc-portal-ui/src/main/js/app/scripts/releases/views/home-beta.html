@@ -1,4 +1,4 @@
-<article class="full">
+<article class="full home-landing">
     <div class="clearfix">
         <form class="t_suggest">
             <input
@@ -38,7 +38,6 @@
         <h3 class="subhead">{{ ReleaseCtrl.applicationReleaseDate }}</h3>
         <donut home=true items='ReleaseCtrl.donut' inner-label='Donors' outer-label='Donors'
                heading="Donor Distribution by Primary Site" height="325"></donut>
-        <br>
 
         <div>
             <table class="table table-striped table-bordered table-hover table-condensed">
@@ -84,15 +83,9 @@
         </div>
     </section>
     <section class="sidebar omega">
-        <h3>Information</h3>
-        <ul>
-            <li><a target="_blank" href="http://docs.icgc.org/access-controlled-data">Access Controlled Data</a></li>
-            <li><a target="_blank" href="http://docs.icgc.org/methods">Methods</a></li>
-            <li><a target="_blank" href="http://docs.icgc.org/data-submission">Submitter Tools</a></li>
-        </ul>
         <h3>Tutorial</h3>
         <h4>Example Queries</h4>
-        <ol>
+        <ol class="list">
             <li>
                 <a href='/search/m?filters={"gene":{"id":{"is":["ENSG00000157764"]}},"mutation":{"consequenceType":{"is":["missense_variant"]}},"donor":{"primarySite":{"is":["Colorectal"]}}}'>BRAF
                     missense mutations in colorectal cancer</a></li>
