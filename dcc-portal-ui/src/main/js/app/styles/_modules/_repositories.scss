@@ -124,7 +124,7 @@ $button-colour: #1693c0;
     nav ul {
         margin: 0 0; 
     }
-    
+       
     section {
         //border-bottom: none;
         //padding: 1rem 2rem;
@@ -134,6 +134,28 @@ $button-colour: #1693c0;
         background: white;
         border-radius: 0;
         border-bottom: 1px solid #cccccc;
+    }
+    
+    .user-guide-content {
+      ol {
+        list-style-type: number;
+        
+        li {
+          list-style: inherit;
+          margin: 0 0;
+        }
+      }
+      
+      ul {
+        list-style-type: disc;
+        
+        li {
+          margin: 0; 
+          list-style: inherit;
+        }
+      }
+      
+      
     }
     
 
@@ -258,13 +280,13 @@ $button-colour: #1693c0;
       display: inline-block; 
     }
     
-    li {
-      margin: 0; 
-    }
+    
     
     ul, ol {
       padding-left: 30px; 
     }
+    
+  
     
     ul :first-child, ol :first-child {
       margin-top: 0; 

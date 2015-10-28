@@ -1418,10 +1418,6 @@ header #brand img {
   }
 }
 
-/* line 2, _sections/_home.scss */
-#home-page .home-landing {
-  display: table;
-}
 /* line 4, _sections/_home.scss */
 #home-page .home-landing section {
   border: none;
@@ -1440,41 +1436,45 @@ header #brand img {
 }
 /* line 14, _sections/_home.scss */
 #home-page .home-landing section.sidebar .list {
-  height: 200px;
+  height: 11.5rem;
 }
-/* line 20, _sections/_home.scss */
+/* line 21, _sections/_home.scss */
+#home-page .home-landing .summary-table-container {
+  margin-top: -2rem;
+}
+/* line 25, _sections/_home.scss */
 #home-page .home-landing .subhead {
   margin-top: -1rem;
   color: #999999;
   font-size: 1.9rem;
 }
-/* line 26, _sections/_home.scss */
+/* line 31, _sections/_home.scss */
 #home-page .home-landing #pcawg-logo {
   margin-left: 1rem;
   margin-bottom: 1rem;
 }
-/* line 33, _sections/_home.scss */
+/* line 38, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home {
   margin: 0 0;
   padding-top: 0;
 }
-/* line 37, _sections/_home.scss */
+/* line 42, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .dividers {
   margin-top: 1.5rem;
 }
-/* line 41, _sections/_home.scss */
+/* line 46, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .icgc-container {
   margin: 0 0;
   position: relative;
   transition: opacity 0.2s ease-in;
   width: 330px;
 }
-/* line 47, _sections/_home.scss */
+/* line 52, _sections/_home.scss */
 #home-page .home-landing .icgc-cloud-home .icgc-container img {
   width: 100%;
   display: block;
 }
-/* line 55, _sections/_home.scss */
+/* line 60, _sections/_home.scss */
 #home-page .home-landing .divider {
   border-top: 1px solid #eee;
   margin-top: 2rem;
@@ -4584,25 +4584,43 @@ td {
   border-bottom: 1px solid #cccccc;
 }
 /* line 140, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ol {
+  list-style-type: number;
+}
+/* line 143, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ol li {
+  list-style: inherit;
+  margin: 0 0;
+}
+/* line 149, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ul {
+  list-style-type: disc;
+}
+/* line 152, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ul li {
+  margin: 0;
+  list-style: inherit;
+}
+/* line 162, _modules/_repositories.scss */
 .cloud-guide-content section h5 {
   font-weight: bold;
 }
-/* line 144, _modules/_repositories.scss */
+/* line 166, _modules/_repositories.scss */
 .cloud-guide-content section .section_ident {
   margin-left: 2rem;
 }
-/* line 148, _modules/_repositories.scss */
+/* line 170, _modules/_repositories.scss */
 .cloud-guide-content a {
   color: #4183C4;
 }
-/* line 153, _modules/_repositories.scss */
+/* line 175, _modules/_repositories.scss */
 .cloud-guide-content img.aws-process-diagram, .cloud-guide-content .screen-shot img {
   display: block;
   width: 50%;
   margin: 1rem auto;
   border: none;
 }
-/* line 161, _modules/_repositories.scss */
+/* line 183, _modules/_repositories.scss */
 .cloud-guide-content h1, .cloud-guide-content h2, .cloud-guide-content h3, .cloud-guide-content h4, .cloud-guide-content h5, .cloud-guide-content h6 {
   margin: 3rem 0rem 0rem 0rem;
   padding: 0;
@@ -4613,113 +4631,109 @@ td {
   text-transform: none;
   font-style: normal;
 }
-/* line 173, _modules/_repositories.scss */
+/* line 195, _modules/_repositories.scss */
 .cloud-guide-content h1 tt, .cloud-guide-content h1 code {
   font-size: inherit;
 }
-/* line 177, _modules/_repositories.scss */
+/* line 199, _modules/_repositories.scss */
 .cloud-guide-content h2 tt, .cloud-guide-content h2 code {
   font-size: inherit;
 }
-/* line 181, _modules/_repositories.scss */
+/* line 203, _modules/_repositories.scss */
 .cloud-guide-content h3 tt, .cloud-guide-content h3 code {
   font-size: inherit;
 }
-/* line 185, _modules/_repositories.scss */
+/* line 207, _modules/_repositories.scss */
 .cloud-guide-content h4 tt, .cloud-guide-content h4 code {
   font-size: inherit;
 }
-/* line 190, _modules/_repositories.scss */
+/* line 212, _modules/_repositories.scss */
 .cloud-guide-content h5 tt, .cloud-guide-content h5 code {
   font-size: inherit;
 }
-/* line 193, _modules/_repositories.scss */
+/* line 215, _modules/_repositories.scss */
 .cloud-guide-content h6 tt, .cloud-guide-content h6 code {
   font-size: inherit;
 }
-/* line 196, _modules/_repositories.scss */
+/* line 218, _modules/_repositories.scss */
 .cloud-guide-content h1 {
   font-size: 28px;
   color: black;
 }
-/* line 200, _modules/_repositories.scss */
+/* line 222, _modules/_repositories.scss */
 .cloud-guide-content h2 {
   font-size: 2.0rem;
   line-height: 1.25rem;
   margin-top: .5rem;
   margin-bottom: .5rem;
 }
-/* line 207, _modules/_repositories.scss */
+/* line 229, _modules/_repositories.scss */
 .cloud-guide-content h3 {
   font-size: 18px;
 }
-/* line 211, _modules/_repositories.scss */
+/* line 233, _modules/_repositories.scss */
 .cloud-guide-content h4 {
   font-size: 16px;
 }
-/* line 215, _modules/_repositories.scss */
+/* line 237, _modules/_repositories.scss */
 .cloud-guide-content h5 {
   font-size: 14px;
 }
-/* line 219, _modules/_repositories.scss */
+/* line 241, _modules/_repositories.scss */
 .cloud-guide-content h6 {
   color: #777777;
   font-size: 14px;
 }
-/* line 224, _modules/_repositories.scss */
+/* line 246, _modules/_repositories.scss */
 .cloud-guide-content p, .cloud-guide-content blockquote, .cloud-guide-content ul, .cloud-guide-content ol, .cloud-guide-content dl, .cloud-guide-content li, .cloud-guide-content table, .cloud-guide-content pre {
   margin: 15px 0;
 }
-/* line 230, _modules/_repositories.scss */
+/* line 252, _modules/_repositories.scss */
 .cloud-guide-content body > h2:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 235, _modules/_repositories.scss */
+/* line 257, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 240, _modules/_repositories.scss */
+/* line 262, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child + h2 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 244, _modules/_repositories.scss */
+/* line 266, _modules/_repositories.scss */
 .cloud-guide-content body > h3:first-child, .cloud-guide-content body > h4:first-child, .cloud-guide-content body > h5:first-child, .cloud-guide-content body > h6:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 249, _modules/_repositories.scss */
+/* line 271, _modules/_repositories.scss */
 .cloud-guide-content a:first-child h1, .cloud-guide-content a:first-child h2, .cloud-guide-content a:first-child h3, .cloud-guide-content a:first-child h4, .cloud-guide-content a:first-child h5, .cloud-guide-content a:first-child h6 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 253, _modules/_repositories.scss */
+/* line 275, _modules/_repositories.scss */
 .cloud-guide-content h1 p, .cloud-guide-content h2 p, .cloud-guide-content h3 p, .cloud-guide-content h4 p, .cloud-guide-content h5 p, .cloud-guide-content h6 p {
   margin-top: 0;
 }
-/* line 257, _modules/_repositories.scss */
+/* line 279, _modules/_repositories.scss */
 .cloud-guide-content li p.first {
   display: inline-block;
 }
-/* line 261, _modules/_repositories.scss */
-.cloud-guide-content li {
-  margin: 0;
-}
-/* line 265, _modules/_repositories.scss */
+/* line 285, _modules/_repositories.scss */
 .cloud-guide-content ul, .cloud-guide-content ol {
   padding-left: 30px;
 }
-/* line 269, _modules/_repositories.scss */
+/* line 291, _modules/_repositories.scss */
 .cloud-guide-content ul :first-child, .cloud-guide-content ol :first-child {
   margin-top: 0;
 }
-/* line 274, _modules/_repositories.scss */
+/* line 296, _modules/_repositories.scss */
 .cloud-guide-content img {
   max-width: 100%;
 }
-/* line 278, _modules/_repositories.scss */
+/* line 300, _modules/_repositories.scss */
 .cloud-guide-content code {
   margin: 0 2px;
   padding: 0 5px;
@@ -4728,7 +4742,7 @@ td {
   background-color: #f8f8f8;
   border-radius: 3px;
 }
-/* line 287, _modules/_repositories.scss */
+/* line 309, _modules/_repositories.scss */
 .cloud-guide-content pre code {
   margin: 0;
   padding: 0;
@@ -4736,7 +4750,7 @@ td {
   border: none;
   background: transparent;
 }
-/* line 296, _modules/_repositories.scss */
+/* line 318, _modules/_repositories.scss */
 .cloud-guide-content pre {
   background-color: #f8f8f8;
   border: 1px solid #cccccc;
@@ -4746,37 +4760,37 @@ td {
   padding: 6px 10px;
   border-radius: 3px;
 }
-/* line 306, _modules/_repositories.scss */
+/* line 328, _modules/_repositories.scss */
 .cloud-guide-content pre code, .cloud-guide-content pre tt {
   background-color: transparent;
   border: none;
 }
-/* line 312, _modules/_repositories.scss */
+/* line 334, _modules/_repositories.scss */
 .cloud-guide-content * {
   -webkit-print-color-adjust: exact;
 }
 @media screen and (min-width: 914px) {
-  /* line 317, _modules/_repositories.scss */
+  /* line 339, _modules/_repositories.scss */
   .cloud-guide-content body {
     width: 854px;
     margin: 0 auto;
   }
 }
 @media print {
-  /* line 324, _modules/_repositories.scss */
+  /* line 346, _modules/_repositories.scss */
   .cloud-guide-content table, .cloud-guide-content pre {
     page-break-inside: avoid;
   }
-  /* line 327, _modules/_repositories.scss */
+  /* line 349, _modules/_repositories.scss */
   .cloud-guide-content pre {
     word-wrap: break-word;
   }
 }
-/* line 332, _modules/_repositories.scss */
+/* line 354, _modules/_repositories.scss */
 .cloud-guide-content table th {
   font-weight: bold;
 }
-/* line 343, _modules/_repositories.scss */
+/* line 365, _modules/_repositories.scss */
 .cloud-guide-content code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   color: black;
@@ -4797,57 +4811,57 @@ td {
   -ms-hyphens: none;
   hyphens: none;
 }
-/* line 366, _modules/_repositories.scss */
+/* line 388, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::-moz-selection, .cloud-guide-content pre[class*="language-"] ::-moz-selection,
 .cloud-guide-content code[class*="language-"]::-moz-selection, .cloud-guide-content code[class*="language-"] ::-moz-selection {
   text-shadow: none;
   background: #b3d4fc;
 }
-/* line 372, _modules/_repositories.scss */
+/* line 394, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::selection, .cloud-guide-content pre[class*="language-"] ::selection,
 .cloud-guide-content code[class*="language-"]::selection, .cloud-guide-content code[class*="language-"] ::selection {
   text-shadow: none;
   background: #b3d4fc;
 }
 @media print {
-  /* line 379, _modules/_repositories.scss */
+  /* line 401, _modules/_repositories.scss */
   .cloud-guide-content code[class*="language-"],
   .cloud-guide-content pre[class*="language-"] {
     text-shadow: none;
   }
 }
-/* line 385, _modules/_repositories.scss */
+/* line 407, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"] {
   padding: 1em;
   margin: .5em 0;
   overflow: auto;
 }
-/* line 392, _modules/_repositories.scss */
+/* line 414, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   background: #f5f2f0;
 }
-/* line 397, _modules/_repositories.scss */
+/* line 419, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"] {
   padding: .1em;
   border-radius: .3em;
 }
-/* line 406, _modules/_repositories.scss */
+/* line 428, _modules/_repositories.scss */
 .cloud-guide-content .token.comment,
 .cloud-guide-content .token.prolog,
 .cloud-guide-content .token.doctype,
 .cloud-guide-content .token.cdata {
   color: slategray;
 }
-/* line 410, _modules/_repositories.scss */
+/* line 432, _modules/_repositories.scss */
 .cloud-guide-content .token.punctuation {
   color: #999;
 }
-/* line 414, _modules/_repositories.scss */
+/* line 436, _modules/_repositories.scss */
 .cloud-guide-content .namespace {
   opacity: .7;
 }
-/* line 424, _modules/_repositories.scss */
+/* line 446, _modules/_repositories.scss */
 .cloud-guide-content .token.property,
 .cloud-guide-content .token.tag,
 .cloud-guide-content .token.boolean,
@@ -4857,7 +4871,7 @@ td {
 .cloud-guide-content .token.deleted {
   color: #905;
 }
-/* line 433, _modules/_repositories.scss */
+/* line 455, _modules/_repositories.scss */
 .cloud-guide-content .token.selector,
 .cloud-guide-content .token.attr-name,
 .cloud-guide-content .token.string,
@@ -4866,7 +4880,7 @@ td {
 .cloud-guide-content .token.inserted {
   color: #690;
 }
-/* line 441, _modules/_repositories.scss */
+/* line 463, _modules/_repositories.scss */
 .cloud-guide-content .token.operator,
 .cloud-guide-content .token.entity,
 .cloud-guide-content .token.url,
@@ -4875,32 +4889,32 @@ td {
   color: #a67f59;
   background: rgba(255, 255, 255, 0.5);
 }
-/* line 448, _modules/_repositories.scss */
+/* line 470, _modules/_repositories.scss */
 .cloud-guide-content .token.atrule,
 .cloud-guide-content .token.attr-value,
 .cloud-guide-content .token.keyword {
   color: #07a;
 }
-/* line 452, _modules/_repositories.scss */
+/* line 474, _modules/_repositories.scss */
 .cloud-guide-content .token.function {
   color: #DD4A68;
 }
-/* line 458, _modules/_repositories.scss */
+/* line 480, _modules/_repositories.scss */
 .cloud-guide-content .token.regex,
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.variable {
   color: #e90;
 }
-/* line 463, _modules/_repositories.scss */
+/* line 485, _modules/_repositories.scss */
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.bold {
   font-weight: bold;
 }
-/* line 466, _modules/_repositories.scss */
+/* line 488, _modules/_repositories.scss */
 .cloud-guide-content .token.italic {
   font-style: italic;
 }
-/* line 470, _modules/_repositories.scss */
+/* line 492, _modules/_repositories.scss */
 .cloud-guide-content .token.entity {
   cursor: help;
 }

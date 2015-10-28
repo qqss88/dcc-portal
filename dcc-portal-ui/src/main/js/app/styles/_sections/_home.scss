@@ -1,6 +1,6 @@
 #home-page {
   .home-landing {
-    display: table;
+    //display: table;
     section {
       border: none;
       padding: 1rem;
@@ -12,9 +12,14 @@
       
       &.sidebar {
         .list {
-          height: 200px;
+          height: 11.5rem;
         }
       }
+    }
+    
+    
+    .summary-table-container {
+      margin-top: -2rem;
     }
   
     .subhead {
