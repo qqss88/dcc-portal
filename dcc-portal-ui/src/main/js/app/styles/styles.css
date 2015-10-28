@@ -4395,27 +4395,35 @@ td {
 :-webkit-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
+/* line 425, _modules/_pathwayviewer.scss */
+:-webkit-full-screen .subpath-link {
+  padding-top: 4rem;
+}
 
-/* line 428, _modules/_pathwayviewer.scss */
+/* line 432, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 434, _modules/_pathwayviewer.scss */
+/* line 438, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
+/* line 443, _modules/_pathwayviewer.scss */
+:-moz-full-screen .subpath-link {
+  padding-top: 4rem;
+}
 
-/* line 442, _modules/_pathwayviewer.scss */
+/* line 450, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 448, _modules/_pathwayviewer.scss */
+/* line 456, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
@@ -4423,7 +4431,7 @@ td {
 /**
  * For disabling zooming
  */
-/* line 457, _modules/_pathwayviewer.scss */
+/* line 465, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }
