@@ -61,18 +61,18 @@
   angular.module('icgc.portalfeature', [])
     .provider('PortalFeature', function() {
        
-       var _features = {
-          REACTOME_VIEWER: false,
+       var _enabledFeatures = {
           AUTH_TOKEN: false,
-          ICGC_CLOUD: false
+          ICGC_CLOUD: false,
+          SOFTWARE_PAGE: false
        };
        
       this.hasFeature = function(featureID) {
-        return _.get(_features, featureID, false);
+        return _.get(_enabledFeatures, featureID, false);
       };
       
       this.$get = ['$state', 'LocationService', function($state, LocationService) {
-          return new PortalFeatureConstructor(_features, $state, LocationService);
+          return new PortalFeatureConstructor(_enabledFeatures, $state, LocationService);
       }];
   });
 
