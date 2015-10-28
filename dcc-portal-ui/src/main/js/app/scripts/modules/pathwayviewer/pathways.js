@@ -157,6 +157,8 @@
           .then(function(xml) {
               _xml = xml;
               deferred.resolve();
+          }).catch(function() {
+            $scope.pathway = {xml: '', zooms: [''], highlights: [] };
           });
           
          return deferred.promise;
@@ -202,7 +204,7 @@
            return deferred.promise;
        })
        .then(function() {
-          var deferred = $q.defer()
+          var deferred = $q.defer();
           
           GeneSetVerificationService.verify(_uniprotIds.join(',') )
           .then(function(data) {

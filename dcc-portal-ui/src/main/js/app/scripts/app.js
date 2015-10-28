@@ -382,7 +382,8 @@
 
     var ignoreNotFound = [
       '/analysis/',
-      '/list'
+      '/list',
+      '/ui/reactome'
     ];
 
     Restangular.setErrorInterceptor(function (response) {

@@ -262,6 +262,7 @@
         
         var handleRender = function(){
           if(!xml || !zoomedOn){
+            $('.pathwaysvg').remove();
             return;
           }else if(!rendered){
             $('.pathwaysvg').remove();
