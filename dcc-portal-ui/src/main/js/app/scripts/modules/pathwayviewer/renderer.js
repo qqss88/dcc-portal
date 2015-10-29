@@ -468,8 +468,8 @@
         if (highlighted.indexOf(node.id) >= 0){
           nodeValues[node.id] =  '*';  
         } else {
-           nodeValues[node.id] =  renderedValue; 
-           highlighted.push(node.id);
+          nodeValues[node.id] =  renderedValue; 
+          highlighted.push(node.id);
         }
       });
     });
