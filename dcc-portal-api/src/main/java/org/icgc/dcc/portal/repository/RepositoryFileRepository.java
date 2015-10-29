@@ -179,14 +179,14 @@ public class RepositoryFileRepository {
    * Dependencies.
    */
   private final Client client;
-  private final String index;
+  private final String repoIndexName;
   private final QueryEngine queryEngine;
 
   @Autowired
   public RepositoryFileRepository(Client client,
       @NonNull @org.springframework.beans.factory.annotation.Value("#{repoIndexName}") String repoIndexName) {
     this.client = client;
-    this.index = repoIndexName;
+    this.repoIndexName = repoIndexName;
     this.queryEngine = new QueryEngine(client, repoIndexName);
   }
 
@@ -473,7 +473,7 @@ public class RepositoryFileRepository {
       val mergedFilter = merge(userFilter, repoFilter.get());
       val filters = buildRepoFilters(mergedFilter);
 
-      val oneSearch = client.prepareSearch(index)
+      val oneSearch = client.prepareSearch(repoIndexName)
           .setSearchType(COUNT)
           .setQuery(filteredQuery(filters))
           .addAggregation(donorIdAgg(donorAggKey));
@@ -557,7 +557,7 @@ public class RepositoryFileRepository {
   @NonNull
   private SearchResponse searchRepositoryFiles(String indexType, String logMessage,
       Consumer<SearchRequestBuilder> customizer) {
-    val request = client.prepareSearch(index).setTypes(indexType);
+    val request = client.prepareSearch(repoIndexName).setTypes(indexType);
     customizer.accept(request);
 
     log.debug(logMessage + "; ES query is: '{}'", request);
@@ -622,7 +622,7 @@ public class RepositoryFileRepository {
   }
 
   public GetResponse findOne(@NonNull String id) {
-    val search = client.prepareGet(index, FILE_INDEX_TYPE, id);
+    val search = client.prepareGet(repoIndexName, FILE_INDEX_TYPE, id);
     val response = search.execute().actionGet();
     // This check is important as it validates if there is any document at all in the GET response.
     checkResponseState(id, response, KIND);
@@ -1015,9 +1015,9 @@ public class RepositoryFileRepository {
 
   @SneakyThrows
   public Map<String, String> getIndexMetaData() {
-    val state = client.admin().cluster().prepareState().setIndices(index).execute().actionGet().getState();
+    val state = client.admin().cluster().prepareState().setIndices(repoIndexName).execute().actionGet().getState();
 
-    val indexMetaData = state.getMetaData().index(index);
+    val indexMetaData = state.getMetaData().index(repoIndexName);
 
     val mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
     val source = mappingMetaData.sourceAsMap();
