@@ -8,10 +8,28 @@ $button-colour: #1693c0;
         display: block;
         margin: 1rem auto;
     }
+    
+    section {
+      border-bottom: none;
+    }
 }
 
 /* shared classes */
 .icgc-cloud {
+  .header-link {
+      a { 
+        color: inherit;
+        
+        &:hover {
+          background: transparent;  
+          color: inherit;
+        } 
+        
+        .link-title {
+          margin-left: 1rem;
+        }
+      }
+  }
     .screen-shot {
         position: relative;
         box-sizing: content-box; 
@@ -136,6 +154,8 @@ $button-colour: #1693c0;
         border-bottom: 1px solid #cccccc;
     }
     
+    // Used specifically to override styles inside the main content
+    // area of the guide
     .user-guide-content {
       ol {
         list-style-type: number;
