@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Ontario Institute for Cancer Research. All rights reserved.                             
+ * Copyright (c) 2015 The Ontario Institute for Cancer Research. All rights reserved.                             
  *                                                                                                               
  * This program and the accompanying materials are made available under the terms of the GNU Public License v3.0.
  * You should have received a copy of the GNU General Public License along with                                  
@@ -15,26 +15,34 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN                         
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.auth.openid;
+package org.icgc.dcc.portal.auth.oauth;
 
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.NonNull;
 import lombok.Value;
 
-/**
- * Value object to provide the following to {@link OpenIDAuthenticator}:
- * <ul>
- * <li>Storage of the necessary credentials for OpenID authentication</li>
- * </ul>
- */
 @Value
-public class OpenIDCredentials {
+class AccessTokenResponse {
 
-  /**
-   * The session token acting as a surrogate for the OpenID token
-   */
-  @NonNull
-  private final UUID sessionToken;
+  String id;
+  String type;
+  String description;
+  int expiresIn;
+  String scope;
+
+  @JsonCreator
+  public AccessTokenResponse(
+      @JsonProperty("access_token") String id,
+      @JsonProperty("token_type") String type,
+      @JsonProperty("desc") String description,
+      @JsonProperty("expires_in") int expires,
+      @JsonProperty("scope") String scope) {
+    this.id = id;
+    this.type = type;
+    this.description = description;
+    this.expiresIn = expires;
+    this.scope = scope;
+  }
 
 }

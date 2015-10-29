@@ -19,18 +19,18 @@ package org.icgc.dcc.portal.auth.oauth;
 
 import java.util.Set;
 
-import lombok.Value;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Value;
+
 @Value
-public class UserScopesInternal {
+public class UserScopesResponse {
 
   Set<String> scopes;
 
   @JsonCreator
-  public UserScopesInternal(@JsonProperty("scopes") Set<String> scopes) {
+  public UserScopesResponse(@JsonProperty("scopes") Set<String> scopes) {
     this.scopes = scopes;
   }
 

@@ -32,7 +32,7 @@ import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
-import org.icgc.dcc.portal.auth.oauth.UserScopesInternal;
+import org.icgc.dcc.portal.auth.oauth.UserScopesResponse;
 import org.icgc.dcc.portal.model.AccessToken;
 import org.icgc.dcc.portal.model.AccessTokenScopes.AccessTokenScope;
 import org.icgc.dcc.portal.model.User;
@@ -111,8 +111,8 @@ public class TokenServiceTest {
     tokenService.userScopes(createUser(USER_ID, TRUE));
   }
 
-  private static UserScopesInternal createUserScopesInternal(Set<String> scopes) {
-    return new UserScopesInternal(scopes);
+  private static UserScopesResponse createUserScopesInternal(Set<String> scopes) {
+    return new UserScopesResponse(scopes);
   }
 
   private static User createUser(String userId, Boolean hasDaco) {

@@ -44,8 +44,9 @@ import org.icgc.dcc.downloader.client.ExportedDataFileSystem.AccessPermission;
 import org.icgc.dcc.downloader.core.ArchiveJobManager.JobProgress;
 import org.icgc.dcc.downloader.core.ArchiveJobManager.JobStatus;
 import org.icgc.dcc.downloader.core.DataType;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthProvider;
-import org.icgc.dcc.portal.auth.openid.OpenIDAuthenticator;
+import org.icgc.dcc.portal.auth.UserAuthProvider;
+import org.icgc.dcc.portal.auth.UserAuthenticator;
+import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.DonorService;
@@ -79,7 +80,8 @@ public class DownloadResourceTest extends ResourceTest {
   private DonorService donorService;
   @Mock
   private DownloaderClient downloader;
-
+  @Mock
+  private OAuthClient oauthClient;
   @Mock
   private ExportedDataFileSystem fs;
 
@@ -96,7 +98,7 @@ public class DownloadResourceTest extends ResourceTest {
   protected final void setUpResources() {
     addResource(new DownloadResource(donorService, downloader, fs, Stage.PRODUCTION));
     addProvider(BadRequestExceptionMapper.class);
-    addProvider(new OpenIDAuthProvider(new OpenIDAuthenticator(sessionService), "openid"));
+    addProvider(new UserAuthProvider(new UserAuthenticator(sessionService, oauthClient), "openid"));
   }
 
   @Test
@@ -169,7 +171,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(
         downloader.streamArchiveInGzTar(any(OutputStream.class), anyString(),
             Matchers.<List<DataType>> any()))
-        .thenReturn(true);
+                .thenReturn(true);
     String testId = "TESTID";
     JobStatus jobStatus =
         new JobStatus(Status.SUCCEEDED, ImmutableMap.<DataType, JobProgress> of(DataType.SSM_OPEN,
@@ -211,7 +213,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(
         downloader.streamArchiveInGzTar(any(OutputStream.class), anyString(),
             Matchers.<List<DataType>> any()))
-        .thenReturn(true);
+                .thenReturn(true);
     when(downloader.isServiceAvailable()).thenReturn(true);
     // // try to access control data without proper authentication
     client()
@@ -227,7 +229,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(
         downloader.streamArchiveInGzTar(any(OutputStream.class), anyString(),
             Matchers.<List<DataType>> any()))
-        .thenReturn(true);
+                .thenReturn(true);
     when(downloader.isServiceAvailable()).thenReturn(true);
     ClientResponse response = client()
         .resource(RESOURCE)
@@ -247,7 +249,7 @@ public class DownloadResourceTest extends ResourceTest {
     when(
         downloader.streamArchiveInGzTar(any(OutputStream.class), anyString(),
             Matchers.<List<DataType>> any()))
-        .thenReturn(true);
+                .thenReturn(true);
 
     String testId = "TESTID";
     JobStatus jobStatus =
