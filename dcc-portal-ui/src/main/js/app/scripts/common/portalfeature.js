@@ -63,7 +63,7 @@
        
        var _enabledFeatures = {
           AUTH_TOKEN: false,
-          ICGC_CLOUD: true,
+          ICGC_CLOUD: false,
           SOFTWARE_PAGE: false
        };
        

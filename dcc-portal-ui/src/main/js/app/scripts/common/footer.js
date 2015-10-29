@@ -31,8 +31,8 @@ angular.module('app.common.footer.controllers').controller('FooterCtrl', functio
   
  
  var cloudLinks = [
-          {'link': '/icgc-in-the-cloud/', 'title': 'ICGC in the Cloud'},
-          {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'Amazon User Guide'}//,
+          {'link': '/icgc-in-the-cloud/', 'title': 'ICGC in the Cloud'}//,
+          //{'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'Amazon User Guide'}//,
           //{'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'ICGC AWS Info'},
           //{'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory Info'}
         ];
