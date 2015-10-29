@@ -261,7 +261,7 @@
 
     this.createForwardSet = function(type, params, forwardUrl) {
       Page.startWork();
-      params.name = 'Input Donor Set';
+      params.name = 'Input donor set';
       params.description = '';
       params.sortBy = 'ssmAffectedGenes';
       params.sortOrder = 'DESCENDING';
@@ -284,7 +284,7 @@
 
     this.createForwardRepositorySet = function(type, params, forwardUrl) {
       Page.startWork();
-      params.name = 'Input Donor Set';
+      params.name = 'Input donor set';
       params.description = '';
       params.sortBy = 'fileName';
       params.sortOrder = 'DESCENDING';
