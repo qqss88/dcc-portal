@@ -452,7 +452,6 @@
   Renderer.prototype.highlightEntity = function (highlights, model) {
     var svg = this.svg, config = this.config;
     var highlighted = [];
-    
     var nodeValues = {};
     
     // Remove old highlights if there are any
@@ -460,6 +459,7 @@
     svg.selectAll('.value-banner').remove();
     svg.selectAll('.pathway-node').style('stroke','').style('stroke-width','');
     
+    // Compute final mutation highlight text value first
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
       nodes.forEach(function (node) {
@@ -471,16 +471,15 @@
            nodeValues[node.id] =  renderedValue; 
            highlighted.push(node.id);
         }
-        
       });
     });
     
+    // Add SVG elements to nodes with highlight values
     for (var nodeId in nodeValues) {
       if (nodeValues.hasOwnProperty(nodeId)) {
-        
+       
         var node = model.getNodeById(nodeId);
         var renderedValue = nodeValues[nodeId];
-        
         var svgNode = svg.selectAll('.entity'+node.id);
         svgNode.style('stroke',config.highlightColor);
         svgNode.style('stroke-width','3px');
@@ -507,10 +506,8 @@
           'font-weight':'bold',
           'fill':'white'
         }).text(renderedValue);
-        
       }
     }
-    
   };
   
   Renderer.prototype.outlineSubPathway = function (svg, reactomeId) {
