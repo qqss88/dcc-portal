@@ -56,8 +56,10 @@
 
                     <ul class="t_quick__hit__text__details">
                         <li>
-                            <span class="t_quick__hit__text__details__label">File Name</span>
-                            <span class="t_quick__hit__text__details__value" data-ng-bind-html="r.fileName | highlight:activeQuery"></span>
+                            <span class="t_quick__hit__text__details__label">File Name</span>           
+                            <span class="t_quick__hit__text__details__value" data-ng-bind-html="r.fileName[0] | highlight:activeQuery"></span>
+                            <span data-ng-if="r.fileName.length > 1" style="cursor:pointer;" 
+                              data-tooltip="{{r.fileName | withoutFirst | highlight:activeQuery}}" class="t_quick__hit__text__details__value">...</span>
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">File Object ID</span>
@@ -69,7 +71,7 @@
                         </li>
                         <li>
                             <span class="t_quick__hit__text__details__label">Project ID</span>
-                            <span class="t_quick__hit__text__details__value">{{r.projectCode}}</span>
+                            <span class="t_quick__hit__text__details__value">{{ r.projectCode | projectCode }}</span>
                         </li>
                     </ul>
                 </td>
