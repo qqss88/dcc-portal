@@ -11,9 +11,6 @@ import static org.icgc.dcc.portal.util.ElasticsearchResponseUtils.createResponse
 
 import java.util.Map;
 
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -25,6 +22,9 @@ import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 @Slf4j
 @Component
 public class ProjectRepository {
@@ -35,6 +35,7 @@ public class ProjectRepository {
 
   private final Client client;
   private final String index;
+  private final String repoIndexName;
 
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
   private final QueryEngine queryEngine;
@@ -42,6 +43,7 @@ public class ProjectRepository {
   @Autowired
   ProjectRepository(Client client, IndexModel indexModel, QueryEngine engine) {
     this.index = indexModel.getIndex();
+    this.repoIndexName = indexModel.getRepoIndex();
     this.client = client;
     this.queryEngine = engine;
   }
@@ -59,6 +61,7 @@ public class ProjectRepository {
     return search.getRequestBuilder().execute().actionGet().getHits().getTotalHits();
   }
 
+  @SuppressWarnings("deprecation")
   public Map<String, Object> findOne(String id, Query query) {
     val search = client.prepareGet(index, TYPE_ID, id)
         .setFields(getFields(query, KIND));
@@ -73,7 +76,7 @@ public class ProjectRepository {
       return result;
     }
 
-    if (!isRepositoryDonorInProject(client, id)) {
+    if (!isRepositoryDonorInProject(client, id, repoIndexName)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }
