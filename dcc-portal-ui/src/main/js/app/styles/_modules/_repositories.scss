@@ -12,6 +12,14 @@ $button-colour: #1693c0;
     section {
       border-bottom: none;
     }
+    
+    .indent { 
+     text-indent: 1rem;
+    }
+    
+    a {
+      text-indent: initial;
+    }
 }
 
 /* shared classes */
@@ -30,50 +38,50 @@ $button-colour: #1693c0;
         }
       }
   }
-    .screen-shot {
-        position: relative;
-        box-sizing: content-box; 
-       
-        a {
-            display: block;
-            position: relative;
-            margin: 0 auto;
-            width: 50%;
-           
-            img {
-                width: 100%;
-                display: block;
-                margin: 0 auto;
-                //border: solid 1px rgb(230, 230, 230);
-                padding: 0.5rem 0.5rem;
-                //box-shadow: 5px 5px 5px rgb(230, 230, 230);
-            } 
-            
-            .screen-caption {
-                position: absolute;
-                background: rgb(22, 147, 192);
-                color: #fff;
-                display: block;
-                opacity: 0.3;
-                padding: 0.4rem 0.4rem;
-                border-radius: 5px;
-                transition: opacity 0.25s ease-in;
-                font-size: 1.4rem;
-                text-align: center;
-                right: 0.8rem;
-                top: 0.8rem;
-               
-            }
-            
-            &:hover .screen-caption {
-                opacity: 0.9; 
-            }
-            
-            &:hover {
-                background: transparent;
-            }
-            
-        }
+  .screen-shot {
+      position: relative;
+      box-sizing: content-box; 
+      
+      a {
+          display: block;
+          position: relative;
+          margin: 0 auto;
+          width: 50%;
+          
+          img {
+              width: 100%;
+              display: block;
+              margin: 0 auto;
+              //border: solid 1px rgb(230, 230, 230);
+              padding: 0.5rem 0.5rem;
+              //box-shadow: 5px 5px 5px rgb(230, 230, 230);
+          } 
+          
+          .screen-caption {
+              position: absolute;
+              background: rgb(22, 147, 192);
+              color: #fff;
+              display: block;
+              opacity: 0.3;
+              padding: 0.4rem 0.4rem;
+              border-radius: 5px;
+              transition: opacity 0.25s ease-in;
+              font-size: 1.4rem;
+              text-align: center;
+              right: 0.8rem;
+              top: 0.8rem;
+              
+          }
+          
+          &:hover .screen-caption {
+              opacity: 0.9; 
+          }
+          
+          &:hover {
+              background: transparent;
+          }
+          
+      }
     }
 }
 
@@ -108,13 +116,14 @@ $button-colour: #1693c0;
     }
     
     .repo-controls-container {
-        padding: 1.5rem 2rem;
+        padding: 0.5rem 2rem;
         text-align: center;
         margin: 0 auto;
        
         .btn {
           color: #fff;
-          transition: all 0.1s ease-in;        
+          transition: all 0.1s ease-in; 
+          margin-top: 1rem;       
         }
         
         .btn:nth-child(2) {
@@ -129,6 +138,10 @@ $button-colour: #1693c0;
         i {
             font-size: 1.25rem;
         }
+    }
+    
+    h3 {
+      padding-top: 3rem;
     }
     
 }
