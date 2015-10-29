@@ -140,10 +140,10 @@ class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
             token = authHeaderValue.substring(0, commaIndex);
           }
         }
-    } catch (IllegalArgumentException e) {
-      log.debug("Invalid OAuth access token passed in request");
     } catch (NullPointerException e) {
       log.debug("No OAuth access token passed in request");
+    } catch (Exception e) {
+      log.debug("Invalid OAuth access token passed in request");
     }
 
     return token;

@@ -55,7 +55,7 @@ public class UserAuthenticator implements Authenticator<UserCredentials, User> {
 
   @Override
   public Optional<User> authenticate(UserCredentials credentials) throws AuthenticationException {
-    if (credentials.getSessionToken().isPresent()) {
+    if (credentials.isWebSession()) {
       val sessionToken = credentials.getSessionToken().get();
       log.debug("Looking up user by session token '{}'...", sessionToken);
 
@@ -64,7 +64,7 @@ public class UserAuthenticator implements Authenticator<UserCredentials, User> {
       if (user.isPresent() && user.get().getDaco()) {
         return user;
       }
-    } else if (credentials.getAccessToken().isPresent()) {
+    } else if (credentials.isAPI()) {
       val accessToken = credentials.getAccessToken().get();
       if (oauthClient.checkToken(accessToken, PORTAL_DOWNLOAD_SCOPE)) {
         val user = new User();

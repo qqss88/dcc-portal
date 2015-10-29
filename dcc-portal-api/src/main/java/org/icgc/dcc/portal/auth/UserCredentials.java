@@ -44,4 +44,12 @@ public class UserCredentials {
   @NonNull
   private final Optional<String> accessToken;
 
+  public boolean isWebSession() {
+    return sessionToken.isPresent();
+  }
+
+  public boolean isAPI() {
+    return accessToken.isPresent();
+  }
+
 }
