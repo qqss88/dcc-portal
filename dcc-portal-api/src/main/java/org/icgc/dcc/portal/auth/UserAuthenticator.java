@@ -66,6 +66,8 @@ public class UserAuthenticator implements Authenticator<UserCredentials, User> {
       }
     } else if (credentials.isAPI()) {
       val accessToken = credentials.getAccessToken().get();
+      log.debug("Looking up user by access token '{}'...", accessToken);
+
       if (oauthClient.checkToken(accessToken, PORTAL_DOWNLOAD_SCOPE)) {
         val user = new User();
         user.setDaco(true);

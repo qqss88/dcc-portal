@@ -17,19 +17,22 @@
  */
 package org.icgc.dcc.portal.auth.oauth;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Value;
 
 @Value
+@JsonIgnoreProperties(ignoreUnknown = true)
 class CheckTokenResponse {
 
-  String scope;
+  List<String> scope;
 
   @JsonCreator
-  public CheckTokenResponse(
-      @JsonProperty("scope") String scope) {
+  public CheckTokenResponse(@JsonProperty("scope") List<String> scope) {
     this.scope = scope;
   }
 

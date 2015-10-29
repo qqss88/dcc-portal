@@ -20,7 +20,6 @@ package org.icgc.dcc.portal.auth;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -57,7 +56,6 @@ class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
   /**
    * Constants.
    */
-  public static final String X_AUTH_TOKEN = "X-Auth-Token";
   public static final String AUTH_BEARER_TYPE = "Bearer";
 
   /**
@@ -105,7 +103,6 @@ class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
   }
 
   private static UUID resolveSessionToken(HttpContext httpContext) {
-    List<String> headers = httpContext.getRequest().getRequestHeader(X_AUTH_TOKEN);
     Map<String, Cookie> cookies = httpContext.getRequest().getCookies();
 
     UUID token = null;
@@ -113,8 +110,6 @@ class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
     try {
       if (cookies.containsKey(CrowdProperties.SESSION_TOKEN_NAME)) {
         token = UUID.fromString(cookies.get(CrowdProperties.SESSION_TOKEN_NAME).getValue());
-      } else if (!headers.isEmpty()) {
-        token = UUID.fromString(headers.get(0));
       }
     } catch (IllegalArgumentException e) {
       log.debug("Invalid session token passed in request");
@@ -138,6 +133,8 @@ class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
           int commaIndex = authHeaderValue.indexOf(',');
           if (commaIndex > 0) {
             token = authHeaderValue.substring(0, commaIndex);
+          } else {
+            token = authHeaderValue;
           }
         }
     } catch (NullPointerException e) {

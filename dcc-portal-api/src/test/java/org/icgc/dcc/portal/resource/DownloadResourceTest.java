@@ -37,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.ws.rs.core.Cookie;
+
 import org.apache.oozie.client.WorkflowJob.Status;
 import org.icgc.dcc.downloader.client.DownloaderClient;
 import org.icgc.dcc.downloader.client.ExportedDataFileSystem;
@@ -47,6 +49,7 @@ import org.icgc.dcc.downloader.core.DataType;
 import org.icgc.dcc.portal.auth.UserAuthProvider;
 import org.icgc.dcc.portal.auth.UserAuthenticator;
 import org.icgc.dcc.portal.auth.oauth.OAuthClient;
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
 import org.icgc.dcc.portal.mapper.BadRequestExceptionMapper;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.DonorService;
@@ -146,7 +149,7 @@ public class DownloadResourceTest extends ResourceTest {
         .resource(RESOURCE)
         .queryParam("fn", "filename_control.txt.gz")
         .queryParam("filters", "")
-        .header("X-Auth-Token", sessionToken.toString())
+        .cookie(new Cookie(CrowdProperties.SESSION_TOKEN_NAME, sessionToken.toString()))
         .get(ClientResponse.class);
 
     verify(fs, times(1)).createInputStream((any(File.class)), anyInt());
@@ -235,7 +238,7 @@ public class DownloadResourceTest extends ResourceTest {
         .resource(RESOURCE)
         .queryParam("filters", "")
         .queryParam("info", "[{\"key\":\"ssm\",\"value\":\"TSV\"}]")
-        .header("X-Auth-Token", sessionToken.toString())
+        .cookie(new Cookie(CrowdProperties.SESSION_TOKEN_NAME, sessionToken.toString()))
         .get(ClientResponse.class);
     List<DataType> selection =
         ImmutableList.of(DataType.SSM_CONTROLLED);

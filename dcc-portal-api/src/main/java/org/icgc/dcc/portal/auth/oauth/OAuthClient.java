@@ -29,6 +29,7 @@ import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
 import java.util.Set;
 
@@ -79,7 +80,7 @@ public class OAuthClient {
   private static final String DESCRIPTION_PARAM = "desc";
   private static final String USERNAME_PARAM = "username";
   private static final String GRANT_TYPE_PARAM = "grant_type";
-  private static final String TOKEN_PARAM = "toekn";
+  private static final String TOKEN_PARAM = "token";
 
   /**
    * Constants - URL.
@@ -143,10 +144,14 @@ public class OAuthClient {
         .type(APPLICATION_FORM_URLENCODED_TYPE)
         .accept(APPLICATION_JSON_TYPE)
         .post(ClientResponse.class, params);
-    validateResponse(response);
-    val accessToken = response.getEntity(CheckTokenResponse.class);
 
-    val scopes = convertScope(accessToken.getScope());
+    checkState(response.getClientResponseStatus().getFamily() != SERVER_ERROR, "Error checking token: %s", response);
+    if (response.getClientResponseStatus() != OK) {
+      return false;
+    }
+
+    val accessToken = response.getEntity(CheckTokenResponse.class);
+    val scopes = accessToken.getScope();
     return scopes.contains(scope);
   }
 
