@@ -19,7 +19,6 @@ package org.icgc.dcc.portal.analysis;
 
 import static java.lang.Math.min;
 import static org.elasticsearch.index.query.FilterBuilders.boolFilter;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.IndexModel.Type.DONOR_TEXT;
 import static org.icgc.dcc.portal.model.IndexModel.Type.REPOSITORY_FILE_DONOR_TEXT;
 import static org.icgc.dcc.portal.service.TermsLookupService.TERMS_LOOKUP_PATH;
@@ -97,6 +96,8 @@ public class UnionAnalyzer {
   private final Client client;
   @Value("#{indexName}")
   private final String indexName;
+  @Value("#{repoIndexName}")
+  private final String repoIndexName;
   @NonNull
   private final PortalProperties properties;
 
@@ -524,7 +525,7 @@ public class UnionAnalyzer {
     val query = QueryBuilders.filteredQuery(MATCH_ALL, boolFilter);
 
     val search = client
-        .prepareSearch(REPOSITORY_INDEX_NAME, indexName)
+        .prepareSearch(repoIndexName, indexName)
         .setTypes(DONOR_TEXT.getId(), REPOSITORY_FILE_DONOR_TEXT.getId())
         .setQuery(query)
         .setSize(maxUnionCount)

@@ -27,11 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.val;
-
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.icgc.dcc.portal.model.IndexModel;
 import org.icgc.dcc.portal.model.IndexModel.Type;
@@ -50,12 +45,18 @@ import com.github.tlrx.elasticsearch.test.request.CreateIndex;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.val;
+
 public abstract class BaseElasticSearchTest {
 
   /**
    * Test configuration.
    */
   protected static final String INDEX_NAME = "test_index";
+  protected static final String REPO_INDEX_NAME = "test-repo-index";
   protected static final String SETTINGS_FILE_NAME = "index.settings.json";
   protected static final String JSON_DIR = "mappings";
   protected static final String FIXTURES_DIR = "src/test/resources/fixtures";
@@ -66,7 +67,7 @@ public abstract class BaseElasticSearchTest {
     return Resources.getResource(JSON_DIR + "/" + fileName);
   }
 
-  protected static final IndexModel INDEX = new IndexModel(INDEX_NAME);
+  protected static final IndexModel INDEX = new IndexModel(INDEX_NAME, REPO_INDEX_NAME);
 
   /**
    * Test data.

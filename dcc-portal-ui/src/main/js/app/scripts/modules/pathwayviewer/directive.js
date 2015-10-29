@@ -116,8 +116,9 @@
           infoRenderer.renderNodes([node]);
           
           if(isMutated){
-            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}],
-                                         {getNodesByReactomeId:function (){return [node];}});
+            var model = new dcc.PathwayModel();
+            model.nodes = [node];
+            infoRenderer.highlightEntity([{id:node.reactomeId,value:mutationCount}], model);
           }
         };
 
