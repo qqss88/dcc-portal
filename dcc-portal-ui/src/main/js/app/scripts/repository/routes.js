@@ -19,7 +19,8 @@
 
   'use strict';
 
-  var module = angular.module('icgc.repository', ['icgc.repository.services', 'icgc.repository.controllers']);
+  var module = angular.module('icgc.repository', ['icgc.repository.services', 'icgc.repository.controllers',
+                                                  'icgc.repository.directives']);
 
   module.config(function ($stateProvider) {
     $stateProvider.state('repository', {

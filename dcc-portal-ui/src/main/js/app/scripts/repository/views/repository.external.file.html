@@ -18,6 +18,9 @@
       <li data-spy="donor" class="t_subnav__items__item">
         <a data-scrollto href="#donor">Donor</a>
       </li>
+      <li data-spy="bam-statistics" class="t_subnav__items__item" data-ng-if="fileCopies[0].fileFormat == 'BAM'">
+        <a data-scrollto href="#bam-statistics">BAM Stats</a>
+      </li>
     </ul>
   </section>
 </aside>
@@ -245,10 +248,11 @@
         <td ng-bind="fileCtrlr.stringOrDefault (donorInfo.matchedControlSampleId)" />
       </tr>
     </table>
-
   </div>
 
 </section>
-
+<section id="bam-statistics" data-ng-if="fileCopies[0].fileFormat == 'BAM'">
+  <bamstats bam-id="info.objectId"></bamstats>
+</section>
 </article>
 </div>
