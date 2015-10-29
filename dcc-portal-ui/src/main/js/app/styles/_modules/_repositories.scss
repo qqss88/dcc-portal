@@ -83,13 +83,16 @@ $button-colour: #1693c0;
     .repo-header {
         
         .logo {
-            height: 3.5rem; 
             margin-left: 2rem; 
-            vertical-align: bottom;
+            vertical-align: baseline;
         }
-        div {
-            display: inline-block;
+        span {
+            margin-left: 0.5rem;
         }
+    }
+    
+    a {
+        text-indent: initial;
     }
         
     .cloud-repository-content {
@@ -105,24 +108,19 @@ $button-colour: #1693c0;
     }
     
     .repo-controls-container {
-        margin: 4rem 2rem;
+        padding: 1.5rem 2rem;
         text-align: center;
+        margin: 0 auto;
        
         .btn {
-            background: transparent;
-            color: darken($button-colour, 30%);
-            border: solid 2px darken($button-colour, 5%);
-            transition: all 0.1s ease-in; 
+          color: #fff;
+          transition: all 0.1s ease-in;        
         }
         
         .btn:nth-child(2) {
             margin-left: 2rem;
         }
-        
-         .btn:hover {
-            background: lighten($button-colour, 30%);
-            border-color: lighten($button-colour, 5%);
-        }
+       
     }
     
     .icons-container {

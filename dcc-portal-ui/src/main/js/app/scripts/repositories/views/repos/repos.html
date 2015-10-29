@@ -1,15 +1,15 @@
 <div data-ng-init="repoContextID = repositoryCtrl.getRepoContextID()">
     <h1 class="repo-header" data-ng-if="repoContextID == 'aws-virginia'">
-        <img src="styles/images/PCAWG-icon.png" class="logo" alt="ICGC AWS Logo" />
-        <div>
+        <img src="http://awsmedia.s3.amazonaws.com/AWS_Logo_PoweredBy_127px.png" class="logo" alt="ICGC AWS Logo" />
+        <span>
             The ICGC AWS S3 Repository
-        </div>
+        </span>
     </h1>
     <h1 class="repo-header" data-ng-if="repoContextID == 'collaboratory'">
-        <img src="styles/images/PCAWG-icon.png" class="logo" alt="Collaboratory Logo" />
-        <div>
+        <img src="styles/images/repositories/home/collab_logo_127px.png" class="logo" alt="Collaboratory Logo" />
+        <span>
         The Cancer Genome Collaboratory Repository
-        </div>
+        </span>
     </h1>
     <section class="cloud-repository-content">
         <div class="half pull-right" data-ui-view2="dataContent">
@@ -65,10 +65,6 @@
             <!-- -->     
         </div>
         <div data-ui-view="bodyContent">
-        </div>
-        <div class="repo-controls-container">
-                <a class="btn" data-ng-show="repositoryCtrl.hasSummaryData()" data-ng-href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}">Search Respository</a>
-                <a class="btn" data-ng-href="/icgc-in-the-cloud/repositories/{{repoContextID}}/guide">User Guide</a>
         </div>
     </section>
 </div>
