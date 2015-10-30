@@ -10,12 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.val;
-
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel;
 import org.dcc.portal.pql.meta.TypeModel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +20,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
 
 @Component
 public class IndexModel {
@@ -46,10 +46,6 @@ public class IndexModel {
    * Special cases for term lookups
    */
   public static final String API_ENTITY_LIST_ID_FIELD_NAME = ENTITY_SET_ID;
-
-  // Index name for the icgc-repository index.
-  // FIXME: Change the value to "icgc-repository"
-  public static final String REPOSITORY_INDEX_NAME = "test-icgc-repository";
 
   @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   @Getter
@@ -110,7 +106,7 @@ public class IndexModel {
     REPOSITORY_FILE_TEXT("file-text"),
     REPOSITORY_FILE_DONOR_TEXT("donor-text"),
     PROJECT_TEXT("project-text");
-
+    
     @NonNull
     private final String id;
   }
@@ -554,15 +550,21 @@ public class IndexModel {
       GeneSetType.GENE_SET_TYPE_GO.getType(), "hasGoTerm");
 
   private String index;
+  private String repoIndexName;
 
   @Autowired
-  public IndexModel(@Value("#{indexName}") String index) {
+  public IndexModel(@Value("#{indexName}") String index, @Value("#{repoIndexName}") String repoIndexName) {
     super();
     this.index = index;
+    this.repoIndexName = repoIndexName;
   }
 
   public String getIndex() {
     return this.index;
+  }
+
+  public String getRepoIndex() {
+    return this.repoIndexName;
   }
 
   private static ImmutableMap<String, String> createFieldsMapping(Kind kind) {

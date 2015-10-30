@@ -17,6 +17,7 @@
  */
 package org.dcc.portal.pql.meta.visitor;
 
+//import static java.util.Collections.singletonMap;
 import static org.dcc.portal.pql.meta.field.FieldModel.FieldType.OBJECT;
 
 import java.util.Collections;
@@ -84,13 +85,18 @@ public class CreateAliasVisitor implements FieldVisitor<Map<String, String>> {
   }
 
   private static Map<String, String> getAlias(FieldModel field) {
-    if (field.getAlias().isEmpty()) {
-      return Collections.<String, String> emptyMap();
+    val aliases = field.getAlias();
+    val fieldName = field.getName();
+
+    // If no alias is defined in the type model mapping, report the field name as the alias.
+    if (aliases.isEmpty()) {
+      // return singletonMap(fieldName, fieldName);
+      return Collections.emptyMap();
     }
 
     val result = new ImmutableMap.Builder<String, String>();
-    for (val alias : field.getAlias()) {
-      result.put(alias, field.getName());
+    for (val alias : aliases) {
+      result.put(alias, fieldName);
     }
 
     return result.build();

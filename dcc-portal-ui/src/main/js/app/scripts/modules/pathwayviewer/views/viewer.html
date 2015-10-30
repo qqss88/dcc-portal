@@ -1,12 +1,15 @@
 <div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">
+  <div data-ng-if="items===''" class="empty loading-text">
+    <h3>No Diagram Available</h3>
+  </div>
 	<i class="fa fa-expand pathway-fullscreen-controller"></i>
-		<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>
+		<div data-ng-if="!items===''" class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>
     	<h4>LEGEND</h4></div>
       <div class="pathway-info">
       <i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>
       <h4>DETAILS</h4><div>{{entityType}}</div><div class="pathway-info-svg"></div>
       <div class="pathway-info-content">
-      	<div data-ng-if="entityType==='ProcessNode'">
+      	<div class="subpath-link" data-ng-if="entityType=='ProcessNode'">
         	<a href="/genesets/R-HSA-{{ subPathwayId }}">VIEW THIS SUB-PATHWAY: R-HSA-{{ subPathwayId }}</a>
         </div>
         <table class="table pathway-gene-table" data-ng-if="geneList.length>0">

@@ -75,18 +75,21 @@
                             <a href="/search/g?filters={{getSelectedPathway().geneSetFilters}}" data-ng-bind="getSelectedPathway().geneCount | number"></a>
                         </td>
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search/g?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetGeneCount | number"></a>
                             </span>
                         </td>
     
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetDonorCount | number"></a>
                             </span>
                         </td>
                         <td class="text-right">
-                            <span>
+                            <span data-ng-if="!getSelectedPathway().geneSetOverlapFilters" data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></span>
+                            <span data-ng-if="getSelectedPathway().geneSetOverlapFilters">
                                 <a href="/search/m?filters={{getSelectedPathway().geneSetOverlapFilters}}"  data-ng-bind="getSelectedPathway().overlapGeneSetMutationCount | number"></a>
                             </span>
                         </td>

@@ -130,19 +130,23 @@ $compartmentBorder:#ffc38b;
     
     .pathway-analysis-header {
       @include clearfix;
-    
+      
       padding-top:0.2rem;
-      padding-bottom:0.8rem;
+      padding-bottom:0.6rem;
     
       .summary-header {
         margin: 0;
         float: left;
+        padding-top:0;
+        padding-bottom:0;
       }
       
       .summary-back-link {
         margin: 0rem 0rem 0rem 0rem;
         float: right;
         border: none;
+        padding-top:0;
+        padding-bottom:0;
       }
     }
     
@@ -416,6 +420,10 @@ $compartmentBorder:#ffc38b;
     .pathway-gene-table{
       margin:4rem auto; 
     }
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
   }  
 }
 
@@ -430,7 +438,11 @@ $compartmentBorder:#ffc38b;
     .pathway-gene-table{
       margin:4rem auto; 
     }
-  }   
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
+  }     
 }
 
 :fullscreen {
@@ -444,7 +456,11 @@ $compartmentBorder:#ffc38b;
     .pathway-gene-table{
       margin:4rem auto; 
     }
-  }  
+  }
+  
+  .subpath-link {
+    padding-top:4rem;
+  }    
 }
 
 /**

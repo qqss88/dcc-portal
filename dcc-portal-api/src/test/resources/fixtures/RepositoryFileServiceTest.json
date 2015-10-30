@@ -1,6 +1,6 @@
 {  
   "index":{  
-    "_index":"test-icgc-repository",
+    "_index":"test-repo-index",
     "_type":"file-centric",
     "_id":"FI49283"
   }
@@ -78,7 +78,7 @@
 
 {  
   "index":{  
-    "_index":"test-icgc-repository",
+    "_index":"test-repo-index",
     "_type":"file-centric",
     "_id":"FI226785"
   }

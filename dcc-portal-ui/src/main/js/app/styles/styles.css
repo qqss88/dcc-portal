@@ -655,14 +655,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -693,14 +693,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -718,14 +718,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -753,14 +753,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -778,14 +778,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -797,14 +797,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -876,14 +876,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -945,14 +945,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -963,6 +963,7 @@ header #brand {
   float: left;
   margin-left: 0;
   margin-right: 2.1276595745%;
+  width: 27%;
   display: inline-block;
 }
 @media (min-width: 721px) {
@@ -973,13 +974,13 @@ header #brand {
     line-height: 1rem;
   }
 }
-/* line 23, _sections/_header.scss */
+/* line 24, _sections/_header.scss */
 header #brand #icgc {
   color: #283e5d;
   font-weight: bold;
   letter-spacing: -2px;
 }
-/* line 28, _sections/_header.scss */
+/* line 29, _sections/_header.scss */
 header #brand a {
   color: #333333;
   font-size: 2.6rem;
@@ -988,30 +989,30 @@ header #brand a {
   text-transform: none;
   text-decoration: none;
 }
-/* line 38, _sections/_header.scss */
+/* line 39, _sections/_header.scss */
 header #brand a:hover {
   text-decoration: none;
   background: none;
 }
-/* line 43, _sections/_header.scss */
+/* line 44, _sections/_header.scss */
 header #brand img {
   height: 2.6rem;
   width: 2.6rem;
 }
 @media (min-width: 721px) {
-  /* line 43, _sections/_header.scss */
+  /* line 44, _sections/_header.scss */
   header #brand img {
     margin-bottom: -0.3rem;
   }
 }
 
-/* line 54, _sections/_header.scss */
+/* line 55, _sections/_header.scss */
 .t_nav {
   font-size: 1.3rem;
   padding-top: .1rem;
 }
 
-/* line 59, _sections/_header.scss */
+/* line 60, _sections/_header.scss */
 .t_nav__pages {
   text-align: center;
   width: 31.914893617%;
@@ -1019,9 +1020,10 @@ header #brand img {
   float: left;
   margin-left: 0;
   margin-right: 2.1276595745%;
+  width: 36%;
 }
 
-/* line 65, _sections/_header.scss */
+/* line 66, _sections/_header.scss */
 .t_nav__actions {
   text-align: right;
   width: 31.914893617%;
@@ -1032,24 +1034,25 @@ header #brand img {
   margin-right: 0;
 }
 
-/* line 71, _sections/_header.scss */
+/* line 72, _sections/_header.scss */
 .t_nav__items {
   position: relative;
 }
 
-/* line 75, _sections/_header.scss */
+/* line 76, _sections/_header.scss */
 .t_nav__items__item {
   background-color: transparent;
   display: inline;
   text-align: left;
+  margin-right: 0.5rem;
 }
 @media (min-width: 721px) {
-  /* line 75, _sections/_header.scss */
+  /* line 76, _sections/_header.scss */
   .t_nav__items__item {
     display: inline-block;
   }
 }
-/* line 84, _sections/_header.scss */
+/* line 86, _sections/_header.scss */
 .t_nav__items__item a, .t_nav__items__item a:active, .t_nav__items__item a:visited {
   border-radius: 0;
   display: block;
@@ -1063,116 +1066,126 @@ header #brand img {
   transition: color .2s, background .2s;*/
 }
 @media (min-width: 721px) {
-  /* line 84, _sections/_header.scss */
+  /* line 86, _sections/_header.scss */
   .t_nav__items__item a, .t_nav__items__item a:active, .t_nav__items__item a:visited {
     border-radius: 3rem;
   }
 }
-/* line 101, _sections/_header.scss */
+/* line 103, _sections/_header.scss */
 .t_nav__items__item a:hover {
   text-decoration: none;
 }
-/* line 105, _sections/_header.scss */
+/* line 107, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__home a {
   color: #ce6503;
   border: 0.3rem solid #ce6503;
 }
-/* line 110, _sections/_header.scss */
+/* line 112, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__home a:hover {
   color: white;
   background: #ce6503;
 }
-/* line 115, _sections/_header.scss */
+/* line 117, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__projects a {
   color: #e9931c;
   border: 0.3rem solid #e9931c;
 }
-/* line 120, _sections/_header.scss */
+/* line 122, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__projects a:hover {
   color: white;
   background: #e9931c;
 }
-/* line 125, _sections/_header.scss */
+/* line 127, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__advanced a {
   color: #166aa2;
   border: 0.3rem solid #166aa2;
 }
-/* line 130, _sections/_header.scss */
+/* line 132, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__advanced a:hover {
   color: white;
   background: #166aa2;
 }
-/* line 135, _sections/_header.scss */
+/* line 137, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a {
   color: #9b315b;
   border: 0.3rem solid #9b315b;
 }
-/* line 140, _sections/_header.scss */
+/* line 142, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__analysis a:hover {
   color: white;
   background: #9b315b;
 }
-/* line 145, _sections/_header.scss */
+/* line 147, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__data_repositories a {
+  color: #666666;
+  border: 0.3rem solid #666666;
+}
+/* line 152, _sections/_header.scss */
+.t_nav__items__item.t_nav__items__item__data_repositories a:hover {
+  color: white;
+  background: #666666;
+}
+/* line 157, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a {
   color: #1693c0;
   border: 0.3rem solid #1693c0;
 }
-/* line 150, _sections/_header.scss */
+/* line 162, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__download a:hover {
   color: white;
   background: #1693c0;
 }
-/* line 155, _sections/_header.scss */
+/* line 167, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a {
   background: #cccccc;
   border: 0.3rem solid #cccccc;
 }
-/* line 158, _sections/_header.scss */
+/* line 170, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a .icon-search {
   padding: 1rem;
 }
-/* line 162, _sections/_header.scss */
+/* line 174, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a form {
   opacity: 0;
 }
-/* line 167, _sections/_header.scss */
+/* line 179, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a:hover {
   background: #cccccc;
 }
-/* line 171, _sections/_header.scss */
+/* line 183, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open {
   border: 0.3rem solid #cccccc;
   text-align: left;
   background: white;
 }
-/* line 175, _sections/_header.scss */
+/* line 187, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open i {
   color: #cccccc;
 }
-/* line 178, _sections/_header.scss */
+/* line 190, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form {
   width: auto;
   opacity: 1;
 }
-/* line 181, _sections/_header.scss */
+/* line 193, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open form input {
   border-radius: 1rem;
 }
-/* line 187, _sections/_header.scss */
+/* line 199, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__search a.open:hover {
   background: white;
 }
-/* line 191, _sections/_header.scss */
+/* line 203, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a {
   background: #6d72c5;
   border: 0.3rem solid #6d72c5;
 }
-/* line 196, _sections/_header.scss */
+/* line 208, _sections/_header.scss */
 .t_nav__items__item.t_nav__items__item__login a:hover {
   background: #6d72c5;
 }
 
-/* line 202, _sections/_header.scss */
+/* line 214, _sections/_header.scss */
 .t_nav__items__item__icon i {
   position: relative;
   display: inline-block;
@@ -1182,35 +1195,35 @@ header #brand img {
   background: rgba(255, 255, 255, 0.1);
 }
 @media (min-width: 1025px) {
-  /* line 202, _sections/_header.scss */
+  /* line 214, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem 1rem .9rem;
   }
 }
 @media (min-width: 1535px) {
-  /* line 202, _sections/_header.scss */
+  /* line 214, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .9rem;
   }
 }
 
-/* line 245, _sections/_header.scss */
+/* line 257, _sections/_header.scss */
 .t_nav__items__item__title {
   display: none;
 }
 
-/* line 250, _sections/_header.scss */
+/* line 262, _sections/_header.scss */
 #home-page header {
   text-align: center;
   padding: 0;
 }
 @media (min-width: 721px) {
-  /* line 250, _sections/_header.scss */
+  /* line 262, _sections/_header.scss */
   #home-page header {
     padding-bottom: 2rem;
   }
 }
-/* line 257, _sections/_header.scss */
+/* line 269, _sections/_header.scss */
 #home-page header #brand {
   width: 100%;
   float: right;
@@ -1219,7 +1232,7 @@ header #brand img {
   clear: none;
   margin: 0;
 }
-/* line 260, _sections/_header.scss */
+/* line 272, _sections/_header.scss */
 #home-page header #brand a {
   line-height: 5rem;
   font-size: 3rem;
@@ -1227,7 +1240,7 @@ header #brand img {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 @media (min-width: 721px) {
-  /* line 260, _sections/_header.scss */
+  /* line 272, _sections/_header.scss */
   #home-page header #brand a {
     line-height: 7rem;
     font-size: 4rem;
@@ -1235,21 +1248,21 @@ header #brand img {
     font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
 }
-/* line 277, _sections/_header.scss */
+/* line 289, _sections/_header.scss */
 #home-page header #brand img {
   height: 3rem;
   margin-bottom: -.4rem;
   width: 3rem;
 }
 @media (min-width: 721px) {
-  /* line 277, _sections/_header.scss */
+  /* line 289, _sections/_header.scss */
   #home-page header #brand img {
     height: 4rem;
     margin-bottom: -.6rem;
     width: 4rem;
   }
 }
-/* line 290, _sections/_header.scss */
+/* line 302, _sections/_header.scss */
 #home-page .t_nav__pages {
   width: 100%;
   float: right;
@@ -1258,110 +1271,127 @@ header #brand img {
   clear: none;
   margin-right: 0;
 }
-/* line 293, _sections/_header.scss */
+/* line 305, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item {
   text-align: left;
   margin: 0;
 }
 @media (min-width: 721px) {
-  /* line 293, _sections/_header.scss */
+  /* line 305, _sections/_header.scss */
   #home-page .t_nav__pages .t_nav__items__item {
     margin: 0 1.25rem;
   }
 }
-/* line 300, _sections/_header.scss */
+/* line 312, _sections/_header.scss */
 #home-page .t_nav__pages .t_nav__items__item a {
   padding-right: 1rem;
 }
-/* line 307, _sections/_header.scss */
+/* line 319, _sections/_header.scss */
 #home-page .t_nav__actions {
   position: absolute;
   top: .4rem;
   right: 2rem;
 }
-/* line 313, _sections/_header.scss */
+/* line 325, _sections/_header.scss */
 #home-page .t_nav__items__item__title {
   font-weight: 300;
   display: inline-block;
 }
-/* line 318, _sections/_header.scss */
+/* line 330, _sections/_header.scss */
 #home-page .t_nav__items__item__home {
   display: none;
 }
-/* line 321, _sections/_header.scss */
+/* line 333, _sections/_header.scss */
 #home-page .t_nav__items__item__search {
   display: none;
 }
-/* line 324, _sections/_header.scss */
+/* line 336, _sections/_header.scss */
 #home-page .t_nav__items__item__projects a {
   background: #e9931c;
   color: white;
 }
-/* line 328, _sections/_header.scss */
+/* line 340, _sections/_header.scss */
 #home-page .t_nav__items__item__advanced a {
   background: #166aa2;
   color: white;
 }
-/* line 332, _sections/_header.scss */
+/* line 344, _sections/_header.scss */
 #home-page .t_nav__items__item__analysis a {
   background: #9b315b;
   color: white;
 }
-/* line 336, _sections/_header.scss */
+/* line 348, _sections/_header.scss */
 #home-page .t_nav__items__item__download a {
   background: #1693c0;
   color: white;
 }
+/* line 352, _sections/_header.scss */
+#home-page .t_nav__items__item__data_repositories a {
+  background: #666666;
+  color: white;
+}
 
-/* line 343, _sections/_header.scss */
+/* line 359, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a {
   cursor: default;
   background: #e9931c;
   color: white;
 }
-/* line 347, _sections/_header.scss */
+/* line 363, _sections/_header.scss */
 #projects-page .t_nav__items__item__projects a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 355, _sections/_header.scss */
+/* line 371, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a {
   cursor: default;
   background: #166aa2;
   color: white;
 }
-/* line 359, _sections/_header.scss */
+/* line 375, _sections/_header.scss */
 #advanced-page .t_nav__items__item__advanced a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 368, _sections/_header.scss */
+/* line 384, _sections/_header.scss */
 #analysis-page .t_nav__items__item__analysis a {
   cursor: default;
   background: #9b315b;
   color: white;
 }
-/* line 372, _sections/_header.scss */
+/* line 388, _sections/_header.scss */
 #analysis-page .t_nav__items__item__analysis a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 380, _sections/_header.scss */
+/* line 396, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a {
   cursor: default;
   background: #1693c0;
   color: white;
 }
-/* line 384, _sections/_header.scss */
+/* line 400, _sections/_header.scss */
 #repository-page .t_nav__items__item__download a i {
   box-shadow: none;
   background: none;
 }
 
-/* line 392, _sections/_header.scss */
+/* line 408, _sections/_header.scss */
+#data-repo-page .t_nav__items__item__data_repositories a {
+  cursor: default;
+  background: #666666;
+  color: white;
+}
+/* line 412, _sections/_header.scss */
+#data-repo-page .t_nav__items__item__data_repositories a i {
+  box-shadow: none;
+  background: none;
+}
+
+/* line 420, _sections/_header.scss */
 #q-page .t_nav__items__item__search {
   display: none;
 }
@@ -1369,14 +1399,14 @@ header #brand img {
 /* ************************************
  *   Suggest
  *********************************** */
-/* line 400, _sections/_header.scss */
+/* line 428, _sections/_header.scss */
 .t_suggest.t_suggest__header {
   color: #333333;
   width: 150%;
   float: right;
   margin: 0;
 }
-/* line 407, _sections/_header.scss */
+/* line 435, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__input {
   margin: .4rem 0 0 0;
   padding-top: .5rem;
@@ -1384,16 +1414,16 @@ header #brand img {
   padding-bottom: .5rem;
   padding-left: 0;
 }
-/* line 417, _sections/_header.scss */
+/* line 445, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest_flyout {
   margin-top: .5rem;
 }
-/* line 421, _sections/_header.scss */
+/* line 449, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__left {
   top: 1.1rem;
   left: 1rem;
 }
-/* line 426, _sections/_header.scss */
+/* line 454, _sections/_header.scss */
 .t_suggest.t_suggest__header .t_suggest__embedded__right {
   top: 1rem;
   right: 1rem;
@@ -1403,30 +1433,30 @@ header #brand img {
  * @-moz-document
  ***********************************************/
 @-moz-document url-prefix() {
-  /* line 437, _sections/_header.scss */
+  /* line 465, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__left {
     top: 1.3rem;
   }
-  /* line 441, _sections/_header.scss */
+  /* line 469, _sections/_header.scss */
   .t_suggest.t_suggest__header .t_suggest__embedded__right {
     top: 1.2rem;
   }
 
-  /* line 447, _sections/_header.scss */
+  /* line 475, _sections/_header.scss */
   .t_nav__items__item__icon i {
     padding: .8rem;
   }
 }
 
-/* line 2, _sections/_home.scss */
-#home-page section {
+/* line 4, _sections/_home.scss */
+#home-page .home-landing section {
   border: none;
   padding: 1rem;
   position: relative;
 }
 @media (min-width: 769px) {
-  /* line 2, _sections/_home.scss */
-  #home-page section {
+  /* line 4, _sections/_home.scss */
+  #home-page .home-landing section {
     width: 31.914893617%;
     clear: right;
     float: left;
@@ -1434,35 +1464,53 @@ header #brand img {
     margin-right: 2.1276595745%;
   }
 }
-/* line 12, _sections/_home.scss */
-#home-page .subhead {
+/* line 14, _sections/_home.scss */
+#home-page .home-landing section.sidebar .list {
+  height: 11.5rem;
+}
+/* line 21, _sections/_home.scss */
+#home-page .home-landing .summary-table-container {
+  margin-top: -2rem;
+}
+/* line 25, _sections/_home.scss */
+#home-page .home-landing .subhead {
   margin-top: -1rem;
   color: #999999;
   font-size: 1.9rem;
 }
-/* line 18, _sections/_home.scss */
-#home-page #pcawg-logo {
+/* line 31, _sections/_home.scss */
+#home-page .home-landing #pcawg-logo {
   margin-left: 1rem;
   margin-bottom: 1rem;
 }
-/* line 25, _sections/_home.scss */
-#home-page .icgc-cloud-home {
-  margin-right: 0;
+/* line 38, _sections/_home.scss */
+#home-page .home-landing .icgc-cloud-home {
+  margin: 0 0;
+  padding-top: 0;
 }
-/* line 28, _sections/_home.scss */
-#home-page .icgc-cloud-home .icgc-container {
+/* line 42, _sections/_home.scss */
+#home-page .home-landing .icgc-cloud-home .dividers {
+  margin-top: 1.5rem;
+}
+/* line 46, _sections/_home.scss */
+#home-page .home-landing .icgc-cloud-home .icgc-container {
   margin: 0 0;
   position: relative;
   transition: opacity 0.2s ease-in;
-  width: 320px;
+  width: 330px;
 }
-/* line 34, _sections/_home.scss */
-#home-page .icgc-cloud-home .icgc-container img {
+/* line 52, _sections/_home.scss */
+#home-page .home-landing .icgc-cloud-home .icgc-container img {
   width: 100%;
   display: block;
+  margin-left: -2rem;
 }
-/* line 42, _sections/_home.scss */
-#home-page .divider {
+/* line 58, _sections/_home.scss */
+#home-page .home-landing .icgc-cloud-home .icgc-container p {
+  margin-top: 0;
+}
+/* line 65, _sections/_home.scss */
+#home-page .home-landing .divider {
   border-top: 1px solid #eee;
   margin-top: 2rem;
   margin-bottom: 2.5rem;
@@ -1627,6 +1675,11 @@ footer a:hover {
   text-decoration: underline;
 }
 /* line 21, _sections/_footer.scss */
+footer .footer-grid-adjust {
+  width: 14.89%;
+  margin-right: 1.5rem;
+}
+/* line 26, _sections/_footer.scss */
 footer ul, footer .logo {
   width: 48.9361702128%;
   clear: right;
@@ -1635,49 +1688,50 @@ footer ul, footer .logo {
   margin-right: 2.1276595745%;
 }
 @media (min-width: 721px) {
-  /* line 21, _sections/_footer.scss */
+  /* line 26, _sections/_footer.scss */
   footer ul, footer .logo {
-    width: 14.8936170213%;
+    width: 13.1914893617%;
     clear: right;
     float: left;
     margin-left: 0;
     margin-right: 2.1276595745%;
   }
 }
-/* line 29, _sections/_footer.scss */
+/* line 35, _sections/_footer.scss */
 footer .logo img {
   margin-top: 2rem;
   width: 116px;
   height: 84px;
 }
 @media (min-width: 721px) {
-  /* line 29, _sections/_footer.scss */
+  /* line 35, _sections/_footer.scss */
   footer .logo img {
     width: 155px;
     height: 112px;
   }
 }
-/* line 41, _sections/_footer.scss */
+/* line 47, _sections/_footer.scss */
 footer ul {
   font-size: .8rem;
   line-height: 1.7;
   list-style: none;
   margin-left: 0;
+  margin-right: 0.4rem;
   padding-left: 0;
 }
-/* line 48, _sections/_footer.scss */
+/* line 55, _sections/_footer.scss */
 footer ul .heading {
   color: #333333;
   text-transform: uppercase;
   font-size: 1rem;
   line-height: 3;
 }
-/* line 58, _sections/_footer.scss */
+/* line 65, _sections/_footer.scss */
 footer .dcc-col {
   margin-right: 0;
 }
 @media (min-width: 721px) {
-  /* line 58, _sections/_footer.scss */
+  /* line 65, _sections/_footer.scss */
   footer .dcc-col {
     margin-right: 2.1276595745%;
   }
@@ -2051,14 +2105,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2162,14 +2216,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2466,14 +2520,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2633,14 +2687,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -4006,14 +4060,14 @@ td {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:after {
   clear: both;
 }
@@ -4058,16 +4112,16 @@ td {
   /* non-JS fallback */
   *zoom: 1;
   padding-top: 0.2rem;
-  padding-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../../../../.rvm/gems/ruby-2.2.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:after {
   clear: both;
 }
@@ -4075,75 +4129,79 @@ td {
 #pathways .pathways-content .pathway-analysis-header .summary-header {
   margin: 0;
   float: left;
+  padding-top: 0;
+  padding-bottom: 0;
 }
-/* line 142, _modules/_pathwayviewer.scss */
+/* line 144, _modules/_pathwayviewer.scss */
 #pathways .pathways-content .pathway-analysis-header .summary-back-link {
   margin: 0rem 0rem 0rem 0rem;
   float: right;
   border: none;
+  padding-top: 0;
+  padding-bottom: 0;
 }
-/* line 149, _modules/_pathwayviewer.scss */
+/* line 153, _modules/_pathwayviewer.scss */
 #pathways .pathways-content .action-item {
   padding: 0rem 0rem 3rem 0rem 0rem;
 }
 
-/* line 156, _modules/_pathwayviewer.scss */
+/* line 160, _modules/_pathwayviewer.scss */
 .RenderableRect, .RenderableProtein, .RenderableChemical, .RenderableEntity, .ProcessNode {
   fill: #b5f9a7;
   stroke: #1a9900;
 }
 
-/* line 161, _modules/_pathwayviewer.scss */
+/* line 165, _modules/_pathwayviewer.scss */
 .span__RenderableRect, .span__RenderableProtein, .span__RenderableChemical, .span__RenderableEntity, .span__ProcessNode {
   background: #b5f9a7;
   padding: 2px;
 }
-/* line 164, _modules/_pathwayviewer.scss */
+/* line 168, _modules/_pathwayviewer.scss */
 .span__RenderableRect:hover, .span__RenderableProtein:hover, .span__RenderableChemical:hover, .span__RenderableEntity:hover, .span__ProcessNode:hover {
   background: #ddfcd7;
 }
 
-/* line 169, _modules/_pathwayviewer.scss */
+/* line 173, _modules/_pathwayviewer.scss */
 .RenderableComplex, .RenderableEntitySet {
   fill: #b6e2ff;
   stroke-width: 0.5px;
   stroke: #166aa2;
 }
 
-/* line 175, _modules/_pathwayviewer.scss */
+/* line 179, _modules/_pathwayviewer.scss */
 .span__RenderableComplex, .span__RenderableEntitySet {
   background: #b6e2ff;
   padding: 2px;
 }
-/* line 178, _modules/_pathwayviewer.scss */
+/* line 182, _modules/_pathwayviewer.scss */
 .span__RenderableComplex:hover, .span__RenderableEntitySet:hover {
   background: #e9f6ff;
 }
 
-/* line 183, _modules/_pathwayviewer.scss */
+/* line 187, _modules/_pathwayviewer.scss */
 .RenderableEntitySet {
   stroke-width: 1.5px;
 }
 
-/* line 187, _modules/_pathwayviewer.scss */
+/* line 191, _modules/_pathwayviewer.scss */
 .ProcessNode {
   stroke: #1a9900;
   stroke-width: 2px;
   fill: #ebffe7;
 }
 
-/* line 193, _modules/_pathwayviewer.scss */
+/* line 197, _modules/_pathwayviewer.scss */
 .RenderableGene {
   stroke: #333;
   fill: none;
 }
 
-/* line 198, _modules/_pathwayviewer.scss */
+/* line 202, _modules/_pathwayviewer.scss */
 .RenderableText {
   font-size: 7px;
 }
 
-/* line 202, _modules/_pathwayviewer.scss */
+/* line 206, _modules/_pathwayviewer.scss */
 .RenderableCompartment {
   fill: #fbf7f4;
   stroke: #ffc38b;
@@ -4151,51 +4209,51 @@ td {
   fill-opacity: 0.25;
 }
 
-/* line 209, _modules/_pathwayviewer.scss */
+/* line 213, _modules/_pathwayviewer.scss */
 .RenderableStroke {
   stroke-width: 1px;
 }
 
-/* line 213, _modules/_pathwayviewer.scss */
+/* line 217, _modules/_pathwayviewer.scss */
 .renderableinteraction {
   stroke-width: 1.5px;
 }
 
-/* line 217, _modules/_pathwayviewer.scss */
+/* line 221, _modules/_pathwayviewer.scss */
 .entitysetandmemberlink, .entitysetandentitysetlink {
   stroke-dasharray: 5 7;
   stroke-width: 0.5px;
 }
 
-/* line 222, _modules/_pathwayviewer.scss */
+/* line 226, _modules/_pathwayviewer.scss */
 .Note {
   stroke: gray;
   fill: #ebffe7;
 }
 
-/* line 227, _modules/_pathwayviewer.scss */
+/* line 231, _modules/_pathwayviewer.scss */
 .pathway-sub-reaction-line {
   stroke-width: 2px;
   stroke: navy;
 }
 
-/* line 233, _modules/_pathwayviewer.scss */
+/* line 237, _modules/_pathwayviewer.scss */
 .RenderableMutated {
   fill: white;
 }
 
 /** ESSENTIALS **/
-/* line 239, _modules/_pathwayviewer.scss */
+/* line 243, _modules/_pathwayviewer.scss */
 .EntitySetAndMemberLink {
   stroke-dasharray: 5 7;
 }
 
-/* line 243, _modules/_pathwayviewer.scss */
+/* line 247, _modules/_pathwayviewer.scss */
 .EntitySetAndEntitySetLink {
   stroke-dasharray: 5 7;
 }
 
-/* line 247, _modules/_pathwayviewer.scss */
+/* line 251, _modules/_pathwayviewer.scss */
 .RenderableNodeText .RenderableNodeTextCell {
   text-align: center;
   height: 100%;
@@ -4203,35 +4261,35 @@ td {
   color: #444;
 }
 
-/* line 254, _modules/_pathwayviewer.scss */
+/* line 258, _modules/_pathwayviewer.scss */
 .RenderableCompartmentText {
   font-size: 9px;
   line-height: 1.1em;
 }
 
-/* line 260, _modules/_pathwayviewer.scss */
+/* line 264, _modules/_pathwayviewer.scss */
 .RenderableNodeText td {
   padding: none;
 }
 
-/* line 264, _modules/_pathwayviewer.scss */
+/* line 268, _modules/_pathwayviewer.scss */
 .RenderableNodeText tbody {
   line-height: normal;
 }
 
-/* line 268, _modules/_pathwayviewer.scss */
+/* line 272, _modules/_pathwayviewer.scss */
 .RenderableBorder {
   fill: none;
 }
 
 /** CONTAINER AND INFO BAR STYLES **/
-/* line 274, _modules/_pathwayviewer.scss */
+/* line 278, _modules/_pathwayviewer.scss */
 .pathwayviewercontainer body {
   margin: 0;
   background: none;
 }
 
-/* line 279, _modules/_pathwayviewer.scss */
+/* line 283, _modules/_pathwayviewer.scss */
 #pathway-viewer-mini {
   border: 1px solid #b3b3b3;
   position: relative;
@@ -4240,7 +4298,7 @@ td {
   background-color: white;
 }
 
-/* line 287, _modules/_pathwayviewer.scss */
+/* line 291, _modules/_pathwayviewer.scss */
 .pathway-legend, .pathway-info {
   position: absolute;
   top: 0;
@@ -4252,25 +4310,25 @@ td {
   background: white;
 }
 
-/* line 298, _modules/_pathwayviewer.scss */
+/* line 302, _modules/_pathwayviewer.scss */
 .pathway-info {
   width: 30%;
   opacity: 0.95;
 }
 
-/* line 303, _modules/_pathwayviewer.scss */
+/* line 307, _modules/_pathwayviewer.scss */
 .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 309, _modules/_pathwayviewer.scss */
+/* line 313, _modules/_pathwayviewer.scss */
 .pathway-info-content .pathway-gene-table {
   margin: 2rem auto;
 }
 
-/* line 314, _modules/_pathwayviewer.scss */
+/* line 318, _modules/_pathwayviewer.scss */
 .pathway-gene-label, .pathway-gene-header-label {
   font-weight: lighter;
   padding-bottom: 0.5em !important;
@@ -4278,22 +4336,22 @@ td {
   text-align: center !important;
 }
 
-/* line 321, _modules/_pathwayviewer.scss */
+/* line 325, _modules/_pathwayviewer.scss */
 .pathway-gene-header-label {
   font-weight: normal !important;
 }
 
-/* line 325, _modules/_pathwayviewer.scss */
+/* line 329, _modules/_pathwayviewer.scss */
 .pathway-legend .RenderableNodeText .RenderableNodeTextCell {
   font-size: 10px;
 }
 
-/* line 329, _modules/_pathwayviewer.scss */
+/* line 333, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   margin-top: 0.5em;
 }
 
-/* line 333, _modules/_pathwayviewer.scss */
+/* line 337, _modules/_pathwayviewer.scss */
 .pathway-info h4, .pathway-legend h4 {
   margin-left: 1em;
   margin-right: 1em;
@@ -4305,44 +4363,44 @@ td {
   padding-top: 0.5em;
 }
 
-/* line 344, _modules/_pathwayviewer.scss */
+/* line 348, _modules/_pathwayviewer.scss */
 .pathway-legend-controller, .pathway-info-controller {
   float: left;
   margin-left: -1.6em;
   font-size: 1.5em;
 }
 
-/* line 350, _modules/_pathwayviewer.scss */
+/* line 354, _modules/_pathwayviewer.scss */
 .pathway-info-svg {
   padding-left: 15%;
   padding-right: 15%;
   max-height: 150px;
 }
 
-/* line 356, _modules/_pathwayviewer.scss */
+/* line 360, _modules/_pathwayviewer.scss */
 .failed-reaction {
   stroke: red;
   stroke-width: 2px;
 }
 
-/* line 361, _modules/_pathwayviewer.scss */
+/* line 365, _modules/_pathwayviewer.scss */
 .lof-RenderableProtein, .lof-RenderableChemical, .lof-RenderableEntitySet, .lof-ProcessNode {
   background-color: #b5f9a7;
   border: 2px dotted red;
 }
 
-/* line 366, _modules/_pathwayviewer.scss */
+/* line 370, _modules/_pathwayviewer.scss */
 .lof-RenderableComplex, .lof-RenderableEntitySet {
   background-color: #b6e2ff;
   border: 2px dotted red;
 }
 
-/* line 371, _modules/_pathwayviewer.scss */
+/* line 375, _modules/_pathwayviewer.scss */
 .lof-cell {
   padding: 0px;
 }
 
-/* line 375, _modules/_pathwayviewer.scss */
+/* line 379, _modules/_pathwayviewer.scss */
 .node-text-body {
   -ms-word-break: break-all;
   -ms-word-wrap: break-all;
@@ -4354,7 +4412,7 @@ td {
   -moz-hyphens: auto;
 }
 
-/* line 386, _modules/_pathwayviewer.scss */
+/* line 390, _modules/_pathwayviewer.scss */
 .pathway-fullscreen-controller {
   position: absolute;
   left: 0;
@@ -4373,87 +4431,317 @@ td {
 * Needed to stretch the content in the div when using webkit. Otherwise
 * nothing is visible. 
 */
-/* line 404, _modules/_pathwayviewer.scss */
+/* line 408, _modules/_pathwayviewer.scss */
 :-webkit-full-screen {
   width: 100%;
   position: fixed;
   top: 0;
   background: white;
 }
-/* line 410, _modules/_pathwayviewer.scss */
+/* line 414, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 416, _modules/_pathwayviewer.scss */
+/* line 420, _modules/_pathwayviewer.scss */
 :-webkit-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
+/* line 425, _modules/_pathwayviewer.scss */
+:-webkit-full-screen .subpath-link {
+  padding-top: 4rem;
+}
 
-/* line 424, _modules/_pathwayviewer.scss */
+/* line 432, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 430, _modules/_pathwayviewer.scss */
+/* line 438, _modules/_pathwayviewer.scss */
 :-moz-full-screen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
 }
+/* line 443, _modules/_pathwayviewer.scss */
+:-moz-full-screen .subpath-link {
+  padding-top: 4rem;
+}
 
-/* line 438, _modules/_pathwayviewer.scss */
+/* line 450, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content {
   line-height: 1.4rem;
   padding: 5%;
   height: 70%;
   overflow-y: auto;
 }
-/* line 444, _modules/_pathwayviewer.scss */
+/* line 456, _modules/_pathwayviewer.scss */
 :fullscreen .pathway-info-content .pathway-gene-table {
   margin: 4rem auto;
+}
+/* line 461, _modules/_pathwayviewer.scss */
+:fullscreen .subpath-link {
+  padding-top: 4rem;
 }
 
 /**
  * For disabling zooming
  */
-/* line 453, _modules/_pathwayviewer.scss */
+/* line 469, _modules/_pathwayviewer.scss */
 .pathway-no-scroll {
   pointer-events: none;
 }
 
 /** Used for the ICGC in the cloud user repository sub site **/
 /** ICGC Cloud Home Page **/
-/* line 6, _modules/_repositories.scss */
+/* line 7, _modules/_repositories.scss */
+.cloud-banner {
+  padding: 0rem 2rem;
+  position: relative;
+}
+/* line 11, _modules/_repositories.scss */
+.cloud-banner img {
+  vertical-align: middle;
+  margin-top: 0.5rem;
+}
+/* line 16, _modules/_repositories.scss */
+.cloud-banner .icgc {
+  color: #283e5d;
+  font-weight: bold;
+  letter-spacing: -2px;
+  font-size: 3.75rem;
+}
+/* line 23, _modules/_repositories.scss */
+.cloud-banner .icgc-cloud-other {
+  color: #bb282e;
+  display: inline;
+  vertical-align: super;
+  font-size: 2rem;
+}
+/* line 32, _modules/_repositories.scss */
+.cloud-banner .icgc-title-caption-container {
+  display: inline-block;
+  border-left: 3px solid #527c9e;
+  height: 6rem;
+  vertical-align: top;
+  padding-left: 1rem;
+}
+/* line 39, _modules/_repositories.scss */
+.cloud-banner .icgc-title-caption-container .icgc-title-caption {
+  margin-top: 1.5rem;
+}
+
+/* line 45, _modules/_repositories.scss */
 .cloud-home .icgc-workflow-diagram {
   width: 60%;
   display: block;
   margin: 1rem auto;
 }
+/* line 52, _modules/_repositories.scss */
+.cloud-home section {
+  padding: 0rem 2rem 2rem 2rem;
+  border-bottom: none;
+}
+/* line 56, _modules/_repositories.scss */
+.cloud-home section h2 {
+  margin-top: 0;
+}
+/* line 61, _modules/_repositories.scss */
+.cloud-home .indent {
+  text-indent: 1rem;
+}
+/* line 65, _modules/_repositories.scss */
+.cloud-home a {
+  text-indent: initial;
+}
+/* line 69, _modules/_repositories.scss */
+.cloud-home h2 {
+  margin-bottom: 1.5rem;
+}
+/* line 73, _modules/_repositories.scss */
+.cloud-home .divider {
+  border-top: solid 1px #e6e6e6;
+  margin-bottom: 2rem;
+}
+/* line 79, _modules/_repositories.scss */
+.cloud-home .card-body {
+  height: 100%;
+  position: relative;
+}
+/* line 83, _modules/_repositories.scss */
+.cloud-home .card-body .card-container {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+}
+/* line 91, _modules/_repositories.scss */
+.cloud-home .card {
+  border: solid 1px #ccc;
+  display: table;
+  height: 100%;
+  /*&:hover { 
+    .card-handle .indicator-icon {
+       transform: rotateZ(0deg);
+    }
+    
+    .card-content {
+      transform: translateX(0);
+     
+    }
+  } */
+}
+/* line 96, _modules/_repositories.scss */
+.cloud-home .card:first-child {
+  margin-left: 0.3rem;
+}
+/* line 100, _modules/_repositories.scss */
+.cloud-home .card .card-handle {
+  overflow: hidden;
+}
+/* line 103, _modules/_repositories.scss */
+.cloud-home .card .card-handle .indicator-icon h3 {
+  text-align: center;
+  margin: 0 0;
+  font-size: 2.3rem;
+}
+/* line 110, _modules/_repositories.scss */
+.cloud-home .card.aws {
+  border-color: #e47911;
+}
+/* line 113, _modules/_repositories.scss */
+.cloud-home .card.aws .card-handle {
+  background: #e47911;
+}
+/* line 118, _modules/_repositories.scss */
+.cloud-home .card.aws .card-handle .indicator-icon:hover {
+  background-color: #fbe0c6;
+}
+/* line 122, _modules/_repositories.scss */
+.cloud-home .card.aws .card-handle .indicator-icon h3 {
+  color: #e47911;
+}
+/* line 126, _modules/_repositories.scss */
+.cloud-home .card.aws .card-handle .indicator-icon img {
+  width: 5.2rem;
+  margin-left: -0.7rem;
+  margin-top: -0.7rem;
+}
+/* line 136, _modules/_repositories.scss */
+.cloud-home .card.aws:hover {
+  border-color: #b5600d;
+}
+/* line 141, _modules/_repositories.scss */
+.cloud-home .card.collab {
+  border-color: #61a8e1;
+}
+/* line 144, _modules/_repositories.scss */
+.cloud-home .card.collab .card-handle {
+  background: #61a8e1;
+}
+/* line 147, _modules/_repositories.scss */
+.cloud-home .card.collab .card-handle .indicator-icon {
+  color: #61a8e1;
+}
+/* line 150, _modules/_repositories.scss */
+.cloud-home .card.collab .card-handle .indicator-icon:hover {
+  background-color: #e2eff9;
+}
+/* line 154, _modules/_repositories.scss */
+.cloud-home .card.collab .card-handle .indicator-icon h3 {
+  color: inherit;
+  font-size: 3rem;
+  margin-left: -0.3rem;
+}
+/* line 162, _modules/_repositories.scss */
+.cloud-home .card.collab:hover {
+  border-color: #3690d9;
+}
+/* line 169, _modules/_repositories.scss */
+.cloud-home .card .card-handle {
+  background: #fafafa;
+  display: table-cell;
+  width: 1rem;
+  vertical-align: middle;
+  -webkit-box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+  -moz-box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+  box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+}
+/* line 183, _modules/_repositories.scss */
+.cloud-home .card .card-handle .indicator-icon {
+  margin: 0 auto;
+  height: 4em;
+  width: 4em;
+  background: #fff;
+  border-radius: 50%;
+  color: #000;
+  transform: rotateZ(-90deg);
+  transition: transform 0.30s ease-in;
+}
+/* line 193, _modules/_repositories.scss */
+.cloud-home .card .card-handle .indicator-icon:hover {
+  background: #e6e6e6;
+}
+/* line 198, _modules/_repositories.scss */
+.cloud-home .card .card-handle .indicator-icon a:hover {
+  background: none;
+}
+/* line 203, _modules/_repositories.scss */
+.cloud-home .card .card-content {
+  padding: 1rem 1rem;
+  background: #fff;
+  transition-property: transform border-color;
+  transition: 0.25s ease-in;
+}
+/* line 210, _modules/_repositories.scss */
+.cloud-home .card .card-content.slide {
+  transform: translateX(0);
+}
 
 /* shared classes */
-/* line 15, _modules/_repositories.scss */
+/* line 230, _modules/_repositories.scss */
+.icgc-cloud .header-link {
+  line-height: 4rem;
+}
+/* line 234, _modules/_repositories.scss */
+.icgc-cloud .header-link img {
+  vertical-align: middle;
+}
+/* line 238, _modules/_repositories.scss */
+.icgc-cloud .header-link a {
+  color: inherit;
+}
+/* line 241, _modules/_repositories.scss */
+.icgc-cloud .header-link a:hover {
+  background: transparent;
+  color: inherit;
+}
+/* line 246, _modules/_repositories.scss */
+.icgc-cloud .header-link a .link-title {
+  margin-left: 1rem;
+  display: inline-block;
+}
+/* line 252, _modules/_repositories.scss */
 .icgc-cloud .screen-shot {
   position: relative;
   box-sizing: content-box;
 }
-/* line 19, _modules/_repositories.scss */
+/* line 256, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a {
   display: block;
   position: relative;
   margin: 0 auto;
   width: 50%;
 }
-/* line 25, _modules/_repositories.scss */
+/* line 262, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a img {
   width: 100%;
   display: block;
   margin: 0 auto;
   padding: 0.5rem 0.5rem;
 }
-/* line 34, _modules/_repositories.scss */
+/* line 271, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a .screen-caption {
   position: absolute;
   background: #1693c0;
@@ -4468,68 +4756,70 @@ td {
   right: 0.8rem;
   top: 0.8rem;
 }
-/* line 50, _modules/_repositories.scss */
+/* line 287, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a:hover .screen-caption {
   opacity: 0.9;
 }
-/* line 54, _modules/_repositories.scss */
+/* line 291, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a:hover {
   background: transparent;
 }
 
 /* Repo Stats Pages (w/stacked bar chart page) */
-/* line 67, _modules/_repositories.scss */
+/* line 304, _modules/_repositories.scss */
 .cloud-repository-container .repo-header .logo {
-  height: 3.5rem;
   margin-left: 2rem;
-  vertical-align: bottom;
+  vertical-align: middle;
 }
-/* line 72, _modules/_repositories.scss */
-.cloud-repository-container .repo-header div {
-  display: inline-block;
+/* line 308, _modules/_repositories.scss */
+.cloud-repository-container .repo-header span {
+  margin-left: 0.5rem;
 }
-/* line 79, _modules/_repositories.scss */
+/* line 313, _modules/_repositories.scss */
+.cloud-repository-container a {
+  text-indent: initial;
+}
+/* line 319, _modules/_repositories.scss */
 .cloud-repository-container .cloud-repository-content p {
   text-align: justify;
   text-indent: 1rem;
 }
-/* line 84, _modules/_repositories.scss */
+/* line 324, _modules/_repositories.scss */
 .cloud-repository-container .cloud-repository-content .bar-chart-container {
   margin: 1rem 2rem 1.5rem 2rem;
 }
-/* line 89, _modules/_repositories.scss */
+/* line 329, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container {
-  margin: 4rem 2rem;
+  padding: 0.5rem 2rem;
   text-align: center;
+  margin: 0 auto;
 }
-/* line 93, _modules/_repositories.scss */
+/* line 334, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container .btn {
-  background: transparent;
-  color: #062a37;
-  border: solid 2px #1381a9;
+  color: #fff;
   transition: all 0.1s ease-in;
+  margin-top: 1rem;
 }
-/* line 100, _modules/_repositories.scss */
+/* line 340, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container .btn:nth-child(2) {
   margin-left: 2rem;
 }
-/* line 104, _modules/_repositories.scss */
-.cloud-repository-container .repo-controls-container .btn:hover {
-  background: #7fd2f0;
-  border-color: #19a5d7;
-}
-/* line 110, _modules/_repositories.scss */
+/* line 346, _modules/_repositories.scss */
 .cloud-repository-container .icons-container {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
-/* line 113, _modules/_repositories.scss */
+/* line 349, _modules/_repositories.scss */
 .cloud-repository-container .icons-container i {
   font-size: 1.25rem;
 }
+/* line 354, _modules/_repositories.scss */
+.cloud-repository-container h3 {
+  padding-top: 2rem;
+}
 
 /** Used for the ICGC in the cloud user guide sub site **/
-/* line 120, _modules/_repositories.scss */
+/* line 360, _modules/_repositories.scss */
 .cloud-guide-content {
   font-size: 1rem;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -4541,11 +4831,11 @@ td {
   /* Code blocks */
   /* Inline code */
 }
-/* line 124, _modules/_repositories.scss */
+/* line 364, _modules/_repositories.scss */
 .cloud-guide-content nav ul {
   margin: 0 0;
 }
-/* line 128, _modules/_repositories.scss */
+/* line 368, _modules/_repositories.scss */
 .cloud-guide-content section {
   padding: 2rem;
   margin: 0;
@@ -4554,26 +4844,44 @@ td {
   border-radius: 0;
   border-bottom: 1px solid #cccccc;
 }
-/* line 140, _modules/_repositories.scss */
+/* line 382, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ol {
+  list-style-type: number;
+}
+/* line 385, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ol li {
+  list-style: inherit;
+  margin: 0 0;
+}
+/* line 391, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ul {
+  list-style-type: disc;
+}
+/* line 394, _modules/_repositories.scss */
+.cloud-guide-content .user-guide-content ul li {
+  margin: 0;
+  list-style: inherit;
+}
+/* line 404, _modules/_repositories.scss */
 .cloud-guide-content section h5 {
   font-weight: bold;
 }
-/* line 144, _modules/_repositories.scss */
+/* line 408, _modules/_repositories.scss */
 .cloud-guide-content section .section_ident {
   margin-left: 2rem;
 }
-/* line 148, _modules/_repositories.scss */
+/* line 412, _modules/_repositories.scss */
 .cloud-guide-content a {
   color: #4183C4;
 }
-/* line 153, _modules/_repositories.scss */
+/* line 417, _modules/_repositories.scss */
 .cloud-guide-content img.aws-process-diagram, .cloud-guide-content .screen-shot img {
   display: block;
   width: 50%;
   margin: 1rem auto;
   border: none;
 }
-/* line 161, _modules/_repositories.scss */
+/* line 425, _modules/_repositories.scss */
 .cloud-guide-content h1, .cloud-guide-content h2, .cloud-guide-content h3, .cloud-guide-content h4, .cloud-guide-content h5, .cloud-guide-content h6 {
   margin: 3rem 0rem 0rem 0rem;
   padding: 0;
@@ -4584,113 +4892,109 @@ td {
   text-transform: none;
   font-style: normal;
 }
-/* line 173, _modules/_repositories.scss */
+/* line 437, _modules/_repositories.scss */
 .cloud-guide-content h1 tt, .cloud-guide-content h1 code {
   font-size: inherit;
 }
-/* line 177, _modules/_repositories.scss */
+/* line 441, _modules/_repositories.scss */
 .cloud-guide-content h2 tt, .cloud-guide-content h2 code {
   font-size: inherit;
 }
-/* line 181, _modules/_repositories.scss */
+/* line 445, _modules/_repositories.scss */
 .cloud-guide-content h3 tt, .cloud-guide-content h3 code {
   font-size: inherit;
 }
-/* line 185, _modules/_repositories.scss */
+/* line 449, _modules/_repositories.scss */
 .cloud-guide-content h4 tt, .cloud-guide-content h4 code {
   font-size: inherit;
 }
-/* line 190, _modules/_repositories.scss */
+/* line 454, _modules/_repositories.scss */
 .cloud-guide-content h5 tt, .cloud-guide-content h5 code {
   font-size: inherit;
 }
-/* line 193, _modules/_repositories.scss */
+/* line 457, _modules/_repositories.scss */
 .cloud-guide-content h6 tt, .cloud-guide-content h6 code {
   font-size: inherit;
 }
-/* line 196, _modules/_repositories.scss */
+/* line 460, _modules/_repositories.scss */
 .cloud-guide-content h1 {
   font-size: 28px;
   color: black;
 }
-/* line 200, _modules/_repositories.scss */
+/* line 464, _modules/_repositories.scss */
 .cloud-guide-content h2 {
   font-size: 2.0rem;
   line-height: 1.25rem;
   margin-top: .5rem;
   margin-bottom: .5rem;
 }
-/* line 207, _modules/_repositories.scss */
+/* line 471, _modules/_repositories.scss */
 .cloud-guide-content h3 {
   font-size: 18px;
 }
-/* line 211, _modules/_repositories.scss */
+/* line 475, _modules/_repositories.scss */
 .cloud-guide-content h4 {
   font-size: 16px;
 }
-/* line 215, _modules/_repositories.scss */
+/* line 479, _modules/_repositories.scss */
 .cloud-guide-content h5 {
   font-size: 14px;
 }
-/* line 219, _modules/_repositories.scss */
+/* line 483, _modules/_repositories.scss */
 .cloud-guide-content h6 {
   color: #777777;
   font-size: 14px;
 }
-/* line 224, _modules/_repositories.scss */
+/* line 488, _modules/_repositories.scss */
 .cloud-guide-content p, .cloud-guide-content blockquote, .cloud-guide-content ul, .cloud-guide-content ol, .cloud-guide-content dl, .cloud-guide-content li, .cloud-guide-content table, .cloud-guide-content pre {
   margin: 15px 0;
 }
-/* line 230, _modules/_repositories.scss */
+/* line 494, _modules/_repositories.scss */
 .cloud-guide-content body > h2:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 235, _modules/_repositories.scss */
+/* line 499, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 240, _modules/_repositories.scss */
+/* line 504, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child + h2 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 244, _modules/_repositories.scss */
+/* line 508, _modules/_repositories.scss */
 .cloud-guide-content body > h3:first-child, .cloud-guide-content body > h4:first-child, .cloud-guide-content body > h5:first-child, .cloud-guide-content body > h6:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 249, _modules/_repositories.scss */
+/* line 513, _modules/_repositories.scss */
 .cloud-guide-content a:first-child h1, .cloud-guide-content a:first-child h2, .cloud-guide-content a:first-child h3, .cloud-guide-content a:first-child h4, .cloud-guide-content a:first-child h5, .cloud-guide-content a:first-child h6 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 253, _modules/_repositories.scss */
+/* line 517, _modules/_repositories.scss */
 .cloud-guide-content h1 p, .cloud-guide-content h2 p, .cloud-guide-content h3 p, .cloud-guide-content h4 p, .cloud-guide-content h5 p, .cloud-guide-content h6 p {
   margin-top: 0;
 }
-/* line 257, _modules/_repositories.scss */
+/* line 521, _modules/_repositories.scss */
 .cloud-guide-content li p.first {
   display: inline-block;
 }
-/* line 261, _modules/_repositories.scss */
-.cloud-guide-content li {
-  margin: 0;
-}
-/* line 265, _modules/_repositories.scss */
+/* line 527, _modules/_repositories.scss */
 .cloud-guide-content ul, .cloud-guide-content ol {
   padding-left: 30px;
 }
-/* line 269, _modules/_repositories.scss */
+/* line 533, _modules/_repositories.scss */
 .cloud-guide-content ul :first-child, .cloud-guide-content ol :first-child {
   margin-top: 0;
 }
-/* line 274, _modules/_repositories.scss */
+/* line 538, _modules/_repositories.scss */
 .cloud-guide-content img {
   max-width: 100%;
 }
-/* line 278, _modules/_repositories.scss */
+/* line 542, _modules/_repositories.scss */
 .cloud-guide-content code {
   margin: 0 2px;
   padding: 0 5px;
@@ -4699,7 +5003,7 @@ td {
   background-color: #f8f8f8;
   border-radius: 3px;
 }
-/* line 287, _modules/_repositories.scss */
+/* line 551, _modules/_repositories.scss */
 .cloud-guide-content pre code {
   margin: 0;
   padding: 0;
@@ -4707,7 +5011,7 @@ td {
   border: none;
   background: transparent;
 }
-/* line 296, _modules/_repositories.scss */
+/* line 560, _modules/_repositories.scss */
 .cloud-guide-content pre {
   background-color: #f8f8f8;
   border: 1px solid #cccccc;
@@ -4717,37 +5021,37 @@ td {
   padding: 6px 10px;
   border-radius: 3px;
 }
-/* line 306, _modules/_repositories.scss */
+/* line 570, _modules/_repositories.scss */
 .cloud-guide-content pre code, .cloud-guide-content pre tt {
   background-color: transparent;
   border: none;
 }
-/* line 312, _modules/_repositories.scss */
+/* line 576, _modules/_repositories.scss */
 .cloud-guide-content * {
   -webkit-print-color-adjust: exact;
 }
 @media screen and (min-width: 914px) {
-  /* line 317, _modules/_repositories.scss */
+  /* line 581, _modules/_repositories.scss */
   .cloud-guide-content body {
     width: 854px;
     margin: 0 auto;
   }
 }
 @media print {
-  /* line 324, _modules/_repositories.scss */
+  /* line 588, _modules/_repositories.scss */
   .cloud-guide-content table, .cloud-guide-content pre {
     page-break-inside: avoid;
   }
-  /* line 327, _modules/_repositories.scss */
+  /* line 591, _modules/_repositories.scss */
   .cloud-guide-content pre {
     word-wrap: break-word;
   }
 }
-/* line 332, _modules/_repositories.scss */
+/* line 596, _modules/_repositories.scss */
 .cloud-guide-content table th {
   font-weight: bold;
 }
-/* line 343, _modules/_repositories.scss */
+/* line 607, _modules/_repositories.scss */
 .cloud-guide-content code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   color: black;
@@ -4768,57 +5072,57 @@ td {
   -ms-hyphens: none;
   hyphens: none;
 }
-/* line 366, _modules/_repositories.scss */
+/* line 630, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::-moz-selection, .cloud-guide-content pre[class*="language-"] ::-moz-selection,
 .cloud-guide-content code[class*="language-"]::-moz-selection, .cloud-guide-content code[class*="language-"] ::-moz-selection {
   text-shadow: none;
   background: #b3d4fc;
 }
-/* line 372, _modules/_repositories.scss */
+/* line 636, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::selection, .cloud-guide-content pre[class*="language-"] ::selection,
 .cloud-guide-content code[class*="language-"]::selection, .cloud-guide-content code[class*="language-"] ::selection {
   text-shadow: none;
   background: #b3d4fc;
 }
 @media print {
-  /* line 379, _modules/_repositories.scss */
+  /* line 643, _modules/_repositories.scss */
   .cloud-guide-content code[class*="language-"],
   .cloud-guide-content pre[class*="language-"] {
     text-shadow: none;
   }
 }
-/* line 385, _modules/_repositories.scss */
+/* line 649, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"] {
   padding: 1em;
   margin: .5em 0;
   overflow: auto;
 }
-/* line 392, _modules/_repositories.scss */
+/* line 656, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   background: #f5f2f0;
 }
-/* line 397, _modules/_repositories.scss */
+/* line 661, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"] {
   padding: .1em;
   border-radius: .3em;
 }
-/* line 406, _modules/_repositories.scss */
+/* line 670, _modules/_repositories.scss */
 .cloud-guide-content .token.comment,
 .cloud-guide-content .token.prolog,
 .cloud-guide-content .token.doctype,
 .cloud-guide-content .token.cdata {
   color: slategray;
 }
-/* line 410, _modules/_repositories.scss */
+/* line 674, _modules/_repositories.scss */
 .cloud-guide-content .token.punctuation {
   color: #999;
 }
-/* line 414, _modules/_repositories.scss */
+/* line 678, _modules/_repositories.scss */
 .cloud-guide-content .namespace {
   opacity: .7;
 }
-/* line 424, _modules/_repositories.scss */
+/* line 688, _modules/_repositories.scss */
 .cloud-guide-content .token.property,
 .cloud-guide-content .token.tag,
 .cloud-guide-content .token.boolean,
@@ -4828,7 +5132,7 @@ td {
 .cloud-guide-content .token.deleted {
   color: #905;
 }
-/* line 433, _modules/_repositories.scss */
+/* line 697, _modules/_repositories.scss */
 .cloud-guide-content .token.selector,
 .cloud-guide-content .token.attr-name,
 .cloud-guide-content .token.string,
@@ -4837,7 +5141,7 @@ td {
 .cloud-guide-content .token.inserted {
   color: #690;
 }
-/* line 441, _modules/_repositories.scss */
+/* line 705, _modules/_repositories.scss */
 .cloud-guide-content .token.operator,
 .cloud-guide-content .token.entity,
 .cloud-guide-content .token.url,
@@ -4846,32 +5150,32 @@ td {
   color: #a67f59;
   background: rgba(255, 255, 255, 0.5);
 }
-/* line 448, _modules/_repositories.scss */
+/* line 712, _modules/_repositories.scss */
 .cloud-guide-content .token.atrule,
 .cloud-guide-content .token.attr-value,
 .cloud-guide-content .token.keyword {
   color: #07a;
 }
-/* line 452, _modules/_repositories.scss */
+/* line 716, _modules/_repositories.scss */
 .cloud-guide-content .token.function {
   color: #DD4A68;
 }
-/* line 458, _modules/_repositories.scss */
+/* line 722, _modules/_repositories.scss */
 .cloud-guide-content .token.regex,
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.variable {
   color: #e90;
 }
-/* line 463, _modules/_repositories.scss */
+/* line 727, _modules/_repositories.scss */
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.bold {
   font-weight: bold;
 }
-/* line 466, _modules/_repositories.scss */
+/* line 730, _modules/_repositories.scss */
 .cloud-guide-content .token.italic {
   font-style: italic;
 }
-/* line 470, _modules/_repositories.scss */
+/* line 734, _modules/_repositories.scss */
 .cloud-guide-content .token.entity {
   cursor: help;
 }

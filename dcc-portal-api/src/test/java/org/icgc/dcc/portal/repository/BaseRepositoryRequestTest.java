@@ -28,10 +28,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 
-import lombok.SneakyThrows;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -48,6 +44,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
+
+import lombok.SneakyThrows;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Base class that adds support for executing test that verify the content and structure of requests sent by repository
@@ -141,7 +141,7 @@ public abstract class BaseRepositoryRequestTest {
   }
 
   @Spy
-  final IndexModel indexModel = new IndexModel("test-index");
+  final IndexModel indexModel = new IndexModel("test-index", "test-repo-index");
 
   @Mock
   Client client;

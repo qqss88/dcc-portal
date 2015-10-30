@@ -35,11 +35,13 @@
       RouteInfoService.get);
 
    var cloudLinks = [
-            {'link': '/icgc-in-the-cloud/', 'title': 'ICGC in the Cloud'},
-            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'Amazon User Guide'},
-            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'ICGC AWS Info'},
-            {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory Info'}
+            {'link': '/icgc-in-the-cloud/', 'title': 'About'},
+            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'Amazon'},
+            {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory'},
+            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'}
           ];
+
+    $scope.portalFeature = PortalFeature;
 
     $scope.stagedFeatures = {
       getCloudLinks: function() {

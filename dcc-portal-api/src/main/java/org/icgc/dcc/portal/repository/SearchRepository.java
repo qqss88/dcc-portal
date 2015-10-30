@@ -30,7 +30,6 @@ import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.prefixQuery;
 import static org.icgc.dcc.common.core.util.stream.Collectors.toImmutableSet;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 
 import java.util.Collection;
@@ -38,11 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -60,6 +54,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -132,6 +131,9 @@ public class SearchRepository {
   @Value("#{indexName}")
   private String indexName;
 
+  @Value("#{repoIndexName}")
+  private String repoIndexName;
+
   @Autowired
   SearchRepository(Client client, IndexModel indexModel) {
     this.client = client;
@@ -167,14 +169,14 @@ public class SearchRepository {
     // Determines which index to use as external file repository are in a daily generated index separated
     // from the main icgc-index.
     if (isRepositoryFileRelated(type)) {
-      return client.prepareSearch(REPOSITORY_INDEX_NAME);
+      return client.prepareSearch(repoIndexName);
     }
 
     if (type.equals(Types.DONOR)) {
       return client.prepareSearch(indexName);
     }
 
-    return client.prepareSearch(indexName, REPOSITORY_INDEX_NAME);
+    return client.prepareSearch(indexName, repoIndexName);
   }
 
   private static String[] toStringArray(Collection<String> source) {

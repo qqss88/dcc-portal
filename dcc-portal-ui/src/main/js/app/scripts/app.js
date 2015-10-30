@@ -310,6 +310,7 @@
   });
 
 
+
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
                           markdownConverterProvider, localStorageServiceProvider, API) {
@@ -318,7 +319,7 @@
     $compileProvider.debugInfoEnabled(false);
 
     // Combine calls - needs more testing
-    // $httpProvider.useApplyAsync(true);
+    $httpProvider.useApplyAsync(true);
 
     // Use in production or when UI hosted by API
     RestangularProvider.setBaseUrl(API.BASE_URL);
@@ -382,7 +383,8 @@
 
     var ignoreNotFound = [
       '/analysis/',
-      '/list'
+      '/list',
+      '/ui/reactome'
     ];
 
     Restangular.setErrorInterceptor(function (response) {
