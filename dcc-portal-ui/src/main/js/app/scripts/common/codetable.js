@@ -119,7 +119,13 @@
 
       // Donor states
       'live': 'Present in DCC',
-      'pending': 'Absent from DCC'
+      'pending': 'Absent from DCC',
+      
+      // Formats
+      'BAM': 'A binary version of a SAM file.',
+      'VCF': 'Variant Call Format.',
+      'XML': 'eXtensible markup language',
+      'FASTQ': 'text-based format for storing both a biological sequence and its corresponding quality scores'
     };
 
     this.translate = function(id) {
