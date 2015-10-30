@@ -1,68 +1,73 @@
 <div class="modal-content">
-    <div class="modal-header clearfix">
-        <h3 class="pull-left">Token Manager</h3>
-    </div>
-    <div class="modal-body"> 
-        <strong>Generate new tokens</strong><br>
-        <span>
-            You can create your own personal API tokens for use in scripts and on the command line. Select the applicable scopes below and
-            click Generate. You may also enter a description to remind youself what the token is for. Your new token will be shown in the table below.
-        </span>
-        <br>
-        <div>
-            <ul>
-                <li data-ng-repeat="scope in availableScopes">
-                    <span data-ng-click="toggleScope(scope)">
-                        <i class="{{ isActive(scope) ===true? 'icon-check':'icon-check-empty'}}"></i> 
-                        <span>{{scope.name}}</strong>
-                        <i class="icon-help" style="font-size:1.2rem" data-tooltip="{{scope.description}}"></i>
-                    </span>
-                </li>
-            </ul>
-        </div>
-        <br>
-        <div>
-            <div>Description</div>
-            <textarea rows="2" data-ng-model="tokenDescription" maxlength=200></textarea>
-            <button class="t_button" data-ng-click="createToken()" data-ng-disabled="selected.length === 0">Generate</button>
-        </div>
-        <br>
+   <div class="modal-header clearfix">
+      <h3 class="pull-left">Token Manager</h3>
+   </div>
+   <div class="modal-body"> 
+      <h4>Generate new tokens</h4>
+      <span>
+         You can create your own personal API tokens for use in scripts and on the command line. Select the applicable scopes below and
+         click Generate. You may also enter a description to remind youself what the token is for. Your new token will be shown in the table below.
+      </span>
+      <div class="alert alert-info" role="alert" style="margin-left: 0; margin-right: 0">To generate tokens for cloud based environments you will require <a href="http://docs.icgc.org/access-controlled-data">DACO cloud access</a>.</div>
+      <br>
+      <div>
+         <ul>
+            <li data-ng-repeat="scope in availableScopes">
+               <span data-ng-click="toggleScope(scope)">
+                  <i class="{{ isActive(scope) ===true? 'icon-check':'icon-check-empty'}}"></i> 
+                  <span class="badge" style="font-weight: normal">{{scope.name}}</span>
+                  <span>
+                     <i class="icon-help" style="font-size:1.2rem" data-tooltip="{{scope.description}}"></i>
+                  </span>
+               </span>
+            </li>
+         </ul>
+      </div>
+      <br>
+      <div>
+         <div>Description</div>
+         <textarea rows="2" data-ng-model="tokenDescription" maxlength="200"></textarea>
+         <button class="t_button" data-ng-click="createToken()" data-ng-disabled="selected.length === 0">Generate</button>
+      </div>
+      <br>
 
-        <strong>Manage active tokens</strong>
-        <div>
-            <table class="table table-info">
-                <thead>
-                    <th>Token Id</th>
-                    <th>Description</th>
-                    <th>Scopes</th>
-                    <th>Expires in</th>
-                    <th>&nbsp;</th>
-                </thead>
-                <tbody>
-                    <tr data-ng-if="processing">
-                       <td colspan="5" class="text-center"><i class="icon-spin icon-spinner" style="font-size:3rem"></i></td>
-                    </tr>
-                    <tr data-ng-if="activeTokens.length === 0 && processing===false">
-                       <td colspan="5">No active tokens</td>
-                    </tr>
-                    <tr data-ng-repeat="token in activeTokens | orderBy:'expiresIn':true" data-ng-if="processing===false">
-                        <td>{{token.id}}</td>
-                        <td style="max-width:20rem">{{token.description}}</td>
-                        <td>{{token.scope.join(', ')}}</td>
-                        <td>{{ (token.expiresIn / (60*60*24)) | number:2 }} days</td> 
-                        <td>
-                            <span style="float:left; font-size:1.25rem"> 
-                                <span class="t_tools__tool">
-                                    <i class="icon-trash" data-ng-click="deleteToken(token.id)"></i>
-                                </span>
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button class="t_button" data-ng-click="cancel()">Cancel</button>
-    </div>
+      <h4>Manage active tokens</h4>
+      <div>
+         <table class="table table-info">
+            <thead>
+               <th>Token Id</th>
+               <th>Description</th>
+               <th>Scopes</th>
+               <th>Expires in</th>
+               <th>&nbsp;</th>
+            </thead>
+            <tbody>
+               <tr data-ng-if="processing">
+                  <td colspan="5" class="text-center"><i class="icon-spin icon-spinner" style="font-size:3rem"></i></td>
+               </tr>
+               <tr data-ng-if="activeTokens.length === 0 && processing===false">
+                  <td colspan="5">No active tokens</td>
+               </tr>
+               <tr data-ng-repeat="token in activeTokens | orderBy:'expiresIn':true" data-ng-if="processing===false">
+                  <td>{{token.id}}</td>
+                  <td style="max-width:20rem">{{token.description}}</td>
+                  <td>
+                     <span data-ng-repeat="scope in token.scope" class="badge" style="font-weight: normal">{{scope}}</span>
+                  </td>
+                  <td>{{ (token.expiresIn / (60*60*24)) | number:2 }} days</td> 
+                  <td>
+                     <span style="float:left; font-size:1.25rem"> 
+                        <span class="t_tools__tool">
+                           <i class="icon-trash" data-ng-click="deleteToken(token.id)"></i>
+                        </span>
+                     </span>
+                  </td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+   <div class="modal-footer">
+      <button class="t_button" data-ng-click="cancel()">Cancel</button>
+   </div>
 </div>
