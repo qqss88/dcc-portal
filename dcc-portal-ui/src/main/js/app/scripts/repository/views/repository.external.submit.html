@@ -20,23 +20,20 @@
          </thead>
 
          <tbody>
-           <tr data-ng-repeat="(k, v) in repos">
+           <tr data-ng-repeat="(repoName, repoData) in repos">
              <td>
-               {{ k }}
-               <span id="aws-v" class="manifest-span pull-right" data-ng-if="k === 'AWS - Virginia'">
-                 <button class="t_button pull-right" data-ng-click="createManifestId (k, fileCount, 'aws-v', 'aws-v-input')">
-                  Create Manifest ID
-                 </button>
-               </span>
-               <span id="collab" class="manifest-span pull-right" data-ng-if="k === 'Collaboratory'">
-                 <button class="t_button pull-right" data-ng-click="createManifestId (k, fileCount, 'collab', 'collab-input')">
+               {{ repoName }}
+               <span class="manifest-span pull-right"
+                  data-ng-if="repoName === 'AWS - Virginia' || repoName === 'Collaboratory'">
+                 <button class="t_button pull-right"
+                   data-ng-click="createManifestId (repoName, fileCount, $event)">
                   Create Manifest ID
                  </button>
                </span>
              </td>
-             <td class="text-right">{{ v.donorCount | number }}</td>
-             <td class="text-right">{{ v.fileCount | number }}</td>
-             <td class="text-right">{{ v.fileSize | bytes }}</td>
+             <td class="text-right">{{ repoData.donorCount | number }}</td>
+             <td class="text-right">{{ repoData.fileCount | number }}</td>
+             <td class="text-right">{{ repoData.fileSize | bytes }}</td>
            </tr>
          </tbody>
        </table>

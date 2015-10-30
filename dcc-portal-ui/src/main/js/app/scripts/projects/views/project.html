@@ -9,10 +9,10 @@
   <section>
     <i class="icon-attention or icon-attention-1"></i>
     No data for this project has been submitted directly to ICGC DCC yet. However, go to the
-    <a href="{{ ProjectCtrl.urlToExternalRepository }}">
-      external repository browser
+    <a href="{{:: ProjectCtrl.urlToExternalRepository() }}">
+      {{:: ProjectCtrl.dataRepoTitle }} browser
     </a>
-     to see the list of data files hosted in external repositories for this project.
+     to see the list of data files hosted in {{:: ProjectCtrl.dataRepoTitle }} for this project.
   </section>
 </span>
 
@@ -295,8 +295,8 @@
             </td>
         </tr>
     </table>
-    <span class="open-in">Open in</span> <a href="/repository/icgc/current/Projects/{{ProjectCtrl.project.id}}"><i
-        class="icon-database"></i>Data Repository</a>
+    <span class="open-in">Open in</span> <a href="{{:: ProjectCtrl.dataReleasesUrl }}/icgc/current/Projects/{{ProjectCtrl.project.id}}"><i
+        class="icon-database"></i>{{:: ProjectCtrl.dataReleasesTitle }}</a>
 </div>
 </section>
 <section id="genes"

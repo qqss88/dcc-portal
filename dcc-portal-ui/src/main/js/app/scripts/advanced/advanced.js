@@ -55,16 +55,18 @@
 
   module.controller('AdvancedCtrl',
     function ($scope, $state, $modal, Page, State, LocationService, AdvancedDonorService,
-              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings) {
+              AdvancedGeneService, AdvancedMutationService, SetService, CodeTable, Settings, RouteInfoService) {
       Page.setTitle('Advanced Search');
       Page.setPage('advanced');
 
       var _ctrl = this;
+      var dataRepoRouteInfo = RouteInfoService.get ('dataRepositories');
+      var dataRepoUrl = dataRepoRouteInfo.href;
 
       _ctrl.Page = Page;
       _ctrl.state = State;
 
-
+      _ctrl.dataRepoTitle = dataRepoRouteInfo.title;
       _ctrl.Donor = AdvancedDonorService;
       _ctrl.Gene = AdvancedGeneService;
       _ctrl.Mutation = AdvancedMutationService;
@@ -122,7 +124,7 @@
         params.isTransient = true;
         // Ensure scope is destroyed as there may be unreferenced watchers on the filter. (see: facets/tags.js)
         $scope.$destroy();
-        SetService.createForwardSet(type, params, '/repository/external');
+        SetService.createForwardSet (type, params, dataRepoUrl);
       };
 
       /**

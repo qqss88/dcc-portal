@@ -40,9 +40,11 @@
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
   module.controller('DonorCtrl',
-    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG) {
+    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG, RouteInfoService) {
 
     var _ctrl = this, promise;
+    var dataRepoRoutInfo = RouteInfoService.get ('dataRepositories');
+    var dataRepUrl = dataRepoRoutInfo.href;
 
     Page.setTitle(donor.id);
     Page.setPage('entity');
@@ -57,7 +59,6 @@
     };
 
     _ctrl.donor = donor;
-
     _ctrl.isPendingDonor = _.isUndefined (_.get(donor, 'primarySite'));
 
     var donorFilter = {
@@ -67,7 +68,12 @@
         }
       }
     };
-    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (donorFilter);
+
+    _ctrl.dataRepoTitle = dataRepoRoutInfo.title;
+
+    _ctrl.urlToExternalRepository = function() {
+      return dataRepUrl + '?filters=' + angular.toJson (donorFilter);
+    };
 
     _ctrl.donor.clinicalXML = null;
     promise = ExternalRepoService.getList({

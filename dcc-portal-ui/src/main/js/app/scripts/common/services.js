@@ -162,6 +162,54 @@
     this.getData = getData;
   });
 
+  module.factory ('RouteInfoService', function ($state, $log) {
+    var href = $state.href;
+    var routeInfo = {
+      home: {
+        href: href ('home'),
+        title: 'Home'
+      },
+      projects: {
+        href: href ('projects'),
+        title: 'Cancer Projects'
+      },
+      advancedSearch: {
+        href: href ('advanced'),
+        title: 'Advanced Search'
+      },
+      dataAnalysis: {
+        href: href ('analyses'),
+        title: 'Data Analysis'
+      },
+      dataReleases: {
+        href: href ('dataReleases'),
+        title: 'DCC Data Releases'
+      },
+      dataRepositories: {
+        href: href ('dataRepositories'),
+        title: 'Data Repositories'
+      },
+      pcawg: {
+        href: href ('pancancer'),
+        title: 'PCAWG'
+      },
+      dataRepositoryFile: {
+        href: href ('dataRepositoryFile'),
+        title: 'File'
+      }
+    };
+
+    return {
+      get: function (name) {
+        if (! _.has (routeInfo, name)) {
+          $log.error ('No route info is defined for %s.', name);
+          return {};
+        }
+
+        return _.get (routeInfo, name, {});
+      }
+    };
+  })
 
   /**
   * Centralized location for tooltip text

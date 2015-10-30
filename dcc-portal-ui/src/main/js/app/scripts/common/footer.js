@@ -15,35 +15,39 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-'use strict';
+(function() {
+  'use strict';
 
-angular.module('app.common.footer', ['app.common.footer.controllers']);
+  angular.module('app.common.footer', ['app.common.footer.controllers']);
 
-angular.module('app.common.footer.controllers', []);
+  angular.module('app.common.footer.controllers', []);
 
-angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($scope, $http, PortalFeature) {
-  var _ctrl = this;
-  $http.get('/api/version').success(function(data) {
-    _ctrl.apiVersion = data.api;
-    _ctrl.portalVersion = data.portal;
-    _ctrl.portalCommit = data.portalCommit;
-  });
-  
- 
- var cloudLinks = [
-          {'link': '/icgc-in-the-cloud/', 'title': 'ICGC in the Cloud'},
-          {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'Amazon User Guide'},
-          {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'ICGC AWS Info'},
-          {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory Info'}
-        ];
- 
-  $scope.stagedFeatures = {
-    getCloudLinks: function() {
-      if (PortalFeature.get('ICGC_CLOUD')) {
-        return cloudLinks;
-      } 
-    }     
+  angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($scope, $http, PortalFeature, RouteInfoService) {
+    var _ctrl = this;
+
+    $http.get('/api/version').success(function(data) {
+      _ctrl.apiVersion = data.api;
+      _ctrl.portalVersion = data.portal;
+      _ctrl.portalCommit = data.portalCommit;
+    });
+
+    _ctrl.mainItems = _.map (['home', 'projects', 'advancedSearch', 'dataAnalysis', 'dataReleases', 'dataRepositories', 'pcawg'],
+      RouteInfoService.get);
+
+   var cloudLinks = [
+            {'link': '/icgc-in-the-cloud/', 'title': 'ICGC in the Cloud'},
+            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'Amazon User Guide'},
+            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'ICGC AWS Info'},
+            {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory Info'}
+          ];
+
+    $scope.stagedFeatures = {
+      getCloudLinks: function() {
+        if (PortalFeature.get('ICGC_CLOUD')) {
+          return cloudLinks;
+        }
+      }
     };
-    
-   
-});
+  });
+
+})();
