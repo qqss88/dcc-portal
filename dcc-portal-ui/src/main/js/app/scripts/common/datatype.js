@@ -42,7 +42,7 @@
     };
 
     this.tooltip = function(id) {
-      return labelMap[id];
+      return labelMap[id.toLowerCase()];
     };
 
   });
