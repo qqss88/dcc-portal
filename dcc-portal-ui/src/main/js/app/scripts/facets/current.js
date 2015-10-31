@@ -33,8 +33,8 @@
       controlFacet: 'donorId',
       controlType: 'file'
     }, {
-      term: 'Input Donor Set',
-      controlTerm: 'Input Donor Set',
+      term: 'Input donor set',
+      controlTerm: 'Input donor set',
       controlFacet: 'donorId',
       controlType: 'file'
     }];
