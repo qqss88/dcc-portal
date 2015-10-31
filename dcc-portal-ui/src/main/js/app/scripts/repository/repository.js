@@ -64,8 +64,8 @@
   /**
    * ICGC static repository controller
    */
-  module.controller('ICGCRepoController',
-    function($scope, $stateParams, Restangular, RepositoryService, ProjectCache, API, Settings, Page, RouteInfoService) {
+  module.controller('ICGCRepoController', function($scope, $stateParams, Restangular, RepositoryService,
+    ProjectCache, API, Settings, Page, RouteInfoService) {
     var _ctrl = this;
     var dataReleasesRouteInfo = RouteInfoService.get ('dataReleases');
 
@@ -262,13 +262,13 @@
 
         var widgetHtml = '<input class="input_manifest' +
           (canCopyToClipboard ? '' : ' pull-right') +
-          '" type="text" size="38" readonly \
-           onClick="this.setSelectionRange (0, this.value.length)" value="' +
+          '" type="text" size="38" readonly ' +
+          'onClick="this.setSelectionRange (0, this.value.length)" value="' +
            data.id + '" />';
 
         if (canCopyToClipboard) {
-          widgetHtml += '<button style="border: 0; background: transparent;" title="Copy Manifest ID">\
-            <span class="icon-clippy" /></button>';
+          widgetHtml += '<button style="border: 0; background: transparent;" title="Copy Manifest ID">' +
+            '<span class="icon-clippy" /></button>';
         }
 
         domNode.html (widgetHtml);
@@ -430,10 +430,10 @@
       currentTabName = tabNames.donors;
     };
 
-    _ctrl.isOnFilesTab = function(debug) {
+    _ctrl.isOnFilesTab = function() {
       return currentTabName === tabNames.files;
     };
-    _ctrl.isOnDonorsTab = function(debug) {
+    _ctrl.isOnDonorsTab = function() {
       return currentTabName === tabNames.donors;
     };
 

@@ -3,7 +3,8 @@
 
   var module = angular.module('icgc.analysis.controllers');
 
-  module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal, SetService, Settings, RouteInfoService) {
+  module.controller('SavedSetController', function($scope, $window, $location, $timeout, $modal,
+    SetService, Settings, RouteInfoService) {
 
     var _this = this;
     var syncSetTimeout;

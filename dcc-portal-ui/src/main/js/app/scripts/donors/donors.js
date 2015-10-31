@@ -39,8 +39,8 @@
 
   var module = angular.module('icgc.donors.controllers', ['icgc.donors.models']);
 
-  module.controller('DonorCtrl',
-    function ($scope, $modal, Page, donor, Projects, Mutations, Settings, ExternalRepoService, PCAWG, RouteInfoService) {
+  module.controller('DonorCtrl', function ($scope, $modal, Page, donor, Projects, Mutations,
+    Settings, ExternalRepoService, PCAWG, RouteInfoService) {
 
     var _ctrl = this, promise;
     var dataRepoRoutInfo = RouteInfoService.get ('dataRepositories');

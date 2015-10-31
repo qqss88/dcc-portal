@@ -209,7 +209,7 @@
         return _.get (routeInfo, name, {});
       }
     };
-  })
+  });
 
   /**
   * Centralized location for tooltip text

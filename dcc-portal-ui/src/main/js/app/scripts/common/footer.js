@@ -22,7 +22,8 @@
 
   angular.module('app.common.footer.controllers', []);
 
-  angular.module('app.common.footer.controllers').controller('FooterCtrl', function ($scope, $http, PortalFeature, RouteInfoService) {
+  angular.module('app.common.footer.controllers').controller('FooterCtrl',
+    function ($scope, $http, PortalFeature, RouteInfoService) {
     var _ctrl = this;
 
     $http.get('/api/version').success(function(data) {
@@ -31,8 +32,8 @@
       _ctrl.portalCommit = data.portalCommit;
     });
 
-    _ctrl.mainItems = _.map (['home', 'projects', 'advancedSearch', 'dataAnalysis', 'dataReleases', 'dataRepositories', 'pcawg'],
-      RouteInfoService.get);
+    _ctrl.mainItems = _.map (['home', 'projects', 'advancedSearch', 'dataAnalysis',
+      'dataReleases', 'dataRepositories', 'pcawg'], RouteInfoService.get);
 
    var cloudLinks = [
             {'link': '/icgc-in-the-cloud/', 'title': 'About'},
