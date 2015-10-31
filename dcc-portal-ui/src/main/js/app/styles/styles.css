@@ -2498,11 +2498,16 @@ h1 .t_badge_icon {
 }
 
 /* line 113, _modules/_badges.scss */
+.t_badge__data_repositories {
+  background: #666666;
+}
+
+/* line 117, _modules/_badges.scss */
 .t_badge__q {
   background: #d33682;
 }
 
-/* line 118, _modules/_badges.scss */
+/* line 122, _modules/_badges.scss */
 .pcawg-badge {
   font-size: 0.5rem;
 }
