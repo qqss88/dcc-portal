@@ -1368,25 +1368,25 @@ header #brand img {
 }
 
 /* line 396, _sections/_header.scss */
-#repository-page .t_nav__items__item__download a {
+#dataReleases-page .t_nav__items__item__download a {
   cursor: default;
   background: #1693c0;
   color: white;
 }
 /* line 400, _sections/_header.scss */
-#repository-page .t_nav__items__item__download a i {
+#dataReleases-page .t_nav__items__item__download a i {
   box-shadow: none;
   background: none;
 }
 
 /* line 408, _sections/_header.scss */
-#data-repo-page .t_nav__items__item__data_repositories a {
+#repository-page .t_nav__items__item__data_repositories a {
   cursor: default;
   background: #666666;
   color: white;
 }
 /* line 412, _sections/_header.scss */
-#data-repo-page .t_nav__items__item__data_repositories a i {
+#repository-page .t_nav__items__item__data_repositories a i {
   box-shadow: none;
   background: none;
 }

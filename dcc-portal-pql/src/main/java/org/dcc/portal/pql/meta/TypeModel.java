@@ -233,7 +233,6 @@ public abstract class TypeModel {
     val result = fieldsByFullPath.get(getField(alias));
 
     if (null == result) {
-      log.error("Field '{}' does not have a matching field model.", alias);
       throw new SemanticException("Field %s does not have a matching field model.", alias);
     }
 

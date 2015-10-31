@@ -268,7 +268,7 @@
 
         if (canCopyToClipboard) {
           widgetHtml += '<button style="border: 0; background: transparent;" title="Copy Manifest ID">\
-            <span class="icon-file-alt" /></button>';
+            <span class="icon-clippy" /></button>';
         }
 
         domNode.html (widgetHtml);

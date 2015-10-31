@@ -29,7 +29,6 @@ import static java.lang.String.format;
 import static org.dcc.portal.pql.meta.IndexModel.getTypeModel;
 import static org.dcc.portal.pql.meta.Type.MUTATION_CENTRIC;
 import static org.dcc.portal.pql.meta.Type.PROJECT;
-import static org.dcc.portal.pql.meta.TypeModel.ENTITY_SET_ID;
 import static org.dcc.portal.pql.meta.TypeModel.GENE_SET_ID;
 import static org.dcc.portal.pql.util.Converters.stringValue;
 import static org.icgc.dcc.portal.pql.convert.model.Operation.ALL;
@@ -42,10 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.math3.util.Pair;
 import org.dcc.portal.pql.meta.Type;
@@ -63,6 +58,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiltersConverter {
@@ -94,7 +93,7 @@ public class FiltersConverter {
       "gene.goTermId",
       "gene.hasPathway",
       GENE_SET_ID,
-      ENTITY_SET_ID,
+      "entitySetId",
       "mutation.location",
       "gene.location");
 
@@ -278,11 +277,11 @@ public class FiltersConverter {
     val reducedValue = unboxReduceValue(reduceValuePair);
     val previousSiblingPath = reduceValuePair.getSecond();
 
-    return isNestFilter(nestedPath, indexType) ? (isChildNesting(nestedPath, previousSiblingPath) ? format(
-        "nested(%s,and(%s,%s))",
-        resolveNestedPath(nestedPath, indexType), reducedValue,
-        filter) : format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) : format("%s,%s", filter,
-        reducedValue);
+    return isNestFilter(nestedPath,
+        indexType) ? (isChildNesting(nestedPath, previousSiblingPath) ? format("nested(%s,and(%s,%s))",
+            resolveNestedPath(nestedPath, indexType), reducedValue,
+            filter) : format("nested(%s,%s),%s", nestedPath, filter, reducedValue)) : format("%s,%s", filter,
+                reducedValue);
   }
 
   private static <T> T head(@NonNull List<T> list) {
@@ -365,7 +364,7 @@ public class FiltersConverter {
         pathwayIdFields.add(jqlField);
       } else if (fieldName.equals("hasPathway")) {
         hasPathwayFields.add(jqlField);
-      } else if (fieldName.equals(ENTITY_SET_ID)) {
+      } else if (fieldName.equals("entitySetId")) {
         entitySetIdFields.add(jqlField);
       } else if (fieldName.equals("id")) {
         idFields.add(jqlField);
