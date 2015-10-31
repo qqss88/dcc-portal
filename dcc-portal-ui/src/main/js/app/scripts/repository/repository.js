@@ -627,6 +627,25 @@
       });
     };
 
+    function removeCityFromRepoName (repoName) {
+      if (_.contains (repoName, 'CGHub')) {
+        return 'CGHub';
+      }
+
+      if (_.contains (repoName, 'TCGA DCC')) {
+        return 'TCGA DCC';
+      }
+
+      return repoName;
+    }
+
+    function fixRepoNameInTableData (data) {
+      _.forEach (data, function (row) {
+        _.forEach (row.fileCopies, function (fileCopy) {
+          fileCopy.repoName = removeCityFromRepoName (fileCopy.repoName);
+        });
+      });
+    }
 
     function refresh() {
       var promise, params = {};
@@ -651,6 +670,8 @@
       // Get files that match query
       promise = ExternalRepoService.getList (params);
       promise.then (function (data) {
+        // Vincent asked to remove city names from repository names for CGHub and TCGA DCC.
+        fixRepoNameInTableData (data.hits);
         _ctrl.files = data;
 
         // Sanity check, just reset everything
