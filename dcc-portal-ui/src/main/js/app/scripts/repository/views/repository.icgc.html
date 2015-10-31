@@ -9,10 +9,6 @@
 
 <div>
 <section style="padding-top:0">
-    <p>
-      The ICGC Data Coordination Center (DCC) is quarterly processing and releasing data submitted by the consortium's project members. Current and previous releases can be downloaded from this section.
-    </p>
-
     <div data-ng-repeat="file in ICGCRepoController.textFiles | filter:{name:'notice.txt'}" class="alert alert-error">
        <div btf-markdown="file.textContent" class="release_notice"></div>
     </div>

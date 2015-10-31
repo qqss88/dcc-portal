@@ -9,8 +9,9 @@
 
 <div>
 <section>
-ICGC data is hosted in multiple archive and cloud repositories worldwide. The ICGC Data Coordination Center (DCC) is aggregating and indexing periodically their content to provide researchers with this centralized data file search tool.
-To know more about ICGC data and cloud computing, please see [ICGC in the cloud].
+The ICGC DCC is aggregating and indexing periodically ICGC data hosted in multiple archives
+and <a href="/icgc-in-the-cloud/">cloud</a> repositories worldwide.
+More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">here</a>.
 </section>
 
 <aside class="t_sidebar">
@@ -53,7 +54,7 @@ To know more about ICGC data and cloud computing, please see [ICGC in the cloud]
           data-facet-name="experimentalStrategy"
           data-label="Experimental Strategy"
           data-facet="ExternalRepoController.files.termFacets.experimentalStrategy"
-          data-defined="true" >
+          data-defined="true" />
         <terms data-type="file"
           data-facet-name="study"
           data-label="Only Files in Study"
@@ -99,6 +100,11 @@ To know more about ICGC data and cloud computing, please see [ICGC in the cloud]
           data-missing-text="None"
           data-facet="ExternalRepoController.files.termFacets.donorStudy" />
       </ul>
+      <section>
+        For more complex queries, use <a href="{{:: ExternalRepoController.advancedSearchInfo.href }}">
+          {{:: ExternalRepoController.advancedSearchInfo.title}}</a> and
+          click on "View in {{:: ExternalRepoController.dataRepoTitle }}"
+      </section>
     </div>
 
   </div>

@@ -410,6 +410,7 @@
     _ctrl.summary = {};
     _ctrl.dataRepoTitle = dataRepoTitle;
     _ctrl.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
+    _ctrl.advancedSearchInfo = RouteInfoService.get ('advancedSearch');
 
     function toSummarizedString (values, name) {
       var size = _.size (values);
