@@ -288,12 +288,21 @@
   /**
    * Controller for File Entity page
    */
-  module.controller('ExternalFileInfoController', function (Page, ExternalRepoService, CodeTable, PCAWG, fileInfo) {
+  module.controller('ExternalFileInfoController',
+    function (Page, ExternalRepoService, CodeTable, ProjectCache, PCAWG, fileInfo) {
 
-    Page.setTitle('External File Entity');
+    Page.setTitle('Repository File');
     Page.setPage('externalFileEntity');
 
     var slash = '/';
+    var projectMap = {};
+
+    function refresh () {
+      ProjectCache.getData().then (function (cache) {
+        projectMap = ensureObject (cache);
+      });
+    }
+    refresh();
 
     this.fileInfo = fileInfo;
     this.stringOrDefault = stringOrDefault;
@@ -332,6 +341,10 @@
     }
 
     // Public functions
+    this.projectName = function (projectCode) {
+      return _.get (projectMap, projectCode, '');
+    };
+
     this.buildUrl = function (baseUrl, dataPath, entityId) {
       // Removes any opening and closing slash in all parts then concatenates.
       return _.map ([baseUrl, dataPath, entityId], removeBookendingSlash)
@@ -672,7 +685,7 @@
     }, true);
 
     $scope.$on ('$locationChangeSuccess', function (event, next) {
-      if (next.indexOf ('repository') !== -1) {
+      if (next.indexOf ('repositories') !== -1) {
         // Undo existing selection if filters change
         refresh();
       }
