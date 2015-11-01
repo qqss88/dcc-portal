@@ -15,7 +15,7 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.auth.openid;
+package org.icgc.dcc.portal.auth;
 
 import org.icgc.dcc.portal.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +40,15 @@ import lombok.NonNull;
  * 
  * @param <T> the principal type.
  */
-public class OpenIDAuthProvider implements InjectableProvider<Auth, Parameter> {
+public class UserAuthProvider implements InjectableProvider<Auth, Parameter> {
 
   @NonNull
-  private final Authenticator<OpenIDCredentials, User> authenticator;
+  private final Authenticator<UserCredentials, User> authenticator;
   @NonNull
   private final String realm;
 
   @Autowired
-  public OpenIDAuthProvider(Authenticator<OpenIDCredentials, User> authenticator, String realm) {
+  public UserAuthProvider(Authenticator<UserCredentials, User> authenticator, String realm) {
     this.authenticator = authenticator;
     this.realm = realm;
   }
@@ -60,7 +60,7 @@ public class OpenIDAuthProvider implements InjectableProvider<Auth, Parameter> {
 
   @Override
   public Injectable<?> getInjectable(ComponentContext context, Auth auth, Parameter param) {
-    return new OpenIDAuthInjectable<User>(authenticator, realm, auth.required());
+    return new UserAuthInjectable<User>(authenticator, realm, auth.required());
   }
 
 }

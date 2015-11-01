@@ -261,16 +261,10 @@ public class AuthResource extends BaseResource {
    * @return sessionToken or <tt>null</tt> if no token found
    */
   private static UUID getSessionToken(HttpServletRequest request) {
-    val headerToken = request.getHeader("X-Auth-Token");
-
     for (val cookie : request.getCookies()) {
       if (isSessionTokenCookie(cookie)) {
         return stringToUuid(cookie.getValue());
       }
-    }
-
-    if (headerToken != null) {
-      return stringToUuid(headerToken);
     }
 
     return null;
@@ -307,7 +301,8 @@ public class AuthResource extends BaseResource {
     val result = ImmutableList.<String> builder();
     result.add(CrowdProperties.CUD_TOKEN_NAME);
     if (cmsService == null) {
-      log.warn("Can't properly define all cookies to be deleted on a failed authentication request. CmsService is not initialized");
+      log.warn(
+          "Can't properly define all cookies to be deleted on a failed authentication request. CmsService is not initialized");
     } else {
       result.add(cmsService.getSessionName());
     }
