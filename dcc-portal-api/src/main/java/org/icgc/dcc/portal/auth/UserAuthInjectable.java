@@ -15,18 +15,26 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.auth.openid;
+package org.icgc.dcc.portal.auth;
 
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN_TYPE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.Response;
+
+import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
+
+import com.google.common.net.HttpHeaders;
+import com.sun.jersey.api.core.HttpContext;
+import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
+import com.yammer.dropwizard.auth.AuthenticationException;
+import com.yammer.dropwizard.auth.Authenticator;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -34,15 +42,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-import org.icgc.dcc.portal.config.PortalProperties.CrowdProperties;
-
-import com.sun.jersey.api.core.HttpContext;
-import com.sun.jersey.server.impl.inject.AbstractHttpContextInjectable;
-import com.yammer.dropwizard.auth.AuthenticationException;
-import com.yammer.dropwizard.auth.Authenticator;
-
 /**
- * An {@code Injectable} which provides the following to {@link OpenIDAuthProvider}:
+ * An {@code Injectable} which provides the following to {@link UserAuthProvider}:
  * <ul>
  * <li>Performs decode from HTTP request</li>
  * <li>Carries OpenID authentication data</li>
@@ -50,14 +51,19 @@ import com.yammer.dropwizard.auth.Authenticator;
  */
 @Slf4j
 @RequiredArgsConstructor
-class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
+class UserAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
+
+  /**
+   * Constants.
+   */
+  public static final String AUTH_BEARER_TYPE = "Bearer";
 
   /**
    * The Authenticator that will compare credentials
    */
   @Getter
   @NonNull
-  private final Authenticator<OpenIDCredentials, T> authenticator;
+  private final Authenticator<UserCredentials, T> authenticator;
 
   /**
    * The authentication realm
@@ -73,9 +79,19 @@ class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
 
   @Override
   public T getValue(HttpContext httpContext) {
-    UUID sessionToken = resolveSessionToken(httpContext);
+    // First try session
+    val sessionToken = resolveSessionToken(httpContext);
     if (sessionToken != null) {
-      val result = handleAuthentication(sessionToken);
+      val result = handleAuthentication(Optional.of(sessionToken), Optional.empty());
+      if (result != null) {
+        return result;
+      }
+    }
+
+    // Next try OAuth
+    val accessToken = resolveAccessToken(httpContext);
+    if (accessToken != null) {
+      val result = handleAuthentication(Optional.empty(), Optional.of(accessToken));
       if (result != null) {
         return result;
       }
@@ -87,7 +103,6 @@ class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
   }
 
   private static UUID resolveSessionToken(HttpContext httpContext) {
-    List<String> headers = httpContext.getRequest().getRequestHeader("X-Auth-Token");
     Map<String, Cookie> cookies = httpContext.getRequest().getCookies();
 
     UUID token = null;
@@ -95,20 +110,44 @@ class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
     try {
       if (cookies.containsKey(CrowdProperties.SESSION_TOKEN_NAME)) {
         token = UUID.fromString(cookies.get(CrowdProperties.SESSION_TOKEN_NAME).getValue());
-      } else if (!headers.isEmpty()) {
-        token = UUID.fromString(headers.get(0));
       }
     } catch (IllegalArgumentException e) {
-      log.debug("Invalid token passed in request");
+      log.debug("Invalid session token passed in request");
     } catch (NullPointerException e) {
-      log.debug("No token passed in request");
+      log.debug("No session token passed in request");
     }
 
     return token;
   }
 
-  private T handleAuthentication(UUID sessionToken) {
-    val credentials = new OpenIDCredentials(sessionToken);
+  private static String resolveAccessToken(HttpContext httpContext) {
+    val headers = httpContext.getRequest().getRequestHeader(HttpHeaders.AUTHORIZATION);
+
+    String token = null;
+
+    try {
+      // Typically there is only one (most servers enforce that)
+      for (val value : headers)
+        if ((value.toLowerCase().startsWith(AUTH_BEARER_TYPE.toLowerCase()))) {
+          val authHeaderValue = value.substring(AUTH_BEARER_TYPE.length()).trim();
+          int commaIndex = authHeaderValue.indexOf(',');
+          if (commaIndex > 0) {
+            token = authHeaderValue.substring(0, commaIndex);
+          } else {
+            token = authHeaderValue;
+          }
+        }
+    } catch (NullPointerException e) {
+      log.debug("No OAuth access token passed in request");
+    } catch (Exception e) {
+      log.debug("Invalid OAuth access token passed in request");
+    }
+
+    return token;
+  }
+
+  private T handleAuthentication(Optional<UUID> sessionToken, Optional<String> accessToken) {
+    val credentials = new UserCredentials(sessionToken, accessToken);
 
     try {
       val result = authenticator.authenticate(credentials);
@@ -130,4 +169,5 @@ class OpenIDAuthInjectable<T> extends AbstractHttpContextInjectable<T> {
           .build());
     }
   }
+
 }

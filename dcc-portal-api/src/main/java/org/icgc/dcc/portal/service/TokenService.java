@@ -55,11 +55,11 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenService {
 
   private static final Map<String, String> SCOPE_DESCRIPTIONS = ImmutableMap.<String, String> builder()
-      .put("portal.download", "Allows to download controlled access data from the Data Portal")
-      .put("aws.upload", "Allows to upload to the AWS S3")
-      .put("aws.download", "Allows to download from the AWS S3")
-      .put("collab.upload", "Allows to upload to the Collaboratory cloud")
-      .put("collab.download", "Allows to download from the Collaboratory cloud")
+      .put("portal.download", "Allows secure downloads from the Data Portal")
+      .put("aws.upload", "Allows uploads to AWS S3")
+      .put("aws.download", "Allows secure downloads from AWS S3")
+      .put("collab.upload", "Allows uploads to the Collaboratory cloud")
+      .put("collab.download", "Allows secure downloads from the Collaboratory cloud")
       .put("id.create", "Allows to create new ICGC IDs at https://id.icgc.org")
       .build();
 
