@@ -40,8 +40,6 @@ angular.module('app.ui', [
   'app.ui.hidetext', 'app.ui.exists'
 ]);
 
-
-
 /**
  * File chooser detector
  *
