@@ -1,48 +1,24 @@
 <h1 id="brand">
-    <a href="/">
-        <img src="/styles/images/icgc-logo.png">
-        <span id="icgc">ICGC</span> Data Portal
-    </a>
+  <a href="/">
+    <img src="/styles/images/icgc-logo.png">
+    <span id="icgc">ICGC</span> Data Portal
+  </a>
 </h1>
+
 <nav class="t_nav t_nav__pages">
-    <ul class="t_nav__items">
-        <li class="t_nav__items__item t_nav__items__item__home">
-            <a href="/" tooltip="Home">
-                <span class="t_nav__items__item__icon">
-                    <i class="icon-home"></i></span>
-                <span class="t_nav__items__item__title">Home</span>
-            </a>
-        </li>
-        <li class="t_nav__items__item t_nav__items__item__projects">
-            <a href="/projects" tooltip="Cancer Projects">
-                <span class="t_nav__items__item__icon">
-                    <i class="icon-list"></i></span>
-                <span class="t_nav__items__item__title">Cancer Projects</span>
-            </a>
-        </li>
-        <li class="t_nav__items__item t_nav__items__item__advanced">
-            <a href="/search" tooltip="Advanced Search">
-                <span class="t_nav__items__item__icon">
-                    <i class="icon-search"></i></span>
-                <span class="t_nav__items__item__title">Advanced Search</span>
-            </a>
-        </li>
-        <li class="t_nav__items__item t_nav__items__item__analysis">
-            <a href="/analysis/sets" tooltip="Data Analysis">
-                <span class="t_nav__items__item__icon">
-                    <i class="icon-beaker"></i></span>
-                <span class="t_nav__items__item__title">Data Analysis</span>
-            </a>
-        </li>
-        <li class="t_nav__items__item t_nav__items__item__download">
-            <a href="/repository" tooltip="Data Repository">
-                <span class="t_nav__items__item__icon">
-                    <i class="icon-database"></i></span>
-                <span class="t_nav__items__item__title">Data Repository</span>
-            </a>
-        </li>
-    </ul>
+  <ul class="t_nav__items">
+    <li ng-repeat="item in controller.menuItems"
+      class="t_nav__items__item {{:: item.styleClass }}">
+      <a href="{{:: item.href }}" tooltip="{{:: item.title }}">
+        <span class="t_nav__items__item__icon">
+          <i class="{{:: item.icon }}" />
+        </span>
+        <span class="t_nav__items__item__title" ng-bind=":: item.title" />
+      </a>
+    </li>
+  </ul>
 </nav>
+
 <nav class="t_nav t_nav__actions">
     <ul class="t_nav__items">
         <li data-ng-if="['q','home'].indexOf(page) === -1"

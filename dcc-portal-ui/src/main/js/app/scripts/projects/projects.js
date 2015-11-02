@@ -389,11 +389,20 @@
   });
 
   module.controller('ProjectCtrl', function ($scope, $window, Page, PubMed, project,
-    Donors, Mutations, API, ExternalLinks, PCAWG) {
-
+    Donors, Mutations, API, ExternalLinks, PCAWG, RouteInfoService) {
     var _ctrl = this;
+
     Page.setTitle(project.id);
     Page.setPage('entity');
+
+    var dataRepoRouteInfo = RouteInfoService.get ('dataRepositories');
+    var dataRepoUrl = dataRepoRouteInfo.href;
+
+    var dataReleasesRouteInfo = RouteInfoService.get ('dataReleases');
+
+    _ctrl.dataRepoTitle = dataRepoRouteInfo.title;
+    _ctrl.dataReleasesTitle = dataReleasesRouteInfo.title;
+    _ctrl.dataReleasesUrl = dataReleasesRouteInfo.href;
 
     _ctrl.hasExp = !_.isEmpty(project.experimentalAnalysisPerformedSampleCounts);
     _ctrl.isPCAWG = PCAWG.isPCAWGStudy;
@@ -411,8 +420,10 @@
         }
       }
     };
-    _ctrl.urlToExternalRepository = '/repository/external?filters=' + angular.toJson (projectFilter);
 
+    _ctrl.urlToExternalRepository = function () {
+      return dataRepoUrl + '?filters=' + angular.toJson (projectFilter);
+    };
 
     if (!_ctrl.project.hasOwnProperty('uiPublicationList')) {
       _ctrl.project.uiPublicationList = [];

@@ -194,7 +194,9 @@
   });
 
   module.directive('setOperation', function($location, $timeout, $filter, $modal, Page, LocationService,
-    Settings, SetService, SetOperationService, Extensions) {
+    Settings, SetService, SetOperationService, Extensions, RouteInfoService) {
+    var dataRepoRouteInfo = RouteInfoService.get ('dataRepositories');
+    var dataRepoUrl = dataRepoRouteInfo.href;
 
     return {
       restrict: 'E',
@@ -273,6 +275,8 @@
           return union;
         }
 
+        $scope.dataRepoTitle = dataRepoRouteInfo.title;
+
         $scope.saveDerivedSet = function() {
 
           $modal.open({
@@ -333,7 +337,7 @@
               return;
             } else {
               var newFilter = JSON.stringify({file: {entitySetId: {is: [data.id]}}});
-              $location.path('repository/external').search('filters', newFilter);
+              $location.path (dataRepoUrl).search ('filters', newFilter);
             }
           });
         };
@@ -517,4 +521,5 @@
       }
     };
   });
+
 })();

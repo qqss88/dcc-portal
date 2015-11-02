@@ -1,12 +1,9 @@
 <div class="clearfix">
 <ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
     <li class="heading">Main</li>
-    <li><a href="/">Home</a></li>
-    <li><a href="/projects">Cancer Projects</a></li>
-    <li><a href="/search">Advanced Search</a></li>
-    <li><a href="/analysis/sets">Data Analysis</a></li>
-    <li><a href="/repository">Data Repository</a></li>
-    <li><a href="/pcawg">PCAWG</a></li>
+    <li ng-repeat="item in FooterCtrl.mainItems">
+      <a href="{{:: item.href }}">{{:: item.title }}</a>
+    </li>
 </ul>
 <ul data-ng-class="{'footer-grid-adjust': ! stagedFeatures.getCloudLinks()}">
     <li class="heading">Tools</li>

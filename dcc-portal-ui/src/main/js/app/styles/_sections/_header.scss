@@ -11,6 +11,7 @@ header {
 
   #brand {
     @include float-span(4);
+    width: 27%;
 
     display: inline-block;
 
@@ -59,7 +60,7 @@ header {
 .t_nav__pages {
   text-align: center;
   @include float-span(4);
-
+  width: 36%;
 }
 
 .t_nav__actions {
@@ -76,6 +77,7 @@ header {
   background-color: transparent;
   display: inline;
   text-align: left;
+  margin-right: 0.5rem;
 
   @include breakpoint($break-tablet) {
     display: inline-block;
@@ -140,6 +142,16 @@ header {
   &.t_nav__items__item__analysis a:hover {
     color: $white;
     background: $mauve;
+  }
+
+  &.t_nav__items__item__data_repositories a {
+    color: $greyDark;
+    border: .3rem solid $greyDark;
+  }
+
+  &.t_nav__items__item__data_repositories a:hover {
+    color: $white;
+    background: $greyDark;
   }
 
   &.t_nav__items__item__download a {
@@ -337,6 +349,10 @@ header {
     background: $cyan;
     color: $white;
   }
+  .t_nav__items__item__data_repositories a {
+    background: $greyDark;
+    color: $white;
+  }
 }
 
 #projects-page {
@@ -376,10 +392,22 @@ header {
   }
 }
 
-#repository-page {
+#dataReleases-page {
   .t_nav__items__item__download a {
     cursor: default;
     background: $cyan;
+    color: $white;
+    i {
+      box-shadow: none;
+      background: none;
+    }
+  }
+}
+
+#repository-page {
+  .t_nav__items__item__data_repositories a {
+    cursor: default;
+    background: $greyDark;
     color: $white;
     i {
       box-shadow: none;

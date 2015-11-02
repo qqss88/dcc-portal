@@ -39,7 +39,7 @@
                   <td> {{type.uiName}}</td>
                   <td class="text-right">{{type.donorCount | number}}</td>
                   <td class="text-right">
-                      <a href="/repository/external?filters={{type.filters}}">{{type.fileCount | number}}</a>
+                      <a href="{{ dataRepoUrl }}?filters={{type.filters}}">{{type.fileCount | number}}</a>
                   </td>
                   <td>{{ type.fileFormat.join(', ')}}</td>
                   <td class="text-right">{{type.fileSize | bytes}}</td>
@@ -48,7 +48,7 @@
       </table>
 
       <span>
-          Available data as of <a href="/repository/external?filters={{filters}}">{{indexDate | date}}</a>
+          Available data as of <a href="{{ dataRepoUrl }}?filters={{filters}}">{{indexDate | date}}</a>
       </span>
    </div>
 

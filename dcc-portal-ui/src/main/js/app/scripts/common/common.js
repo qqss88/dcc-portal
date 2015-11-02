@@ -19,6 +19,7 @@
 
   var module = angular.module('app.common', [
     'app.common.services',
+    'app.common.header',
     'app.common.footer',
     'icgc.common.version',
     'icgc.common.notify',
@@ -200,13 +201,13 @@
       return Number(bytes).toFixed(precision) + ' ' + sizes[postTxt];
     };
   });
-  
+
   module.filter('projectCode', function () {
     return function (input) {
       return input.toString().replace(/[\[\"][\"\]]/g, '');
     };
   });
-  
+
   module.filter('withoutFirst', function () {
     return function (input) {
       return input.slice(1,input.length).toString();

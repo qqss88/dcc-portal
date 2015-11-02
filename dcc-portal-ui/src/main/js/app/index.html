@@ -126,7 +126,9 @@
 </div>
 <div class="wrap light ng-cloak">
     <login></login>
-    <header data-ng-include="'/scripts/common/views/header.html'"></header>
+    <header data-ng-controller="MainHeaderController as controller"
+      data-ng-include="'/scripts/common/views/header.html'">
+    </header>
     <div class="content transition-fade" data-ui-view></div>
     <div class="push"></div>
 </div>
@@ -206,6 +208,7 @@
 <script src="scripts/app.js"></script>
 <script src="scripts/common/common.js"></script>
 <script src="scripts/common/services.js"></script>
+<script src="scripts/common/header.js"></script>
 <script src="scripts/common/footer.js"></script>
 <script src="scripts/common/version.js"></script>
 <script src="scripts/common/notify.js"></script>

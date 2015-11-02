@@ -150,7 +150,7 @@
     refresh();
     $scope.$on('$locationChangeSuccess', function (evt, next) {
       // FIXME: Only applicable on search page. Should have a cleaner solution
-      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repository/external') ) {
+      if (next.indexOf('search') !== -1 || next.indexOf('projects') !== -1 || next.indexOf('repositories') ) {
         refresh();
       }
     });

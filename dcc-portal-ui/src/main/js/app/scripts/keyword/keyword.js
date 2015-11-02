@@ -36,7 +36,7 @@
   var module = angular.module('icgc.keyword.controllers', ['icgc.keyword.models']);
 
   module.controller('KeywordController',
-    function ($scope, Page, LocationService, debounce, Keyword) {
+    function ($scope, Page, LocationService, debounce, Keyword, RouteInfoService) {
       var pageSize;
 
       $scope.from = 1;
@@ -46,6 +46,7 @@
       $scope.type = LocationService.getParam('type') || 'all';
       $scope.isBusy = false;
       $scope.isFinished = false;
+      $scope.dataRepoFileUrl = RouteInfoService.get ('dataRepositoryFile').href;
 
       Page.setTitle('Results for ' + $scope.query);
       Page.setPage('q');
