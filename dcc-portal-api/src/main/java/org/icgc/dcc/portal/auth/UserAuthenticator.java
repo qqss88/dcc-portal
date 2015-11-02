@@ -15,12 +15,9 @@
  * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.icgc.dcc.portal.auth.openid;
+package org.icgc.dcc.portal.auth;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
+import org.icgc.dcc.portal.auth.oauth.OAuthClient;
 import org.icgc.dcc.portal.model.User;
 import org.icgc.dcc.portal.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,32 +27,56 @@ import com.google.common.base.Optional;
 import com.yammer.dropwizard.auth.AuthenticationException;
 import com.yammer.dropwizard.auth.Authenticator;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Authenticator which verifies if the provided OpenID credentials are valid.
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor = @__({ @Autowired }))
-public class OpenIDAuthenticator implements Authenticator<OpenIDCredentials, User> {
+@RequiredArgsConstructor(onConstructor = @__({ @Autowired }) )
+public class UserAuthenticator implements Authenticator<UserCredentials, User> {
 
+  /**
+   * Constants.
+   */
+  private static final String PORTAL_DOWNLOAD_SCOPE = "portal.download";
+
+  /**
+   * Dependencies.
+   */
   @NonNull
   private final SessionService sessionService;
+  @NonNull
+  private final OAuthClient oauthClient;
 
   @Override
-  public Optional<User> authenticate(OpenIDCredentials credentials) throws AuthenticationException {
-    log.debug("Looking up user by session token '{}'...", credentials.getSessionToken());
+  public Optional<User> authenticate(UserCredentials credentials) throws AuthenticationException {
+    if (credentials.isWebSession()) {
+      val sessionToken = credentials.getSessionToken().get();
+      log.debug("Looking up user by session token '{}'...", sessionToken);
 
-    // Get the User referred to by the API key
-    Optional<User> user = findUserBySessionToken(credentials);
-    if (user.isPresent() && user.get().getDaco()) {
-      return user;
+      // Get the User referred to by the API key
+      val user = sessionService.getUserBySessionToken(sessionToken);
+      if (user.isPresent() && user.get().getDaco()) {
+        return user;
+      }
+    } else if (credentials.isAPI()) {
+      val accessToken = credentials.getAccessToken().get();
+      log.debug("Looking up user by access token '{}'...", accessToken);
+
+      if (oauthClient.checkToken(accessToken, PORTAL_DOWNLOAD_SCOPE)) {
+        val user = new User();
+        user.setDaco(true);
+
+        return Optional.of(user);
+      }
     }
 
     return Optional.absent();
-  }
-
-  private Optional<User> findUserBySessionToken(OpenIDCredentials credentials) {
-    return sessionService.getUserBySessionToken(credentials.getSessionToken());
   }
 
 }
