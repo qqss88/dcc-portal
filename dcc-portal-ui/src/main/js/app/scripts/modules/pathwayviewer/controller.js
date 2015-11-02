@@ -192,10 +192,10 @@
     legendRenderer.renderNodes(nodes);
     legendRenderer.renderEdges(rendererUtils.getLegendLines(40,h*0.38,legendSvg));
     legendRenderer.renderReactionLabels(rendererUtils.getLegendLabels(35,h*0.63,legendSvg),true);
-    legendRenderer.highlightEntity(
-      [{id:'Mutated',value:99}],
-      {getNodesByReactomeId:function (){return [nodes[nodes.length-1]];}
-    });
+    var model = new dcc.PathwayModel();
+    model.nodes = [nodes[nodes.length-1]];
+    legendRenderer.highlightEntity([{id:'mutated',value:99}],model);
+    
     legendSvg.selectAll('.reaction-failed-example')
           .classed('failed-reaction',true);
   };
