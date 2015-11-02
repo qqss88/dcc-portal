@@ -6,12 +6,16 @@ footer {
   background-image: -moz-linear-gradient(center top, #fafafa 0%, #fff 100%);
   background-image: -o-linear-gradient(#fafafa, #fff);*/
 
-  padding: 1rem 3rem;
+  padding: 0.5rem 3rem;
   position: relative;
   z-index: 100;
   
   .clear-fix {
     @include clearfix();
+  }
+  
+  .footer-caption {
+    margin-top: 0.1rem;
   }
 
   a {
@@ -37,7 +41,7 @@ footer {
 
   .logo {
     img {
-      margin-top: 2rem;
+      margin-top: 1rem;
       width: 116px;
       height: 84px;
 
