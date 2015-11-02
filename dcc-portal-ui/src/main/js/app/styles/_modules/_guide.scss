@@ -1,0 +1,28 @@
+$guide-aws-color: #E9931C;
+$guide-collab-color: #1693C0;
+
+.guide-callout {
+   padding: 15px;
+   border: 1px solid #eee;
+   border-left-width: 5px;
+   border-radius: 3px;
+   margin: 5px;
+   h4 {
+      margin: 0;
+      font-weight: bold
+   }
+}
+
+.guide-callout-aws {
+   h4 {
+      color: $guide-aws-color;
+   }
+   border-left-color: $guide-aws-color;
+}
+
+.guide-callout-collab {
+   h4 {
+      color: $guide-collab-color;
+   }
+   border-left-color: $guide-collab-color;
+}
