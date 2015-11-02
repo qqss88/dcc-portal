@@ -5297,39 +5297,67 @@ td {
 
 /* line 4, _modules/_guide.scss */
 .guide-callout {
-  padding: 15px;
-  border: 1px solid #eee;
-  border-left-width: 5px;
-  border-radius: 3px;
-  margin: 5px;
+  position: relative;
+  display: table;
+  border: solid 1px #eee;
+  margin: 1rem 0rem;
+  width: 100%;
 }
-/* line 10, _modules/_guide.scss */
+/* line 15, _modules/_guide.scss */
+.guide-callout:before {
+  position: relative;
+  height: 100%;
+  display: table-cell;
+  background: #eee;
+  content: '\a0';
+  width: 0.5rem;
+  -webkit-box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+  -moz-box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+  box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
+}
+/* line 27, _modules/_guide.scss */
+.guide-callout .guide-callout-content {
+  margin-left: 1rem;
+  padding: 0.5rem 0.5rem 0.5rem 0rem;
+}
+/* line 31, _modules/_guide.scss */
+.guide-callout .guide-callout-content p:last-child {
+  margin-bottom: 0rem;
+}
+/* line 37, _modules/_guide.scss */
 .guide-callout h4 {
   margin: 0;
   font-weight: bold;
 }
 
-/* line 16, _modules/_guide.scss */
+/* line 43, _modules/_guide.scss */
 .guide-callout-aws {
-  border-left-color: #fdb013;
+  border-color: #e47911;
 }
-/* line 17, _modules/_guide.scss */
+/* line 45, _modules/_guide.scss */
+.guide-callout-aws:before {
+  background-color: #e47911;
+}
+/* line 49, _modules/_guide.scss */
 .guide-callout-aws h4 {
-  color: #fdb013;
+  color: #e47911;
   padding-left: 30px;
   background-image: url(/styles/images/repositories/guides/aws/aws-cube.png);
   background-repeat: no-repeat;
   background-size: 25px;
 }
 
-/* line 27, _modules/_guide.scss */
+/* line 60, _modules/_guide.scss */
 .guide-callout-collab {
-  border-left-color: #59a5d8;
+  border-color: #61a8e1;
 }
-/* line 28, _modules/_guide.scss */
+/* line 62, _modules/_guide.scss */
+.guide-callout-collab:before {
+  background-color: #61a8e1;
+}
+/* line 66, _modules/_guide.scss */
 .guide-callout-collab h4 {
-  color: #59a5d8;
-  border-left-color: #59a5d8;
+  color: #61a8e1;
   padding-left: 27px;
   background-image: url(/styles/images/repositories/guides/collab/collab-logo-small.png);
   background-size: 16px;

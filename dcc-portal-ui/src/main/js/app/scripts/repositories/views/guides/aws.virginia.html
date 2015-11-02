@@ -54,19 +54,23 @@
          <h3>Security</h3>
          <p>The usage of the distributed <a href="/software">Storage Client</a> is required to provide additional security while operating in participating cloud environments and to enhance user download speeds. </p>
          <div class="guide-callout guide-callout-aws">
-            <h4>AWS</h4>
-            <p>
-               Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.
-            </p>
-            <p>
-               It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
-            </p>
+            <div class="guide-callout-content">
+              <h4>AWS</h4>
+              <p>
+                Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.
+              </p>
+              <p>
+                It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
+              </p>
+             </div>
          </div>
          <div class="guide-callout guide-callout-collab">
+          <div class="guide-callout-content">
             <h4>Collaboratory</h4>
             <p>
-            Downloads will only function inside Collaboratory's OpenStack environment.
+                Downloads will only function inside Collaboratory's OpenStack environment.
             </p>
+          </div>
          </div>
          <p>
             Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any cloud and downstream resources.
@@ -86,12 +90,20 @@
          <p>The access token model used for protecting the cloud data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. Scopes will become available after acquiring cloud DACO access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
 
          <div class="guide-callout guide-callout-aws">
+           <div class="guide-callout-content">
             <h4>AWS</h4>
-            In the case of the ICGC AWS data set, an access token with the <code>aws.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+            <p>
+              In the case of the ICGC AWS data set, an access token with the <code>aws.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+            </p>
+            </div>
          </div>
          <div class="guide-callout guide-callout-collab">
+           <div class="guide-callout-content">
             <h4>Collaboratory</h4>
-            In the case of the ICGC Collaboratory data set, an access token with the <code>collab.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+            <p>
+              In the case of the ICGC Collaboratory data set, an access token with the <code>collab.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+            </p>
+            </div>
          </div>
 
          <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. You will need to specify the scope mentioned above when you generate your token.</p>
@@ -115,12 +127,20 @@
          <h3>Compute Instance</h3>
          As a first step in analyzing data, you will need to create a compute instance to run the Storage Client and any other supporting software.
          <div class="guide-callout guide-callout-aws">
+            <div class="guide-callout-content">
             <h4>AWS</h4>
-            In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
+            <p>
+              In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
+            </p>
+            </div>
          </div>
          <div class="guide-callout guide-callout-collab">
+           <div class="guide-callout-content">
             <h4>Collaboratory</h4>
-            In order to run in within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To start the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
+            <p>
+              In order to run in within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To start the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
+            </p>
+            </div>
          </div>
 
          <p>
@@ -187,6 +207,7 @@
          <pre class="language-shell"><code class="language-shell">accessToken<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span></code></pre>
 
          <div class="guide-callout guide-callout-collab">
+           <div class="guide-callout-content">
             <h4>Collaboratory</h4>
             <p>
                In addition to the above, you will need to change the storage server URL to the following:
@@ -194,6 +215,7 @@
 
             Or via the environmental variable <code>CLIENT_UPLOAD_SERVICEHOSTNAME</code>
             </p>
+           </div>
          </div>
 
 
