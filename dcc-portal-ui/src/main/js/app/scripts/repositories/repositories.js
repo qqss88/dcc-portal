@@ -36,9 +36,9 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
                 isICGCCloudFunctionlityEnabled = PortalFeatureProvider.hasFeature('ICGC_CLOUD') !== false;
                   
                 if (isICGCCloudFunctionlityEnabled) {
-                   _templateStr = '<div data-ui-view="home"></div>' +
-                      '<div data-ui-view="repositoryGuides"></div>' +
-                      '<div data-ui-view="repos" class="cloud-repository-container"></div>';
+                   _templateStr = '<div data-ui-view="home" data-reset-scroll="top"></div>' +
+                      '<div data-ui-view="repositoryGuides" data-reset-scroll="top"></div>' +
+                      '<div data-ui-view="repos" class="cloud-repository-container" data-reset-scroll="top"></div>';
                 }
                 
               return _templateStr;  
@@ -141,7 +141,7 @@ angular.module('icgc.repositories.controllers', [])
 			_repoSummaryData = null,
 			_repoStats = {};
 		
-			
+
 		function _capitalizeWords(str) {
 			return str.replace(/[^\s]+/g, function(word) {
 				return word.replace(/^[a-z]/i, function(firstLetter) {
