@@ -655,14 +655,14 @@ body {
   max-width: 1280px;
   margin: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:before, body:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 body:after {
   clear: both;
 }
@@ -693,14 +693,14 @@ body:after {
   overflow: hidden;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:before, .wrap:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .wrap:after {
   clear: both;
 }
@@ -718,14 +718,14 @@ body:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:before, .content:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .content:after {
   clear: both;
 }
@@ -753,14 +753,14 @@ aside {
   margin-left: 0%;
   clear: none;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:before, aside:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 aside:after {
   clear: both;
 }
@@ -778,14 +778,14 @@ article {
   clear: none;
   margin-right: 0;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:before, article:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 article:after {
   clear: both;
 }
@@ -797,14 +797,14 @@ section {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:before, section:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 section:after {
   clear: both;
 }
@@ -876,14 +876,14 @@ section:after {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:before, .clearfix:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .clearfix:after {
   clear: both;
 }
@@ -945,14 +945,14 @@ header {
   padding: .4rem 2rem;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:before, header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 header:after {
   clear: both;
 }
@@ -2105,14 +2105,14 @@ input.valid:focus {
   clear: none;
   position: relative;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:before, .t_suggest:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest:after {
   clear: both;
 }
@@ -2216,14 +2216,14 @@ input.valid:focus {
   cursor: pointer;
   padding: .25rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:before, .t_suggest_flyout__hits__hit:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_suggest_flyout__hits__hit:after {
   clear: both;
 }
@@ -2525,14 +2525,14 @@ h1 .t_badge_icon {
   background-image: -o-linear-gradient(#fff, #fafafa);*/
   padding: 1rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:before, .t_current:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_current:after {
   clear: both;
 }
@@ -2692,14 +2692,14 @@ aside .t_tabs__tab {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:before, .t_sh:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 .t_sh:after {
   clear: both;
 }
@@ -4065,14 +4065,14 @@ td {
   /* non-JS fallback */
   *zoom: 1;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:before, #pathways .pathway-filter-container .pathway-item-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathway-filter-container .pathway-item-header:after {
   clear: both;
 }
@@ -4119,14 +4119,14 @@ td {
   padding-top: 0.2rem;
   padding-bottom: 0.6rem;
 }
-/* line 48, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:before, #pathways .pathways-content .pathway-analysis-header:after {
   content: ".";
   display: block;
   height: 0;
   overflow: hidden;
 }
-/* line 55, ../../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
 #pathways .pathways-content .pathway-analysis-header:after {
   clear: both;
 }
@@ -4553,35 +4553,39 @@ td {
 .cloud-home section h2 {
   margin-top: 0;
 }
-/* line 61, _modules/_repositories.scss */
+/* line 60, _modules/_repositories.scss */
+.cloud-home section p:last-child {
+  margin-bottom: 0rem;
+}
+/* line 65, _modules/_repositories.scss */
 .cloud-home .indent {
   text-indent: 1rem;
 }
-/* line 65, _modules/_repositories.scss */
+/* line 69, _modules/_repositories.scss */
 .cloud-home a {
   text-indent: initial;
 }
-/* line 69, _modules/_repositories.scss */
+/* line 73, _modules/_repositories.scss */
 .cloud-home h2 {
   margin-bottom: 1.5rem;
 }
-/* line 73, _modules/_repositories.scss */
+/* line 77, _modules/_repositories.scss */
 .cloud-home .divider {
   border-top: solid 1px #e6e6e6;
   margin-bottom: 2rem;
 }
-/* line 79, _modules/_repositories.scss */
+/* line 83, _modules/_repositories.scss */
 .cloud-home .card-body {
   height: 100%;
   position: relative;
 }
-/* line 83, _modules/_repositories.scss */
+/* line 87, _modules/_repositories.scss */
 .cloud-home .card-body .card-container {
   position: relative;
   display: inline-block;
   height: 100%;
 }
-/* line 91, _modules/_repositories.scss */
+/* line 95, _modules/_repositories.scss */
 .cloud-home .card {
   border: solid 1px #ccc;
   display: table;
@@ -4597,73 +4601,73 @@ td {
     }
   } */
 }
-/* line 96, _modules/_repositories.scss */
+/* line 100, _modules/_repositories.scss */
 .cloud-home .card:first-child {
   margin-left: 0.3rem;
 }
-/* line 100, _modules/_repositories.scss */
+/* line 104, _modules/_repositories.scss */
 .cloud-home .card .card-handle {
   overflow: hidden;
 }
-/* line 103, _modules/_repositories.scss */
+/* line 107, _modules/_repositories.scss */
 .cloud-home .card .card-handle .indicator-icon h3 {
   text-align: center;
   margin: 0 0;
   font-size: 2.3rem;
 }
-/* line 110, _modules/_repositories.scss */
+/* line 114, _modules/_repositories.scss */
 .cloud-home .card.aws {
   border-color: #e47911;
 }
-/* line 113, _modules/_repositories.scss */
+/* line 117, _modules/_repositories.scss */
 .cloud-home .card.aws .card-handle {
   background: #e47911;
 }
-/* line 118, _modules/_repositories.scss */
+/* line 122, _modules/_repositories.scss */
 .cloud-home .card.aws .card-handle .indicator-icon:hover {
   background-color: #fbe0c6;
 }
-/* line 122, _modules/_repositories.scss */
+/* line 126, _modules/_repositories.scss */
 .cloud-home .card.aws .card-handle .indicator-icon h3 {
   color: #e47911;
 }
-/* line 126, _modules/_repositories.scss */
+/* line 130, _modules/_repositories.scss */
 .cloud-home .card.aws .card-handle .indicator-icon img {
   width: 5.2rem;
   margin-left: -0.7rem;
   margin-top: -0.7rem;
 }
-/* line 136, _modules/_repositories.scss */
+/* line 140, _modules/_repositories.scss */
 .cloud-home .card.aws:hover {
   border-color: #b5600d;
 }
-/* line 141, _modules/_repositories.scss */
+/* line 145, _modules/_repositories.scss */
 .cloud-home .card.collab {
   border-color: #61a8e1;
 }
-/* line 144, _modules/_repositories.scss */
+/* line 148, _modules/_repositories.scss */
 .cloud-home .card.collab .card-handle {
   background: #61a8e1;
 }
-/* line 147, _modules/_repositories.scss */
+/* line 151, _modules/_repositories.scss */
 .cloud-home .card.collab .card-handle .indicator-icon {
   color: #61a8e1;
 }
-/* line 150, _modules/_repositories.scss */
+/* line 154, _modules/_repositories.scss */
 .cloud-home .card.collab .card-handle .indicator-icon:hover {
   background-color: #e2eff9;
 }
-/* line 154, _modules/_repositories.scss */
+/* line 158, _modules/_repositories.scss */
 .cloud-home .card.collab .card-handle .indicator-icon h3 {
   color: inherit;
   font-size: 3rem;
   margin-left: -0.3rem;
 }
-/* line 162, _modules/_repositories.scss */
+/* line 166, _modules/_repositories.scss */
 .cloud-home .card.collab:hover {
   border-color: #3690d9;
 }
-/* line 169, _modules/_repositories.scss */
+/* line 173, _modules/_repositories.scss */
 .cloud-home .card .card-handle {
   background: #fafafa;
   display: table-cell;
@@ -4673,7 +4677,7 @@ td {
   -moz-box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
   box-shadow: inset -16px 0px 8px -16px rgba(0, 0, 0, 0.72);
 }
-/* line 183, _modules/_repositories.scss */
+/* line 187, _modules/_repositories.scss */
 .cloud-home .card .card-handle .indicator-icon {
   margin: 0 auto;
   height: 4em;
@@ -4684,69 +4688,69 @@ td {
   transform: rotateZ(-90deg);
   transition: transform 0.30s ease-in;
 }
-/* line 193, _modules/_repositories.scss */
+/* line 197, _modules/_repositories.scss */
 .cloud-home .card .card-handle .indicator-icon:hover {
   background: #e6e6e6;
 }
-/* line 198, _modules/_repositories.scss */
+/* line 202, _modules/_repositories.scss */
 .cloud-home .card .card-handle .indicator-icon a:hover {
   background: none;
 }
-/* line 203, _modules/_repositories.scss */
+/* line 207, _modules/_repositories.scss */
 .cloud-home .card .card-content {
   padding: 1rem 1rem;
   background: #fff;
   transition-property: transform border-color;
   transition: 0.25s ease-in;
 }
-/* line 210, _modules/_repositories.scss */
+/* line 214, _modules/_repositories.scss */
 .cloud-home .card .card-content.slide {
   transform: translateX(0);
 }
 
 /* shared classes */
-/* line 230, _modules/_repositories.scss */
+/* line 234, _modules/_repositories.scss */
 .icgc-cloud .header-link {
   line-height: 4rem;
 }
-/* line 234, _modules/_repositories.scss */
+/* line 238, _modules/_repositories.scss */
 .icgc-cloud .header-link img {
   vertical-align: middle;
 }
-/* line 238, _modules/_repositories.scss */
+/* line 242, _modules/_repositories.scss */
 .icgc-cloud .header-link a {
   color: inherit;
 }
-/* line 241, _modules/_repositories.scss */
+/* line 245, _modules/_repositories.scss */
 .icgc-cloud .header-link a:hover {
   background: transparent;
   color: inherit;
 }
-/* line 246, _modules/_repositories.scss */
+/* line 250, _modules/_repositories.scss */
 .icgc-cloud .header-link a .link-title {
   margin-left: 1rem;
   display: inline-block;
 }
-/* line 252, _modules/_repositories.scss */
+/* line 256, _modules/_repositories.scss */
 .icgc-cloud .screen-shot {
   position: relative;
   box-sizing: content-box;
 }
-/* line 256, _modules/_repositories.scss */
+/* line 260, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a {
   display: block;
   position: relative;
   margin: 0 auto;
   width: 50%;
 }
-/* line 262, _modules/_repositories.scss */
+/* line 266, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a img {
   width: 100%;
   display: block;
   margin: 0 auto;
   padding: 0.5rem 0.5rem;
 }
-/* line 271, _modules/_repositories.scss */
+/* line 275, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a .screen-caption {
   position: absolute;
   background: #1693c0;
@@ -4761,74 +4765,80 @@ td {
   right: 0.8rem;
   top: 0.8rem;
 }
-/* line 287, _modules/_repositories.scss */
+/* line 291, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a:hover .screen-caption {
   opacity: 0.9;
 }
-/* line 291, _modules/_repositories.scss */
+/* line 295, _modules/_repositories.scss */
 .icgc-cloud .screen-shot a:hover {
   background: transparent;
 }
 
 /* Repo Stats Pages (w/stacked bar chart page) */
-/* line 304, _modules/_repositories.scss */
+/* line 308, _modules/_repositories.scss */
 .cloud-repository-container .repo-header .logo {
   margin-left: 2rem;
   vertical-align: middle;
 }
-/* line 308, _modules/_repositories.scss */
+/* line 312, _modules/_repositories.scss */
 .cloud-repository-container .repo-header span {
   margin-left: 0.5rem;
 }
-/* line 313, _modules/_repositories.scss */
+/* line 317, _modules/_repositories.scss */
 .cloud-repository-container a {
   text-indent: initial;
 }
-/* line 317, _modules/_repositories.scss */
+/* line 321, _modules/_repositories.scss */
 .cloud-repository-container .cloud-repository-content {
   padding-top: 0rem;
 }
-/* line 320, _modules/_repositories.scss */
+/* line 324, _modules/_repositories.scss */
 .cloud-repository-container .cloud-repository-content p {
   text-align: justify;
   text-indent: 1rem;
 }
-/* line 325, _modules/_repositories.scss */
+/* line 329, _modules/_repositories.scss */
 .cloud-repository-container .cloud-repository-content .bar-chart-container {
   margin: 1rem 2rem 1.5rem 2rem;
 }
-/* line 330, _modules/_repositories.scss */
+/* line 334, _modules/_repositories.scss */
+.cloud-repository-container .confine-column {
+  text-align: justify;
+  text-indent: 1rem;
+  max-width: 46rem;
+}
+/* line 340, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container {
   padding: 0.5rem 2rem;
   text-align: center;
   margin: 0 auto;
 }
-/* line 335, _modules/_repositories.scss */
+/* line 345, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container .btn {
   color: #fff;
   transition: all 0.1s ease-in;
   margin-top: 1rem;
 }
-/* line 341, _modules/_repositories.scss */
+/* line 351, _modules/_repositories.scss */
 .cloud-repository-container .repo-controls-container .btn:nth-child(2) {
   margin-left: 2rem;
 }
-/* line 347, _modules/_repositories.scss */
+/* line 357, _modules/_repositories.scss */
 .cloud-repository-container .icons-container {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
-/* line 350, _modules/_repositories.scss */
+/* line 360, _modules/_repositories.scss */
 .cloud-repository-container .icons-container i {
   font-size: 1.25rem;
 }
-/* line 355, _modules/_repositories.scss */
+/* line 365, _modules/_repositories.scss */
 .cloud-repository-container h3 {
   padding-top: 2rem;
 }
 
 /** Used for the ICGC in the cloud user guide sub site **/
-/* line 361, _modules/_repositories.scss */
+/* line 371, _modules/_repositories.scss */
 .cloud-guide-content {
   font-size: 1rem;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -4840,11 +4850,11 @@ td {
   /* Code blocks */
   /* Inline code */
 }
-/* line 365, _modules/_repositories.scss */
+/* line 375, _modules/_repositories.scss */
 .cloud-guide-content nav ul {
   margin: 0 0;
 }
-/* line 369, _modules/_repositories.scss */
+/* line 379, _modules/_repositories.scss */
 .cloud-guide-content section {
   padding: 2rem;
   margin: 0;
@@ -4853,44 +4863,44 @@ td {
   border-radius: 0;
   border-bottom: 1px solid #cccccc;
 }
-/* line 383, _modules/_repositories.scss */
+/* line 393, _modules/_repositories.scss */
 .cloud-guide-content .user-guide-content ol {
   list-style-type: number;
 }
-/* line 386, _modules/_repositories.scss */
+/* line 396, _modules/_repositories.scss */
 .cloud-guide-content .user-guide-content ol li {
   list-style: inherit;
   margin: 0 0;
 }
-/* line 392, _modules/_repositories.scss */
+/* line 402, _modules/_repositories.scss */
 .cloud-guide-content .user-guide-content ul {
   list-style-type: disc;
 }
-/* line 395, _modules/_repositories.scss */
+/* line 405, _modules/_repositories.scss */
 .cloud-guide-content .user-guide-content ul li {
   margin: 0;
   list-style: inherit;
 }
-/* line 405, _modules/_repositories.scss */
+/* line 415, _modules/_repositories.scss */
 .cloud-guide-content section h5 {
   font-weight: bold;
 }
-/* line 409, _modules/_repositories.scss */
+/* line 419, _modules/_repositories.scss */
 .cloud-guide-content section .section_ident {
   margin-left: 2rem;
 }
-/* line 413, _modules/_repositories.scss */
+/* line 423, _modules/_repositories.scss */
 .cloud-guide-content a {
   color: #4183C4;
 }
-/* line 418, _modules/_repositories.scss */
+/* line 428, _modules/_repositories.scss */
 .cloud-guide-content img.aws-process-diagram, .cloud-guide-content .screen-shot img {
   display: block;
   width: 50%;
   margin: 1rem auto;
   border: none;
 }
-/* line 426, _modules/_repositories.scss */
+/* line 436, _modules/_repositories.scss */
 .cloud-guide-content h1, .cloud-guide-content h2, .cloud-guide-content h3, .cloud-guide-content h4, .cloud-guide-content h5, .cloud-guide-content h6 {
   margin: 3rem 0rem 0rem 0rem;
   padding: 0;
@@ -4901,109 +4911,109 @@ td {
   text-transform: none;
   font-style: normal;
 }
-/* line 438, _modules/_repositories.scss */
+/* line 448, _modules/_repositories.scss */
 .cloud-guide-content h1 tt, .cloud-guide-content h1 code {
   font-size: inherit;
 }
-/* line 442, _modules/_repositories.scss */
+/* line 452, _modules/_repositories.scss */
 .cloud-guide-content h2 tt, .cloud-guide-content h2 code {
   font-size: inherit;
 }
-/* line 446, _modules/_repositories.scss */
+/* line 456, _modules/_repositories.scss */
 .cloud-guide-content h3 tt, .cloud-guide-content h3 code {
   font-size: inherit;
 }
-/* line 450, _modules/_repositories.scss */
+/* line 460, _modules/_repositories.scss */
 .cloud-guide-content h4 tt, .cloud-guide-content h4 code {
   font-size: inherit;
 }
-/* line 455, _modules/_repositories.scss */
+/* line 465, _modules/_repositories.scss */
 .cloud-guide-content h5 tt, .cloud-guide-content h5 code {
   font-size: inherit;
 }
-/* line 458, _modules/_repositories.scss */
+/* line 468, _modules/_repositories.scss */
 .cloud-guide-content h6 tt, .cloud-guide-content h6 code {
   font-size: inherit;
 }
-/* line 461, _modules/_repositories.scss */
+/* line 471, _modules/_repositories.scss */
 .cloud-guide-content h1 {
   font-size: 28px;
   color: black;
 }
-/* line 465, _modules/_repositories.scss */
+/* line 475, _modules/_repositories.scss */
 .cloud-guide-content h2 {
   font-size: 2.0rem;
   line-height: 1.25rem;
   margin-top: .5rem;
   margin-bottom: .5rem;
 }
-/* line 472, _modules/_repositories.scss */
+/* line 482, _modules/_repositories.scss */
 .cloud-guide-content h3 {
   font-size: 18px;
 }
-/* line 476, _modules/_repositories.scss */
+/* line 486, _modules/_repositories.scss */
 .cloud-guide-content h4 {
   font-size: 16px;
 }
-/* line 480, _modules/_repositories.scss */
+/* line 490, _modules/_repositories.scss */
 .cloud-guide-content h5 {
   font-size: 14px;
 }
-/* line 484, _modules/_repositories.scss */
+/* line 494, _modules/_repositories.scss */
 .cloud-guide-content h6 {
   color: #777777;
   font-size: 14px;
 }
-/* line 489, _modules/_repositories.scss */
+/* line 499, _modules/_repositories.scss */
 .cloud-guide-content p, .cloud-guide-content blockquote, .cloud-guide-content ul, .cloud-guide-content ol, .cloud-guide-content dl, .cloud-guide-content li, .cloud-guide-content table, .cloud-guide-content pre {
   margin: 15px 0;
 }
-/* line 495, _modules/_repositories.scss */
+/* line 505, _modules/_repositories.scss */
 .cloud-guide-content body > h2:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 500, _modules/_repositories.scss */
+/* line 510, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 505, _modules/_repositories.scss */
+/* line 515, _modules/_repositories.scss */
 .cloud-guide-content body > h1:first-child + h2 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 509, _modules/_repositories.scss */
+/* line 519, _modules/_repositories.scss */
 .cloud-guide-content body > h3:first-child, .cloud-guide-content body > h4:first-child, .cloud-guide-content body > h5:first-child, .cloud-guide-content body > h6:first-child {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 514, _modules/_repositories.scss */
+/* line 524, _modules/_repositories.scss */
 .cloud-guide-content a:first-child h1, .cloud-guide-content a:first-child h2, .cloud-guide-content a:first-child h3, .cloud-guide-content a:first-child h4, .cloud-guide-content a:first-child h5, .cloud-guide-content a:first-child h6 {
   margin-top: 0;
   padding-top: 0;
 }
-/* line 518, _modules/_repositories.scss */
+/* line 528, _modules/_repositories.scss */
 .cloud-guide-content h1 p, .cloud-guide-content h2 p, .cloud-guide-content h3 p, .cloud-guide-content h4 p, .cloud-guide-content h5 p, .cloud-guide-content h6 p {
   margin-top: 0;
 }
-/* line 522, _modules/_repositories.scss */
+/* line 532, _modules/_repositories.scss */
 .cloud-guide-content li p.first {
   display: inline-block;
 }
-/* line 528, _modules/_repositories.scss */
+/* line 538, _modules/_repositories.scss */
 .cloud-guide-content ul, .cloud-guide-content ol {
   padding-left: 30px;
 }
-/* line 534, _modules/_repositories.scss */
+/* line 544, _modules/_repositories.scss */
 .cloud-guide-content ul :first-child, .cloud-guide-content ol :first-child {
   margin-top: 0;
 }
-/* line 539, _modules/_repositories.scss */
+/* line 549, _modules/_repositories.scss */
 .cloud-guide-content img {
   max-width: 100%;
 }
-/* line 543, _modules/_repositories.scss */
+/* line 553, _modules/_repositories.scss */
 .cloud-guide-content code {
   margin: 0 2px;
   padding: 0 5px;
@@ -5012,7 +5022,7 @@ td {
   background-color: #f8f8f8;
   border-radius: 3px;
 }
-/* line 552, _modules/_repositories.scss */
+/* line 562, _modules/_repositories.scss */
 .cloud-guide-content pre code {
   margin: 0;
   padding: 0;
@@ -5020,7 +5030,7 @@ td {
   border: none;
   background: transparent;
 }
-/* line 561, _modules/_repositories.scss */
+/* line 571, _modules/_repositories.scss */
 .cloud-guide-content pre {
   background-color: #f8f8f8;
   border: 1px solid #cccccc;
@@ -5030,37 +5040,37 @@ td {
   padding: 6px 10px;
   border-radius: 3px;
 }
-/* line 571, _modules/_repositories.scss */
+/* line 581, _modules/_repositories.scss */
 .cloud-guide-content pre code, .cloud-guide-content pre tt {
   background-color: transparent;
   border: none;
 }
-/* line 577, _modules/_repositories.scss */
+/* line 587, _modules/_repositories.scss */
 .cloud-guide-content * {
   -webkit-print-color-adjust: exact;
 }
 @media screen and (min-width: 914px) {
-  /* line 582, _modules/_repositories.scss */
+  /* line 592, _modules/_repositories.scss */
   .cloud-guide-content body {
     width: 854px;
     margin: 0 auto;
   }
 }
 @media print {
-  /* line 589, _modules/_repositories.scss */
+  /* line 599, _modules/_repositories.scss */
   .cloud-guide-content table, .cloud-guide-content pre {
     page-break-inside: avoid;
   }
-  /* line 592, _modules/_repositories.scss */
+  /* line 602, _modules/_repositories.scss */
   .cloud-guide-content pre {
     word-wrap: break-word;
   }
 }
-/* line 597, _modules/_repositories.scss */
+/* line 607, _modules/_repositories.scss */
 .cloud-guide-content table th {
   font-weight: bold;
 }
-/* line 608, _modules/_repositories.scss */
+/* line 618, _modules/_repositories.scss */
 .cloud-guide-content code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   color: black;
@@ -5081,57 +5091,57 @@ td {
   -ms-hyphens: none;
   hyphens: none;
 }
-/* line 631, _modules/_repositories.scss */
+/* line 641, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::-moz-selection, .cloud-guide-content pre[class*="language-"] ::-moz-selection,
 .cloud-guide-content code[class*="language-"]::-moz-selection, .cloud-guide-content code[class*="language-"] ::-moz-selection {
   text-shadow: none;
   background: #b3d4fc;
 }
-/* line 637, _modules/_repositories.scss */
+/* line 647, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"]::selection, .cloud-guide-content pre[class*="language-"] ::selection,
 .cloud-guide-content code[class*="language-"]::selection, .cloud-guide-content code[class*="language-"] ::selection {
   text-shadow: none;
   background: #b3d4fc;
 }
 @media print {
-  /* line 644, _modules/_repositories.scss */
+  /* line 654, _modules/_repositories.scss */
   .cloud-guide-content code[class*="language-"],
   .cloud-guide-content pre[class*="language-"] {
     text-shadow: none;
   }
 }
-/* line 650, _modules/_repositories.scss */
+/* line 660, _modules/_repositories.scss */
 .cloud-guide-content pre[class*="language-"] {
   padding: 1em;
   margin: .5em 0;
   overflow: auto;
 }
-/* line 657, _modules/_repositories.scss */
+/* line 667, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"],
 .cloud-guide-content pre[class*="language-"] {
   background: #f5f2f0;
 }
-/* line 662, _modules/_repositories.scss */
+/* line 672, _modules/_repositories.scss */
 .cloud-guide-content :not(pre) > code[class*="language-"] {
   padding: .1em;
   border-radius: .3em;
 }
-/* line 671, _modules/_repositories.scss */
+/* line 681, _modules/_repositories.scss */
 .cloud-guide-content .token.comment,
 .cloud-guide-content .token.prolog,
 .cloud-guide-content .token.doctype,
 .cloud-guide-content .token.cdata {
   color: slategray;
 }
-/* line 675, _modules/_repositories.scss */
+/* line 685, _modules/_repositories.scss */
 .cloud-guide-content .token.punctuation {
   color: #999;
 }
-/* line 679, _modules/_repositories.scss */
+/* line 689, _modules/_repositories.scss */
 .cloud-guide-content .namespace {
   opacity: .7;
 }
-/* line 689, _modules/_repositories.scss */
+/* line 699, _modules/_repositories.scss */
 .cloud-guide-content .token.property,
 .cloud-guide-content .token.tag,
 .cloud-guide-content .token.boolean,
@@ -5141,7 +5151,7 @@ td {
 .cloud-guide-content .token.deleted {
   color: #905;
 }
-/* line 698, _modules/_repositories.scss */
+/* line 708, _modules/_repositories.scss */
 .cloud-guide-content .token.selector,
 .cloud-guide-content .token.attr-name,
 .cloud-guide-content .token.string,
@@ -5150,7 +5160,7 @@ td {
 .cloud-guide-content .token.inserted {
   color: #690;
 }
-/* line 706, _modules/_repositories.scss */
+/* line 716, _modules/_repositories.scss */
 .cloud-guide-content .token.operator,
 .cloud-guide-content .token.entity,
 .cloud-guide-content .token.url,
@@ -5159,32 +5169,32 @@ td {
   color: #a67f59;
   background: rgba(255, 255, 255, 0.5);
 }
-/* line 713, _modules/_repositories.scss */
+/* line 723, _modules/_repositories.scss */
 .cloud-guide-content .token.atrule,
 .cloud-guide-content .token.attr-value,
 .cloud-guide-content .token.keyword {
   color: #07a;
 }
-/* line 717, _modules/_repositories.scss */
+/* line 727, _modules/_repositories.scss */
 .cloud-guide-content .token.function {
   color: #DD4A68;
 }
-/* line 723, _modules/_repositories.scss */
+/* line 733, _modules/_repositories.scss */
 .cloud-guide-content .token.regex,
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.variable {
   color: #e90;
 }
-/* line 728, _modules/_repositories.scss */
+/* line 738, _modules/_repositories.scss */
 .cloud-guide-content .token.important,
 .cloud-guide-content .token.bold {
   font-weight: bold;
 }
-/* line 731, _modules/_repositories.scss */
+/* line 741, _modules/_repositories.scss */
 .cloud-guide-content .token.italic {
   font-style: italic;
 }
-/* line 735, _modules/_repositories.scss */
+/* line 745, _modules/_repositories.scss */
 .cloud-guide-content .token.entity {
   cursor: help;
 }

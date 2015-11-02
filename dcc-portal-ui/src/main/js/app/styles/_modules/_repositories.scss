@@ -48,13 +48,17 @@ $aws-colour:  rgb(228, 121, 17);
         margin: 1rem auto;
     }
     
-
+    
     section {
       padding: 0rem 2rem 2rem 2rem;
       border-bottom: none;
       
       h2 {
         margin-top: 0;
+      }
+      
+      p:last-child {
+        margin-bottom: 0rem;
       }
     }
     
@@ -325,6 +329,12 @@ $aws-colour:  rgb(228, 121, 17);
         .bar-chart-container {
             margin: 1rem 2rem 1.5rem 2rem;
         }
+    }
+    
+    .confine-column {
+      text-align: justify; 
+      text-indent: 1rem; 
+      max-width:46rem; 
     }
     
     .repo-controls-container {
