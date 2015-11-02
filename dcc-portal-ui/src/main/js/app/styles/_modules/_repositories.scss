@@ -5,12 +5,16 @@ $aws-colour:  rgb(228, 121, 17);
 
 /** ICGC Cloud Home Page **/
 .cloud-banner {
-  padding: 0rem 2rem;
+  //padding: 0rem 2rem;
   position: relative;
+  margin: 0 0;
   
   img {
     vertical-align: middle;
-      margin-top: 0.5rem
+    //margin-top: 0.5rem
+    width: 60%;
+    max-width: 480px;
+    min-width: 320px;
   }
   
   .icgc {
