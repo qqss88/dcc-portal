@@ -16,112 +16,123 @@
  */
 
 
- /**
-  * This module handles CRUD operations of accessibility tokens. These tokens are used in other projects
-  * such as Collaboratory, and is thus technically speaking, has no influence on the ICGC Data Portal.
-  *
-  * Note: These token functions are only visible to users whom have logged in through the Data Portal.
-  */
+/**
+ * This module handles CRUD operations of accessibility tokens. These tokens are used in other projects
+ * such as Collaboratory, and is thus technically speaking, has no influence on the ICGC Data Portal.
+ *
+ * Note: These token functions are only visible to users whom have logged in through the Data Portal.
+ */
 
-(function() {
-  'use strict';
+(function () {
+   'use strict';
 
-  angular.module('icgc.tokens', ['icgc.tokens.controllers', 'icgc.tokens.services']);
+   angular.module('icgc.tokens', ['icgc.tokens.controllers', 'icgc.tokens.services']);
 
 })();
 
-(function() {
-  'use strict';
+(function () {
+   'use strict';
 
-  var module = angular.module('icgc.tokens.controllers', []);
+   var module = angular.module('icgc.tokens.controllers', []);
 
-  module.controller('TokenController', function($scope, $timeout, $modalInstance, TokenService) {
+   module.controller('TokenController', function ($scope, $timeout, $modalInstance, TokenService) {
 
-    // Transient
-    $scope.selected = [];
-    $scope.newToken = '';
-    $scope.processing = false;
-    $scope.tokenDescription = '';
-
-
-    // From server
-    $scope.activeTokens = [];
-    $scope.availableScopes = [];
-
-    function refresh() {
+      // Transient
       $scope.selected = [];
+      $scope.newToken = '';
+      $scope.processing = false;
+      $scope.tokenDescription = '';
 
-      TokenService.getTokens().then(function(data) {
-        $scope.activeTokens = data.tokens;
+      // From server
+      $scope.cloudAccess = true;
+      $scope.activeTokens = null;
+      $scope.availableScopes = null;
 
-        // Give this a slight delay to make viewers aware that UI is updating
-        $timeout(function() { $scope.processing = false; }, 250);
-      });
+      function refresh() {
+         $scope.selected = [];
 
-      TokenService.getScopes().then(function(data) {
-        $scope.availableScopes = data.scopes;
-      });
-    }
+         TokenService.getTokens().then(function(data) {
+            $scope.activeTokens = data.tokens;
 
-    $scope.isActive = function(s) {
-      return _.contains($scope.selected, s);
-    };
+            // Give this a slight delay to make viewers aware that UI is updating
+            $timeout(function() { $scope.processing = false; }, 250);
+         });
 
-    $scope.toggleScope = function(s) {
-      if (_.contains($scope.selected, s)) {
-        _.remove($scope.selected, s);
-      } else {
-        $scope.selected.push(s);
+         TokenService.getScopes().then(function(data) {
+            $scope.availableScopes = data.scopes;
+
+            $scope.cloudAccess = false;
+            for (var i = 0; i < $scope.availableScopes.length; i++) {
+               var scope = $scope.availableScopes[i];
+               if (scope.name.indexOf('aws.') === 0 || scope.name.indexOf('collab.') === 0) {
+                  $scope.cloudAccess = true;
+               }
+            }
+         });
       }
-    };
 
-    $scope.deleteToken = function(token) {
-      $scope.processing = true;
-      TokenService.deleteToken(token).then(function() {
-        refresh();
-      });
-    };
+      $scope.isActive = function (s) {
+         return _.contains($scope.selected, s);
+      };
 
-    $scope.createToken = function() {
-      $scope.processing = true;
-      TokenService.createToken($scope.selected, $scope.tokenDescription).then(function() {
-        refresh();
-      });
-    };
+      $scope.toggleScope = function (s) {
+         if (_.contains($scope.selected, s)) {
+            _.remove($scope.selected, s);
+         } else {
+            $scope.selected.push(s);
+         }
+      };
 
-    $scope.cancel = function() {
-      $modalInstance.dismiss('cancel');
-    };
+      $scope.deleteToken = function (token) {
+         $scope.processing = true;
+         TokenService.deleteToken(token).then(function () {
+            refresh();
+         });
+      };
 
-    refresh();
-  });
+      $scope.createToken = function () {
+         $scope.processing = true;
+         TokenService.createToken($scope.selected, $scope.tokenDescription).then(function () {
+            refresh();
+         });
+      };
+
+      $scope.cancel = function () {
+         $modalInstance.dismiss('cancel');
+      };
+
+      refresh();
+   });
 
 })();
 
-(function() {
-  'use strict';
+(function () {
+   'use strict';
 
-  var module = angular.module('icgc.tokens.services', []);
+   var module = angular.module('icgc.tokens.services', []);
 
-  module.service('TokenService', function(RestangularNoCache) {
-    this.getTokens = function() {
-      return RestangularNoCache.one('settings/tokens').get({});
-    };
+   module.service('TokenService', function (RestangularNoCache) {
 
-    this.createToken = function(scopes, desc) {
-      var scopeStr = _.pluck(scopes, 'name').join(' ');
-      return RestangularNoCache.one('settings')
-        .post('tokens', 'scope='+scopeStr+'&desc='+desc, {}, {'Accept': 'text/plain'});
-    };
+      this.getScopes = function () {
+          return RestangularNoCache.one('settings/tokens/scopes').get({});
+      };
 
-    this.deleteToken = function(token) {
-      return RestangularNoCache.one('settings').one('tokens', token).remove();
-    };
+      this.getTokens = function () {
+         return RestangularNoCache.one('settings/tokens').get({});
+      };
 
-    this.getScopes = function() {
-      return RestangularNoCache.one('settings/tokens/scopes').get({});
-    };
+      this.createToken = function (scopes, desc) {
+         var scopeStr = _.pluck(scopes, 'name').join(' ');
+         return RestangularNoCache.one('settings')
+            .post('tokens', 'scope=' + scopeStr + '&desc=' + desc, {}, {
+            'Accept': 'text/plain'
+         });
+      };
 
-  });
+      this.deleteToken = function (token) {
+         return RestangularNoCache.one('settings').one('tokens', token).remove();
+      };
+
+   });
 
 })();

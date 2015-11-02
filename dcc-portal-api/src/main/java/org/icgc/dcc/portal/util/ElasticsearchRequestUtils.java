@@ -24,15 +24,9 @@ import static org.elasticsearch.action.search.SearchType.COUNT;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
 import java.util.List;
-
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.meta.IndexModel;
 import org.dcc.portal.pql.meta.RepositoryFileTypeModel.Fields;
@@ -44,6 +38,11 @@ import org.icgc.dcc.portal.model.IndexModel.Kind;
 import org.icgc.dcc.portal.model.Query;
 
 import com.google.common.collect.Lists;
+
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
@@ -75,7 +74,8 @@ public class ElasticsearchRequestUtils {
   }
 
   @NonNull
-  public static SearchRequestBuilder setFetchSourceOfSearchRequest(SearchRequestBuilder builder, Query query, Kind kind) {
+  public static SearchRequestBuilder setFetchSourceOfSearchRequest(SearchRequestBuilder builder, Query query,
+      Kind kind) {
     String[] sourceFields = resolveSourceFields(query, kind);
 
     if (sourceFields != EMPTY_SOURCE_FIELDS) {
@@ -86,19 +86,20 @@ public class ElasticsearchRequestUtils {
   }
 
   @NonNull
-  public static boolean isRepositoryDonor(Client client, String donorId) {
-    return isRepositoryDonor(client, Fields.DONOR_ID, donorId);
+  public static boolean isRepositoryDonor(Client client, String donorId, String repoIndexName) {
+    return isRepositoryDonorExecute(client, Fields.DONOR_ID, donorId, repoIndexName);
   }
 
   @NonNull
-  public static boolean isRepositoryDonorInProject(Client client, String projectId) {
-    return isRepositoryDonor(client, Fields.PROJECT_CODE, projectId);
+  public static boolean isRepositoryDonorInProject(Client client, String projectId, String repoIndexName) {
+    return isRepositoryDonorExecute(client, Fields.PROJECT_CODE, projectId, repoIndexName);
   }
 
-  private static boolean isRepositoryDonor(Client client, String fieldAlias, String value) {
+  private static boolean isRepositoryDonorExecute(Client client, String fieldAlias, String value,
+      String repoIndexName) {
     val query = nestedQuery(TYPE_MODEL.getNestedPath(fieldAlias),
         termQuery(TYPE_MODEL.getField(fieldAlias), value));
-    val search = client.prepareSearch(REPOSITORY_INDEX_NAME)
+    val search = client.prepareSearch(repoIndexName)
         .setTypes(FILE_INDEX_TYPE)
         .setSearchType(COUNT)
         .setQuery(query);

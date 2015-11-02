@@ -185,6 +185,8 @@
           // Get pathway XML
           GeneSetService.getPathwayXML(pathwayId).then(function(xml) {
             _ctrl.pathway.xml = xml;
+          }).catch(function() {
+            _ctrl.pathway.xml = '';
           });
 
 
@@ -243,6 +245,8 @@
             });
 
             _ctrl.pathway.highlights = pathwayHighlights;
+          }).catch(function () {
+            _ctrl.pathway.highlights = [];
           });
 
 

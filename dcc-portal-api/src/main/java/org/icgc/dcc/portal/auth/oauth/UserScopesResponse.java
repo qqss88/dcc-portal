@@ -17,32 +17,21 @@
  */
 package org.icgc.dcc.portal.auth.oauth;
 
-import lombok.Value;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Value
-public class AccessTokenInternal {
+import lombok.Value;
 
-  String id;
-  String type;
-  String description;
-  int expiresIn;
-  String scope;
+@Value
+public class UserScopesResponse {
+
+  Set<String> scopes;
 
   @JsonCreator
-  public AccessTokenInternal(
-      @JsonProperty("access_token") String id,
-      @JsonProperty("token_type") String type,
-      @JsonProperty("desc") String description,
-      @JsonProperty("expires_in") int expires,
-      @JsonProperty("scope") String scope) {
-    this.id = id;
-    this.type = type;
-    this.description = description;
-    this.expiresIn = expires;
-    this.scope = scope;
+  public UserScopesResponse(@JsonProperty("scopes") Set<String> scopes) {
+    this.scopes = scopes;
   }
 
 }

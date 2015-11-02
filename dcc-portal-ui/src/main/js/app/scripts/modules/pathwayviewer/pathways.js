@@ -49,7 +49,8 @@
 	
 
 	module.controller('PathwaysController', function($scope, $q, Page, EnrichmentData, Restangular,
-		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService) {
+		GeneSetService, GeneSetHierarchy, GeneSets, GeneSetVerificationService, TooltipText, LocationService,
+    EnrichmentService) {
 				
 		
 		var _ctrl = this,
@@ -86,14 +87,26 @@
 			}
 			
 		}
-    	
+    
+    function _addFilters(pathway) {
+      
+      if (_.get(pathway, 'geneSetFilters', false)) {
+        return;
+      }
+      
+      pathway.geneSetFilters = EnrichmentService.geneSetFilters(EnrichmentData, pathway);
+      pathway.geneSetOverlapFilters = EnrichmentService.geneSetOverlapFilters(EnrichmentData, pathway);
+     
+    }
 		
 		$scope.getSelectedPathway = function() {
       return _selectedPathway;
-    }
+    };
 
 		$scope.setSelectedPathway = function(pathway) {			
 			$scope.pathway = {};
+      
+      _addFilters(pathway);
       
 			_selectedPathway = pathway; 
      
@@ -101,14 +114,12 @@
       
       
       var _geneSet = null,
-        _pathway = null,
         _pathwayId = null,
         _parentPathwayId = null,
         _uiParentPathways = null,
         _uniprotIds = null,
         _xml = null,
         _zooms = [''],
-        _highlights = [''],
         _pathwayHighlights = [];
         
         
@@ -129,6 +140,8 @@
           .then(function(xml) {
               _xml = xml;
               deferred.resolve();
+          }).catch(function() {
+            $scope.pathway = {xml: '', zooms: [''], highlights: [] };
           });
           
          return deferred.promise;
@@ -174,7 +187,7 @@
            return deferred.promise;
        })
        .then(function() {
-          var deferred = $q.defer()
+          var deferred = $q.defer();
           
           GeneSetVerificationService.verify(_uniprotIds.join(',') )
           .then(function(data) {

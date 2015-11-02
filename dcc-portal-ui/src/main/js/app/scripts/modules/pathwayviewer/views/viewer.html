@@ -1,6 +1,9 @@
 <div id="pathway-viewer-mini" class="pathwayviewercontainer text-center">
+  <div data-ng-if="items===''" class="empty loading-text">
+    <h3>No Diagram Available</h3>
+  </div>
 	<i class="fa fa-expand pathway-fullscreen-controller"></i>
-		<div class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>
+		<div data-ng-if="!items===''" class="pathway-legend"><i class="fa fa-question-circle pathway-legend-controller"></i>
     	<h4>LEGEND</h4></div>
       <div class="pathway-info">
       <i style="visibility:hidden" class="fa fa-chevron-circle-right pathway-info-controller"></i>

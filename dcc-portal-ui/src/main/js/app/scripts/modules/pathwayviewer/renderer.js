@@ -452,34 +452,41 @@
   Renderer.prototype.highlightEntity = function (highlights, model) {
     var svg = this.svg, config = this.config;
     var highlighted = [];
+    var nodeValues = {};
     
     // Remove old highlights if there are any
     svg.selectAll('.banner-text').remove();
     svg.selectAll('.value-banner').remove();
     svg.selectAll('.pathway-node').style('stroke','').style('stroke-width','');
     
+    // Compute final mutation highlight text value first
     highlights.forEach(function (highlight) {
       var nodes = model.getNodesByReactomeId(highlight.id);
       nodes.forEach(function (node) {
-        var svgNode = svg.selectAll('.entity'+node.id);
         var renderedValue = highlight.value;
-
-        if(highlighted.indexOf(node.id) >= 0){
-          svg.select('.banner-text'+highlight.id).text('*');
-          svg.select('.value-banner'+highlight.id).attr('width',15);
-          return;
+        
+        if (highlighted.indexOf(node.id) >= 0){
+          nodeValues[node.id] =  '*';  
+        } else {
+          nodeValues[node.id] =  renderedValue; 
+          highlighted.push(node.id);
         }
-        highlighted.push(node.id);
-      
-        if(svgNode[0].length <= 0){
-          return;
-        }
+      });
+    });
+    
+    // Add SVG elements to nodes with highlight values
+    for (var nodeId in nodeValues) {
+      if (nodeValues.hasOwnProperty(nodeId)) {
+       
+        var node = model.getNodeById(nodeId);
+        var renderedValue = nodeValues[nodeId];
+        var svgNode = svg.selectAll('.entity'+node.id);
         svgNode.style('stroke',config.highlightColor);
         svgNode.style('stroke-width','3px');
         
         svg.append('rect')
           .attr({
-            class:'value-banner value-banner'+highlight.id,
+            class:'value-banner value-banner'+nodeId,
             x: (+node.position.x)+(+node.size.width) - 10,
             y: (+node.position.y)- 7,
             width:(renderedValue.toString().length*5)+10,
@@ -491,7 +498,7 @@
           });
 
         svg.append('text').attr({
-          'class':'banner-text banner-text'+highlight.id,
+          'class':'banner-text banner-text'+nodeId,
           'x':(+node.position.x)+(+node.size.width) - 5,
           'y':(+node.position.y)+4,
           'pointer-events':'none',
@@ -499,8 +506,8 @@
           'font-weight':'bold',
           'fill':'white'
         }).text(renderedValue);
-      });
-    });
+      }
+    }
   };
   
   Renderer.prototype.outlineSubPathway = function (svg, reactomeId) {

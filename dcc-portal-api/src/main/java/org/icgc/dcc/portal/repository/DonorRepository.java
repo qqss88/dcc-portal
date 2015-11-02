@@ -43,7 +43,6 @@ import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.portal.model.IndexModel.FIELDS_MAPPING;
 import static org.icgc.dcc.portal.model.IndexModel.MAX_FACET_TERM_COUNT;
-import static org.icgc.dcc.portal.model.IndexModel.REPOSITORY_INDEX_NAME;
 import static org.icgc.dcc.portal.model.SearchFieldMapper.searchFieldMapper;
 import static org.icgc.dcc.portal.service.QueryService.getFields;
 import static org.icgc.dcc.portal.service.TermsLookupService.createTermsLookupFilter;
@@ -62,11 +61,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.val;
-import lombok.extern.slf4j.Slf4j;
 
 import org.dcc.portal.pql.query.QueryEngine;
 import org.elasticsearch.action.search.MultiSearchRequestBuilder;
@@ -102,6 +96,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -166,6 +165,7 @@ public class DonorRepository implements Repository {
 
   private final Client client;
   private final String index;
+  private final String repoIndexName;
   private final QueryEngine queryEngine;
   private final Jql2PqlConverter converter = Jql2PqlConverter.getInstance();
 
@@ -173,6 +173,7 @@ public class DonorRepository implements Repository {
   DonorRepository(Client client, IndexModel indexModel, QueryEngine queryEngine,
       EntityListRepository entityListRepository) {
     this.index = indexModel.getIndex();
+    this.repoIndexName = indexModel.getRepoIndex();
     this.client = client;
     this.queryEngine = queryEngine;
     this.entityListRepository = entityListRepository;
@@ -481,7 +482,7 @@ public class DonorRepository implements Repository {
       return createResponseMap(response, query, KIND);
     }
 
-    if (!isRepositoryDonor(client, id)) {
+    if (!isRepositoryDonor(client, id, repoIndexName)) {
       // We know this is guaranteed to throw a 404, since the 'id' was not found in the first query.
       checkResponseState(id, response, KIND);
     }
@@ -552,7 +553,7 @@ public class DonorRepository implements Repository {
   public SearchResponse validateIdentifiers(@NonNull List<String> ids, boolean isForExternalFile) {
     val maxSize = 5000;
     val fields = isForExternalFile ? FILE_DONOR_ID_SEARCH_FIELDS : DONOR_ID_SEARCH_FIELDS;
-    val indexName = isForExternalFile ? REPOSITORY_INDEX_NAME : index;
+    val indexName = isForExternalFile ? repoIndexName : index;
     val indexType = isForExternalFile ? Type.REPOSITORY_FILE_DONOR_TEXT : Type.DONOR_TEXT;
 
     val search = client.prepareSearch(indexName)

@@ -11,7 +11,7 @@ angular.module('icgc.ui.events', [])
     restrict: 'A',
     link: function(scope, element) {
       element.on('click', function() {
-        this.select();
+        element.select();
       });
     }
   };
