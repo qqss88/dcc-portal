@@ -1,5 +1,5 @@
-$guide-aws-color: #E9931C;
-$guide-collab-color: #1693C0;
+$guide-aws-color: #FDB013;
+$guide-collab-color: #59A5D8;
 
 .guide-callout {
    padding: 15px;
@@ -16,6 +16,10 @@ $guide-collab-color: #1693C0;
 .guide-callout-aws {
    h4 {
       color: $guide-aws-color;
+      padding-left: 30px;
+      background-image: url(/styles/images/repositories/guides/aws/aws-cube.png);
+      background-repeat: no-repeat;
+      background-size: 25px;
    }
    border-left-color: $guide-aws-color;
 }
@@ -23,6 +27,12 @@ $guide-collab-color: #1693C0;
 .guide-callout-collab {
    h4 {
       color: $guide-collab-color;
+      border-left-color: $guide-collab-color;
+      padding-left: 27px;
+      background-image: url(/styles/images/repositories/guides/collab/collab-logo-small.png);
+      background-size: 16px;
+      background-repeat: no-repeat;
+      background-position: 3px 0;
    }
    border-left-color: $guide-collab-color;
 }

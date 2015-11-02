@@ -26,7 +26,7 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>.</p>
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a> clouds.</p>
 
          <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
 
@@ -34,8 +34,8 @@
 
          <p>The figure below illustrates the overall process and software components involved:</p>
          <div class="screen-shot">
-            <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
-               <img src="styles/images/repositories/guides/aws/cloud_process_diagram.png" alt="AWS Process Diagram">
+            <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/cloud_process_diagram.png" target="_blank">
+               <img src="styles/images/repositories/guides/cloud_process_diagram.png" alt="Cloud Process Diagram">
             </a>
          </div>
          <ol>
@@ -64,7 +64,9 @@
          </div>
          <div class="guide-callout guide-callout-collab">
             <h4>Collaboratory</h4>
+            <p>
             Downloads will only function inside Collaboratory's OpenStack environment.
+            </p>
          </div>
          <p>
             Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any cloud and downstream resources.
@@ -96,14 +98,14 @@
 
 
          <div class="screen-shot">
-          <img  style="width: 30%;" src="styles/images/repositories/guides/aws/token_manager_link.png" alt="Token Manager Link" />
+          <img  style="width: 30%;" src="styles/images/repositories/guides/token_manager_link.png" alt="Token Manager Link" />
          </div>
 
          <p>You will then need to edit the client configuration file in the storage client to include this token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
          <p>You can delete and regenerate an access token if you believe that it has been compromised.</p>
          <div class="screen-shot">
-            <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/aws/token_manager_screenshot.png" target="_blank">
-               <img src="styles/images/repositories/guides/aws/token_manager_screenshot.png" alt="Token Manager Screenshot" />
+            <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/token_manager_screenshot.png" target="_blank">
+               <img src="styles/images/repositories/guides/token_manager_screenshot.png" alt="Token Manager Screenshot" />
             </a>
          </div>
       </section>
