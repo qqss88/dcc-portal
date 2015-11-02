@@ -75,8 +75,7 @@ public class SearchConfig {
 
   @Bean
   public String repoIndexName() {
-    String repoIndexName = properties.getElastic().getRepoIndexName();
-    return repoIndexName;
+    return properties.getElastic().getRepoIndexName();
   }
 
   private String resolveIndexName(String indexName) {
