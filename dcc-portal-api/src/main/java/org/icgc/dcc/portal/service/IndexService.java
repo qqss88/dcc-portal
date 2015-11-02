@@ -39,7 +39,7 @@ public class IndexService {
   /**
    * Dependencies.
    */
-  private ConcurrentMap<Object, Object> cache;
+  private final ConcurrentMap<Object, Object> cache;
 
   /**
    * Constants.
@@ -65,11 +65,17 @@ public class IndexService {
 
     String realIndex;
     if (cache.containsKey(indexName)) {
-      log.debug("Cache hit for index name: " + indexName);
       realIndex = (String) cache.get(indexName);
+      log.info(String.format("Cache hit for index name: '%s' with value: '%s'", indexName, realIndex));
     } else {
-      log.debug("Cache miss for index name: " + indexName);
-      realIndex = (state.getMetaData().getAliases().get(indexName)).iterator().next().key;
+      log.info("Cache miss for index name: " + indexName);
+      val aliases = state.getMetaData().getAliases().get(indexName);
+
+      if (aliases != null) {
+        realIndex = aliases.iterator().next().key;
+      } else {
+        realIndex = indexName;
+      }
       cache.put(indexName, realIndex);
     }
 
