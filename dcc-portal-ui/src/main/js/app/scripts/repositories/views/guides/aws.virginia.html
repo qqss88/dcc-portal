@@ -171,7 +171,7 @@
          <p>Finding files of interest can be done via the Data Portal. Objects are identified by their object id.</p>
 
          <ul>
-            <li>Navigate to <a href="https://dcc.icgc.org/repository/external">repository file search</a></li>
+            <li>Navigate to <a href="https://dcc.icgc.org/repositories">repository file search</a></li>
             <li>Click on the <code>AWS</code> filter in the left hand pane</li>
             <li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
             <li>Export manifest for future use with the storage client</li>
@@ -248,7 +248,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 
          <h4>Manifest</h4>
 
-         <p>Using a manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repository/external" target="_blank">repository file search</a> allows one to generate a manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
+         <p>Using a manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repositories" target="_blank">repository file search</a> allows one to generate a manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
 
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
 

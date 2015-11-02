@@ -50,7 +50,7 @@
                             <td data-ng-bind="type.uiName"></td>
                             <td class="text-right" data-ng-bind="type.donorCount | number"></td>
                             <td class="text-right">
-                                <a href="/repository/external?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
+                                <a href="/repositories?filters={{type.filters}}" data-ng-bind="type.fileCount | number"></a>
                             </td>
                             <td data-ng-bind="type.fileFormat.join(', ')"></td>
                             <td class="text-right" data-ng-bind="type.fileSize | bytes"></td>
@@ -59,7 +59,7 @@
                 </table>
             
                 <span>
-                    Available data as of <a href="/repository/external?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
+                    Available data as of <a href="/repositories?filters={{repositoryCtrl.getFilterQueryStr()}}" data-ng-bind="repositoryCtrl.getRepoCreationDate() | date"></a>
                 </span>
             </div>
             <!-- -->     

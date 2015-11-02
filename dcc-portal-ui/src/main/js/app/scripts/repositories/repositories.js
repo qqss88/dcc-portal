@@ -55,7 +55,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 					}
 			})
 			.state('ICGCcloud.repositories', {
-				url: '/repository/{repoCode}/',
+				url: '/repositories/{repoCode}/',
 				// UI-Router only instantiates RepositoriesController once
 				// which is good for us in this context 
 				views: {
@@ -91,7 +91,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 				}
 			})
 			.state('ICGCcloud.repositoryGuides', {
-				url: '/repository/{repoCode}/guide',
+				url: '/repositories/{repoCode}/guide',
 				views: {
 					'repositoryGuides': {
 						templateUrl: function ($stateParams) {
