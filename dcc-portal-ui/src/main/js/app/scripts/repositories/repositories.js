@@ -90,6 +90,17 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
 					} */
 				}
 			})
+      .state('ICGCcloud.repositoryGuide', {
+				url: '/guide',
+				views: {
+					'repositoryGuides': {
+						templateUrl: function ($stateParams) {
+							return 	'scripts/repositories/views/guides/aws.virginia.html';
+						},
+						controller: 'RepositoriesGuideController as repositoryGuideCtrl'
+					}
+				}
+			})
 			.state('ICGCcloud.repositoryGuides', {
 				url: '/repositories/{repoCode}/guide',
 				views: {

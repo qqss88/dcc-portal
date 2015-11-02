@@ -39,7 +39,8 @@
             {'link': '/icgc-in-the-cloud/', 'title': 'About'},
             {'link': '/icgc-in-the-cloud/repositories/aws-virginia/', 'title': 'Amazon'},
             {'link': '/icgc-in-the-cloud/repositories/collaboratory/', 'title': 'Collaboratory'},
-            {'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'}
+            {'link': '/icgc-in-the-cloud/guide', 'title': 'User Guide'}
+            //{'link': '/icgc-in-the-cloud/repositories/aws-virginia/guide', 'title': 'User Guide'}
           ];
 
     $scope.portalFeature = PortalFeature;

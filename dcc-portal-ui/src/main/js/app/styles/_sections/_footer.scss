@@ -9,6 +9,10 @@ footer {
   padding: 1rem 3rem;
   position: relative;
   z-index: 100;
+  
+  .clear-fix {
+    @include clearfix();
+  }
 
   a {
     text-decoration: none;

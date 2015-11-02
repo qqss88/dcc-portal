@@ -1666,20 +1666,38 @@ footer {
   clear: none;
 }
 /* line 13, _sections/_footer.scss */
+footer .clear-fix {
+  /* for IE 6/7 */
+  *zoom: expression(this.runtimeStyle.zoom="1", this.appendChild(document.createElement("br")).style.cssText="clear:both;font:0/0 serif");
+  /* non-JS fallback */
+  *zoom: 1;
+}
+/* line 48, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+footer .clear-fix:before, footer .clear-fix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+/* line 55, ../../../../../../../../../../Library/Ruby/Gems/2.0.0/gems/singularitygs-1.1.1/stylesheets/singularitygs/helpers/_clearfix.scss */
+footer .clear-fix:after {
+  clear: both;
+}
+/* line 17, _sections/_footer.scss */
 footer a {
   text-decoration: none;
   color: #166aa2;
 }
-/* line 17, _sections/_footer.scss */
+/* line 21, _sections/_footer.scss */
 footer a:hover {
   text-decoration: underline;
 }
-/* line 21, _sections/_footer.scss */
+/* line 25, _sections/_footer.scss */
 footer .footer-grid-adjust {
   width: 14.89%;
   margin-right: 1.5rem;
 }
-/* line 26, _sections/_footer.scss */
+/* line 30, _sections/_footer.scss */
 footer ul, footer .logo {
   width: 48.9361702128%;
   clear: right;
@@ -1688,7 +1706,7 @@ footer ul, footer .logo {
   margin-right: 2.1276595745%;
 }
 @media (min-width: 721px) {
-  /* line 26, _sections/_footer.scss */
+  /* line 30, _sections/_footer.scss */
   footer ul, footer .logo {
     width: 13.1914893617%;
     clear: right;
@@ -1697,20 +1715,20 @@ footer ul, footer .logo {
     margin-right: 2.1276595745%;
   }
 }
-/* line 35, _sections/_footer.scss */
+/* line 39, _sections/_footer.scss */
 footer .logo img {
   margin-top: 2rem;
   width: 116px;
   height: 84px;
 }
 @media (min-width: 721px) {
-  /* line 35, _sections/_footer.scss */
+  /* line 39, _sections/_footer.scss */
   footer .logo img {
     width: 155px;
     height: 112px;
   }
 }
-/* line 47, _sections/_footer.scss */
+/* line 51, _sections/_footer.scss */
 footer ul {
   font-size: .8rem;
   line-height: 1.7;
@@ -1719,19 +1737,19 @@ footer ul {
   margin-right: 0.4rem;
   padding-left: 0;
 }
-/* line 55, _sections/_footer.scss */
+/* line 59, _sections/_footer.scss */
 footer ul .heading {
   color: #333333;
   text-transform: uppercase;
   font-size: 1rem;
   line-height: 3;
 }
-/* line 65, _sections/_footer.scss */
+/* line 69, _sections/_footer.scss */
 footer .dcc-col {
   margin-right: 0;
 }
 @media (min-width: 721px) {
-  /* line 65, _sections/_footer.scss */
+  /* line 69, _sections/_footer.scss */
   footer .dcc-col {
     margin-right: 2.1276595745%;
   }
