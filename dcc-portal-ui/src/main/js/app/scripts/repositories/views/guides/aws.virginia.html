@@ -3,7 +3,7 @@
       <span class="t_badge t_badge_icon">
          <span class="icon-book-open"></span>
       </span>
-      User Guide: ICGC Data Analysis on Amazon
+      User Guide: ICGC Data Analysis in the Cloud
    </h1>
 </div>
 <div data-scroll-spy class="cloud-guide-content icgc-cloud">
@@ -26,7 +26,7 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a>. </p>
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored within S3 using <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>.</p>
 
          <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
 
@@ -35,14 +35,14 @@
          <p>The figure below illustrates the overall process and software components involved:</p>
          <div class="screen-shot">
             <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/aws/aws_process_diagram.png" target="_blank">
-               <img src="styles/images/repositories/guides/aws/aws_process_diagram.png" alt="AWS Process Diagram">
+               <img src="styles/images/repositories/guides/aws/cloud_process_diagram.png" alt="AWS Process Diagram">
             </a>
          </div>
          <ol>
             <li><a data-scrollto href="#auth">Authorization</a>: Apply for DACO access if not already approved</li>
             <li><a data-scrollto href="#auth">Authorization</a>: Upon approval, login to the <em>Data Portal</em></li>
-            <li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for S3 download</li>
-            <li><a data-scrollto href="#preqs">Prerequistes</a>: Create an EC2 instance in AWS if not aready available</li>
+            <li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for cloud download</li>
+            <li><a data-scrollto href="#preqs">Prerequistes</a>: Create a compute instance in the target clould if not aready available</li>
             <li><a data-scrollto href="#install">Installation</a>: Download and install the ICGC Storage Client</li>
             <li><a data-scrollto href="#config">Configuration</a>: Configure the storage client to use the access token from step 3.</li>
             <li><a data-scrollto href="#fs-search">Search</a>: Identify files of interest using the Data Portal</li>
@@ -53,17 +53,24 @@
 
          <h3>Security</h3>
          <p>The usage of the distributed <a href="/software">Storage Client</a> is required to provide additional security while operating in participating cloud environments and to enhance user download speeds. </p>
+         <div class="guide-callout guide-callout-aws">
+            <h4>AWS</h4>
+            <p>
+               Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.
+            </p>
+            <p>
+               It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
+            </p>
+         </div>
+         <div class="guide-callout guide-callout-collab">
+            <h4>Collaboratory</h4>
+            Downloads will only function inside Collaboratory's OpenStack environment.
+         </div>
          <p>
-            Security is enforced by using a coordinating ICGC EC2 server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.  
-         </p>
-         <p>
-            It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
-         </p>
-         <p>
-            Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any AWS and downstream resources.
+            Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any cloud and downstream resources.
          </p>
       </section>
-      <section id="auth">		
+      <section id="auth">
          <h2>Authorization</h2>
 
          <p>This section describes how to attain the required access to use the software by first ensuring DACO access and subsequently self-provisioning an access token.</p>
@@ -74,9 +81,18 @@
 
          <h3 id="auth-token">Access Token</h3>
 
-         <p>The access token model used for protecting the AWS S3 data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. In the case of the ICGC AWS data set, an access token with the <code>aws.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>. This scope will become available after acquiring DACO access. A instance of this token will grant access to all of the available data.</p>
+         <p>The access token model used for protecting the cloud data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. Scopes will become available after acquiring cloud DACO access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
 
-         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. For AWS, you will need to specify the <code>aws.download</code> scope when you generate your token. </p>
+         <div class="guide-callout guide-callout-aws">
+            <h4>AWS</h4>
+            In the case of the ICGC AWS data set, an access token with the <code>aws.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+         </div>
+         <div class="guide-callout guide-callout-collab">
+            <h4>Collaboratory</h4>
+            In the case of the ICGC Collaboratory data set, an access token with the <code>collab.download</code> scope is required to access the <a href="https://docs.icgc.org/access-controlled-data" target="_blank"><i class="icon-external-link"></i>controlled access data</a>
+         </div>
+
+         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. You will need to specify the scope mentioned above when you generate your token.</p>
 
 
          <div class="screen-shot">
@@ -94,25 +110,32 @@
       <section id="preqs">
          <h2>Prerequisites</h2>
 
-         <h3>EC2 Instance</h3>
-         <p>
+         <h3>Compute Instance</h3>
+         As a first step in analyzing data, you will need to create a compute instance to run the Storage Client and any other supporting software.
+         <div class="guide-callout guide-callout-aws">
+            <h4>AWS</h4>
             In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
-         </p>
+         </div>
+         <div class="guide-callout guide-callout-collab">
+            <h4>Collaboratory</h4>
+            In order to run in within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To start the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
+         </div>
+
          <p>
            The following sections will give guidance on the selecting and configuring the chosen instance type.
          </p>
 
          <h3>Hardware</h3>
          <p>
-            As data files are quite large, users should have enough local disk space to store files downloaded from the S3 repository. 
+            As data files are quite large, users should have enough local disk space to store files downloaded from the remote repository.
          </p>
          <p>
            More cores will give greater parallelism, and therefore, better thoughput of downloads.</p>
          <p>
            By default the storage client is configured to use a maximum of 3G of RAM. Most of time this is more than sufficient.
-         </p>	
+         </p>
 
-         <h3>Operating System</h3>	
+         <h3>Operating System</h3>
          <p>The storage client has been designed to work on modern Mac and Linux distributions. Windows should work as well but remains untested.</p>
 
 
@@ -125,12 +148,12 @@
       </section>
       <section id="install">
          <h2>Installation</h2>
-         <p>This section describes how to install the storage client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>		
+         <p>This section describes how to install the storage client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>
 
          <div class="section_ident">
             <h3>From Tarball</h3>
 
-            <h4>Download</h4>		
+            <h4>Download</h4>
             <p>To begin using the storage client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
 
             <pre class="language-shell"><code class="language-shell">wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>dcc<span class="token punctuation">.</span>icgc<span class="token punctuation">.</span>org<span class="token operator">/</span>software<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client<span class="token operator">/</span>latest</code></pre>
@@ -165,21 +188,21 @@
 
          <pre class=" language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it <span class="token operator">-</span>e ACCESSTOKEN<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span> icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
       </section>
-      <section id="fs-search">			
+      <section id="fs-search">
          <h2>File Search</h2>
 
          <p>Finding files of interest can be done via the Data Portal. Objects are identified by their object id.</p>
 
          <ul>
             <li>Navigate to <a href="https://dcc.icgc.org/repositories">repository file search</a></li>
-            <li>Click on the <code>AWS</code> filter in the left hand pane</li>
+            <li>Click on the <code>AWS</code> or <code>Collaboratory</code> filter in the left hand pane</li>
             <li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
             <li>Export manifest for future use with the storage client</li>
          </ul>
 
          <p>The manifest is the main way to define what files should be downloaded by the storage client. However, knowing the object id is sufficient for a single file download.</p>
       </section>
-      <section id="storage-client">		
+      <section id="storage-client">
          <h2>Storage Client Usage</h2>
 
          <p>This section provides information on how to use the storage client once it has been properly downloaded and configured. It assumes the user possesses and has configured the requisite access token discussed previously. </p>
@@ -233,7 +256,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
          <h4>From URL</h4>
          <p>An example of using a URL hosted manifest:</p>
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client manifest --manifest http://hastebin.com/raw/ujajodilih</code></pre>
-         
+
          <h3>Download Command</h3>
 
          <p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) manifest driven mode</p>
@@ -268,7 +291,7 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
          <p>It is also possible to pipe the output of the above to <code>samtools</code>, etc. for pipelining a workflow: </p>
 
          <pre class="language-shell"><code class=" language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client view <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">|</span> samtools mpileup <span class="token operator">-</span></code></pre>
-      
+
         <h3>Mount Command</h3>
         <p>The <code>mount</code> command can be used to mount the remote S3 bucket as a read-only <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i>FUSE</a> file system. This is very useful to browse and explore the available files, as well as quickly see their size and date of modification using common commands such as <code>ls</code>, <code>find</code>, <code>du</code> and <code>tree</code>. It also works very well with standard analysis tools such as <code>samtools</code>. </p>
         <p>Files are organized into a virtual directory structure:</p>
@@ -283,16 +306,16 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
 /gnosIdn/fileNamej</code></pre>
         <p>where <code>gnosId</code> and <code>fileName</code> are the original bundle ID and file name of the file respectively.</p>
         <p>
-          The file system implementation's performance is optimized for serial reads. Frequent random access patterns will lead to very poor performance. 
+          The file system implementation's performance is optimized for serial reads. Frequent random access patterns will lead to very poor performance.
           Under the covers, each random seek requires a new HTTP connection to S3 with the appropriate <code>Range</code> header set which is an expensive operation.
           For this reason, it is only recommended for streaming analysis (e.g. <code>samtools view</code> like functionality).
-          
+
         </p>
         <h4>All Files</h4>
         <p>To mount all available files locally, issue the following:</p>
-        
-        
-        
+
+
+
 
         <pre class="language-shell"><code class=" language-shell"># Create the mount point
 mkdir /mnt/icgc
@@ -319,11 +342,11 @@ mkdir /mnt/icgc
 bin/dcc-storage-client mount --mount-point /mnt/icgc --manfiest <span class="token operator">&lt;</span>manifest<span class="token operator">&gt;</span></code></pre>
 
         <p>See the <code>manifest</code> command for more details on how to specify a manifest.</p>
-        
+
         <h4>Mount in Docker</h4>
-        
+
         <p>First, ensure that Docker and the Storage Client image is installed. See the installation section for details.</p>
-        
+
         <p>Next, export the access token generated from the portal:</p>
 
         <pre class="language-shell"><code class=" language-shell"># Export access token
@@ -336,7 +359,7 @@ export ACCESSTOKEN=&lt;accessToken&gt;</code></pre>
 docker run -it --rm -e ACCESSTOKEN --privileged icgc/dcc-storage-client bin/dcc-storage-client mount --mount-point /mnt</code></pre>
 
         <p>Note that the <code>--privileged</code> Docker option is required for FUSE in order to access the hosts <code>/dev/fuse</code> device.</p>
-        
+
         <p>In another terminal, you can access the newly mounted file system:</p>
 
 <pre class="language-shell"><code class=" language-shell"># List all files recursively
@@ -354,7 +377,7 @@ apt-get install samtools
 samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a303bc086c.bam 1:10000-20000</code></pre>
 
         <p>
-          Due to a limitation of Docker it is not possible to access a FUSE mounted file system from the host operating system. 
+          Due to a limitation of Docker it is not possible to access a FUSE mounted file system from the host operating system.
           Please see <a href="https://github.com/docker/docker/issues/10088" target="_blank"><i class="icon-external-link"></i>here</a> for more details.
         </p>
       </section>
@@ -372,9 +395,9 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>Does the client maintain state?</h5>
 
-         <p>Yes, the client maintains state in the working directory in a hidden file <code>.<span class="token operator">&lt;</span>object id<span class="token operator">&gt;</span>/meta</code>. This file includes cached pre-signed urls. 
-          If your downloads fail unexpectedly, then try deleting this directory. It could be that the pre-signed URLs have expired. Also, when using the 
-          <code>mount</code> command with the <code>--cache-metadata</code> option, <code>.entities.cache</code> and <code>.objects.cache</code> are stored in the current working directory. 
+         <p>Yes, the client maintains state in the working directory in a hidden file <code>.<span class="token operator">&lt;</span>object id<span class="token operator">&gt;</span>/meta</code>. This file includes cached pre-signed urls.
+          If your downloads fail unexpectedly, then try deleting this directory. It could be that the pre-signed URLs have expired. Also, when using the
+          <code>mount</code> command with the <code>--cache-metadata</code> option, <code>.entities.cache</code> and <code>.objects.cache</code> are stored in the current working directory.
          </p>
 
          <h5>Why do I get a security exception?</h5>
@@ -400,7 +423,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                   <th>Term</th>
                   <th>Meaning</th>
                </tr>
-            </thead>		
+            </thead>
             <tbody>
                <tr>
                   <td><em>Access Token</em></td>
@@ -420,7 +443,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>FUSE</em></td>
-                  <td><a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace" target="_blank"><i class="icon-external-link"></i>Filesystem in Userspace</a> is an operating system mechanism for Unix-like computer operating systems that 
+                  <td><a href="https://en.wikipedia.org/wiki/Filesystem_in_Userspace" target="_blank"><i class="icon-external-link"></i>Filesystem in Userspace</a> is an operating system mechanism for Unix-like computer operating systems that
                   lets non-privileged users create their own file systems without editing kernel code.</a></td>
                </tr>
                <tr>
@@ -432,17 +455,21 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                   <td>The unique identifier of an object expressed as a UUID. In the command line interface this is refered to as <code>--object-id</code>.</td>
                </tr>
                <tr>
+                  <td><em>OpenStack</em></td>
+                  <td>OpenStack is a cloud operating system that controls large pools of compute, storage, and networking resources throughout a datacenter, all managed through a dashboard that gives administrators control while empowering their users to provision resources through a web interface.</td>
+               </tr>
+               <tr>
                   <td><em>Storage Client</em></td>
                   <td>Sofware provided by ICGC required to download data from AWS S3</td>
                </tr>
                <tr>
                   <td><em>S3</em></td>
                   <td><a href="https://aws.amazon.com/s3/" target="_blank"><i class="icon-external-link"></i>Amazon Simple Storage Service</a>, the physical store of the ICGC AWS data.</td>
-               </tr>					
+               </tr>
                <tr>
                   <td><em>Token Manager</em></td>
                   <td>Section of the portal used to manage <em>Access Tokens</em></td>
-               </tr>						
+               </tr>
             </tbody>
          </table>
       </section>

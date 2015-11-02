@@ -5263,6 +5263,38 @@ td {
   margin-left: 0;
 }
 
+/* line 4, _modules/_guide.scss */
+.guide-callout {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-left-width: 5px;
+  border-radius: 3px;
+  margin: 5px;
+}
+/* line 10, _modules/_guide.scss */
+.guide-callout h4 {
+  margin: 0;
+  font-weight: bold;
+}
+
+/* line 16, _modules/_guide.scss */
+.guide-callout-aws {
+  border-left-color: #e9931c;
+}
+/* line 17, _modules/_guide.scss */
+.guide-callout-aws h4 {
+  color: #e9931c;
+}
+
+/* line 23, _modules/_guide.scss */
+.guide-callout-collab {
+  border-left-color: #1693c0;
+}
+/* line 24, _modules/_guide.scss */
+.guide-callout-collab h4 {
+  color: #1693c0;
+}
+
 /* line 26, styles.scss */
 html {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
