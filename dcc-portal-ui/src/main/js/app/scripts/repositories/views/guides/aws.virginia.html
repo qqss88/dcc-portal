@@ -44,7 +44,7 @@
                            <li>Generate an <em>Access Token</em> for cloud download</li>
                         </ul>
                      </li>
-                     <li><a data-scrollto href="#preqs">Prerequistes</a><br> 
+                     <li><a data-scrollto href="#preqs">Prerequistes</a><br>
                      Create a <em>compute instance</em> in the target cloud if there is not one already running.</li>
                      <li><a data-scrollto href="#install">Installation</a><br> Download and install the ICGC <em>Storage Client</em></li>
                      <li><a data-scrollto href="#config">Configuration</a><br> Configure the Storage Client to use the generated Access Token.</li>
@@ -96,7 +96,7 @@
 
          <h3 id="auth-daco">DACO Cloud Access</h3>
 
-         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). 
+         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google).
          After successful authentication, you will know that you have access to the controlled tier if the &ldquo;login&rdquo; link is replaced with a green shield.
         </p>
 
@@ -255,7 +255,13 @@
             <li>Export a Manifest for future use with the Storage Client</li>
          </ul>
 
-         <p>The Manifest is the main way to define what files should be downloaded by the Storage Client. However, knowing the Object ID is sufficient for a single file download.</p>
+         <p>The Manifest is the main way to define what files should be downloaded by the Storage Client. However, knowing the Object ID is sufficient for a single file download. To generate a Manifest, click on the "Download manifests" link the the Data Repository browser. You will be prompted with a "Download manifests" dialog:</p>
+
+         <div class="screen-shot">
+            <img src="styles/images/repositories/guides/download_manifest_dialog.png" alt="Download Manifest Dialog" />
+         </div>
+
+         <p>Manifests downloaded from the Data Portal can be transferred to the Storage Client instance by using SFTP or SCP. For convenience, it is also possible to use a Manfest ID saved on the Data Portal by clicking on the "Create Manifest ID" button. See the <a href="storage-client">Storage Client Usage</a> section for usage information.</p>
       </section>
       <section id="storage-client">
          <h2>Storage Client Usage</h2>
@@ -290,6 +296,26 @@ https<span class="token punctuation">:</span><span class="token operator">/</spa
 
 wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>s3<span class="token operator">-</span>external<span class="token number">-1</span><span class="token punctuation">.</span>amazonaws<span class="token punctuation">.</span>com<span class="token operator">/</span><span class="token operator">&lt;</span>snip<span class="token operator">&gt;</span></code></pre>
 
+         <h3>Download Command</h3>
+
+         <p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) Manifest driven mode</p>
+         <p>Note that the Storage Client is able to resume an interrupted download session. Simply rerun the same command again and it will continue.</p>
+         <h4>Single Object</h4>
+
+         <p>This mode is most useful when downloading a single object given a known Object ID, perhaps acquired from the Data Portal:</p>
+
+         <pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client download <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>output<span class="token operator">-</span>dir data</code></pre>
+
+         <p>Downloads will be stored in the <code>--output-dir</code>.</p>
+
+         <h4>Manifest</h4>
+
+         <p>Using a Manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repositories" target="_blank">repository file search</a> allows one to generate a Manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
+
+         <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
+
+         <p>The optional <code>--output-layout</code> option can be used to organize the downloads into a couple of predefined directory layouts. See the <code>--help</code> for addional information.</p>
+
          <h3>Manifest Command</h3>
          <p>
            The <code>manifest</code> command allows a user to quickly view the contents of a download Manfiest produced by the Data Portal. A Manifest can come from:
@@ -314,26 +340,6 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
          <p>An example of using a URL hosted Manifest:</p>
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client manifest --manifest http://hastebin.com/raw/ujajodilih</code></pre>
 
-         <h3>Download Command</h3>
-
-         <p>The <code>download</code> command allows fast parallel download of remote objects. It can be run in one of two modes: (a) single object mode and (b) Manifest driven mode</p>
-         <p>Note that the Storage Client is able to resume an interrupted download session. Simply rerun the same command again and it will continue.</p>
-         <h4>Single Object</h4>
-
-         <p>This mode is most useful when downloading a single object given a known Object ID, perhaps acquired from the Data Portal:</p>
-
-         <pre class="language-shell"><code class="language-shell">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client download <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd <span class="token operator">--</span>output<span class="token operator">-</span>dir data</code></pre>
-
-         <p>Downloads will be stored in the <code>--output-dir</code>.</p>
-
-         <h4>Manifest</h4>
-
-         <p>Using a Manifest is ideal for downloading multiple files identified through the Data Portal. The <a href="https://dcc.icgc.org/repositories" target="_blank">repository file search</a> allows one to generate a Manifest file that can be supplied for bulk downloading files. It also provides some additional metadata for selected files that gives the donor, specimen and sample context.</p>
-
-         <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client download --manifest manifest.txt --output-dir data</code></pre>
-
-         <p>The optional <code>--output-layout</code> option can be used to organize the downloads into a couple of predefined directory layouts. See the <code>--help</code> for addional information.</p>
-
          <h3>View Command</h3>
 
          <p>The <code>view</code> command is a minimal version of <a href="http://www.htslib.org/doc/samtools.html" target="_blank"><i class="icon-external-link"></i>samtools view</a>. It allows to request a &ldquo;genomic slice&rdquo; of the remote BAM file, freeing the user from having to download the entire file locally, saving bytes and time.</p>
@@ -352,16 +358,16 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
         <h3>Mount Command</h3>
         <p>The <code>mount</code> command can be used to mount the remote S3 bucket as a read-only <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i>FUSE</a> file system. This is very useful to browse and explore the available files, as well as quickly see their size and date of modification using common commands such as <code>ls</code>, <code>find</code>, <code>du</code> and <code>tree</code>. It also works very well with standard analysis tools such as <code>samtools</code>. </p>
         <p>Files are organized into a virtual directory structure. The following shows the default <code>bundle</code> layout:</p>
-        <pre><code>/gnosId1/fileName1
-/gnosId1/fileName2
+        <pre><code>/bundleId1/fileName1
+/bundleId1/fileName2
 ...
-/gnosId1/fileNamei
+/bundleId1/fileNamei
 ...
-/gnosIdn/fileName1
-/gnosIdn/fileName2
+/bundleIdn/fileName1
+/bundleIdn/fileName2
 ...
-/gnosIdn/fileNamej</code></pre>
-        <p>where <code>gnosId</code> and <code>fileName</code> are the original bundle ID and file name of the file respectively. It possible to control the layout using the <code>--layout</code> option. Using <code>--layout object-id</code> will instead produce a flat list of files named by their associated Object ID.</p>
+/bundleIdn/fileNamej</code></pre>
+        <p>where <code>bundleId</code> and <code>fileName</code> are the original <em>Bundle ID</em> and file name of the file respectively. It possible to control the layout using the <code>--layout</code> option. Using <code>--layout object-id</code> will instead produce a flat list of files named by their associated Object ID.</p>
         <p>
           The file system implementation's performance is optimized for serial reads. Frequent random access patterns will lead to very poor performance.
           Under the covers, each random seek requires a new HTTP connection to S3 with the appropriate <code>Range</code> header set which is an expensive operation.
@@ -451,15 +457,15 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
           <code>mount</code> command with the <code>--cache-metadata</code> option, <code>.entities.cache</code> and <code>.objects.cache</code> are stored in the current working directory.
          </p>
 
-         <h5>Why do I get a security exception?</h5>
+         <h5>Why do I get a security exception when I try to download an object?</h5>
 
-         <p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank"><i class="icon-external-link"></i>region</a>.</p>
+         <p>If you are targeting the AWS cloud, ensure that you are running within the <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank"><i class="icon-external-link"></i>region</a>. If you are targeting Collaboratory, make sure you are inside the OpenStack environment.</p>
 
          <h5>I can&rsquo;t use the result of a <code>url</code> command with <code>samtools</code>:</h5>
 
          <p>
-           <code>samtools</code> doesn&rsquo;t support the HTTPS 
-            protocol, which is required by ICGC to access S3-stored data files. 
+           <code>samtools</code> doesn&rsquo;t support the HTTPS
+            protocol, which is required by ICGC to access S3-stored data files.
             Use the client <code>view</code> command to pipe data to samtools, download the desired files locally, or use the mount command to create a FUSE mount of the ICGC data files.
          </p>
 
@@ -483,6 +489,10 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                <tr>
                   <td><em>Access Token</em></td>
                   <td>An authorization mechanism used to access data. Created by the <em>Data Portal</em></td>
+               </tr>
+               <tr>
+                  <td><em>Bundle ID</em></td>
+                  <td>An identifier that refers to a submission bundle of related files. Typically this are produced by analysis workflows and are packaged as a single unit. However, when a bundle is imported into a cloud repository each of its contained file is given its own Object ID.</td>
                </tr>
                <tr>
                   <td><em>Cloud Access</em></td>
