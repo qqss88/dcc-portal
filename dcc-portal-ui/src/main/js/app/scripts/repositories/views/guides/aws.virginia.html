@@ -26,28 +26,40 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory OpenStack</a> clouds.</p>
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon (<em>AWS</em>)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory (<em>OpenStack</em>)</a> cloud environments.</p>
 
          <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
 
          <h3>Process</h3>
 
          <p>The figure below illustrates the overall process and software components involved:</p>
-         <div class="screen-shot">
-            <a title="Click AWS Process Diagram to see the full image." href="styles/images/repositories/guides/cloud_process_diagram.png" target="_blank">
-               <img src="styles/images/repositories/guides/cloud_process_diagram.png" alt="Cloud Process Diagram">
-            </a>
-         </div>
-         <ol>
-            <li><a data-scrollto href="#auth">Authorization</a>: Apply for DACO access if not already approved</li>
-            <li><a data-scrollto href="#auth">Authorization</a>: Upon approval, login to the <em>Data Portal</em></li>
-            <li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for cloud download</li>
-            <li><a data-scrollto href="#preqs">Prerequistes</a>: Create a compute instance in the target clould if not aready available</li>
-            <li><a data-scrollto href="#install">Installation</a>: Download and install the ICGC Storage Client</li>
-            <li><a data-scrollto href="#config">Configuration</a>: Configure the Storage Client to use the access token from step 3.</li>
-            <li><a data-scrollto href="#fs-search">Search</a>: Identify files of interest using the Data Portal</li>
-            <li><a data-scrollto href="#storage-client">Usage</a>: Download or view data with the provided Storage Client or via an external tool</li>
-         </ol>
+         <table>
+            <tr style="vertical-align: top; border: 1px solid #CCC; border-radius: 4px;">
+               <td style="width: 50%; padding: 1.2rem; background-color: #f5f2f0; font-size: 1.20rem;">
+                  <ol>
+                     <li><a data-scrollto href="#auth">Authorization</a>
+                        <ul style="margin-left: -1em; margin-top: 0; margin-bottom: 0">
+                           <li>Apply for DACO <em>Cloud Access</em> if not already approved</li>
+                           <li>Upon approval, login to the <em>Data Portal</em></li>
+                           <li>Generate an access token for cloud download</li>
+                        </ul>
+                     </li>
+                     <li><a data-scrollto href="#preqs">Prerequistes</a><br> Create a compute instance in the target cloud if not aready available</li>
+                     <li><a data-scrollto href="#install">Installation</a><br> Download and install the ICGC <em>Storage Client</em></li>
+                     <li><a data-scrollto href="#config">Configuration</a><br> Configure the Storage Client to use the access token from <span style="white-space: nowrap;">step 3</span>.</li>
+                     <li><a data-scrollto href="#fs-search">Search</a><br> Identify files of interest using the Data Portal</li>
+                     <li><a data-scrollto href="#storage-client">Analyze</a><br> Download or view data with the provided Storage Client or via an external tool</li>
+                  </ol>
+               </td>
+               <td>
+                  <div class="screen-shot" style="padding: 0; margin: 0;">
+                     <a style="width: 100%"  title="Click Cloud Process Diagram to see the full image." href="styles/images/repositories/guides/cloud_process_diagram.png" target="_blank">
+                        <img style="padding: 0" src="styles/images/repositories/guides/cloud_process_diagram.png" alt="Cloud Process Diagram">
+                     </a>
+                  </div>
+               </td>
+            </tr>
+         </table>
 
          <p>The subsequent sections will provide additional details on each of these topics.</p>
 
@@ -57,7 +69,7 @@
             <div class="guide-callout-content">
               <h4>AWS</h4>
               <p>
-                Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from S3 to the client, maintaining fast access to the data.
+                Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC access tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from <em>S3</em> to the client, maintaining fast access to the data.
               </p>
               <p>
                 It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
@@ -130,7 +142,7 @@
             <div class="guide-callout-content">
             <h4>AWS</h4>
             <p>
-              In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the EC2 is free of charge. Please see Amazon's documentation for detailed instructions.
+              In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the same EC2 region is free of charge. Please see Amazon's documentation for detailed instructions.
             </p>
             </div>
          </div>
@@ -250,8 +262,10 @@
          <h3>Help</h3>
 
          <p>The Storage Client provides a <code>--help</code> option to list the available commands and a brief description of their supported options:</p>
-
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client --help</code></pre>
+
+         <p>It is also possible to get information on a specific command using the <code>help</code> command:</p>
+         <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client help download</code></pre>
 
          <h3>URL Command</h3>
 
@@ -447,7 +461,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <p>Related terms and their defintions are given below:</p>
 
-         <table class="table table-info">
+         <table class="guide-terms table table-info" style="font-size: 1.1rem">
             <thead>
                <tr>
                   <th>Term</th>
@@ -460,8 +474,12 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                   <td>An authorization mechanism used to access data. Created by the <em>Data Portal</em></td>
                </tr>
                <tr>
-                  <td><em>Controlled Access</em></td>
-                  <td>Data that requires DACO approval</td>
+                  <td><em>Cloud Access</em></td>
+                  <td>DACO access with supplemental approved Cloud Access status</td>
+               </tr>
+               <tr>
+                  <td><em>DACO</em></td>
+                  <td>The Data Access Compliance Office which handles requests from scientists for access to controlled data from the ICGC.</td>
                </tr>
                <tr>
                   <td><em>DCC</em></td>
