@@ -32,19 +32,19 @@ import lombok.SneakyThrows;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
 @Slf4j
+@Service
 public class IndexService {
-
-  /**
-   * Dependencies.
-   */
-  private final ConcurrentMap<Object, Object> cache;
 
   /**
    * Constants.
    */
   private static final int CACHE_TTL_HOURS = 1;
+
+  /**
+   * Dependencies.
+   */
+  private final ConcurrentMap<Object, Object> cache;
 
   public IndexService() {
     this.cache = createStore();
@@ -57,6 +57,11 @@ public class IndexService {
         .maximumSize(100)
         .build()
         .asMap();
+  }
+
+  public void clearCache() {
+    log.info("Clearing index name cache.");
+    this.cache.clear();
   }
 
   @SneakyThrows
@@ -79,9 +84,13 @@ public class IndexService {
       cache.put(indexName, realIndex);
     }
 
-    val indexMetaData = state.getMetaData().index(realIndex);
+    val stateMetaData = state.getMetaData();
+    val indexMetaData = stateMetaData.index(realIndex);
 
-    val mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
+    val mappings = indexMetaData.getMappings();
+    log.info("Size of index meta data mappings: " + mappings.values().size());
+    val mappingIterator = mappings.values().iterator();
+    val mappingMetaData = mappingIterator.next().value;
     val source = mappingMetaData.sourceAsMap();
 
     @SuppressWarnings("unchecked")
