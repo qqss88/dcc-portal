@@ -150,7 +150,6 @@
                   }
                   
                   _.set(highlight.advQuery, 'mutation.consequenceType', consequenceFilter);
-                  delete highlight.advQuery.gene.pathwayId;
                   
                   geneList.push({
                     symbol:highlight.geneSymbol,
