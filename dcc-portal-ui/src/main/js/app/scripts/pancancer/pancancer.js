@@ -25,7 +25,7 @@
 
   module.config(function($stateProvider) {
     $stateProvider.state('pancancer', {
-      url: '/pcawg',
+      url: '/pcawg?link',
       templateUrl: 'scripts/pancancer/views/pancancer.html',
       controller: 'PancancerController as PancancerController'
     });
@@ -49,15 +49,21 @@
     Page.stopWork();
     Page.setPage('entity');
     Page.setTitle('PCAWG');
-  });
-
+  }); 
+  
 
   module.controller('PancancerController',
-    function($scope, Page, PancancerService, ExternalRepoService, RouteInfoService) {
+    function($scope, Page, $stateParams, LocationService, PancancerService, ExternalRepoService, RouteInfoService) {
 
     Page.stopWork();
     Page.setPage('entity');
     Page.setTitle('PCAWG');
+    
+    var inlineAnchor = $stateParams.link || null;
+    
+    if (inlineAnchor !== null) {
+      LocationService.goToInlineAnchor(inlineAnchor);
+    }
 
     $scope.dataRepoUrl = RouteInfoService.get ('dataRepositories').href;
 

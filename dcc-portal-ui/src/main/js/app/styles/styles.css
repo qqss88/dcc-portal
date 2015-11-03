@@ -5463,22 +5463,41 @@ section {
   border-radius: 0;
   border-bottom: 1px solid #cccccc;
 }
+/* line 110, styles.scss */
+section a {
+  white-space: nowrap;
+  text-indent: initial;
+}
+/* line 115, styles.scss */
+section .indent {
+  text-align: justify;
+  text-indent: 1rem;
+}
+/* line 120, styles.scss */
+section.no-border {
+  border-bottom: none;
+}
+/* line 124, styles.scss */
+section.no-vert-padding {
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+}
 
-/* line 111, styles.scss */
+/* line 130, styles.scss */
 section:last-child {
   border: none;
 }
 
-/* line 115, styles.scss */
+/* line 134, styles.scss */
 aside {
   font-size: .9rem;
 }
-/* line 117, styles.scss */
+/* line 136, styles.scss */
 aside section {
   padding: 1rem;
 }
 
-/* line 122, styles.scss */
+/* line 141, styles.scss */
 article.full {
   width: 100%;
   float: right;
@@ -5488,92 +5507,92 @@ article.full {
   border: 0;
 }
 
-/* line 127, styles.scss */
+/* line 146, styles.scss */
 ul, ul li {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 133, styles.scss */
+/* line 152, styles.scss */
 ol {
   vertical-align: middle;
 }
-/* line 135, styles.scss */
+/* line 154, styles.scss */
 ol p {
   margin: .2rem 0;
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 1rem;
 }
 
-/* line 144, styles.scss */
+/* line 163, styles.scss */
 .match {
   font-weight: 700;
 }
 
-/* line 148, styles.scss */
+/* line 167, styles.scss */
 .empty, .loading {
   color: #666666;
 }
-/* line 150, styles.scss */
+/* line 169, styles.scss */
 .empty h3, .loading h3 {
   color: #666666;
   margin-bottom: 0;
 }
 
-/* line 156, styles.scss */
+/* line 175, styles.scss */
 .loading-text {
   margin: 2rem;
 }
 
-/* line 160, styles.scss */
+/* line 179, styles.scss */
 .loading-icon {
   margin-top: 2rem;
   text-align: center;
 }
 
-/* line 165, styles.scss */
+/* line 184, styles.scss */
 .data-available {
   color: #1a9900;
 }
 
-/* line 169, styles.scss */
+/* line 188, styles.scss */
 .data-missing {
   color: #dc502e;
 }
 
-/* line 173, styles.scss */
+/* line 192, styles.scss */
 .text-center {
   text-align: center;
 }
 
-/* line 177, styles.scss */
+/* line 196, styles.scss */
 .text-left {
   text-align: left;
 }
 
-/* line 181, styles.scss */
+/* line 200, styles.scss */
 .text-right {
   text-align: right;
 }
 
-/* line 185, styles.scss */
+/* line 204, styles.scss */
 .link {
   cursor: pointer;
 }
 
-/* line 189, styles.scss */
+/* line 208, styles.scss */
 .ui-scrollfix {
   position: fixed;
   z-index: 99;
 }
 
-/* line 194, styles.scss */
+/* line 213, styles.scss */
 .h1-wrap {
   height: 5rem;
 }
 
-/* line 198, styles.scss */
+/* line 217, styles.scss */
 h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
   width: 1280px;
   top: 0;
@@ -5582,44 +5601,44 @@ h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
   border-bottom: 1px solid #f2f2f2;
 }
 @media (min-width: 1535px) {
-  /* line 198, styles.scss */
+  /* line 217, styles.scss */
   h1.ui-scrollfix, .sug-wrap.ui-scrollfix {
     width: 1440px;
   }
 }
 
-/* line 211, styles.scss */
+/* line 230, styles.scss */
 aside.ui-scrollfix {
   top: 5rem;
 }
-/* line 213, styles.scss */
+/* line 232, styles.scss */
 aside.ui-scrollfix section {
   background: transparent;
 }
 
-/* line 218, styles.scss */
+/* line 237, styles.scss */
 .open-in {
   font-size: 1rem;
   color: #999999;
   text-transform: uppercase;
 }
 
-/* line 225, styles.scss */
+/* line 244, styles.scss */
 h3:hover .pilcrow {
   opacity: 1;
 }
 
-/* line 230, styles.scss */
+/* line 249, styles.scss */
 .pilcrow {
   opacity: .1;
 }
 
-/* line 234, styles.scss */
+/* line 253, styles.scss */
 .t_sidebar {
   position: relative;
 }
 
-/* line 238, styles.scss */
+/* line 257, styles.scss */
 .t_notify_popup, #buorg {
   position: fixed;
   z-index: 1000000;
@@ -5633,37 +5652,37 @@ h3:hover .pilcrow {
   font-family: inherit;
 }
 
-/* line 251, styles.scss */
+/* line 270, styles.scss */
 .t_notify_link {
   cursor: pointer;
   color: #FFF;
 }
 
-/* line 256, styles.scss */
+/* line 275, styles.scss */
 .t_notify_link:hover {
   text-decoration: underline;
 }
 
-/* line 261, styles.scss */
+/* line 280, styles.scss */
 .t_notify_body {
   font-size: 1rem;
 }
 
-/* line 265, styles.scss */
+/* line 284, styles.scss */
 .t_notify_warning {
   background: #e9931c;
 }
 
-/* line 269, styles.scss */
+/* line 288, styles.scss */
 .t_notify_success {
   background: #1a9900;
 }
 
-/* line 275, styles.scss */
+/* line 294, styles.scss */
 #buorg div {
   padding: 0;
 }
-/* line 279, styles.scss */
+/* line 298, styles.scss */
 #buorg #buorgclose {
   position: relative;
   float: right;
@@ -5677,7 +5696,7 @@ h3:hover .pilcrow {
   padding-right: 1rem;
 }
 
-/* line 293, styles.scss */
+/* line 312, styles.scss */
 #loading-screen {
   position: fixed;
   z-index: 1000;
@@ -5691,18 +5710,18 @@ h3:hover .pilcrow {
   font-size: 6rem;
   color: #666666;
 }
-/* line 307, styles.scss */
+/* line 326, styles.scss */
 #loading-screen i, #loading-screen img {
   position: fixed;
   top: 50%;
   left: 50%;
 }
-/* line 312, styles.scss */
+/* line 331, styles.scss */
 #loading-screen i {
   margin-left: -2rem;
   margin-top: -8rem;
 }
-/* line 316, styles.scss */
+/* line 335, styles.scss */
 #loading-screen img {
   height: 3rem;
   margin-left: .7rem;
