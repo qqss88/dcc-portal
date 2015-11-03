@@ -18,7 +18,8 @@ header {
     @include breakpoint($break-tablet) {
       font-size: 1.8rem;
       margin-top: .8rem;
-      line-height: 1rem;
+      line-height: 2.5rem;
+      margin-right: 0.2rem;
     }
 
     #icgc {
@@ -60,7 +61,7 @@ header {
 .t_nav__pages {
   text-align: center;
   @include float-span(4);
-  width: 36%;
+  width: 38%;
 }
 
 .t_nav__actions {
@@ -77,7 +78,7 @@ header {
   background-color: transparent;
   display: inline;
   text-align: left;
-  margin-right: 0.5rem;
+  margin-right: 0.7rem;
 
   @include breakpoint($break-tablet) {
     display: inline-block;
