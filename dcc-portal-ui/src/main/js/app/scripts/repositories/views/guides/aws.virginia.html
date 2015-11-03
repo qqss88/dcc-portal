@@ -12,7 +12,7 @@
          <ol class="t_subnav__items">
             <li data-spy="overview" class="t_subnav__items__item current"><a data-scrollto href="#overview">Overview</a></li>
             <li data-spy="auth" class="t_subnav__items__item"><a data-scrollto href="#auth">Authorization</a></li>
-            <li data-spy="preqs" class="t_subnav__items__item"><a data-scrollto href="#preqs">Prerequisites</a></li>
+            <li data-spy="preqs" class="t_subnav__items__item"><a data-scrollto href="#preqs">Compute Prerequisites</a></li>
             <li data-spy="install" class="t_subnav__items__item"><a data-scrollto href="#install">Installation</a></li>
             <li data-spy="config" class="t_subnav__items__item"><a data-scrollto href="#config">Configuration</a></li>
             <li data-spy="fs-search" class="t_subnav__items__item"><a data-scrollto href="#fs-search">File Search</a></li>
@@ -26,9 +26,9 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon (<em>AWS</em>)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory (<em>OpenStack</em>)</a> cloud environments. For more information about ICGC cloud initiatives, please see <a href="/icgc-in-the-cloud/">ICGC in the Cloud</a>.</p>
+         <p>This user guide describes the steps to securely explore and analyze ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon (<em>AWS</em>)</a> or <a href="https://www.cancercollaboratory.org/" target="_blank"><i class="icon-external-link"></i>Collaboratory (<em>OpenStack</em>)</a> cloud environments. For more information about ICGC cloud initiatives, please see <a href="/icgc-in-the-cloud/">ICGC in the Cloud</a>.</p>
 
-         <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of terms used in this guide.</p>
+         <p>Please see <a data-scrollto href="#terms">Terms</a> for a glossary of terms used in this guide.</p>
 
          <h3>Process</h3>
 
@@ -37,17 +37,15 @@
             <tr style="vertical-align: top; border: 1px solid #CCC; border-radius: 4px;">
                <td style="width: 50%; padding: 1.2rem; background-color: #f5f2f0; font-size: 1.20rem;">
                   <ol>
-                     <li><a data-scrollto href="#auth">Authorization</a>
-                        <ul style="margin-left: -1em; margin-top: 0; margin-bottom: 0">
-                           <li>Apply for DACO <em>Cloud Access</em> if not already approved</li>
-                           <li>Upon approval, login to the <em>Data Portal</em></li>
-                           <li>Generate an <em>Access Token</em> for cloud download</li>
-                        </ul>
+                     <li><a data-scrollto href="#auth">Authorization</a><br>
+                        Apply for DACO <em>Cloud Access</em> if not already approved<br>
+                        Upon approval, login to the <em>Data Portal</em><br>
+                        Generate an <em>Access Token</em> for cloud download
                      </li>
-                     <li><a data-scrollto href="#preqs">Prerequistes</a><br>
-                     Create a <em>compute instance</em> in the target cloud if there is not one already running.</li>
+                     <li><a data-scrollto href="#preqs">Compute Prerequistes</a><br>
+                     Create a <em>compute instance</em> in the target cloud if there is not one already running</li>
                      <li><a data-scrollto href="#install">Installation</a><br> Download and install the ICGC <em>Storage Client</em></li>
-                     <li><a data-scrollto href="#config">Configuration</a><br> Configure the Storage Client to use the generated Access Token.</li>
+                     <li><a data-scrollto href="#config">Configuration</a><br> Configure the Storage Client to use the generated Access Token</li>
                      <li><a data-scrollto href="#fs-search">Search</a><br> Identify files of interest using the Data Portal</li>
                      <li><a data-scrollto href="#storage-client">Analyze</a><br> Download or view data with the provided Storage Client or via an external tool</li>
                   </ol>
@@ -70,10 +68,10 @@
             <div class="guide-callout-content">
               <h4>AWS</h4>
               <p>
-                Security is enforced by using a coordinating ICGC storage server that the client communicates with to broker downloads and convert ICGC Access Tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server has taken place, downloads will be transferred directly from <em>S3</em> to the client, maintaining fast access to the data.
+                Security is enforced by a coordinating ICGC storage server. The client communicates with the server which brokers downloads and converts ICGC Access Tokens into Amazon <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html" target="_blank"><i class="icon-external-link"></i>pre-signed urls</a>. Once a successful authorization handshake between the client and the server is established, downloads will be transferred directly from <em>S3</em> to the client, maintaining fast access to the data.
               </p>
               <p>
-                It is important to note that the provided software will only function within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
+                It is important to note that the provided software only functions within the <code>us-east-1</code> EC2 region of AWS located in Northern Virginia, U.S. where the data is physically stored. Attempting to use the software outside of this region will be denied data access.
               </p>
              </div>
          </div>
@@ -81,22 +79,22 @@
           <div class="guide-callout-content">
             <h4>Collaboratory</h4>
             <p>
-                Downloads will only function inside Collaboratory's OpenStack environment.
+                Downloads only function inside Collaboratory's OpenStack environment.
             </p>
           </div>
          </div>
          <p>
-            Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any cloud and downstream resources.
+            Lastly, it is the user’s responsibility to protect the data after it has been attained. This includes any subsequent analyses and storage on cloud and downstream resources.
          </p>
       </section>
       <section id="auth">
          <h2>Authorization</h2>
 
-         <p>This section describes how to attain the required access to use the software by first ensuring DACO access and subsequently self-provisioning an access token.</p>
+         <p>There are tow prerequesites to using the Storage Client: DACO Cloud Access status and subsequently self-provisioning an Access Token.</p>
 
          <h3 id="auth-daco">DACO Cloud Access</h3>
 
-         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google).
+         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, choose to login with either your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google).
          After successful authentication, you will know that you have access to the controlled tier if the &ldquo;login&rdquo; link is replaced with a green shield.
         </p>
 
@@ -107,7 +105,7 @@
          <p>Related to Access Tokens is the concept of <em>Scopes</em>. Tokens allow you to associate Scopes which limit access to that needed for the target environment. This enhances security by following the <a href="http://www.wikiwand.com/en/Principle_of_least_privilege"><i class="icon-external-link"></i>Principle of Least Privilege</a>. Cloud specific Scopes will become available after acquiring DACO Cloud Access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
 
          <h3 id="auth-token-manager">Token Manager</h3>
-         <p>To acquire a token you must first acquire DACO Clould Access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will display the <em>Token Manager</em>.</p>
+         <p>To acquire an Access Token, you must first acquire DACO Clould Access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will display the <em>Token Manager</em>.</p>
 
          <div class="screen-shot">
           <img  style="width: 30%;" src="styles/images/repositories/guides/token_manager_link.png" alt="Token Manager Link" />
@@ -120,7 +118,7 @@
             </a>
          </div>
 
-         <p>When creating an Access Token you will need to specify the Scope associated with the target cloud(s).</p>
+         <p>When creating an Access Token, you will need to specify the Scope associated with the target cloud(s).</p>
          <div class="guide-callout guide-callout-aws">
            <div class="guide-callout-content">
             <h4>AWS</h4>
@@ -143,7 +141,7 @@
          <p>You will then need to edit the client configuration file in the Storage Client to include the generated Access Token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
       </section>
       <section id="preqs">
-         <h2>Prerequisites</h2>
+         <h2>Compute Prerequisites</h2>
 
          <h3>Compute Instance</h3>
          As a first step in analyzing data, you will need to create a compute instance to run the Storage Client and any other supporting software.
@@ -151,7 +149,7 @@
             <div class="guide-callout-content">
             <h4>AWS</h4>
             <p>
-              In order to run in within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the same EC2 region is free of charge. Please see Amazon's documentation for detailed instructions.
+              In order to run within <a href="https://aws.amazon.com/ec2/" target="_blank"><i class="icon-external-link"></i>EC2</a>, you will need to create a new account or use an exisiting one on AWS to provision a running EC2 instance. Any data processing will be charged to this account. Note that ICGC data download from S3 to the same EC2 region is free of charge. Please see Amazon's documentation for detailed instructions.
             </p>
             </div>
          </div>
@@ -159,16 +157,16 @@
            <div class="guide-callout-content">
             <h4>Collaboratory</h4>
             <p>
-              In order to run in within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To start the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
+              In order to run within <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a>, you will need to be enrolled. To start the enrollment process, please send an email to <a href="help@cancercollaboratory.org "><i class="icon-external-link"></i>help@cancercollaboratory.org</a>.
             </p>
             </div>
          </div>
 
          <p>
-           The following sections will give guidance on the selecting and configuring the chosen instance type.
+           The following sections provide guidance on selecting and configuring the chosen instance type.
          </p>
 
-         <h3>Hardware</h3>
+         <h3>Resources</h3>
          <p>
             As data files are quite large, users should have enough local disk space to store files downloaded from the remote repository.
          </p>
@@ -238,7 +236,7 @@
                In addition to the above, you will need to change the storage server URL to the following:
                <pre class="language-shell">client.upload.serviceHostname=storage.cancercollaboratory.org</pre>
 
-            Or via the environmental variable <code>CLIENT_UPLOAD_SERVICEHOSTNAME</code>
+               Or via the environmental variable <code>CLIENT_UPLOAD_SERVICEHOSTNAME</code>
             </p>
            </div>
          </div>
@@ -444,11 +442,11 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>Where can I find the Bundle ID associated with an Object ID?</h5>
 
-         <p>Currently the only way to retrieve the Bundle ID of an Object ID is viewing the file entity page in the Data Portal. Navigate to the Data Repository browser and enter the Object ID in the "File" filter and click on the resulting record.</p>
+         <p>Currently the only way to retrieve the Bundle ID of an Object ID is by viewing the file entity page in the Data Portal. Navigate to the Data Repository browser and enter the Object ID in the "File" filter and click on the resulting record.</p>
 
          <h5>Where are detailed Storage Client logs stored?</h5>
 
-         <p>The Storage Client log file is stored in at<code>logs/client.log</code></p>
+         <p>The Storage Client log file is stored at <code>logs/client.log</code></p>
 
          <h5>How long will pre-signed URLs remain valid?</h5>
 
@@ -456,8 +454,8 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <h5>Does the client maintain state?</h5>
 
-         <p>Yes, the client maintains state in the working directory in a hidden file <code>.<span class="token operator">&lt;</span>Object ID<span class="token operator">&gt;</span>/meta</code>. This file includes cached pre-signed urls.
-          If your downloads fail unexpectedly, then try deleting this directory. It could be that the pre-signed URLs have expired. Also, when using the
+         <p>Yes, the client maintains state in the working directory in a hidden file <code>.<span class="token operator">&lt;</span>Object ID<span class="token operator">&gt;</span>/meta</code>. This file includes cached pre-signed URLS.
+          If your downloads fail unexpectedly, then try deleting this directory to purge pre-signed URLs that may have expired. Also, when using the
           <code>mount</code> command with the <code>--cache-metadata</code> option, <code>.entities.cache</code> and <code>.objects.cache</code> are stored in the current working directory.
          </p>
 
@@ -492,23 +490,23 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
             <tbody>
                <tr>
                   <td><em>Access Token</em></td>
-                  <td>An authorization mechanism used to access data. Created by the <em>Data Portal</em></td>
+                  <td>An authorization mechanism created by the <em>Data Portal</em> to access data.</td>
                </tr>
                <tr>
                   <td><em>Bundle ID</em></td>
-                  <td>An identifier that refers to a submission bundle of related files. Typically this are produced by analysis workflows and are packaged as a single unit. However, when a bundle is imported into a cloud repository each of its contained file is given its own Object ID.</td>
+                  <td>An identifier that refers to a submission bundle of related files. Typically the files produced by analysis workflows are packaged as a single unit. However, when a bundle is imported into a cloud repository each file in the bundle is given its own Object ID.</td>
                </tr>
                <tr>
-                  <td><em>Cloud Access</em></td>
-                  <td>DACO access with supplemental approved Cloud Access status</td>
+                  <td><em>DACO Cloud Access</em></td>
+                  <td>DACO access with supplemental approved Cloud Access status.</td>
                </tr>
                <tr>
                   <td><em>Compute Instance</em></td>
-                  <td>A user virtual machine operating in a cloud environment</td>
+                  <td>A user virtual machine operating in a cloud environment.</td>
                </tr>
                <tr>
                   <td><em>DACO</em></td>
-                  <td>The Data Access Compliance Office which handles requests from scientists for access to controlled data from the ICGC.</td>
+                  <td>The Data Access Compliance Office which handles requests from researchers for access to controlled data from the ICGC.</td>
                </tr>
                <tr>
                   <td><em>DCC</em></td>
@@ -516,7 +514,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>Data Portal</em></td>
-                  <td>The ICGC data portal located at <a href="https://dcc.icgc.org">https://dcc.icgc.org</a></td>
+                  <td>The ICGC data portal located at <a href="https://dcc.icgc.org">https://dcc.icgc.org</a>.</td>
                </tr>
                <tr>
                   <td><em>FUSE</em></td>
@@ -525,7 +523,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>Manifest</em></td>
-                  <td>A file used as input to the Storage Client to describe and identify files to be downloaded</td>
+                  <td>A file used as input to the Storage Client to describe and identify files to be downloaded.</td>
                </tr>
                <tr>
                   <td><em>Object ID</em></td>
@@ -541,7 +539,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>Storage Client</em></td>
-                  <td>Sofware provided by ICGC required to download data from AWS S3</td>
+                  <td>Sofware provided by ICGC required to download data from AWS S3.</td>
                </tr>
                <tr>
                   <td><em>S3</em></td>
@@ -549,7 +547,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>Token Manager</em></td>
-                  <td>Section of the portal used to manage Access Tokens</td>
+                  <td>Section of the portal used to manage Access Tokens.</td>
                </tr>
             </tbody>
          </table>
