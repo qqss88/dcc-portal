@@ -60,6 +60,7 @@ public class IndexService {
   }
 
   public void clearCache() {
+    log.info("Clearing index name cache.");
     this.cache.clear();
   }
 
@@ -87,7 +88,7 @@ public class IndexService {
     val indexMetaData = stateMetaData.index(realIndex);
 
     val mappings = indexMetaData.getMappings();
-    log.info("size of index meta data mappings: " + mappings.values().size());
+    log.info("Size of index meta data mappings: " + mappings.values().size());
     val mappingIterator = mappings.values().iterator();
     val mappingMetaData = mappingIterator.next().value;
     val source = mappingMetaData.sourceAsMap();
