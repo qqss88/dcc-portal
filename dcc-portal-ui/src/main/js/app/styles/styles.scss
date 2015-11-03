@@ -106,6 +106,25 @@ section {
   background: $white;
   border-radius: 0;
   border-bottom: 1px solid $greyLight;
+  
+  a {
+    white-space: nowrap;
+    text-indent: initial;
+  }
+
+  .indent {
+    text-align: justify; 
+    text-indent: 1rem;
+  }
+  
+  &.no-border {
+    border-bottom: none;
+  }
+  
+  &.no-vert-padding {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+  }
 }
 
 section:last-child {

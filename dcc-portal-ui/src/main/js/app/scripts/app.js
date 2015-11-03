@@ -267,7 +267,7 @@
   // https://github.com/angular-ui/ui-router/issues/110#issuecomment-18348811
   // modified for our needs
   module
-    .value('$anchorScroll', angular.noop)
+    //.value('$anchorScroll', angular.noop)
     .run(function($state, $stateParams, $window, $rootScope) {
       function scroll() {
         var state, offset, to;
