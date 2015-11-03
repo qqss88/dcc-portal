@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.icgc.dcc.common.core.util.Joiners;
 import org.icgc.dcc.portal.model.DiagramProtein;
 import org.icgc.dcc.portal.model.IndexModel;
@@ -174,8 +175,9 @@ public class DiagramService {
     if (impacts.length > 0) {
       query.must(termsQuery(functionalImpactFieldName, impacts));
     }
-    query.must(termsQuery("consequence_type", CONSEQUENCE_TYPES));
+    query.must(termsQuery(MUTATION_TRANSCRIPTS + ".consequence.consequence_type", CONSEQUENCE_TYPES));
 
-    return query;
+    val nestedQuery = QueryBuilders.nestedQuery(MUTATION_TRANSCRIPTS, query);
+    return boolQuery().must(nestedQuery);
   }
 }
