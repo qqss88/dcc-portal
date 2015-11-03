@@ -268,16 +268,21 @@
   // modified for our needs
   module
     //.value('$anchorScroll', angular.noop)
-    .run(function($state, $stateParams, $window, $rootScope) {
+    .run(function($state, $stateParams, $anchorScroll, $location, $window, $rootScope) {
       function scroll() {
         var state, offset, to;
         state = $state.$current;
+
+        if ($location.hash()) {
+          $anchorScroll();
+        } 
 
         // Prevents browser window from jumping around while navigating analyses
         if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
           return;
         }
 
+        
 
         // Default behaviour is to scroll to top
         // Any string that isn't [top,none] is treated as a jq selector
@@ -313,8 +318,11 @@
 
   module.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $compileProvider,
                           AngularyticsProvider, $httpProvider, RestangularProvider,
-                          markdownConverterProvider, localStorageServiceProvider, API) {
-
+                          markdownConverterProvider, localStorageServiceProvider, $uiViewScrollProvider, API) {
+    
+    // Enable the ability to do inline anchor scrolling
+    $uiViewScrollProvider.useAnchorScroll();
+    
     // Disables debugging information
     $compileProvider.debugInfoEnabled(false);
 

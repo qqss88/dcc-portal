@@ -21,9 +21,6 @@
   var module = angular.module('icgc.common.location', []);
 
   module
-    .config(function ($uiViewScrollProvider) {
-      $uiViewScrollProvider.useAnchorScroll();
-    })
     .factory('LocationService', function ($location, $anchorScroll, Notify, Extensions) {
 
     return {
