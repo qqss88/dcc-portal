@@ -90,19 +90,19 @@
       <section id="auth">
          <h2>Authorization</h2>
 
-         <p>There are tow prerequesites to using the Storage Client: DACO Cloud Access status and subsequently self-provisioning an Access Token.</p>
+         <p>There are two prerequesites to using the Storage Client: DACO Cloud Access status and a self-provisioned Access Token.</p>
 
          <h3 id="auth-daco">DACO Cloud Access</h3>
 
          <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, choose to login with either your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google).
          After successful authentication, you will know that you have access to the controlled tier if the &ldquo;login&rdquo; link is replaced with a green shield.
-        </p>
+         </p>
 
          <h3 id="auth-token">Access Tokens</h3>
 
          <p>The Access Token model used for protecting the cloud data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. Tokens are used instead of a username / password to securely access ICGC resources.</p>
 
-         <p>Related to Access Tokens is the concept of <em>Scopes</em>. Tokens allow you to associate Scopes which limit access to that needed for the target environment. This enhances security by following the <a href="http://www.wikiwand.com/en/Principle_of_least_privilege"><i class="icon-external-link"></i>Principle of Least Privilege</a>. Cloud specific Scopes will become available after acquiring DACO Cloud Access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
+         <p>Related to Access Tokens is the concept of <em>Scopes</em>. Tokens allow you to associate Scopes which limit access to that needed for the target environment. This enhances security by following the <a href="http://www.wikiwand.com/en/Principle_of_least_privilege"><i class="icon-external-link"></i>Principle of Least Privilege</a>. Cloud specific Scopes will become available after acquiring DACO Cloud Access. An instance of a cloud download token will grant access to all of the available data in that environment.</p>
 
          <h3 id="auth-token-manager">Token Manager</h3>
          <p>To acquire an Access Token, you must first acquire DACO Clould Access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will display the <em>Token Manager</em>.</p>
