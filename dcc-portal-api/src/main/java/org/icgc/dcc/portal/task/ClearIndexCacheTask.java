@@ -17,8 +17,6 @@
  */
 package org.icgc.dcc.portal.task;
 
-import static java.lang.String.format;
-
 import java.io.PrintWriter;
 
 import org.icgc.dcc.portal.service.IndexService;
@@ -29,7 +27,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.yammer.dropwizard.tasks.Task;
 
 import lombok.NonNull;
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -49,9 +46,7 @@ public class ClearIndexCacheTask extends Task {
 
   @Override
   public void execute(ImmutableMultimap<String, String> parameters, PrintWriter output) throws Exception {
-    val message =
-        format("Requesting clearCache task with parameters '%s'...", parameters);
-    log.info(message);
+    log.info("Requesting clearCache task with parameters '{}'...", parameters);
     indexService.clearCache();
   }
 
