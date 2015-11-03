@@ -403,7 +403,7 @@ bin/dcc-storage-client mount --mount-point /mnt/icgc --manfiest <span class="tok
 
         <h4>Mount in Docker</h4>
 
-        <p>First, ensure that Docker and the Storage Client image is installed. See the installation section for details.</p>
+        <p>To avoid having to install the FUSE and Java dependencies when working with the <code>mount</code> command, it is very convenient to mount from within a Docker container. This is also useful for creating a custom image for analysis that derives from the one published by ICGC. First, ensure that Docker and the Storage Client image is installed. See the <a data-scrollto href="#install">Installation</a> section for details.</p>
 
         <p>Next, export the access token generated from the portal:</p>
 
@@ -442,9 +442,13 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
       <section id="faq">
          <h2>FAQs</h2>
 
-         <h5>Where are detailed logs stored?</h5>
+         <h5>Where can I find the Bundle ID associated with an Object ID?</h5>
 
-         <p>The client log file is stored in at<code>logs/client.log</code></p>
+         <p>Currently the only way to retrieve the Bundle ID of an Object ID is viewing the file entity page in the Data Portal. Navigate to the Data Repository browser and enter the Object ID in the "File" filter and click on the resulting record.</p>
+
+         <h5>Where are detailed Storage Client logs stored?</h5>
+
+         <p>The Storage Client log file is stored in at<code>logs/client.log</code></p>
 
          <h5>How long will pre-signed URLs remain valid?</h5>
 
