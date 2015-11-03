@@ -23,8 +23,10 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_DB_ID;
 import static org.icgc.dcc.common.core.model.FieldNames.DIAGRAM_PROTEIN_MAP_UNIPROT_IDS;
 import static org.icgc.dcc.common.core.model.FieldNames.GENE_UNIPROT_IDS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_CONSEQUENCE_TYPES;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS;
+import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_CONSEQUENCE;
 import static org.icgc.dcc.common.core.model.FieldNames.MUTATION_TRANSCRIPTS_GENE;
 import static org.icgc.dcc.portal.util.SearchResponses.getTotalHitCount;
 
@@ -170,12 +172,14 @@ public class DiagramService {
   private BoolQueryBuilder getQuery(String id, String[] impacts) {
     val uniprotIdsFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_GENE + "." + GENE_UNIPROT_IDS;
     val functionalImpactFieldName = MUTATION_TRANSCRIPTS + "." + MUTATION_FUNCTIONAL_IMPACT_PREDICTION_SUMMARY;
+    val consequenceTypeFullPath =
+        MUTATION_TRANSCRIPTS + "." + MUTATION_TRANSCRIPTS_CONSEQUENCE + "." + MUTATION_CONSEQUENCE_TYPES;
 
     val query = boolQuery().must(termQuery(uniprotIdsFieldName, id));
     if (impacts.length > 0) {
       query.must(termsQuery(functionalImpactFieldName, impacts));
     }
-    query.must(termsQuery(MUTATION_TRANSCRIPTS + ".consequence.consequence_type", CONSEQUENCE_TYPES));
+    query.must(termsQuery(consequenceTypeFullPath, CONSEQUENCE_TYPES));
 
     val nestedQuery = QueryBuilders.nestedQuery(MUTATION_TRANSCRIPTS, query);
     return boolQuery().must(nestedQuery);
