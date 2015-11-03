@@ -86,7 +86,13 @@ function histogramD3() {
       var bar = g.selectAll(".bar").data(data)
       var barEnter = bar.enter().append("g")
             .attr("class", "bar")
-            .attr("transform", function(d) { return "translate(" + x(d[0]) + "," + innerHeight + ")"; });            
+            .attr("transform", function(d) { return "translate(" + x(d[0]) + "," + innerHeight + ")"; });      
+      
+      var div = d3.select('body')
+      .append("div")
+      .attr('class', 'iobio-tooltip')
+      .style('left', '0px')
+      .style('top', '0px');
       
       //  Add new bars.
       barEnter.append("rect")

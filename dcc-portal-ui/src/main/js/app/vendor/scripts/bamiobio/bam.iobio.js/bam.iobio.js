@@ -433,7 +433,7 @@ var Bam = Class.extend({
       }
       else if (me.sourceType == 'dcc')  {
          var client = BinaryClient(me.iobio.samtools);
-         var url = encodeURI( me.iobio.samtools + '?cmd=view -H /home/iobio/iobio/tools/dcc-storage-client/data/' + this.bamUri);
+         var url = encodeURI( me.iobio.samtools + '?cmd=view -h /home/iobio/iobio/tools/dcc-storage-client/data/' + this.bamUri);
          client.on('open', function(stream){
             var stream = client.createStream({event:'run', params : {'url':url}});
             var rawHeader = ""

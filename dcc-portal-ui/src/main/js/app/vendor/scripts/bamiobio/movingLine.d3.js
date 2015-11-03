@@ -43,13 +43,22 @@ function movingLineD3(container) {
           })
           .orient("bottom");
       
+      var div = d3.select('body')
+      .append("div")
+      .attr('class', 'iobio-tooltip')
+      .style('left', '0px')
+      .style('top', '0px');
+      
+      //.style("visibility", "hidden");
+      
        // add mouseover
        var formatter = d3.format(',');
        svg.on("mouseover", function() {  
-             div.transition()        
+         console.log (d3.event.pageX, d3.event.pageY);
+         div.transition()        
                  .duration(200)      
                  .style("opacity", .9);      
-             div .html(formatter(parseInt(x.invert(d3.event.pageX - $(this).position().left))))
+         div.html(formatter(parseInt(x.invert(d3.event.pageX - $(this).position().left))))
                  .style("left", (d3.event.pageX) + "px") 
                  .style("text-align", 'left')    
                  .style("top", (d3.event.pageY - 24) + "px");    

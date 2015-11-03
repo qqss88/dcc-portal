@@ -21,26 +21,27 @@
 
   module.directive('bamstats', function() {
             return {
-              replace : true,
+              replace : true, 
               restrict : 'AE',
               scope: {
                 bamId: '='
               },
               templateUrl : 'scripts/repository/views/bamiobio.html',
-              link : function($scope, element) {
-                console.log("this is the element: ", $scope.bamId);
+              link : function(scope, element) {
+                
+                console.log("this is the element: ", element);
+                
                 $("#length-distribution input[type='checkbox']").change(
                     function() {
-                      var outliers = $(this).parent().hasClass("checked");
-
-                      var dataId = $(
+                      var outliers = $(this).parent().hasClass("checked"),
+                        dataId = $(
                           "#length-distribution .chart-chooser .selected")
-                          .attr("data-id")
-                      var h = window.sampleStats[dataId];
-                      var d = Object.keys(h).map(function(k) {
-                        return [ +k, +h[k] ]
-                      });
-                      var selection = d3.select("#length-distribution svg")
+                          .attr("data-id"),
+                          h = window.sampleStats[dataId],
+                          d = Object.keys(h).map(function(k) {
+                              return [ +k, +h[k] ]
+                          }),
+                          selection = d3.select("#length-distribution svg")
                       selection.datum(d);
                       window.lengthChart(selection, {
                         'outliers' : outliers
@@ -91,7 +92,24 @@
                     range.select();
                   }
                 });
-
+                
+                $(document).on('click', '.seq-buttons', function(event) {
+                    setSelectedSeq(event.toElement);
+                });
+                  
+                
+                $(document).on('click', '.sample-more', function(event) {
+                   sampleMore(); 
+                });
+                  
+                $(document).on('click', '.length-chart', function(event) {
+                    toggleChart(event.toElement, 'lengthChart');
+                });
+                  
+                $(document).on('click', '.quality-chart', function(event) {
+                    toggleChart(event.toElement, 'qualityChart');
+                });
+                  
                 // initialize charts
                 // get height width of histogram charts and set viewboxes
                 var width = $("#read-coverage-distribution-chart").width();
@@ -105,7 +123,7 @@
                   dists[i].setAttribute('viewBox', "0 0 " + width + " "
                       + height)
                 }
-
+                
                 // setup main window read depth chart
                 window.depthChart = movingLineD3("#depth-distribution");
 
@@ -150,7 +168,8 @@
                 
                 //TODO here
 //                var bamUrl = getUrlParameter('bam')
-                var bamId = $scope.bamId;
+                var bamId = scope.bamId;
+//                var bamId = 'http://s3.amazonaws.com/iobio/NA12878/NA12878.autsome.bam'
                 // check if url to bam file is supplied in url and sample it
                 if (bamId != undefined) {
                   // remove https if present
@@ -335,7 +354,7 @@
                           $('#depth-distribution')
                               .append(
                                   "<div style='width: 100%; overflow-x: scroll;' id='seq-list'></div>");
-                          var htmlstr = "<span onclick='setSelectedSeq(this)' class='seq-buttons' data-id='"
+                          var htmlstr = "<span class='seq-buttons' data-id='"
                               + id + "'>" + id + "</span>";
                           $('#seq-list').append(htmlstr);
                           $('#depth-distribution')
@@ -348,7 +367,7 @@
 
                         } else {
                           // create seq buttons
-                          var htmlstr = "<span onclick='setSelectedSeq(this)' class='seq-buttons' data-id='"
+                          var htmlstr = "<span class='seq-buttons' data-id='"
                               + id + "'>" + id + "</span>";
                           $('#seq-list').append(htmlstr);
                         }
@@ -388,7 +407,8 @@
                   $("#total-reads>#base>#number").html(reads[1] || "");
                 }
 
-                function setSelectedSeq(selected, start, end) {
+                function setSelectedSeq (selected, start, end) {
+                  console.log('selected: ', selected);
                   var dataId = selected.getAttribute("data-id");
                   $(".seq-buttons.selected").removeClass("selected");
                   $(selected).addClass("selected");
@@ -677,21 +697,21 @@
                   goBam();
                 }
 
-                function openBamId() {
-                  //TODO here
-//                  var id = $("#id-input").val();
-                  var id = "c342c10f-65a3-5dbf-8811-d7af835cf606";
-                  // remove https if present
-                  // if (url.slice(0,5) == 'https')
-                  // url = 'http' + url.slice(5,url.length);
-                  
-                  //TODO here
-//                  window.history.pushState({
-//                    'index.html' : 'bar'
-//                  }, null, "?bam=" + id);
-                  window.bam = new Bam(id);
-                  goBam();
-                }
+//                function openBamId() {
+//                  //TODO here
+////                  var id = $("#id-input").val();
+//                  var id = "c342c10f-65a3-5dbf-8811-d7af835cf606";
+//                  // remove https if present
+//                  // if (url.slice(0,5) == 'https')
+//                  // url = 'http' + url.slice(5,url.length);
+//                  
+//                  //TODO here
+////                  window.history.pushState({
+////                    'index.html' : 'bar'
+////                  }, null, "?bam=" + id);
+//                  window.bam = new Bam(id);
+//                  goBam();
+//                }
 
                 function tickFormatter(d) {
                   if ((d / 1000000) >= 1)

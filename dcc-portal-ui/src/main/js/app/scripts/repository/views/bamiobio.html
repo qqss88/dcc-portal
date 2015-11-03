@@ -8,18 +8,15 @@
                 <input type="checkbox"value="" class="outlier" data-toggle="checkbox" >
                 Exome
             </label> -->
-            <div id="remove-bedfile-button" class="bedfile-button" onClick="removeBedFile()" style="visibility:hidden">Remove Bed</div>
-            <div id="default-bedfile-button" class="bedfile-button" onClick="addDefaultBedFile()" title="1000G human exome targets file " style="right:110px">Default Bed</div>
-            <label id="add-bedfile-button" class="bedfile-button" for="bedfile" title="Add Bed format capture target definition file">Custom Bed</label>
             <div id="readDepthLoadingMsg" style="font-size:50px;margin-top:30px;color:#2687BE">Initializing data <img style="height:18px" src="vendor/styles/bamiobio/images/loading_dots.gif"/></div>
             <!-- <ul id="sequences"></ul> -->
         </div>
         <div id="total-reads" class="panel">
             <div class="title">Reads Sampled</div>
-            <div id="value" style="font-size:5.5vw; color:#2687BE; text-align:center;padding-left:8px;">0</div>
-            <div id="base" style="font-size:1.4vw;padding-left:28px; letter-spacing:3px; color:#2687BE; text-align:center;">
+            <div id="value" style="font-size:3.5vw; color:#2687BE; text-align:center;padding-bottom:10px;">0</div>
+            <div id="base" style="font-size:1.4vw;padding-left:10px; letter-spacing:3px; color:#2687BE; text-align:center;">
                 <span id="number"></span>
-                <img title="Sample More" style="width:20px;margin-bottom:-3px;margin-left:-7px;cursor:pointer" onClick="sampleMore()"  src="vendor/styles/bamiobio/images/more_sampling.png"></img>
+                <img title="Sample More" class="sample-more" style="width:20px;margin-bottom:-3px;margin-left:-7px;cursor:pointer" src="vendor/styles/bamiobio/images/more_sampling.png"></img>
             </div>
             
         </div>
@@ -57,7 +54,7 @@
                 <svg id="read-coverage-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:90%"></svg>
             </div>
             <div id="length-distribution" class="distribution panel">
-                <div><div class="chart-chooser"><span class="selected" onclick="toggleChart(this,'lengthChart')" data-outlier="false" data-id="frag_hist">Insert Length</span> | <span onclick="toggleChart(this,'lengthChart')" data-id="length_hist" data-outlier="true">Read Length</span></div></div>                    
+                <div><div class="chart-chooser"><span class="selected length-chart" data-outlier="false" data-id="frag_hist">Insert Length</span> | <span class="length-chart" data-id="length_hist" data-outlier="true">Read Length</span></div></div>                    
                 <label class="checkbox" for="checkbox2" style="position:absolute;right:10px;top:24px;cursor:pointer" >
                     <input type="checkbox"value="" class="outlier" data-toggle="checkbox" >
                     Outliers
@@ -66,10 +63,11 @@
                 <svg id="length-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:85%"></svg>
             </div>
             <div id="mapping-quality-distribution" class="distribution panel">
-                <div><div class="chart-chooser"><span onclick="toggleChart(this,'qualityChart')" data-id="mapq_hist" class="selected">Mapping Quality</span> | <span data-id="baseq_hist" onclick="toggleChart(this,'qualityChart')">Base Quality</span></div></div>
+                <div><div class="chart-chooser"><span data-id="mapq_hist" class="selected quality-chart">Mapping Quality</span> | <span class="quality-chart" data-id="baseq_hist">Base Quality</span></div></div>
                 <div class="samplingLoader">Sampling <img src="vendor/styles/bamiobio/images/loading_dots.gif"/></div>
                 <svg id="mapping-quality-distribution-chart" class="focus" preserveAspectRatio="none" style="width:98%;height:90%"></svg>
             </div>
         </div>
-    </section>   
+    </section>
+<div style="float:right"><p>Powered by <a href="http://iobio.io/">Iobio</a></p></div>
 </div>
