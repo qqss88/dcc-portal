@@ -108,8 +108,11 @@ section {
   border-bottom: 1px solid $greyLight;
   
   a {
-    white-space: nowrap;
     text-indent: initial;
+    
+    &.link {
+      white-space: nowrap;
+    }
   }
 
   .indent {
