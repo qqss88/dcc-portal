@@ -44,7 +44,8 @@
                            <li>Generate an <em>Access Token</em> for cloud download</li>
                         </ul>
                      </li>
-                     <li><a data-scrollto href="#preqs">Prerequistes</a><br> Create a <em>Compute Instance</em> in the target cloud if not aready available</li>
+                     <li><a data-scrollto href="#preqs">Prerequistes</a><br> 
+                     Create a <em>compute instance</em> in the target cloud if there is not one already running.</li>
                      <li><a data-scrollto href="#install">Installation</a><br> Download and install the ICGC <em>Storage Client</em></li>
                      <li><a data-scrollto href="#config">Configuration</a><br> Configure the Storage Client to use the generated Access Token.</li>
                      <li><a data-scrollto href="#fs-search">Search</a><br> Identify files of interest using the Data Portal</li>
@@ -95,7 +96,9 @@
 
          <h3 id="auth-daco">DACO Cloud Access</h3>
 
-         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
+         <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). 
+         After successful authentication, you will know that you have access to the controlled tier if the &ldquo;login&rdquo; link is replaced with a green shield.
+        </p>
 
          <h3 id="auth-token">Access Token</h3>
 
@@ -201,7 +204,7 @@
 
             <pre class="language-shell"><code class="language-shell">docker pull icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
 
-            <p>Once pulled, you can enter in to the container with the following:</p>
+            <p>Once pulled, you can enter into the container...</p>
 
             <pre class="language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
 
@@ -431,9 +434,9 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <p>The client log file is stored in at<code>logs/client.log</code></p>
 
-         <h5>How long will pre-signed urls valid?</h5>
+         <h5>How long will pre-signed URLs remain valid?</h5>
 
-         <p>Pre-signed URLs will be valid for 7 days after the time they were created.</p>
+         <p> Pre-signed URLs are valid for 7 days from the time they are issued. A token issued to one user cannot be used by another.</p>
 
          <h5>Does the client maintain state?</h5>
 
@@ -446,9 +449,13 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
 
          <p>Ensure that you are running within the AWS <code>us-east-1</code> <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions-availability-zones" target="_blank"><i class="icon-external-link"></i>region</a>.</p>
 
-         <h5>I can&rsquo;t use the result of a <code>url</code> command with <code>samtools</code></h5>
+         <h5>I can&rsquo;t use the result of a <code>url</code> command with <code>samtools</code>:</h5>
 
-         <p><code>samtools</code> doesn&rsquo;t support HTTPS which is a requirement for ICGC&rsquo;s security policy concerning S3. Use the <code>view</code> command to pipe to samtools or download the entire file locally.</p>
+         <p>
+           <code>samtools</code> doesn&rsquo;t support the HTTPS 
+            protocol, which is required by ICGC to access S3-stored data files. 
+            Use the client <code>view</code> command to pipe data to samtools, download the desired files locally, or use the mount command to create a FUSE mount of the ICGC data files.
+         </p>
 
          <h5>How do I report a bug in the software?</h5>
 
