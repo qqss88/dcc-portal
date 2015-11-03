@@ -26,7 +26,7 @@
       <section id="overview">
          <h2>Overview</h2>
 
-         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory</a> clouds.</p>
+         <p>This user guide will walk a user through the steps needed to begin securely exploring and analysing ICGC data stored in <a href="https://aws.amazon.com/about-aws/" target="_blank"><i class="icon-external-link"></i>Amazon Web Services (AWS)</a> or <a href="https://www.cancercollaboratory.org/"><i class="icon-external-link"></i>Collaboratory OpenStack</a> clouds.</p>
 
          <p>The general process is described in the following section. Please see <a data-scrollto href="#terms">Terms</a> for a glossary of related terms.</p>
 
@@ -44,7 +44,7 @@
             <li><a data-scrollto href="#auth">Authorization</a>: Generate an access token for cloud download</li>
             <li><a data-scrollto href="#preqs">Prerequistes</a>: Create a compute instance in the target clould if not aready available</li>
             <li><a data-scrollto href="#install">Installation</a>: Download and install the ICGC Storage Client</li>
-            <li><a data-scrollto href="#config">Configuration</a>: Configure the storage client to use the access token from step 3.</li>
+            <li><a data-scrollto href="#config">Configuration</a>: Configure the Storage Client to use the access token from step 3.</li>
             <li><a data-scrollto href="#fs-search">Search</a>: Identify files of interest using the Data Portal</li>
             <li><a data-scrollto href="#storage-client">Usage</a>: Download or view data with the provided Storage Client or via an external tool</li>
          </ol>
@@ -83,7 +83,7 @@
 
          <h3 id="auth-daco">DACO Access</h3>
 
-         <p>DACO access is prerequisite to using the storage client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
+         <p>DACO access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">access token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
 
          <h3 id="auth-token">Access Token</h3>
 
@@ -158,32 +158,32 @@
          </p>
 
          <h3>Operating System</h3>
-         <p>The storage client has been designed to work on modern Mac and Linux distributions. Windows should work as well but remains untested.</p>
+         <p>The Storage Client has been designed to work on modern Mac and Linux distributions. Windows should work as well but remains untested.</p>
 
 
          <h3>Dependencies</h3>
 
-         <p>The storage client requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used.</p>
+         <p>The Storage Client requires Java 8 to be installed. It has been tested using the Oracle distribution. The procedure for installing Java 8 will vary depending on the operating system and package manager used.</p>
          <p>
            In order to use the mount feature, <a href="http://fuse.sourceforge.net/" target="_blank"><i class="icon-external-link"></i>FUSE</a> is required. On most Linux based systems this will require installing <code>libfuse-dev</code> and <code>fuse</code> packages.
          </p>
       </section>
       <section id="install">
          <h2>Installation</h2>
-         <p>This section describes how to install the storage client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>
+         <p>This section describes how to install the Storage Client. The are two options: (a) from a tarball and (b) from a Docker image hosted on Dockerhub.</p>
 
          <div class="section_ident">
             <h3>From Tarball</h3>
 
             <h4>Download</h4>
-            <p>To begin using the storage client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
+            <p>To begin using the Storage Client, the first step is to download the distribution. The latest version can be downloaded from <a href="/repositories/aws-virginia#downloads">here</a>.</p>
 
             <pre class="language-shell"><code class="language-shell">wget https<span class="token punctuation">:</span><span class="token operator">/</span><span class="token operator">/</span>dcc<span class="token punctuation">.</span>icgc<span class="token punctuation">.</span>org<span class="token operator">/</span>software<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client<span class="token operator">/</span>latest</code></pre>
 
-            <p>After untaring the archive, the storage client will be available at <code>bin/dcc-storage-client</code>. Steps to verify the authenticity and integrity of the download can be found on our <a href="/software">software</a> page.</p>
+            <p>After untaring the archive, the Storage Client will be available at <code>bin/dcc-storage-client</code>. Steps to verify the authenticity and integrity of the download can be found on our <a href="/software">software</a> page.</p>
             <h3>From Docker Image</h3>
 
-            <p>We also support a Docker image of the storage client that is bundled with Java 8 for easy deployment.</p>
+            <p>We also support a Docker image of the Storage Client that is bundled with Java 8 for easy deployment.</p>
 
             <p>The image is hosted at <a href="https://hub.docker.com/r/icgc/dcc-storage-client/" target="_blank"><i class="icon-external-link"></i>https://hub.docker.com/r/icgc/dcc-storage-client/</a> and downloaded by issuing the following command:</p>
 
@@ -193,7 +193,7 @@
 
             <pre class="language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
 
-            <p>There is no entry point or command defined for the image. The software may be located at <code>/icgc/dcc-storage-client</code> which is also the working directory of the container. All other steps for <a data-scrollto href="#storage-client">using the storage client</a> will be the same for both Docker and tarball installations.</p>
+            <p>There is no entry point or command defined for the image. The software may be located at <code>/icgc/dcc-storage-client</code> which is also the working directory of the container. All other steps for <a data-scrollto href="#storage-client">using the Storage Client</a> will be the same for both Docker and tarball installations.</p>
          </div>
 
       </section>
@@ -206,6 +206,10 @@
 
          <pre class="language-shell"><code class="language-shell">accessToken<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span></code></pre>
 
+         <p>With docker, this can also be set with an environmental variable:</p>
+
+         <pre class=" language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it <span class="token operator">-</span>e ACCESSTOKEN<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span> icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
+
          <div class="guide-callout guide-callout-collab">
            <div class="guide-callout-content">
             <h4>Collaboratory</h4>
@@ -217,11 +221,6 @@
             </p>
            </div>
          </div>
-
-
-         <p>With docker, this can also be set with an environmental variable:</p>
-
-         <pre class=" language-shell"><code class="language-shell">docker run <span class="token operator">-</span>it <span class="token operator">-</span>e ACCESSTOKEN<span class="token operator">=</span><span class="token operator">&lt;</span>access token<span class="token operator">&gt;</span> icgc<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client</code></pre>
       </section>
       <section id="fs-search">
          <h2>File Search</h2>
@@ -232,17 +231,17 @@
             <li>Navigate to <a href="https://dcc.icgc.org/repositories">repository file search</a></li>
             <li>Click on the <code>AWS</code> or <code>Collaboratory</code> filter in the left hand pane</li>
             <li>Filter based on properties of interest (e.g. donor id, specimen id, etc.)</li>
-            <li>Export manifest for future use with the storage client</li>
+            <li>Export manifest for future use with the Storage Client</li>
          </ul>
 
-         <p>The manifest is the main way to define what files should be downloaded by the storage client. However, knowing the object id is sufficient for a single file download.</p>
+         <p>The manifest is the main way to define what files should be downloaded by the Storage Client. However, knowing the object id is sufficient for a single file download.</p>
       </section>
       <section id="storage-client">
          <h2>Storage Client Usage</h2>
 
-         <p>This section provides information on how to use the storage client once it has been properly downloaded and configured. It assumes the user possesses and has configured the requisite access token discussed previously. </p>
+         <p>This section provides information on how to use the Storage Client once it has been properly downloaded and configured. It assumes the user possesses and has configured the requisite access token discussed previously. </p>
 
-         <p>The storage client has the general syntax:</p>
+         <p>The Storage Client has the general syntax:</p>
 
          <pre class="language-shell"><code class=" language-shell">dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span>command options<span class="token punctuation">]</span></code></pre>
 
@@ -250,13 +249,13 @@
 
          <h3>Help</h3>
 
-         <p>The storage client provides a <code>--help</code> option to list the available commands and a brief description of their supported options:</p>
+         <p>The Storage Client provides a <code>--help</code> option to list the available commands and a brief description of their supported options:</p>
 
          <pre class="language-shell"><code class="language-shell">bin/dcc-storage-client --help</code></pre>
 
          <h3>URL Command</h3>
 
-         <p>The <code>url</code> command is the most basic command supported by the storage client. It allows one to resolve the underyling S3 URL for the requested object. This is useful if one wants to directly access the URL via HTTPS with an external client or tool (e.g. <code>curl</code>, <code>wget</code>, etc.)</p>
+         <p>The <code>url</code> command is the most basic command supported by the Storage Client. It allows one to resolve the underyling S3 URL for the requested object. This is useful if one wants to directly access the URL via HTTPS with an external client or tool (e.g. <code>curl</code>, <code>wget</code>, etc.)</p>
 
          <pre class=" language-javascript"><code class=" language-javascript">bin<span class="token operator">/</span>dcc<span class="token operator">-</span>storage<span class="token operator">-</span>client url <span class="token operator">--</span>object<span class="token operator">-</span>id ddcdd044<span class="token operator">-</span>adda<span class="token operator">-</span>5f09<span class="token number">-8849</span><span class="token operator">-</span>27d6038f8ccd</code></pre>
 
@@ -348,10 +347,6 @@ wget https<span class="token punctuation">:</span><span class="token operator">/
         </p>
         <h4>All Files</h4>
         <p>To mount all available files locally, issue the following:</p>
-
-
-
-
         <pre class="language-shell"><code class=" language-shell"># Create the mount point
 mkdir /mnt/icgc
 
@@ -483,7 +478,7 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                </tr>
                <tr>
                   <td><em>Manifest</em></td>
-                  <td>A file used as input to the storage client to describe and identify files to be downloaded</td>
+                  <td>A file used as input to the Storage Client to describe and identify files to be downloaded</td>
                </tr>
                <tr>
                   <td><em>Object Id</em></td>

@@ -64,7 +64,7 @@
        var _enabledFeatures = {
           AUTH_TOKEN: false,
           ICGC_CLOUD: true,
-          SOFTWARE_PAGE: false
+          SOFTWARE_PAGE: true
        };
 
       this.hasFeature = function(featureID) {
