@@ -268,14 +268,18 @@
   // modified for our needs
   module
     //.value('$anchorScroll', angular.noop)
-    .run(function($state, $stateParams, $anchorScroll, $location, $window, $rootScope) {
+    .run(function($state, $stateParams, $anchorScroll, $location, $window, $timeout, $rootScope) {
       function scroll() {
         var state, offset, to;
         state = $state.$current;
 
-        if ($location.hash()) {
-          $anchorScroll();
-        } 
+        // Give angular some time to do digests then check for a
+        // in page scroll
+        $timeout(function () {
+          if ($location.hash()) {
+            $anchorScroll();
+          }
+        }, 100);
 
         // Prevents browser window from jumping around while navigating analyses
         if (['analyses', 'analyses.analysis'].indexOf($state.current.name) >= 0) {
