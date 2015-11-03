@@ -204,8 +204,7 @@
                 var ensemblId = uniprotObj[0].id;
                 n.advQuery =  LocationService.mergeIntoFilters({
                   gene: {
-                    id:  {is: [ensemblId]},
-                    pathwayId: {is: [_parentPathwayId]}
+                    id:  {is: [ensemblId]}
                   }
                 });
                 n.geneSymbol = uniprotObj[0].symbol;
