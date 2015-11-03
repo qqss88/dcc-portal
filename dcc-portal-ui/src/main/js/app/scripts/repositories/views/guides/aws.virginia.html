@@ -97,10 +97,27 @@
 
          <p>DACO Cloud Access is prerequisite to using the Storage Client. To apply for DACO access please follow the instructions provided at <a href="https://icgc.org/daco" target="_blank"><i class="icon-external-link"></i>https://icgc.org/daco</a>. Once approved, you will be able to <a href="https://dcc.icgc.org/">login</a> to the Data Portal to generate an <a data-scrollto href="#auth-token" data-scroll-offset="70">Access Token</a>. To login, click on the &ldquo;Login&rdquo; link in the upper right-hand corner of the page. When prompted, either choose to login with your <a href="https://icgc.org/user/login" target="_blank"><i class="icon-external-link"></i>ICGC.org login</a> or one of the supported OpenID providers (e.g. Google). After a successful authentication redirect, one can validate that the necessary access has been obtained if a green shield is revealed where the &ldquo;Login&rdquo; link once was.</p>
 
-         <h3 id="auth-token">Access Token</h3>
+         <h3 id="auth-token">Access Tokens</h3>
 
-         <p>The access token model used for protecting the cloud data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. Scopes will become available after acquiring cloud DACO access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
+         <p>The Access Token model used for protecting the cloud data set follows a similar process to Github&rsquo;s <a href="https://help.github.com/articles/creating-an-access-token-for-command-line-use/" target="_blank"><i class="icon-external-link"></i>personal access tokens</a>. Tokens are used instead of a username / password to securely access ICGC resources.</p>
 
+         <p>Related to Access Tokens is the concept of <em>Scopes</em>. Tokens allow you to associate Scopes which limit access to that needed for the target environment. This enhances security by following the <a href="http://www.wikiwand.com/en/Principle_of_least_privilege"><i class="icon-external-link"></i>Principle of Least Privilege</a>. Cloud specific Scopes will become available after acquiring DACO Cloud Access. A instance of a cloud download token will grant access to all of the available data in that environment.</p>
+
+         <h3 id="auth-token-manager">Token Manager</h3>
+         <p>To acquire a token you must first acquire DACO Clould Access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will display the <em>Token Manager</em>.</p>
+
+         <div class="screen-shot">
+          <img  style="width: 30%;" src="styles/images/repositories/guides/token_manager_link.png" alt="Token Manager Link" />
+         </div>
+
+         <p>From this page, you can manage the Access Tokens associated with your account. Importantly, you may delete and regenerate an access token if you believe that it has been compromised.</p>
+         <div class="screen-shot">
+            <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/token_manager_screenshot.png" target="_blank">
+               <img src="styles/images/repositories/guides/token_manager_screenshot.png" alt="Token Manager Screenshot" />
+            </a>
+         </div>
+
+         <p>When creating an Access Token you will need to specify the Scope associated with the target cloud(s).</p>
          <div class="guide-callout guide-callout-aws">
            <div class="guide-callout-content">
             <h4>AWS</h4>
@@ -118,20 +135,9 @@
             </div>
          </div>
 
-         <p>To acquire a token you must first acquire DACO access and login to the Data Portal. After a successful login, there will be a small gear icon on the upper right corner of the page. Clicking on this icon will allow you to manage the tokens associated with the account. You will need to specify the scope mentioned above when you generate your token.</p>
+         <p>You can verify that your Access Token has the desired scopes by inspecting it in the table at the bottom of the page.</p>
 
-
-         <div class="screen-shot">
-          <img  style="width: 30%;" src="styles/images/repositories/guides/token_manager_link.png" alt="Token Manager Link" />
-         </div>
-
-         <p>You will then need to edit the client configuration file in the storage client to include this token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
-         <p>You can delete and regenerate an access token if you believe that it has been compromised.</p>
-         <div class="screen-shot">
-            <a title="Click the token manager screenshot to see the full image." href="styles/images/repositories/guides/token_manager_screenshot.png" target="_blank">
-               <img src="styles/images/repositories/guides/token_manager_screenshot.png" alt="Token Manager Screenshot" />
-            </a>
-         </div>
+         <p>You will then need to edit the client configuration file in the Storage Client to include the generated Access Token. See the <a data-scrollto href="#config">Configuration</a> section for additional information.</p>
       </section>
       <section id="preqs">
          <h2>Prerequisites</h2>
@@ -507,6 +513,10 @@ samtools view /mnt/fff75930-0f8c-4c99-9b48-732e7ed4c625/443a7a6ab964e41c011cc9a3
                <tr>
                   <td><em>OpenStack</em></td>
                   <td>OpenStack is a cloud operating system that controls large pools of compute, storage, and networking resources throughout a datacenter, all managed through a dashboard that gives administrators control while empowering their users to provision resources through a web interface.</td>
+               </tr>
+               <tr>
+                  <td><em>Scope</em></td>
+                  <td>A user permission or authorization to access a resource.</td>
                </tr>
                <tr>
                   <td><em>Storage Client</em></td>
