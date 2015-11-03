@@ -24,7 +24,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.math.LongMath.divide;
 import static java.lang.String.format;
 import static java.math.RoundingMode.CEILING;
-import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -119,6 +118,7 @@ import org.icgc.dcc.portal.model.SearchFieldMapper;
 import org.icgc.dcc.portal.model.TermFacet;
 import org.icgc.dcc.portal.model.TermFacet.Term;
 import org.icgc.dcc.portal.pql.convert.Jql2PqlConverter;
+import org.icgc.dcc.portal.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -181,13 +181,16 @@ public class RepositoryFileRepository {
   private final Client client;
   private final String repoIndexName;
   private final QueryEngine queryEngine;
+  private final IndexService indexService;
 
   @Autowired
   public RepositoryFileRepository(Client client,
-      @NonNull @org.springframework.beans.factory.annotation.Value("#{repoIndexName}") String repoIndexName) {
+      @NonNull @org.springframework.beans.factory.annotation.Value("#{repoIndexName}") String repoIndexName,
+      IndexService indexService) {
     this.client = client;
     this.repoIndexName = repoIndexName;
     this.queryEngine = new QueryEngine(client, repoIndexName);
+    this.indexService = indexService;
   }
 
   public static boolean isNestedField(String fieldAlias) {
@@ -1015,17 +1018,7 @@ public class RepositoryFileRepository {
 
   @SneakyThrows
   public Map<String, String> getIndexMetaData() {
-    val state = client.admin().cluster().prepareState().setIndices(repoIndexName).execute().actionGet().getState();
-
-    val indexMetaData = state.getMetaData().index(repoIndexName);
-
-    val mappingMetaData = indexMetaData.getMappings().values().iterator().next().value;
-    val source = mappingMetaData.sourceAsMap();
-
-    @SuppressWarnings("unchecked")
-    val meta = (Map<String, String>) source.get("_meta");
-
-    return (meta == null) ? emptyMap() : meta;
+    return indexService.getIndexMetaData(client, repoIndexName);
   }
 
 }

@@ -114,7 +114,7 @@ public class RepositoryFileServiceTest extends BaseElasticSearchTest {
     // This creates and populates the test index with fixture data.
     es.execute(createIndexMapping(Type.REPOSITORY_FILE_CENTRIC)
         .withData(bulkFile(getClass())));
-    service = new RepositoryFileService(new RepositoryFileRepository(es.client(), REPO_INDEX_NAME));
+    service = new RepositoryFileService(new RepositoryFileRepository(es.client(), REPO_INDEX_NAME, new IndexService()));
   }
 
   @Test
