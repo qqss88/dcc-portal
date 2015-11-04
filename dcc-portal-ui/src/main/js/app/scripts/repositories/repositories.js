@@ -184,7 +184,7 @@ angular.module('icgc.repositories.controllers', [])
       function _init() {
          Page.stopWork();
          Page.setPage('entity');
-         Page.setTitle('ICGC in the cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
+         Page.setTitle('ICGC in the Cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
 
 
          // In this case we are querying by the repo name which is indexed.

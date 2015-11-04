@@ -62,7 +62,7 @@
     .provider('PortalFeature', function() {
 
        var _enabledFeatures = {
-          AUTH_TOKEN: false,
+          AUTH_TOKEN: true,
           ICGC_CLOUD: true,
           SOFTWARE_PAGE: true
        };
