@@ -44,10 +44,11 @@
     function login(data) {
       delete $cookies.openid_error;
       user = {
-        email: data.username,
-        token: data.token,
-        daco: data.daco,
-        verifying: false
+        email: data.username || 'Unknown User',
+        token: data.token || false,
+        daco: data.daco || false,
+        verifying: false,
+        cloudAccess: data.cloudAccess || false
       };
     }
 
@@ -144,7 +145,7 @@
       $scope.params.cudUsername = null;
       $scope.params.cudPassword = null;
       $scope.params.showCollaboratoryToken = PortalFeature.get('AUTH_TOKEN');
-
+    
 
 
       function setup() {
