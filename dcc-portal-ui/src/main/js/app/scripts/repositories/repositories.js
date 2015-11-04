@@ -95,7 +95,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
             views: {
                'repositoryGuides': {
                   templateUrl: function () {
-                     return    'scripts/repositories/views/guides/aws.virginia.html';
+                     return    'scripts/repositories/views/guide.html';
                   },
                   controller: 'RepositoriesGuideController as repositoryGuideCtrl'
                }
@@ -184,7 +184,7 @@ angular.module('icgc.repositories.controllers', [])
       function _init() {
          Page.stopWork();
          Page.setPage('entity');
-         Page.setTitle('ICGC in the cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
+         Page.setTitle('ICGC in the Cloud - ' + _capitalizeWords(_repoContext) +  ' Repository');
 
 
          // In this case we are querying by the repo name which is indexed.
