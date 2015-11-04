@@ -22,9 +22,8 @@
           
       <span data-ng-bind="params.user.email"></span>
       <ul class="toolbar">
-        <li class="tool-item">
+        <li class="tool-item" data-ng-show="params.user.daco && params.showCollaboratoryToken" >
           <a href="" 
-            data-ng-show="params.user.daco && params.showCollaboratoryToken" 
             data-ng-click="openTokenManagerPopup()" 
             data-tooltip="Token Manager Settings"
             class="tool-bttn" 
