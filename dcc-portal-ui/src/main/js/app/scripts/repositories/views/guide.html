@@ -213,7 +213,9 @@
       </section>
       <section id="config">
          <h2>Configuration</h2>
+         <p>The configuration of the Storage Client is stored in the <code>conf/application.propertie</code> file of the distribution.</p>
 
+         <h3>Access Configuration</h3>
          <p>The main configuration element is the access token generated in <a data-scrollto data-scroll-offset="70" href="#auth-token">Access Token</a> above. Configuration is stored in the <code>conf/</code> directory of the distribution.</p>
 
          <p>Edit <code>application.properties</code> and add the generated accesss token to the line:</p>
@@ -235,6 +237,13 @@
             </p>
            </div>
          </div>
+
+         <h3>Transport Configuration</h3>
+         <p>Based on the target Compute Instance defined in <a data-scrollto href="#preqs">Compute Prerequisites</a> and transfer speed requirements, it may be necessary to make changes to how the Storage Client transfers data. This is achieved by setting <code>transport.parallel</code> and <code>transport.memory</code>:</p>
+         <ul>
+            <li><code>transport.parallel</code> controls the number of concurrent threads for multi-part data transfers. It is recommend to set this to the number of cores of the Compute Image</li>
+            <li><code>transport.memory</code> is the amount of non-heap memory per thread, in gigabytes. It is recommended set this to a value of <code>1</code> (1 GB). Be sure to leave enough memory for the operating system and any other software that may be running on the Compute Instance.</li>
+         </ul>
       </section>
       <section id="fs-search">
          <h2>File Search</h2>
