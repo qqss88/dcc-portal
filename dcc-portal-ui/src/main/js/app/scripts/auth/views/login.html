@@ -8,7 +8,7 @@
          data-tooltip-placement="bottom"
          data-tooltip="Unauthorized"></i>
       <span><a href="">{{params.user.email}}</a></span>
-   <i data-ng-show="params.user.daco && params.showCollaboratoryToken" style="cursor: pointer" class="icon-cog" data-ng-click="openTokenManagerPopup()" data-tooltip="Token Settings" data-tooltip-placement="bottom"></i> (
+   <i data-ng-show="params.user.daco && params.showCollaboratoryToken" style="cursor: pointer" class="icon-key" data-ng-click="openTokenManagerPopup()" data-tooltip="Token Settings" data-tooltip-placement="bottom"></i> (
    <a href="" data-ng-click="logout()"><i class="icon-logout"></i> Logout</a>)</span>
    <a data-ng-hide="params.user.token || params.user.verifying" data-ng-click="openLoginPopup()" href="">
       <i class="icon-login"></i>Login</a>

@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icgc-icons';
-  src: url('fonts/icgc-icons.eot?24741710');
-  src: url('fonts/icgc-icons.eot?24741710#iefix') format('embedded-opentype'),
-       url('fonts/icgc-icons.woff?24741710') format('woff'),
-       url('fonts/icgc-icons.ttf?24741710') format('truetype'),
-       url('fonts/icgc-icons.svg?24741710#icgc-icons') format('svg');
+  src: url('fonts/icgc-icons.eot?35289213');
+  src: url('fonts/icgc-icons.eot?35289213#iefix') format('embedded-opentype'),
+       url('fonts/icgc-icons.woff?35289213') format('woff'),
+       url('fonts/icgc-icons.ttf?35289213') format('truetype'),
+       url('fonts/icgc-icons.svg?35289213#icgc-icons') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -126,6 +126,7 @@
 .icon-cloud-1:before { content: '\e845'; } /* '' */
 .icon-download-cloud:before { content: '\e846'; } /* '' */
 .icon-clippy:before { content: '\e847'; } /* '' */
+.icon-key:before { content: '\e848'; } /* '' */
 
 /*
    Animation example, for spinners
