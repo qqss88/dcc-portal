@@ -95,7 +95,7 @@ angular.module('icgc.repositories', ['icgc.repositories.controllers', 'icgc.repo
             views: {
                'repositoryGuides': {
                   templateUrl: function () {
-                     return    'scripts/repositories/views/guides/aws.virginia.html';
+                     return    'scripts/repositories/views/guide.html';
                   },
                   controller: 'RepositoriesGuideController as repositoryGuideCtrl'
                }

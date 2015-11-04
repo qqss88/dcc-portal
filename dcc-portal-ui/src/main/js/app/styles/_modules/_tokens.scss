@@ -30,24 +30,6 @@
       }
    }
 
-   .token-scopes {
-      margin-right: 20px;
-      .token-badge {
-         margin-left: 3px;
-      }
-      li {
-         border-top: 1px solid #eee;
-         padding: 3px;
-      }
-      li:last-of-type {
-         border-bottom: 1px solid #eee;
-      }
-   }
-
-   .token-badge {
-      margin-right: 3px;
-   }
-
    .token-description {
       float: right;
       font-style: italic;
@@ -66,4 +48,23 @@
    .t_tools__tool {
       font-size:1.25rem; margin-left: 0;
    }
+}
+
+
+.token-scopes {
+   margin-right: 20px;
+   .token-badge {
+      margin-left: 3px;
+   }
+   li {
+      border-top: 1px solid #eee;
+      padding: 3px;
+   }
+   li:last-of-type {
+      border-bottom: 1px solid #eee;
+   }
+}
+
+.token-badge {
+   margin-right: 3px;
 }
