@@ -313,7 +313,7 @@ public class PortalConfig {
     return Mailer.builder()
         .enabled(mail.isEnabled())
         .recipient(mail.getRecipientEmail())
-        .from(mail.getSenderName())
+        .from(mail.getSenderEmail())
         .host(mail.getSmtpServer())
         .port(Integer.toString(mail.getSmtpPort()))
         .build();
