@@ -208,6 +208,10 @@ function ICGCGruntConfigProvider() {
         files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
         tasks: ['compass:server']
       },
+      injector: {
+        files: ['<%= yeoman.app %>/index.html'],
+        tasks: ['injector:dev']
+      },
       livereload: {
         options: {
           livereload: LIVERELOAD_PORT
