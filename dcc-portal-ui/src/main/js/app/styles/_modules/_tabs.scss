@@ -59,6 +59,12 @@
   }
 }
 
+.t_tabs__tab__file {
+  &.active, &:hover {
+    border-top-color: $file;
+  } 
+}
+
 .t_tabs__tab__charts {
   &.active, &:hover {
     border-top-color: $charts;

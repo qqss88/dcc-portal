@@ -8,7 +8,7 @@
 </div>
 
 <div>
-<section>
+<section style="border-bottom: none;">
 The ICGC DCC is periodically aggregating and indexing ICGC data hosted in multiple archives
 and <a href="/icgc-in-the-cloud/">cloud</a> repositories worldwide.
 More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">here</a>.
@@ -17,12 +17,12 @@ More information <a href="https://docs.icgc.org/data-portal-usage#externalrepo">
 <aside class="t_sidebar">
 
   <div class="t_tabs">
-    <div class="t_tabs__tab"
+    <div class="t_tabs__tab t_tabs__tab__file"
       ng-class="{ active: ExternalRepoController.isOnFilesTab() }"
       ng-click="ExternalRepoController.setTabToFiles()">
       Files
     </div>
-    <div class="t_tabs__tab"
+    <div class="t_tabs__tab t_tabs__tab__donor"
       ng-class="{ active: ExternalRepoController.isOnDonorsTab() }"
       ng-click="ExternalRepoController.setTabToDonors()">
       Donors

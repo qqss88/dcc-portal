@@ -2710,26 +2710,31 @@ h1 .t_badge_icon {
 }
 
 /* line 63, _modules/_tabs.scss */
+.t_tabs__tab__file.active, .t_tabs__tab__file:hover {
+  border-top-color: #666666;
+}
+
+/* line 69, _modules/_tabs.scss */
 .t_tabs__tab__charts.active, .t_tabs__tab__charts:hover {
   border-top-color: #6d72c5;
 }
 
-/* line 69, _modules/_tabs.scss */
+/* line 75, _modules/_tabs.scss */
 .t_tabs__tab__table.active, .t_tabs__tab__table:hover {
   border-top-color: #d33682;
 }
 
-/* line 75, _modules/_tabs.scss */
+/* line 81, _modules/_tabs.scss */
 .t_tabs__tab__history.active, .t_tabs__tab__history:hover {
   border-top-color: #1a9900;
 }
 
-/* line 81, _modules/_tabs.scss */
+/* line 87, _modules/_tabs.scss */
 aside .t_tabs {
   margin-top: 0;
   margin-right: -2rem;
 }
-/* line 85, _modules/_tabs.scss */
+/* line 91, _modules/_tabs.scss */
 aside .t_tabs__tab {
   padding: .5rem 0;
   text-align: center;
