@@ -5,13 +5,13 @@
                 class="icon-cancel"></i>
         </button>
     </div>
-    <div class="modal-body" style="max-height:none">
+    <div class="modal-body light" style="max-height:none">
 
         <div data-ng-if="params.dataTypes.length > 0">
             <div class="alert alert-info" style="margin:0 0.1rem">
               To browse and download unfiltered data, please visit the
-              <a href="{{:: dataReleasesRouteInfo.href }}" data-ng-click="modal=false"><i class="icon-database"></i>
-              <strong>{{:: dataReleasesRouteInfo.title }}</strong></a> section.
+              <a href="{{:: dataReleasesRouteInfo.href }}" data-ng-click="modal=false">
+                <i class="icon-database"></i><strong>{{:: dataReleasesRouteInfo.title }}</strong></a> section.
             </div>
 
             <span>Search criteria results in <strong>{{totalDonor | number}}</strong> donors. Select data types to download</span>
