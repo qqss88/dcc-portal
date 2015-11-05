@@ -100,13 +100,14 @@
                 </tbody>
             </table>
         <div data-ng-if="pathway">
-            <h4>Drag and scroll to explore the pathway. Double click to reset the view.</h4>
+            <h4 data-ng-if="pathway.xml!==''">Drag and scroll to explore the pathway. Double click to reset the view.</h4>
             <pathway-viewer data-items="pathway.xml" data-zooms="pathway.zooms" data-highlights="pathway.highlights">
             </pathway-viewer>
         </div>
         <h3 data-ng-if="!pathway">
             No Pathway Diagram Found.
         </h3>
+        <small>Data Source: <a href="http://www.reactome.org/">Reactome</a></small>
       </section>
     </article>
   </div>
