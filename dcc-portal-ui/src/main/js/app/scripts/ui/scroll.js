@@ -7,7 +7,7 @@ angular.module('icgc.ui.scroll', [
 ]);
 
 
-angular.module('icgc.ui.scroll.resetScroll', []).directive('resetScroll', function($timeout) {
+angular.module('icgc.ui.scroll.resetScroll', []).directive('resetScroll', function($location, $timeout) {
   return {
     restrict: 'A',
     scope: {
@@ -16,6 +16,11 @@ angular.module('icgc.ui.scroll.resetScroll', []).directive('resetScroll', functi
     link: function (scope, elem) {
       var _scrollOffset = scope.resetScroll, 
           _top = 0;
+      
+      // Do not scroll if we are trying to anchor within another page.    
+      if ($location.hash()) {
+        return;
+      }
       
       if (! isNaN(_scrollOffset)) {
         _top = Math.round(elem.offset().top + parseInt(_scrollOffset, 10));

@@ -697,11 +697,10 @@
     refresh();
 
     $scope.$watch (function() {return LocationService.filters();}, function (n) {
-      if (n) {
-        $scope.isActive = true;
-      }
 
-      if (n && _ctrl.selectedFiles.length > 0) {
+      var hasFilters = ! _.isEmpty(n);
+
+      if (hasFilters && _ctrl.selectedFiles.length > 0) {
         _ctrl.undo();
       }
     }, true);
